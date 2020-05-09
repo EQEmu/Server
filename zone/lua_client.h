@@ -346,6 +346,8 @@ public:
 	luabind::object GetExpeditionLockouts(lua_State* L);
 	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
+	void            RemoveAllExpeditionLockouts();
+	void            RemoveAllExpeditionLockouts(std::string expedition_name);
 	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
 	bool            HasExpeditionLockout(std::string expedition_name, std::string event_name);
 	void            MovePCDynamicZone(uint32 zone_id);

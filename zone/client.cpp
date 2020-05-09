@@ -9665,6 +9665,25 @@ void Client::RemoveExpeditionLockout(
 	}
 }
 
+void Client::RemoveAllExpeditionLockouts(std::string expedition_name)
+{
+	if (expedition_name.empty())
+	{
+		ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID());
+		m_expedition_lockouts.clear();
+	}
+	else
+	{
+		ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID(), expedition_name);
+		m_expedition_lockouts.erase(std::remove_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
+			[&](const ExpeditionLockoutTimer& lockout) {
+				return lockout.GetExpeditionName() == expedition_name;
+			}
+		), m_expedition_lockouts.end());
+	}
+	SendExpeditionLockoutTimers();
+}
+
 const ExpeditionLockoutTimer* Client::GetExpeditionLockout(
 	const std::string& expedition_name, const std::string& event_name, bool include_expired) const
 {

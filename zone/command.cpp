@@ -6912,6 +6912,17 @@ void command_dz(Client* c, const Seperator* sep)
 			}
 		}
 	}
+	else if (strcasecmp(sep->arg[1], "lockouts") == 0)
+	{
+		if (strcasecmp(sep->arg[2], "remove") == 0 && sep->arg[3][0] != '\0')
+		{
+			c->Message(Chat::White, fmt::format(
+				"Removing [{}] lockouts on [{}].", sep->arg[4][0] ? sep->arg[4] : "all", sep->arg[3]
+			).c_str());
+
+			Expedition::RemoveAllCharacterLockouts(sep->arg[3], sep->arg[4]);
+		}
+	}
 	else
 	{
 		c->Message(Chat::White, "#dz usage:");
@@ -6919,6 +6930,8 @@ void command_dz(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "#dz cache reload - reload zone cache from database");
 		c->Message(Chat::White, "#dz destroy <expedition_id> - destroy expedition globally (must be in cache)");
 		c->Message(Chat::White, "#dz list - list all dynamic zones with corresponding instance ids from database");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
 	}
 }
 

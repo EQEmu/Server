@@ -1397,6 +1397,12 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		Expedition::MakeLeader(pack);
 		break;
 	}
+	case ServerOP_ExpeditionRemoveCharLockouts:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+		client_list.SendPacket(buf->character_name, pack);
+		break;
+	}
 	case ServerOP_DzCharacterChange:
 	case ServerOP_DzRemoveAllCharacters:
 	{

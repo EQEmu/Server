@@ -141,22 +141,23 @@
 #define ServerOP_LFPMatches			0x0214
 #define ServerOP_ClientVersionSummary 0x0215
 
-#define ServerOP_ExpeditionCreate           0x0400
-#define ServerOP_ExpeditionDeleted          0x0401
-#define ServerOP_ExpeditionLeaderChanged    0x0402
-#define ServerOP_ExpeditionLockout          0x0403
-#define ServerOP_ExpeditionMemberChange     0x0404
-#define ServerOP_ExpeditionMemberSwap       0x0405
-#define ServerOP_ExpeditionMemberStatus     0x0406
-#define ServerOP_ExpeditionGetOnlineMembers 0x0407
-#define ServerOP_ExpeditionDzAddPlayer      0x0408
-#define ServerOP_ExpeditionDzMakeLeader     0x0409
-#define ServerOP_ExpeditionDzCompass        0x040a
-#define ServerOP_ExpeditionDzSafeReturn     0x040b
-#define ServerOP_ExpeditionDzZoneIn         0x040c
+#define ServerOP_ExpeditionCreate             0x0400
+#define ServerOP_ExpeditionDeleted            0x0401
+#define ServerOP_ExpeditionLeaderChanged      0x0402
+#define ServerOP_ExpeditionLockout            0x0403
+#define ServerOP_ExpeditionMemberChange       0x0404
+#define ServerOP_ExpeditionMemberSwap         0x0405
+#define ServerOP_ExpeditionMemberStatus       0x0406
+#define ServerOP_ExpeditionGetOnlineMembers   0x0407
+#define ServerOP_ExpeditionDzAddPlayer        0x0408
+#define ServerOP_ExpeditionDzMakeLeader       0x0409
+#define ServerOP_ExpeditionDzCompass          0x040a
+#define ServerOP_ExpeditionDzSafeReturn       0x040b
+#define ServerOP_ExpeditionDzZoneIn           0x040c
+#define ServerOP_ExpeditionRemoveCharLockouts 0x040d
 
-#define ServerOP_DzCharacterChange          0x0450
-#define ServerOP_DzRemoveAllCharacters      0x0451
+#define ServerOP_DzCharacterChange            0x0450
+#define ServerOP_DzRemoveAllCharacters        0x0451
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2049,6 +2050,11 @@ struct ServerExpeditionLockout_Struct {
 	uint16 sender_instance_id;
 	uint8  remove;
 	char   event_name[256];
+};
+
+struct ServerExpeditionCharacterName_Struct {
+	char character_name[64];
+	char expedition_name[128];
 };
 
 struct ServerDzCommand_Struct {

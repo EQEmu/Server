@@ -201,6 +201,37 @@ MySQLRequestResult ExpeditionDatabase::LoadValidationData(
 	return results;
 }
 
+void ExpeditionDatabase::DeleteAllCharacterLockouts(uint32_t character_id)
+{
+	LogExpeditionsDetail("Deleting all character [{}] lockouts", character_id);
+
+	if (character_id != 0)
+	{
+		std::string query = fmt::format(SQL(
+			DELETE FROM expedition_character_lockouts
+			WHERE character_id = {};
+		), character_id);
+
+		database.QueryDatabase(query);
+	}
+}
+
+void ExpeditionDatabase::DeleteAllCharacterLockouts(
+	uint32_t character_id, const std::string& expedition_name)
+{
+	LogExpeditionsDetail("Deleting all character [{}] lockouts for [{}]", character_id, expedition_name);
+
+	if (character_id != 0 && !expedition_name.empty())
+	{
+		std::string query = fmt::format(SQL(
+			DELETE FROM expedition_character_lockouts
+			WHERE character_id = {} AND expedition_name = '{}';
+		), character_id, expedition_name);
+
+		database.QueryDatabase(query);
+	}
+}
+
 void ExpeditionDatabase::DeleteCharacterLockout(
 	uint32_t character_id, const std::string& expedition_name, const std::string& event_name)
 {
