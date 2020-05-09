@@ -4125,7 +4125,8 @@ void command_findzone(Client *c, const Seperator *sep)
 		 */
 		if (id == 0) {
 			query = fmt::format(
-				"SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE long_name LIKE '%{}%'",
+				"SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE long_name LIKE '%{}%' OR `short_name` LIKE '%{}%'",
+				EscapeString(sep->arg[1]),				
 				EscapeString(sep->arg[1])
 			);
 		}
