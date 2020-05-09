@@ -54,6 +54,7 @@ public:
 	bool IsMobSpawnedByNpcTypeID(int npc_type);
 	Lua_NPC GetNPCByID(int id);
 	Lua_NPC GetNPCByNPCTypeID(int npc_type);
+	Lua_NPC GetNPCBySpawnID(uint32 spawn_id);
 	Lua_Client GetClientByName(const char *name);
 	Lua_Client GetClientByAccID(uint32 acct_id);
 	Lua_Client GetClientByID(int id);

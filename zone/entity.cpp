@@ -1116,6 +1116,22 @@ NPC *EntityList::GetNPCByNPCTypeID(uint32 npc_id)
 	return nullptr;
 }
 
+NPC *EntityList::GetNPCBySpawnID(uint32 spawn_id)
+{
+	if (spawn_id == 0 || npc_list.empty()) {
+		return nullptr;
+	}
+
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		if (it->second->GetSpawnGroupId() == spawn_id) {
+			return it->second;
+		}
+		++it;
+	}
+	return nullptr;
+}
+
 Mob *EntityList::GetMob(uint16 get_id)
 {
 	Entity *ent = nullptr;
