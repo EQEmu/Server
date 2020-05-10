@@ -1933,6 +1933,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZMessageGroup:
+	{
+		CZMessageGroup_Struct* CZGM = (CZMessageGroup_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZGM->GroupID) {
+				client.second->Message(CZGM->Type, CZGM->Message);
+			}
+		}
+		break;
+	}
 	case ServerOP_CZSetEntityVariableByClientName:
 	{
 		CZSetEntVarByClientName_Struct* CZCS = (CZSetEntVarByClientName_Struct*)pack->pBuffer;

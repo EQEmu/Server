@@ -1034,6 +1034,10 @@ void lua_cross_zone_message_player_by_name(uint32 type, const char *player, cons
 	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
 }
 
+void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
+}
+
 void lua_cross_zone_set_entity_variable_by_client_name(const char *player, const char *id, const char *m_var) {
 	quest_manager.CrossZoneSetEntityVariableByClientName(player, id, m_var);
 }
@@ -1841,6 +1845,7 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
 		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
 		luabind::def("world_wide_marquee", &lua_world_wide_marquee),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
