@@ -198,6 +198,7 @@
 #define ServerOP_UCSServerStatusRequest		0x4013
 #define ServerOP_UCSServerStatusReply		0x4014
 #define ServerOP_HotReloadQuests 0x4015
+#define ServerOP_CZMessageRaid 0x4020
 
 /**
  * QueryServer
@@ -1331,6 +1332,12 @@ struct QSGeneralQuery_Struct {
 struct CZMessagePlayer_Struct {
 	uint32	Type;
 	char	CharName[64];
+	char	Message[512];
+};
+
+struct CZMessageRaid_Struct {
+	uint32	Type;
+	int	    RaidID;
 	char	Message[512];
 };
 

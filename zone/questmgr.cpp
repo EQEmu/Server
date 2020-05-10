@@ -3234,6 +3234,17 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneMessagePlayerByRaidID(uint32 Type, int RaidID, const char *Message){
+	uint32 message_len = strlen(Message) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMessageRaid, sizeof(CZMessageRaid_Struct) + message_len);
+	CZMessageRaid_Struct* CZRM = (CZMessageRaid_Struct*) pack->pBuffer;
+	CZRM->Type = Type;
+	CZRM->RaidID = RaidID;
+	strn0cpy(CZRM->Message, Message, 512);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var){
 	uint32 message_len = strlen(id) + 1;
 	uint32 message_len2 = strlen(m_var) + 1;
