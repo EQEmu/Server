@@ -4106,7 +4106,8 @@ namespace UF
 		iqbs.HealAmt = item->HealAmt;
 		iqbs.SpellDmg = item->SpellDmg;
 		iqbs.Clairvoyance = item->Clairvoyance;
-		
+		iqbs.SubType = item->SubType;
+
 		ob.write((const char*)&iqbs, sizeof(UF::structs::ItemQuaternaryBodyStruct));
 
 		EQEmu::OutBuffer::pos_type count_pos = ob.tellp();
