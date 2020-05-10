@@ -3721,6 +3721,24 @@ XS(XS__crosszonesignalclientbycharid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonesignalclientbyguildid);
+XS(XS__crosszonesignalclientbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
+
+	if (items == 2) {
+		int    guild_id   = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonesignalclientbyname);
 XS(XS__crosszonesignalclientbyname) {
 	dXSARGS;
@@ -4176,6 +4194,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyguildid"), XS__crosszonesignalclientbyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);

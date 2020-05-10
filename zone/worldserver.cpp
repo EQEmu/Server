@@ -1914,6 +1914,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			client->Signal(CZCS->data);
 		}
 		break;
+	}	
+	case ServerOP_CZSignalGuild:
+	{
+		CZGuildSignal_Struct* CZGS = (CZGuildSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZGS->guild_id) {
+				client.second->Signal(CZGS->data);
+			}
+		}
+		break;
 	}
 	case ServerOP_CZSignalClientByName:
 	{

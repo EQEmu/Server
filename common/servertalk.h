@@ -198,6 +198,7 @@
 #define ServerOP_UCSServerStatusRequest		0x4013
 #define ServerOP_UCSServerStatusReply		0x4014
 #define ServerOP_HotReloadQuests 0x4015
+#define ServerOP_CZSignalGuild 0x4018
 
 /**
  * QueryServer
@@ -1164,6 +1165,11 @@ struct Server_Speech_Struct {
 
 struct CZClientSignal_Struct {
 	int charid;
+	uint32 data;
+};
+
+struct CZGuildSignal_Struct {
+	int guild_id;
 	uint32 data;
 };
 
