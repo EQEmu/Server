@@ -1026,6 +1026,10 @@ void lua_cross_zone_signal_client_by_char_id(uint32 player_id, int signal) {
 	quest_manager.CrossZoneSignalPlayerByCharID(player_id, signal);
 }
 
+void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
+}
+
 void lua_cross_zone_signal_client_by_name(const char *player, int signal) {
 	quest_manager.CrossZoneSignalPlayerByName(player, signal);
 }
@@ -1839,6 +1843,7 @@ luabind::scope lua_register_general() {
 		luabind::def("voice_tell", &lua_voice_tell),
 		luabind::def("send_mail", &lua_send_mail),
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
+		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
 		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
 		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
