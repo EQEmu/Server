@@ -3211,6 +3211,15 @@ void QuestManager::CrossZoneSignalPlayerByCharID(int charid, uint32 data){
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneSignalPlayerByRaidID(int raid_id, uint32 data){
+	auto pack = new ServerPacket(ServerOP_CZSignalRaid, sizeof(CZRaidSignal_Struct));
+	CZRaidSignal_Struct* CZRS = (CZRaidSignal_Struct*) pack->pBuffer;
+	CZRS->raid_id = raid_id;
+	CZRS->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data){
 	uint32 message_len = strlen(CharName) + 1;
 	auto pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
