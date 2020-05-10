@@ -3757,6 +3757,23 @@ XS(XS__crosszonemessageplayerbyname) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonemessageplayerbyguildid);
+XS(XS__crosszonemessageplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int typ, int guild_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int guild_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__enablerecipe);
 XS(XS__enablerecipe) {
 	dXSARGS;
@@ -4173,6 +4190,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
