@@ -198,6 +198,7 @@
 #define ServerOP_UCSServerStatusRequest		0x4013
 #define ServerOP_UCSServerStatusReply		0x4014
 #define ServerOP_HotReloadQuests 0x4015
+#define ServerOP_CZMessageGuild 0x4021
 
 /**
  * QueryServer
@@ -1332,6 +1333,12 @@ struct CZMessagePlayer_Struct {
 	uint32	Type;
 	char	CharName[64];
 	char	Message[512];
+};
+
+struct CZMessageGuild_Struct {
+	uint32 Type;
+	int GuildID;
+	char Message[512];
 };
 
 struct WWMarquee_Struct {
