@@ -104,15 +104,23 @@ if (-e "eqemu_update.pl") {
 
 print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
-check_db_version_table();
+my $skip_checks = 0;
+if ($ARGV[0] && $ARGV[0] eq "new_server") {
+    $skip_checks = 1;
+}
 
-#::: Check if db_version table exists...
-if (trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db) {
-    print get_mysql_result("DROP TABLE db_version");
-    print "[Database] Old db_version table present, dropping...\n\n";
+if ($skip_checks == 0) {
+    check_db_version_table();
+
+    #::: Check if db_version table exists...
+    if (trim(get_mysql_result("SHOW COLUMNS FROM db_version LIKE 'Revision'")) ne "" && $db) {
+        print get_mysql_result("DROP TABLE db_version");
+        print "[Database] Old db_version table present, dropping...\n\n";
+    }
 }
 
 check_for_world_bootup_database_update();
+
 
 sub urlencode
 {
@@ -568,6 +576,9 @@ sub check_for_world_bootup_database_update
         $world_path = "bin/world.exe";
     }
 
+    $binary_database_version = 0;
+    $local_database_version  = 0;
+
     # Usually hit during installer when world hasn't been installed yet...
     if (-e $world_path) {
         if ($OS eq "Windows") {
@@ -576,10 +587,10 @@ sub check_for_world_bootup_database_update
         if ($OS eq "Linux") {
             @db_version = split(': ', `./$world_path db_version`);
         }
-    }
 
-    $binary_database_version = trim($db_version[1]);
-    $local_database_version  = get_main_db_version();
+        $binary_database_version = trim($db_version[1]);
+        $local_database_version  = get_main_db_version();
+    }
 
     if ($binary_database_version == $local_database_version && $ARGV[0] eq "ran_from_world") {
         print "[Update] Database up to date...\n";
@@ -1704,8 +1715,8 @@ sub do_linux_login_server_setup
     rmtree('updates_staged');
     rmtree('db_update');
 
-    get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", "login_opcodes.conf");
-    get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", "login_opcodes_sod.conf");
+    get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", $opcodes_path . "login_opcodes.conf");
+    get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", $opcodes_path . "login_opcodes_sod.conf");
     get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
     system("chmod 755 *.sh");
 
