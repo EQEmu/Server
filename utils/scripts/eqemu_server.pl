@@ -2006,7 +2006,7 @@ sub lua_modules_fetch
 
             if (!-e $destination_file) {
                 copy_file($staged_file, $destination_file);
-                print "[Install] Installing :: '" . $destination_file . "'\n";
+                print "[Install] Installing [" . $destination_file . "]\n";
                 $fc++;
             }
             else {
@@ -2023,7 +2023,7 @@ sub lua_modules_fetch
                         copy_file($destination_file, $backup_dest);
                         #::: Copy staged to running
                         copy($staged_file, $destination_file);
-                        print "[Install] Installing :: '" . $destination_file . "'\n\n";
+                        print "[Install] Installing [" . $destination_file . "]\n\n";
                     }
                     $fc++;
                 }
@@ -2068,7 +2068,7 @@ sub plugins_fetch
 
             if (!-e $destination_file) {
                 copy_file($staged_file, $destination_file);
-                print "[Install] Installing :: '" . $destination_file . "'\n";
+                print "[Install] Installing [" . $destination_file . "]\n";
                 $fc++;
             }
             else {
@@ -2085,7 +2085,7 @@ sub plugins_fetch
                         copy_file($destination_file, $backup_dest);
                         #::: Copy staged to running
                         copy($staged_file, $destination_file);
-                        print "[Install] Installing :: '" . $destination_file . "'\n\n";
+                        print "[Install] Installing [" . $destination_file . "]\n\n";
                     }
                     $fc++;
                 }
