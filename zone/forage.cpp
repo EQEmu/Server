@@ -369,9 +369,13 @@ void Client::GoFish()
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
 	const EQEmu::ItemInstance* Pole = m_inv[EQEmu::invslot::slotPrimary];
-	if (Pole && Pole->GetItem()->SubType == 0 && zone->random.Int(0, 49) == 1) {
-		MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
-		DeleteItemInInventory(EQEmu::invslot::slotPrimary, 0, true);
+
+	if (Pole) {
+		const EQEmu::ItemData* fishing_item = Pole->GetItem();
+		if (fishing_item && fishing_item->SubType == 0 && zone->random.Int(0, 49) == 1) {
+			MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
+			DeleteItemInInventory(EQEmu::invslot::slotPrimary, 0, true);
+		}
 	}
 
 	if (CheckIncreaseSkill(EQEmu::skills::SkillFishing, nullptr, 5))
