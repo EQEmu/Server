@@ -2443,18 +2443,27 @@ void NPC::LevelScale() {
 
 	if (RuleB(NPC, NewLevelScaling)) {
 		if (scalerate == 0 || maxlevel <= 25) {
-			// pre-pop seems to scale by 20 HP increments while newer by 100
-			// We also don't want 100 increments on newer noobie zones, check level
-			if (zone->GetZoneID() < 200 || level < 48) {
-				max_hp += (random_level - level) * 20;
-				base_hp += (random_level - level) * 20;
-			} else {
-				max_hp += (random_level - level) * 100;
-				base_hp += (random_level - level) * 100;
+			// Don't add HP to dynamically scaled NPCs since this will be calculated later
+			if (max_hp > 0 || skip_auto_scale)
+			{
+				// pre-pop seems to scale by 20 HP increments while newer by 100
+				// We also don't want 100 increments on newer noobie zones, check level
+				if (zone->GetZoneID() < 200 || level < 48) {
+					max_hp += (random_level - level) * 20;
+					base_hp += (random_level - level) * 20;
+				} else {
+					max_hp += (random_level - level) * 100;
+					base_hp += (random_level - level) * 100;
+				}
+				
+				current_hp = max_hp;
 			}
-
-			current_hp = max_hp;
-			max_dmg += (random_level - level) * 2;
+			
+			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
+			if (max_dmg > 0  || skip_auto_scale)
+			{
+				max_dmg += (random_level - level) * 2;
+			}
 		} else {
 			uint8 scale_adjust = 1;
 

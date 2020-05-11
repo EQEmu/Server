@@ -1915,6 +1915,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZSignalGroup:
+	{
+		CZGroupSignal_Struct* CZGS = (CZGroupSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZGS->group_id) {
+				client.second->Signal(CZGS->data);
+			}
+		}
+		break;
+	}
 	case ServerOP_CZSignalClientByName:
 	{
 		CZClientSignalByName_Struct* CZCS = (CZClientSignalByName_Struct*)pack->pBuffer;
@@ -1930,6 +1941,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* client = entity_list.GetClientByName(CZCS->CharName);
 		if (client != 0) {
 			client->Message(CZCS->Type, CZCS->Message);
+		}
+		break;
+	}
+	case ServerOP_CZMessageGuild:
+	{
+		CZMessageGuild_Struct* CZGM = (CZMessageGuild_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZGM->GuildID) {
+				client.second->Message(CZGM->Type, CZGM->Message);
+			}
 		}
 		break;
 	}

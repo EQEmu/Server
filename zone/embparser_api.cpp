@@ -3721,19 +3721,37 @@ XS(XS__crosszonesignalclientbycharid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonesignalclientbygroupid);
+XS(XS__crosszonesignalclientbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
+
+	if (items == 2) {
+		int    group_id   = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGroupID(group_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonesignalclientbyname);
 XS(XS__crosszonesignalclientbyname) {
 	dXSARGS;
 
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 
 	if (items == 2) {
 		char   *name     = (char *) SvPV_nolen(ST(0));
 		uint32 int_value = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneSignalPlayerByName(name, int_value);
 	} else {
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 	}
 
 	XSRETURN_EMPTY;
@@ -3752,6 +3770,23 @@ XS(XS__crosszonemessageplayerbyname) {
 		char   *name      = (char *) SvPV_nolen(ST(1));
 		char   *message   = (char *) SvPV_nolen(ST(2));
 		quest_manager.CrossZoneMessagePlayerByName(channel_id, name, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyguildid);
+XS(XS__crosszonemessageplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int typ, int guild_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int guild_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
 	}
 
 	XSRETURN_EMPTY;
@@ -4173,9 +4208,11 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbygroupid"), XS__crosszonesignalclientbygroupid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);

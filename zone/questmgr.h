@@ -279,11 +279,13 @@ public:
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
 	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
+	void CrossZoneSignalPlayerByGroupID(int group_id, uint32 data);
 	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);
 	void CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
+	void CrossZoneMessagePlayerByGuildID(uint32 Type, int GuildID, const char *Message);
 	void WorldWideMarquee(uint32 Type, uint32 Priority, uint32 FadeIn, uint32 FadeOut, uint32 Duration, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);

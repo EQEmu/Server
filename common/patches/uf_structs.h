@@ -4215,8 +4215,8 @@ struct ItemQuaternaryBodyStruct
 	int32 HealAmt;
 	int32 SpellDmg;
 	int32 Clairvoyance;
-	uint8 unknown18;	//Power Source Capacity or evolve filename?
-	uint32 evolve_string; // Some String, but being evolution related is just a guess
+	int32 SubType;
+	uint8 evolve_string; // Some String, but being evolution related is just a guess
 	uint8 unknown19;
 	uint32 unknown20;	// Bard Stuff?
 	uint32 unknown21;

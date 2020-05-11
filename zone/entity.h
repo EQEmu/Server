@@ -166,6 +166,7 @@ public:
 		return nullptr;
 	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
+	NPC *GetNPCBySpawnID(uint32 spawn_id);
 	inline Merc *GetMercByID(uint16 id)
 	{
 		auto it = merc_list.find(id);
