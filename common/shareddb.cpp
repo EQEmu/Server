@@ -1029,6 +1029,7 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 
 		item.MaxCharges = (int16)atoi(row[ItemField::maxcharges]);
 		item.ItemType = (uint8)atoi(row[ItemField::itemtype]);
+		item.SubType = atoi(row[ItemField::subtype]);
 		item.Material = (uint8)atoi(row[ItemField::material]);
 		item.HerosForgeModel = (uint32)atoi(row[ItemField::herosforgemodel]);
 		item.SellRate = (float)atof(row[ItemField::sellrate]);
