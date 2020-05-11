@@ -887,6 +887,23 @@ sub fetch_utility_scripts
         get_remote_file($install_repository_request_url . "win_server_launcher.pl", "win_server_launcher.pl");
         get_remote_file($install_repository_request_url . "t_start_server_with_login_server.bat",
             "t_start_server_with_login_server.bat");
+
+        get_remote_file(
+            $install_repository_request_url . "t_start_world.bat",
+            "t_start_world.bat"
+        );
+        get_remote_file(
+            $install_repository_request_url . "t_start_zone.bat",
+            "t_start_zone.bat"
+        );
+        get_remote_file(
+            $install_repository_request_url . "t_set_gm_account.bat",
+            "t_set_gm_account.bat"
+        );
+        get_remote_file(
+            $install_repository_request_url . "t_start_shared_memory.bat",
+            "t_start_shared_memory.bat"
+        );
     }
     else {
         get_remote_file($install_repository_request_url . "linux/server_launcher.pl", "server_launcher.pl");
