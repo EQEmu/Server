@@ -455,8 +455,8 @@ sub do_installer_routines {
 
     #::: Download assets
     if ($OS eq "Windows") {
-        fetch_latest_windows_binaries();
-        # fetch_latest_windows_appveyor();
+        # fetch_latest_windows_binaries();
+        fetch_latest_windows_appveyor();
         get_remote_file($install_repository_request_url . "lua51.dll", "lua51.dll", 1);
         #get_remote_file($install_repository_request_url . "zlib1.dll", "zlib1.dll", 1); # No longer required
 		#get_remote_file($install_repository_request_url . "zlib1.pdb", "zlib1.pdb", 1);
