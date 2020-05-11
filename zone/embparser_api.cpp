@@ -3726,14 +3726,14 @@ XS(XS__crosszonesignalclientbyname) {
 	dXSARGS;
 
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 
 	if (items == 2) {
 		char   *name     = (char *) SvPV_nolen(ST(0));
 		uint32 int_value = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneSignalPlayerByName(name, int_value);
 	} else {
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 	}
 
 	XSRETURN_EMPTY;
