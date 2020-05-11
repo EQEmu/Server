@@ -5611,6 +5611,12 @@ namespace RoF2
 		itbs.no_transfer = item->NoTransfer;
 		itbs.expendablearrow = item->ExpendableArrow;
 
+		// Done to hack older clients to label expendable fishing poles as such
+		// July 28th, 2018 patch
+		if (item->ItemType == EQEmu::item::ItemTypeFishingPole && item->SubType == 0) {
+			itbs.expendablearrow = 1;
+		}
+
 		itbs.unknown8 = 0;
 		itbs.unknown9 = 0;
 		itbs.unknown10 = 0;
