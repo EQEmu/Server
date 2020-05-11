@@ -1254,7 +1254,7 @@ sub get_remote_file {
         $wget = `wget -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
     }
     elsif ($OS eq "Windows") {
-        $wget = `powershell -Command "Invoke-WebRequest $request_url -OutFile $destination_file"`
+        $wget = `powershell -Command "\$ProgressPreference = 'SilentlyContinue'; Invoke-RestMethod -ContentType \"application/octet-stream\" -Uri $request_url -OutFile $destination_file"`;
     }
     print "[Download] Saved: (" . $destination_file . ") from " . $request_url . "\n" if !$silent_download;
     if (($OS eq "Linux" && $wget =~ /unable to resolve/i) || ($OS eq "Windows" && $wget =~ /404/i || $wget =~ /could not be resolved/i) ) {
