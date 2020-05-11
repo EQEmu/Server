@@ -498,11 +498,30 @@ void EntityList::MobProcess()
 		size_t sz = mob_list.size();
 
 #ifdef IDLE_WHEN_EMPTY
+		static int old_client_count=0;
+		static Timer *mob_settle_timer = new Timer();
+
+		if (numclients == 0 && old_client_count > 0 &&
+			RuleI(Zone, SecondsBeforeIdle) > 0) {
+			// Start Timer to allow any mobs that chased chars from zone
+			// to return home.
+			mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
+		}
+
+		old_client_count = numclients;
+
+		// Disable settle timer if someone zones into empty zone
+		if (numclients > 0 || mob_settle_timer->Check()) {
+			mob_settle_timer->Disable();
+		}
+
 		if (numclients > 0 ||
-			mob->GetWanderType() == 4 || mob->GetWanderType() == 6) {
+			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
+			mob_settle_timer->Enabled()) {
 			// Normal processing, or assuring that spawns that should
 			// path and depop do that.  Otherwise all of these type mobs
-			// will be up and at starting positions when idle zone wakes up.
+			// will be up and at starting positions, or waiting at the zoneline
+			// if they chased the PCs  when idle zone wakes up.
 			mob_dead = !mob->Process();
 		}
 		else {
