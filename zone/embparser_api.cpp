@@ -3729,11 +3729,47 @@ XS(XS__crosszonesignalclientbygroupid) {
 		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
 
 	if (items == 2) {
-		int    group_id   = (int) SvIV(ST(0));
+		int group_id = (int) SvIV(ST(0));
 		uint32 int_value = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneSignalPlayerByGroupID(group_id, int_value);
 	} else {
 		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyraidid);
+XS(XS__crosszonesignalclientbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, int value)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyguildid);
+XS(XS__crosszonesignalclientbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
 	}
 
 	XSRETURN_EMPTY;
@@ -3775,12 +3811,46 @@ XS(XS__crosszonemessageplayerbyname) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonemessageplayerbygroupid);
+XS(XS__crosszonemessageplayerbygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbygroupid(int type, int group_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int group_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyraidid);
+XS(XS__crosszonemessageplayerbyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyraidid(int type, int raid_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int raid_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonemessageplayerbyguildid);
 XS(XS__crosszonemessageplayerbyguildid) {
 	dXSARGS;
 
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int typ, int guild_id, string message)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int type, int guild_id, string message)");
 
 	if (items == 3) {
 		uint32 type = (uint32) SvIV(ST(0));
@@ -3906,6 +3976,57 @@ XS(XS__crosszonesetentityvariablebyclientname) {
 		const char *key         = (const char *) SvPV_nolen(ST(1));
 		const char *str_value   = (const char *) SvPV_nolen(ST(2));
 		quest_manager.CrossZoneSetEntityVariableByClientName(client_name, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebygroupid);
+XS(XS__crosszonesetentityvariablebygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebygroupid(int group_id, string key, string value)");
+
+	if (items == 3) {
+		int group_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyraidid);
+XS(XS__crosszonesetentityvariablebyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyraidid(int raid_id, string key, string value)");
+
+	if (items == 3) {
+		int raid_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyguildid);
+XS(XS__crosszonesetentityvariablebyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyguildid(int guild_id, string key, string value)");
+
+	if (items == 3) {
+		int guild_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, key, str_value);
 	}
 
 	XSRETURN_EMPTY;
@@ -4208,11 +4329,18 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebygroupid"), XS__crosszonesetentityvariablebygroupid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyraidid"), XS__crosszonesetentityvariablebyraidid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyguildid"), XS__crosszonesetentityvariablebyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbygroupid"), XS__crosszonesignalclientbygroupid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyraidid"), XS__crosszonesignalclientbyraidid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyguildid"), XS__crosszonesignalclientbyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);

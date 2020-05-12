@@ -1238,12 +1238,19 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_CZSignalClientByName:
 	case ServerOP_CZMessagePlayer:
+	case ServerOP_CZMessageGroup:
+	case ServerOP_CZMessageRaid:
 	case ServerOP_CZMessageGuild:
 	case ServerOP_CZSignalNPC:
 	case ServerOP_CZSetEntityVariableByNPCTypeID:
 	case ServerOP_CZSignalClient:
 	case ServerOP_CZSignalGroup:
+	case ServerOP_CZSignalRaid:
+	case ServerOP_CZSignalGuild:
 	case ServerOP_CZSetEntityVariableByClientName:
+	case ServerOP_CZSetEntityVariableByGroupID:
+	case ServerOP_CZSetEntityVariableByRaidID:
+	case ServerOP_CZSetEntityVariableByGuildID:
 	case ServerOP_WWMarquee:
 	case ServerOP_DepopAllPlayersCorpses:
 	case ServerOP_DepopPlayerCorpse:

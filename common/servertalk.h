@@ -199,7 +199,14 @@
 #define ServerOP_UCSServerStatusReply		0x4014
 #define ServerOP_HotReloadQuests 0x4015
 #define ServerOP_CZSignalGroup 0x4016
+#define ServerOP_CZSignalRaid 0x4017
+#define ServerOP_CZSignalGuild 0x4018
+#define ServerOP_CZMessageGroup 0x4019
+#define ServerOP_CZMessageRaid 0x4020
 #define ServerOP_CZMessageGuild 0x4021
+#define ServerOP_CZSetEntityVariableByGroupID 0x4022
+#define ServerOP_CZSetEntityVariableByRaidID 0x4023
+#define ServerOP_CZSetEntityVariableByGuildID 0x4024
 
 /**
  * QueryServer
@@ -1174,6 +1181,16 @@ struct CZGroupSignal_Struct {
 	uint32 data;
 };
 
+struct CZRaidSignal_Struct {
+	int raid_id;
+	uint32 data;
+};
+
+struct CZGuildSignal_Struct {
+	int guild_id;
+	uint32 data;
+};
+
 struct CZNPCSignal_Struct {
 	uint32 npctype_id;
 	uint32 data;
@@ -1341,6 +1358,18 @@ struct CZMessagePlayer_Struct {
 	char	Message[512];
 };
 
+struct CZMessageGroup_Struct {
+	uint32 Type;
+	int GroupID;
+	char Message[512];
+};
+
+struct CZMessageRaid_Struct {
+	uint32 Type;
+	int RaidID;
+	char Message[512];
+};
+
 struct CZMessageGuild_Struct {
 	uint32 Type;
 	int GuildID;
@@ -1364,6 +1393,24 @@ struct CZSetEntVarByNPCTypeID_Struct {
 
 struct CZSetEntVarByClientName_Struct {
 	char CharName[64];
+	char id[256];
+	char m_var[256];
+};
+
+struct CZSetEntVarByGroupID_Struct {
+	int group_id;
+	char id[256];
+	char m_var[256];
+};
+
+struct CZSetEntVarByRaidID_Struct {
+	int raid_id;
+	char id[256];
+	char m_var[256];
+};
+
+struct CZSetEntVarByGuildID_Struct {
+	int guild_id;
 	char id[256];
 	char m_var[256];
 };

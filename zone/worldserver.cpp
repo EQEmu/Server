@@ -1926,6 +1926,28 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZSignalRaid:
+	{
+		CZRaidSignal_Struct* CZRS = (CZRaidSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZRS->raid_id) {
+				client.second->Signal(CZRS->data);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSignalGuild:
+	{
+		CZGuildSignal_Struct* CZGS = (CZGuildSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZGS->guild_id) {
+				client.second->Signal(CZGS->data);
+			}
+		}
+		break;
+	}
 	case ServerOP_CZSignalClientByName:
 	{
 		CZClientSignalByName_Struct* CZCS = (CZClientSignalByName_Struct*)pack->pBuffer;
@@ -1941,6 +1963,28 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* client = entity_list.GetClientByName(CZCS->CharName);
 		if (client != 0) {
 			client->Message(CZCS->Type, CZCS->Message);
+		}
+		break;
+	}
+	case ServerOP_CZMessageGroup:
+	{
+		CZMessageGroup_Struct* CZGM = (CZMessageGroup_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZGM->GroupID) {
+				client.second->Message(CZGM->Type, CZGM->Message);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMessageRaid:
+	{
+		CZMessageRaid_Struct* CZRM = (CZMessageRaid_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZRM->RaidID) {
+				client.second->Message(CZRM->Type, CZRM->Message);
+			}
 		}
 		break;
 	}
@@ -1961,6 +2005,39 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client* client = entity_list.GetClientByName(CZCS->CharName);
 		if (client != 0) {
 			client->SetEntityVariable(CZCS->id, CZCS->m_var);
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByGroupID:
+	{
+		CZSetEntVarByGroupID_Struct* CZCS = (CZSetEntVarByGroupID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZCS->group_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByRaidID:
+	{
+		CZSetEntVarByRaidID_Struct* CZCS = (CZSetEntVarByRaidID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZCS->raid_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByGuildID:
+	{
+		CZSetEntVarByGuildID_Struct* CZCS = (CZSetEntVarByGuildID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZCS->guild_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
 		}
 		break;
 	}

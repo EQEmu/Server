@@ -3220,6 +3220,24 @@ void QuestManager::CrossZoneSignalPlayerByGroupID(int group_id, uint32 data){
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneSignalPlayerByRaidID(int raid_id, uint32 data){
+	auto pack = new ServerPacket(ServerOP_CZSignalRaid, sizeof(CZRaidSignal_Struct));
+	CZRaidSignal_Struct* CZRS = (CZRaidSignal_Struct*) pack->pBuffer;
+	CZRS->raid_id = raid_id;
+	CZRS->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSignalPlayerByGuildID(int guild_id, uint32 data){
+	auto pack = new ServerPacket(ServerOP_CZSignalGuild, sizeof(CZGuildSignal_Struct));
+	CZGuildSignal_Struct* CZGS = (CZGuildSignal_Struct*) pack->pBuffer;
+	CZGS->guild_id = guild_id;
+	CZGS->data = data;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSignalPlayerByName(const char *CharName, uint32 data){
 	uint32 message_len = strlen(CharName) + 1;
 	auto pack = new ServerPacket(ServerOP_CZSignalClientByName, sizeof(CZClientSignalByName_Struct) + message_len);
@@ -3243,6 +3261,28 @@ void QuestManager::CrossZoneMessagePlayerByName(uint32 Type, const char *CharNam
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneMessagePlayerByGroupID(uint32 Type, int GroupID, const char *Message){
+	uint32 message_len = strlen(Message) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMessageGroup, sizeof(CZMessageGroup_Struct) + message_len);
+	CZMessageGroup_Struct* CZGM = (CZMessageGroup_Struct*) pack->pBuffer;
+	CZGM->Type = Type;
+	CZGM->GroupID = GroupID;
+	strn0cpy(CZGM->Message, Message, 512);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMessagePlayerByRaidID(uint32 Type, int RaidID, const char *Message){
+	uint32 message_len = strlen(Message) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMessageRaid, sizeof(CZMessageRaid_Struct) + message_len);
+	CZMessageRaid_Struct* CZRM = (CZMessageRaid_Struct*) pack->pBuffer;
+	CZRM->Type = Type;
+	CZRM->RaidID = RaidID;
+	strn0cpy(CZRM->Message, Message, 512);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneMessagePlayerByGuildID(uint32 Type, int GuildID, const char *Message){
 	uint32 message_len = strlen(Message) + 1;
 	auto pack = new ServerPacket(ServerOP_CZMessageGuild, sizeof(CZMessageGuild_Struct) + message_len);
@@ -3262,6 +3302,42 @@ void QuestManager::CrossZoneSetEntityVariableByClientName(const char *CharName, 
 				     sizeof(CZSetEntVarByClientName_Struct) + message_len + message_len2 + message_len3);
 	CZSetEntVarByClientName_Struct* CZ = (CZSetEntVarByClientName_Struct*)pack->pBuffer;
 	strn0cpy(CZ->CharName, CharName, 64);
+	strn0cpy(CZ->id, id, 256);
+	strn0cpy(CZ->m_var, m_var, 256);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByGroupID(int group_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByGroupID, sizeof(CZSetEntVarByGroupID_Struct) + message_len + message_len2);
+	CZSetEntVarByGroupID_Struct* CZ = (CZSetEntVarByGroupID_Struct*)pack->pBuffer;
+	CZ->group_id = group_id;
+	strn0cpy(CZ->id, id, 256);
+	strn0cpy(CZ->m_var, m_var, 256);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByRaidID(int raid_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByRaidID, sizeof(CZSetEntVarByRaidID_Struct) + message_len + message_len2);
+	CZSetEntVarByRaidID_Struct* CZ = (CZSetEntVarByRaidID_Struct*)pack->pBuffer;
+	CZ->raid_id = raid_id;
+	strn0cpy(CZ->id, id, 256);
+	strn0cpy(CZ->m_var, m_var, 256);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneSetEntityVariableByGuildID(int guild_id, const char *id, const char *m_var){
+	uint32 message_len = strlen(id) + 1;
+	uint32 message_len2 = strlen(m_var) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSetEntityVariableByGuildID, sizeof(CZSetEntVarByGuildID_Struct) + message_len + message_len2);
+	CZSetEntVarByGuildID_Struct* CZ = (CZSetEntVarByGuildID_Struct*)pack->pBuffer;
+	CZ->guild_id = guild_id;
 	strn0cpy(CZ->id, id, 256);
 	strn0cpy(CZ->m_var, m_var, 256);
 	worldserver.SendPacket(pack);
