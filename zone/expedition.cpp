@@ -254,27 +254,6 @@ bool Expedition::CacheAllFromDatabase()
 	return true;
 }
 
-void Expedition::LoadAllClientLockouts(Client* client)
-{
-	if (!client)
-	{
-		return;
-	}
-
-	auto results = ExpeditionDatabase::LoadCharacterLockouts(client->CharacterID());
-	if (results.Success())
-	{
-		for (auto row = results.begin(); row != results.end(); ++row)
-		{
-			auto expire_time = strtoull(row[0], nullptr, 10);
-			auto original_duration = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			ExpeditionLockoutTimer lockout{ row[2], row[3], expire_time, original_duration };
-			client->AddExpeditionLockout(lockout);
-		}
-	}
-	client->SendExpeditionLockoutTimers();
-}
-
 void Expedition::LoadMembers()
 {
 	m_members.clear();

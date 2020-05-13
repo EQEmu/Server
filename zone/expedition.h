@@ -73,7 +73,6 @@ public:
 	static void CacheFromDatabase(uint32_t expedition_id);
 	static bool CacheAllFromDatabase();
 	static void CacheExpeditions(MySQLRequestResult& results);
-	static void LoadAllClientLockouts(Client* client);
 	static Expedition* FindCachedExpeditionByCharacterID(uint32_t character_id);
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
