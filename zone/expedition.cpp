@@ -1170,14 +1170,13 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 
 			if (is_removed)
 			{
+				// live doesn't clear expedition info on clients removed while inside dz.
+				// it instead let's the dz kick timer do it even if character zones out
+				// before it triggers. for simplicity we'll always clear immediately
 				ExpeditionDatabase::DeletePendingLockouts(member_client->CharacterID());
 				member_client->SetExpeditionID(0);
-				if (!m_dynamiczone.IsCurrentZoneDzInstance())
-				{
-					// live doesn't clear expedition info on clients removed while inside dz
-					member_client->SendDzCompassUpdate();
-					member_client->QueuePacket(CreateInfoPacket(true).get());
-				}
+				member_client->SendDzCompassUpdate();
+				member_client->QueuePacket(CreateInfoPacket(true).get());
 				member_client->MessageString(
 					Chat::Yellow, EXPEDITION_REMOVED, it->name.c_str(), m_expedition_name.c_str()
 				);
