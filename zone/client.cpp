@@ -9581,7 +9581,7 @@ void Client::UpdateExpeditionInfoAndLockouts()
 		}
 	}
 
-	Expedition::LoadAllClientLockouts(this);
+	LoadAllExpeditionLockouts();
 }
 
 Expedition* Client::CreateExpedition(
@@ -9702,6 +9702,22 @@ bool Client::HasExpeditionLockout(
 	const std::string& expedition_name, const std::string& event_name, bool include_expired)
 {
 	return (GetExpeditionLockout(expedition_name, event_name, include_expired) != nullptr);
+}
+
+void Client::LoadAllExpeditionLockouts()
+{
+	auto results = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
+	if (results.Success())
+	{
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			auto expire_time = strtoull(row[0], nullptr, 10);
+			auto original_duration = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
+			ExpeditionLockoutTimer lockout{ row[2], row[3], expire_time, original_duration };
+			AddExpeditionLockout(lockout);
+		}
+	}
+	SendExpeditionLockoutTimers();
 }
 
 void Client::SendExpeditionLockoutTimers()
