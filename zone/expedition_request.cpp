@@ -199,15 +199,25 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 	{
 		uint64_t expire_time = strtoull(row[0], nullptr, 10);
 		uint32_t duration = strtoul(row[1], nullptr, 10);
+		ExpeditionLockoutTimer lockout{m_expedition_name, row[2], expire_time, duration, true};
 
-		m_lockouts.emplace(row[2], ExpeditionLockoutTimer{
-			m_expedition_name, row[2], expire_time, duration, true
-		});
-
-		// on live if leader has a replay lockout it never bothers checking for event conflicts
-		if (m_check_event_lockouts && m_has_replay_timer && strcmp(row[2], DZ_REPLAY_TIMER_NAME) == 0)
+		// client window hides timers with less than 60s remaining, optionally count them as expired
+		if (lockout.GetSecondsRemaining() <= RuleI(Expedition, RequestExpiredLockoutLeewaySeconds))
 		{
-			m_check_event_lockouts = false;
+			LogExpeditionsModerate(
+				"Ignoring leader [{}] lockout [{}] with [{}] seconds remaining due to expired leeway rule",
+				m_leader_id, lockout.GetEventName(), lockout.GetSecondsRemaining()
+			);
+		}
+		else
+		{
+			m_lockouts.emplace(row[2], lockout);
+
+			// on live if leader has a replay lockout it never bothers checking for event conflicts
+			if (m_check_event_lockouts && m_has_replay_timer && strcmp(row[2], DZ_REPLAY_TIMER_NAME) == 0)
+			{
+				m_check_event_lockouts = false;
+			}
 		}
 	}
 
@@ -265,22 +275,33 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 
 			ExpeditionLockoutTimer lockout(m_expedition_name, event_name, expire_time, original_duration);
 
-			// replay timer conflict messages always show up before event conflicts
-			if (/*m_has_replay_timer && */event_name == DZ_REPLAY_TIMER_NAME)
+			// client window hides timers with less than 60s remaining, optionally count them as expired
+			if (lockout.GetSecondsRemaining() <= RuleI(Expedition, RequestExpiredLockoutLeewaySeconds))
 			{
-				has_conflicts = true;
-				SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
-				// replay timers no longer also show up as event conflicts
-				//SendLeaderMemberEventLockout(character_name, lockout);
+				LogExpeditionsModerate(
+					"Ignoring character [{}] lockout [{}] with [{}] seconds remaining due to expired leeway rule",
+					character_id, lockout.GetEventName(), lockout.GetSecondsRemaining()
+				);
 			}
-			else if (m_check_event_lockouts && character_id != m_leader_id)
+			else
 			{
-				if (m_lockouts.find(event_name) == m_lockouts.end())
+				// replay timer conflict messages always show up before event conflicts
+				if (/*m_has_replay_timer && */event_name == DZ_REPLAY_TIMER_NAME)
 				{
-					// leader doesn't have this lockout
-					// queue instead of messaging now so they come after any replay lockout messages
 					has_conflicts = true;
-					member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
+					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
+					// replay timers no longer also show up as event conflicts
+					//SendLeaderMemberEventLockout(character_name, lockout);
+				}
+				else if (m_check_event_lockouts && character_id != m_leader_id)
+				{
+					if (m_lockouts.find(event_name) == m_lockouts.end())
+					{
+						// leader doesn't have this lockout
+						// queue instead of messaging now so they come after any replay lockout messages
+						has_conflicts = true;
+						member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
+					}
 				}
 			}
 		}

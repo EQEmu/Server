@@ -790,6 +790,7 @@ RULE_INT(Expedition, MinStatusToBypassPlayerCountRequirements, 80, "Minimum GM s
 RULE_BOOL(Expedition, UseDatabaseToVerifyLeaderCommands, false, "Use database instead of zone cache to verify Expedition leader for commands")
 RULE_BOOL(Expedition, EmptyDzShutdownEnabled, true, "Enable early instance shutdown after last member of expedition removed")
 RULE_INT(Expedition, EmptyDzShutdownDelaySeconds, 900, "Seconds to set dynamic zone instance expiration if early shutdown enabled")
+RULE_INT(Expedition, RequestExpiredLockoutLeewaySeconds, 60, "Seconds remaining on lockout to count as expired for creation requests (client hides timers under 60s remaining)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(DynamicZone)
