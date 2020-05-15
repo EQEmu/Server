@@ -5665,13 +5665,14 @@ void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 
 void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
 {
-	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite_id);
-	m_pending_expedition_invite_id = 0;
+	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
+	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
+	m_pending_expedition_invite = { 0 }; // clear before re-validating
 
 	if (expedition)
 	{
 		auto dzmsg = reinterpret_cast<ExpeditionInviteResponse_Struct*>(app->pBuffer);
-		expedition->DzInviteResponse(this, dzmsg->accepted, dzmsg->swapping, dzmsg->swap_name);
+		expedition->DzInviteResponse(this, dzmsg->accepted, swap_remove_name);
 	}
 }
 
