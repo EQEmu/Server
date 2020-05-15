@@ -6898,18 +6898,24 @@ void command_dz(Client* c, const Seperator* sep)
 				auto start_time = strtoul(row[4], nullptr, 10);
 				auto duration = strtoul(row[5], nullptr, 10);
 				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
-				bool is_expired = std::chrono::system_clock::now() > expire_time;
 
+				auto now = std::chrono::system_clock::now();
+				auto remaining = std::chrono::duration_cast<std::chrono::seconds>(expire_time - now);
+				auto seconds = std::max(0, static_cast<int>(remaining.count()));
+
+				bool is_expired = now > expire_time;
 				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
 				{
 					c->Message(Chat::White, fmt::format(
-						"type: [{}] instance: [{}] zone: [{}] version: [{}] members: [{}] expired: [{}]",
+						"type: [{}] instance: [{}] zone: [{}] version: [{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 						strtoul(row[0], nullptr, 10),
 						strtoul(row[1], nullptr, 10),
 						strtoul(row[2], nullptr, 10),
 						strtoul(row[3], nullptr, 10),
 						strtoul(row[6], nullptr, 10),
-						is_expired
+						seconds / 3600,      // hours
+						(seconds / 60) % 60, // minutes
+						seconds % 60         // seconds
 					).c_str());
 				}
 			}
