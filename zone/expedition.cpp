@@ -612,7 +612,7 @@ void Expedition::SendClientExpeditionInvite(
 		m_id, client->GetName(), inviter_name, swap_remove_name
 	);
 
-	client->SetPendingExpeditionInvite(m_id);
+	client->SetPendingExpeditionInvite(ExpeditionInvite{m_id, inviter_name, swap_remove_name});
 
 	client->MessageString(
 		Chat::System, EXPEDITION_ASKED_TO_JOIN, m_leader.name.c_str(), m_expedition_name.c_str()
@@ -731,8 +731,7 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 	return has_conflict;
 }
 
-void Expedition::DzInviteResponse(
-	Client* add_client, bool accepted, bool has_swap_name, std::string swap_remove_name)
+void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::string& swap_remove_name)
 {
 	if (!add_client)
 	{
@@ -740,8 +739,8 @@ void Expedition::DzInviteResponse(
 	}
 
 	LogExpeditionsModerate(
-		"Invite response by [{}] accepted [{}] swapping [{}] swap_name [{}]",
-		add_client->GetName(), accepted, has_swap_name, swap_remove_name
+		"Invite response by [{}] accepted [{}] swap_name [{}]",
+		add_client->GetName(), accepted, swap_remove_name
 	);
 
 	// a null leader_client is handled by SendLeaderMessage fallbacks
@@ -754,7 +753,7 @@ void Expedition::DzInviteResponse(
 		return;
 	}
 
-	bool was_swap_invite = (has_swap_name && !swap_remove_name.empty());
+	bool was_swap_invite = !swap_remove_name.empty();
 	bool has_conflicts = ProcessAddConflicts(leader_client, add_client, was_swap_invite);
 
 	// error if swapping and character was already removed before the accept

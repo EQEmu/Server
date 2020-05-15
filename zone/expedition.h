@@ -60,6 +60,13 @@ struct ExpeditionMember
 		: char_id(char_id_), name(name_), status(status_) {}
 };
 
+struct ExpeditionInvite
+{
+	uint32_t    expedition_id;
+	std::string inviter_name;
+	std::string swap_remove_name;
+};
+
 class Expedition
 {
 public:
@@ -111,7 +118,7 @@ public:
 
 	void DzAddPlayer(Client* requester, std::string add_char_name, std::string swap_remove_name = {});
 	void DzAddPlayerContinue(std::string leader_name, std::string add_char_name, std::string swap_remove_name = {});
-	void DzInviteResponse(Client* add_client, bool accepted, bool has_swap_name, std::string swap_remove_name);
+	void DzInviteResponse(Client* add_client, bool accepted, const std::string& swap_remove_name);
 	void DzMakeLeader(Client* requester, std::string new_leader_name);
 	void DzPlayerList(Client* requester);
 	void DzRemovePlayer(Client* requester, std::string remove_char_name);

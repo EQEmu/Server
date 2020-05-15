@@ -21,8 +21,6 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
-class Expedition;
-class ExpeditionLockoutTimer;
 class Group;
 class NPC;
 class Object;
@@ -54,6 +52,7 @@ namespace EQ
 #include "aggromanager.h"
 
 #include "common.h"
+#include "expedition.h"
 #include "dynamiczone.h"
 #include "merc.h"
 #include "mob.h"
@@ -1125,14 +1124,14 @@ public:
 		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
 	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
 	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name);
-	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite_id; }
+	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
 	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
 	bool IsInExpedition() const { return m_expedition_id != 0; }
 	void RemoveAllExpeditionLockouts(std::string expedition_name = {});
 	void RemoveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool update_db = false);
-	void SetPendingExpeditionInvite(uint32 id) { m_pending_expedition_invite_id = id; }
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
+	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
 	void LoadAllExpeditionLockouts();
 	void UpdateExpeditionInfoAndLockouts();
 	void DzListTimers();
@@ -1698,7 +1697,7 @@ private:
 	int client_max_level;
 
 	uint32 m_expedition_id = 0;
-	uint32 m_pending_expedition_invite_id = 0;
+	ExpeditionInvite m_pending_expedition_invite { 0 };
 	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
 	DynamicZoneLocation m_quest_compass;
 
