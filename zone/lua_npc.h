@@ -73,6 +73,7 @@ public:
 	void SetPetSpellID(int id);
 	uint32 GetMaxDamage(int level);
 	void SetTaunting(bool t);
+	bool IsTaunting();
 	void PickPocket(Lua_Client thief);
 	void StartSwarmTimer(uint32 duration);
 	void DoClassAttacks(Lua_Mob target);
