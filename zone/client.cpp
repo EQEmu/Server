@@ -9584,6 +9584,11 @@ void Client::UpdateExpeditionInfoAndLockouts()
 	LoadAllExpeditionLockouts();
 }
 
+Expedition* Client::CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request)
+{
+	return Expedition::TryCreate(this, dz_instance, request);
+}
+
 Expedition* Client::CreateExpedition(
 	std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
 	uint32 min_players, uint32 max_players, bool has_replay_timer, bool disable_messages)

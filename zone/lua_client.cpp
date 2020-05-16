@@ -5,6 +5,7 @@
 
 #include "client.h"
 #include "expedition_lockout_timer.h"
+#include "expedition_request.h"
 #include "lua_client.h"
 #include "lua_expedition.h"
 #include "lua_npc.h"
@@ -1646,6 +1647,77 @@ int Lua_Client::GetClientMaxLevel() {
 	return self->GetClientMaxLevel();
 }
 
+Lua_Expedition Lua_Client::CreateExpedition(luabind::object dz_info, luabind::object expedition_info) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+
+	if (luabind::type(dz_info) != LUA_TTABLE || luabind::type(expedition_info) != LUA_TTABLE)
+	{
+		return nullptr;
+	}
+
+	// luabind will catch thrown cast_failed exceptions for invalid args, we
+	// shouldn't need to validate here unless we want non-ambiguous quest errors
+	std::string zone_name  = luabind::object_cast<std::string>(dz_info[1]);
+	uint32_t zone_version  = luabind::object_cast<uint32_t>(dz_info[2]);
+	uint32_t zone_duration = luabind::object_cast<uint32_t>(dz_info[3]);
+
+	DynamicZone dz{ zone_name, zone_version, zone_duration, DynamicZoneType::Expedition };
+
+	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
+	if (luabind::type(dz_info["compass"]) == LUA_TTABLE)
+	{
+		dz.SetCompass(DynamicZoneLocation{
+			luabind::object_cast<uint32_t>(dz_info["compass"][1]),
+			luabind::object_cast<float>(dz_info["compass"][2]),
+			luabind::object_cast<float>(dz_info["compass"][3]),
+			luabind::object_cast<float>(dz_info["compass"][4]),
+			0
+		});
+	}
+
+	if (luabind::type(dz_info["safereturn"]) == LUA_TTABLE)
+	{
+		dz.SetSafeReturn(DynamicZoneLocation{
+			luabind::object_cast<uint32_t>(dz_info["safereturn"][1]),
+			luabind::object_cast<float>(dz_info["safereturn"][2]),
+			luabind::object_cast<float>(dz_info["safereturn"][3]),
+			luabind::object_cast<float>(dz_info["safereturn"][4]),
+			luabind::object_cast<float>(dz_info["safereturn"][5])
+		});
+	}
+
+	if (luabind::type(dz_info["zonein"]) == LUA_TTABLE)
+	{
+		dz.SetZoneInLocation(DynamicZoneLocation{
+			0,
+			luabind::object_cast<float>(dz_info["zonein"][1]),
+			luabind::object_cast<float>(dz_info["zonein"][2]),
+			luabind::object_cast<float>(dz_info["zonein"][3]),
+			luabind::object_cast<float>(dz_info["zonein"][4])
+		});
+	}
+
+	std::string expedition_name = luabind::object_cast<std::string>(expedition_info[1]);
+	uint32_t min_players        = luabind::object_cast<uint32_t>(expedition_info[2]);
+	uint32_t max_players        = luabind::object_cast<uint32_t>(expedition_info[3]);
+	bool has_replay_timer       = false;
+	bool disable_messages       = false;
+
+	if (luabind::type(expedition_info[4]) == LUA_TBOOLEAN)
+	{
+		has_replay_timer = luabind::object_cast<bool>(expedition_info[4]);
+	}
+
+	if (luabind::type(expedition_info[5]) == LUA_TBOOLEAN)
+	{
+		disable_messages = luabind::object_cast<bool>(expedition_info[5]);
+	}
+
+	ExpeditionRequest request{ expedition_name, min_players, max_players, has_replay_timer, disable_messages };
+
+	return self->CreateExpedition(dz, request);
+}
+
 Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players) {
 	Lua_Safe_Call_Class(Lua_Expedition);
 	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players);
@@ -2048,6 +2120,7 @@ luabind::scope lua_register_client() {
 		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
 		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
 		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object, luabind::object))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool, bool))&Lua_Client::CreateExpedition)

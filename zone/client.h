@@ -1116,6 +1116,7 @@ public:
 
 	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false, bool update_client = true);
 	void AddNewExpeditionLockout(const std::string& expedition_name, const std::string& event_name, uint32_t duration);
+	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
 	Expedition* CreateExpedition(
 		std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
 		uint32 min_players, uint32 max_players, bool has_replay_timer = false, bool disable_messages = false);
