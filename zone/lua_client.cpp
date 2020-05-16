@@ -1709,7 +1709,6 @@ void Lua_Client::RemoveAllExpeditionLockouts(std::string expedition_name) {
 void Lua_Client::RemoveExpeditionLockout(std::string expedition_name, std::string event_name) {
 	Lua_Safe_Call_Void();
 	self->RemoveExpeditionLockout(expedition_name, event_name, true);
-	self->SendExpeditionLockoutTimers();
 }
 
 bool Lua_Client::HasExpeditionLockout(std::string expedition_name, std::string event_name) {

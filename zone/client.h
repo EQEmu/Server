@@ -1113,7 +1113,7 @@ public:
 		Client* client, const std::string& client_name, uint16_t chat_type,
 		uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
 
-	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false, bool update_client = true);
 	void AddNewExpeditionLockout(const std::string& expedition_name, const std::string& event_name, uint32_t duration);
 	Expedition* CreateExpedition(
 		std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
@@ -1128,7 +1128,7 @@ public:
 	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
 	bool IsInExpedition() const { return m_expedition_id != 0; }
 	void RemoveAllExpeditionLockouts(std::string expedition_name = {});
-	void RemoveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool update_db = false);
+	void RemoveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool update_db = false, bool update_client = true);
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
 	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }

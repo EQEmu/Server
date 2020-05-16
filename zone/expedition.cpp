@@ -1192,7 +1192,6 @@ void Expedition::ProcessLockoutUpdate(
 			{
 				member_client->RemoveExpeditionLockout(m_expedition_name, event_name);
 			}
-			member_client->SendExpeditionLockoutTimers();
 		}
 	}
 
@@ -1214,7 +1213,6 @@ void Expedition::ProcessLockoutUpdate(
 				} else {
 					client->RemoveExpeditionLockout(m_expedition_name, event_name);
 				}
-				client->SendExpeditionLockoutTimers();
 			}
 		}
 

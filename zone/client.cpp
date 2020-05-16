@@ -9608,7 +9608,7 @@ std::vector<ExpeditionLockoutTimer> Client::GetExpeditionLockouts(const std::str
 	return lockouts;
 }
 
-void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db)
+void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db, bool update_client)
 {
 	// todo: support for account based lockouts like live AoC expeditions
 	auto it = std::find_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
@@ -9625,8 +9625,14 @@ void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool up
 		m_expedition_lockouts.emplace_back(lockout);
 	}
 
-	if (update_db) { // for quest api
+	if (update_db) // for quest api
+	{
 		ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { lockout }, true);
+	}
+
+	if (update_client)
+	{
+		SendExpeditionLockoutTimers();
 	}
 }
 
@@ -9637,11 +9643,10 @@ void Client::AddNewExpeditionLockout(
 	auto expire_time = static_cast<uint64_t>(std::chrono::system_clock::to_time_t(expire_at));
 	ExpeditionLockoutTimer lockout{ expedition_name, event_name, expire_time, seconds };
 	AddExpeditionLockout(lockout, true);
-	SendExpeditionLockoutTimers();
 }
 
 void Client::RemoveExpeditionLockout(
-	const std::string& expedition_name, const std::string& event_name, bool update_db)
+	const std::string& expedition_name, const std::string& event_name, bool update_db, bool update_client)
 {
 	m_expedition_lockouts.erase(std::remove_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
 		[&](const ExpeditionLockoutTimer& lockout) {
@@ -9649,8 +9654,14 @@ void Client::RemoveExpeditionLockout(
 		}
 	), m_expedition_lockouts.end());
 
-	if (update_db) { // for quest api
+	if (update_db) // for quest api
+	{
 		ExpeditionDatabase::DeleteCharacterLockout(CharacterID(), expedition_name, event_name);
+	}
+
+	if (update_client)
+	{
+		SendExpeditionLockoutTimers();
 	}
 }
 
@@ -9703,7 +9714,7 @@ void Client::LoadAllExpeditionLockouts()
 			auto expire_time = strtoull(row[0], nullptr, 10);
 			auto original_duration = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
 			ExpeditionLockoutTimer lockout{ row[2], row[3], expire_time, original_duration };
-			AddExpeditionLockout(lockout);
+			AddExpeditionLockout(lockout, false, false);
 		}
 	}
 	SendExpeditionLockoutTimers();
