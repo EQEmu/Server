@@ -29,6 +29,7 @@
 #include "embparser.h"
 #include "embxs.h"
 #include "entity.h"
+#include "expedition.h"
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
@@ -6059,6 +6060,251 @@ XS(XS__SetContentFlag)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__get_expedition);
+XS(XS__get_expedition) {
+	dXSARGS;
+	if (items != 0) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition()");
+	}
+
+	Expedition* RETVAL = nullptr;
+	if (zone && zone->GetInstanceID() != 0)
+	{
+		RETVAL = Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
+	}
+
+	EXTEND(sp, 1); // grow stack, function had 0 arguments
+	ST(0) = sv_newmortal(); // PUSHs(sv_newmortal());
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_by_char_id);
+XS(XS__get_expedition_by_char_id) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_by_char_id(uint32 character_id)");
+	}
+
+	uint32 character_id = (int)SvUV(ST(0));
+
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByCharacterID(character_id);
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_by_instance_id);
+XS(XS__get_expedition_by_instance_id) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::GetExpeditionByInstanceID(uint16 instance_id)");
+	}
+
+	uint16 instance_id = (uint16)SvUV(ST(0));
+
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByInstanceID(instance_id);
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_lockout_by_char_id);
+XS(XS__get_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockout_by_char_id"
+			"(uint32 character_id, string expedition_name, string event_name)");
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
+	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
+		return lockout.IsSameLockout(expedition_name, event_name);
+	});
+
+	// mortalize so its refcnt is auto decremented on function exit to avoid leak
+	HV* hash = (HV*)sv_2mortal((SV*)newHV()); // hash refcnt +1 (mortal -1)
+
+	if (it != lockouts.end())
+	{
+		hv_store(hash, "remaining", 9, newSVuv(it->GetSecondsRemaining()), 0);
+		hv_store(hash, "uuid",      4, newSVpv(it->GetExpeditionUUID().c_str(), 0), 0);
+	}
+
+	ST(0) = sv_2mortal(newRV((SV*)hash)); // hash refcnt: 2 (-1 mortal), reference: 1 (-1 mortal)
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_lockouts_by_char_id);
+XS(XS__get_expedition_lockouts_by_char_id) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockouts_by_char_id"
+			"(uint32 character_id [, string expedition_name])");
+	}
+
+	HV* hash = newHV(); // hash refcnt +1 (non-mortal, newRV_noinc to not inc)
+	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
+
+	for (const auto& lockout : lockouts)
+	{
+		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
+		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
+
+		// hashes are stored through references inside other hashes/arrays. we need
+		// to wrap newHV in newRV references when inserting nested hash values.
+		// we use newRV_noinc to not increment the hash's ref count; rv will own it
+
+		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
+		if (!entry)
+		{
+			// create expedition entry in hash with its value as ref to event hash
+			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // ref takes ownership
+			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
+			{
+				hash_ref = event_hash_ref; // save ref for filtered expedition return
+			}
+			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+		}
+
+		// *entry is a reference to expedition's event hash (which it owns). the
+		// event entry in the hash will contain ref to a lockout detail hash
+		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV) // is ref to hash type
+		{
+			HV* details_hash = newHV(); // refcnt +1, reference will take ownership
+			hv_store(details_hash, "remaining", 9, newSVuv(lockout.GetSecondsRemaining()), 0);
+			hv_store(details_hash, "uuid",      4, newSVpv(lockout.GetExpeditionUUID().c_str(), 0), 0);
+
+			HV* event_hash = (HV*)SvRV(*entry);
+			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
+				(SV*)newRV_noinc((SV*)details_hash), 0);
+		}
+	}
+
+	SV* rv = &PL_sv_undef;
+
+	if (!expedition_name.empty() && hash_ref)
+	{
+		rv = sv_2mortal(hash_ref); // ref that owns event hash
+	}
+	else
+	{
+		rv = sv_2mortal(newRV_noinc((SV*)hash)); // takes ownership of expedition hash
+	}
+
+	ST(0) = rv;
+	XSRETURN(1);
+}
+
+XS(XS__add_expedition_lockout_all_clients);
+XS(XS__add_expedition_lockout_all_clients) {
+	dXSARGS;
+	if (items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_all_clients"
+			"(string expedition_name, string event_name, uint32 seconds [, string uuid])");
+	}
+
+	std::string expedition_name = SvPV_nolen(ST(0));
+	std::string event_name = SvPV_nolen(ST(1));
+	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(2)));
+	std::string uuid;
+
+	if (items == 4)
+	{
+		uuid = SvPV_nolen(ST(3));
+	}
+
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
+	Expedition::AddLockoutClients(lockout);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__add_expedition_lockout_by_char_id);
+XS(XS__add_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_by_char_id"
+			"(uint32 character_id, string expedition_name, string event_name, uint32 seconds [, string uuid])");
+	}
+
+	std::string uuid;
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(3)));
+
+	Expedition::AddLockoutByCharacterID(character_id, expedition_name, event_name, seconds, uuid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__remove_expedition_lockout_by_char_id);
+XS(XS__remove_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id"
+			"(uint32 character_id, string expedition_name, string event_name)");
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name, event_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__remove_all_expedition_lockouts_by_char_id);
+XS(XS__remove_all_expedition_lockouts_by_char_id) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id"
+			"(uint32 character_id [, string expedition_name])");
+	}
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name);
+
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6129,6 +6375,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
 	newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
 	newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
+	newXS(strcpy(buf, "add_expedition_lockout_by_char_id"), XS__add_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "addldonloss"), XS__addldonpoints, file);
 	newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
 	newXS(strcpy(buf, "addldonwin"), XS__addldonpoints, file);
@@ -6263,6 +6510,11 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
+	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
+	newXS(strcpy(buf, "get_expedition_by_char_id"), XS__get_expedition_by_char_id, file);
+	newXS(strcpy(buf, "get_expedition_by_instance_id"), XS__get_expedition_by_instance_id, file);
+	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
+	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
@@ -6328,6 +6580,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "rain"), XS__rain, file);
 	newXS(strcpy(buf, "rebind"), XS__rebind, file);
 	newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
+	newXS(strcpy(buf, "remove_all_expedition_lockouts_by_char_id"), XS__remove_all_expedition_lockouts_by_char_id, file);
+	newXS(strcpy(buf, "remove_expedition_lockout_by_char_id"), XS__remove_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);

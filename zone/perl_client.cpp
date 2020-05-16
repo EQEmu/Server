@@ -37,11 +37,25 @@
 #endif
 
 #include "client.h"
+#include "expedition.h"
 #include "titles.h"
 
 #ifdef THIS        /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
+
+#define VALIDATE_THIS_IS_CLIENT \
+	do { \
+		if (sv_derived_from(ST(0), "Client")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Client*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Client"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_Client_SendSound); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendSound) {
@@ -6759,6 +6773,286 @@ XS(XS_Client_GetClientMaxLevel) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_CreateExpedition);
+XS(XS_Client_CreateExpedition) {
+	dXSARGS;
+	if (items != 7 && items != 8) {
+		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, string zone_name, uint32 zone_version, "
+			"uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, "
+			"[, bool disable_messages = false])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string zone_name(SvPV_nolen(ST(1)));
+	uint32 zone_version = (uint32)SvUV(ST(2));
+	uint32 duration = (uint32)SvUV(ST(3));
+	std::string expedition_name(SvPV_nolen(ST(4)));
+	uint32 min_players = (uint32)SvUV(ST(5));
+	uint32 max_players = (uint32)SvUV(ST(6));
+	bool disable_messages = (items > 7) ? (bool)SvTRUE(ST(7)) : false;
+
+	Expedition* RETVAL = THIS->CreateExpedition(zone_name, zone_version, duration,
+		expedition_name, min_players, max_players, disable_messages);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpedition);
+XS(XS_Client_GetExpedition) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpedition(THIS)");
+	}
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	Expedition* RETVAL = THIS->GetExpedition();
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpeditionLockouts);
+XS(XS_Client_GetExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS [, string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	HV* hash = newHV();
+	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	auto lockouts = THIS->GetExpeditionLockouts();
+
+	for (const auto& lockout : lockouts)
+	{
+		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
+		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
+
+		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
+		if (!entry)
+		{
+			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // takes ownership of hash
+			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
+			{
+				hash_ref = event_hash_ref; // save ref to event hash for return
+			}
+			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+		}
+
+		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV)
+		{
+			HV* event_hash = (HV*)SvRV(*entry);
+			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
+				newSVuv(lockout.GetSecondsRemaining()), 0);
+		}
+	}
+
+	SV* rv = &PL_sv_undef;
+
+	if (!expedition_name.empty())
+	{
+		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
+	}
+	else
+	{
+		rv = sv_2mortal(newRV_noinc((SV*)hash)); // owns expedition hash
+	}
+
+	ST(0) = rv;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLockoutExpeditionUUID);
+XS(XS_Client_GetLockoutExpeditionUUID) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::GetLockoutExpeditionUUID(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	auto lockout = THIS->GetExpeditionLockout(expedition_name, event_name);
+	if (lockout)
+	{
+		XSRETURN_PV(lockout->GetExpeditionUUID().c_str());
+	}
+
+	XSRETURN_UNDEF;
+}
+
+XS(XS_Client_AddExpeditionLockout);
+XS(XS_Client_AddExpeditionLockout) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds [, string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	uint32 seconds = (uint32)SvUV(ST(3));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_AddExpeditionLockoutDuration);
+XS(XS_Client_AddExpeditionLockoutDuration) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds [, string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	int seconds = static_cast<int>(SvUV(ST(3)));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveAllExpeditionLockouts);
+XS(XS_Client_RemoveAllExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS [, string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	THIS->RemoveAllExpeditionLockouts(expedition_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveExpeditionLockout);
+XS(XS_Client_RemoveExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	THIS->RemoveExpeditionLockout(expedition_name, event_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasExpeditionLockout);
+XS(XS_Client_HasExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::HasExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	bool result = THIS->HasExpeditionLockout(expedition_name, event_name);
+	ST(0) = boolSV(result);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_MovePCDynamicZone);
+XS(XS_Client_MovePCDynamicZone) {
+	dXSARGS;
+	if (items != 2 && items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id [, int zone_version = -1, bool message_if_invalid = true])\n"
+		                 "Usage: Client::MovePCDynamicZone(THIS, string zone_name [, int zone_version = -1, bool message_if_invalid = true])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	if (SvTYPE(ST(1)) == SVt_PV)
+	{
+		std::string zone_name(SvPV_nolen(ST(1)));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 4)
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version, (bool)SvTRUE(ST(3)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version);
+		}
+	}
+	else if (SvTYPE(ST(1)) == SVt_IV)
+	{
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 3)
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version, (bool)SvTRUE(ST(2)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version);
+		}
+	}
+	else
+	{
+		Perl_croak(aTHX_ "Client::MovePCDynamicZone expected an integer or string");
+	}
+
+	XSRETURN_EMPTY;
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -6786,6 +7080,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
+	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
+	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
 	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
@@ -6804,6 +7100,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "CheckSpecializeIncrease"), XS_Client_CheckSpecializeIncrease, file, "$$");
 	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
+	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
@@ -6858,6 +7155,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetEndurance"), XS_Client_GetEndurance, file, "$");
 	newXSproto(strcpy(buf, "GetEnduranceRatio"), XS_Client_GetEnduranceRatio, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
+	newXSproto(strcpy(buf, "GetExpedition"), XS_Client_GetExpedition, file, "$");
+	newXSproto(strcpy(buf, "GetExpeditionLockouts"), XS_Client_GetExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "GetFace"), XS_Client_GetFace, file, "$");
 	newXSproto(strcpy(buf, "GetFactionLevel"), XS_Client_GetFactionLevel, file, "$$$$$$$$");
 	newXSproto(strcpy(buf, "GetFeigned"), XS_Client_GetFeigned, file, "$");
@@ -6880,6 +7179,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
+	newXSproto(strcpy(buf, "GetLockoutExpeditionUUID"), XS_Client_GetLockoutExpeditionUUID, file, "$$$");
 	newXSproto(strcpy(buf, "GetMaxEndurance"), XS_Client_GetMaxEndurance, file, "$");
 	newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
 	newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
@@ -6907,6 +7207,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
 	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
+	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
@@ -6938,6 +7239,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MaxSkill"), XS_Client_MaxSkill, file, "$$;$$");
 	newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 	newXSproto(strcpy(buf, "MovePC"), XS_Client_MovePC, file, "$$$$$$");
+	newXSproto(strcpy(buf, "MovePCDynamicZone"), XS_Client_MovePCDynamicZone, file, "$$;$$");
 	newXSproto(strcpy(buf, "MovePCInstance"), XS_Client_MovePCInstance, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
@@ -6954,6 +7256,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 	newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
+	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");

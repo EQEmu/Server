@@ -971,6 +971,9 @@ void PerlembParser::MapFunctions()
 		"package Doors;"
 		"&boot_Doors;"    // load quest Doors XS
 
+		"package Expedition;"
+		"&boot_Expedition;"
+
 		#endif
 		"package main;"
 		"}"
