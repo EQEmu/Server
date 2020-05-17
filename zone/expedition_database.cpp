@@ -419,6 +419,25 @@ ExpeditionMember ExpeditionDatabase::GetExpeditionLeader(uint32_t expedition_id)
 	return leader;
 }
 
+uint32_t ExpeditionDatabase::GetExpeditionMemberCount(uint32_t expedition_id)
+{
+	auto query = fmt::format(SQL(
+		SELECT COUNT(IF(is_current_member = TRUE, 1, NULL)) member_count
+		FROM expedition_members
+		WHERE expedition_id = {};
+	), expedition_id);
+
+	auto results = database.QueryDatabase(query);
+
+	uint32_t member_count = 0;
+	if (results.Success() && results.RowCount() > 0)
+	{
+		auto row = results.begin();
+		member_count = static_cast<uint32_t>(strtoul(row[0], nullptr, 10));
+	}
+	return member_count;
+}
+
 void ExpeditionDatabase::InsertCharacterLockouts(
 	uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
 	bool update_expire_times, bool is_pending)
