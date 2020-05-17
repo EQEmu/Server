@@ -509,9 +509,13 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 		ChooseNewLeader();
 	}
 
-	if (m_members.empty())
+	// we can't check for empty member count via cache because if other zones
+	// remove members at the same time then we race. cache member count won't
+	// be accurate until the world messages from other zones are processed
+	uint32_t member_count = ExpeditionDatabase::GetExpeditionMemberCount(m_id);
+	if (member_count == 0)
 	{
-		// cache removal will occur in world message handler
+		// zone cache removal will occur in world message handler
 		ExpeditionDatabase::DeleteExpedition(m_id);
 		if (RuleB(Expedition, EmptyDzShutdownEnabled))
 		{
@@ -1163,6 +1167,11 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 
 		it = is_removed ? m_members.erase(it) : it + 1;
 	}
+
+	LogExpeditionsDetail(
+		"Processed member [{}] ({}) removal, current zone cache member count: [{}]",
+		removed_char_name, removed_char_id, m_members.size()
+	);
 }
 
 void Expedition::ProcessLockoutUpdate(
@@ -1581,6 +1590,11 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (expedition && zone)
 		{
+			LogExpeditionsDetail(
+				"World member change message -- remove: [{}] name: [{}] zone: [{}]:[{}] sender: [{}]:[{}]",
+				buf->removed, buf->char_name, zone->GetZoneID(), zone->GetInstanceID(), buf->sender_zone_id, buf->sender_instance_id
+			);
+
 			if (!zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 			{
 				if (buf->removed)
