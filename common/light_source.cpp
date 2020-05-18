@@ -22,7 +22,7 @@
 #include <string.h>
 
 
-uint8 EQEmu::lightsource::TypeToLevel(uint8 light_type)
+uint8 EQ::lightsource::TypeToLevel(uint8 light_type)
 {
 	switch (light_type) {
 	case LightTypeGlobeOfStars:
@@ -55,7 +55,7 @@ uint8 EQEmu::lightsource::TypeToLevel(uint8 light_type)
 	}
 }
 
-bool EQEmu::lightsource::IsLevelGreater(uint8 left_type, uint8 right_type)
+bool EQ::lightsource::IsLevelGreater(uint8 left_type, uint8 right_type)
 {
 	static const uint8 light_levels[LightTypeCount] = {
 		LightLevelUnlit,			/* LightTypeNone */
@@ -82,17 +82,17 @@ bool EQEmu::lightsource::IsLevelGreater(uint8 left_type, uint8 right_type)
 	return (light_levels[left_type] > light_levels[right_type]);
 }
 
-EQEmu::LightSource_Struct::LightSource_Struct()
+EQ::LightSource_Struct::LightSource_Struct()
 {
 	Clear();
 }
 
-void EQEmu::LightSource_Struct::Clear()
+void EQ::LightSource_Struct::Clear()
 {
 	memset(&Slot, 0, (sizeof(uint8) * lightsource::LightCount));
 }
 
-void EQEmu::LightSourceProfile::Clear()
+void EQ::LightSourceProfile::Clear()
 {
 	Type.Clear();
 	Level.Clear();

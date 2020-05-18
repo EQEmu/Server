@@ -28,7 +28,7 @@ class Client;
 class Mob;
 class NPC;
 
-namespace EQEmu
+namespace EQ
 {
 	class ItemInstance;
 }
@@ -37,7 +37,7 @@ class QuestManager {
 	struct running_quest {
 		Mob *owner;
 		Client *initiator;
-		EQEmu::ItemInstance* questitem;
+		EQ::ItemInstance* questitem;
 		bool depop_npc;
 		std::string encounter;
 	};
@@ -51,7 +51,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQEmu::ItemInstance* _questitem = nullptr, std::string encounter = "");
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -79,13 +79,13 @@ public:
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
 	void settimerMS(const char *timer_name, int milliseconds);
-	void settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst);
+	void settimerMS(const char *timer_name, int milliseconds, EQ::ItemInstance *inst);
 	void settimerMS(const char *timer_name, int milliseconds, Mob *mob);
 	void stoptimer(const char *timer_name);
-	void stoptimer(const char *timer_name, EQEmu::ItemInstance *inst);
+	void stoptimer(const char *timer_name, EQ::ItemInstance *inst);
 	void stoptimer(const char *timer_name, Mob *mob);
 	void stopalltimers();
-	void stopalltimers(EQEmu::ItemInstance *inst);
+	void stopalltimers(EQ::ItemInstance *inst);
 	void stopalltimers(Mob *mob);
 	void pausetimer(const char *timer_name);
 	void resumetimer(const char *timer_name);
@@ -302,7 +302,7 @@ public:
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
-	EQEmu::ItemInstance *GetQuestItem() const;
+	EQ::ItemInstance *GetQuestItem() const;
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 

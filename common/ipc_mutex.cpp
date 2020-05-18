@@ -31,7 +31,7 @@
 #include "eqemu_exception.h"
 #include "eqemu_config.h"
 
-namespace EQEmu {
+namespace EQ {
 	struct IPCMutex::Implementation {
 #ifdef _WINDOWS
 		HANDLE mut_;

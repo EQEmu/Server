@@ -52,30 +52,30 @@ public:
 	// Public Methods
 	/////////////////////////
 
-	inline std::list<EQEmu::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
-	inline std::list<EQEmu::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
+	inline std::list<EQ::ItemInstance*>::const_iterator cbegin() { return m_list.cbegin(); }
+	inline std::list<EQ::ItemInstance*>::const_iterator cend() { return m_list.cend(); }
 
 	inline int size() { return static_cast<int>(m_list.size()); } // TODO: change to size_t
 	inline bool empty() { return m_list.empty(); }
 
-	void push(EQEmu::ItemInstance* inst);
-	void push_front(EQEmu::ItemInstance* inst);
-	EQEmu::ItemInstance* pop();
-	EQEmu::ItemInstance* pop_back();
-	EQEmu::ItemInstance* peek_front() const;
+	void push(EQ::ItemInstance* inst);
+	void push_front(EQ::ItemInstance* inst);
+	EQ::ItemInstance* pop();
+	EQ::ItemInstance* pop_back();
+	EQ::ItemInstance* peek_front() const;
 
 protected:
 	/////////////////////////
 	// Protected Members
 	/////////////////////////
 
-	std::list<EQEmu::ItemInstance*> m_list;
+	std::list<EQ::ItemInstance*> m_list;
 };
 
 // ########################################
-// Class: EQEmu::InventoryProfile
+// Class: EQ::InventoryProfile
 //	Character inventory
-namespace EQEmu
+namespace EQ
 {
 	class InventoryProfile
 	{

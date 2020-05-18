@@ -345,7 +345,7 @@ int main(int argc, char** argv) {
 	database.GetDecayTimes(npcCorpseDecayTimes);
 
 	LogInfo("Loading profanity list");
-	if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+	if (!EQ::ProfanityManager::LoadProfanityList(&database))
 		LogError("Loading profanity list failed!");
 
 	LogInfo("Loading commands");
@@ -373,7 +373,7 @@ int main(int argc, char** argv) {
 			}
 		}
 
-		EQEmu::InitializeDynamicLookups();
+		EQ::InitializeDynamicLookups();
 		LogInfo("Initialized dynamic dictionary entries");
 	}
 

@@ -1592,7 +1592,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 				safe_delete_array(hp_packet.pBuffer);
 
 				hp_packet.size = 0;
-				if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1629,7 +1629,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 		if(members[x].member) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
@@ -1661,7 +1661,7 @@ void Raid::SendManaPacketFrom(Mob *mob)
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if (members[x].member) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
@@ -1688,7 +1688,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if (members[x].member) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
 					MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 					endurance_update->spawn_id = mob->GetID();

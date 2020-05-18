@@ -24,7 +24,7 @@
  *  DEALINGS IN THE SOFTWARE.
  */
 
-// EQEmu::Any is a modified version of Boost::Any and as such retains the Boost licensing.
+// EQ::Any is a modified version of Boost::Any and as such retains the Boost licensing.
 
 #ifndef EQEMU_COMMON_ANY_H
 #define EQEMU_COMMON_ANY_H
@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <typeinfo>
 
-namespace EQEmu
+namespace EQ
 {
 	class Any
 	{

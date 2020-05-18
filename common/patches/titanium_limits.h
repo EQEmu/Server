@@ -31,7 +31,7 @@ namespace Titanium
 	const int16 INULL = 0;
 
 	namespace inventory {
-		inline EQEmu::versions::ClientVersion GetInventoryRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		const bool ConcatenateInvTypeLimbo = true;
 
@@ -43,7 +43,7 @@ namespace Titanium
 	} /*inventory*/
 
 	namespace invtype {
-		inline EQEmu::versions::ClientVersion GetInvTypeRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		namespace enum_ {
 			enum InventoryTypes : int16 {
@@ -106,7 +106,7 @@ namespace Titanium
 	} /*invtype*/
 
 	namespace invslot {
-		inline EQEmu::versions::ClientVersion GetInvSlotRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		namespace enum_ {
 			enum InventorySlots : int16 {
@@ -204,7 +204,7 @@ namespace Titanium
 	} /*invslot*/
 
 	namespace invbag {
-		inline EQEmu::versions::ClientVersion GetInvBagRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
@@ -236,7 +236,7 @@ namespace Titanium
 	} /*invbag*/
 
 	namespace invaug {
-		inline EQEmu::versions::ClientVersion GetInvAugRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		const int16 SOCKET_INVALID = IINVALID;
 		const int16 SOCKET_BEGIN = INULL;
@@ -248,7 +248,7 @@ namespace Titanium
 	} /*invaug*/
 
 	namespace item {
-		inline EQEmu::versions::ClientVersion GetItemRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		enum ItemPacketType : int {
 			ItemPacketMerchant = 100,
@@ -266,7 +266,7 @@ namespace Titanium
 	} /*item*/
 
 	namespace profile {
-		inline EQEmu::versions::ClientVersion GetProfileRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		const int16 BANDOLIERS_SIZE = 4;		// number of bandolier instances
 		const int16 BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
@@ -278,11 +278,11 @@ namespace Titanium
 	} /*profile*/
 
 	namespace constants {
-		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::Titanium; }
 
-		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::DoD; // Someone had this as PoR in another section...
-		const uint32 EXPANSION_BIT = EQEmu::expansions::bitDoD;
-		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskDoD;
+		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::DoD; // Someone had this as PoR in another section...
+		const uint32 EXPANSION_BIT = EQ::expansions::bitDoD;
+		const uint32 EXPANSIONS_MASK = EQ::expansions::maskDoD;
 
 		const size_t CHARACTER_CREATION_LIMIT = 8; // Hard-coded in client - DO NOT ALTER
 
@@ -291,21 +291,21 @@ namespace Titanium
 	} /*constants*/
 
 	namespace behavior {
-		inline EQEmu::versions::ClientVersion GetBehaviorRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::Titanium; }
 
 		const bool CoinHasWeight = true;
 
 	} /*behavior*/
 
 	namespace skills {
-		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Titanium; }
 
-		const size_t LastUsableSkill = EQEmu::skills::SkillFrenzy;
+		const size_t LastUsableSkill = EQ::skills::SkillFrenzy;
 
 	} /*skills*/
 
 	namespace spells {
-		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::Titanium; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::Titanium; }
 		
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,

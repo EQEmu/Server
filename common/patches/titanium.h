@@ -43,7 +43,7 @@ namespace Titanium
 	protected:
 
 		virtual std::string Describe() const;
-		virtual const EQEmu::versions::ClientVersion ClientVersion() const;
+		virtual const EQ::versions::ClientVersion ClientVersion() const;
 
 		//magic macro to declare our opcode processors
 		#include "ss_declare.h"

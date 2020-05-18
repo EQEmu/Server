@@ -28,7 +28,7 @@
 #include <sstream>
 
 
-namespace EQEmu
+namespace EQ
 {
 	class MemoryBuffer {
 	public:

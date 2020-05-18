@@ -1078,7 +1078,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Unable to locate zone record for zone id [{}] or instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id, s->instance_id);
 		}
 
-		if (s->consent_type == EQEmu::consent::Normal) {
+		if (s->consent_type == EQ::consent::Normal) {
 			// send the message to the client being granted or denied permission
 			ClientListEntry* cle = client_list.FindCharacter(s->grantname);
 			if (cle) {

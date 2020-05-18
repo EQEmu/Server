@@ -606,7 +606,7 @@ XS(XS_Mob_GetSkill) {
 		Mob *THIS;
 		uint32                   RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -872,7 +872,7 @@ XS(XS_Mob_Damage) {
 		Mob *from;
 		int32                    damage       = (int32) SvIV(ST(2));
 		uint16                   spell_id     = (uint16) SvUV(ST(3));
-		EQEmu::skills::SkillType attack_skill = (EQEmu::skills::SkillType) SvUV(ST(4));
+		EQ::skills::SkillType attack_skill = (EQ::skills::SkillType) SvUV(ST(4));
 		bool                     avoidable;
 		int8                     buffslot;
 		bool                     iBuffTic;
@@ -3830,7 +3830,7 @@ XS(XS_Mob_CastSpell) {
 		Mob *THIS;
 		uint16             spell_id  = (uint16) SvUV(ST(1));
 		uint16             target_id = (uint16) SvUV(ST(2));
-		EQEmu::spells::CastingSlot slot;
+		EQ::spells::CastingSlot slot;
 		int32              casttime;
 		int32              mana_cost;
 		int16              resist_adjust;
@@ -3844,9 +3844,9 @@ XS(XS_Mob_CastSpell) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		if (items < 4)
-			slot = EQEmu::spells::CastingSlot::Item;
+			slot = EQ::spells::CastingSlot::Item;
 		else {
-			slot = static_cast<EQEmu::spells::CastingSlot>(SvUV(ST(3)));
+			slot = static_cast<EQ::spells::CastingSlot>(SvUV(ST(3)));
 		}
 
 		if (items < 5)
@@ -3919,7 +3919,7 @@ XS(XS_Mob_SpellFinished) {
 			resist_diff = spells[spell_id].ResistDiff;
 		}
 
-		THIS->SpellFinished(spell_id, spell_target, EQEmu::spells::CastingSlot::Item, mana_cost, -1, resist_diff);
+		THIS->SpellFinished(spell_id, spell_target, EQ::spells::CastingSlot::Item, mana_cost, -1, resist_diff);
 	}
 	XSRETURN_EMPTY;
 }
@@ -6494,7 +6494,7 @@ XS(XS_Mob_DoSpecialAttackDamage) {
 	{
 		Mob *THIS;
 		Mob *target;
-		EQEmu::skills::SkillType attack_skill  = (EQEmu::skills::SkillType) SvUV(ST(2));
+		EQ::skills::SkillType attack_skill  = (EQ::skills::SkillType) SvUV(ST(2));
 		int32                    max_damage    = (int32) SvIV(ST(3));
 		int32                    min_damage    = 1;
 		int32                    hate_override = -11;
@@ -7401,7 +7401,7 @@ XS(XS_Mob_ModSkillDmgTaken) {
 		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, int skill, int16 value)");
 	{
 		Mob *THIS;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 		int16                    value     = (int16) SvIV(ST(2));
 
 		if (sv_derived_from(ST(0), "Mob")) {
@@ -7426,7 +7426,7 @@ XS(XS_Mob_GetModSkillDmgTaken) {
 		Mob *THIS;
 		int16                    RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -7452,7 +7452,7 @@ XS(XS_Mob_GetSkillDmgTaken) {
 		Mob *THIS;
 		int32                    RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -7607,7 +7607,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg) {
 		Mob *THIS;
 		Mob *target;
 		uint16                   weapon_damage = (uint16) SvIV(ST(2));
-		EQEmu::skills::SkillType skill         = (EQEmu::skills::SkillType) SvUV(ST(3));
+		EQ::skills::SkillType skill         = (EQ::skills::SkillType) SvUV(ST(3));
 		int16                    chance_mod    = (int16) SvIV(ST(4));
 		int16                    focus         = (int16) SvIV(ST(5));
 		uint8                    CanRiposte    = (uint8) SvIV(ST(6));
@@ -7641,8 +7641,8 @@ XS(XS_Mob_DoArcheryAttackDmg) {
 	{
 		Mob                 *THIS;
 		Mob                 *target;
-		EQEmu::ItemInstance *RangeWeapon = nullptr;
-		EQEmu::ItemInstance *Ammo        = nullptr;
+		EQ::ItemInstance *RangeWeapon = nullptr;
+		EQ::ItemInstance *Ammo        = nullptr;
 		uint16 weapon_damage = (uint16) SvIV(ST(4));
 		int16  chance_mod    = (int16) SvIV(ST(5));
 		int16  focus         = (int16) SvIV(ST(6));
@@ -7676,8 +7676,8 @@ XS(XS_Mob_DoThrowingAttackDmg) {
 	{
 		Mob                 *THIS;
 		Mob                 *target;
-		EQEmu::ItemInstance *RangeWeapon = nullptr;
-		EQEmu::ItemData     *item        = nullptr;
+		EQ::ItemInstance *RangeWeapon = nullptr;
+		EQ::ItemData     *item        = nullptr;
 		uint16 weapon_damage = (uint16) SvIV(ST(4));
 		int16  chance_mod    = (int16) SvIV(ST(5));
 		int16  focus         = (int16) SvIV(ST(6));

@@ -81,7 +81,7 @@ std::vector<RaceClassCombos> character_create_race_class_combos;
 extern ZSList zoneserver_list;
 extern LoginServerList loginserverlist;
 extern ClientList client_list;
-extern EQEmu::Random emu_random;
+extern EQ::Random emu_random;
 extern uint32 numclients;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
@@ -108,7 +108,7 @@ Client::Client(EQStreamInterface* ieqs)
 	StartInTutorial = false;
 
 	m_ClientVersion = eqs->ClientVersion();
-	m_ClientVersionBit = EQEmu::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
+	m_ClientVersionBit = EQ::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
 	
 	numclients++;
 }
@@ -173,10 +173,10 @@ void Client::SendExpansionInfo() {
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
 	
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
-		eis->Expansions = EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
+		eis->Expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
 	}
 	else {
-		eis->Expansions = (RuleI(World, ExpansionSettings) & EQEmu::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
+		eis->Expansions = (RuleI(World, ExpansionSettings) & EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion()));
 	}
 
 	QueuePacket(outapp);
@@ -188,7 +188,7 @@ void Client::SendCharInfo() {
 		cle->SetOnline(CLE_Status::CharSelect);
 	}
 
-	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) {
+	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater) {
 		SendMaxCharCreate();
 		SendMembership();
 		SendMembershipSettings();
@@ -213,9 +213,9 @@ void Client::SendMaxCharCreate() {
 	auto outapp = new EQApplicationPacket(OP_SendMaxCharacters, sizeof(MaxCharacters_Struct));
 	MaxCharacters_Struct* mc = (MaxCharacters_Struct*)outapp->pBuffer;
 
-	mc->max_chars = EQEmu::constants::StaticLookup(m_ClientVersion)->CharacterCreationLimit;
-	if (mc->max_chars > EQEmu::constants::CHARACTER_CREATION_LIMIT)
-		mc->max_chars = EQEmu::constants::CHARACTER_CREATION_LIMIT;
+	mc->max_chars = EQ::constants::StaticLookup(m_ClientVersion)->CharacterCreationLimit;
+	if (mc->max_chars > EQ::constants::CHARACTER_CREATION_LIMIT)
+		mc->max_chars = EQ::constants::CHARACTER_CREATION_LIMIT;
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -682,7 +682,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	}
 	else
 	{
-		if (m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier)
+		if (m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier)
 			StartInTutorial = true;
 		SendCharInfo();
 	}
@@ -730,9 +730,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	// This can probably be moved outside and have another method return requested info (don't forget to remove the #include "../common/shareddb.h" above)
 	// (This is a literal translation of the original process..I don't see why it can't be changed to a single-target query over account iteration)
 	if (!is_player_zoning) {
-		size_t character_limit = EQEmu::constants::StaticLookup(eqs->ClientVersion())->CharacterCreationLimit;
-		if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) { character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT; }
-		if (eqs->ClientVersion() == EQEmu::versions::ClientVersion::Titanium) { character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; }
+		size_t character_limit = EQ::constants::StaticLookup(eqs->ClientVersion())->CharacterCreationLimit;
+		if (character_limit > EQ::constants::CHARACTER_CREATION_LIMIT) { character_limit = EQ::constants::CHARACTER_CREATION_LIMIT; }
+		if (eqs->ClientVersion() == EQ::versions::ClientVersion::Titanium) { character_limit = Titanium::constants::CHARACTER_CREATION_LIMIT; }
 
 		std::string tgh_query = StringFormat(
 			"SELECT                     "
@@ -865,30 +865,30 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		const WorldConfig *Config = WorldConfig::get();
 		std::string buffer;
 
-		EQEmu::versions::UCSVersion ConnectionType = EQEmu::versions::ucsUnknown;
+		EQ::versions::UCSVersion ConnectionType = EQ::versions::ucsUnknown;
 
 		// chat server packet
 		switch (GetClientVersion()) {
-		case EQEmu::versions::ClientVersion::Titanium:
-			ConnectionType = EQEmu::versions::ucsTitaniumChat;
+		case EQ::versions::ClientVersion::Titanium:
+			ConnectionType = EQ::versions::ucsTitaniumChat;
 			break;
-		case EQEmu::versions::ClientVersion::SoF:
-			ConnectionType = EQEmu::versions::ucsSoFCombined;
+		case EQ::versions::ClientVersion::SoF:
+			ConnectionType = EQ::versions::ucsSoFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::SoD:
-			ConnectionType = EQEmu::versions::ucsSoDCombined;
+		case EQ::versions::ClientVersion::SoD:
+			ConnectionType = EQ::versions::ucsSoDCombined;
 			break;
-		case EQEmu::versions::ClientVersion::UF:
-			ConnectionType = EQEmu::versions::ucsUFCombined;
+		case EQ::versions::ClientVersion::UF:
+			ConnectionType = EQ::versions::ucsUFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::RoF:
-			ConnectionType = EQEmu::versions::ucsRoFCombined;
+		case EQ::versions::ClientVersion::RoF:
+			ConnectionType = EQ::versions::ucsRoFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::RoF2:
-			ConnectionType = EQEmu::versions::ucsRoF2Combined;
+		case EQ::versions::ClientVersion::RoF2:
+			ConnectionType = EQ::versions::ucsRoF2Combined;
 			break;
 		default:
-			ConnectionType = EQEmu::versions::ucsUnknown;
+			ConnectionType = EQ::versions::ucsUnknown;
 			break;
 		}
 
@@ -910,8 +910,8 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 		// mail server packet
 		switch (GetClientVersion()) {
-		case EQEmu::versions::ClientVersion::Titanium:
-			ConnectionType = EQEmu::versions::ucsTitaniumMail;
+		case EQ::versions::ClientVersion::Titanium:
+			ConnectionType = EQ::versions::ucsTitaniumMail;
 			break;
 		default:
 			// retain value from previous switch
@@ -954,7 +954,7 @@ bool Client::HandleDeleteCharacterPacket(const EQApplicationPacket *app) {
 
 bool Client::HandleZoneChangePacket(const EQApplicationPacket *app) {
 	// HoT sends this to world while zoning and wants it echoed back.
-	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater)
+	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater)
 	{
 		QueuePacket(app);
 	}
@@ -1416,10 +1416,10 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 {
 	PlayerProfile_Struct pp;
 	ExtendedProfile_Struct ext;
-	EQEmu::InventoryProfile inv;
+	EQ::InventoryProfile inv;
 
-	pp.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
-	inv.SetInventoryVersion(EQEmu::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
+	pp.SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(EQ::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit)));
+	inv.SetInventoryVersion(EQ::versions::ConvertClientVersionBitToClientVersion(m_ClientVersionBit));
 	inv.SetGMInventory(false); // character cannot have gm flag at this point
 
 	time_t bday = time(nullptr);
@@ -1444,7 +1444,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	LogInfo("Beard: [{}]  Beardcolor: [{}]", cc->beard, cc->beardcolor);
 
 	/* Validate the char creation struct */
-	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
+	if (m_ClientVersionBit & EQ::versions::maskSoFAndLater) {
 		if (!CheckCharCreateInfoSoF(cc)) {
 			LogInfo("CheckCharCreateInfo did not validate the request (bad race/class/stats)");
 			return false;
@@ -1496,14 +1496,14 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	SetClassStartingSkills(&pp);
 	SetClassLanguages(&pp);
 
-	pp.skills[EQEmu::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
-	pp.skills[EQEmu::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
+	pp.skills[EQ::skills::SkillSwimming] = RuleI(Skills, SwimmingStartValue);
+	pp.skills[EQ::skills::SkillSenseHeading] = RuleI(Skills, SenseHeadingStartValue);
 
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
-	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELLBOOK_SIZE));
+	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
 	
-	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQEmu::spells::SPELL_GEM_COUNT));
+	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQ::spells::SPELL_GEM_COUNT));
 
 	for(i = 0; i < BUFF_COUNT; i++)
 		pp.buffs[i].spellid = 0xFFFF;
@@ -1512,7 +1512,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
-	if (m_ClientVersionBit & EQEmu::versions::maskSoFAndLater) {
+	if (m_ClientVersionBit & EQ::versions::maskSoFAndLater) {
 		LogInfo("Found 'SoFStartZoneID' rule setting: [{}]", RuleI(World, SoFStartZoneID));
 		if (RuleI(World, SoFStartZoneID) > 0) {
 			pp.zone_id = RuleI(World, SoFStartZoneID);
@@ -1528,7 +1528,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		}
 	} 	
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQEmu::versions::maskTitaniumAndEarlier);
+	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;
@@ -1870,21 +1870,21 @@ bool CheckCharCreateInfoTitanium(CharCreate_Struct *cc)
 
 void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 {
-	for (uint32 i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i) {
+	for (uint32 i = 0; i <= EQ::skills::HIGHEST_SKILL; ++i) {
 		if (pp->skills[i] == 0) {
 			// Skip specialized, tradeskills (fishing excluded), Alcohol Tolerance, and Bind Wound
-			if (EQEmu::skills::IsSpecializedSkill((EQEmu::skills::SkillType)i) ||
-				(EQEmu::skills::IsTradeskill((EQEmu::skills::SkillType)i) && i != EQEmu::skills::SkillFishing) ||
-				i == EQEmu::skills::SkillAlcoholTolerance || i == EQEmu::skills::SkillBindWound)
+			if (EQ::skills::IsSpecializedSkill((EQ::skills::SkillType)i) ||
+				(EQ::skills::IsTradeskill((EQ::skills::SkillType)i) && i != EQ::skills::SkillFishing) ||
+				i == EQ::skills::SkillAlcoholTolerance || i == EQ::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = database.GetSkillCap(pp->class_, (EQEmu::skills::SkillType)i, 1);
+			pp->skills[i] = database.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1);
 		}
 	}
 
-	if (cle->GetClientVersion() < static_cast<uint8>(EQEmu::versions::ClientVersion::RoF2) && pp->class_ == BERSERKER) {
-		pp->skills[EQEmu::skills::Skill1HPiercing] = pp->skills[EQEmu::skills::Skill2HPiercing];
-		pp->skills[EQEmu::skills::Skill2HPiercing] = 0;
+	if (cle->GetClientVersion() < static_cast<uint8>(EQ::versions::ClientVersion::RoF2) && pp->class_ == BERSERKER) {
+		pp->skills[EQ::skills::Skill1HPiercing] = pp->skills[EQ::skills::Skill2HPiercing];
+		pp->skills[EQ::skills::Skill2HPiercing] = 0;
 	}
 }
 
@@ -1907,41 +1907,41 @@ void Client::SetRaceStartingSkills( PlayerProfile_Struct *pp )
 		}
 	case DARK_ELF:
 		{
-			pp->skills[EQEmu::skills::SkillHide] = 50;
+			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
 	case FROGLOK:
 		{
-			pp->skills[EQEmu::skills::SkillSwimming] = 125;
+			pp->skills[EQ::skills::SkillSwimming] = 125;
 			break;
 		}
 	case GNOME:
 		{
-			pp->skills[EQEmu::skills::SkillTinkering] = 50;
+			pp->skills[EQ::skills::SkillTinkering] = 50;
 			break;
 		}
 	case HALFLING:
 		{
-			pp->skills[EQEmu::skills::SkillHide] = 50;
-			pp->skills[EQEmu::skills::SkillSneak] = 50;
+			pp->skills[EQ::skills::SkillHide] = 50;
+			pp->skills[EQ::skills::SkillSneak] = 50;
 			break;
 		}
 	case IKSAR:
 		{
-			pp->skills[EQEmu::skills::SkillForage] = 50;
-			pp->skills[EQEmu::skills::SkillSwimming] = 100;
+			pp->skills[EQ::skills::SkillForage] = 50;
+			pp->skills[EQ::skills::SkillSwimming] = 100;
 			break;
 		}
 	case WOOD_ELF:
 		{
-			pp->skills[EQEmu::skills::SkillForage] = 50;
-			pp->skills[EQEmu::skills::SkillHide] = 50;
+			pp->skills[EQ::skills::SkillForage] = 50;
+			pp->skills[EQ::skills::SkillHide] = 50;
 			break;
 		}
 	case VAHSHIR:
 		{
-			pp->skills[EQEmu::skills::SkillSafeFall] = 50;
-			pp->skills[EQEmu::skills::SkillSneak] = 50;
+			pp->skills[EQ::skills::SkillSafeFall] = 50;
+			pp->skills[EQ::skills::SkillSneak] = 50;
 			break;
 		}
 	}

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <zlib.h>
 
-namespace EQEmu
+namespace EQ
 {
 	uint32 EstimateDeflateBuffer(uint32 len) {
 		z_stream zstream;

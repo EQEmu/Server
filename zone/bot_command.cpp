@@ -338,11 +338,11 @@ public:
 				while (spells[spell_id].typedescnum == 27) {
 					if (!spells[spell_id].goodEffect)
 						break;
-					if (spells[spell_id].skill != EQEmu::skills::SkillOffense && spells[spell_id].skill != EQEmu::skills::SkillDefense)
+					if (spells[spell_id].skill != EQ::skills::SkillOffense && spells[spell_id].skill != EQ::skills::SkillDefense)
 						break;
 
 					entry_prototype = new STStanceEntry();
-					if (spells[spell_id].skill == EQEmu::skills::SkillOffense)
+					if (spells[spell_id].skill == EQ::skills::SkillOffense)
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Aggressive;
 					else
 						entry_prototype->SafeCastToStance()->stance_type = BCEnum::StT_Defensive;
@@ -2462,7 +2462,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](Bot* l) { return (!l->IsBotArcher()); });
 	}
 	
-	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, EQEmu::skills::SkillType skill_type, float& skill_value) {
+	static void Filter_ByHighestSkill(Client* bot_owner, std::list<Bot*>& sbl, EQ::skills::SkillType skill_type, float& skill_value) {
 		sbl.remove_if([bot_owner](Bot* l) { return (!MyBots::IsMyBot(bot_owner, l)); });
 		skill_value = 0.0f;
 
@@ -2474,8 +2474,8 @@ namespace ActionableBots
 				continue;
 
 			mod_skill_value = base_skill_value;
-			for (int16 index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
-				const EQEmu::ItemInstance* indexed_item = bot_iter->GetBotItem(index);
+			for (int16 index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; ++index) {
+				const EQ::ItemInstance* indexed_item = bot_iter->GetBotItem(index);
 				if (indexed_item && indexed_item->GetItem()->SkillModType == skill_type)
 					mod_skill_value += (base_skill_value * (((float)indexed_item->GetItem()->SkillModValue) / 100.0f));
 			}
@@ -2499,7 +2499,7 @@ namespace ActionableBots
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == ROGUE && l->GetLevel() < 5); });
 		sbl.remove_if([bot_owner](const Bot* l) { return (l->GetClass() == BARD && l->GetLevel() < 40); });
 
-		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQEmu::skills::SkillPickLock, pick_lock_value);
+		ActionableBots::Filter_ByHighestSkill(bot_owner, sbl, EQ::skills::SkillPickLock, pick_lock_value);
 	}
 };
 
@@ -2611,7 +2611,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 		return;
 	}
 	
-	const auto poison_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	const auto poison_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!poison_instance) {
 
 		c->Message(m_fail, "No item found on cursor!");
@@ -2625,7 +2625,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (poison_data->ItemType == EQEmu::item::ItemTypePoison) {
+	if (poison_data->ItemType == EQ::item::ItemTypePoison) {
 
 		if ((~poison_data->Races) & GetPlayerRaceBit(my_rogue_bot->GetRace())) {
 
@@ -2654,7 +2654,7 @@ void bot_command_apply_poison(Client *c, const Seperator *sep)
 			c->Message(m_fail, "Failed to apply %s to %s's weapon.", poison_data->Name, my_rogue_bot->GetCleanName());
 		}
 
-		c->DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
+		c->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 	}
 	else {
 
@@ -2687,7 +2687,7 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 		return;
 	}
 
-	const auto potion_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	const auto potion_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!potion_instance) {
 
 		c->Message(m_fail, "No item found on cursor!");
@@ -2701,7 +2701,7 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (potion_data->ItemType == EQEmu::item::ItemTypePotion && potion_data->Click.Effect > 0) {
+	if (potion_data->ItemType == EQ::item::ItemTypePotion && potion_data->Click.Effect > 0) {
 
 		if (RuleB(Bots, RestrictApplyPotionToRogue) && potion_data->Classes != PLAYER_CLASS_ROGUE_BIT) {
 
@@ -2726,14 +2726,14 @@ void bot_command_apply_potion(Client* c, const Seperator* sep)
 		}
 
 		// TODO: figure out best way to handle casting time/animation
-		if (my_bot->SpellFinished(potion_data->Click.Effect, my_bot, EQEmu::spells::CastingSlot::Item, 0)) {
+		if (my_bot->SpellFinished(potion_data->Click.Effect, my_bot, EQ::spells::CastingSlot::Item, 0)) {
 			c->Message(m_action, "Successfully applied %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
 		}
 		else {
 			c->Message(m_fail, "Failed to apply %s to %s's buff effects.", potion_data->Name, my_bot->GetCleanName());
 		}
 
-		c->DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
+		c->DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 	}
 	else {
 
@@ -2776,7 +2776,7 @@ void bot_command_attack(Client *c, const Seperator *sep)
 	sbl.remove(nullptr);
 	for (auto bot_iter : sbl) {
 
-		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != EQEmu::constants::stancePassive) {
+		if (bot_iter->GetAppearance() != eaDead && bot_iter->GetBotStance() != EQ::constants::stancePassive) {
 
 			if (!first_attacker) {
 				first_attacker = bot_iter;
@@ -3599,7 +3599,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		empty_only = true;
 	}
 
-	const auto item_instance = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	const auto item_instance = c->GetInv().GetItem(EQ::invslot::slotCursor);
 	if (!item_instance) {
 
 		c->Message(m_fail, "No item found on cursor!");
@@ -3613,14 +3613,14 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (item_data->ItemClass != EQEmu::item::ItemClassCommon || item_data->Slots == 0) {
+	if (item_data->ItemClass != EQ::item::ItemClassCommon || item_data->Slots == 0) {
 
 		c->Message(m_fail, "'%s' is not an equipable item!", item_data->Name);
 		return;
 	}
 
 	std::list<int16> equipable_slot_list;
-	for (int16 equipable_slot = EQEmu::invslot::EQUIPMENT_BEGIN; equipable_slot <= EQEmu::invslot::EQUIPMENT_END; ++equipable_slot) {
+	for (int16 equipable_slot = EQ::invslot::EQUIPMENT_BEGIN; equipable_slot <= EQ::invslot::EQUIPMENT_END; ++equipable_slot) {
 		if (item_data->Slots & (1 << equipable_slot)) {
 			equipable_slot_list.push_back(equipable_slot);
 		}
@@ -3629,8 +3629,8 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 	std::string msg;
 	std::string text_link;
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
 	std::list<Bot*> sbl;
 	MyBots::PopulateSBL_BySpawnedBots(c, sbl);
@@ -3651,7 +3651,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 		for (auto slot_iter : equipable_slot_list) {
 
 			// needs more failure criteria - this should cover the bulk for now
-			if (slot_iter == EQEmu::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
+			if (slot_iter == EQ::invslot::slotSecondary && item_data->Damage && !bot_iter->CanThisClassDualWield()) {
 				continue;
 			}
 
@@ -3665,7 +3665,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					Chat::Say,
 					"[%s] says, 'I can use that for my %s! (replaces: [%s])'",
 					text_link.c_str(),
-					EQEmu::invslot::GetInvPossessionsSlotName(slot_iter),
+					EQ::invslot::GetInvPossessionsSlotName(slot_iter),
 					linker.GenerateLink().c_str()
 				);
 				bot_iter->DoAnim(29);
@@ -3676,7 +3676,7 @@ void bot_command_item_use(Client* c, const Seperator* sep)
 					Chat::Say,
 					"[%s] says, 'I can use that for my %s!'",
 					text_link.c_str(),
-					EQEmu::invslot::GetInvPossessionsSlotName(slot_iter)
+					EQ::invslot::GetInvPossessionsSlotName(slot_iter)
 				);
 				bot_iter->DoAnim(29);
 			}
@@ -4307,7 +4307,7 @@ void bot_command_pull(Client *c, const Seperator *sep)
 	Bot* bot_puller = nullptr;
 	for (auto bot_iter : sbl) {
 
-		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == EQEmu::constants::stancePassive) {
+		if (bot_iter->GetAppearance() == eaDead || bot_iter->GetBotStance() == EQ::constants::stancePassive) {
 			continue;
 		}
 		
@@ -4774,7 +4774,7 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 	
 	int taunting_count = 0;
 	for (auto bot_iter : sbl) {
-		if (!bot_iter->GetSkill(EQEmu::skills::SkillTaunt))
+		if (!bot_iter->GetSkill(EQ::skills::SkillTaunt))
 			continue;
 		
 		if (toggle_taunt)
@@ -5094,7 +5094,7 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 		return;
 	}
 
-	int clone_stance = EQEmu::constants::stancePassive;
+	int clone_stance = EQ::constants::stancePassive;
 	if (!database.botdb.LoadStance(my_bot->GetBotID(), clone_stance))
 		c->Message(m_fail, "%s for bot '%s'", BotDatabase::fail::LoadStance(), my_bot->GetCleanName());
 	if (!database.botdb.SaveStance(clone_id, clone_stance))
@@ -5298,7 +5298,7 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	// TODO: Trouble-shoot model update issue
 	
 	const std::string msg_matslot = StringFormat("mat_slot: %c(All), %i(Head), %i(Chest), %i(Arms), %i(Wrists), %i(Hands), %i(Legs), %i(Feet)",
-		'*', EQEmu::textures::armorHead, EQEmu::textures::armorChest, EQEmu::textures::armorArms, EQEmu::textures::armorWrist, EQEmu::textures::armorHands, EQEmu::textures::armorLegs, EQEmu::textures::armorFeet);
+		'*', EQ::textures::armorHead, EQ::textures::armorChest, EQ::textures::armorArms, EQ::textures::armorWrist, EQ::textures::armorHands, EQ::textures::armorLegs, EQ::textures::armorFeet);
 	
 	if (helper_command_alias_fail(c, "bot_subcommand_bot_dye_armor", sep->arg[0], "botdyearmor"))
 		return;
@@ -5309,15 +5309,15 @@ void bot_subcommand_bot_dye_armor(Client *c, const Seperator *sep)
 	}
 	const int ab_mask = ActionableBots::ABM_NoFilter;
 
-	uint8 material_slot = EQEmu::textures::materialInvalid;
+	uint8 material_slot = EQ::textures::materialInvalid;
 	int16 slot_id = INVALID_INDEX;
 
 	bool dye_all = (sep->arg[1][0] == '*');
 	if (!dye_all) {
 		material_slot = atoi(sep->arg[1]);
-		slot_id = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+		slot_id = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
-		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQEmu::textures::LastTintableTexture) {
+		if (!sep->IsNumber(1) || slot_id == INVALID_INDEX || material_slot > EQ::textures::LastTintableTexture) {
 			c->Message(m_fail, "Valid [mat_slot]s for this command are:");
 			c->Message(m_fail, msg_matslot.c_str());
 			return;
@@ -5654,7 +5654,7 @@ void bot_subcommand_bot_inspect_message(Client *c, const Seperator *sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s [set | clear] ([actionable: target | byname | ownergroup | botgroup | targetgroup | namesgroup | healrotation | spawned] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "Notes:");
-		if (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+		if (c->ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 			c->Message(m_message, "- Self-inspect and type your bot's inspect message");
 			c->Message(m_message, "- Close the self-inspect window to update the server");
 			c->Message(m_message, "- Type '%s set' to set the bot's inspect message", sep->arg[0]);
@@ -5799,7 +5799,7 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		Bot * botCheckNotOnline = entity_list.GetBotByBotName(bots_iter.Name);
 		std::string	botspawn_saylink = StringFormat("^botspawn %s", bots_iter.Name);
 		c->Message(Chat::White, "[%s] is a level %u %s %s %s who is owned by %s",
-			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQEmu::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
+			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQ::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
 			bots_iter.Level,
 			Bot::RaceIdToString(bots_iter.Race).c_str(),
 			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
@@ -6127,32 +6127,32 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 	if (helper_is_help_or_usage(sep->arg[1])) {
 		c->Message(m_usage, "usage: %s [current | value: 1-9] ([actionable: target | byname] ([actionable_name]))", sep->arg[0]);
 		c->Message(m_note, "value: %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s), %u(%s)",
-			EQEmu::constants::stancePassive, EQEmu::constants::GetStanceName(EQEmu::constants::stancePassive),
-			EQEmu::constants::stanceBalanced, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBalanced),
-			EQEmu::constants::stanceEfficient, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient),
-			EQEmu::constants::stanceReactive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceReactive),
-			EQEmu::constants::stanceAggressive, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAggressive),
-			EQEmu::constants::stanceAssist, EQEmu::constants::GetStanceName(EQEmu::constants::stanceAssist),
-			EQEmu::constants::stanceBurn, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurn),
-			EQEmu::constants::stanceEfficient2, EQEmu::constants::GetStanceName(EQEmu::constants::stanceEfficient2),
-			EQEmu::constants::stanceBurnAE, EQEmu::constants::GetStanceName(EQEmu::constants::stanceBurnAE)
+			EQ::constants::stancePassive, EQ::constants::GetStanceName(EQ::constants::stancePassive),
+			EQ::constants::stanceBalanced, EQ::constants::GetStanceName(EQ::constants::stanceBalanced),
+			EQ::constants::stanceEfficient, EQ::constants::GetStanceName(EQ::constants::stanceEfficient),
+			EQ::constants::stanceReactive, EQ::constants::GetStanceName(EQ::constants::stanceReactive),
+			EQ::constants::stanceAggressive, EQ::constants::GetStanceName(EQ::constants::stanceAggressive),
+			EQ::constants::stanceAssist, EQ::constants::GetStanceName(EQ::constants::stanceAssist),
+			EQ::constants::stanceBurn, EQ::constants::GetStanceName(EQ::constants::stanceBurn),
+			EQ::constants::stanceEfficient2, EQ::constants::GetStanceName(EQ::constants::stanceEfficient2),
+			EQ::constants::stanceBurnAE, EQ::constants::GetStanceName(EQ::constants::stanceBurnAE)
 		);
 		return;
 	}
 	int ab_mask = (ActionableBots::ABM_Target | ActionableBots::ABM_ByName);
 
 	bool current_flag = false;
-	auto bst = EQEmu::constants::stanceUnknown;
+	auto bst = EQ::constants::stanceUnknown;
 	
 	if (!strcasecmp(sep->arg[1], "current"))
 		current_flag = true;
 	else if (sep->IsNumber(1)) {
-		bst = (EQEmu::constants::StanceType)atoi(sep->arg[1]);
-		if (bst < EQEmu::constants::stanceUnknown || bst > EQEmu::constants::stanceBurnAE)
-			bst = EQEmu::constants::stanceUnknown;
+		bst = (EQ::constants::StanceType)atoi(sep->arg[1]);
+		if (bst < EQ::constants::stanceUnknown || bst > EQ::constants::stanceBurnAE)
+			bst = EQ::constants::stanceUnknown;
 	}
 
-	if (!current_flag && bst == EQEmu::constants::stanceUnknown) {
+	if (!current_flag && bst == EQ::constants::stanceUnknown) {
 		c->Message(m_fail, "A [current] argument or valid numeric [value] is required to use this command");
 		return;
 	}
@@ -6173,7 +6173,7 @@ void bot_subcommand_bot_stance(Client *c, const Seperator *sep)
 		Bot::BotGroupSay(
 			bot_iter,
 			"My current stance is '%s' (%i)",
-			EQEmu::constants::GetStanceName(bot_iter->GetBotStance()),
+			EQ::constants::GetStanceName(bot_iter->GetBotStance()),
 			bot_iter->GetBotStance()
 		);
 	}
@@ -8181,31 +8181,31 @@ void bot_subcommand_inventory_list(Client *c, const Seperator *sep)
 		return;
 	}
 
-	const EQEmu::ItemInstance* inst = nullptr;
-	const EQEmu::ItemData* item = nullptr;
+	const EQ::ItemInstance* inst = nullptr;
+	const EQ::ItemData* item = nullptr;
 	bool is2Hweapon = false;
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
 	uint32 inventory_count = 0;
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
-		if ((i == EQEmu::invslot::slotSecondary) && is2Hweapon)
+	for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
+		if ((i == EQ::invslot::slotSecondary) && is2Hweapon)
 			continue;
 
 		inst = my_bot->CastToBot()->GetBotItem(i);
 		if (!inst || !inst->GetItem()) {
-			c->Message(m_message, "I need something for my %s (slot %i)", EQEmu::invslot::GetInvPossessionsSlotName(i), i);
+			c->Message(m_message, "I need something for my %s (slot %i)", EQ::invslot::GetInvPossessionsSlotName(i), i);
 			continue;
 		}
 		
 		item = inst->GetItem();
-		if ((i == EQEmu::invslot::slotPrimary) && item->IsType2HWeapon()) {
+		if ((i == EQ::invslot::slotPrimary) && item->IsType2HWeapon()) {
 			is2Hweapon = true;
 		}
 
 		linker.SetItemInst(inst);
-		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), EQEmu::invslot::GetInvPossessionsSlotName(i), i);
+		c->Message(m_message, "Using %s in my %s (slot %i)", linker.GenerateLink().c_str(), EQ::invslot::GetInvPossessionsSlotName(i), i);
 
 		++inventory_count;
 	}
@@ -8244,13 +8244,13 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	int slotId = atoi(sep->arg[1]);
-	if (!sep->IsNumber(1) || (slotId > EQEmu::invslot::EQUIPMENT_END || slotId < EQEmu::invslot::EQUIPMENT_BEGIN)) {
+	if (!sep->IsNumber(1) || (slotId > EQ::invslot::EQUIPMENT_END || slotId < EQ::invslot::EQUIPMENT_BEGIN)) {
 		c->Message(m_fail, "Valid slots are 0-22");
 		return;
 	}
 
-	const EQEmu::ItemData* itm = nullptr;
-	const EQEmu::ItemInstance* itminst = my_bot->GetBotItem(slotId);
+	const EQ::ItemData* itm = nullptr;
+	const EQ::ItemInstance* itminst = my_bot->GetBotItem(slotId);
 	if (itminst)
 		itm = itminst->GetItem();
 
@@ -8259,11 +8259,11 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 		return;
 	}
 
-	for (int m = EQEmu::invaug::SOCKET_BEGIN; m <= EQEmu::invaug::SOCKET_END; ++m) {
+	for (int m = EQ::invaug::SOCKET_BEGIN; m <= EQ::invaug::SOCKET_END; ++m) {
 		if (!itminst)
 			break;
 
-		EQEmu::ItemInstance *itma = itminst->GetAugment(m);
+		EQ::ItemInstance *itma = itminst->GetAugment(m);
 		if (!itma)
 			continue;
 		if (!c->CheckLoreConflict(itma->GetItem()))
@@ -8276,7 +8276,7 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	std::string error_message;
 	if (itm) {
 		c->PushItemOnCursor(*itminst, true);
-		if ((slotId == EQEmu::invslot::slotRange) || (slotId == EQEmu::invslot::slotAmmo) || (slotId == EQEmu::invslot::slotPrimary) || (slotId == EQEmu::invslot::slotSecondary))
+		if ((slotId == EQ::invslot::slotRange) || (slotId == EQ::invslot::slotAmmo) || (slotId == EQ::invslot::slotPrimary) || (slotId == EQ::invslot::slotSecondary))
 			my_bot->SetBotArcher(false);
 
 		my_bot->RemoveBotItemBySlot(slotId, &error_message);
@@ -8290,32 +8290,32 @@ void bot_subcommand_inventory_remove(Client *c, const Seperator *sep)
 	}
 
 	switch (slotId) {
-	case EQEmu::invslot::slotCharm:
-	case EQEmu::invslot::slotEar1:
-	case EQEmu::invslot::slotHead:
-	case EQEmu::invslot::slotFace:
-	case EQEmu::invslot::slotEar2:
-	case EQEmu::invslot::slotNeck:
-	case EQEmu::invslot::slotBack:
-	case EQEmu::invslot::slotWrist1:
-	case EQEmu::invslot::slotWrist2:
-	case EQEmu::invslot::slotRange:
-	case EQEmu::invslot::slotPrimary:
-	case EQEmu::invslot::slotSecondary:
-	case EQEmu::invslot::slotFinger1:
-	case EQEmu::invslot::slotFinger2:
-	case EQEmu::invslot::slotChest:
-	case EQEmu::invslot::slotWaist:
-	case EQEmu::invslot::slotPowerSource:
-	case EQEmu::invslot::slotAmmo:
-		c->Message(m_message, "My %s is %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
+	case EQ::invslot::slotCharm:
+	case EQ::invslot::slotEar1:
+	case EQ::invslot::slotHead:
+	case EQ::invslot::slotFace:
+	case EQ::invslot::slotEar2:
+	case EQ::invslot::slotNeck:
+	case EQ::invslot::slotBack:
+	case EQ::invslot::slotWrist1:
+	case EQ::invslot::slotWrist2:
+	case EQ::invslot::slotRange:
+	case EQ::invslot::slotPrimary:
+	case EQ::invslot::slotSecondary:
+	case EQ::invslot::slotFinger1:
+	case EQ::invslot::slotFinger2:
+	case EQ::invslot::slotChest:
+	case EQ::invslot::slotWaist:
+	case EQ::invslot::slotPowerSource:
+	case EQ::invslot::slotAmmo:
+		c->Message(m_message, "My %s is %s unequipped", EQ::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
-	case EQEmu::invslot::slotShoulders:
-	case EQEmu::invslot::slotArms:
-	case EQEmu::invslot::slotHands:
-	case EQEmu::invslot::slotLegs:
-	case EQEmu::invslot::slotFeet:
-		c->Message(m_message, "My %s are %s unequipped", EQEmu::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
+	case EQ::invslot::slotShoulders:
+	case EQ::invslot::slotArms:
+	case EQ::invslot::slotHands:
+	case EQ::invslot::slotLegs:
+	case EQ::invslot::slotFeet:
+		c->Message(m_message, "My %s are %s unequipped", EQ::invslot::GetInvPossessionsSlotName(slotId), ((itm) ? ("now") : ("already")));
 		break;
 	default:
 		c->Message(m_fail, "I'm soo confused...");
@@ -8348,17 +8348,17 @@ void bot_subcommand_inventory_window(Client *c, const Seperator *sep)
 
 	std::string window_text;
 	//std::string item_link;
-	//EQEmu::SayLinkEngine linker;
-	//linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+	//EQ::SayLinkEngine linker;
+	//linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
-		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i);
+	for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
+		const EQ::ItemData* item = nullptr;
+		const EQ::ItemInstance* inst = my_bot->CastToBot()->GetBotItem(i);
 		if (inst)
 			item = inst->GetItem();
 
 		window_text.append("<c \"#FFFFFF\">");
-		window_text.append(EQEmu::invslot::GetInvPossessionsSlotName(i));
+		window_text.append(EQ::invslot::GetInvPossessionsSlotName(i));
 		window_text.append(": ");
 		if (item) {
 			//window_text.append("</c>");
@@ -8840,7 +8840,7 @@ bool helper_cast_standard_spell(Bot* casting_bot, Mob* target_mob, int spell_id,
 	if (annouce_cast)
 		Bot::BotGroupSay(casting_bot, "Attempting to cast '%s' on %s", spells[spell_id].name, target_mob->GetCleanName());
 
-	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQEmu::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
+	return casting_bot->CastSpell(spell_id, target_mob->GetID(), EQ::spells::CastingSlot::Gem2, -1, -1, dont_root_before);
 }
 
 bool helper_command_disabled(Client* bot_owner, bool rule_value, const char* command)

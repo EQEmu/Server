@@ -99,7 +99,7 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
-EQEmu::Random emu_random;
+EQ::Random emu_random;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
 uint32 numzones = 0;
@@ -364,7 +364,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	EQEmu::InitializeDynamicLookups();
+	EQ::InitializeDynamicLookups();
 	LogInfo("Initialized dynamic dictionary entries");
 
 	if (RuleB(World, ClearTempMerchantlist)) {

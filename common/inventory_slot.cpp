@@ -22,7 +22,7 @@
 #include "string_util.h"
 
 
-int8 EQEmu::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
+int8 EQ::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
 {
 	switch (slot_index) {
 	case invslot::slotHead:
@@ -48,7 +48,7 @@ int8 EQEmu::inventory::ConvertEquipmentIndexToTextureIndex(int16 slot_index)
 	}
 }
 
-int8 EQEmu::inventory::ConvertEquipmentSlotToTextureIndex(const InventorySlot& inventory_slot)
+int8 EQ::inventory::ConvertEquipmentSlotToTextureIndex(const InventorySlot& inventory_slot)
 {
 	if ((!inventory_slot.Typeless() && !inventory_slot.IsTypeIndex(invtype::typePossessions)) || !inventory_slot.IsContainerIndex(invbag::SLOT_INVALID) || !inventory_slot.IsSocketIndex(invaug::SOCKET_INVALID))
 		return textures::textureInvalid;
@@ -56,7 +56,7 @@ int8 EQEmu::inventory::ConvertEquipmentSlotToTextureIndex(const InventorySlot& i
 	return ConvertEquipmentIndexToTextureIndex(inventory_slot.SlotIndex());
 }
 
-int16 EQEmu::inventory::ConvertTextureIndexToEquipmentIndex(int8 texture_index)
+int16 EQ::inventory::ConvertTextureIndexToEquipmentIndex(int8 texture_index)
 {
 	switch (texture_index) {
 	case textures::armorHead:
@@ -82,7 +82,7 @@ int16 EQEmu::inventory::ConvertTextureIndexToEquipmentIndex(int8 texture_index)
 	}
 }
 
-bool EQEmu::InventorySlot::IsValidSlot() const
+bool EQ::InventorySlot::IsValidSlot() const
 {
 	if (_typeless)
 		return false;
@@ -100,7 +100,7 @@ bool EQEmu::InventorySlot::IsValidSlot() const
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsDeleteSlot() const
+bool EQ::InventorySlot::IsDeleteSlot() const
 {
 	if (_typeless)
 		return (_slot_index == invslot::SLOT_INVALID && _container_index == invbag::SLOT_INVALID && _socket_index == invaug::SOCKET_INVALID);
@@ -108,7 +108,7 @@ bool EQEmu::InventorySlot::IsDeleteSlot() const
 		return (_type_index == invtype::TYPE_INVALID && _slot_index == invslot::SLOT_INVALID && _container_index == invbag::SLOT_INVALID && _socket_index == invaug::SOCKET_INVALID);
 }
 
-bool EQEmu::InventorySlot::IsEquipmentIndex(int16 slot_index)
+bool EQ::InventorySlot::IsEquipmentIndex(int16 slot_index)
 {
 	if (slot_index < invslot::EQUIPMENT_BEGIN || slot_index > invslot::EQUIPMENT_END)
 		return false;
@@ -116,7 +116,7 @@ bool EQEmu::InventorySlot::IsEquipmentIndex(int16 slot_index)
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsGeneralIndex(int16 slot_index)
+bool EQ::InventorySlot::IsGeneralIndex(int16 slot_index)
 {
 	if (slot_index < invslot::GENERAL_BEGIN || slot_index > invslot::GENERAL_END)
 		return false;
@@ -124,7 +124,7 @@ bool EQEmu::InventorySlot::IsGeneralIndex(int16 slot_index)
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsCursorIndex(int16 slot_index)
+bool EQ::InventorySlot::IsCursorIndex(int16 slot_index)
 {
 	if (slot_index == invslot::slotCursor)
 		return true;
@@ -132,7 +132,7 @@ bool EQEmu::InventorySlot::IsCursorIndex(int16 slot_index)
 	return false;
 }
 
-bool EQEmu::InventorySlot::IsWeaponIndex(int16 slot_index)
+bool EQ::InventorySlot::IsWeaponIndex(int16 slot_index)
 {
 	if (slot_index == invslot::slotPrimary || slot_index == invslot::slotSecondary || slot_index == invslot::slotRange)
 		return true;
@@ -140,7 +140,7 @@ bool EQEmu::InventorySlot::IsWeaponIndex(int16 slot_index)
 	return false;
 }
 
-bool EQEmu::InventorySlot::IsTextureIndex(int16 slot_index)
+bool EQ::InventorySlot::IsTextureIndex(int16 slot_index)
 {
 	switch (slot_index) {
 	case invslot::slotHead:
@@ -158,7 +158,7 @@ bool EQEmu::InventorySlot::IsTextureIndex(int16 slot_index)
 	}
 }
 
-bool EQEmu::InventorySlot::IsTintableIndex(int16 slot_index)
+bool EQ::InventorySlot::IsTintableIndex(int16 slot_index)
 {
 	switch (slot_index) {
 	case invslot::slotHead:
@@ -174,7 +174,7 @@ bool EQEmu::InventorySlot::IsTintableIndex(int16 slot_index)
 	}
 }
 
-bool EQEmu::InventorySlot::IsEquipmentSlot() const
+bool EQ::InventorySlot::IsEquipmentSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -185,7 +185,7 @@ bool EQEmu::InventorySlot::IsEquipmentSlot() const
 	return IsEquipmentIndex(_slot_index);
 }
 
-bool EQEmu::InventorySlot::IsGeneralSlot() const
+bool EQ::InventorySlot::IsGeneralSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -196,7 +196,7 @@ bool EQEmu::InventorySlot::IsGeneralSlot() const
 	return IsGeneralIndex(_socket_index);
 }
 
-bool EQEmu::InventorySlot::IsCursorSlot() const
+bool EQ::InventorySlot::IsCursorSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -207,7 +207,7 @@ bool EQEmu::InventorySlot::IsCursorSlot() const
 	return IsCursorIndex(_slot_index);
 }
 
-bool EQEmu::InventorySlot::IsWeaponSlot() const
+bool EQ::InventorySlot::IsWeaponSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -218,7 +218,7 @@ bool EQEmu::InventorySlot::IsWeaponSlot() const
 	return IsWeaponIndex(_slot_index);
 }
 
-bool EQEmu::InventorySlot::IsTextureSlot() const
+bool EQ::InventorySlot::IsTextureSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -229,7 +229,7 @@ bool EQEmu::InventorySlot::IsTextureSlot() const
 	return IsTextureIndex(_slot_index);
 }
 
-bool EQEmu::InventorySlot::IsTintableSlot() const
+bool EQ::InventorySlot::IsTintableSlot() const
 {
 	if (!_typeless && (_type_index != invtype::typePossessions))
 		return false;
@@ -240,7 +240,7 @@ bool EQEmu::InventorySlot::IsTintableSlot() const
 	return IsTintableIndex(_slot_index);
 }
 
-bool EQEmu::InventorySlot::IsSlot() const
+bool EQ::InventorySlot::IsSlot() const
 {
 	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
@@ -254,7 +254,7 @@ bool EQEmu::InventorySlot::IsSlot() const
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsSlotSocket() const
+bool EQ::InventorySlot::IsSlotSocket() const
 {
 	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
@@ -268,7 +268,7 @@ bool EQEmu::InventorySlot::IsSlotSocket() const
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsContainer() const
+bool EQ::InventorySlot::IsContainer() const
 {
 	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
@@ -282,7 +282,7 @@ bool EQEmu::InventorySlot::IsContainer() const
 	return true;
 }
 
-bool EQEmu::InventorySlot::IsContainerSocket() const
+bool EQ::InventorySlot::IsContainerSocket() const
 {
 	if (!_typeless && (_type_index == invtype::TYPE_INVALID))
 		return false;
@@ -296,12 +296,12 @@ bool EQEmu::InventorySlot::IsContainerSocket() const
 	return true;
 }
 
-EQEmu::InventorySlot EQEmu::InventorySlot::ToTopOwner() const
+EQ::InventorySlot EQ::InventorySlot::ToTopOwner() const
 {
 	return InventorySlot(_type_index, _slot_index);
 }
 
-EQEmu::InventorySlot EQEmu::InventorySlot::ToOwner() const
+EQ::InventorySlot EQ::InventorySlot::ToOwner() const
 {
 	if (IsSlot() || IsSlotSocket() || IsContainer())
 		return InventorySlot(_type_index, _slot_index);
@@ -312,17 +312,17 @@ EQEmu::InventorySlot EQEmu::InventorySlot::ToOwner() const
 	return InventorySlot();
 }
 
-const std::string EQEmu::InventorySlot::ToString() const
+const std::string EQ::InventorySlot::ToString() const
 {
 	return StringFormat("(%i%s, %i, %i, %i)", _type_index, (_typeless ? " [typeless]" : ""), _slot_index, _container_index, _socket_index);
 }
 
-const std::string EQEmu::InventorySlot::ToName() const
+const std::string EQ::InventorySlot::ToName() const
 {
 	return StringFormat("InventorySlot - _type_index: %i%s, _slot_index: %i, _container_index: %i, _socket_index: %i", _type_index, (_typeless ? " [typeless]" : ""), _slot_index, _container_index, _socket_index);
 }
 
-void EQEmu::InventorySlot::SetInvalidSlot()
+void EQ::InventorySlot::SetInvalidSlot()
 {
 	_type_index = invtype::TYPE_INVALID;
 	_slot_index = invslot::SLOT_INVALID;
@@ -330,7 +330,7 @@ void EQEmu::InventorySlot::SetInvalidSlot()
 	_socket_index = invaug::SOCKET_INVALID;
 }
 
-//bool EQEmu::InventorySlot::IsBonusIndex(int16 slot_index)
+//bool EQ::InventorySlot::IsBonusIndex(int16 slot_index)
 //{
 //	if ((slot_index >= inventory::EquipmentBegin) && (slot_index <= inventory::EquipmentEnd) && (slot_index != inventory::slotAmmo))
 //		return true;
@@ -338,7 +338,7 @@ void EQEmu::InventorySlot::SetInvalidSlot()
 //	return false;
 //}
 
-//bool EQEmu::InventorySlot::IsBonusSlot() const
+//bool EQ::InventorySlot::IsBonusSlot() const
 //{
 //	if ((_type_index != inventory::typePossessions) || (_container_index != inventory::containerInvalid) || (_socket_index != inventory::socketInvalid))
 //		return false;
@@ -346,7 +346,7 @@ void EQEmu::InventorySlot::SetInvalidSlot()
 //	return IsBonusIndex(_slot_index);
 //}
 
-bool inventory_slot_typeless_lessthan(const EQEmu::InventorySlot& lhs, const EQEmu::InventorySlot& rhs)
+bool inventory_slot_typeless_lessthan(const EQ::InventorySlot& lhs, const EQ::InventorySlot& rhs)
 {
 	if (lhs.SlotIndex() < rhs.SlotIndex())
 		return true;
@@ -360,7 +360,7 @@ bool inventory_slot_typeless_lessthan(const EQEmu::InventorySlot& lhs, const EQE
 	return false;
 }
 
-bool EQEmu::InventorySlot::operator<(const InventorySlot& rhs) const
+bool EQ::InventorySlot::operator<(const InventorySlot& rhs) const
 {
 	if (Typeless() || rhs.Typeless())
 		return inventory_slot_typeless_lessthan(*this, rhs);
@@ -380,7 +380,7 @@ bool EQEmu::InventorySlot::operator<(const InventorySlot& rhs) const
 	return false;
 }
 
-bool EQEmu::operator==(const InventorySlot& lhs, const InventorySlot& rhs)
+bool EQ::operator==(const InventorySlot& lhs, const InventorySlot& rhs)
 {
 	if (lhs.Typeless() || rhs.Typeless())
 		return ((lhs.SlotIndex() == rhs.SlotIndex()) && (lhs.ContainerIndex() == rhs.ContainerIndex()) && (lhs.SocketIndex() == rhs.SocketIndex()));

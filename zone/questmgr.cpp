@@ -54,7 +54,7 @@ QuestManager quest_manager;
 #define QuestManagerCurrentQuestVars() \
 	Mob *owner = nullptr; \
 	Client *initiator = nullptr; \
-	EQEmu::ItemInstance* questitem = nullptr; \
+	EQ::ItemInstance* questitem = nullptr; \
 	bool depop_npc = false; \
 	std::string encounter; \
 	do { \
@@ -116,7 +116,7 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQEmu::ItemInstance* _questitem, std::string encounter) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
@@ -370,14 +370,14 @@ void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
 		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 	}
 }
 
 void QuestManager::selfcast(int spell_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
 }
 
 void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
@@ -455,7 +455,7 @@ void QuestManager::settimerMS(const char *timer_name, int milliseconds) {
 	QTimerList.push_back(QuestTimer(milliseconds, owner, timer_name));
 }
 
-void QuestManager::settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst) {
+void QuestManager::settimerMS(const char *timer_name, int milliseconds, EQ::ItemInstance *inst) {
 	if (inst) {
 		inst->SetTimer(timer_name, milliseconds);
 	}
@@ -498,7 +498,7 @@ void QuestManager::stoptimer(const char *timer_name) {
 	}
 }
 
-void QuestManager::stoptimer(const char *timer_name, EQEmu::ItemInstance *inst) {
+void QuestManager::stoptimer(const char *timer_name, EQ::ItemInstance *inst) {
 	if (inst) {
 		inst->StopTimer(timer_name);
 	}
@@ -536,7 +536,7 @@ void QuestManager::stopalltimers() {
 	}
 }
 
-void QuestManager::stopalltimers(EQEmu::ItemInstance *inst) {
+void QuestManager::stopalltimers(EQ::ItemInstance *inst) {
 	if (inst) {
 		inst->ClearTimers();
 	}
@@ -847,12 +847,12 @@ void QuestManager::traindisc(int discipline_tome_item_id) {
 }
 
 bool QuestManager::isdisctome(int item_id) {
-	const EQEmu::ItemData *item = database.GetItem(item_id);
+	const EQ::ItemData *item = database.GetItem(item_id);
 	if(item == nullptr) {
 		return(false);
 	}
 
-	if (!item->IsClassCommon() || item->ItemType != EQEmu::item::ItemTypeSpell) {
+	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
 		return(false);
 	}
 
@@ -920,8 +920,8 @@ std::string QuestManager::getspellname(uint32 spell_id) {
 }
 
 std::string QuestManager::getskillname(int skill_id) {
-	if (skill_id >= 0 && skill_id < EQEmu::skills::SkillCount) {
-		std::map<EQEmu::skills::SkillType, std::string> Skills = EQEmu::skills::GetSkillTypeMap();
+	if (skill_id >= 0 && skill_id < EQ::skills::SkillCount) {
+		std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
 		for (auto skills_iter : Skills) {
 			if (skill_id == skills_iter.first) {
 				return skills_iter.second;
@@ -1009,7 +1009,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	bool SpellGlobalCheckResult = false;
 	bool SpellBucketCheckResult = false;
 
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
 		if (book_slot == -1) {
 			initiator->Message(
 				13,
@@ -1024,8 +1024,8 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return count;
 		}
-		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
+			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
 			return count;
 		}
 
@@ -1286,10 +1286,10 @@ void QuestManager::doanim(int anim_id) {
 
 void QuestManager::addskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->AddSkill((EQEmu::skills::SkillType) skill_id, value);
+		initiator->AddSkill((EQ::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setlanguage(int skill_id, int value) {
@@ -1300,10 +1300,10 @@ void QuestManager::setlanguage(int skill_id, int value) {
 
 void QuestManager::setskill(int skill_id, int value) {
 	QuestManagerCurrentQuestVars();
-	if (skill_id < 0 || skill_id > EQEmu::skills::HIGHEST_SKILL)
+	if (skill_id < 0 || skill_id > EQ::skills::HIGHEST_SKILL)
 		return;
 	if (initiator && initiator->IsClient())
-		initiator->SetSkill((EQEmu::skills::SkillType) skill_id, value);
+		initiator->SetSkill((EQ::skills::SkillType) skill_id, value);
 }
 
 void QuestManager::setallskill(int value) {
@@ -1311,8 +1311,8 @@ void QuestManager::setallskill(int value) {
 	if (!initiator)
 		return;
 	if (initiator && initiator->IsClient()) {
-		EQEmu::skills::SkillType sk;
-		for (sk = EQEmu::skills::Skill1HBlunt; sk <= EQEmu::skills::HIGHEST_SKILL; sk = (EQEmu::skills::SkillType)(sk + 1)) {
+		EQ::skills::SkillType sk;
+		for (sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; sk = (EQ::skills::SkillType)(sk + 1)) {
 			initiator->SetSkill(sk, value);
 		}
 	}
@@ -1438,12 +1438,12 @@ void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= 
 void QuestManager::itemlink(int item_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator) {
-		const EQEmu::ItemData* item = database.GetItem(item_id);
+		const EQ::ItemData* item = database.GetItem(item_id);
 		if (item == nullptr)
 			return;
 
-		EQEmu::SayLinkEngine linker;
-		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 		linker.SetItemData(item);
 
 		initiator->Message(Chat::White, "%s tells you, %s", owner->GetCleanName(), linker.GenerateLink().c_str());
@@ -1908,7 +1908,7 @@ void QuestManager::clear_zone_flag(int zone_id) {
 void QuestManager::sethp(int hpperc) {
 	QuestManagerCurrentQuestVars();
 	int newhp = (owner->GetMaxHP() * (100 - hpperc)) / 100;
-	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false, 0, false);
+	owner->Damage(owner, newhp, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false, 0, false);
 }
 
 bool QuestManager::summonburiedplayercorpse(uint32 char_id, const glm::vec4& position) {
@@ -2567,7 +2567,7 @@ int QuestManager::collectitems_processSlot(int16 slot_id, uint32 item_id,
 	bool remove)
 {
 	QuestManagerCurrentQuestVars();
-	EQEmu::ItemInstance *item = nullptr;
+	EQ::ItemInstance *item = nullptr;
 	int quantity = 0;
 
 	item = initiator->GetInv().GetItem(slot_id);
@@ -2602,12 +2602,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 	int quantity = 0;
 	int slot_id;
 
-	for (slot_id = EQEmu::invslot::GENERAL_BEGIN; slot_id <= EQEmu::invslot::GENERAL_END; ++slot_id)
+	for (slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
 
-	for (slot_id = EQEmu::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQEmu::invbag::GENERAL_BAGS_END; ++slot_id)
+	for (slot_id = EQ::invbag::GENERAL_BAGS_BEGIN; slot_id <= EQ::invbag::GENERAL_BAGS_END; ++slot_id)
 	{
 		quantity += collectitems_processSlot(slot_id, item_id, remove);
 	}
@@ -2618,15 +2618,15 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 int QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
 	int quantity = 0;
-	EQEmu::ItemInstance *item = nullptr;
+	EQ::ItemInstance *item = nullptr;
 	static const int16 slots[][2] = {
-		{ EQEmu::invslot::POSSESSIONS_BEGIN, EQEmu::invslot::POSSESSIONS_END },
-		{ EQEmu::invbag::GENERAL_BAGS_BEGIN, EQEmu::invbag::GENERAL_BAGS_END },
-		{ EQEmu::invbag::CURSOR_BAG_BEGIN, EQEmu::invbag::CURSOR_BAG_END},
-		{ EQEmu::invslot::BANK_BEGIN, EQEmu::invslot::BANK_END },
-		{ EQEmu::invbag::BANK_BAGS_BEGIN, EQEmu::invbag::BANK_BAGS_END },
-		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
-		{ EQEmu::invbag::SHARED_BANK_BAGS_BEGIN, EQEmu::invbag::SHARED_BANK_BAGS_END },
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
 	const size_t size = sizeof(slots) / sizeof(slots[0]);	
 	for (int slot_index = 0; slot_index < size; ++slot_index) {
@@ -2682,7 +2682,7 @@ void QuestManager::MerchantSetItem(uint32 NPCid, uint32 itemid, uint32 quantity)
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return;	// don't do anything if NPCid isn't a merchant
 
-	const EQEmu::ItemData* item = nullptr;
+	const EQ::ItemData* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item) return;		// if the item id doesn't correspond to a real item, do nothing
 
@@ -2695,7 +2695,7 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 	if (merchant == 0 || !merchant->IsNPC() || (merchant->GetClass() != MERCHANT))
 		return 0;	// if it isn't a merchant, it doesn't have any items
 
-	const EQEmu::ItemData* item = nullptr;
+	const EQ::ItemData* item = nullptr;
 	item = database.GetItem(itemid);
 	if (!item)
 		return 0;	// if it isn't a valid item, the merchant doesn't have any
@@ -2718,12 +2718,12 @@ uint32 QuestManager::MerchantCountItem(uint32 NPCid, uint32 itemid) {
 // Item Link for use in Variables - "my $example_link = quest::varlink(item_id);"
 const char* QuestManager::varlink(char* perltext, int item_id) {
 	QuestManagerCurrentQuestVars();
-	const EQEmu::ItemData* item = database.GetItem(item_id);
+	const EQ::ItemData* item = database.GetItem(item_id);
 	if (!item)
 		return "INVALID ITEM ID IN VARLINK";
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemData);
 	linker.SetItemData(item);
 
 	strcpy(perltext, linker.GenerateLink().c_str());
@@ -2732,7 +2732,7 @@ const char* QuestManager::varlink(char* perltext, int item_id) {
 }
 
 std::string QuestManager::getitemname(uint32 item_id) {
-	const EQEmu::ItemData* item_data = database.GetItem(item_id);
+	const EQ::ItemData* item_data = database.GetItem(item_id);
 	if (!item_data) {
 		return "INVALID ITEM ID IN GETITEMNAME";
 	}
@@ -2948,7 +2948,7 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 {
 	QuestManagerCurrentQuestVars();
 
-	return EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
+	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
 
 const char* QuestManager::getcharnamebyid(uint32 char_id) {
@@ -3427,7 +3427,7 @@ Mob *QuestManager::GetOwner() const {
 	return nullptr;
 }
 
-EQEmu::ItemInstance *QuestManager::GetQuestItem() const {
+EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
 		return e.questitem;

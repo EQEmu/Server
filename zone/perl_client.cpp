@@ -1891,7 +1891,7 @@ XS(XS_Client_GetSkill) {
 		Client *THIS;
 		uint16                   RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1917,7 +1917,7 @@ XS(XS_Client_GetRawSkill) {
 		Client *THIS;
 		uint32                   RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1942,7 +1942,7 @@ XS(XS_Client_HasSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1967,7 +1967,7 @@ XS(XS_Client_CanHaveSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1991,7 +1991,7 @@ XS(XS_Client_SetSkill) {
 		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)");
 	{
 		Client *THIS;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value     = (uint16) SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2014,7 +2014,7 @@ XS(XS_Client_AddSkill) {
 		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)");
 	{
 		Client                   *THIS;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value   = (uint16) SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2060,7 +2060,7 @@ XS(XS_Client_CheckIncreaseSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		int                      chancemodi;
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2116,7 +2116,7 @@ XS(XS_Client_MaxSkill) {
 	{
 		Client                   *THIS;
 		uint16                   RETVAL;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   class_  = 0;
 		uint16                   level   = 0;
 		dXSTARG;
@@ -3148,7 +3148,7 @@ XS(XS_Client_SummonItem) {
 		uint32 aug3    = 0;
 		uint32 aug4    = 0;
 		uint32 aug5    = 0;
-		uint16 slot_id = EQEmu::invslot::slotCursor;
+		uint16 slot_id = EQ::invslot::slotCursor;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -4206,7 +4206,7 @@ XS(XS_Client_GetItemAt) {
 		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)");
 	{
 		Client              *THIS;
-		EQEmu::ItemInstance *RETVAL;
+		EQ::ItemInstance *RETVAL;
 		uint32 slot = (int32) SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -4231,7 +4231,7 @@ XS(XS_Client_GetAugmentAt) {
 		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)");
 	{
 		Client              *THIS;
-		EQEmu::ItemInstance *RETVAL;
+		EQ::ItemInstance *RETVAL;
 		uint32 slot     = (int32) SvIV(ST(1));
 		uint32 aug_slot = (int32) SvIV(ST(1));
 
@@ -4243,7 +4243,7 @@ XS(XS_Client_GetAugmentAt) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		EQEmu::ItemInstance *inst = THIS->GetInv().GetItem(slot);
+		EQ::ItemInstance *inst = THIS->GetInv().GetItem(slot);
 		if (inst) {
 			RETVAL = inst->GetAugment(aug_slot);
 		} else {
@@ -5431,7 +5431,7 @@ XS(XS_Client_GetItemInInventory) {
 	{
 		Client *THIS;
 		int16               slot_id = (int16) SvIV(ST(1));
-		EQEmu::ItemInstance *RETVAL = nullptr;
+		EQ::ItemInstance *RETVAL = nullptr;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));

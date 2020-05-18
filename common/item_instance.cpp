@@ -54,9 +54,9 @@ static inline int32 GetNextItemInstSerialNumber() {
 }
 
 //
-// class EQEmu::ItemInstance
+// class EQ::ItemInstance
 //
-EQEmu::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
+EQ::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_use_type = ItemInstNormal;
 	if(item) {
 		m_item = new ItemData(*item);
@@ -87,7 +87,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemData* item, int16 charges) {
 	m_new_id_file = 0;
 }
 
-EQEmu::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
+EQ::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 charges) {
 	m_use_type = ItemInstNormal;
 	m_item = db->GetItem(item_id);
 	if(m_item) {
@@ -121,7 +121,7 @@ EQEmu::ItemInstance::ItemInstance(SharedDatabase *db, uint32 item_id, int16 char
 	m_new_id_file = 0;
 }
 
-EQEmu::ItemInstance::ItemInstance(ItemInstTypes use_type) {
+EQ::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_use_type = use_type;
 	m_item = nullptr;
 	m_charges = 0;
@@ -143,8 +143,8 @@ EQEmu::ItemInstance::ItemInstance(ItemInstTypes use_type) {
 	m_new_id_file = 0;
 }
 
-// Make a copy of an EQEmu::ItemInstance object
-EQEmu::ItemInstance::ItemInstance(const ItemInstance& copy)
+// Make a copy of an EQ::ItemInstance object
+EQ::ItemInstance::ItemInstance(const ItemInstance& copy)
 {
 	m_use_type=copy.m_use_type;
 	if(copy.m_item)
@@ -202,7 +202,7 @@ EQEmu::ItemInstance::ItemInstance(const ItemInstance& copy)
 }
 
 // Clean up container contents
-EQEmu::ItemInstance::~ItemInstance()
+EQ::ItemInstance::~ItemInstance()
 {
 	Clear();
 	safe_delete(m_item);
@@ -211,7 +211,7 @@ EQEmu::ItemInstance::~ItemInstance()
 }
 
 // Query item type
-bool EQEmu::ItemInstance::IsType(item::ItemClass item_class) const
+bool EQ::ItemInstance::IsType(item::ItemClass item_class) const
 {
 	// IsType(<ItemClassTypes>) does not protect against 'm_item = nullptr'
 	
@@ -225,23 +225,23 @@ bool EQEmu::ItemInstance::IsType(item::ItemClass item_class) const
 	return (m_item->ItemClass == item_class);
 }
 
-bool EQEmu::ItemInstance::IsClassCommon() const
+bool EQ::ItemInstance::IsClassCommon() const
 {
 	return (m_item && m_item->IsClassCommon());
 }
 
-bool EQEmu::ItemInstance::IsClassBag() const
+bool EQ::ItemInstance::IsClassBag() const
 {
 	return (m_item && m_item->IsClassBag());
 }
 
-bool EQEmu::ItemInstance::IsClassBook() const
+bool EQ::ItemInstance::IsClassBook() const
 {
 	return (m_item && m_item->IsClassBook());
 }
 
 // Is item stackable?
-bool EQEmu::ItemInstance::IsStackable() const
+bool EQ::ItemInstance::IsStackable() const
 {
 	if (!m_item)
 		return false;
@@ -249,7 +249,7 @@ bool EQEmu::ItemInstance::IsStackable() const
 	return m_item->Stackable;
 }
 
-bool EQEmu::ItemInstance::IsCharged() const
+bool EQ::ItemInstance::IsCharged() const
 {
 	if (!m_item)
 		return false;
@@ -261,7 +261,7 @@ bool EQEmu::ItemInstance::IsCharged() const
 }
 
 // Can item be equipped?
-bool EQEmu::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
+bool EQ::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
 {
 	if (!m_item || (m_item->Slots == 0))
 		return false;
@@ -270,18 +270,18 @@ bool EQEmu::ItemInstance::IsEquipable(uint16 race, uint16 class_) const
 }
 
 // Can equip at this slot?
-bool EQEmu::ItemInstance::IsEquipable(int16 slot_id) const
+bool EQ::ItemInstance::IsEquipable(int16 slot_id) const
 {
 	if (!m_item)
 		return false;
 
-	if (slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END)
+	if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END)
 		return false;
 
 	return ((m_item->Slots & (1 << slot_id)) != 0);
 }
 
-bool EQEmu::ItemInstance::IsAugmentable() const
+bool EQ::ItemInstance::IsAugmentable() const
 {
 	if (!m_item)
 		return false;
@@ -294,7 +294,7 @@ bool EQEmu::ItemInstance::IsAugmentable() const
 	return false;
 }
 
-bool EQEmu::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
+bool EQ::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
 
@@ -306,10 +306,10 @@ bool EQEmu::ItemInstance::AvailableWearSlot(uint32 aug_wear_slots) const {
 		}
 	}
 
-	return (index <= EQEmu::invslot::EQUIPMENT_END);
+	return (index <= EQ::invslot::EQUIPMENT_END);
 }
 
-int8 EQEmu::ItemInstance::AvailableAugmentSlot(int32 augtype) const
+int8 EQ::ItemInstance::AvailableAugmentSlot(int32 augtype) const
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return INVALID_INDEX;
@@ -324,7 +324,7 @@ int8 EQEmu::ItemInstance::AvailableAugmentSlot(int32 augtype) const
 	return (index <= invaug::SOCKET_END) ? index : INVALID_INDEX;
 }
 
-bool EQEmu::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
+bool EQ::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) const
 {
 	if (!m_item || !m_item->IsClassCommon())
 		 return false;
@@ -336,7 +336,7 @@ bool EQEmu::ItemInstance::IsAugmentSlotAvailable(int32 augtype, uint8 slot) cons
 }
 
 // Retrieve item inside container
-EQEmu::ItemInstance* EQEmu::ItemInstance::GetItem(uint8 index) const
+EQ::ItemInstance* EQ::ItemInstance::GetItem(uint8 index) const
 {
 	auto it = m_contents.find(index);
 	if (it != m_contents.end()) {
@@ -346,7 +346,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetItem(uint8 index) const
 	return nullptr;
 }
 
-uint32 EQEmu::ItemInstance::GetItemID(uint8 slot) const
+uint32 EQ::ItemInstance::GetItemID(uint8 slot) const
 {
 	ItemInstance *item = GetItem(slot);
 	if (item)
@@ -355,7 +355,7 @@ uint32 EQEmu::ItemInstance::GetItemID(uint8 slot) const
 	return 0;
 }
 
-void EQEmu::ItemInstance::PutItem(uint8 index, const ItemInstance& inst)
+void EQ::ItemInstance::PutItem(uint8 index, const ItemInstance& inst)
 {
 	// Clean up item already in slot (if exists)
 	DeleteItem(index);
@@ -365,7 +365,7 @@ void EQEmu::ItemInstance::PutItem(uint8 index, const ItemInstance& inst)
 }
 
 // Remove item inside container
-void EQEmu::ItemInstance::DeleteItem(uint8 index)
+void EQ::ItemInstance::DeleteItem(uint8 index)
 {
 	ItemInstance* inst = PopItem(index);
 	safe_delete(inst);
@@ -373,7 +373,7 @@ void EQEmu::ItemInstance::DeleteItem(uint8 index)
 
 // Remove item from container without memory delete
 // Hands over memory ownership to client of this function call
-EQEmu::ItemInstance* EQEmu::ItemInstance::PopItem(uint8 index)
+EQ::ItemInstance* EQ::ItemInstance::PopItem(uint8 index)
 {
 	auto iter = m_contents.find(index);
 	if (iter != m_contents.end()) {
@@ -386,7 +386,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::PopItem(uint8 index)
 }
 
 // Remove all items from container
-void EQEmu::ItemInstance::Clear()
+void EQ::ItemInstance::Clear()
 {
 	// Destroy container contents
 	for (auto iter = m_contents.begin(); iter != m_contents.end(); ++iter) {
@@ -396,7 +396,7 @@ void EQEmu::ItemInstance::Clear()
 }
 
 // Remove all items from container
-void EQEmu::ItemInstance::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
+void EQ::ItemInstance::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is_norent)
 {
 	// TODO: This needs work...
 
@@ -458,7 +458,7 @@ void EQEmu::ItemInstance::ClearByFlags(byFlagSetting is_nodrop, byFlagSetting is
 	}
 }
 
-uint8 EQEmu::ItemInstance::FirstOpenSlot() const
+uint8 EQ::ItemInstance::FirstOpenSlot() const
 {
 	if (!m_item)
 		return INVALID_INDEX;
@@ -472,7 +472,7 @@ uint8 EQEmu::ItemInstance::FirstOpenSlot() const
 	return (i < slots) ? i : INVALID_INDEX;
 }
 
-uint8 EQEmu::ItemInstance::GetTotalItemCount() const
+uint8 EQ::ItemInstance::GetTotalItemCount() const
 {
 	if (!m_item)
 		return 0;
@@ -486,7 +486,7 @@ uint8 EQEmu::ItemInstance::GetTotalItemCount() const
 	return item_count;
 }
 
-bool EQEmu::ItemInstance::IsNoneEmptyContainer()
+bool EQ::ItemInstance::IsNoneEmptyContainer()
 {
 	if (!m_item || !m_item->IsClassBag())
 		return false;
@@ -500,7 +500,7 @@ bool EQEmu::ItemInstance::IsNoneEmptyContainer()
 }
 
 // Retrieve augment inside item
-EQEmu::ItemInstance* EQEmu::ItemInstance::GetAugment(uint8 slot) const
+EQ::ItemInstance* EQ::ItemInstance::GetAugment(uint8 slot) const
 {
 	if (m_item && m_item->IsClassCommon())
 		return GetItem(slot);
@@ -508,7 +508,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetAugment(uint8 slot) const
 	return nullptr;
 }
 
-EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentationAugtype) const
+EQ::ItemInstance* EQ::ItemInstance::GetOrnamentationAug(int32 ornamentationAugtype) const
 {
 	if (!m_item || !m_item->IsClassCommon()) { return nullptr; }
 	if (ornamentationAugtype == 0) { return nullptr; }
@@ -533,7 +533,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::GetOrnamentationAug(int32 ornamentatio
 	return nullptr;
 }
 
-uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
+uint32 EQ::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
 	// Not a Hero Forge item.
 	if (m_ornament_hero_model == 0 || material_slot < 0)
 		return 0;
@@ -546,7 +546,7 @@ uint32 EQEmu::ItemInstance::GetOrnamentHeroModel(int32 material_slot) const {
 	return (m_ornament_hero_model * 100) + material_slot;
 }
 
-bool EQEmu::ItemInstance::UpdateOrnamentationInfo() {
+bool EQ::ItemInstance::UpdateOrnamentationInfo() {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
 	
@@ -582,7 +582,7 @@ bool EQEmu::ItemInstance::UpdateOrnamentationInfo() {
 	return ornamentSet;
 }
 
-bool EQEmu::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll) {
+bool EQ::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData *Container, bool AllowAll) {
 	if (!ItemToTry || !Container) return false;
 
 	if (ItemToTry->ItemType == item::ItemTypeArrow || strnlen(Container->CharmFile, 30) == 0)
@@ -629,7 +629,7 @@ bool EQEmu::ItemInstance::CanTransform(const ItemData *ItemToTry, const ItemData
 	return false;
 }
 
-uint32 EQEmu::ItemInstance::GetAugmentItemID(uint8 slot) const
+uint32 EQ::ItemInstance::GetAugmentItemID(uint8 slot) const
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return 0;
@@ -638,7 +638,7 @@ uint32 EQEmu::ItemInstance::GetAugmentItemID(uint8 slot) const
 }
 
 // Add an augment to the item
-void EQEmu::ItemInstance::PutAugment(uint8 slot, const ItemInstance& augment)
+void EQ::ItemInstance::PutAugment(uint8 slot, const ItemInstance& augment)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
@@ -646,7 +646,7 @@ void EQEmu::ItemInstance::PutAugment(uint8 slot, const ItemInstance& augment)
 	PutItem(slot, augment);
 }
 
-void EQEmu::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
+void EQ::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item_id)
 {
 	if (item_id == 0) { return; }
 	if (db == nullptr) { return; /* TODO: add log message for nullptr */ }
@@ -659,7 +659,7 @@ void EQEmu::ItemInstance::PutAugment(SharedDatabase *db, uint8 slot, uint32 item
 }
 
 // Remove augment from item and destroy it
-void EQEmu::ItemInstance::DeleteAugment(uint8 index)
+void EQ::ItemInstance::DeleteAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return;
@@ -668,7 +668,7 @@ void EQEmu::ItemInstance::DeleteAugment(uint8 index)
 }
 
 // Remove augment from item and return it
-EQEmu::ItemInstance* EQEmu::ItemInstance::RemoveAugment(uint8 index)
+EQ::ItemInstance* EQ::ItemInstance::RemoveAugment(uint8 index)
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return nullptr;
@@ -676,7 +676,7 @@ EQEmu::ItemInstance* EQEmu::ItemInstance::RemoveAugment(uint8 index)
 	return PopItem(index);
 }
 
-bool EQEmu::ItemInstance::IsAugmented()
+bool EQ::ItemInstance::IsAugmented()
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
@@ -690,7 +690,7 @@ bool EQEmu::ItemInstance::IsAugmented()
 }
 
 // Has attack/delay?
-bool EQEmu::ItemInstance::IsWeapon() const
+bool EQ::ItemInstance::IsWeapon() const
 {
 	if (!m_item || !m_item->IsClassCommon())
 		return false;
@@ -701,7 +701,7 @@ bool EQEmu::ItemInstance::IsWeapon() const
 		return ((m_item->Damage != 0) && (m_item->Delay != 0));
 }
 
-bool EQEmu::ItemInstance::IsAmmo() const
+bool EQ::ItemInstance::IsAmmo() const
 {
 	if (!m_item)
 		return false;
@@ -717,7 +717,7 @@ bool EQEmu::ItemInstance::IsAmmo() const
 
 }
 
-const EQEmu::ItemData* EQEmu::ItemInstance::GetItem() const
+const EQ::ItemData* EQ::ItemInstance::GetItem() const
 {
 	if (!m_item)
 		return nullptr;
@@ -728,13 +728,13 @@ const EQEmu::ItemData* EQEmu::ItemInstance::GetItem() const
 	return m_item;
 }
 
-const EQEmu::ItemData* EQEmu::ItemInstance::GetUnscaledItem() const
+const EQ::ItemData* EQ::ItemInstance::GetUnscaledItem() const
 {
 	// No operator calls and defaults to nullptr
 	return m_item;
 }
 
-std::string EQEmu::ItemInstance::GetCustomDataString() const {
+std::string EQ::ItemInstance::GetCustomDataString() const {
 	std::string ret_val;
 	auto iter = m_custom_data.begin();
 	while (iter != m_custom_data.end()) {
@@ -753,7 +753,7 @@ std::string EQEmu::ItemInstance::GetCustomDataString() const {
 	return ret_val;
 }
 
-std::string EQEmu::ItemInstance::GetCustomData(std::string identifier) {
+std::string EQ::ItemInstance::GetCustomData(std::string identifier) {
 	std::map<std::string, std::string>::const_iterator iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		return iter->second;
@@ -762,49 +762,49 @@ std::string EQEmu::ItemInstance::GetCustomData(std::string identifier) {
 	return "";
 }
 
-void EQEmu::ItemInstance::SetCustomData(std::string identifier, std::string value) {
+void EQ::ItemInstance::SetCustomData(std::string identifier, std::string value) {
 	DeleteCustomData(identifier);
 	m_custom_data[identifier] = value;
 }
 
-void EQEmu::ItemInstance::SetCustomData(std::string identifier, int value) {
+void EQ::ItemInstance::SetCustomData(std::string identifier, int value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQEmu::ItemInstance::SetCustomData(std::string identifier, float value) {
+void EQ::ItemInstance::SetCustomData(std::string identifier, float value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQEmu::ItemInstance::SetCustomData(std::string identifier, bool value) {
+void EQ::ItemInstance::SetCustomData(std::string identifier, bool value) {
 	DeleteCustomData(identifier);
 	std::stringstream ss;
 	ss << value;
 	m_custom_data[identifier] = ss.str();
 }
 
-void EQEmu::ItemInstance::DeleteCustomData(std::string identifier) {
+void EQ::ItemInstance::DeleteCustomData(std::string identifier) {
 	auto iter = m_custom_data.find(identifier);
 	if (iter != m_custom_data.end()) {
 		m_custom_data.erase(iter);
 	}
 }
 
-// Clone a type of EQEmu::ItemInstance object
+// Clone a type of EQ::ItemInstance object
 // c++ doesn't allow a polymorphic copy constructor,
 // so we have to resort to a polymorphic Clone()
-EQEmu::ItemInstance* EQEmu::ItemInstance::Clone() const
+EQ::ItemInstance* EQ::ItemInstance::Clone() const
 {
 	// Pseudo-polymorphic copy constructor
 	return new ItemInstance(*this);
 }
 
-bool EQEmu::ItemInstance::IsSlotAllowed(int16 slot_id) const {
+bool EQ::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 	if (!m_item) { return false; }
 	else if (InventoryProfile::SupportsContainers(slot_id)) { return true; }
 	else if (m_item->Slots & (1 << slot_id)) { return true; }
@@ -812,7 +812,7 @@ bool EQEmu::ItemInstance::IsSlotAllowed(int16 slot_id) const {
 	else { return false; }
 }
 
-bool EQEmu::ItemInstance::IsDroppable(bool recurse) const
+bool EQ::ItemInstance::IsDroppable(bool recurse) const
 {
 	if (!m_item)
 		return false;
@@ -838,7 +838,7 @@ bool EQEmu::ItemInstance::IsDroppable(bool recurse) const
 	return true;
 }
 
-void EQEmu::ItemInstance::Initialize(SharedDatabase *db) {
+void EQ::ItemInstance::Initialize(SharedDatabase *db) {
 	// if there's no actual item, don't do anything
 	if (!m_item)
 		return;
@@ -855,7 +855,7 @@ void EQEmu::ItemInstance::Initialize(SharedDatabase *db) {
 	}
 }
 
-void EQEmu::ItemInstance::ScaleItem() {
+void EQ::ItemInstance::ScaleItem() {
 	if (!m_item)
 		return;
 
@@ -939,18 +939,18 @@ void EQEmu::ItemInstance::ScaleItem() {
 	m_scaledItem->CharmFileID = 0;	// this stops the client from trying to scale the item itself.
 }
 
-bool EQEmu::ItemInstance::EvolveOnAllKills() const {
+bool EQ::ItemInstance::EvolveOnAllKills() const {
 	return (m_evolveInfo && m_evolveInfo->AllKills);
 }
 
-int8 EQEmu::ItemInstance::GetMaxEvolveLvl() const {
+int8 EQ::ItemInstance::GetMaxEvolveLvl() const {
 	if (m_evolveInfo)
 		return m_evolveInfo->MaxLvl;
 	else
 		return 0;
 }
 
-uint32 EQEmu::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
+uint32 EQ::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
 	uint32 kills = -1;	// default to -1 (max uint32 value) because this value is usually divided by, so we don't want to ever return zero.
 	if (m_evolveInfo)
 		if (currentlevel != m_evolveInfo->MaxLvl)
@@ -962,24 +962,24 @@ uint32 EQEmu::ItemInstance::GetKillsNeeded(uint8 currentlevel) {
 	return kills;
 }
 
-void EQEmu::ItemInstance::SetTimer(std::string name, uint32 time) {
+void EQ::ItemInstance::SetTimer(std::string name, uint32 time) {
 	Timer t(time);
 	t.Start(time, false);
 	m_timers[name] = t;
 }
 
-void EQEmu::ItemInstance::StopTimer(std::string name) {
+void EQ::ItemInstance::StopTimer(std::string name) {
 	auto iter = m_timers.find(name);
 	if(iter != m_timers.end()) {
 		m_timers.erase(iter);
 	}
 }
 
-void EQEmu::ItemInstance::ClearTimers() {
+void EQ::ItemInstance::ClearTimers() {
 	m_timers.clear();
 }
 
-int EQEmu::ItemInstance::GetItemArmorClass(bool augments) const
+int EQ::ItemInstance::GetItemArmorClass(bool augments) const
 {
 	int ac = 0;
 	const auto item = GetItem();
@@ -993,7 +993,7 @@ int EQEmu::ItemInstance::GetItemArmorClass(bool augments) const
 	return ac;
 }
 
-int EQEmu::ItemInstance::GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments) const
+int EQ::ItemInstance::GetItemElementalDamage(int &magic, int &fire, int &cold, int &poison, int &disease, int &chromatic, int &prismatic, int &physical, int &corruption, bool augments) const
 {
 	const auto item = GetItem();
 	if (item) {
@@ -1035,7 +1035,7 @@ int EQEmu::ItemInstance::GetItemElementalDamage(int &magic, int &fire, int &cold
 	return magic + fire + cold + poison + disease + chromatic + prismatic + physical + corruption;
 }
 
-int EQEmu::ItemInstance::GetItemElementalFlag(bool augments) const
+int EQ::ItemInstance::GetItemElementalFlag(bool augments) const
 {
 	int flag = 0;
 	const auto item = GetItem();
@@ -1056,7 +1056,7 @@ int EQEmu::ItemInstance::GetItemElementalFlag(bool augments) const
 	return flag;
 }
 
-int EQEmu::ItemInstance::GetItemElementalDamage(bool augments) const
+int EQ::ItemInstance::GetItemElementalDamage(bool augments) const
 {
 	int damage = 0;
 	const auto item = GetItem();
@@ -1077,7 +1077,7 @@ int EQEmu::ItemInstance::GetItemElementalDamage(bool augments) const
 	return damage;
 }
 
-int EQEmu::ItemInstance::GetItemRecommendedLevel(bool augments) const
+int EQ::ItemInstance::GetItemRecommendedLevel(bool augments) const
 {
 	int level = 0;
 	const auto item = GetItem();
@@ -1099,7 +1099,7 @@ int EQEmu::ItemInstance::GetItemRecommendedLevel(bool augments) const
 	return level;
 }
 
-int EQEmu::ItemInstance::GetItemRequiredLevel(bool augments) const
+int EQ::ItemInstance::GetItemRequiredLevel(bool augments) const
 {
 	int level = 0;
 	const auto item = GetItem();
@@ -1121,7 +1121,7 @@ int EQEmu::ItemInstance::GetItemRequiredLevel(bool augments) const
 	return level;
 }
 
-int EQEmu::ItemInstance::GetItemWeaponDamage(bool augments) const
+int EQ::ItemInstance::GetItemWeaponDamage(bool augments) const
 {
 	int damage = 0;
 	const auto item = GetItem();
@@ -1137,7 +1137,7 @@ int EQEmu::ItemInstance::GetItemWeaponDamage(bool augments) const
 	return damage;
 }
 
-int EQEmu::ItemInstance::GetItemBackstabDamage(bool augments) const
+int EQ::ItemInstance::GetItemBackstabDamage(bool augments) const
 {
 	int damage = 0;
 	const auto item = GetItem();
@@ -1153,7 +1153,7 @@ int EQEmu::ItemInstance::GetItemBackstabDamage(bool augments) const
 	return damage;
 }
 
-int EQEmu::ItemInstance::GetItemBaneDamageBody(bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageBody(bool augments) const
 {
 	int body = 0;
 	const auto item = GetItem();
@@ -1174,7 +1174,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageBody(bool augments) const
 	return body;
 }
 
-int EQEmu::ItemInstance::GetItemBaneDamageRace(bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageRace(bool augments) const
 {
 	int race = 0;
 	const auto item = GetItem();
@@ -1195,7 +1195,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageRace(bool augments) const
 	return race;
 }
 
-int EQEmu::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) const
 {
 	int damage = 0;
 	const auto item = GetItem();
@@ -1212,7 +1212,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageBody(bodyType against, bool augments) 
 	return damage;
 }
 
-int EQEmu::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) const
+int EQ::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) const
 {
 	int damage = 0;
 	const auto item = GetItem();
@@ -1229,7 +1229,7 @@ int EQEmu::ItemInstance::GetItemBaneDamageRace(uint16 against, bool augments) co
 	return damage;
 }
 
-int EQEmu::ItemInstance::GetItemMagical(bool augments) const
+int EQ::ItemInstance::GetItemMagical(bool augments) const
 {
 	const auto item = GetItem();
 	if (item) {
@@ -1245,7 +1245,7 @@ int EQEmu::ItemInstance::GetItemMagical(bool augments) const
 	return 0;
 }
 
-int EQEmu::ItemInstance::GetItemHP(bool augments) const
+int EQ::ItemInstance::GetItemHP(bool augments) const
 {
 	int hp = 0;
 	const auto item = GetItem();
@@ -1259,7 +1259,7 @@ int EQEmu::ItemInstance::GetItemHP(bool augments) const
 	return hp;
 }
 
-int EQEmu::ItemInstance::GetItemMana(bool augments) const
+int EQ::ItemInstance::GetItemMana(bool augments) const
 {
 	int mana = 0;
 	const auto item = GetItem();
@@ -1273,7 +1273,7 @@ int EQEmu::ItemInstance::GetItemMana(bool augments) const
 	return mana;
 }
 
-int EQEmu::ItemInstance::GetItemEndur(bool augments) const
+int EQ::ItemInstance::GetItemEndur(bool augments) const
 {
 	int endur = 0;
 	const auto item = GetItem();
@@ -1287,7 +1287,7 @@ int EQEmu::ItemInstance::GetItemEndur(bool augments) const
 	return endur;
 }
 
-int EQEmu::ItemInstance::GetItemAttack(bool augments) const
+int EQ::ItemInstance::GetItemAttack(bool augments) const
 {
 	int atk = 0;
 	const auto item = GetItem();
@@ -1301,7 +1301,7 @@ int EQEmu::ItemInstance::GetItemAttack(bool augments) const
 	return atk;
 }
 
-int EQEmu::ItemInstance::GetItemStr(bool augments) const
+int EQ::ItemInstance::GetItemStr(bool augments) const
 {
 	int str = 0;
 	const auto item = GetItem();
@@ -1315,7 +1315,7 @@ int EQEmu::ItemInstance::GetItemStr(bool augments) const
 	return str;
 }
 
-int EQEmu::ItemInstance::GetItemSta(bool augments) const
+int EQ::ItemInstance::GetItemSta(bool augments) const
 {
 	int sta = 0;
 	const auto item = GetItem();
@@ -1329,7 +1329,7 @@ int EQEmu::ItemInstance::GetItemSta(bool augments) const
 	return sta;
 }
 
-int EQEmu::ItemInstance::GetItemDex(bool augments) const
+int EQ::ItemInstance::GetItemDex(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1343,7 +1343,7 @@ int EQEmu::ItemInstance::GetItemDex(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemAgi(bool augments) const
+int EQ::ItemInstance::GetItemAgi(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1357,7 +1357,7 @@ int EQEmu::ItemInstance::GetItemAgi(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemInt(bool augments) const
+int EQ::ItemInstance::GetItemInt(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1371,7 +1371,7 @@ int EQEmu::ItemInstance::GetItemInt(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemWis(bool augments) const
+int EQ::ItemInstance::GetItemWis(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1385,7 +1385,7 @@ int EQEmu::ItemInstance::GetItemWis(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemCha(bool augments) const
+int EQ::ItemInstance::GetItemCha(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1399,7 +1399,7 @@ int EQEmu::ItemInstance::GetItemCha(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemMR(bool augments) const
+int EQ::ItemInstance::GetItemMR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1413,7 +1413,7 @@ int EQEmu::ItemInstance::GetItemMR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemFR(bool augments) const
+int EQ::ItemInstance::GetItemFR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1427,7 +1427,7 @@ int EQEmu::ItemInstance::GetItemFR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemCR(bool augments) const
+int EQ::ItemInstance::GetItemCR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1441,7 +1441,7 @@ int EQEmu::ItemInstance::GetItemCR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemPR(bool augments) const
+int EQ::ItemInstance::GetItemPR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1455,7 +1455,7 @@ int EQEmu::ItemInstance::GetItemPR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemDR(bool augments) const
+int EQ::ItemInstance::GetItemDR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1469,7 +1469,7 @@ int EQEmu::ItemInstance::GetItemDR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemCorrup(bool augments) const
+int EQ::ItemInstance::GetItemCorrup(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1483,7 +1483,7 @@ int EQEmu::ItemInstance::GetItemCorrup(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicStr(bool augments) const
+int EQ::ItemInstance::GetItemHeroicStr(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1497,7 +1497,7 @@ int EQEmu::ItemInstance::GetItemHeroicStr(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicSta(bool augments) const
+int EQ::ItemInstance::GetItemHeroicSta(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1511,7 +1511,7 @@ int EQEmu::ItemInstance::GetItemHeroicSta(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicDex(bool augments) const
+int EQ::ItemInstance::GetItemHeroicDex(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1525,7 +1525,7 @@ int EQEmu::ItemInstance::GetItemHeroicDex(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicAgi(bool augments) const
+int EQ::ItemInstance::GetItemHeroicAgi(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1539,7 +1539,7 @@ int EQEmu::ItemInstance::GetItemHeroicAgi(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicInt(bool augments) const
+int EQ::ItemInstance::GetItemHeroicInt(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1553,7 +1553,7 @@ int EQEmu::ItemInstance::GetItemHeroicInt(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicWis(bool augments) const
+int EQ::ItemInstance::GetItemHeroicWis(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1567,7 +1567,7 @@ int EQEmu::ItemInstance::GetItemHeroicWis(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicCha(bool augments) const
+int EQ::ItemInstance::GetItemHeroicCha(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1581,7 +1581,7 @@ int EQEmu::ItemInstance::GetItemHeroicCha(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicMR(bool augments) const
+int EQ::ItemInstance::GetItemHeroicMR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1595,7 +1595,7 @@ int EQEmu::ItemInstance::GetItemHeroicMR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicFR(bool augments) const
+int EQ::ItemInstance::GetItemHeroicFR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1609,7 +1609,7 @@ int EQEmu::ItemInstance::GetItemHeroicFR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicCR(bool augments) const
+int EQ::ItemInstance::GetItemHeroicCR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1623,7 +1623,7 @@ int EQEmu::ItemInstance::GetItemHeroicCR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicPR(bool augments) const
+int EQ::ItemInstance::GetItemHeroicPR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1637,7 +1637,7 @@ int EQEmu::ItemInstance::GetItemHeroicPR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicDR(bool augments) const
+int EQ::ItemInstance::GetItemHeroicDR(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1651,7 +1651,7 @@ int EQEmu::ItemInstance::GetItemHeroicDR(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHeroicCorrup(bool augments) const
+int EQ::ItemInstance::GetItemHeroicCorrup(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();
@@ -1665,7 +1665,7 @@ int EQEmu::ItemInstance::GetItemHeroicCorrup(bool augments) const
 	return total;
 }
 
-int EQEmu::ItemInstance::GetItemHaste(bool augments) const
+int EQ::ItemInstance::GetItemHaste(bool augments) const
 {
 	int total = 0;
 	const auto item = GetItem();

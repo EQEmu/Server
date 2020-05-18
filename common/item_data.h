@@ -47,7 +47,7 @@
 #include "emu_constants.h"
 
 
-namespace EQEmu
+namespace EQ
 {
 	namespace item {
 		enum ItemClass {

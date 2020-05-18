@@ -144,7 +144,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 							int min_hp = AIspells[i].min_hp; // well 0 is default, so no special case here
 							int max_hp = AIspells[i].max_hp ? AIspells[i].max_hp : RuleI(Spells, AI_HealHPPct);
 
-							if (EQEmu::ValueWithin(hp_ratio, min_hp, max_hp) || (tar->IsClient() && hp_ratio <= 99)) { // not sure about client bit, leaving it
+							if (EQ::ValueWithin(hp_ratio, min_hp, max_hp) || (tar->IsClient() && hp_ratio <= 99)) { // not sure about client bit, leaving it
 								uint32 tempTime = 0;
 								AIDoSpellCast(i, tar, mana_cost, &tempTime);
 								tar->SetDontHealMeBefore(tempTime);
@@ -375,7 +375,7 @@ bool NPC::AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgain
 #endif
 	casting_spell_AIindex = i;
 
-	return CastSpell(AIspells[i].spellid, tar->GetID(), EQEmu::spells::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
+	return CastSpell(AIspells[i].spellid, tar->GetID(), EQ::spells::CastingSlot::Gem2, AIspells[i].manacost == -2 ? 0 : -1, mana_cost, oDontDoAgainBefore, -1, -1, 0, &(AIspells[i].resist_adjust));
 }
 
 void Mob::AI_Init()
@@ -635,11 +635,11 @@ void Client::AI_SpellCast()
 	}
 
 	uint32 spell_to_cast = 0xFFFFFFFF;
-	EQEmu::spells::CastingSlot slot_to_use = EQEmu::spells::CastingSlot::Item;
+	EQ::spells::CastingSlot slot_to_use = EQ::spells::CastingSlot::Item;
 	if(valid_spells.size() == 1)
 	{
 		spell_to_cast = valid_spells[0];
-		slot_to_use = static_cast<EQEmu::spells::CastingSlot>(slots[0]);
+		slot_to_use = static_cast<EQ::spells::CastingSlot>(slots[0]);
 	}
 	else if(valid_spells.empty())
 	{
@@ -649,7 +649,7 @@ void Client::AI_SpellCast()
 	{
 		uint32 idx = zone->random.Int(0, (valid_spells.size()-1));
 		spell_to_cast = valid_spells[idx];
-		slot_to_use = static_cast<EQEmu::spells::CastingSlot>(slots[idx]);
+		slot_to_use = static_cast<EQ::spells::CastingSlot>(slots[idx]);
 	}
 
 	if(IsMezSpell(spell_to_cast) || IsFearSpell(spell_to_cast))
@@ -803,7 +803,7 @@ void Client::AI_Process()
 			if (GetTarget() && !IsStunned() && !IsMezzed() && !GetFeigned()) {
 				if (attack_timer.Check()) {
 					// Should charmed clients not be procing?
-					DoAttackRounds(GetTarget(), EQEmu::invslot::slotPrimary);
+					DoAttackRounds(GetTarget(), EQ::invslot::slotPrimary);
 				}
 			}
 
@@ -811,7 +811,7 @@ void Client::AI_Process()
 				if (attack_dw_timer.Check()) {
 					if (CheckDualWield()) {
 						// Should charmed clients not be procing?
-						DoAttackRounds(GetTarget(), EQEmu::invslot::slotSecondary);
+						DoAttackRounds(GetTarget(), EQ::invslot::slotSecondary);
 					}
 				}
 			}
@@ -1159,7 +1159,7 @@ void Mob::AI_Process() {
 				//try main hand first
 				if (attack_timer.Check()) {
 					DoMainHandAttackRounds(target);
-					TriggerDefensiveProcs(target, EQEmu::invslot::slotPrimary, false);
+					TriggerDefensiveProcs(target, EQ::invslot::slotPrimary, false);
 
 					bool specialed = false; // NPCs can only do one of these a round
 					if (GetSpecialAbility(SPECATK_FLURRY)) {
@@ -1549,10 +1549,10 @@ void NPC::AI_DoMovement() {
 		// Check if we're already moving to a WP
 		// If so, if we're not moving we have arrived and need to set delay
 
-		if (GetCWP() == EQEmu::WaypointStatus::RoamBoxPauseInProgress && !IsMoving()) {
+		if (GetCWP() == EQ::WaypointStatus::RoamBoxPauseInProgress && !IsMoving()) {
 			// We have arrived
 
-			int roambox_move_delay = EQEmu::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
+			int roambox_move_delay = EQ::ClampLower(GetRoamboxDelay(), GetRoamboxMinDelay());
 			int move_delay_max     = (roambox_move_delay > 0 ? roambox_move_delay : (int) GetRoamboxMinDelay() * 4);
 			int random_timer       = RandomTimer(
 				GetRoamboxMinDelay(),
@@ -1579,8 +1579,8 @@ void NPC::AI_DoMovement() {
 			auto move_x = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 			auto move_y = static_cast<float>(zone->random.Real(-roambox_distance, roambox_distance));
 
-			roambox_destination_x = EQEmu::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
-			roambox_destination_y = EQEmu::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
+			roambox_destination_x = EQ::Clamp((GetX() + move_x), roambox_min_x, roambox_max_x);
+			roambox_destination_y = EQ::Clamp((GetY() + move_y), roambox_min_y, roambox_max_y);
 
 			/**
 			 * If our roambox was configured with large distances, chances of hitting the min or max end of
@@ -1672,7 +1672,7 @@ void NPC::AI_DoMovement() {
 				roambox_destination_z
 			);
 
-			SetCurrentWP(EQEmu::WaypointStatus::RoamBoxPauseInProgress);
+			SetCurrentWP(EQ::WaypointStatus::RoamBoxPauseInProgress);
 			NavigateTo(roambox_destination_x, roambox_destination_y, roambox_destination_z);
 		}
 
@@ -1686,7 +1686,7 @@ void NPC::AI_DoMovement() {
 
 		int32 gridno = CastToNPC()->GetGrid();
 
-		if (gridno > 0 || cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
+		if (gridno > 0 || cur_wp == EQ::WaypointStatus::QuestControlNoGrid) {
 			if (pause_timer_complete == true) { // time to pause at wp is over
 				AI_SetupNextWaypoint();
 			}    // endif (pause_timer_complete==true)
@@ -1736,7 +1736,7 @@ void NPC::AI_DoMovement() {
 					// as that is where roamer is unset and we don't want
 					// the next trip through to move again based on grid stuff.
 					doMove = false;
-					if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
+					if (cur_wp == EQ::WaypointStatus::QuestControlNoGrid) {
 						AI_SetupNextWaypoint();
 					}
 		
@@ -1830,7 +1830,7 @@ void NPC::AI_SetupNextWaypoint() {
 		pause_timer_complete = false;
 		LogPathing("We are departing waypoint [{}]", cur_wp);
 		//if we were under quest control (with no grid), we are done now..
-		if (cur_wp == EQEmu::WaypointStatus::QuestControlNoGrid) {
+		if (cur_wp == EQ::WaypointStatus::QuestControlNoGrid) {
 			LogPathing("Non-grid quest mob has reached its quest ordered waypoint. Leaving pathing mode");
 			roamer = false;
 			cur_wp = 0;
@@ -2107,7 +2107,7 @@ bool Mob::Flurry(ExtraAttackOptions *opts)
 		int num_attacks = GetSpecialAbilityParam(SPECATK_FLURRY, 1);
 		num_attacks = num_attacks > 0 ? num_attacks : RuleI(Combat, MaxFlurryHits);
 		for (int i = 0; i < num_attacks; i++)
-			Attack(target, EQEmu::invslot::slotPrimary, false, false, false, opts);
+			Attack(target, EQ::invslot::slotPrimary, false, false, false, opts);
 	}
 	return true;
 }

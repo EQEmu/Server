@@ -112,7 +112,7 @@ bool Client::Process() {
 				HandleRespawnFromHover(0);
 		}
 
-		if (IsTracking() && (ClientVersion() >= EQEmu::versions::ClientVersion::SoD) && TrackingTimer.Check())
+		if (IsTracking() && (ClientVersion() >= EQ::versions::ClientVersion::SoD) && TrackingTimer.Check())
 			DoTracking();
 
 		// SendHPUpdate calls hpupdate_timer.Start so it can delay this timer, so lets not reset with the check
@@ -286,10 +286,10 @@ bool Client::Process() {
 		}
 
 		if (AutoFireEnabled()) {
-			EQEmu::ItemInstance *ranged = GetInv().GetItem(EQEmu::invslot::slotRange);
+			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
 			if (ranged)
 			{
-				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQEmu::item::ItemTypeBow) {
+				if (ranged->GetItem() && ranged->GetItem()->ItemType == EQ::item::ItemTypeBow) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
@@ -309,7 +309,7 @@ bool Client::Process() {
 							ranged_timer.Start();
 					}
 				}
-				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQEmu::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQEmu::item::ItemTypeSmallThrowing)) {
+				else if (ranged->GetItem() && (ranged->GetItem()->ItemType == EQ::item::ItemTypeLargeThrowing || ranged->GetItem()->ItemType == EQ::item::ItemTypeSmallThrowing)) {
 					if (ranged_timer.Check(false)) {
 						if (GetTarget() && (GetTarget()->IsNPC() || GetTarget()->IsClient())) {
 							if (GetTarget()->InFrontMob(this, GetTarget()->GetX(), GetTarget()->GetY())) {
@@ -374,11 +374,11 @@ bool Client::Process() {
 			}
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
-				EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::invslot::slotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQEmu::invslot::slotPrimary);
-				TriggerDefensiveProcs(auto_attack_target, EQEmu::invslot::slotPrimary, false);
+				EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotPrimary);
+				TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotPrimary);
+				TriggerDefensiveProcs(auto_attack_target, EQ::invslot::slotPrimary, false);
 
-				DoAttackRounds(auto_attack_target, EQEmu::invslot::slotPrimary);
+				DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
 				if (CheckAATimer(aaTimerRampage)) {
 					entity_list.AEAttack(this, 30);
 				}
@@ -413,12 +413,12 @@ bool Client::Process() {
 				//you can't see your target
 			}
 			else if (auto_attack_target->GetHP() > -10) {
-				CheckIncreaseSkill(EQEmu::skills::SkillDualWield, auto_attack_target, -10);
+				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
-					EQEmu::ItemInstance *wpn = GetInv().GetItem(EQEmu::invslot::slotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQEmu::invslot::slotSecondary);
+					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
+					TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotSecondary);
 
-					DoAttackRounds(auto_attack_target, EQEmu::invslot::slotSecondary);
+					DoAttackRounds(auto_attack_target, EQ::invslot::slotSecondary);
 				}
 			}
 		}
@@ -722,10 +722,10 @@ void Client::BulkSendInventoryItems()
 {
 	// LINKDEAD TRADE ITEMS
 	// Move trade slot items back into normal inventory..need them there now for the proceeding validity checks
-	for (int16 slot_id = EQEmu::invslot::TRADE_BEGIN; slot_id <= EQEmu::invslot::TRADE_END; slot_id++) {
-		EQEmu::ItemInstance* inst = m_inv.PopItem(slot_id);
+	for (int16 slot_id = EQ::invslot::TRADE_BEGIN; slot_id <= EQ::invslot::TRADE_END; slot_id++) {
+		EQ::ItemInstance* inst = m_inv.PopItem(slot_id);
 		if(inst) {
-			bool is_arrow = (inst->GetItem()->ItemType == EQEmu::item::ItemTypeArrow) ? true : false;
+			bool is_arrow = (inst->GetItem()->ItemType == EQ::item::ItemTypeArrow) ? true : false;
 			int16 free_slot_id = m_inv.FindFreeSlot(inst->IsClassBag(), true, inst->GetItem()->Size, is_arrow);
 			LogInventory("Incomplete Trade Transaction: Moving [{}] from slot [{}] to [{}]", inst->GetItem()->Name, slot_id, free_slot_id);
 			PutItemInInventory(free_slot_id, *inst, false);
@@ -744,12 +744,12 @@ void Client::BulkSendInventoryItems()
 	RemoveDuplicateLore(false);
 	MoveSlotNotAllowed(false);
 
-	EQEmu::OutBuffer ob;
-	EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+	EQ::OutBuffer ob;
+	EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
 	// Possessions items
-	for (int16 slot_id = EQEmu::invslot::POSSESSIONS_BEGIN; slot_id <= EQEmu::invslot::POSSESSIONS_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
+	for (int16 slot_id = EQ::invslot::POSSESSIONS_BEGIN; slot_id <= EQ::invslot::POSSESSIONS_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -762,8 +762,8 @@ void Client::BulkSendInventoryItems()
 	}
 
 	// Bank items
-	for (int16 slot_id = EQEmu::invslot::BANK_BEGIN; slot_id <= EQEmu::invslot::BANK_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
+	for (int16 slot_id = EQ::invslot::BANK_BEGIN; slot_id <= EQ::invslot::BANK_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -776,8 +776,8 @@ void Client::BulkSendInventoryItems()
 	}
 
 	// SharedBank items
-	for (int16 slot_id = EQEmu::invslot::SHARED_BANK_BEGIN; slot_id <= EQEmu::invslot::SHARED_BANK_END; slot_id++) {
-		const EQEmu::ItemInstance* inst = m_inv[slot_id];
+	for (int16 slot_id = EQ::invslot::SHARED_BANK_BEGIN; slot_id <= EQ::invslot::SHARED_BANK_END; slot_id++) {
+		const EQ::ItemInstance* inst = m_inv[slot_id];
 		if (!inst)
 			continue;
 
@@ -797,12 +797,12 @@ void Client::BulkSendInventoryItems()
 }
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
-	const EQEmu::ItemData* handyitem = nullptr;
+	const EQ::ItemData* handyitem = nullptr;
 	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
-	if (m_ClientVersionBit & EQEmu::versions::maskRoFAndLater) { // RoF+ can send 200 items
+	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater) { // RoF+ can send 200 items
 		numItemSlots = 200;
 	}
-	const EQEmu::ItemData *item = nullptr;
+	const EQ::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
 	Mob* merch = entity_list.GetMobByNpcTypeID(npcid);
@@ -851,7 +851,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			int charges = 1;
 			if (item->IsClassCommon())
 				charges = item->MaxCharges;
-			EQEmu::ItemInstance* inst = database.CreateItem(item, charges);
+			EQ::ItemInstance* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -892,7 +892,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 			//	charges=ml.charges;
 			//else
 			charges = item->MaxCharges;
-			EQEmu::ItemInstance* inst = database.CreateItem(item, charges);
+			EQ::ItemInstance* inst = database.CreateItem(item, charges);
 			if (inst) {
 				if (RuleB(Merchant, UsePriceMod)) {
 					inst->SetPrice((item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate * Client::CalcPriceMod(merch, false)));
@@ -1066,11 +1066,11 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 	switch(memspell->scribing)
 	{
 		case memSpellScribing:	{	// scribing spell to book
-			const EQEmu::ItemInstance* inst = m_inv[EQEmu::invslot::slotCursor];
+			const EQ::ItemInstance* inst = m_inv[EQ::invslot::slotCursor];
 
 			if (inst && inst->IsClassCommon())
 			{
-				const EQEmu::ItemData* item = inst->GetItem();
+				const EQ::ItemData* item = inst->GetItem();
 
 				if (RuleB(Character, RestrictSpellScribing) && !item->IsEquipable(GetRace(), GetClass())) {
 					MessageString(Chat::Red, CANNOT_USE_ITEM);
@@ -1080,7 +1080,7 @@ void Client::OPMemorizeSpell(const EQApplicationPacket* app)
 				if(item && item->Scroll.Effect == (int32)(memspell->spell_id))
 				{
 					ScribeSpell(memspell->spell_id, memspell->slot);
-					DeleteItemInInventory(EQEmu::invslot::slotCursor, 1, true);
+					DeleteItemInInventory(EQ::invslot::slotCursor, 1, true);
 				}
 				else
 					Message(0,"Scribing spell: inst exists but item does not or spell ids do not match.");
@@ -1119,7 +1119,7 @@ void Client::CancelSneakHide()
 		// The later clients send back a OP_Hide (this has a size but data is 0)
 		// as well as OP_SpawnAppearance with AT_Invis and one with AT_Sneak
 		// So we don't have to handle any of those flags
-		if (ClientVersionBit() & EQEmu::versions::maskSoFAndEarlier)
+		if (ClientVersionBit() & EQ::versions::maskSoFAndEarlier)
 			sneaking = false;
 	}
 }
@@ -1486,19 +1486,19 @@ void Client::OPGMTraining(const EQApplicationPacket *app)
 	// if this for-loop acts up again (crashes linux), try enabling the before and after #pragmas
 //#pragma GCC push_options
 //#pragma GCC optimize ("O0")
-	for (int sk = EQEmu::skills::Skill1HBlunt; sk <= EQEmu::skills::HIGHEST_SKILL; ++sk) {
-		if (sk == EQEmu::skills::SkillTinkering && GetRace() != GNOME) {
+	for (int sk = EQ::skills::Skill1HBlunt; sk <= EQ::skills::HIGHEST_SKILL; ++sk) {
+		if (sk == EQ::skills::SkillTinkering && GetRace() != GNOME) {
 			gmtrain->skills[sk] = 0; //Non gnomes can't tinker!
 		} else {
-			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQEmu::skills::SkillType)sk, MaxSkill((EQEmu::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
+			gmtrain->skills[sk] = GetMaxSkillAfterSpecializationRules((EQ::skills::SkillType)sk, MaxSkill((EQ::skills::SkillType)sk, GetClass(), RuleI(Character, MaxLevel)));
 			//this is the highest level that the trainer can train you to, this is enforced clientside so we can't just
 			//Set it to 1 with CanHaveSkill or you wont be able to train past 1.
 		}
 	}
 
-	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF2 && GetClass() == BERSERKER) {
-		gmtrain->skills[EQEmu::skills::Skill1HPiercing] = gmtrain->skills[EQEmu::skills::Skill2HPiercing];
-		gmtrain->skills[EQEmu::skills::Skill2HPiercing] = 0;
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && GetClass() == BERSERKER) {
+		gmtrain->skills[EQ::skills::Skill1HPiercing] = gmtrain->skills[EQ::skills::Skill2HPiercing];
+		gmtrain->skills[EQ::skills::Skill2HPiercing] = 0;
 	}
 //#pragma GCC pop_options
 
@@ -1587,14 +1587,14 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 	else if (gmskill->skillbank == 0x00)
 	{
 		// normal skills go here
-		if (gmskill->skill_id > EQEmu::skills::HIGHEST_SKILL)
+		if (gmskill->skill_id > EQ::skills::HIGHEST_SKILL)
 		{
 			std::cout << "Wrong Training Skill (abilities)" << std::endl;
 			DumpPacket(app);
 			return;
 		}
 
-		EQEmu::skills::SkillType skill = (EQEmu::skills::SkillType)gmskill->skill_id;
+		EQ::skills::SkillType skill = (EQ::skills::SkillType)gmskill->skill_id;
 
 		if(!CanHaveSkill(skill)) {
 			LogSkills("Tried to train skill [{}], which is not allowed", skill);
@@ -1619,27 +1619,27 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			SetSkill(skill, t_level);
 		} else {
 			switch(skill) {
-			case EQEmu::skills::SkillBrewing:
-			case EQEmu::skills::SkillMakePoison:
-			case EQEmu::skills::SkillTinkering:
-			case EQEmu::skills::SkillResearch:
-			case EQEmu::skills::SkillAlchemy:
-			case EQEmu::skills::SkillBaking:
-			case EQEmu::skills::SkillTailoring:
-			case EQEmu::skills::SkillBlacksmithing:
-			case EQEmu::skills::SkillFletching:
-			case EQEmu::skills::SkillJewelryMaking:
-			case EQEmu::skills::SkillPottery:
+			case EQ::skills::SkillBrewing:
+			case EQ::skills::SkillMakePoison:
+			case EQ::skills::SkillTinkering:
+			case EQ::skills::SkillResearch:
+			case EQ::skills::SkillAlchemy:
+			case EQ::skills::SkillBaking:
+			case EQ::skills::SkillTailoring:
+			case EQ::skills::SkillBlacksmithing:
+			case EQ::skills::SkillFletching:
+			case EQ::skills::SkillJewelryMaking:
+			case EQ::skills::SkillPottery:
 				if(skilllevel >= RuleI(Skills, MaxTrainTradeskills)) {
 					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					return;
 				}
 				break;
-			case EQEmu::skills::SkillSpecializeAbjure:
-			case EQEmu::skills::SkillSpecializeAlteration:
-			case EQEmu::skills::SkillSpecializeConjuration:
-			case EQEmu::skills::SkillSpecializeDivination:
-			case EQEmu::skills::SkillSpecializeEvocation:
+			case EQ::skills::SkillSpecializeAbjure:
+			case EQ::skills::SkillSpecializeAlteration:
+			case EQ::skills::SkillSpecializeConjuration:
+			case EQ::skills::SkillSpecializeDivination:
+			case EQ::skills::SkillSpecializeEvocation:
 				if(skilllevel >= RuleI(Skills, MaxTrainSpecializations)) {
 					MessageString(Chat::Red, MORE_SKILLED_THAN_I, pTrainer->GetCleanName());
 					return;
@@ -1656,7 +1656,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 				return;
 			}
 
-			if (gmskill->skill_id >= EQEmu::skills::SkillSpecializeAbjure && gmskill->skill_id <= EQEmu::skills::SkillSpecializeEvocation)
+			if (gmskill->skill_id >= EQ::skills::SkillSpecializeAbjure && gmskill->skill_id <= EQ::skills::SkillSpecializeEvocation)
 			{
 				int MaxSpecSkill = GetMaxSkillAfterSpecializationRules(skill, MaxSkillValue);
 				if (skilllevel >= MaxSpecSkill)
@@ -1680,7 +1680,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 		}
 	}
 
-	if (ClientVersion() >= EQEmu::versions::ClientVersion::SoF) {
+	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 		// The following packet decreases the skill points left in the Training Window and
 		// produces the 'You have increased your skill / learned the basics of' message.
 		//
@@ -1694,7 +1694,7 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			gmtsc->SkillID += 100;
 		}
 		else
-			gmtsc->NewSkill = (GetRawSkill((EQEmu::skills::SkillType)gmtsc->SkillID) == 1);
+			gmtsc->NewSkill = (GetRawSkill((EQ::skills::SkillType)gmtsc->SkillID) == 1);
 
 		gmtsc->Cost = Cost;
 
@@ -1775,8 +1775,8 @@ void Client::DoManaRegen() {
 	if (GetMana() >= max_mana && spellbonuses.ManaRegen >= 0)
 		return;
 
-	if (GetMana() < max_mana && (IsSitting() || CanMedOnHorse()) && HasSkill(EQEmu::skills::SkillMeditate))
-		CheckIncreaseSkill(EQEmu::skills::SkillMeditate, nullptr, -5);
+	if (GetMana() < max_mana && (IsSitting() || CanMedOnHorse()) && HasSkill(EQ::skills::SkillMeditate))
+		CheckIncreaseSkill(EQ::skills::SkillMeditate, nullptr, -5);
 
 	SetMana(GetMana() + CalcManaRegen());
 	CheckManaEndUpdate();
@@ -1794,11 +1794,11 @@ void Client::DoStaminaHungerUpdate()
 		if (GetHorseId() != 0)
 			loss *= 3;
 
-		m_pp.hunger_level = EQEmu::Clamp(m_pp.hunger_level - loss, 0, 6000);
-		m_pp.thirst_level = EQEmu::Clamp(m_pp.thirst_level - loss, 0, 6000);
+		m_pp.hunger_level = EQ::Clamp(m_pp.hunger_level - loss, 0, 6000);
+		m_pp.thirst_level = EQ::Clamp(m_pp.thirst_level - loss, 0, 6000);
 		if (spellbonuses.hunger) {
-			m_pp.hunger_level = EQEmu::ClampLower(m_pp.hunger_level, 3500);
-			m_pp.thirst_level = EQEmu::ClampLower(m_pp.thirst_level, 3500);
+			m_pp.hunger_level = EQ::ClampLower(m_pp.hunger_level, 3500);
+			m_pp.thirst_level = EQ::ClampLower(m_pp.thirst_level, 3500);
 		}
 		sta->food = m_pp.hunger_level;
 		sta->water = m_pp.thirst_level;
@@ -2113,7 +2113,7 @@ void Client::ClearHover()
 	entity_list.QueueClients(this, outapp, false);
 	safe_delete(outapp);
 
-	if (IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskUFAndLater)
+	if (IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)
 	{
 		EQApplicationPacket *outapp = MakeBuffsPacket(false);
 		CastToClient()->FastQueuePacket(&outapp);

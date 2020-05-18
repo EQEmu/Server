@@ -1569,7 +1569,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -1610,7 +1610,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -1651,7 +1651,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | ID %5d | %s | x %.0f | y %0.f | z %.0f",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetName(),
 					entity->GetX(),
@@ -1692,7 +1692,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | Entity ID %5d | Door ID %i | %s | x %.0f | y %0.f | z %.0f",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetDoorID(),
 					entity->GetDoorName(),
@@ -1734,7 +1734,7 @@ void command_list(Client *c, const Seperator *sep)
 				c->Message(
 					0,
 					"| %s | Entity ID %5d | Object DBID %i | %s | x %.0f | y %0.f | z %.0f",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Goto").c_str(),
 					entity->GetID(),
 					entity->GetDBID(),
 					entity->GetModelName(),
@@ -2624,7 +2624,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		t=c->GetTarget()->CastToClient();
 
 	c->Message(Chat::White, "Skills for %s",  t->GetName());
-	for (EQEmu::skills::SkillType i = EQEmu::skills::Skill1HBlunt; i <= EQEmu::skills::HIGHEST_SKILL; i = (EQEmu::skills::SkillType)(i + 1))
+	for (EQ::skills::SkillType i = EQ::skills::Skill1HBlunt; i <= EQ::skills::HIGHEST_SKILL; i = (EQ::skills::SkillType)(i + 1))
 		c->Message(Chat::White, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
 }
 
@@ -2693,14 +2693,14 @@ void command_castspell(Client *c, const Seperator *sep)
 		else
 			if (c->GetTarget() == 0)
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, 0, EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, 0, EQEmu::spells::CastingSlot::Item, 0);
+					c->CastSpell(spellid, 0, EQ::spells::CastingSlot::Item, 0);
 			else
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), EQEmu::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, c->GetTarget(), EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
 				else
-					c->CastSpell(spellid, c->GetTarget()->GetID(), EQEmu::spells::CastingSlot::Item, 0);
+					c->CastSpell(spellid, c->GetTarget()->GetID(), EQ::spells::CastingSlot::Item, 0);
 	}
 }
 
@@ -2772,20 +2772,20 @@ void command_setskill(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Error: #setskill: Target must be a client.");
 	}
 	else if (
-		!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > EQEmu::skills::HIGHEST_SKILL ||
+		!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > EQ::skills::HIGHEST_SKILL ||
 						!sep->IsNumber(2) || atoi(sep->arg[2]) < 0 || atoi(sep->arg[2]) > HIGHEST_CAN_SET_SKILL
 					)
 	{
 		c->Message(Chat::White, "Usage: #setskill skill x ");
-		c->Message(Chat::White, "       skill = 0 to %d", EQEmu::skills::HIGHEST_SKILL);
+		c->Message(Chat::White, "       skill = 0 to %d", EQ::skills::HIGHEST_SKILL);
 		c->Message(Chat::White, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
 	}
 	else {
 		LogInfo("Set skill request from [{}], target:[{}] skill_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
 		int skill_num = atoi(sep->arg[1]);
 		uint16 skill_value = atoi(sep->arg[2]);
-		if (skill_num <= EQEmu::skills::HIGHEST_SKILL)
-			c->GetTarget()->CastToClient()->SetSkill((EQEmu::skills::SkillType)skill_num, skill_value);
+		if (skill_num <= EQ::skills::HIGHEST_SKILL)
+			c->GetTarget()->CastToClient()->SetSkill((EQ::skills::SkillType)skill_num, skill_value);
 	}
 }
 
@@ -2803,7 +2803,7 @@ void command_setskillall(Client *c, const Seperator *sep)
 		if (c->Admin() >= commandSetSkillsOther || c->GetTarget()==c || c->GetTarget()==0) {
 			LogInfo("Set ALL skill request from [{}], target:[{}]",  c->GetName(), c->GetTarget()->GetName());
 			uint16 level = atoi(sep->arg[1]);
-			for (EQEmu::skills::SkillType skill_num = EQEmu::skills::Skill1HBlunt; skill_num <= EQEmu::skills::HIGHEST_SKILL; skill_num = (EQEmu::skills::SkillType)(skill_num + 1)) {
+			for (EQ::skills::SkillType skill_num = EQ::skills::Skill1HBlunt; skill_num <= EQ::skills::HIGHEST_SKILL; skill_num = (EQ::skills::SkillType)(skill_num + 1)) {
 				c->GetTarget()->CastToClient()->SetSkill(skill_num, level);
 			}
 		}
@@ -2992,7 +2992,7 @@ void command_spawneditmass(Client *c, const Seperator *sep)
 	if (found_count > 0) {
 		c->Message(
 			Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
 			saylink.c_str()
 		);
 	}
@@ -3060,14 +3060,14 @@ void command_texture(Client *c, const Seperator *sep)
 		// Player Races Wear Armor, so Wearchange is sent instead
 		int i;
 		if (!c->GetTarget())
-			for (i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTintableTexture; i++)
+			for (i = EQ::textures::textureBegin; i <= EQ::textures::LastTintableTexture; i++)
 			{
 				c->SendTextureWC(i, texture);
 			}
 		else if ((c->GetTarget()->GetModel() > 0 && c->GetTarget()->GetModel() <= 12) ||
 			c->GetTarget()->GetModel() == 128 || c->GetTarget()->GetModel() == 130 ||
 			c->GetTarget()->GetModel() == 330 || c->GetTarget()->GetModel() == 522) {
-			for (i = EQEmu::textures::textureBegin; i <= EQEmu::textures::LastTintableTexture; i++)
+			for (i = EQ::textures::textureBegin; i <= EQ::textures::LastTintableTexture; i++)
 			{
 				c->GetTarget()->SendTextureWC(i, texture);
 			}
@@ -3249,15 +3249,15 @@ void command_peekinv(Client *c, const Seperator *sep)
 	static const char* scope_prefix[] = { "equip", "gen", "cursor", "limbo", "trib", "bank", "shbank", "trade", "world" };
 
 	static const int16 scope_range[][2] = {
-		{ EQEmu::invslot::EQUIPMENT_BEGIN, EQEmu::invslot::EQUIPMENT_END },
-		{ EQEmu::invslot::GENERAL_BEGIN, EQEmu::invslot::GENERAL_END },
-		{ EQEmu::invslot::slotCursor, EQEmu::invslot::slotCursor },
-		{ EQEmu::invslot::SLOT_INVALID, EQEmu::invslot::SLOT_INVALID },
-		{ EQEmu::invslot::TRIBUTE_BEGIN, EQEmu::invslot::TRIBUTE_END },
-		{ EQEmu::invslot::BANK_BEGIN, EQEmu::invslot::BANK_END },
-		{ EQEmu::invslot::SHARED_BANK_BEGIN, EQEmu::invslot::SHARED_BANK_END },
-		{ EQEmu::invslot::TRADE_BEGIN, EQEmu::invslot::TRADE_END },
-		{ EQEmu::invslot::SLOT_BEGIN, (EQEmu::invtype::WORLD_SIZE - 1) }
+		{ EQ::invslot::EQUIPMENT_BEGIN, EQ::invslot::EQUIPMENT_END },
+		{ EQ::invslot::GENERAL_BEGIN, EQ::invslot::GENERAL_END },
+		{ EQ::invslot::slotCursor, EQ::invslot::slotCursor },
+		{ EQ::invslot::SLOT_INVALID, EQ::invslot::SLOT_INVALID },
+		{ EQ::invslot::TRIBUTE_BEGIN, EQ::invslot::TRIBUTE_END },
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invslot::TRADE_BEGIN, EQ::invslot::TRADE_END },
+		{ EQ::invslot::SLOT_BEGIN, (EQ::invtype::WORLD_SIZE - 1) }
 	};
 
 	static const bool scope_bag[] = { false, true, true, true, false, true, true, true, true };
@@ -3297,13 +3297,13 @@ void command_peekinv(Client *c, const Seperator *sep)
 	if (c->GetTarget())
 		targetClient = c->GetTarget()->CastToClient();
 
-	const EQEmu::ItemInstance* inst_main = nullptr;
-	const EQEmu::ItemInstance* inst_sub = nullptr;
-	const EQEmu::ItemInstance* inst_aug = nullptr;
-	const EQEmu::ItemData* item_data = nullptr;
+	const EQ::ItemInstance* inst_main = nullptr;
+	const EQ::ItemInstance* inst_sub = nullptr;
+	const EQ::ItemInstance* inst_aug = nullptr;
+	const EQ::ItemData* item_data = nullptr;
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 
 	c->Message(Chat::White, "Displaying inventory for %s...", targetClient->GetName());
 
@@ -3326,7 +3326,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 		}
 
 		for (int16 indexMain = scope_range[scopeIndex][0]; indexMain <= scope_range[scopeIndex][1]; ++indexMain) {
-			if (indexMain == EQEmu::invslot::SLOT_INVALID)
+			if (indexMain == EQ::invslot::SLOT_INVALID)
 				continue;
 
 			inst_main = ((scopeBit & peekWorld) ? objectTradeskill->GetItem(indexMain) : targetClient->GetInv().GetItem(indexMain));
@@ -3344,14 +3344,14 @@ void command_peekinv(Client *c, const Seperator *sep)
 				(item_data == nullptr),
 				"%sSlot: %i, Item: %i (%s), Charges: %i",
 				scope_prefix[scopeIndex],
-				((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
+				((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
 				((item_data == nullptr) ? 0 : item_data->ID),
 				linker.GenerateLink().c_str(),
 				((inst_main == nullptr) ? 0 : inst_main->GetCharges())
 			);
 
 			if (inst_main && inst_main->IsClassCommon()) {
-				for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
+				for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
 					inst_aug = inst_main->GetItem(indexAug);
 					if (!inst_aug) // extant only
 						continue;
@@ -3364,7 +3364,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 						".%sAugSlot: %i (Slot #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
 						scope_prefix[scopeIndex],
 						INVALID_INDEX,
-						((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
+						((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
 						indexAug,
 						((item_data == nullptr) ? 0 : item_data->ID),
 						linker.GenerateLink().c_str(),
@@ -3376,7 +3376,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 			if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag()))
 				continue;
 
-			for (uint8 indexSub = EQEmu::invbag::SLOT_BEGIN; indexSub <= EQEmu::invbag::SLOT_END; ++indexSub) {
+			for (uint8 indexSub = EQ::invbag::SLOT_BEGIN; indexSub <= EQ::invbag::SLOT_END; ++indexSub) {
 				inst_sub = inst_main->GetItem(indexSub);
 				if (!inst_sub) // extant only
 					continue;
@@ -3388,8 +3388,8 @@ void command_peekinv(Client *c, const Seperator *sep)
 					(item_data == nullptr),
 					"..%sBagSlot: %i (Slot #%i, Bag idx #%i), Item: %i (%s), Charges: %i",
 					scope_prefix[scopeIndex],
-					((scopeBit & peekWorld) ? INVALID_INDEX : EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub)),
-					((scopeBit & peekWorld) ? (EQEmu::invslot::WORLD_BEGIN + indexMain) : indexMain),
+					((scopeBit & peekWorld) ? INVALID_INDEX : EQ::InventoryProfile::CalcSlotId(indexMain, indexSub)),
+					((scopeBit & peekWorld) ? (EQ::invslot::WORLD_BEGIN + indexMain) : indexMain),
 					indexSub,
 					((item_data == nullptr) ? 0 : item_data->ID),
 					linker.GenerateLink().c_str(),
@@ -3397,7 +3397,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				);
 
 				if (inst_sub->IsClassCommon()) {
-					for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
+					for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
 						inst_aug = inst_sub->GetItem(indexAug);
 						if (!inst_aug) // extant only
 							continue;
@@ -3410,7 +3410,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 							"...%sAugSlot: %i (Slot #%i, Sub idx #%i, Aug idx #%i), Item: %i (%s), Charges: %i",
 							scope_prefix[scopeIndex],
 							INVALID_INDEX,
-							((scopeBit & peekWorld) ? INVALID_INDEX : EQEmu::InventoryProfile::CalcSlotId(indexMain, indexSub)),
+							((scopeBit & peekWorld) ? INVALID_INDEX : EQ::InventoryProfile::CalcSlotId(indexMain, indexSub)),
 							indexSub,
 							indexAug,
 							((item_data == nullptr) ? 0 : item_data->ID),
@@ -3450,7 +3450,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				);
 
 				if (inst_main && inst_main->IsClassCommon()) {
-					for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
+					for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
 						inst_aug = inst_main->GetItem(indexAug);
 						if (!inst_aug) // extant only
 							continue;
@@ -3475,7 +3475,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 				if (!scope_bag[scopeIndex] || !(inst_main && inst_main->IsClassBag()))
 					continue;
 
-				for (uint8 indexSub = EQEmu::invbag::SLOT_BEGIN; indexSub <= EQEmu::invbag::SLOT_END; ++indexSub) {
+				for (uint8 indexSub = EQ::invbag::SLOT_BEGIN; indexSub <= EQ::invbag::SLOT_END; ++indexSub) {
 					inst_sub = inst_main->GetItem(indexSub);
 					if (!inst_sub)
 						continue;
@@ -3497,7 +3497,7 @@ void command_peekinv(Client *c, const Seperator *sep)
 					);
 
 					if (inst_sub->IsClassCommon()) {
-						for (uint8 indexAug = EQEmu::invaug::SOCKET_BEGIN; indexAug <= EQEmu::invaug::SOCKET_END; ++indexAug) {
+						for (uint8 indexAug = EQ::invaug::SOCKET_BEGIN; indexAug <= EQ::invaug::SOCKET_END; ++indexAug) {
 							inst_aug = inst_sub->GetItem(indexAug);
 							if (!inst_aug) // extant only
 								continue;
@@ -3557,7 +3557,7 @@ void command_interrogateinv(Client *c, const Seperator *sep)
 	}
 
 	Client* target = nullptr;
-	std::map<int16, const EQEmu::ItemInstance*> instmap;
+	std::map<int16, const EQ::ItemInstance*> instmap;
 	bool log = false;
 	bool silent = false;
 	bool error = false;
@@ -4063,7 +4063,7 @@ void command_faction(Client *c, const Seperator *sep)
 			std::string fvalue = rrow[2];
 			_ctr2++;
 			std::string resetlink = fmt::format("#faction reset {}", f_id);
-			c->Message(Chat::Yellow, "Reset: %s         id: %s (%s)", EQEmu::SayLinkEngine::GenerateQuestSaylink(resetlink, false, cname.c_str()).c_str(), std::to_string(f_id).c_str(), fvalue.c_str());
+			c->Message(Chat::Yellow, "Reset: %s         id: %s (%s)", EQ::SayLinkEngine::GenerateQuestSaylink(resetlink, false, cname.c_str()).c_str(), std::to_string(f_id).c_str(), fvalue.c_str());
 		}
 		std::string response = _ctr2 > 0 ? fmt::format("Found {} matching factions", _ctr2).c_str() : "No faction hits found.";
 		c->Message(Chat::Yellow, response.c_str());
@@ -4159,8 +4159,8 @@ void command_findzone(Client *c, const Seperator *sep)
 			break;
 		}
 
-		std::string command_zone   = EQEmu::SayLinkEngine::GenerateQuestSaylink("#zone " + short_name, false, "zone");
-		std::string command_gmzone = EQEmu::SayLinkEngine::GenerateQuestSaylink(
+		std::string command_zone   = EQ::SayLinkEngine::GenerateQuestSaylink("#zone " + short_name, false, "zone");
+		std::string command_gmzone = EQ::SayLinkEngine::GenerateQuestSaylink(
 			fmt::format("#gmzone {} {}", short_name, version),
 			false,
 			"gmzone"
@@ -4410,16 +4410,16 @@ void command_listpetition(Client *c, const Seperator *sep)
 void command_equipitem(Client *c, const Seperator *sep)
 {
 	uint32 slot_id = atoi(sep->arg[1]);
-	if (sep->IsNumber(1) && (slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END)) {
-		const EQEmu::ItemInstance* from_inst = c->GetInv().GetItem(EQEmu::invslot::slotCursor);
-		const EQEmu::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
+	if (sep->IsNumber(1) && (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END)) {
+		const EQ::ItemInstance* from_inst = c->GetInv().GetItem(EQ::invslot::slotCursor);
+		const EQ::ItemInstance* to_inst = c->GetInv().GetItem(slot_id); // added (desync issue when forcing stack to stack)
 		bool partialmove = false;
 		int16 movecount;
 
 		if (from_inst && from_inst->IsClassCommon()) {
 			auto outapp = new EQApplicationPacket(OP_MoveItem, sizeof(MoveItem_Struct));
 			MoveItem_Struct* mi	= (MoveItem_Struct*)outapp->pBuffer;
-			mi->from_slot = EQEmu::invslot::slotCursor;
+			mi->from_slot = EQ::invslot::slotCursor;
 			mi->to_slot			= slot_id;
 			// mi->number_in_stack	= from_inst->GetCharges(); // replaced with con check for stacking
 
@@ -5151,7 +5151,7 @@ void command_memspell(Client *c, const Seperator *sep)
 	{
 		slot = atoi(sep->arg[1]) - 1;
 		spell_id = atoi(sep->arg[2]);
-		if (slot > EQEmu::spells::SPELL_GEM_COUNT || spell_id >= SPDAT_RECORDS)
+		if (slot > EQ::spells::SPELL_GEM_COUNT || spell_id >= SPDAT_RECORDS)
 		{
 			c->Message(Chat::White, "Error: #MemSpell: Arguement out of range");
 		}
@@ -5249,11 +5249,11 @@ void command_devtools(Client *c, const Seperator *sep)
 	/**
 	 * Search entity commands
 	 */
-	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
-	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
-	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
-	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
-	menu_commands_search += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
 
 	std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", c->AccountID());
 
@@ -5272,9 +5272,9 @@ void command_devtools(Client *c, const Seperator *sep)
 	/**
 	 * Show window status
 	 */
-	window_toggle_command = "Disabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
+	window_toggle_command = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
 	if (c->IsDevToolsWindowEnabled()) {
-		window_toggle_command = "Enabled [" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
+		window_toggle_command = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
 	}
 
 	/**
@@ -5546,7 +5546,7 @@ void command_proximity(Client *c, const Seperator *sep)
 		points.push_back(p);
 	}
 
-	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF) {
+	if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
 		c->SendPathPacket(points);
 	}
 }
@@ -5723,7 +5723,7 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 			continue;
 		}
 
-		entity->Damage(c, 1000000000, 0, EQEmu::skills::SkillDragonPunch);
+		entity->Damage(c, 1000000000, 0, EQ::skills::SkillDragonPunch);
 
 		count++;
 	}
@@ -5759,7 +5759,7 @@ void command_damage(Client *c, const Seperator *sep)
 		if (nkdmg > 2100000000)
 			c->Message(Chat::White, "Enter a value less then 2,100,000,000.");
 		else
-			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, EQEmu::skills::SkillHandtoHand, false);
+			c->GetTarget()->Damage(c, nkdmg, SPELL_UNKNOWN, EQ::skills::SkillHandtoHand, false);
 	}
 }
 
@@ -5949,7 +5949,7 @@ void command_goto(Client *c, const Seperator *sep)
 
 void command_iteminfo(Client *c, const Seperator *sep)
 {
-	auto inst = c->GetInv()[EQEmu::invslot::slotCursor];
+	auto inst = c->GetInv()[EQ::invslot::slotCursor];
 	if (!inst) {
 		c->Message(Chat::Red, "Error: You need an item on your cursor for this command");
 		return;
@@ -5961,8 +5961,8 @@ void command_iteminfo(Client *c, const Seperator *sep)
 		return;
 	}
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemInst);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemInst);
 	linker.SetItemInst(inst);
 
 	c->Message(Chat::White, "*** Item Info for [%s] ***", linker.GenerateLink().c_str());
@@ -6653,7 +6653,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 				c->Message(
 					Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
-					EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+					EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
 					saylink.c_str()
 				);
 			}
@@ -7027,7 +7027,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 	int spell_id = 0;
 	int count = 0;
 
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQEmu::spells::SPELLBOOK_SIZE; ++spell_id) {
+	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
 		if (book_slot == -1) {
 			t->Message(
 				13,
@@ -7050,8 +7050,8 @@ void command_scribespells(Client *c, const Seperator *sep)
 			c->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
 			return;
 		}
-		if (book_slot < 0 || book_slot >= EQEmu::spells::SPELLBOOK_SIZE) {
-			c->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQEmu::spells::SPELLBOOK_SIZE);
+		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
+			c->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
 			return;
 		}
 
@@ -7286,9 +7286,9 @@ void command_summonitem(Client *c, const Seperator *sep)
 	std::string cmd_msg = sep->msg;
 	size_t link_open = cmd_msg.find('\x12');
 	size_t link_close = cmd_msg.find_last_of('\x12');
-	if (link_open != link_close && (cmd_msg.length() - link_open) > EQEmu::constants::SAY_LINK_BODY_SIZE) {
-		EQEmu::SayLinkBody_Struct link_body;
-		EQEmu::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQEmu::constants::SAY_LINK_BODY_SIZE));
+	if (link_open != link_close && (cmd_msg.length() - link_open) > EQ::constants::SAY_LINK_BODY_SIZE) {
+		EQ::SayLinkBody_Struct link_body;
+		EQ::saylink::DegenerateLinkBody(link_body, cmd_msg.substr(link_open + 1, EQ::constants::SAY_LINK_BODY_SIZE));
 		itemid = link_body.item_id;
 	}
 	else if (!sep->IsNumber(1)) {
@@ -7304,7 +7304,7 @@ void command_summonitem(Client *c, const Seperator *sep)
 	}
 
 	int16 item_status = 0;
-	const EQEmu::ItemData* item = database.GetItem(itemid);
+	const EQ::ItemData* item = database.GetItem(itemid);
 	if (item) {
 		item_status = static_cast<int16>(item->MinStatus);
 	}
@@ -7343,7 +7343,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		Client *t = c->GetTarget()->CastToClient();
 		uint32 itemid = atoi(sep->arg[1]);
 		int16 item_status = 0;
-		const EQEmu::ItemData* item = database.GetItem(itemid);
+		const EQ::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -7396,9 +7396,9 @@ void command_itemsearch(Client *c, const Seperator *sep)
 	{
 		const char *search_criteria=sep->argplus[1];
 
-		const EQEmu::ItemData* item = nullptr;
-		EQEmu::SayLinkEngine linker;
-		linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
+		const EQ::ItemData* item = nullptr;
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemData);
 
 		if (Seperator::IsNumber(search_criteria)) {
 			item = database.GetItem(atoi(search_criteria));
@@ -8101,7 +8101,7 @@ void command_npceditmass(Client *c, const Seperator *sep)
 		if (found_count > 0) {
 			c->Message(
 				Chat::Yellow, "To apply these changes, click <%s> or type [%s]",
-				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+				EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
 				saylink.c_str()
 			);
 		}
@@ -8889,9 +8889,9 @@ void command_path(Client *c, const Seperator *sep)
 }
 
 void Client::Undye() {
-	for (int cur_slot = EQEmu::textures::textureBegin; cur_slot <= EQEmu::textures::LastTexture; cur_slot++) {
+	for (int cur_slot = EQ::textures::textureBegin; cur_slot <= EQ::textures::LastTexture; cur_slot++) {
 		uint8 slot2=SlotConvert(cur_slot);
-		EQEmu::ItemInstance* inst = m_inv.GetItem(slot2);
+		EQ::ItemInstance* inst = m_inv.GetItem(slot2);
 
 		if(inst != nullptr) {
 			inst->SetColor(inst->GetItem()->Color);
@@ -8930,30 +8930,30 @@ void command_ucs(Client *c, const Seperator *sep)
 		std::string buffer;
 
 		std::string MailKey = database.GetMailKey(c->CharacterID(), true);
-		EQEmu::versions::UCSVersion ConnectionType = EQEmu::versions::ucsUnknown;
+		EQ::versions::UCSVersion ConnectionType = EQ::versions::ucsUnknown;
 
 		// chat server packet
 		switch (c->ClientVersion()) {
-		case EQEmu::versions::ClientVersion::Titanium:
-			ConnectionType = EQEmu::versions::ucsTitaniumChat;
+		case EQ::versions::ClientVersion::Titanium:
+			ConnectionType = EQ::versions::ucsTitaniumChat;
 			break;
-		case EQEmu::versions::ClientVersion::SoF:
-			ConnectionType = EQEmu::versions::ucsSoFCombined;
+		case EQ::versions::ClientVersion::SoF:
+			ConnectionType = EQ::versions::ucsSoFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::SoD:
-			ConnectionType = EQEmu::versions::ucsSoDCombined;
+		case EQ::versions::ClientVersion::SoD:
+			ConnectionType = EQ::versions::ucsSoDCombined;
 			break;
-		case EQEmu::versions::ClientVersion::UF:
-			ConnectionType = EQEmu::versions::ucsUFCombined;
+		case EQ::versions::ClientVersion::UF:
+			ConnectionType = EQ::versions::ucsUFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::RoF:
-			ConnectionType = EQEmu::versions::ucsRoFCombined;
+		case EQ::versions::ClientVersion::RoF:
+			ConnectionType = EQ::versions::ucsRoFCombined;
 			break;
-		case EQEmu::versions::ClientVersion::RoF2:
-			ConnectionType = EQEmu::versions::ucsRoF2Combined;
+		case EQ::versions::ClientVersion::RoF2:
+			ConnectionType = EQ::versions::ucsRoF2Combined;
 			break;
 		default:
-			ConnectionType = EQEmu::versions::ucsUnknown;
+			ConnectionType = EQ::versions::ucsUnknown;
 			break;
 		}
 
@@ -8975,8 +8975,8 @@ void command_ucs(Client *c, const Seperator *sep)
 
 		// mail server packet
 		switch (c->ClientVersion()) {
-		case EQEmu::versions::ClientVersion::Titanium:
-			ConnectionType = EQEmu::versions::ucsTitaniumMail;
+		case EQ::versions::ClientVersion::Titanium:
+			ConnectionType = EQ::versions::ucsTitaniumMail;
 			break;
 		default:
 			// retain value from previous switch
@@ -11864,16 +11864,16 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 {
 	if(c)
 	{
-		for (int i = 0; i <= EQEmu::skills::HIGHEST_SKILL; ++i)
+		for (int i = 0; i <= EQ::skills::HIGHEST_SKILL; ++i)
 		{
-			if (i >= EQEmu::skills::SkillSpecializeAbjure && i <= EQEmu::skills::SkillSpecializeEvocation)
+			if (i >= EQ::skills::SkillSpecializeAbjure && i <= EQ::skills::SkillSpecializeEvocation)
 			{
-				c->SetSkill((EQEmu::skills::SkillType)i, 50);
+				c->SetSkill((EQ::skills::SkillType)i, 50);
 			}
 			else
 			{
-				int max_skill_level = database.GetSkillCap(c->GetClass(), (EQEmu::skills::SkillType)i, c->GetLevel());
-				c->SetSkill((EQEmu::skills::SkillType)i, max_skill_level);
+				int max_skill_level = database.GetSkillCap(c->GetClass(), (EQ::skills::SkillType)i, c->GetLevel());
+				c->SetSkill((EQ::skills::SkillType)i, max_skill_level);
 			}
 		}
 	}
@@ -11959,14 +11959,14 @@ void command_disarmtrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if (c->HasSkill(EQEmu::skills::SkillDisarmTraps))
+		if (c->HasSkill(EQ::skills::SkillDisarmTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(Chat::Red, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillDisarmTraps), LDoNTypeMechanical);
+			c->HandleLDoNDisarm(target->CastToNPC(), c->GetSkill(EQ::skills::SkillDisarmTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(Chat::Red, "You do not have the disarm trap skill.");
@@ -11984,14 +11984,14 @@ void command_sensetrap(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if (c->HasSkill(EQEmu::skills::SkillSenseTraps))
+		if (c->HasSkill(EQ::skills::SkillSenseTraps))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(Chat::Red, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillSenseTraps), LDoNTypeMechanical);
+			c->HandleLDoNSenseTraps(target->CastToNPC(), c->GetSkill(EQ::skills::SkillSenseTraps), LDoNTypeMechanical);
 		}
 		else
 			c->Message(Chat::Red, "You do not have the sense traps skill.");
@@ -12009,14 +12009,14 @@ void command_picklock(Client *c, const Seperator *sep)
 
 	if(target->IsNPC())
 	{
-		if (c->HasSkill(EQEmu::skills::SkillPickLock))
+		if (c->HasSkill(EQ::skills::SkillPickLock))
 		{
 			if(DistanceSquaredNoZ(c->GetPosition(), target->GetPosition()) > RuleI(Adventure, LDoNTrapDistanceUse))
 			{
 				c->Message(Chat::Red, "%s is too far away.",  target->GetCleanName());
 				return;
 			}
-			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(EQEmu::skills::SkillPickLock), LDoNTypeMechanical);
+			c->HandleLDoNPickLock(target->CastToNPC(), c->GetSkill(EQ::skills::SkillPickLock), LDoNTypeMechanical);
 		}
 		else
 			c->Message(Chat::Red, "You do not have the pick locks skill.");
@@ -12032,27 +12032,27 @@ void command_profanity(Client *c, const Seperator *sep)
 			// do nothing
 		}
 		else if (arg1.compare("clear") == 0) {
-			EQEmu::ProfanityManager::DeleteProfanityList(&database);
+			EQ::ProfanityManager::DeleteProfanityList(&database);
 			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
 		}
 		else if (arg1.compare("add") == 0) {
-			if (!EQEmu::ProfanityManager::AddProfanity(&database, sep->arg[2]))
+			if (!EQ::ProfanityManager::AddProfanity(&database, sep->arg[2]))
 				c->Message(Chat::Red, "Could not add '%s' to the profanity list.", sep->arg[2]);
 			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
 		}
 		else if (arg1.compare("del") == 0) {
-			if (!EQEmu::ProfanityManager::RemoveProfanity(&database, sep->arg[2]))
+			if (!EQ::ProfanityManager::RemoveProfanity(&database, sep->arg[2]))
 				c->Message(Chat::Red, "Could not delete '%s' from the profanity list.", sep->arg[2]);
 			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
 		}
 		else if (arg1.compare("reload") == 0) {
-			if (!EQEmu::ProfanityManager::UpdateProfanityList(&database))
+			if (!EQ::ProfanityManager::UpdateProfanityList(&database))
 				c->Message(Chat::Red, "Could not reload the profanity list.");
 			auto pack = new ServerPacket(ServerOP_RefreshCensorship);
 			worldserver.SendPacket(pack);
@@ -12063,7 +12063,7 @@ void command_profanity(Client *c, const Seperator *sep)
 		}
 
 		std::string popup;
-		const auto &list = EQEmu::ProfanityManager::GetProfanityList();
+		const auto &list = EQ::ProfanityManager::GetProfanityList();
 		for (const auto &iter : list) {
 			popup.append(iter);
 			popup.append("<br>");
@@ -12213,7 +12213,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		uint32 itemid = atoi(sep->arg[3]);
 		int16 charges = sep->argnum == 4 ? atoi(sep->arg[4]) : 1; // defaults to 1 charge if not specified
 
-		const EQEmu::ItemData* FakeItem = database.GetItem(itemid);
+		const EQ::ItemData* FakeItem = database.GetItem(itemid);
 
 		if (!FakeItem) {
 			c->Message(Chat::Red, "Error: Item [%u] is not a valid item id.",  itemid);
@@ -12221,7 +12221,7 @@ void command_zopp(Client *c, const Seperator *sep)
 		}
 
 		int16 item_status = 0;
-		const EQEmu::ItemData* item = database.GetItem(itemid);
+		const EQ::ItemData* item = database.GetItem(itemid);
 		if(item) {
 			item_status = static_cast<int16>(item->MinStatus);
 		}
@@ -12235,7 +12235,7 @@ void command_zopp(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Processing request..results may cause unpredictable behavior.");
 		}
 
-		EQEmu::ItemInstance* FakeItemInst = database.CreateItem(FakeItem, charges);
+		EQ::ItemInstance* FakeItemInst = database.CreateItem(FakeItem, charges);
 		c->SendItemPacket(slotid, FakeItemInst, packettype);
 		c->Message(Chat::White, "Sending zephyr op packet to client - [%s] %s (%u) with %i %s to slot %i.",
 			   packettype == ItemPacketTrade ? "Trade" : "Summon",  FakeItem->Name, itemid, charges,
@@ -12993,7 +12993,7 @@ void command_scale(Client *c, const Seperator *sep)
 			c->Message(Chat::Yellow, "Found (%i) NPC's that match this search...", found_count);
 			c->Message(
 				Chat::Yellow, "To apply these changes, click <%s> or type %s",
-				EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
+				EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Apply").c_str(),
 				saylink.c_str()
 			);
 		}
@@ -13062,7 +13062,7 @@ void command_databuckets(Client *c, const Seperator *sep)
 			_ctr++;
 			std::string	del_saylink = StringFormat("#databuckets delete %s", key.c_str());
 			c->Message(Chat::White, "%s : %s",
-				EQEmu::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
+				EQ::SayLinkEngine::GenerateQuestSaylink(del_saylink, false, "Delete").c_str(), key.c_str(), "  Value:  ", value.c_str());
 		}
 		window_text.append("</table>");
 		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
@@ -13157,7 +13157,7 @@ void command_who(Client *c, const Seperator *sep)
 
 		std::string displayed_guild_name;
 		if (guild_name.length() > 0) {
-			displayed_guild_name = EQEmu::SayLinkEngine::GenerateQuestSaylink(
+			displayed_guild_name = EQ::SayLinkEngine::GenerateQuestSaylink(
 				StringFormat(
 					"#who \"%s\"",
 					guild_name.c_str()),
@@ -13166,7 +13166,7 @@ void command_who(Client *c, const Seperator *sep)
 			);
 		}
 
-		std::string goto_saylink = EQEmu::SayLinkEngine::GenerateQuestSaylink(
+		std::string goto_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
 			StringFormat("#goto %s", player_name.c_str()), false, "Goto"
 		);
 
@@ -13176,15 +13176,15 @@ void command_who(Client *c, const Seperator *sep)
 			5, "%s[%u %s] %s (%s) %s ZONE: %s (%u) (%s) (%s) (%s)",
 			(account_status > 0 ? "* GM * " : ""),
 			player_level,
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", base_class_name.c_str()), false, display_class_name).c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", base_class_name.c_str()), false, display_class_name).c_str(),
 			player_name.c_str(),
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", displayed_race_name.c_str()), false, displayed_race_name).c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", displayed_race_name.c_str()), false, displayed_race_name).c_str(),
 			displayed_guild_name.c_str(),
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", zone_short_name.c_str()), false, zone_short_name).c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", zone_short_name.c_str()), false, zone_short_name).c_str(),
 			zone_instance,
 			goto_saylink.c_str(),
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_name.c_str()), false, account_name).c_str(),
-			EQEmu::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_ip.c_str()), false, account_ip).c_str()
+			EQ::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_name.c_str()), false, account_name).c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink(StringFormat("#who %s", account_ip.c_str()), false, account_ip).c_str()
 		);
 
 		found_count++;

@@ -23,7 +23,7 @@
 #include "emu_constants.h"
 
 
-namespace EQEmu
+namespace EQ
 {
 	class InventorySlot;
 

@@ -40,7 +40,7 @@
 class MySQLRequestResult;
 class Client;
 
-namespace EQEmu
+namespace EQ
 {
 	class InventoryProfile;
 }
@@ -115,7 +115,7 @@ public:
 	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
 	bool	SetHackerFlag(const char* accountname, const char* charactername, const char* hacked);
 	bool	SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone);
-	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv);
+	bool	StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQ::InventoryProfile* inv);
 	bool	UpdateName(const char* oldname, const char* newname);
 
 	/* General Information Queries */

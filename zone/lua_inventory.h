@@ -7,7 +7,7 @@
 class Lua_ItemInst;
 class Lua_Item;
 
-namespace EQEmu
+namespace EQ
 {
 	class InventoryProfile;
 }
@@ -23,16 +23,16 @@ luabind::scope lua_register_inventory();
 // of database calls and can lead to lost items, duplicated items and/or
 // desync'd inventories, if not handled correctly.
 
-class Lua_Inventory : public Lua_Ptr<EQEmu::InventoryProfile>
+class Lua_Inventory : public Lua_Ptr<EQ::InventoryProfile>
 {
-	typedef EQEmu::InventoryProfile NativeType;
+	typedef EQ::InventoryProfile NativeType;
 public:
 	Lua_Inventory() : Lua_Ptr(nullptr) { }
-	Lua_Inventory(EQEmu::InventoryProfile *d) : Lua_Ptr(d) { }
+	Lua_Inventory(EQ::InventoryProfile *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Inventory() { }
 
-	operator EQEmu::InventoryProfile*() {
-		return reinterpret_cast<EQEmu::InventoryProfile*>(GetLuaPtrData());
+	operator EQ::InventoryProfile*() {
+		return reinterpret_cast<EQ::InventoryProfile*>(GetLuaPtrData());
 	}
 
 	Lua_ItemInst GetItem(int slot_id);
