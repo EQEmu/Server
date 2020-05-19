@@ -523,7 +523,7 @@ Client::Client(std::shared_ptr<EQStreamInterface> eqs) {
 	GlobalChatLimiterTimer = new Timer(RuleI(Chat, IntervalDurationMS));
 
 	TypeOfConnection = ConnectionTypeUnknown;
-	ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
+	ClientVersion_ = EQ::versions::ClientVersion::Unknown;
 
 	UnderfootOrLater = false;
 }
@@ -2163,54 +2163,54 @@ void Client::SetConnectionType(char c) {
 
 	switch (c)
 	{
-	case EQEmu::versions::ucsTitaniumChat:
+	case EQ::versions::ucsTitaniumChat:
 	{
 		TypeOfConnection = ConnectionTypeChat;
-		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		ClientVersion_ = EQ::versions::ClientVersion::Titanium;
 		LogInfo("Connection type is Chat (Titanium)");
 		break;
 	}
-	case EQEmu::versions::ucsTitaniumMail:
+	case EQ::versions::ucsTitaniumMail:
 	{
 		TypeOfConnection = ConnectionTypeMail;
-		ClientVersion_ = EQEmu::versions::ClientVersion::Titanium;
+		ClientVersion_ = EQ::versions::ClientVersion::Titanium;
 		LogInfo("Connection type is Mail (Titanium)");
 		break;
 	}
-	case EQEmu::versions::ucsSoFCombined:
+	case EQ::versions::ucsSoFCombined:
 	{
 		TypeOfConnection = ConnectionTypeCombined;
-		ClientVersion_ = EQEmu::versions::ClientVersion::SoF;
+		ClientVersion_ = EQ::versions::ClientVersion::SoF;
 		LogInfo("Connection type is Combined (SoF)");
 		break;
 	}
-	case EQEmu::versions::ucsSoDCombined:
+	case EQ::versions::ucsSoDCombined:
 	{
 		TypeOfConnection = ConnectionTypeCombined;
-		ClientVersion_ = EQEmu::versions::ClientVersion::SoD;
+		ClientVersion_ = EQ::versions::ClientVersion::SoD;
 		LogInfo("Connection type is Combined (SoD)");
 		break;
 	}
-	case EQEmu::versions::ucsUFCombined:
+	case EQ::versions::ucsUFCombined:
 	{
 		TypeOfConnection = ConnectionTypeCombined;
-		ClientVersion_ = EQEmu::versions::ClientVersion::UF;
+		ClientVersion_ = EQ::versions::ClientVersion::UF;
 		UnderfootOrLater = true;
 		LogInfo("Connection type is Combined (Underfoot)");
 		break;
 	}
-	case EQEmu::versions::ucsRoFCombined:
+	case EQ::versions::ucsRoFCombined:
 	{
 		TypeOfConnection = ConnectionTypeCombined;
-		ClientVersion_ = EQEmu::versions::ClientVersion::RoF;
+		ClientVersion_ = EQ::versions::ClientVersion::RoF;
 		UnderfootOrLater = true;
 		LogInfo("Connection type is Combined (RoF)");
 		break;
 	}
-	case EQEmu::versions::ucsRoF2Combined:
+	case EQ::versions::ucsRoF2Combined:
 	{
 		TypeOfConnection = ConnectionTypeCombined;
-		ClientVersion_ = EQEmu::versions::ClientVersion::RoF2;
+		ClientVersion_ = EQ::versions::ClientVersion::RoF2;
 		UnderfootOrLater = true;
 		LogInfo("Connection type is Combined (RoF2)");
 		break;
@@ -2218,7 +2218,7 @@ void Client::SetConnectionType(char c) {
 	default:
 	{
 		TypeOfConnection = ConnectionTypeUnknown;
-		ClientVersion_ = EQEmu::versions::ClientVersion::Unknown;
+		ClientVersion_ = EQ::versions::ClientVersion::Unknown;
 		LogInfo("Connection type is unknown");
 	}
 	}

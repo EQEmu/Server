@@ -101,18 +101,18 @@ void WorldServer::ProcessMessage(uint16 opcode, EQ::Net::Packet &p)
 		{
 			std::string new_message;
 			switch (c->GetClientVersion()) {
-			case EQEmu::versions::ClientVersion::Titanium:
+			case EQ::versions::ClientVersion::Titanium:
 				Client45ToServerSayLink(new_message, Message.substr(1, std::string::npos));
 				break;
-			case EQEmu::versions::ClientVersion::SoF:
-			case EQEmu::versions::ClientVersion::SoD:
-			case EQEmu::versions::ClientVersion::UF:
+			case EQ::versions::ClientVersion::SoF:
+			case EQ::versions::ClientVersion::SoD:
+			case EQ::versions::ClientVersion::UF:
 				Client50ToServerSayLink(new_message, Message.substr(1, std::string::npos));
 				break;
-			case EQEmu::versions::ClientVersion::RoF:
+			case EQ::versions::ClientVersion::RoF:
 				Client55ToServerSayLink(new_message, Message.substr(1, std::string::npos));
 				break;
-			case EQEmu::versions::ClientVersion::RoF2:
+			case EQ::versions::ClientVersion::RoF2:
 			default:
 				new_message = Message.substr(1, std::string::npos);
 				break;

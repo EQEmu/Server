@@ -23,7 +23,7 @@
 #include "eqemu_exception.h"
 #include "types.h"
 
-namespace EQEmu {
+namespace EQ {
 
 	/*! Simple HashSet designed to be used in fixed memory that may be difficult to use an
 	allocator for (shared memory), we assume all keys are unsigned int

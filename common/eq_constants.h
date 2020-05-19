@@ -318,7 +318,7 @@ static const uint8 DamageTypeUnknown	= 0xFF;
 **
 **	(indexed by 'Skill' of SkillUseTypes)
 */
-static const uint8 SkillDamageTypes[EQEmu::skills::HIGHEST_SKILL + 1] = // change to _SkillServerArraySize once activated
+static const uint8 SkillDamageTypes[EQ::skills::HIGHEST_SKILL + 1] = // change to _SkillServerArraySize once activated
 {
 /*1HBlunt*/					0,
 /*1HSlashing*/				1,

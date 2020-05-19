@@ -255,7 +255,7 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 	}
 
 	if (RuleB(Combat, UseIntervalAC)) {
-		float softcap = (GetSkill(EQEmu::skills::SkillDefense) + GetLevel()) *
+		float softcap = (GetSkill(EQ::skills::SkillDefense) + GetLevel()) *
 			RuleR(Combat, SoftcapFactor) * (1.0 + aa_mit);
 		float mitigation_rating = 0.0;
 		float attack_rating = 0.0;
@@ -410,14 +410,14 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 		int tmp_armor = armor;
 		if (GetClass() == WIZARD || GetClass() == MAGICIAN ||
 				GetClass() == NECROMANCER || GetClass() == ENCHANTER){
-			mitigation_rating = ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4.0) + armor + 1;
+			mitigation_rating = ((GetSkill(EQ::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 4.0) + armor + 1;
 			if (Msg >= 2)
-				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
+				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQ::skills::SkillDefense), itembonuses.HeroicAGI);
 		}
 		else{
-			mitigation_rating = ((GetSkill(EQEmu::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3.0) + (armor * 1.333333) + 1;
+			mitigation_rating = ((GetSkill(EQ::skills::SkillDefense) + itembonuses.HeroicAGI / 10) / 3.0) + (armor * 1.333333) + 1;
 			if (Msg >= 2)
-				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQEmu::skills::SkillDefense), itembonuses.HeroicAGI);
+				GM->Message(Chat::White, "# + %.2f #### DEFENDER Armor Bonus [Defense Skill %i Heroic Agi %i]", mitigation_rating - tmp_armor, GetSkill(EQ::skills::SkillDefense), itembonuses.HeroicAGI);
 
 		}
 		mitigation_rating *= 0.847;
@@ -443,16 +443,16 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 
 		if (attacker->IsClient()){
 			if (atk_override)
-				attack_rating = (atk_override + ((attacker->GetSTR() - 66) * 0.9) + (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345));
+				attack_rating = (atk_override + ((attacker->GetSTR() - 66) * 0.9) + (attacker->GetSkill(EQ::skills::SkillOffense)*1.345));
 			else
-				attack_rating = ((attacker->CastToClient()->CalcATK() + add_atk) + ((attacker->GetSTR() - 66) * 0.9) + (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345));
+				attack_rating = ((attacker->CastToClient()->CalcATK() + add_atk) + ((attacker->GetSTR() - 66) * 0.9) + (attacker->GetSkill(EQ::skills::SkillOffense)*1.345));
 
 		}
 		else{
 			if (atk_override)
-				attack_rating = (atk_override + (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345) + ((attacker->GetSTR() - 66) * 0.9));
+				attack_rating = (atk_override + (attacker->GetSkill(EQ::skills::SkillOffense)*1.345) + ((attacker->GetSTR() - 66) * 0.9));
 			else
-				attack_rating = ((attacker->GetATK() + add_atk) + (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345) + ((attacker->GetSTR() - 66) * 0.9));
+				attack_rating = ((attacker->GetATK() + add_atk) + (attacker->GetSkill(EQ::skills::SkillOffense)*1.345) + ((attacker->GetSTR() - 66) * 0.9));
 		}
 
 		attack_rating = attacker->mod_attack_rating(attack_rating, this);
@@ -468,7 +468,7 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
 				GM->Message(Chat::White, "# %i #### ATTACKER Worn/Equip ATK Bonus", attacker->itembonuses.ATK);
 				GM->Message(Chat::White, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
-				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQ::skills::SkillOffense)*1.345), attacker->GetSkill(EQ::skills::SkillOffense));
 			}
 				
 			else{
@@ -476,7 +476,7 @@ int32 Mob::Tune_MeleeMitigation(Mob* GM, Mob *attacker, int32 damage, int32 minh
 				GM->Message(Chat::White, "# %i #### ATTACKER SE_ATK(2) spell Bonus", attacker->spellbonuses.ATK);
 				GM->Message(Chat::White, "# %i #### ATTACKER NPC ATK Stat", attacker->CastToNPC()->ATK);
 				GM->Message(Chat::White, "# %.2f #### ATTACKER Strength Stat ATK Bonus [Stat Amt: %i]", ((attacker->GetSTR()-66) * 0.9),attacker->GetSTR());
-				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQEmu::skills::SkillOffense)*1.345), attacker->GetSkill(EQEmu::skills::SkillOffense));
+				GM->Message(Chat::White, "# %.2f #### ATTACKER Offensive Skill ATK Bonus [Stat Amt: %i]", (attacker->GetSkill(EQ::skills::SkillOffense)*1.345), attacker->GetSkill(EQ::skills::SkillOffense));
 			}
 		}
 
@@ -582,13 +582,13 @@ int32 Client::Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 mi
 
 int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 {
-	int Hand = EQEmu::invslot::slotPrimary;
+	int Hand = EQ::invslot::slotPrimary;
 
 	if (!other) 
 		return 0;
 	
-	EQEmu::ItemInstance* weapon;
-	weapon = GetInv().GetItem(EQEmu::invslot::slotPrimary);
+	EQ::ItemInstance* weapon;
+	weapon = GetInv().GetItem(EQ::invslot::slotPrimary);
 	
 	if(weapon != nullptr) {
 		if (!weapon->IsWeapon()) {
@@ -596,7 +596,7 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 		}
 	} 
 
-	EQEmu::skills::SkillType skillinuse = AttackAnimation(Hand, weapon);
+	EQ::skills::SkillType skillinuse = AttackAnimation(Hand, weapon);
 
 	int damage = 0;
 	uint8 mylevel = GetLevel() ? GetLevel() : 1;
@@ -620,16 +620,16 @@ int32 Client::GetMeleeDamage(Mob* other, bool GetMinDamage)
 			max_hit = (RuleI(Combat, HitCapPre20));
 
 		CheckIncreaseSkill(skillinuse, other, -15);
-		CheckIncreaseSkill(EQEmu::skills::SkillOffense, other, -15);
+		CheckIncreaseSkill(EQ::skills::SkillOffense, other, -15);
 
 
 #ifndef EQEMU_NO_WEAPON_DAMAGE_BONUS
 
 		int ucDamageBonus = 0;
 
-		if (Hand == EQEmu::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass())
+		if (Hand == EQ::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass())
 		{
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
 
 			min_hit += (int) ucDamageBonus;
 			max_hit += (int) ucDamageBonus;
@@ -657,28 +657,28 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 	float tmp_hit_chance = 0.0f;
 	bool end = false;
 
-	EQEmu::skills::SkillType skillinuse = EQEmu::skills::SkillHandtoHand;
+	EQ::skills::SkillType skillinuse = EQ::skills::SkillHandtoHand;
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
-		EQEmu::ItemInstance* weapon;
-		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
+		EQ::ItemInstance* weapon;
+		weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotPrimary, weapon);
+			skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotPrimary, weapon);
 		}
 		else {
-			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
+			weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotSecondary, weapon);
+				skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotSecondary, weapon);
 			else {
-				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotRange);
+				weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotRange);
 				if (weapon && weapon->IsWeapon()) 
-					skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotRange, weapon);
+					skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotRange, weapon);
 			}
 		}
 	}
 
-	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, 0, 0, avoid_override);
+	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, 0, 0, avoid_override);
 
 	
 	Message(0, "#Tune - Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
@@ -690,7 +690,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	for (int j=0; j < max_loop; j++)        
 	{
-		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, false, 0, avoid_override, add_acc);
+		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, false, 0, avoid_override, add_acc);
 
 		if (Msg >= 3)
 			Message(Chat::Yellow, "#Tune - Processing... [%i] [ACCURACY %i] Hit Chance %.2f ",j,add_acc,tmp_hit_chance);
@@ -705,7 +705,7 @@ void Mob::Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 		if (end){
 			
-			Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, Msg, 0, avoid_override);//Display Stat Report
+			Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, Msg, 0, avoid_override);//Display Stat Report
 			
 			Message(0, " ");
 
@@ -737,28 +737,28 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 	float tmp_hit_chance = 0.0f;
 	bool end = false;
 
-	EQEmu::skills::SkillType skillinuse = EQEmu::skills::SkillHandtoHand;
+	EQ::skills::SkillType skillinuse = EQ::skills::SkillHandtoHand;
 	if (attacker->IsClient())
 	{//Will check first equiped weapon for skill. Ie. remove wepaons to assess bow.
-		EQEmu::ItemInstance* weapon;
-		weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotPrimary);
+		EQ::ItemInstance* weapon;
+		weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
 			
 		if(weapon && weapon->IsWeapon()){
-			skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotPrimary, weapon);
+			skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotPrimary, weapon);
 		}
 		else {
-			weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotSecondary);
+			weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 			if (weapon && weapon->IsWeapon()) 
-				skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotSecondary, weapon);
+				skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotSecondary, weapon);
 			else {
-				weapon = attacker->CastToClient()->GetInv().GetItem(EQEmu::invslot::slotRange);
+				weapon = attacker->CastToClient()->GetInv().GetItem(EQ::invslot::slotRange);
 				if (weapon && weapon->IsWeapon()) 
-					skillinuse = attacker->CastToClient()->AttackAnimation(EQEmu::invslot::slotRange, weapon);
+					skillinuse = attacker->CastToClient()->AttackAnimation(EQ::invslot::slotRange, weapon);
 			}
 		}
 	}
 
-	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, 0, acc_override, 0);
+	tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, 0, acc_override, 0);
 
 	Message(0, "#Tune - Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
 	Message(0, "#Tune - Processing... Find Avoidance for hit chance on defender of (%.0f) pct from attacker. [Current Hit Chance %.2f]", hit_chance, tmp_hit_chance);
@@ -768,7 +768,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 
 	for (int j=0; j < max_loop; j++)        
 	{
-		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, 0, acc_override, 0, 0, add_avoid);
+		tmp_hit_chance = Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, 0, acc_override, 0, 0, add_avoid);
 
 		if (Msg >= 3)
 			Message(0, "#Tune - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ",j,add_avoid,tmp_hit_chance);
@@ -783,7 +783,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 
 		if (end){
 			
-			Tune_CheckHitChance(defender, attacker, skillinuse, EQEmu::invslot::slotPrimary, 0, Msg, acc_override, 0);//Display Stat Report
+			Tune_CheckHitChance(defender, attacker, skillinuse, EQ::invslot::slotPrimary, 0, Msg, acc_override, 0);//Display Stat Report
 			
 			Message(0, " ");
 
@@ -808,7 +808,7 @@ void Mob::Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_
 }
 
 
-float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::SkillType skillinuse, int Hand, int16 chance_mod, int Msg, int acc_override, int avoid_override, int add_acc, int add_avoid)
+float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQ::skills::SkillType skillinuse, int Hand, int16 chance_mod, int Msg, int acc_override, int avoid_override, int add_acc, int add_avoid)
 {
 
 	float chancetohit = RuleR(Combat, BaseHitChance);
@@ -896,9 +896,9 @@ float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::Skil
 		
 	if(defender->IsClient())
 	{
-		chancetohit += (RuleR(Combat, WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(EQEmu::skills::SkillDefense) - defender->GetSkill(EQEmu::skills::SkillDefense)));
+		chancetohit += (RuleR(Combat, WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(EQ::skills::SkillDefense) - defender->GetSkill(EQ::skills::SkillDefense)));
 		if (Msg >= 2)
-			Message(0, "# + %.2f Total: %.2f #### DEFENDER Defense Skill Mod", (RuleR(Combat, WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(EQEmu::skills::SkillDefense) - defender->GetSkill(EQEmu::skills::SkillDefense))), chancetohit);
+			Message(0, "# + %.2f Total: %.2f #### DEFENDER Defense Skill Mod", (RuleR(Combat, WeaponSkillFalloff) * (defender->CastToClient()->MaxSkill(EQ::skills::SkillDefense) - defender->GetSkill(EQ::skills::SkillDefense))), chancetohit);
 	}
 	
 
@@ -987,17 +987,17 @@ float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::Skil
 	hitBonus +=	attacker->itembonuses.HitChanceEffect[skillinuse] +
 				attacker->spellbonuses.HitChanceEffect[skillinuse]+
 				attacker->aabonuses.HitChanceEffect[skillinuse]+
-				attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1];
+				attacker->itembonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] +
+				attacker->spellbonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] +
+				attacker->aabonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1];
 
 	if (Msg >= 2){
-		if (attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %i #### ATTACKER SE_HitChance(184) AA Bonus [All Skills]", attacker->aabonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1]);
-		if (attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %i #### ATTACKER SE_HitChance(184) Spell Bonus [All Skills]", attacker->spellbonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1]);
-		if (attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %i #### ATTACKER SE_HitChance(184) Worn Bonus [All Skills]", attacker->itembonuses.HitChanceEffect[EQEmu::skills::HIGHEST_SKILL + 1]);
+		if (attacker->aabonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %i #### ATTACKER SE_HitChance(184) AA Bonus [All Skills]", attacker->aabonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1]);
+		if (attacker->spellbonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %i #### ATTACKER SE_HitChance(184) Spell Bonus [All Skills]", attacker->spellbonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1]);
+		if (attacker->itembonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %i #### ATTACKER SE_HitChance(184) Worn Bonus [All Skills]", attacker->itembonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1]);
 		if (attacker->itembonuses.HitChanceEffect[skillinuse])
 			Message(0, "# %i #### ATTACKER SE_HitChance(184) AA Bonus [Skill]", attacker->aabonuses.HitChanceEffect[skillinuse]);
 		if (attacker->spellbonuses.HitChanceEffect[skillinuse])
@@ -1008,19 +1008,19 @@ float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::Skil
 
 	//Accuracy = Spell Effect , HitChance = 'Accuracy' from Item Effect
 	//Only AA derived accuracy can be skill limited. ie (Precision of the Pathfinder, Dead Aim)
-	hitBonus += (attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
-				attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1] +
+	hitBonus += (attacker->itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
+				attacker->spellbonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
+				attacker->aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
 				attacker->aabonuses.Accuracy[skillinuse] +
 				attacker->itembonuses.HitChance) / 15.0f; //Item Mod 'Accuracy'
 
 	if (Msg >= 2) {
-		if (attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) AA Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->aabonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]);
-		if (attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) Spell Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->spellbonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]);
-		if (attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1])
-			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) Worn Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->itembonuses.Accuracy[EQEmu::skills::HIGHEST_SKILL + 1]);
+		if (attacker->aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) AA Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]);
+		if (attacker->spellbonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) Spell Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->spellbonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->spellbonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]);
+		if (attacker->itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1])
+			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) Worn Bonus [All Skills] [Stat Amt: %i]", static_cast<float>(attacker->itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]) / 15.0f, attacker->itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1]);
 		if (attacker->aabonuses.Accuracy[skillinuse])
 			Message(0, "# %.2f #### ATTACKER SE_Accuracy(216) AA Bonus [Skill] [Stat Amt: %i]", static_cast<float>(attacker->aabonuses.Accuracy[skillinuse])/15.0f,attacker->aabonuses.Accuracy[skillinuse]);
 		if (attacker->itembonuses.HitChance)
@@ -1052,7 +1052,7 @@ float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQEmu::skills::Skil
 			hitBonus += (add_acc / 15.0f); //Modifier from database
 	}
 
-	if (skillinuse == EQEmu::skills::SkillArchery){
+	if (skillinuse == EQ::skills::SkillArchery){
 		hitBonus -= hitBonus*RuleR(Combat, ArcheryHitPenalty);
 		if (Msg >= 2)
 			Message(0, "# %.2f pct #### RuleR(Combat, ArcheryHitPenalty) ", RuleR(Combat, ArcheryHitPenalty));

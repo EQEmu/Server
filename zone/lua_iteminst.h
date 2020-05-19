@@ -6,7 +6,7 @@
 
 class Lua_Item;
 
-namespace EQEmu
+namespace EQ
 {
 	class ItemInstance;
 }
@@ -17,21 +17,21 @@ namespace luabind {
 
 luabind::scope lua_register_iteminst();
 
-class Lua_ItemInst : public Lua_Ptr<EQEmu::ItemInstance>
+class Lua_ItemInst : public Lua_Ptr<EQ::ItemInstance>
 {
-	typedef EQEmu::ItemInstance NativeType;
+	typedef EQ::ItemInstance NativeType;
 public:
 	Lua_ItemInst(int item_id);
 	Lua_ItemInst(int item_id, int charges);
 	Lua_ItemInst() : Lua_Ptr(nullptr), cloned_(false) { }
-	Lua_ItemInst(EQEmu::ItemInstance *d) : Lua_Ptr(d), cloned_(false) { }
-	Lua_ItemInst(EQEmu::ItemInstance *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
+	Lua_ItemInst(EQ::ItemInstance *d) : Lua_Ptr(d), cloned_(false) { }
+	Lua_ItemInst(EQ::ItemInstance *d, bool cloned) : Lua_Ptr(d), cloned_(cloned) { }
 	Lua_ItemInst& operator=(const Lua_ItemInst& o);
 	Lua_ItemInst(const Lua_ItemInst& o);
-	virtual ~Lua_ItemInst() { if(cloned_) { EQEmu::ItemInstance *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
+	virtual ~Lua_ItemInst() { if(cloned_) { EQ::ItemInstance *ptr = GetLuaPtrData(); if(ptr) { delete ptr; } } }
 
-	operator EQEmu::ItemInstance*() {
-		return reinterpret_cast<EQEmu::ItemInstance*>(GetLuaPtrData());
+	operator EQ::ItemInstance*() {
+		return reinterpret_cast<EQ::ItemInstance*>(GetLuaPtrData());
 	}
 
 	bool IsType(int item_class);

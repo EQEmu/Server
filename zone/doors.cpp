@@ -210,7 +210,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 	uint32 player_has_key          = 0;
 	uint32 player_key              = 0;
 
-	const EQEmu::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQEmu::invslot::slotCursor);
+	const EQ::ItemInstance *lock_pick_item = sender->GetInv().GetItem(EQ::invslot::slotCursor);
 	player_has_key = static_cast<uint32>(sender->GetInv().HasItem(required_key_item, 1));
 
 	if (player_has_key != INVALID_INDEX) {
@@ -320,10 +320,10 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 		 * Try Lock pick
 		 */
 		else if (lock_pick_item != nullptr) {
-			if (sender->GetSkill(EQEmu::skills::SkillPickLock)) {
-				if (lock_pick_item->GetItem()->ItemType == EQEmu::item::ItemTypeLockPick) {
-					float player_pick_lock_skill = sender->GetSkill(EQEmu::skills::SkillPickLock);
-					sender->CheckIncreaseSkill(EQEmu::skills::SkillPickLock, nullptr, 1);
+			if (sender->GetSkill(EQ::skills::SkillPickLock)) {
+				if (lock_pick_item->GetItem()->ItemType == EQ::item::ItemTypeLockPick) {
+					float player_pick_lock_skill = sender->GetSkill(EQ::skills::SkillPickLock);
+					sender->CheckIncreaseSkill(EQ::skills::SkillPickLock, nullptr, 1);
 
 					LogSkills("Client has lockpicks: skill=[{}]", player_pick_lock_skill);
 

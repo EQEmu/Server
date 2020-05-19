@@ -30,7 +30,7 @@ class Raid;
 struct ExtraAttackOptions;
 struct NPCType;
 
-namespace EQEmu
+namespace EQ
 {
 	class ItemInstance;
 }
@@ -51,9 +51,9 @@ class Corpse : public Mob {
 	static Corpse* LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std::string in_charname, const glm::vec4& position, std::string time_of_death, bool rezzed, bool was_at_graveyard, uint32 guild_consent_id);
 
 	/* Corpse: General */
-	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) { return true; }
-	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
-	virtual bool	Attack(Mob* other, int Hand = EQEmu::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
+	virtual bool	Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) { return true; }
+	virtual void	Damage(Mob* from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable = true, int8 buffslot = -1, bool iBuffTic = false, eSpecialAttacks special = eSpecialAttacks::None) { return; }
+	virtual bool	Attack(Mob* other, int Hand = EQ::invslot::slotPrimary, bool FromRiposte = false, bool IsStrikethrough = true, bool IsFromSpell = false, ExtraAttackOptions *opts = nullptr) { return false; }
 	virtual bool	HasRaid()			{ return false; }
 	virtual bool	HasGroup()			{ return false; }
 	virtual Raid*	GetRaid()			{ return 0; }
@@ -138,7 +138,7 @@ class Corpse : public Mob {
 	virtual void UpdateEquipmentLight();
 
 protected:
-	void MoveItemToCorpse(Client *client, EQEmu::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
+	void MoveItemToCorpse(Client *client, EQ::ItemInstance *inst, int16 equipSlot, std::list<uint32> &removedList);
 
 private:
 	bool		is_player_corpse; /* Determines if Player Corpse or not */
@@ -167,7 +167,7 @@ private:
 	Timer		corpse_delay_timer;
 	Timer		corpse_graveyard_timer;
 	Timer		loot_cooldown_timer; /* Delay between loot actions on the corpse entity */
-	EQEmu::TintProfile item_tint;
+	EQ::TintProfile item_tint;
 	std::vector<std::string> consented_player_names;
 
 	LootRequestType	loot_request_type;

@@ -195,7 +195,7 @@ public:
 	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
 
 private:
-	EQEmu::Random                      random;
+	EQ::Random                      random;
 	std::shared_ptr<EQStreamInterface> connection;
 	LSClientVersion                    version;
 	LSClientStatus                     status;

@@ -95,7 +95,7 @@ void GetDamageHitInfo(luabind::adl::object &ret, DamageHitInfo &hit) {
 		}
 
 		if (luabind::type(skill) == LUA_TNUMBER) {
-			hit.skill = (EQEmu::skills::SkillType)luabind::object_cast<int>(skill);
+			hit.skill = (EQ::skills::SkillType)luabind::object_cast<int>(skill);
 		}
 	}
 }

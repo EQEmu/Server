@@ -117,7 +117,7 @@ public:
 	bool AddItem(uint32 GuildID, uint8 Area, uint32 ItemID, int32 QtyOrCharges, const char *Donator, uint8 Permissions, const char *WhoFor);
 	int Promote(uint32 GuildID, int SlotID);
 	void SetPermissions(uint32 GuildID, uint16 SlotID, uint32 Permissions, const char *MemberName);
-	EQEmu::ItemInstance* GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
+	EQ::ItemInstance* GetItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 	bool DeleteItem(uint32 GuildID, uint16 Area, uint16 SlotID, uint32 Quantity);
 	bool HasItem(uint32 GuildID, uint32 ItemID);
 	bool IsAreaFull(uint32 GuildID, uint16 Area);

@@ -403,7 +403,7 @@ bool Map::LoadV2(FILE *f) {
 
 	std::vector<char> buffer;
 	buffer.resize(buffer_size);
-	uint32 v = EQEmu::InflateData(&data[0], data_size, &buffer[0], buffer_size);
+	uint32 v = EQ::InflateData(&data[0], data_size, &buffer[0], buffer_size);
 
 	char *buf = &buffer[0];
 	uint32 vert_count;

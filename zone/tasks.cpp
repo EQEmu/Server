@@ -1071,7 +1071,7 @@ void TaskManager::TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *m
 
 void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList) {
 
-	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
+	if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF)
 	{
 		SendTaskSelectorNew(c, mob, TaskCount, TaskList);
 		return;
@@ -1118,7 +1118,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 			continue;
 
 		buf.WriteUInt32(TaskList[i]);	// TaskID
-		if (c->ClientVersion() != EQEmu::versions::ClientVersion::Titanium)
+		if (c->ClientVersion() != EQ::versions::ClientVersion::Titanium)
 			buf.WriteFloat(1.0f); // affects color, difficulty?
 		buf.WriteUInt32(Tasks[TaskList[i]]->Duration);
 		buf.WriteUInt32(static_cast<int>(Tasks[TaskList[i]]->dur_code));
@@ -1126,7 +1126,7 @@ void TaskManager::SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *Task
 		buf.WriteString(Tasks[TaskList[i]]->Title); // max 64 with null
 		buf.WriteString(Tasks[TaskList[i]]->Description); // max 4000 with null
 
-		if (c->ClientVersion() != EQEmu::versions::ClientVersion::Titanium)
+		if (c->ClientVersion() != EQ::versions::ClientVersion::Titanium)
 			buf.WriteUInt8(0); // Has reward set flag
 
 		buf.WriteUInt32(Tasks[TaskList[i]]->ActivityCount);
@@ -1771,7 +1771,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *c, int ExploreID)
 	return;
 }
 
-bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQEmu::ItemInstance *> &Items, int Cash, int NPCTypeID)
+bool ClientTaskState::UpdateTasksOnDeliver(Client *c, std::list<EQ::ItemInstance *> &Items, int Cash, int NPCTypeID)
 {
 	bool Ret = false;
 
@@ -1988,7 +1988,7 @@ void ClientTaskState::RewardTask(Client *c, TaskInformation *Task) {
 
 	if(!Task || !c) return;
 
-	const EQEmu::ItemData* Item;
+	const EQ::ItemData* Item;
 	std::vector<int> RewardList;
 
 	switch(Task->RewardMethod) {
@@ -2698,7 +2698,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 	TaskActivityShort_Struct* tass;
 
-	if (c->ClientVersionBit() & EQEmu::versions::maskRoFAndLater)
+	if (c->ClientVersionBit() & EQ::versions::maskRoFAndLater)
 	{
 		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
 		outapp->WriteUInt32(ClientTaskIndex);
@@ -2734,7 +2734,7 @@ void TaskManager::SendTaskActivityShort(Client *c, int TaskID, int ActivityID, i
 
 void TaskManager::SendTaskActivityLong(Client *c, int TaskID, int ActivityID, int ClientTaskIndex, bool Optional, bool TaskComplete) {
 
-	if (c->ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
+	if (c->ClientVersion() >= EQ::versions::ClientVersion::RoF)
 	{
 		SendTaskActivityNew(c, TaskID, ActivityID, ClientTaskIndex, Optional, TaskComplete);
 		return;
@@ -2943,10 +2943,10 @@ void TaskManager::SendActiveTaskDescription(Client *c, int TaskID, ClientTaskInf
 		}
 
 		if(ItemID) {
-			const EQEmu::ItemData* reward_item = database.GetItem(ItemID);
+			const EQ::ItemData* reward_item = database.GetItem(ItemID);
 
-			EQEmu::SayLinkEngine linker;
-			linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
 			Tasks[TaskID]->item_link = linker.GenerateLink();

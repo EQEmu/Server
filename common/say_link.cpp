@@ -26,10 +26,10 @@
 #include "../zone/zonedb.h"
 
 
-bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
+bool EQ::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
-	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE) {
+	if (say_link_body.length() != EQ::constants::SAY_LINK_BODY_SIZE) {
 		return false;
 	}
 
@@ -50,7 +50,7 @@ bool EQEmu::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct
 	return true;
 }
 
-bool EQEmu::saylink::GenerateLinkBody(std::string &say_link_body, const SayLinkBody_Struct &say_link_body_struct)
+bool EQ::saylink::GenerateLinkBody(std::string &say_link_body, const SayLinkBody_Struct &say_link_body_struct)
 {
 	say_link_body = StringFormat(
 		"%1X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%05X" "%1X" "%04X" "%02X" "%05X" "%08X",
@@ -69,19 +69,19 @@ bool EQEmu::saylink::GenerateLinkBody(std::string &say_link_body, const SayLinkB
 		(0xFFFFFFFF & say_link_body_struct.hash)
 	);
 
-	if (say_link_body.length() != EQEmu::constants::SAY_LINK_BODY_SIZE) {
+	if (say_link_body.length() != EQ::constants::SAY_LINK_BODY_SIZE) {
 		return false;
 	}
 
 	return true;
 }
 
-EQEmu::SayLinkEngine::SayLinkEngine()
+EQ::SayLinkEngine::SayLinkEngine()
 {
 	Reset();
 }
 
-const std::string &EQEmu::SayLinkEngine::GenerateLink()
+const std::string &EQ::SayLinkEngine::GenerateLink()
 {
 	m_Link.clear();
 	m_LinkBody.clear();
@@ -90,25 +90,25 @@ const std::string &EQEmu::SayLinkEngine::GenerateLink()
 	generate_body();
 	generate_text();
 
-	if ((m_LinkBody.length() == EQEmu::constants::SAY_LINK_BODY_SIZE) && (m_LinkText.length() > 0)) {
+	if ((m_LinkBody.length() == EQ::constants::SAY_LINK_BODY_SIZE) && (m_LinkText.length() > 0)) {
 		m_Link.push_back(0x12);
 		m_Link.append(m_LinkBody);
 		m_Link.append(m_LinkText);
 		m_Link.push_back(0x12);
 	}
 
-	if ((m_Link.length() == 0) || (m_Link.length() > (EQEmu::constants::SAY_LINK_MAXIMUM_SIZE))) {
+	if ((m_Link.length() == 0) || (m_Link.length() > (EQ::constants::SAY_LINK_MAXIMUM_SIZE))) {
 		m_Error = true;
 		m_Link  = "<LINKER ERROR>";
 		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
 		LogError(">> LinkType: {}, Lengths: {link: {}({}), body: {}({}), text: {}({})}",
 			m_LinkType,
 			m_Link.length(),
-			EQEmu::constants::SAY_LINK_MAXIMUM_SIZE,
+			EQ::constants::SAY_LINK_MAXIMUM_SIZE,
 			m_LinkBody.length(),
-			EQEmu::constants::SAY_LINK_BODY_SIZE,
+			EQ::constants::SAY_LINK_BODY_SIZE,
 			m_LinkText.length(),
-			EQEmu::constants::SAY_LINK_TEXT_SIZE
+			EQ::constants::SAY_LINK_TEXT_SIZE
 		);
 		LogError(">> LinkBody: {}", m_LinkBody.c_str());
 		LogError(">> LinkText: {}", m_LinkText.c_str());
@@ -117,7 +117,7 @@ const std::string &EQEmu::SayLinkEngine::GenerateLink()
 	return m_Link;
 }
 
-void EQEmu::SayLinkEngine::Reset()
+void EQ::SayLinkEngine::Reset()
 {
 	m_LinkType = saylink::SayLinkBlank;
 	m_ItemData = nullptr;
@@ -134,7 +134,7 @@ void EQEmu::SayLinkEngine::Reset()
 	m_Error = false;
 }
 
-void EQEmu::SayLinkEngine::generate_body()
+void EQ::SayLinkEngine::generate_body()
 {
 	/*
 	Current server mask: EQClientRoF2
@@ -147,7 +147,7 @@ void EQEmu::SayLinkEngine::generate_body()
 
 	memset(&m_LinkBodyStruct, 0, sizeof(SayLinkBody_Struct));
 
-	const EQEmu::ItemData *item_data = nullptr;
+	const EQ::ItemData *item_data = nullptr;
 
 	switch (m_LinkType) {
 		case saylink::SayLinkBlank:
@@ -257,14 +257,14 @@ void EQEmu::SayLinkEngine::generate_body()
 	);
 }
 
-void EQEmu::SayLinkEngine::generate_text()
+void EQ::SayLinkEngine::generate_text()
 {
 	if (m_LinkProxyStruct.text != nullptr) {
 		m_LinkText = m_LinkProxyStruct.text;
 		return;
 	}
 
-	const EQEmu::ItemData *item_data = nullptr;
+	const EQ::ItemData *item_data = nullptr;
 
 	switch (m_LinkType) {
 		case saylink::SayLinkBlank:
@@ -291,7 +291,7 @@ void EQEmu::SayLinkEngine::generate_text()
 	m_LinkText = "null";
 }
 
-std::string EQEmu::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name)
+std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bool silent, std::string link_name)
 {
 	uint32 saylink_id = 0;
 
@@ -327,7 +327,7 @@ std::string EQEmu::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text,
 	/**
 	 * Generate the actual link
 	 */
-	EQEmu::SayLinkEngine linker;
+	EQ::SayLinkEngine linker;
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	if (silent) {
 		linker.SetProxyAugment2ID(saylink_id);

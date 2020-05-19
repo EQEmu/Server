@@ -393,7 +393,7 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 	if(!Sender) return;
 
-	std::string cv_messages[EQEmu::versions::ClientVersionCount];
+	std::string cv_messages[EQ::versions::ClientVersionCount];
 
 	ChatMessagesSent++;
 
@@ -412,18 +412,18 @@ void ChatChannel::SendMessageToChannel(std::string Message, Client* Sender) {
 
 			if (cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())].length() == 0) {
 				switch (ChannelClient->GetClientVersion()) {
-				case EQEmu::versions::ClientVersion::Titanium:
+				case EQ::versions::ClientVersion::Titanium:
 					ServerToClient45SayLink(cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())], Message);
 					break;
-				case EQEmu::versions::ClientVersion::SoF:
-				case EQEmu::versions::ClientVersion::SoD:
-				case EQEmu::versions::ClientVersion::UF:
+				case EQ::versions::ClientVersion::SoF:
+				case EQ::versions::ClientVersion::SoD:
+				case EQ::versions::ClientVersion::UF:
 					ServerToClient50SayLink(cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())], Message);
 					break;
-				case EQEmu::versions::ClientVersion::RoF:
+				case EQ::versions::ClientVersion::RoF:
 					ServerToClient55SayLink(cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())], Message);
 					break;
-				case EQEmu::versions::ClientVersion::RoF2:
+				case EQ::versions::ClientVersion::RoF2:
 				default:
 					cv_messages[static_cast<uint32>(ChannelClient->GetClientVersion())] = Message;
 					break;

@@ -38,16 +38,16 @@ extern std::vector<RaceClassCombos> character_create_race_class_combos;
  */
 void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit)
 {
-	EQEmu::versions::ClientVersion
-		   client_version  = EQEmu::versions::ConvertClientVersionBitToClientVersion(client_version_bit);
-	size_t character_limit = EQEmu::constants::StaticLookup(client_version)->CharacterCreationLimit;
+	EQ::versions::ClientVersion
+		   client_version  = EQ::versions::ConvertClientVersionBitToClientVersion(client_version_bit);
+	size_t character_limit = EQ::constants::StaticLookup(client_version)->CharacterCreationLimit;
 
-	if (character_limit > EQEmu::constants::CHARACTER_CREATION_LIMIT) {
-		character_limit = EQEmu::constants::CHARACTER_CREATION_LIMIT;
+	if (character_limit > EQ::constants::CHARACTER_CREATION_LIMIT) {
+		character_limit = EQ::constants::CHARACTER_CREATION_LIMIT;
 	}
 
 	// Force Titanium clients to use '8'
-	if (client_version == EQEmu::versions::ClientVersion::Titanium) {
+	if (client_version == EQ::versions::ClientVersion::Titanium) {
 		character_limit = 8;
 	}
 
@@ -104,9 +104,9 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		CharacterSelectEntry_Struct *p_character_select_entry_struct = (CharacterSelectEntry_Struct *) buff_ptr;
 		PlayerProfile_Struct        player_profile_struct;
-		EQEmu::InventoryProfile     inventory_profile;
+		EQ::InventoryProfile     inventory_profile;
 
-		player_profile_struct.SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version));
+		player_profile_struct.SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(client_version));
 		inventory_profile.SetInventoryVersion(client_version);
 		inventory_profile.SetGMInventory(true); // charsel can not interact with items..but, no harm in setting to full expansion support
 
@@ -128,7 +128,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		p_character_select_entry_struct->Gender      = (uint8) atoi(row[2]);
 		p_character_select_entry_struct->Face        = (uint8) atoi(row[15]);
 
-		for (uint32 material_slot = 0; material_slot < EQEmu::textures::materialCount; material_slot++) {
+		for (uint32 material_slot = 0; material_slot < EQ::textures::materialCount; material_slot++) {
 			p_character_select_entry_struct->Equip[material_slot].Material        = 0;
 			p_character_select_entry_struct->Equip[material_slot].Unknown1        = 0;
 			p_character_select_entry_struct->Equip[material_slot].EliteModel      = 0;
@@ -294,12 +294,12 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 		}
 
 		if (GetCharSelInventory(account_id, p_character_select_entry_struct->Name, &inventory_profile)) {
-			const EQEmu::ItemData     *item          = nullptr;
-			const EQEmu::ItemInstance *inst          = nullptr;
+			const EQ::ItemData     *item          = nullptr;
+			const EQ::ItemInstance *inst          = nullptr;
 			int16 inventory_slot = 0;
 
-			for (uint32 matslot = EQEmu::textures::textureBegin; matslot < EQEmu::textures::materialCount; matslot++) {
-				inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(matslot);
+			for (uint32 matslot = EQ::textures::textureBegin; matslot < EQ::textures::materialCount; matslot++) {
+				inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(matslot);
 				if (inventory_slot == INVALID_INDEX) { continue; }
 				inst = inventory_profile.GetItem(inventory_slot);
 				if (inst == nullptr) {
@@ -323,7 +323,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 							p_character_select_entry_struct->Equip[matslot].Material = item_id_file;
 						}
 					}
-					if (matslot == EQEmu::textures::weaponPrimary) {
+					if (matslot == EQ::textures::weaponPrimary) {
 						p_character_select_entry_struct->PrimaryIDFile = item_id_file;
 					}
 					else {
@@ -645,7 +645,7 @@ bool WorldDatabase::LoadCharacterCreateCombos()
 }
 
 // this is a slightly modified version of SharedDatabase::GetInventory(...) for character select use-only
-bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::InventoryProfile *inv)
+bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQ::InventoryProfile *inv)
 {
 	if (!account_id || !name || !inv)
 		return false;
@@ -683,8 +683,8 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		" slotid <= %i",
 		name,
 		account_id,
-		EQEmu::invslot::slotHead,
-		EQEmu::invslot::slotFeet
+		EQ::invslot::slotHead,
+		EQ::invslot::slotFeet
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -694,13 +694,13 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		int16 slot_id = atoi(row[0]);
 
 		switch (slot_id) {
-		case EQEmu::invslot::slotFace:
-		case EQEmu::invslot::slotEar2:
-		case EQEmu::invslot::slotNeck:
-		case EQEmu::invslot::slotShoulders:
-		case EQEmu::invslot::slotBack:
-		case EQEmu::invslot::slotFinger1:
-		case EQEmu::invslot::slotFinger2:
+		case EQ::invslot::slotFace:
+		case EQ::invslot::slotEar2:
+		case EQ::invslot::slotNeck:
+		case EQ::invslot::slotShoulders:
+		case EQ::invslot::slotBack:
+		case EQ::invslot::slotFinger1:
+		case EQ::invslot::slotFinger2:
 			continue;
 		default:
 			break;
@@ -710,7 +710,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		int8 charges = atoi(row[2]);
 		uint32 color = atoul(row[3]);
 
-		uint32 aug[EQEmu::invaug::SOCKET_COUNT];
+		uint32 aug[EQ::invaug::SOCKET_COUNT];
 		aug[0] = (uint32)atoi(row[4]);
 		aug[1] = (uint32)atoi(row[5]);
 		aug[2] = (uint32)atoi(row[6]);
@@ -723,11 +723,11 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		uint32 ornament_idfile = (uint32)atoul(row[13]);
 		uint32 ornament_hero_model = (uint32)atoul(row[14]);
 
-		const EQEmu::ItemData *item = GetItem(item_id);
+		const EQ::ItemData *item = GetItem(item_id);
 		if (!item)
 			continue;
 
-		EQEmu::ItemInstance *inst = CreateBaseItem(item, charges);
+		EQ::ItemInstance *inst = CreateBaseItem(item, charges);
 
 		if (inst == nullptr)
 			continue;
@@ -770,7 +770,7 @@ bool WorldDatabase::GetCharSelInventory(uint32 account_id, char *name, EQEmu::In
 		inst->SetCharges(charges);
 
 		if (item->IsClassCommon()) {
-			for (int i = EQEmu::invaug::SOCKET_BEGIN; i <= EQEmu::invaug::SOCKET_END; i++) {
+			for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 				if (aug[i])
 					inst->PutAugment(this, i, aug[i]);
 			}

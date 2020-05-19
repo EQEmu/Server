@@ -834,7 +834,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_RefreshCensorship: {
-		if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		if (!EQ::ProfanityManager::LoadProfanityList(&database))
 			LogError("Received request to refresh the profanity list..but, the action failed");
 		break;
 	}
@@ -926,7 +926,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
 				group->UpdateGroupAAs();
 
-				if (Inviter->CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
+				if (Inviter->CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoD)
 				{
 					auto outapp =
 						new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
@@ -1454,7 +1454,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		bool found_corpse = false;
 		for (auto const& it : entity_list.GetCorpseList()) {
 			if (it.second->IsPlayerCorpse() && strcmp(it.second->GetOwnerName(), s->ownername) == 0) {
-				if (s->consent_type == EQEmu::consent::Normal) {
+				if (s->consent_type == EQ::consent::Normal) {
 					if (s->permission == 1) {
 						it.second->AddConsentName(s->grantname);
 					}
@@ -1462,13 +1462,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						it.second->RemoveConsentName(s->grantname);
 					}
 				}
-				else if (s->consent_type == EQEmu::consent::Group) {
+				else if (s->consent_type == EQ::consent::Group) {
 					it.second->SetConsentGroupID(s->consent_id);
 				}
-				else if (s->consent_type == EQEmu::consent::Raid) {
+				else if (s->consent_type == EQ::consent::Raid) {
 					it.second->SetConsentRaidID(s->consent_id);
 				}
-				else if (s->consent_type == EQEmu::consent::Guild) {
+				else if (s->consent_type == EQ::consent::Guild) {
 					it.second->SetConsentGuildID(s->consent_id);
 				}
 				found_corpse = true;
@@ -1492,7 +1492,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 		Client* owner_client = entity_list.GetClientByName(s->ownername);
 		Client* grant_client = nullptr;
-		if (s->consent_type == EQEmu::consent::Normal) {
+		if (s->consent_type == EQ::consent::Normal) {
 			grant_client = entity_list.GetClientByName(s->grantname);
 		}
 		if (owner_client || grant_client) {
