@@ -876,33 +876,41 @@ sub do_install_config_login_json
 sub fetch_utility_scripts
 {
     if ($OS eq "Windows") {
-        get_remote_file($install_repository_request_url . "t_database_backup.bat", "t_database_backup.bat");
-        get_remote_file($install_repository_request_url . "t_start_server.bat", "t_start_server.bat");
-        get_remote_file($install_repository_request_url . "t_server_update_binaries_no_bots.bat",
-            "t_server_update_binaries_no_bots.bat");
-        get_remote_file($install_repository_request_url . "t_start_server_with_login_server.bat",
-            "t_start_server_with_login_server.bat");
-        get_remote_file($install_repository_request_url . "t_stop_server.bat", "t_stop_server.bat");
-        get_remote_file($install_repository_request_url . "t_server_crash_report.pl", "t_server_crash_report.pl");
-        get_remote_file($install_repository_request_url . "win_server_launcher.pl", "win_server_launcher.pl");
-        get_remote_file($install_repository_request_url . "t_start_server_with_login_server.bat",
-            "t_start_server_with_login_server.bat");
 
+        opendir(DIR, "bin/");
+        my @files = grep(/\.exe$/, readdir(DIR));
+        closedir(DIR);
+
+        foreach my $file (@files) {
+            my $full_file = "bin/" . $file;
+
+            if ($file=~/test|launch/i) {
+                next;
+            }
+
+            print "Creating Symbolic Link for [$file] from [$full_file]\n";
+            system("del start_$file >nul 2>&1");
+            system("powershell.exe \"New-Item -ItemType SymbolicLink -Name 'start_$file' -Value '$full_file'\" >nul 2>&1");
+        }
+
+        get_remote_file($install_repository_request_url . "windows/t_database_backup.bat", "t_database_backup.bat");
+        get_remote_file($install_repository_request_url . "windows/t_start_server.bat", "t_start_server.bat");
+        get_remote_file($install_repository_request_url . "windows/t_server_update_binaries_no_bots.bat",
+            "t_server_update_binaries_no_bots.bat");
+        get_remote_file($install_repository_request_url . "windows/t_start_server_with_login_server.bat",
+            "t_start_server_with_login_server.bat");
+        get_remote_file($install_repository_request_url . "windows/t_stop_server.bat", "t_stop_server.bat");
+        get_remote_file($install_repository_request_url . "windows/t_server_crash_report.pl", "t_server_crash_report.pl");
+        get_remote_file($install_repository_request_url . "windows/win_server_launcher.pl", "win_server_launcher.pl");
+        get_remote_file($install_repository_request_url . "windows/t_start_server_with_login_server.bat",
+            "t_start_server_with_login_server.bat");
         get_remote_file(
-            $install_repository_request_url . "t_start_world.bat",
-            "t_start_world.bat"
-        );
-        get_remote_file(
-            $install_repository_request_url . "t_start_zone.bat",
-            "t_start_zone.bat"
-        );
-        get_remote_file(
-            $install_repository_request_url . "t_set_gm_account.bat",
+            $install_repository_request_url . "windows/t_set_gm_account.bat",
             "t_set_gm_account.bat"
         );
         get_remote_file(
-            $install_repository_request_url . "t_start_shared_memory.bat",
-            "t_start_shared_memory.bat"
+            $install_repository_request_url . "windows/windows_server_readme.html",
+            "windows_server_readme.html"
         );
     }
     else {
@@ -1346,7 +1354,7 @@ sub get_remote_file
             # print "checking '" . $build_path . "'\n";
             #::: If path does not exist, create the directory...
             if (!-d $build_path) {
-                print "[Copy] folder doesn't exist, creating '" . $build_path . "'\n";
+                print "[Copy] folder doesn't exist, creating [" . $build_path . "]\n";
                 mkdir($build_path);
             }
             if (!$directory_indexr_path[$directory_index + 2] && $directory_indexr_path[$directory_index + 1]) {
@@ -1566,7 +1574,8 @@ sub fetch_latest_windows_appveyor
     print "[Update] Fetching Latest Windows Binaries (unstable) from Appveyor... \n";
     get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-pglwk/artifacts/build_x64.zip",
         "updates_staged/build_x64.zip",
-        1);
+        1
+    );
 
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
@@ -1593,7 +1602,8 @@ sub fetch_latest_windows_binaries
     print "[Update] Fetching Latest Windows Binaries... \n";
     get_remote_file($install_repository_request_url . "master_windows_build.zip",
         "updates_staged/master_windows_build.zip",
-        1);
+        1
+    );
     print "[Update] Fetched Latest Windows Binaries... \n";
     print "[Update] Extracting... --- \n";
     unzip('updates_staged/master_windows_build.zip', 'updates_staged/binaries/');
@@ -1733,7 +1743,8 @@ sub do_linux_login_server_setup
     rmtree('db_update');
 
     get_remote_file($install_repository_request_url . "linux/login_opcodes.conf", $opcodes_path . "login_opcodes.conf");
-    get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf", $opcodes_path . "login_opcodes_sod.conf");
+    get_remote_file($install_repository_request_url . "linux/login_opcodes_sod.conf",
+        $opcodes_path . "login_opcodes_sod.conf");
     get_remote_file($install_repository_request_url . "linux/server_start_with_login.sh", "server_start_with_login.sh");
     system("chmod 755 *.sh");
 
@@ -1756,11 +1767,11 @@ sub add_login_server_firewall_rules
                 $val =~ s/Rule Name://g;
                 if ($val =~ /EQEmu Loginserver/i && $val =~ /Titanium/i) {
                     $has_loginserver_rules_titanium = 1;
-                    print "[Install] Found existing rule :: " . trim($val) . "\n";
+                    print "[Install] Found existing rule [" . trim($val) . "]\n";
                 }
                 if ($val =~ /EQEmu Loginserver/i && $val =~ /SOD/i) {
                     $has_loginserver_rules_sod = 1;
-                    print "[Install] Found existing rule :: " . trim($val) . "\n";
+                    print "[Install] Found existing rule [" . trim($val) . "]\n";
                 }
             }
         }
@@ -1813,11 +1824,11 @@ sub check_windows_firewall_rules
             $val =~ s/Rule Name://g;
             if ($val =~ /EQEmu World/i) {
                 $has_world_rules = 1;
-                print "[Install] Found existing rule :: " . trim($val) . "\n";
+                print "[Install] Found existing rule [" . trim($val) . "]\n";
             }
             if ($val =~ /EQEmu Zone/i) {
                 $has_zone_rules = 1;
-                print "[Install] Found existing rule :: " . trim($val) . "\n";
+                print "[Install] Found existing rule [" . trim($val) . "]\n";
             }
         }
     }
@@ -1967,7 +1978,7 @@ sub quest_files_fetch
                     $backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
 
                     print $directory_indexff . "\n";
-                    print "[Update] File Different :: '" . $destination_file . "'\n";
+                    print "[Update] File Different [" . $destination_file . "]\n";
                     print "[Update] Do you wish to update this Quest? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
                     my $input = <STDIN>;
                     if ($input =~ /N/i) {}
@@ -2031,7 +2042,7 @@ sub lua_modules_fetch
                 if ($directory_indexff ne "") {
                     $backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
                     print $directory_indexff . "\n";
-                    print "[Update] File Different :: '" . $destination_file . "'\n";
+                    print "[Update] File Different [" . $destination_file . "]\n";
                     print "[Update] Do you wish to update this LUA Module? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
                     my $input = <STDIN>;
                     if ($input =~ /N/i) {}
@@ -2093,7 +2104,7 @@ sub plugins_fetch
                 if ($directory_indexff ne "") {
                     $backup_dest = "updates_backups/" . $time_stamp . "/" . $destination_file;
                     print $directory_indexff . "\n";
-                    print "[Update] File Different :: '" . $destination_file . "'\n";
+                    print "[Update] File Different [" . $destination_file . "]\n";
                     print "[Update] Do you wish to update this Plugin? '" . $destination_file . "' [Yes (Enter) - No (N)] \nA backup will be found in '" . $backup_dest . "'\n";
                     my $input = <STDIN>;
                     if ($input =~ /N/i) {}
