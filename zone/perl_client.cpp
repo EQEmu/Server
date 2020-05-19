@@ -1882,32 +1882,6 @@ XS(XS_Client_IncreaseLanguageSkill) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_GetSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSkill(THIS, uint16 skill_id)");
-	{
-		Client *THIS;
-		uint16                   RETVAL;
-		dXSTARG;
-		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetSkill(skill_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_GetRawSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawSkill) {
 	dXSARGS;
@@ -6515,7 +6489,6 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
 	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
 	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
-	newXSproto(strcpy(buf, "GetSkill"), XS_Client_GetSkill, file, "$$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
