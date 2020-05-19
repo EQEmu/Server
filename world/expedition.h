@@ -27,9 +27,12 @@ namespace Expedition
 {
 	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();
+	void HandleZoneMessage(ServerPacket* pack);
 	void AddPlayer(ServerPacket* pack);
 	void MakeLeader(ServerPacket* pack);
 	void GetOnlineMembers(ServerPacket* pack);
+	void SaveInvite(ServerPacket* pack);
+	void RequestInvite(ServerPacket* pack);
 };
 
 #endif
