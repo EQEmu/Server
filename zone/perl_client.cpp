@@ -5543,28 +5543,6 @@ XS(XS_Client_NotifyNewTitlesAvailable) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_SignalClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SignalClient) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SignalClient(THIS, uint32 data)");
-	{
-		Client *THIS;
-		uint32 data = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		THIS->Signal(data);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Client_AddAlternateCurrencyValue); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddAlternateCurrencyValue) {
 	dXSARGS;
@@ -6647,7 +6625,6 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetTint"), XS_Client_SetTint, file, "$$$");
 	newXSproto(strcpy(buf, "SetTitleSuffix"), XS_Client_SetTitleSuffix, file, "$$;$");
 	newXSproto(strcpy(buf, "SetZoneFlag"), XS_Client_SetZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "SignalClient"), XS_Client_SignalClient, file, "$");
 	newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
