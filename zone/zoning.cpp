@@ -404,6 +404,16 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
+	if (GetPendingExpeditionInviteID() != 0)
+	{
+		// live re-invites if client zoned with a pending invite, save pending invite info in world
+		auto expedition = Expedition::FindCachedExpeditionByID(GetPendingExpeditionInviteID());
+		if (expedition)
+		{
+			expedition->SendWorldPendingInvite(m_pending_expedition_invite, GetName());
+		}
+	}
+
 	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, ZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
 	//set the player's coordinates in the new zone so they have them

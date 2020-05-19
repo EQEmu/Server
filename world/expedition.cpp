@@ -68,6 +68,44 @@ void Expedition::PurgeExpiredCharacterLockouts()
 	}
 }
 
+void Expedition::HandleZoneMessage(ServerPacket* pack)
+{
+	switch (pack->opcode)
+	{
+	case ServerOP_ExpeditionGetOnlineMembers:
+	{
+		Expedition::GetOnlineMembers(pack);
+		break;
+	}
+	case ServerOP_ExpeditionDzAddPlayer:
+	{
+		Expedition::AddPlayer(pack);
+		break;
+	}
+	case ServerOP_ExpeditionDzMakeLeader:
+	{
+		Expedition::MakeLeader(pack);
+		break;
+	}
+	case ServerOP_ExpeditionRemoveCharLockouts:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+		client_list.SendPacket(buf->character_name, pack);
+		break;
+	}
+	case ServerOP_ExpeditionSaveInvite:
+	{
+		Expedition::SaveInvite(pack);
+		break;
+	}
+	case ServerOP_ExpeditionRequestInvite:
+	{
+		Expedition::RequestInvite(pack);
+		break;
+	}
+	}
+}
+
 void Expedition::AddPlayer(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
@@ -137,4 +175,32 @@ void Expedition::GetOnlineMembers(ServerPacket* pack)
 	}
 
 	zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
+}
+
+void Expedition::SaveInvite(ServerPacket* pack)
+{
+	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
+
+	ClientListEntry* invited_cle = client_list.FindCharacter(buf->target_name);
+	if (invited_cle)
+	{
+		// store packet on cle and re-send it when client requests it
+		buf->is_char_online = true;
+		pack->opcode = ServerOP_ExpeditionDzAddPlayer;
+		invited_cle->SetPendingExpeditionInvite(pack);
+	}
+}
+
+void Expedition::RequestInvite(ServerPacket* pack)
+{
+	auto buf = reinterpret_cast<ServerExpeditionCharacterID_Struct*>(pack->pBuffer);
+	ClientListEntry* cle = client_list.FindCLEByCharacterID(buf->character_id);
+	if (cle)
+	{
+		auto invite_pack = cle->GetPendingExpeditionInvite();
+		if (invite_pack && cle->Server())
+		{
+			cle->Server()->SendPacket(invite_pack.get());
+		}
+	}
 }

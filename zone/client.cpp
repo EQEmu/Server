@@ -9549,7 +9549,6 @@ void Client::SendCrossZoneMessageString(
 void Client::UpdateExpeditionInfoAndLockouts()
 {
 	// this is processed by client after entering a zone
-	// todo: live re-invites if client zoned with a pending invite window open
 	SendDzCompassUpdate();
 
 	auto expedition = GetExpedition();
@@ -9571,6 +9570,9 @@ void Client::UpdateExpeditionInfoAndLockouts()
 	}
 
 	LoadAllExpeditionLockouts();
+
+	// ask world for any pending invite we saved from a previous zone
+	RequestPendingExpeditionInvite();
 }
 
 Expedition* Client::CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request)
@@ -9762,6 +9764,15 @@ void Client::SendExpeditionLockoutTimers()
 		memcpy(outbuf->timers, lockout_entries.data(), lockout_entries_size);
 	}
 	QueuePacket(outapp.get());
+}
+
+void Client::RequestPendingExpeditionInvite()
+{
+	uint32_t packsize = sizeof(ServerExpeditionCharacterID_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRequestInvite, packsize));
+	auto packbuf = reinterpret_cast<ServerExpeditionCharacterID_Struct*>(pack->pBuffer);
+	packbuf->character_id = CharacterID();
+	worldserver.SendPacket(pack.get());
 }
 
 void Client::DzListTimers()

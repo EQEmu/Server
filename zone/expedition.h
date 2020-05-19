@@ -115,6 +115,7 @@ public:
 	void RemoveLockout(const std::string& event_name);
 
 	void SendClientExpeditionInfo(Client* client);
+	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 
 	void DzAddPlayer(Client* requester, std::string add_char_name, std::string swap_remove_name = {});
 	void DzAddPlayerContinue(std::string leader_name, std::string add_char_name, std::string swap_remove_name = {});
@@ -155,7 +156,7 @@ private:
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(bool destroyed = false);
 	void SendWorldGetOnlineMembers();
-	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name);
+	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name, bool pending = false);
 	void SendWorldLeaderChanged();
 	void SendWorldLockoutUpdate(const std::string& event_name, uint64_t expire_time, uint32_t duration, bool remove = false);
 	void SendWorldMakeLeaderRequest(const std::string& requester_name, const std::string& new_leader_name);

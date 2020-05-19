@@ -1383,24 +1383,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		break;
 	}
 	case ServerOP_ExpeditionGetOnlineMembers:
-	{
-		Expedition::GetOnlineMembers(pack);
-		break;
-	}
 	case ServerOP_ExpeditionDzAddPlayer:
-	{
-		Expedition::AddPlayer(pack);
-		break;
-	}
 	case ServerOP_ExpeditionDzMakeLeader:
-	{
-		Expedition::MakeLeader(pack);
-		break;
-	}
 	case ServerOP_ExpeditionRemoveCharLockouts:
+	case ServerOP_ExpeditionSaveInvite:
+	case ServerOP_ExpeditionRequestInvite:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
-		client_list.SendPacket(buf->character_name, pack);
+		Expedition::HandleZoneMessage(pack);
 		break;
 	}
 	case ServerOP_DzCharacterChange:

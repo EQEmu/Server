@@ -1269,6 +1269,16 @@ void Expedition::SendClientExpeditionInfo(Client* client)
 	}
 }
 
+void Expedition::SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name)
+{
+	LogExpeditions(
+		"Character [{}] saving pending invite from [{}] to expedition [{}] in world",
+		add_name, invite.inviter_name, invite.expedition_id
+	);
+
+	SendWorldAddPlayerInvite(invite.inviter_name, invite.swap_remove_name, add_name, true);
+}
+
 std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 {
 	uint32_t outsize = sizeof(ExpeditionInfo_Struct);
@@ -1375,10 +1385,11 @@ void Expedition::SendWorldExpeditionUpdate(bool destroyed)
 }
 
 void Expedition::SendWorldAddPlayerInvite(
-	const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name)
+	const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name, bool pending)
 {
+	auto server_opcode = pending ? ServerOP_ExpeditionSaveInvite : ServerOP_ExpeditionDzAddPlayer;
 	uint32_t pack_size = sizeof(ServerDzCommand_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzAddPlayer, pack_size));
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(server_opcode, pack_size));
 	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->is_char_online = false;

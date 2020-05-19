@@ -155,6 +155,8 @@
 #define ServerOP_ExpeditionDzSafeReturn       0x040b
 #define ServerOP_ExpeditionDzZoneIn           0x040c
 #define ServerOP_ExpeditionRemoveCharLockouts 0x040d
+#define ServerOP_ExpeditionSaveInvite         0x040e
+#define ServerOP_ExpeditionRequestInvite      0x040f
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2055,6 +2057,10 @@ struct ServerExpeditionLockout_Struct {
 struct ServerExpeditionCharacterName_Struct {
 	char character_name[64];
 	char expedition_name[128];
+};
+
+struct ServerExpeditionCharacterID_Struct {
+	uint32_t character_id;
 };
 
 struct ServerDzCommand_Struct {
