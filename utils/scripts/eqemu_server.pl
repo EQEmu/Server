@@ -243,7 +243,7 @@ sub show_install_summary_info
         print " - server_status.sh			Prints the status of the EQEmu Server processes\n";
     }
 
-    print "[Configure] eqemu_config.xml 		Edit to change server settings and name\n";
+    print "[Configure] eqemu_config.json 		Edit to change server settings and name\n";
 
     analytics_insertion("install_complete", "null");
 }
@@ -1465,7 +1465,7 @@ sub read_eqemu_config_json
 sub aa_fetch
 {
     if (!$db) {
-        print "No database present, check your eqemu_config.xml for proper MySQL/MariaDB configuration...\n";
+        print "No database present, check your eqemu_config.json for proper MySQL/MariaDB configuration...\n";
         return;
     }
 
@@ -2395,7 +2395,7 @@ sub run_database_check
 {
 
     if (!$db) {
-        print "No database present, check your eqemu_config.xml for proper MySQL/MariaDB configuration...\n";
+        print "No database present, check your eqemu_config.json for proper MySQL/MariaDB configuration...\n";
         return;
     }
 
