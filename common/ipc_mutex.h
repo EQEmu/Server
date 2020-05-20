@@ -21,7 +21,7 @@
 
 #include <string>
 
-namespace EQEmu {
+namespace EQ {
 
 	//! Interprocess Named Binary Semaphore (Mutex)
 	/*!

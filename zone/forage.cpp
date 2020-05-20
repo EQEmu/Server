@@ -153,21 +153,21 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 //we need this function to immediately determine, after we receive OP_Fishing, if we can even try to fish, otherwise we have to wait a while to get the failure
 bool Client::CanFish() {
 	//make sure we still have a fishing pole on:
-	const EQEmu::ItemInstance* Pole = m_inv[EQEmu::invslot::slotPrimary];
-	int32 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
-	const EQEmu::ItemInstance* Bait = nullptr;
+	const EQ::ItemInstance* Pole = m_inv[EQ::invslot::slotPrimary];
+	int32 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
+	const EQ::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
-	if (!Pole || !Pole->IsClassCommon() || Pole->GetItem()->ItemType != EQEmu::item::ItemTypeFishingPole) {
-		if (m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingPole, 1, invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor))	//We have a fishing pole somewhere, just not equipped
+	if (!Pole || !Pole->IsClassCommon() || Pole->GetItem()->ItemType != EQ::item::ItemTypeFishingPole) {
+		if (m_inv.HasItemByUse(EQ::item::ItemTypeFishingPole, 1, invWhereWorn | invWherePersonal | invWhereBank | invWhereSharedBank | invWhereTrading | invWhereCursor))	//We have a fishing pole somewhere, just not equipped
 			MessageString(Chat::Skills, FISHING_EQUIP_POLE);	//You need to put your fishing pole in your primary hand.
 		else	//We don't have a fishing pole anywhere
 			MessageString(Chat::Skills, FISHING_NO_POLE);	//You can't fish without a fishing pole, go buy one.
 		return false;
 	}
 
-	if (!Bait || !Bait->IsClassCommon() || Bait->GetItem()->ItemType != EQEmu::item::ItemTypeFishingBait) {
+	if (!Bait || !Bait->IsClassCommon() || Bait->GetItem()->ItemType != EQ::item::ItemTypeFishingBait) {
 		MessageString(Chat::Skills, FISHING_NO_BAIT);	//You can't fish without fishing bait, go buy some.
 		return false;
 	}
@@ -249,16 +249,16 @@ void Client::GoFish()
 
 	//success formula is not researched at all
 
-	int fishing_skill = GetSkill(EQEmu::skills::SkillFishing);	//will take into account skill bonuses on pole & bait
+	int fishing_skill = GetSkill(EQ::skills::SkillFishing);	//will take into account skill bonuses on pole & bait
 
 	//make sure we still have a fishing pole on:
-	int32 bslot = m_inv.HasItemByUse(EQEmu::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
-	const EQEmu::ItemInstance* Bait = nullptr;
+	int32 bslot = m_inv.HasItemByUse(EQ::item::ItemTypeFishingBait, 1, invWhereWorn | invWherePersonal);
+	const EQ::ItemInstance* Bait = nullptr;
 	if (bslot != INVALID_INDEX)
 		Bait = m_inv.GetItem(bslot);
 
 	//if the bait isnt equipped, need to add its skill bonus
-	if (bslot >= EQEmu::invslot::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == EQEmu::skills::SkillFishing) {
+	if (bslot >= EQ::invslot::GENERAL_BEGIN && Bait != nullptr && Bait->GetItem()->SkillModType == EQ::skills::SkillFishing) {
 		fishing_skill += Bait->GetItem()->SkillModValue;
 	}
 
@@ -312,17 +312,17 @@ void Client::GoFish()
 			food_id = (RuleB(Character, UseNoJunkFishing) ? 13019 : common_fish_ids[index]);
 		}
 
-		const EQEmu::ItemData* food_item = database.GetItem(food_id);
+		const EQ::ItemData* food_item = database.GetItem(food_id);
 		if (food_item) {
 
-			if (food_item->ItemType != EQEmu::item::ItemTypeFood) {
+			if (food_item->ItemType != EQ::item::ItemTypeFood) {
 				MessageString(Chat::Skills, FISHING_SUCCESS);
 			}
 			else {
 				MessageString(Chat::Skills, FISHING_SUCCESS_FISH_NAME, food_item->Name);
 			}
 
-			EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
+			EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 			if (inst != nullptr) {
 				if (CheckLoreConflict(inst->GetItem()))
 				{
@@ -332,16 +332,16 @@ void Client::GoFish()
 				else
 				{
 					PushItemOnCursor(*inst);
-					SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
+					SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 					if (RuleB(TaskSystem, EnableTaskSystem))
 						UpdateTasksForItem(ActivityFish, food_id);
 
 					safe_delete(inst);
-					inst = m_inv.GetItem(EQEmu::invslot::slotCursor);
+					inst = m_inv.GetItem(EQ::invslot::slotCursor);
 				}
 
 				if (inst) {
-					std::vector<EQEmu::Any> args;
+					std::vector<EQ::Any> args;
 					args.push_back(inst);
 					parse->EventPlayer(EVENT_FISH_SUCCESS, this, "", inst->GetID(), &args);
 				}
@@ -368,21 +368,26 @@ void Client::GoFish()
 	//chance to break fishing pole...
 	//this is potentially exploitable in that they can fish
 	//and then swap out items in primary slot... too lazy to fix right now
-	if (zone->random.Int(0, 49) == 1) {
-		MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
-		DeleteItemInInventory(EQEmu::invslot::slotPrimary, 0, true);
+	const EQ::ItemInstance* Pole = m_inv[EQ::invslot::slotPrimary];
+
+	if (Pole) {
+		const EQ::ItemData* fishing_item = Pole->GetItem();
+		if (fishing_item && fishing_item->SubType == 0 && zone->random.Int(0, 49) == 1) {
+			MessageString(Chat::Skills, FISHING_POLE_BROKE);	//Your fishing pole broke!
+			DeleteItemInInventory(EQ::invslot::slotPrimary, 0, true);
+		}
 	}
 
-	if (CheckIncreaseSkill(EQEmu::skills::SkillFishing, nullptr, 5))
+	if (CheckIncreaseSkill(EQ::skills::SkillFishing, nullptr, 5))
 	{
-		if (title_manager.IsNewTradeSkillTitleAvailable(EQEmu::skills::SkillFishing, GetRawSkill(EQEmu::skills::SkillFishing)))
+		if (title_manager.IsNewTradeSkillTitleAvailable(EQ::skills::SkillFishing, GetRawSkill(EQ::skills::SkillFishing)))
 			NotifyNewTitlesAvailable();
 	}
 }
 
 void Client::ForageItem(bool guarantee) {
 
-	int skill_level = GetSkill(EQEmu::skills::SkillForage);
+	int skill_level = GetSkill(EQ::skills::SkillForage);
 
 	//be wary of the string ids in switch below when changing this.
 	uint32 common_food_ids[MAX_COMMON_FOOD_IDS] = {
@@ -412,7 +417,7 @@ void Client::ForageItem(bool guarantee) {
 			foragedfood = common_food_ids[index];
 		}
 
-		const EQEmu::ItemData* food_item = database.GetItem(foragedfood);
+		const EQ::ItemData* food_item = database.GetItem(foragedfood);
 
 		if(!food_item) {
 			LogError("nullptr returned from database.GetItem in ClientForageItem");
@@ -423,10 +428,10 @@ void Client::ForageItem(bool guarantee) {
 			stringid = FORAGE_GRUBS;
 		else
 			switch(food_item->ItemType) {
-			case EQEmu::item::ItemTypeFood:
+			case EQ::item::ItemTypeFood:
 				stringid = FORAGE_FOOD;
 				break;
-			case EQEmu::item::ItemTypeDrink:
+			case EQ::item::ItemTypeDrink:
 				if(strstr(food_item->Name, "ater"))
 					stringid = FORAGE_WATER;
 				else
@@ -437,7 +442,7 @@ void Client::ForageItem(bool guarantee) {
 			}
 
 		MessageString(Chat::Skills, stringid);
-		EQEmu::ItemInstance* inst = database.CreateItem(food_item, 1);
+		EQ::ItemInstance* inst = database.CreateItem(food_item, 1);
 		if(inst != nullptr) {
 			// check to make sure it isn't a foraged lore item
 			if(CheckLoreConflict(inst->GetItem()))
@@ -447,16 +452,16 @@ void Client::ForageItem(bool guarantee) {
 			}
 			else {
 				PushItemOnCursor(*inst);
-				SendItemPacket(EQEmu::invslot::slotCursor, inst, ItemPacketLimbo);
+				SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
 				if(RuleB(TaskSystem, EnableTaskSystem))
 					UpdateTasksForItem(ActivityForage, foragedfood);
 
 				safe_delete(inst);
-				inst = m_inv.GetItem(EQEmu::invslot::slotCursor);
+				inst = m_inv.GetItem(EQ::invslot::slotCursor);
 			}
 
 			if(inst) {
-				std::vector<EQEmu::Any> args;
+				std::vector<EQ::Any> args;
 				args.push_back(inst);
 				parse->EventPlayer(EVENT_FORAGE_SUCCESS, this, "", inst->GetID(), &args);
 			}
@@ -473,7 +478,7 @@ void Client::ForageItem(bool guarantee) {
 		parse->EventPlayer(EVENT_FORAGE_FAILURE, this, "", 0);
 	}
 
-	CheckIncreaseSkill(EQEmu::skills::SkillForage, nullptr, 5);
+	CheckIncreaseSkill(EQ::skills::SkillForage, nullptr, 5);
 
 }
 

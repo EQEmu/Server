@@ -133,7 +133,7 @@ public:
 
 	const char *GetSpellBlockedMessage(uint32 spell_id, const glm::vec3 &location);
 
-	EQEmu::Random random;
+	EQ::Random random;
 	EQTime        zone_time;
 
 	ZonePoint *GetClosestZonePoint(const glm::vec3 &location, const char *to_name, Client *client, float max_distance = 40000.0f);

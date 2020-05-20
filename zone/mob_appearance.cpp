@@ -52,47 +52,47 @@ void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color
 	);
 
 	switch (material_slot) {
-		case EQEmu::textures::armorHead:
+		case EQ::textures::armorHead:
 			mob_texture_profile.Head.Material        = texture;
 			mob_texture_profile.Head.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Head.Color           = color;
 			break;
-		case EQEmu::textures::armorChest:
+		case EQ::textures::armorChest:
 			mob_texture_profile.Chest.Material        = texture;
 			mob_texture_profile.Chest.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Chest.Color           = color;
 			break;
-		case EQEmu::textures::armorArms:
+		case EQ::textures::armorArms:
 			mob_texture_profile.Arms.Material        = texture;
 			mob_texture_profile.Arms.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Arms.Color           = color;
 			break;
-		case EQEmu::textures::armorWrist:
+		case EQ::textures::armorWrist:
 			mob_texture_profile.Wrist.Material        = texture;
 			mob_texture_profile.Wrist.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Wrist.Color           = color;
 			break;
-		case EQEmu::textures::armorHands:
+		case EQ::textures::armorHands:
 			mob_texture_profile.Hands.Material        = texture;
 			mob_texture_profile.Hands.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Hands.Color           = color;
 			break;
-		case EQEmu::textures::armorLegs:
+		case EQ::textures::armorLegs:
 			mob_texture_profile.Legs.Material        = texture;
 			mob_texture_profile.Legs.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Legs.Color           = color;
 			break;
-		case EQEmu::textures::armorFeet:
+		case EQ::textures::armorFeet:
 			mob_texture_profile.Feet.Material        = texture;
 			mob_texture_profile.Feet.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Feet.Color           = color;
 			break;
-		case EQEmu::textures::weaponPrimary:
+		case EQ::textures::weaponPrimary:
 			mob_texture_profile.Primary.Material        = texture;
 			mob_texture_profile.Primary.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Primary.Color           = color;
 			break;
-		case EQEmu::textures::weaponSecondary:
+		case EQ::textures::weaponSecondary:
 			mob_texture_profile.Secondary.Material        = texture;
 			mob_texture_profile.Secondary.HerosForgeModel = hero_forge_model;
 			mob_texture_profile.Secondary.Color           = color;
@@ -111,23 +111,23 @@ void Mob::SetMobTextureProfile(uint8 material_slot, uint16 texture, uint32 color
 int32 Mob::GetTextureProfileMaterial(uint8 material_slot) const
 {
 	switch (material_slot) {
-		case EQEmu::textures::armorHead:
+		case EQ::textures::armorHead:
 			return mob_texture_profile.Head.Material;
-		case EQEmu::textures::armorChest:
+		case EQ::textures::armorChest:
 			return mob_texture_profile.Chest.Material;
-		case EQEmu::textures::armorArms:
+		case EQ::textures::armorArms:
 			return mob_texture_profile.Arms.Material;
-		case EQEmu::textures::armorWrist:
+		case EQ::textures::armorWrist:
 			return mob_texture_profile.Wrist.Material;
-		case EQEmu::textures::armorHands:
+		case EQ::textures::armorHands:
 			return mob_texture_profile.Hands.Material;
-		case EQEmu::textures::armorLegs:
+		case EQ::textures::armorLegs:
 			return mob_texture_profile.Legs.Material;
-		case EQEmu::textures::armorFeet:
+		case EQ::textures::armorFeet:
 			return mob_texture_profile.Feet.Material;
-		case EQEmu::textures::weaponPrimary:
+		case EQ::textures::weaponPrimary:
 			return mob_texture_profile.Primary.Material;
-		case EQEmu::textures::weaponSecondary:
+		case EQ::textures::weaponSecondary:
 			return mob_texture_profile.Secondary.Material;
 		default:
 			return 0;
@@ -143,23 +143,23 @@ int32 Mob::GetTextureProfileMaterial(uint8 material_slot) const
 int32 Mob::GetTextureProfileColor(uint8 material_slot) const
 {
 	switch (material_slot) {
-		case EQEmu::textures::armorHead:
+		case EQ::textures::armorHead:
 			return mob_texture_profile.Head.Color;
-		case EQEmu::textures::armorChest:
+		case EQ::textures::armorChest:
 			return mob_texture_profile.Chest.Color;
-		case EQEmu::textures::armorArms:
+		case EQ::textures::armorArms:
 			return mob_texture_profile.Arms.Color;
-		case EQEmu::textures::armorWrist:
+		case EQ::textures::armorWrist:
 			return mob_texture_profile.Wrist.Color;
-		case EQEmu::textures::armorHands:
+		case EQ::textures::armorHands:
 			return mob_texture_profile.Hands.Color;
-		case EQEmu::textures::armorLegs:
+		case EQ::textures::armorLegs:
 			return mob_texture_profile.Legs.Color;
-		case EQEmu::textures::armorFeet:
+		case EQ::textures::armorFeet:
 			return mob_texture_profile.Feet.Color;
-		case EQEmu::textures::weaponPrimary:
+		case EQ::textures::weaponPrimary:
 			return mob_texture_profile.Primary.Color;
-		case EQEmu::textures::weaponSecondary:
+		case EQ::textures::weaponSecondary:
 			return mob_texture_profile.Secondary.Color;
 		default:
 			return 0;
@@ -175,23 +175,23 @@ int32 Mob::GetTextureProfileColor(uint8 material_slot) const
 int32 Mob::GetTextureProfileHeroForgeModel(uint8 material_slot) const
 {
 	switch (material_slot) {
-		case EQEmu::textures::armorHead:
+		case EQ::textures::armorHead:
 			return mob_texture_profile.Head.HerosForgeModel;
-		case EQEmu::textures::armorChest:
+		case EQ::textures::armorChest:
 			return mob_texture_profile.Chest.HerosForgeModel;
-		case EQEmu::textures::armorArms:
+		case EQ::textures::armorArms:
 			return mob_texture_profile.Arms.HerosForgeModel;
-		case EQEmu::textures::armorWrist:
+		case EQ::textures::armorWrist:
 			return mob_texture_profile.Wrist.HerosForgeModel;
-		case EQEmu::textures::armorHands:
+		case EQ::textures::armorHands:
 			return mob_texture_profile.Hands.HerosForgeModel;
-		case EQEmu::textures::armorLegs:
+		case EQ::textures::armorLegs:
 			return mob_texture_profile.Legs.HerosForgeModel;
-		case EQEmu::textures::armorFeet:
+		case EQ::textures::armorFeet:
 			return mob_texture_profile.Feet.HerosForgeModel;
-		case EQEmu::textures::weaponPrimary:
+		case EQ::textures::weaponPrimary:
 			return mob_texture_profile.Primary.HerosForgeModel;
-		case EQEmu::textures::weaponSecondary:
+		case EQ::textures::weaponSecondary:
 			return mob_texture_profile.Secondary.HerosForgeModel;
 		default:
 			return 0;
@@ -230,18 +230,18 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
 		 * Handle primary / secondary texture
 		 */
 		bool is_primary_or_secondary_weapon =
-				 material_slot == EQEmu::textures::weaponPrimary ||
-				 material_slot == EQEmu::textures::weaponSecondary;
+				 material_slot == EQ::textures::weaponPrimary ||
+				 material_slot == EQ::textures::weaponSecondary;
 
 		if (is_primary_or_secondary_weapon) {
 			if (this->IsClient()) {
 
-				int16 inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+				int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 				if (inventory_slot == INVALID_INDEX) {
 					return 0;
 				}
 
-				const EQEmu::ItemInstance *item_instance = CastToClient()->m_inv[inventory_slot];
+				const EQ::ItemInstance *item_instance = CastToClient()->m_inv[inventory_slot];
 				if (item_instance) {
 					if (item_instance->GetOrnamentationAug(ornamentation_augment_type)) {
 						item = item_instance->GetOrnamentationAug(ornamentation_augment_type)->GetItem();
@@ -273,7 +273,7 @@ int32 Mob::GetEquipmentMaterial(uint8 material_slot) const
  */
 uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 {
-	const EQEmu::ItemData *item = nullptr;
+	const EQ::ItemData *item = nullptr;
 
 	if (armor_tint.Slot[material_slot].Color) {
 		return armor_tint.Slot[material_slot].Color;
@@ -294,15 +294,15 @@ uint32 Mob::GetEquipmentColor(uint8 material_slot) const
 int32 Mob::GetHerosForgeModel(uint8 material_slot) const
 {
 	uint32 hero_model = 0;
-	if (material_slot >= 0 && material_slot < EQEmu::textures::weaponPrimary) {
+	if (material_slot >= 0 && material_slot < EQ::textures::weaponPrimary) {
 		uint32 ornamentation_aug_type = RuleI(Character, OrnamentationAugmentType);
 
-		const EQEmu::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
-		int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+		const EQ::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(material_slot));
+		int16 invslot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 
 		if (item != nullptr && invslot != INVALID_INDEX) {
 			if (IsClient()) {
-				const EQEmu::ItemInstance *inst = CastToClient()->m_inv[invslot];
+				const EQ::ItemInstance *inst = CastToClient()->m_inv[invslot];
 				if (inst) {
 					if (inst->GetOrnamentationAug(ornamentation_aug_type)) {
 						item       = inst->GetOrnamentationAug(ornamentation_aug_type)->GetItem();
@@ -352,7 +352,7 @@ uint32 NPC::GetEquippedItemFromTextureSlot(uint8 material_slot) const
 		return 0;
 	}
 
-	int16 inventory_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	int16 inventory_slot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (inventory_slot == INVALID_INDEX) {
 		return 0;
 	}
@@ -383,8 +383,8 @@ void Mob::SendArmorAppearance(Client *one_client)
 
 	if (IsPlayerRace(race)) {
 		if (!IsClient()) {
-			for (uint8 i = 0; i <= EQEmu::textures::materialCount; ++i) {
-				const EQEmu::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(i));
+			for (uint8 i = 0; i <= EQ::textures::materialCount; ++i) {
+				const EQ::ItemData *item = database.GetItem(GetEquippedItemFromTextureSlot(i));
 				if (item != nullptr) {
 					SendWearChange(i, one_client);
 				}
@@ -392,7 +392,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 		}
 	}
 
-	for (uint8 i = 0; i <= EQEmu::textures::materialCount; ++i) {
+	for (uint8 i = 0; i <= EQ::textures::materialCount; ++i) {
 		if (GetTextureProfileMaterial(i)) {
 			SendWearChange(i, one_client);
 		}
@@ -419,7 +419,7 @@ void Mob::SendWearChange(uint8 material_slot, Client *one_client)
 
 #ifdef BOTS
 	if (IsBot()) {
-		auto item_inst = CastToBot()->GetBotItem(EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot));
+		auto item_inst = CastToBot()->GetBotItem(EQ::InventoryProfile::CalcSlotFromMaterial(material_slot));
 		if (item_inst)
 			wear_change->color.Color = item_inst->GetColor();
 		else

@@ -48,19 +48,19 @@ public:
 
 	private:
 	void InitTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_, 501);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_, 501);
 		TEST_ASSERT(!hash.exists(0));
 		TEST_ASSERT(!hash.exists(501));
 	}
 
 	void LoadTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		TEST_ASSERT(!hash.exists(0));
 		TEST_ASSERT(!hash.exists(501));
 	}
 
 	void InsertTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		test_struct test;
 		memset(&test, 0, sizeof(test));
 		strcpy(test.name, "Bill D.");
@@ -71,7 +71,7 @@ public:
 	}
 
 	void RetrieveTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		TEST_ASSERT(hash.exists(0));
 		TEST_ASSERT(!hash.exists(501));
 
@@ -80,7 +80,7 @@ public:
 	}
 
 	void InsertAgainTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		test_struct test;
 		memset(&test, 0, sizeof(test));
 		strcpy(test.name, "Jimmy P.");
@@ -91,7 +91,7 @@ public:
 	}
 
 	void RetrieveAgainTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		TEST_ASSERT(hash.exists(0));
 		TEST_ASSERT(hash.exists(501));
 
@@ -100,7 +100,7 @@ public:
 	}
 
 	void InsertAgainFailTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		test_struct test;
 		memset(&test, 0, sizeof(test));
 		strcpy(test.name, "Tommy M.");
@@ -115,7 +115,7 @@ public:
 	}
 
 	void RetrieveAgainFailTest() {
-		EQEmu::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
+		EQ::FixedMemoryVariableHashSet<test_struct> hash(data_, size_);
 		TEST_ASSERT(hash.exists(0));
 		TEST_ASSERT(hash.exists(501));
 		TEST_ASSERT(!hash.exists(500));

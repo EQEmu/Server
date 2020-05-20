@@ -43,7 +43,7 @@ namespace SoD
 	static OpcodeManager *opcodes = nullptr;
 	static Strategy struct_strategy;
 
-	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id, uint8 depth);
+	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id, uint8 depth);
 
 	// server to client inventory location converters
 	static inline uint32 ServerToSoDSlot(uint32 server_slot);
@@ -59,8 +59,8 @@ namespace SoD
 	// client to server say link converter
 	static inline void SoDToServerSayLink(std::string &server_saylink, const std::string &sod_saylink);
 
-	static inline spells::CastingSlot ServerToSoDCastingSlot(EQEmu::spells::CastingSlot slot);
-	static inline EQEmu::spells::CastingSlot SoDToServerCastingSlot(spells::CastingSlot slot);
+	static inline spells::CastingSlot ServerToSoDCastingSlot(EQ::spells::CastingSlot slot);
+	static inline EQ::spells::CastingSlot SoDToServerCastingSlot(spells::CastingSlot slot);
 
 	static inline int ServerToSoDBuffSlot(int index);
 	static inline int SoDToServerBuffSlot(int index);
@@ -144,9 +144,9 @@ namespace SoD
 		return(r);
 	}
 
-	const EQEmu::versions::ClientVersion Strategy::ClientVersion() const
+	const EQ::versions::ClientVersion Strategy::ClientVersion() const
 	{
-		return EQEmu::versions::ClientVersion::SoD;
+		return EQ::versions::ClientVersion::SoD;
 	}
 
 #include "ss_define.h"
@@ -381,24 +381,24 @@ namespace SoD
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 
-		int item_count = in->size / sizeof(EQEmu::InternalSerializedItem_Struct);
-		if (!item_count || (in->size % sizeof(EQEmu::InternalSerializedItem_Struct)) != 0) {
+		int item_count = in->size / sizeof(EQ::InternalSerializedItem_Struct);
+		if (!item_count || (in->size % sizeof(EQ::InternalSerializedItem_Struct)) != 0) {
 			Log(Logs::General, Logs::Netcode, "[STRUCTS] Wrong size on outbound %s: Got %d, expected multiple of %d",
-				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQEmu::InternalSerializedItem_Struct));
+				opcodes->EmuToName(in->GetOpcode()), in->size, sizeof(EQ::InternalSerializedItem_Struct));
 
 			delete in;
 			return;
 		}
 
-		EQEmu::InternalSerializedItem_Struct* eq = (EQEmu::InternalSerializedItem_Struct*)in->pBuffer;
+		EQ::InternalSerializedItem_Struct* eq = (EQ::InternalSerializedItem_Struct*)in->pBuffer;
 
-		EQEmu::OutBuffer ob;
-		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+		EQ::OutBuffer ob;
+		EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
 		ob.write((const char*)&item_count, sizeof(uint32));
 
 		for (int index = 0; index < item_count; ++index, ++eq) {
-			SerializeItem(ob, (const EQEmu::ItemInstance*)eq->inst, eq->slot_id, 0);
+			SerializeItem(ob, (const EQ::ItemInstance*)eq->inst, eq->slot_id, 0);
 			if (ob.tellp() == last_pos)
 				LogNetcode("SoD::ENCODE(OP_CharInventory) Serialization failed on item slot [{}] during OP_CharInventory.  Item skipped", eq->slot_id);
 
@@ -1060,14 +1060,14 @@ namespace SoD
 		//store away the emu struct
 		uchar* __emu_buffer = in->pBuffer;
 		
-		EQEmu::InternalSerializedItem_Struct* int_struct = (EQEmu::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
+		EQ::InternalSerializedItem_Struct* int_struct = (EQ::InternalSerializedItem_Struct*)(&__emu_buffer[4]);
 
-		EQEmu::OutBuffer ob;
-		EQEmu::OutBuffer::pos_type last_pos = ob.tellp();
+		EQ::OutBuffer ob;
+		EQ::OutBuffer::pos_type last_pos = ob.tellp();
 
 		ob.write((const char*)__emu_buffer, 4);
 
-		SerializeItem(ob, (const EQEmu::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
+		SerializeItem(ob, (const EQ::ItemInstance*)int_struct->inst, int_struct->slot_id, 0);
 		if (ob.tellp() == last_pos) {
 			LogNetcode("SoD::ENCODE(OP_ItemPacket) Serialization failed on item slot [{}]", int_struct->slot_id);
 			delete in;
@@ -1463,7 +1463,7 @@ namespace SoD
 		OUT(hairstyle);
 		OUT(beard);
 		//	OUT(unknown00178[10]);
-		for (r = EQEmu::textures::textureBegin; r < EQEmu::textures::materialCount; r++) {
+		for (r = EQ::textures::textureBegin; r < EQ::textures::materialCount; r++) {
 			eq->equipment.Slot[r].Material = emu->item_material.Slot[r].Material;
 			eq->equipment.Slot[r].Unknown1 = 0;
 			eq->equipment.Slot[r].EliteMaterial = 0;
@@ -1493,7 +1493,7 @@ namespace SoD
 		OUT(face);
 		//	OUT(unknown02264[47]);
 
-		if (spells::SPELLBOOK_SIZE <= EQEmu::spells::SPELLBOOK_SIZE) {
+		if (spells::SPELLBOOK_SIZE <= EQ::spells::SPELLBOOK_SIZE) {
 			for (uint32 r = 0; r < spells::SPELLBOOK_SIZE; r++) {
 				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
 					eq->spell_book[r] = emu->spell_book[r];
@@ -1502,14 +1502,14 @@ namespace SoD
 			}
 		}
 		else {
-			for (uint32 r = 0; r < EQEmu::spells::SPELLBOOK_SIZE; r++) {
+			for (uint32 r = 0; r < EQ::spells::SPELLBOOK_SIZE; r++) {
 				if (emu->spell_book[r] <= spells::SPELL_ID_MAX)
 					eq->spell_book[r] = emu->spell_book[r];
 				else
 					eq->spell_book[r] = 0xFFFFFFFFU;
 			}
 			// invalidate the rest of the spellbook slots
-			memset(&eq->spell_book[EQEmu::spells::SPELLBOOK_SIZE], 0xFF, (sizeof(uint32) * (spells::SPELLBOOK_SIZE - EQEmu::spells::SPELLBOOK_SIZE)));
+			memset(&eq->spell_book[EQ::spells::SPELLBOOK_SIZE], 0xFF, (sizeof(uint32) * (spells::SPELLBOOK_SIZE - EQ::spells::SPELLBOOK_SIZE)));
 		}
 
 		//	OUT(unknown4184[128]);
@@ -1553,7 +1553,7 @@ namespace SoD
 		//	OUT(unknown06160[4]);
 
 		// Copy bandoliers where server and client indices converge
-		for (r = 0; r < EQEmu::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
+		for (r = 0; r < EQ::profile::BANDOLIERS_SIZE && r < profile::BANDOLIERS_SIZE; ++r) {
 			OUT_str(bandoliers[r].Name);
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				OUT(bandoliers[r].Items[k].ID);
@@ -1562,7 +1562,7 @@ namespace SoD
 			}
 		}
 		// Nullify bandoliers where server and client indices diverge, with a client bias
-		for (r = EQEmu::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
+		for (r = EQ::profile::BANDOLIERS_SIZE; r < profile::BANDOLIERS_SIZE; ++r) {
 			eq->bandoliers[r].Name[0] = '\0';
 			for (uint32 k = 0; k < profile::BANDOLIER_ITEM_COUNT; ++k) { // Will need adjusting if 'server != client' is ever true
 				eq->bandoliers[r].Items[k].ID = 0;
@@ -1574,13 +1574,13 @@ namespace SoD
 		//	OUT(unknown07444[5120]);
 
 		// Copy potion belt where server and client indices converge
-		for (r = 0; r < EQEmu::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
+		for (r = 0; r < EQ::profile::POTION_BELT_SIZE && r < profile::POTION_BELT_SIZE; ++r) {
 			OUT(potionbelt.Items[r].ID);
 			OUT(potionbelt.Items[r].Icon);
 			OUT_str(potionbelt.Items[r].Name);
 		}
 		// Nullify potion belt where server and client indices diverge, with a client bias
-		for (r = EQEmu::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
+		for (r = EQ::profile::POTION_BELT_SIZE; r < profile::POTION_BELT_SIZE; ++r) {
 			eq->potionbelt.Items[r].ID = 0;
 			eq->potionbelt.Items[r].Icon = 0;
 			eq->potionbelt.Items[r].Name[0] = '\0';
@@ -1923,7 +1923,7 @@ namespace SoD
 			eq_cse->HairColor = emu_cse->HairColor;
 			eq_cse->Face = emu_cse->Face;
 
-			for (int equip_index = EQEmu::textures::textureBegin; equip_index < EQEmu::textures::materialCount; equip_index++) {
+			for (int equip_index = EQ::textures::textureBegin; equip_index < EQ::textures::materialCount; equip_index++) {
 				eq_cse->Equip[equip_index].Material = emu_cse->Equip[equip_index].Material;
 				eq_cse->Equip[equip_index].Unknown1 = emu_cse->Equip[equip_index].Unknown1;
 				eq_cse->Equip[equip_index].EliteMaterial = emu_cse->Equip[equip_index].EliteModel;
@@ -2484,7 +2484,7 @@ namespace SoD
 			float SpawnSize = emu->size;
 			if (!((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522)))
 			{
-				PacketSize -= (sizeof(structs::Texture_Struct) * EQEmu::textures::materialCount);
+				PacketSize -= (sizeof(structs::Texture_Struct) * EQ::textures::materialCount);
 
 				if (emu->size == 0)
 				{
@@ -2681,7 +2681,7 @@ namespace SoD
 
 			if ((emu->NPC == 0) || (emu->race <= 12) || (emu->race == 128) || (emu->race == 130) || (emu->race == 330) || (emu->race == 522))
 			{
-				for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; ++k)
+				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; ++k)
 				{
 					{
 						VARSTRUCT_ENCODE_TYPE(uint32, Buffer, emu->equipment_tint.Slot[k].Color);
@@ -2708,13 +2708,13 @@ namespace SoD
 			{
 				structs::Texture_Struct *Equipment = (structs::Texture_Struct *)Buffer;
 
-				for (k = EQEmu::textures::textureBegin; k < EQEmu::textures::materialCount; k++) {
+				for (k = EQ::textures::textureBegin; k < EQ::textures::materialCount; k++) {
 					Equipment[k].Material = emu->equipment.Slot[k].Material;
 					Equipment[k].Unknown1 = emu->equipment.Slot[k].Unknown1;
 					Equipment[k].EliteMaterial = emu->equipment.Slot[k].EliteModel;
 				}
 
-				Buffer += (sizeof(structs::Texture_Struct) * EQEmu::textures::materialCount);
+				Buffer += (sizeof(structs::Texture_Struct) * EQ::textures::materialCount);
 			}
 			if (strlen(emu->title))
 			{
@@ -3146,7 +3146,7 @@ namespace SoD
 
 		for (int i = 0; i < spells::SPELL_GEM_COUNT; ++i)
 			emu->spell[i] = eq->spell[i];
-		for (int i = spells::SPELL_GEM_COUNT; i < EQEmu::spells::SPELL_GEM_COUNT; ++i)
+		for (int i = spells::SPELL_GEM_COUNT; i < EQ::spells::SPELL_GEM_COUNT; ++i)
 			emu->spell[i] = 0xFFFFFFFF;
 
 		FINISH_DIRECT_DECODE();
@@ -3440,9 +3440,9 @@ namespace SoD
 		return NextItemInstSerialNumber;
 	}
 
-	void SerializeItem(EQEmu::OutBuffer& ob, const EQEmu::ItemInstance *inst, int16 slot_id_in, uint8 depth)
+	void SerializeItem(EQ::OutBuffer& ob, const EQ::ItemInstance *inst, int16 slot_id_in, uint8 depth)
 	{
-		const EQEmu::ItemData *item = inst->GetUnscaledItem();
+		const EQ::ItemData *item = inst->GetUnscaledItem();
 		
 		SoD::structs::ItemSerializationHeader hdr;
 
@@ -3631,6 +3631,12 @@ namespace SoD
 		itbs.no_transfer = item->NoTransfer;
 		itbs.expendablearrow = item->ExpendableArrow;
 
+		// Done to hack older clients to label expendable fishing poles as such
+		// July 28th, 2018 patch
+		if (item->ItemType == EQ::item::ItemTypeFishingPole && item->SubType == 0) {
+			itbs.expendablearrow = 1;
+		}
+
 		ob.write((const char*)&itbs, sizeof(SoD::structs::ItemTertiaryBodyStruct));
 
 		// Effect Structures Broken down to allow variable length strings for effect names
@@ -3751,30 +3757,30 @@ namespace SoD
 		
 		ob.write((const char*)&iqbs, sizeof(SoD::structs::ItemQuaternaryBodyStruct));
 
-		EQEmu::OutBuffer::pos_type count_pos = ob.tellp();
+		EQ::OutBuffer::pos_type count_pos = ob.tellp();
 		uint32 subitem_count = 0;
 
 		ob.write((const char*)&subitem_count, sizeof(uint32));
 
 		// moved outside of loop since it is not modified within that scope
-		int16 SubSlotNumber = EQEmu::invbag::SLOT_INVALID;
+		int16 SubSlotNumber = EQ::invbag::SLOT_INVALID;
 
-		if (slot_id_in <= EQEmu::invslot::slotGeneral8 && slot_id_in >= EQEmu::invslot::GENERAL_BEGIN)
-			SubSlotNumber = EQEmu::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::GENERAL_BEGIN) * EQEmu::invbag::SLOT_COUNT);
-		else if (slot_id_in <= EQEmu::invslot::GENERAL_END && slot_id_in >= EQEmu::invslot::slotGeneral9)
-			SubSlotNumber = EQEmu::invbag::SLOT_INVALID;
-		else if (slot_id_in == EQEmu::invslot::slotCursor)
-			SubSlotNumber = EQEmu::invbag::CURSOR_BAG_BEGIN;
-		else if (slot_id_in <= EQEmu::invslot::BANK_END && slot_id_in >= EQEmu::invslot::BANK_BEGIN)
-			SubSlotNumber = EQEmu::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
-		else if (slot_id_in <= EQEmu::invslot::SHARED_BANK_END && slot_id_in >= EQEmu::invslot::SHARED_BANK_BEGIN)
-			SubSlotNumber = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQEmu::invslot::SHARED_BANK_BEGIN) * EQEmu::invbag::SLOT_COUNT);
+		if (slot_id_in <= EQ::invslot::slotGeneral8 && slot_id_in >= EQ::invslot::GENERAL_BEGIN)
+			SubSlotNumber = EQ::invbag::GENERAL_BAGS_BEGIN + ((slot_id_in - EQ::invslot::GENERAL_BEGIN) * EQ::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQ::invslot::GENERAL_END && slot_id_in >= EQ::invslot::slotGeneral9)
+			SubSlotNumber = EQ::invbag::SLOT_INVALID;
+		else if (slot_id_in == EQ::invslot::slotCursor)
+			SubSlotNumber = EQ::invbag::CURSOR_BAG_BEGIN;
+		else if (slot_id_in <= EQ::invslot::BANK_END && slot_id_in >= EQ::invslot::BANK_BEGIN)
+			SubSlotNumber = EQ::invbag::BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
+		else if (slot_id_in <= EQ::invslot::SHARED_BANK_END && slot_id_in >= EQ::invslot::SHARED_BANK_BEGIN)
+			SubSlotNumber = EQ::invbag::SHARED_BANK_BAGS_BEGIN + ((slot_id_in - EQ::invslot::SHARED_BANK_BEGIN) * EQ::invbag::SLOT_COUNT);
 		else
 			SubSlotNumber = slot_id_in; // not sure if this is the best way to handle this..leaving for now
 
-		if (SubSlotNumber != EQEmu::invbag::SLOT_INVALID) {
-			for (uint32 index = EQEmu::invbag::SLOT_BEGIN; index <= EQEmu::invbag::SLOT_END; ++index) {
-				EQEmu::ItemInstance* sub = inst->GetItem(index);
+		if (SubSlotNumber != EQ::invbag::SLOT_INVALID) {
+			for (uint32 index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; ++index) {
+				EQ::ItemInstance* sub = inst->GetItem(index);
 				if (!sub)
 					continue;
 
@@ -3793,59 +3799,59 @@ namespace SoD
 	{
 		uint32 SoDSlot = invslot::SLOT_INVALID;
 
-		if (serverSlot <= EQEmu::invslot::slotGeneral8) {
+		if (serverSlot <= EQ::invslot::slotGeneral8) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::CORPSE_END && serverSlot >= EQEmu::invslot::slotCursor) {
+		else if (serverSlot <= EQ::invslot::CORPSE_END && serverSlot >= EQ::invslot::slotCursor) {
 			SoDSlot = serverSlot - 2;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::GENERAL_BAGS_8_END && serverSlot >= EQEmu::invbag::GENERAL_BAGS_BEGIN) {
+		else if (serverSlot <= EQ::invbag::GENERAL_BAGS_8_END && serverSlot >= EQ::invbag::GENERAL_BAGS_BEGIN) {
 			SoDSlot = serverSlot + 11;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::CURSOR_BAG_END && serverSlot >= EQEmu::invbag::CURSOR_BAG_BEGIN) {
+		else if (serverSlot <= EQ::invbag::CURSOR_BAG_END && serverSlot >= EQ::invbag::CURSOR_BAG_BEGIN) {
 			SoDSlot = serverSlot - 9;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::TRIBUTE_END && serverSlot >= EQEmu::invslot::TRIBUTE_BEGIN) {
+		else if (serverSlot <= EQ::invslot::TRIBUTE_END && serverSlot >= EQ::invslot::TRIBUTE_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::GUILD_TRIBUTE_END && serverSlot >= EQEmu::invslot::GUILD_TRIBUTE_BEGIN) {
+		else if (serverSlot <= EQ::invslot::GUILD_TRIBUTE_END && serverSlot >= EQ::invslot::GUILD_TRIBUTE_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot == EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
+		else if (serverSlot == EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::BANK_END && serverSlot >= EQEmu::invslot::BANK_BEGIN) {
+		else if (serverSlot <= EQ::invslot::BANK_END && serverSlot >= EQ::invslot::BANK_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::BANK_BAGS_END && serverSlot >= EQEmu::invbag::BANK_BAGS_BEGIN) {
+		else if (serverSlot <= EQ::invbag::BANK_BAGS_END && serverSlot >= EQ::invbag::BANK_BAGS_BEGIN) {
 			SoDSlot = serverSlot + 1;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::SHARED_BANK_END && serverSlot >= EQEmu::invslot::SHARED_BANK_BEGIN) {
+		else if (serverSlot <= EQ::invslot::SHARED_BANK_END && serverSlot >= EQ::invslot::SHARED_BANK_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQEmu::invbag::SHARED_BANK_BAGS_BEGIN) {
+		else if (serverSlot <= EQ::invbag::SHARED_BANK_BAGS_END && serverSlot >= EQ::invbag::SHARED_BANK_BAGS_BEGIN) {
 			SoDSlot = serverSlot + 1;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::TRADE_END && serverSlot >= EQEmu::invslot::TRADE_BEGIN) {
+		else if (serverSlot <= EQ::invslot::TRADE_END && serverSlot >= EQ::invslot::TRADE_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invbag::TRADE_BAGS_END && serverSlot >= EQEmu::invbag::TRADE_BAGS_BEGIN) {
+		else if (serverSlot <= EQ::invbag::TRADE_BAGS_END && serverSlot >= EQ::invbag::TRADE_BAGS_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
-		else if (serverSlot <= EQEmu::invslot::WORLD_END && serverSlot >= EQEmu::invslot::WORLD_BEGIN) {
+		else if (serverSlot <= EQ::invslot::WORLD_END && serverSlot >= EQ::invslot::WORLD_BEGIN) {
 			SoDSlot = serverSlot;
 		}
 
@@ -3858,11 +3864,11 @@ namespace SoD
 	{
 		uint32 SoDSlot = invslot::SLOT_INVALID;
 
-		if (server_corpse_slot <= EQEmu::invslot::slotGeneral8 && server_corpse_slot >= EQEmu::invslot::slotGeneral1) {
+		if (server_corpse_slot <= EQ::invslot::slotGeneral8 && server_corpse_slot >= EQ::invslot::slotGeneral1) {
 			SoDSlot = server_corpse_slot;
 		}
 
-		else if (server_corpse_slot <= EQEmu::invslot::CORPSE_END && server_corpse_slot >= EQEmu::invslot::slotCursor) {
+		else if (server_corpse_slot <= EQ::invslot::CORPSE_END && server_corpse_slot >= EQ::invslot::slotCursor) {
 			SoDSlot = server_corpse_slot - 2;
 		}
 
@@ -3873,7 +3879,7 @@ namespace SoD
 
 	static inline uint32 SoDToServerSlot(uint32 sod_slot)
 	{
-		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQ::invslot::SLOT_INVALID;
 
 		if (sod_slot <= invslot::slotGeneral8) {
 			server_slot = sod_slot;
@@ -3938,7 +3944,7 @@ namespace SoD
 
 	static inline uint32 SoDToServerCorpseSlot(uint32 sod_corpse_slot)
 	{
-		uint32 server_slot = EQEmu::invslot::SLOT_INVALID;
+		uint32 server_slot = EQ::invslot::SLOT_INVALID;
 
 		if (sod_corpse_slot <= invslot::slotGeneral8 && sod_corpse_slot >= invslot::slotGeneral1) {
 			server_slot = sod_corpse_slot;
@@ -3955,7 +3961,7 @@ namespace SoD
 
 	static inline void ServerToSoDSayLink(std::string &sod_saylink, const std::string &server_saylink)
 	{
-		if ((constants::SAY_LINK_BODY_SIZE == EQEmu::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
+		if ((constants::SAY_LINK_BODY_SIZE == EQ::constants::SAY_LINK_BODY_SIZE) || (server_saylink.find('\x12') == std::string::npos)) {
 			sod_saylink = server_saylink;
 			return;
 		}
@@ -3964,7 +3970,7 @@ namespace SoD
 
 		for (size_t segment_iter = 0; segment_iter < segments.size(); ++segment_iter) {
 			if (segment_iter & 1) {
-				if (segments[segment_iter].length() <= EQEmu::constants::SAY_LINK_BODY_SIZE) {
+				if (segments[segment_iter].length() <= EQ::constants::SAY_LINK_BODY_SIZE) {
 					sod_saylink.append(segments[segment_iter]);
 					// TODO: log size mismatch error
 					continue;
@@ -3995,7 +4001,7 @@ namespace SoD
 
 	static inline void SoDToServerSayLink(std::string &server_saylink, const std::string &sod_saylink)
 	{
-		if ((EQEmu::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sod_saylink.find('\x12') == std::string::npos)) {
+		if ((EQ::constants::SAY_LINK_BODY_SIZE == constants::SAY_LINK_BODY_SIZE) || (sod_saylink.find('\x12') == std::string::npos)) {
 			server_saylink = sod_saylink;
 			return;
 		}
@@ -4029,84 +4035,84 @@ namespace SoD
 		}
 	}
 
-	static inline spells::CastingSlot ServerToSoDCastingSlot(EQEmu::spells::CastingSlot slot)
+	static inline spells::CastingSlot ServerToSoDCastingSlot(EQ::spells::CastingSlot slot)
 	{
 		switch (slot) {
-		case EQEmu::spells::CastingSlot::Gem1:
+		case EQ::spells::CastingSlot::Gem1:
 			return spells::CastingSlot::Gem1;
-		case EQEmu::spells::CastingSlot::Gem2:
+		case EQ::spells::CastingSlot::Gem2:
 			return spells::CastingSlot::Gem2;
-		case EQEmu::spells::CastingSlot::Gem3:
+		case EQ::spells::CastingSlot::Gem3:
 			return spells::CastingSlot::Gem3;
-		case EQEmu::spells::CastingSlot::Gem4:
+		case EQ::spells::CastingSlot::Gem4:
 			return spells::CastingSlot::Gem4;
-		case EQEmu::spells::CastingSlot::Gem5:
+		case EQ::spells::CastingSlot::Gem5:
 			return spells::CastingSlot::Gem5;
-		case EQEmu::spells::CastingSlot::Gem6:
+		case EQ::spells::CastingSlot::Gem6:
 			return spells::CastingSlot::Gem6;
-		case EQEmu::spells::CastingSlot::Gem7:
+		case EQ::spells::CastingSlot::Gem7:
 			return spells::CastingSlot::Gem7;
-		case EQEmu::spells::CastingSlot::Gem8:
+		case EQ::spells::CastingSlot::Gem8:
 			return spells::CastingSlot::Gem8;
-		case EQEmu::spells::CastingSlot::Gem9:
+		case EQ::spells::CastingSlot::Gem9:
 			return spells::CastingSlot::Gem9;
-		case EQEmu::spells::CastingSlot::Gem10:
+		case EQ::spells::CastingSlot::Gem10:
 			return spells::CastingSlot::Gem10;
-		case EQEmu::spells::CastingSlot::Item:
-		case EQEmu::spells::CastingSlot::PotionBelt:
+		case EQ::spells::CastingSlot::Item:
+		case EQ::spells::CastingSlot::PotionBelt:
 			return spells::CastingSlot::Item;
-		case EQEmu::spells::CastingSlot::Discipline:
+		case EQ::spells::CastingSlot::Discipline:
 			return spells::CastingSlot::Discipline;
-		case EQEmu::spells::CastingSlot::AltAbility:
+		case EQ::spells::CastingSlot::AltAbility:
 			return spells::CastingSlot::AltAbility;
 		default: // we shouldn't have any issues with other slots ... just return something
 			return spells::CastingSlot::Discipline;
 		}
 	}
 
-	static inline EQEmu::spells::CastingSlot SoDToServerCastingSlot(spells::CastingSlot slot)
+	static inline EQ::spells::CastingSlot SoDToServerCastingSlot(spells::CastingSlot slot)
 	{
 		switch (slot) {
 		case spells::CastingSlot::Gem1:
-			return EQEmu::spells::CastingSlot::Gem1;
+			return EQ::spells::CastingSlot::Gem1;
 		case spells::CastingSlot::Gem2:
-			return EQEmu::spells::CastingSlot::Gem2;
+			return EQ::spells::CastingSlot::Gem2;
 		case spells::CastingSlot::Gem3:
-			return EQEmu::spells::CastingSlot::Gem3;
+			return EQ::spells::CastingSlot::Gem3;
 		case spells::CastingSlot::Gem4:
-			return EQEmu::spells::CastingSlot::Gem4;
+			return EQ::spells::CastingSlot::Gem4;
 		case spells::CastingSlot::Gem5:
-			return EQEmu::spells::CastingSlot::Gem5;
+			return EQ::spells::CastingSlot::Gem5;
 		case spells::CastingSlot::Gem6:
-			return EQEmu::spells::CastingSlot::Gem6;
+			return EQ::spells::CastingSlot::Gem6;
 		case spells::CastingSlot::Gem7:
-			return EQEmu::spells::CastingSlot::Gem7;
+			return EQ::spells::CastingSlot::Gem7;
 		case spells::CastingSlot::Gem8:
-			return EQEmu::spells::CastingSlot::Gem8;
+			return EQ::spells::CastingSlot::Gem8;
 		case spells::CastingSlot::Gem9:
-			return EQEmu::spells::CastingSlot::Gem9;
+			return EQ::spells::CastingSlot::Gem9;
 		case spells::CastingSlot::Gem10:
-			return EQEmu::spells::CastingSlot::Gem10;
+			return EQ::spells::CastingSlot::Gem10;
 		case spells::CastingSlot::Discipline:
-			return EQEmu::spells::CastingSlot::Discipline;
+			return EQ::spells::CastingSlot::Discipline;
 		case spells::CastingSlot::Item:
-			return EQEmu::spells::CastingSlot::Item;
+			return EQ::spells::CastingSlot::Item;
 		case spells::CastingSlot::AltAbility:
-			return EQEmu::spells::CastingSlot::AltAbility;
+			return EQ::spells::CastingSlot::AltAbility;
 		default: // we shouldn't have any issues with other slots ... just return something
-			return EQEmu::spells::CastingSlot::Discipline;
+			return EQ::spells::CastingSlot::Discipline;
 		}
 	}
 
 	static inline int ServerToSoDBuffSlot(int index)
 	{
 		// we're a disc
-		if (index >= EQEmu::spells::LONG_BUFFS + EQEmu::spells::SHORT_BUFFS)
-			return index - EQEmu::spells::LONG_BUFFS - EQEmu::spells::SHORT_BUFFS +
+		if (index >= EQ::spells::LONG_BUFFS + EQ::spells::SHORT_BUFFS)
+			return index - EQ::spells::LONG_BUFFS - EQ::spells::SHORT_BUFFS +
 			       spells::LONG_BUFFS + spells::SHORT_BUFFS;
 		// we're a song
-		if (index >= EQEmu::spells::LONG_BUFFS)
-			return index - EQEmu::spells::LONG_BUFFS + spells::LONG_BUFFS;
+		if (index >= EQ::spells::LONG_BUFFS)
+			return index - EQ::spells::LONG_BUFFS + spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}
@@ -4115,11 +4121,11 @@ namespace SoD
 	{
 		// we're a disc
 		if (index >= spells::LONG_BUFFS + spells::SHORT_BUFFS)
-			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQEmu::spells::LONG_BUFFS +
-			       EQEmu::spells::SHORT_BUFFS;
+			return index - spells::LONG_BUFFS - spells::SHORT_BUFFS + EQ::spells::LONG_BUFFS +
+			       EQ::spells::SHORT_BUFFS;
 		// we're a song
 		if (index >= spells::LONG_BUFFS)
-			return index - spells::LONG_BUFFS + EQEmu::spells::LONG_BUFFS;
+			return index - spells::LONG_BUFFS + EQ::spells::LONG_BUFFS;
 		// we're a normal buff
 		return index; // as long as we guard against bad slots server side, we should be fine
 	}

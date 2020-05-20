@@ -15,7 +15,7 @@
 extern ZSList zoneserver_list;
 extern ClientList client_list;
 extern AdventureManager adventure_manager;
-extern EQEmu::Random emu_random;
+extern EQ::Random emu_random;
 
 Adventure::Adventure(AdventureTemplate *t)
 {

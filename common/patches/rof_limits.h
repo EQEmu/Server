@@ -31,7 +31,7 @@ namespace RoF
 	const int16 INULL = 0;
 
 	namespace inventory {
-		inline EQEmu::versions::ClientVersion GetInventoryRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetInventoryRef() { return EQ::versions::ClientVersion::RoF; }
 
 		const bool ConcatenateInvTypeLimbo = false;
 
@@ -43,7 +43,7 @@ namespace RoF
 	} /*inventory*/
 
 	namespace invtype {
-		inline EQEmu::versions::ClientVersion GetInvTypeRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetInvTypeRef() { return EQ::versions::ClientVersion::RoF; }
 
 		namespace enum_ {
 			enum InventoryTypes : int16 {
@@ -116,7 +116,7 @@ namespace RoF
 	} /*invtype*/
 
 	namespace invslot {
-		inline EQEmu::versions::ClientVersion GetInvSlotRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetInvSlotRef() { return EQ::versions::ClientVersion::RoF; }
 
 		namespace enum_ {
 			enum InventorySlots : int16 {
@@ -194,7 +194,7 @@ namespace RoF
 	} /*invslot*/
 
 	namespace invbag {
-		inline EQEmu::versions::ClientVersion GetInvBagRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetInvBagRef() { return EQ::versions::ClientVersion::RoF; }
 
 		const int16 SLOT_INVALID = IINVALID;
 		const int16 SLOT_BEGIN = INULL;
@@ -206,7 +206,7 @@ namespace RoF
 	} /*invbag*/
 
 	namespace invaug {
-		inline EQEmu::versions::ClientVersion GetInvAugRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetInvAugRef() { return EQ::versions::ClientVersion::RoF; }
 
 		const int16 SOCKET_INVALID = IINVALID;
 		const int16 SOCKET_BEGIN = INULL;
@@ -218,7 +218,7 @@ namespace RoF
 	} /*invaug*/
 
 	namespace item {
-		inline EQEmu::versions::ClientVersion GetItemRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetItemRef() { return EQ::versions::ClientVersion::RoF; }
 
 		enum ItemPacketType : int {
 			ItemPacketMerchant = 100,
@@ -240,7 +240,7 @@ namespace RoF
 	} /*item*/
 
 	namespace profile {
-		inline EQEmu::versions::ClientVersion GetProfileRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetProfileRef() { return EQ::versions::ClientVersion::RoF; }
 
 		const int16 BANDOLIERS_SIZE = 20;		// number of bandolier instances
 		const int16 BANDOLIER_ITEM_COUNT = 4;	// number of equipment slots in bandolier instance
@@ -252,11 +252,11 @@ namespace RoF
 	} /*profile*/
 
 	namespace constants {
-		inline EQEmu::versions::ClientVersion GetConstantsRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetConstantsRef() { return EQ::versions::ClientVersion::RoF; }
 
-		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::RoF;
-		const uint32 EXPANSION_BIT = EQEmu::expansions::bitRoF;
-		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskRoF;
+		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::RoF;
+		const uint32 EXPANSION_BIT = EQ::expansions::bitRoF;
+		const uint32 EXPANSIONS_MASK = EQ::expansions::maskRoF;
 
 		const size_t CHARACTER_CREATION_LIMIT = 12;
 
@@ -265,21 +265,21 @@ namespace RoF
 	} /*constants*/
 
 	namespace behavior {
-		inline EQEmu::versions::ClientVersion GetBehaviorRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetBehaviorRef() { return EQ::versions::ClientVersion::RoF; }
 
 		const bool CoinHasWeight = false;
 
 	} /*behavior*/
 
 	namespace skills {
-		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::RoF; }
 
-		const size_t LastUsableSkill = EQEmu::skills::SkillTripleAttack;
+		const size_t LastUsableSkill = EQ::skills::SkillTripleAttack;
 
 	} /*skills*/
 
 	namespace spells {
-		inline EQEmu::versions::ClientVersion GetSkillsRef() { return EQEmu::versions::ClientVersion::RoF; }
+		inline EQ::versions::ClientVersion GetSkillsRef() { return EQ::versions::ClientVersion::RoF; }
 		
 		enum class CastingSlot : uint32 {
 			Gem1 = 0,

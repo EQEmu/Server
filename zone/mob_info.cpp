@@ -230,11 +230,11 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "tohit") {
-		return std::to_string(mob->compute_tohit(EQEmu::skills::SkillHandtoHand));
+		return std::to_string(mob->compute_tohit(EQ::skills::SkillHandtoHand));
 	}
 
 	if (attribute == "total_to_hit") {
-		return std::to_string(mob->GetTotalToHit(EQEmu::skills::SkillHandtoHand, 0));
+		return std::to_string(mob->GetTotalToHit(EQ::skills::SkillHandtoHand, 0));
 	}
 
 	if (attribute == "defense") {
@@ -246,7 +246,7 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 	}
 
 	if (attribute == "offense") {
-		return std::to_string(mob->offense(EQEmu::skills::SkillHandtoHand));
+		return std::to_string(mob->offense(EQ::skills::SkillHandtoHand));
 	}
 
 	if (attribute == "mitigation_ac") {
@@ -606,24 +606,24 @@ inline void NPCCommandsMenu(Client* client, NPC* npc)
 	std::string menu_commands;
 
 	if (npc->GetGrid() > 0) {
-		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#grid show", false, "Grid Points") + "] ";
+		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#grid show", false, "Grid Points") + "] ";
 	}
 
 	if (npc->GetEmoteID() > 0) {
 		std::string saylink = StringFormat("#emotesearch %u", npc->GetEmoteID());
-		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Emotes") + "] ";
+		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink(saylink, false, "Emotes") + "] ";
 	}
 
 	if (npc->GetLoottableID() > 0) {
-		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#npcloot show", false, "Loot") + "] ";
+		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#npcloot show", false, "Loot") + "] ";
 	}
 
 	if (npc->IsProximitySet()) {
-		menu_commands += "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#proximity show", false, "Proximity") + "] ";
+		menu_commands += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#proximity show", false, "Proximity") + "] ";
 	}
 
 	if (menu_commands.length() > 0) {
-		std::string dev_menu = "[" + EQEmu::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
+		std::string dev_menu = "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools", false, "DevTools") + "] ";;
 		client->Message(Chat::White, "| %s [Show Commands] %s", dev_menu.c_str(), menu_commands.c_str());
 	}
 }
@@ -823,7 +823,7 @@ void Mob::DisplayInfo(Mob *mob)
 			client->SendFullPopup(
 				"GM: Entity Info",
 				window_text.c_str(),
-				EQEmu::popupresponse::MOB_INFO_DISMISS,
+				EQ::popupresponse::MOB_INFO_DISMISS,
 				0,
 				100,
 				0,

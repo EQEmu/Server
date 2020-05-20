@@ -31,13 +31,13 @@
 #include "../common/patches/rof2_limits.h"
 
 
-namespace EQEmu
+namespace EQ
 {
 	void InitializeDynamicLookups();
 
 	namespace constants {
 		struct LookupEntry {
-			EQEmu::expansions::Expansion Expansion;
+			EQ::expansions::Expansion Expansion;
 			uint32 ExpansionBit;
 			uint32 ExpansionsMask;
 			int16 CharacterCreationLimit;
@@ -45,7 +45,7 @@ namespace EQEmu
 			
 			LookupEntry(const LookupEntry *lookup_entry) { }
 			LookupEntry(
-				EQEmu::expansions::Expansion Expansion,
+				EQ::expansions::Expansion Expansion,
 				uint32 ExpansionBit,
 				uint32 ExpansionsMask,
 				int16 CharacterCreationLimit,
@@ -111,7 +111,7 @@ namespace EQEmu
 
 			union {
 				InventoryTypeSize_Struct InventoryTypeSize;
-				int16 InventoryTypeSizeArray[25]; // should reflect EQEmu::invtype::TYPE_COUNT referenced in emu_constants.h
+				int16 InventoryTypeSizeArray[25]; // should reflect EQ::invtype::TYPE_COUNT referenced in emu_constants.h
 			};
 
 			uint64 EquipmentBitmask;
@@ -244,9 +244,9 @@ namespace ClientUnknown
 	const int16 INULL = 0;
 
 	namespace constants {
-		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
-		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
-		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQ::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQ::expansions::maskEverQuest;
 
 	} // namespace constants
 
@@ -258,9 +258,9 @@ namespace Client62
 	const int16 INULL = 0;
 
 	namespace constants {
-		const EQEmu::expansions::Expansion EXPANSION = EQEmu::expansions::Expansion::EverQuest;
-		const uint32 EXPANSION_BIT = EQEmu::expansions::bitEverQuest;
-		const uint32 EXPANSIONS_MASK = EQEmu::expansions::maskEverQuest;
+		const EQ::expansions::Expansion EXPANSION = EQ::expansions::Expansion::EverQuest;
+		const uint32 EXPANSION_BIT = EQ::expansions::bitEverQuest;
+		const uint32 EXPANSIONS_MASK = EQ::expansions::maskEverQuest;
 
 	} // namespace constants
 

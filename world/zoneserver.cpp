@@ -1078,7 +1078,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Unable to locate zone record for zone id [{}] or instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id, s->instance_id);
 		}
 
-		if (s->consent_type == EQEmu::consent::Normal) {
+		if (s->consent_type == EQ::consent::Normal) {
 			// send the message to the client being granted or denied permission
 			ClientListEntry* cle = client_list.FindCharacter(s->grantname);
 			if (cle) {
@@ -1238,12 +1238,19 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_CZSignalClientByName:
 	case ServerOP_CZMessagePlayer:
+	case ServerOP_CZMessageGroup:
+	case ServerOP_CZMessageRaid:
 	case ServerOP_CZMessageGuild:
 	case ServerOP_CZSignalNPC:
 	case ServerOP_CZSetEntityVariableByNPCTypeID:
 	case ServerOP_CZSignalClient:
 	case ServerOP_CZSignalGroup:
+	case ServerOP_CZSignalRaid:
+	case ServerOP_CZSignalGuild:
 	case ServerOP_CZSetEntityVariableByClientName:
+	case ServerOP_CZSetEntityVariableByGroupID:
+	case ServerOP_CZSetEntityVariableByRaidID:
+	case ServerOP_CZSetEntityVariableByGuildID:
 	case ServerOP_WWMarquee:
 	case ServerOP_DepopAllPlayersCorpses:
 	case ServerOP_DepopPlayerCorpse:

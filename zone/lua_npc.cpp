@@ -237,6 +237,11 @@ void Lua_NPC::SetTaunting(bool t) {
 	self->SetTaunting(t);
 }
 
+bool Lua_NPC::IsTaunting() {
+	Lua_Safe_Call_Bool();
+	return self->IsTaunting();
+}
+
 void Lua_NPC::PickPocket(Lua_Client thief) {
 	Lua_Safe_Call_Void();
 	self->PickPocket(thief);
@@ -602,6 +607,7 @@ luabind::scope lua_register_npc() {
 		.def("SetPetSpellID", (void(Lua_NPC::*)(int))&Lua_NPC::SetPetSpellID)
 		.def("GetMaxDamage", (uint32(Lua_NPC::*)(int))&Lua_NPC::GetMaxDamage)
 		.def("SetTaunting", (void(Lua_NPC::*)(bool))&Lua_NPC::SetTaunting)
+		.def("IsTaunting", (bool(Lua_NPC::*)(void))&Lua_NPC::IsTaunting)
 		.def("PickPocket", (void(Lua_NPC::*)(Lua_Client))&Lua_NPC::PickPocket)
 		.def("StartSwarmTimer", (void(Lua_NPC::*)(uint32))&Lua_NPC::StartSwarmTimer)
 		.def("DoClassAttacks", (void(Lua_NPC::*)(Lua_Mob))&Lua_NPC::DoClassAttacks)

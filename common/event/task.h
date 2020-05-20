@@ -8,7 +8,7 @@ namespace EQ {
 	class Task
 	{
 	public:
-		typedef std::function<void(const EQEmu::Any&)> ResolveFn;
+		typedef std::function<void(const EQ::Any&)> ResolveFn;
 		typedef std::function<void(const std::exception&)> RejectFn;
 		typedef std::function<void()> FinallyFn;
 		typedef std::function<void(ResolveFn, RejectFn)> TaskFn;
@@ -19,7 +19,7 @@ namespace EQ {
 			RejectFn on_catch;
 			FinallyFn on_finally;
 			bool has_result;
-			EQEmu::Any result;
+			EQ::Any result;
 			bool has_error;
 			std::exception error;
 		};
@@ -63,7 +63,7 @@ namespace EQ {
 			uv_queue_work(EventLoop::Get().Handle(), m_work, [](uv_work_t* req) {
 				TaskBaton *baton = (TaskBaton*)req->data;
 
-				baton->fn([baton](const EQEmu::Any& result) {
+				baton->fn([baton](const EQ::Any& result) {
 					baton->has_error = false;
 					baton->has_result = true;
 					baton->result = result;

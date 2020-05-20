@@ -432,14 +432,14 @@ int32 Client::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 bool Client::TrainDiscipline(uint32 itemid) {
 
 	//get the item info
-	const EQEmu::ItemData *item = database.GetItem(itemid);
+	const EQ::ItemData *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(Chat::Red, "Unable to find the tome you turned in!");
 		LogError("Unable to find turned in tome id [{}]\n", (unsigned long)itemid);
 		return(false);
 	}
 
-	if (!item->IsClassCommon() || item->ItemType != EQEmu::item::ItemTypeSpell) {
+	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
 		Message(Chat::Red, "Invalid item type, you cannot learn from this item.");
 		//summon them the item back...
 		SummonItem(itemid);
@@ -645,9 +645,9 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		}
 
 		if (reduced_recast > 0)
-			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
 		else{
-			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
+			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 			return true;
 		}
 
@@ -655,7 +655,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 	else
 	{
-		CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
+		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 	}
 	return(true);
 }

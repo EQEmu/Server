@@ -25,7 +25,7 @@
 #include <stdlib.h>
 
 
-namespace EQEmu
+namespace EQ
 {
 	namespace versions {
 		enum class ClientVersion : uint32 {

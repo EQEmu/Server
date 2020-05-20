@@ -190,7 +190,7 @@ struct TintProfile
 			Tint_Struct Primary;
 			Tint_Struct Secondary;
 		};
-		Tint_Struct Slot[EQEmu::textures::materialCount];
+		Tint_Struct Slot[EQ::textures::materialCount];
 	};
 };
 
@@ -222,7 +222,7 @@ struct Texture_Struct
 //			Texture_Struct Primary;
 //			Texture_Struct Secondary;
 //		};
-//		Texture_Struct Slot[EQEmu::textures::TextureCount];
+//		Texture_Struct Slot[EQ::textures::TextureCount];
 //	};
 //
 //	TextureProfile();
@@ -1113,7 +1113,7 @@ union
 	/*00184*/ Texture_Struct equipment[22];		// Total Slots
 };
 /*00624*/ uint32 equip2_count;			// Seen 9
-/*00628*/ Texture_Struct equipment2[EQEmu::textures::materialCount];	// Appears to be Visible slots, but all 0s
+/*00628*/ Texture_Struct equipment2[EQ::textures::materialCount];	// Appears to be Visible slots, but all 0s
 /*00808*/ uint32 tint_count;			// Seen 9
 /*00812*/ TintProfile item_tint;		// RR GG BB 00
 /*00848*/ uint32 tint_count2;			// Seen 9

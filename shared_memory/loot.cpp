@@ -26,7 +26,7 @@
 #include "../common/loottable.h"
 
 void LoadLoot(SharedDatabase *database, const std::string &prefix) {
-	EQEmu::IPCMutex mutex("loot");
+	EQ::IPCMutex mutex("loot");
 	mutex.Lock();
 
 	uint32 loot_table_count, loot_table_max, loot_table_entries_count;
@@ -48,15 +48,15 @@ void LoadLoot(SharedDatabase *database, const std::string &prefix) {
 	std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
 	std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
 
-	EQEmu::MemoryMappedFile mmf_loot_table(file_name_lt, loot_table_size);
-	EQEmu::MemoryMappedFile mmf_loot_drop(file_name_ld, loot_drop_size);
+	EQ::MemoryMappedFile mmf_loot_table(file_name_lt, loot_table_size);
+	EQ::MemoryMappedFile mmf_loot_drop(file_name_ld, loot_drop_size);
 	mmf_loot_table.ZeroFile();
 	mmf_loot_drop.ZeroFile();
 
-	EQEmu::FixedMemoryVariableHashSet<LootTable_Struct> loot_table_hash(reinterpret_cast<byte*>(mmf_loot_table.Get()),
+	EQ::FixedMemoryVariableHashSet<LootTable_Struct> loot_table_hash(reinterpret_cast<byte*>(mmf_loot_table.Get()),
 		loot_table_size, loot_table_max);
 
-	EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct> loot_drop_hash(reinterpret_cast<byte*>(mmf_loot_drop.Get()),
+	EQ::FixedMemoryVariableHashSet<LootDrop_Struct> loot_drop_hash(reinterpret_cast<byte*>(mmf_loot_drop.Get()),
 		loot_drop_size, loot_drop_max);
 
 	database->LoadLootTables(mmf_loot_table.Get(), loot_table_max);

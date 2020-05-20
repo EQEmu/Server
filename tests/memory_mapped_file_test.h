@@ -35,7 +35,7 @@ public:
 
 	private:
 	void LoadAndZeroMMF() {
-		EQEmu::MemoryMappedFile mmf("testfile.txt", 512);
+		EQ::MemoryMappedFile mmf("testfile.txt", 512);
 		mmf.ZeroFile();
 		TEST_ASSERT(mmf.Size() == 512);
 
@@ -46,7 +46,7 @@ public:
 	}
 
 	void LoadExistingMMF() {
-		EQEmu::MemoryMappedFile mmf("testfile.txt");
+		EQ::MemoryMappedFile mmf("testfile.txt");
 		TEST_ASSERT(mmf.Size() == 512);
 
 		unsigned char *data = reinterpret_cast<unsigned char*>(mmf.Get());

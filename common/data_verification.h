@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <cmath>
 
-namespace EQEmu {
+namespace EQ {
 	template<typename T>
 	T Clamp(const T &value, const T &lower, const T &upper)
 	{

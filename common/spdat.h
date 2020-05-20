@@ -748,7 +748,7 @@ struct SPDat_Spell_Struct
 /* 086 */	int effectid[EFFECT_COUNT];	// Spell's effects -- SPELLAFFECT1 ... SPELLAFFECT12
 /* 098 */	SpellTargetType targettype;	// Spell's Target -- TYPENUMBER
 /* 099 */	int basediff; // base difficulty fizzle adjustment -- BASEDIFFICULTY
-/* 100 */	EQEmu::skills::SkillType skill; // -- CASTINGSKILL
+/* 100 */	EQ::skills::SkillType skill; // -- CASTINGSKILL
 /* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any -- ZONETYPE
 /* 102 */	int8 EnvironmentType; // -- ENVIRONMENTTYPE
 /* 103 */	int8 TimeOfDay; // -- TIMEOFDAY

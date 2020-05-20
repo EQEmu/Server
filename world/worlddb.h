@@ -42,7 +42,7 @@ private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 	void SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 
-	bool GetCharSelInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv);
+	bool GetCharSelInventory(uint32 account_id, char* name, EQ::InventoryProfile* inv);
 };
 
 extern WorldDatabase database;

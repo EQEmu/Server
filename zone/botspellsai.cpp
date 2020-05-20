@@ -193,18 +193,18 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						float hpRatioToCast = 0.0f;
 
 						switch(this->GetBotStance()) {
-						case EQEmu::constants::stanceEfficient:
-						case EQEmu::constants::stanceAggressive:
+						case EQ::constants::stanceEfficient:
+						case EQ::constants::stanceAggressive:
 							hpRatioToCast = isPrimaryHealer?90.0f:50.0f;
 							break;
-						case EQEmu::constants::stanceBalanced:
+						case EQ::constants::stanceBalanced:
 							hpRatioToCast = isPrimaryHealer?95.0f:75.0f;
 							break;
-						case EQEmu::constants::stanceReactive:
+						case EQ::constants::stanceReactive:
 							hpRatioToCast = isPrimaryHealer?100.0f:90.0f;
 							break;
-						case EQEmu::constants::stanceBurn:
-						case EQEmu::constants::stanceBurnAE:
+						case EQ::constants::stanceBurn:
+						case EQ::constants::stanceBurnAE:
 							hpRatioToCast = isPrimaryHealer?75.0f:25.0f;
 							break;
 						default:
@@ -381,16 +381,16 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 						float manaRatioToCast = 75.0f;
 
 						switch(this->GetBotStance()) {
-						case EQEmu::constants::stanceEfficient:
+						case EQ::constants::stanceEfficient:
 							manaRatioToCast = 90.0f;
 							break;
-						case EQEmu::constants::stanceBalanced:
-						case EQEmu::constants::stanceAggressive:
+						case EQ::constants::stanceBalanced:
+						case EQ::constants::stanceAggressive:
 							manaRatioToCast = 75.0f;
 							break;
-						case EQEmu::constants::stanceReactive:
-						case EQEmu::constants::stanceBurn:
-						case EQEmu::constants::stanceBurnAE:
+						case EQ::constants::stanceReactive:
+						case EQ::constants::stanceBurn:
+						case EQ::constants::stanceBurnAE:
 							manaRatioToCast = 50.0f;
 							break;
 						default:
@@ -460,18 +460,18 @@ bool Bot::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes) {
 					float manaRatioToCast = 75.0f;
 
 					switch(this->GetBotStance()) {
-					case EQEmu::constants::stanceEfficient:
+					case EQ::constants::stanceEfficient:
 						manaRatioToCast = 90.0f;
 						break;
-					case EQEmu::constants::stanceBalanced:
+					case EQ::constants::stanceBalanced:
 						manaRatioToCast = 75.0f;
 						break;
-					case EQEmu::constants::stanceReactive:
-					case EQEmu::constants::stanceAggressive:
+					case EQ::constants::stanceReactive:
+					case EQ::constants::stanceAggressive:
 						manaRatioToCast = 50.0f;
 						break;
-					case EQEmu::constants::stanceBurn:
-					case EQEmu::constants::stanceBurnAE:
+					case EQ::constants::stanceBurn:
+					case EQ::constants::stanceBurnAE:
 						manaRatioToCast = 25.0f;
 						break;
 					default:
@@ -1310,7 +1310,7 @@ bool Bot::AI_EngagedCastCheck() {
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
 		uint8 botClass = GetClass();
-		EQEmu::constants::StanceType botStance = GetBotStance();
+		EQ::constants::StanceType botStance = GetBotStance();
 		bool mayGetAggro = HasOrMayGetAggro();
 
 		LogAI("Engaged autocast check triggered (BOTS). Trying to cast healing spells then maybe offensive spells");
@@ -2653,11 +2653,11 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 		return 0;
 	--class_index;
 
-	EQEmu::constants::StanceType stance_type = GetBotStance();
-	if (stance_type < EQEmu::constants::stancePassive || stance_type > EQEmu::constants::stanceBurnAE)
+	EQ::constants::StanceType stance_type = GetBotStance();
+	if (stance_type < EQ::constants::stancePassive || stance_type > EQ::constants::stanceBurnAE)
 		return 0;
 
-	uint8 stance_index = EQEmu::constants::ConvertStanceTypeToIndex(stance_type);
+	uint8 stance_index = EQ::constants::ConvertStanceTypeToIndex(stance_type);
 	uint8 type_index = nHSND;
 
 	if (HasGroup()) {

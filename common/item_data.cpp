@@ -23,7 +23,7 @@
 //#include "deity.h"
 
 
-uint32 EQEmu::item::ConvertAugTypeToAugTypeBit(uint8 aug_type)
+uint32 EQ::item::ConvertAugTypeToAugTypeBit(uint8 aug_type)
 {
 	switch (aug_type) {
 	case AugTypeGeneralSingleStat:
@@ -95,7 +95,7 @@ uint32 EQEmu::item::ConvertAugTypeToAugTypeBit(uint8 aug_type)
 	}
 }
 
-uint8 EQEmu::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
+uint8 EQ::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
 {
 	switch (aug_type_bit) {
 	case bit_AugTypeGeneralSingleStat:
@@ -167,7 +167,7 @@ uint8 EQEmu::item::ConvertAugTypeBitToAugType(uint32 aug_type_bit)
 	}
 }
 
-bool EQEmu::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
+bool EQ::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
 {
 	if (!(Races & GetPlayerRaceBit(race_id)))
 		return false;
@@ -178,37 +178,37 @@ bool EQEmu::ItemData::IsEquipable(uint16 race_id, uint16 class_id) const
 	return true;
 }
 
-bool EQEmu::ItemData::IsClassCommon() const
+bool EQ::ItemData::IsClassCommon() const
 {
 	return (ItemClass == item::ItemClassCommon);
 }
 
-bool EQEmu::ItemData::IsClassBag() const
+bool EQ::ItemData::IsClassBag() const
 {
 	return (ItemClass == item::ItemClassBag);
 }
 
-bool EQEmu::ItemData::IsClassBook() const
+bool EQ::ItemData::IsClassBook() const
 {
 	return (ItemClass == item::ItemClassBook);
 }
 
-bool EQEmu::ItemData::IsType1HWeapon() const
+bool EQ::ItemData::IsType1HWeapon() const
 {
 	return ((ItemType == item::ItemType1HBlunt) || (ItemType == item::ItemType1HSlash) || (ItemType == item::ItemType1HPiercing) || (ItemType == item::ItemTypeMartial));
 }
 
-bool EQEmu::ItemData::IsType2HWeapon() const
+bool EQ::ItemData::IsType2HWeapon() const
 {
 	return ((ItemType == item::ItemType2HBlunt) || (ItemType == item::ItemType2HSlash) || (ItemType == item::ItemType2HPiercing));
 }
 
-bool EQEmu::ItemData::IsTypeShield() const
+bool EQ::ItemData::IsTypeShield() const
 {
 	return (ItemType == item::ItemTypeShield);
 }
 
-bool EQEmu::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_item)
+bool EQ::ItemData::CheckLoreConflict(const ItemData* l_item, const ItemData* r_item)
 {
 	if (!l_item || !r_item)
 		return false;

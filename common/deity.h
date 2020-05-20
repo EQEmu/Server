@@ -23,7 +23,7 @@
 #include "types.h"
 
 
-namespace EQEmu
+namespace EQ
 {
 	namespace deity {
 		enum DeityType {

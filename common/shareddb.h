@@ -41,7 +41,7 @@ struct NPCFactionList;
 struct LootTable_Struct;
 struct LootDrop_Struct;
 
-namespace EQEmu
+namespace EQ
 {
 	struct ItemData;
 	class ItemInstance;
@@ -80,22 +80,22 @@ class SharedDatabase : public Database
 		/*
 		    Character InventoryProfile
 		*/
-		bool	SaveCursor(uint32 char_id, std::list<EQEmu::ItemInstance*>::const_iterator &start, std::list<EQEmu::ItemInstance*>::const_iterator &end);
-		bool	SaveInventory(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
+		bool	SaveCursor(uint32 char_id, std::list<EQ::ItemInstance*>::const_iterator &start, std::list<EQ::ItemInstance*>::const_iterator &end);
+		bool	SaveInventory(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id);
 		bool    DeleteSharedBankSlot(uint32 char_id, int16 slot_id);
 		bool    DeleteInventorySlot(uint32 char_id, int16 slot_id);
-		bool    UpdateInventorySlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
-		bool    UpdateSharedBankSlot(uint32 char_id, const EQEmu::ItemInstance* inst, int16 slot_id);
-		bool	VerifyInventory(uint32 account_id, int16 slot_id, const EQEmu::ItemInstance* inst);
-		bool	GetSharedBank(uint32 id, EQEmu::InventoryProfile* inv, bool is_charid);
+		bool    UpdateInventorySlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id);
+		bool    UpdateSharedBankSlot(uint32 char_id, const EQ::ItemInstance* inst, int16 slot_id);
+		bool	VerifyInventory(uint32 account_id, int16 slot_id, const EQ::ItemInstance* inst);
+		bool	GetSharedBank(uint32 id, EQ::InventoryProfile* inv, bool is_charid);
 		int32	GetSharedPlatinum(uint32 account_id);
 		bool	SetSharedPlatinum(uint32 account_id, int32 amount_to_add);
-		bool	GetInventory(uint32 char_id, EQEmu::InventoryProfile* inv);
-		bool	GetInventory(uint32 account_id, char* name, EQEmu::InventoryProfile* inv); // deprecated
+		bool	GetInventory(uint32 char_id, EQ::InventoryProfile* inv);
+		bool	GetInventory(uint32 account_id, char* name, EQ::InventoryProfile* inv); // deprecated
 		std::map<uint32, uint32> GetItemRecastTimestamps(uint32 char_id);
 		uint32	GetItemRecastTimestamp(uint32 char_id, uint32 recast_type);
 		void	ClearOldRecastTimestamps(uint32 char_id);
-		bool	SetStartingItems(PlayerProfile_Struct* pp, EQEmu::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
+		bool	SetStartingItems(PlayerProfile_Struct* pp, EQ::InventoryProfile* inv, uint32 si_race, uint32 si_class, uint32 si_deity, uint32 si_current_zone, char* si_name, int admin);
 
 
 		std::string	GetBook(const char *txtfile, int16 *language);
@@ -103,9 +103,9 @@ class SharedDatabase : public Database
 		/*
 		    Item Methods
 		*/
-		EQEmu::ItemInstance* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		EQEmu::ItemInstance* CreateItem(const EQEmu::ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
-		EQEmu::ItemInstance* CreateBaseItem(const EQEmu::ItemData* item, int16 charges = 0);
+		EQ::ItemInstance* CreateItem(uint32 item_id, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQ::ItemInstance* CreateItem(const EQ::ItemData* item, int16 charges = 0, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, uint8 attuned = 0);
+		EQ::ItemInstance* CreateBaseItem(const EQ::ItemData* item, int16 charges = 0);
 
 		/*
 		    Shared Memory crap
@@ -115,8 +115,8 @@ class SharedDatabase : public Database
 		void GetItemsCount(int32 &item_count, uint32 &max_id);
 		void LoadItems(void *data, uint32 size, int32 items, uint32 max_item_id);
 		bool LoadItems(const std::string &prefix);
-		const EQEmu::ItemData* IterateItems(uint32* id);
-		const EQEmu::ItemData* GetItem(uint32 id);
+		const EQ::ItemData* IterateItems(uint32* id);
+		const EQ::ItemData* GetItem(uint32 id);
 		const EvolveInfo* GetEvolveInfo(uint32 loregroup);
 
 		//faction lists
@@ -136,8 +136,8 @@ class SharedDatabase : public Database
 
 		void LoadSkillCaps(void *data);
 		bool LoadSkillCaps(const std::string &prefix);
-		uint16 GetSkillCap(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
-		uint8 GetTrainLevel(uint8 Class_, EQEmu::skills::SkillType Skill, uint8 Level);
+		uint16 GetSkillCap(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level);
+		uint8 GetTrainLevel(uint8 Class_, EQ::skills::SkillType Skill, uint8 Level);
 
 		int GetMaxSpellID();
 		bool LoadSpells(const std::string &prefix, int32 *records, const SPDat_Spell_Struct **sp);
@@ -151,17 +151,17 @@ class SharedDatabase : public Database
 
 	protected:
 
-		std::unique_ptr<EQEmu::MemoryMappedFile> skill_caps_mmf;
-		std::unique_ptr<EQEmu::MemoryMappedFile> items_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryHashSet<EQEmu::ItemData>> items_hash;
-		std::unique_ptr<EQEmu::MemoryMappedFile> faction_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryHashSet<NPCFactionList>> faction_hash;
-		std::unique_ptr<EQEmu::MemoryMappedFile> loot_table_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
-		std::unique_ptr<EQEmu::MemoryMappedFile> loot_drop_mmf;
-		std::unique_ptr<EQEmu::FixedMemoryVariableHashSet<LootDrop_Struct>> loot_drop_hash;
-		std::unique_ptr<EQEmu::MemoryMappedFile> base_data_mmf;
-		std::unique_ptr<EQEmu::MemoryMappedFile> spells_mmf;
+		std::unique_ptr<EQ::MemoryMappedFile> skill_caps_mmf;
+		std::unique_ptr<EQ::MemoryMappedFile> items_mmf;
+		std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>> items_hash;
+		std::unique_ptr<EQ::MemoryMappedFile> faction_mmf;
+		std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>> faction_hash;
+		std::unique_ptr<EQ::MemoryMappedFile> loot_table_mmf;
+		std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootTable_Struct>> loot_table_hash;
+		std::unique_ptr<EQ::MemoryMappedFile> loot_drop_mmf;
+		std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>> loot_drop_hash;
+		std::unique_ptr<EQ::MemoryMappedFile> base_data_mmf;
+		std::unique_ptr<EQ::MemoryMappedFile> spells_mmf;
 };
 
 #endif /*SHAREDDB_H_*/

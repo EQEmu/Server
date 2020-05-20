@@ -25,7 +25,7 @@
 #include "../common/spdat.h"
 
 void LoadSpells(SharedDatabase *database, const std::string &prefix) {
-	EQEmu::IPCMutex mutex("spells");
+	EQ::IPCMutex mutex("spells");
 	mutex.Lock();
 	int records = database->GetMaxSpellID() + 1;
 	if(records == 0) {
@@ -36,7 +36,7 @@ void LoadSpells(SharedDatabase *database, const std::string &prefix) {
 
 	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
-	EQEmu::MemoryMappedFile mmf(file_name, size);
+	EQ::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();

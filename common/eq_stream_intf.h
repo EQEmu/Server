@@ -100,7 +100,7 @@ public:
 	virtual MatchState CheckSignature(const Signature *sig) { return MatchFailed; }
 	virtual EQStreamState GetState() = 0;
 	virtual void SetOpcodeManager(OpcodeManager **opm) = 0;
-	virtual const EQEmu::versions::ClientVersion ClientVersion() const { return EQEmu::versions::ClientVersion::Unknown; }
+	virtual const EQ::versions::ClientVersion ClientVersion() const { return EQ::versions::ClientVersion::Unknown; }
 	virtual Stats GetStats() const = 0;
 	virtual void ResetStats() = 0;
 	virtual EQStreamManagerInterface* GetManager() const = 0;
