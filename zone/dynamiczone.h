@@ -89,7 +89,7 @@ public:
 	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void     SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void     SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
-	void     UpdateExpireTime(uint32_t seconds);
+	void     UpdateExpireTime(uint32_t seconds, bool reduce_only = true);
 
 	void     LoadFromDatabase(uint32_t instance_id);
 	uint32_t SaveToDatabase();

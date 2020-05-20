@@ -437,21 +437,19 @@ void DynamicZone::SendInstanceCharacterChange(uint32_t character_id, bool remove
 	}
 }
 
-void DynamicZone::UpdateExpireTime(uint32_t seconds)
+void DynamicZone::UpdateExpireTime(uint32_t seconds, bool reduce_only)
 {
-	if (GetInstanceID() == 0)
+	if (GetInstanceID() == 0 || (reduce_only && GetSecondsRemaining() < seconds))
 	{
 		return;
 	}
 
-	m_duration = seconds;
 	m_expire_time = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
-
-	auto new_duration = std::chrono::system_clock::to_time_t(m_expire_time) - m_start_time;
+	m_duration = std::chrono::system_clock::to_time_t(m_expire_time) - m_start_time;
 
 	std::string query = fmt::format(SQL(
 		UPDATE instance_list SET duration = {} WHERE id = {};
-	), new_duration, GetInstanceID());
+	), m_duration, GetInstanceID());
 
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
