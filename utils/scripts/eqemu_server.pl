@@ -701,12 +701,11 @@ sub get_perl_version
 }
 
 sub get_windows_wget {
-    if (!-e "wget.exe" && $OS eq "Windows") {
-        eval "use LWP::Simple qw(getstore);";
+    if (!-e "bin/wget.exe" && $OS eq "Windows") {
         if (!-d "bin") {
             mkdir("bin");
         }
-        getstore("https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe", "bin/wget.exe");
+        `powershell -Command "\$ProgressPreference = 'SilentlyContinue'; Invoke-RestMethod -ContentType \"application/octet-stream\" -Uri https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe -OutFile bin/wget.exe"`
     }
 }
 
