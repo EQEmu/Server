@@ -200,6 +200,7 @@ int command_init(void)
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
 		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
+		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
@@ -6941,6 +6942,18 @@ void command_dz(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "#dz list [all] - list dynamic zones from database -- 'all' includes expired");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
+	}
+}
+
+void command_dzkickplayers(Client* c, const Seperator* sep)
+{
+	if (c)
+	{
+		auto expedition = c->GetExpedition();
+		if (expedition)
+		{
+			expedition->DzKickPlayers(c);
+		}
 	}
 }
 
