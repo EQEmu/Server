@@ -1371,11 +1371,10 @@ sub get_remote_file
         $wget = `wget -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
     }
     elsif ($OS eq "Windows") {
-        $wget =
-            `powershell -Command "\$ProgressPreference = 'SilentlyContinue'; Invoke-RestMethod -ContentType \"application/octet-stream\" -Uri $request_url -OutFile $destination_file"`
+        $wget = `bin\\wget.exe -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
     }
     print "[Download] Saved [" . $destination_file . "] from [" . $request_url . "]\n" if !$silent_download;
-    if (($OS eq "Linux" && $wget =~ /unable to resolve/i) || ($OS eq "Windows" && $wget =~ /404/i || $wget =~ /could not be resolved/i)) {
+    if ($wget =~ /unable to resolve/i) {
         print "Error, no connection or failed request...\n\n";
         #die;
     }
