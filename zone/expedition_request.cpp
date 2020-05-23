@@ -59,7 +59,7 @@ bool ExpeditionRequest::Validate(Client* requester)
 
 	// a message is sent to leader for every member that fails a requirement
 
-	auto start = std::chrono::steady_clock::now();
+	BenchTimer benchmark;
 
 	bool requirements_met = false;
 
@@ -81,9 +81,8 @@ bool ExpeditionRequest::Validate(Client* requester)
 		requirements_met = ValidateMembers(fmt::format("'{}'", m_leader_name), 1);
 	}
 
-	auto end = std::chrono::steady_clock::now();
-	auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - start);
-	LogExpeditions("Create validation for [{}] members took {}s", m_members.size(), elapsed.count());
+	auto elapsed = benchmark.elapsed();
+	LogExpeditions("Create validation for [{}] members took {}s", m_members.size(), elapsed);
 
 	return requirements_met;
 }
