@@ -166,16 +166,4 @@ luabind::scope lua_register_expedition() {
 		.def("SetZoneInLocation", (void(Lua_Expedition::*)(float, float, float, float))&Lua_Expedition::SetZoneInLocation);
 }
 
-luabind::scope lua_register_expedition_member_status() {
-	return luabind::class_<ExpeditionMemberStatus>("ExpeditionMemberStatus")
-		.enum_("constants")
-		[
-			luabind::value("Unknown", static_cast<int>(ExpeditionMemberStatus::Unknown)),
-			luabind::value("Online", static_cast<int>(ExpeditionMemberStatus::Online)),
-			luabind::value("Offline", static_cast<int>(ExpeditionMemberStatus::Offline)),
-			luabind::value("InDynamicZone", static_cast<int>(ExpeditionMemberStatus::InDynamicZone)),
-			luabind::value("LinkDead", static_cast<int>(ExpeditionMemberStatus::LinkDead))
-		];
-}
-
 #endif // LUA_EQEMU
