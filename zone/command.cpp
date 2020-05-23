@@ -6834,19 +6834,24 @@ void command_dz(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (strcasecmp(sep->arg[1], "cache") == 0)
+	if (strcasecmp(sep->arg[1], "expedition") == 0)
 	{
 		if (strcasecmp(sep->arg[2], "list") == 0)
 		{
 			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", zone->expedition_cache.size()).c_str());
 			for (const auto& expedition : zone->expedition_cache)
 			{
+				auto seconds = expedition.second->GetDynamicZone().GetSecondsRemaining();
+
 				c->Message(Chat::White, fmt::format(
-					"Expedition id: [{}]: leader: [{}] instance id: [{}] members: [{}]",
+					"Expedition id: [{}]: leader: [{}] instance id: [{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					expedition.second->GetID(),
 					expedition.second->GetLeaderName(),
 					expedition.second->GetInstanceID(),
-					expedition.second->GetMemberCount()
+					expedition.second->GetMemberCount(),
+					seconds / 3600,      // hours
+					(seconds / 60) % 60, // minutes
+					seconds % 60         // seconds
 				).c_str());
 			}
 		}
@@ -6857,19 +6862,20 @@ void command_dz(Client* c, const Seperator* sep)
 				"Reloaded [{}] expeditions to cache from database.", zone->expedition_cache.size()
 			).c_str());
 		}
-	}
-	else if (strcasecmp(sep->arg[1], "destroy") == 0)
-	{
-		if (sep->IsNumber(2))
+		else if (strcasecmp(sep->arg[2], "destroy") == 0 && sep->IsNumber(3))
 		{
-			auto expedition_id = std::strtoul(sep->arg[2], nullptr, 10);
-			if (expedition_id)
+			auto expedition_id = std::strtoul(sep->arg[3], nullptr, 10);
+			auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+			if (expedition)
 			{
-				auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
-				if (expedition)
-				{
-					expedition->RemoveAllMembers();
-				}
+				c->Message(Chat::White, fmt::format(
+					"Destroying expedition [{}] ({})", expedition_id, expedition->GetName()).c_str()
+				);
+				expedition->RemoveAllMembers();
+			}
+			else
+			{
+				c->Message(Chat::Red, fmt::format("Failed to destroy expedition [{}]", sep->arg[3]).c_str());
 			}
 		}
 	}
@@ -6936,10 +6942,10 @@ void command_dz(Client* c, const Seperator* sep)
 	else
 	{
 		c->Message(Chat::White, "#dz usage:");
-		c->Message(Chat::White, "#dz cache list - list expeditions in current zone cache");
-		c->Message(Chat::White, "#dz cache reload - reload zone cache from database");
-		c->Message(Chat::White, "#dz destroy <expedition_id> - destroy expedition globally (must be in cache)");
-		c->Message(Chat::White, "#dz list [all] - list dynamic zones from database -- 'all' includes expired");
+		c->Message(Chat::White, "#dz expedition list - list expeditions in current zone cache");
+		c->Message(Chat::White, "#dz expedition reload - reload expedition zone cache from database");
+		c->Message(Chat::White, "#dz expedition destroy <expedition_id> - destroy expedition globally (must be in cache)");
+		c->Message(Chat::White, "#dz list [all] - list dynamic zone instances from database -- 'all' includes expired");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
 	}
