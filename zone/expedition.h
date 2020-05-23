@@ -100,7 +100,7 @@ public:
 	const std::vector<ExpeditionMember>& GetMembers() const { return m_members; }
 
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
-	bool HasMember(const std::string& name);
+	bool HasMember(const std::string& character_name);
 	bool HasMember(uint32_t character_id);
 	void RemoveAllMembers(bool enable_removal_timers = true, bool update_dz_expire_time = true);
 	bool RemoveMember(const std::string& remove_char_name);
