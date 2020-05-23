@@ -39,7 +39,6 @@ namespace luabind {
 }
 
 luabind::scope lua_register_expedition();
-luabind::scope lua_register_expedition_member_status();
 
 class Lua_Expedition : public Lua_Ptr<Expedition>
 {
