@@ -209,7 +209,7 @@ void Expedition::CacheFromDatabase(uint32_t expedition_id)
 {
 	if (zone)
 	{
-		auto start = std::chrono::steady_clock::now();
+		BenchTimer benchmark;
 
 		auto results = ExpeditionDatabase::LoadExpedition(expedition_id);
 		if (!results.Success())
@@ -220,9 +220,8 @@ void Expedition::CacheFromDatabase(uint32_t expedition_id)
 
 		CacheExpeditions(results);
 
-		auto end = std::chrono::steady_clock::now();
-		auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - start);
-		LogExpeditions("Caching new expedition [{}] took {}s", expedition_id, elapsed.count());
+		auto elapsed = benchmark.elapsed();
+		LogExpeditions("Caching new expedition [{}] took {}s", expedition_id, elapsed);
 	}
 }
 
@@ -233,7 +232,7 @@ bool Expedition::CacheAllFromDatabase()
 		return false;
 	}
 
-	auto start = std::chrono::steady_clock::now();
+	BenchTimer benchmark;
 
 	zone->expedition_cache.clear();
 
@@ -247,9 +246,8 @@ bool Expedition::CacheAllFromDatabase()
 
 	CacheExpeditions(results);
 
-	auto end = std::chrono::steady_clock::now();
-	auto elapsed = std::chrono::duration_cast<std::chrono::duration<float>>(end - start);
-	LogExpeditions("Caching [{}] expedition(s) took {}s", zone->expedition_cache.size(), elapsed.count());
+	auto elapsed = benchmark.elapsed();
+	LogExpeditions("Caching [{}] expedition(s) took {}s", zone->expedition_cache.size(), elapsed);
 
 	return true;
 }
