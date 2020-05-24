@@ -161,7 +161,7 @@ int main(int argc, char **argv)
 			}
 		}
 
-		EQEmu::InitializeDynamicLookups();
+		EQ::InitializeDynamicLookups();
 		LogInfo("Initialized dynamic dictionary entries");
 	}
 

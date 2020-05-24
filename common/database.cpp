@@ -750,61 +750,6 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	return true;
 }
 
-/* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQ::InventoryProfile* inv) {
-	uint32 charid = 0;
-	char zone[50];
-	float x, y, z;
-	charid = GetCharacterID(pp->name);
-
-	if(!charid) {
-		LogError("StoreCharacter: no character id");
-		return false;
-	}
-
-	const char *zname = GetZoneName(pp->zone_id);
-	if(zname == nullptr) {
-		/* Zone not in the DB, something to prevent crash... */
-		strn0cpy(zone, "qeynos", 49);
-		pp->zone_id = 1;
-	}
-	else{ strn0cpy(zone, zname, 49); }
-
-	x = pp->x;
-	y = pp->y;
-	z = pp->z;
-
-	/* Saves Player Profile Data */
-	SaveCharacterCreate(charid, account_id, pp);
-
-	/* Insert starting inventory... */
-	std::string invquery;
-	for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invbag::BANK_BAGS_END;) {
-		const EQ::ItemInstance* newinv = inv->GetItem(i);
-		if (newinv) {
-			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
-				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor());
-
-			auto results = QueryDatabase(invquery);
-		}
-
-		if (i == EQ::invslot::slotCursor) {
-			i = EQ::invbag::GENERAL_BAGS_BEGIN;
-			continue;
-		}
-		else if (i == EQ::invbag::CURSOR_BAG_END) {
-			i = EQ::invslot::BANK_BEGIN;
-			continue;
-		}
-		else if (i == EQ::invslot::BANK_END) {
-			i = EQ::invbag::BANK_BAGS_BEGIN;
-			continue;
-		}
-		i++;
-	}
-	return true;
-}
-
 uint32 Database::GetCharacterID(const char *name) {
 	std::string query = StringFormat("SELECT `id` FROM `character_data` WHERE `name` = '%s'", name);
 	auto results = QueryDatabase(query);

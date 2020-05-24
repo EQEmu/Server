@@ -7438,7 +7438,7 @@ void command_itemsearch(Client *c, const Seperator *sep)
 
 				std::string saylink_commands;
 				for (auto   &amount : amounts) {
-					saylink_commands += EQEmu::SayLinkEngine::GenerateQuestSaylink(
+					saylink_commands += EQ::SayLinkEngine::GenerateQuestSaylink(
 						"#si " + std::to_string(item->ID) + " " + amount,
 						false,
 						"[" + amount + "] "

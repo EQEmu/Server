@@ -311,7 +311,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	container = inst;
-	if (container->GetItem() && container->GetItem()->BagType == EQEmu::item::BagTypeTransformationmold) {
+	if (container->GetItem() && container->GetItem()->BagType == EQ::item::BagTypeTransformationmold) {
 		const EQ::ItemInstance *inst    = container->GetItem(0);
 		bool                      AllowAll = RuleB(Inventory, AllowAnyWeaponTransformation);
 		if (inst && EQ::ItemInstance::CanTransform(inst->GetItem(), container->GetItem(), AllowAll)) {
@@ -328,7 +328,7 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 				inst->GetAugmentItemID(4),
 				inst->GetAugmentItemID(5),
 				inst->IsAttuned(),
-				EQEmu::invslot::slotCursor,
+				EQ::invslot::slotCursor,
 				container->GetItem()->Icon,
 				atoi(container->GetItem()->IDFile + 2)
 			);

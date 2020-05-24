@@ -2078,7 +2078,7 @@ void Client::SetClassLanguages(PlayerProfile_Struct *pp)
 bool Client::StoreCharacter(
 	uint32 account_id,
 	PlayerProfile_Struct *p_player_profile_struct,
-	EQEmu::InventoryProfile *p_inventory_profile
+	EQ::InventoryProfile *p_inventory_profile
 )
 {
 	uint32 character_id = 0;
@@ -2103,8 +2103,8 @@ bool Client::StoreCharacter(
 	database.SaveCharacterCreate(character_id, account_id, p_player_profile_struct);
 
 	std::string invquery;
-	for (int16  i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invbag::BANK_BAGS_END;) {
-		const EQEmu::ItemInstance *new_inventory_item = p_inventory_profile->GetItem(i);
+	for (int16  i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invbag::BANK_BAGS_END;) {
+		const EQ::ItemInstance *new_inventory_item = p_inventory_profile->GetItem(i);
 		if (new_inventory_item) {
 			invquery = StringFormat(
 				"INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
@@ -2118,16 +2118,16 @@ bool Client::StoreCharacter(
 			auto results = database.QueryDatabase(invquery);
 		}
 
-		if (i == EQEmu::invslot::slotCursor) {
-			i = EQEmu::invbag::GENERAL_BAGS_BEGIN;
+		if (i == EQ::invslot::slotCursor) {
+			i = EQ::invbag::GENERAL_BAGS_BEGIN;
 			continue;
 		}
-		else if (i == EQEmu::invbag::CURSOR_BAG_END) {
-			i = EQEmu::invslot::BANK_BEGIN;
+		else if (i == EQ::invbag::CURSOR_BAG_END) {
+			i = EQ::invslot::BANK_BEGIN;
 			continue;
 		}
-		else if (i == EQEmu::invslot::BANK_END) {
-			i = EQEmu::invbag::BANK_BAGS_BEGIN;
+		else if (i == EQ::invslot::BANK_END) {
+			i = EQ::invbag::BANK_BAGS_BEGIN;
 			continue;
 		}
 		i++;
