@@ -157,6 +157,7 @@
 #define ServerOP_ExpeditionRemoveCharLockouts 0x040d
 #define ServerOP_ExpeditionSaveInvite         0x040e
 #define ServerOP_ExpeditionRequestInvite      0x040f
+#define ServerOP_ExpeditionReplayOnJoin       0x0410
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2052,6 +2053,13 @@ struct ServerExpeditionLockout_Struct {
 	uint16 sender_instance_id;
 	uint8  remove;
 	char   event_name[256];
+};
+
+struct ServerExpeditionSetting_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  enabled;
 };
 
 struct ServerExpeditionCharacterName_Struct {

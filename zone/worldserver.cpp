@@ -2906,6 +2906,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionMemberChange:
 	case ServerOP_ExpeditionMemberSwap:
 	case ServerOP_ExpeditionMemberStatus:
+	case ServerOP_ExpeditionReplayOnJoin:
 	case ServerOP_ExpeditionGetOnlineMembers:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:

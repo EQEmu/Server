@@ -1375,6 +1375,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionMemberChange:
 	case ServerOP_ExpeditionMemberSwap:
 	case ServerOP_ExpeditionMemberStatus:
+	case ServerOP_ExpeditionReplayOnJoin:
 	case ServerOP_ExpeditionDzCompass:
 	case ServerOP_ExpeditionDzSafeReturn:
 	case ServerOP_ExpeditionDzZoneIn:

@@ -160,7 +160,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		if (expedition_id != last_expedition_id)
 		{
 			auto leader_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			ExpeditionMember leader{ leader_id, row[7] }; // id, name
+			ExpeditionMember leader{ leader_id, row[8] }; // id, name
 			auto instance_id = row[1] ? strtoul(row[1], nullptr, 10) : 0; // can be null from fk constraint
 
 			DynamicZone dynamic_zone = DynamicZone::LoadDzFromDatabase(instance_id);
@@ -175,6 +175,9 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 				(strtoul(row[6], nullptr, 10) != 0) // has_replay_timer
 			));
 
+			bool add_replay_on_join = (strtoul(row[7], nullptr, 10) != 0);
+
+			expedition->SetReplayLockoutOnMemberJoin(add_replay_on_join);
 			expedition->LoadMembers();
 			expedition->SendUpdatesToZoneMembers();
 
@@ -188,17 +191,17 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		last_expedition_id = expedition_id;
 
 		// optional lockouts from left join
-		if (row[8] && row[9] && row[10] && row[11])
+		if (row[9] && row[10] && row[11] && row[12])
 		{
 			auto it = zone->expedition_cache.find(last_expedition_id);
 			if (it != zone->expedition_cache.end())
 			{
 				it->second->AddInternalLockout(ExpeditionLockoutTimer{
 					row[2],                                               // expedition_name
-					row[8],                                               // event_name
-					strtoull(row[9], nullptr, 10),                        // expire_time
-					static_cast<uint32_t>(strtoul(row[10], nullptr, 10)), // original duration
-					(strtoul(row[11], nullptr, 10) != 0)                  // is_inherited
+					row[9],                                               // event_name
+					strtoull(row[10], nullptr, 10),                       // expire_time
+					static_cast<uint32_t>(strtoul(row[11], nullptr, 10)), // original duration
+					(strtoul(row[12], nullptr, 10) != 0)                  // is_inherited
 				});
 			}
 		}
@@ -390,6 +393,17 @@ ExpeditionMember Expedition::GetMemberData(const std::string& character_name)
 		member_data = *it;
 	}
 	return member_data;
+}
+
+void Expedition::SetReplayLockoutOnMemberJoin(bool add_on_join, bool update_db)
+{
+	m_add_replay_on_join = add_on_join;
+
+	if (update_db)
+	{
+		ExpeditionDatabase::UpdateReplayLockoutOnJoin(m_id, add_on_join);
+		SendWorldSettingChanged(ServerOP_ExpeditionReplayOnJoin, m_add_replay_on_join);
+	}
 }
 
 void Expedition::AddReplayLockout(uint32_t seconds)
@@ -774,12 +788,15 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 			if (!lockout.IsInherited() &&
 			    !add_client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 			{
-				// replay timers are added to characters immediately on joining with
-				// a fresh expire time using the original duration
+				// replay timers are optionally added to new members immediately on
+				// join with a fresh expire time using the original duration.
 				if (m_has_replay_timer && lockout.IsReplayTimer())
 				{
-					add_client->AddNewExpeditionLockout(
-						lockout.GetExpeditionName(), lockout.GetEventName(), lockout.GetDuration());
+					if (m_add_replay_on_join)
+					{
+						add_client->AddNewExpeditionLockout(
+							lockout.GetExpeditionName(), lockout.GetEventName(), lockout.GetDuration());
+					}
 				}
 				else
 				{
@@ -1499,6 +1516,18 @@ void Expedition::SendWorldMemberSwapped(
 	worldserver.SendPacket(pack.get());
 }
 
+void Expedition::SendWorldSettingChanged(uint16_t server_opcode, bool setting_value)
+{
+	uint32_t pack_size = sizeof(ServerExpeditionSetting_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(server_opcode, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionSetting_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
+	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
+	buf->enabled = setting_value;
+	worldserver.SendPacket(pack.get());
+}
+
 void Expedition::SendWorldGetOnlineMembers()
 {
 	// request online status of all characters in our expedition tracked by world
@@ -1645,6 +1674,19 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			if (expedition)
 			{
 				expedition->UpdateMemberStatus(buf->character_id, static_cast<ExpeditionMemberStatus>(buf->status));
+			}
+		}
+		break;
+	}
+	case ServerOP_ExpeditionReplayOnJoin:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionSetting_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+			if (expedition)
+			{
+				expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
 			}
 		}
 		break;

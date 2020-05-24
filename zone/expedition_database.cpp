@@ -62,6 +62,7 @@ MySQLRequestResult ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 			expedition_details.min_players,
 			expedition_details.max_players,
 			expedition_details.has_replay_timer,
+			expedition_details.add_replay_on_join,
 			character_data.name leader_name,
 			expedition_lockouts.event_name,
 			UNIX_TIMESTAMP(expedition_lockouts.expire_time),
@@ -93,6 +94,7 @@ MySQLRequestResult ExpeditionDatabase::LoadAllExpeditions()
 			expedition_details.min_players,
 			expedition_details.max_players,
 			expedition_details.has_replay_timer,
+			expedition_details.add_replay_on_join,
 			character_data.name leader_name,
 			expedition_lockouts.event_name,
 			UNIX_TIMESTAMP(expedition_lockouts.expire_time),
@@ -654,5 +656,20 @@ void ExpeditionDatabase::UpdateMemberRemoved(uint32_t expedition_id, uint32_t ch
 	if (!results.Success())
 	{
 		LogExpeditions("Failed to remove [{}] from expedition [{}]", character_id, expedition_id);
+	}
+}
+
+void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join)
+{
+	LogExpeditionsDetail("Updating replay lockout on join [{}] for expedition [{}]", add_on_join, expedition_id);
+
+	auto query = fmt::format(SQL(
+		UPDATE expedition_details SET add_replay_on_join = {} WHERE id = {};
+	), add_on_join, expedition_id);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+	{
+		LogExpeditions("Failed to update expedition [{}] replay timer setting", expedition_id);
 	}
 }
