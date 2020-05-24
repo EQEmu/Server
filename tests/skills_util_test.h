@@ -35,13 +35,13 @@ public:
 
 	private:
 	void IsTradeskill() {
-		TEST_ASSERT(EQEmu::skills::IsTradeskill(EQEmu::skills::SkillPottery));
-		TEST_ASSERT(!EQEmu::skills::IsTradeskill(EQEmu::skills::SkillParry));
+		TEST_ASSERT(EQ::skills::IsTradeskill(EQ::skills::SkillPottery));
+		TEST_ASSERT(!EQ::skills::IsTradeskill(EQ::skills::SkillParry));
 	}
 
 	void IsSpecializedSkill() {
-		TEST_ASSERT(EQEmu::skills::IsSpecializedSkill(EQEmu::skills::SkillSpecializeConjuration));
-		TEST_ASSERT(!EQEmu::skills::IsSpecializedSkill(EQEmu::skills::SkillConjuration))
+		TEST_ASSERT(EQ::skills::IsSpecializedSkill(EQ::skills::SkillSpecializeConjuration));
+		TEST_ASSERT(!EQ::skills::IsSpecializedSkill(EQ::skills::SkillConjuration))
 	}
 };
 

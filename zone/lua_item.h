@@ -4,7 +4,7 @@
 
 #include "lua_ptr.h"
 
-namespace EQEmu
+namespace EQ
 {
 	struct ItemData;
 }
@@ -15,17 +15,17 @@ namespace luabind {
 
 luabind::scope lua_register_item();
 
-class Lua_Item : public Lua_Ptr<const EQEmu::ItemData>
+class Lua_Item : public Lua_Ptr<const EQ::ItemData>
 {
-	typedef const EQEmu::ItemData NativeType;
+	typedef const EQ::ItemData NativeType;
 public:
 	Lua_Item(uint32 item_id);
 	Lua_Item() : Lua_Ptr(nullptr) { }
-	Lua_Item(const EQEmu::ItemData *d) : Lua_Ptr(d) { }
+	Lua_Item(const EQ::ItemData *d) : Lua_Ptr(d) { }
 	virtual ~Lua_Item() { }
 
-	operator const EQEmu::ItemData*() {
-		return reinterpret_cast<const EQEmu::ItemData*>(GetLuaPtrData());
+	operator const EQ::ItemData*() {
+		return reinterpret_cast<const EQ::ItemData*>(GetLuaPtrData());
 	}
 
 	int GetMinStatus();

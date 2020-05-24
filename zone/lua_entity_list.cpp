@@ -80,6 +80,11 @@ Lua_NPC Lua_EntityList::GetNPCByNPCTypeID(int npc_type) {
 	return Lua_NPC(self->GetNPCByNPCTypeID(npc_type));
 }
 
+Lua_NPC Lua_EntityList::GetNPCBySpawnID(uint32 spawn_id) {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetNPCBySpawnID(spawn_id));
+}
+
 Lua_Client Lua_EntityList::GetClientByName(const char *name) {
 	Lua_Safe_Call_Class(Lua_Client);
 	return Lua_Client(self->GetClientByName(name));
@@ -449,6 +454,7 @@ luabind::scope lua_register_entity_list() {
 		.def("IsMobSpawnedByNpcTypeID", (bool(Lua_EntityList::*)(int))&Lua_EntityList::IsMobSpawnedByNpcTypeID)
 		.def("GetNPCByID", (Lua_NPC(Lua_EntityList::*)(int))&Lua_EntityList::GetNPCByID)
 		.def("GetNPCByNPCTypeID", (Lua_NPC(Lua_EntityList::*)(int))&Lua_EntityList::GetNPCByNPCTypeID)
+		.def("GetNPCBySpawnID", (Lua_NPC(Lua_EntityList::*)(int))&Lua_EntityList::GetNPCBySpawnID)
 		.def("GetClientByName", (Lua_Client(Lua_EntityList::*)(const char*))&Lua_EntityList::GetClientByName)
 		.def("GetClientByAccID", (Lua_Client(Lua_EntityList::*)(uint32))&Lua_EntityList::GetClientByAccID)
 		.def("GetClientByID", (Lua_Client(Lua_EntityList::*)(int))&Lua_EntityList::GetClientByID)

@@ -86,7 +86,7 @@ struct NPCType
 	uint32	drakkin_heritage;
 	uint32	drakkin_tattoo;
 	uint32	drakkin_details;
-	EQEmu::TintProfile	armor_tint;
+	EQ::TintProfile	armor_tint;
 	uint32	min_dmg;
 	uint32	max_dmg;
 	uint32	charm_ac;
@@ -185,7 +185,7 @@ struct PlayerCorpse_Struct {
 	uint32	silver;
 	uint32	gold;
 	uint32	plat;
-	EQEmu::TintProfile item_tint;
+	EQ::TintProfile item_tint;
 	uint8 haircolor;
 	uint8 beardcolor;
 	uint8 eyecolor1;

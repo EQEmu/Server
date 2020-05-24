@@ -1882,32 +1882,6 @@ XS(XS_Client_IncreaseLanguageSkill) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_GetSkill); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_GetSkill) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSkill(THIS, uint16 skill_id)");
-	{
-		Client *THIS;
-		uint16                   RETVAL;
-		dXSTARG;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-		RETVAL = THIS->GetSkill(skill_id);
-		XSprePUSH;
-		PUSHu((UV) RETVAL);
-	}
-	XSRETURN(1);
-}
-
 XS(XS_Client_GetRawSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawSkill) {
 	dXSARGS;
@@ -1917,7 +1891,7 @@ XS(XS_Client_GetRawSkill) {
 		Client *THIS;
 		uint32                   RETVAL;
 		dXSTARG;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1942,7 +1916,7 @@ XS(XS_Client_HasSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1967,7 +1941,7 @@ XS(XS_Client_CanHaveSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skill_id = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -1991,7 +1965,7 @@ XS(XS_Client_SetSkill) {
 		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)");
 	{
 		Client *THIS;
-		EQEmu::skills::SkillType skill_num = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value     = (uint16) SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2014,7 +1988,7 @@ XS(XS_Client_AddSkill) {
 		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)");
 	{
 		Client                   *THIS;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value   = (uint16) SvUV(ST(2));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2060,7 +2034,7 @@ XS(XS_Client_CheckIncreaseSkill) {
 	{
 		Client *THIS;
 		bool                     RETVAL;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		int                      chancemodi;
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -2116,7 +2090,7 @@ XS(XS_Client_MaxSkill) {
 	{
 		Client                   *THIS;
 		uint16                   RETVAL;
-		EQEmu::skills::SkillType skillid = (EQEmu::skills::SkillType) SvUV(ST(1));
+		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   class_  = 0;
 		uint16                   level   = 0;
 		dXSTARG;
@@ -3148,7 +3122,7 @@ XS(XS_Client_SummonItem) {
 		uint32 aug3    = 0;
 		uint32 aug4    = 0;
 		uint32 aug5    = 0;
-		uint16 slot_id = EQEmu::invslot::slotCursor;
+		uint16 slot_id = EQ::invslot::slotCursor;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -4206,7 +4180,7 @@ XS(XS_Client_GetItemAt) {
 		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)");
 	{
 		Client              *THIS;
-		EQEmu::ItemInstance *RETVAL;
+		EQ::ItemInstance *RETVAL;
 		uint32 slot = (int32) SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
@@ -4231,7 +4205,7 @@ XS(XS_Client_GetAugmentAt) {
 		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)");
 	{
 		Client              *THIS;
-		EQEmu::ItemInstance *RETVAL;
+		EQ::ItemInstance *RETVAL;
 		uint32 slot     = (int32) SvIV(ST(1));
 		uint32 aug_slot = (int32) SvIV(ST(1));
 
@@ -4243,7 +4217,7 @@ XS(XS_Client_GetAugmentAt) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		EQEmu::ItemInstance *inst = THIS->GetInv().GetItem(slot);
+		EQ::ItemInstance *inst = THIS->GetInv().GetItem(slot);
 		if (inst) {
 			RETVAL = inst->GetAugment(aug_slot);
 		} else {
@@ -5431,7 +5405,7 @@ XS(XS_Client_GetItemInInventory) {
 	{
 		Client *THIS;
 		int16               slot_id = (int16) SvIV(ST(1));
-		EQEmu::ItemInstance *RETVAL = nullptr;
+		EQ::ItemInstance *RETVAL = nullptr;
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -5522,14 +5496,13 @@ XS(XS_Client_OpenLFGuildWindow) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Client_SignalClient); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Client_SignalClient) {
+XS(XS_Client_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_NotifyNewTitlesAvailable) {
 	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SignalClient(THIS, uint32 data)");
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)");
 	{
 		Client *THIS;
-		uint32 data = (uint32) SvUV(ST(1));
 
 		if (sv_derived_from(ST(0), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
@@ -5539,7 +5512,7 @@ XS(XS_Client_SignalClient) {
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		THIS->Signal(data);
+		THIS->NotifyNewTitlesAvailable();
 	}
 	XSRETURN_EMPTY;
 }
@@ -6516,7 +6489,6 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
 	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
 	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
-	newXSproto(strcpy(buf, "GetSkill"), XS_Client_GetSkill, file, "$$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
@@ -6568,6 +6540,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "NPCSpawn"), XS_Client_NPCSpawn, file, "$$$;$");
 	newXSproto(strcpy(buf, "NukeItem"), XS_Client_NukeItem, file, "$$;$");
 	newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
+	newXSproto(strcpy(buf, "NotifyNewTitlesAvailable"), XS_Client_NotifyNewTitlesAvailable, file, "$");
 	newXSproto(strcpy(buf, "PlayMP3"), XS_Client_PlayMP3, file, "$;$");
 	newXSproto(strcpy(buf, "Popup2"), XS_Client_Popup2, file, "$$$;$$$$$$$");
 	newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
@@ -6625,7 +6598,6 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetTint"), XS_Client_SetTint, file, "$$$");
 	newXSproto(strcpy(buf, "SetTitleSuffix"), XS_Client_SetTitleSuffix, file, "$$;$");
 	newXSproto(strcpy(buf, "SetZoneFlag"), XS_Client_SetZoneFlag, file, "$$");
-	newXSproto(strcpy(buf, "SignalClient"), XS_Client_SignalClient, file, "$");
 	newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");

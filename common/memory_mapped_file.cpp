@@ -33,7 +33,7 @@
 #include <sys/stat.h>
 #endif
 
-namespace EQEmu {
+namespace EQ {
 
 	struct MemoryMappedFile::Implementation {
 #ifdef _WINDOWS

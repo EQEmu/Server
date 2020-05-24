@@ -40,15 +40,15 @@ XS(XS_QuestItem_GetName) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::GetName(THIS)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		Const_char          *RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -66,14 +66,14 @@ XS(XS_QuestItem_SetScale) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: QuestItem::SetScale(THIS, float scale_multiplier)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		float Mult;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -92,15 +92,15 @@ XS(XS_QuestItem_ItemSay) {
 	if (items != 2 && items != 3)
 		Perl_croak(aTHX_ "Usage: QuestItem::ItemSay(THIS, string text [int language_id])");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		Const_char          *text;
 		int lang = 0;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -119,19 +119,19 @@ XS(XS_QuestItem_IsType) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: QuestItem::IsType(THIS, type)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		bool   RETVAL;
 		uint32 type = (int32) SvIV(ST(1));
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
-		RETVAL = THIS->IsType((EQEmu::item::ItemClass) type);
+		RETVAL = THIS->IsType((EQ::item::ItemClass) type);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
@@ -144,14 +144,14 @@ XS(XS_QuestItem_IsAttuned) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::IsAttuned(THIS)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		bool RETVAL;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -168,15 +168,15 @@ XS(XS_QuestItem_GetCharges) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::GetCharges(THIS)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		int16 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -193,15 +193,15 @@ XS(XS_QuestItem_GetAugment) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, int16 slot_id)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
-		EQEmu::ItemInstance *RETVAL;
+		EQ::ItemInstance *RETVAL;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
@@ -218,15 +218,15 @@ XS(XS_QuestItem_GetID) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: QuestItem::GetID(THIS)");
 	{
-		EQEmu::ItemInstance *THIS;
+		EQ::ItemInstance *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 
 		if (sv_derived_from(ST(0), "QuestItem")) {
 			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EQEmu::ItemInstance *, tmp);
+			THIS = INT2PTR(EQ::ItemInstance *, tmp);
 		} else
-			Perl_croak(aTHX_ "THIS is not of type EQEmu::ItemInstance");
+			Perl_croak(aTHX_ "THIS is not of type EQ::ItemInstance");
 		if (THIS == nullptr)
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 

@@ -40,7 +40,7 @@ Bot::Bot(NPCType *npcTypeData, Client* botOwner) : NPC(npcTypeData, nullptr, glm
 		this->_botOwnerCharacterID = 0;
 	}
 
-	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetInventoryVersion(EQ::versions::MobVersion::Bot);
 	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
@@ -132,7 +132,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 
 	auto bot_owner = GetBotOwner();
 
-	m_inv.SetInventoryVersion(EQEmu::versions::MobVersion::Bot);
+	m_inv.SetInventoryVersion(EQ::versions::MobVersion::Bot);
 	m_inv.SetGMInventory(false); // bot expansions are not currently implemented (defaults to static)
 
 	_guildRank = 0;
@@ -177,7 +177,7 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if (!stance_flag && bot_owner)
 		bot_owner->Message(Chat::Red, "Could not locate stance for '%s'", GetCleanName());
 
-	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQEmu::constants::stanceAggressive));
+	SetTaunting((GetClass() == WARRIOR || GetClass() == PALADIN || GetClass() == SHADOWKNIGHT) && (GetBotStance() == EQ::constants::stanceAggressive));
 	SetPauseAI(false);
 
 	m_alt_combat_hate_timer.Start(250);
@@ -491,14 +491,14 @@ void  Bot::SetSuffix(std::string bot_suffix) {
 }
 
 uint32 Bot::GetBotArcheryRange() {
-	const EQEmu::ItemInstance *range_inst = GetBotItem(EQEmu::invslot::slotRange);
-	const EQEmu::ItemInstance *ammo_inst = GetBotItem(EQEmu::invslot::slotAmmo);
+	const EQ::ItemInstance *range_inst = GetBotItem(EQ::invslot::slotRange);
+	const EQ::ItemInstance *ammo_inst = GetBotItem(EQ::invslot::slotAmmo);
 	if (!range_inst || !ammo_inst)
 		return 0;
 
-	const EQEmu::ItemData *range_item = range_inst->GetItem();
-	const EQEmu::ItemData *ammo_item = ammo_inst->GetItem();
-	if (!range_item || !ammo_item || range_item->ItemType != EQEmu::item::ItemTypeBow || ammo_item->ItemType != EQEmu::item::ItemTypeArrow)
+	const EQ::ItemData *range_item = range_inst->GetItem();
+	const EQ::ItemData *ammo_item = ammo_inst->GetItem();
+	if (!range_item || !ammo_item || range_item->ItemType != EQ::item::ItemTypeBow || ammo_item->ItemType != EQ::item::ItemTypeArrow)
 		return 0;
 
 	// everything is good!
@@ -508,15 +508,15 @@ uint32 Bot::GetBotArcheryRange() {
 void Bot::ChangeBotArcherWeapons(bool isArcher) {
 	if((GetClass()==WARRIOR) || (GetClass()==PALADIN) || (GetClass()==RANGER) || (GetClass()==SHADOWKNIGHT) || (GetClass()==ROGUE)) {
 		if(!isArcher) {
-			BotAddEquipItem(EQEmu::invslot::slotPrimary, GetBotItemBySlot(EQEmu::invslot::slotPrimary));
-			BotAddEquipItem(EQEmu::invslot::slotSecondary, GetBotItemBySlot(EQEmu::invslot::slotSecondary));
+			BotAddEquipItem(EQ::invslot::slotPrimary, GetBotItemBySlot(EQ::invslot::slotPrimary));
+			BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotSecondary));
 			SetAttackTimer();
 			BotGroupSay(this, "My blade is ready");
 		} else {
-			BotRemoveEquipItem(EQEmu::invslot::slotPrimary);
-			BotRemoveEquipItem(EQEmu::invslot::slotSecondary);
-			BotAddEquipItem(EQEmu::invslot::slotAmmo, GetBotItemBySlot(EQEmu::invslot::slotAmmo));
-			BotAddEquipItem(EQEmu::invslot::slotSecondary, GetBotItemBySlot(EQEmu::invslot::slotRange));
+			BotRemoveEquipItem(EQ::invslot::slotPrimary);
+			BotRemoveEquipItem(EQ::invslot::slotSecondary);
+			BotAddEquipItem(EQ::invslot::slotAmmo, GetBotItemBySlot(EQ::invslot::slotAmmo));
+			BotAddEquipItem(EQ::invslot::slotSecondary, GetBotItemBySlot(EQ::invslot::slotRange));
 			SetAttackTimer();
 			BotGroupSay(this, "My bow is true and ready");
 		}
@@ -574,7 +574,7 @@ NPCType *Bot::FillNPCTypeStruct(uint32 botSpellsID, std::string botName, std::st
 	bot_npc_type->race = botRace;
 	bot_npc_type->class_ = botClass;
 	bot_npc_type->bodytype = 1;
-	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->deity = EQ::deity::DeityAgnostic;
 	bot_npc_type->level = botLevel;
 	//bot_npc_type->npc_id = 0;
 	//bot_npc_type->texture = 0;
@@ -699,7 +699,7 @@ NPCType *Bot::CreateDefaultNPCTypeStructForBot(std::string botName, std::string 
 	bot_npc_type->race = botRace;
 	bot_npc_type->class_ = botClass;
 	bot_npc_type->bodytype = 1;
-	bot_npc_type->deity = EQEmu::deity::DeityAgnostic;
+	bot_npc_type->deity = EQ::deity::DeityAgnostic;
 	bot_npc_type->level = botLevel;
 	//bot_npc_type->npc_id = 0;
 	//bot_npc_type->texture = 0;
@@ -1553,36 +1553,36 @@ int32 Bot::acmod() {
 }
 
 uint16 Bot::GetPrimarySkillValue() {
-	EQEmu::skills::SkillType skill = EQEmu::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
-	bool equiped = m_inv.GetItem(EQEmu::invslot::slotPrimary);
+	EQ::skills::SkillType skill = EQ::skills::HIGHEST_SKILL; //because nullptr == 0, which is 1H Slashing, & we want it to return 0 from GetSkill
+	bool equiped = m_inv.GetItem(EQ::invslot::slotPrimary);
 	if(!equiped)
-		skill = EQEmu::skills::SkillHandtoHand;
+		skill = EQ::skills::SkillHandtoHand;
 	else {
-		uint8 type = m_inv.GetItem(EQEmu::invslot::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
+		uint8 type = m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->ItemType; //is this the best way to do this?
 		switch(type) {
-		case EQEmu::item::ItemType1HSlash:
-			skill = EQEmu::skills::Skill1HSlashing;
+		case EQ::item::ItemType1HSlash:
+			skill = EQ::skills::Skill1HSlashing;
 			break;
-		case EQEmu::item::ItemType2HSlash:
-			skill = EQEmu::skills::Skill2HSlashing;
+		case EQ::item::ItemType2HSlash:
+			skill = EQ::skills::Skill2HSlashing;
 			break;
-		case EQEmu::item::ItemType1HPiercing:
-			skill = EQEmu::skills::Skill1HPiercing;
+		case EQ::item::ItemType1HPiercing:
+			skill = EQ::skills::Skill1HPiercing;
 			break;
-		case EQEmu::item::ItemType1HBlunt:
-			skill = EQEmu::skills::Skill1HBlunt;
+		case EQ::item::ItemType1HBlunt:
+			skill = EQ::skills::Skill1HBlunt;
 			break;
-		case EQEmu::item::ItemType2HBlunt:
-			skill = EQEmu::skills::Skill2HBlunt;
+		case EQ::item::ItemType2HBlunt:
+			skill = EQ::skills::Skill2HBlunt;
 			break;
-		case EQEmu::item::ItemType2HPiercing:
-			skill = EQEmu::skills::Skill2HPiercing;
+		case EQ::item::ItemType2HPiercing:
+			skill = EQ::skills::Skill2HPiercing;
 			break;
-		case EQEmu::item::ItemTypeMartial:
-			skill = EQEmu::skills::SkillHandtoHand;
+		case EQ::item::ItemTypeMartial:
+			skill = EQ::skills::SkillHandtoHand;
 			break;
 		default:
-			skill = EQEmu::skills::SkillHandtoHand;
+			skill = EQ::skills::SkillHandtoHand;
 			break;
 		}
 	}
@@ -1590,7 +1590,7 @@ uint16 Bot::GetPrimarySkillValue() {
 	return GetSkill(skill);
 }
 
-uint16 Bot::MaxSkill(EQEmu::skills::SkillType skillid, uint16 class_, uint16 level) const {
+uint16 Bot::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
 	return(database.GetSkillCap(class_, skillid, level));
 }
 
@@ -1598,7 +1598,7 @@ uint32 Bot::GetTotalATK() {
 	uint32 AttackRating = 0;
 	uint32 WornCap = itembonuses.ATK;
 	if(IsBot()) {
-		AttackRating = ((WornCap * 1.342) + (GetSkill(EQEmu::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
+		AttackRating = ((WornCap * 1.342) + (GetSkill(EQ::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69));
 		AttackRating += aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 		if (AttackRating < 10)
 			AttackRating = 10;
@@ -1613,7 +1613,7 @@ uint32 Bot::GetTotalATK() {
 uint32 Bot::GetATKRating() {
 	uint32 AttackRating = 0;
 	if(IsBot()) {
-		AttackRating = (GetSkill(EQEmu::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
+		AttackRating = (GetSkill(EQ::skills::SkillOffense) * 1.345) + ((GetSTR() - 66) * 0.9) + (GetPrimarySkillValue() * 2.69);
 		if (AttackRating < 10)
 			AttackRating = 10;
 	}
@@ -1626,7 +1626,7 @@ int32 Bot::GenerateBaseHitPoints() {
 	uint32 lm = GetClassLevelFactor();
 	int32 Post255;
 	int32 NormalSTA = GetSTA();
-	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		float SoDPost255;
 		if(((NormalSTA - 255) / 2) > 0)
 			SoDPost255 = ((NormalSTA - 255) / 2);
@@ -2106,8 +2106,8 @@ bool Bot::LoadPet()
 	if (!database.botdb.LoadPetBuffs(GetBotID(), pet_buffs))
 		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetBuffs(), GetCleanName());
 
-	uint32 pet_items[EQEmu::invslot::EQUIPMENT_COUNT];
-	memset(pet_items, 0, (sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT));
+	uint32 pet_items[EQ::invslot::EQUIPMENT_COUNT];
+	memset(pet_items, 0, (sizeof(uint32) * EQ::invslot::EQUIPMENT_COUNT));
 	if (!database.botdb.LoadPetItems(GetBotID(), pet_items))
 		bot_owner->Message(Chat::Red, "%s for %s's pet", BotDatabase::fail::LoadPetItems(), GetCleanName());
 
@@ -2134,11 +2134,11 @@ bool Bot::SavePet()
 
 	char* pet_name = new char[64];
 	SpellBuff_Struct pet_buffs[PET_BUFF_COUNT];
-	uint32 pet_items[EQEmu::invslot::EQUIPMENT_COUNT];
+	uint32 pet_items[EQ::invslot::EQUIPMENT_COUNT];
 
 	memset(pet_name, 0, 64);
 	memset(pet_buffs, 0, (sizeof(SpellBuff_Struct) * PET_BUFF_COUNT));
-	memset(pet_items, 0, (sizeof(uint32) * EQEmu::invslot::EQUIPMENT_COUNT));
+	memset(pet_items, 0, (sizeof(uint32) * EQ::invslot::EQUIPMENT_COUNT));
 	
 	pet_inst->GetPetState(pet_buffs, pet_items, pet_name);
 	
@@ -2344,13 +2344,13 @@ void Bot::BotRangedAttack(Mob* other) {
 		return;
 	}
 
-	EQEmu::ItemInstance* rangedItem = GetBotItem(EQEmu::invslot::slotRange);
-	const EQEmu::ItemData* RangeWeapon = nullptr;
+	EQ::ItemInstance* rangedItem = GetBotItem(EQ::invslot::slotRange);
+	const EQ::ItemData* RangeWeapon = nullptr;
 	if(rangedItem)
 		RangeWeapon = rangedItem->GetItem();
 
-	EQEmu::ItemInstance* ammoItem = GetBotItem(EQEmu::invslot::slotAmmo);
-	const EQEmu::ItemData* Ammo = nullptr;
+	EQ::ItemInstance* ammoItem = GetBotItem(EQ::invslot::slotAmmo);
+	const EQ::ItemData* Ammo = nullptr;
 	if(ammoItem)
 		Ammo = ammoItem->GetItem();
 
@@ -2361,7 +2361,7 @@ void Bot::BotRangedAttack(Mob* other) {
 	if(!IsAttackAllowed(other) || IsCasting() || DivineAura() || IsStunned() || IsMezzed() || (GetAppearance() == eaDead))
 		return;
 
-	SendItemAnimation(other, Ammo, EQEmu::skills::SkillArchery);
+	SendItemAnimation(other, Ammo, EQ::skills::SkillArchery);
 	//DoArcheryAttackDmg(GetTarget(), rangedItem, ammoItem);
 	DoArcheryAttackDmg(other, rangedItem, ammoItem); // watch
 
@@ -2406,12 +2406,12 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	//Check for bonuses that give you a double attack chance regardless of skill (ie Bestial Frenzy/Harmonious Attack AA)
 	uint32 bonusGiveDA = (aabonuses.GiveDoubleAttack + spellbonuses.GiveDoubleAttack + itembonuses.GiveDoubleAttack);
 	// If you don't have the double attack skill, return
-	if (!GetSkill(EQEmu::skills::SkillDoubleAttack) && !(GetClass() == BARD || GetClass() == BEASTLORD))
+	if (!GetSkill(EQ::skills::SkillDoubleAttack) && !(GetClass() == BARD || GetClass() == BEASTLORD))
 		return false;
 
 	// You start with no chance of double attacking
 	float chance = 0.0f;
-	uint16 skill = GetSkill(EQEmu::skills::SkillDoubleAttack);
+	uint16 skill = GetSkill(EQ::skills::SkillDoubleAttack);
 	int32 bonusDA = (aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance);
 	//Use skill calculations otherwise, if you only have AA applied GiveDoubleAttack chance then use that value as the base.
 	if (skill)
@@ -2436,28 +2436,28 @@ bool Bot::CheckBotDoubleAttack(bool tripleAttack) {
 	return false;
 }
 
-void Bot::ApplySpecialAttackMod(EQEmu::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
+void Bot::ApplySpecialAttackMod(EQ::skills::SkillType skill, int32 &dmg, int32 &mindmg) {
 	int item_slot = -1;
 	//1: Apply bonus from AC (BOOT/SHIELD/HANDS) est. 40AC=6dmg
 	switch (skill) {
-	case EQEmu::skills::SkillFlyingKick:
-	case EQEmu::skills::SkillRoundKick:
-	case EQEmu::skills::SkillKick:
-		item_slot = EQEmu::invslot::slotFeet;
+	case EQ::skills::SkillFlyingKick:
+	case EQ::skills::SkillRoundKick:
+	case EQ::skills::SkillKick:
+		item_slot = EQ::invslot::slotFeet;
 		break;
-	case EQEmu::skills::SkillBash:
-		item_slot = EQEmu::invslot::slotSecondary;
+	case EQ::skills::SkillBash:
+		item_slot = EQ::invslot::slotSecondary;
 		break;
-	case EQEmu::skills::SkillDragonPunch:
-	case EQEmu::skills::SkillEagleStrike:
-	case EQEmu::skills::SkillTigerClaw:
-		item_slot = EQEmu::invslot::slotHands;
+	case EQ::skills::SkillDragonPunch:
+	case EQ::skills::SkillEagleStrike:
+	case EQ::skills::SkillTigerClaw:
+		item_slot = EQ::invslot::slotHands;
 		break;
 	}
 
-	if (item_slot >= EQEmu::invslot::EQUIPMENT_BEGIN){
-		const EQEmu::ItemInstance* inst = GetBotItem(item_slot);
-		const EQEmu::ItemData* botweapon = nullptr;
+	if (item_slot >= EQ::invslot::EQUIPMENT_BEGIN){
+		const EQ::ItemInstance* inst = GetBotItem(item_slot);
+		const EQ::ItemData* botweapon = nullptr;
 		if(inst)
 			botweapon = inst->GetItem();
 
@@ -2532,8 +2532,8 @@ void Bot::AI_Process()
 #define NOT_GUARDING (!GetGuardFlag())
 #define HOLDING (GetHoldFlag())
 #define NOT_HOLDING (!GetHoldFlag())
-#define PASSIVE (GetBotStance() == EQEmu::constants::stancePassive)
-#define NOT_PASSIVE (GetBotStance() != EQEmu::constants::stancePassive)
+#define PASSIVE (GetBotStance() == EQ::constants::stancePassive)
+#define NOT_PASSIVE (GetBotStance() != EQ::constants::stancePassive)
 
 	Client* bot_owner = (GetBotOwner() && GetBotOwner()->IsClient() ? GetBotOwner()->CastToClient() : nullptr);
 	Group* bot_group = GetGroup();
@@ -3068,8 +3068,8 @@ void Bot::AI_Process()
 
 		bool atCombatRange = false;
 
-		const auto* p_item = GetBotItem(EQEmu::invslot::slotPrimary);
-		const auto* s_item = GetBotItem(EQEmu::invslot::slotSecondary);
+		const auto* p_item = GetBotItem(EQ::invslot::slotPrimary);
+		const auto* s_item = GetBotItem(EQ::invslot::slotSecondary);
 
 		bool behind_mob = false;
 		bool backstab_weapon = false;
@@ -3257,13 +3257,13 @@ void Bot::AI_Process()
 
 								if (m_evade_timer.Check(false)) { // Attempt to evade
 
-									int timer_duration = (HideReuseTime - GetSkillReuseTime(EQEmu::skills::SkillHide)) * 1000;
+									int timer_duration = (HideReuseTime - GetSkillReuseTime(EQ::skills::SkillHide)) * 1000;
 									if (timer_duration < 0) {
 										timer_duration = 0;
 									}
 
 									m_evade_timer.Start(timer_duration);
-									if (zone->random.Int(0, 260) < (int)GetSkill(EQEmu::skills::SkillHide)) {
+									if (zone->random.Int(0, 260) < (int)GetSkill(EQ::skills::SkillHide)) {
 										RogueEvade(tar);
 									}
 
@@ -3417,13 +3417,13 @@ void Bot::AI_Process()
 				TEST_COMBATANTS();
 				if (attack_timer.Check()) { // Process primary weapon attacks
 
-					Attack(tar, EQEmu::invslot::slotPrimary);
+					Attack(tar, EQ::invslot::slotPrimary);
 
 					TEST_COMBATANTS();
-					TriggerDefensiveProcs(tar, EQEmu::invslot::slotPrimary, false);
+					TriggerDefensiveProcs(tar, EQ::invslot::slotPrimary, false);
 
 					TEST_COMBATANTS();
-					TryWeaponProc(p_item, tar, EQEmu::invslot::slotPrimary);
+					TryWeaponProc(p_item, tar, EQ::invslot::slotPrimary);
 
 					// bool tripleSuccess = false;
 
@@ -3431,19 +3431,19 @@ void Bot::AI_Process()
 					if (CanThisClassDoubleAttack()) {
 
 						if (CheckBotDoubleAttack()) {
-							Attack(tar, EQEmu::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						if (GetSpecialAbility(SPECATK_TRIPLE) && CheckBotDoubleAttack(true)) {
 							// tripleSuccess = true;
-							Attack(tar, EQEmu::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 
 						TEST_COMBATANTS();
 						// quad attack, does this belong here??
 						if (GetSpecialAbility(SPECATK_QUAD) && CheckBotDoubleAttack(true)) {
-							Attack(tar, EQEmu::invslot::slotPrimary, true);
+							Attack(tar, EQ::invslot::slotPrimary, true);
 						}
 					}
 
@@ -3455,10 +3455,10 @@ void Bot::AI_Process()
 						if (zone->random.Int(0, 100) < flurrychance) {
 
 							MessageString(Chat::NPCFlurry, YOU_FLURRY);
-							Attack(tar, EQEmu::invslot::slotPrimary, false);
+							Attack(tar, EQ::invslot::slotPrimary, false);
 
 							TEST_COMBATANTS();
-							Attack(tar, EQEmu::invslot::slotPrimary, false);
+							Attack(tar, EQ::invslot::slotPrimary, false);
 						}
 					}
 
@@ -3469,7 +3469,7 @@ void Bot::AI_Process()
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {
 
 							if (zone->random.Int(0, 100) < ExtraAttackChanceBonus) {
-								Attack(tar, EQEmu::invslot::slotPrimary, false);
+								Attack(tar, EQ::invslot::slotPrimary, false);
 							}
 						}
 					}
@@ -3478,7 +3478,7 @@ void Bot::AI_Process()
 				TEST_COMBATANTS();
 				if (attack_dw_timer.Check() && CanThisClassDualWield()) { // Process secondary weapon attacks
 
-					const EQEmu::ItemData* s_itemdata = nullptr;
+					const EQ::ItemData* s_itemdata = nullptr;
 					// Can only dual wield without a weapon if you're a monk
 					if (s_item || (GetClass() == MONK)) {
 
@@ -3499,7 +3499,7 @@ void Bot::AI_Process()
 							float DualWieldProbability = 0.0f;
 
 							int32 Ambidexterity = (aabonuses.Ambidexterity + spellbonuses.Ambidexterity + itembonuses.Ambidexterity);
-							DualWieldProbability = ((GetSkill(EQEmu::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
+							DualWieldProbability = ((GetSkill(EQ::skills::SkillDualWield) + GetLevel() + Ambidexterity) / 400.0f); // 78.0 max
 
 							int32 DWBonus = (spellbonuses.DualWieldChance + itembonuses.DualWieldChance);
 							DualWieldProbability += (DualWieldProbability * float(DWBonus) / 100.0f);
@@ -3507,16 +3507,16 @@ void Bot::AI_Process()
 							float random = zone->random.Real(0, 1);
 							if (random < DualWieldProbability) { // Max 78% of DW
 
-								Attack(tar, EQEmu::invslot::slotSecondary);	// Single attack with offhand
+								Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 
 								TEST_COMBATANTS();
-								TryWeaponProc(s_item, tar, EQEmu::invslot::slotSecondary);
+								TryWeaponProc(s_item, tar, EQ::invslot::slotSecondary);
 
 								TEST_COMBATANTS();
 								if (CanThisClassDoubleAttack() && CheckBotDoubleAttack()) {
 
 									if (tar->GetHP() > -10) {
-										Attack(tar, EQEmu::invslot::slotSecondary);	// Single attack with offhand
+										Attack(tar, EQ::invslot::slotSecondary);	// Single attack with offhand
 									}
 								}
 							}
@@ -3859,12 +3859,12 @@ void Bot::PetAIProcess() {
 					if(!botPet->BehindMob(botPet->GetTarget(), botPet->GetX(), botPet->GetY()) && botPet->GetTarget()->IsEnraged())
 						return;
 
-					if (botPet->Attack(GetTarget(), EQEmu::invslot::slotPrimary))	// try the main hand
+					if (botPet->Attack(GetTarget(), EQ::invslot::slotPrimary))	// try the main hand
 						if (botPet->GetTarget()) {
 							// We're a pet so we re able to dual attack
 							int32 RandRoll = zone->random.Int(0, 99);
 							if (botPet->CanThisClassDoubleAttack() && (RandRoll < (botPet->GetLevel() + NPCDualAttackModifier))) {
-								if (botPet->Attack(botPet->GetTarget(), EQEmu::invslot::slotPrimary)) {}
+								if (botPet->Attack(botPet->GetTarget(), EQ::invslot::slotPrimary)) {}
 							}
 						}
 
@@ -3899,14 +3899,14 @@ void Bot::PetAIProcess() {
 						// Ok now, let's check pet's offhand.
 						if (botPet->GetAttackDWTimer().Check() && botPet->GetOwnerID() && botPet->GetOwner() && ((botPet->GetOwner()->GetClass() == MAGICIAN) || (botPet->GetOwner()->GetClass() == NECROMANCER) || (botPet->GetOwner()->GetClass() == SHADOWKNIGHT) || (botPet->GetOwner()->GetClass() == BEASTLORD))) {
 							if(botPet->GetOwner()->GetLevel() >= 24) {
-								float DualWieldProbability = ((botPet->GetSkill(EQEmu::skills::SkillDualWield) + botPet->GetLevel()) / 400.0f);
+								float DualWieldProbability = ((botPet->GetSkill(EQ::skills::SkillDualWield) + botPet->GetLevel()) / 400.0f);
 								DualWieldProbability -= zone->random.Real(0, 1);
 								if(DualWieldProbability < 0) {
-									botPet->Attack(botPet->GetTarget(), EQEmu::invslot::slotSecondary);
+									botPet->Attack(botPet->GetTarget(), EQ::invslot::slotSecondary);
 									if (botPet->CanThisClassDoubleAttack()) {
 										int32 RandRoll = zone->random.Int(0, 99);
 										if (RandRoll < (botPet->GetLevel() + 20))
-											botPet->Attack(botPet->GetTarget(), EQEmu::invslot::slotSecondary);
+											botPet->Attack(botPet->GetTarget(), EQ::invslot::slotSecondary);
 									}
 								}
 							}
@@ -4030,10 +4030,10 @@ bool Bot::Spawn(Client* botCharacterOwner) {
 		// I re-enabled this until I can sort it out
 		uint32 itemID = 0;
 		uint8 materialFromSlot = 0xFF;
-		for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
+		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
 			itemID = GetBotItemBySlot(i);
 			if(itemID != 0) {
-				materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(i);
+				materialFromSlot = EQ::InventoryProfile::CalcMaterialFromSlot(i);
 				if(materialFromSlot != 0xFF)
 					this->SendWearChange(materialFromSlot);
 			}
@@ -4059,7 +4059,7 @@ void Bot::RemoveBotItemBySlot(uint32 slotID, std::string *errorMessage)
 }
 
 // Retrieves all the inventory records from the database for this bot.
-void Bot::GetBotItems(EQEmu::InventoryProfile &inv, std::string* errorMessage)
+void Bot::GetBotItems(EQ::InventoryProfile &inv, std::string* errorMessage)
 {
 	if(!GetBotID())
 		return;
@@ -4111,18 +4111,18 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 		ns->spawn.size = 0;
 		ns->spawn.NPC = 0;					// 0=player,1=npc,2=pc corpse,3=npc corpse
 		UpdateActiveLight();
-		ns->spawn.light = m_Light.Type[EQEmu::lightsource::LightActive];
+		ns->spawn.light = m_Light.Type[EQ::lightsource::LightActive];
 		ns->spawn.helm = helmtexture; //(GetShowHelm() ? helmtexture : 0); //0xFF;
 		ns->spawn.equip_chest2 = texture; //0xFF;
 		ns->spawn.show_name = true;
 		strcpy(ns->spawn.lastName, GetSurname().c_str());
 		strcpy(ns->spawn.title, GetTitle().c_str());
 		strcpy(ns->spawn.suffix, GetSuffix().c_str());
-		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = nullptr;
+		const EQ::ItemData* item = nullptr;
+		const EQ::ItemInstance* inst = nullptr;
 		uint32 spawnedbotid = 0;
 		spawnedbotid = this->GetBotID();
-		for (int i = EQEmu::textures::textureBegin; i < EQEmu::textures::weaponPrimary; i++) {
+		for (int i = EQ::textures::textureBegin; i < EQ::textures::weaponPrimary; i++) {
 			inst = GetBotItem(i);
 			if (inst) {
 				item = inst->GetItem();
@@ -4141,25 +4141,25 @@ void Bot::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
 			}
 		}
 
-		inst = GetBotItem(EQEmu::invslot::slotPrimary);
+		inst = GetBotItem(EQ::invslot::slotPrimary);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
 					ns->spawn.equipment.Primary.Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQEmu::textures::weaponPrimary);
+				ns->spawn.equipment_tint.Primary.Color = GetEquipmentColor(EQ::textures::weaponPrimary);
 			}
 		}
 
-		inst = GetBotItem(EQEmu::invslot::slotSecondary);
+		inst = GetBotItem(EQ::invslot::slotSecondary);
 		if(inst) {
 			item = inst->GetItem();
 			if(item) {
 				if(strlen(item->IDFile) > 2)
 					ns->spawn.equipment.Secondary.Material = atoi(&item->IDFile[2]);
 
-				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQEmu::textures::weaponSecondary);
+				ns->spawn.equipment_tint.Secondary.Color = GetEquipmentColor(EQ::textures::weaponSecondary);
 			}
 		}
 	}
@@ -4396,8 +4396,8 @@ void Bot::SendBotArcheryWearChange(uint8 material_slot, uint32 material, uint32 
 }
 
 // Returns the item id that is in the bot inventory collection for the specified slot.
-EQEmu::ItemInstance* Bot::GetBotItem(uint32 slotID) {
-	EQEmu::ItemInstance* item = m_inv.GetItem(slotID);
+EQ::ItemInstance* Bot::GetBotItem(uint32 slotID) {
+	EQ::ItemInstance* item = m_inv.GetItem(slotID);
 	if(item)
 		return item;
 
@@ -4409,9 +4409,9 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 	// this is being called before bot is assigned an entity id..
 	// ..causing packets to be sent out to zone with an id of '0'
 	if(slot > 0 && id > 0) {
-		uint8 materialFromSlot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
+		uint8 materialFromSlot = EQ::InventoryProfile::CalcMaterialFromSlot(slot);
 
-		if (materialFromSlot != EQEmu::textures::materialInvalid) {
+		if (materialFromSlot != EQ::textures::materialInvalid) {
 			equipment[slot] = id; // npc has more than just material slots. Valid material should mean valid inventory index
 			if (GetID()) // temp hack fix
 				SendWearChange(materialFromSlot);
@@ -4427,13 +4427,13 @@ void Bot::BotAddEquipItem(int slot, uint32 id) {
 // Erases the specified item from bot the NPC equipment array and from the bot inventory collection.
 void Bot::BotRemoveEquipItem(int16 slot)
 {
-	uint8 material_slot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot);
+	uint8 material_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot);
 
-	if (material_slot != EQEmu::textures::materialInvalid) {
+	if (material_slot != EQ::textures::materialInvalid) {
 		equipment[slot] = 0; // npc has more than just material slots. Valid material should mean valid inventory index
 		SendWearChange(material_slot);
-		if (material_slot == EQEmu::textures::armorChest)
-			SendWearChange(EQEmu::textures::armorArms);
+		if (material_slot == EQ::textures::armorChest)
+			SendWearChange(EQ::textures::armorArms);
 	}
 
 	UpdateEquipmentLight();
@@ -4441,7 +4441,7 @@ void Bot::BotRemoveEquipItem(int16 slot)
 		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
-void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInstance* inst, const EQEmu::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap) {
+void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQ::ItemInstance* inst, const EQ::ItemInstance* inst_swap, uint32 equipableSlots, std::string* errorMessage, bool swap) {
 
 	if(!errorMessage->empty())
 		return;
@@ -4464,7 +4464,7 @@ void Bot::BotTradeSwapItem(Client* client, int16 lootSlot, const EQEmu::ItemInst
 	}
 }
 
-void Bot::BotTradeAddItem(uint32 id, const EQEmu::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
+void Bot::BotTradeAddItem(uint32 id, const EQ::ItemInstance* inst, int16 charges, uint32 equipableSlots, uint16 lootSlot, std::string* errorMessage, bool addToDb)
 {
 	if(addToDb) {
 		if (!database.botdb.SaveItemBySlot(this, lootSlot, inst)) {
@@ -4537,12 +4537,12 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType)
 	if (tradeType == BotTradeClientNormal) {
 		// Items being traded are found in the normal trade window used to trade between a Client and a Client or NPC
 		// Items in this mode are found in slot ids 3000 thru 3003 - thought bots used the full 8-slot window..?
-		PerformTradeWithClient(EQEmu::invslot::TRADE_BEGIN, EQEmu::invslot::TRADE_END, client); // {3000..3007}
+		PerformTradeWithClient(EQ::invslot::TRADE_BEGIN, EQ::invslot::TRADE_END, client); // {3000..3007}
 	}
 	else if (tradeType == BotTradeClientNoDropNoTrade) {
 		// Items being traded are found on the Client's cursor slot, slot id 30. This item can be either a single item or it can be a bag.
 		// If it is a bag, then we have to search for items in slots 331 thru 340
-		PerformTradeWithClient(EQEmu::invslot::slotCursor, EQEmu::invslot::slotCursor, client);
+		PerformTradeWithClient(EQ::invslot::slotCursor, EQ::invslot::slotCursor, client);
 
 		// TODO: Add logic here to test if the item in SLOT_CURSOR is a container type, if it is then we need to call the following:
 		// PerformTradeWithClient(331, 340, client);
@@ -4552,7 +4552,7 @@ void Bot::FinishTrade(Client* client, BotTradeType tradeType)
 // Perfoms the actual trade action with a client bot owner
 void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client)
 {
-	using namespace EQEmu;
+	using namespace EQ;
 
 	struct ClientTrade {
 		const ItemInstance* tradeItemInstance;
@@ -4692,7 +4692,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 	}
 
 	// find equipment slots
-	const bool can_dual_wield = (GetSkill(EQEmu::skills::SkillDualWield) > 0);
+	const bool can_dual_wield = (GetSkill(EQ::skills::SkillDualWield) > 0);
 	bool melee_2h_weapon = false;
 	bool melee_secondary = false;
 
@@ -4904,7 +4904,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		this->BotAddEquipItem(trade_iterator.toBotSlot, (trade_iterator.tradeItemInstance ? trade_iterator.tradeItemInstance->GetID() : 0));
 		trade_iterator.tradeItemInstance = nullptr; // actual deletion occurs in client delete below
 
-		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQEmu::invslot::slotCursor));
+		client->DeleteItemInInventory(trade_iterator.fromClientSlot, 0, (trade_iterator.fromClientSlot == EQ::invslot::slotCursor));
 
 		// database currently has unattuned item saved in inventory..it will be attuned on next bot load
 		// this prevents unattuned item returns in the mean time (TODO: re-work process)
@@ -4934,7 +4934,7 @@ void Bot::PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* cli
 		CalcBotStats(client->GetBotOption(Client::booStatsUpdate));
 }
 
-bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill) {
+bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill) {
 	if(!NPC::Death(killerMob, damage, spell_id, attack_skill))
 		return false;
 
@@ -5022,7 +5022,7 @@ bool Bot::Death(Mob *killerMob, int32 damage, uint16 spell_id, EQEmu::skills::Sk
 	return true;
 }
 
-void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQEmu::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
+void Bot::Damage(Mob *from, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if(spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
@@ -5108,14 +5108,14 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 	}
 
 	FaceTarget(GetTarget());
-	EQEmu::ItemInstance* weapon = nullptr;
-	if (Hand == EQEmu::invslot::slotPrimary) {
-		weapon = GetBotItem(EQEmu::invslot::slotPrimary);
+	EQ::ItemInstance* weapon = nullptr;
+	if (Hand == EQ::invslot::slotPrimary) {
+		weapon = GetBotItem(EQ::invslot::slotPrimary);
 		OffHandAtk(false);
 	}
 
-	if (Hand == EQEmu::invslot::slotSecondary) {
-		weapon = GetBotItem(EQEmu::invslot::slotSecondary);
+	if (Hand == EQ::invslot::slotSecondary) {
+		weapon = GetBotItem(EQ::invslot::slotSecondary);
 		OffHandAtk(true);
 	}
 
@@ -5164,18 +5164,18 @@ bool Bot::Attack(Mob* other, int Hand, bool FromRiposte, bool IsStrikethrough, b
 		// This is not recommended for normal usage, as the damage bonus represents a non-trivial component of the DPS output
 		// of weapons wielded by higher-level melee characters (especially for two-handed weapons).
 		int ucDamageBonus = 0;
-		if (Hand == EQEmu::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass()) {
+		if (Hand == EQ::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass()) {
 			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
 			// who belong to a melee class. If we're here, then all of these conditions apply.
-			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
 			my_hit.min_damage = ucDamageBonus;
 			hate += ucDamageBonus;
 		}
 #endif
 		//Live AA - Sinister Strikes *Adds weapon damage bonus to offhand weapon.
-		if (Hand == EQEmu::invslot::slotSecondary) {
+		if (Hand == EQ::invslot::slotSecondary) {
 			if (aabonuses.SecondaryDmgInc || itembonuses.SecondaryDmgInc || spellbonuses.SecondaryDmgInc){
-				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQEmu::ItemData*) nullptr);
+				ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
 				my_hit.min_damage = ucDamageBonus;
 				hate += ucDamageBonus;
 			}
@@ -5581,18 +5581,18 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id) {
 
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[bottype]) {
-		const EQEmu::ItemData* TempItem = nullptr;
-		const EQEmu::ItemData* UsedItem = nullptr;
-		const EQEmu::ItemInstance* TempInst = nullptr;
+		const EQ::ItemData* TempItem = nullptr;
+		const EQ::ItemData* UsedItem = nullptr;
+		const EQ::ItemInstance* TempInst = nullptr;
 		uint16 UsedFocusID = 0;
 		int32 Total = 0;
 		int32 focus_max = 0;
 		int32 focus_max_real = 0;
 		//item focus
 		// are focus effects the same as bonus? (slotAmmo-excluded)
-		for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; x++) {
+		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
 			TempItem = nullptr;
-			EQEmu::ItemInstance* ins = GetBotItem(x);
+			EQ::ItemInstance* ins = GetBotItem(x);
 			if (!ins)
 				continue;
 
@@ -5615,11 +5615,11 @@ int32 Bot::GetBotFocusEffect(focusType bottype, uint16 spell_id) {
 				}
 			}
 
-			for (int y = EQEmu::invaug::SOCKET_BEGIN; y <= EQEmu::invaug::SOCKET_END; ++y) {
-				EQEmu::ItemInstance *aug = nullptr;
+			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y) {
+				EQ::ItemInstance *aug = nullptr;
 				aug = ins->GetAugment(y);
 				if(aug) {
-					const EQEmu::ItemData* TempItemAug = aug->GetItem();
+					const EQ::ItemData* TempItemAug = aug->GetItem();
 					if (TempItemAug && TempItemAug->Focus.Effect > 0 && TempItemAug->Focus.Effect != SPELL_UNKNOWN) {
 						if(rand_effectiveness) {
 							focus_max = CalcBotFocusEffect(bottype, TempItemAug->Focus.Effect, spell_id, true);
@@ -6070,13 +6070,13 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 	float ProcChance = 0.0f;
 	uint32 weapon_speed = 0;
 	switch (hand) {
-	case EQEmu::invslot::slotPrimary:
+	case EQ::invslot::slotPrimary:
 		weapon_speed = attack_timer.GetDuration();
 		break;
-	case EQEmu::invslot::slotSecondary:
+	case EQ::invslot::slotSecondary:
 		weapon_speed = attack_dw_timer.GetDuration();
 		break;
-	case EQEmu::invslot::slotRange:
+	case EQ::invslot::slotRange:
 		weapon_speed = ranged_timer.GetDuration();
 		break;
 	}
@@ -6100,9 +6100,9 @@ float Bot::GetProcChances(float ProcBonus, uint16 hand) {
 int Bot::GetHandToHandDamage(void) {
 	if (RuleB(Combat, UseRevampHandToHand)) {
 		// everyone uses this in the revamp!
-		int skill = GetSkill(EQEmu::skills::SkillHandtoHand);
+		int skill = GetSkill(EQ::skills::SkillHandtoHand);
 		int epic = 0;
-		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 46)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQ::textures::armorHands) == 10652 && GetLevel() > 46)
 			epic = 280;
 		if (epic > skill)
 			skill = epic;
@@ -6124,7 +6124,7 @@ int Bot::GetHandToHandDamage(void) {
 				9, 9, 9, 9, 9, 10, 10, 10, 10, 10,   // 31-40
 				10, 11, 11, 11, 11, 11, 11, 12, 12}; // 41-49
 	if (GetClass() == MONK) {
-		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQEmu::textures::armorHands) == 10652 && GetLevel() > 50)
+		if (CastToNPC()->GetEquippedItemFromTextureSlot(EQ::textures::armorHands) == 10652 && GetLevel() > 50)
 			return 9;
 		if (level > 62)
 			return 15;
@@ -6166,11 +6166,11 @@ void Bot::DoRiposte(Mob* defender) {
 	if (!defender)
 		return;
 
-	defender->Attack(this, EQEmu::invslot::slotPrimary, true);
+	defender->Attack(this, EQ::invslot::slotPrimary, true);
 	int32 DoubleRipChance = (defender->GetAABonuses().GiveDoubleRiposte[0] + defender->GetSpellBonuses().GiveDoubleRiposte[0] + defender->GetItemBonuses().GiveDoubleRiposte[0]);
 	if(DoubleRipChance && (DoubleRipChance >= zone->random.Int(0, 100))) {
 		LogCombat("Preforming a double riposte ([{}] percent chance)", DoubleRipChance);
-		defender->Attack(this, EQEmu::invslot::slotPrimary, true);
+		defender->Attack(this, EQ::invslot::slotPrimary, true);
 	}
 
 	DoubleRipChance = defender->GetAABonuses().GiveDoubleRiposte[1];
@@ -6182,14 +6182,14 @@ void Bot::DoRiposte(Mob* defender) {
 	}
 }
 
-int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
+int Bot::GetBaseSkillDamage(EQ::skills::SkillType skill, Mob *target)
 {
-	int base = EQEmu::skills::GetBaseDamage(skill);
+	int base = EQ::skills::GetBaseDamage(skill);
 	auto skill_level = GetSkill(skill);
 	switch (skill) {
-	case EQEmu::skills::SkillDragonPunch:
-	case EQEmu::skills::SkillEagleStrike:
-	case EQEmu::skills::SkillTigerClaw:
+	case EQ::skills::SkillDragonPunch:
+	case EQ::skills::SkillEagleStrike:
+	case EQ::skills::SkillTigerClaw:
 		if (skill_level >= 25)
 			base++;
 		if (skill_level >= 75)
@@ -6199,8 +6199,8 @@ int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 		if (skill_level >= 175)
 			base++;
 		return base;
-	case EQEmu::skills::SkillFrenzy:
-		if (GetBotItem(EQEmu::invslot::slotPrimary)) {
+	case EQ::skills::SkillFrenzy:
+		if (GetBotItem(EQ::invslot::slotPrimary)) {
 			if (GetLevel() > 15)
 				base += GetLevel() - 15;
 			if (base > 23)
@@ -6213,44 +6213,44 @@ int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 				base++;
 		}
 		return base;
-	case EQEmu::skills::SkillFlyingKick: {
+	case EQ::skills::SkillFlyingKick: {
 		float skill_bonus = skill_level / 9.0f;
 		float ac_bonus = 0.0f;
-		auto inst = GetBotItem(EQEmu::invslot::slotFeet);
+		auto inst = GetBotItem(EQ::invslot::slotFeet);
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		if (ac_bonus > skill_bonus)
 			ac_bonus = skill_bonus;
 		return static_cast<int>(ac_bonus + skill_bonus);
 	}
-	case EQEmu::skills::SkillKick: {
+	case EQ::skills::SkillKick: {
 		float skill_bonus = skill_level / 10.0f;
 		float ac_bonus = 0.0f;
-		auto inst = GetBotItem(EQEmu::invslot::slotFeet);
+		auto inst = GetBotItem(EQ::invslot::slotFeet);
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		if (ac_bonus > skill_bonus)
 			ac_bonus = skill_bonus;
 		return static_cast<int>(ac_bonus + skill_bonus);
 	}
-	case EQEmu::skills::SkillBash: {
+	case EQ::skills::SkillBash: {
 		float skill_bonus = skill_level / 10.0f;
 		float ac_bonus = 0.0f;
-		const EQEmu::ItemInstance *inst = nullptr;
+		const EQ::ItemInstance *inst = nullptr;
 		if (HasShieldEquiped())
-			inst = GetBotItem(EQEmu::invslot::slotSecondary);
+			inst = GetBotItem(EQ::invslot::slotSecondary);
 		else if (HasTwoHanderEquipped())
-			inst = GetBotItem(EQEmu::invslot::slotPrimary);
+			inst = GetBotItem(EQ::invslot::slotPrimary);
 		if (inst)
 			ac_bonus = inst->GetItemArmorClass(true) / 25.0f;
 		if (ac_bonus > skill_bonus)
 			ac_bonus = skill_bonus;
 		return static_cast<int>(ac_bonus + skill_bonus);
 	}
-	case EQEmu::skills::SkillBackstab: {
+	case EQ::skills::SkillBackstab: {
 		float skill_bonus = static_cast<float>(skill_level) * 0.02f;
-		auto inst = GetBotItem(EQEmu::invslot::slotPrimary);
-		if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQEmu::item::ItemType1HPiercing) {
+		auto inst = GetBotItem(EQ::invslot::slotPrimary);
+		if (inst && inst->GetItem() && inst->GetItem()->ItemType == EQ::item::ItemType1HPiercing) {
 			base = inst->GetItemBackstabDamage(true);
 			if (!inst->GetItemBackstabDamage())
 				base += inst->GetItemWeaponDamage(true);
@@ -6268,19 +6268,19 @@ int Bot::GetBaseSkillDamage(EQEmu::skills::SkillType skill, Mob *target)
 	}
 }
 
-void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 max_damage, int32 min_damage, int32 hate_override, int ReuseTime, bool HitChance) {
+void Bot::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 max_damage, int32 min_damage, int32 hate_override, int ReuseTime, bool HitChance) {
 	int32 hate = max_damage;
 	if(hate_override > -1)
 		hate = hate_override;
 
-	if (skill == EQEmu::skills::SkillBash) {
-		const EQEmu::ItemInstance* inst = GetBotItem(EQEmu::invslot::slotSecondary);
-		const EQEmu::ItemData* botweapon = nullptr;
+	if (skill == EQ::skills::SkillBash) {
+		const EQ::ItemInstance* inst = GetBotItem(EQ::invslot::slotSecondary);
+		const EQ::ItemData* botweapon = nullptr;
 		if(inst)
 			botweapon = inst->GetItem();
 
 		if(botweapon) {
-			if (botweapon->ItemType == EQEmu::item::ItemTypeShield)
+			if (botweapon->ItemType == EQ::item::ItemTypeShield)
 				hate += botweapon->AC;
 
 			hate = (hate * (100 + GetFuriousBash(botweapon->Focus.Effect)) / 100);
@@ -6295,10 +6295,10 @@ void Bot::DoSpecialAttackDamage(Mob *who, EQEmu::skills::SkillType skill, int32 
 	my_hit.skill = skill;
 	my_hit.offense = offense(my_hit.skill);
 	my_hit.tohit = GetTotalToHit(my_hit.skill, 0);
-	my_hit.hand = EQEmu::invslot::slotPrimary;
+	my_hit.hand = EQ::invslot::slotPrimary;
 
-	if (skill == EQEmu::skills::SkillThrowing || skill == EQEmu::skills::SkillArchery)
-		my_hit.hand = EQEmu::invslot::slotRange;
+	if (skill == EQ::skills::SkillThrowing || skill == EQ::skills::SkillArchery)
+		my_hit.hand = EQ::invslot::slotRange;
 
 	DoAttack(who, my_hit);
 
@@ -6335,12 +6335,12 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 
 	bool bIsBehind = false;
 	bool bCanFrontalBS = false;
-	const EQEmu::ItemInstance* inst = GetBotItem(EQEmu::invslot::slotPrimary);
-	const EQEmu::ItemData* botpiercer = nullptr;
+	const EQ::ItemInstance* inst = GetBotItem(EQ::invslot::slotPrimary);
+	const EQ::ItemData* botpiercer = nullptr;
 	if(inst)
 		botpiercer = inst->GetItem();
 
-	if (!botpiercer || (botpiercer->ItemType != EQEmu::item::ItemType1HPiercing)) {
+	if (!botpiercer || (botpiercer->ItemType != EQ::item::ItemType1HPiercing)) {
 		BotGroupSay(this, "I can't backstab with this weapon!");
 		return;
 	}
@@ -6362,7 +6362,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		} else {
 			RogueBackstab(other);
 			if (level > 54) {
-				float DoubleAttackProbability = ((GetSkill(EQEmu::skills::SkillDoubleAttack) + GetLevel()) / 500.0f);
+				float DoubleAttackProbability = ((GetSkill(EQ::skills::SkillDoubleAttack) + GetLevel()) / 500.0f);
 				if(zone->random.Real(0, 1) < DoubleAttackProbability) {
 					if(other->GetHP() > 0)
 						RogueBackstab(other,false,ReuseTime);
@@ -6378,7 +6378,7 @@ void Bot::TryBackstab(Mob *other, int ReuseTime) {
 		m_specialattacks = eSpecialAttacks::None;
 	}
 	else
-		Attack(other, EQEmu::invslot::slotPrimary);
+		Attack(other, EQ::invslot::slotPrimary);
 }
 
 void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
@@ -6386,30 +6386,30 @@ void Bot::RogueBackstab(Mob *other, bool min_damage, int ReuseTime)
 	if (!other)
 		return;
 
-	EQEmu::ItemInstance *botweaponInst = GetBotItem(EQEmu::invslot::slotPrimary);
+	EQ::ItemInstance *botweaponInst = GetBotItem(EQ::invslot::slotPrimary);
 	if (botweaponInst) {
 		if (!GetWeaponDamage(other, botweaponInst))
 			return;
-	} else if (!GetWeaponDamage(other, (const EQEmu::ItemData *)nullptr)) {
+	} else if (!GetWeaponDamage(other, (const EQ::ItemData *)nullptr)) {
 		return;
 	}
 
 	uint32 hate = 0;
 
-	int base_damage = GetBaseSkillDamage(EQEmu::skills::SkillBackstab, other);
+	int base_damage = GetBaseSkillDamage(EQ::skills::SkillBackstab, other);
 	hate = base_damage;
 
-	DoSpecialAttackDamage(other, EQEmu::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
+	DoSpecialAttackDamage(other, EQ::skills::SkillBackstab, base_damage, 0, hate, ReuseTime);
 	DoAnim(anim1HPiercing);
 }
 
 void Bot::RogueAssassinate(Mob* other) {
-	EQEmu::ItemInstance* botweaponInst = GetBotItem(EQEmu::invslot::slotPrimary);
+	EQ::ItemInstance* botweaponInst = GetBotItem(EQ::invslot::slotPrimary);
 	if(botweaponInst) {
 		if(GetWeaponDamage(other, botweaponInst))
-			other->Damage(this, 32000, SPELL_UNKNOWN, EQEmu::skills::SkillBackstab);
+			other->Damage(this, 32000, SPELL_UNKNOWN, EQ::skills::SkillBackstab);
 		else
-			other->Damage(this, -5, SPELL_UNKNOWN, EQEmu::skills::SkillBackstab);
+			other->Damage(this, -5, SPELL_UNKNOWN, EQ::skills::SkillBackstab);
 	}
 
 	DoAnim(anim1HPiercing);
@@ -6428,7 +6428,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 		// Bots without this skill shouldn't be 'checking' on this timer..let's just disable it and avoid the extra IsAttackAllowed() checks
 		// Note: this is done here instead of NPC::ctor() because taunt skill can be acquired during level ups (the timer is re-enabled in CalcBotStats())
-		if (!GetSkill(EQEmu::skills::SkillTaunt)) {
+		if (!GetSkill(EQ::skills::SkillTaunt)) {
 
 			taunt_timer.Disable();
 			return;
@@ -6480,18 +6480,18 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 	if (ma_time) {
 		switch (GetClass()) {
 		case MONK: {
-			int reuse = (MonkSpecialAttack(target, EQEmu::skills::SkillTigerClaw) - 1);
+			int reuse = (MonkSpecialAttack(target, EQ::skills::SkillTigerClaw) - 1);
 			
 			// Live AA - Technique of Master Wu
 			int wuchance = itembonuses.DoubleSpecialAttack + spellbonuses.DoubleSpecialAttack + aabonuses.DoubleSpecialAttack;
 
 			if (wuchance) {
 				const int MonkSPA[5] = {
-					EQEmu::skills::SkillFlyingKick,
-					EQEmu::skills::SkillDragonPunch,
-					EQEmu::skills::SkillEagleStrike,
-					EQEmu::skills::SkillTigerClaw,
-					EQEmu::skills::SkillRoundKick
+					EQ::skills::SkillFlyingKick,
+					EQ::skills::SkillDragonPunch,
+					EQ::skills::SkillEagleStrike,
+					EQ::skills::SkillTigerClaw,
+					EQ::skills::SkillRoundKick
 				};
 				int extra = 0;
 				// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
@@ -6519,7 +6519,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 				auto classic = RuleB(Combat, ClassicMasterWu);
 				while (extra) {
-					MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : EQEmu::skills::SkillTigerClaw));
+					MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : EQ::skills::SkillTigerClaw));
 					--extra;
 				}
 			}
@@ -6547,70 +6547,70 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		case WARRIOR:
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				bool canBash = false;
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQEmu::invslot::slotSecondary) && m_inv.GetItem(EQEmu::invslot::slotSecondary)->GetItem()->ItemType == EQEmu::item::ItemTypeShield) || (m_inv.GetItem(EQEmu::invslot::slotPrimary) && m_inv.GetItem(EQEmu::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
+				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
 					canBash = true;
 
 				if(!canBash || zone->random.Int(0, 100) > 25)
-					skill_to_use = EQEmu::skills::SkillKick;
+					skill_to_use = EQ::skills::SkillKick;
 				else
-					skill_to_use = EQEmu::skills::SkillBash;
+					skill_to_use = EQ::skills::SkillBash;
 			}
 		case RANGER:
 		case BEASTLORD:
-			skill_to_use = EQEmu::skills::SkillKick;
+			skill_to_use = EQ::skills::SkillKick;
 			break;
 		case BERSERKER:
-			skill_to_use = EQEmu::skills::SkillFrenzy;
+			skill_to_use = EQ::skills::SkillFrenzy;
 			break;
 		case CLERIC:
 		case SHADOWKNIGHT:
 		case PALADIN:
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
-				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQEmu::invslot::slotSecondary) && m_inv.GetItem(EQEmu::invslot::slotSecondary)->GetItem()->ItemType == EQEmu::item::ItemTypeShield) || (m_inv.GetItem(EQEmu::invslot::slotPrimary) && m_inv.GetItem(EQEmu::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
-					skill_to_use = EQEmu::skills::SkillBash;
+				if ((GetRace() == OGRE || GetRace() == TROLL || GetRace() == BARBARIAN) || (m_inv.GetItem(EQ::invslot::slotSecondary) && m_inv.GetItem(EQ::invslot::slotSecondary)->GetItem()->ItemType == EQ::item::ItemTypeShield) || (m_inv.GetItem(EQ::invslot::slotPrimary) && m_inv.GetItem(EQ::invslot::slotPrimary)->GetItem()->IsType2HWeapon() && GetAA(aa2HandBash) >= 1))
+					skill_to_use = EQ::skills::SkillBash;
 			}
 			break;
 		case MONK:
 			if (GetLevel() >= 30) {
-				skill_to_use = EQEmu::skills::SkillFlyingKick;
+				skill_to_use = EQ::skills::SkillFlyingKick;
 			}
 			else if (GetLevel() >= 25) {
-				skill_to_use = EQEmu::skills::SkillDragonPunch;
+				skill_to_use = EQ::skills::SkillDragonPunch;
 			}
 			else if (GetLevel() >= 20) {
-				skill_to_use = EQEmu::skills::SkillEagleStrike;
+				skill_to_use = EQ::skills::SkillEagleStrike;
 			}
 			else if (GetLevel() >= 5) {
-				skill_to_use = EQEmu::skills::SkillRoundKick;
+				skill_to_use = EQ::skills::SkillRoundKick;
 			}
 			else {
-				skill_to_use = EQEmu::skills::SkillKick;
+				skill_to_use = EQ::skills::SkillKick;
 			}
 
 			break;
 		case ROGUE:
-			skill_to_use = EQEmu::skills::SkillBackstab;
+			skill_to_use = EQ::skills::SkillBackstab;
 			break;
 	}
 
 	if(skill_to_use == -1)
 		return;
 
-	int dmg = GetBaseSkillDamage(static_cast<EQEmu::skills::SkillType>(skill_to_use), GetTarget());
+	int dmg = GetBaseSkillDamage(static_cast<EQ::skills::SkillType>(skill_to_use), GetTarget());
 
-	if (skill_to_use == EQEmu::skills::SkillBash) {
+	if (skill_to_use == EQ::skills::SkillBash) {
 		if (target != this) {
 			DoAnim(animTailRake);
-			if (GetWeaponDamage(target, GetBotItem(EQEmu::invslot::slotSecondary)) <= 0 && GetWeaponDamage(target, GetBotItem(EQEmu::invslot::slotShoulders)) <= 0)
+			if (GetWeaponDamage(target, GetBotItem(EQ::invslot::slotSecondary)) <= 0 && GetWeaponDamage(target, GetBotItem(EQ::invslot::slotShoulders)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
 			reuse = (BashReuseTime * 1000);
-			DoSpecialAttackDamage(target, EQEmu::skills::SkillBash, dmg, 0, -1, reuse);
+			DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
 	}
 
-	if (skill_to_use == EQEmu::skills::SkillFrenzy) {
+	if (skill_to_use == EQ::skills::SkillFrenzy) {
 		int AtkRounds = 3;
 		DoAnim(anim2HSlashing);
 
@@ -6618,30 +6618,30 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		did_attack = true;
 		while(AtkRounds > 0) {
 			if (GetTarget() && (AtkRounds == 1 || zone->random.Int(0, 100) < 75)) {
-				DoSpecialAttackDamage(GetTarget(), EQEmu::skills::SkillFrenzy, dmg, 0, dmg, reuse, true);
+				DoSpecialAttackDamage(GetTarget(), EQ::skills::SkillFrenzy, dmg, 0, dmg, reuse, true);
 			}
 
 			AtkRounds--;
 		}
 	}
 
-	if (skill_to_use == EQEmu::skills::SkillKick) {
+	if (skill_to_use == EQ::skills::SkillKick) {
 		if(target != this) {
 			DoAnim(animKick);
-			if (GetWeaponDamage(target, GetBotItem(EQEmu::invslot::slotFeet)) <= 0)
+			if (GetWeaponDamage(target, GetBotItem(EQ::invslot::slotFeet)) <= 0)
 				dmg = DMG_INVULNERABLE;
 
 			reuse = (KickReuseTime * 1000);
-			DoSpecialAttackDamage(target, EQEmu::skills::SkillKick, dmg, 0, -1, reuse);
+			DoSpecialAttackDamage(target, EQ::skills::SkillKick, dmg, 0, -1, reuse);
 			did_attack = true;
 		}
 	}
 
 	if (
-		skill_to_use == EQEmu::skills::SkillFlyingKick ||
-		skill_to_use == EQEmu::skills::SkillDragonPunch ||
-		skill_to_use == EQEmu::skills::SkillEagleStrike ||
-		skill_to_use == EQEmu::skills::SkillRoundKick
+		skill_to_use == EQ::skills::SkillFlyingKick ||
+		skill_to_use == EQ::skills::SkillDragonPunch ||
+		skill_to_use == EQ::skills::SkillEagleStrike ||
+		skill_to_use == EQ::skills::SkillRoundKick
 	) {
 		reuse = (MonkSpecialAttack(target, skill_to_use) - 1);
 		
@@ -6650,11 +6650,11 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 
 		if (wuchance) {
 			const int MonkSPA[5] = {
-				EQEmu::skills::SkillFlyingKick,
-				EQEmu::skills::SkillDragonPunch,
-				EQEmu::skills::SkillEagleStrike,
-				EQEmu::skills::SkillTigerClaw,
-				EQEmu::skills::SkillRoundKick
+				EQ::skills::SkillFlyingKick,
+				EQ::skills::SkillDragonPunch,
+				EQ::skills::SkillEagleStrike,
+				EQ::skills::SkillTigerClaw,
+				EQ::skills::SkillRoundKick
 			};
 			int extra = 0;
 			// always 1/4 of the double attack chance, 25% at rank 5 (100/4)
@@ -6691,7 +6691,7 @@ void Bot::DoClassAttacks(Mob *target, bool IsRiposte) {
 		did_attack = true;
 	}
 
-	if (skill_to_use == EQEmu::skills::SkillBackstab) {
+	if (skill_to_use == EQ::skills::SkillBackstab) {
 		reuse = (BackstabReuseTime * 1000);
 		did_attack = true;
 		if (IsRiposte)
@@ -6799,9 +6799,9 @@ bool Bot::IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined) {
 
 void Bot::EquipBot(std::string* errorMessage) {
 	GetBotItems(m_inv, errorMessage);
-	const EQEmu::ItemInstance* inst = nullptr;
-	const EQEmu::ItemData* item = nullptr;
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
+	const EQ::ItemInstance* inst = nullptr;
+	const EQ::ItemData* item = nullptr;
+	for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			item = inst->GetItem();
@@ -6927,23 +6927,23 @@ void Bot::SetAttackTimer() {
 	float haste_mod = (GetHaste() * 0.01f);
 	attack_timer.SetAtTrigger(4000, true);
 	Timer* TimerToUse = nullptr;
-	const EQEmu::ItemData* PrimaryWeapon = nullptr;
-	for (int i = EQEmu::invslot::slotRange; i <= EQEmu::invslot::slotSecondary; i++) {
-		if (i == EQEmu::invslot::slotPrimary)
+	const EQ::ItemData* PrimaryWeapon = nullptr;
+	for (int i = EQ::invslot::slotRange; i <= EQ::invslot::slotSecondary; i++) {
+		if (i == EQ::invslot::slotPrimary)
 			TimerToUse = &attack_timer;
-		else if (i == EQEmu::invslot::slotRange)
+		else if (i == EQ::invslot::slotRange)
 			TimerToUse = &ranged_timer;
-		else if (i == EQEmu::invslot::slotSecondary)
+		else if (i == EQ::invslot::slotSecondary)
 			TimerToUse = &attack_dw_timer;
 		else
 			continue;
 
-		const EQEmu::ItemData* ItemToUse = nullptr;
-		EQEmu::ItemInstance* ci = GetBotItem(i);
+		const EQ::ItemData* ItemToUse = nullptr;
+		EQ::ItemInstance* ci = GetBotItem(i);
 		if (ci)
 			ItemToUse = ci->GetItem();
 
-		if (i == EQEmu::invslot::slotSecondary) {
+		if (i == EQ::invslot::slotSecondary) {
 			if (PrimaryWeapon != nullptr) {
 				if (PrimaryWeapon->IsClassCommon() && PrimaryWeapon->IsType2HWeapon()) {
 					attack_dw_timer.Disable();
@@ -6951,14 +6951,14 @@ void Bot::SetAttackTimer() {
 				}
 			}
 
-			if (!GetSkill(EQEmu::skills::SkillDualWield)) {
+			if (!GetSkill(EQ::skills::SkillDualWield)) {
 				attack_dw_timer.Disable();
 				continue;
 			}
 		}
 
 		if (ItemToUse != nullptr) {
-			if (!ItemToUse->IsClassCommon() || ItemToUse->Damage == 0 || ItemToUse->Delay == 0 || ((ItemToUse->ItemType > EQEmu::item::ItemTypeLargeThrowing) && (ItemToUse->ItemType != EQEmu::item::ItemTypeMartial) && (ItemToUse->ItemType != EQEmu::item::ItemType2HPiercing)))
+			if (!ItemToUse->IsClassCommon() || ItemToUse->Damage == 0 || ItemToUse->Delay == 0 || ((ItemToUse->ItemType > EQ::item::ItemTypeLargeThrowing) && (ItemToUse->ItemType != EQ::item::ItemTypeMartial) && (ItemToUse->ItemType != EQ::item::ItemType2HPiercing)))
 				ItemToUse = nullptr;
 		}
 
@@ -6974,7 +6974,7 @@ void Bot::SetAttackTimer() {
 		speed = (RuleB(Spells, Jun182014HundredHandsRevamp) ? static_cast<int>(((delay / haste_mod) + ((hhe / 1000.0f) * (delay / haste_mod))) * 100) : static_cast<int>(((delay / haste_mod) + ((hhe / 100.0f) * delay)) * 100));
 		TimerToUse->SetAtTrigger(std::max(RuleI(Combat, MinHastedDelay), speed), true, true);
 
-		if (i == EQEmu::invslot::slotPrimary)
+		if (i == EQ::invslot::slotPrimary)
 			PrimaryWeapon = ItemToUse;
 	}
 }
@@ -7337,7 +7337,7 @@ void Bot::DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster) {
 	Mob::DoBuffTic(buff, slot, caster);
 }
 
-bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
+bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, int32 cast_time, int32 mana_cost,
 					uint32* oSpellWillFinish, uint32 item_slot, int16 *resist_adjust, uint32 aa_id) {
 	bool Result = false;
 	if(zone && !zone->IsSpellBlocked(spell_id, glm::vec3(GetPosition()))) {
@@ -7377,7 +7377,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 			return false;
 		}
 
-		if(slot < EQEmu::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
+		if(slot < EQ::spells::CastingSlot::MaxGems && !CheckFizzle(spell_id)) {
 			int fizzle_msg = IsBardSong(spell_id) ? MISS_NOTE : SPELL_FIZZLE;
 			InterruptSpell(fizzle_msg, 0x121, spell_id);
 
@@ -7391,7 +7391,7 @@ bool Bot::CastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlo
 			LogSpells("Casting a new spell/song while singing a song. Killing old song [{}]", bardsong);
 			bardsong = 0;
 			bardsong_target_id = 0;
-			bardsong_slot = EQEmu::spells::CastingSlot::Gem1;
+			bardsong_slot = EQ::spells::CastingSlot::Gem1;
 			bardsong_timer.Disable();
 		}
 
@@ -7521,7 +7521,7 @@ bool Bot::IsImmuneToSpell(uint16 spell_id, Mob *caster) {
 	return Result;
 }
 
-bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQEmu::spells::CastingSlot slot) {
+bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center, CastAction_type &CastAction, EQ::spells::CastingSlot slot) {
 	bool Result = false;
 	SpellTargetType targetType = spells[spell_id].targettype;
 	if(targetType == ST_GroupClientAndPet) {
@@ -7534,7 +7534,7 @@ bool Bot::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	return Result;
 }
 
-bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQEmu::spells::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
+bool Bot::DoCastSpell(uint16 spell_id, uint16 target_id, EQ::spells::CastingSlot slot, int32 cast_time, int32 mana_cost, uint32* oSpellWillFinish, uint32 item_slot, uint32 aa_id) {
 	bool Result = false;
 	if(GetClass() == BARD)
 		cast_time = 0;
@@ -7558,7 +7558,7 @@ int32 Bot::GenerateBaseManaPoints() {
 	switch(GetCasterClass()) {
 		case 'I':
 			WisInt = INT;
-			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201)
@@ -7593,7 +7593,7 @@ int32 Bot::GenerateBaseManaPoints() {
 			break;
 		case 'W':
 			WisInt = WIS;
-			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+			if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 				if(WisInt > 100) {
 					ConvertedWisInt = (((WisInt - 100) * 5 / 2) + 100);
 					if(WisInt > 201)
@@ -7638,7 +7638,7 @@ void Bot::GenerateSpecialAttacks() {
 		SetSpecialAbility(SPECATK_TRIPLE, 1);
 }
 
-bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	if(GetClass() == BARD) {
 		if(!ApplyNextBardPulse(bardsong, this, bardsong_slot))
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
@@ -7648,7 +7648,7 @@ bool Bot::DoFinishedSpellAETarget(uint16 spell_id, Mob* spellTarget, EQEmu::spel
 	return true;
 }
 
-bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	if(spellTarget) {
 		if(IsGrouped() && (spellTarget->IsBot() || spellTarget->IsClient()) && RuleB(Bots, GroupBuffing)) {
 			bool noGroupSpell = false;
@@ -7660,7 +7660,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 				bool spelltypeequal = ((spelltype == 2) || (spelltype == 16) || (spelltype == 32));
 				bool spelltypetargetequal = ((spelltype == 8) && (spells[thespell].targettype == ST_Self));
 				bool spelltypeclassequal = ((spelltype == 1024) && (GetClass() == SHAMAN));
-				bool slotequal = (slot == EQEmu::spells::CastingSlot::Item);
+				bool slotequal = (slot == EQ::spells::CastingSlot::Item);
 				if(spellequal || slotequal) {
 					if((spelltypeequal || spelltypetargetequal) || spelltypeclassequal || slotequal) {
 						if(((spells[thespell].effectid[0] == 0) && (spells[thespell].base[0] < 0)) &&
@@ -7699,7 +7699,7 @@ bool Bot::DoFinishedSpellSingleTarget(uint16 spell_id, Mob* spellTarget, EQEmu::
 	return true;
 }
 
-bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQEmu::spells::CastingSlot slot, bool& stopLogic) {
+bool Bot::DoFinishedSpellGroupTarget(uint16 spell_id, Mob* spellTarget, EQ::spells::CastingSlot slot, bool& stopLogic) {
 	bool isMainGroupMGB = false;
 	if(isMainGroupMGB && (GetClass() != BARD)) {
 		BotGroupSay(this, "MGB %s", spells[spell_id].name);
@@ -7777,7 +7777,7 @@ int32 Bot::GetMaxStat() {
 	int32 base = 0;
 	if (level < 61)
 		base = 255;
-	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoF)
+	else if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoF)
 		base = (255 + 5 * (level - 60));
 	else if (level < 71)
 		base = (255 + 5 * (level - 60));
@@ -8170,7 +8170,7 @@ int32 Bot::CalcManaRegen() {
 	if (IsSitting()) {
 		BuffFadeBySitModifier();
 		if(botclass != WARRIOR && botclass != MONK && botclass != ROGUE && botclass != BERSERKER) {
-			regen = ((((GetSkill(EQEmu::skills::SkillMeditate) / 10) + (level - (level / 4))) / 4) + 4);
+			regen = ((((GetSkill(EQ::skills::SkillMeditate) / 10) + (level - (level / 4))) / 4) + 4);
 			regen += (spellbonuses.ManaRegen + itembonuses.ManaRegen);
 		} else
 			regen = (2 + spellbonuses.ManaRegen + itembonuses.ManaRegen);
@@ -8271,7 +8271,7 @@ int32 Bot::CalcBaseEndurance() {
 	int32 ConvertedStats = 0;
 	int32 sta_end = 0;
 	int Stats = 0;
-	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQEmu::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
+	if (GetOwner() && GetOwner()->CastToClient() && GetOwner()->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
 		int HeroicStats = 0;
 		Stats = ((GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4);
 		HeroicStats = ((GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4);
@@ -8687,10 +8687,10 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 		insr->TargetID = inspectedBot->GetNPCTypeID();
 		insr->playerid = inspectedBot->GetID();
 
-		const EQEmu::ItemData* item = nullptr;
-		const EQEmu::ItemInstance* inst = nullptr;
+		const EQ::ItemData* item = nullptr;
+		const EQ::ItemInstance* inst = nullptr;
 
-		for (int16 L = EQEmu::invslot::EQUIPMENT_BEGIN; L <= EQEmu::invslot::EQUIPMENT_END; L++) {
+		for (int16 L = EQ::invslot::EQUIPMENT_BEGIN; L <= EQ::invslot::EQUIPMENT_END; L++) {
 			inst = inspectedBot->GetBotItem(L);
 
 			if(inst) {
@@ -8718,10 +8718,10 @@ void Bot::ProcessBotInspectionRequest(Bot* inspectedBot, Client* client) {
 
 void Bot::CalcItemBonuses(StatBonuses* newbon)
 {
-	const EQEmu::ItemData* itemtmp = nullptr;
+	const EQ::ItemData* itemtmp = nullptr;
 
-	for (int i = EQEmu::invslot::BONUS_BEGIN; i <= EQEmu::invslot::BONUS_STAT_END; ++i) {
-		const EQEmu::ItemInstance* item = GetBotItem(i);
+	for (int i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_STAT_END; ++i) {
+		const EQ::ItemInstance* item = GetBotItem(i);
 		if(item) {
 			AddItemBonuses(item, newbon);
 		}
@@ -8738,7 +8738,7 @@ void Bot::CalcItemBonuses(StatBonuses* newbon)
 		newbon->EnduranceRegen = CalcEnduranceRegenCap();
 }
 
-void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, bool isAug, bool isTribute, int rec_override) {
+void Bot::AddItemBonuses(const EQ::ItemInstance *inst, StatBonuses* newbon, bool isAug, bool isTribute, int rec_override) {
 	if (!inst || !inst->IsClassCommon())
 	{
 		return;
@@ -8749,11 +8749,11 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 		return;
 	}
 
-	const EQEmu::ItemData *item = inst->GetItem();
+	const EQ::ItemData *item = inst->GetItem();
 
 	if(!isTribute && !inst->IsEquipable(GetBaseRace(),GetClass()))
 	{
-		if (item->ItemType != EQEmu::item::ItemTypeFood && item->ItemType != EQEmu::item::ItemTypeDrink)
+		if (item->ItemType != EQ::item::ItemTypeFood && item->ItemType != EQ::item::ItemTypeDrink)
 			return;
 	}
 
@@ -8960,17 +8960,17 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 		else
 			newbon->DSMitigation += item->DSMitigation;
 	}
-	if (item->Worn.Effect > 0 && item->Worn.Type == EQEmu::item::ItemEffectWorn) {// latent effects
+	if (item->Worn.Effect > 0 && item->Worn.Type == EQ::item::ItemEffectWorn) {// latent effects
 		ApplySpellsBonuses(item->Worn.Effect, item->Worn.Level, newbon, 0, item->Worn.Type);
 	}
 
-	if (item->Focus.Effect>0 && (item->Focus.Type == EQEmu::item::ItemEffectFocus)) { // focus effects
+	if (item->Focus.Effect>0 && (item->Focus.Type == EQ::item::ItemEffectFocus)) { // focus effects
 		ApplySpellsBonuses(item->Focus.Effect, item->Focus.Level, newbon, 0);
 	}
 
 	switch(item->BardType)
 	{
-	case EQEmu::item::ItemTypeAllInstrumentTypes: // (e.g. Singing Short Sword)
+	case EQ::item::ItemTypeAllInstrumentTypes: // (e.g. Singing Short Sword)
 		{
 			if(item->BardValue > newbon->singingMod)
 				newbon->singingMod = item->BardValue;
@@ -8984,31 +8984,31 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 				newbon->windMod = item->BardValue;
 			break;
 		}
-	case EQEmu::item::ItemTypeSinging:
+	case EQ::item::ItemTypeSinging:
 		{
 			if(item->BardValue > newbon->singingMod)
 				newbon->singingMod = item->BardValue;
 			break;
 		}
-	case EQEmu::item::ItemTypeWindInstrument:
+	case EQ::item::ItemTypeWindInstrument:
 		{
 			if(item->BardValue > newbon->windMod)
 				newbon->windMod = item->BardValue;
 			break;
 		}
-	case EQEmu::item::ItemTypeStringedInstrument:
+	case EQ::item::ItemTypeStringedInstrument:
 		{
 			if(item->BardValue > newbon->stringedMod)
 				newbon->stringedMod = item->BardValue;
 			break;
 		}
-	case EQEmu::item::ItemTypeBrassInstrument:
+	case EQ::item::ItemTypeBrassInstrument:
 		{
 			if(item->BardValue > newbon->brassMod)
 				newbon->brassMod = item->BardValue;
 			break;
 		}
-	case EQEmu::item::ItemTypePercussionInstrument:
+	case EQ::item::ItemTypePercussionInstrument:
 		{
 			if(item->BardValue > newbon->percussionMod)
 				newbon->percussionMod = item->BardValue;
@@ -9016,7 +9016,7 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 		}
 	}
 
-	if (item->SkillModValue != 0 && item->SkillModType <= EQEmu::skills::HIGHEST_SKILL){
+	if (item->SkillModValue != 0 && item->SkillModType <= EQ::skills::HIGHEST_SKILL){
 		if ((item->SkillModValue > 0 && newbon->skillmod[item->SkillModType] < item->SkillModValue) ||
 			(item->SkillModValue < 0 && newbon->skillmod[item->SkillModType] > item->SkillModValue))
 		{
@@ -9024,7 +9024,7 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 		}
 	}
 
-	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= EQEmu::skills::HIGHEST_SKILL) {
+	if (item->ExtraDmgSkill != 0 && item->ExtraDmgSkill <= EQ::skills::HIGHEST_SKILL) {
 		if((newbon->SkillDamageAmount[item->ExtraDmgSkill] + item->ExtraDmgAmt) > RuleI(Character, ItemExtraDmgCap))
 			newbon->SkillDamageAmount[item->ExtraDmgSkill] = RuleI(Character, ItemExtraDmgCap);
 		else
@@ -9033,7 +9033,7 @@ void Bot::AddItemBonuses(const EQEmu::ItemInstance *inst, StatBonuses* newbon, b
 
 	if (!isAug)
 	{
-		for (int i = EQEmu::invaug::SOCKET_BEGIN; i <= EQEmu::invaug::SOCKET_END; i++)
+		for (int i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++)
 			AddItemBonuses(inst->GetAugment(i),newbon,true, false, rec_level);
 	}
 
@@ -9079,8 +9079,8 @@ void Bot::CalcBotStats(bool showtext) {
 	if(GetBotOwner()->GetLevel() != GetLevel())
 		SetLevel(GetBotOwner()->GetLevel());
 
-	for (int sindex = 0; sindex <= EQEmu::skills::HIGHEST_SKILL; ++sindex) {
-		skills[sindex] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)sindex, GetLevel());
+	for (int sindex = 0; sindex <= EQ::skills::HIGHEST_SKILL; ++sindex) {
+		skills[sindex] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)sindex, GetLevel());
 	}
 
 	taunt_timer.Start(1000);
@@ -9099,7 +9099,7 @@ void Bot::CalcBotStats(bool showtext) {
 		// Test Code
 		if(GetClass() == BARD)
 			GetBotOwner()->Message(Chat::Yellow, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
-			GetSkill(EQEmu::skills::SkillBrassInstruments), GetSkill(EQEmu::skills::SkillPercussionInstruments), GetSkill(EQEmu::skills::SkillSinging), GetSkill(EQEmu::skills::SkillStringedInstruments), GetSkill(EQEmu::skills::SkillWindInstruments));
+			GetSkill(EQ::skills::SkillBrassInstruments), GetSkill(EQ::skills::SkillPercussionInstruments), GetSkill(EQ::skills::SkillSinging), GetSkill(EQ::skills::SkillStringedInstruments), GetSkill(EQ::skills::SkillWindInstruments));
 	}
 
 	//if(this->Save())
@@ -9118,17 +9118,17 @@ void Bot::CalcBotStats(bool showtext) {
 		// Test Code
 		if(GetClass() == BARD) {
 			GetBotOwner()->Message(Chat::Yellow, "Bard Skills-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i",
-				GetSkill(EQEmu::skills::SkillBrassInstruments) + GetBrassMod(),
-				GetSkill(EQEmu::skills::SkillPercussionInstruments) + GetPercMod(),
-				GetSkill(EQEmu::skills::SkillSinging) + GetSingMod(),
-				GetSkill(EQEmu::skills::SkillStringedInstruments) + GetStringMod(),
-				GetSkill(EQEmu::skills::SkillWindInstruments) + GetWindMod());
+				GetSkill(EQ::skills::SkillBrassInstruments) + GetBrassMod(),
+				GetSkill(EQ::skills::SkillPercussionInstruments) + GetPercMod(),
+				GetSkill(EQ::skills::SkillSinging) + GetSingMod(),
+				GetSkill(EQ::skills::SkillStringedInstruments) + GetStringMod(),
+				GetSkill(EQ::skills::SkillWindInstruments) + GetWindMod());
 			GetBotOwner()->Message(Chat::Yellow, "Bard Skill Mods-- Brass: %i, Percussion: %i, Singing: %i, Stringed: %i, Wind: %i", GetBrassMod(), GetPercMod(), GetSingMod(), GetStringMod(), GetWindMod());
 		}
 	}
 }
 
-bool Bot::CheckLoreConflict(const EQEmu::ItemData* item) {
+bool Bot::CheckLoreConflict(const EQ::ItemData* item) {
 	if (!item || !(item->LoreFlag))
 		return false;
 
@@ -9195,16 +9195,16 @@ bool EntityList::Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, fl
 				Group *g = caster->GetGroup();
 				float hpRatioToHeal = 25.0f;
 				switch(caster->GetBotStance()) {
-				case EQEmu::constants::stanceReactive:
-				case EQEmu::constants::stanceBalanced:
+				case EQ::constants::stanceReactive:
+				case EQ::constants::stanceBalanced:
 					hpRatioToHeal = 50.0f;
 					break;
-				case EQEmu::constants::stanceBurn:
-				case EQEmu::constants::stanceBurnAE:
+				case EQ::constants::stanceBurn:
+				case EQ::constants::stanceBurnAE:
 					hpRatioToHeal = 20.0f;
 					break;
-				case EQEmu::constants::stanceAggressive:
-				case EQEmu::constants::stanceEfficient:
+				case EQ::constants::stanceAggressive:
+				case EQ::constants::stanceEfficient:
 				default:
 					hpRatioToHeal = 25.0f;
 					break;
@@ -9601,12 +9601,12 @@ uint8 Bot::GetNumberNeedingHealedInGroup(uint8 hpr, bool includePets) {
 int Bot::GetRawACNoShield(int &shield_ac) {
 	int ac = itembonuses.AC + spellbonuses.AC;
 	shield_ac = 0;
-	EQEmu::ItemInstance* inst = GetBotItem(EQEmu::invslot::slotSecondary);
+	EQ::ItemInstance* inst = GetBotItem(EQ::invslot::slotSecondary);
 	if(inst) {
-		if (inst->GetItem()->ItemType == EQEmu::item::ItemTypeShield) {
+		if (inst->GetItem()->ItemType == EQ::item::ItemTypeShield) {
 			ac -= inst->GetItem()->AC;
 			shield_ac = inst->GetItem()->AC;
-			for (uint8 i = EQEmu::invaug::SOCKET_BEGIN; i <= EQEmu::invaug::SOCKET_END; i++) {
+			for (uint8 i = EQ::invaug::SOCKET_BEGIN; i <= EQ::invaug::SOCKET_END; i++) {
 				if(inst->GetAugment(i)) {
 					ac -= inst->GetAugment(i)->GetItem()->AC;
 					shield_ac += inst->GetAugment(i)->GetItem()->AC;
@@ -9618,10 +9618,10 @@ int Bot::GetRawACNoShield(int &shield_ac) {
 }
 
 uint32 Bot::CalcCurrentWeight() {
-	const EQEmu::ItemData* TempItem = nullptr;
-	EQEmu::ItemInstance* inst = nullptr;
+	const EQ::ItemData* TempItem = nullptr;
+	EQ::ItemInstance* inst = nullptr;
 	uint32 Total = 0;
-	for (int i = EQEmu::invslot::EQUIPMENT_BEGIN; i <= EQEmu::invslot::EQUIPMENT_END; ++i) {
+	for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; ++i) {
 		inst = GetBotItem(i);
 		if(inst) {
 			TempItem = inst->GetItem();
@@ -9794,11 +9794,11 @@ bool Bot::HasOrMayGetAggro() {
 }
 
 void Bot::SetDefaultBotStance() {
-	EQEmu::constants::StanceType defaultStance = EQEmu::constants::stanceBalanced;
+	EQ::constants::StanceType defaultStance = EQ::constants::stanceBalanced;
 	if (GetClass() == WARRIOR)
-		defaultStance = EQEmu::constants::stanceAggressive;
+		defaultStance = EQ::constants::stanceAggressive;
 
-	_baseBotStance = EQEmu::constants::stancePassive;
+	_baseBotStance = EQ::constants::stancePassive;
 	_botStance = defaultStance;
 }
 
@@ -9847,7 +9847,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 	if(IsCasting())
 		InterruptSpell();
 
-	CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
+	CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 	return true;
 }
 
@@ -10011,9 +10011,9 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		if (slot_id != INVALID_INDEX)
 			return false;
 
-		for (uint8 i = EQEmu::textures::textureBegin; i < EQEmu::textures::weaponPrimary; ++i) {
-			uint8 inv_slot = EQEmu::InventoryProfile::CalcSlotFromMaterial(i);
-			EQEmu::ItemInstance* inst = m_inv.GetItem(inv_slot);
+		for (uint8 i = EQ::textures::textureBegin; i < EQ::textures::weaponPrimary; ++i) {
+			uint8 inv_slot = EQ::InventoryProfile::CalcSlotFromMaterial(i);
+			EQ::ItemInstance* inst = m_inv.GetItem(inv_slot);
 			if (!inst)
 				continue;
 
@@ -10022,11 +10022,11 @@ bool Bot::DyeArmor(int16 slot_id, uint32 rgb, bool all_flag, bool save_flag)
 		}
 	}
 	else {
-		uint8 mat_slot = EQEmu::InventoryProfile::CalcMaterialFromSlot(slot_id);
-		if (mat_slot == EQEmu::textures::materialInvalid || mat_slot >= EQEmu::textures::weaponPrimary)
+		uint8 mat_slot = EQ::InventoryProfile::CalcMaterialFromSlot(slot_id);
+		if (mat_slot == EQ::textures::materialInvalid || mat_slot >= EQ::textures::weaponPrimary)
 			return false;
 
-		EQEmu::ItemInstance* inst = m_inv.GetItem(slot_id);
+		EQ::ItemInstance* inst = m_inv.GetItem(slot_id);
 		if (!inst)
 			return false;
 
@@ -10061,8 +10061,8 @@ std::string Bot::CreateSayLink(Client* c, const char* message, const char* name)
 	uint32 saylink_id = database.LoadSaylinkID(escaped_string);
 	safe_delete_array(escaped_string);
 
-	EQEmu::SayLinkEngine linker;
-	linker.SetLinkType(EQEmu::saylink::SayLinkItemData);
+	EQ::SayLinkEngine linker;
+	linker.SetLinkType(EQ::saylink::SayLinkItemData);
 	linker.SetProxyItemID(SAYLINK_ITEM_ID);
 	linker.SetProxyAugment1ID(saylink_id);
 	linker.SetProxyText(name);
@@ -10087,6 +10087,6 @@ void Bot::StopMoving(float new_heading)
 	Mob::StopMoving(new_heading);
 }
 
-uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQEmu::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
+uint8 Bot::spell_casting_chances[SPELL_TYPE_COUNT][PLAYER_CLASS_COUNT][EQ::constants::STANCE_TYPE_COUNT][cntHSND] = { 0 };
 
 #endif

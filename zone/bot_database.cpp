@@ -146,7 +146,7 @@ bool BotDatabase::LoadBotSpellCastingChances()
 			continue;
 		--class_index;
 		uint8 stance_index = atoi(row[2]);
-		if (stance_index >= EQEmu::constants::STANCE_TYPE_COUNT)
+		if (stance_index >= EQ::constants::STANCE_TYPE_COUNT)
 			continue;
 
 		for (uint8 conditional_index = nHSND; conditional_index < cntHSND; ++conditional_index) {
@@ -915,7 +915,7 @@ bool BotDatabase::LoadStance(Bot* bot_inst, bool& stance_flag)
 		return true;
 
 	auto row = results.begin();
-	bot_inst->SetBotStance((EQEmu::constants::StanceType)atoi(row[0]));
+	bot_inst->SetBotStance((EQ::constants::StanceType)atoi(row[0]));
 	stance_flag = true;
 
 	return true;
@@ -1142,7 +1142,7 @@ bool BotDatabase::QueryInventoryCount(const uint32 bot_id, uint32& item_count)
 	return true;
 }
 
-bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& inventory_inst)
+bool BotDatabase::LoadItems(const uint32 bot_id, EQ::InventoryProfile& inventory_inst)
 {
 	if (!bot_id)
 		return false;
@@ -1177,13 +1177,13 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		int16 slot_id = atoi(row[0]);
-		if (slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END)
+		if (slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END)
 			continue;
 
 		uint32 item_id = atoi(row[1]);
 		uint16 item_charges = (uint16)atoi(row[2]);
 
-		EQEmu::ItemInstance* item_inst = database.CreateItem(
+		EQ::ItemInstance* item_inst = database.CreateItem(
 			item_id,
 			item_charges,
 			(uint32)atoul(row[9]),
@@ -1212,7 +1212,7 @@ bool BotDatabase::LoadItems(const uint32 bot_id, EQEmu::InventoryProfile& invent
 		if (item_inst->GetItem()->Attuneable) {
 			if (atoi(row[4]))
 				item_inst->SetAttuned(true);
-			else if (slot_id >= EQEmu::invslot::EQUIPMENT_BEGIN && slot_id <= EQEmu::invslot::EQUIPMENT_END)
+			else if (slot_id >= EQ::invslot::EQUIPMENT_BEGIN && slot_id <= EQ::invslot::EQUIPMENT_END)
 				item_inst->SetAttuned(true);
 		}
 
@@ -1280,7 +1280,7 @@ bool BotDatabase::LoadItemBySlot(Bot* bot_inst)
 
 bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint32& item_id)
 {
-	if (!bot_id || slot_id > EQEmu::invslot::EQUIPMENT_END)
+	if (!bot_id || slot_id > EQ::invslot::EQUIPMENT_END)
 		return false;
 
 	query = StringFormat("SELECT `item_id` FROM `bot_inventories` WHERE `bot_id` = '%i' AND `slot_id` = '%i' LIMIT 1", bot_id, slot_id);
@@ -1296,9 +1296,9 @@ bool BotDatabase::LoadItemBySlot(const uint32 bot_id, const uint32 slot_id, uint
 	return true;
 }
 
-bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEmu::ItemInstance* item_inst)
+bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQ::ItemInstance* item_inst)
 {
-	if (!bot_inst || !bot_inst->GetBotID() || slot_id > EQEmu::invslot::EQUIPMENT_END)
+	if (!bot_inst || !bot_inst->GetBotID() || slot_id > EQ::invslot::EQUIPMENT_END)
 		return false;
 
 	if (!DeleteItemBySlot(bot_inst->GetBotID(), slot_id))
@@ -1306,9 +1306,8 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEm
 
 	if (!item_inst || !item_inst->GetID())
 		return true;
-
-	uint32 augment_id[EQEmu::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
-	for (int augment_iter = EQEmu::invaug::SOCKET_BEGIN; augment_iter <= EQEmu::invaug::SOCKET_END; ++augment_iter)
+	uint32 augment_id[EQ::invaug::SOCKET_COUNT] = { 0, 0, 0, 0, 0, 0 };
+	for (int augment_iter = EQ::invaug::SOCKET_BEGIN; augment_iter <= EQ::invaug::SOCKET_END; ++augment_iter)
 		augment_id[augment_iter] = item_inst->GetAugmentItemID(augment_iter);
 
 	uint16 item_charges = 0;
@@ -1382,7 +1381,7 @@ bool BotDatabase::SaveItemBySlot(Bot* bot_inst, const uint32 slot_id, const EQEm
 
 bool BotDatabase::DeleteItemBySlot(const uint32 bot_id, const uint32 slot_id)
 {
-	if (!bot_id || slot_id > EQEmu::invslot::EQUIPMENT_END)
+	if (!bot_id || slot_id > EQ::invslot::EQUIPMENT_END)
 		return false;
 
 	query = StringFormat("DELETE FROM `bot_inventories` WHERE `bot_id` = '%u' AND `slot_id` = '%u'", bot_id, slot_id);
@@ -1398,7 +1397,7 @@ bool BotDatabase::LoadEquipmentColor(const uint32 bot_id, const uint8 material_s
 	if (!bot_id)
 		return false;
 
-	int16 slot_id = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot_id);
+	int16 slot_id = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot_id);
 	if (slot_id == INVALID_INDEX)
 		return false;
 
@@ -1421,12 +1420,12 @@ bool BotDatabase::SaveEquipmentColor(const uint32 bot_id, const int16 slot_id, c
 		return false;
 
 	bool all_flag = (slot_id == -2);
-	if ((slot_id < EQEmu::invslot::EQUIPMENT_BEGIN || slot_id > EQEmu::invslot::EQUIPMENT_END) && !all_flag)
+	if ((slot_id < EQ::invslot::EQUIPMENT_BEGIN || slot_id > EQ::invslot::EQUIPMENT_END) && !all_flag)
 		return false;
 
 	std::string where_clause;
 	if (all_flag)
-		where_clause = StringFormat(" AND `slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u')", EQEmu::invslot::slotHead, EQEmu::invslot::slotArms, EQEmu::invslot::slotWrist1, EQEmu::invslot::slotHands, EQEmu::invslot::slotChest, EQEmu::invslot::slotLegs, EQEmu::invslot::slotFeet);
+		where_clause = StringFormat(" AND `slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u')", EQ::invslot::slotHead, EQ::invslot::slotArms, EQ::invslot::slotWrist1, EQ::invslot::slotHands, EQ::invslot::slotChest, EQ::invslot::slotLegs, EQ::invslot::slotFeet);
 	else
 		where_clause = StringFormat(" AND `slot_id` = '%u'", slot_id);
 
@@ -1697,8 +1696,8 @@ bool BotDatabase::LoadPetItems(const uint32 bot_id, uint32* pet_items)
 	if (!results.RowCount())
 		return true;
 
-	int item_index = EQEmu::invslot::EQUIPMENT_BEGIN;
-	for (auto row = results.begin(); row != results.end() && (item_index >= EQEmu::invslot::EQUIPMENT_BEGIN && item_index <= EQEmu::invslot::EQUIPMENT_END); ++row) {
+	int item_index = EQ::invslot::EQUIPMENT_BEGIN;
+	for (auto row = results.begin(); row != results.end() && (item_index >= EQ::invslot::EQUIPMENT_BEGIN && item_index <= EQ::invslot::EQUIPMENT_END); ++row) {
 		pet_items[item_index] = atoi(row[0]);
 		++item_index;
 	}
@@ -1722,7 +1721,7 @@ bool BotDatabase::SavePetItems(const uint32 bot_id, const uint32* pet_items, boo
 	if (!saved_pet_index)
 		return true;
 
-	for (int item_index = EQEmu::invslot::EQUIPMENT_BEGIN; item_index <= EQEmu::invslot::EQUIPMENT_END; ++item_index) {
+	for (int item_index = EQ::invslot::EQUIPMENT_BEGIN; item_index <= EQ::invslot::EQUIPMENT_END; ++item_index) {
 		if (!pet_items[item_index])
 			continue;
 
@@ -1871,7 +1870,7 @@ bool BotDatabase::SaveAllArmorColorBySlot(const uint32 owner_id, const int16 slo
 		" AND bi.`slot_id` = '%i'",
 		owner_id,
 		rgb_value,
-		EQEmu::invslot::slotHead, EQEmu::invslot::slotChest, EQEmu::invslot::slotArms, EQEmu::invslot::slotWrist1, EQEmu::invslot::slotWrist2, EQEmu::invslot::slotHands, EQEmu::invslot::slotLegs, EQEmu::invslot::slotFeet,
+		EQ::invslot::slotHead, EQ::invslot::slotChest, EQ::invslot::slotArms, EQ::invslot::slotWrist1, EQ::invslot::slotWrist2, EQ::invslot::slotHands, EQ::invslot::slotLegs, EQ::invslot::slotFeet,
 		slot_id
 	);
 	auto results = database.QueryDatabase(query);
@@ -1895,7 +1894,7 @@ bool BotDatabase::SaveAllArmorColors(const uint32 owner_id, const uint32 rgb_val
 		" AND bi.`slot_id` IN ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
 		owner_id,
 		rgb_value,
-		EQEmu::invslot::slotHead, EQEmu::invslot::slotChest, EQEmu::invslot::slotArms, EQEmu::invslot::slotWrist1, EQEmu::invslot::slotWrist2, EQEmu::invslot::slotHands, EQEmu::invslot::slotLegs, EQEmu::invslot::slotFeet
+		EQ::invslot::slotHead, EQ::invslot::slotChest, EQ::invslot::slotArms, EQ::invslot::slotWrist1, EQ::invslot::slotWrist2, EQ::invslot::slotHands, EQ::invslot::slotLegs, EQ::invslot::slotFeet
 	);
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -2945,7 +2944,7 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 		return 0;
 	if (class_index >= PLAYER_CLASS_COUNT)
 		return 0;
-	if (stance_index >= EQEmu::constants::STANCE_TYPE_COUNT)
+	if (stance_index >= EQ::constants::STANCE_TYPE_COUNT)
 		return 0;
 	if (conditional_index >= cntHSND)
 		return 0;

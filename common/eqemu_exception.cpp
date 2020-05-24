@@ -18,7 +18,7 @@
 
 #include "eqemu_exception.h"
 
-namespace EQEmu
+namespace EQ
 {
 	Exception::Exception(const char* name, const std::string& description, const char* file, long line)
 		: line_(line),

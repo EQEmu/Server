@@ -26,7 +26,7 @@
 
 class DBcore;
 
-namespace EQEmu
+namespace EQ
 {
 	class ProfanityManager {
 	public:

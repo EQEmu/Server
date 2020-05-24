@@ -28,7 +28,7 @@ public:
 	virtual void RemoveData();
 	virtual bool CheckState(EQStreamState state);
 	virtual std::string Describe() const;
-	virtual const EQEmu::versions::ClientVersion ClientVersion() const;
+	virtual const EQ::versions::ClientVersion ClientVersion() const;
 	virtual EQStreamState GetState();
 	virtual void SetOpcodeManager(OpcodeManager **opm);
 	virtual Stats GetStats() const;

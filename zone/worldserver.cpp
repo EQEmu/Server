@@ -834,7 +834,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_RefreshCensorship: {
-		if (!EQEmu::ProfanityManager::LoadProfanityList(&database))
+		if (!EQ::ProfanityManager::LoadProfanityList(&database))
 			LogError("Received request to refresh the profanity list..but, the action failed");
 		break;
 	}
@@ -926,7 +926,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				database.SetGroupLeaderName(group->GetID(), Inviter->GetName());
 				group->UpdateGroupAAs();
 
-				if (Inviter->CastToClient()->ClientVersion() < EQEmu::versions::ClientVersion::SoD)
+				if (Inviter->CastToClient()->ClientVersion() < EQ::versions::ClientVersion::SoD)
 				{
 					auto outapp =
 						new EQApplicationPacket(OP_GroupUpdate, sizeof(GroupJoin_Struct));
@@ -1454,7 +1454,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		bool found_corpse = false;
 		for (auto const& it : entity_list.GetCorpseList()) {
 			if (it.second->IsPlayerCorpse() && strcmp(it.second->GetOwnerName(), s->ownername) == 0) {
-				if (s->consent_type == EQEmu::consent::Normal) {
+				if (s->consent_type == EQ::consent::Normal) {
 					if (s->permission == 1) {
 						it.second->AddConsentName(s->grantname);
 					}
@@ -1462,13 +1462,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						it.second->RemoveConsentName(s->grantname);
 					}
 				}
-				else if (s->consent_type == EQEmu::consent::Group) {
+				else if (s->consent_type == EQ::consent::Group) {
 					it.second->SetConsentGroupID(s->consent_id);
 				}
-				else if (s->consent_type == EQEmu::consent::Raid) {
+				else if (s->consent_type == EQ::consent::Raid) {
 					it.second->SetConsentRaidID(s->consent_id);
 				}
-				else if (s->consent_type == EQEmu::consent::Guild) {
+				else if (s->consent_type == EQ::consent::Guild) {
 					it.second->SetConsentGuildID(s->consent_id);
 				}
 				found_corpse = true;
@@ -1492,7 +1492,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerOP_Consent_Struct* s = (ServerOP_Consent_Struct*)pack->pBuffer;
 		Client* owner_client = entity_list.GetClientByName(s->ownername);
 		Client* grant_client = nullptr;
-		if (s->consent_type == EQEmu::consent::Normal) {
+		if (s->consent_type == EQ::consent::Normal) {
 			grant_client = entity_list.GetClientByName(s->grantname);
 		}
 		if (owner_client || grant_client) {
@@ -1915,6 +1915,39 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZSignalGroup:
+	{
+		CZGroupSignal_Struct* CZGS = (CZGroupSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZGS->group_id) {
+				client.second->Signal(CZGS->data);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSignalRaid:
+	{
+		CZRaidSignal_Struct* CZRS = (CZRaidSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZRS->raid_id) {
+				client.second->Signal(CZRS->data);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSignalGuild:
+	{
+		CZGuildSignal_Struct* CZGS = (CZGuildSignal_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZGS->guild_id) {
+				client.second->Signal(CZGS->data);
+			}
+		}
+		break;
+	}
 	case ServerOP_CZSignalClientByName:
 	{
 		CZClientSignalByName_Struct* CZCS = (CZClientSignalByName_Struct*)pack->pBuffer;
@@ -1933,12 +1966,78 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZMessageGroup:
+	{
+		CZMessageGroup_Struct* CZGM = (CZMessageGroup_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZGM->GroupID) {
+				client.second->Message(CZGM->Type, CZGM->Message);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMessageRaid:
+	{
+		CZMessageRaid_Struct* CZRM = (CZMessageRaid_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZRM->RaidID) {
+				client.second->Message(CZRM->Type, CZRM->Message);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMessageGuild:
+	{
+		CZMessageGuild_Struct* CZGM = (CZMessageGuild_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZGM->GuildID) {
+				client.second->Message(CZGM->Type, CZGM->Message);
+			}
+		}
+		break;
+	}
 	case ServerOP_CZSetEntityVariableByClientName:
 	{
 		CZSetEntVarByClientName_Struct* CZCS = (CZSetEntVarByClientName_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(CZCS->CharName);
 		if (client != 0) {
 			client->SetEntityVariable(CZCS->id, CZCS->m_var);
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByGroupID:
+	{
+		CZSetEntVarByGroupID_Struct* CZCS = (CZSetEntVarByGroupID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZCS->group_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByRaidID:
+	{
+		CZSetEntVarByRaidID_Struct* CZCS = (CZSetEntVarByRaidID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZCS->raid_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSetEntityVariableByGuildID:
+	{
+		CZSetEntVarByGuildID_Struct* CZCS = (CZSetEntVarByGuildID_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZCS->guild_id) {
+				client.second->SetEntityVariable(CZCS->id, CZCS->m_var);
+			}
 		}
 		break;
 	}

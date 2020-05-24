@@ -47,7 +47,7 @@ bool TitleManager::LoadTitles()
 	for (auto row = results.begin(); row != results.end(); ++row) {
         TitleEntry Title;
 		Title.TitleID = atoi(row[0]);
-		Title.SkillID = (EQEmu::skills::SkillType) atoi(row[1]);
+		Title.SkillID = (EQ::skills::SkillType) atoi(row[1]);
 		Title.MinSkillValue = atoi(row[2]);
 		Title.MaxSkillValue = atoi(row[3]);
 		Title.MinAAPoints = atoi(row[4]);
@@ -188,10 +188,10 @@ bool TitleManager::IsClientEligibleForTitle(Client *c, std::vector<TitleEntry>::
 
 		if(Title->SkillID >= 0)
 		{
-			if ((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<EQEmu::skills::SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
+			if ((Title->MinSkillValue >= 0) && (c->GetRawSkill(static_cast<EQ::skills::SkillType>(Title->SkillID)) < static_cast<uint32>(Title->MinSkillValue)))
 				return false;
 
-			if ((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<EQEmu::skills::SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
+			if ((Title->MaxSkillValue >= 0) && (c->GetRawSkill(static_cast<EQ::skills::SkillType>(Title->SkillID)) > static_cast<uint32>(Title->MaxSkillValue)))
 				return false;
 
 		}

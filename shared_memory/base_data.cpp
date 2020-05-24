@@ -24,7 +24,7 @@
 #include "../common/eqemu_exception.h"
 
 void LoadBaseData(SharedDatabase *database, const std::string &prefix) {
-	EQEmu::IPCMutex mutex("base_data");
+	EQ::IPCMutex mutex("base_data");
 	mutex.Lock();
 	int records = (database->GetMaxBaseDataLevel() + 1);
 	if(records == 0) {
@@ -35,7 +35,7 @@ void LoadBaseData(SharedDatabase *database, const std::string &prefix) {
 
 	auto Config = EQEmuConfig::get();
 	std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
-	EQEmu::MemoryMappedFile mmf(file_name, size);
+	EQ::MemoryMappedFile mmf(file_name, size);
 	mmf.ZeroFile();
 
 	void *ptr = mmf.Get();

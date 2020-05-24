@@ -28,7 +28,7 @@ class Client;
 class Mob;
 class NPC;
 
-namespace EQEmu
+namespace EQ
 {
 	class ItemInstance;
 }
@@ -37,7 +37,7 @@ class QuestManager {
 	struct running_quest {
 		Mob *owner;
 		Client *initiator;
-		EQEmu::ItemInstance* questitem;
+		EQ::ItemInstance* questitem;
 		bool depop_npc;
 		std::string encounter;
 	};
@@ -51,7 +51,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQEmu::ItemInstance* _questitem = nullptr, std::string encounter = "");
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -79,13 +79,13 @@ public:
 	void Zone(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
 	void settimerMS(const char *timer_name, int milliseconds);
-	void settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst);
+	void settimerMS(const char *timer_name, int milliseconds, EQ::ItemInstance *inst);
 	void settimerMS(const char *timer_name, int milliseconds, Mob *mob);
 	void stoptimer(const char *timer_name);
-	void stoptimer(const char *timer_name, EQEmu::ItemInstance *inst);
+	void stoptimer(const char *timer_name, EQ::ItemInstance *inst);
 	void stoptimer(const char *timer_name, Mob *mob);
 	void stopalltimers();
-	void stopalltimers(EQEmu::ItemInstance *inst);
+	void stopalltimers(EQ::ItemInstance *inst);
 	void stopalltimers(Mob *mob);
 	void pausetimer(const char *timer_name);
 	void resumetimer(const char *timer_name);
@@ -279,11 +279,20 @@ public:
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
 	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
+	void CrossZoneSignalPlayerByGroupID(int group_id, uint32 data);
+	void CrossZoneSignalPlayerByRaidID(int raid_id, uint32 data);
+	void CrossZoneSignalPlayerByGuildID(int guild_id, uint32 data);
 	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
 	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
 	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);
 	void CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var);
+	void CrossZoneSetEntityVariableByGroupID(int group_id, const char *id, const char *m_var);
+	void CrossZoneSetEntityVariableByRaidID(int raid_id, const char *id, const char *m_var);
+	void CrossZoneSetEntityVariableByGuildID(int guild_id, const char *id, const char *m_var);
 	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
+	void CrossZoneMessagePlayerByGroupID(uint32 Type, int GroupID, const char *Message);
+	void CrossZoneMessagePlayerByRaidID(uint32 Type, int RaidID, const char *Message);
+	void CrossZoneMessagePlayerByGuildID(uint32 Type, int GuildID, const char *Message);
 	void WorldWideMarquee(uint32 Type, uint32 Priority, uint32 FadeIn, uint32 FadeOut, uint32 Duration, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
@@ -293,7 +302,7 @@ public:
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
-	EQEmu::ItemInstance *GetQuestItem() const;
+	EQ::ItemInstance *GetQuestItem() const;
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 

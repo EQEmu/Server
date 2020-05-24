@@ -40,14 +40,14 @@ void CullPoints(std::vector<FindPerson_Point> &points) {
 }
 
 void Client::SendPathPacket(const std::vector<FindPerson_Point> &points) {
-	EQEmu::Any data(points);
+	EQ::Any data(points);
 	EQ::Task([=](EQ::Task::ResolveFn resolve, EQ::Task::RejectFn reject) {
-		auto points = EQEmu::any_cast<std::vector<FindPerson_Point>>(data);
+		auto points = EQ::any_cast<std::vector<FindPerson_Point>>(data);
 		CullPoints(points);
 		resolve(points);
 	})
-	.Then([this](const EQEmu::Any &result) {
-		auto points = EQEmu::any_cast<std::vector<FindPerson_Point>>(result);
+	.Then([this](const EQ::Any &result) {
+		auto points = EQ::any_cast<std::vector<FindPerson_Point>>(result);
 		if (points.size() < 2) {
 			if (Admin() > 10) {
 				Message(Chat::System, "Too few points");

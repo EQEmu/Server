@@ -165,8 +165,8 @@ void PerlembParser::ReloadQuests()
 }
 
 int PerlembParser::EventCommon(
-	QuestEventID event, uint32 objid, const char *data, NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob,
-	uint32 extradata, bool global, std::vector<EQEmu::Any> *extra_pointers
+	QuestEventID event, uint32 objid, const char *data, NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob,
+	uint32 extradata, bool global, std::vector<EQ::Any> *extra_pointers
 )
 {
 	if (!perl) {
@@ -266,7 +266,7 @@ int PerlembParser::EventCommon(
 
 int PerlembParser::EventNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, false, extra_pointers);
@@ -274,7 +274,7 @@ int PerlembParser::EventNPC(
 
 int PerlembParser::EventGlobalNPC(
 	QuestEventID evt, NPC *npc, Mob *init, std::string data, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	return EventCommon(evt, npc->GetNPCTypeID(), data.c_str(), npc, nullptr, init, extra_data, true, extra_pointers);
@@ -282,7 +282,7 @@ int PerlembParser::EventGlobalNPC(
 
 int PerlembParser::EventPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, false, extra_pointers);
@@ -290,15 +290,15 @@ int PerlembParser::EventPlayer(
 
 int PerlembParser::EventGlobalPlayer(
 	QuestEventID evt, Client *client, std::string data, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, data.c_str(), nullptr, nullptr, client, extra_data, true, extra_pointers);
 }
 
 int PerlembParser::EventItem(
-	QuestEventID evt, Client *client, EQEmu::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	// needs pointer validation on 'item' argument
@@ -307,7 +307,7 @@ int PerlembParser::EventItem(
 
 int PerlembParser::EventSpell(
 	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, uint32 extra_data,
-	std::vector<EQEmu::Any> *extra_pointers
+	std::vector<EQ::Any> *extra_pointers
 )
 {
 	return EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
@@ -416,7 +416,7 @@ bool PerlembParser::SpellHasQuestSub(uint32 spell_id, QuestEventID evt)
 	return (perl->SubExists(package_name.str().c_str(), subname));
 }
 
-bool PerlembParser::ItemHasQuestSub(EQEmu::ItemInstance *itm, QuestEventID evt)
+bool PerlembParser::ItemHasQuestSub(EQ::ItemInstance *itm, QuestEventID evt)
 {
 	std::stringstream package_name;
 	package_name << "qst_item_" << itm->GetID();
@@ -564,7 +564,7 @@ void PerlembParser::LoadGlobalPlayerScript(std::string filename)
 	global_player_quest_status_ = questLoaded;
 }
 
-void PerlembParser::LoadItemScript(std::string filename, EQEmu::ItemInstance *item)
+void PerlembParser::LoadItemScript(std::string filename, EQ::ItemInstance *item)
 {
 	if (item == nullptr) {
 		return;
@@ -776,7 +776,7 @@ int PerlembParser::SendCommands(
 	uint32 npcid,
 	Mob *other,
 	Mob *mob,
-	EQEmu::ItemInstance *item_inst
+	EQ::ItemInstance *item_inst
 )
 {
 	if (!perl) {
@@ -852,7 +852,7 @@ int PerlembParser::SendCommands(
 
 		//only export QuestItem if it's an item quest
 		if (item_inst) {
-			EQEmu::ItemInstance *curi = quest_manager.GetQuestItem();
+			EQ::ItemInstance *curi = quest_manager.GetQuestItem();
 			snprintf(namebuf, 64, "%s::questitem", pkgprefix);
 			SV *questitem = get_sv(namebuf, true);
 			sv_setref_pv(questitem, "QuestItem", curi);
@@ -979,7 +979,7 @@ void PerlembParser::MapFunctions()
 
 void PerlembParser::GetQuestTypes(
 	bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest,
-	bool &isSpellQuest, QuestEventID event, NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob, bool global
+	bool &isSpellQuest, QuestEventID event, NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, bool global
 )
 {
 	if (event == EVENT_SPELL_EFFECT_CLIENT ||
@@ -1018,7 +1018,7 @@ void PerlembParser::GetQuestPackageName(
 	uint32 objid,
 	const char *data,
 	NPC *npcmob,
-	EQEmu::ItemInstance *item_inst,
+	EQ::ItemInstance *item_inst,
 	bool global
 )
 {
@@ -1033,8 +1033,8 @@ void PerlembParser::GetQuestPackageName(
 		}
 	}
 	else if (isItemQuest) {
-		// need a valid EQEmu::ItemInstance pointer check here..unsure how to cancel this process
-		const EQEmu::ItemData *item = item_inst->GetItem();
+		// need a valid EQ::ItemInstance pointer check here..unsure how to cancel this process
+		const EQ::ItemData *item = item_inst->GetItem();
 		package_name = "qst_item_";
 		package_name += itoa(item->ID);
 	}
@@ -1263,7 +1263,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 		//start with an empty hash
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 
-		for (int slot = EQEmu::invslot::EQUIPMENT_BEGIN; slot <= EQEmu::invslot::GENERAL_END; slot++) {
+		for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
 			char *hi_decl = nullptr;
 			int  itemid   = mob->CastToClient()->GetItemIDAt(slot);
 			if (itemid != -1 && itemid != 0) {
@@ -1278,9 +1278,9 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 		char *hi_decl = nullptr;
-		int  itemid   = mob->CastToClient()->GetItemIDAt(EQEmu::invslot::slotCursor);
+		int  itemid   = mob->CastToClient()->GetItemIDAt(EQ::invslot::slotCursor);
 		if (itemid != -1 && itemid != 0) {
-			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, EQEmu::invslot::slotCursor);
+			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, EQ::invslot::slotCursor);
 			perl->eval(hi_decl);
 			safe_delete_array(hi_decl);
 		}
@@ -1289,7 +1289,7 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 
 void PerlembParser::ExportEventVariables(
 	std::string &package_name, QuestEventID event, uint32 objid, const char *data,
-	NPC *npcmob, EQEmu::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<EQEmu::Any> *extra_pointers
+	NPC *npcmob, EQ::ItemInstance *item_inst, Mob *mob, uint32 extradata, std::vector<EQ::Any> *extra_pointers
 )
 {
 	switch (event) {
@@ -1308,7 +1308,7 @@ void PerlembParser::ExportEventVariables(
 			if (extra_pointers) {
 				size_t      sz = extra_pointers->size();
 				for (size_t i  = 0; i < sz; ++i) {
-					EQEmu::ItemInstance *inst = EQEmu::any_cast<EQEmu::ItemInstance *>(extra_pointers->at(i));
+					EQ::ItemInstance *inst = EQ::any_cast<EQ::ItemInstance *>(extra_pointers->at(i));
 
 					std::string var_name = "item";
 					var_name += std::to_string(i + 1);
@@ -1476,7 +1476,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_SCALE_CALC:
 		case EVENT_ITEM_ENTER_ZONE: {
-			// need a valid EQEmu::ItemInstance pointer check here..unsure how to cancel this process
+			// need a valid EQ::ItemInstance pointer check here..unsure how to cancel this process
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", item_inst->GetItem()->Name);
 			break;
@@ -1484,7 +1484,7 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_ITEM_CLICK_CAST:
 		case EVENT_ITEM_CLICK: {
-			// need a valid EQEmu::ItemInstance pointer check here..unsure how to cancel this process
+			// need a valid EQ::ItemInstance pointer check here..unsure how to cancel this process
 			ExportVar(package_name.c_str(), "itemid", objid);
 			ExportVar(package_name.c_str(), "itemname", item_inst->GetItem()->Name);
 			ExportVar(package_name.c_str(), "slotid", extradata);

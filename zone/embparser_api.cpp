@@ -110,7 +110,7 @@ XS(XS_QuestItem_new) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::QuestItem::new()");
 
-	EQEmu::ItemInstance *RETVAL;
+	EQ::ItemInstance *RETVAL;
 
 	RETVAL = quest_manager.GetQuestItem();
 	ST(0) = sv_newmortal();
@@ -373,7 +373,7 @@ XS(XS__getinventoryslotid) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
 
-	int16 RETVAL = EQEmu::invslot::SLOT_INVALID;
+	int16 RETVAL = EQ::invslot::SLOT_INVALID;
 	dXSTARG;
 
 	std::string identifier = (Const_char *)SvPV_nolen(ST(0));
@@ -381,89 +381,89 @@ XS(XS__getinventoryslotid) {
 		identifier[i] = std::tolower(identifier[i]);
 
 	if (identifier.find('.') == std::string::npos) {
-		if (identifier == "invalid")                    RETVAL = EQEmu::invslot::SLOT_INVALID;
-		else if (identifier == "charm")                 RETVAL = EQEmu::invslot::slotCharm;
-		else if (identifier == "ear1")                  RETVAL = EQEmu::invslot::slotEar1;
-		else if (identifier == "head")                  RETVAL = EQEmu::invslot::slotHead;
-		else if (identifier == "face")                  RETVAL = EQEmu::invslot::slotFace;
-		else if (identifier == "ear2")                  RETVAL = EQEmu::invslot::slotEar2;
-		else if (identifier == "neck")                  RETVAL = EQEmu::invslot::slotNeck;
-		else if (identifier == "shoulders")             RETVAL = EQEmu::invslot::slotShoulders;
-		else if (identifier == "arms")                  RETVAL = EQEmu::invslot::slotArms;
-		else if (identifier == "back")                  RETVAL = EQEmu::invslot::slotBack;
-		else if (identifier == "wrist1")                RETVAL = EQEmu::invslot::slotWrist1;
-		else if (identifier == "wrist2")                RETVAL = EQEmu::invslot::slotWrist2;
-		else if (identifier == "range")                 RETVAL = EQEmu::invslot::slotRange;
-		else if (identifier == "hands")                 RETVAL = EQEmu::invslot::slotHands;
-		else if (identifier == "primary")               RETVAL = EQEmu::invslot::slotPrimary;
-		else if (identifier == "secondary")             RETVAL = EQEmu::invslot::slotSecondary;
-		else if (identifier == "finger1")               RETVAL = EQEmu::invslot::slotFinger1;
-		else if (identifier == "finger2")               RETVAL = EQEmu::invslot::slotFinger2;
-		else if (identifier == "chest")                 RETVAL = EQEmu::invslot::slotChest;
-		else if (identifier == "legs")                  RETVAL = EQEmu::invslot::slotLegs;
-		else if (identifier == "feet")                  RETVAL = EQEmu::invslot::slotFeet;
-		else if (identifier == "waist")                 RETVAL = EQEmu::invslot::slotWaist;
-		else if (identifier == "powersource")           RETVAL = EQEmu::invslot::slotPowerSource;
-		else if (identifier == "ammo")                  RETVAL = EQEmu::invslot::slotAmmo;
-		else if (identifier == "general1")              RETVAL = EQEmu::invslot::slotGeneral1;
-		else if (identifier == "general2")              RETVAL = EQEmu::invslot::slotGeneral2;
-		else if (identifier == "general3")              RETVAL = EQEmu::invslot::slotGeneral3;
-		else if (identifier == "general4")              RETVAL = EQEmu::invslot::slotGeneral4;
-		else if (identifier == "general5")              RETVAL = EQEmu::invslot::slotGeneral5;
-		else if (identifier == "general6")              RETVAL = EQEmu::invslot::slotGeneral6;
-		else if (identifier == "general7")              RETVAL = EQEmu::invslot::slotGeneral7;
-		else if (identifier == "general8")              RETVAL = EQEmu::invslot::slotGeneral8;
-		else if (identifier == "general9")              RETVAL = EQEmu::invslot::slotGeneral9;
-		else if (identifier == "general10")             RETVAL = EQEmu::invslot::slotGeneral10;
-		else if (identifier == "cursor")                RETVAL = EQEmu::invslot::slotCursor;
-		else if (identifier == "tradeskill")            RETVAL = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
-		else if (identifier == "augment")               RETVAL = EQEmu::invslot::SLOT_AUGMENT_GENERIC_RETURN;
+		if (identifier == "invalid")                    RETVAL = EQ::invslot::SLOT_INVALID;
+		else if (identifier == "charm")                 RETVAL = EQ::invslot::slotCharm;
+		else if (identifier == "ear1")                  RETVAL = EQ::invslot::slotEar1;
+		else if (identifier == "head")                  RETVAL = EQ::invslot::slotHead;
+		else if (identifier == "face")                  RETVAL = EQ::invslot::slotFace;
+		else if (identifier == "ear2")                  RETVAL = EQ::invslot::slotEar2;
+		else if (identifier == "neck")                  RETVAL = EQ::invslot::slotNeck;
+		else if (identifier == "shoulders")             RETVAL = EQ::invslot::slotShoulders;
+		else if (identifier == "arms")                  RETVAL = EQ::invslot::slotArms;
+		else if (identifier == "back")                  RETVAL = EQ::invslot::slotBack;
+		else if (identifier == "wrist1")                RETVAL = EQ::invslot::slotWrist1;
+		else if (identifier == "wrist2")                RETVAL = EQ::invslot::slotWrist2;
+		else if (identifier == "range")                 RETVAL = EQ::invslot::slotRange;
+		else if (identifier == "hands")                 RETVAL = EQ::invslot::slotHands;
+		else if (identifier == "primary")               RETVAL = EQ::invslot::slotPrimary;
+		else if (identifier == "secondary")             RETVAL = EQ::invslot::slotSecondary;
+		else if (identifier == "finger1")               RETVAL = EQ::invslot::slotFinger1;
+		else if (identifier == "finger2")               RETVAL = EQ::invslot::slotFinger2;
+		else if (identifier == "chest")                 RETVAL = EQ::invslot::slotChest;
+		else if (identifier == "legs")                  RETVAL = EQ::invslot::slotLegs;
+		else if (identifier == "feet")                  RETVAL = EQ::invslot::slotFeet;
+		else if (identifier == "waist")                 RETVAL = EQ::invslot::slotWaist;
+		else if (identifier == "powersource")           RETVAL = EQ::invslot::slotPowerSource;
+		else if (identifier == "ammo")                  RETVAL = EQ::invslot::slotAmmo;
+		else if (identifier == "general1")              RETVAL = EQ::invslot::slotGeneral1;
+		else if (identifier == "general2")              RETVAL = EQ::invslot::slotGeneral2;
+		else if (identifier == "general3")              RETVAL = EQ::invslot::slotGeneral3;
+		else if (identifier == "general4")              RETVAL = EQ::invslot::slotGeneral4;
+		else if (identifier == "general5")              RETVAL = EQ::invslot::slotGeneral5;
+		else if (identifier == "general6")              RETVAL = EQ::invslot::slotGeneral6;
+		else if (identifier == "general7")              RETVAL = EQ::invslot::slotGeneral7;
+		else if (identifier == "general8")              RETVAL = EQ::invslot::slotGeneral8;
+		else if (identifier == "general9")              RETVAL = EQ::invslot::slotGeneral9;
+		else if (identifier == "general10")             RETVAL = EQ::invslot::slotGeneral10;
+		else if (identifier == "cursor")                RETVAL = EQ::invslot::slotCursor;
+		else if (identifier == "tradeskill")            RETVAL = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+		else if (identifier == "augment")               RETVAL = EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN;
 	}
 	else {
-		if (identifier == "possessions.begin")          RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
-		else if (identifier == "possessions.end")       RETVAL = EQEmu::invslot::POSSESSIONS_END;
-		else if (identifier == "equipment.begin")       RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
-		else if (identifier == "equipment.end")         RETVAL = EQEmu::invslot::EQUIPMENT_END;
-		else if (identifier == "general.begin")         RETVAL = EQEmu::invslot::GENERAL_BEGIN;
-		else if (identifier == "general.end")           RETVAL = EQEmu::invslot::GENERAL_END;
-		else if (identifier == "possessionsbags.begin") RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "possessionsbags.end")   RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-		else if (identifier == "generalbags.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "generalbags.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
-		else if (identifier == "general1bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "general1bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 9;
-		else if (identifier == "general2bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 10;
-		else if (identifier == "general2bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 19;
-		else if (identifier == "general3bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 20;
-		else if (identifier == "general3bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 29;
-		else if (identifier == "general4bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 30;
-		else if (identifier == "general4bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 39;
-		else if (identifier == "general5bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 40;
-		else if (identifier == "general5bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 49;
-		else if (identifier == "general6bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 50;
-		else if (identifier == "general6bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 59;
-		else if (identifier == "general7bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 60;
-		else if (identifier == "general7bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 69;
-		else if (identifier == "general8bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 70;
-		else if (identifier == "general8bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 79;
-		else if (identifier == "general9bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 80;
-		else if (identifier == "general9bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 89;
-		else if (identifier == "general10bag.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 90;
-		else if (identifier == "general10bag.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 99;
-		else if (identifier == "cursorbag.begin")       RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
-		else if (identifier == "cursorbag.end")         RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-		else if (identifier == "bank.begin")            RETVAL = EQEmu::invslot::BANK_BEGIN;
-		else if (identifier == "bank.end")              RETVAL = EQEmu::invslot::BANK_END;
-		else if (identifier == "bankbags.begin")        RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
-		else if (identifier == "bankbags.end")          RETVAL = EQEmu::invbag::BANK_BAGS_END;
-		else if (identifier == "sharedbank.begin")      RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
-		else if (identifier == "sharedbank.end")        RETVAL = EQEmu::invslot::SHARED_BANK_END;
-		else if (identifier == "sharedbankbags.begin")  RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
-		else if (identifier == "sharedbankbags.end")    RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
-		else if (identifier == "bagslot.begin")         RETVAL = EQEmu::invbag::SLOT_BEGIN;
-		else if (identifier == "bagslot.end")           RETVAL = EQEmu::invbag::SLOT_END;
-		else if (identifier == "augsocket.begin")       RETVAL = EQEmu::invaug::SOCKET_BEGIN;
-		else if (identifier == "augsocket.end")         RETVAL = EQEmu::invaug::SOCKET_END;
+		if (identifier == "possessions.begin")          RETVAL = EQ::invslot::POSSESSIONS_BEGIN;
+		else if (identifier == "possessions.end")       RETVAL = EQ::invslot::POSSESSIONS_END;
+		else if (identifier == "equipment.begin")       RETVAL = EQ::invslot::EQUIPMENT_BEGIN;
+		else if (identifier == "equipment.end")         RETVAL = EQ::invslot::EQUIPMENT_END;
+		else if (identifier == "general.begin")         RETVAL = EQ::invslot::GENERAL_BEGIN;
+		else if (identifier == "general.end")           RETVAL = EQ::invslot::GENERAL_END;
+		else if (identifier == "possessionsbags.begin") RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "possessionsbags.end")   RETVAL = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "generalbags.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "generalbags.end")       RETVAL = EQ::invbag::GENERAL_BAGS_END;
+		else if (identifier == "general1bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "general1bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 9;
+		else if (identifier == "general2bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 10;
+		else if (identifier == "general2bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 19;
+		else if (identifier == "general3bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 20;
+		else if (identifier == "general3bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 29;
+		else if (identifier == "general4bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 30;
+		else if (identifier == "general4bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 39;
+		else if (identifier == "general5bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 40;
+		else if (identifier == "general5bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 49;
+		else if (identifier == "general6bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 50;
+		else if (identifier == "general6bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 59;
+		else if (identifier == "general7bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 60;
+		else if (identifier == "general7bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 69;
+		else if (identifier == "general8bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 70;
+		else if (identifier == "general8bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 79;
+		else if (identifier == "general9bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 80;
+		else if (identifier == "general9bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 89;
+		else if (identifier == "general10bag.begin")    RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 90;
+		else if (identifier == "general10bag.end")      RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 99;
+		else if (identifier == "cursorbag.begin")       RETVAL = EQ::invbag::CURSOR_BAG_BEGIN;
+		else if (identifier == "cursorbag.end")         RETVAL = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "bank.begin")            RETVAL = EQ::invslot::BANK_BEGIN;
+		else if (identifier == "bank.end")              RETVAL = EQ::invslot::BANK_END;
+		else if (identifier == "bankbags.begin")        RETVAL = EQ::invbag::BANK_BAGS_BEGIN;
+		else if (identifier == "bankbags.end")          RETVAL = EQ::invbag::BANK_BAGS_END;
+		else if (identifier == "sharedbank.begin")      RETVAL = EQ::invslot::SHARED_BANK_BEGIN;
+		else if (identifier == "sharedbank.end")        RETVAL = EQ::invslot::SHARED_BANK_END;
+		else if (identifier == "sharedbankbags.begin")  RETVAL = EQ::invbag::SHARED_BANK_BAGS_BEGIN;
+		else if (identifier == "sharedbankbags.end")    RETVAL = EQ::invbag::SHARED_BANK_BAGS_END;
+		else if (identifier == "bagslot.begin")         RETVAL = EQ::invbag::SLOT_BEGIN;
+		else if (identifier == "bagslot.end")           RETVAL = EQ::invbag::SLOT_END;
+		else if (identifier == "augsocket.begin")       RETVAL = EQ::invaug::SOCKET_BEGIN;
+		else if (identifier == "augsocket.end")         RETVAL = EQ::invaug::SOCKET_END;
 	}
 
 	XSprePUSH; PUSHu((IV)RETVAL);
@@ -3722,19 +3722,73 @@ XS(XS__crosszonesignalclientbycharid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonesignalclientbygroupid);
+XS(XS__crosszonesignalclientbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGroupID(group_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyraidid);
+XS(XS__crosszonesignalclientbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, int value)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyguildid);
+XS(XS__crosszonesignalclientbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		uint32 int_value = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, int_value);
+	} else {
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, int value)");
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonesignalclientbyname);
 XS(XS__crosszonesignalclientbyname) {
 	dXSARGS;
 
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 
 	if (items == 2) {
 		char   *name     = (char *) SvPV_nolen(ST(0));
 		uint32 int_value = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneSignalPlayerByName(name, int_value);
 	} else {
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, int value)");
 	}
 
 	XSRETURN_EMPTY;
@@ -3753,6 +3807,57 @@ XS(XS__crosszonemessageplayerbyname) {
 		char   *name      = (char *) SvPV_nolen(ST(1));
 		char   *message   = (char *) SvPV_nolen(ST(2));
 		quest_manager.CrossZoneMessagePlayerByName(channel_id, name, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbygroupid);
+XS(XS__crosszonemessageplayerbygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbygroupid(int type, int group_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int group_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyraidid);
+XS(XS__crosszonemessageplayerbyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyraidid(int type, int raid_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int raid_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyguildid);
+XS(XS__crosszonemessageplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(int type, int guild_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvIV(ST(0));
+		int guild_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
 	}
 
 	XSRETURN_EMPTY;
@@ -3872,6 +3977,57 @@ XS(XS__crosszonesetentityvariablebyclientname) {
 		const char *key         = (const char *) SvPV_nolen(ST(1));
 		const char *str_value   = (const char *) SvPV_nolen(ST(2));
 		quest_manager.CrossZoneSetEntityVariableByClientName(client_name, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebygroupid);
+XS(XS__crosszonesetentityvariablebygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebygroupid(int group_id, string key, string value)");
+
+	if (items == 3) {
+		int group_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyraidid);
+XS(XS__crosszonesetentityvariablebyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyraidid(int raid_id, string key, string value)");
+
+	if (items == 3) {
+		int raid_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyguildid);
+XS(XS__crosszonesetentityvariablebyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyguildid(int guild_id, string key, string value)");
+
+	if (items == 3) {
+		int guild_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, key, str_value);
 	}
 
 	XSRETURN_EMPTY;
@@ -4822,9 +4978,18 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebygroupid"), XS__crosszonesetentityvariablebygroupid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyraidid"), XS__crosszonesetentityvariablebyraidid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyguildid"), XS__crosszonesetentityvariablebyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbygroupid"), XS__crosszonesignalclientbygroupid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyraidid"), XS__crosszonesignalclientbyraidid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyguildid"), XS__crosszonesignalclientbyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
 	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);

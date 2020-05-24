@@ -142,7 +142,7 @@ public:
 
 	void SetConnectionType(char c);
 	ConnectionType GetConnectionType() { return TypeOfConnection; }
-	EQEmu::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
+	EQ::versions::ClientVersion GetClientVersion() { return ClientVersion_; }
 
 	inline bool IsMailConnection() { return (TypeOfConnection == ConnectionTypeMail) || (TypeOfConnection == ConnectionTypeCombined); }
 	void SendNotification(int MailBoxNumber, std::string From, std::string Subject, int MessageID);
@@ -173,7 +173,7 @@ private:
 	bool ForceDisconnect;
 
 	ConnectionType TypeOfConnection;
-	EQEmu::versions::ClientVersion ClientVersion_;
+	EQ::versions::ClientVersion ClientVersion_;
 	bool UnderfootOrLater;
 };
 

@@ -297,7 +297,7 @@ int HateList::GetHateRatio(Mob *top, Mob *other)
 	if (!top_entry || top_entry->stored_hate_amount < 1)
 		return 999; // shouldn't happen if you call it right :P
 
-	return EQEmu::Clamp(static_cast<int>((other_entry->stored_hate_amount * 100) / top_entry->stored_hate_amount), 1, 999);
+	return EQ::Clamp(static_cast<int>((other_entry->stored_hate_amount * 100) / top_entry->stored_hate_amount), 1, 999);
 }
 
 // skip is used to ignore a certain mob on the list

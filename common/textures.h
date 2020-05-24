@@ -23,7 +23,7 @@
 #include "types.h"
 
 
-namespace EQEmu
+namespace EQ
 {
 	namespace textures {
 		enum : int8 { textureInvalid = -1, textureBegin };

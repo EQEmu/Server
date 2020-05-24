@@ -129,7 +129,7 @@ struct LDoNTrapTemplate
 
 // All clients translate the character select information to some degree
 
-struct CharSelectEquip : EQEmu::textures::Texture_Struct, EQEmu::textures::Tint_Struct {};
+struct CharSelectEquip : EQ::textures::Texture_Struct, EQ::textures::Tint_Struct {};
 
 // RoF2-based hybrid struct
 struct CharacterSelectEntry_Struct
@@ -144,7 +144,7 @@ struct CharacterSelectEntry_Struct
 	uint16 Instance;
 	uint8 Gender;
 	uint8 Face;
-	CharSelectEquip	Equip[EQEmu::textures::materialCount];
+	CharSelectEquip	Equip[EQ::textures::materialCount];
 	uint8 Unknown15;			// Seen FF
 	uint8 Unknown19;			// Seen FF
 	uint32 DrakkinTattoo;
@@ -253,7 +253,7 @@ struct Spawn_Struct {
 /*0189*/ uint32	petOwnerId;			// If this is a pet, the spawn id of owner
 /*0193*/ uint8	guildrank;			// 0=normal, 1=officer, 2=leader
 /*0194*/ uint8	unknown0194[3];
-/*0197*/ EQEmu::TextureProfile equipment;
+/*0197*/ EQ::TextureProfile equipment;
 /*0233*/ float	runspeed;		// Speed when running
 /*0036*/ uint8	afk;			// 0=no, 1=afk
 /*0238*/ uint32	guildID;		// Current guild
@@ -284,7 +284,7 @@ union
 /*0340*/ uint32 spawnId;		// Spawn Id
 /*0344*/ float bounding_radius; // used in melee, overrides calc
 /*0347*/ uint8 IsMercenary;
-/*0348*/ EQEmu::TintProfile equipment_tint;
+/*0348*/ EQ::TintProfile equipment_tint;
 /*0384*/ uint8	lfg;			// 0=off, 1=lfg on
 /*0385*/
 
@@ -736,7 +736,7 @@ struct BandolierItem_Struct
 struct Bandolier_Struct
 {
 	char Name[32];
-	BandolierItem_Struct Items[EQEmu::profile::BANDOLIER_ITEM_COUNT];
+	BandolierItem_Struct Items[EQ::profile::BANDOLIER_ITEM_COUNT];
 };
 
 //len = 72
@@ -750,7 +750,7 @@ struct PotionBeltItem_Struct
 //len = 288
 struct PotionBelt_Struct
 {
-	PotionBeltItem_Struct Items[EQEmu::profile::POTION_BELT_SIZE];
+	PotionBeltItem_Struct Items[EQ::profile::POTION_BELT_SIZE];
 };
 
 struct MovePotionToBelt_Struct
@@ -841,7 +841,7 @@ struct SuspendedMinion_Struct
 	/*002*/	uint32 HP;
 	/*006*/	uint32 Mana;
 	/*010*/	SpellBuff_Struct Buffs[BUFF_COUNT];
-	/*510*/	EQEmu::TextureMaterialProfile Items;
+	/*510*/	EQ::TextureMaterialProfile Items;
 	/*546*/	char Name[64];
 	/*610*/
 };
@@ -933,7 +933,7 @@ struct PlayerProfile_Struct
 /*0245*/	uint8				guildbanker;
 /*0246*/	uint8				unknown0246[6];		//
 /*0252*/	uint32				intoxication;
-/*0256*/	uint32				spellSlotRefresh[EQEmu::spells::SPELL_GEM_COUNT];	//in ms
+/*0256*/	uint32				spellSlotRefresh[EQ::spells::SPELL_GEM_COUNT];	//in ms
 /*0292*/	uint32				abilitySlotRefresh;
 /*0296*/	uint8				haircolor;			// Player hair color
 /*0297*/	uint8				beardcolor;			// Player beard color
@@ -946,9 +946,9 @@ struct PlayerProfile_Struct
 /*0304*/	uint8				ability_time_minutes;
 /*0305*/	uint8				ability_time_hours;	//place holder
 /*0306*/	uint8				unknown0306[6];		// @bp Spacer/Flag?
-/*0312*/	EQEmu::TextureMaterialProfile	item_material;	// Item texture/material of worn/held items
+/*0312*/	EQ::TextureMaterialProfile	item_material;	// Item texture/material of worn/held items
 /*0348*/	uint8				unknown0348[44];
-/*0392*/	EQEmu::TintProfile	item_tint;
+/*0392*/	EQ::TintProfile	item_tint;
 /*0428*/	AA_Array			aa_array[MAX_PP_AA_ARRAY];
 /*2348*/	float				unknown2384;		//seen ~128, ~47
 /*2352*/	char				servername[32];		// length probably not right
@@ -972,9 +972,9 @@ struct PlayerProfile_Struct
 /*2505*/	uint8				unknown2541[47];	// ?
 /*2552*/	uint8				languages[MAX_PP_LANGUAGE];
 /*2580*/	uint8				unknown2616[4];
-/*2584*/	uint32				spell_book[EQEmu::spells::SPELLBOOK_SIZE];
+/*2584*/	uint32				spell_book[EQ::spells::SPELLBOOK_SIZE];
 /*4504*/	uint8				unknown4540[128];	// Was [428] all 0xff
-/*4632*/	uint32				mem_spells[EQEmu::spells::SPELL_GEM_COUNT];
+/*4632*/	uint32				mem_spells[EQ::spells::SPELL_GEM_COUNT];
 /*4668*/	uint8				unknown4704[32];	//
 /*4700*/	float				y;					// Player y position
 /*4704*/	float				x;					// Player x position
@@ -1050,7 +1050,7 @@ struct PlayerProfile_Struct
 /*7212*/	uint32				tribute_points;
 /*7216*/	uint32				unknown7252;
 /*7220*/	uint32				tribute_active;		//1=active
-/*7224*/	Tribute_Struct		tributes[EQEmu::invtype::TRIBUTE_SIZE];
+/*7224*/	Tribute_Struct		tributes[EQ::invtype::TRIBUTE_SIZE];
 /*7264*/	Disciplines_Struct	disciplines;
 /*7664*/	uint32				recastTimers[MAX_RECAST_TYPES];	// Timers (GMT of last use)
 /*7744*/	char				unknown7780[160];
@@ -1077,7 +1077,7 @@ struct PlayerProfile_Struct
 /*12800*/	uint32				expAA;
 /*12804*/	uint32				aapoints;			//avaliable, unspent
 /*12808*/	uint8				unknown12844[36];
-/*12844*/	Bandolier_Struct	bandoliers[EQEmu::profile::BANDOLIERS_SIZE];
+/*12844*/	Bandolier_Struct	bandoliers[EQ::profile::BANDOLIERS_SIZE];
 /*14124*/	uint8				unknown14160[4506];
 /*18630*/	SuspendedMinion_Struct	SuspendedMinion; // No longer in use
 /*19240*/	uint32				timeentitledonaccount;
@@ -1095,16 +1095,16 @@ struct PlayerProfile_Struct
 /*19568*/
 
 	// All player profile packets are translated and this overhead is ignored in out-bound packets
-	PlayerProfile_Struct() : m_player_profile_version(EQEmu::versions::MobVersion::Unknown) { }
+	PlayerProfile_Struct() : m_player_profile_version(EQ::versions::MobVersion::Unknown) { }
 
-	EQEmu::versions::MobVersion PlayerProfileVersion() { return m_player_profile_version; }
-	void SetPlayerProfileVersion(EQEmu::versions::MobVersion mob_version) { m_player_profile_version = EQEmu::versions::ValidateMobVersion(mob_version); }
-	void SetPlayerProfileVersion(EQEmu::versions::ClientVersion client_version) { SetPlayerProfileVersion(EQEmu::versions::ConvertClientVersionToMobVersion(client_version)); }
+	EQ::versions::MobVersion PlayerProfileVersion() { return m_player_profile_version; }
+	void SetPlayerProfileVersion(EQ::versions::MobVersion mob_version) { m_player_profile_version = EQ::versions::ValidateMobVersion(mob_version); }
+	void SetPlayerProfileVersion(EQ::versions::ClientVersion client_version) { SetPlayerProfileVersion(EQ::versions::ConvertClientVersionToMobVersion(client_version)); }
 
 private:
 	// No need for gm flag since pp already has one
 	// No need for lookup pointer since this struct is not tied to any one system
-	EQEmu::versions::MobVersion m_player_profile_version;
+	EQ::versions::MobVersion m_player_profile_version;
 };
 
 
@@ -1215,7 +1215,7 @@ struct WearChange_Struct {
 /*010*/ uint32                       elite_material;    // 1 for Drakkin Elite Material
 /*014*/ uint32                       hero_forge_model; // New to VoA
 /*018*/ uint32                       unknown18; // New to RoF
-/*022*/ EQEmu::textures::Tint_Struct color;
+/*022*/ EQ::textures::Tint_Struct color;
 /*026*/ uint8                        wear_slot_id;
 /*027*/
 };
@@ -2123,7 +2123,7 @@ struct AdventureLeaderboard_Struct
 /*struct Item_Shop_Struct {
 	uint16 merchantid;
 	uint8 itemtype;
-	EQEmu::ItemData item;
+	EQ::ItemData item;
 	uint8 iss_unknown001[6];
 };*/
 
@@ -2149,7 +2149,7 @@ struct Illusion_Struct { //size: 256 - SoF
 /*092*/	uint32	drakkin_heritage;	//
 /*096*/	uint32	drakkin_tattoo;		//
 /*100*/	uint32	drakkin_details;	//
-/*104*/	EQEmu::TintProfile	armor_tint;	//
+/*104*/	EQ::TintProfile	armor_tint;	//
 /*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
 /*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
 /*142*/	uint8	unknown138[114];	//
@@ -3489,8 +3489,8 @@ struct SelectTributeReply_Struct {
 
 struct TributeInfo_Struct {
 	uint32	active;		//0 == inactive, 1 == active
-	uint32	tributes[EQEmu::invtype::TRIBUTE_SIZE];	//-1 == NONE
-	uint32	tiers[EQEmu::invtype::TRIBUTE_SIZE];		//all 00's
+	uint32	tributes[EQ::invtype::TRIBUTE_SIZE];	//-1 == NONE
+	uint32	tiers[EQ::invtype::TRIBUTE_SIZE];		//all 00's
 	uint32	tribute_master_id;
 };
 
@@ -4401,7 +4401,7 @@ struct AnnoyingZoneUnknown_Struct {
 };
 
 struct LoadSpellSet_Struct {
-	uint32 spell[EQEmu::spells::SPELL_GEM_COUNT];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
+	uint32 spell[EQ::spells::SPELL_GEM_COUNT];	// 0xFFFFFFFF if no action, slot number if to unmem starting at 0
 	uint32 unknown;					//there seems to be an extra field in this packet...
 };
 

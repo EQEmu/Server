@@ -274,12 +274,12 @@ bool Zone::LoadZoneObjects()
 
 		data.z = zone->zonemap->FindBestZ(position, nullptr);
 
-		EQEmu::ItemInstance *inst = nullptr;
+		EQ::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...
 		// tradeskill containers do not have an itemid of 0... at least what I am seeing
 		if (itemid == 0) {
 			// Generic tradeskill container
-			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
+			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		} else {
 			// Groundspawn object
 			inst = database.CreateItem(itemid);
@@ -287,11 +287,11 @@ bool Zone::LoadZoneObjects()
 
 		// Father Nitwit's fix... not perfect...
 		if (inst == nullptr && type != OT_DROPPEDITEM) {
-			inst = new EQEmu::ItemInstance(ItemInstWorldContainer);
+			inst = new EQ::ItemInstance(ItemInstWorldContainer);
 		}
 
 		// Load child objects if container
-		if (inst && inst->IsType(EQEmu::item::ItemClassBag)) {
+		if (inst && inst->IsType(EQ::item::ItemClassBag)) {
 			database.LoadWorldContainer(id, inst);
 		}
 
@@ -320,7 +320,7 @@ bool Zone::LoadGroundSpawns() {
 	uint32 gsnumber=0;
 	for(gsindex=0;gsindex<50;gsindex++){
 		if(groundspawn.spawn[gsindex].item>0 && groundspawn.spawn[gsindex].item<SAYLINK_ITEM_ID){
-			EQEmu::ItemInstance* inst = nullptr;
+			EQ::ItemInstance* inst = nullptr;
 			inst = database.CreateItem(groundspawn.spawn[gsindex].item);
 			gsnumber=groundspawn.spawn[gsindex].max_allowed;
 			ix=0;
@@ -1397,7 +1397,7 @@ bool Zone::Process() {
 
 		LinkedListIterator<Spawn2 *> iterator(spawn2_list);
 
-		EQEmu::InventoryProfile::CleanDirty();
+		EQ::InventoryProfile::CleanDirty();
 
 		iterator.Reset();
 		while (iterator.MoreElements()) {
@@ -2615,7 +2615,7 @@ void Zone::CalculateNpcUpdateDistanceSpread()
 	int x_spread        = int(abs(max_x - min_x));
 	int y_spread        = int(abs(max_y - min_y));
 	int combined_spread = int(abs((x_spread + y_spread) / 2));
-	int update_distance = EQEmu::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
+	int update_distance = EQ::ClampLower(int(combined_spread / 4), int(zone->GetMaxMovementUpdateRange()));
 
 	SetNpcPositionUpdateDistance(update_distance);
 

@@ -32,7 +32,7 @@
  * Eventually this should be derived from an abstract base class
  */
 
-namespace EQEmu {
+namespace EQ {
 	class Random {
 	public:
 		// AKA old MakeRandomInt
@@ -80,7 +80,7 @@ namespace EQEmu {
 		{
 			static_assert(std::is_same<std::random_access_iterator_tag,
 					typename std::iterator_traits<RandomAccessIterator>::iterator_category>::value,
-					"EQEmu::Random::Shuffle requires random access iterators");
+					"EQ::Random::Shuffle requires random access iterators");
 			std::shuffle(first, last, m_gen);
 		}
 

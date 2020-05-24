@@ -22,7 +22,7 @@ std::string EQStreamProxy::Describe() const {
 	return(m_structs->Describe());
 }
 
-const EQEmu::versions::ClientVersion EQStreamProxy::ClientVersion() const
+const EQ::versions::ClientVersion EQStreamProxy::ClientVersion() const
 {
 	return m_structs->ClientVersion();
 }
