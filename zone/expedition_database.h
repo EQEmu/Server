@@ -67,6 +67,7 @@ namespace ExpeditionDatabase
 	void InsertMember(uint32_t expedition_id, uint32_t character_id);
 	void InsertMembers(uint32_t expedition_id, const std::vector<ExpeditionMember>& members);
 	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
+	void UpdateLockState(uint32_t expedition_id, bool is_locked);
 	void UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
 };

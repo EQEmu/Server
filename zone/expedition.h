@@ -107,6 +107,7 @@ public:
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name);
 	void SwapMember(Client* add_client, const std::string& remove_char_name);
+	void SetLocked(bool lock_expedition, bool update_db = false);
 
 	void AddLockout(const std::string& event_name, uint32_t seconds);
 	void AddReplayLockout(uint32_t seconds);
@@ -180,6 +181,7 @@ private:
 	uint32_t    m_id                 = 0;
 	uint32_t    m_min_players        = 0;
 	uint32_t    m_max_players        = 0;
+	bool        m_is_locked          = false;
 	bool        m_has_replay_timer   = false;
 	bool        m_add_replay_on_join = true;
 	std::string m_expedition_name;

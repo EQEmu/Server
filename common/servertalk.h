@@ -158,6 +158,7 @@
 #define ServerOP_ExpeditionSaveInvite         0x040e
 #define ServerOP_ExpeditionRequestInvite      0x040f
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
+#define ServerOP_ExpeditionLockState          0x0411
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451

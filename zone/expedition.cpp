@@ -160,7 +160,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		if (expedition_id != last_expedition_id)
 		{
 			auto leader_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			ExpeditionMember leader{ leader_id, row[8] }; // id, name
+			ExpeditionMember leader{ leader_id, row[9] }; // id, name
 			auto instance_id = row[1] ? strtoul(row[1], nullptr, 10) : 0; // can be null from fk constraint
 
 			DynamicZone dynamic_zone = DynamicZone::LoadDzFromDatabase(instance_id);
@@ -176,8 +176,10 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			));
 
 			bool add_replay_on_join = (strtoul(row[7], nullptr, 10) != 0);
+			bool is_locked = (strtoul(row[8], nullptr, 10) != 0);
 
 			expedition->SetReplayLockoutOnMemberJoin(add_replay_on_join);
+			expedition->SetLocked(is_locked);
 			expedition->LoadMembers();
 			expedition->SendUpdatesToZoneMembers();
 
@@ -191,17 +193,17 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		last_expedition_id = expedition_id;
 
 		// optional lockouts from left join
-		if (row[9] && row[10] && row[11] && row[12])
+		if (row[10] && row[11] && row[12] && row[13])
 		{
 			auto it = zone->expedition_cache.find(last_expedition_id);
 			if (it != zone->expedition_cache.end())
 			{
 				it->second->AddInternalLockout(ExpeditionLockoutTimer{
 					row[2],                                               // expedition_name
-					row[9],                                               // event_name
-					strtoull(row[10], nullptr, 10),                       // expire_time
-					static_cast<uint32_t>(strtoul(row[11], nullptr, 10)), // original duration
-					(strtoul(row[12], nullptr, 10) != 0)                  // is_inherited
+					row[10],                                              // event_name
+					strtoull(row[11], nullptr, 10),                       // expire_time
+					static_cast<uint32_t>(strtoul(row[12], nullptr, 10)), // original duration
+					(strtoul(row[13], nullptr, 10) != 0)                  // is_inherited
 				});
 			}
 		}
@@ -760,7 +762,16 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 	}
 
 	bool was_swap_invite = !swap_remove_name.empty();
-	bool has_conflicts = ProcessAddConflicts(leader_client, add_client, was_swap_invite);
+	bool has_conflicts = m_is_locked;
+
+	if (m_is_locked)
+	{
+		SendLeaderMessage(leader_client, Chat::Red, DZADD_NOT_ALLOWING);
+	}
+	else
+	{
+		has_conflicts = ProcessAddConflicts(leader_client, add_client, was_swap_invite);
+	}
 
 	// error if swapping and character was already removed before the accept
 	if (was_swap_invite && !HasMember(swap_remove_name))
@@ -902,7 +913,12 @@ void Expedition::DzAddPlayer(
 
 	bool invite_failed = false;
 
-	if (add_char_name.empty())
+	if (m_is_locked)
+	{
+		requester->MessageString(Chat::Red, DZADD_NOT_ALLOWING);
+		invite_failed = true;
+	}
+	else if (add_char_name.empty())
 	{
 		requester->MessageString(Chat::Red, DZADD_NOT_ONLINE, add_char_name.c_str());
 		invite_failed = true;
@@ -1066,6 +1082,17 @@ void Expedition::DzKickPlayers(Client* requester)
 
 	RemoveAllMembers();
 	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, KICKPLAYERS_EVERYONE, m_expedition_name.c_str());
+}
+
+void Expedition::SetLocked(bool lock_expedition, bool update_db)
+{
+	m_is_locked = lock_expedition;
+
+	if (update_db)
+	{
+		ExpeditionDatabase::UpdateLockState(m_id, lock_expedition);
+		SendWorldSettingChanged(ServerOP_ExpeditionLockState, m_is_locked);
+	}
 }
 
 void Expedition::SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name)
@@ -1678,6 +1705,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_ExpeditionLockState:
 	case ServerOP_ExpeditionReplayOnJoin:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionSetting_Struct*>(pack->pBuffer);
@@ -1686,7 +1714,14 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 			if (expedition)
 			{
-				expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
+				if (pack->opcode == ServerOP_ExpeditionLockState)
+				{
+					expedition->SetLocked(buf->enabled);
+				}
+				else if (pack->opcode == ServerOP_ExpeditionReplayOnJoin)
+				{
+					expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
+				}
 			}
 		}
 		break;
