@@ -417,7 +417,7 @@ int main(int argc, char** argv) {
 		set_content_flags.push_back(flags.flag_name);
 
 		LogInfo(
-			"Enabling content-flag [{}]",
+			"Enabled content flag [{}]",
 			flags.flag_name
 		);
 	}

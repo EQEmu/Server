@@ -54,22 +54,17 @@ namespace ContentFilterCriteria {
 		);
 
 		std::vector<std::string> flags = content_service.GetContentFlags();
-
-		for (auto &flag: flags) {
-			flag = "'" + flag + "'";
-		}
-
-		std::string flags_in_filter;
+		std::string              flags_in_filter;
 		if (!flags.empty()) {
 			flags_in_filter = fmt::format(
-				" OR {}content_flags IN ({})",
+				" OR CONCAT(',', {}content_flags, ',') REGEXP ',({}),' ",
 				table_prefix,
-				implode(", ", flags)
+				implode("|", flags)
 			);
 		}
 
 		criteria += fmt::format(
-			" AND ({}content_flags IS NULL{})",
+			" AND ({}content_flags IS NULL{}) ",
 			table_prefix,
 			flags_in_filter
 		);
