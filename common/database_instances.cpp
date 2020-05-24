@@ -516,9 +516,6 @@ void Database::DeleteInstance(uint16 instance_id)
 {
 	std::string query;
 	
-	query = StringFormat("DELETE FROM instance_list WHERE id=%u", instance_id);
-	QueryDatabase(query);
-
 	query = StringFormat("DELETE FROM instance_list_player WHERE id=%u", instance_id);
 	QueryDatabase(query);
 
@@ -606,6 +603,9 @@ void Database::PurgeExpiredInstances()
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
+		query = StringFormat("DELETE FROM instance_list WHERE id=%u", atoi(row[0]));
+		QueryDatabase(query);
+
 		DeleteInstance(atoi(row[0]));
 	}
 }
