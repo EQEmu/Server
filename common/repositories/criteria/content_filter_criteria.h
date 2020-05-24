@@ -63,7 +63,7 @@ namespace ContentFilterCriteria {
 				implode("|", flags)
 			);
 			flags_in_filter_disabled = fmt::format(
-				" OR CONCAT(',', {}content_flags, ',') NOT REGEXP ',({}),' ",
+				" OR CONCAT(',', {}content_flags_disabled, ',') NOT REGEXP ',({}),' ",
 				table_prefix,
 				implode("|", flags)
 			);
