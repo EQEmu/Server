@@ -1,5 +1,5 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+/*	EQ::: Everquest Server Emulator
+	Copyright (C) 2001-2002 EQ:: Development Team (http://EQ::.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public:
 	bool StoreCharacter(
 		uint32 account_id,
 		PlayerProfile_Struct *p_player_profile_struct,
-		EQEmu::InventoryProfile *p_inventory_profile
+		EQ::::InventoryProfile *p_inventory_profile
 	);
 
 private:
