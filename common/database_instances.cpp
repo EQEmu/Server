@@ -483,6 +483,9 @@ void Database::BuryCorpsesInInstance(uint16 instance_id) {
 void Database::DeleteInstance(uint16 instance_id)
 {
 	std::string query;
+	
+	query = StringFormat("DELETE FROM instance_list WHERE id=%u", instance_id);
+	QueryDatabase(query)
 
 	query = StringFormat("DELETE FROM instance_list_player WHERE id=%u", instance_id);
 	QueryDatabase(query);
