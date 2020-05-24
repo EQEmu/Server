@@ -7,6 +7,7 @@ CREATE TABLE `expedition_details` (
 	`max_players` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	`has_replay_timer` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	`add_replay_on_join` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
+	`is_locked` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `instance_id` (`instance_id`),
 	CONSTRAINT `FK_expedition_details_instance_list` FOREIGN KEY (`instance_id`) REFERENCES `instance_list` (`id`) ON DELETE SET NULL

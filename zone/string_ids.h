@@ -323,6 +323,7 @@
 #define EXPEDITION_EVENT_TIMER      3561    //%1 cannot be added to this expedition since they have recently experienced %2.  They must wait another %3D:%4H:%5M until they can experience it again.  They may be added to the expedition later, once %2 has been completed.
 #define LOOT_NOT_ALLOWED			3562	//You are not allowed to loot the item: %1.
 #define DZ_UNABLE_RETRIEVE_LEADER   3583    //Unable to retrieve dynamic zone leader to check permissions.
+#define DZADD_NOT_ALLOWING          3585    //The expedition is not allowing players to be added.
 #define DZADD_NOT_ONLINE            3586    //%1 is not currently online.  A player needs to be online to be added to a Dynamic Zone
 #define DZADD_EXCEED_MAX            3587    //You can not add another player since you currently have the maximum number of players allowed (%1) in this zone.
 #define DZADD_ALREADY_PART          3588    //You can not add %1 since they are already part of this zone.
