@@ -54,10 +54,16 @@ namespace ContentFilterCriteria {
 		);
 
 		std::vector<std::string> flags = content_service.GetContentFlags();
-		std::string              flags_in_filter;
+		std::string              flags_in_filter_enabled;
+		std::string              flags_in_filter_disabled;
 		if (!flags.empty()) {
-			flags_in_filter = fmt::format(
+			flags_in_filter_enabled = fmt::format(
 				" OR CONCAT(',', {}content_flags, ',') REGEXP ',({}),' ",
+				table_prefix,
+				implode("|", flags)
+			);
+			flags_in_filter_disabled = fmt::format(
+				" OR CONCAT(',', {}content_flags, ',') NOT REGEXP ',({}),' ",
 				table_prefix,
 				implode("|", flags)
 			);
@@ -66,7 +72,13 @@ namespace ContentFilterCriteria {
 		criteria += fmt::format(
 			" AND ({}content_flags IS NULL{}) ",
 			table_prefix,
-			flags_in_filter
+			flags_in_filter_enabled
+		);
+
+		criteria += fmt::format(
+			" AND ({}content_flags_disabled IS NULL{}) ",
+			table_prefix,
+			flags_in_filter_disabled
 		);
 
 		return std::string(criteria);

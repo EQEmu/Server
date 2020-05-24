@@ -57,6 +57,7 @@
 #include "../common/data_verification.h"
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/repositories/content_flags_repository.h"
 
 #include <time.h>
 #include <ctime>
@@ -1230,8 +1231,29 @@ void Zone::ReloadStaticData() {
 	zone->LoadNPCEmotes(&NPCEmoteList);
 
 	//load the zone config file.
-	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) // try loading the zone name...
-		LoadZoneCFG(zone->GetFileName(), zone->GetInstanceVersion()); // if that fails, try the file name, then load defaults
+	if (!LoadZoneCFG(zone->GetShortName(), zone->GetInstanceVersion())) { // try loading the zone name...
+		LoadZoneCFG(
+			zone->GetFileName(),
+			zone->GetInstanceVersion()
+		);
+	} // if that fails, try the file name, then load defaults
+
+	content_service.SetExpansionContext();
+
+	std::vector<std::string> set_content_flags;
+	auto                     content_flags = ContentFlagsRepository::GetWhere("enabled = 1");
+	set_content_flags.reserve(content_flags.size());
+
+	for (auto &flags: content_flags) {
+		set_content_flags.push_back(flags.flag_name);
+
+		LogInfo(
+			"Enabled content flag [{}]",
+			flags.flag_name
+		);
+	}
+
+	content_service.SetContentFlags(set_content_flags);
 
 	LogInfo("Zone Static Data Reloaded");
 }

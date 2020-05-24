@@ -83,3 +83,22 @@ update doors set min_expansion = 4 where name like '%POKTELE%';
 
 -- content flags
 CREATE TABLE `content_flags` (`id` int AUTO_INCREMENT,`flag_name` varchar(75),`enabled` tinyint,`notes` text, PRIMARY KEY (id));
+
+-- content flags disabled
+
+ALTER TABLE `doors` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `fishing` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `forage` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `global_loot` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `ground_spawns` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `lootdrop` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `loottable` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `merchantlist` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `object` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `spawn2` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `start_zones` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `starting_items` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `tradeskill_recipe` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `traps` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `zone` ADD `content_flags_disabled` varchar(100) NULL;
+ALTER TABLE `zone_points` ADD `content_flags_disabled` varchar(100) NULL;
