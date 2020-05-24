@@ -68,6 +68,7 @@ public:
 	void            RemoveLockout(std::string event_name);
 	void            SetCompass(uint32 zone_id, float x, float y, float z);
 	void            SetCompass(std::string zone_name, float x, float y, float z);
+	void            SetReplayLockoutOnMemberJoin(bool enable);
 	void            SetSafeReturn(uint32 zone_id, float x, float y, float z, float heading);
 	void            SetSafeReturn(std::string zone_name, float x, float y, float z, float heading);
 	void            SetZoneInLocation(float x, float y, float z, float heading);

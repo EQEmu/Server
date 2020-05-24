@@ -125,6 +125,11 @@ void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z
 	return self->SetDzCompass(zone_name, x, y, z, true);
 }
 
+void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
+	Lua_Safe_Call_Void();
+	self->SetReplayLockoutOnMemberJoin(enable, true);
+}
+
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	return self->SetDzSafeReturn(zone_id, x, y, z, heading, true);
@@ -161,6 +166,7 @@ luabind::scope lua_register_expedition() {
 		.def("RemoveLockout", (void(Lua_Expedition::*)(std::string))&Lua_Expedition::RemoveLockout)
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetCompass", (void(Lua_Expedition::*)(std::string, float, float, float))&Lua_Expedition::SetCompass)
+		.def("SetReplayLockoutOnMemberJoin", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetReplayLockoutOnMemberJoin)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(uint32_t, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(std::string, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 		.def("SetZoneInLocation", (void(Lua_Expedition::*)(float, float, float, float))&Lua_Expedition::SetZoneInLocation);

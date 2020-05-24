@@ -113,6 +113,7 @@ public:
 	bool HasLockout(const std::string& event_name);
 	bool HasReplayLockout();
 	void RemoveLockout(const std::string& event_name);
+	void SetReplayLockoutOnMemberJoin(bool add_on_join, bool update_db = false);
 
 	void SendClientExpeditionInfo(Client* client);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
@@ -163,6 +164,7 @@ private:
 	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
 	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id, const std::string& add_char_name, uint32_t add_char_id);
+	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
 	void TryAddClient(Client* add_client, std::string inviter_name, std::string orig_add_name, std::string swap_remove_name, Client* leader_client = nullptr);
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
@@ -175,10 +177,11 @@ private:
 	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, ExpeditionMemberStatus status);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
-	uint32_t    m_id               = 0;
-	uint32_t    m_min_players      = 0;
-	uint32_t    m_max_players      = 0;
-	bool        m_has_replay_timer = false;
+	uint32_t    m_id                 = 0;
+	uint32_t    m_min_players        = 0;
+	uint32_t    m_max_players        = 0;
+	bool        m_has_replay_timer   = false;
+	bool        m_add_replay_on_join = true;
 	std::string m_expedition_name;
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	ExpeditionMember m_leader;
