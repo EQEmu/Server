@@ -570,12 +570,20 @@ void Database::PurgeExpiredInstances()
 		return;
 	}
 
+	std::vector<std::string> instance_ids;
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		query = StringFormat("DELETE FROM instance_list WHERE id=%u", atoi(row[0]));
-		QueryDatabase(query);
-
-		DeleteInstance(atoi(row[0]));
+		instance_ids.emplace_back(row[0]);
 	}
+
+	std::string imploded_instance_ids = implode(",", instance_ids);
+
+	QueryDatabase(fmt::format("DELETE FROM instance_list WHERE id IN ({})", imploded_instance_ids));
+	QueryDatabase(fmt::format("DELETE FROM instance_list_player WHERE id IN ({})", imploded_instance_ids));
+	QueryDatabase(fmt::format("DELETE FROM respawn_times WHERE instance_id IN ({})", imploded_instance_ids));
+	QueryDatabase(fmt::format("DELETE FROM spawn_condition_values WHERE instance_id IN ({})", imploded_instance_ids));
+	QueryDatabase(fmt::format("UPDATE character_corpses SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})", imploded_instance_ids));
+
+	
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
