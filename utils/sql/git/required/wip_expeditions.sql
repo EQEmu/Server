@@ -10,7 +10,7 @@ CREATE TABLE `expedition_details` (
 	UNIQUE INDEX `instance_id` (`instance_id`),
 	CONSTRAINT `FK_expedition_details_instance_list` FOREIGN KEY (`instance_id`) REFERENCES `instance_list` (`id`) ON DELETE SET NULL
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
@@ -25,7 +25,7 @@ CREATE TABLE `expedition_lockouts` (
 	UNIQUE INDEX `expedition_id_event_name` (`expedition_id`, `event_name`),
 	CONSTRAINT `FK_expedition_lockouts_expedition_details` FOREIGN KEY (`expedition_id`) REFERENCES `expedition_details` (`id`) ON DELETE CASCADE
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
@@ -53,7 +53,7 @@ CREATE TABLE `expedition_character_lockouts` (
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `character_id_expedition_name_event_name` (`character_id`, `expedition_name`, `event_name`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ROW_FORMAT=DYNAMIC
 ;
