@@ -2218,8 +2218,8 @@ luabind::scope lua_register_general() {
 		/**
 		 * Content flags
 		 */
-		luabind::def("is_content_flag_enabled", (bool(*)(std::string*))&lua_is_content_flag_enabled),
-		luabind::def("set_content_flag", (void(*)(std::string*, bool*))&lua_set_content_flag)
+		luabind::def("is_content_flag_enabled", (bool(*)(std::string))&lua_is_content_flag_enabled),
+		luabind::def("set_content_flag", (void(*)(std::string, bool))&lua_set_content_flag)
 	];
 }
 
