@@ -409,20 +409,7 @@ int main(int argc, char** argv) {
 
 	content_service.SetExpansionContext();
 
-	std::vector<std::string> set_content_flags;
-	auto                     content_flags = ContentFlagsRepository::GetWhere("enabled = 1");
-	set_content_flags.reserve(content_flags.size());
-
-	for (auto &flags: content_flags) {
-		set_content_flags.push_back(flags.flag_name);
-
-		LogInfo(
-			"Enabled content flag [{}]",
-			flags.flag_name
-		);
-	}
-
-	content_service.SetContentFlags(set_content_flags);
+	ZoneStore::LoadContentFlags();
 
 #ifdef BOTS
 	LogInfo("Loading bot commands");

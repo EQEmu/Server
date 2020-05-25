@@ -4883,6 +4883,34 @@ XS(XS__IsCurrentExpansionTormentOfVelious) {
 	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
 }
 
+XS(XS__IsContentFlagEnabled);
+XS(XS__IsContentFlagEnabled) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_content_flag_enabled(string flag_name)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsContentFlagEnabled(flag_name);
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__SetContentFlag);
+XS(XS__SetContentFlag)
+{
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::set_content_flag(string flag_name, enabled)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+	bool        enabled   = (int) SvIV(ST(1)) != 0;
+	ZoneStore::SetContentFlag(flag_name, enabled);
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -5215,6 +5243,12 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "is_current_expansion_ring_of_scale"), XS__IsCurrentExpansionRingOfScale, file);
 	newXS(strcpy(buf, "is_current_expansion_the_burning_lands"), XS__IsCurrentExpansionTheBurningLands, file);
 	newXS(strcpy(buf, "is_current_expansion_torment_of_velious"), XS__IsCurrentExpansionTormentOfVelious, file);
+
+	/**
+	 * Content flags
+	 */
+	newXS(strcpy(buf, "is_content_flag_enabled"), XS__IsContentFlagEnabled, file);
+	newXS(strcpy(buf, "set_content_flag"), XS__SetContentFlag, file);
 
 	XSRETURN_YES;
 }

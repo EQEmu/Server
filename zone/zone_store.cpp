@@ -19,6 +19,8 @@
  */
 
 #include "zone_store.h"
+#include "../common/repositories/content_flags_repository.h"
+#include "../common/content/world_content_service.h"
 
 ZoneStore::ZoneStore() = default;
 ZoneStore::~ZoneStore() = default;
@@ -28,6 +30,10 @@ void ZoneStore::LoadZones()
 	zones = ZoneRepository::All();
 }
 
+/**
+ * @param in_zone_name
+ * @return
+ */
 uint32 ZoneStore::GetZoneID(const char *in_zone_name)
 {
 	if (in_zone_name == nullptr) {
@@ -39,6 +45,10 @@ uint32 ZoneStore::GetZoneID(const char *in_zone_name)
 	return GetZoneID(zone_name);
 }
 
+/**
+ * @param zone_name
+ * @return
+ */
 uint32 ZoneStore::GetZoneID(std::string zone_name)
 {
 	for (auto &z: zones) {
@@ -129,4 +139,54 @@ ZoneRepository::Zone ZoneStore::GetZone(const char *in_zone_name)
 	}
 
 	return ZoneRepository::Zone();
+}
+
+/**
+ * @return
+ */
+void ZoneStore::LoadContentFlags()
+{
+	std::vector<std::string> set_content_flags;
+	auto                     content_flags = ContentFlagsRepository::GetWhere("enabled = 1");
+
+	for (auto &flags: content_flags) {
+		set_content_flags.push_back(flags.flag_name);
+
+		LogInfo(
+			"Enabled content flag [{}]",
+			flags.flag_name
+		);
+	}
+
+	content_service.SetContentFlags(set_content_flags);
+}
+
+/**
+ * Sets the value in the database and proceeds to load content flags into the server context again
+ *
+ * @param content_flag_name
+ * @param enabled
+ */
+void ZoneStore::SetContentFlag(const std::string &content_flag_name, bool enabled)
+{
+	auto content_flags = ContentFlagsRepository::GetWhere(
+		fmt::format("flag_name = '{}'", content_flag_name)
+	);
+
+	auto content_flag = ContentFlagsRepository::NewEntity();
+	if (!content_flags.empty()) {
+		content_flag = content_flags.front();
+	}
+
+	content_flag.enabled   = enabled ? 1 : 0;
+	content_flag.flag_name = content_flag_name;
+
+	if (!content_flags.empty()) {
+		ContentFlagsRepository::UpdateOne(content_flag);
+	}
+	else {
+		ContentFlagsRepository::InsertOne(content_flag);
+	}
+
+	LoadContentFlags();
 }

@@ -159,10 +159,11 @@ public:
 	bool IsCurrentExpansionTormentOfVelious() { return current_expansion == Expansion::ExpansionNumber::TormentOfVelious; }
 
 private:
-	int current_expansion;
+	int current_expansion{};
 	std::vector<std::string> content_flags;
 public:
 	const std::vector<std::string> &GetContentFlags() const;
+	bool IsContentFlagEnabled(const std::string& content_flag);
 	void SetContentFlags(std::vector<std::string> content_flags);
 	void SetExpansionContext();
 };

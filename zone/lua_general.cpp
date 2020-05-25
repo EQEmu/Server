@@ -1726,6 +1726,14 @@ bool lua_is_current_expansion_torment_of_velious() {
 	return content_service.IsCurrentExpansionTormentOfVelious();
 }
 
+bool lua_is_content_flag_enabled(std::string content_flag){
+	return content_service.IsContentFlagEnabled(content_flag);
+}
+
+void lua_set_content_flag(std::string flag_name, bool enabled){
+	ZoneStore::SetContentFlag(flag_name, enabled);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2205,7 +2213,13 @@ luabind::scope lua_register_general() {
 		luabind::def("is_current_expansion_empires_of_kunark", &lua_is_current_expansion_empires_of_kunark),
 		luabind::def("is_current_expansion_ring_of_scale", &lua_is_current_expansion_ring_of_scale),
 		luabind::def("is_current_expansion_the_burning_lands", &lua_is_current_expansion_the_burning_lands),
-		luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious)
+		luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious),
+
+		/**
+		 * Content flags
+		 */
+		luabind::def("is_content_flag_enabled", (bool(*)(std::string*))&lua_is_content_flag_enabled),
+		luabind::def("set_content_flag", (void(*)(std::string*, bool*))&lua_set_content_flag)
 	];
 }
 

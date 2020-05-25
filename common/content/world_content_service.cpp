@@ -48,21 +48,6 @@ void WorldContentService::SetExpansionContext()
 	);
 }
 
-void WorldContentService::SetCurrentExpansion(int current_expansion)
-{
-	WorldContentService::current_expansion = current_expansion;
-}
-
-const std::vector<std::string> &WorldContentService::GetContentFlags() const
-{
-	return content_flags;
-}
-
-void WorldContentService::SetContentFlags(std::vector<std::string> content_flags)
-{
-	WorldContentService::content_flags = content_flags;
-}
-
 std::string WorldContentService::GetCurrentExpansionName()
 {
 	if (content_service.GetCurrentExpansion() == Expansion::EXPANSION_ALL) {
@@ -74,4 +59,43 @@ std::string WorldContentService::GetCurrentExpansionName()
 	}
 
 	return "Unknown Expansion";
+}
+
+/**
+ * @param current_expansion
+ */
+void WorldContentService::SetCurrentExpansion(int current_expansion)
+{
+	WorldContentService::current_expansion = current_expansion;
+}
+
+/**
+ * @return
+ */
+const std::vector<std::string> &WorldContentService::GetContentFlags() const
+{
+	return content_flags;
+}
+
+/**
+ * @param content_flags
+ */
+void WorldContentService::SetContentFlags(std::vector<std::string> content_flags)
+{
+	WorldContentService::content_flags = content_flags;
+}
+
+/**
+ * @param content_flag
+ * @return
+ */
+bool WorldContentService::IsContentFlagEnabled(const std::string& content_flag)
+{
+	for (auto &flag : GetContentFlags()) {
+		if (flag == content_flag) {
+			return true;
+		}
+	}
+
+	return false;
 }
