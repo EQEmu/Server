@@ -1290,23 +1290,24 @@ bool ZoneDatabase::GetTradeRecipe(
 
             //length limit on buf2
             if(index == 214) { //Maximum number of recipe matches (19 * 215 = 4096)
-        LogError("GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries", index + 1, results.RowCount());
+        		LogError("GetTradeRecipe warning: Too many matches. Unable to search all recipe entries. Searched [{}] of [{}] possible entries", index + 1, results.RowCount());
                 break;
             }
         }
 
         query = StringFormat("SELECT tre.recipe_id "
                             "FROM tradeskill_recipe_entries AS tre "
-                            "WHERE tre.recipe_id IN (%s) "
-                            "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
-                            "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum);
+							 "WHERE tre.recipe_id IN (%s) "
+							 "GROUP BY tre.recipe_id HAVING sum(tre.componentcount) = %u "
+							 "AND sum(tre.item_id * tre.componentcount) = %u", buf2.c_str(), count, sum
+		);
 		results = QueryDatabase(query);
-        if (!results.Success()) {
-      LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
-      LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
-            return false;
-        }
-    }
+		if (!results.Success()) {
+			LogError("Error in GetTradeRecipe, re-query: [{}]", query.c_str());
+			LogError("Error in GetTradeRecipe, error: [{}]", results.ErrorMessage().c_str());
+			return false;
+		}
+	}
 
     if (results.RowCount() < 1)
         return false;
@@ -1373,23 +1374,30 @@ bool ZoneDatabase::GetTradeRecipe(
 	}
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
-		int ccnt = 0;
+		int component_count = 0;
 
 		for (int x = EQ::invbag::SLOT_BEGIN; x < EQ::invtype::WORLD_SIZE; x++) {
             const EQ::ItemInstance* inst = container->GetItem(x);
             if(!inst)
                 continue;
 
-			const EQ::ItemData* item = GetItem(inst->GetItem()->ID);
+			const EQ::ItemData* item = database.GetItem(inst->GetItem()->ID);
             if (!item)
                 continue;
 
 			if (item->ID == atoi(row[0])) {
-				ccnt++;
+				component_count++;
 			}
+
+			LogTradeskills(
+				"[GetTradeRecipe] Component count loop [{}] item [{}] recipe component_count [{}]",
+				component_count,
+				item->ID,
+				atoi(row[1])
+			);
 		}
 
-		if (ccnt != atoi(row[1])) {
+		if (component_count != atoi(row[1])) {
 			return false;
 		}
 	}

@@ -1,4 +1,4 @@
-/*	EQ::: Everquest Server Emulator
+/*	EQ Everquest Server Emulator
 	Copyright (C) 2001-2002 EQ:: Development Team (http://EQ::.org)
 
 	This program is free software; you can redistribute it and/or modify
