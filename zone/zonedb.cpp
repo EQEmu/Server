@@ -4106,7 +4106,7 @@ bool ZoneDatabase::LoadFactionData()
 
 	memset(faction_array, 0, (sizeof(Faction*) * (max_faction + 1)));
 
-	std::vector<size_t> faction_ids;
+	std::vector<std::string> faction_ids;
 
 	// load factions
     query = "SELECT `id`, `name`, `base` FROM `faction_list`";
@@ -4136,12 +4136,12 @@ bool ZoneDatabase::LoadFactionData()
 		faction_array[index]->min = MIN_PERSONAL_FACTION;
 		faction_array[index]->max = MAX_PERSONAL_FACTION;
 
-		faction_ids.push_back(index);
+		faction_ids.push_back(fr_row[0]);
 	}
 
 	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
 
-	const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
+	const std::string faction_id_criteria(implode(",", faction_ids));
 
 	// load faction mins/maxes
 	query = fmt::format("SELECT `client_faction_id`, `min`, `max` FROM `faction_base_data` WHERE `client_faction_id` IN ({})", faction_id_criteria);
