@@ -705,7 +705,7 @@ sub get_windows_wget {
         if (!-d "bin") {
             mkdir("bin");
         }
-        `powershell -Command "\$ProgressPreference = 'SilentlyContinue'; Invoke-RestMethod -ContentType \"application/octet-stream\" -Uri https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe -OutFile bin/wget.exe"`
+        `powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe', 'bin\\wget.exe') "`
     }
 }
 
