@@ -1368,8 +1368,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		client_list.SendPacket(buf->character_name, pack);
 		break;
 	}
-	case ServerOP_ExpeditionCreate:
-	case ServerOP_ExpeditionDeleted:
 	case ServerOP_ExpeditionLeaderChanged:
 	case ServerOP_ExpeditionLockout:
 	case ServerOP_ExpeditionLockState:
@@ -1384,6 +1382,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_ExpeditionCreate:
+	case ServerOP_ExpeditionDeleted:
 	case ServerOP_ExpeditionGetOnlineMembers:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
@@ -1391,7 +1391,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionSaveInvite:
 	case ServerOP_ExpeditionRequestInvite:
 	{
-		Expedition::HandleZoneMessage(pack);
+		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
 	}
 	case ServerOP_DzCharacterChange:

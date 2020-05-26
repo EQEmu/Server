@@ -27,10 +27,109 @@
 #include "../common/servertalk.h"
 #include "../common/string_util.h"
 
+ExpeditionCache expedition_cache;
+
 extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-void Expedition::PurgeExpiredExpeditions()
+Expedition::Expedition(
+	uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
+	uint32_t start_time, uint32_t duration
+) :
+	m_expedition_id(expedition_id),
+	m_dz_instance_id(instance_id),
+	m_dz_zone_id(dz_zone_id),
+	m_start_time(start_time),
+	m_duration(duration)
+{
+	m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+}
+
+void Expedition::SendZonesExpeditionExpired()
+{
+	uint32_t pack_size = sizeof(ServerExpeditionID_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpired, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	zoneserver_list.SendPacket(pack.get());
+}
+
+void ExpeditionCache::LoadActiveExpeditions()
+{
+	BenchTimer benchmark;
+
+	m_expeditions = ExpeditionDatabase::LoadExpeditions();
+
+	auto elapsed = benchmark.elapsed();
+	LogExpeditions("World caching [{}] expeditions took {}s", m_expeditions.size(), elapsed);
+}
+
+void ExpeditionCache::AddExpedition(uint32_t expedition_id)
+{
+	if (expedition_id == 0)
+	{
+		return;
+	}
+
+	auto expedition = ExpeditionDatabase::LoadExpedition(expedition_id);
+
+	if (expedition.GetID() == expedition_id)
+	{
+		auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
+			return expedition.GetID() == expedition_id;
+		});
+
+		if (it == m_expeditions.end())
+		{
+			m_expeditions.emplace_back(expedition);
+		}
+	}
+}
+
+void ExpeditionCache::RemoveExpedition(uint32_t expedition_id)
+{
+	m_expeditions.erase(std::remove_if(m_expeditions.begin(), m_expeditions.end(),
+		[&](const Expedition& expedition) {
+			return expedition.GetID() == expedition_id;
+		}
+	), m_expeditions.end());
+}
+
+void ExpeditionCache::Process()
+{
+	if (!m_process_throttle_timer.Check())
+	{
+		return;
+	}
+
+	std::vector<uint32_t> expedition_ids;
+
+	// check for expired expeditions (using the dz instance expiration time)
+	for (auto it = m_expeditions.begin(); it != m_expeditions.end();)
+	{
+		if (!it->IsExpired())
+		{
+			++it;
+		}
+		else
+		{
+			// we need to delete expired expeditions from the database now instead
+			// of waiting for purge timer so members can request new expeditions.
+			// the dz should process this on its own to kick any clients inside it
+			LogExpeditions("Expedition [{}] expired, notifying zones and deleting", it->GetID());
+			expedition_ids.emplace_back(it->GetID());
+			it->SendZonesExpeditionExpired();
+			it = m_expeditions.erase(it);
+		}
+	}
+
+	if (!expedition_ids.empty())
+	{
+		ExpeditionDatabase::DeleteExpeditions(expedition_ids);
+	}
+}
+
+void ExpeditionDatabase::PurgeExpiredExpeditions()
 {
 	std::string query = SQL(
 		DELETE expedition FROM expedition_details expedition
@@ -54,7 +153,7 @@ void Expedition::PurgeExpiredExpeditions()
 	}
 }
 
-void Expedition::PurgeExpiredCharacterLockouts()
+void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 {
 	std::string query = SQL(
 		DELETE FROM expedition_character_lockouts
@@ -68,23 +167,139 @@ void Expedition::PurgeExpiredCharacterLockouts()
 	}
 }
 
-void Expedition::HandleZoneMessage(ServerPacket* pack)
+std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
+{
+	std::vector<Expedition> expeditions;
+
+	std::string query = SQL(
+		SELECT
+			expedition_details.id,
+			expedition_details.instance_id,
+			instance_list.zone,
+			instance_list.start_time,
+			instance_list.duration
+		FROM expedition_details
+			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
+		ORDER BY expedition_details.id;
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+	{
+		LogExpeditions("Failed to load expeditions for world cache");
+	}
+	else
+	{
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			expeditions.emplace_back(Expedition{
+				static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
+				static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_instance_id
+				static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_zone_id
+				static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // start_time
+				static_cast<uint32_t>(strtoul(row[4], nullptr, 10))  // duration
+			});
+		}
+	}
+
+	return expeditions;
+}
+
+Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
+{
+	std::string query = fmt::format(SQL(
+		SELECT
+			expedition_details.id,
+			expedition_details.instance_id,
+			instance_list.zone,
+			instance_list.start_time,
+			instance_list.duration
+		FROM expedition_details
+			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
+		WHERE expedition_details.id = {};
+	), expedition_id);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success())
+	{
+		LogExpeditions("Failed to load expedition [{}] for world cache", expedition_id);
+	}
+	else if (results.RowCount() > 0)
+	{
+		auto row = results.begin();
+		return Expedition{
+			static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
+			static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_instance_id
+			static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_zone_id
+			static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // start_time
+			static_cast<uint32_t>(strtoul(row[4], nullptr, 10))  // duration
+		};
+	}
+
+	return Expedition{};
+}
+
+void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expedition_ids)
+{
+	std::string expedition_ids_query;
+	for (const auto& expedition_id : expedition_ids)
+	{
+		fmt::format_to(std::back_inserter(expedition_ids_query), "{},", expedition_id);
+	}
+
+	if (!expedition_ids_query.empty())
+	{
+		expedition_ids_query.pop_back(); // trailing comma
+
+		std::string query = fmt::format(
+			"DELETE FROM expedition_details WHERE id IN ({});", expedition_ids_query
+		);
+		database.QueryDatabase(query);
+
+		// todo: if not using foreign key constraints
+		//query = fmt::format(
+		//	"DELETE FROM expedition_members WHERE expedition_id IN ({});", expedition_ids_query
+		//);
+		//database.QueryDatabase(query);
+
+		//query = fmt::format(
+		//	"DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query
+		//);
+		//database.QueryDatabase(query);
+	}
+}
+
+void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
+	case ServerOP_ExpeditionCreate:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+		expedition_cache.AddExpedition(buf->expedition_id);
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ExpeditionDeleted:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+		expedition_cache.RemoveExpedition(buf->expedition_id);
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	case ServerOP_ExpeditionGetOnlineMembers:
 	{
-		Expedition::GetOnlineMembers(pack);
+		ExpeditionMessage::GetOnlineMembers(pack);
 		break;
 	}
 	case ServerOP_ExpeditionDzAddPlayer:
 	{
-		Expedition::AddPlayer(pack);
+		ExpeditionMessage::AddPlayer(pack);
 		break;
 	}
 	case ServerOP_ExpeditionDzMakeLeader:
 	{
-		Expedition::MakeLeader(pack);
+		ExpeditionMessage::MakeLeader(pack);
 		break;
 	}
 	case ServerOP_ExpeditionRemoveCharLockouts:
@@ -95,18 +310,18 @@ void Expedition::HandleZoneMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionSaveInvite:
 	{
-		Expedition::SaveInvite(pack);
+		ExpeditionMessage::SaveInvite(pack);
 		break;
 	}
 	case ServerOP_ExpeditionRequestInvite:
 	{
-		Expedition::RequestInvite(pack);
+		ExpeditionMessage::RequestInvite(pack);
 		break;
 	}
 	}
 }
 
-void Expedition::AddPlayer(ServerPacket* pack)
+void ExpeditionMessage::AddPlayer(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
 
@@ -128,7 +343,7 @@ void Expedition::AddPlayer(ServerPacket* pack)
 	}
 }
 
-void Expedition::MakeLeader(ServerPacket* pack)
+void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
 
@@ -150,7 +365,7 @@ void Expedition::MakeLeader(ServerPacket* pack)
 	}
 }
 
-void Expedition::GetOnlineMembers(ServerPacket* pack)
+void ExpeditionMessage::GetOnlineMembers(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
 
@@ -177,7 +392,7 @@ void Expedition::GetOnlineMembers(ServerPacket* pack)
 	zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
 }
 
-void Expedition::SaveInvite(ServerPacket* pack)
+void ExpeditionMessage::SaveInvite(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
 
@@ -191,7 +406,7 @@ void Expedition::SaveInvite(ServerPacket* pack)
 	}
 }
 
-void Expedition::RequestInvite(ServerPacket* pack)
+void ExpeditionMessage::RequestInvite(ServerPacket* pack)
 {
 	auto buf = reinterpret_cast<ServerExpeditionCharacterID_Struct*>(pack->pBuffer);
 	ClientListEntry* cle = client_list.FindCLEByCharacterID(buf->character_id);

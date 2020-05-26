@@ -789,6 +789,7 @@ RULE_BOOL(Expedition, UseDatabaseToVerifyLeaderCommands, false, "Use database in
 RULE_BOOL(Expedition, EmptyDzShutdownEnabled, true, "Enable early instance shutdown after last member of expedition removed")
 RULE_INT(Expedition, EmptyDzShutdownDelaySeconds, 900, "Seconds to set dynamic zone instance expiration if early shutdown enabled")
 RULE_INT(Expedition, RequestExpiredLockoutLeewaySeconds, 60, "Seconds remaining on lockout to count as expired for creation requests (client hides timers under 60s remaining)")
+RULE_INT(Expedition, WorldExpeditionProcessRateMS, 6000, "Timer interval (ms) that world checks expedition states")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(DynamicZone)
