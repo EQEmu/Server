@@ -1310,7 +1310,14 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 	strcpy(newzone_data.zone_long_name, GetLongName());
 	strcpy(newzone_data.zone_short_name2, GetShortName());
 
-	LogInfo("Successfully loaded Zone Config");
+	LogInfo(
+		"Successfully loaded Zone Config for Zone [{}] ({}) Version [{}] Instance ID [{}]",
+		GetShortName(),
+		GetLongName(),
+		GetInstanceVersion(),
+		instance_id
+	);
+
 	return true;
 }
 
@@ -1864,8 +1871,7 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	{
 		ZonePoint* zp = iterator.GetData();
 		uint32 mask_test = client->ClientVersionBit();
-		if(!(zp->client_version_mask & mask_test))
-		{
+		if (!(zp->client_version_mask & mask_test)) {
 			iterator.Advance();
 			continue;
 		}
