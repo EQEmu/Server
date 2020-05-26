@@ -17,9 +17,13 @@
 |:---:|:---:|:---:|
 |**Install Count**|![Windows Install Count](http://analytics.akkadius.com/?install_count&windows_count)|![Linux Install Count](http://analytics.akkadius.com/?install_count&linux_count)| 
 ### > Windows 
-* [Install](https://eqemu.gitbook.io/server/categories/how-to-guides/installation/server-installation-windows)
+
+* [Install Guide](https://eqemu.gitbook.io/server/categories/installation/server-installation-windows)
 
 ### > Debian/Ubuntu/CentOS/Fedora
+
+* [Install Guide](https://eqemu.gitbook.io/server/categories/installation/server-installation-linux)
+
 * You can use curl or wget to kick off the installer (whichever your OS has)
 > curl -O https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/linux_installer/install.sh install.sh && chmod 755 install.sh && ./install.sh
 
