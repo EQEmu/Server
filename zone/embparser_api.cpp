@@ -1618,11 +1618,12 @@ XS(XS__ChooseRandom) {
 	if (items < 1)
 		Perl_croak(aTHX_ "Usage: quest::ChooseRandom(option1, option2, option3, option4, option5...[no limit])");
 
+	dXSTARG;
 	int index = zone->random.Int(0, items - 1);
+	SV *RETVAL = ST(index);
 
-	SV *tmp = ST(0);
-	ST(0)     = ST(index);
-	ST(index) = tmp;
+	XSprePUSH;
+	PUSHs(RETVAL);
 
 	XSRETURN(1);    //return 1 element from the stack (ST(0))
 }
