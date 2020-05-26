@@ -21,18 +21,67 @@
 #ifndef WORLD_EXPEDITION_H
 #define WORLD_EXPEDITION_H
 
+#include "../common/rulesys.h"
+#include "../common/timer.h"
+#include <chrono>
+#include <vector>
+
+extern class ExpeditionCache expedition_cache;
+
+class Expedition;
 class ServerPacket;
 
-namespace Expedition
+namespace ExpeditionDatabase
 {
 	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();
+	std::vector<Expedition> LoadExpeditions();
+	Expedition LoadExpedition(uint32_t expedition_id);
+	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
+};
+
+namespace ExpeditionMessage
+{
 	void HandleZoneMessage(ServerPacket* pack);
 	void AddPlayer(ServerPacket* pack);
 	void MakeLeader(ServerPacket* pack);
 	void GetOnlineMembers(ServerPacket* pack);
 	void SaveInvite(ServerPacket* pack);
 	void RequestInvite(ServerPacket* pack);
+};
+
+class ExpeditionCache
+{
+public:
+	void AddExpedition(uint32_t expedition_id);
+	void RemoveExpedition(uint32_t expedition_id);
+	void LoadActiveExpeditions();
+	void Process();
+
+private:
+	std::vector<Expedition> m_expeditions;
+	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(Expedition, WorldExpeditionProcessRateMS))};
+};
+
+class Expedition
+{
+public:
+	Expedition() = default;
+	Expedition(
+		uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
+		uint32_t expire_time, uint32_t duration);
+
+	uint32_t GetID() const { return m_expedition_id; }
+	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
+	void SendZonesExpeditionExpired();
+
+private:
+	uint32_t m_expedition_id  = 0;
+	uint32_t m_dz_instance_id = 0;
+	uint32_t m_dz_zone_id     = 0;
+	uint32_t m_start_time     = 0;
+	uint32_t m_duration       = 0;
+	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 
 #endif

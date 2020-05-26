@@ -1272,7 +1272,7 @@ void Expedition::ProcessLockoutUpdate(
 	}
 }
 
-void Expedition::SendUpdatesToZoneMembers(bool clear)
+void Expedition::SendUpdatesToZoneMembers(bool clear, bool message_on_clear)
 {
 	if (!m_members.empty())
 	{
@@ -1289,7 +1289,7 @@ void Expedition::SendUpdatesToZoneMembers(bool clear)
 				member_client->QueuePacket(outapp_info.get());
 				member_client->QueuePacket(outapp_members.get());
 				member_client->SendExpeditionLockoutTimers();
-				if (clear)
+				if (clear && message_on_clear)
 				{
 					member_client->MessageString(
 						Chat::Yellow, EXPEDITION_REMOVED, member_client->GetName(), m_expedition_name.c_str()
@@ -1605,6 +1605,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		break;
 	}
 	case ServerOP_ExpeditionDeleted:
+	case ServerOP_ExpeditionExpired:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
@@ -1612,7 +1613,9 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		{
 			if (!zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 			{
-				expedition->SendUpdatesToZoneMembers(true);
+				// expired deletions should be silent
+				bool notify_members = (pack->opcode == ServerOP_ExpeditionDeleted);
+				expedition->SendUpdatesToZoneMembers(true, notify_members);
 			}
 
 			// remove even from sender zone

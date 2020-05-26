@@ -431,8 +431,11 @@ int main(int argc, char** argv) {
 	PurgeInstanceTimer.Start(450000);
 
 	LogInfo("Purging expired expeditions");
-	Expedition::PurgeExpiredExpeditions();
-	Expedition::PurgeExpiredCharacterLockouts();
+	ExpeditionDatabase::PurgeExpiredExpeditions();
+	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
+
+	LogInfo("Loading active expeditions");
+	expedition_cache.LoadActiveExpeditions();
 
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();
@@ -604,8 +607,8 @@ int main(int argc, char** argv) {
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
-			Expedition::PurgeExpiredExpeditions();
-			Expedition::PurgeExpiredCharacterLockouts();
+			ExpeditionDatabase::PurgeExpiredExpeditions();
+			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 		}
 
 		if (EQTimeTimer.Check()) {
@@ -621,6 +624,7 @@ int main(int argc, char** argv) {
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
+		expedition_cache.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
