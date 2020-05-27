@@ -65,6 +65,7 @@ public:
 	luabind::object GetLockouts(lua_State* L);
 	bool            HasLockout(std::string event_name);
 	bool            HasReplayLockout();
+	void            RemoveCompass();
 	void            RemoveLockout(std::string event_name);
 	void            SetCompass(uint32 zone_id, float x, float y, float z);
 	void            SetCompass(std::string zone_name, float x, float y, float z);

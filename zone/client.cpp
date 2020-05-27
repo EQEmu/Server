@@ -9828,7 +9828,7 @@ void Client::SendDzCompassUpdate()
 	if (expedition)
 	{
 		auto compass = expedition->GetDynamicZone().GetCompassLocation();
-		if (zone && zone->GetZoneID() == compass.zone_id)
+		if (zone && zone->GetZoneID() == compass.zone_id && zone->GetInstanceID() == 0)
 		{
 			DynamicZoneCompassEntry_Struct entry;
 			entry.dz_zone_id = static_cast<uint16_t>(expedition->GetDynamicZone().GetZoneID());
@@ -9845,7 +9845,7 @@ void Client::SendDzCompassUpdate()
 	// todo: shared tasks, missions, and quests with an associated dz
 
 	// compass set via MarkSingleCompassLocation()
-	if (zone && zone->GetZoneID() == m_quest_compass.zone_id)
+	if (zone && zone->GetZoneID() == m_quest_compass.zone_id && zone->GetInstanceID() == 0)
 	{
 		DynamicZoneCompassEntry_Struct entry;
 		entry.dz_zone_id = 0;
