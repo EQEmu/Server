@@ -132,7 +132,7 @@ Expedition* Expedition::TryCreate(
 		auto inserted = zone->expedition_cache.emplace(expedition_id, std::move(expedition));
 
 		inserted.first->second->SendUpdatesToZoneMembers();
-		inserted.first->second->SendWorldExpeditionUpdate(); // cache in other zones
+		inserted.first->second->SendWorldExpeditionUpdate(ServerOP_ExpeditionCreate); // cache in other zones
 
 		Client* leader_client = request.GetLeaderClient();
 
@@ -486,11 +486,10 @@ void Expedition::RemoveAllMembers(bool enable_removal_timers, bool update_dz_exp
 		m_dynamiczone.UpdateExpireTime(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
 	}
 
-	ExpeditionDatabase::DeleteAllMembers(m_id);
-	ExpeditionDatabase::DeleteExpedition(m_id);
+	ExpeditionDatabase::UpdateAllMembersRemoved(m_id);
 
 	SendUpdatesToZoneMembers(true);
-	SendWorldExpeditionUpdate(true);
+	SendWorldExpeditionUpdate(ServerOP_ExpeditionMembersRemoved);
 }
 
 bool Expedition::RemoveMember(const std::string& remove_char_name)
@@ -519,8 +518,6 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 	uint32_t member_count = ExpeditionDatabase::GetExpeditionMemberCount(m_id);
 	if (member_count == 0)
 	{
-		// zone cache removal will occur in world message handler
-		ExpeditionDatabase::DeleteExpedition(m_id);
 		if (RuleB(Expedition, EmptyDzShutdownEnabled))
 		{
 			m_dynamiczone.UpdateExpireTime(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
@@ -1412,11 +1409,10 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateLeaderNamePacket()
 	return outapp;
 }
 
-void Expedition::SendWorldExpeditionUpdate(bool destroyed)
+void Expedition::SendWorldExpeditionUpdate(uint16_t server_opcode)
 {
-	uint16_t opcode = destroyed ? ServerOP_ExpeditionDeleted : ServerOP_ExpeditionCreate;
 	uint32_t pack_size = sizeof(ServerExpeditionID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(opcode, pack_size));
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(server_opcode, pack_size));
 	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
@@ -1605,21 +1601,29 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		break;
 	}
 	case ServerOP_ExpeditionDeleted:
-	case ServerOP_ExpeditionExpired:
 	{
+		// sent by world when it deletes expired or empty expeditions
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (zone && expedition)
 		{
-			if (!zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
-			{
-				// expired deletions should be silent
-				bool notify_members = (pack->opcode == ServerOP_ExpeditionDeleted);
-				expedition->SendUpdatesToZoneMembers(true, notify_members);
-			}
+			expedition->SendUpdatesToZoneMembers(true, false); // any members silently removed
 
-			// remove even from sender zone
+			LogExpeditionsModerate("Deleting expedition [{}] from zone cache", buf->expedition_id);
 			zone->expedition_cache.erase(buf->expedition_id);
+		}
+		break;
+	}
+	case ServerOP_ExpeditionMembersRemoved:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+			if (expedition)
+			{
+				expedition->SendUpdatesToZoneMembers(true);
+			}
 		}
 		break;
 	}
@@ -1656,11 +1660,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (expedition && zone)
 		{
-			LogExpeditionsDetail(
-				"World member change message -- remove: [{}] name: [{}] zone: [{}]:[{}] sender: [{}]:[{}]",
-				buf->removed, buf->char_name, zone->GetZoneID(), zone->GetInstanceID(), buf->sender_zone_id, buf->sender_instance_id
-			);
-
 			if (!zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 			{
 				if (buf->removed)
@@ -1671,12 +1670,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 				{
 					expedition->ProcessMemberAdded(buf->char_name, buf->char_id);
 				}
-			}
-
-			// remove this expedition from zone cache if last member was removed
-			if (buf->removed && expedition->GetMemberCount() == 0)
-			{
-				zone->expedition_cache.erase(buf->expedition_id);
 			}
 		}
 		break;

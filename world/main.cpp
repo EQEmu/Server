@@ -607,7 +607,6 @@ int main(int argc, char** argv) {
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
-			ExpeditionDatabase::PurgeExpiredExpeditions();
 			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 		}
 

@@ -320,18 +320,6 @@ void ExpeditionDatabase::DeletePendingLockouts(uint32_t character_id)
 	database.QueryDatabase(query);
 }
 
-void ExpeditionDatabase::DeleteExpedition(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Deleting expedition [{}]", expedition_id);
-
-	auto query = fmt::format("DELETE FROM expedition_details WHERE id = {}", expedition_id);
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to delete expedition [{}]", expedition_id);
-	}
-}
-
 void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string& event_name)
 {
 	LogExpeditionsDetail("Deleting expedition [{}] lockout event [{}]", expedition_id, event_name);
@@ -345,21 +333,6 @@ void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string
 	if (!results.Success())
 	{
 		LogExpeditions("Failed to delete expedition [{}] lockout [{}]", expedition_id, event_name);
-	}
-}
-
-void ExpeditionDatabase::DeleteAllMembers(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Deleting all members of expedition [{}]", expedition_id);
-
-	auto query = fmt::format(SQL(
-		DELETE FROM expedition_members WHERE expedition_id = {};
-	), expedition_id);
-
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to delete all members of expedition [{}]", expedition_id);
 	}
 }
 
@@ -673,6 +646,18 @@ void ExpeditionDatabase::UpdateMemberRemoved(uint32_t expedition_id, uint32_t ch
 	{
 		LogExpeditions("Failed to remove [{}] from expedition [{}]", character_id, expedition_id);
 	}
+}
+
+void ExpeditionDatabase::UpdateAllMembersRemoved(uint32_t expedition_id)
+{
+	LogExpeditionsDetail("Updating all members of expedition [{}] as removed", expedition_id);
+
+	auto query = fmt::format(SQL(
+		UPDATE expedition_members SET is_current_member = FALSE
+		WHERE expedition_id = {};
+	), expedition_id);
+
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join)
