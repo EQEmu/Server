@@ -44,11 +44,9 @@ namespace ExpeditionDatabase
 	MySQLRequestResult LoadCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	MySQLRequestResult LoadExpeditionMembers(uint32_t expedition_id);
 	MySQLRequestResult LoadValidationData(const std::string& character_names_query, const std::string& expedition_name);
-	void DeleteAllMembers(uint32_t expedition_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name, const std::string& event_name);
-	void DeleteExpedition(uint32_t expedition_id);
 	void DeleteLockout(uint32_t expedition_id, const std::string& event_name);
 	void DeleteMembersLockout(
 		const std::vector<ExpeditionMember>& members, const std::string& expedition_name, const std::string& event_name);
@@ -69,6 +67,7 @@ namespace ExpeditionDatabase
 	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
 	void UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id);
+	void UpdateAllMembersRemoved(uint32_t expedition_id);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
 };
 

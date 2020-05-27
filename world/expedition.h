@@ -24,6 +24,7 @@
 #include "../common/rulesys.h"
 #include "../common/timer.h"
 #include <chrono>
+#include <unordered_set>
 #include <vector>
 
 extern class ExpeditionCache expedition_cache;
@@ -56,6 +57,8 @@ public:
 	void AddExpedition(uint32_t expedition_id);
 	void RemoveExpedition(uint32_t expedition_id);
 	void LoadActiveExpeditions();
+	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
+	void RemoveAllMembers(uint32_t expedition_id);
 	void Process();
 
 private:
@@ -71,9 +74,15 @@ public:
 		uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
 		uint32_t expire_time, uint32_t duration);
 
+	void AddMember(uint32_t character_id) { m_member_ids.emplace(character_id); }
+	void RemoveMember(uint32_t character_id) { m_member_ids.erase(character_id); }
+	void RemoveAllMembers() { m_member_ids.clear(); }
 	uint32_t GetID() const { return m_expedition_id; }
+	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_dz_instance_id); }
+	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_dz_zone_id); }
+	bool IsEmpty() const { return m_member_ids.empty(); }
 	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
-	void SendZonesExpeditionExpired();
+	void SendZonesExpeditionDeleted();
 
 private:
 	uint32_t m_expedition_id  = 0;
@@ -81,6 +90,7 @@ private:
 	uint32_t m_dz_zone_id     = 0;
 	uint32_t m_start_time     = 0;
 	uint32_t m_duration       = 0;
+	std::unordered_set<uint32_t> m_member_ids;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 
