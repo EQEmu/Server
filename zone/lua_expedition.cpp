@@ -110,6 +110,11 @@ bool Lua_Expedition::HasReplayLockout() {
 	return self->HasReplayLockout();
 }
 
+void Lua_Expedition::RemoveCompass() {
+	Lua_Safe_Call_Void();
+	self->SetDzCompass(0, 0, 0, 0, true);
+}
+
 void Lua_Expedition::RemoveLockout(std::string event_name) {
 	Lua_Safe_Call_Void();
 	self->RemoveLockout(event_name);
@@ -117,12 +122,12 @@ void Lua_Expedition::RemoveLockout(std::string event_name) {
 
 void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	return self->SetDzCompass(zone_id, x, y, z, true);
+	self->SetDzCompass(zone_id, x, y, z, true);
 }
 
 void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	return self->SetDzCompass(zone_name, x, y, z, true);
+	self->SetDzCompass(zone_name, x, y, z, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
@@ -137,17 +142,17 @@ void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	return self->SetDzSafeReturn(zone_id, x, y, z, heading, true);
+	self->SetDzSafeReturn(zone_id, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	return self->SetDzSafeReturn(zone_name, x, y, z, heading, true);
+	self->SetDzSafeReturn(zone_name, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	return self->SetDzZoneInLocation(x, y, z, heading, true);
+	self->SetDzZoneInLocation(x, y, z, heading, true);
 }
 
 luabind::scope lua_register_expedition() {
@@ -167,7 +172,8 @@ luabind::scope lua_register_expedition() {
 		.def("GetSecondsRemaining", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetSecondsRemaining)
 		.def("GetZoneID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetZoneID)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
-		.def("HasReplayLockout", (bool(Lua_Expedition::*)())&Lua_Expedition::HasReplayLockout)
+		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
+		.def("RemoveCompass", (void(Lua_Expedition::*)(void))&Lua_Expedition::RemoveCompass)
 		.def("RemoveLockout", (void(Lua_Expedition::*)(std::string))&Lua_Expedition::RemoveLockout)
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetCompass", (void(Lua_Expedition::*)(std::string, float, float, float))&Lua_Expedition::SetCompass)
