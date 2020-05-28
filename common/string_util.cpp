@@ -527,3 +527,51 @@ bool isAlphaNumeric(const char *text)
 
 	return true;
 }
+
+// Function to convert single digit or two digit number into words
+std::string convert2digit(int n, std::string suffix)
+{
+	// if n is zero
+	if (n == 0) {
+		return "";
+	}
+
+	// split n if it is more than 19
+	if (n > 19) {
+		return NUM_TO_ENGLISH_Y[n / 10] + NUM_TO_ENGLISH_X[n % 10] + suffix;
+	}
+	else {
+		return NUM_TO_ENGLISH_X[n] + suffix;
+	}
+}
+
+// Function to convert a given number (max 9-digits) into words
+std::string numberToWords(unsigned long long int n)
+{
+	// string to store word representation of given number
+	std::string res;
+
+	// this handles digits at ones & tens place
+	res = convert2digit((n % 100), "");
+
+	if (n > 100 && n % 100) {
+		res = "and " + res;
+	}
+
+	// this handles digit at hundreds place
+	res = convert2digit(((n / 100) % 10), "Hundred ") + res;
+
+	// this handles digits at thousands & tens thousands place
+	res = convert2digit(((n / 1000) % 100), "Thousand ") + res;
+
+	// this handles digits at hundred thousands & one millions place
+	res = convert2digit(((n / 100000) % 100), "Lakh, ") + res;
+
+	// this handles digits at ten millions & hundred millions place
+	res = convert2digit((n / 10000000) % 100, "Crore, ") + res;
+
+	// this handles digits at ten millions & hundred millions place
+	res = convert2digit((n / 1000000000) % 100, "Billion, ") + res;
+
+	return res;
+}
