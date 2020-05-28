@@ -1495,7 +1495,7 @@ bool Zone::Process() {
 				Expedition* expedition = Expedition::FindExpeditionByInstanceID(GetInstanceID());
 				if (expedition)
 				{
-					expedition->RemoveAllMembers(false, false); // entity list will teleport clients out immediately
+					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately
 				}
 				// todo: move corpses to non-instanced version of dz at same coords (if no graveyard)
 				entity_list.GateAllClientsToSafeReturn();

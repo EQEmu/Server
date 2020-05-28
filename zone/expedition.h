@@ -102,7 +102,7 @@ public:
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
 	bool HasMember(const std::string& character_name);
 	bool HasMember(uint32_t character_id);
-	void RemoveAllMembers(bool enable_removal_timers = true, bool update_dz_expire_time = true);
+	void RemoveAllMembers(bool enable_removal_timers = true);
 	bool RemoveMember(const std::string& remove_char_name);
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name);
@@ -134,6 +134,7 @@ public:
 	void SetDzSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
 	void SetDzSafeReturn(const std::string& zone_name, float x, float y, float z, float heading, bool update_db = false);
 	void SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
+	void SetDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }
 
 	static const uint32_t REPLAY_TIMER_ID;
 	static const uint32_t EVENT_TIMER_ID;

@@ -55,7 +55,6 @@ namespace ExpeditionDatabase
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
 	uint32_t GetExpeditionIDFromInstanceID(uint32_t instance_id);
 	ExpeditionMember GetExpeditionLeader(uint32_t expedition_id);
-	uint32_t GetExpeditionMemberCount(uint32_t expedition_id);
 	void InsertCharacterLockouts(
 		uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
 		bool update_expire_times, bool is_pending = false);

@@ -54,6 +54,42 @@ void Expedition::SendZonesExpeditionDeleted()
 	zoneserver_list.SendPacket(pack.get());
 }
 
+void Expedition::SendZonesDurationUpdate()
+{
+	uint32_t packsize = sizeof(ServerExpeditionUpdateDuration_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzDuration, packsize));
+	auto packbuf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
+	packbuf->expedition_id = GetID();
+	packbuf->new_duration_seconds = m_duration;
+	zoneserver_list.SendPacket(pack.get());
+}
+
+void Expedition::UpdateDzSecondsRemaining(uint32_t seconds_remaining)
+{
+	auto now = std::chrono::system_clock::now();
+	auto update_time = std::chrono::seconds(seconds_remaining);
+
+	auto current_remaining = m_expire_time - now;
+	if (current_remaining > update_time) // reduce only
+	{
+		LogExpeditionsDetail(
+			"Updating expedition [{}] dz instance [{}] seconds remaining to [{}]s",
+			GetID(), GetInstanceID(), seconds_remaining
+		);
+
+		// preserve original start time and adjust duration instead
+		auto new_expire_time = now + update_time;
+		auto new_duration = std::chrono::system_clock::to_time_t(new_expire_time) - m_start_time;
+		m_duration = static_cast<uint32_t>(new_duration);
+		m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+
+		ExpeditionDatabase::UpdateDzDuration(GetInstanceID(), m_duration);
+
+		// update zone level caches and update the actual dz instance's timer
+		SendZonesDurationUpdate();
+	}
+}
+
 void ExpeditionCache::LoadActiveExpeditions()
 {
 	BenchTimer benchmark;
@@ -151,6 +187,13 @@ void ExpeditionCache::Process()
 				it->SendZonesExpeditionDeleted();
 				is_deleted = true;
 			}
+
+			if (it->IsEmpty() && !it->IsPendingDelete() && RuleB(Expedition, EmptyDzShutdownEnabled))
+			{
+				it->UpdateDzSecondsRemaining(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
+			}
+
+			it->SetPendingDelete(true);
 		}
 
 		it = is_deleted ? m_expeditions.erase(it) : it + 1;
@@ -332,6 +375,16 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 		//);
 		//database.QueryDatabase(query);
 	}
+}
+
+void ExpeditionDatabase::UpdateDzDuration(uint16_t instance_id, uint32_t new_duration)
+{
+	std::string query = fmt::format(
+		"UPDATE instance_list SET duration = {} WHERE id = {};",
+		new_duration, instance_id
+	);
+
+	database.QueryDatabase(query);
 }
 
 void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)

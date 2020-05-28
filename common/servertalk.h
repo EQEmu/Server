@@ -160,6 +160,7 @@
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
 #define ServerOP_ExpeditionLockState          0x0411
 #define ServerOP_ExpeditionMembersRemoved     0x0412
+#define ServerOP_ExpeditionDzDuration         0x0413
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2071,6 +2072,11 @@ struct ServerExpeditionCharacterName_Struct {
 
 struct ServerExpeditionCharacterID_Struct {
 	uint32_t character_id;
+};
+
+struct ServerExpeditionUpdateDuration_Struct {
+	uint32_t expedition_id;
+	uint32_t new_duration_seconds;
 };
 
 struct ServerDzCommand_Struct {
