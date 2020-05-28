@@ -437,7 +437,7 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionRemoveCharLockouts:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+		auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
 		client_list.SendPacket(buf->character_name, pack);
 		break;
 	}

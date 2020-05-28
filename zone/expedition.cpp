@@ -1556,17 +1556,15 @@ void Expedition::SendWorldGetOnlineMembers()
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::RemoveAllCharacterLockouts(std::string character_name, std::string expedition_name)
+void Expedition::RemoveCharacterLockouts(
+	std::string character_name, std::string expedition_name, std::string event_name)
 {
-	uint32_t pack_size = sizeof(ServerExpeditionCharacterName_Struct);
+	uint32_t pack_size = sizeof(ServerExpeditionCharacterLockout_Struct);
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRemoveCharLockouts, pack_size));
-	auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+	auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
 	strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
-	buf->expedition_name[0] = '\0';
-	if (!expedition_name.empty())
-	{
-		strn0cpy(buf->expedition_name, expedition_name.c_str(), sizeof(buf->expedition_name));
-	}
+	strn0cpy(buf->expedition_name, expedition_name.c_str(), sizeof(buf->expedition_name));
+	strn0cpy(buf->event_name, event_name.c_str(), sizeof(buf->event_name));
 	worldserver.SendPacket(pack.get());
 }
 
@@ -1788,11 +1786,18 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionRemoveCharLockouts:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionCharacterName_Struct*>(pack->pBuffer);
+		auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
 		Client* client = entity_list.GetClientByName(buf->character_name);
 		if (client)
 		{
-			client->RemoveAllExpeditionLockouts(buf->expedition_name);
+			if (buf->event_name[0] != '\0')
+			{
+				client->RemoveExpeditionLockout(buf->expedition_name, buf->event_name, true);
+			}
+			else
+			{
+				client->RemoveAllExpeditionLockouts(buf->expedition_name);
+			}
 		}
 		break;
 	}
