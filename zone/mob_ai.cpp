@@ -1319,9 +1319,10 @@ void Mob::AI_Process() {
 						FaceTarget();
 					}
 				}
-				else if (AI_movement_timer->Check() &&
+				// mob/npc waits until call for help complete, others can move
+				else if (AI_movement_timer->Check() && target &&
 						(IsPet() || IsMerc() || IsBot() ||
-						(target && CastToNPC()->GetCombatEvent()))) {
+						CastToNPC()->GetCombatEvent())) {
 					if (!IsRooted()) {
 						LogAI("Pursuing [{}] while engaged", target->GetName());
 						RunTo(target->GetX(), target->GetY(), target->GetZ());
