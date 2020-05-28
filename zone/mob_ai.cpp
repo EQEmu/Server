@@ -1319,7 +1319,9 @@ void Mob::AI_Process() {
 						FaceTarget();
 					}
 				}
-				else if (AI_movement_timer->Check() && target && CastToNPC()->GetCombatEvent()) {
+				else if (AI_movement_timer->Check() &&
+						(IsPet() || IsMerc() || IsBot() ||
+						(target && CastToNPC()->GetCombatEvent()))) {
 					if (!IsRooted()) {
 						LogAI("Pursuing [{}] while engaged", target->GetName());
 						RunTo(target->GetX(), target->GetY(), target->GetZ());
