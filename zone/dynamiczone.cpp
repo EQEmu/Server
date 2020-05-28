@@ -437,32 +437,6 @@ void DynamicZone::SendInstanceCharacterChange(uint32_t character_id, bool remove
 	}
 }
 
-void DynamicZone::UpdateExpireTime(uint32_t seconds, bool reduce_only)
-{
-	if (GetInstanceID() == 0 || (reduce_only && GetSecondsRemaining() < seconds))
-	{
-		return;
-	}
-
-	m_expire_time = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
-	m_duration = std::chrono::system_clock::to_time_t(m_expire_time) - m_start_time;
-
-	std::string query = fmt::format(SQL(
-		UPDATE instance_list SET duration = {} WHERE id = {};
-	), m_duration, GetInstanceID());
-
-	auto results = database.QueryDatabase(query);
-	if (results.Success())
-	{
-		uint32_t packsize = sizeof(ServerInstanceUpdateTime_Struct);
-		auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_InstanceUpdateTime, packsize));
-		auto packbuf = reinterpret_cast<ServerInstanceUpdateTime_Struct*>(pack->pBuffer);
-		packbuf->instance_id = GetInstanceID();
-		packbuf->new_duration = seconds;
-		worldserver.SendPacket(pack.get());
-	}
-}
-
 void DynamicZone::SetCompass(const DynamicZoneLocation& location, bool update_db)
 {
 	m_compass = location;
@@ -513,6 +487,18 @@ uint32_t DynamicZone::GetSecondsRemaining() const
 		return static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(remaining).count());
 	}
 	return 0;
+}
+
+void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
+{
+	// preserves original start time, just modifies duration and expire time
+	m_duration = new_duration;
+	m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+
+	if (zone && IsCurrentZoneDzInstance())
+	{
+		zone->SetInstanceTimer(GetSecondsRemaining());
+	}
 }
 
 void DynamicZone::HandleWorldMessage(ServerPacket* pack)

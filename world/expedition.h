@@ -39,6 +39,7 @@ namespace ExpeditionDatabase
 	std::vector<Expedition> LoadExpeditions();
 	Expedition LoadExpedition(uint32_t expedition_id);
 	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
+	void UpdateDzDuration(uint16_t instance_id, uint32_t new_duration);
 };
 
 namespace ExpeditionMessage
@@ -82,7 +83,11 @@ public:
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_dz_zone_id); }
 	bool IsEmpty() const { return m_member_ids.empty(); }
 	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
+	bool IsPendingDelete() const { return m_pending_delete; }
+	void SendZonesDurationUpdate();
 	void SendZonesExpeditionDeleted();
+	void SetPendingDelete(bool pending) { m_pending_delete = pending; }
+	void UpdateDzSecondsRemaining(uint32_t seconds_remaining);
 
 private:
 	uint32_t m_expedition_id  = 0;
@@ -90,6 +95,7 @@ private:
 	uint32_t m_dz_zone_id     = 0;
 	uint32_t m_start_time     = 0;
 	uint32_t m_duration       = 0;
+	bool     m_pending_delete = false;
 	std::unordered_set<uint32_t> m_member_ids;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };

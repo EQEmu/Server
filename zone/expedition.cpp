@@ -477,14 +477,9 @@ bool Expedition::AddMember(const std::string& add_char_name, uint32_t add_char_i
 	return true;
 }
 
-void Expedition::RemoveAllMembers(bool enable_removal_timers, bool update_dz_expire_time)
+void Expedition::RemoveAllMembers(bool enable_removal_timers)
 {
 	m_dynamiczone.RemoveAllCharacters(enable_removal_timers);
-
-	if (update_dz_expire_time && RuleB(Expedition, EmptyDzShutdownEnabled))
-	{
-		m_dynamiczone.UpdateExpireTime(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
-	}
 
 	ExpeditionDatabase::UpdateAllMembersRemoved(m_id);
 
@@ -510,18 +505,6 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 	if (member.char_id == m_leader.char_id)
 	{
 		ChooseNewLeader();
-	}
-
-	// we can't check for empty member count via cache because if other zones
-	// remove members at the same time then we race. cache member count won't
-	// be accurate until the world messages from other zones are processed
-	uint32_t member_count = ExpeditionDatabase::GetExpeditionMemberCount(m_id);
-	if (member_count == 0)
-	{
-		if (RuleB(Expedition, EmptyDzShutdownEnabled))
-		{
-			m_dynamiczone.UpdateExpireTime(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
-		}
 	}
 
 	return true;
@@ -1810,6 +1793,16 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		if (client)
 		{
 			client->RemoveAllExpeditionLockouts(buf->expedition_name);
+		}
+		break;
+	}
+	case ServerOP_ExpeditionDzDuration:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
+		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+		if (expedition)
+		{
+			expedition->SetDzDuration(buf->new_duration_seconds);
 		}
 		break;
 	}
