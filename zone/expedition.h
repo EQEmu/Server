@@ -84,7 +84,7 @@ public:
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
 	static Expedition* FindExpeditionByInstanceID(uint32_t instance_id);
-	static void RemoveAllCharacterLockouts(std::string character_name, std::string expedition_name = {});
+	static void RemoveCharacterLockouts(std::string character_name, std::string expedition_name = {}, std::string event_name = {});
 	static void HandleWorldMessage(ServerPacket* pack);
 
 	uint32_t GetID() const { return m_id; }

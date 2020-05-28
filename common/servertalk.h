@@ -2065,9 +2065,10 @@ struct ServerExpeditionSetting_Struct {
 	uint8  enabled;
 };
 
-struct ServerExpeditionCharacterName_Struct {
+struct ServerExpeditionCharacterLockout_Struct {
 	char character_name[64];
 	char expedition_name[128];
+	char event_name[256];
 };
 
 struct ServerExpeditionCharacterID_Struct {

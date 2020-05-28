@@ -6932,11 +6932,19 @@ void command_dz(Client* c, const Seperator* sep)
 	{
 		if (strcasecmp(sep->arg[2], "remove") == 0 && sep->arg[3][0] != '\0')
 		{
-			c->Message(Chat::White, fmt::format(
-				"Removing [{}] lockouts on [{}].", sep->arg[4][0] ? sep->arg[4] : "all", sep->arg[3]
-			).c_str());
-
-			Expedition::RemoveAllCharacterLockouts(sep->arg[3], sep->arg[4]);
+			if (sep->arg[5][0] == '\0')
+			{
+				c->Message(Chat::White, fmt::format(
+					"Removing [{}] lockouts on [{}].", sep->arg[4][0] ? sep->arg[4] : "all", sep->arg[3]
+				).c_str());
+			}
+			else
+			{
+				c->Message(Chat::White, fmt::format(
+					"Removing [{}]:[{}] lockout on [{}].", sep->arg[4], sep->arg[5], sep->arg[3]
+				).c_str());
+			}
+			Expedition::RemoveCharacterLockouts(sep->arg[3], sep->arg[4], sep->arg[5]);
 		}
 	}
 	else
@@ -6948,6 +6956,7 @@ void command_dz(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "#dz list [all] - list dynamic zone instances from database -- 'all' includes expired");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" \"<event_name>\" - delete lockout by expedition event");
 	}
 }
 
