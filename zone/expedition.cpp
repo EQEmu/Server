@@ -153,58 +153,95 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		return;
 	}
 
+	std::vector<uint32_t> expedition_ids;
+	std::vector<uint32_t> instance_ids;
+
+	using col = LoadExpeditionColumns::eLoadExpeditionColumns;
+
+	Expedition* current_expedition = nullptr;
 	uint32_t last_expedition_id = 0;
+
 	for (auto row = results.begin(); row != results.end(); ++row)
 	{
-		auto expedition_id = strtoul(row[0], nullptr, 10);
+		auto expedition_id = strtoul(row[col::id], nullptr, 10);
+
 		if (expedition_id != last_expedition_id)
 		{
-			auto leader_id = static_cast<uint32_t>(strtoul(row[3], nullptr, 10));
-			ExpeditionMember leader{ leader_id, row[9] }; // id, name
-			auto instance_id = row[1] ? strtoul(row[1], nullptr, 10) : 0; // can be null from fk constraint
+			// finished parsing previous expedition members, send member updates
+			if (current_expedition)
+			{
+				current_expedition->SendWorldGetOnlineMembers();
+				current_expedition->SendUpdatesToZoneMembers();
+			}
 
-			DynamicZone dynamic_zone = DynamicZone::LoadDzFromDatabase(instance_id);
+			expedition_ids.emplace_back(expedition_id);
+
+			uint32_t leader_id = strtoul(row[col::leader_id], nullptr, 10);
+			uint32_t instance_id = row[col::instance_id] ? strtoul(row[col::instance_id], nullptr, 10) : 0;
+			if (instance_id) // can be null from fk constraint
+			{
+				instance_ids.emplace_back(instance_id);
+			}
 
 			std::unique_ptr<Expedition> expedition = std::unique_ptr<Expedition>(new Expedition(
 				expedition_id,
-				dynamic_zone,
-				row[2],                             // expedition name
-				leader,                             // expedition leader
-				strtoul(row[4], nullptr, 10),       // min_players
-				strtoul(row[5], nullptr, 10),       // max_players
-				(strtoul(row[6], nullptr, 10) != 0) // has_replay_timer
+				DynamicZone{instance_id},
+				row[col::expedition_name],                              // expedition name
+				ExpeditionMember{leader_id, row[col::leader_name]},     // expedition leader id, name
+				strtoul(row[col::min_players], nullptr, 10),            // min_players
+				strtoul(row[col::max_players], nullptr, 10),            // max_players
+				(strtoul(row[col::has_replay_timer], nullptr, 10) != 0) // has_replay_timer
 			));
 
-			bool add_replay_on_join = (strtoul(row[7], nullptr, 10) != 0);
-			bool is_locked = (strtoul(row[8], nullptr, 10) != 0);
+			bool add_replay_on_join = (strtoul(row[col::add_replay_on_join], nullptr, 10) != 0);
+			bool is_locked = (strtoul(row[col::is_locked], nullptr, 10) != 0);
 
 			expedition->SetReplayLockoutOnMemberJoin(add_replay_on_join);
 			expedition->SetLocked(is_locked);
-			expedition->LoadMembers();
-			expedition->SendUpdatesToZoneMembers();
 
-			// don't bother caching empty expeditions
-			if (expedition->GetMemberCount() > 0)
-			{
-				zone->expedition_cache.emplace(expedition_id, std::move(expedition));
-			}
+			zone->expedition_cache.emplace(expedition_id, std::move(expedition));
 		}
 
 		last_expedition_id = expedition_id;
 
-		// optional lockouts from left join
-		if (row[10] && row[11] && row[12] && row[13])
+		// looping expedition members
+		current_expedition = Expedition::FindCachedExpeditionByID(last_expedition_id);
+		if (current_expedition)
 		{
-			auto it = zone->expedition_cache.find(last_expedition_id);
-			if (it != zone->expedition_cache.end())
+			auto member_id = strtoul(row[col::member_id], nullptr, 10);
+			bool is_current_member = (strtoul(row[col::is_current_member], nullptr, 10) != 0);
+			current_expedition->AddInternalMember(
+				row[col::member_name], member_id, ExpeditionMemberStatus::Offline, is_current_member
+			);
+		}
+	}
+
+	// update for the last cached expedition
+	if (current_expedition)
+	{
+		current_expedition->SendWorldGetOnlineMembers();
+		current_expedition->SendUpdatesToZoneMembers();
+	}
+
+	// bulk load dynamic zone data and expedition lockouts for cached expeditions
+	auto dynamic_zones = DynamicZone::LoadMultipleDzFromDatabase(instance_ids);
+	auto expedition_lockouts = ExpeditionDatabase::LoadMultipleExpeditionLockouts(expedition_ids);
+
+	for (const auto& expedition_id : expedition_ids)
+	{
+		auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+		if (expedition)
+		{
+			auto dz_iter = dynamic_zones.find(expedition->GetInstanceID());
+			if (dz_iter != dynamic_zones.end())
 			{
-				it->second->AddInternalLockout(ExpeditionLockoutTimer{
-					row[2],                                               // expedition_name
-					row[10],                                              // event_name
-					strtoull(row[11], nullptr, 10),                       // expire_time
-					static_cast<uint32_t>(strtoul(row[12], nullptr, 10)), // original duration
-					(strtoul(row[13], nullptr, 10) != 0)                  // is_inherited
-				});
+				expedition->m_dynamiczone = dz_iter->second;
+			}
+
+			auto lockout_iter = expedition_lockouts.find(expedition->GetID());
+			if (lockout_iter != expedition_lockouts.end())
+			{
+				expedition->m_lockouts = lockout_iter->second;
 			}
 		}
 	}
@@ -255,23 +292,6 @@ bool Expedition::CacheAllFromDatabase()
 	LogExpeditions("Caching [{}] expedition(s) took {}s", zone->expedition_cache.size(), elapsed);
 
 	return true;
-}
-
-void Expedition::LoadMembers()
-{
-	m_members.clear();
-
-	auto results = ExpeditionDatabase::LoadExpeditionMembers(m_id);
-	if (results.Success())
-	{
-		for (auto row = results.begin(); row != results.end(); ++row)
-		{
-			auto character_id = strtoul(row[0], nullptr, 10);
-			bool is_current_member = strtoul(row[1], nullptr, 10);
-			AddInternalMember(row[2], character_id, ExpeditionMemberStatus::Offline, is_current_member);
-		}
-		SendWorldGetOnlineMembers();
-	}
 }
 
 void Expedition::SaveLockouts(ExpeditionRequest& request)

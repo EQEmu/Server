@@ -38,12 +38,14 @@ namespace ExpeditionDatabase
 	uint32_t InsertExpedition(
 		uint32_t instance_id, const std::string& expedition_name, uint32_t leader_id,
 		uint32_t min_players, uint32_t max_players, bool has_replay_lockout);
+	std::string LoadExpeditionsSelectQuery();
 	MySQLRequestResult LoadExpedition(uint32_t expedition_id);
 	MySQLRequestResult LoadAllExpeditions();
 	MySQLRequestResult LoadCharacterLockouts(uint32_t character_id);
 	MySQLRequestResult LoadCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
-	MySQLRequestResult LoadExpeditionMembers(uint32_t expedition_id);
 	MySQLRequestResult LoadValidationData(const std::string& character_names_query, const std::string& expedition_name);
+	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
+		LoadMultipleExpeditionLockouts(const std::vector<uint32_t>& expedition_ids);
 	void DeleteAllCharacterLockouts(uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name, const std::string& event_name);
@@ -68,6 +70,26 @@ namespace ExpeditionDatabase
 	void UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id);
 	void UpdateAllMembersRemoved(uint32_t expedition_id);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
+};
+
+namespace LoadExpeditionColumns
+{
+	enum eLoadExpeditionColumns
+	{
+		id = 0,
+		instance_id,
+		expedition_name,
+		leader_id,
+		min_players,
+		max_players,
+		has_replay_timer,
+		add_replay_on_join,
+		is_locked,
+		leader_name,
+		member_id,
+		is_current_member,
+		member_name
+	};
 };
 
 #endif

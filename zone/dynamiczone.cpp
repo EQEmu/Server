@@ -62,6 +62,42 @@ DynamicZone DynamicZone::LoadDzFromDatabase(uint32_t instance_id)
 	return dynamic_zone;
 }
 
+std::unordered_map<uint32_t, DynamicZone> DynamicZone::LoadMultipleDzFromDatabase(
+	const std::vector<uint32_t>& instance_ids)
+{
+	LogDynamicZonesDetail("Loading dynamic zone data for [{}] instances", instance_ids.size());
+
+	std::string in_instance_ids_query;
+	for (const auto& instance_id : instance_ids)
+	{
+		fmt::format_to(std::back_inserter(in_instance_ids_query), "{},", instance_id);
+	}
+
+	std::unordered_map<uint32_t, DynamicZone> dynamic_zones;
+
+	if (!in_instance_ids_query.empty())
+	{
+		in_instance_ids_query.pop_back(); // trailing comma
+
+		std::string query = fmt::format(SQL(
+			{} WHERE dynamic_zones.instance_id IN ({});
+		), DynamicZoneSelectQuery(), in_instance_ids_query);
+
+		auto results = database.QueryDatabase(query);
+		if (results.Success())
+		{
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				DynamicZone dz;
+				dz.LoadDatabaseResult(row);
+				dynamic_zones.emplace(dz.GetInstanceID(), dz);
+			}
+		}
+	}
+
+	return dynamic_zones;
+}
+
 uint32_t DynamicZone::CreateInstance()
 {
 	if (m_instance_id)
@@ -107,26 +143,11 @@ uint32_t DynamicZone::CreateInstance()
 	return m_instance_id;
 }
 
-void DynamicZone::LoadFromDatabase(uint32_t instance_id)
+std::string DynamicZone::DynamicZoneSelectQuery()
 {
-	if (instance_id == 0)
-	{
-		return;
-	}
-
-	if (m_instance_id)
-	{
-		LogDynamicZones(
-			"Loading instance data for [{}] failed, instance id [{}] data already loaded",
-			instance_id, m_instance_id
-		);
-		return;
-	}
-
-	LogDynamicZonesDetail("Loading dz instance [{}] from database", instance_id);
-
-	std::string query = fmt::format(SQL(
+	return std::string(SQL(
 		SELECT
+			instance_list.id,
 			instance_list.zone,
 			instance_list.version,
 			instance_list.start_time,
@@ -149,36 +170,53 @@ void DynamicZone::LoadFromDatabase(uint32_t instance_id)
 			dynamic_zones.has_zone_in
 		FROM dynamic_zones
 			INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
-		WHERE dynamic_zones.instance_id = {};
-	), instance_id);
+	));
+}
+
+void DynamicZone::LoadDatabaseResult(MySQLRequestRow& row)
+{
+	m_instance_id        = strtoul(row[0], nullptr, 10);
+	m_zone_id            = strtoul(row[1], nullptr, 10);
+	m_version            = strtoul(row[2], nullptr, 10);
+	m_start_time         = strtoul(row[3], nullptr, 10);
+	m_duration           = strtoul(row[4], nullptr, 10);
+	m_never_expires      = (strtoul(row[5], nullptr, 10) != 0);
+	m_type               = static_cast<DynamicZoneType>(strtoul(row[6], nullptr, 10));
+	m_expire_time        = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+	m_compass.zone_id    = strtoul(row[7], nullptr, 10);
+	m_compass.x          = strtof(row[8], nullptr);
+	m_compass.y          = strtof(row[9], nullptr);
+	m_compass.z          = strtof(row[10], nullptr);
+	m_safereturn.zone_id = strtoul(row[11], nullptr, 10);
+	m_safereturn.x       = strtof(row[12], nullptr);
+	m_safereturn.y       = strtof(row[13], nullptr);
+	m_safereturn.z       = strtof(row[14], nullptr);
+	m_safereturn.heading = strtof(row[15], nullptr);
+	m_zonein.x           = strtof(row[16], nullptr);
+	m_zonein.y           = strtof(row[17], nullptr);
+	m_zonein.z           = strtof(row[18], nullptr);
+	m_zonein.heading     = strtof(row[19], nullptr);
+	m_has_zonein         = (strtoul(row[20], nullptr, 10) != 0);
+}
+
+void DynamicZone::LoadFromDatabase(uint32_t instance_id)
+{
+	if (instance_id == 0)
+	{
+		return;
+	}
+
+	LogDynamicZonesDetail("Loading dz instance [{}] from database", instance_id);
+
+	std::string query = fmt::format(SQL(
+		{} WHERE dynamic_zones.instance_id = {};
+	), DynamicZoneSelectQuery(), instance_id);
 
 	auto results = database.QueryDatabase(query);
 	if (results.Success() && results.RowCount() > 0)
 	{
 		auto row = results.begin();
-
-		m_instance_id        = instance_id;
-		m_zone_id            = strtoul(row[0], nullptr, 10);
-		m_version            = strtoul(row[1], nullptr, 10);
-		m_start_time         = strtoul(row[2], nullptr, 10);
-		m_duration           = strtoul(row[3], nullptr, 10);
-		m_never_expires      = (strtoul(row[4], nullptr, 10) != 0);
-		m_type               = static_cast<DynamicZoneType>(strtoul(row[5], nullptr, 10));
-		m_expire_time        = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
-		m_compass.zone_id    = strtoul(row[6], nullptr, 10);
-		m_compass.x          = strtof(row[7], nullptr);
-		m_compass.y          = strtof(row[8], nullptr);
-		m_compass.z          = strtof(row[9], nullptr);
-		m_safereturn.zone_id = strtoul(row[10], nullptr, 10);
-		m_safereturn.x       = strtof(row[11], nullptr);
-		m_safereturn.y       = strtof(row[12], nullptr);
-		m_safereturn.z       = strtof(row[13], nullptr);
-		m_safereturn.heading = strtof(row[14], nullptr);
-		m_zonein.x           = strtof(row[15], nullptr);
-		m_zonein.y           = strtof(row[16], nullptr);
-		m_zonein.z           = strtof(row[17], nullptr);
-		m_zonein.heading     = strtof(row[18], nullptr);
-		m_has_zonein         = (strtoul(row[19], nullptr, 10) != 0);
+		LoadDatabaseResult(row);
 	}
 }
 
