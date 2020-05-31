@@ -21,6 +21,7 @@
 #ifndef EXPEDITION_REQUEST_H
 #define EXPEDITION_REQUEST_H
 
+#include "expedition.h"
 #include "expedition_lockout_timer.h"
 #include <cstdint>
 #include <string>
@@ -32,7 +33,6 @@ class Group;
 class MySQLRequestResult;
 class Raid;
 class ServerPacket;
-struct ExpeditionMember;
 
 class ExpeditionRequest
 {
