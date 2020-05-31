@@ -4,6 +4,7 @@
 #include <luabind/luabind.hpp>
 
 #include "client.h"
+#include "dynamiczone.h"
 #include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "lua_client.h"

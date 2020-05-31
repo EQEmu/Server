@@ -21,12 +21,17 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
+class DynamicZone;
+class Expedition;
+class ExpeditionLockoutTimer;
+class ExpeditionRequest;
 class Group;
 class NPC;
 class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+struct DynamicZoneLocation;
 enum WaterRegionType : int;
 
 namespace EQ
@@ -52,8 +57,6 @@ namespace EQ
 #include "aggromanager.h"
 
 #include "common.h"
-#include "expedition.h"
-#include "dynamiczone.h"
 #include "merc.h"
 #include "mob.h"
 #include "qglobals.h"
@@ -1701,7 +1704,8 @@ private:
 	uint32 m_expedition_id = 0;
 	ExpeditionInvite m_pending_expedition_invite { 0 };
 	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
-	DynamicZoneLocation m_quest_compass;
+	glm::vec3 m_quest_compass;
+	bool m_has_quest_compass = false;
 
 #ifdef BOTS
 

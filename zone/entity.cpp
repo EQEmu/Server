@@ -32,6 +32,7 @@
 #include "../common/features.h"
 #include "../common/guilds.h"
 
+#include "dynamiczone.h"
 #include "guild_mgr.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"

@@ -32,6 +32,7 @@
 
 class Client;
 class EQApplicationPacket;
+struct ExpeditionInvite;
 class ExpeditionRequest;
 class MySQLRequestResult;
 class ServerPacket;
@@ -54,17 +55,11 @@ struct ExpeditionMember
 	std::string name;
 	ExpeditionMemberStatus status = ExpeditionMemberStatus::Online;
 
-	ExpeditionMember() {}
-	ExpeditionMember(uint32_t char_id_, const std::string& name_) : char_id(char_id_), name(name_) {}
+	ExpeditionMember() = default;
+	ExpeditionMember(uint32_t char_id_, const std::string& name_)
+		: char_id(char_id_), name(name_) {}
 	ExpeditionMember(uint32_t char_id_, const std::string& name_, ExpeditionMemberStatus status_)
 		: char_id(char_id_), name(name_), status(status_) {}
-};
-
-struct ExpeditionInvite
-{
-	uint32_t    expedition_id;
-	std::string inviter_name;
-	std::string swap_remove_name;
 };
 
 class Expedition

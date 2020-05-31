@@ -6145,11 +6145,11 @@ void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 coun
 {
 	if (count == 0)
 	{
-		m_quest_compass.zone_id = 0;
+		m_has_quest_compass = false;
 	}
 	else
 	{
-		m_quest_compass.zone_id = zone ? zone->GetZoneID() : 0;
+		m_has_quest_compass = true;
 		m_quest_compass.x = in_x;
 		m_quest_compass.y = in_y;
 		m_quest_compass.z = in_z;
@@ -9845,7 +9845,7 @@ void Client::SendDzCompassUpdate()
 	// todo: shared tasks, missions, and quests with an associated dz
 
 	// compass set via MarkSingleCompassLocation()
-	if (zone && zone->GetZoneID() == m_quest_compass.zone_id && zone->GetInstanceID() == 0)
+	if (m_has_quest_compass)
 	{
 		DynamicZoneCompassEntry_Struct entry;
 		entry.dz_zone_id = 0;
