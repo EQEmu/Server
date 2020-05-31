@@ -139,7 +139,6 @@ private:
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status, bool is_current_member = true);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);
-	void LoadMembers();
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name);
 	void ProcessLockoutUpdate(const std::string& event_name, uint64_t expire_time, uint32_t duration, bool remove);

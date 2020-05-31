@@ -24,12 +24,14 @@
 #include <chrono>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
+class MySQLRequestRow;
 class ServerPacket;
 
-enum class DynamicZoneType : uint8_t // DynamicZoneActiveType
+enum class DynamicZoneType : uint8_t
 {
 	None = 0,
 	Expedition,
@@ -47,7 +49,7 @@ struct DynamicZoneLocation
 	float z = 0.0f;
 	float heading = 0.0f;
 
-	DynamicZoneLocation() {}
+	DynamicZoneLocation() = default;
 	DynamicZoneLocation(uint32_t zone_id_, float x_, float y_, float z_, float heading_)
 		: zone_id(zone_id_), x(x_), y(y_), z(z_), heading(heading_) {}
 };
@@ -58,9 +60,12 @@ public:
 	DynamicZone() = default;
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
 	DynamicZone(std::string zone_shortname, uint32_t version, uint32_t duration, DynamicZoneType type);
-	DynamicZone(DynamicZoneType type) : m_type(type) { }
+	DynamicZone(uint32_t instance_id) : m_instance_id(instance_id) {}
+	DynamicZone(DynamicZoneType type) : m_type(type) {}
 
 	static DynamicZone LoadDzFromDatabase(uint32_t instance_id);
+	static std::unordered_map<uint32_t, DynamicZone> LoadMultipleDzFromDatabase(
+		const std::vector<uint32_t>& instance_ids);
 	static void HandleWorldMessage(ServerPacket* pack);
 
 	DynamicZoneType     GetType() const { return m_type; }
@@ -95,6 +100,8 @@ public:
 	uint32_t SaveToDatabase();
 
 private:
+	static std::string DynamicZoneSelectQuery();
+	void LoadDatabaseResult(MySQLRequestRow& row);
 	void DeleteFromDatabase();
 	void SaveCompassToDatabase();
 	void SaveSafeReturnToDatabase();
@@ -111,7 +118,7 @@ private:
 	DynamicZoneLocation m_compass;
 	DynamicZoneLocation m_safereturn;
 	DynamicZoneLocation m_zonein;
-	std::chrono::time_point<std::chrono::system_clock> m_expire_time; //uint64_t m_expire_time = 0;
+	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 
 #endif
