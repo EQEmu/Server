@@ -155,6 +155,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 
 	std::vector<uint32_t> expedition_ids;
 	std::vector<uint32_t> instance_ids;
+	std::vector<std::pair<uint32_t, uint32_t>> expedition_character_ids;
 
 	using col = LoadExpeditionColumns::eLoadExpeditionColumns;
 
@@ -170,7 +171,6 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			// finished parsing previous expedition members, send member updates
 			if (current_expedition)
 			{
-				current_expedition->SendWorldGetOnlineMembers();
 				current_expedition->SendUpdatesToZoneMembers();
 			}
 
@@ -213,15 +213,18 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			current_expedition->AddInternalMember(
 				row[col::member_name], member_id, ExpeditionMemberStatus::Offline, is_current_member
 			);
+			expedition_character_ids.emplace_back(std::make_pair(expedition_id, member_id));
 		}
 	}
 
 	// update for the last cached expedition
 	if (current_expedition)
 	{
-		current_expedition->SendWorldGetOnlineMembers();
 		current_expedition->SendUpdatesToZoneMembers();
 	}
+
+	// ask world for online members from all cached expeditions at once
+	Expedition::SendWorldGetOnlineMembers(expedition_character_ids);
 
 	// bulk load dynamic zone data and expedition lockouts for cached expeditions
 	auto dynamic_zones = DynamicZone::LoadMultipleDzFromDatabase(instance_ids);
@@ -1554,21 +1557,22 @@ void Expedition::SendWorldSettingChanged(uint16_t server_opcode, bool setting_va
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldGetOnlineMembers()
+void Expedition::SendWorldGetOnlineMembers(
+	const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids)
 {
-	// request online status of all characters in our expedition tracked by world
-	uint32_t count = static_cast<uint32_t>(m_members.size());
+	// request online status of characters
+	uint32_t count = static_cast<uint32_t>(expedition_character_ids.size());
 	uint32_t entries_size = sizeof(ServerExpeditionCharacterEntry_Struct) * count;
 	uint32_t pack_size = sizeof(ServerExpeditionCharacters_Struct) + entries_size;
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionGetOnlineMembers, pack_size));
 	auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
 	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
 	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
 	buf->count = count;
 	for (uint32_t i = 0; i < buf->count; ++i)
 	{
-		buf->entries[i].character_id = m_members[i].char_id;
+		buf->entries[i].expedition_id = expedition_character_ids[i].first;
+		buf->entries[i].character_id = expedition_character_ids[i].second;
 		buf->entries[i].character_zone_id = 0;
 		buf->entries[i].character_instance_id = 0;
 		buf->entries[i].character_online = false;
@@ -1725,14 +1729,14 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionGetOnlineMembers:
 	{
-		// reply from world for online member statuses request
+		// reply from world for online member statuses request (for multiple expeditions)
 		auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition)
+		for (uint32_t i = 0; i < buf->count; ++i)
 		{
-			for (uint32_t i = 0; i < buf->count; ++i)
+			auto member = reinterpret_cast<ServerExpeditionCharacterEntry_Struct*>(&buf->entries[i]);
+			auto expedition = Expedition::FindCachedExpeditionByID(member->expedition_id);
+			if (expedition)
 			{
-				auto member = reinterpret_cast<ServerExpeditionCharacterEntry_Struct*>(&buf->entries[i]);
 				auto is_online = member->character_online;
 				auto status = is_online ? ExpeditionMemberStatus::Online : ExpeditionMemberStatus::Offline;
 				if (is_online && expedition->GetDynamicZone().IsInstanceID(member->character_instance_id))

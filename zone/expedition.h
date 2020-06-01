@@ -74,7 +74,6 @@ public:
 
 	static void CacheFromDatabase(uint32_t expedition_id);
 	static bool CacheAllFromDatabase();
-	static void CacheExpeditions(MySQLRequestResult& results);
 	static Expedition* FindCachedExpeditionByCharacterID(uint32_t character_id);
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
@@ -135,6 +134,9 @@ public:
 	static const uint32_t EVENT_TIMER_ID;
 
 private:
+	static void CacheExpeditions(MySQLRequestResult& results);
+	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
+
 	void AddInternalLockout(ExpeditionLockoutTimer&& lockout_timer);
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status, bool is_current_member = true);
 	bool ChooseNewLeader();
@@ -152,7 +154,6 @@ private:
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
-	void SendWorldGetOnlineMembers();
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name, bool pending = false);
 	void SendWorldLeaderChanged();
 	void SendWorldLockoutUpdate(const std::string& event_name, uint64_t expire_time, uint32_t duration, bool remove = false);
