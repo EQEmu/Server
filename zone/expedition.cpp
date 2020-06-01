@@ -613,7 +613,7 @@ void Expedition::SendClientExpeditionInvite(
 	{
 		// live doesn't issue a warning for the dz's replay timer
 		const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-		if (!lockout.IsInherited() && !lockout.IsReplayTimer() &&
+		if (!lockout.IsInherited() && !lockout.IsExpired() && !lockout.IsReplayTimer() &&
 		    !client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 		{
 			if (!warned)
@@ -680,7 +680,7 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 		}
 	}
 
-	// check any extra event lockouts for this expedition that the client has and leader doesn't
+	// check any extra event lockouts for this expedition that the client has and expedition doesn't
 	auto client_lockouts = add_client->GetExpeditionLockouts(m_expedition_name);
 	for (const auto& client_lockout : client_lockouts)
 	{
@@ -776,7 +776,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		for (const auto& lockout_iter : m_lockouts)
 		{
 			const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-			if (!lockout.IsInherited() &&
+			if (!lockout.IsInherited() && !lockout.IsExpired() &&
 			    !add_client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 			{
 				// replay timers are optionally added to new members immediately on

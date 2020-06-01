@@ -1127,12 +1127,13 @@ public:
 	const ExpeditionLockoutTimer* GetExpeditionLockout(
 		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
 	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
-	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name);
+	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name, bool include_expired = false);
 	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
 	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
 	bool IsInExpedition() const { return m_expedition_id != 0; }
 	void RemoveAllExpeditionLockouts(std::string expedition_name = {});
-	void RemoveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool update_db = false, bool update_client = true);
+	void RemoveExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, bool update_db = false, bool update_client = true);
 	void RequestPendingExpeditionInvite();
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
