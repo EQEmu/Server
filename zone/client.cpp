@@ -9613,19 +9613,6 @@ Expedition* Client::GetExpedition() const
 	return nullptr;
 }
 
-std::vector<ExpeditionLockoutTimer> Client::GetExpeditionLockouts(const std::string& expedition_name)
-{
-	std::vector<ExpeditionLockoutTimer> lockouts;
-	for (const auto& lockout : m_expedition_lockouts)
-	{
-		if (lockout.GetExpeditionName() == expedition_name)
-		{
-			lockouts.emplace_back(lockout);
-		}
-	}
-	return lockouts;
-}
-
 void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db, bool update_client)
 {
 	// todo: support for account based lockouts like live AoC expeditions
@@ -9707,13 +9694,28 @@ const ExpeditionLockoutTimer* Client::GetExpeditionLockout(
 {
 	for (const auto& expedition_lockout : m_expedition_lockouts)
 	{
-		if ((include_expired || expedition_lockout.GetSecondsRemaining() > 0) &&
+		if ((include_expired || !expedition_lockout.IsExpired()) &&
 		    expedition_lockout.IsSameLockout(expedition_name, event_name))
 		{
 			return &expedition_lockout;
 		}
 	}
 	return nullptr;
+}
+
+std::vector<ExpeditionLockoutTimer> Client::GetExpeditionLockouts(
+	const std::string& expedition_name, bool include_expired)
+{
+	std::vector<ExpeditionLockoutTimer> lockouts;
+	for (const auto& lockout : m_expedition_lockouts)
+	{
+		if ((include_expired || !lockout.IsExpired()) &&
+		    lockout.GetExpeditionName() == expedition_name)
+		{
+			lockouts.emplace_back(lockout);
+		}
+	}
+	return lockouts;
 }
 
 bool Client::HasExpeditionLockout(

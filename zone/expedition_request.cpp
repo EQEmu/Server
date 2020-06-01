@@ -194,6 +194,8 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 		return false;
 	}
 
+	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
+
 	for (auto row = results.begin(); row != results.end(); ++row)
 	{
 		uint64_t expire_time = strtoull(row[0], nullptr, 10);
@@ -201,11 +203,11 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 		ExpeditionLockoutTimer lockout{m_expedition_name, row[2], expire_time, duration, true};
 
 		// client window hides timers with less than 60s remaining, optionally count them as expired
-		if (lockout.GetSecondsRemaining() <= RuleI(Expedition, RequestExpiredLockoutLeewaySeconds))
+		if (lockout.GetSecondsRemaining() <= leeway_seconds)
 		{
 			LogExpeditionsModerate(
-				"Ignoring leader [{}] lockout [{}] with [{}] seconds remaining due to expired leeway rule",
-				m_leader_id, lockout.GetEventName(), lockout.GetSecondsRemaining()
+				"Ignoring leader [{}] lockout [{}] with [{}s] remaining due to leeway rule [{}s]",
+				m_leader_id, lockout.GetEventName(), lockout.GetSecondsRemaining(), leeway_seconds
 			);
 		}
 		else
@@ -229,6 +231,8 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 	bool has_conflicts = false;
 
 	std::vector<ExpeditionRequestConflict> member_lockout_conflicts;
+
+	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
 
 	bool leader_processed = false;
 	uint32_t last_character_id = 0;
@@ -275,11 +279,11 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 			ExpeditionLockoutTimer lockout(m_expedition_name, event_name, expire_time, original_duration);
 
 			// client window hides timers with less than 60s remaining, optionally count them as expired
-			if (lockout.GetSecondsRemaining() <= RuleI(Expedition, RequestExpiredLockoutLeewaySeconds))
+			if (lockout.GetSecondsRemaining() <= leeway_seconds)
 			{
 				LogExpeditionsModerate(
-					"Ignoring character [{}] lockout [{}] with [{}] seconds remaining due to expired leeway rule",
-					character_id, lockout.GetEventName(), lockout.GetSecondsRemaining()
+					"Ignoring character [{}] lockout [{}] with [{}s] remaining due to leeway rule [{}s]",
+					character_id, lockout.GetEventName(), lockout.GetSecondsRemaining(), leeway_seconds
 				);
 			}
 			else

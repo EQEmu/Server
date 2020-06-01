@@ -25,7 +25,6 @@
 
 extern const char* const DZ_REPLAY_TIMER_NAME;
 
-// DynamicZoneEventTimer and DynamicZoneReplayTimer in client
 class ExpeditionLockoutTimer
 {
 public:
@@ -47,6 +46,7 @@ public:
 	const std::string& GetEventName() const { return m_event_name; }
 	void SetExpireTime(uint64_t expire_time) { m_expire_time = expire_time; }
 	void SetInherited(bool is_inherited) { m_is_inherited = is_inherited; }
+	bool IsExpired() const { return GetSecondsRemaining() == 0; }
 	bool IsInherited() const { return m_is_inherited; }
 	bool IsReplayTimer() const { return m_is_replay_timer; }
 	bool IsSameLockout(const ExpeditionLockoutTimer& compare_lockout) const;
