@@ -2034,6 +2034,7 @@ struct ServerExpeditionMemberStatus_Struct {
 };
 
 struct ServerExpeditionCharacterEntry_Struct {
+	uint32 expedition_id;
 	uint32 character_id;
 	uint32 character_zone_id;
 	uint16 character_instance_id;
@@ -2041,7 +2042,6 @@ struct ServerExpeditionCharacterEntry_Struct {
 };
 
 struct ServerExpeditionCharacters_Struct {
-	uint32 expedition_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
 	uint32 count;

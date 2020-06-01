@@ -510,15 +510,15 @@ void ExpeditionMessage::GetOnlineMembers(ServerPacket* pack)
 
 	for (uint32_t i = 0; i < buf->count; ++i)
 	{
-		for (const auto& cle : all_clients)
+		auto it = std::find_if(all_clients.begin(), all_clients.end(), [&](const ClientListEntry* cle) {
+			return (cle && cle->CharID() == buf->entries[i].character_id);
+		});
+
+		if (it != all_clients.end())
 		{
-			if (cle && cle->CharID() == buf->entries[i].character_id)
-			{
-				buf->entries[i].character_zone_id = cle->zone();
-				buf->entries[i].character_instance_id = cle->instance();
-				buf->entries[i].character_online = true;
-				break;
-			}
+			buf->entries[i].character_zone_id = (*it)->zone();
+			buf->entries[i].character_instance_id = (*it)->instance();
+			buf->entries[i].character_online = true;
 		}
 	}
 
