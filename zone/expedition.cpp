@@ -29,6 +29,7 @@
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/util/uuid.h"
 
 extern WorldServer worldserver;
 extern Zone* zone;
@@ -46,10 +47,11 @@ const uint32_t Expedition::REPLAY_TIMER_ID = std::numeric_limits<uint32_t>::max(
 const uint32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
-	uint32_t id, const DynamicZone& dynamic_zone, std::string expedition_name,
+	uint32_t id, const std::string& uuid, const DynamicZone& dynamic_zone, std::string expedition_name,
 	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players
 ) :
 	m_id(id),
+	m_uuid(uuid),
 	m_dynamiczone(dynamic_zone),
 	m_expedition_name(expedition_name),
 	m_leader(leader),
@@ -89,13 +91,14 @@ Expedition* Expedition::TryCreate(
 		return nullptr;
 	}
 
-	ExpeditionMember leader{ request.GetLeaderID(), request.GetLeaderName() };
+	std::string expedition_uuid = EQ::Util::UUID::Generate().ToString();
 
 	// unique expedition ids are created from database via auto-increment column
 	auto expedition_id = ExpeditionDatabase::InsertExpedition(
+		expedition_uuid,
 		dynamiczone.GetInstanceID(),
 		request.GetExpeditionName(),
-		leader.char_id,
+		request.GetLeaderID(),
 		request.GetMinPlayers(),
 		request.GetMaxPlayers()
 	);
@@ -104,8 +107,11 @@ Expedition* Expedition::TryCreate(
 	{
 		dynamiczone.SaveToDatabase();
 
+		ExpeditionMember leader{request.GetLeaderID(), request.GetLeaderName()};
+
 		auto expedition = std::unique_ptr<Expedition>(new Expedition(
 			expedition_id,
+			expedition_uuid,
 			dynamiczone,
 			request.GetExpeditionName(),
 			leader,
@@ -182,6 +188,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 
 			std::unique_ptr<Expedition> expedition = std::unique_ptr<Expedition>(new Expedition(
 				expedition_id,
+				row[col::uuid],                                         // expedition uuid
 				DynamicZone{instance_id},
 				row[col::expedition_name],                              // expedition name
 				ExpeditionMember{leader_id, row[col::leader_name]},     // expedition leader id, name

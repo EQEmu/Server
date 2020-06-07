@@ -36,8 +36,8 @@ class MySQLRequestResult;
 namespace ExpeditionDatabase
 {
 	uint32_t InsertExpedition(
-		uint32_t instance_id, const std::string& expedition_name, uint32_t leader_id,
-		uint32_t min_players, uint32_t max_players);
+		const std::string& uuid, uint32_t instance_id, const std::string& expedition_name,
+		uint32_t leader_id, uint32_t min_players, uint32_t max_players);
 	std::string LoadExpeditionsSelectQuery();
 	MySQLRequestResult LoadExpedition(uint32_t expedition_id);
 	MySQLRequestResult LoadAllExpeditions();
@@ -79,6 +79,7 @@ namespace LoadExpeditionColumns
 	enum eLoadExpeditionColumns
 	{
 		id = 0,
+		uuid,
 		instance_id,
 		expedition_name,
 		leader_id,

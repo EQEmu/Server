@@ -95,6 +95,11 @@ int Lua_Expedition::GetSecondsRemaining() {
 	return self->GetDynamicZone().GetSecondsRemaining();
 }
 
+std::string Lua_Expedition::GetUUID() {
+	Lua_Safe_Call_String();
+	return self->GetUUID();
+}
+
 int Lua_Expedition::GetZoneID() {
 	Lua_Safe_Call_Int();
 	return self->GetDynamicZone().GetZoneID();
@@ -170,6 +175,7 @@ luabind::scope lua_register_expedition() {
 		.def("GetMembers", &Lua_Expedition::GetMembers)
 		.def("GetName", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetName)
 		.def("GetSecondsRemaining", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetSecondsRemaining)
+		.def("GetUUID", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetUUID)
 		.def("GetZoneID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetZoneID)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
 		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
