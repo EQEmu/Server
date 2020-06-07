@@ -67,8 +67,8 @@ class Expedition
 public:
 	Expedition() = delete;
 	Expedition(
-		uint32_t id, const DynamicZone& dz, std::string expedition_name, const ExpeditionMember& leader,
-		uint32_t min_players, uint32_t max_players);
+		uint32_t id, const std::string& uuid, const DynamicZone& dz, std::string expedition_name,
+		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
 
@@ -90,6 +90,7 @@ public:
 	const DynamicZone& GetDynamicZone() const { return m_dynamiczone; }
 	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
+	const std::string& GetUUID() const { return m_uuid; }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
 	const std::vector<ExpeditionMember>& GetMembers() const { return m_members; }
 
@@ -179,6 +180,7 @@ private:
 	uint32_t    m_max_players        = 0;
 	bool        m_is_locked          = false;
 	bool        m_add_replay_on_join = true;
+	std::string m_uuid;
 	std::string m_expedition_name;
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	ExpeditionMember m_leader;

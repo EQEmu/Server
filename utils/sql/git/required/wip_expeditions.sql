@@ -1,5 +1,6 @@
 CREATE TABLE `expedition_details` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`uuid` VARCHAR(36) NOT NULL,
 	`instance_id` INT(10) NULL DEFAULT NULL,
 	`expedition_name` VARCHAR(128) NOT NULL,
 	`leader_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
@@ -11,7 +12,7 @@ CREATE TABLE `expedition_details` (
 	UNIQUE INDEX `instance_id` (`instance_id`),
 	CONSTRAINT `FK_expedition_details_instance_list` FOREIGN KEY (`instance_id`) REFERENCES `instance_list` (`id`) ON DELETE SET NULL
 )
-COLLATE='latin1_swedish_ci'
+COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
