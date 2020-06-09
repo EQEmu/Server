@@ -43,7 +43,8 @@ namespace ExpeditionDatabase
 	MySQLRequestResult LoadAllExpeditions();
 	MySQLRequestResult LoadCharacterLockouts(uint32_t character_id);
 	MySQLRequestResult LoadCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
-	MySQLRequestResult LoadValidationData(const std::string& character_names_query, const std::string& expedition_name);
+	MySQLRequestResult LoadMembersForCreateRequest(
+		const std::vector<std::string>& character_names, const std::string& expedition_name);
 	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
 		LoadMultipleExpeditionLockouts(const std::vector<uint32_t>& expedition_ids);
 	void DeleteAllCharacterLockouts(uint32_t character_id);

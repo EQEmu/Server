@@ -54,10 +54,10 @@ public:
 	std::unordered_map<std::string, ExpeditionLockoutTimer> TakeLockouts() && { return std::move(m_lockouts); }
 
 private:
-	bool ValidateMembers(const std::string& query_member_names, uint32_t member_count);
+	bool ValidateMembers(const std::vector<std::string>& member_names);
 	bool CanRaidRequest(Raid* raid);
 	bool CanGroupRequest(Group* group);
-	bool CheckMembersForConflicts(MySQLRequestResult& results, bool is_solo);
+	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
 	std::string GetGroupLeaderName(uint32_t group_id);
 	bool IsPlayerCountValidated(uint32_t member_count);
 	bool LoadLeaderLockouts();
