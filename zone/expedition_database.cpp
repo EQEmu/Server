@@ -186,34 +186,49 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 	return lockouts;
 }
 
-MySQLRequestResult ExpeditionDatabase::LoadValidationData(
-	const std::string& character_names, const std::string& expedition_name)
+MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
+	const std::vector<std::string>& character_names, const std::string& expedition_name)
 {
 	LogExpeditionsDetail("Loading multiple characters data for [{}] request validation", expedition_name);
 
-	// for create validation, loads each character's lockouts and possible current expedition
-	auto query = fmt::format(SQL(
-		SELECT
-			character_data.id,
-			character_data.name,
-			member.expedition_id,
-			UNIX_TIMESTAMP(lockout.expire_time),
-			lockout.duration,
-			lockout.event_name
-		FROM character_data
-			LEFT JOIN expedition_character_lockouts lockout
-				ON character_data.id = lockout.character_id
-				AND lockout.is_pending = FALSE
-				AND lockout.expire_time > NOW()
-				AND lockout.expedition_name = '{}'
-			LEFT JOIN expedition_members member
-				ON character_data.id = member.character_id
-				AND member.is_current_member = TRUE
-		WHERE character_data.name IN ({})
-		ORDER BY character_data.id;
-	), expedition_name, character_names);
+	std::string in_character_names_query;
+	for (const auto& character_name : character_names)
+	{
+		fmt::format_to(std::back_inserter(in_character_names_query), "'{}',", character_name);
+	}
 
-	return database.QueryDatabase(query);
+	MySQLRequestResult results;
+
+	if (!in_character_names_query.empty())
+	{
+		in_character_names_query.pop_back(); // trailing comma
+
+		// for create validation, loads each character's lockouts and possible current expedition
+		auto query = fmt::format(SQL(
+			SELECT
+				character_data.id,
+				character_data.name,
+				member.expedition_id,
+				UNIX_TIMESTAMP(lockout.expire_time),
+				lockout.duration,
+				lockout.event_name
+			FROM character_data
+				LEFT JOIN expedition_character_lockouts lockout
+					ON character_data.id = lockout.character_id
+					AND lockout.is_pending = FALSE
+					AND lockout.expire_time > NOW()
+					AND lockout.expedition_name = '{}'
+				LEFT JOIN expedition_members member
+					ON character_data.id = member.character_id
+					AND member.is_current_member = TRUE
+			WHERE character_data.name IN ({})
+			ORDER BY character_data.id;
+		), expedition_name, in_character_names_query);
+
+		results = database.QueryDatabase(query);
+	}
+
+	return results;
 }
 
 void ExpeditionDatabase::DeleteAllCharacterLockouts(uint32_t character_id)

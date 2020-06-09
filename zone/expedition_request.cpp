@@ -78,7 +78,7 @@ bool ExpeditionRequest::Validate(Client* requester)
 		m_leader = m_requester;
 		m_leader_id = m_requester->CharacterID();
 		m_leader_name = m_requester->GetName();
-		requirements_met = ValidateMembers(fmt::format("'{}'", m_leader_name), 1);
+		requirements_met = ValidateMembers({m_leader_name});
 	}
 
 	auto elapsed = benchmark.elapsed();
@@ -93,23 +93,16 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	m_leader_name = raid->leadername;
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(raid->leadername);
 
-	uint32_t count = 0;
-	std::string query_member_names;
+	std::vector<std::string> member_names;
 	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
 	{
 		if (raid->members[i].membername[0])
 		{
-			fmt::format_to(std::back_inserter(query_member_names), "'{}',", raid->members[i].membername);
-			++count;
+			member_names.emplace_back(raid->members[i].membername);
 		}
 	}
 
-	if (!query_member_names.empty())
-	{
-		query_member_names.pop_back(); // trailing comma
-	}
-
-	return ValidateMembers(query_member_names, count);
+	return ValidateMembers(member_names);
 }
 
 bool ExpeditionRequest::CanGroupRequest(Group* group)
@@ -124,22 +117,16 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name.c_str());
 
 	uint32_t count = 0;
-	std::string query_member_names;
+	std::vector<std::string> member_names;
 	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
 		if (group->membername[i][0])
 		{
-			fmt::format_to(std::back_inserter(query_member_names), "'{}',", group->membername[i]);
-			++count;
+			member_names.emplace_back(group->membername[i]);
 		}
 	}
 
-	if (!query_member_names.empty())
-	{
-		query_member_names.pop_back(); // trailing comma
-	}
-
-	return ValidateMembers(query_member_names, count);
+	return ValidateMembers(member_names);
 }
 
 std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
@@ -149,27 +136,16 @@ std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
 	return std::string(leader_name_buffer);
 }
 
-bool ExpeditionRequest::ValidateMembers(const std::string& query_member_names, uint32_t member_count)
+bool ExpeditionRequest::ValidateMembers(const std::vector<std::string>& member_names)
 {
-	if (query_member_names.empty() || !LoadLeaderLockouts())
+	if (member_names.empty())
 	{
-		return false;
-	}
-
-	// get character ids for all members through database since some may be out
-	// of zone. also gets each member's existing expeditions and/or lockouts
-	auto results = ExpeditionDatabase::LoadValidationData(query_member_names, m_expedition_name);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to load data to verify members for expedition request");
 		return false;
 	}
 
 	bool requirements_met = true;
 
-	bool is_solo = (member_count == 1);
-	bool has_conflicts = CheckMembersForConflicts(results, is_solo);
-	if (has_conflicts)
+	if (CheckMembersForConflicts(member_names))
 	{
 		requirements_met = false;
 	}
@@ -178,7 +154,7 @@ bool ExpeditionRequest::ValidateMembers(const std::string& query_member_names, u
 	// maybe it's done intentionally as a way to preview lockout conflicts
 	if (requirements_met)
 	{
-		requirements_met = IsPlayerCountValidated(member_count);
+		requirements_met = IsPlayerCountValidated(static_cast<uint32_t>(member_names.size()));
 	}
 
 	return requirements_met;
@@ -225,21 +201,29 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 	return true;
 }
 
-bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bool is_solo)
+bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>& member_names)
 {
-	// leader lockouts were pre-loaded to compare with members below
+	// load data for each member and compare with leader lockouts
+	auto results = ExpeditionDatabase::LoadMembersForCreateRequest(member_names, m_expedition_name);
+	if (!results.Success() || !LoadLeaderLockouts())
+	{
+		LogExpeditions("Failed to load data to verify members for expedition request");
+		return true;
+	}
+
+	bool is_solo = (member_names.size() == 1);
 	bool has_conflicts = false;
 
 	std::vector<ExpeditionRequestConflict> member_lockout_conflicts;
 
 	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
 
-	bool leader_processed = false;
 	uint32_t last_character_id = 0;
 	for (auto row = results.begin(); row != results.end(); ++row)
 	{
 		auto character_id = static_cast<uint32_t>(std::strtoul(row[0], nullptr, 10));
 		std::string character_name(row[1]);
+		bool has_expedition = (row[2] != nullptr); // in expedition_members with another expedition
 
 		if (character_id != last_character_id)
 		{
@@ -253,8 +237,7 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 			}
 			member_lockout_conflicts.clear();
 
-			// current character existing expedition check
-			if (row[2])
+			if (has_expedition)
 			{
 				has_conflicts = true;
 				SendLeaderMemberInExpedition(character_name, is_solo);
@@ -293,15 +276,13 @@ bool ExpeditionRequest::CheckMembersForConflicts(MySQLRequestResult& results, bo
 				{
 					has_conflicts = true;
 					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
-					// replay timers no longer also show up as event conflicts
-					//SendLeaderMemberEventLockout(character_name, lockout);
 				}
 				else if (m_check_event_lockouts && character_id != m_leader_id)
 				{
 					if (m_lockouts.find(event_name) == m_lockouts.end())
 					{
-						// leader doesn't have this lockout
-						// queue instead of messaging now so they come after any replay lockout messages
+						// leader doesn't have this lockout. queue instead of messaging
+						// now so message comes after any replay lockout messages
 						has_conflicts = true;
 						member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
 					}
@@ -348,7 +329,7 @@ void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& member_n
 void ExpeditionRequest::SendLeaderMemberReplayLockout(
 	const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo)
 {
-	if (m_disable_messages || lockout.GetSecondsRemaining() <= 0)
+	if (m_disable_messages)
 	{
 		return;
 	}
@@ -371,7 +352,7 @@ void ExpeditionRequest::SendLeaderMemberReplayLockout(
 void ExpeditionRequest::SendLeaderMemberEventLockout(
 	const std::string& member_name, const ExpeditionLockoutTimer& lockout)
 {
-	if (m_disable_messages || lockout.GetSecondsRemaining() <= 0)
+	if (m_disable_messages)
 	{
 		return;
 	}
