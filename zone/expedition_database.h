@@ -61,7 +61,7 @@ namespace ExpeditionDatabase
 	ExpeditionMember GetExpeditionLeader(uint32_t expedition_id);
 	void InsertCharacterLockouts(
 		uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
-		bool update_expire_times, bool is_pending = false);
+		bool replace_timer, bool is_pending = false);
 	void InsertMembersLockout(const std::vector<ExpeditionMember>& members, const ExpeditionLockoutTimer& lockout);
 	void InsertLockout(uint32_t expedition_id, const ExpeditionLockoutTimer& lockout);
 	void InsertLockouts(uint32_t expedition_id, const std::unordered_map<std::string, ExpeditionLockoutTimer>& lockouts);

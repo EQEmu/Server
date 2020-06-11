@@ -1753,9 +1753,25 @@ luabind::object Lua_Client::GetExpeditionLockouts(lua_State* L, std::string expe
 	return lua_table;
 }
 
+std::string Lua_Client::GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_String();
+	std::string uuid;
+	auto lockout = self->GetExpeditionLockout(expedition_name, event_name);
+	if (lockout)
+	{
+		uuid = lockout->GetExpeditionUUID();
+	}
+	return uuid;
+}
+
 void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds) {
 	Lua_Safe_Call_Void();
 	self->AddNewExpeditionLockout(expedition_name, event_name, seconds);
+}
+
+void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid) {
+	Lua_Safe_Call_Void();
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
 }
 
 void Lua_Client::RemoveAllExpeditionLockouts() {
@@ -2098,7 +2114,9 @@ luabind::scope lua_register_client() {
 		.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
 		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetExpeditionLockouts)
 		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L, std::string))&Lua_Client::GetExpeditionLockouts)
+		.def("GetLockoutExpeditionUUID", (std::string(Lua_Client::*)(std::string, std::string))&Lua_Client::GetLockoutExpeditionUUID)
 		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32))&Lua_Client::AddExpeditionLockout)
+		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32, std::string))&Lua_Client::AddExpeditionLockout)
 		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
 		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 		.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)

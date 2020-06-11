@@ -39,6 +39,7 @@ extern volatile bool RunLoops;
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
 #include "../common/profanity_manager.h"
+#include "../common/util/uuid.h"
 #include "data_bucket.h"
 #include "expedition.h"
 #include "expedition_database.h"
@@ -9602,22 +9603,19 @@ Expedition* Client::GetExpedition() const
 	return nullptr;
 }
 
-void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db, bool update_client)
+void Client::AddExpeditionLockout(
+	const ExpeditionLockoutTimer& lockout, bool update_db, bool update_client)
 {
 	// todo: support for account based lockouts like live AoC expeditions
-	auto it = std::find_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
+
+	// if client already has this lockout, we're replacing it with the new one
+	m_expedition_lockouts.erase(std::remove_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
 		[&](const ExpeditionLockoutTimer& existing_lockout) {
 			return existing_lockout.IsSameLockout(lockout);
-		});
+		}
+	), m_expedition_lockouts.end());
 
-	if (it != m_expedition_lockouts.end())
-	{
-		it->SetExpireTime(lockout.GetExpireTime());
-	}
-	else
-	{
-		m_expedition_lockouts.emplace_back(lockout);
-	}
+	m_expedition_lockouts.emplace_back(lockout);
 
 	if (update_db) // for quest api
 	{
@@ -9631,11 +9629,14 @@ void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool up
 }
 
 void Client::AddNewExpeditionLockout(
-	const std::string& expedition_name, const std::string& event_name, uint32_t seconds)
+	const std::string& expedition_name, const std::string& event_name, uint32_t seconds, std::string uuid)
 {
-	auto expire_at = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
-	auto expire_time = static_cast<uint64_t>(std::chrono::system_clock::to_time_t(expire_at));
-	ExpeditionLockoutTimer lockout{ expedition_name, event_name, expire_time, seconds };
+	if (uuid.empty())
+	{
+		uuid = EQ::Util::UUID::Generate().ToString();
+	}
+	ExpeditionLockoutTimer lockout{uuid, expedition_name, event_name, 0, seconds};
+	lockout.Reset(); // sets expire time
 	AddExpeditionLockout(lockout, true);
 }
 
@@ -9783,7 +9784,9 @@ void Client::DzListTimers()
 			auto time_remaining = lockout.GetDaysHoursMinutesRemaining();
 			MessageString(
 				Chat::Yellow, DZLIST_REPLAY_TIMER,
-				time_remaining.days.c_str(), time_remaining.hours.c_str(), time_remaining.mins.c_str(),
+				time_remaining.days.c_str(),
+				time_remaining.hours.c_str(),
+				time_remaining.mins.c_str(),
 				lockout.GetExpeditionName().c_str()
 			);
 		}

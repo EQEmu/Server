@@ -29,10 +29,10 @@ extern const char* const DZ_REPLAY_TIMER_NAME;
 class ExpeditionLockoutTimer
 {
 public:
-	ExpeditionLockoutTimer() {}
+	ExpeditionLockoutTimer() = default;
 	ExpeditionLockoutTimer(
-		std::string expedition_name, std::string event_name,
-		uint64_t expire_time, uint32_t duration, bool inherited = false);
+		const std::string& expedition_uuid, const std::string& expedition_name,
+		const std::string& event_name, uint64_t expire_time, uint32_t duration);
 
 	struct DaysHoursMinutes
 	{
@@ -46,20 +46,20 @@ public:
 	uint32_t GetSecondsRemaining() const;
 	DaysHoursMinutes GetDaysHoursMinutesRemaining() const;
 	const std::string& GetExpeditionName() const { return m_expedition_name; }
+	const std::string& GetExpeditionUUID() const { return m_expedition_uuid; }
 	const std::string& GetEventName() const { return m_event_name; }
-	void SetExpireTime(uint64_t expire_time) { m_expire_time = std::chrono::system_clock::from_time_t(expire_time); }
-	void SetInherited(bool is_inherited) { m_is_inherited = is_inherited; }
 	bool IsExpired() const { return GetSecondsRemaining() == 0; }
-	bool IsInherited() const { return m_is_inherited; }
+	bool IsFromExpedition(const std::string& uuid) const { return uuid == m_expedition_uuid; }
 	bool IsReplayTimer() const { return m_is_replay_timer; }
 	bool IsSameLockout(const ExpeditionLockoutTimer& compare_lockout) const;
 	bool IsSameLockout(const std::string& expedition_name, const std::string& event_name) const;
+	void Reset() { m_expire_time = std::chrono::system_clock::now() + m_duration; }
 
 private:
+	bool m_is_replay_timer = false;
+	std::string m_expedition_uuid; // expedition received in
 	std::string m_expedition_name;
 	std::string m_event_name;
-	bool        m_is_inherited    = false; // inherited from expedition leader
-	bool        m_is_replay_timer = false;
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
