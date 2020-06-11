@@ -443,17 +443,15 @@ void Expedition::AddReplayLockout(uint32_t seconds)
 
 void Expedition::AddLockout(const std::string& event_name, uint32_t seconds)
 {
-	auto expire_at = std::chrono::system_clock::now() + std::chrono::seconds(seconds);
-	auto expire_time = static_cast<uint64_t>(std::chrono::system_clock::to_time_t(expire_at));
-
-	// both expedition and current members get the lockout data, expirations updated on duplicates
-	ExpeditionLockoutTimer lockout{ m_expedition_name, event_name, expire_time, seconds };
+	// any current lockouts for the event are updated with new expiration time
+	ExpeditionLockoutTimer lockout{m_uuid, m_expedition_name, event_name, 0, seconds};
+	lockout.Reset(); // sets expire time
 
 	ExpeditionDatabase::InsertLockout(m_id, lockout);
 	ExpeditionDatabase::InsertMembersLockout(m_members, lockout);
 
-	ProcessLockoutUpdate(event_name, expire_time, seconds, false);
-	SendWorldLockoutUpdate(event_name, expire_time, seconds);
+	ProcessLockoutUpdate(lockout, false);
+	SendWorldLockoutUpdate(lockout, false);
 }
 
 void Expedition::RemoveLockout(const std::string& event_name)
@@ -461,13 +459,9 @@ void Expedition::RemoveLockout(const std::string& event_name)
 	ExpeditionDatabase::DeleteLockout(m_id, event_name);
 	ExpeditionDatabase::DeleteMembersLockout(m_members, m_expedition_name, event_name);
 
-	ProcessLockoutUpdate(event_name, 0, 0, true);
-	SendWorldLockoutUpdate(event_name, 0, 0, true);
-}
-
-void Expedition::AddInternalLockout(ExpeditionLockoutTimer&& lockout_timer)
-{
-	m_lockouts.emplace(lockout_timer.GetEventName(), std::move(lockout_timer));
+	ExpeditionLockoutTimer lockout{m_uuid, m_expedition_name, event_name, 0, 0};
+	ProcessLockoutUpdate(lockout, true);
+	SendWorldLockoutUpdate(lockout, true);
 }
 
 void Expedition::AddInternalMember(
@@ -644,7 +638,7 @@ void Expedition::SendClientExpeditionInvite(
 	{
 		// live doesn't issue a warning for the dz's replay timer
 		const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-		if (!lockout.IsInherited() && !lockout.IsExpired() && !lockout.IsReplayTimer() &&
+		if (!lockout.IsReplayTimer() && !lockout.IsExpired() && lockout.IsFromExpedition(m_uuid) &&
 		    !client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 		{
 			if (!warned)
@@ -813,7 +807,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		for (const auto& lockout_iter : m_lockouts)
 		{
 			const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-			if (!lockout.IsInherited() &&
+			if (lockout.IsFromExpedition(m_uuid) &&
 			    !add_client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 			{
 				// replay timers are optionally added to new members immediately on
@@ -822,8 +816,9 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 				{
 					if (m_add_replay_on_join)
 					{
-						add_client->AddNewExpeditionLockout(
-							lockout.GetExpeditionName(), lockout.GetEventName(), lockout.GetDuration());
+						ExpeditionLockoutTimer replay_timer = lockout;
+						replay_timer.Reset();
+						add_client->AddExpeditionLockout(replay_timer, true);
 					}
 				}
 				else if (!lockout.IsExpired())
@@ -1229,18 +1224,15 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 	);
 }
 
-void Expedition::ProcessLockoutUpdate(
-	const std::string& event_name, uint64_t expire_time, uint32_t duration, bool remove)
+void Expedition::ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove)
 {
-	ExpeditionLockoutTimer lockout{ m_expedition_name, event_name, expire_time, duration };
-
 	if (!remove)
 	{
-		m_lockouts.emplace(event_name, lockout);
+		m_lockouts[lockout.GetEventName()] = lockout;
 	}
 	else
 	{
-		m_lockouts.erase(event_name);
+		m_lockouts.erase(lockout.GetEventName());
 	}
 
 	for (const auto& member : m_members)
@@ -1254,7 +1246,7 @@ void Expedition::ProcessLockoutUpdate(
 			}
 			else
 			{
-				member_client->RemoveExpeditionLockout(m_expedition_name, event_name);
+				member_client->RemoveExpeditionLockout(m_expedition_name, lockout.GetEventName());
 			}
 		}
 	}
@@ -1462,18 +1454,18 @@ void Expedition::SendWorldLeaderChanged()
 }
 
 void Expedition::SendWorldLockoutUpdate(
-	const std::string& event_name, uint64_t expire_time, uint32_t duration, bool remove)
+	const ExpeditionLockoutTimer& lockout, bool remove)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionLockout_Struct);
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLockout, pack_size));
 	auto buf = reinterpret_cast<ServerExpeditionLockout_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	buf->expire_time = expire_time;
-	buf->duration = duration;
+	buf->expire_time = lockout.GetExpireTime();
+	buf->duration = lockout.GetDuration();
 	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
 	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
 	buf->remove = remove;
-	strn0cpy(buf->event_name, event_name.c_str(), sizeof(buf->event_name));
+	strn0cpy(buf->event_name, lockout.GetEventName().c_str(), sizeof(buf->event_name));
 	worldserver.SendPacket(pack.get());
 }
 
@@ -1661,7 +1653,10 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 			if (expedition)
 			{
-				expedition->ProcessLockoutUpdate(buf->event_name, buf->expire_time, buf->duration, buf->remove);
+				ExpeditionLockoutTimer lockout{
+					expedition->GetUUID(), expedition->GetName(), buf->event_name, buf->expire_time, buf->duration
+				};
+				expedition->ProcessLockoutUpdate(lockout, buf->remove);
 			}
 		}
 		break;

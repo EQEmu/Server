@@ -104,6 +104,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 
 	auto query = fmt::format(SQL(
 		SELECT
+			from_expedition_uuid,
 			expedition_name,
 			event_name,
 			UNIX_TIMESTAMP(expire_time),
@@ -118,10 +119,11 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
 			lockouts.emplace_back(ExpeditionLockoutTimer{
-				row[0],                                             // expedition_name
-				row[1],                                             // event_name
-				strtoull(row[2], nullptr, 10),                      // expire_time
-				static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) // duration
+				row[0],                                             // expedition_uuid
+				row[1],                                             // expedition_name
+				row[2],                                             // event_name
+				strtoull(row[3], nullptr, 10),                      // expire_time
+				static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) // duration
 			});
 		}
 	}
@@ -138,6 +140,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 
 	auto query = fmt::format(SQL(
 		SELECT
+			from_expedition_uuid,
 			event_name,
 			UNIX_TIMESTAMP(expire_time),
 			duration
@@ -155,10 +158,11 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
 			lockouts.emplace_back(ExpeditionLockoutTimer{
+				row[0],                                             // expedition_uuid
 				expedition_name,
-				row[0],                                             // event_name
-				strtoull(row[1], nullptr, 10),                      // expire_time
-				static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) // duration
+				row[1],                                             // event_name
+				strtoull(row[2], nullptr, 10),                      // expire_time
+				static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) // duration
 			});
 		}
 	}
@@ -178,7 +182,7 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 		fmt::format_to(std::back_inserter(in_expedition_ids_query), "{},", expedition_id);
 	}
 
-	// these are loaded into the same container type expedition's use to store lockouts
+	// these are loaded into the same container type expeditions use to store lockouts
 	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>> lockouts;
 
 	if (!in_expedition_ids_query.empty())
@@ -188,11 +192,11 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 		std::string query = fmt::format(SQL(
 			SELECT
 				expedition_lockouts.expedition_id,
+				expedition_lockouts.from_expedition_uuid,
+				expedition_details.expedition_name,
 				expedition_lockouts.event_name,
 				UNIX_TIMESTAMP(expedition_lockouts.expire_time),
-				expedition_lockouts.duration,
-				expedition_lockouts.is_inherited,
-				expedition_details.expedition_name
+				expedition_lockouts.duration
 			FROM expedition_lockouts
 				INNER JOIN expedition_details ON expedition_lockouts.expedition_id = expedition_details.id
 			WHERE expedition_id IN ({})
@@ -206,12 +210,12 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 			for (auto row = results.begin(); row != results.end(); ++row)
 			{
 				auto expedition_id = strtoul(row[0], nullptr, 10);
-				lockouts[expedition_id].emplace(row[1], ExpeditionLockoutTimer{
-					row[5],                                               // expedition_name
-					row[1],                                               // event_name
-					strtoull(row[2], nullptr, 10),                        // expire_time
-					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)),  // original duration
-					(strtoul(row[4], nullptr, 10) != 0)                   // is_inherited
+				lockouts[expedition_id].emplace(row[3], ExpeditionLockoutTimer{
+					row[1],                                               // expedition_uuid
+					row[2],                                               // expedition_name
+					row[3],                                               // event_name
+					strtoull(row[4], nullptr, 10),                        // expire_time
+					static_cast<uint32_t>(strtoul(row[5], nullptr, 10))   // original duration
 				});
 			}
 		}
@@ -223,7 +227,7 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 	const std::vector<std::string>& character_names, const std::string& expedition_name)
 {
-	LogExpeditionsDetail("Loading multiple characters data for [{}] request validation", expedition_name);
+	LogExpeditionsDetail("Loading multiple characters data for [{}] request", expedition_name);
 
 	std::string in_character_names_query;
 	for (const auto& character_name : character_names)
@@ -243,6 +247,7 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 				character_data.id,
 				character_data.name,
 				member.expedition_id,
+				lockout.from_expedition_uuid,
 				UNIX_TIMESTAMP(lockout.expire_time),
 				lockout.duration,
 				lockout.event_name
@@ -299,7 +304,9 @@ void ExpeditionDatabase::DeleteAllCharacterLockouts(
 void ExpeditionDatabase::DeleteCharacterLockout(
 	uint32_t character_id, const std::string& expedition_name, const std::string& event_name)
 {
-	LogExpeditionsDetail("Deleting character [{}] lockout: [{}]:[{}]", character_id, expedition_name, event_name);
+	LogExpeditionsDetail(
+		"Deleting character [{}] lockout: [{}]:[{}]", character_id, expedition_name, event_name
+	);
 
 	auto query = fmt::format(SQL(
 		DELETE FROM expedition_character_lockouts
@@ -466,7 +473,7 @@ ExpeditionMember ExpeditionDatabase::GetExpeditionLeader(uint32_t expedition_id)
 
 void ExpeditionDatabase::InsertCharacterLockouts(
 	uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
-	bool update_expire_times, bool is_pending)
+	bool replace_timer, bool is_pending)
 {
 	LogExpeditionsDetail("Inserting character [{}] lockouts", character_id);
 
@@ -474,10 +481,11 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 	for (const auto& lockout : lockouts)
 	{
 		fmt::format_to(std::back_inserter(insert_values),
-			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', {}),",
+			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}', {}),",
 			character_id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
+			lockout.GetExpeditionUUID(),
 			lockout.GetExpeditionName(),
 			lockout.GetEventName(),
 			is_pending
@@ -489,15 +497,30 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 		insert_values.pop_back(); // trailing comma
 
 		std::string on_duplicate;
-		if (update_expire_times) {
-			on_duplicate = "expire_time = VALUES(expire_time)";
-		} else {
+		if (replace_timer)
+		{
+			on_duplicate = SQL(
+				from_expedition_uuid = VALUES(from_expedition_uuid),
+				expire_time = VALUES(expire_time),
+				duration = VALUES(duration)
+			);
+		}
+		else
+		{
 			on_duplicate = "character_id = VALUES(character_id)";
 		}
 
 		auto query = fmt::format(SQL(
 			INSERT INTO expedition_character_lockouts
-				(character_id, expire_time, duration, expedition_name, event_name, is_pending)
+				(
+					character_id,
+					expire_time,
+					duration,
+					from_expedition_uuid,
+					expedition_name,
+					event_name,
+					is_pending
+				)
 			VALUES {}
 			ON DUPLICATE KEY UPDATE {};
 		), insert_values, on_duplicate);
@@ -518,10 +541,11 @@ void ExpeditionDatabase::InsertMembersLockout(
 	for (const auto& member : members)
 	{
 		fmt::format_to(std::back_inserter(insert_values),
-			"({}, FROM_UNIXTIME({}), {}, '{}', '{}'),",
+			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
 			member.char_id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
+			lockout.GetExpeditionUUID(),
 			lockout.GetExpeditionName(),
 			lockout.GetEventName()
 		);
@@ -533,9 +557,12 @@ void ExpeditionDatabase::InsertMembersLockout(
 
 		auto query = fmt::format(SQL(
 			INSERT INTO expedition_character_lockouts
-				(character_id, expire_time, duration, expedition_name, event_name)
+				(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
 			VALUES {}
-			ON DUPLICATE KEY UPDATE expire_time = VALUES(expire_time);
+			ON DUPLICATE KEY UPDATE
+				from_expedition_uuid = VALUES(from_expedition_uuid),
+				expire_time = VALUES(expire_time),
+				duration = VALUES(duration);
 		), insert_values);
 
 		database.QueryDatabase(query);
@@ -552,11 +579,20 @@ void ExpeditionDatabase::InsertLockout(
 
 	auto query = fmt::format(SQL(
 		INSERT INTO expedition_lockouts
-			(expedition_id, event_name, expire_time, duration, is_inherited)
+			(expedition_id, from_expedition_uuid, event_name, expire_time, duration)
 		VALUES
-			({}, '{}', FROM_UNIXTIME({}), {}, FALSE)
-		ON DUPLICATE KEY UPDATE expire_time = VALUES(expire_time);
-	), expedition_id, lockout.GetEventName(), lockout.GetExpireTime(), lockout.GetDuration());
+			({}, '{}', '{}', FROM_UNIXTIME({}), {})
+		ON DUPLICATE KEY UPDATE
+			from_expedition_uuid = VALUES(from_expedition_uuid),
+			expire_time = VALUES(expire_time),
+			duration = VALUES(duration);
+	),
+		expedition_id,
+		lockout.GetExpeditionUUID(),
+		lockout.GetEventName(),
+		lockout.GetExpireTime(),
+		lockout.GetDuration()
+	);
 
 	database.QueryDatabase(query);
 }
@@ -570,12 +606,12 @@ void ExpeditionDatabase::InsertLockouts(
 	for (const auto& lockout : lockouts)
 	{
 		fmt::format_to(std::back_inserter(insert_values),
-			"({}, '{}', FROM_UNIXTIME({}), {}, {}),",
+			"({}, '{}', '{}', FROM_UNIXTIME({}), {}),",
 			expedition_id,
+			lockout.second.GetExpeditionUUID(),
 			lockout.second.GetEventName(),
 			lockout.second.GetExpireTime(),
-			lockout.second.GetDuration(),
-			lockout.second.IsInherited()
+			lockout.second.GetDuration()
 		);
 	}
 
@@ -585,9 +621,12 @@ void ExpeditionDatabase::InsertLockouts(
 
 		auto query = fmt::format(SQL(
 			INSERT INTO expedition_lockouts
-				(expedition_id, event_name, expire_time, duration, is_inherited)
+				(expedition_id, from_expedition_uuid, event_name, expire_time, duration)
 			VALUES {}
-			ON DUPLICATE KEY UPDATE expire_time = VALUES(expire_time);
+			ON DUPLICATE KEY UPDATE
+				from_expedition_uuid = VALUES(from_expedition_uuid),
+				expire_time = VALUES(expire_time),
+				duration = VALUES(duration);
 		), insert_values);
 
 		database.QueryDatabase(query);

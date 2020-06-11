@@ -166,8 +166,6 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 
 	for (auto& lockout : lockouts)
 	{
-		lockout.SetInherited(true);
-
 		// client window hides timers with less than 60s remaining, optionally count them as expired
 		if (lockout.GetSecondsRemaining() <= leeway_seconds)
 		{
@@ -243,12 +241,12 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 		last_character_id = character_id;
 
 		// compare member lockouts with leader lockouts
-		if (row[3] && row[4] && row[5])
+		if (row[3] && row[4] && row[5] && row[6])
 		{
-			auto expire_time = strtoull(row[3], nullptr, 10);
-			auto duration = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
+			auto expire_time = strtoull(row[4], nullptr, 10);
+			auto duration = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
 
-			ExpeditionLockoutTimer lockout{m_expedition_name, row[5], expire_time, duration};
+			ExpeditionLockoutTimer lockout{row[3], m_expedition_name, row[6], expire_time, duration};
 
 			// client window hides timers with less than 60s remaining, optionally count them as expired
 			if (lockout.GetSecondsRemaining() <= leeway_seconds)

@@ -22,7 +22,7 @@ CREATE TABLE `expedition_lockouts` (
 	`event_name` VARCHAR(256) NOT NULL,
 	`expire_time` DATETIME NOT NULL DEFAULT current_timestamp(),
 	`duration` INT(10) UNSIGNED NOT NULL DEFAULT 0,
-	`is_inherited` TINYINT(4) UNSIGNED NOT NULL DEFAULT 0,
+	`from_expedition_uuid` VARCHAR(36) NOT NULL,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `expedition_id_event_name` (`expedition_id`, `event_name`),
 	CONSTRAINT `FK_expedition_lockouts_expedition_details` FOREIGN KEY (`expedition_id`) REFERENCES `expedition_details` (`id`) ON DELETE CASCADE
@@ -49,6 +49,7 @@ CREATE TABLE `expedition_character_lockouts` (
 	`character_id` INT(10) UNSIGNED NOT NULL,
 	`expire_time` DATETIME NOT NULL DEFAULT current_timestamp(),
 	`duration` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	`from_expedition_uuid` VARCHAR(36) NOT NULL,
 	`expedition_name` VARCHAR(128) NOT NULL,
 	`event_name` VARCHAR(256) NOT NULL,
 	`is_pending` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
@@ -57,5 +58,4 @@ CREATE TABLE `expedition_character_lockouts` (
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-ROW_FORMAT=DYNAMIC
 ;

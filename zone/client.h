@@ -1118,7 +1118,8 @@ public:
 		uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
 
 	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false, bool update_client = true);
-	void AddNewExpeditionLockout(const std::string& expedition_name, const std::string& event_name, uint32_t duration);
+	void AddNewExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, uint32_t duration, std::string uuid = {});
 	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
 	Expedition* CreateExpedition(
 		std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
