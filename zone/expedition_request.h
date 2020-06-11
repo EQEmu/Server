@@ -50,8 +50,8 @@ public:
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	bool HasReplayTimer() const { return m_has_replay_timer; }
-	std::vector<ExpeditionMember> TakeMembers() && { return std::move(m_members); }
-	std::unordered_map<std::string, ExpeditionLockoutTimer> TakeLockouts() && { return std::move(m_lockouts); }
+	std::vector<ExpeditionMember> GetMembers() const { return m_members; }
+	std::unordered_map<std::string, ExpeditionLockoutTimer> GetLockouts() const { return m_lockouts; }
 
 private:
 	bool ValidateMembers(const std::vector<std::string>& member_names);
