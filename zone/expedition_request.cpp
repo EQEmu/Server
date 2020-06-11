@@ -116,7 +116,6 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	m_leader_name = m_leader ? m_leader->GetName() : GetGroupLeaderName(group->GetID()); // group->GetLeaderName();
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name.c_str());
 
-	uint32_t count = 0;
 	std::vector<std::string> member_names;
 	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
@@ -163,20 +162,13 @@ bool ExpeditionRequest::ValidateMembers(const std::vector<std::string>& member_n
 bool ExpeditionRequest::LoadLeaderLockouts()
 {
 	// leader's lockouts are used to check member conflicts and later stored in expedition
-	auto results = ExpeditionDatabase::LoadCharacterLockouts(m_leader_id, m_expedition_name);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to load leader id [{}] lockouts ([{}])", m_leader_id, m_leader_name);
-		return false;
-	}
+	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(m_leader_id, m_expedition_name);
 
 	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
 
-	for (auto row = results.begin(); row != results.end(); ++row)
+	for (auto& lockout : lockouts)
 	{
-		uint64_t expire_time = strtoull(row[0], nullptr, 10);
-		uint32_t duration = strtoul(row[1], nullptr, 10);
-		ExpeditionLockoutTimer lockout{m_expedition_name, row[2], expire_time, duration, true};
+		lockout.SetInherited(true);
 
 		// client window hides timers with less than 60s remaining, optionally count them as expired
 		if (lockout.GetSecondsRemaining() <= leeway_seconds)
@@ -188,10 +180,10 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 		}
 		else
 		{
-			m_lockouts.emplace(row[2], lockout);
+			m_lockouts.emplace(lockout.GetEventName(), lockout);
 
 			// on live if leader has a replay lockout it never bothers checking for event conflicts
-			if (m_check_event_lockouts && m_has_replay_timer && strcmp(row[2], DZ_REPLAY_TIMER_NAME) == 0)
+			if (m_check_event_lockouts && m_has_replay_timer && lockout.IsReplayTimer())
 			{
 				m_check_event_lockouts = false;
 			}
@@ -256,10 +248,9 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 		if (row[3] && row[4] && row[5])
 		{
 			auto expire_time = strtoull(row[3], nullptr, 10);
-			auto original_duration = strtoul(row[4], nullptr, 10);
-			std::string event_name(row[5]);
+			auto duration = static_cast<uint32_t>(strtoul(row[4], nullptr, 10));
 
-			ExpeditionLockoutTimer lockout(m_expedition_name, event_name, expire_time, original_duration);
+			ExpeditionLockoutTimer lockout{m_expedition_name, row[5], expire_time, duration};
 
 			// client window hides timers with less than 60s remaining, optionally count them as expired
 			if (lockout.GetSecondsRemaining() <= leeway_seconds)
@@ -272,14 +263,14 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 			else
 			{
 				// replay timer conflict messages always show up before event conflicts
-				if (/*m_has_replay_timer && */event_name == DZ_REPLAY_TIMER_NAME)
+				if (/*m_has_replay_timer && */lockout.IsReplayTimer())
 				{
 					has_conflicts = true;
 					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
 				}
 				else if (m_check_event_lockouts && character_id != m_leader_id)
 				{
-					if (m_lockouts.find(event_name) == m_lockouts.end())
+					if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
 					{
 						// leader doesn't have this lockout. queue instead of messaging
 						// now so message comes after any replay lockout messages

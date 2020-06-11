@@ -94,33 +94,51 @@ MySQLRequestResult ExpeditionDatabase::LoadAllExpeditions()
 	return database.QueryDatabase(query);
 }
 
-MySQLRequestResult ExpeditionDatabase::LoadCharacterLockouts(uint32_t character_id)
+std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(uint32_t character_id)
 {
 	LogExpeditionsDetail("Loading character [{}] lockouts", character_id);
 
+	std::vector<ExpeditionLockoutTimer> lockouts;
+
 	auto query = fmt::format(SQL(
 		SELECT
-			UNIX_TIMESTAMP(expire_time),
-			duration,
 			expedition_name,
-			event_name
+			event_name,
+			UNIX_TIMESTAMP(expire_time),
+			duration
 		FROM expedition_character_lockouts
 		WHERE character_id = {} AND is_pending = FALSE AND expire_time > NOW();
 	), character_id);
 
-	return database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
+	if (results.Success())
+	{
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			lockouts.emplace_back(ExpeditionLockoutTimer{
+				row[0],                                             // expedition_name
+				row[1],                                             // event_name
+				strtoull(row[2], nullptr, 10),                      // expire_time
+				static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) // duration
+			});
+		}
+	}
+
+	return lockouts;
 }
 
-MySQLRequestResult ExpeditionDatabase::LoadCharacterLockouts(
+std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 	uint32_t character_id, const std::string& expedition_name)
 {
 	LogExpeditionsDetail("Loading character [{}] lockouts for [{}]", character_id, expedition_name);
 
+	std::vector<ExpeditionLockoutTimer> lockouts;
+
 	auto query = fmt::format(SQL(
 		SELECT
+			event_name,
 			UNIX_TIMESTAMP(expire_time),
-			duration,
-			event_name
+			duration
 		FROM expedition_character_lockouts
 		WHERE
 			character_id = {}
@@ -129,7 +147,21 @@ MySQLRequestResult ExpeditionDatabase::LoadCharacterLockouts(
 			AND expedition_name = '{}';
 	), character_id, expedition_name);
 
-	return database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
+	if (results.Success())
+	{
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			lockouts.emplace_back(ExpeditionLockoutTimer{
+				expedition_name,
+				row[0],                                             // event_name
+				strtoull(row[1], nullptr, 10),                      // expire_time
+				static_cast<uint32_t>(strtoul(row[2], nullptr, 10)) // duration
+			});
+		}
+	}
+
+	return lockouts;
 }
 
 std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
