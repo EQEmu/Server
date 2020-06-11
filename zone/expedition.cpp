@@ -299,13 +299,13 @@ bool Expedition::CacheAllFromDatabase()
 
 void Expedition::SaveLockouts(ExpeditionRequest& request)
 {
-	m_lockouts = std::move(request).TakeLockouts();
+	m_lockouts = request.GetLockouts();
 	ExpeditionDatabase::InsertLockouts(m_id, m_lockouts);
 }
 
 void Expedition::SaveMembers(ExpeditionRequest& request)
 {
-	m_members = std::move(request).TakeMembers();
+	m_members = request.GetMembers();
 	for (const auto& member : m_members)
 	{
 		m_member_id_history.emplace(member.char_id);
@@ -1047,8 +1047,7 @@ void Expedition::DzSwapPlayer(
 
 	if (remove_char_name.empty() || !HasMember(remove_char_name))
 	{
-		remove_char_name = FormatName(remove_char_name);
-		requester->MessageString(Chat::Red, DZSWAP_CANNOT_REMOVE, remove_char_name.c_str());
+		requester->MessageString(Chat::Red, DZSWAP_CANNOT_REMOVE, FormatName(remove_char_name).c_str());
 		return;
 	}
 
@@ -1180,7 +1179,6 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 		return;
 	}
 
-	// cache a re-usable packet for each member
 	auto outapp_member_name = CreateMemberListNamePacket(removed_char_name, true);
 
 	for (auto it = m_members.begin(); it != m_members.end();)
@@ -1212,8 +1210,8 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 	}
 
 	LogExpeditionsDetail(
-		"Processed member [{}] ({}) removal, current zone cache member count: [{}]",
-		removed_char_name, removed_char_id, m_members.size()
+		"Processed member [{}] ({}) removal from [{}], cache member count: [{}]",
+		removed_char_name, removed_char_id, m_id, m_members.size()
 	);
 }
 
