@@ -9715,16 +9715,10 @@ bool Client::HasExpeditionLockout(
 
 void Client::LoadAllExpeditionLockouts()
 {
-	auto results = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
-	if (results.Success())
+	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
+	for (const auto& lockout : lockouts)
 	{
-		for (auto row = results.begin(); row != results.end(); ++row)
-		{
-			auto expire_time = strtoull(row[0], nullptr, 10);
-			auto original_duration = static_cast<uint32_t>(strtoul(row[1], nullptr, 10));
-			ExpeditionLockoutTimer lockout{ row[2], row[3], expire_time, original_duration };
-			AddExpeditionLockout(lockout, false, false);
-		}
+		AddExpeditionLockout(lockout, false, false);
 	}
 	SendExpeditionLockoutTimers();
 }
