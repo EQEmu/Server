@@ -227,7 +227,9 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 	const std::vector<std::string>& character_names, const std::string& expedition_name)
 {
-	LogExpeditionsDetail("Loading multiple characters data for [{}] request", expedition_name);
+	LogExpeditionsDetail(
+		"Loading data of [{}] characters for [{}] request", character_names.size(), expedition_name
+	);
 
 	std::string in_character_names_query;
 	for (const auto& character_name : character_names)

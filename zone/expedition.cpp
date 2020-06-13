@@ -691,44 +691,43 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 		has_conflict = true;
 	}
 
-	// client with a replay lockout is allowed only if they were a previous member
-	auto member_iter = m_member_id_history.find(add_client->CharacterID());
-	bool was_member = (member_iter != m_member_id_history.end());
-	if (!was_member)
-	{
-		auto replay_lockout = add_client->GetExpeditionLockout(m_expedition_name, DZ_REPLAY_TIMER_NAME);
-		if (replay_lockout)
-		{
-			has_conflict = true;
-
-			auto time_remaining = replay_lockout->GetDaysHoursMinutesRemaining();
-			SendLeaderMessage(leader_client, Chat::Red, DZADD_REPLAY_TIMER, {
-				add_client->GetName(),
-				time_remaining.days,
-				time_remaining.hours,
-				time_remaining.mins
-			});
-		}
-	}
-
 	// check any extra event lockouts for this expedition that the client has and expedition doesn't
 	auto client_lockouts = add_client->GetExpeditionLockouts(m_expedition_name);
 	for (const auto& client_lockout : client_lockouts)
 	{
-		bool is_missing_lockout = (m_lockouts.find(client_lockout.GetEventName()) == m_lockouts.end());
-		if (!client_lockout.IsReplayTimer() && is_missing_lockout)
+		if (client_lockout.IsReplayTimer())
 		{
-			has_conflict = true;
+			// client with a replay lockout is allowed only if the replay timer was from this expedition
+			if (client_lockout.GetExpeditionUUID() != GetUUID())
+			{
+				has_conflict = true;
 
-			auto time_remaining = client_lockout.GetDaysHoursMinutesRemaining();
-			SendLeaderMessage(leader_client, Chat::Red, DZADD_EVENT_TIMER, {
-				add_client->GetName(),
-				client_lockout.GetEventName(),
-				time_remaining.days,
-				time_remaining.hours,
-				time_remaining.mins,
-				client_lockout.GetEventName()
-			});
+				auto time_remaining = client_lockout.GetDaysHoursMinutesRemaining();
+				SendLeaderMessage(leader_client, Chat::Red, DZADD_REPLAY_TIMER, {
+					add_client->GetName(),
+					time_remaining.days,
+					time_remaining.hours,
+					time_remaining.mins
+				});
+			}
+		}
+		else
+		{
+			bool is_missing_lockout = (m_lockouts.find(client_lockout.GetEventName()) == m_lockouts.end());
+			if (is_missing_lockout)
+			{
+				has_conflict = true;
+
+				auto time_remaining = client_lockout.GetDaysHoursMinutesRemaining();
+				SendLeaderMessage(leader_client, Chat::Red, DZADD_EVENT_TIMER, {
+					add_client->GetName(),
+					client_lockout.GetEventName(),
+					time_remaining.days,
+					time_remaining.hours,
+					time_remaining.mins,
+					client_lockout.GetEventName()
+				});
+			}
 		}
 	}
 
