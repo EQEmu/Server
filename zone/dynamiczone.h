@@ -110,14 +110,14 @@ private:
 	uint32_t m_zone_id       = 0;
 	uint32_t m_instance_id   = 0;
 	uint32_t m_version       = 0;
-	uint32_t m_start_time    = 0;
-	uint32_t m_duration      = 0;
 	bool     m_never_expires = false;
 	bool     m_has_zonein    = false;
 	DynamicZoneType m_type   = DynamicZoneType::None;
 	DynamicZoneLocation m_compass;
 	DynamicZoneLocation m_safereturn;
 	DynamicZoneLocation m_zonein;
+	std::chrono::seconds m_duration;
+	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 

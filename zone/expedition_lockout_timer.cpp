@@ -26,11 +26,12 @@
 const char* const DZ_REPLAY_TIMER_NAME = "Replay Timer"; // see December 14, 2016 patch notes
 
 ExpeditionLockoutTimer::ExpeditionLockoutTimer(
-	std::string expedition_name, std::string event_name, uint64_t expire_time, uint32_t duration, bool inherited
+	std::string expedition_name, std::string event_name,
+	uint64_t expire_time, uint32_t duration, bool inherited
 ) :
 	m_expedition_name(expedition_name),
 	m_event_name(event_name),
-	m_expire_time(expire_time),
+	m_expire_time(std::chrono::system_clock::from_time_t(expire_time)),
 	m_duration(duration),
 	m_is_inherited(inherited)
 {
@@ -43,11 +44,10 @@ ExpeditionLockoutTimer::ExpeditionLockoutTimer(
 uint32_t ExpeditionLockoutTimer::GetSecondsRemaining() const
 {
 	auto now = std::chrono::system_clock::now();
-	auto expire_time = std::chrono::system_clock::from_time_t(m_expire_time);
-	if (expire_time > now)
+	if (m_expire_time > now)
 	{
-		auto time_remaining = std::chrono::duration_cast<std::chrono::seconds>(expire_time - now).count();
-		return static_cast<uint32_t>(time_remaining);
+		auto remaining = m_expire_time - now;
+		return static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::seconds>(remaining).count());
 	}
 	return 0;
 }
