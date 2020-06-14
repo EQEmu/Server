@@ -308,14 +308,7 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 			AND event_name = '{}';
 	), character_id, expedition_name, event_name);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions(
-			"Failed to delete [{}] event [{}] lockout from character [{}]",
-			expedition_name, event_name, character_id
-		);
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::DeleteMembersLockout(
@@ -343,11 +336,7 @@ void ExpeditionDatabase::DeleteMembersLockout(
 				AND event_name = '{}';
 		), query_character_ids, expedition_name, event_name);
 
-		auto results = database.QueryDatabase(query);
-		if (!results.Success())
-		{
-			LogExpeditions("Failed to delete [{}] event [{}] lockouts", expedition_name, event_name);
-		}
+		database.QueryDatabase(query);
 	}
 }
 
@@ -411,11 +400,7 @@ void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string
 		WHERE expedition_id = {} AND event_name = '{}';
 	), expedition_id, event_name);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to delete expedition [{}] lockout [{}]", expedition_id, event_name);
-	}
+	database.QueryDatabase(query);
 }
 
 uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_id)
@@ -571,11 +556,7 @@ void ExpeditionDatabase::InsertLockout(
 		ON DUPLICATE KEY UPDATE expire_time = VALUES(expire_time);
 	), expedition_id, lockout.GetEventName(), lockout.GetExpireTime(), lockout.GetDuration());
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to insert expedition lockouts");
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::InsertLockouts(
@@ -607,11 +588,7 @@ void ExpeditionDatabase::InsertLockouts(
 			ON DUPLICATE KEY UPDATE expire_time = VALUES(expire_time);
 		), insert_values);
 
-		auto results = database.QueryDatabase(query);
-		if (!results.Success())
-		{
-			LogExpeditions("Failed to insert expedition lockouts");
-		}
+		database.QueryDatabase(query);
 	}
 }
 
@@ -627,11 +604,7 @@ void ExpeditionDatabase::InsertMember(uint32_t expedition_id, uint32_t character
 		ON DUPLICATE KEY UPDATE is_current_member = TRUE;
 	), expedition_id, character_id);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to insert [{}] to expedition [{}]", character_id, expedition_id);
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::InsertMembers(
@@ -657,11 +630,7 @@ void ExpeditionDatabase::InsertMembers(
 			VALUES {};
 		), insert_values);
 
-		auto results = database.QueryDatabase(query);
-		if (!results.Success())
-		{
-			LogExpeditions("Failed to save expedition members to database");
-		}
+		database.QueryDatabase(query);
 	}
 }
 
@@ -673,11 +642,7 @@ void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_
 		UPDATE expedition_details SET leader_id = {} WHERE id = {};
 	), leader_id, expedition_id);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to update expedition [{}] leader", expedition_id);
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
@@ -688,11 +653,7 @@ void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 		UPDATE expedition_details SET is_locked = {} WHERE id = {};
 	), is_locked, expedition_id);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to update expedition [{}] lock state", expedition_id);
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id)
@@ -704,11 +665,7 @@ void ExpeditionDatabase::UpdateMemberRemoved(uint32_t expedition_id, uint32_t ch
 		WHERE expedition_id = {} AND character_id = {};
 	), expedition_id, character_id);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to remove [{}] from expedition [{}]", character_id, expedition_id);
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::UpdateAllMembersRemoved(uint32_t expedition_id)
@@ -731,9 +688,5 @@ void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool 
 		UPDATE expedition_details SET add_replay_on_join = {} WHERE id = {};
 	), add_on_join, expedition_id);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to update expedition [{}] replay timer setting", expedition_id);
-	}
+	database.QueryDatabase(query);
 }
