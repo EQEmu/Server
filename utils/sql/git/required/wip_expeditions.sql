@@ -35,7 +35,6 @@ CREATE TABLE `expedition_members` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`expedition_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
 	`character_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
-	`is_current_member` TINYINT(4) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `expedition_id_character_id` (`expedition_id`, `character_id`),
 	CONSTRAINT `FK_expedition_members_expedition_details` FOREIGN KEY (`expedition_id`) REFERENCES `expedition_details` (`id`) ON DELETE CASCADE

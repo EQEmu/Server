@@ -47,6 +47,8 @@ namespace ExpeditionDatabase
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
 		LoadMultipleExpeditionLockouts(const std::vector<uint32_t>& expedition_ids);
+	void DeleteAllMembers(uint32_t expedition_id);
+	void DeleteMember(uint32_t expedition_id, uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name, const std::string& event_name);
@@ -69,8 +71,6 @@ namespace ExpeditionDatabase
 	void InsertMembers(uint32_t expedition_id, const std::vector<ExpeditionMember>& members);
 	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
-	void UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id);
-	void UpdateAllMembersRemoved(uint32_t expedition_id);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
 };
 
@@ -89,7 +89,6 @@ namespace LoadExpeditionColumns
 		is_locked,
 		leader_name,
 		member_id,
-		is_current_member,
 		member_name
 	};
 };

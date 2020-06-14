@@ -65,7 +65,6 @@ std::string ExpeditionDatabase::LoadExpeditionsSelectQuery()
 			expedition_details.is_locked,
 			character_data.name leader_name,
 			expedition_members.character_id,
-			expedition_members.is_current_member,
 			member_data.name
 		FROM expedition_details
 			INNER JOIN character_data ON expedition_details.leader_id = character_data.id
@@ -259,9 +258,7 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 					AND lockout.is_pending = FALSE
 					AND lockout.expire_time > NOW()
 					AND lockout.expedition_name = '{}'
-				LEFT JOIN expedition_members member
-					ON character_data.id = member.character_id
-					AND member.is_current_member = TRUE
+				LEFT JOIN expedition_members member ON character_data.id = member.character_id
 			WHERE character_data.name IN ({})
 			ORDER BY character_data.id;
 		), expedition_name, in_character_names_query);
@@ -420,8 +417,7 @@ uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_i
 
 	uint32_t expedition_id = 0;
 	auto query = fmt::format(SQL(
-		SELECT expedition_id FROM expedition_members
-		WHERE character_id = {} AND is_current_member = TRUE;
+		SELECT expedition_id FROM expedition_members WHERE character_id = {};
 	), character_id);
 
 	auto results = database.QueryDatabase(query);
@@ -641,10 +637,10 @@ void ExpeditionDatabase::InsertMember(uint32_t expedition_id, uint32_t character
 
 	auto query = fmt::format(SQL(
 		INSERT INTO expedition_members
-			(expedition_id, character_id, is_current_member)
+			(expedition_id, character_id)
 		VALUES
-			({}, {}, TRUE)
-		ON DUPLICATE KEY UPDATE is_current_member = TRUE;
+			({}, {})
+		ON DUPLICATE KEY UPDATE character_id = VALUES(character_id);
 	), expedition_id, character_id);
 
 	database.QueryDatabase(query);
@@ -659,7 +655,7 @@ void ExpeditionDatabase::InsertMembers(
 	for (const auto& member : members)
 	{
 		fmt::format_to(std::back_inserter(insert_values),
-			"({}, {}, TRUE),",
+			"({}, {}),",
 			expedition_id, member.char_id
 		);
 	}
@@ -669,7 +665,8 @@ void ExpeditionDatabase::InsertMembers(
 		insert_values.pop_back(); // trailing comma
 
 		auto query = fmt::format(SQL(
-			INSERT INTO expedition_members (expedition_id, character_id, is_current_member)
+			INSERT INTO expedition_members
+				(expedition_id, character_id)
 			VALUES {};
 		), insert_values);
 
@@ -699,25 +696,23 @@ void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 	database.QueryDatabase(query);
 }
 
-void ExpeditionDatabase::UpdateMemberRemoved(uint32_t expedition_id, uint32_t character_id)
+void ExpeditionDatabase::DeleteMember(uint32_t expedition_id, uint32_t character_id)
 {
 	LogExpeditionsDetail("Removing member [{}] from expedition [{}]", character_id, expedition_id);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE
-		WHERE expedition_id = {} AND character_id = {};
+		DELETE FROM expedition_members WHERE expedition_id = {} AND character_id = {};
 	), expedition_id, character_id);
 
 	database.QueryDatabase(query);
 }
 
-void ExpeditionDatabase::UpdateAllMembersRemoved(uint32_t expedition_id)
+void ExpeditionDatabase::DeleteAllMembers(uint32_t expedition_id)
 {
 	LogExpeditionsDetail("Updating all members of expedition [{}] as removed", expedition_id);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE
-		WHERE expedition_id = {};
+		DELETE FROM expedition_members WHERE expedition_id = {};
 	), expedition_id);
 
 	database.QueryDatabase(query);

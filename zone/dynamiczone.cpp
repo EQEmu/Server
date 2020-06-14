@@ -427,7 +427,7 @@ void DynamicZone::RemoveAllCharacters(bool enable_removal_timers)
 	database.RemoveClientsFromInstance(GetInstanceID());
 }
 
-void DynamicZone::SaveInstanceMembersToDatabase(const std::unordered_set<uint32_t>& character_ids)
+void DynamicZone::SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids)
 {
 	LogDynamicZonesDetail("Saving [{}] instance members to database", character_ids.size());
 

@@ -205,20 +205,19 @@ void ExpeditionCache::Process()
 
 void ExpeditionDatabase::PurgeExpiredExpeditions()
 {
-	LogExpeditionsDetail("Purging expired expeditions");
-
 	std::string query = SQL(
-		DELETE expedition FROM expedition_details expedition
+		DELETE expedition
+		FROM expedition_details expedition
 			LEFT JOIN instance_list ON expedition.instance_id = instance_list.id
 			LEFT JOIN (
-				SELECT expedition_id, COUNT(IF(is_current_member = TRUE, 1, NULL)) member_count
+				SELECT expedition_id, COUNT(*) member_count
 				FROM expedition_members
 				GROUP BY expedition_id
 			) AS expedition_members
 			ON expedition_members.expedition_id = expedition.id
 		WHERE
 			expedition.instance_id IS NULL
-			OR expedition_members.member_count = 0
+			OR expedition_members.member_count IS NULL
 			OR (instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP();
 	);
 
@@ -227,8 +226,6 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 
 void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 {
-	LogExpeditionsDetail("Purging expired lockouts");
-
 	std::string query = SQL(
 		DELETE FROM expedition_character_lockouts
 		WHERE expire_time <= NOW();
@@ -239,8 +236,6 @@ void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 
 std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 {
-	LogExpeditionsDetail("Loading expeditions for world cache");
-
 	std::vector<Expedition> expeditions;
 
 	std::string query = SQL(
@@ -253,9 +248,7 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 			expedition_members.character_id
 		FROM expedition_details
 			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
-			INNER JOIN expedition_members
-				ON expedition_members.expedition_id = expedition_details.id
-				AND expedition_members.is_current_member = TRUE
+			INNER JOIN expedition_members ON expedition_members.expedition_id = expedition_details.id
 		ORDER BY expedition_details.id;
 	);
 
@@ -305,9 +298,7 @@ Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 			expedition_members.character_id
 		FROM expedition_details
 			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
-			INNER JOIN expedition_members
-				ON expedition_members.expedition_id = expedition_details.id
-				AND expedition_members.is_current_member = TRUE
+			INNER JOIN expedition_members ON expedition_members.expedition_id = expedition_details.id
 		WHERE expedition_details.id = {};
 	), expedition_id);
 
