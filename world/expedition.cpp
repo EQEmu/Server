@@ -205,6 +205,8 @@ void ExpeditionCache::Process()
 
 void ExpeditionDatabase::PurgeExpiredExpeditions()
 {
+	LogExpeditionsDetail("Purging expired expeditions");
+
 	std::string query = SQL(
 		DELETE expedition FROM expedition_details expedition
 			LEFT JOIN instance_list ON expedition.instance_id = instance_list.id
@@ -220,29 +222,25 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 			OR (instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP();
 	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to purge expired and empty expeditions");
-	}
+	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 {
+	LogExpeditionsDetail("Purging expired lockouts");
+
 	std::string query = SQL(
 		DELETE FROM expedition_character_lockouts
 		WHERE expire_time <= NOW();
 	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to purge expired lockouts");
-	}
+	database.QueryDatabase(query);
 }
 
 std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 {
+	LogExpeditionsDetail("Loading expeditions for world cache");
+
 	std::vector<Expedition> expeditions;
 
 	std::string query = SQL(
@@ -262,11 +260,7 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 	);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to load expeditions for world cache");
-	}
-	else
+	if (results.Success())
 	{
 		uint32_t last_expedition_id = 0;
 
@@ -297,6 +291,8 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 
 Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 {
+	LogExpeditions("Loading expedition [{}] for world cache", expedition_id);
+
 	Expedition expedition;
 
 	std::string query = fmt::format(SQL(
@@ -316,11 +312,7 @@ Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 	), expedition_id);
 
 	auto results = database.QueryDatabase(query);
-	if (!results.Success())
-	{
-		LogExpeditions("Failed to load expedition [{}] for world cache", expedition_id);
-	}
-	else
+	if (results.Success())
 	{
 		bool created = false;
 		for (auto row = results.begin(); row != results.end(); ++row)

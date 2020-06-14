@@ -429,6 +429,8 @@ void DynamicZone::RemoveAllCharacters(bool enable_removal_timers)
 
 void DynamicZone::SaveInstanceMembersToDatabase(const std::unordered_set<uint32_t>& character_ids)
 {
+	LogDynamicZonesDetail("Saving [{}] instance members to database", character_ids.size());
+
 	std::string insert_values;
 	for (const auto& character_id : character_ids)
 	{
@@ -443,11 +445,7 @@ void DynamicZone::SaveInstanceMembersToDatabase(const std::unordered_set<uint32_
 			REPLACE INTO instance_list_player (id, charid) VALUES {};
 		), insert_values);
 
-		auto results = database.QueryDatabase(query);
-		if (!results.Success())
-		{
-			LogDynamicZones("Failed to save instance members to database");
-		}
+		database.QueryDatabase(query);
 	}
 }
 
