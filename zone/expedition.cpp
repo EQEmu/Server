@@ -1253,7 +1253,7 @@ void Expedition::ProcessLockoutUpdate(
 	// if this is the expedition's dz instance, all clients inside the zone need
 	// to receive added lockouts. this is done on live to avoid exploits where
 	// members leave the expedition but haven't been kicked from zone yet
-	if (m_dynamiczone.IsCurrentZoneDzInstance())
+	if (!remove && m_dynamiczone.IsCurrentZoneDzInstance())
 	{
 		std::vector<ExpeditionMember> non_members;
 		for (const auto& client_iter : entity_list.GetClientList())
@@ -1261,17 +1261,12 @@ void Expedition::ProcessLockoutUpdate(
 			Client* client = client_iter.second;
 			if (client && client->GetExpeditionID() != GetID())
 			{
-				non_members.emplace_back(ExpeditionMember{ client->CharacterID(), client->GetName() });
-
-				if (!remove) {
-					client->AddExpeditionLockout(lockout);
-				} else {
-					client->RemoveExpeditionLockout(m_expedition_name, event_name);
-				}
+				non_members.emplace_back(ExpeditionMember{client->CharacterID(), client->GetName()});
+				client->AddExpeditionLockout(lockout);
 			}
 		}
 
-		if (!remove && !non_members.empty()) // expedition members were already updated in db
+		if (!non_members.empty())
 		{
 			ExpeditionDatabase::InsertMembersLockout(non_members, lockout);
 		}
