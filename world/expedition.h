@@ -93,10 +93,10 @@ private:
 	uint32_t m_expedition_id  = 0;
 	uint32_t m_dz_instance_id = 0;
 	uint32_t m_dz_zone_id     = 0;
-	uint32_t m_start_time     = 0;
-	uint32_t m_duration       = 0;
 	bool     m_pending_delete = false;
 	std::unordered_set<uint32_t> m_member_ids;
+	std::chrono::seconds m_duration;
+	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 

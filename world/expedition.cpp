@@ -39,10 +39,10 @@ Expedition::Expedition(
 	m_expedition_id(expedition_id),
 	m_dz_instance_id(instance_id),
 	m_dz_zone_id(dz_zone_id),
-	m_start_time(start_time),
+	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
 	m_duration(duration)
 {
-	m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+	m_expire_time = m_start_time + m_duration;
 }
 
 void Expedition::SendZonesExpeditionDeleted()
@@ -60,7 +60,7 @@ void Expedition::SendZonesDurationUpdate()
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzDuration, packsize));
 	auto packbuf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
 	packbuf->expedition_id = GetID();
-	packbuf->new_duration_seconds = m_duration;
+	packbuf->new_duration_seconds = static_cast<uint32_t>(m_duration.count());
 	zoneserver_list.SendPacket(pack.get());
 }
 
@@ -78,12 +78,10 @@ void Expedition::UpdateDzSecondsRemaining(uint32_t seconds_remaining)
 		);
 
 		// preserve original start time and adjust duration instead
-		auto new_expire_time = now + update_time;
-		auto new_duration = std::chrono::system_clock::to_time_t(new_expire_time) - m_start_time;
-		m_duration = static_cast<uint32_t>(new_duration);
-		m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+		m_expire_time = now + update_time;
+		m_duration = std::chrono::duration_cast<std::chrono::seconds>(m_expire_time - m_start_time);
 
-		ExpeditionDatabase::UpdateDzDuration(GetInstanceID(), m_duration);
+		ExpeditionDatabase::UpdateDzDuration(GetInstanceID(), static_cast<uint32_t>(m_duration.count()));
 
 		// update zone level caches and update the actual dz instance's timer
 		SendZonesDurationUpdate();

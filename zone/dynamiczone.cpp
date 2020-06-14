@@ -119,14 +119,15 @@ uint32_t DynamicZone::CreateInstance()
 		return 0;
 	}
 
-	auto start_time = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+	m_start_time    = std::chrono::system_clock::now();
+	auto start_time = std::chrono::system_clock::to_time_t(m_start_time);
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO instance_list
 			(id, zone, version, start_time, duration)
 		VALUES
 			({}, {}, {}, {}, {})
-	), instance_id, m_zone_id, m_version, start_time, m_duration);
+	), instance_id, m_zone_id, m_version, start_time, m_duration.count());
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -136,9 +137,8 @@ uint32_t DynamicZone::CreateInstance()
 	}
 
 	m_instance_id   = instance_id;
-	m_start_time    = static_cast<uint32_t>(start_time);
 	m_never_expires = false;
-	m_expire_time   = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+	m_expire_time   = m_start_time + m_duration;
 
 	return m_instance_id;
 }
@@ -178,11 +178,11 @@ void DynamicZone::LoadDatabaseResult(MySQLRequestRow& row)
 	m_instance_id        = strtoul(row[0], nullptr, 10);
 	m_zone_id            = strtoul(row[1], nullptr, 10);
 	m_version            = strtoul(row[2], nullptr, 10);
-	m_start_time         = strtoul(row[3], nullptr, 10);
-	m_duration           = strtoul(row[4], nullptr, 10);
+	m_start_time         = std::chrono::system_clock::from_time_t(strtoul(row[3], nullptr, 10));
+	m_duration           = std::chrono::seconds(strtoul(row[4], nullptr, 10));
+	m_expire_time        = m_start_time + m_duration;
 	m_never_expires      = (strtoul(row[5], nullptr, 10) != 0);
 	m_type               = static_cast<DynamicZoneType>(strtoul(row[6], nullptr, 10));
-	m_expire_time        = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
 	m_compass.zone_id    = strtoul(row[7], nullptr, 10);
 	m_compass.x          = strtof(row[8], nullptr);
 	m_compass.y          = strtof(row[9], nullptr);
@@ -530,8 +530,8 @@ uint32_t DynamicZone::GetSecondsRemaining() const
 void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 {
 	// preserves original start time, just modifies duration and expire time
-	m_duration = new_duration;
-	m_expire_time = std::chrono::system_clock::from_time_t(m_start_time + m_duration);
+	m_duration = std::chrono::seconds(new_duration);
+	m_expire_time = m_start_time + m_duration;
 
 	if (zone && IsCurrentZoneDzInstance())
 	{

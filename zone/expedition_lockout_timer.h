@@ -21,6 +21,7 @@
 #ifndef EXPEDITION_LOCKOUT_TIMER_H
 #define EXPEDITION_LOCKOUT_TIMER_H
 
+#include <chrono>
 #include <string>
 
 extern const char* const DZ_REPLAY_TIMER_NAME;
@@ -29,7 +30,9 @@ class ExpeditionLockoutTimer
 {
 public:
 	ExpeditionLockoutTimer() {}
-	ExpeditionLockoutTimer(std::string expedition_name, std::string event_name, uint64_t expire_time, uint32_t duration, bool inherited = false);
+	ExpeditionLockoutTimer(
+		std::string expedition_name, std::string event_name,
+		uint64_t expire_time, uint32_t duration, bool inherited = false);
 
 	struct DaysHoursMinutes
 	{
@@ -38,13 +41,13 @@ public:
 		std::string mins;
 	};
 
-	uint32_t GetDuration() const { return m_duration; }
-	uint64_t GetExpireTime() const { return m_expire_time; }
+	uint32_t GetDuration() const { return static_cast<uint32_t>(m_duration.count()); }
+	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetSecondsRemaining() const;
 	DaysHoursMinutes GetDaysHoursMinutesRemaining() const;
 	const std::string& GetExpeditionName() const { return m_expedition_name; }
 	const std::string& GetEventName() const { return m_event_name; }
-	void SetExpireTime(uint64_t expire_time) { m_expire_time = expire_time; }
+	void SetExpireTime(uint64_t expire_time) { m_expire_time = std::chrono::system_clock::from_time_t(expire_time); }
 	void SetInherited(bool is_inherited) { m_is_inherited = is_inherited; }
 	bool IsExpired() const { return GetSecondsRemaining() == 0; }
 	bool IsInherited() const { return m_is_inherited; }
@@ -55,10 +58,10 @@ public:
 private:
 	std::string m_expedition_name;
 	std::string m_event_name;
-	uint64_t    m_expire_time     = 0;
-	uint32_t    m_duration        = 0;
 	bool        m_is_inherited    = false; // inherited from expedition leader
 	bool        m_is_replay_timer = false;
+	std::chrono::seconds m_duration;
+	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 
 #endif
