@@ -1492,7 +1492,7 @@ bool Zone::Process() {
 			if(Instance_Timer->Check())
 			{
 				// if this is a dynamic zone instance notify system associated with it
-				Expedition* expedition = Expedition::FindExpeditionByInstanceID(GetInstanceID());
+				Expedition* expedition = Expedition::FindCachedExpeditionByInstanceID(GetInstanceID());
 				if (expedition)
 				{
 					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately

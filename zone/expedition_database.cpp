@@ -429,24 +429,6 @@ uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_i
 	return expedition_id;
 }
 
-uint32_t ExpeditionDatabase::GetExpeditionIDFromInstanceID(uint32_t instance_id)
-{
-	LogExpeditionsDetail("Getting expedition id for instance [{}]", instance_id);
-
-	uint32_t expedition_id = 0;
-	auto query = fmt::format(
-		"SELECT id FROM expedition_details WHERE instance_id = {};", instance_id
-	);
-
-	auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0)
-	{
-		auto row = results.begin();
-		expedition_id = std::strtoul(row[0], nullptr, 10);
-	}
-	return expedition_id;
-}
-
 ExpeditionMember ExpeditionDatabase::GetExpeditionLeader(uint32_t expedition_id)
 {
 	LogExpeditionsDetail("Getting expedition leader for expedition [{}]", expedition_id);

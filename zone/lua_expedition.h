@@ -58,6 +58,8 @@ public:
 	int             GetInstanceID();
 	std::string     GetLeaderName();
 	luabind::object GetLockouts(lua_State* L);
+	std::string     GetLootEventByNPCTypeID(uint32_t npc_type_id);
+	std::string     GetLootEventBySpawnID(uint32_t spawn_id);
 	uint32_t        GetMemberCount();
 	luabind::object GetMembers(lua_State* L);
 	std::string     GetName();
@@ -71,6 +73,8 @@ public:
 	void            SetCompass(uint32_t zone_id, float x, float y, float z);
 	void            SetCompass(std::string zone_name, float x, float y, float z);
 	void            SetLocked(bool lock_expedition);
+	void            SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name);
+	void            SetLootEventBySpawnID(uint32_t spawn_id, std::string event_name);
 	void            SetReplayLockoutOnMemberJoin(bool enable);
 	void            SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading);
 	void            SetSafeReturn(std::string zone_name, float x, float y, float z, float heading);

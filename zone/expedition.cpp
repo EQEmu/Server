@@ -363,13 +363,17 @@ Expedition* Expedition::FindCachedExpeditionByID(uint32_t expedition_id)
 	return nullptr;
 }
 
-Expedition* Expedition::FindExpeditionByInstanceID(uint32_t instance_id)
+Expedition* Expedition::FindCachedExpeditionByInstanceID(uint32_t instance_id)
 {
-	if (instance_id)
+	if (instance_id && zone)
 	{
-		// ask database since it may have expired
-		auto expedition_id = ExpeditionDatabase::GetExpeditionIDFromInstanceID(instance_id);
-		return Expedition::FindCachedExpeditionByID(expedition_id);
+		for (const auto& cached_expedition : zone->expedition_cache)
+		{
+			if (cached_expedition.second->GetInstanceID() == instance_id)
+			{
+				return cached_expedition.second.get();
+			}
+		}
 	}
 	return nullptr;
 }
@@ -1890,4 +1894,83 @@ void Expedition::SetDzZoneInLocation(float x, float y, float z, float heading, b
 	{
 		SendWorldDzLocationUpdate(ServerOP_ExpeditionDzZoneIn, location);
 	}
+}
+
+bool Expedition::CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t spawn_id)
+{
+	if (client && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		// entity id takes priority, falls back to checking by npc type if not set
+		std::string event_name = GetLootEventBySpawnID(spawn_id);
+		if (event_name.empty())
+		{
+			event_name = GetLootEventByNPCTypeID(npc_type_id);
+		}
+
+		if (!event_name.empty())
+		{
+			auto client_lockout = client->GetExpeditionLockout(GetName(), event_name);
+			if (!client_lockout || client_lockout->GetExpeditionUUID() != GetUUID())
+			{
+				// client lockout not received in this expedition, prevent looting
+				LogExpeditions(
+					"Character [{}] denied looting npc [{}] spawn [{}] for lockout event [{}]",
+					client->CharacterID(), npc_type_id, spawn_id, event_name
+				);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+void Expedition::SetLootEventByNPCTypeID(uint32_t npc_type_id, const std::string& event_name)
+{
+	if (npc_type_id && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		LogExpeditions("Setting loot event [{}] for npc type id [{}]", event_name, npc_type_id);
+		m_npc_loot_events[npc_type_id] = event_name;
+	}
+}
+
+void Expedition::SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name)
+{
+	if (spawn_id && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		LogExpeditions("Setting loot event [{}] for entity id [{}]", event_name, spawn_id);
+		m_spawn_loot_events[spawn_id] = event_name;
+	}
+}
+
+std::string Expedition::GetLootEventByNPCTypeID(uint32_t npc_type_id)
+{
+	std::string event_name;
+
+	if (npc_type_id && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		auto it = m_npc_loot_events.find(npc_type_id);
+		if (it != m_npc_loot_events.end())
+		{
+			event_name = it->second;
+		}
+	}
+
+	return event_name;
+}
+
+std::string Expedition::GetLootEventBySpawnID(uint32_t spawn_id)
+{
+	std::string event_name;
+
+	if (spawn_id && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		auto it = m_spawn_loot_events.find(spawn_id);
+		if (it != m_spawn_loot_events.end())
+		{
+			event_name = it->second;
+		}
+	}
+
+	return event_name;
 }
