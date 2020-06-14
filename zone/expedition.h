@@ -76,7 +76,7 @@ public:
 	static Expedition* FindCachedExpeditionByCharacterID(uint32_t character_id);
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
-	static Expedition* FindExpeditionByInstanceID(uint32_t instance_id);
+	static Expedition* FindCachedExpeditionByInstanceID(uint32_t instance_id);
 	static void RemoveCharacterLockouts(std::string character_name, std::string expedition_name = {}, std::string event_name = {});
 	static void HandleWorldMessage(ServerPacket* pack);
 
@@ -109,6 +109,12 @@ public:
 	bool HasReplayLockout();
 	void RemoveLockout(const std::string& event_name);
 	void SetReplayLockoutOnMemberJoin(bool add_on_join, bool update_db = false);
+
+	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t spawn_id);
+	std::string GetLootEventByNPCTypeID(uint32_t npc_id);
+	std::string GetLootEventBySpawnID(uint32_t spawn_id);
+	void SetLootEventByNPCTypeID(uint32_t npc_type_id, const std::string& event_name);
+	void SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name);
 
 	void SendClientExpeditionInfo(Client* client);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
@@ -184,6 +190,8 @@ private:
 	ExpeditionMember m_leader;
 	std::vector<ExpeditionMember> m_members;
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
+	std::unordered_map<uint32_t, std::string> m_npc_loot_events;   // only valid inside dz zone
+	std::unordered_map<uint32_t, std::string> m_spawn_loot_events; // only valid inside dz zone
 };
 
 #endif

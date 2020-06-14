@@ -66,6 +66,16 @@ luabind::object Lua_Expedition::GetLockouts(lua_State* L) {
 	return lua_table;
 }
 
+std::string Lua_Expedition::GetLootEventByNPCTypeID(uint32_t npc_type_id) {
+	Lua_Safe_Call_String();
+	return self->GetLootEventByNPCTypeID(npc_type_id);
+}
+
+std::string Lua_Expedition::GetLootEventBySpawnID(uint32_t spawn_id) {
+	Lua_Safe_Call_String();
+	return self->GetLootEventBySpawnID(spawn_id);
+}
+
 uint32_t Lua_Expedition::GetMemberCount() {
 	Lua_Safe_Call_Int();
 	return self->GetMemberCount();
@@ -140,6 +150,16 @@ void Lua_Expedition::SetLocked(bool lock_expedition) {
 	self->SetLocked(lock_expedition, true);
 }
 
+void Lua_Expedition::SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->SetLootEventByNPCTypeID(npc_type_id, event_name);
+}
+
+void Lua_Expedition::SetLootEventBySpawnID(uint32_t spawn_id, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->SetLootEventBySpawnID(spawn_id, event_name);
+}
+
 void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 	Lua_Safe_Call_Void();
 	self->SetReplayLockoutOnMemberJoin(enable, true);
@@ -171,6 +191,8 @@ luabind::scope lua_register_expedition() {
 		.def("GetInstanceID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetInstanceID)
 		.def("GetLeaderName", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetLeaderName)
 		.def("GetLockouts", &Lua_Expedition::GetLockouts)
+		.def("GetLootEventByNPCTypeID", (std::string(Lua_Expedition::*)(uint32_t))&Lua_Expedition::GetLootEventByNPCTypeID)
+		.def("GetLootEventBySpawnID", (std::string(Lua_Expedition::*)(uint32_t))&Lua_Expedition::GetLootEventBySpawnID)
 		.def("GetMemberCount", (uint32_t(Lua_Expedition::*)(void))&Lua_Expedition::GetMemberCount)
 		.def("GetMembers", &Lua_Expedition::GetMembers)
 		.def("GetName", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetName)
@@ -184,6 +206,8 @@ luabind::scope lua_register_expedition() {
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetCompass", (void(Lua_Expedition::*)(std::string, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetLocked", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetLocked)
+		.def("SetLootEventByNPCTypeID", (void(Lua_Expedition::*)(uint32_t, std::string))&Lua_Expedition::SetLootEventByNPCTypeID)
+		.def("SetLootEventBySpawnID", (void(Lua_Expedition::*)(uint32_t, std::string))&Lua_Expedition::SetLootEventBySpawnID)
 		.def("SetReplayLockoutOnMemberJoin", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetReplayLockoutOnMemberJoin)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(uint32_t, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(std::string, float, float, float, float))&Lua_Expedition::SetSafeReturn)

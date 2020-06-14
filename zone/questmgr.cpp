@@ -4336,14 +4336,14 @@ Expedition* QuestManager::GetExpeditionByCharID(uint32 char_id)
 
 Expedition* QuestManager::GetExpeditionByInstanceID(uint32 instance_id)
 {
-	return Expedition::FindExpeditionByInstanceID(instance_id);
+	return Expedition::FindCachedExpeditionByInstanceID(instance_id);
 }
 
 Expedition* QuestManager::GetExpeditionForCurrentInstance()
 {
 	if (zone && zone->GetInstanceID() != 0)
 	{
-		return Expedition::FindExpeditionByInstanceID(zone->GetInstanceID());
+		return Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
 	}
 	return nullptr;
 }
