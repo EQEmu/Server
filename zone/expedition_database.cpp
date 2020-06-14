@@ -379,6 +379,29 @@ void ExpeditionDatabase::DeletePendingLockouts(uint32_t character_id)
 	database.QueryDatabase(query);
 }
 
+void ExpeditionDatabase::DeleteAllMembersPendingLockouts(const std::vector<ExpeditionMember>& members)
+{
+	LogExpeditionsDetail("Deleting pending lockouts for [{}] characters", members.size());
+
+	std::string query_character_ids;
+	for (const auto& member : members)
+	{
+		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.char_id);
+	}
+
+	if (!query_character_ids.empty())
+	{
+		query_character_ids.pop_back(); // trailing comma
+
+		auto query = fmt::format(SQL(
+			DELETE FROM expedition_character_lockouts
+			WHERE character_id IN ({}) AND is_pending = TRUE;
+		), query_character_ids);
+
+		database.QueryDatabase(query);
+	}
+}
+
 void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string& event_name)
 {
 	LogExpeditionsDetail("Deleting expedition [{}] lockout event [{}]", expedition_id, event_name);

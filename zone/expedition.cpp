@@ -310,7 +310,9 @@ void Expedition::SaveMembers(ExpeditionRequest& request)
 	{
 		m_member_id_history.emplace(member.char_id);
 	}
+
 	ExpeditionDatabase::InsertMembers(m_id, m_members);
+	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
 	m_dynamiczone.SaveInstanceMembersToDatabase(m_member_id_history); // all are current members here
 }
 
@@ -504,10 +506,13 @@ void Expedition::RemoveAllMembers(bool enable_removal_timers)
 {
 	m_dynamiczone.RemoveAllCharacters(enable_removal_timers);
 
+	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
 	ExpeditionDatabase::UpdateAllMembersRemoved(m_id);
 
 	SendUpdatesToZoneMembers(true);
 	SendWorldExpeditionUpdate(ServerOP_ExpeditionMembersRemoved);
+
+	m_members.clear();
 }
 
 bool Expedition::RemoveMember(const std::string& remove_char_name)
@@ -1626,6 +1631,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			if (expedition)
 			{
 				expedition->SendUpdatesToZoneMembers(true);
+				expedition->m_members.clear();
 			}
 		}
 		break;
