@@ -55,6 +55,7 @@ namespace ExpeditionDatabase
 		const std::vector<ExpeditionMember>& members, const std::string& expedition_name, const std::string& event_name);
 	void AssignPendingLockouts(uint32_t character_id, const std::string& expedition_name);
 	void DeletePendingLockouts(uint32_t character_id);
+	void DeleteAllMembersPendingLockouts(const std::vector<ExpeditionMember>& members);
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
 	uint32_t GetExpeditionIDFromInstanceID(uint32_t instance_id);
 	ExpeditionMember GetExpeditionLeader(uint32_t expedition_id);

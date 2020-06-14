@@ -75,7 +75,7 @@ public:
 
 	uint32_t CreateInstance();
 	void     AddCharacter(uint32_t character_id);
-	void     SaveInstanceMembersToDatabase(const std::unordered_set<uint32_t> character_ids);
+	void     SaveInstanceMembersToDatabase(const std::unordered_set<uint32_t>& character_ids);
 
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); };
