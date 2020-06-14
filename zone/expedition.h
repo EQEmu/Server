@@ -27,7 +27,6 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 class Client;
@@ -138,7 +137,7 @@ private:
 	static void CacheExpeditions(MySQLRequestResult& results);
 	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
 
-	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status, bool is_current_member = true);
+	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
@@ -183,8 +182,7 @@ private:
 	std::string m_expedition_name;
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	ExpeditionMember m_leader;
-	std::vector<ExpeditionMember> m_members; // current members
-	std::unordered_set<uint32_t> m_member_id_history; // track past members to allow invites for replay timer bypass
+	std::vector<ExpeditionMember> m_members;
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
 };
 

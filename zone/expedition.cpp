@@ -212,9 +212,8 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		if (current_expedition)
 		{
 			auto member_id = strtoul(row[col::member_id], nullptr, 10);
-			bool is_current_member = (strtoul(row[col::is_current_member], nullptr, 10) != 0);
 			current_expedition->AddInternalMember(
-				row[col::member_name], member_id, ExpeditionMemberStatus::Offline, is_current_member
+				row[col::member_name], member_id, ExpeditionMemberStatus::Offline
 			);
 			expedition_character_ids.emplace_back(std::make_pair(expedition_id, member_id));
 		}
@@ -309,14 +308,16 @@ void Expedition::SaveLockouts(ExpeditionRequest& request)
 void Expedition::SaveMembers(ExpeditionRequest& request)
 {
 	m_members = request.GetMembers();
+
+	std::vector<uint32_t> member_ids;
 	for (const auto& member : m_members)
 	{
-		m_member_id_history.emplace(member.char_id);
+		member_ids.emplace_back(member.char_id);
 	}
 
 	ExpeditionDatabase::InsertMembers(m_id, m_members);
 	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
-	m_dynamiczone.SaveInstanceMembersToDatabase(m_member_id_history); // all are current members here
+	m_dynamiczone.SaveInstanceMembersToDatabase(member_ids);
 }
 
 Expedition* Expedition::FindCachedExpeditionByCharacterID(uint32_t character_id)
@@ -465,22 +466,17 @@ void Expedition::RemoveLockout(const std::string& event_name)
 }
 
 void Expedition::AddInternalMember(
-	const std::string& char_name, uint32_t character_id, ExpeditionMemberStatus status, bool is_current_member)
+	const std::string& char_name, uint32_t character_id, ExpeditionMemberStatus status)
 {
-	if (is_current_member)
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[character_id](const ExpeditionMember& member) {
+			return member.char_id == character_id;
+		});
+
+	if (it == m_members.end())
 	{
-		auto it = std::find_if(m_members.begin(), m_members.end(),
-			[character_id](const ExpeditionMember& member) {
-				return member.char_id == character_id;
-			});
-
-		if (it == m_members.end())
-		{
-			m_members.emplace_back(ExpeditionMember{character_id, char_name, status});
-		}
+		m_members.emplace_back(ExpeditionMember{character_id, char_name, status});
 	}
-
-	m_member_id_history.emplace(character_id);
 }
 
 bool Expedition::AddMember(const std::string& add_char_name, uint32_t add_char_id)
@@ -504,7 +500,7 @@ void Expedition::RemoveAllMembers(bool enable_removal_timers)
 	m_dynamiczone.RemoveAllCharacters(enable_removal_timers);
 
 	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
-	ExpeditionDatabase::UpdateAllMembersRemoved(m_id);
+	ExpeditionDatabase::DeleteAllMembers(m_id);
 
 	SendUpdatesToZoneMembers(true);
 	SendWorldExpeditionUpdate(ServerOP_ExpeditionMembersRemoved);
@@ -520,7 +516,7 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 		return false;
 	}
 
-	ExpeditionDatabase::UpdateMemberRemoved(m_id, member.char_id);
+	ExpeditionDatabase::DeleteMember(m_id, member.char_id);
 	m_dynamiczone.RemoveCharacter(member.char_id);
 
 	ProcessMemberRemoved(member.name, member.char_id);
@@ -549,7 +545,7 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	}
 
 	// make remove and add atomic to avoid racing with separate world messages
-	ExpeditionDatabase::UpdateMemberRemoved(m_id, member.char_id);
+	ExpeditionDatabase::DeleteMember(m_id, member.char_id);
 	ExpeditionDatabase::InsertMember(m_id, add_client->CharacterID());
 	m_dynamiczone.RemoveCharacter(member.char_id);
 	m_dynamiczone.AddCharacter(add_client->CharacterID());
