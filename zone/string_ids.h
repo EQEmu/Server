@@ -327,6 +327,7 @@
 #define DZADD_NOT_ONLINE            3586    //%1 is not currently online.  A player needs to be online to be added to a Dynamic Zone
 #define DZADD_EXCEED_MAX            3587    //You can not add another player since you currently have the maximum number of players allowed (%1) in this zone.
 #define DZADD_ALREADY_PART          3588    //You can not add %1 since they are already part of this zone.
+#define DZADD_LEAVE_ZONE_FIRST      3589    //You can not add %1 since they first need to leave the zone before being allowed back in.
 #define DZADD_ALREADY_ASSIGNED      3590    //%1 can not be added to this dynamic zone since they are already assigned to another dynamic zone.
 #define DZADD_REPLAY_TIMER          3591    //%1 can not be added to this dynamic zone for another %2D:%3H:%4M since they have recently played this zone.
 #define DZADD_EVENT_TIMER           3592    //%1 can not be added to this dynamic zone since they have recently experienced %2.  They must wait for another %3D:%4H:%5M, or until event %2 has occurred.

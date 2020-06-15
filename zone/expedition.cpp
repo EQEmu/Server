@@ -673,12 +673,18 @@ void Expedition::SendLeaderMessage(
 
 bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping)
 {
-	if (!add_client) // a null leader_client handled by SendLeaderMessage fallback
+	if (!add_client) // a null leader_client is handled by SendLeaderMessage fallback
 	{
 		return true;
 	}
 
 	bool has_conflict = false;
+
+	if (m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		SendLeaderMessage(leader_client, Chat::Red, DZADD_LEAVE_ZONE_FIRST, { add_client->GetName() });
+		has_conflict = true;
+	}
 
 	auto expedition_id = add_client->GetExpeditionID();
 	if (expedition_id)
