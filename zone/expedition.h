@@ -109,6 +109,7 @@ public:
 	bool HasReplayLockout();
 	void RemoveLockout(const std::string& event_name);
 	void SetReplayLockoutOnMemberJoin(bool add_on_join, bool update_db = false);
+	void UpdateLockoutDuration(const std::string& event_name, uint32_t seconds, bool members_only = true);
 
 	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t spawn_id);
 	std::string GetLootEventByNPCTypeID(uint32_t npc_id);
@@ -143,12 +144,13 @@ private:
 	static void CacheExpeditions(MySQLRequestResult& results);
 	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
 
+	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name);
-	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove);
+	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader, const std::string& new_leader_name, bool is_online);
 	void ProcessMemberAdded(std::string added_char_name, uint32_t added_char_id);
 	void ProcessMemberRemoved(std::string removed_char_name, uint32_t removed_char_id);
@@ -161,7 +163,7 @@ private:
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name, bool pending = false);
 	void SendWorldLeaderChanged();
-	void SendWorldLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove);
+	void SendWorldLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void SendWorldMakeLeaderRequest(const std::string& requester_name, const std::string& new_leader_name);
 	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
