@@ -810,7 +810,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		for (const auto& lockout_iter : m_lockouts)
 		{
 			const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-			if (!lockout.IsInherited() && !lockout.IsExpired() &&
+			if (!lockout.IsInherited() &&
 			    !add_client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
 			{
 				// replay timers are optionally added to new members immediately on
@@ -823,7 +823,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 							lockout.GetExpeditionName(), lockout.GetEventName(), lockout.GetDuration());
 					}
 				}
-				else
+				else if (!lockout.IsExpired())
 				{
 					pending_lockouts.emplace_back(lockout);
 				}
