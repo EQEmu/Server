@@ -2055,6 +2055,7 @@ struct ServerExpeditionLockout_Struct {
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
 	uint8  remove;
+	uint8  members_only;
 	char   event_name[256];
 };
 

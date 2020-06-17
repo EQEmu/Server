@@ -448,15 +448,34 @@ void Expedition::AddReplayLockout(uint32_t seconds)
 
 void Expedition::AddLockout(const std::string& event_name, uint32_t seconds)
 {
-	// any current lockouts for the event are updated with new expiration time
 	ExpeditionLockoutTimer lockout{m_uuid, m_expedition_name, event_name, 0, seconds};
 	lockout.Reset(); // sets expire time
+	AddLockout(lockout);
+}
 
-	ExpeditionDatabase::InsertLockout(m_id, lockout);
+void Expedition::AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only)
+{
+	if (!members_only)
+	{
+		ExpeditionDatabase::InsertLockout(m_id, lockout);
+	}
 	ExpeditionDatabase::InsertMembersLockout(m_members, lockout);
 
-	ProcessLockoutUpdate(lockout, false);
-	SendWorldLockoutUpdate(lockout, false);
+	ProcessLockoutUpdate(lockout, false, members_only);
+	SendWorldLockoutUpdate(lockout, false, members_only);
+}
+
+void Expedition::UpdateLockoutDuration(
+	const std::string& event_name, uint32_t seconds, bool members_only)
+{
+	// some live expeditions update existing lockout timers during progression
+	auto it = m_lockouts.find(event_name);
+	if (it != m_lockouts.end())
+	{
+		uint64_t expire_time = it->second.GetStartTime() + seconds;
+		ExpeditionLockoutTimer lockout{m_uuid, m_expedition_name, event_name, expire_time, seconds};
+		AddLockout(lockout, members_only);
+	}
 }
 
 void Expedition::RemoveLockout(const std::string& event_name)
@@ -1223,15 +1242,19 @@ void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t re
 	);
 }
 
-void Expedition::ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove)
+void Expedition::ProcessLockoutUpdate(
+	const ExpeditionLockoutTimer& lockout, bool remove, bool members_only)
 {
-	if (!remove)
+	if (!members_only)
 	{
-		m_lockouts[lockout.GetEventName()] = lockout;
-	}
-	else
-	{
-		m_lockouts.erase(lockout.GetEventName());
+		if (!remove)
+		{
+			m_lockouts[lockout.GetEventName()] = lockout;
+		}
+		else
+		{
+			m_lockouts.erase(lockout.GetEventName());
+		}
 	}
 
 	for (const auto& member : m_members)
@@ -1453,7 +1476,7 @@ void Expedition::SendWorldLeaderChanged()
 }
 
 void Expedition::SendWorldLockoutUpdate(
-	const ExpeditionLockoutTimer& lockout, bool remove)
+	const ExpeditionLockoutTimer& lockout, bool remove, bool members_only)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionLockout_Struct);
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLockout, pack_size));
@@ -1464,6 +1487,7 @@ void Expedition::SendWorldLockoutUpdate(
 	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
 	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
 	buf->remove = remove;
+	buf->members_only = members_only;
 	strn0cpy(buf->event_name, lockout.GetEventName().c_str(), sizeof(buf->event_name));
 	worldserver.SendPacket(pack.get());
 }
@@ -1655,7 +1679,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 				ExpeditionLockoutTimer lockout{
 					expedition->GetUUID(), expedition->GetName(), buf->event_name, buf->expire_time, buf->duration
 				};
-				expedition->ProcessLockoutUpdate(lockout, buf->remove);
+				expedition->ProcessLockoutUpdate(lockout, buf->remove, buf->members_only);
 			}
 		}
 		break;

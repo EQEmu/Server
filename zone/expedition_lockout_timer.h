@@ -43,6 +43,7 @@ public:
 
 	uint32_t GetDuration() const { return static_cast<uint32_t>(m_duration.count()); }
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
+	uint64_t GetStartTime() const { return std::chrono::system_clock::to_time_t(m_expire_time - m_duration); }
 	uint32_t GetSecondsRemaining() const;
 	DaysHoursMinutes GetDaysHoursMinutesRemaining() const;
 	const std::string& GetExpeditionName() const { return m_expedition_name; }
