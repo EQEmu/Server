@@ -38,13 +38,11 @@ struct ExpeditionRequestConflict
 };
 
 ExpeditionRequest::ExpeditionRequest(
-	std::string expedition_name, uint32_t min_players, uint32_t max_players,
-	bool has_replay_timer, bool disable_messages
+	std::string expedition_name, uint32_t min_players, uint32_t max_players, bool disable_messages
 ) :
 	m_expedition_name(expedition_name),
 	m_min_players(min_players),
 	m_max_players(max_players),
-	m_has_replay_timer(has_replay_timer),
 	m_disable_messages(disable_messages)
 {
 }
@@ -183,7 +181,7 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 			m_lockouts.emplace(lockout.GetEventName(), lockout);
 
 			// on live if leader has a replay lockout it never bothers checking for event conflicts
-			if (m_check_event_lockouts && m_has_replay_timer && lockout.IsReplayTimer())
+			if (m_check_event_lockouts && lockout.IsReplayTimer())
 			{
 				m_check_event_lockouts = false;
 			}
@@ -260,23 +258,20 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 					character_id, lockout.GetEventName(), lockout.GetSecondsRemaining(), leeway_seconds
 				);
 			}
-			else
+			else if (lockout.IsReplayTimer())
 			{
 				// replay timer conflict messages always show up before event conflicts
-				if (/*m_has_replay_timer && */lockout.IsReplayTimer())
+				has_conflicts = true;
+				SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
+			}
+			else if (m_check_event_lockouts && character_id != m_leader_id)
+			{
+				if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
 				{
+					// leader doesn't have this lockout. queue instead of messaging
+					// now so message comes after any replay lockout messages
 					has_conflicts = true;
-					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
-				}
-				else if (m_check_event_lockouts && character_id != m_leader_id)
-				{
-					if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
-					{
-						// leader doesn't have this lockout. queue instead of messaging
-						// now so message comes after any replay lockout messages
-						has_conflicts = true;
-						member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
-					}
+					member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
 				}
 			}
 		}

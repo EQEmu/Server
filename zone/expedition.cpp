@@ -47,15 +47,14 @@ const uint32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
 	uint32_t id, const DynamicZone& dynamic_zone, std::string expedition_name,
-	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players, bool replay_timer
+	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players
 ) :
 	m_id(id),
 	m_dynamiczone(dynamic_zone),
 	m_expedition_name(expedition_name),
 	m_leader(leader),
 	m_min_players(min_players),
-	m_max_players(max_players),
-	m_has_replay_timer(replay_timer)
+	m_max_players(max_players)
 {
 }
 
@@ -98,8 +97,7 @@ Expedition* Expedition::TryCreate(
 		request.GetExpeditionName(),
 		leader.char_id,
 		request.GetMinPlayers(),
-		request.GetMaxPlayers(),
-		request.HasReplayTimer()
+		request.GetMaxPlayers()
 	);
 
 	if (expedition_id)
@@ -112,8 +110,7 @@ Expedition* Expedition::TryCreate(
 			request.GetExpeditionName(),
 			leader,
 			request.GetMinPlayers(),
-			request.GetMaxPlayers(),
-			request.HasReplayTimer()
+			request.GetMaxPlayers()
 		));
 
 		LogExpeditions(
@@ -189,8 +186,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 				row[col::expedition_name],                              // expedition name
 				ExpeditionMember{leader_id, row[col::leader_name]},     // expedition leader id, name
 				strtoul(row[col::min_players], nullptr, 10),            // min_players
-				strtoul(row[col::max_players], nullptr, 10),            // max_players
-				(strtoul(row[col::has_replay_timer], nullptr, 10) != 0) // has_replay_timer
+				strtoul(row[col::max_players], nullptr, 10)             // max_players
 			));
 
 			bool add_replay_on_join = (strtoul(row[col::add_replay_on_join], nullptr, 10) != 0);
@@ -697,7 +693,7 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 	// client with a replay lockout is allowed only if they were a previous member
 	auto member_iter = m_member_id_history.find(add_client->CharacterID());
 	bool was_member = (member_iter != m_member_id_history.end());
-	if (!was_member && m_has_replay_timer)
+	if (!was_member)
 	{
 		auto replay_lockout = add_client->GetExpeditionLockout(m_expedition_name, DZ_REPLAY_TIMER_NAME);
 		if (replay_lockout)
@@ -815,7 +811,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 			{
 				// replay timers are optionally added to new members immediately on
 				// join with a fresh expire time using the original duration.
-				if (m_has_replay_timer && lockout.IsReplayTimer())
+				if (lockout.IsReplayTimer())
 				{
 					if (m_add_replay_on_join)
 					{
