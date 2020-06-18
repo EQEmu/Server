@@ -68,7 +68,7 @@ public:
 	Expedition() = delete;
 	Expedition(
 		uint32_t id, const DynamicZone& dz, std::string expedition_name, const ExpeditionMember& leader,
-		uint32_t min_players, uint32_t max_players, bool replay_timer);
+		uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
 
@@ -178,7 +178,6 @@ private:
 	uint32_t    m_min_players        = 0;
 	uint32_t    m_max_players        = 0;
 	bool        m_is_locked          = false;
-	bool        m_has_replay_timer   = false;
 	bool        m_add_replay_on_join = true;
 	std::string m_expedition_name;
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };

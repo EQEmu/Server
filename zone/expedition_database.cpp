@@ -27,16 +27,16 @@
 
 uint32_t ExpeditionDatabase::InsertExpedition(
 	uint32_t instance_id, const std::string& expedition_name, uint32_t leader_id,
-	uint32_t min_players, uint32_t max_players, bool has_replay_lockout)
+	uint32_t min_players, uint32_t max_players)
 {
 	LogExpeditionsDetail("Inserting new expedition [{}] leader [{}]", expedition_name, leader_id);
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO expedition_details
-			(instance_id, expedition_name, leader_id, min_players, max_players, has_replay_timer)
+			(instance_id, expedition_name, leader_id, min_players, max_players)
 		VALUES
-			({}, '{}', {}, {}, {}, {});
-	), instance_id, expedition_name, leader_id, min_players, max_players, has_replay_lockout);
+			({}, '{}', {}, {}, {});
+	), instance_id, expedition_name, leader_id, min_players, max_players);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -58,7 +58,6 @@ std::string ExpeditionDatabase::LoadExpeditionsSelectQuery()
 			expedition_details.leader_id,
 			expedition_details.min_players,
 			expedition_details.max_players,
-			expedition_details.has_replay_timer,
 			expedition_details.add_replay_on_join,
 			expedition_details.is_locked,
 			character_data.name leader_name,

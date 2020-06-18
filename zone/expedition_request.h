@@ -39,7 +39,7 @@ class ExpeditionRequest
 public:
 	ExpeditionRequest(
 		std::string expedition_name, uint32_t min_players, uint32_t max_players,
-		bool has_replay_timer, bool disable_messages = false);
+		bool disable_messages = false);
 
 	bool Validate(Client* requester);
 
@@ -49,7 +49,6 @@ public:
 	const std::string& GetLeaderName() const { return m_leader_name; }
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
-	bool HasReplayTimer() const { return m_has_replay_timer; }
 	std::vector<ExpeditionMember> GetMembers() const { return m_members; }
 	std::unordered_map<std::string, ExpeditionLockoutTimer> GetLockouts() const { return m_lockouts; }
 
@@ -73,7 +72,6 @@ private:
 	uint32_t m_max_players          = 0;
 	bool     m_check_event_lockouts = true;
 	bool     m_disable_messages     = false;
-	bool     m_has_replay_timer     = false;
 	std::string m_expedition_name;
 	std::string m_leader_name;
 	std::vector<ExpeditionMember> m_members;
