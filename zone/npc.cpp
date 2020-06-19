@@ -1074,11 +1074,11 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 z
 	memset(npc_type, 0, sizeof(NPCType));
 
 	std::string str_zoffset = numberToWords(zoffset);
-	std::string str_number= numberToWords(grid_number);
+	std::string str_number = numberToWords(grid_number);
 
 	strcpy(npc_type->name, str_number.c_str());
 	if (zoffset != 0) {
-		strcat(npc_type->name, "(Zoffset)");
+		strcat(npc_type->name, "(Stacked)");
 	}
 
 	npc_type->current_hp       = 4000000;

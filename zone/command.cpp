@@ -2477,7 +2477,9 @@ void command_grid(Client *c, const Seperator *sep)
 			glm::vec4 node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
 
 			std::vector<float> node_loc {
-					node_position.x, node_position.y, node_position.z
+					node_position.x, 
+					node_position.y, 
+					node_position.z
 			};
 
 			// If we already have a node at this location, set the z offset
