@@ -567,6 +567,7 @@ void Client::SendDisciplineUpdate() {
 
 bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	// Dont let client waste a reuse timer if they can't use the disc
+	bool disc_failed = false;
 	if (IsStunned() || IsFeared() || IsMezzed() || IsAmnesiad() || IsPet())
 	{
 		return(false);
@@ -644,20 +645,40 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			reduced_recast -= focus;
 		}
 
-		if (reduced_recast > 0)
-			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
-		else{
-			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
-			return true;
+		if (reduced_recast > 0) {
+			if (!CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast)) {
+				disc_failed = true;
+			}
+		} else {
+			if (!CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline)) {
+				disc_failed = true;
+			}
 		}
 
-		SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);
+		if (disc_failed) {
+			if (GetPTimers().Enabled((uint32)DiscTimer)) {
+				GetPTimers().Clear(&database, (uint32)DiscTimer);
+			}
+			SendDisciplineTimer(spells[spell_id].EndurTimerIndex, 0);
+			return false;
+		} else {
+			SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);			
+		}
+	} else {
+		if (!CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline)) {
+			return false;
+		}
 	}
-	else
-	{
-		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
+	return true;
+}
+
+void Client::ResetDisciplineTimer(uint32 timer_id)
+{
+	pTimerType DiscTimer = pTimerDisciplineReuseStart + timer_id;
+	if (GetPTimers().Enabled((uint32)DiscTimer)) {
+		GetPTimers().Clear(&database, (uint32)DiscTimer);
 	}
-	return(true);
+	SendDisciplineTimer(timer_id, 0);
 }
 
 void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)

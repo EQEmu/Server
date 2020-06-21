@@ -3670,6 +3670,30 @@ XS(XS_Client_UseDiscipline) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_ResetDisciplineTimer)
+{
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, timer_id)");
+	{
+		Client*		THIS;
+		uint32		timer_id = (uint32)SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->ResetDisciplineTimer(timer_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_GetCharacterFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCharacterFactionLevel) {
 	dXSARGS;
@@ -6548,6 +6572,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
+	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");
 	newXSproto(strcpy(buf, "SaveBackup"), XS_Client_SaveBackup, file, "$");

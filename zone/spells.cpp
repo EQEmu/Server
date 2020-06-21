@@ -298,8 +298,16 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if(IsClient()) {
 		char temp[64];
 		sprintf(temp, "%d", spell_id);
-		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0) != 0)
+		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0) != 0) {
+			if (IsDiscipline(spell_id)) {
+				InterruptSpell(5805, 0x121, spell_id);
+				CastToClient()->SendDisciplineTimer(spells[spell_id].EndurTimerIndex, 1);
+			} else {
+				InterruptSpell(INSUFFICIENT_MANA, 0x121, spell_id);
+				CastToClient()->SendSpellBarEnable(spell_id);
+			}
 			return false;
+		}
 	} else if(IsNPC()) {
 		char temp[64];
 		sprintf(temp, "%d", spell_id);

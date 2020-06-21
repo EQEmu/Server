@@ -197,6 +197,7 @@ public:
 	float CalcPriceMod(Lua_Mob other, bool reverse);
 	void ResetTrade();
 	bool UseDiscipline(int spell_id, int target_id);
+	void ResetDisciplineTimer(int timer_id);
 	int GetCharacterFactionLevel(int faction_id);
 	void SetZoneFlag(int zone_id);
 	void ClearZoneFlag(int zone_id);
