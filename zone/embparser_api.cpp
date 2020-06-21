@@ -530,6 +530,32 @@ XS(XS__zone) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__zonegroup);
+XS(XS__zonegroup) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zonegroup(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneGroup(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__zoneraid);
+XS(XS__zoneraid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zoneraid(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneRaid(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__settimer);
 XS(XS__settimer) {
 	dXSARGS;
@@ -4520,6 +4546,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "write"), XS__write, file);
 	newXS(strcpy(buf, "ze"), XS__ze, file);
 	newXS(strcpy(buf, "zone"), XS__zone, file);
+	newXS(strcpy(buf, "zonegroup"), XS__zonegroup, file);
+	newXS(strcpy(buf, "zoneraid"), XS__zoneraid, file);
 
 	XSRETURN_YES;
 }
