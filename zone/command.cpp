@@ -2439,10 +2439,10 @@ void command_grid(Client *c, const Seperator *sep)
 		}
 
 		std::string query = StringFormat(
-			"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
+			"SELECT `x`, `y`, `z`, `heading`, `number` "
 			"FROM `grid_entries` "
 			"WHERE `zoneid` = %u and `gridid` = %i "
-			"ORDER BY `number` ",
+			"ORDER BY `number`",
 			zone->GetZoneID(),
 			target->CastToNPC()->GetGrid()
 		);
@@ -2472,18 +2472,31 @@ void command_grid(Client *c, const Seperator *sep)
 		/**
 		 * Spawn grid nodes
 		 */
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			auto node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+		std::map<std::vector<float>, int32> zoffset;
 
-			NPC *npc = NPC::SpawnGridNodeNPC(
-				target->GetCleanName(),
-				node_position,
-				static_cast<uint32>(target->CastToNPC()->GetGrid()),
-				static_cast<uint32>(atoi(row[4])),
-				static_cast<uint32>(atoi(row[5]))
-			);
-			npc->SetFlyMode(GravityBehavior::Flying);
-			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			glm::vec4 node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+
+			std::vector<float> node_loc {
+					node_position.x, 
+					node_position.y, 
+					node_position.z
+			};
+
+			// If we already have a node at this location, set the z offset
+			// higher from the existing one so we can see it.  Adjust so if
+			// there is another at the same spot we adjust again.
+			auto search = zoffset.find(node_loc);
+			if (search != zoffset.end()) {
+				search->second = search->second + 3;
+			}
+			else {
+				zoffset[node_loc] = 0.0;
+			}
+
+			node_position.z += zoffset[node_loc];
+
+			NPC::SpawnGridNodeNPC(node_position,atoi(row[4]),zoffset[node_loc]);
 		}
 	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0) {

@@ -43,6 +43,20 @@ std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::string implode(std::string glue, std::vector<std::string> src);
+std::string convert2digit(int n, std::string suffix);
+std::string numberToWords(unsigned long long int n);
+
+// For converstion of numerics into English
+// Used for grid nodes, as NPC names remove numerals.
+// But general purpose
+
+const std::string NUM_TO_ENGLISH_X[] = { "", "One ", "Two ", "Three ", "Four ",
+				"Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ",
+				"Twelve ", "Thirteen ", "Fourteen ", "Fifteen ",
+				"Sixteen ", "Seventeen ", "Eighteen ", "Nineteen " };
+
+const std::string NUM_TO_ENGLISH_Y[] = { "", "", "Twenty ", "Thirty ", "Forty ",
+				"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
 
 /**
  * @param str
@@ -189,5 +203,8 @@ uint32 hextoi(const char* num);
 uint64 hextoi64(const char* num);
 void MakeLowerString(const char *source, char *target);
 void RemoveApostrophes(std::string &s);
+std::string convert2digit(int n, std::string suffix);
+std::string numberToWords(unsigned long long int n);
+
 
 #endif
