@@ -4223,10 +4223,11 @@ void command_findzone(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"[{}] [{}] [{}] Version ({}) [{}]",
+				"[{}] [{}] [{}] ID ({}) Version ({}) [{}]",
 				(version == 0 ? command_zone : "zone"),
 				command_gmzone,
 				short_name,
+				zone_id,
 				version,
 				long_name
 			).c_str()
