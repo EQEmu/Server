@@ -2041,6 +2041,49 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZTaskAssign:
+	{
+		CZTaskAssign_Struct* CZTA = (CZTaskAssign_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		Client* client = entity_list.GetClientByCharID(CZTA->character_id);
+		if (client != 0) {
+			client->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
+		}
+		break;
+	}
+	case ServerOP_CZTaskAssignGroup:
+	{
+		CZTaskAssignGroup_Struct* CZTA = (CZTaskAssignGroup_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZTA->group_id) {
+				client.second->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZTaskAssignRaid:
+	{
+		CZTaskAssignRaid_Struct* CZTA = (CZTaskAssignRaid_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZTA->raid_id) {
+				client.second->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZTaskAssignGuild:
+	{
+		CZTaskAssignGuild_Struct* CZTA = (CZTaskAssignGuild_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZTA->guild_id) {
+				client.second->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
+			}
+		}
+		break;
+	}
 	case ServerOP_WWMarquee:
 	{
 		WWMarquee_Struct* WWMS = (WWMarquee_Struct*)pack->pBuffer;
