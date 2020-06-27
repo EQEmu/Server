@@ -153,7 +153,7 @@ RULE_INT(Character, AvoidanceCap, 750, "750 Is a pretty good value, seen people 
 RULE_BOOL(Character, AllowMQTarget, false, "Disables putting players in the 'hackers' list for targeting beyond the clip plane or attempting to target something untargetable")
 RULE_BOOL(Character, UseOldBindWound, false, "Uses the original bind wound behavior")
 RULE_BOOL(Character, GrantHoTTOnCreate, false, "Grant Health of Target's Target leadership AA on character creation")
-RULE_BOOL(Character, UseOldConSystem, false, "Grant Health of Target's Target leadership AA on character creation")
+RULE_BOOL(Character, UseOldConSystem, false, "Setting whether the pre SoF era consider system should be used")
 RULE_BOOL(Character, OPClientUpdateVisualDebug, false, "Shows a pulse and forward directional particle each time the client sends its position to server")
 RULE_BOOL(Character, AllowCrossClassTrainers, false, "If the value is true, a player can also train with other class Guildmasters.")
 RULE_BOOL(Character, PetsUseReagents, true, "Conjuring pets consumes reagents")
@@ -737,8 +737,8 @@ RULE_BOOL(Inventory, TransformSummonedBags, false, "Transforms summoned bags int
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Client)
-RULE_BOOL(Client, UseLiveFactionMessage, false, "Allows players to see faction adjustments like Live")
-RULE_BOOL(Client, UseLiveBlockedMessage, false, "Allows players to see faction adjustments like Live")
+RULE_BOOL(Client, UseLiveFactionMessage, false, "Allows players to see detailed faction adjustments as on the live servers")
+RULE_BOOL(Client, UseLiveBlockedMessage, false, "Setting whether detailed spell block messages should be used as on the live servers")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Bugs)
