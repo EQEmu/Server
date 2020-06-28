@@ -633,6 +633,9 @@ public:
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
+	void MoveZone(const char *zone_short_name);
+	void MoveZoneGroup(const char *zone_short_name);
+	void MoveZoneRaid(const char *zone_short_name);
 	void SendToGuildHall();
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
