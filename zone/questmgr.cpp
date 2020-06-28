@@ -407,6 +407,84 @@ void QuestManager::Zone(const char *zone_name) {
 	}
 }
 
+void QuestManager::ZoneGroup(const char *zone_name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (!initiator->GetGroup()) {
+			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+			ztz->response = 0;
+			ztz->current_zone_id = zone->GetZoneID();
+			ztz->current_instance_id = zone->GetInstanceID();
+			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->admin = initiator->Admin();
+			strcpy(ztz->name, initiator->GetName());
+			ztz->guild_id = initiator->GuildID();
+			ztz->ignorerestrictions = 3;
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		} else {
+			auto client_group = initiator->GetGroup();
+			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+					auto group_member = client_group->members[member_index]->CastToClient();
+					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+					ztz->response = 0;
+					ztz->current_zone_id = zone->GetZoneID();
+					ztz->current_instance_id = zone->GetInstanceID();
+					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->admin = group_member->Admin();
+					strcpy(ztz->name, group_member->GetName());
+					ztz->guild_id = group_member->GuildID();
+					ztz->ignorerestrictions = 3;
+					worldserver.SendPacket(pack);
+					safe_delete(pack);
+				}
+			}
+		}
+	}
+}
+
+void QuestManager::ZoneRaid(const char *zone_name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (!initiator->GetRaid()) {
+			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+			ztz->response = 0;
+			ztz->current_zone_id = zone->GetZoneID();
+			ztz->current_instance_id = zone->GetInstanceID();
+			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->admin = initiator->Admin();
+			strcpy(ztz->name, initiator->GetName());
+			ztz->guild_id = initiator->GuildID();
+			ztz->ignorerestrictions = 3;
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		} else {
+			auto client_raid = initiator->GetRaid();
+			for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+				if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+					auto raid_member = client_raid->members[member_index].member->CastToClient();
+					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+					ztz->response = 0;
+					ztz->current_zone_id = zone->GetZoneID();
+					ztz->current_instance_id = zone->GetInstanceID();
+					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->admin = raid_member->Admin();
+					strcpy(ztz->name, raid_member->GetName());
+					ztz->guild_id = raid_member->GuildID();
+					ztz->ignorerestrictions = 3;
+					worldserver.SendPacket(pack);
+					safe_delete(pack);
+				}
+			}
+		}
+	}
+}
+
 void QuestManager::settimer(const char *timer_name, int seconds) {
 	QuestManagerCurrentQuestVars();
 

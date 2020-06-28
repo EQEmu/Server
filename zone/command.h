@@ -101,6 +101,7 @@ void command_face(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
+void command_findrace(Client *c, const Seperator *sep);
 void command_findspell(Client *c, const Seperator *sep);
 void command_findzone(Client *c, const Seperator *sep);
 void command_fixmob(Client *c, const Seperator *sep);

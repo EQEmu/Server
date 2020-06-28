@@ -204,9 +204,10 @@ int command_init(void)
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
 		command_add("face", "- Change the face of your target", 80, command_face) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", 80, command_faction) ||
-		command_add("findaliases", "[search term]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
+		command_add("findaliases", "[search criteria]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
-		command_add("findspell", "[searchstring] - Search for a spell", 50, command_findspell) ||
+		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) || 
+		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", 80, command_fixmob) ||
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", 0, command_flag) ||
@@ -2438,10 +2439,10 @@ void command_grid(Client *c, const Seperator *sep)
 		}
 
 		std::string query = StringFormat(
-			"SELECT `x`, `y`, `z`, `heading`, `number`, `pause` "
+			"SELECT `x`, `y`, `z`, `heading`, `number` "
 			"FROM `grid_entries` "
 			"WHERE `zoneid` = %u and `gridid` = %i "
-			"ORDER BY `number` ",
+			"ORDER BY `number`",
 			zone->GetZoneID(),
 			target->CastToNPC()->GetGrid()
 		);
@@ -2471,18 +2472,31 @@ void command_grid(Client *c, const Seperator *sep)
 		/**
 		 * Spawn grid nodes
 		 */
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			auto node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+		std::map<std::vector<float>, int32> zoffset;
 
-			NPC *npc = NPC::SpawnGridNodeNPC(
-				target->GetCleanName(),
-				node_position,
-				static_cast<uint32>(target->CastToNPC()->GetGrid()),
-				static_cast<uint32>(atoi(row[4])),
-				static_cast<uint32>(atoi(row[5]))
-			);
-			npc->SetFlyMode(GravityBehavior::Flying);
-			npc->GMMove(node_position.x, node_position.y, node_position.z, node_position.w);
+		for (auto row = results.begin(); row != results.end(); ++row) {
+			glm::vec4 node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
+
+			std::vector<float> node_loc {
+					node_position.x, 
+					node_position.y, 
+					node_position.z
+			};
+
+			// If we already have a node at this location, set the z offset
+			// higher from the existing one so we can see it.  Adjust so if
+			// there is another at the same spot we adjust again.
+			auto search = zoffset.find(node_loc);
+			if (search != zoffset.end()) {
+				search->second = search->second + 3;
+			}
+			else {
+				zoffset[node_loc] = 0.0;
+			}
+
+			node_position.z += zoffset[node_loc];
+
+			NPC::SpawnGridNodeNPC(node_position,atoi(row[4]),zoffset[node_loc]);
 		}
 	}
 	else if (strcasecmp("delete", sep->arg[1]) == 0) {
@@ -2626,6 +2640,46 @@ void command_showskills(Client *c, const Seperator *sep)
 	c->Message(Chat::White, "Skills for %s",  t->GetName());
 	for (EQ::skills::SkillType i = EQ::skills::Skill1HBlunt; i <= EQ::skills::HIGHEST_SKILL; i = (EQ::skills::SkillType)(i + 1))
 		c->Message(Chat::White, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
+}
+
+void command_findrace(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #findrace [race name]");
+	} else if (Seperator::IsNumber(sep->argplus[1])) {
+		int search_id = atoi(sep->argplus[1]);
+		std::string race_name = GetRaceIDName(search_id);
+		if (race_name != std::string("")) {
+			c->Message(Chat::White, "Race %d: %s", search_id, race_name.c_str());
+			return;
+		}
+	} else {
+		const char *search_criteria = sep->argplus[1];
+		int found_count = 0;
+		char race_name[64];
+		char search_string[65];
+		strn0cpy(search_string, search_criteria, sizeof(search_string));
+		strupr(search_string);
+		char *string_location;
+		for (int race_id = RACE_HUMAN_1; race_id <= RT_PEGASUS_3; race_id++) {
+			strn0cpy(race_name, GetRaceIDName(race_id), sizeof(race_name));
+			strupr(race_name);
+			string_location = strstr(race_name, search_string);
+			if (string_location != nullptr) {
+				c->Message(Chat::White, "Race %d: %s", race_id, GetRaceIDName(race_id));
+				found_count++;
+			}
+
+			if (found_count == 20) {
+				break;
+			}
+		}
+		if (found_count == 20) {
+			c->Message(Chat::White, "20 Races found... max reached.");
+		} else {
+			c->Message(Chat::White, "%i Race(s) found.", found_count);
+		}
+	}
 }
 
 void command_findspell(Client *c, const Seperator *sep)
@@ -4169,10 +4223,11 @@ void command_findzone(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"[{}] [{}] [{}] Version ({}) [{}]",
+				"[{}] [{}] [{}] ID ({}) Version ({}) [{}]",
 				(version == 0 ? command_zone : "zone"),
 				command_gmzone,
 				short_name,
+				zone_id,
 				version,
 				long_name
 			).c_str()

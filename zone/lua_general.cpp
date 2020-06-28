@@ -1146,6 +1146,18 @@ Lua_EntityList lua_get_entity_list() {
 	return Lua_EntityList(&entity_list);
 }
 
+void lua_zone(const char* zone_name) {
+	quest_manager.Zone(zone_name);
+}
+
+void lua_zone_group(const char* zone_name) {
+	quest_manager.ZoneGroup(zone_name);
+}
+
+void lua_zone_raid(const char* zone_name) {
+	quest_manager.ZoneRaid(zone_name);
+}
+
 int lua_get_zone_id() {
 	if(!zone)
 		return 0;
@@ -1893,6 +1905,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*))&lua_get_qglobals),
 		luabind::def("get_entity_list", &lua_get_entity_list),
+		luabind::def("zone", &lua_zone),
+		luabind::def("zone_group", &lua_zone_group),
+		luabind::def("zone_raid", &lua_zone_raid),
 		luabind::def("get_zone_id", &lua_get_zone_id),
 		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
 		luabind::def("get_zone_short_name", &lua_get_zone_short_name),
