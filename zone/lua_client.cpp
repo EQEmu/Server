@@ -325,6 +325,21 @@ void Lua_Client::MovePCInstance(int zone, int instance, float x, float y, float 
 	self->MovePC(zone, instance, x, y, z, heading);
 }
 
+void Lua_Client::MoveZone(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZone(zone_short_name);
+}
+
+void Lua_Client::MoveZoneGroup(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneGroup(zone_short_name);
+}
+
+void Lua_Client::MoveZoneRaid(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneRaid(zone_short_name);
+}
+
 void Lua_Client::ChangeLastName(const char *in) {
 	Lua_Safe_Call_Void();
 	self->ChangeLastName(in);
@@ -1648,6 +1663,9 @@ luabind::scope lua_register_client() {
 		.def("SetSecondaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetSecondaryWeaponOrnamentation)
 		.def("MovePC", (void(Lua_Client::*)(int,float,float,float,float))&Lua_Client::MovePC)
 		.def("MovePCInstance", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::MovePCInstance)
+		.def("MoveZone", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZone)
+		.def("MoveZoneGroup", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneGroup)
+		.def("MoveZoneRaid", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneRaid)
 		.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
 		.def("GetFactionLevel", (int(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,uint32,Lua_NPC))&Lua_Client::GetFactionLevel)
 		.def("SetFactionLevel", (void(Lua_Client::*)(uint32,uint32,int,int,int))&Lua_Client::SetFactionLevel)

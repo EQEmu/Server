@@ -418,6 +418,17 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 	ProcessMovePC(zoneID, instanceID, x, y, z, heading, ignorerestrictions, zm);
 }
 
+void Client::MoveZone(const char *zone_short_name) {
+	quest_manager.Zone(zone_short_name);
+}
+
+void Client::MoveZoneGroup(const char *zone_short_name) {
+	quest_manager.ZoneGroup(zone_short_name);
+}
+
+void Client::MoveZoneRaid(const char *zone_short_name) {
+	quest_manager.ZoneRaid(zone_short_name);
+}
 
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {
