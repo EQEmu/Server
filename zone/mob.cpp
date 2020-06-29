@@ -115,7 +115,7 @@ Mob::Mob(
 	tmHidden(-1),
 	mitigation_ac(0),
 	m_specialattacks(eSpecialAttacks::None),
-	attack_anim_timer(1000),
+	attack_anim_timer(500),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
 	mob_scan_close(6000),
@@ -501,7 +501,7 @@ Mob::~Mob()
 	if (HasTempPetsActive()) {
 		entity_list.DestroyTempPets(this);
 	}
-	
+
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
 
@@ -1645,21 +1645,23 @@ void Mob::ShowStats(Client* client)
 	}
 }
 
-void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) {
-	if (!attack_anim_timer.Check())
+void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter)
+{
+	if (!attack_anim_timer.Check()) {
 		return;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
+	auto *anim  = (Animation_Struct *) outapp->pBuffer;
 	anim->spawnid = GetID();
 
-	if(type == 0){
+	if (type == 0) {
 		anim->action = animnum;
-		anim->speed = 10;
+		anim->speed  = 10;
 	}
 	else {
 		anim->action = animnum;
-		anim->speed = type;
+		anim->speed  = type;
 	}
 
 	entity_list.QueueCloseClients(
@@ -1801,11 +1803,11 @@ void Mob::SendIllusionPacket(
 	new_hairstyle = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
 	new_luclinface = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
 	new_beard = (in_beard == 0xFF) ? GetBeard() : in_beard;
-	new_drakkin_heritage = 
+	new_drakkin_heritage =
 		(in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
-	new_drakkin_tattoo = 
+	new_drakkin_tattoo =
 		(in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
-	new_drakkin_details = 
+	new_drakkin_details =
 		(in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
 	new_aa_title = in_aa_title;
 	size = (in_size <= 0.0f) ? GetSize() : in_size;
@@ -2110,8 +2112,8 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 }
 
 uint16 Mob::GetFactionRace() {
-	uint16 current_race = GetRace();	
-	if (IsPlayerRace(current_race) || current_race == TREE || 
+	uint16 current_race = GetRace();
+	if (IsPlayerRace(current_race) || current_race == TREE ||
 		current_race == MINOR_ILL_OBJ) {
 		return current_race;
 	}
@@ -5898,7 +5900,7 @@ bool Mob::LeaveHealRotationTargetPool()
 
 	m_target_of_heal_rotation->RemoveTargetFromPool(this);
 	m_target_of_heal_rotation.reset();
-	
+
 	return !IsHealRotationTarget();
 }
 

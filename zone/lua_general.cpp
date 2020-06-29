@@ -1023,6 +1023,38 @@ void lua_send_mail(const char *to, const char *from, const char *subject, const 
 	quest_manager.SendMail(to, from, subject, message);
 }
 
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
+}
+
 void lua_cross_zone_signal_client_by_char_id(uint32 player_id, int signal) {
 	quest_manager.CrossZoneSignalPlayerByCharID(player_id, signal);
 }
@@ -1145,6 +1177,18 @@ luabind::adl::object lua_get_qglobals(lua_State *L) {
 
 Lua_EntityList lua_get_entity_list() {
 	return Lua_EntityList(&entity_list);
+}
+
+void lua_zone(const char* zone_name) {
+	quest_manager.Zone(zone_name);
+}
+
+void lua_zone_group(const char* zone_name) {
+	quest_manager.ZoneGroup(zone_name);
+}
+
+void lua_zone_raid(const char* zone_name) {
+	quest_manager.ZoneRaid(zone_name);
 }
 
 int lua_get_zone_id() {
@@ -2103,6 +2147,14 @@ luabind::scope lua_register_general() {
 		luabind::def("wear_change", &lua_wear_change),
 		luabind::def("voice_tell", &lua_voice_tell),
 		luabind::def("send_mail", &lua_send_mail),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
 		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
 		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
 		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
@@ -2122,6 +2174,9 @@ luabind::scope lua_register_general() {
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*))&lua_get_qglobals),
 		luabind::def("get_entity_list", &lua_get_entity_list),
+		luabind::def("zone", &lua_zone),
+		luabind::def("zone_group", &lua_zone_group),
+		luabind::def("zone_raid", &lua_zone_raid),
 		luabind::def("get_zone_id", &lua_get_zone_id),
 		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
 		luabind::def("get_zone_short_name", &lua_get_zone_short_name),

@@ -531,6 +531,32 @@ XS(XS__zone) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__zonegroup);
+XS(XS__zonegroup) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zonegroup(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneGroup(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__zoneraid);
+XS(XS__zoneraid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zoneraid(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneRaid(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__settimer);
 XS(XS__settimer) {
 	dXSARGS;
@@ -1524,12 +1550,12 @@ XS(XS__addldonpoints) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonpoints(int points, int theme_id)");
 
-	long          points   = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+long          points = (long)SvIV(ST(0));
+unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
-	quest_manager.addldonpoints(points, theme_id);
+quest_manager.addldonpoints(points, theme_id);
 
-	XSRETURN_EMPTY;
+XSRETURN_EMPTY;
 }
 
 XS(XS__addldonwin);
@@ -1538,8 +1564,8 @@ XS(XS__addldonwin) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonwin(int wins, int theme_id)");
 
-	long          wins     = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+	long          wins = (long)SvIV(ST(0));
+	unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
 	quest_manager.addldonwin(wins, theme_id);
 
@@ -1552,8 +1578,8 @@ XS(XS__addldonloss) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonloss(int losses, int theme_id)");
 
-	long          losses   = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+	long          losses = (long)SvIV(ST(0));
+	unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
 	quest_manager.addldonloss(losses, theme_id);
 
@@ -1566,7 +1592,7 @@ XS(XS__setnexthpevent) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::setnexthpevent(int at_mob_percentage)");
 
-	int at = (int) SvIV(ST(0));
+	int at = (int)SvIV(ST(0));
 
 	quest_manager.setnexthpevent(at);
 
@@ -1579,7 +1605,7 @@ XS(XS__setnextinchpevent) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::setnextinchpevent(int at_mob_percentage)");
 
-	int at = (int) SvIV(ST(0));
+	int at = (int)SvIV(ST(0));
 
 	quest_manager.setnextinchpevent(at);
 
@@ -1592,7 +1618,7 @@ XS(XS__sethp) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::sethp(int mob_health_percentage [0-100])");
 
-	int hpperc = (int) SvIV(ST(0));
+	int hpperc = (int)SvIV(ST(0));
 
 	quest_manager.sethp(hpperc);
 
@@ -1605,13 +1631,20 @@ XS(XS__respawn) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::respawn(int npc_type_id, int grid_id)");
 
-	int npc_type_id = (int) SvIV(ST(0));
-	int grid_id     = (int) SvIV(ST(1));
+	int npc_type_id = (int)SvIV(ST(0));
+	int grid_id = (int)SvIV(ST(1));
 
 	quest_manager.respawn(npc_type_id, grid_id);
 
 	XSRETURN_EMPTY;
 }
+
+//64 bit windows seems to optimize something poorly here causing access violations.
+//If you don't do anything with index before passing it to perl it gets optimized out
+//Disabling optimization right now for msvc on this function is the best solution.
+#ifdef _MSC_VER
+#pragma optimize( "", off )
+#endif
 
 XS(XS__ChooseRandom);
 XS(XS__ChooseRandom) {
@@ -1621,13 +1654,17 @@ XS(XS__ChooseRandom) {
 
 	dXSTARG;
 	int index = zone->random.Int(0, items - 1);
-	SV *RETVAL = ST(index);
+	SV* RETVAL = ST(index);
 
 	XSprePUSH;
 	PUSHs(RETVAL);
 
 	XSRETURN(1);    //return 1 element from the stack (ST(0))
 }
+
+#ifdef _MSC_VER
+#pragma optimize( "", on )
+#endif
 
 XS(XS__set_proximity);
 XS(XS__set_proximity) {
@@ -3705,6 +3742,82 @@ XS(XS__GetTimeSeconds) {
 	XSRETURN_UV(seconds);
 }
 
+XS(XS__crosszoneassigntaskbycharid);
+XS(XS__crosszoneassigntaskbycharid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbycharid(int character_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int character_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+	
+		quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbygroupid);
+XS(XS__crosszoneassigntaskbygroupid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbygroupid(int group_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+
+		quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbyraidid);
+XS(XS__crosszoneassigntaskbyraidid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_id, [bool enforce_level_requirement = false])");\
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+	
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+
+		quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneassigntaskbyguildid);
+XS(XS__crosszoneassigntaskbyguildid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyguildid(int guild_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+		quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
 XS(XS__crosszonesignalclientbycharid);
 XS(XS__crosszonesignalclientbycharid) {
 	dXSARGS;
@@ -5006,6 +5119,10 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbycharid"), XS__crosszoneassigntaskbycharid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbygroupid"), XS__crosszoneassigntaskbygroupid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyraidid"), XS__crosszoneassigntaskbyraidid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyguildid"), XS__crosszoneassigntaskbyguildid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
@@ -5186,6 +5303,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "write"), XS__write, file);
 	newXS(strcpy(buf, "ze"), XS__ze, file);
 	newXS(strcpy(buf, "zone"), XS__zone, file);
+	newXS(strcpy(buf, "zonegroup"), XS__zonegroup, file);
+	newXS(strcpy(buf, "zoneraid"), XS__zoneraid, file);
 
 	/**
 	 * Expansions

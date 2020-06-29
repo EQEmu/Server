@@ -917,7 +917,7 @@ void Client::CompleteConnect()
 
 	worldserver.RequestTellQueue(GetName());
 
-	entity_list.ScanCloseMobs(close_mobs, this);
+	entity_list.ScanCloseMobs(close_mobs, this, true);
 }
 
 // connecting opcode handlers

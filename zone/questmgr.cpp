@@ -408,6 +408,84 @@ void QuestManager::Zone(const char *zone_name) {
 	}
 }
 
+void QuestManager::ZoneGroup(const char *zone_name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (!initiator->GetGroup()) {
+			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+			ztz->response = 0;
+			ztz->current_zone_id = zone->GetZoneID();
+			ztz->current_instance_id = zone->GetInstanceID();
+			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->admin = initiator->Admin();
+			strcpy(ztz->name, initiator->GetName());
+			ztz->guild_id = initiator->GuildID();
+			ztz->ignorerestrictions = 3;
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		} else {
+			auto client_group = initiator->GetGroup();
+			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+					auto group_member = client_group->members[member_index]->CastToClient();
+					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+					ztz->response = 0;
+					ztz->current_zone_id = zone->GetZoneID();
+					ztz->current_instance_id = zone->GetInstanceID();
+					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->admin = group_member->Admin();
+					strcpy(ztz->name, group_member->GetName());
+					ztz->guild_id = group_member->GuildID();
+					ztz->ignorerestrictions = 3;
+					worldserver.SendPacket(pack);
+					safe_delete(pack);
+				}
+			}
+		}
+	}
+}
+
+void QuestManager::ZoneRaid(const char *zone_name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (!initiator->GetRaid()) {
+			auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+			ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+			ztz->response = 0;
+			ztz->current_zone_id = zone->GetZoneID();
+			ztz->current_instance_id = zone->GetInstanceID();
+			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->admin = initiator->Admin();
+			strcpy(ztz->name, initiator->GetName());
+			ztz->guild_id = initiator->GuildID();
+			ztz->ignorerestrictions = 3;
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+		} else {
+			auto client_raid = initiator->GetRaid();
+			for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+				if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+					auto raid_member = client_raid->members[member_index].member->CastToClient();
+					auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+					ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+					ztz->response = 0;
+					ztz->current_zone_id = zone->GetZoneID();
+					ztz->current_instance_id = zone->GetInstanceID();
+					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->admin = raid_member->Admin();
+					strcpy(ztz->name, raid_member->GetName());
+					ztz->guild_id = raid_member->GuildID();
+					ztz->ignorerestrictions = 3;
+					worldserver.SendPacket(pack);
+					safe_delete(pack);
+				}
+			}
+		}
+	}
+}
+
 void QuestManager::settimer(const char *timer_name, int seconds) {
 	QuestManagerCurrentQuestVars();
 
@@ -3192,6 +3270,62 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 	safe_delete_array(long_name);
 
 	return ln.c_str();
+}
+
+void QuestManager::CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssign, sizeof(CZTaskAssign_Struct));
+		CZTaskAssign_Struct* CZTA = (CZTaskAssign_Struct*)pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->character_id = character_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignGroup, sizeof(CZTaskAssignGroup_Struct));
+		CZTaskAssignGroup_Struct* CZTA = (CZTaskAssignGroup_Struct*)pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->group_id = group_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignRaid, sizeof(CZTaskAssignRaid_Struct));
+		CZTaskAssignRaid_Struct* CZTA = (CZTaskAssignRaid_Struct*) pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->raid_id = raid_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByGuildID(int guild_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignGuild, sizeof(CZTaskAssignGuild_Struct));
+		CZTaskAssignGuild_Struct* CZTA = (CZTaskAssignGuild_Struct*) pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->guild_id = guild_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
 }
 
 void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
