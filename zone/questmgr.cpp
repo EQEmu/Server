@@ -417,7 +417,7 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 			ztz->response = 0;
 			ztz->current_zone_id = zone->GetZoneID();
 			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->requested_zone_id = ZoneID(zone_name);
 			ztz->admin = initiator->Admin();
 			strcpy(ztz->name, initiator->GetName());
 			ztz->guild_id = initiator->GuildID();
@@ -434,7 +434,7 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 					ztz->response = 0;
 					ztz->current_zone_id = zone->GetZoneID();
 					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->requested_zone_id = ZoneID(zone_name);
 					ztz->admin = group_member->Admin();
 					strcpy(ztz->name, group_member->GetName());
 					ztz->guild_id = group_member->GuildID();
@@ -456,7 +456,7 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 			ztz->response = 0;
 			ztz->current_zone_id = zone->GetZoneID();
 			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->requested_zone_id = ZoneID(zone_name);
 			ztz->admin = initiator->Admin();
 			strcpy(ztz->name, initiator->GetName());
 			ztz->guild_id = initiator->GuildID();
@@ -473,7 +473,7 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 					ztz->response = 0;
 					ztz->current_zone_id = zone->GetZoneID();
 					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->requested_zone_id = ZoneID(zone_name);
 					ztz->admin = raid_member->Admin();
 					strcpy(ztz->name, raid_member->GetName());
 					ztz->guild_id = raid_member->GuildID();

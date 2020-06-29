@@ -452,7 +452,7 @@ void Client::MoveZone(const char *zone_short_name) {
 	ztz->response = 0;
 	ztz->current_zone_id = zone->GetZoneID();
 	ztz->current_instance_id = zone->GetInstanceID();
-	ztz->requested_zone_id = database.GetZoneID(zone_short_name);
+	ztz->requested_zone_id = ZoneID(zone_short_name);
 	ztz->admin = Admin();
 	strcpy(ztz->name, GetName());
 	ztz->guild_id = GuildID();
