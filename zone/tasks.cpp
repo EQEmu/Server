@@ -3308,18 +3308,13 @@ void ClientTaskState::AcceptNewTask(Client *c, int TaskID, int NPCID, bool enfor
 
 	taskmanager->SendSingleActiveTaskToClient(c, *active_slot, false, true);
 	c->Message(Chat::White, "You have been assigned the task '%s'.", taskmanager->Tasks[TaskID]->Title.c_str());
-
+	taskmanager->SaveClientState(c, this);
 	std::string buf = std::to_string(TaskID);
 
 	NPC *npc = entity_list.GetID(NPCID)->CastToNPC();
-	if(!npc) {
-		c->Message(Chat::Yellow, "Task Giver ID is %i", NPCID);
-		c->Message(Chat::Red, "Unable to find NPC to send EVENT_TASKACCEPTED to. Report this bug.");
-		return;
+	if(npc) {
+		parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
 	}
-
-	taskmanager->SaveClientState(c, this);
-	parse->EventNPC(EVENT_TASK_ACCEPTED, npc, c, buf.c_str(), 0);
 }
 
 void ClientTaskState::ProcessTaskProximities(Client *c, float X, float Y, float Z) {

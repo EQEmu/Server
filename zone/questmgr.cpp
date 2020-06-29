@@ -3271,6 +3271,62 @@ const char* QuestManager::GetZoneLongName(const char *zone) {
 	return ln.c_str();
 }
 
+void QuestManager::CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssign, sizeof(CZTaskAssign_Struct));
+		CZTaskAssign_Struct* CZTA = (CZTaskAssign_Struct*)pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->character_id = character_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignGroup, sizeof(CZTaskAssignGroup_Struct));
+		CZTaskAssignGroup_Struct* CZTA = (CZTaskAssignGroup_Struct*)pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->group_id = group_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignRaid, sizeof(CZTaskAssignRaid_Struct));
+		CZTaskAssignRaid_Struct* CZTA = (CZTaskAssignRaid_Struct*) pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->raid_id = raid_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
+void QuestManager::CrossZoneAssignTaskByGuildID(int guild_id, uint32 task_id, bool enforce_level_requirement) {
+	QuestManagerCurrentQuestVars();
+	if (RuleB(TaskSystem, EnableTaskSystem) && initiator && owner) {
+		auto pack = new ServerPacket(ServerOP_CZTaskAssignGuild, sizeof(CZTaskAssignGuild_Struct));
+		CZTaskAssignGuild_Struct* CZTA = (CZTaskAssignGuild_Struct*) pack->pBuffer;
+		CZTA->npc_entity_id = owner->GetID();
+		CZTA->guild_id = guild_id;
+		CZTA->task_id = task_id;
+		CZTA->enforce_level_requirement = enforce_level_requirement;
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+}
+
 void QuestManager::CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data){
 	auto pack = new ServerPacket(ServerOP_CZSignalNPC, sizeof(CZNPCSignal_Struct));
 	CZNPCSignal_Struct* CZSN = (CZNPCSignal_Struct*)pack->pBuffer;
