@@ -636,6 +636,7 @@ public:
 	void MoveZone(const char *zone_short_name);
 	void MoveZoneGroup(const char *zone_short_name);
 	void MoveZoneRaid(const char *zone_short_name);
+	void MoveZoneInstance(uint16 instance_id);
 	void SendToGuildHall();
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);

@@ -461,6 +461,25 @@ void Client::MoveZoneRaid(const char *zone_short_name) {
 	}
 }
 
+void Client::MoveZoneInstance(uint16 instance_id) {
+	if (!quest_manager.CheckInstanceByCharID(instance_id, CharacterID())) {
+		quest_manager.AssignToInstanceByCharID(instance_id, CharacterID());
+	}
+	auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+	ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+	ztz->response = 0;
+	ztz->current_zone_id = zone->GetZoneID();
+	ztz->current_instance_id = zone->GetInstanceID();
+	ztz->requested_zone_id = database.ZoneIDFromInstanceID(instance_id);
+	ztz->requested_instance_id = instance_id;
+	ztz->admin = Admin();
+	strcpy(ztz->name, GetName());
+	ztz->guild_id = GuildID();
+	ztz->ignorerestrictions = 3;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {
 	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can implement that later.

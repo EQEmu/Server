@@ -1445,6 +1445,48 @@ XS(XS_Client_MoveZoneRaid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstance) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstance(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ChangeLastName) {
 	dXSARGS;
@@ -6715,6 +6757,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneRaid"), XS_Client_MoveZoneRaid, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstance"), XS_Client_MoveZoneInstance, file, "$$");
 	newXSproto(strcpy(buf, "NPCSpawn"), XS_Client_NPCSpawn, file, "$$$;$");
 	newXSproto(strcpy(buf, "NukeItem"), XS_Client_NukeItem, file, "$$;$");
 	newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
