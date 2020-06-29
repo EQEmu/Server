@@ -2044,7 +2044,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_CZTaskAssign:
 	{
 		CZTaskAssign_Struct* CZTA = (CZTaskAssign_Struct*)pack->pBuffer;
-		auto client_list = entity_list.GetClientList();
 		Client* client = entity_list.GetClientByCharID(CZTA->character_id);
 		if (client != 0) {
 			client->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
@@ -2080,6 +2079,48 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto client : client_list) {
 			if (client.second->GuildID() > 0 && client.second->GuildID() == CZTA->guild_id) {
 				client.second->AssignTask(CZTA->task_id, CZTA->npc_entity_id, CZTA->enforce_level_requirement);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMovePlayer:
+	{
+		CZMovePlayer_Struct* CZMP = (CZMovePlayer_Struct*)pack->pBuffer;
+		Client* client = entity_list.GetClientByCharID(CZMP->character_id);
+		if (client != 0) {
+			client->MoveZone(CZMP->zone_short_name);
+		}
+		break;
+	}
+	case ServerOP_CZMoveGroup:
+	{
+		CZMoveGroup_Struct* CZMG = (CZMoveGroup_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetGroup() && client.second->GetGroup()->GetID() == CZMG->group_id) {
+				client.second->MoveZone(CZMG->zone_short_name);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMoveRaid:
+	{
+		CZMoveRaid_Struct* CZMR = (CZMoveRaid_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GetRaid() && client.second->GetRaid()->GetID() == CZMR->raid_id) {
+				client.second->MoveZone(CZMR->zone_short_name);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZMoveGuild:
+	{
+		CZMoveGuild_Struct* CZMG = (CZMoveGuild_Struct*)pack->pBuffer;
+		auto client_list = entity_list.GetClientList();
+		for (auto client : client_list) {
+			if (client.second->GuildID() > 0 && client.second->GuildID() == CZMG->guild_id) {
+				client.second->MoveZone(CZMG->zone_short_name);
 			}
 		}
 		break;

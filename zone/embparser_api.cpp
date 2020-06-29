@@ -3976,6 +3976,70 @@ XS(XS__crosszonemessageplayerbyguildid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonemoveplayerbycharid);
+XS(XS__crosszonemoveplayerbycharid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbycharid(int character_id, string zone_short_name)");
+
+	if (items == 2) {
+		int character_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbygroupid);
+XS(XS__crosszonemoveplayerbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbygroupid(int group_id, string zone_short_name)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbyraidid);
+XS(XS__crosszonemoveplayerbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyraidid(int raid_id, string zone_short_name)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbyguildid);
+XS(XS__crosszonemoveplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyguildid(int guild_id, string zone_short_name)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__enablerecipe);
 XS(XS__enablerecipe) {
 	dXSARGS;
@@ -4450,6 +4514,10 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbycharid"), XS__crosszonemoveplayerbycharid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbygroupid"), XS__crosszonemoveplayerbygroupid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbyraidid"), XS__crosszonemoveplayerbyraidid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbyguildid"), XS__crosszonemoveplayerbyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebygroupid"), XS__crosszonesetentityvariablebygroupid, file);

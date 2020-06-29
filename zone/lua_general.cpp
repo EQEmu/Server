@@ -1090,6 +1090,22 @@ void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const 
 	quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
 }
 
+void lua_cross_zone_move_player_by_char_id(int character_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_group_id(int group_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_raid_id(int raid_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_guild_id(int guild_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
+}
+
 void lua_cross_zone_set_entity_variable_by_client_name(const char *player, const char *id, const char *m_var) {
 	quest_manager.CrossZoneSetEntityVariableByClientName(player, id, m_var);
 }
@@ -1935,6 +1951,10 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
 		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
 		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
 		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
 		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
 		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),

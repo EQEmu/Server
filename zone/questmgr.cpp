@@ -3428,6 +3428,46 @@ void QuestManager::CrossZoneMessagePlayerByGuildID(uint32 Type, int GuildID, con
 	safe_delete(pack);
 }
 
+void QuestManager::CrossZoneMovePlayerByCharID(int character_id, const char *zone_short_name){
+	uint32 message_len = strlen(zone_short_name) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMovePlayer, sizeof(CZMovePlayer_Struct) + message_len);
+	CZMovePlayer_Struct* CZGM = (CZMovePlayer_Struct*) pack->pBuffer;
+	CZGM->character_id = character_id;
+	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMovePlayerByGroupID(int group_id, const char *zone_short_name){
+	uint32 message_len = strlen(zone_short_name) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMoveGroup, sizeof(CZMoveGroup_Struct) + message_len);
+	CZMoveGroup_Struct* CZGM = (CZMoveGroup_Struct*) pack->pBuffer;
+	CZGM->group_id = group_id;
+	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMovePlayerByRaidID(int raid_id, const char *zone_short_name){
+	uint32 message_len = strlen(zone_short_name) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMoveRaid, sizeof(CZMoveRaid_Struct) + message_len);
+	CZMoveRaid_Struct* CZRM = (CZMoveRaid_Struct*) pack->pBuffer;
+	CZRM->raid_id = raid_id;
+	strn0cpy(CZRM->zone_short_name, zone_short_name, 32);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void QuestManager::CrossZoneMovePlayerByGuildID(int guild_id, const char *zone_short_name){
+	uint32 message_len = strlen(zone_short_name) + 1;
+	auto pack = new ServerPacket(ServerOP_CZMoveGuild, sizeof(CZMoveGuild_Struct) + message_len);
+	CZMoveGuild_Struct* CZGM = (CZMoveGuild_Struct*) pack->pBuffer;
+	CZGM->guild_id = guild_id;
+	strn0cpy(CZGM->zone_short_name, zone_short_name, 32);
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
 void QuestManager::CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var){
 	uint32 message_len = strlen(id) + 1;
 	uint32 message_len2 = strlen(m_var) + 1;
