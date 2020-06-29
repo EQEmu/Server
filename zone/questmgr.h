@@ -299,6 +299,10 @@ public:
 	void CrossZoneMessagePlayerByGroupID(uint32 Type, int GroupID, const char *Message);
 	void CrossZoneMessagePlayerByRaidID(uint32 Type, int RaidID, const char *Message);
 	void CrossZoneMessagePlayerByGuildID(uint32 Type, int GuildID, const char *Message);
+	void CrossZoneMovePlayerByCharID(int character_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByGroupID(int group_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByRaidID(int raid_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByGuildID(int guild_id, const char *zone_short_name);
 	void WorldWideMarquee(uint32 Type, uint32 Priority, uint32 FadeIn, uint32 FadeOut, uint32 Duration, const char *Message);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);

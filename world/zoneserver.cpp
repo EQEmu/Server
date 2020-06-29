@@ -1255,6 +1255,10 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_CZTaskAssignGroup:
 	case ServerOP_CZTaskAssignRaid:
 	case ServerOP_CZTaskAssignGuild:
+	case ServerOP_CZMovePlayer:
+	case ServerOP_CZMoveGroup:
+	case ServerOP_CZMoveRaid:
+	case ServerOP_CZMoveGuild:
 	case ServerOP_WWMarquee:
 	case ServerOP_DepopAllPlayersCorpses:
 	case ServerOP_DepopPlayerCorpse:

@@ -211,6 +211,10 @@
 #define ServerOP_CZTaskAssignGroup 0x4026
 #define ServerOP_CZTaskAssignRaid 0x4027
 #define ServerOP_CZTaskAssignGuild 0x4028
+#define ServerOP_CZMovePlayer 0x4029
+#define ServerOP_CZMoveGroup 0x4030
+#define ServerOP_CZMoveRaid 0x4031
+#define ServerOP_CZMoveGuild 0x4032
 
 /**
  * QueryServer
@@ -1406,6 +1410,26 @@ struct CZMessageGuild_Struct {
 	uint32 Type;
 	int GuildID;
 	char Message[512];
+};
+
+struct CZMovePlayer_Struct {
+	int character_id;
+	char zone_short_name[32];
+};
+
+struct CZMoveGroup_Struct {
+	int group_id;
+	char zone_short_name[32];
+};
+
+struct CZMoveRaid_Struct {
+	int raid_id;
+	char zone_short_name[32];
+};
+
+struct CZMoveGuild_Struct {
+	int guild_id;
+	char zone_short_name[32];
 };
 
 struct WWMarquee_Struct {
