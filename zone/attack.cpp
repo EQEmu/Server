@@ -780,7 +780,7 @@ int Mob::GetClassRaceACBonus()
 	return ac_bonus;
 }
 
-int Mob::ACSum()
+int Mob::ACSum(bool skip_caps)
 {
 	int ac = 0; // this should be base AC whenever shrouds come around
 	ac += itembonuses.AC; // items + food + tribute
@@ -799,7 +799,7 @@ int Mob::ACSum()
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
+	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
 		ac = std::min(ac, 25 + 6 * GetLevel());
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
@@ -835,11 +835,11 @@ int Mob::ACSum()
 	if (ac < 0)
 		ac = 0;
 
-	if (IsClient()
+	if (!skip_caps && (IsClient()
 #ifdef BOTS
 		|| IsBot()
 #endif
-		) {
+	)) {
 		auto softcap = GetACSoftcap();
 		auto returns = GetSoftcapReturns();
 		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
