@@ -2479,7 +2479,7 @@ XS(XS_NPC_SetSimpleRoamBox) {
 XS(XS_NPC_RecalculateSkills); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RecalculateSkills) {
 	dXSARGS;
-	if (items != 2)
+	if (items != 1)
 		Perl_croak(aTHX_ "Usage: NPC::RecalculateSkills(THIS)");
 	{
 		NPC    *THIS;

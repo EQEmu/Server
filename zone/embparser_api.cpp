@@ -3741,6 +3741,82 @@ XS(XS__GetTimeSeconds) {
 	XSRETURN_UV(seconds);
 }
 
+XS(XS__crosszoneassigntaskbycharid);
+XS(XS__crosszoneassigntaskbycharid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbycharid(int character_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int character_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+	
+		quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbygroupid);
+XS(XS__crosszoneassigntaskbygroupid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbygroupid(int group_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+
+		quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbyraidid);
+XS(XS__crosszoneassigntaskbyraidid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_id, [bool enforce_level_requirement = false])");\
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+	
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+
+		quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneassigntaskbyguildid);
+XS(XS__crosszoneassigntaskbyguildid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyguildid(int guild_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+		quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
 XS(XS__crosszonesignalclientbycharid);
 XS(XS__crosszonesignalclientbycharid) {
 	dXSARGS;
@@ -4366,6 +4442,10 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbycharid"), XS__crosszoneassigntaskbycharid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbygroupid"), XS__crosszoneassigntaskbygroupid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyraidid"), XS__crosszoneassigntaskbyraidid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyguildid"), XS__crosszoneassigntaskbyguildid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);

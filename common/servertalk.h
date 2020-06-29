@@ -207,6 +207,10 @@
 #define ServerOP_CZSetEntityVariableByGroupID 0x4022
 #define ServerOP_CZSetEntityVariableByRaidID 0x4023
 #define ServerOP_CZSetEntityVariableByGuildID 0x4024
+#define ServerOP_CZTaskAssign 0x4025
+#define ServerOP_CZTaskAssignGroup 0x4026
+#define ServerOP_CZTaskAssignRaid 0x4027
+#define ServerOP_CZTaskAssignGuild 0x4028
 
 /**
  * QueryServer
@@ -1169,6 +1173,34 @@ struct Server_Speech_Struct {
 	int16	minstatus;
 	uint32	type;
 	char	message[0];
+};
+
+struct CZTaskAssign_Struct {
+	uint16 npc_entity_id;
+	int character_id;
+	uint32 task_id;
+	bool enforce_level_requirement;
+};
+
+struct CZTaskAssignGroup_Struct {
+	uint16 npc_entity_id;
+	int group_id;
+	uint32 task_id;
+	bool enforce_level_requirement;
+};
+
+struct CZTaskAssignRaid_Struct {
+	uint16 npc_entity_id;
+	int raid_id;
+	uint32 task_id;
+	bool enforce_level_requirement;
+};
+
+struct CZTaskAssignGuild_Struct {
+	uint16 npc_entity_id;
+	int guild_id;
+	uint32 task_id;
+	bool enforce_level_requirement;
 };
 
 struct CZClientSignal_Struct {
