@@ -276,6 +276,7 @@ public:
 	GetItems_Struct* GetTraderItems();
 	void SendBazaarWelcome();
 	void DyeArmor(EQ::TintProfile* dye);
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint = 0x00);
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);

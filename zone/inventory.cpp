@@ -2228,6 +2228,22 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 	
 }
 
+void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
+	uint8 item_slot = SlotConvert(slot);
+	EQ::ItemInstance* item_instance = this->m_inv.GetItem(item_slot);
+	if (item_instance) {
+		uint32 armor_color = ((uint32)red << 16) | ((uint32)green << 8) | ((uint32)blue);
+		item_instance->SetColor(armor_color); 
+		database.SaveCharacterMaterialColor(this->CharacterID(), slot, armor_color);
+		database.SaveInventory(CharacterID(), item_instance, item_slot);
+		m_pp.item_tint.Slot[slot].UseTint = (use_tint ? 0xFF : 0x00);
+	}
+	m_pp.item_tint.Slot[slot].Red = red;
+	m_pp.item_tint.Slot[slot].Green = green;
+	m_pp.item_tint.Slot[slot].Blue = blue;
+	SendWearChange(slot);
+}
+
 #if 0
 bool Client::DecreaseByItemType(uint32 type, uint8 amt) {
 	const ItemData* TempItem = 0;

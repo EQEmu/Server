@@ -42,6 +42,8 @@ public:
 	void SendToGuildHall();
 	bool GetAnon();
 	void Duck();
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue);
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint);
 	void Stand();
 	void SetGM(bool v);
 	void SetPVP(bool v);

@@ -75,6 +75,16 @@ void Lua_Client::Duck() {
 	self->Duck();
 }
 
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue);
+}
+
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
 void Lua_Client::Stand() {
 	Lua_Safe_Call_Void();
 	self->Stand();
@@ -1622,6 +1632,8 @@ luabind::scope lua_register_client() {
 		.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 		.def("GetAnon", (bool(Lua_Client::*)(void))&Lua_Client::GetAnon)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
 		.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
 		.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
 		.def("SetPVP", (void(Lua_Client::*)(bool))&Lua_Client::SetPVP)
