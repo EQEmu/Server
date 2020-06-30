@@ -1,5 +1,6 @@
 #include "uuid.h"
 
+#include <ios>
 #include <fmt/format.h>
 
 #ifdef _WIN32

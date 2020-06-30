@@ -418,6 +418,48 @@ void Client::MovePC(uint32 zoneID, uint32 instanceID, float x, float y, float z,
 	ProcessMovePC(zoneID, instanceID, x, y, z, heading, ignorerestrictions, zm);
 }
 
+void Client::MoveZone(const char *zone_short_name) {
+	auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+	ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+	ztz->response = 0;
+	ztz->current_zone_id = zone->GetZoneID();
+	ztz->current_instance_id = zone->GetInstanceID();
+	ztz->requested_zone_id = database.GetZoneID(zone_short_name);
+	ztz->admin = Admin();
+	strcpy(ztz->name, GetName());
+	ztz->guild_id = GuildID();
+	ztz->ignorerestrictions = 3;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void Client::MoveZoneGroup(const char *zone_short_name) {
+	if (!GetGroup()) {
+		MoveZone(zone_short_name);
+	} else {
+		auto client_group = GetGroup();
+		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+				auto group_member = client_group->members[member_index]->CastToClient();
+				group_member->MoveZone(zone_short_name);
+			}
+		}
+	}
+}
+
+void Client::MoveZoneRaid(const char *zone_short_name) {
+	if (!GetRaid()) {
+		MoveZone(zone_short_name);
+	} else {
+		auto client_raid = GetRaid();
+		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+				auto raid_member = client_raid->members[member_index].member->CastToClient();
+				raid_member->MoveZone(zone_short_name);
+			}
+		}
+	}
+}
 
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {

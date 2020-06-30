@@ -200,7 +200,7 @@ void RegisterLoginservers()
 
 /**
  * World process entrypoint
- * 
+ *
  * @param argc
  * @param argv
  * @return
@@ -481,14 +481,19 @@ int main(int argc, char** argv) {
 		zoneserver_list.UpdateUCSServerAvailable();
 	});
 
-	server_connection->OnConnectionRemoved("UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
-			LogInfo("Removed UCS Server connection from [{0}]",
-			connection->GetUUID());
+	server_connection->OnConnectionRemoved(
+		"UCS", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
+			LogInfo("Connection lost from UCS Server [{0}]", connection->GetUUID());
 
-		UCSLink.SetConnection(nullptr);
+			auto ucs_connection = UCSLink.GetConnection();
 
-		zoneserver_list.UpdateUCSServerAvailable(false);
-	});
+			if (ucs_connection->GetUUID() == connection->GetUUID()) {
+				LogInfo("Removing currently active UCS connection");
+				UCSLink.SetConnection(nullptr);
+				zoneserver_list.UpdateUCSServerAvailable(false);
+			}
+		}
+	);
 
 	server_connection->OnConnectionIdentified("WebInterface", [](std::shared_ptr<EQ::Net::ServertalkServerConnection> connection) {
 		LogInfo("New WebInterface Server connection from [{2}] at [{0}:{1}]",

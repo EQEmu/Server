@@ -84,6 +84,7 @@ if (-d "bin") {
 #############################################
 # run routines
 #############################################
+get_windows_wget();
 check_xml_to_json_conversion() if $ARGV[0] eq "convert_xml";
 do_self_update_check_routine() if !$skip_self_update_check;
 get_perl_version();
@@ -699,6 +700,15 @@ sub get_perl_version
     no warnings;
 }
 
+sub get_windows_wget {
+    if (!-e "bin/wget.exe" && $OS eq "Windows") {
+        if (!-d "bin") {
+            mkdir("bin");
+        }
+        `powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe', 'bin\\wget.exe') "`
+    }
+}
+
 sub do_self_update_check_routine
 {
 
@@ -1048,10 +1058,6 @@ sub show_menu_prompt
             fetch_latest_windows_appveyor();
             $dc = 1;
         }
-        elsif ($input eq "windows_server_download_bots") {
-            fetch_latest_windows_binaries_bots();
-            $dc = 1;
-        }
         elsif ($input eq "windows_server_latest_bots") {
             fetch_latest_windows_appveyor_bots();
             $dc = 1;
@@ -1371,11 +1377,10 @@ sub get_remote_file
         $wget = `wget -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
     }
     elsif ($OS eq "Windows") {
-        $wget =
-            `powershell -Command "\$ProgressPreference = 'SilentlyContinue'; Invoke-RestMethod -ContentType \"application/octet-stream\" -Uri $request_url -OutFile $destination_file"`
+        $wget = `bin\\wget.exe -N --no-cache --cache=no --no-check-certificate --quiet -O $destination_file $request_url`;
     }
     print "[Download] Saved [" . $destination_file . "] from [" . $request_url . "]\n" if !$silent_download;
-    if (($OS eq "Linux" && $wget =~ /unable to resolve/i) || ($OS eq "Windows" && $wget =~ /404/i || $wget =~ /could not be resolved/i)) {
+    if ($wget =~ /unable to resolve/i) {
         print "Error, no connection or failed request...\n\n";
         #die;
     }
@@ -1627,13 +1632,13 @@ sub fetch_latest_windows_binaries
 sub fetch_latest_windows_appveyor_bots
 {
     print "[Update] Fetching Latest Windows Binaries with Bots (unstable) from Appveyor... \n";
-    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server/artifacts/eqemu-x86-bots.zip",
-        "updates_staged/eqemu-x86-bots.zip",
+    get_remote_file("https://ci.appveyor.com/api/projects/KimLS/server-87crp/artifacts/build_x64.zip",
+        "updates_staged/eqemu-x64-bots.zip",
         1);
 
     print "[Update] Fetched Latest Windows Binaries (unstable) from Appveyor... \n";
     print "[Update] Extracting... --- \n";
-    unzip('updates_staged/eqemu-x86-bots.zip', 'updates_staged/binaries/');
+    unzip('updates_staged/eqemu-x64-bots.zip', 'updates_staged/binaries/');
     my @files;
     my $start_dir = "updates_staged/binaries";
     find(
@@ -1647,33 +1652,6 @@ sub fetch_latest_windows_appveyor_bots
         copy_file($file, $bin_dir . $destination_file);
     }
     print "[Update] Done\n";
-
-    rmtree('updates_staged');
-}
-
-sub fetch_latest_windows_binaries_bots
-{
-    print "[Update] Fetching Latest Windows Binaries with Bots...\n";
-    get_remote_file($install_repository_request_url . "master_windows_build_bots.zip",
-        "updates_staged/master_windows_build_bots.zip",
-        1);
-
-    print "[Update] Fetched Latest Windows Binaries with Bots...\n";
-    print "[Update] Extracting...\n";
-    unzip('updates_staged/master_windows_build_bots.zip', 'updates_staged/binaries/');
-    my @files;
-    my $start_dir = "updates_staged/binaries";
-    find(
-        sub {push @files, $File::Find::name unless -d;},
-        $start_dir
-    );
-    for my $file (@files) {
-        $destination_file = $file;
-        $destination_file =~ s/updates_staged\/binaries\///g;
-        print "[Install] Installing [" . $bin_dir . $destination_file . "]\n";
-        copy_file($file, $bin_dir . $destination_file);
-    }
-    print "[Update] Done...\n";
 
     rmtree('updates_staged');
 }

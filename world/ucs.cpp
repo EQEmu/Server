@@ -19,7 +19,7 @@ void UCSConnection::SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConne
 		LogInfo("Incoming UCS Connection while we were already connected to a UCS");
 		connection->Handle()->Disconnect();
 	}
-	
+
 	connection = inStream;
 	if (connection) {
 		connection->OnMessage(
@@ -32,7 +32,12 @@ void UCSConnection::SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConne
 		);
 	}
 
-	m_keepalive.reset(new EQ::Timer(5000, true, std::bind(&UCSConnection::OnKeepAlive, this, std::placeholders::_1)));
+	m_keepalive.reset(new EQ::Timer(1000, true, std::bind(&UCSConnection::OnKeepAlive, this, std::placeholders::_1)));
+}
+
+const std::shared_ptr<EQ::Net::ServertalkServerConnection> &UCSConnection::GetConnection() const
+{
+	return connection;
 }
 
 void UCSConnection::ProcessPacket(uint16 opcode, EQ::Net::Packet &p)
