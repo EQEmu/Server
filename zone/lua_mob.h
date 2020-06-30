@@ -124,6 +124,7 @@ public:
 	int SetMana(int mana);
 	double GetManaRatio();
 	int GetAC();
+	int GetDisplayAC();
 	int GetATK();
 	int GetSTR();
 	int GetSTA();

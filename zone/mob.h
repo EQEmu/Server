@@ -211,7 +211,8 @@ public:
 	int TryAssassinate(Mob* defender, EQ::skills::SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
 	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
-	int ACSum();
+	int ACSum(bool skip_caps = false);
+	inline int GetDisplayAC() { return 1000 * (ACSum(true) + compute_defense()) / 847; }
 	int offense(EQ::skills::SkillType skill);
 	int GetBestMeleeSkill();
 	void CalcAC() { mitigation_ac = ACSum(); }
