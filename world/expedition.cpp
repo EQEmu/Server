@@ -206,22 +206,33 @@ void ExpeditionCache::Process()
 void ExpeditionDatabase::PurgeExpiredExpeditions()
 {
 	std::string query = SQL(
-		DELETE expedition
-		FROM expedition_details expedition
-			LEFT JOIN instance_list ON expedition.instance_id = instance_list.id
-			LEFT JOIN (
-				SELECT expedition_id, COUNT(*) member_count
-				FROM expedition_members
-				GROUP BY expedition_id
-			) AS expedition_members
-			ON expedition_members.expedition_id = expedition.id
+		SELECT
+			expedition_details.id
+		FROM expedition_details
+			LEFT JOIN instance_list ON expedition_details.instance_id = instance_list.id
+			LEFT JOIN
+				(
+					SELECT expedition_id, COUNT(*) member_count
+					FROM expedition_members
+					GROUP BY expedition_id
+				) expedition_members
+				ON expedition_members.expedition_id = expedition_details.id
 		WHERE
-			expedition.instance_id IS NULL
+			instance_list.id IS NULL
 			OR expedition_members.member_count IS NULL
 			OR (instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP();
 	);
 
-	database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
+	if (results.Success())
+	{
+		std::vector<uint32_t> expedition_ids;
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			expedition_ids.emplace_back(static_cast<uint32_t>(strtoul(row[0], nullptr, 10)));
+		}
+		ExpeditionDatabase::DeleteExpeditions(expedition_ids);
+	}
 }
 
 void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
@@ -330,6 +341,8 @@ Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 
 void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expedition_ids)
 {
+	LogExpeditionsDetail("Deleting [{}] expedition(s)", expedition_ids.size());
+
 	std::string expedition_ids_query;
 	for (const auto& expedition_id : expedition_ids)
 	{
@@ -345,16 +358,15 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 		);
 		database.QueryDatabase(query);
 
-		// todo: if not using foreign key constraints
-		//query = fmt::format(
-		//	"DELETE FROM expedition_members WHERE expedition_id IN ({});", expedition_ids_query
-		//);
-		//database.QueryDatabase(query);
+		query = fmt::format(
+			"DELETE FROM expedition_members WHERE expedition_id IN ({});", expedition_ids_query
+		);
+		database.QueryDatabase(query);
 
-		//query = fmt::format(
-		//	"DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query
-		//);
-		//database.QueryDatabase(query);
+		query = fmt::format(
+			"DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query
+		);
+		database.QueryDatabase(query);
 	}
 }
 
