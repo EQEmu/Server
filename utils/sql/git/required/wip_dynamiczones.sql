@@ -17,8 +17,7 @@ CREATE TABLE `dynamic_zones` (
 	`zone_in_heading` FLOAT NOT NULL DEFAULT 0,
 	`has_zone_in` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
-	UNIQUE INDEX `instance_id` (`instance_id`),
-	CONSTRAINT `FK_dynamic_zones_instance_list` FOREIGN KEY (`instance_id`) REFERENCES `instance_list` (`id`) ON DELETE CASCADE
+	UNIQUE INDEX `instance_id` (`instance_id`)
 )
 COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
