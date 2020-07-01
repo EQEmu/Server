@@ -4308,7 +4308,7 @@ struct ExpeditionLockoutTimerEntry_Struct
 {
 /*000*/ char   expedition_name[1]; // variable length, null terminated, max 0x80 (128)
 /*000*/ uint32 seconds_remaining;
-/*000*/ uint32 event_type;         // seen -1 (0xffffffff) for replay timers and 1 for event timers
+/*000*/ int32  event_type;         // seen -1 (0xffffffff) for replay timers and 1 for event timers
 /*000*/ char   event_name[1];      // variable length, null terminated, max 0x100 (256)
 };
 

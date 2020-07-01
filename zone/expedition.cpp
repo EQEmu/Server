@@ -43,8 +43,8 @@ const char* const DZADD_INVITE_WARNING       = "Warning! You will be given repla
 const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
 const char* const KICKPLAYERS_EVERYONE       = "Everyone";
 
-const uint32_t Expedition::REPLAY_TIMER_ID = std::numeric_limits<uint32_t>::max();
-const uint32_t Expedition::EVENT_TIMER_ID  = 1;
+const int32_t Expedition::REPLAY_TIMER_ID = -1;
+const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
 	uint32_t id, const std::string& uuid, const DynamicZone& dynamic_zone, std::string expedition_name,
