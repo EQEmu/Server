@@ -1356,15 +1356,9 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		cle->ProcessTellQueue();
 		break;
 	}
-	case ServerOP_CZClientMessage:
-	{
-		auto buf = reinterpret_cast<ServerCZClientMessage_Struct*>(pack->pBuffer);
-		client_list.SendPacket(buf->character_name, pack);
-		break;
-	}
 	case ServerOP_CZClientMessageString:
 	{
-		auto buf = reinterpret_cast<ServerCZClientMessageString_Struct*>(pack->pBuffer);
+		auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 		client_list.SendPacket(buf->character_name, pack);
 		break;
 	}

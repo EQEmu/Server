@@ -288,7 +288,7 @@ public:
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
-	void MessageString(const ServerCZClientMessageString_Struct* msg);
+	void MessageString(const CZClientMessageString_Struct* msg);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
@@ -1115,7 +1115,7 @@ public:
 		Client* client, const std::string& client_name, uint16_t chat_type, const std::string& message);
 	static void SendCrossZoneMessageString(
 		Client* client, const std::string& client_name, uint16_t chat_type,
-		uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
+		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
 
 	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false, bool update_client = true);
 	void AddNewExpeditionLockout(

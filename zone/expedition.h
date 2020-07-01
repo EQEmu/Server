@@ -157,7 +157,8 @@ private:
 	void SaveLockouts(ExpeditionRequest& request);
 	void SaveMembers(ExpeditionRequest& request);
 	void SendClientExpeditionInvite(Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
-	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
+	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
+		const std::initializer_list<std::string>& args = {});
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);

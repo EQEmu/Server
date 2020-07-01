@@ -63,7 +63,7 @@ private:
 	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);
 	void SendLeaderMemberReplayLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo);
 	void SendLeaderMemberEventLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout);
-	void SendLeaderMessage(uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters = {});
+	void SendLeaderMessage(uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args = {});
 
 	Client*  m_requester            = nullptr;
 	Client*  m_leader               = nullptr;

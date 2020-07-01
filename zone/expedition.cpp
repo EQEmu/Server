@@ -682,9 +682,9 @@ void Expedition::SendClientExpeditionInvite(
 }
 
 void Expedition::SendLeaderMessage(
-	Client* leader_client, uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters)
+	Client* leader_client, uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args)
 {
-	Client::SendCrossZoneMessageString(leader_client, m_leader.name, chat_type, string_id, parameters);
+	Client::SendCrossZoneMessageString(leader_client, m_leader.name, chat_type, string_id, args);
 }
 
 bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping)
