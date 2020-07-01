@@ -2881,18 +2881,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_CZClientMessage:
-	{
-		auto buf = reinterpret_cast<ServerCZClientMessage_Struct*>(pack->pBuffer);
-		Client* client = entity_list.GetClientByName(buf->character_name);
-		if (client) {
-			client->Message(buf->chat_type, buf->message);
-		}
-		break;
-	}
 	case ServerOP_CZClientMessageString:
 	{
-		auto buf = reinterpret_cast<ServerCZClientMessageString_Struct*>(pack->pBuffer);
+		auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 		Client* client = entity_list.GetClientByName(buf->character_name);
 		if (client) {
 			client->MessageString(buf);

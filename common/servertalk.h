@@ -282,8 +282,7 @@
 #define ServerOP_CZTaskRemoveGroup 0x4560
 #define ServerOP_CZTaskRemoveRaid 0x4561
 #define ServerOP_CZTaskRemoveGuild 0x4562
-#define ServerOP_CZClientMessage 0x4563
-#define ServerOP_CZClientMessageString 0x4564
+#define ServerOP_CZClientMessageString 0x4563
 
 #define ServerOP_WWAssignTask 0x4750
 #define ServerOP_WWCastSpell 0x4751
@@ -1460,6 +1459,14 @@ struct CZNPCSignal_Struct {
 	uint32 signal;
 };
 
+struct CZClientMessageString_Struct {
+	uint32 string_id;
+	uint16 chat_type;
+	char   character_name[64];
+	uint32 args_size;
+	char   args[1]; // null delimited
+};
+
 struct CZClientSignalByName_Struct {
 	char character_name[64];
 	uint32 signal;
@@ -1983,21 +1990,6 @@ struct UCSServerStatus_Struct {
 		};
 		uint32 timestamp;
 	};
-};
-
-struct ServerCZClientMessage_Struct {
-	uint16 chat_type;
-	char   character_name[64];
-	uint32 message_size;
-	char   message[1];
-};
-
-struct ServerCZClientMessageString_Struct {
-	uint32 string_id;
-	uint16 chat_type;
-	char   character_name[64];
-	uint32 string_params_size;
-	char   string_params[1]; // null delimited
 };
 
 struct ServerExpeditionID_Struct {

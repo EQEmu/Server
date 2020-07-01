@@ -285,11 +285,11 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 }
 
 void ExpeditionRequest::SendLeaderMessage(
-	uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& parameters)
+	uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args)
 {
 	if (!m_disable_messages)
 	{
-		Client::SendCrossZoneMessageString(m_leader, m_leader_name, chat_type, string_id, parameters);
+		Client::SendCrossZoneMessageString(m_leader, m_leader_name, chat_type, string_id, args);
 	}
 }
 
