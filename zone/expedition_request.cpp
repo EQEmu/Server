@@ -166,15 +166,8 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 
 	for (auto& lockout : lockouts)
 	{
-		// client window hides timers with less than 60s remaining, optionally count them as expired
-		if (lockout.GetSecondsRemaining() <= leeway_seconds)
-		{
-			LogExpeditionsModerate(
-				"Ignoring leader [{}] lockout [{}] with [{}s] remaining due to leeway rule [{}s]",
-				m_leader_id, lockout.GetEventName(), lockout.GetSecondsRemaining(), leeway_seconds
-			);
-		}
-		else
+		bool is_expired = lockout.IsExpired() || lockout.GetSecondsRemaining() <= leeway_seconds;
+		if (!is_expired)
 		{
 			m_lockouts.emplace(lockout.GetEventName(), lockout);
 
@@ -248,28 +241,25 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 
 			ExpeditionLockoutTimer lockout{row[3], m_expedition_name, row[6], expire_time, duration};
 
-			// client window hides timers with less than 60s remaining, optionally count them as expired
-			if (lockout.GetSecondsRemaining() <= leeway_seconds)
+			// client window hides timers with less than 60s remaining, optionally count as expired
+			bool is_expired = lockout.IsExpired() || lockout.GetSecondsRemaining() <= leeway_seconds;
+			if (!is_expired)
 			{
-				LogExpeditionsModerate(
-					"Ignoring character [{}] lockout [{}] with [{}s] remaining due to leeway rule [{}s]",
-					character_id, lockout.GetEventName(), lockout.GetSecondsRemaining(), leeway_seconds
-				);
-			}
-			else if (lockout.IsReplayTimer())
-			{
-				// replay timer conflict messages always show up before event conflicts
-				has_conflicts = true;
-				SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
-			}
-			else if (m_check_event_lockouts && character_id != m_leader_id)
-			{
-				if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
+				if (lockout.IsReplayTimer())
 				{
-					// leader doesn't have this lockout. queue instead of messaging
-					// now so message comes after any replay lockout messages
+					// replay timer conflict messages always show up before event conflicts
 					has_conflicts = true;
-					member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
+					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
+				}
+				else if (m_check_event_lockouts && character_id != m_leader_id)
+				{
+					if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
+					{
+						// leader doesn't have this lockout. queue instead of messaging
+						// now so message comes after any replay lockout messages
+						has_conflicts = true;
+						member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
+					}
 				}
 			}
 		}
@@ -295,7 +285,8 @@ void ExpeditionRequest::SendLeaderMessage(
 
 void ExpeditionRequest::SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo)
 {
-	if (m_disable_messages) {
+	if (m_disable_messages)
+	{
 		return;
 	}
 
