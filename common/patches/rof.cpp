@@ -811,7 +811,7 @@ namespace RoF
 		{
 			buf.WriteString(emu->timers[i].expedition_name);
 			buf.WriteUInt32(emu->timers[i].seconds_remaining);
-			buf.WriteUInt32(emu->timers[i].event_type);
+			buf.WriteInt32(emu->timers[i].event_type);
 			buf.WriteString(emu->timers[i].event_name);
 		}
 

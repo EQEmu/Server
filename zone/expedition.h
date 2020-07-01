@@ -137,8 +137,8 @@ public:
 	void SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
 	void SetDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }
 
-	static const uint32_t REPLAY_TIMER_ID;
-	static const uint32_t EVENT_TIMER_ID;
+	static const int32_t REPLAY_TIMER_ID;
+	static const int32_t EVENT_TIMER_ID;
 
 private:
 	static void CacheExpeditions(MySQLRequestResult& results);
