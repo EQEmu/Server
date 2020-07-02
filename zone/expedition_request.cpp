@@ -27,7 +27,6 @@
 #include "raids.h"
 #include "string_ids.h"
 #include "worldserver.h"
-#include <fmt/format.h>
 
 extern WorldServer worldserver;
 

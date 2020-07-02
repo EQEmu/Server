@@ -156,21 +156,25 @@ private:
 	void ProcessMemberRemoved(std::string removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
 	void SaveMembers(ExpeditionRequest& request);
-	void SendClientExpeditionInvite(Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
+	void SendClientExpeditionInvite(
+		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
-	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name, const std::string& add_name, bool pending = false);
+	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name,
+		const std::string& add_name, bool pending = false);
 	void SendWorldLeaderChanged();
 	void SendWorldLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void SendWorldMakeLeaderRequest(const std::string& requester_name, const std::string& new_leader_name);
 	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
-	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id, const std::string& add_char_name, uint32_t add_char_id);
+	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
+		const std::string& add_char_name, uint32_t add_char_id);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
-	void TryAddClient(Client* add_client, std::string inviter_name, std::string orig_add_name, std::string swap_remove_name, Client* leader_client = nullptr);
+	void TryAddClient(Client* add_client, const std::string& inviter_name, const std::string& orig_add_name,
+		const std::string& swap_remove_name, Client* leader_client = nullptr);
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
 	ExpeditionMember GetMemberData(uint32_t character_id);

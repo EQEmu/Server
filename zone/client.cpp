@@ -9755,7 +9755,6 @@ void Client::SendExpeditionLockoutTimers()
 	uint32_t outsize = sizeof(ExpeditionLockoutTimers_Struct) + lockout_entries_size;
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzExpeditionLockoutTimers, outsize));
 	auto outbuf = reinterpret_cast<ExpeditionLockoutTimers_Struct*>(outapp->pBuffer);
-	outbuf->client_id = 0;
 	outbuf->count = lockout_count;
 	if (!lockout_entries.empty())
 	{
@@ -9842,7 +9841,7 @@ void Client::SendDzCompassUpdate()
 		}
 	}
 
-	// todo: shared tasks, missions, and quests with an associated dz
+	// todo: tasks, missions, and quests with an associated dz
 
 	// compass set via MarkSingleCompassLocation()
 	if (m_has_quest_compass)
@@ -9863,7 +9862,6 @@ void Client::SendDzCompassUpdate()
 	uint32 outsize = sizeof(DynamicZoneCompass_Struct) + entries_size;
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzCompass, outsize));
 	auto outbuf = reinterpret_cast<DynamicZoneCompass_Struct*>(outapp->pBuffer);
-	outbuf->client_id = 0;
 	outbuf->count = count;
 	memcpy(outbuf->entries, compass_entries.data(), entries_size);
 
@@ -9873,15 +9871,7 @@ void Client::SendDzCompassUpdate()
 void Client::GoToDzSafeReturnOrBind(const DynamicZoneLocation& safereturn)
 {
 	LogDynamicZonesDetail(
-		"Sending character [{}] in zone [{}]:[{}] to safereturn [{}] at ([{}], [{}], [{}], [{}]) or bind",
-		CharacterID(),
-		zone ? zone->GetZoneID() : 0,
-		zone ? zone->GetInstanceID() : 0,
-		safereturn.zone_id,
-		safereturn.x,
-		safereturn.y,
-		safereturn.z,
-		safereturn.heading
+		"Sending character [{}] to safereturn zone [{}] or bind", CharacterID(), safereturn.zone_id
 	);
 
 	if (safereturn.zone_id == 0)
@@ -9914,7 +9904,6 @@ void Client::MovePCDynamicZone(uint32 zone_id)
 		dz.dz_zone_id = expedition->GetDynamicZone().GetZoneID();
 		dz.dz_instance_id = expedition->GetDynamicZone().GetInstanceID();
 		dz.dz_type = static_cast<uint8_t>(expedition->GetDynamicZone().GetType());
-		//dz.unknown_id2 = expedition->GetDynamicZone().GetRealID();
 		strn0cpy(dz.description, expedition->GetName().c_str(), sizeof(dz.description));
 		strn0cpy(dz.leader_name, expedition->GetLeaderName().c_str(), sizeof(dz.leader_name));
 
@@ -9959,7 +9948,6 @@ void Client::MovePCDynamicZone(uint32 zone_id)
 		uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
 		auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzChooseZone, outsize));
 		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
-		outbuf->client_id = 0;
 		outbuf->count = count;
 		memcpy(outbuf->choices, client_dzs.data(), entries_size);
 

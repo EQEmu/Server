@@ -23,8 +23,6 @@
 #include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "client.h"
-#include "groups.h"
-#include "raids.h"
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
@@ -71,9 +69,7 @@ Expedition* Expedition::TryCreate(
 	// request parses leader, members list, and lockouts while validating
 	if (!request.Validate(requester))
 	{
-		LogExpeditionsModerate(
-			"Creation of [{}] by [{}] denied", request.GetExpeditionName(), requester->GetName()
-		);
+		LogExpeditionsModerate("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
 		return nullptr;
 	}
 
@@ -900,8 +896,8 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 }
 
 void Expedition::TryAddClient(
-	Client* add_client, std::string inviter_name, std::string orig_add_name,
-	std::string swap_remove_name, Client* leader_client)
+	Client* add_client, const std::string& inviter_name, const std::string& orig_add_name,
+	const std::string& swap_remove_name, Client* leader_client)
 {
 	if (!add_client)
 	{
@@ -1350,7 +1346,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 	auto info = reinterpret_cast<ExpeditionInfo_Struct*>(outapp->pBuffer);
 	if (!clear)
 	{
-		info->client_id = 0;
 		info->assigned = true;
 		strn0cpy(info->expedition_name, m_expedition_name.c_str(), sizeof(info->expedition_name));
 		strn0cpy(info->leader_name, m_leader.name.c_str(), sizeof(info->leader_name));
@@ -1382,7 +1377,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListPacket(bool cle
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzMemberList, outsize));
 	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
 
-	buf->client_id = 0;
 	buf->count = member_count;
 
 	if (!clear)
@@ -1403,7 +1397,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListNamePacket(
 	uint32_t outsize = sizeof(ExpeditionMemberListName_Struct);
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzMemberListName, outsize));
 	auto buf = reinterpret_cast<ExpeditionMemberListName_Struct*>(outapp->pBuffer);
-	buf->client_id = 0;
 	buf->add_name = !remove_name;
 	strn0cpy(buf->name, name.c_str(), sizeof(buf->name));
 	return outapp;
@@ -1416,7 +1409,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 	uint32_t outsize = sizeof(ExpeditionMemberList_Struct) + sizeof(ExpeditionMemberEntry_Struct);
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzMemberListStatus, outsize));
 	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
-	buf->client_id = 0;
 	buf->count = 1;
 
 	auto entry = reinterpret_cast<ExpeditionMemberEntry_Struct*>(buf->members);
@@ -1431,7 +1423,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateLeaderNamePacket()
 	uint32_t outsize = sizeof(ExpeditionSetLeaderName_Struct);
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzSetLeaderName, outsize));
 	auto buf = reinterpret_cast<ExpeditionSetLeaderName_Struct*>(outapp->pBuffer);
-	buf->client_id = 0;
 	strn0cpy(buf->leader_name, m_leader.name.c_str(), sizeof(buf->leader_name));
 	return outapp;
 }
