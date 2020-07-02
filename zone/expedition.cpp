@@ -842,10 +842,8 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 			}
 		}
 
-		bool add_immediately = m_dynamiczone.IsCurrentZoneDzInstance();
-
 		ExpeditionDatabase::InsertCharacterLockouts(
-			add_client->CharacterID(), pending_lockouts, false, !add_immediately);
+			add_client->CharacterID(), pending_lockouts, false, true);
 
 		if (was_swap_invite)
 		{
@@ -854,11 +852,6 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 		else
 		{
 			AddMember(add_client->GetName(), add_client->CharacterID());
-		}
-
-		if (m_dynamiczone.IsCurrentZoneDzInstance())
-		{
-			SetMemberStatus(add_client, ExpeditionMemberStatus::InDynamicZone);
 		}
 	}
 }

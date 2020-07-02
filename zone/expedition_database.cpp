@@ -455,7 +455,7 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 	uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
 	bool replace_timer, bool is_pending)
 {
-	LogExpeditionsDetail("Inserting character [{}] lockouts", character_id);
+	LogExpeditionsDetail("Inserting [{}] lockouts for character [{}]", lockouts.size(), character_id);
 
 	std::string insert_values;
 	for (const auto& lockout : lockouts)
