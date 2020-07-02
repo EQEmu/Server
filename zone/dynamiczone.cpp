@@ -23,7 +23,6 @@
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/eqemu_logsys.h"
-#include <chrono>
 
 extern WorldServer worldserver;
 
@@ -558,10 +557,9 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		{
 			for (const auto& client_list_iter : entity_list.GetClientList())
 			{
-				Client* client = client_list_iter.second;
-				if (client)
+				if (client_list_iter.second)
 				{
-					client->SetDzRemovalTimer(true);
+					client_list_iter.second->SetDzRemovalTimer(true);
 				}
 			}
 		}

@@ -5218,11 +5218,10 @@ void EntityList::GateAllClientsToSafeReturn()
 
 	for (const auto& client_list_iter : client_list)
 	{
-		Client* client = client_list_iter.second;
-		if (client)
+		if (client_list_iter.second)
 		{
 			// falls back to gating clients to bind if dz invalid
-			client->GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
+			client_list_iter.second->GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
 		}
 	}
 }
