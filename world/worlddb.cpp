@@ -405,10 +405,24 @@ bool WorldDatabase::GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct*
 
 	in_pp->x = in_pp->y = in_pp->z = in_pp->heading = in_pp->zone_id = 0;
 	in_pp->binds[0].x = in_pp->binds[0].y = in_pp->binds[0].z = in_pp->binds[0].zoneId = in_pp->binds[0].instance_id = 0;
+	
 	// see if we have an entry for start_zone. We can support both titanium & SOF+ by having two entries per class/race/deity combo with different zone_ids
-	std::string query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
-		"AND player_class = %i AND player_deity = %i AND player_race = %i",
-		in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
+	std::string query;
+
+	if (isTitanium) {
+		// Titanium sends player choice (starting city) instead of a zone id
+		query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE player_choice = %i "
+			"AND player_class = %i AND player_deity = %i AND player_race = %i",
+			in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
+		LogInfo("Titanium Start zone query: [{}]\n", query.c_str());
+	}
+	else {
+		query = StringFormat("SELECT x, y, z, heading, start_zone, bind_id, bind_x, bind_y, bind_z FROM start_zones WHERE zone_id = %i "
+			"AND player_class = %i AND player_deity = %i AND player_race = %i",
+			in_cc->start_zone, in_cc->class_, in_cc->deity, in_cc->race);
+		LogInfo("SoF Start zone query: [{}]\n", query.c_str());
+	}
+        
     auto results = QueryDatabase(query);
 	if(!results.Success()) {
 		return false;
