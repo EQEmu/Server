@@ -428,10 +428,14 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		ExpeditionMessage::MakeLeader(pack);
 		break;
 	}
-	case ServerOP_ExpeditionRemoveCharLockouts:
+	case ServerOP_ExpeditionCharacterLockout:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
-		client_list.SendPacket(buf->character_name, pack);
+		auto cle = client_list.FindCLEByCharacterID(buf->character_id);
+		if (cle && cle->Server())
+		{
+			cle->Server()->SendPacket(pack);
+		}
 		break;
 	}
 	case ServerOP_ExpeditionSaveInvite:

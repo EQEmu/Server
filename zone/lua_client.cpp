@@ -1776,12 +1776,12 @@ void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string e
 
 void Lua_Client::RemoveAllExpeditionLockouts() {
 	Lua_Safe_Call_Void();
-	self->RemoveAllExpeditionLockouts();
+	self->RemoveAllExpeditionLockouts({}, true);
 }
 
 void Lua_Client::RemoveAllExpeditionLockouts(std::string expedition_name) {
 	Lua_Safe_Call_Void();
-	self->RemoveAllExpeditionLockouts(expedition_name);
+	self->RemoveAllExpeditionLockouts(expedition_name, true);
 }
 
 void Lua_Client::RemoveExpeditionLockout(std::string expedition_name, std::string event_name) {

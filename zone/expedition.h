@@ -77,8 +77,16 @@ public:
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
 	static Expedition* FindCachedExpeditionByInstanceID(uint32_t instance_id);
-	static void RemoveCharacterLockouts(std::string character_name, std::string expedition_name = {}, std::string event_name = {});
+	static std::vector<ExpeditionLockoutTimer> GetExpeditionLockoutsByCharacterID(uint32_t character_id);
 	static void HandleWorldMessage(ServerPacket* pack);
+	static void AddLockoutByCharacterID(uint32_t character_id, const std::string& expedition_name,
+		const std::string& event_name, uint32_t seconds, const std::string& uuid = {});
+	static void AddLockoutByCharacterName(const std::string& character_name, const std::string& expedition_name,
+		const std::string& event_name, uint32_t seconds, const std::string& uuid = {});
+	static void RemoveLockoutsByCharacterID(uint32_t character_id,
+		const std::string& expedition_name = {}, const std::string& event_name = {});
+	static void RemoveLockoutsByCharacterName(const std::string& character_name,
+		const std::string& expedition_name = {}, const std::string& event_name = {});
 
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return m_dynamiczone.GetInstanceID(); }
@@ -143,6 +151,7 @@ public:
 private:
 	static void CacheExpeditions(MySQLRequestResult& results);
 	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
+	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);

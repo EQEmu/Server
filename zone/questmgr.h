@@ -365,9 +365,6 @@ public:
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
-	Expedition* GetExpeditionByCharID(uint32 char_id);
-	Expedition* GetExpeditionByInstanceID(uint32 instance_id);
-	Expedition* GetExpeditionForCurrentInstance();
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

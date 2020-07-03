@@ -1381,7 +1381,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionMembersRemoved:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
-	case ServerOP_ExpeditionRemoveCharLockouts:
+	case ServerOP_ExpeditionCharacterLockout:
 	case ServerOP_ExpeditionSaveInvite:
 	case ServerOP_ExpeditionRequestInvite:
 	{
