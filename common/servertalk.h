@@ -154,7 +154,7 @@
 #define ServerOP_ExpeditionDzCompass          0x040a
 #define ServerOP_ExpeditionDzSafeReturn       0x040b
 #define ServerOP_ExpeditionDzZoneIn           0x040c
-#define ServerOP_ExpeditionRemoveCharLockouts 0x040d
+#define ServerOP_ExpeditionCharacterLockout   0x040d
 #define ServerOP_ExpeditionSaveInvite         0x040e
 #define ServerOP_ExpeditionRequestInvite      0x040f
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
@@ -2059,9 +2059,13 @@ struct ServerExpeditionSetting_Struct {
 };
 
 struct ServerExpeditionCharacterLockout_Struct {
-	char character_name[64];
-	char expedition_name[128];
-	char event_name[256];
+	uint8  remove;
+	uint32 character_id;
+	uint64 expire_time;
+	uint32 duration;
+	char   uuid[37];
+	char   expedition_name[128];
+	char   event_name[256];
 };
 
 struct ServerExpeditionCharacterID_Struct {

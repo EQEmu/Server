@@ -26,7 +26,6 @@
 
 #include "entity.h"
 #include "event_codes.h"
-#include "expedition.h"
 #include "guild_mgr.h"
 #include "qglobals.h"
 #include "queryserv.h"
@@ -4327,23 +4326,4 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
-}
-
-Expedition* QuestManager::GetExpeditionByCharID(uint32 char_id)
-{
-	return Expedition::FindCachedExpeditionByCharacterID(char_id);
-}
-
-Expedition* QuestManager::GetExpeditionByInstanceID(uint32 instance_id)
-{
-	return Expedition::FindCachedExpeditionByInstanceID(instance_id);
-}
-
-Expedition* QuestManager::GetExpeditionForCurrentInstance()
-{
-	if (zone && zone->GetInstanceID() != 0)
-	{
-		return Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
-	}
-	return nullptr;
 }

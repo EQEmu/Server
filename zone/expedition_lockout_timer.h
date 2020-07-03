@@ -34,6 +34,10 @@ public:
 		const std::string& expedition_uuid, const std::string& expedition_name,
 		const std::string& event_name, uint64_t expire_time, uint32_t duration);
 
+	static ExpeditionLockoutTimer CreateLockout(
+		const std::string& expedition_name, const std::string& event_name,
+		uint32_t seconds, std::string uuid = {});
+
 	struct DaysHoursMinutes
 	{
 		std::string days;

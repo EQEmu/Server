@@ -39,7 +39,6 @@ extern volatile bool RunLoops;
 #include "../common/string_util.h"
 #include "../common/data_verification.h"
 #include "../common/profanity_manager.h"
-#include "../common/util/uuid.h"
 #include "data_bucket.h"
 #include "expedition.h"
 #include "expedition_database.h"
@@ -9643,12 +9642,7 @@ void Client::AddExpeditionLockout(
 void Client::AddNewExpeditionLockout(
 	const std::string& expedition_name, const std::string& event_name, uint32_t seconds, std::string uuid)
 {
-	if (uuid.empty())
-	{
-		uuid = EQ::Util::UUID::Generate().ToString();
-	}
-	ExpeditionLockoutTimer lockout{uuid, expedition_name, event_name, 0, seconds};
-	lockout.Reset(); // sets expire time
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
 	AddExpeditionLockout(lockout, true);
 }
 
@@ -9672,22 +9666,30 @@ void Client::RemoveExpeditionLockout(
 	}
 }
 
-void Client::RemoveAllExpeditionLockouts(std::string expedition_name)
+void Client::RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db)
 {
 	if (expedition_name.empty())
 	{
-		ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID());
+		if (update_db)
+		{
+			ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID());
+		}
 		m_expedition_lockouts.clear();
 	}
 	else
 	{
-		ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID(), expedition_name);
+		if (update_db)
+		{
+			ExpeditionDatabase::DeleteAllCharacterLockouts(CharacterID(), expedition_name);
+		}
+
 		m_expedition_lockouts.erase(std::remove_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
 			[&](const ExpeditionLockoutTimer& lockout) {
 				return lockout.GetExpeditionName() == expedition_name;
 			}
 		), m_expedition_lockouts.end());
 	}
+
 	SendExpeditionLockoutTimers();
 }
 
@@ -9728,6 +9730,8 @@ bool Client::HasExpeditionLockout(
 
 void Client::LoadAllExpeditionLockouts()
 {
+	m_expedition_lockouts.clear();
+
 	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
 	for (const auto& lockout : lockouts)
 	{

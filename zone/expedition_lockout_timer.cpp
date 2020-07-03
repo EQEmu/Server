@@ -20,6 +20,7 @@
 
 #include "expedition_lockout_timer.h"
 #include "../common/string_util.h"
+#include "../common/util/uuid.h"
 #include <fmt/format.h>
 
 const char* const DZ_REPLAY_TIMER_NAME = "Replay Timer"; // see December 14, 2016 patch notes
@@ -38,6 +39,19 @@ ExpeditionLockoutTimer::ExpeditionLockoutTimer(
 	{
 		m_is_replay_timer = true;
 	}
+}
+
+ExpeditionLockoutTimer ExpeditionLockoutTimer::CreateLockout(
+	const std::string& expedition_name, const std::string& event_name, uint32_t seconds, std::string uuid)
+{
+	if (uuid.empty())
+	{
+		uuid = EQ::Util::UUID::Generate().ToString();
+	}
+
+	ExpeditionLockoutTimer lockout{uuid, expedition_name, event_name, 0, seconds};
+	lockout.Reset(); // sets expire time
+	return lockout;
 }
 
 uint32_t ExpeditionLockoutTimer::GetSecondsRemaining() const

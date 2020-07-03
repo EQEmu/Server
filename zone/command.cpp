@@ -6889,7 +6889,7 @@ void command_dz(Client* c, const Seperator* sep)
 				instance_list.version,
 				instance_list.start_time,
 				instance_list.duration,
-				COUNT(instance_list.id) member_count
+				COUNT(instance_list_player.id) member_count
 			FROM dynamic_zones
 				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
@@ -6944,7 +6944,7 @@ void command_dz(Client* c, const Seperator* sep)
 					"Removing [{}]:[{}] lockout on [{}].", sep->arg[4], sep->arg[5], sep->arg[3]
 				).c_str());
 			}
-			Expedition::RemoveCharacterLockouts(sep->arg[3], sep->arg[4], sep->arg[5]);
+			Expedition::RemoveLockoutsByCharacterName(sep->arg[3], sep->arg[4], sep->arg[5]);
 		}
 	}
 	else

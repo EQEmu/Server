@@ -2907,7 +2907,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionDzSafeReturn:
 	case ServerOP_ExpeditionDzZoneIn:
 	case ServerOP_ExpeditionDzDuration:
-	case ServerOP_ExpeditionRemoveCharLockouts:
+	case ServerOP_ExpeditionCharacterLockout:
 	{
 		Expedition::HandleWorldMessage(pack);
 		break;

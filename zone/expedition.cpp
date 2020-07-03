@@ -1586,16 +1586,76 @@ void Expedition::SendWorldGetOnlineMembers(
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::RemoveCharacterLockouts(
-	std::string character_name, std::string expedition_name, std::string event_name)
+void Expedition::SendWorldCharacterLockout(
+	uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionCharacterLockout_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRemoveCharLockouts, pack_size));
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionCharacterLockout, pack_size));
 	auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
-	strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
-	strn0cpy(buf->expedition_name, expedition_name.c_str(), sizeof(buf->expedition_name));
-	strn0cpy(buf->event_name, event_name.c_str(), sizeof(buf->event_name));
+	buf->remove = remove;
+	buf->character_id = character_id;
+	buf->expire_time = lockout.GetExpireTime();
+	buf->duration = lockout.GetDuration();
+	strn0cpy(buf->uuid, lockout.GetExpeditionUUID().c_str(), sizeof(buf->uuid));
+	strn0cpy(buf->expedition_name, lockout.GetExpeditionName().c_str(), sizeof(buf->expedition_name));
+	strn0cpy(buf->event_name, lockout.GetEventName().c_str(), sizeof(buf->event_name));
 	worldserver.SendPacket(pack.get());
+}
+
+void Expedition::AddLockoutByCharacterID(
+	uint32_t character_id, const std::string& expedition_name, const std::string& event_name,
+	uint32_t seconds, const std::string& uuid)
+{
+	if (character_id)
+	{
+		auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
+		ExpeditionDatabase::InsertCharacterLockouts(character_id, { lockout }, true);
+		SendWorldCharacterLockout(character_id, lockout, false);
+	}
+}
+
+void Expedition::AddLockoutByCharacterName(
+	const std::string& character_name, const std::string& expedition_name, const std::string& event_name,
+	uint32_t seconds, const std::string& uuid)
+{
+	if (!character_name.empty())
+	{
+		uint32_t character_id = database.GetCharacterID(character_name.c_str());
+		AddLockoutByCharacterID(character_id, expedition_name, event_name, seconds, uuid);
+	}
+}
+
+void Expedition::RemoveLockoutsByCharacterID(
+	uint32_t character_id, const std::string& expedition_name, const std::string& event_name)
+{
+	if (character_id)
+	{
+		if (!event_name.empty())
+		{
+			ExpeditionDatabase::DeleteCharacterLockout(character_id, expedition_name, event_name);
+		}
+		else if (!expedition_name.empty())
+		{
+			ExpeditionDatabase::DeleteAllCharacterLockouts(character_id, expedition_name);
+		}
+		else
+		{
+			ExpeditionDatabase::DeleteAllCharacterLockouts(character_id);
+		}
+
+		ExpeditionLockoutTimer lockout{{}, expedition_name, event_name, 0, 0};
+		SendWorldCharacterLockout(character_id, lockout, true);
+	}
+}
+
+void Expedition::RemoveLockoutsByCharacterName(
+	const std::string& character_name, const std::string& expedition_name, const std::string& event_name)
+{
+	if (!character_name.empty())
+	{
+		uint32_t character_id = database.GetCharacterID(character_name.c_str());
+		RemoveLockoutsByCharacterID(character_id, expedition_name, event_name);
+	}
 }
 
 void Expedition::HandleWorldMessage(ServerPacket* pack)
@@ -1818,15 +1878,21 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	case ServerOP_ExpeditionRemoveCharLockouts:
+	case ServerOP_ExpeditionCharacterLockout:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
-		Client* client = entity_list.GetClientByName(buf->character_name);
+		Client* client = entity_list.GetClientByCharID(buf->character_id);
 		if (client)
 		{
-			if (buf->event_name[0] != '\0')
+			if (!buf->remove)
 			{
-				client->RemoveExpeditionLockout(buf->expedition_name, buf->event_name, true);
+				client->AddExpeditionLockout(ExpeditionLockoutTimer{
+					buf->uuid, buf->expedition_name, buf->event_name, buf->expire_time, buf->duration
+				});
+			}
+			else if (buf->event_name[0] != '\0')
+			{
+				client->RemoveExpeditionLockout(buf->expedition_name, buf->event_name);
 			}
 			else
 			{
@@ -1981,4 +2047,21 @@ std::string Expedition::GetLootEventBySpawnID(uint32_t spawn_id)
 	}
 
 	return event_name;
+}
+
+std::vector<ExpeditionLockoutTimer> Expedition::GetExpeditionLockoutsByCharacterID(uint32_t character_id)
+{
+	std::vector<ExpeditionLockoutTimer> lockouts;
+
+	auto client = entity_list.GetClientByCharID(character_id);
+	if (client)
+	{
+		lockouts = client->GetExpeditionLockouts();
+	}
+	else
+	{
+		lockouts = ExpeditionDatabase::LoadCharacterLockouts(character_id);
+	}
+
+	return lockouts;
 }
