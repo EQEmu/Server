@@ -206,7 +206,7 @@ int command_init(void)
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", 80, command_faction) ||
 		command_add("findaliases", "[search criteria]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
-		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) || 
+		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) ||
 		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", 80, command_fixmob) ||
@@ -2478,8 +2478,8 @@ void command_grid(Client *c, const Seperator *sep)
 			glm::vec4 node_position = glm::vec4(atof(row[0]), atof(row[1]), atof(row[2]), atof(row[3]));
 
 			std::vector<float> node_loc {
-					node_position.x, 
-					node_position.y, 
+					node_position.x,
+					node_position.y,
 					node_position.z
 			};
 
@@ -4180,7 +4180,7 @@ void command_findzone(Client *c, const Seperator *sep)
 		if (id == 0) {
 			query = fmt::format(
 				"SELECT zoneidnumber, short_name, long_name, version FROM zone WHERE long_name LIKE '%{}%' OR `short_name` LIKE '%{}%'",
-				EscapeString(sep->arg[1]),				
+				EscapeString(sep->arg[1]),
 				EscapeString(sep->arg[1])
 			);
 		}
@@ -12822,15 +12822,23 @@ void command_hotfix(Client *c, const Seperator *sep)
 	c->Message(Chat::White, "Creating and applying hotfix");
 	std::thread t1(
 		[c, hotfix_name]() {
+
+			std::string shared_memory_path;
+
 #ifdef WIN32
-			if(hotfix_name.length() > 0) {
-				if(system(StringFormat("shared_memory -hotfix=%s", hotfix_name.c_str()).c_str()));
-			} else {
-				if(system(StringFormat("shared_memory").c_str()));
+			shared_memory_path = "shared_memory";
+			if (file_exists("bin/shared_memory")) {
+				shared_memory_path = "bin/shared_memory";
+			}
+
+			if (hotfix_name.length() > 0) {
+				if (system(StringFormat("%s -hotfix=%s", shared_memory_path.c_str(), hotfix_name.c_str()).c_str())) {}
+			}
+			else {
+				if (system(StringFormat("%s", shared_memory_path.c_str()).c_str())) {}
 			}
 #else
-
-			std::string shared_memory_path = "./shared_memory";
+			shared_memory_path = "./shared_memory";
 			if (file_exists("./bin/shared_memory")) {
 				shared_memory_path = "./bin/shared_memory";
 			}
