@@ -1054,28 +1054,88 @@ void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id, bool e
 	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
 }
 
-void lua_cross_zone_signal_client_by_char_id(uint32 player_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByCharID(player_id, signal);
+void lua_cross_zone_cast_spell_by_char_id(int character_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByCharID(character_id, spell_id);
 }
 
-void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
+void lua_cross_zone_cast_spell_by_group_id(int group_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByGroupID(group_id, spell_id);
 }
 
-void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, signal);
+void lua_cross_zone_cast_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByRaidID(raid_id, spell_id);
 }
 
-void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
+void lua_cross_zone_cast_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByGuildID(guild_id, spell_id);
 }
 
-void lua_cross_zone_signal_client_by_name(const char *player, int signal) {
-	quest_manager.CrossZoneSignalPlayerByName(player, signal);
+void lua_cross_zone_disable_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByCharID(character_id, task_id);
 }
 
-void lua_cross_zone_message_player_by_name(uint32 type, const char *player, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
+void lua_cross_zone_disable_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_disable_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_disable_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByCharID(character_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByGroupID(group_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByRaidID(raid_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByGuildID(guild_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_message_player_by_name(uint32 type, const char *character_name, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByName(type, character_name, message);
 }
 
 void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char *message) {
@@ -1106,24 +1166,216 @@ void lua_cross_zone_move_player_by_guild_id(int guild_id, const char *zone_short
 	quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
 }
 
-void lua_cross_zone_set_entity_variable_by_client_name(const char *player, const char *id, const char *m_var) {
-	quest_manager.CrossZoneSetEntityVariableByClientName(player, id, m_var);
+void lua_cross_zone_move_instance_by_char_id(int character_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByCharID(character_id, instance_id);
 }
 
-void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char *id, const char *m_var) {
-	quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, id, m_var);
+void lua_cross_zone_move_instance_by_group_id(int group_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByGroupID(group_id, instance_id);
 }
 
-void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char *id, const char *m_var) {
-	quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, id, m_var);
+void lua_cross_zone_move_instance_by_raid_id(int raid_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByRaidID(raid_id, instance_id);
 }
 
-void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char *id, const char *m_var) {
-	quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, id, m_var);
+void lua_cross_zone_move_instance_by_guild_id(int guild_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByGuildID(guild_id, instance_id);
 }
 
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fadein, uint32 fadeout, uint32 duration, const char *message) {
-	quest_manager.WorldWideMarquee(type, priority, fadein, fadeout, duration, message);
+void lua_cross_zone_remove_spell_by_char_id(int character_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByCharID(character_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_group_id(int group_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByGroupID(group_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByRaidID(raid_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByGuildID(guild_id, spell_id);
+}
+
+void lua_cross_zone_remove_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_reset_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByCharID(character_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByGroupID(group_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByRaidID(raid_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
+}
+
+void lua_cross_zone_set_entity_variable_by_client_name(const char *character_name, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByClientName(character_name, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByCharID(character_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_name(const char *character_name, int signal) {
+	quest_manager.CrossZoneSignalPlayerByName(character_name, signal);
+}
+
+void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal) {
+	quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, signal);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id, activity_count);
+}
+
+void lua_world_wide_assign_task(uint32 task_id) {
+	quest_manager.WorldWideAssignTask(task_id);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id) {
+	quest_manager.WorldWideCastSpell(spell_id);
+}
+
+void lua_world_wide_disable_task(uint32 task_id) {
+	quest_manager.WorldWideDisableTask(task_id);
+}
+
+void lua_world_wide_enable_task(uint32 task_id) {
+	quest_manager.WorldWideEnableTask(task_id);
+}
+
+void lua_world_wide_fail_task(uint32 task_id) {
+	quest_manager.WorldWideFailTask(task_id);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_world_wide_message(uint32 type, const char *message) {
+	quest_manager.WorldWideMessage(type, message);
+}
+
+void lua_world_wide_move(const char *zone_short_name) {
+	quest_manager.WorldWideMove(zone_short_name);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id) {
+	quest_manager.WorldWideMoveInstance(instance_id);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id) {
+	quest_manager.WorldWideRemoveSpell(spell_id);
+}
+
+void lua_world_wide_remove_task(uint32 task_id) {
+	quest_manager.WorldWideRemoveTask(task_id);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value);
+}
+
+void lua_world_wide_set_entity_variable_npc(const char *variable_name, const char *variable_value) {
+	quest_manager.WorldWideSetEntityVariableNPC(variable_name, variable_value);
+}
+
+void lua_world_wide_signal_client(uint32 signal) {
+	quest_manager.WorldWideSignalClient(signal);
+}
+
+void lua_world_wide_signal_npc(uint32 signal) {
+	quest_manager.WorldWideSignalNPC(signal);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count);
 }
 
 luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
@@ -1942,11 +2194,26 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
 		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
 		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
-		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
-		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
-		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+		luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
+		luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
+		luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
+		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
+		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
+		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
+		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
+		luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
+		luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
+		luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
+		luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
+		luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
+		luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
+		luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
+		luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
+		luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
+		luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
+		luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
+		luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
+		luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
 		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
 		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
@@ -1955,11 +2222,59 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
 		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
 		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
+		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
+		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
+		luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
+		luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
+		luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
+		luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
+		luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
+		luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
+		luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
+		luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
+		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
 		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
 		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
 		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
 		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
+		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
+		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
+		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
+		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
+		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+		luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
+		luabind::def("world_wide_cast_spell", &lua_world_wide_cast_spell),
+		luabind::def("world_wide_disable_task", &lua_world_wide_disable_task),
+		luabind::def("world_wide_enable_task", &lua_world_wide_enable_task),
+		luabind::def("world_wide_fail_task", &lua_world_wide_fail_task),
 		luabind::def("world_wide_marquee", &lua_world_wide_marquee),
+		luabind::def("world_wide_message", &lua_world_wide_message),
+		luabind::def("world_wide_move", &lua_world_wide_move),
+		luabind::def("world_wide_move_instance", &lua_world_wide_move_instance),
+		luabind::def("world_wide_remove_spell", &lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_task", &lua_world_wide_remove_task),
+		luabind::def("world_wide_reset_activity", &lua_world_wide_reset_activity),
+		luabind::def("world_wide_set_entity_variable_client", &lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
+		luabind::def("world_wide_signal_client", &lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
