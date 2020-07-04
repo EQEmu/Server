@@ -12827,16 +12827,20 @@ void command_hotfix(Client *c, const Seperator *sep)
 
 #ifdef WIN32
 			shared_memory_path = "shared_memory";
-			if (file_exists("bin/shared_memory")) {
-				shared_memory_path = "bin/shared_memory";
+			if (file_exists("bin/shared_memory.exe")) {
+				shared_memory_path = "bin\\shared_memory.exe";
 			}
 
+			std::string hotfix_command;
 			if (hotfix_name.length() > 0) {
-				if (system(StringFormat("%s -hotfix=%s", shared_memory_path.c_str(), hotfix_name.c_str()).c_str())) {}
+				hotfix_command = fmt::format("\"{}\" -hotfix={}", shared_memory_path, hotfix_name);
 			}
 			else {
-				if (system(StringFormat("%s", shared_memory_path.c_str()).c_str())) {}
+				hotfix_command = fmt::format("\"{}\"", shared_memory_path, hotfix_name);
 			}
+
+			LogInfo("Running hotfix command [{}]", hotfix_command);
+			if (system(hotfix_command.c_str())) {}
 #else
 			shared_memory_path = "./shared_memory";
 			if (file_exists("./bin/shared_memory")) {
