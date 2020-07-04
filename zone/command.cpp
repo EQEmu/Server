@@ -12827,7 +12827,7 @@ void command_hotfix(Client *c, const Seperator *sep)
 
 #ifdef WIN32
 			shared_memory_path = "shared_memory";
-			if (file_exists("bin/shared_memory")) {
+			if (file_exists("bin/shared_memory.exe")) {
 				shared_memory_path = "bin/shared_memory";
 			}
 
