@@ -12832,10 +12832,10 @@ void command_hotfix(Client *c, const Seperator *sep)
 			}
 
 			if (hotfix_name.length() > 0) {
-				if (system(StringFormat("%s -hotfix=%s", shared_memory_path.c_str(), hotfix_name.c_str()).c_str())) {}
+				if (system(StringFormat("\"%s\" -hotfix=%s", shared_memory_path.c_str(), hotfix_name.c_str()).c_str())) {}
 			}
 			else {
-				if (system(StringFormat("%s", shared_memory_path.c_str()).c_str())) {}
+				if (system(StringFormat("\"%s\"", shared_memory_path.c_str()).c_str())) {}
 			}
 #else
 			shared_memory_path = "./shared_memory";
