@@ -766,6 +766,7 @@ RULE_CATEGORY(HotReload)
 RULE_BOOL(HotReload, QuestsRepopWithReload, true, "When a hot reload is triggered, the zone will repop")
 RULE_BOOL(HotReload, QuestsRepopWhenPlayersNotInCombat, true, "When a hot reload is triggered, the zone will repop when no clients are in combat")
 RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is triggered, quest timers will be reset")
+RULE_BOOL(HotReload, QuestsAutoReloadGlobalScripts, false, "When a quest, plugin, or global script changes, auto reload.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Instances)
