@@ -407,6 +407,7 @@
 9151|2020_03_05_npc_always_aggro.sql|SHOW COLUMNS FROM `npc_types` LIKE 'always_aggro'|empty|
 9152|2020_03_09_convert_myisam_to_innodb.sql|SELECT * FROM db_version WHERE version >= 9152|empty|
 9153|2020_05_09_items_subtype.sql|SHOW COLUMNS from `items` LIKE 'UNK219'|not_empty|
+9154|2020_04_11_expansions_content_filters.sql|SHOW COLUMNS from `zone` LIKE 'min_expansion'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
