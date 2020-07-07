@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/eq_packet_structs.h"
 #include "../common/misc_functions.h"
 #include "../common/rulesys.h"
+#include "../common/say_link.h"
 #include "../common/servertalk.h"
 #include "../common/profanity_manager.h"
 
@@ -2194,9 +2195,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		std::string request_zone_short_name = hot_reload_quests->zone_short_name;
 		std::string local_zone_short_name   = zone->GetShortName();
+		bool can_reload_global_script = (request_zone_short_name == "all" && RuleB(HotReload, QuestsAutoReloadGlobalScripts));
 
-		if (request_zone_short_name == local_zone_short_name || request_zone_short_name == "all"){
+		if (request_zone_short_name == local_zone_short_name || can_reload_global_script) {
 			zone->SetQuestHotReloadQueued(true);
+		} else if (request_zone_short_name == "all") {
+			std::string reload_quest_saylink = EQ::SayLinkEngine::GenerateQuestSaylink("#reloadquest", false, "Locally");
+			std::string reload_world_saylink = EQ::SayLinkEngine::GenerateQuestSaylink("#reloadworld", false, "Globally");
+			worldserver.SendEmoteMessage(0, 0, 20, 15, "A quest, plugin, or global script has changed reload quests [%s] [%s].", reload_quest_saylink.c_str(), reload_world_saylink.c_str());
 		}
 
 		break;
