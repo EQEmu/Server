@@ -45,7 +45,7 @@ const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
-	uint32_t id, const std::string& uuid, const DynamicZone& dynamic_zone, std::string expedition_name,
+	uint32_t id, const std::string& uuid, const DynamicZone& dynamic_zone, const std::string& expedition_name,
 	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players
 ) :
 	m_id(id),
@@ -103,20 +103,18 @@ Expedition* Expedition::TryCreate(
 	{
 		dynamiczone.SaveToDatabase();
 
-		ExpeditionMember leader{request.GetLeaderID(), request.GetLeaderName()};
-
 		auto expedition = std::unique_ptr<Expedition>(new Expedition(
 			expedition_id,
 			expedition_uuid,
 			dynamiczone,
 			request.GetExpeditionName(),
-			leader,
+			ExpeditionMember{ request.GetLeaderID(), request.GetLeaderName() },
 			request.GetMinPlayers(),
 			request.GetMaxPlayers()
 		));
 
 		LogExpeditions(
-			"Created [{}] ({}) instance id: [{}] leader: [{}] minplayers: [{}] maxplayers: [{}]",
+			"Created [{}] [{}] instance id: [{}] leader: [{}] minplayers: [{}] maxplayers: [{}]",
 			expedition->GetID(),
 			expedition->GetName(),
 			expedition->GetInstanceID(),
@@ -133,10 +131,8 @@ Expedition* Expedition::TryCreate(
 		inserted.first->second->SendUpdatesToZoneMembers();
 		inserted.first->second->SendWorldExpeditionUpdate(ServerOP_ExpeditionCreate); // cache in other zones
 
-		Client* leader_client = request.GetLeaderClient();
-
-		Client::SendCrossZoneMessageString(
-			leader_client, leader.name, Chat::Yellow, EXPEDITION_AVAILABLE, { request.GetExpeditionName() }
+		inserted.first->second->SendLeaderMessage(
+			request.GetLeaderClient(), Chat::Yellow, EXPEDITION_AVAILABLE, { request.GetExpeditionName() }
 		);
 
 		return inserted.first->second.get();
@@ -185,9 +181,9 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			std::unique_ptr<Expedition> expedition = std::unique_ptr<Expedition>(new Expedition(
 				expedition_id,
 				row[col::uuid],                                         // expedition uuid
-				DynamicZone{instance_id},
+				DynamicZone{ instance_id },
 				row[col::expedition_name],                              // expedition name
-				ExpeditionMember{leader_id, row[col::leader_name]},     // expedition leader id, name
+				ExpeditionMember{ leader_id, row[col::leader_name] },   // expedition leader id, name
 				strtoul(row[col::min_players], nullptr, 10),            // min_players
 				strtoul(row[col::max_players], nullptr, 10)             // max_players
 			));
@@ -264,7 +260,7 @@ void Expedition::CacheFromDatabase(uint32_t expedition_id)
 		CacheExpeditions(results);
 
 		auto elapsed = benchmark.elapsed();
-		LogExpeditions("Caching new expedition [{}] took {}s", expedition_id, elapsed);
+		LogExpeditions("Caching new expedition [{}] took [{}s]", expedition_id, elapsed);
 	}
 }
 
@@ -290,7 +286,7 @@ bool Expedition::CacheAllFromDatabase()
 	CacheExpeditions(results);
 
 	auto elapsed = benchmark.elapsed();
-	LogExpeditions("Caching [{}] expedition(s) took {}s", zone->expedition_cache.size(), elapsed);
+	LogExpeditions("Caching [{}] expedition(s) took [{}s]", zone->expedition_cache.size(), elapsed);
 
 	return true;
 }
@@ -923,7 +919,7 @@ void Expedition::TryAddClient(
 }
 
 void Expedition::DzAddPlayer(
-	Client* requester, std::string add_char_name, std::string swap_remove_name)
+	Client* requester, const std::string& add_char_name, const std::string& swap_remove_name)
 {
 	if (!requester || !ConfirmLeaderCommand(requester))
 	{
@@ -1015,7 +1011,7 @@ void Expedition::DzMakeLeader(Client* requester, std::string new_leader_name)
 	else
 	{
 		// new leader not in this zone, let world verify and pass to new leader's zone
-		SendWorldMakeLeaderRequest(requester->GetName(), FormatName(new_leader_name));
+		SendWorldMakeLeaderRequest(requester->GetName(), new_leader_name);
 	}
 }
 
@@ -1026,22 +1022,15 @@ void Expedition::DzRemovePlayer(Client* requester, std::string char_name)
 		return;
 	}
 
-	LogExpeditionsModerate(
-		"Remove player request for expedition [{}] by [{}] leader [{}] remove name [{}]",
-		m_id, requester->GetName(), m_leader.name, char_name
-	);
-
-	char_name = FormatName(char_name);
-
 	// live only seems to enforce min_players for requesting expeditions, no need to check here
 	bool removed = RemoveMember(char_name);
 	if (!removed)
 	{
-		requester->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, char_name.c_str());
+		requester->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, FormatName(char_name).c_str());
 	}
 	else
 	{
-		requester->MessageString(Chat::Yellow, EXPEDITION_REMOVED, char_name.c_str(), m_expedition_name.c_str());
+		requester->MessageString(Chat::Yellow, EXPEDITION_REMOVED, FormatName(char_name).c_str(), m_expedition_name.c_str());
 	}
 }
 
@@ -1165,7 +1154,7 @@ void Expedition::ProcessMakeLeader(
 	}
 }
 
-void Expedition::ProcessMemberAdded(std::string char_name, uint32_t added_char_id)
+void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added_char_id)
 {
 	// adds the member to this expedition and notifies both leader and new member
 	Client* leader_client = entity_list.GetClientByCharID(m_leader.char_id);
@@ -1188,7 +1177,7 @@ void Expedition::ProcessMemberAdded(std::string char_name, uint32_t added_char_i
 	SendUpdatesToZoneMembers(); // live sends full update when member added
 }
 
-void Expedition::ProcessMemberRemoved(std::string removed_char_name, uint32_t removed_char_id)
+void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id)
 {
 	if (m_members.empty())
 	{
@@ -1731,11 +1720,10 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionMemberChange:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition && zone)
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 		{
-			if (!zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+			if (expedition)
 			{
 				if (buf->removed)
 				{
@@ -1834,8 +1822,9 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			Client* leader = entity_list.GetClientByName(buf->requester_name);
 			if (leader)
 			{
-				leader->MessageString(Chat::Red, DZADD_NOT_ONLINE, FormatName(buf->target_name).c_str());
-				leader->MessageString(Chat::Red, DZADD_INVITE_FAIL, FormatName(buf->target_name).c_str());
+				std::string target_name = FormatName(buf->target_name);
+				leader->MessageString(Chat::Red, DZADD_NOT_ONLINE, target_name.c_str());
+				leader->MessageString(Chat::Red, DZADD_INVITE_FAIL, target_name.c_str());
 			}
 		}
 		break;

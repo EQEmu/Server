@@ -9582,7 +9582,7 @@ Expedition* Client::CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest
 }
 
 Expedition* Client::CreateExpedition(
-	std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
+	const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
 	uint32 min_players, uint32 max_players, bool disable_messages)
 {
 	DynamicZone dz_instance{ zone_name, version, duration, DynamicZoneType::Expedition };
@@ -9736,8 +9736,8 @@ void Client::SendExpeditionLockoutTimers()
 	// erases expired lockouts while building lockout timer list
 	for (auto it = m_expedition_lockouts.begin(); it != m_expedition_lockouts.end();)
 	{
-		auto seconds_remaining = it->GetSecondsRemaining();
-		if (seconds_remaining <= 0)
+		uint32_t seconds_remaining = it->GetSecondsRemaining();
+		if (seconds_remaining == 0)
 		{
 			it = m_expedition_lockouts.erase(it);
 		}
@@ -9922,11 +9922,7 @@ void Client::MovePCDynamicZone(uint32 zone_id)
 	}
 	else if (client_dzs.size() == 1)
 	{
-		if (single_dz.GetInstanceID() == 0)
-		{
-			LogDynamicZones("Character [{}] has dz for zone [{}] with no instance id", CharacterID(), zone_id);
-		}
-		else
+		if (single_dz.IsValid())
 		{
 			DynamicZoneLocation zonein = single_dz.GetZoneInLocation();
 			ZoneMode zone_mode = ZoneMode::ZoneToSafeCoords;
