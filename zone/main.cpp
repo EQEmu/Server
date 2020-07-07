@@ -260,7 +260,8 @@ int main(int argc, char** argv) {
 			Config->ContentDbUsername.c_str(),
 			Config->ContentDbPassword.c_str(),
 			Config->ContentDbName.c_str(),
-			Config->ContentDbPort
+			Config->ContentDbPort,
+			"content"
 		)) {
 			LogError("Cannot continue without a content database connection");
 			return 1;

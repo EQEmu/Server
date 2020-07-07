@@ -100,7 +100,7 @@ class Database : public DBcore {
 public:
 	Database();
 	Database(const char* host, const char* user, const char* passwd, const char* database,uint32 port);
-	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port);
+	bool Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port, std::string connection_label = "default");
 	~Database();
 
 	/* Character Creation */

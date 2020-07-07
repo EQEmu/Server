@@ -61,15 +61,15 @@ Database::Database(const char* host, const char* user, const char* passwd, const
 	Connect(host, user, passwd, database, port);
 }
 
-bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port) {
+bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port, std::string connection_label) {
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogError("Failed to connect to database: Error: {}", errbuf);
+		LogError("[MySQL] Connection [{}] Failed to connect to database: Error [{}]", connection_label, errbuf);
 		return false;
 	}
 	else {
-		LogInfo("Using database [{}] at [{}]:[{}]", database, host,port);
+		LogInfo("[MySQL] Connection [{}] database [{}] at [{}]:[{}]", connection_label, database, host,port);
 		return true;
 	}
 }
