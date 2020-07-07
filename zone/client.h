@@ -1122,7 +1122,7 @@ public:
 		const std::string& expedition_name, const std::string& event_name, uint32_t duration, std::string uuid = {});
 	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
 	Expedition* CreateExpedition(
-		std::string zone_name, uint32 version, uint32 duration, std::string expedition_name,
+		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
 		uint32 min_players, uint32 max_players, bool disable_messages = false);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }

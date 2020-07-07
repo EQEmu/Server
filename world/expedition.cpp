@@ -95,7 +95,7 @@ void ExpeditionCache::LoadActiveExpeditions()
 	m_expeditions = ExpeditionDatabase::LoadExpeditions();
 
 	auto elapsed = benchmark.elapsed();
-	LogExpeditions("World caching [{}] expeditions took {}s", m_expeditions.size(), elapsed);
+	LogExpeditions("World caching [{}] expeditions took [{}s]", m_expeditions.size(), elapsed);
 }
 
 void ExpeditionCache::AddExpedition(uint32_t expedition_id)

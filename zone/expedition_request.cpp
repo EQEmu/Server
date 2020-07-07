@@ -79,7 +79,7 @@ bool ExpeditionRequest::Validate(Client* requester)
 	}
 
 	auto elapsed = benchmark.elapsed();
-	LogExpeditions("Create validation for [{}] members took {}s", m_members.size(), elapsed);
+	LogExpeditions("Create validation for [{}] members took [{}s]", m_members.size(), elapsed);
 
 	return requirements_met;
 }

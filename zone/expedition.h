@@ -66,7 +66,7 @@ class Expedition
 public:
 	Expedition() = delete;
 	Expedition(
-		uint32_t id, const std::string& uuid, const DynamicZone& dz, std::string expedition_name,
+		uint32_t id, const std::string& uuid, const DynamicZone& dz, const std::string& expedition_name,
 		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
@@ -128,7 +128,7 @@ public:
 	void SendClientExpeditionInfo(Client* client);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 
-	void DzAddPlayer(Client* requester, std::string add_char_name, std::string swap_remove_name = {});
+	void DzAddPlayer(Client* requester, const std::string& add_char_name, const std::string& swap_remove_name = {});
 	void DzAddPlayerContinue(std::string leader_name, std::string add_char_name, std::string swap_remove_name = {});
 	void DzInviteResponse(Client* add_client, bool accepted, const std::string& swap_remove_name);
 	void DzMakeLeader(Client* requester, std::string new_leader_name);
@@ -161,8 +161,8 @@ private:
 	void ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader, const std::string& new_leader_name, bool is_online);
-	void ProcessMemberAdded(std::string added_char_name, uint32_t added_char_id);
-	void ProcessMemberRemoved(std::string removed_char_name, uint32_t removed_char_id);
+	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
+	void ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
 	void SaveMembers(ExpeditionRequest& request);
 	void SendClientExpeditionInvite(
