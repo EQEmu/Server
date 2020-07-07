@@ -966,6 +966,16 @@ std::string TaskManager::GetTaskName(uint32 task_id)
 	return std::string();
 }
 
+TaskType TaskManager::GetTaskType(uint32 task_id)
+{
+	if (task_id > 0 && task_id < MAXTASKS) {
+		if (Tasks[task_id] != nullptr) {
+			return Tasks[task_id]->type;
+		}
+	}
+	return TaskType::Task;
+}
+
 int TaskManager::GetTaskMinLevel(int TaskID)
 {
 	if (Tasks[TaskID]->MinLevel)
@@ -1981,6 +1991,7 @@ void ClientTaskState::IncrementDoneCount(Client *c, TaskInformation *Task, int T
 		// Send an update packet for this single activity
 		taskmanager->SendTaskActivityLong(c, info->TaskID, ActivityID, TaskIndex,
 						  Task->Activity[ActivityID].Optional);
+		taskmanager->SaveClientState(c, this);
 	}
 }
 
@@ -2238,15 +2249,16 @@ void ClientTaskState::UpdateTaskActivity(Client *c, int TaskID, int ActivityID, 
 		return;
 
 	// The Activity is not currently active
-	if (info->Activity[ActivityID].State != ActivityActive)
+	if (info->Activity[ActivityID].State == ActivityHidden)
 		return;
-	Log(Logs::General, Logs::Tasks, "[UPDATE] Increment done count on UpdateTaskActivity");
+		
+	Log(Logs::General, Logs::Tasks, "[UPDATE] Increment done count on UpdateTaskActivity %d %d", ActivityID, Count);
 	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, Count, ignore_quest_update);
 }
 
 void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 {
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState UpdateTaskActivity(%i, %i, 0).", TaskID, ActivityID);
+	Log(Logs::General, Logs::Tasks, "[RESET] ClientTaskState ResetTaskActivity(%i, %i).", TaskID, ActivityID);
 
 	// Quick sanity check
 	if (ActivityID < 0 || (ActiveTaskCount == 0 && ActiveTask.TaskID == TASKSLOTEMPTY))
@@ -2288,18 +2300,11 @@ void ClientTaskState::ResetTaskActivity(Client *c, int TaskID, int ActivityID)
 		return;
 
 	// The Activity is not currently active
-	if (info->Activity[ActivityID].State != ActivityActive)
+	if (info->Activity[ActivityID].State == ActivityHidden)
 		return;
-
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ResetTaskActivityCount");
-
-	info->Activity[ActivityID].DoneCount = 0;
-
-	info->Activity[ActivityID].Updated = true;
-
-	// Send an update packet for this single activity
-	taskmanager->SendTaskActivityLong(c, info->TaskID, ActivityID, ActiveTaskIndex,
-					  Task->Activity[ActivityID].Optional);
+		
+	Log(Logs::General, Logs::Tasks, "[RESET] Increment done count on ResetTaskActivity");
+	IncrementDoneCount(c, Task, ActiveTaskIndex, ActivityID, (info->Activity[ActivityID].DoneCount * -1), false);
 }
 
 void ClientTaskState::ShowClientTasks(Client *c)
@@ -3196,6 +3201,68 @@ void ClientTaskState::RemoveTask(Client *c, int sequenceNumber, TaskType type)
 		break;
 	default:
 		break;
+	}
+}
+
+void ClientTaskState::RemoveTaskByTaskID(Client *c, uint32 task_id)
+{
+	auto task_type = taskmanager->GetTaskType(task_id);
+	int character_id = c->CharacterID();
+	Log(Logs::General, Logs::Tasks, "[UPDATE] RemoveTaskByTaskID: %d", task_id);
+	std::string query = fmt::format("DELETE FROM character_activities WHERE charid = {} AND taskid = {}", character_id, task_id);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("[TASKS] Error in CientTaskState::RemoveTaskByTaskID [{}]", results.ErrorMessage().c_str());
+		return;
+	}
+	LogTasks("[UPDATE] RemoveTaskByTaskID: {}", query.c_str());
+
+	query = fmt::format("DELETE FROM character_tasks WHERE charid = {} AND taskid = {} AND type = {}", character_id, task_id, (int) task_type);
+	results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		LogError("[TASKS] Error in ClientTaskState::RemoveTaskByTaskID [{}]", results.ErrorMessage().c_str());
+	}
+
+	LogTasks("[UPDATE] RemoveTaskByTaskID: {}", query.c_str());
+
+	switch (task_type) {
+		case TaskType::Task:
+		{
+			if (ActiveTask.TaskID == task_id) {
+				auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
+				CancelTask_Struct* cts = (CancelTask_Struct*)outapp->pBuffer;
+				cts->SequenceNumber = 0;
+				cts->type = static_cast<uint32>(task_type);
+				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
+				c->QueuePacket(outapp);
+				safe_delete(outapp);
+				ActiveTask.TaskID = TASKSLOTEMPTY;
+			}
+			break;
+		}
+		case TaskType::Shared:
+		{
+			break; // TODO: shared tasks
+		}
+		case TaskType::Quest:
+		{
+			for (int active_quest = 0; active_quest < MAXACTIVEQUESTS; active_quest++) {
+				if (ActiveQuests[active_quest].TaskID == task_id) {
+					auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
+					CancelTask_Struct* cts = (CancelTask_Struct*)outapp->pBuffer;
+					cts->SequenceNumber = active_quest;
+					cts->type = static_cast<uint32>(task_type);
+					LogTasks("[UPDATE] RemoveTaskByTaskID found Quest [{}] at index [{}]", task_id, active_quest);
+					ActiveQuests[active_quest].TaskID = TASKSLOTEMPTY;
+					ActiveTaskCount--;
+					c->QueuePacket(outapp);
+					safe_delete(outapp);
+				}
+			}
+		}
+		default: {
+			break;
+		}
 	}
 }
 

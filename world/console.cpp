@@ -830,8 +830,8 @@ void ConsoleSignalCharByName(
 		sizeof(CZClientSignalByName_Struct) + message_len
 	);
 	CZClientSignalByName_Struct *CZSC       = (CZClientSignalByName_Struct *) pack->pBuffer;
-	strn0cpy(CZSC->Name, (char *) args[0].c_str(), 64);
-	CZSC->data = atoi(args[1].c_str());
+	strn0cpy(CZSC->character_name, (char *) args[0].c_str(), 64);
+	CZSC->signal = atoi(args[1].c_str());
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }
