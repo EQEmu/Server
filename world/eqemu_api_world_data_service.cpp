@@ -23,6 +23,7 @@
 #include "eqemu_api_world_data_service.h"
 #include "zoneserver.h"
 #include "zonelist.h"
+#include "../common/database_schema.h"
 
 extern ZSList     zoneserver_list;
 extern ClientList client_list;
@@ -60,6 +61,63 @@ void callGetZoneList(Json::Value &response)
 	}
 }
 
+void callGetDatabaseSchema(Json::Value &response)
+{
+	Json::Value              player_tables_json;
+	std::vector<std::string> player_tables  = DatabaseSchema::GetPlayerTables();
+	for (const auto          &table : player_tables) {
+		player_tables_json.append(table);
+	}
+
+	Json::Value              content_tables_json;
+	std::vector<std::string> content_tables = DatabaseSchema::GetContentTables();
+	for (const auto          &table : content_tables) {
+		content_tables_json.append(table);
+	}
+
+	Json::Value              server_tables_json;
+	std::vector<std::string> server_tables  = DatabaseSchema::GetServerTables();
+	for (const auto          &table : server_tables) {
+		server_tables_json.append(table);
+	}
+
+	Json::Value              login_tables_json;
+	std::vector<std::string> login_tables   = DatabaseSchema::GetLoginTables();
+	for (const auto          &table : login_tables) {
+		login_tables_json.append(table);
+	}
+
+	Json::Value              state_tables_json;
+	std::vector<std::string> state_tables   = DatabaseSchema::GetStateTables();
+	for (const auto          &table : state_tables) {
+		state_tables_json.append(table);
+	}
+
+	Json::Value              version_tables_json;
+	std::vector<std::string> version_tables = DatabaseSchema::GetVersionTables();
+	for (const auto          &table : version_tables) {
+		version_tables_json.append(table);
+	}
+
+	Json::Value                        character_table_columns_json;
+	std::map<std::string, std::string> character_table = DatabaseSchema::GetCharacterTables();
+	for (const auto                    &ctc : character_table) {
+		character_table_columns_json[ctc.first] = ctc.second;
+	}
+
+	Json::Value schema;
+
+	schema["character_table_columns"] = character_table_columns_json;
+	schema["content_tables"]          = content_tables_json;
+	schema["login_tables"]            = login_tables_json;
+	schema["player_tables"]           = player_tables_json;
+	schema["server_tables"]           = server_tables_json;
+	schema["state_tables"]            = state_tables_json;
+	schema["version_tables"]          = version_tables_json;
+
+	response.append(schema);
+}
+
 void callGetClientList(Json::Value &response)
 {
 	client_list.GetClientList(response);
@@ -71,6 +129,9 @@ void EQEmuApiWorldDataService::get(Json::Value &response, const std::vector<std:
 
 	if (method == "get_zone_list") {
 		callGetZoneList(response);
+	}
+	if (method == "get_database_schema") {
+		callGetDatabaseSchema(response);
 	}
 	if (method == "get_client_list") {
 		callGetClientList(response);
