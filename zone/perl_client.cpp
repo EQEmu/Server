@@ -312,6 +312,34 @@ XS(XS_Client_Duck) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_DyeArmorBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_DyeArmorBySlot) {
+	dXSARGS;
+	if (items != 5 && items != 6)
+		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])");
+	{
+		Client *THIS;
+		uint8 slot = (uint8) SvUV(ST(1));
+		uint8 red = (uint8) SvUV(ST(2));
+		uint8 green = (uint8) SvUV(ST(3));
+		uint8 blue = (uint8) SvUV(ST(4));
+		uint8 use_tint = 0x00;
+		if (items == 6) {
+			use_tint = (uint8) SvUV(ST(5));
+		}
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->DyeArmorBySlot(slot, red, green, blue, use_tint);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Stand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Stand) {
 	dXSARGS;
@@ -1436,6 +1464,132 @@ XS(XS_Client_MoveZoneRaid) {
 			}
 			else {
 				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstance) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstance(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstanceGroup); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstanceGroup) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstanceGroup(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstanceRaid); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstanceRaid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstanceRaid(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process an Unknown type reference");
 			}
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
@@ -6585,6 +6739,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
 	newXSproto(strcpy(buf, "DropItem"), XS_Client_DropItem, file, "$$");
 	newXSproto(strcpy(buf, "Duck"), XS_Client_Duck, file, "$");
+	newXSproto(strcpy(buf, "DyeArmorBySlot"), XS_Client_DyeArmorBySlot, file, "$$$$$;$");
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
@@ -6715,6 +6870,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneRaid"), XS_Client_MoveZoneRaid, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstance"), XS_Client_MoveZoneInstance, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstanceGroup"), XS_Client_MoveZoneInstanceGroup, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstanceRaid"), XS_Client_MoveZoneInstanceRaid, file, "$$");
 	newXSproto(strcpy(buf, "NPCSpawn"), XS_Client_NPCSpawn, file, "$$$;$");
 	newXSproto(strcpy(buf, "NukeItem"), XS_Client_NukeItem, file, "$$;$");
 	newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");

@@ -532,6 +532,11 @@ int Lua_Mob::GetAC() {
 	return self->GetAC();
 }
 
+int Lua_Mob::GetDisplayAC() {
+	Lua_Safe_Call_Int();
+	return self->GetDisplayAC();
+}
+
 int Lua_Mob::GetATK() {
 	Lua_Safe_Call_Int();
 	return self->GetATK();
@@ -2344,6 +2349,7 @@ luabind::scope lua_register_mob() {
 		.def("SetMana", &Lua_Mob::SetMana)
 		.def("GetManaRatio", &Lua_Mob::GetManaRatio)
 		.def("GetAC", &Lua_Mob::GetAC)
+		.def("GetDisplayAC", &Lua_Mob::GetDisplayAC)
 		.def("GetATK", &Lua_Mob::GetATK)
 		.def("GetSTR", &Lua_Mob::GetSTR)
 		.def("GetSTA", &Lua_Mob::GetSTA)

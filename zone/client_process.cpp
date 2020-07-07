@@ -257,7 +257,7 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this);
+			entity_list.ScanCloseMobs(close_mobs, this, true);
 		}
 
 		bool may_use_attacks = false;
