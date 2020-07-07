@@ -77,7 +77,7 @@ namespace EQEmuCommand {
 			index++;
 		}
 
-		if (!arguments_filled || argc == 2) {
+		if (!arguments_filled || argc == 2 || cmd[{"-h", "--help"}]) {
 			std::string arguments_string;
 			for (auto &arg : arguments) {
 				arguments_string += " " + arg;
@@ -101,7 +101,7 @@ namespace EQEmuCommand {
 
 			std::cout << command_string.str() << std::endl;
 
-			exit(1);
+			exit(0);
 		}
 	}
 
@@ -188,11 +188,11 @@ namespace EQEmuCommand {
 
 			std::cout << std::endl;
 
-			std::exit(1);
+			std::exit(0);
 		}
 
 		if (ran_command) {
-			std::exit(1);
+			std::exit(0);
 		}
 	}
 

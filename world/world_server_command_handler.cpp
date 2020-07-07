@@ -223,10 +223,6 @@ namespace WorldserverCommandHandler {
 	{
 		description = "Dumps server database tables";
 
-		if (cmd[{"-h", "--help"}]) {
-			return;
-		}
-
 		std::vector<std::string> arguments = {};
 		std::vector<std::string> options   = {
 			"--all",
@@ -245,7 +241,7 @@ namespace WorldserverCommandHandler {
 		};
 
 
-		if (argc < 3) {
+		if (argc < 3 || cmd[{"-h", "--help"}]) {
 			EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 			return;
 		}
