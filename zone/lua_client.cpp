@@ -75,6 +75,16 @@ void Lua_Client::Duck() {
 	self->Duck();
 }
 
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue);
+}
+
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
 void Lua_Client::Stand() {
 	Lua_Safe_Call_Void();
 	self->Stand();
@@ -338,6 +348,21 @@ void Lua_Client::MoveZoneGroup(const char *zone_short_name) {
 void Lua_Client::MoveZoneRaid(const char *zone_short_name) {
 	Lua_Safe_Call_Void();
 	self->MoveZoneRaid(zone_short_name);
+}
+
+void Lua_Client::MoveZoneInstance(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstance(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceGroup(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceRaid(instance_id);
 }
 
 void Lua_Client::ChangeLastName(const char *in) {
@@ -1622,6 +1647,8 @@ luabind::scope lua_register_client() {
 		.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 		.def("GetAnon", (bool(Lua_Client::*)(void))&Lua_Client::GetAnon)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
 		.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
 		.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
 		.def("SetPVP", (void(Lua_Client::*)(bool))&Lua_Client::SetPVP)
@@ -1676,6 +1703,9 @@ luabind::scope lua_register_client() {
 		.def("MoveZone", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZone)
 		.def("MoveZoneGroup", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneGroup)
 		.def("MoveZoneRaid", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneRaid)
+		.def("MoveZoneInstance", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstance)
+		.def("MoveZoneInstanceGroup", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceGroup)
+		.def("MoveZoneInstanceRaid", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceRaid)
 		.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
 		.def("GetFactionLevel", (int(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,uint32,Lua_NPC))&Lua_Client::GetFactionLevel)
 		.def("SetFactionLevel", (void(Lua_Client::*)(uint32,uint32,int,int,int))&Lua_Client::SetFactionLevel)

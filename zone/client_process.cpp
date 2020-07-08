@@ -256,9 +256,9 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this);
+			entity_list.ScanCloseMobs(close_mobs, this, true);
 		}
-		
+
 		bool may_use_attacks = false;
 		/*
 			Things which prevent us from attacking:
@@ -757,7 +757,7 @@ void Client::BulkSendInventoryItems()
 
 		if (ob.tellp() == last_pos)
 			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
-		
+
 		last_pos = ob.tellp();
 	}
 
@@ -836,7 +836,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		else {
 			cur_fac_level = GetModCharacterFactionLevel(fac);
 		}
-			
+
 		if (cur_fac_level < ml.faction_required)
 			continue;
 
@@ -1170,7 +1170,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	{
 		return;
 	}
-	
+
 	// could just do a range, but this is clearer and explicit
 	if
 	(

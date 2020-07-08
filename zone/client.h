@@ -276,6 +276,7 @@ public:
 	GetItems_Struct* GetTraderItems();
 	void SendBazaarWelcome();
 	void DyeArmor(EQ::TintProfile* dye);
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint = 0x00);
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
@@ -636,6 +637,9 @@ public:
 	void MoveZone(const char *zone_short_name);
 	void MoveZoneGroup(const char *zone_short_name);
 	void MoveZoneRaid(const char *zone_short_name);
+	void MoveZoneInstance(uint16 instance_id);
+	void MoveZoneInstanceGroup(uint16 instance_id);
+	void MoveZoneInstanceRaid(uint16 instance_id);
 	void SendToGuildHall();
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
@@ -1008,6 +1012,7 @@ public:
 	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
 	inline ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(type, index, ActivityID) : ActivityHidden); }
 	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count, bool ignore_quest_update = false) { if (taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count, ignore_quest_update); }
+	inline void RemoveTaskByTaskID(uint32 task_id) { if (taskstate) taskstate->RemoveTaskByTaskID(this, task_id); }
 	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
 	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
 	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }

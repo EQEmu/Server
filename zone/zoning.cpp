@@ -461,6 +461,53 @@ void Client::MoveZoneRaid(const char *zone_short_name) {
 	}
 }
 
+void Client::MoveZoneInstance(uint16 instance_id) {
+	if (!database.CharacterInInstanceGroup(instance_id, CharacterID())) {
+		database.AddClientToInstance(instance_id, CharacterID());
+	}
+	auto pack = new ServerPacket(ServerOP_ZoneToZoneRequest, sizeof(ZoneToZone_Struct));
+	ZoneToZone_Struct* ztz = (ZoneToZone_Struct*) pack->pBuffer;
+	ztz->response = 0;
+	ztz->current_zone_id = zone->GetZoneID();
+	ztz->current_instance_id = zone->GetInstanceID();
+	ztz->requested_zone_id = database.ZoneIDFromInstanceID(instance_id);
+	ztz->requested_instance_id = instance_id;
+	ztz->admin = Admin();
+	strcpy(ztz->name, GetName());
+	ztz->guild_id = GuildID();
+	ztz->ignorerestrictions = 3;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
+}
+
+void Client::MoveZoneInstanceGroup(uint16 instance_id) {
+	if (!GetGroup()) {
+		MoveZoneInstance(instance_id);
+	} else {
+		auto client_group = GetGroup();
+		for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+			if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+				auto group_member = client_group->members[member_index]->CastToClient();
+				group_member->MoveZoneInstance(instance_id);
+			}
+		}
+	}
+}
+
+void Client::MoveZoneInstanceRaid(uint16 instance_id) {
+	if (!GetRaid()) {
+		MoveZoneInstance(instance_id);
+	} else {
+		auto client_raid = GetRaid();
+		for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+			if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+				auto raid_member = client_raid->members[member_index].member->CastToClient();
+				raid_member->MoveZoneInstance(instance_id);
+			}
+		}
+	}
+}
+
 void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm)
 {
 	// From what I have read, dragged corpses should stay with the player for Intra-zone summons etc, but we can implement that later.
