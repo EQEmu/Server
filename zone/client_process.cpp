@@ -180,6 +180,13 @@ bool Client::Process() {
 			if (myraid) {
 				myraid->MemberZoned(this);
 			}
+
+			Expedition* expedition = GetExpedition();
+			if (expedition)
+			{
+				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+			}
+
 			return false; //delete client
 		}
 
@@ -655,11 +662,6 @@ bool Client::Process() {
 					myraid->MemberZoned(this);
 				}
 			}
-			Expedition* expedition = GetExpedition();
-			if (expedition && !bZoning)
-			{
-				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
-			}
 			OnDisconnect(false);
 			return false;
 		}
@@ -701,12 +703,6 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		if (MyRaid)
 			MyRaid->MemberZoned(this);
 
-		Expedition* expedition = GetExpedition();
-		if (expedition)
-		{
-			expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
-		}
-
 		parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
 
 		/* QS: PlayerLogConnectDisconnect */
@@ -714,6 +710,12 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+	}
+
+	Expedition* expedition = GetExpedition();
+	if (expedition && !bZoning)
+	{
+		expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
