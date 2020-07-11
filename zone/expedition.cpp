@@ -581,6 +581,13 @@ void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
 	{
 		UpdateMemberStatus(client->CharacterID(), status);
 		SendWorldMemberStatus(client->CharacterID(), status);
+
+		// we either changed leader status here or leader was already offline and
+		// a member coming online needs to trigger a leader change
+		if (m_leader.status == ExpeditionMemberStatus::Offline)
+		{
+			ChooseNewLeader();
+		}
 	}
 }
 
@@ -607,13 +614,18 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 			member_client->QueuePacket(outapp_member_status.get());
 		}
 	}
+
+	if (update_member_id == m_leader.char_id)
+	{
+		m_leader.status = status;
+	}
 }
 
 bool Expedition::ChooseNewLeader()
 {
 	for (const auto& member : m_members)
 	{
-		if (member.char_id != m_leader.char_id)
+		if (member.char_id != m_leader.char_id && member.status == ExpeditionMemberStatus::Online)
 		{
 			LogExpeditionsModerate("Replacing leader [{}] with [{}]", m_leader.name, member.name);
 			SetNewLeader(member.char_id, member.name);
@@ -1111,8 +1123,7 @@ void Expedition::SetNewLeader(uint32_t new_leader_id, const std::string& new_lea
 
 void Expedition::ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name)
 {
-	m_leader.char_id = new_leader_id;
-	m_leader.name = new_leader_name;
+	m_leader = { new_leader_id, new_leader_name, ExpeditionMemberStatus::Online };
 
 	// update each client's expedition window in this zone
 	auto outapp_leader = CreateLeaderNamePacket();
