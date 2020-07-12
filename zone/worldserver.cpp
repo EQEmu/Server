@@ -3266,4 +3266,3 @@ void WorldServer::OnKeepAlive(EQ::Timer *t)
 	ServerPacket pack(ServerOP_KeepAlive, 0);
 	SendPacket(&pack);
 }
->>
