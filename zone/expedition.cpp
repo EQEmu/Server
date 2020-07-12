@@ -1133,6 +1133,11 @@ void Expedition::ProcessLeaderChanged(uint32_t new_leader_id, const std::string&
 		if (member_client)
 		{
 			member_client->QueuePacket(outapp_leader.get());
+
+			if (member.char_id == new_leader_id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+			{
+				member_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
+			}
 		}
 	}
 }
@@ -1160,7 +1165,10 @@ void Expedition::ProcessMakeLeader(
 
 	if (new_leader_client)
 	{
-		new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
+		if (!RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+		{
+			new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
+		}
 		SetNewLeader(new_leader_client->CharacterID(), new_leader_client->GetName());
 	}
 }
