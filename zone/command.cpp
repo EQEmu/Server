@@ -6947,6 +6947,33 @@ void command_dz(Client* c, const Seperator* sep)
 			Expedition::RemoveLockoutsByCharacterName(sep->arg[3], sep->arg[4], sep->arg[5]);
 		}
 	}
+	else if (strcasecmp(sep->arg[1], "makeleader") == 0 && sep->IsNumber(2) && sep->arg[3][0] != '\0')
+	{
+		auto expedition_id = std::strtoul(sep->arg[2], nullptr, 10);
+		auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+		if (expedition)
+		{
+			uint32_t char_id = database.GetCharacterID(sep->arg[3]);
+			auto char_name = FormatName(sep->arg[3]);
+			if (char_id == 0)
+			{
+				c->Message(Chat::Red, fmt::format("Failed to find character id for [{}]", char_name).c_str());
+			}
+			else if (!expedition->HasMember(char_id))
+			{
+				c->Message(Chat::Red, fmt::format("Character [{}] is not in that expedition", char_name).c_str());
+			}
+			else
+			{
+				c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
+				expedition->SetNewLeader(char_id, char_name);
+			}
+		}
+		else
+		{
+			c->Message(Chat::Red, fmt::format("Failed to find expedition [{}]", expedition_id).c_str());
+		}
+	}
 	else
 	{
 		c->Message(Chat::White, "#dz usage:");
@@ -6957,6 +6984,7 @@ void command_dz(Client* c, const Seperator* sep)
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" \"<event_name>\" - delete lockout by expedition event");
+		c->Message(Chat::White, "#dz makeleader <expedition_id> <character_name> - set new expedition leader");
 	}
 }
 
