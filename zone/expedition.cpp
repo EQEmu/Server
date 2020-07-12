@@ -897,8 +897,8 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 }
 
 void Expedition::TryAddClient(
-	Client* add_client, const std::string& inviter_name, const std::string& orig_add_name,
-	const std::string& swap_remove_name, Client* leader_client)
+	Client* add_client, const std::string& inviter_name, const std::string& swap_remove_name,
+	Client* leader_client)
 {
 	if (!add_client)
 	{
@@ -907,7 +907,7 @@ void Expedition::TryAddClient(
 
 	LogExpeditionsModerate(
 		"Add player request for expedition [{}] by inviter [{}] add name [{}] swap name [{}]",
-		m_id, inviter_name, orig_add_name, swap_remove_name
+		m_id, inviter_name, add_client->GetName(), swap_remove_name
 	);
 
 	// null leader client handled by ProcessAddConflicts/SendLeaderMessage fallbacks
@@ -921,7 +921,7 @@ void Expedition::TryAddClient(
 	{
 		// live uses the original unsanitized input string in invite messages
 		uint32_t string_id = swap_remove_name.empty() ? DZADD_INVITE : DZSWAP_INVITE;
-		SendLeaderMessage(leader_client, Chat::Yellow, string_id, { orig_add_name.c_str() });
+		SendLeaderMessage(leader_client, Chat::Yellow, string_id, { add_client->GetName() });
 		SendClientExpeditionInvite(add_client, inviter_name.c_str(), swap_remove_name);
 	}
 	else if (swap_remove_name.empty()) // swap command doesn't result in this message
@@ -971,12 +971,12 @@ void Expedition::DzAddPlayer(
 	if (add_client)
 	{
 		// client is online in this zone
-		TryAddClient(add_client, requester->GetName(), add_char_name, swap_remove_name, requester);
+		TryAddClient(add_client, requester->GetName(), swap_remove_name, requester);
 	}
 	else
 	{
 		// forward to world to check if client is online and perform cross-zone invite
-		SendWorldAddPlayerInvite(requester->GetName(), swap_remove_name, add_char_name);
+		SendWorldAddPlayerInvite(requester->GetName(), swap_remove_name, FormatName(add_char_name));
 	}
 }
 
@@ -987,7 +987,7 @@ void Expedition::DzAddPlayerContinue(
 	Client* add_client = entity_list.GetClientByName(add_name.c_str());
 	if (add_client)
 	{
-		TryAddClient(add_client, inviter_name, add_name, swap_remove_name);
+		TryAddClient(add_client, inviter_name, swap_remove_name);
 	}
 }
 
