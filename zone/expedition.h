@@ -182,7 +182,7 @@ private:
 	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
 		const std::string& add_char_name, uint32_t add_char_id);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
-	void TryAddClient(Client* add_client, const std::string& inviter_name, const std::string& orig_add_name,
+	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
