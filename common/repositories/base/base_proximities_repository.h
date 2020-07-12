@@ -155,12 +155,12 @@ public:
 
 			entry.zoneid    = atoi(row[0]);
 			entry.exploreid = atoi(row[1]);
-			entry.minx      = atof(row[2]);
-			entry.maxx      = atof(row[3]);
-			entry.miny      = atof(row[4]);
-			entry.maxy      = atof(row[5]);
-			entry.minz      = atof(row[6]);
-			entry.maxz      = atof(row[7]);
+			entry.minx      = static_cast<float>(atof(row[2]));
+			entry.maxx      = static_cast<float>(atof(row[3]));
+			entry.miny      = static_cast<float>(atof(row[4]));
+			entry.maxy      = static_cast<float>(atof(row[5]));
+			entry.minz      = static_cast<float>(atof(row[6]));
+			entry.maxz      = static_cast<float>(atof(row[7]));
 
 			return entry;
 		}
@@ -299,12 +299,12 @@ public:
 
 			entry.zoneid    = atoi(row[0]);
 			entry.exploreid = atoi(row[1]);
-			entry.minx      = atof(row[2]);
-			entry.maxx      = atof(row[3]);
-			entry.miny      = atof(row[4]);
-			entry.maxy      = atof(row[5]);
-			entry.minz      = atof(row[6]);
-			entry.maxz      = atof(row[7]);
+			entry.minx      = static_cast<float>(atof(row[2]));
+			entry.maxx      = static_cast<float>(atof(row[3]));
+			entry.miny      = static_cast<float>(atof(row[4]));
+			entry.maxy      = static_cast<float>(atof(row[5]));
+			entry.minz      = static_cast<float>(atof(row[6]));
+			entry.maxz      = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}
@@ -331,12 +331,12 @@ public:
 
 			entry.zoneid    = atoi(row[0]);
 			entry.exploreid = atoi(row[1]);
-			entry.minx      = atof(row[2]);
-			entry.maxx      = atof(row[3]);
-			entry.miny      = atof(row[4]);
-			entry.maxy      = atof(row[5]);
-			entry.minz      = atof(row[6]);
-			entry.maxz      = atof(row[7]);
+			entry.minx      = static_cast<float>(atof(row[2]));
+			entry.maxx      = static_cast<float>(atof(row[3]));
+			entry.miny      = static_cast<float>(atof(row[4]));
+			entry.maxy      = static_cast<float>(atof(row[5]));
+			entry.minz      = static_cast<float>(atof(row[6]));
+			entry.maxz      = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}

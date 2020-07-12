@@ -160,7 +160,7 @@ public:
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
-			entry.size     = atof(row[7]);
+			entry.size     = static_cast<float>(atof(row[7]));
 
 			return entry;
 		}
@@ -304,7 +304,7 @@ public:
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
-			entry.size     = atof(row[7]);
+			entry.size     = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}
@@ -336,7 +336,7 @@ public:
 			entry.spell_id = atoi(row[4]);
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
-			entry.size     = atof(row[7]);
+			entry.size     = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}

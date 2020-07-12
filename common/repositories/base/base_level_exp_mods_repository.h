@@ -139,8 +139,8 @@ public:
 			LevelExpMods entry{};
 
 			entry.level      = atoi(row[0]);
-			entry.exp_mod    = atof(row[1]);
-			entry.aa_exp_mod = atof(row[2]);
+			entry.exp_mod    = static_cast<float>(atof(row[1]));
+			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
 
 			return entry;
 		}
@@ -263,8 +263,8 @@ public:
 			LevelExpMods entry{};
 
 			entry.level      = atoi(row[0]);
-			entry.exp_mod    = atof(row[1]);
-			entry.aa_exp_mod = atof(row[2]);
+			entry.exp_mod    = static_cast<float>(atof(row[1]));
+			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
 
 			all_entries.push_back(entry);
 		}
@@ -290,8 +290,8 @@ public:
 			LevelExpMods entry{};
 
 			entry.level      = atoi(row[0]);
-			entry.exp_mod    = atof(row[1]);
-			entry.aa_exp_mod = atof(row[2]);
+			entry.exp_mod    = static_cast<float>(atof(row[1]));
+			entry.aa_exp_mod = static_cast<float>(atof(row[2]));
 
 			all_entries.push_back(entry);
 		}

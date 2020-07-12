@@ -183,10 +183,10 @@ public:
 		if (results.RowCount() == 1) {
 			StartZones entry{};
 
-			entry.x             = atof(row[0]);
-			entry.y             = atof(row[1]);
-			entry.z             = atof(row[2]);
-			entry.heading       = atof(row[3]);
+			entry.x             = static_cast<float>(atof(row[0]));
+			entry.y             = static_cast<float>(atof(row[1]));
+			entry.z             = static_cast<float>(atof(row[2]));
+			entry.heading       = static_cast<float>(atof(row[3]));
 			entry.zone_id       = atoi(row[4]);
 			entry.bind_id       = atoi(row[5]);
 			entry.player_choice = atoi(row[6]);
@@ -194,9 +194,9 @@ public:
 			entry.player_deity  = atoi(row[8]);
 			entry.player_race   = atoi(row[9]);
 			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = atof(row[11]);
-			entry.bind_y        = atof(row[12]);
-			entry.bind_z        = atof(row[13]);
+			entry.bind_x        = static_cast<float>(atof(row[11]));
+			entry.bind_y        = static_cast<float>(atof(row[12]));
+			entry.bind_z        = static_cast<float>(atof(row[13]));
 			entry.select_rank   = atoi(row[14]);
 			entry.min_expansion = atoi(row[15]);
 			entry.max_expansion = atoi(row[16]);
@@ -367,10 +367,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartZones entry{};
 
-			entry.x             = atof(row[0]);
-			entry.y             = atof(row[1]);
-			entry.z             = atof(row[2]);
-			entry.heading       = atof(row[3]);
+			entry.x             = static_cast<float>(atof(row[0]));
+			entry.y             = static_cast<float>(atof(row[1]));
+			entry.z             = static_cast<float>(atof(row[2]));
+			entry.heading       = static_cast<float>(atof(row[3]));
 			entry.zone_id       = atoi(row[4]);
 			entry.bind_id       = atoi(row[5]);
 			entry.player_choice = atoi(row[6]);
@@ -378,9 +378,9 @@ public:
 			entry.player_deity  = atoi(row[8]);
 			entry.player_race   = atoi(row[9]);
 			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = atof(row[11]);
-			entry.bind_y        = atof(row[12]);
-			entry.bind_z        = atof(row[13]);
+			entry.bind_x        = static_cast<float>(atof(row[11]));
+			entry.bind_y        = static_cast<float>(atof(row[12]));
+			entry.bind_z        = static_cast<float>(atof(row[13]));
 			entry.select_rank   = atoi(row[14]);
 			entry.min_expansion = atoi(row[15]);
 			entry.max_expansion = atoi(row[16]);
@@ -409,10 +409,10 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartZones entry{};
 
-			entry.x             = atof(row[0]);
-			entry.y             = atof(row[1]);
-			entry.z             = atof(row[2]);
-			entry.heading       = atof(row[3]);
+			entry.x             = static_cast<float>(atof(row[0]));
+			entry.y             = static_cast<float>(atof(row[1]));
+			entry.z             = static_cast<float>(atof(row[2]));
+			entry.heading       = static_cast<float>(atof(row[3]));
 			entry.zone_id       = atoi(row[4]);
 			entry.bind_id       = atoi(row[5]);
 			entry.player_choice = atoi(row[6]);
@@ -420,9 +420,9 @@ public:
 			entry.player_deity  = atoi(row[8]);
 			entry.player_race   = atoi(row[9]);
 			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = atof(row[11]);
-			entry.bind_y        = atof(row[12]);
-			entry.bind_z        = atof(row[13]);
+			entry.bind_x        = static_cast<float>(atof(row[11]));
+			entry.bind_y        = static_cast<float>(atof(row[12]));
+			entry.bind_z        = static_cast<float>(atof(row[13]));
 			entry.select_rank   = atoi(row[14]);
 			entry.min_expansion = atoi(row[15]);
 			entry.max_expansion = atoi(row[16]);

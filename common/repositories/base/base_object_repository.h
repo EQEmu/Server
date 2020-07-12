@@ -210,10 +210,10 @@ public:
 			entry.id           = atoi(row[0]);
 			entry.zoneid       = atoi(row[1]);
 			entry.version      = atoi(row[2]);
-			entry.xpos         = atof(row[3]);
-			entry.ypos         = atof(row[4]);
-			entry.zpos         = atof(row[5]);
-			entry.heading      = atof(row[6]);
+			entry.xpos         = static_cast<float>(atof(row[3]));
+			entry.ypos         = static_cast<float>(atof(row[4]));
+			entry.zpos         = static_cast<float>(atof(row[5]));
+			entry.heading      = static_cast<float>(atof(row[6]));
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
 			entry.objectname   = row[9] ? row[9] : "";
@@ -229,9 +229,9 @@ public:
 			entry.unknown72    = atoi(row[19]);
 			entry.unknown76    = atoi(row[20]);
 			entry.unknown84    = atoi(row[21]);
-			entry.size         = atof(row[22]);
-			entry.tilt_x       = atof(row[23]);
-			entry.tilt_y       = atof(row[24]);
+			entry.size         = static_cast<float>(atof(row[22]));
+			entry.tilt_x       = static_cast<float>(atof(row[23]));
+			entry.tilt_y       = static_cast<float>(atof(row[24]));
 			entry.display_name = row[25] ? row[25] : "";
 
 			return entry;
@@ -423,10 +423,10 @@ public:
 			entry.id           = atoi(row[0]);
 			entry.zoneid       = atoi(row[1]);
 			entry.version      = atoi(row[2]);
-			entry.xpos         = atof(row[3]);
-			entry.ypos         = atof(row[4]);
-			entry.zpos         = atof(row[5]);
-			entry.heading      = atof(row[6]);
+			entry.xpos         = static_cast<float>(atof(row[3]));
+			entry.ypos         = static_cast<float>(atof(row[4]));
+			entry.zpos         = static_cast<float>(atof(row[5]));
+			entry.heading      = static_cast<float>(atof(row[6]));
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
 			entry.objectname   = row[9] ? row[9] : "";
@@ -442,9 +442,9 @@ public:
 			entry.unknown72    = atoi(row[19]);
 			entry.unknown76    = atoi(row[20]);
 			entry.unknown84    = atoi(row[21]);
-			entry.size         = atof(row[22]);
-			entry.tilt_x       = atof(row[23]);
-			entry.tilt_y       = atof(row[24]);
+			entry.size         = static_cast<float>(atof(row[22]));
+			entry.tilt_x       = static_cast<float>(atof(row[23]));
+			entry.tilt_y       = static_cast<float>(atof(row[24]));
 			entry.display_name = row[25] ? row[25] : "";
 
 			all_entries.push_back(entry);
@@ -473,10 +473,10 @@ public:
 			entry.id           = atoi(row[0]);
 			entry.zoneid       = atoi(row[1]);
 			entry.version      = atoi(row[2]);
-			entry.xpos         = atof(row[3]);
-			entry.ypos         = atof(row[4]);
-			entry.zpos         = atof(row[5]);
-			entry.heading      = atof(row[6]);
+			entry.xpos         = static_cast<float>(atof(row[3]));
+			entry.ypos         = static_cast<float>(atof(row[4]));
+			entry.zpos         = static_cast<float>(atof(row[5]));
+			entry.heading      = static_cast<float>(atof(row[6]));
 			entry.itemid       = atoi(row[7]);
 			entry.charges      = atoi(row[8]);
 			entry.objectname   = row[9] ? row[9] : "";
@@ -492,9 +492,9 @@ public:
 			entry.unknown72    = atoi(row[19]);
 			entry.unknown76    = atoi(row[20]);
 			entry.unknown84    = atoi(row[21]);
-			entry.size         = atof(row[22]);
-			entry.tilt_x       = atof(row[23]);
-			entry.tilt_y       = atof(row[24]);
+			entry.size         = static_cast<float>(atof(row[22]));
+			entry.tilt_x       = static_cast<float>(atof(row[23]));
+			entry.tilt_y       = static_cast<float>(atof(row[24]));
 			entry.display_name = row[25] ? row[25] : "";
 
 			all_entries.push_back(entry);

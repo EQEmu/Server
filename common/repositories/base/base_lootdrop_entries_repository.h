@@ -160,8 +160,8 @@ public:
 			entry.item_id         = atoi(row[1]);
 			entry.item_charges    = atoi(row[2]);
 			entry.equip_item      = atoi(row[3]);
-			entry.chance          = atof(row[4]);
-			entry.disabled_chance = atof(row[5]);
+			entry.chance          = static_cast<float>(atof(row[4]));
+			entry.disabled_chance = static_cast<float>(atof(row[5]));
 			entry.minlevel        = atoi(row[6]);
 			entry.maxlevel        = atoi(row[7]);
 			entry.multiplier      = atoi(row[8]);
@@ -308,8 +308,8 @@ public:
 			entry.item_id         = atoi(row[1]);
 			entry.item_charges    = atoi(row[2]);
 			entry.equip_item      = atoi(row[3]);
-			entry.chance          = atof(row[4]);
-			entry.disabled_chance = atof(row[5]);
+			entry.chance          = static_cast<float>(atof(row[4]));
+			entry.disabled_chance = static_cast<float>(atof(row[5]));
 			entry.minlevel        = atoi(row[6]);
 			entry.maxlevel        = atoi(row[7]);
 			entry.multiplier      = atoi(row[8]);
@@ -341,8 +341,8 @@ public:
 			entry.item_id         = atoi(row[1]);
 			entry.item_charges    = atoi(row[2]);
 			entry.equip_item      = atoi(row[3]);
-			entry.chance          = atof(row[4]);
-			entry.disabled_chance = atof(row[5]);
+			entry.chance          = static_cast<float>(atof(row[4]));
+			entry.disabled_chance = static_cast<float>(atof(row[5]));
 			entry.minlevel        = atoi(row[6]);
 			entry.maxlevel        = atoi(row[7]);
 			entry.multiplier      = atoi(row[8]);

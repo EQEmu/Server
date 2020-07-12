@@ -169,12 +169,12 @@ public:
 			entry.spellid     = atoi(row[1]);
 			entry.type        = atoi(row[2]);
 			entry.zoneid      = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.x_diff      = atof(row[7]);
-			entry.y_diff      = atof(row[8]);
-			entry.z_diff      = atof(row[9]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.x_diff      = static_cast<float>(atof(row[7]));
+			entry.y_diff      = static_cast<float>(atof(row[8]));
+			entry.z_diff      = static_cast<float>(atof(row[9]));
 			entry.message     = row[10] ? row[10] : "";
 			entry.description = row[11] ? row[11] : "";
 
@@ -326,12 +326,12 @@ public:
 			entry.spellid     = atoi(row[1]);
 			entry.type        = atoi(row[2]);
 			entry.zoneid      = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.x_diff      = atof(row[7]);
-			entry.y_diff      = atof(row[8]);
-			entry.z_diff      = atof(row[9]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.x_diff      = static_cast<float>(atof(row[7]));
+			entry.y_diff      = static_cast<float>(atof(row[8]));
+			entry.z_diff      = static_cast<float>(atof(row[9]));
 			entry.message     = row[10] ? row[10] : "";
 			entry.description = row[11] ? row[11] : "";
 
@@ -362,12 +362,12 @@ public:
 			entry.spellid     = atoi(row[1]);
 			entry.type        = atoi(row[2]);
 			entry.zoneid      = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.x_diff      = atof(row[7]);
-			entry.y_diff      = atof(row[8]);
-			entry.z_diff      = atof(row[9]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.x_diff      = static_cast<float>(atof(row[7]));
+			entry.y_diff      = static_cast<float>(atof(row[8]));
+			entry.z_diff      = static_cast<float>(atof(row[9]));
 			entry.message     = row[10] ? row[10] : "";
 			entry.description = row[11] ? row[11] : "";
 

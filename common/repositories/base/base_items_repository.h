@@ -296,7 +296,7 @@ public:
 		std::string bardname;
 		int         bardunk7;
 		int         UNK214;
-		int         UNK219;
+		int         subtype;
 		int         UNK220;
 		int         UNK221;
 		int         heirloom;
@@ -591,7 +591,7 @@ public:
 			"bardname",
 			"bardunk7",
 			"UNK214",
-			"UNK219",
+			"subtype",
 			"UNK220",
 			"UNK221",
 			"heirloom",
@@ -926,7 +926,7 @@ public:
 		entry.bardname            = "";
 		entry.bardunk7            = 0;
 		entry.UNK214              = 0;
-		entry.UNK219              = 0;
+		entry.subtype             = 0;
 		entry.UNK220              = 0;
 		entry.UNK221              = 0;
 		entry.heirloom            = 0;
@@ -1091,7 +1091,7 @@ public:
 			entry.reclevel            = atoi(row[104]);
 			entry.recskill            = atoi(row[105]);
 			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = atof(row[107]);
+			entry.sellrate            = static_cast<float>(atof(row[107]));
 			entry.shielding           = atoi(row[108]);
 			entry.size                = atoi(row[109]);
 			entry.skillmodtype        = atoi(row[110]);
@@ -1245,7 +1245,7 @@ public:
 			entry.bardname            = row[258] ? row[258] : "";
 			entry.bardunk7            = atoi(row[259]);
 			entry.UNK214              = atoi(row[260]);
-			entry.UNK219              = atoi(row[261]);
+			entry.subtype             = atoi(row[261]);
 			entry.UNK220              = atoi(row[262]);
 			entry.UNK221              = atoi(row[263]);
 			entry.heirloom            = atoi(row[264]);
@@ -1561,7 +1561,7 @@ public:
 		update_values.push_back(columns[258] + " = '" + EscapeString(items_entry.bardname) + "'");
 		update_values.push_back(columns[259] + " = " + std::to_string(items_entry.bardunk7));
 		update_values.push_back(columns[260] + " = " + std::to_string(items_entry.UNK214));
-		update_values.push_back(columns[261] + " = " + std::to_string(items_entry.UNK219));
+		update_values.push_back(columns[261] + " = " + std::to_string(items_entry.subtype));
 		update_values.push_back(columns[262] + " = " + std::to_string(items_entry.UNK220));
 		update_values.push_back(columns[263] + " = " + std::to_string(items_entry.UNK221));
 		update_values.push_back(columns[264] + " = " + std::to_string(items_entry.heirloom));
@@ -1866,7 +1866,7 @@ public:
 		insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
 		insert_values.push_back(std::to_string(items_entry.bardunk7));
 		insert_values.push_back(std::to_string(items_entry.UNK214));
-		insert_values.push_back(std::to_string(items_entry.UNK219));
+		insert_values.push_back(std::to_string(items_entry.subtype));
 		insert_values.push_back(std::to_string(items_entry.UNK220));
 		insert_values.push_back(std::to_string(items_entry.UNK221));
 		insert_values.push_back(std::to_string(items_entry.heirloom));
@@ -2179,7 +2179,7 @@ public:
 			insert_values.push_back("'" + EscapeString(items_entry.bardname) + "'");
 			insert_values.push_back(std::to_string(items_entry.bardunk7));
 			insert_values.push_back(std::to_string(items_entry.UNK214));
-			insert_values.push_back(std::to_string(items_entry.UNK219));
+			insert_values.push_back(std::to_string(items_entry.subtype));
 			insert_values.push_back(std::to_string(items_entry.UNK220));
 			insert_values.push_back(std::to_string(items_entry.UNK221));
 			insert_values.push_back(std::to_string(items_entry.heirloom));
@@ -2343,7 +2343,7 @@ public:
 			entry.reclevel            = atoi(row[104]);
 			entry.recskill            = atoi(row[105]);
 			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = atof(row[107]);
+			entry.sellrate            = static_cast<float>(atof(row[107]));
 			entry.shielding           = atoi(row[108]);
 			entry.size                = atoi(row[109]);
 			entry.skillmodtype        = atoi(row[110]);
@@ -2497,7 +2497,7 @@ public:
 			entry.bardname            = row[258] ? row[258] : "";
 			entry.bardunk7            = atoi(row[259]);
 			entry.UNK214              = atoi(row[260]);
-			entry.UNK219              = atoi(row[261]);
+			entry.subtype             = atoi(row[261]);
 			entry.UNK220              = atoi(row[262]);
 			entry.UNK221              = atoi(row[263]);
 			entry.heirloom            = atoi(row[264]);
@@ -2652,7 +2652,7 @@ public:
 			entry.reclevel            = atoi(row[104]);
 			entry.recskill            = atoi(row[105]);
 			entry.reqlevel            = atoi(row[106]);
-			entry.sellrate            = atof(row[107]);
+			entry.sellrate            = static_cast<float>(atof(row[107]));
 			entry.shielding           = atoi(row[108]);
 			entry.size                = atoi(row[109]);
 			entry.skillmodtype        = atoi(row[110]);
@@ -2806,7 +2806,7 @@ public:
 			entry.bardname            = row[258] ? row[258] : "";
 			entry.bardunk7            = atoi(row[259]);
 			entry.UNK214              = atoi(row[260]);
-			entry.UNK219              = atoi(row[261]);
+			entry.subtype             = atoi(row[261]);
 			entry.UNK220              = atoi(row[262]);
 			entry.UNK221              = atoi(row[263]);
 			entry.heirloom            = atoi(row[264]);

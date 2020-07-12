@@ -157,10 +157,10 @@ public:
 			entry.slot        = atoi(row[1]);
 			entry.zone_id     = atoi(row[2]);
 			entry.instance_id = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.heading     = atof(row[7]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.heading     = static_cast<float>(atof(row[7]));
 
 			return entry;
 		}
@@ -298,10 +298,10 @@ public:
 			entry.slot        = atoi(row[1]);
 			entry.zone_id     = atoi(row[2]);
 			entry.instance_id = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.heading     = atof(row[7]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.heading     = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}
@@ -330,10 +330,10 @@ public:
 			entry.slot        = atoi(row[1]);
 			entry.zone_id     = atoi(row[2]);
 			entry.instance_id = atoi(row[3]);
-			entry.x           = atof(row[4]);
-			entry.y           = atof(row[5]);
-			entry.z           = atof(row[6]);
-			entry.heading     = atof(row[7]);
+			entry.x           = static_cast<float>(atof(row[4]));
+			entry.y           = static_cast<float>(atof(row[5]));
+			entry.z           = static_cast<float>(atof(row[6]));
+			entry.heading     = static_cast<float>(atof(row[7]));
 
 			all_entries.push_back(entry);
 		}

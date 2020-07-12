@@ -508,7 +508,7 @@ public:
 			entry.texture                = atoi(row[10]);
 			entry.helmtexture            = atoi(row[11]);
 			entry.herosforgemodel        = atoi(row[12]);
-			entry.size                   = atof(row[13]);
+			entry.size                   = static_cast<float>(atof(row[13]));
 			entry.hp_regen_rate          = atoi(row[14]);
 			entry.mana_regen_rate        = atoi(row[15]);
 			entry.loottable_id           = atoi(row[16]);
@@ -546,7 +546,7 @@ public:
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);
-			entry.runspeed               = atof(row[51]);
+			entry.runspeed               = static_cast<float>(atof(row[51]));
 			entry.MR                     = atoi(row[52]);
 			entry.CR                     = atoi(row[53]);
 			entry.DR                     = atoi(row[54]);
@@ -560,7 +560,7 @@ public:
 			entry.AC                     = atoi(row[62]);
 			entry.npc_aggro              = atoi(row[63]);
 			entry.spawn_limit            = atoi(row[64]);
-			entry.attack_speed           = atof(row[65]);
+			entry.attack_speed           = static_cast<float>(atof(row[65]));
 			entry.attack_delay           = atoi(row[66]);
 			entry.findable               = atoi(row[67]);
 			entry.STR                    = atoi(row[68]);
@@ -587,8 +587,8 @@ public:
 			entry.underwater             = atoi(row[89]);
 			entry.isquest                = atoi(row[90]);
 			entry.emoteid                = atoi(row[91]);
-			entry.spellscale             = atof(row[92]);
-			entry.healscale              = atof(row[93]);
+			entry.spellscale             = static_cast<float>(atof(row[92]));
+			entry.healscale              = static_cast<float>(atof(row[93]));
 			entry.no_target_hotkey       = atoi(row[94]);
 			entry.raid_target            = atoi(row[95]);
 			entry.armtexture             = atoi(row[96]);
@@ -1105,7 +1105,7 @@ public:
 			entry.texture                = atoi(row[10]);
 			entry.helmtexture            = atoi(row[11]);
 			entry.herosforgemodel        = atoi(row[12]);
-			entry.size                   = atof(row[13]);
+			entry.size                   = static_cast<float>(atof(row[13]));
 			entry.hp_regen_rate          = atoi(row[14]);
 			entry.mana_regen_rate        = atoi(row[15]);
 			entry.loottable_id           = atoi(row[16]);
@@ -1143,7 +1143,7 @@ public:
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);
-			entry.runspeed               = atof(row[51]);
+			entry.runspeed               = static_cast<float>(atof(row[51]));
 			entry.MR                     = atoi(row[52]);
 			entry.CR                     = atoi(row[53]);
 			entry.DR                     = atoi(row[54]);
@@ -1157,7 +1157,7 @@ public:
 			entry.AC                     = atoi(row[62]);
 			entry.npc_aggro              = atoi(row[63]);
 			entry.spawn_limit            = atoi(row[64]);
-			entry.attack_speed           = atof(row[65]);
+			entry.attack_speed           = static_cast<float>(atof(row[65]));
 			entry.attack_delay           = atoi(row[66]);
 			entry.findable               = atoi(row[67]);
 			entry.STR                    = atoi(row[68]);
@@ -1184,8 +1184,8 @@ public:
 			entry.underwater             = atoi(row[89]);
 			entry.isquest                = atoi(row[90]);
 			entry.emoteid                = atoi(row[91]);
-			entry.spellscale             = atof(row[92]);
-			entry.healscale              = atof(row[93]);
+			entry.spellscale             = static_cast<float>(atof(row[92]));
+			entry.healscale              = static_cast<float>(atof(row[93]));
 			entry.no_target_hotkey       = atoi(row[94]);
 			entry.raid_target            = atoi(row[95]);
 			entry.armtexture             = atoi(row[96]);
@@ -1251,7 +1251,7 @@ public:
 			entry.texture                = atoi(row[10]);
 			entry.helmtexture            = atoi(row[11]);
 			entry.herosforgemodel        = atoi(row[12]);
-			entry.size                   = atof(row[13]);
+			entry.size                   = static_cast<float>(atof(row[13]));
 			entry.hp_regen_rate          = atoi(row[14]);
 			entry.mana_regen_rate        = atoi(row[15]);
 			entry.loottable_id           = atoi(row[16]);
@@ -1289,7 +1289,7 @@ public:
 			entry.prim_melee_type        = atoi(row[48]);
 			entry.sec_melee_type         = atoi(row[49]);
 			entry.ranged_type            = atoi(row[50]);
-			entry.runspeed               = atof(row[51]);
+			entry.runspeed               = static_cast<float>(atof(row[51]));
 			entry.MR                     = atoi(row[52]);
 			entry.CR                     = atoi(row[53]);
 			entry.DR                     = atoi(row[54]);
@@ -1303,7 +1303,7 @@ public:
 			entry.AC                     = atoi(row[62]);
 			entry.npc_aggro              = atoi(row[63]);
 			entry.spawn_limit            = atoi(row[64]);
-			entry.attack_speed           = atof(row[65]);
+			entry.attack_speed           = static_cast<float>(atof(row[65]));
 			entry.attack_delay           = atoi(row[66]);
 			entry.findable               = atoi(row[67]);
 			entry.STR                    = atoi(row[68]);
@@ -1330,8 +1330,8 @@ public:
 			entry.underwater             = atoi(row[89]);
 			entry.isquest                = atoi(row[90]);
 			entry.emoteid                = atoi(row[91]);
-			entry.spellscale             = atof(row[92]);
-			entry.healscale              = atof(row[93]);
+			entry.spellscale             = static_cast<float>(atof(row[92]));
+			entry.healscale              = static_cast<float>(atof(row[93]));
 			entry.no_target_hotkey       = atoi(row[94]);
 			entry.raid_target            = atoi(row[95]);
 			entry.armtexture             = atoi(row[96]);

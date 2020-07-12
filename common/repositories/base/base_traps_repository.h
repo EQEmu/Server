@@ -208,8 +208,8 @@ public:
 			entry.y                      = atoi(row[4]);
 			entry.z                      = atoi(row[5]);
 			entry.chance                 = atoi(row[6]);
-			entry.maxzdiff               = atof(row[7]);
-			entry.radius                 = atof(row[8]);
+			entry.maxzdiff               = static_cast<float>(atof(row[7]));
+			entry.radius                 = static_cast<float>(atof(row[8]));
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);
@@ -413,8 +413,8 @@ public:
 			entry.y                      = atoi(row[4]);
 			entry.z                      = atoi(row[5]);
 			entry.chance                 = atoi(row[6]);
-			entry.maxzdiff               = atof(row[7]);
-			entry.radius                 = atof(row[8]);
+			entry.maxzdiff               = static_cast<float>(atof(row[7]));
+			entry.radius                 = static_cast<float>(atof(row[8]));
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);
@@ -461,8 +461,8 @@ public:
 			entry.y                      = atoi(row[4]);
 			entry.z                      = atoi(row[5]);
 			entry.chance                 = atoi(row[6]);
-			entry.maxzdiff               = atof(row[7]);
-			entry.radius                 = atof(row[8]);
+			entry.maxzdiff               = static_cast<float>(atof(row[7]));
+			entry.radius                 = static_cast<float>(atof(row[8]));
 			entry.effect                 = atoi(row[9]);
 			entry.effectvalue            = atoi(row[10]);
 			entry.effectvalue2           = atoi(row[11]);

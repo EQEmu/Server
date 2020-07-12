@@ -152,7 +152,7 @@ public:
 			entry.multiplier   = atoi(row[2]);
 			entry.droplimit    = atoi(row[3]);
 			entry.mindrop      = atoi(row[4]);
-			entry.probability  = atof(row[5]);
+			entry.probability  = static_cast<float>(atof(row[5]));
 
 			return entry;
 		}
@@ -288,7 +288,7 @@ public:
 			entry.multiplier   = atoi(row[2]);
 			entry.droplimit    = atoi(row[3]);
 			entry.mindrop      = atoi(row[4]);
-			entry.probability  = atof(row[5]);
+			entry.probability  = static_cast<float>(atof(row[5]));
 
 			all_entries.push_back(entry);
 		}
@@ -318,7 +318,7 @@ public:
 			entry.multiplier   = atoi(row[2]);
 			entry.droplimit    = atoi(row[3]);
 			entry.mindrop      = atoi(row[4]);
-			entry.probability  = atof(row[5]);
+			entry.probability  = static_cast<float>(atof(row[5]));
 
 			all_entries.push_back(entry);
 		}
