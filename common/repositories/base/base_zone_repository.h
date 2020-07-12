@@ -414,7 +414,7 @@ public:
 			entry.fog_green                 = atoi(row[24]);
 			entry.sky                       = atoi(row[25]);
 			entry.ztype                     = atoi(row[26]);
-			entry.zone_exp_multiplier       = atof(row[27]);
+			entry.zone_exp_multiplier       = static_cast<float>(atof(row[27]));
 			entry.walkspeed                 = static_cast<float>(atof(row[28]));
 			entry.time_type                 = atoi(row[29]);
 			entry.fog_red1                  = atoi(row[30]);
@@ -867,7 +867,7 @@ public:
 			entry.fog_green                 = atoi(row[24]);
 			entry.sky                       = atoi(row[25]);
 			entry.ztype                     = atoi(row[26]);
-			entry.zone_exp_multiplier       = atof(row[27]);
+			entry.zone_exp_multiplier       = static_cast<float>(atof(row[27]));
 			entry.walkspeed                 = static_cast<float>(atof(row[28]));
 			entry.time_type                 = atoi(row[29]);
 			entry.fog_red1                  = atoi(row[30]);
@@ -977,7 +977,7 @@ public:
 			entry.fog_green                 = atoi(row[24]);
 			entry.sky                       = atoi(row[25]);
 			entry.ztype                     = atoi(row[26]);
-			entry.zone_exp_multiplier       = atof(row[27]);
+			entry.zone_exp_multiplier       = static_cast<float>(atof(row[27]));
 			entry.walkspeed                 = static_cast<float>(atof(row[28]));
 			entry.time_type                 = atoi(row[29]);
 			entry.fog_red1                  = atoi(row[30]);

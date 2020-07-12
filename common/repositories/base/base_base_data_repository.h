@@ -161,14 +161,14 @@ public:
 
 			entry.level    = atoi(row[0]);
 			entry.class    = atoi(row[1]);
-			entry.hp       = atof(row[2]);
-			entry.mana     = atof(row[3]);
-			entry.end      = atof(row[4]);
-			entry.unk1     = atof(row[5]);
-			entry.unk2     = atof(row[6]);
-			entry.hp_fac   = atof(row[7]);
-			entry.mana_fac = atof(row[8]);
-			entry.end_fac  = atof(row[9]);
+			entry.hp       = static_cast<float>(atof(row[2]));
+			entry.mana     = static_cast<float>(atof(row[3]));
+			entry.end      = static_cast<float>(atof(row[4]));
+			entry.unk1     = static_cast<float>(atof(row[5]));
+			entry.unk2     = static_cast<float>(atof(row[6]));
+			entry.hp_fac   = static_cast<float>(atof(row[7]));
+			entry.mana_fac = static_cast<float>(atof(row[8]));
+			entry.end_fac  = static_cast<float>(atof(row[9]));
 
 			return entry;
 		}
@@ -313,14 +313,14 @@ public:
 
 			entry.level    = atoi(row[0]);
 			entry.class    = atoi(row[1]);
-			entry.hp       = atof(row[2]);
-			entry.mana     = atof(row[3]);
-			entry.end      = atof(row[4]);
-			entry.unk1     = atof(row[5]);
-			entry.unk2     = atof(row[6]);
-			entry.hp_fac   = atof(row[7]);
-			entry.mana_fac = atof(row[8]);
-			entry.end_fac  = atof(row[9]);
+			entry.hp       = static_cast<float>(atof(row[2]));
+			entry.mana     = static_cast<float>(atof(row[3]));
+			entry.end      = static_cast<float>(atof(row[4]));
+			entry.unk1     = static_cast<float>(atof(row[5]));
+			entry.unk2     = static_cast<float>(atof(row[6]));
+			entry.hp_fac   = static_cast<float>(atof(row[7]));
+			entry.mana_fac = static_cast<float>(atof(row[8]));
+			entry.end_fac  = static_cast<float>(atof(row[9]));
 
 			all_entries.push_back(entry);
 		}
@@ -347,14 +347,14 @@ public:
 
 			entry.level    = atoi(row[0]);
 			entry.class    = atoi(row[1]);
-			entry.hp       = atof(row[2]);
-			entry.mana     = atof(row[3]);
-			entry.end      = atof(row[4]);
-			entry.unk1     = atof(row[5]);
-			entry.unk2     = atof(row[6]);
-			entry.hp_fac   = atof(row[7]);
-			entry.mana_fac = atof(row[8]);
-			entry.end_fac  = atof(row[9]);
+			entry.hp       = static_cast<float>(atof(row[2]));
+			entry.mana     = static_cast<float>(atof(row[3]));
+			entry.end      = static_cast<float>(atof(row[4]));
+			entry.unk1     = static_cast<float>(atof(row[5]));
+			entry.unk2     = static_cast<float>(atof(row[6]));
+			entry.hp_fac   = static_cast<float>(atof(row[7]));
+			entry.mana_fac = static_cast<float>(atof(row[8]));
+			entry.end_fac  = static_cast<float>(atof(row[9]));
 
 			all_entries.push_back(entry);
 		}

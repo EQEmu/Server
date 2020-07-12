@@ -282,13 +282,9 @@ foreach my $table_to_generate (@tables) {
             $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
             $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
         }
-        elsif ($data_type =~ /float/) {
+        elsif ($data_type =~ /float|double|decimal/) {
             $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
             $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
-        }
-        elsif ($data_type =~ /double|decimal/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atof(row[%s]);\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atof(row[%s]);\n", $column_name, $index);
         }
         else {
             $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
