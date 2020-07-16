@@ -1145,7 +1145,7 @@ public:
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
-	void GoToDzSafeReturnOrBind(const DynamicZoneLocation& safereturn);
+	void GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone);
 	void MovePCDynamicZone(uint32 zone_id);
 	void MovePCDynamicZone(const std::string& zone_name);
 

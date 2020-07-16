@@ -5208,7 +5208,7 @@ void EntityList::GateAllClientsToSafeReturn()
 	DynamicZone dz;
 	if (zone)
 	{
-		dz = DynamicZone::LoadDzFromDatabase(zone->GetInstanceID());
+		dz = zone->GetDynamicZone();
 
 		LogDynamicZones(
 			"Sending all clients in zone: [{}] instance: [{}] to dz safereturn or bind",
@@ -5221,7 +5221,7 @@ void EntityList::GateAllClientsToSafeReturn()
 		if (client_list_iter.second)
 		{
 			// falls back to gating clients to bind if dz invalid
-			client_list_iter.second->GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
+			client_list_iter.second->GoToDzSafeReturnOrBind(dz);
 		}
 	}
 }
