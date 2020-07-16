@@ -1822,9 +1822,29 @@ void Lua_Client::MovePCDynamicZone(uint32 zone_id) {
 	return self->MovePCDynamicZone(zone_id);
 }
 
+void Lua_Client::MovePCDynamicZone(uint32 zone_id, int zone_version) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_id, zone_version);
+}
+
+void Lua_Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
+}
+
 void Lua_Client::MovePCDynamicZone(std::string zone_name) {
 	Lua_Safe_Call_Void();
 	return self->MovePCDynamicZone(zone_name);
+}
+
+void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_name, zone_version);
+}
+
+void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_name, zone_version, msg_if_invalid);
 }
 
 luabind::scope lua_register_client() {
@@ -2147,7 +2167,11 @@ luabind::scope lua_register_client() {
 		.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
 		.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32))&Lua_Client::MovePCDynamicZone)
-		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string))&Lua_Client::MovePCDynamicZone);
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int, bool))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone);
 }
 
 luabind::scope lua_register_inventory_where() {
