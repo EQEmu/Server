@@ -9872,13 +9872,14 @@ void Client::SendDzCompassUpdate()
 	QueuePacket(outapp.get());
 }
 
-void Client::GoToDzSafeReturnOrBind(const DynamicZoneLocation& safereturn)
+void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
 {
+	auto safereturn = dynamic_zone.GetSafeReturnLocation();
 	LogDynamicZonesDetail(
 		"Sending character [{}] to safereturn zone [{}] or bind", CharacterID(), safereturn.zone_id
 	);
 
-	if (safereturn.zone_id == 0)
+	if (!dynamic_zone.IsValid() || safereturn.zone_id == 0)
 	{
 		GoToBind();
 	}

@@ -164,8 +164,7 @@ bool Client::Process() {
 		if (dynamiczone_removal_timer.Check() && zone && zone->GetInstanceID() != 0)
 		{
 			dynamiczone_removal_timer.Disable();
-			DynamicZone dz = DynamicZone::LoadDzFromDatabase(zone->GetInstanceID());
-			GoToDzSafeReturnOrBind(dz.GetSafeReturnLocation());
+			GoToDzSafeReturnOrBind(zone->GetDynamicZone());
 		}
 
 		if (linkdead_timer.Check()) {
