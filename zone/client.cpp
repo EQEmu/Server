@@ -9856,20 +9856,18 @@ void Client::SetDzRemovalTimer(bool enable_timer)
 
 void Client::SendDzCompassUpdate()
 {
-	// a client may be associated with multiple dynamic zones with compasses
-	// in the same zone. any systems that use dynamic zones need checked here
+	// client may be associated with multiple dynamic zone compasses in this zone
 	std::vector<DynamicZoneCompassEntry_Struct> compass_entries;
 
-	Expedition* expedition = GetExpedition();
-	if (expedition)
+	for (const auto& client_dz : GetDynamicZones())
 	{
-		auto compass = expedition->GetDynamicZone().GetCompassLocation();
+		auto compass = client_dz.dynamic_zone.GetCompassLocation();
 		if (zone && zone->GetZoneID() == compass.zone_id && zone->GetInstanceID() == 0)
 		{
 			DynamicZoneCompassEntry_Struct entry;
-			entry.dz_zone_id = static_cast<uint16_t>(expedition->GetDynamicZone().GetZoneID());
-			entry.dz_instance_id = static_cast<uint16_t>(expedition->GetDynamicZone().GetInstanceID());
-			entry.dz_type = static_cast<uint8_t>(expedition->GetDynamicZone().GetType());
+			entry.dz_zone_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetZoneID());
+			entry.dz_instance_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetInstanceID());
+			entry.dz_type = static_cast<uint32_t>(client_dz.dynamic_zone.GetType());
 			entry.x = compass.x;
 			entry.y = compass.y;
 			entry.z = compass.z;
@@ -9877,8 +9875,6 @@ void Client::SendDzCompassUpdate()
 			compass_entries.emplace_back(entry);
 		}
 	}
-
-	// todo: tasks, missions, and quests with an associated dz
 
 	// compass set via MarkSingleCompassLocation()
 	if (m_has_quest_compass)
@@ -9922,57 +9918,52 @@ void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
 	}
 }
 
-void Client::MovePCDynamicZone(uint32 zone_id)
+std::vector<DynamicZoneInfo> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
+{
+	std::vector<DynamicZoneInfo> client_dzs;
+
+	// check client systems for any associated dynamic zones optionally filtered by zone
+	Expedition* expedition = GetExpedition();
+	if (expedition &&
+	   (zone_id == 0 || expedition->GetDynamicZone().GetZoneID() == zone_id) &&
+	   (zone_version < 0 || expedition->GetDynamicZone().GetZoneVersion() == zone_version))
+	{
+		client_dzs.emplace_back(expedition->GetName(), expedition->GetLeaderName(), expedition->GetDynamicZone());
+	}
+
+	// todo: tasks, missions (shared tasks), and quests with an associated dz to zone_id
+
+	return client_dzs;
+}
+
+void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid)
 {
 	if (zone_id == 0)
 	{
 		return;
 	}
 
-	// check client systems for any associated dynamic zones to the requested zone id
-	std::vector<DynamicZoneChooseZoneEntry_Struct> client_dzs;
-	DynamicZone single_dz;
-
-	Expedition* expedition = GetExpedition();
-	if (expedition && expedition->GetDynamicZone().GetZoneID() == zone_id)
-	{
-		single_dz = expedition->GetDynamicZone();
-
-		DynamicZoneChooseZoneEntry_Struct dz;
-		dz.dz_zone_id = expedition->GetDynamicZone().GetZoneID();
-		dz.dz_instance_id = expedition->GetDynamicZone().GetInstanceID();
-		dz.dz_type = static_cast<uint8_t>(expedition->GetDynamicZone().GetType());
-		strn0cpy(dz.description, expedition->GetName().c_str(), sizeof(dz.description));
-		strn0cpy(dz.leader_name, expedition->GetLeaderName().c_str(), sizeof(dz.leader_name));
-
-		client_dzs.emplace_back(dz);
-	}
-
-	// todo: check for Missions (Shared Tasks), Quests, or Tasks that have associated dzs to zone_id
+	auto client_dzs = GetDynamicZones(zone_id, zone_version);
 
 	if (client_dzs.empty())
 	{
-		MessageString(Chat::Red, DYNAMICZONE_WAY_IS_BLOCKED); // unconfirmed message
+		if (msg_if_invalid)
+		{
+			MessageString(Chat::Red, DYNAMICZONE_WAY_IS_BLOCKED); // unconfirmed message
+		}
 	}
 	else if (client_dzs.size() == 1)
 	{
-		if (single_dz.IsValid())
-		{
-			DynamicZoneLocation zonein = single_dz.GetZoneInLocation();
-			ZoneMode zone_mode = ZoneMode::ZoneToSafeCoords;
-			if (single_dz.HasZoneInLocation())
-			{
-				zone_mode = ZoneMode::ZoneSolicited;
-			}
-			MovePC(zone_id, single_dz.GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
-		}
+		const DynamicZone& dz = client_dzs[0].dynamic_zone;
+		DynamicZoneLocation zonein = dz.GetZoneInLocation();
+		ZoneMode zone_mode = dz.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(zone_id, dz.GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
 	}
-	else if (client_dzs.size() > 1)
+	else
 	{
 		LogDynamicZonesDetail(
 			"Sending DzSwitchListWnd to character [{}] associated with [{}] dynamic zone(s)",
-			CharacterID(), client_dzs.size()
-		);
+			CharacterID(), client_dzs.size());
 
 		// more than one dynamic zone to this zone, send out the switchlist window
 		// note that this will most likely crash clients if they've reloaded the ui
@@ -9983,14 +9974,20 @@ void Client::MovePCDynamicZone(uint32 zone_id)
 		auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzChooseZone, outsize));
 		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
 		outbuf->count = count;
-		memcpy(outbuf->choices, client_dzs.data(), entries_size);
-
+		for (int i = 0; i < client_dzs.size(); ++i)
+		{
+			outbuf->choices[i].dz_zone_id = client_dzs[i].dynamic_zone.GetZoneID();
+			outbuf->choices[i].dz_instance_id = client_dzs[i].dynamic_zone.GetInstanceID();
+			outbuf->choices[i].dz_type = static_cast<uint32_t>(client_dzs[i].dynamic_zone.GetType());
+			strn0cpy(outbuf->choices[i].description, client_dzs[i].description.c_str(), sizeof(outbuf->choices[i].description));
+			strn0cpy(outbuf->choices[i].leader_name, client_dzs[i].leader_name.c_str(), sizeof(outbuf->choices[i].leader_name));
+		}
 		QueuePacket(outapp.get());
 	}
 }
 
-void Client::MovePCDynamicZone(const std::string& zone_name)
+void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, bool msg_if_invalid)
 {
 	auto zone_id = ZoneID(zone_name.c_str());
-	MovePCDynamicZone(zone_id);
+	MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
 }

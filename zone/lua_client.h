@@ -355,7 +355,11 @@ public:
 	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
 	bool            HasExpeditionLockout(std::string expedition_name, std::string event_name);
 	void            MovePCDynamicZone(uint32 zone_id);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid);
 	void            MovePCDynamicZone(std::string zone_name);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
 };
 
 #endif

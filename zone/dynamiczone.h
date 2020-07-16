@@ -116,4 +116,15 @@ private:
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 };
 
+struct DynamicZoneInfo
+{
+	std::string description; // from owning system
+	std::string leader_name;
+	DynamicZone dynamic_zone;
+
+	DynamicZoneInfo() = default;
+	DynamicZoneInfo(std::string desc, std::string leader, const DynamicZone& dz)
+		: description(std::move(desc)), leader_name(std::move(leader)), dynamic_zone(dz) {}
+};
+
 #endif
