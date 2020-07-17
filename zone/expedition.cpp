@@ -952,11 +952,18 @@ void Expedition::DzAddPlayer(
 	}
 	else
 	{
-		// we can avoid checking online status in world if we trust member status accuracy
 		auto member_data = GetMemberData(add_char_name);
-		if (member_data.char_id != 0 && member_data.status != ExpeditionMemberStatus::Offline)
+		if (member_data.char_id != 0)
 		{
-			requester->MessageString(Chat::Red, DZADD_ALREADY_PART, add_char_name.c_str());
+			// live prioritizes offline message before already a member message
+			if (member_data.status == ExpeditionMemberStatus::Offline)
+			{
+				requester->MessageString(Chat::Red, DZADD_NOT_ONLINE, add_char_name.c_str());
+			}
+			else
+			{
+				requester->MessageString(Chat::Red, DZADD_ALREADY_PART, add_char_name.c_str());
+			}
 			invite_failed = true;
 		}
 	}
