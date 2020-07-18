@@ -291,23 +291,47 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	 * Expansion check
 	 */
 	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
-		auto zones = ZoneRepository::GetWhere(
-			fmt::format(
-				"expansion <= {} AND short_name = '{}'",
-				(content_service.GetCurrentExpansion() + 1),
-				target_zone_name
-			)
-		);
+
+		/**
+		 * Hit the zone cache first so we're not hitting the database every time someone attempts to zone
+		 */
+		bool      meets_zone_expansion_check = false;
+		bool      found_zone                 = false;
+		for (auto &z: zone_store.zones) {
+			if (z.short_name == target_zone_name && z.version == 0) {
+				found_zone = true;
+				if (z.expansion <= (content_service.GetCurrentExpansion() + 1)) {
+					meets_zone_expansion_check = true;
+					break;
+				}
+			}
+		}
+
+		/**
+		 * If we fail to find a cached zone lookup because someone just so happened to change some data, second attempt
+		 * In 99% of cases we would never get here and this would be fallback
+		 */
+		if (!found_zone) {
+			auto zones = ZoneRepository::GetWhere(
+				fmt::format(
+					"expansion <= {} AND short_name = '{}' and version = 0",
+					(content_service.GetCurrentExpansion() + 1),
+					target_zone_name
+				)
+			);
+
+			meets_zone_expansion_check = !zones.empty();
+		}
 
 		LogInfo(
 			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
 			target_zone_name,
 			(content_service.GetCurrentExpansion() + 1),
 			content_service.GetCurrentExpansionName(),
-			!zones.empty() ? "true" : "false"
+			meets_zone_expansion_check ? "true" : "false"
 		);
 
-		if (zones.empty()) {
+		if (!meets_zone_expansion_check) {
 			myerror = ZONE_ERROR_NOEXPANSION;
 		}
 	}
