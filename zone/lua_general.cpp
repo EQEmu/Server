@@ -2461,6 +2461,7 @@ luabind::scope lua_register_general() {
 		luabind::def("disable_recipe", &lua_disable_recipe),
 		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
 		luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
+		luabind::def("update_zone_header", &lua_update_zone_header),
 		luabind::def("clock", &lua_clock),
 		luabind::def("create_npc", &lua_create_npc),
 		luabind::def("log", (void(*)(int, std::string))&lua_log),
