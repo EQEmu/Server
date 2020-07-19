@@ -177,6 +177,7 @@ int command_init(void)
 		command_add("castspell", "[spellid] - Cast a spell", 50, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", 200, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
+		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] Copies character to destination account", 250, command_copycharacter) ||
 		command_add("corpse", "- Manipulate corpses, use with no arguments for help", 50, command_corpse) ||
 		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", 0, command_corpsefix) ||
 		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
@@ -4576,6 +4577,38 @@ void command_zonelock(Client *c, const Seperator *sep)
 		}
 	}
 	safe_delete(pack);
+}
+
+void command_copycharacter(Client *c, const Seperator *sep)
+{
+	if (sep->argnum < 3) {
+		c->Message(
+			Chat::White,
+			"Usage: [source_character_name] [destination_character_name] [destination_account_name]"
+		);
+		return;
+	}
+
+	std::string source_character_name      = sep->arg[1];
+	std::string destination_character_name = sep->arg[2];
+	std::string destination_account_name   = sep->arg[3];
+
+	bool result = database.CopyCharacter(
+		source_character_name,
+		destination_character_name,
+		destination_account_name
+	);
+
+	c->Message(
+		Chat::Yellow,
+		fmt::format(
+			"Character Copy [{}] to [{}] via account [{}] [{}]",
+			source_character_name,
+			destination_character_name,
+			destination_account_name,
+			result ? "Success" : "Failed"
+		).c_str()
+	);
 }
 
 void command_corpse(Client *c, const Seperator *sep)

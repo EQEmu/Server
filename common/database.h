@@ -105,16 +105,35 @@ public:
 
 	/* Character Creation */
 
-	bool	AddToNameFilter(const char* name);
-	bool	CreateCharacter(uint32 account_id, char* name, uint16 gender, uint16 race, uint16 class_, uint8 str, uint8 sta, uint8 cha, uint8 dex, uint8 int_, uint8 agi, uint8 wis, uint8 face);
-	bool	DeleteCharacter(char* character_name);
-	bool	MoveCharacterToZone(const char* charname, uint32 zone_id);
-	bool	MoveCharacterToZone(uint32 character_id, uint32 zone_id);
-	bool	ReserveName(uint32 account_id, char* name);
-	bool	SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp);
-	bool	SetHackerFlag(const char* accountname, const char* charactername, const char* hacked);
-	bool	SetMQDetectionFlag(const char* accountname, const char* charactername, const char* hacked, const char* zone);
-	bool	UpdateName(const char* oldname, const char* newname);
+	bool AddToNameFilter(const char *name);
+	bool CreateCharacter(
+		uint32 account_id,
+		char *name,
+		uint16 gender,
+		uint16 race,
+		uint16 class_,
+		uint8 str,
+		uint8 sta,
+		uint8 cha,
+		uint8 dex,
+		uint8 int_,
+		uint8 agi,
+		uint8 wis,
+		uint8 face
+	);
+	bool DeleteCharacter(char *character_name);
+	bool MoveCharacterToZone(const char *charname, uint32 zone_id);
+	bool MoveCharacterToZone(uint32 character_id, uint32 zone_id);
+	bool ReserveName(uint32 account_id, char *name);
+	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp);
+	bool SetHackerFlag(const char *accountname, const char *charactername, const char *hacked);
+	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const char *hacked, const char *zone);
+	bool UpdateName(const char *oldname, const char *newname);
+	bool CopyCharacter(
+		std::string source_character_name,
+		std::string destination_character_name,
+		std::string destination_account_name
+	);
 
 	/* General Information Queries */
 

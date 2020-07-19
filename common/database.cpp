@@ -2309,3 +2309,141 @@ int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
 	return 0;
 }
 
+/**
+ * @param source_character_name
+ * @param destination_character_name
+ * @param destination_account_name
+ * @return
+ */
+bool Database::CopyCharacter(
+	std::string source_character_name,
+	std::string destination_character_name,
+	std::string destination_account_name
+)
+{
+	auto results = QueryDatabase(
+		fmt::format(
+			"SELECT id FROM character_data WHERE name = '{}' and deleted_at is NULL LIMIT 1",
+			source_character_name
+		)
+	);
+
+	if (results.RowCount() == 0) {
+		LogError("No character found with name [{}]", source_character_name);
+	}
+
+	auto        row                 = results.begin();
+	std::string source_character_id = row[0];
+
+	results = QueryDatabase(
+		fmt::format(
+			"SELECT id FROM account WHERE name = '{}' LIMIT 1",
+			destination_account_name
+		)
+	);
+
+	if (results.RowCount() == 0) {
+		LogError("No account found with name [{}]", destination_account_name);
+	}
+
+	row = results.begin();
+	std::string source_account_id = row[0];
+
+	/**
+	 * Fresh ID
+	 */
+	results = QueryDatabase("SELECT (MAX(id) + 1) as new_id from character_data");
+	row     = results.begin();
+	std::string new_character_id = row[0];
+
+	TransactionBegin();
+	for (const auto &iter : DatabaseSchema::GetCharacterTables()) {
+		std::string table_name               = iter.first;
+		std::string character_id_column_name = iter.second;
+
+		/**
+		 * Columns
+		 */
+		results = QueryDatabase(fmt::format("SHOW COLUMNS FROM {}", table_name));
+		std::vector<std::string> columns      = {};
+		int                      column_count = 0;
+		for (row = results.begin(); row != results.end(); ++row) {
+			columns.emplace_back(row[0]);
+			column_count++;
+		}
+
+		results = QueryDatabase(
+			fmt::format(
+				"SELECT {} FROM {} WHERE {} = {}",
+				implode(",", wrap(columns, "`")),
+				table_name,
+				character_id_column_name,
+				source_character_id
+			)
+		);
+
+		std::vector<std::vector<std::string>> new_rows;
+		for (row = results.begin(); row != results.end(); ++row) {
+			std::vector<std::string> new_values   = {};
+			for (int                 column_index = 0; column_index < column_count; column_index++) {
+				std::string column = columns[column_index];
+				std::string value  = row[column_index] ? row[column_index] : "null";
+
+				if (column == character_id_column_name) {
+					value = new_character_id;
+				}
+
+				if (column == "name" && table_name == "character_data") {
+					value = destination_character_name;
+				}
+
+				if (column == "account_id" && table_name == "character_data") {
+					value = source_account_id;
+				}
+
+				new_values.emplace_back(value);
+			}
+
+			new_rows.emplace_back(new_values);
+		}
+
+		std::string              insert_values;
+		std::vector<std::string> insert_rows;
+
+		for (auto &r: new_rows) {
+			std::string insert_row = "(" + implode(",", wrap(r, "'")) + ")";
+			insert_rows.emplace_back(insert_row);
+		}
+
+		if (!insert_rows.empty()) {
+			QueryDatabase(
+				fmt::format(
+					"DELETE FROM {} WHERE {} = {}",
+					table_name,
+					character_id_column_name,
+					new_character_id
+				)
+			);
+
+			auto insert = QueryDatabase(
+				fmt::format(
+					"INSERT INTO {} ({}) VALUES {}",
+					table_name,
+					implode(",", wrap(columns, "`")),
+					implode(",", insert_rows)
+				)
+			);
+
+			if (!insert.ErrorMessage().empty()) {
+				TransactionRollback();
+				return false;
+				break;
+			}
+		}
+	}
+
+	TransactionCommit();
+
+	return true;
+}
+

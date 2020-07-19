@@ -54,6 +54,7 @@ namespace WorldserverCommandHandler {
 		 * Register commands
 		 */
 		function_map["world:version"]               = &WorldserverCommandHandler::Version;
+		function_map["character:copy-character"]    = &WorldserverCommandHandler::CopyCharacter;
 		function_map["database:version"]            = &WorldserverCommandHandler::DatabaseVersion;
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
@@ -240,11 +241,11 @@ namespace WorldserverCommandHandler {
 			"--compress"
 		};
 
-
-		if (argc < 3 || cmd[{"-h", "--help"}]) {
-			EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+		if (cmd[{"-h", "--help"}]) {
 			return;
 		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		auto database_dump_service = new DatabaseDumpService();
 		bool dump_all              = cmd[{"-a", "--all"}];
@@ -451,6 +452,47 @@ namespace WorldserverCommandHandler {
 				zone.id
 			);
 		}
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void CopyCharacter(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Copies a character into a destination account";
+
+		std::vector<std::string> arguments = {
+			"source_character_name",
+			"destination_character_name",
+			"destination_account_name"
+		};
+		std::vector<std::string> options   = { };
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		std::string source_character_name      = cmd(2).str();
+		std::string destination_character_name = cmd(3).str();
+		std::string destination_account_name   = cmd(4).str();
+
+		LogInfo(
+			"Attempting to copy character [{}] to [{}] via account [{}]",
+			source_character_name,
+			destination_character_name,
+			destination_account_name
+		);
+
+		database.CopyCharacter(
+			source_character_name,
+			destination_character_name,
+			destination_account_name
+		);
 	}
 
 }
