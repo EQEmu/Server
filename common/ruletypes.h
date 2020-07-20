@@ -686,6 +686,7 @@ RULE_BOOL(AA, ModernAAScalingEnabled, false, "Are we linearly scaling AA experie
 RULE_REAL(AA, ModernAAScalingStartPercent, 1000, "1000% or 10x AA experience at the start of the scaling range")
 RULE_INT(AA, ModernAAScalingAAMinimum, 0, "The minimum number of earned AA before AA experience scaling begins")
 RULE_INT(AA, ModernAAScalingAALimit, 4000, "The number of earned AA when AA experience scaling ends")
+RULE_BOOL(AA, SoundForAAEarned, false, "Play sound when AA point earned")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Console)
