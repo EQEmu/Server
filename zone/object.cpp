@@ -672,30 +672,34 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 		charges = inst->GetCharges();
 	}
 
-	// SQL Escape object_name
-	uint32 len = strlen(object.object_name) * 2 + 1;
-	auto object_name = new char[len];
-	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
+	if (inst && !inst->IsType(EQ::item::ItemClassBag)) {
+		uint32 len         = strlen(object.object_name) * 2 + 1;
+		auto   object_name = new char[len];
+		DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
-	// Save new record for object
-	std::string query = StringFormat("UPDATE object SET "
-                                    "zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
-                                    "itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
-									"size = %f, tilt_x = %f, tilt_y = %f "
-                                    "WHERE id = %i",
-                                    object.zone_id, object.x, object.y, object.z, object.heading,
-                                    item_id, charges, object_name, type, icon,
-									object.size, object.tilt_x, object.tilt_y, id);
-    safe_delete_array(object_name);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
-		return;
+		// Save new record for object
+		std::string query = StringFormat(
+			"UPDATE object SET "
+			"zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
+			"itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
+			"size = %f, tilt_x = %f, tilt_y = %f "
+			"WHERE id = %i",
+			object.zone_id, object.x, object.y, object.z, object.heading,
+			item_id, charges, object_name, type, icon,
+			object.size, object.tilt_x, object.tilt_y, id
+		);
+		safe_delete_array(object_name);
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
+			return;
+		}
 	}
 
-    // Save container contents, if container
-	if (inst && inst->IsType(EQ::item::ItemClassBag))
-        SaveWorldContainer(object.zone_id, id, inst);
+	// Save container contents, if container
+	if (inst && inst->IsType(EQ::item::ItemClassBag)) {
+		SaveWorldContainer(object.zone_id, id, inst);
+	}
 }
 
 //
