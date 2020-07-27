@@ -515,7 +515,7 @@ void EntityList::MobProcess()
 			mob_settle_timer->Disable();
 		}
 
-		if (numclients > 0 ||
+		if (zone->process_mobs_while_empty || numclients > 0 ||
 			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
 			mob_settle_timer->Enabled()) {
 			// Normal processing, or assuring that spawns that should

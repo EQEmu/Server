@@ -866,6 +866,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	default_ruleset = 0;
 
 	is_zone_time_localized = false;
+	process_mobs_while_empty = false;
 
 	loglevelvar = 0;
 	merchantvar = 0;
