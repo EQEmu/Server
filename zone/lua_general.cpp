@@ -1310,52 +1310,156 @@ void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement) 
 	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement);
 }
 
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status, max_status);
+}
+
 void lua_world_wide_cast_spell(uint32 spell_id) {
 	quest_manager.WorldWideCastSpell(spell_id);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status) {
+	quest_manager.WorldWideCastSpell(spell_id, min_status);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideCastSpell(spell_id, min_status, max_status);
 }
 
 void lua_world_wide_disable_task(uint32 task_id) {
 	quest_manager.WorldWideDisableTask(task_id);
 }
 
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideDisableTask(task_id, min_status);
+}
+
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideDisableTask(task_id, min_status, max_status);
+}
+
 void lua_world_wide_enable_task(uint32 task_id) {
 	quest_manager.WorldWideEnableTask(task_id);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideEnableTask(task_id, min_status);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideEnableTask(task_id, min_status, max_status);
 }
 
 void lua_world_wide_fail_task(uint32 task_id) {
 	quest_manager.WorldWideFailTask(task_id);
 }
 
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideFailTask(task_id, min_status);
+}
+
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideFailTask(task_id, min_status, max_status);
+}
+
 void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
 	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
 }
 
 void lua_world_wide_message(uint32 type, const char *message) {
 	quest_manager.WorldWideMessage(type, message);
 }
 
+void lua_world_wide_message(uint32 type, const char *message, uint8 min_status) {
+	quest_manager.WorldWideMessage(type, message, min_status);
+}
+
+void lua_world_wide_message(uint32 type, const char *message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMessage(type, message, min_status, max_status);
+}
+
 void lua_world_wide_move(const char *zone_short_name) {
 	quest_manager.WorldWideMove(zone_short_name);
+}
+
+void lua_world_wide_move(const char *zone_short_name, uint8 min_status) {
+	quest_manager.WorldWideMove(zone_short_name, min_status);
+}
+
+void lua_world_wide_move(const char *zone_short_name, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMove(zone_short_name, min_status, max_status);
 }
 
 void lua_world_wide_move_instance(uint16 instance_id) {
 	quest_manager.WorldWideMoveInstance(instance_id);
 }
 
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status) {
+	quest_manager.WorldWideMoveInstance(instance_id, min_status);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMoveInstance(instance_id, min_status, max_status);
+}
+
 void lua_world_wide_remove_spell(uint32 spell_id) {
 	quest_manager.WorldWideRemoveSpell(spell_id);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status) {
+	quest_manager.WorldWideRemoveSpell(spell_id, min_status);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideRemoveSpell(spell_id, min_status, max_status);
 }
 
 void lua_world_wide_remove_task(uint32 task_id) {
 	quest_manager.WorldWideRemoveTask(task_id);
 }
 
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideRemoveTask(task_id, min_status);
+}
+
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideRemoveTask(task_id, min_status, max_status);
+}
+
 void lua_world_wide_reset_activity(uint32 task_id, int activity_id) {
 	quest_manager.WorldWideResetActivity(task_id, activity_id);
 }
 
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status, max_status);
+}
+
 void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value) {
 	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status, max_status);
 }
 
 void lua_world_wide_set_entity_variable_npc(const char *variable_name, const char *variable_value) {
@@ -1364,6 +1468,14 @@ void lua_world_wide_set_entity_variable_npc(const char *variable_name, const cha
 
 void lua_world_wide_signal_client(uint32 signal) {
 	quest_manager.WorldWideSignalClient(signal);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status) {
+	quest_manager.WorldWideSignalClient(signal, min_status);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideSignalClient(signal, min_status, max_status);
 }
 
 void lua_world_wide_signal_npc(uint32 signal) {
@@ -1376,6 +1488,14 @@ void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
 
 void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count) {
 	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status, max_status);
 }
 
 luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
@@ -2258,23 +2378,53 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
 		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
 		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
-		luabind::def("world_wide_cast_spell", &lua_world_wide_cast_spell),
-		luabind::def("world_wide_disable_task", &lua_world_wide_disable_task),
-		luabind::def("world_wide_enable_task", &lua_world_wide_enable_task),
-		luabind::def("world_wide_fail_task", &lua_world_wide_fail_task),
-		luabind::def("world_wide_marquee", &lua_world_wide_marquee),
-		luabind::def("world_wide_message", &lua_world_wide_message),
-		luabind::def("world_wide_move", &lua_world_wide_move),
-		luabind::def("world_wide_move_instance", &lua_world_wide_move_instance),
-		luabind::def("world_wide_remove_spell", &lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_task", &lua_world_wide_remove_task),
-		luabind::def("world_wide_reset_activity", &lua_world_wide_reset_activity),
-		luabind::def("world_wide_set_entity_variable_client", &lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_move", (void(*)(const char*))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move_instance", (void(*)(uint16))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_task", (void(*)(uint32))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
 		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
-		luabind::def("world_wide_signal_client", &lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
 		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
 		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
 		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8,uint8))&lua_world_wide_update_activity),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
