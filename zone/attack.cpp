@@ -283,7 +283,7 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	bool lua_ret = false;
 	bool ignoreDefault = false;
 	lua_ret = LuaParser::Instance()->CheckHitChance(this, other, hit, ignoreDefault);
-	
+
 	if(ignoreDefault) {
 		return lua_ret;
 	}
@@ -323,7 +323,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	bool lua_ret = false;
 	bool ignoreDefault = false;
 	lua_ret = LuaParser::Instance()->AvoidDamage(this, other, hit, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return lua_ret;
 	}
@@ -862,6 +862,7 @@ int Mob::ACSum(bool skip_caps)
 int Mob::GetBestMeleeSkill()
 	{
 	int bestSkill=0;
+
 	EQ::skills::SkillType meleeSkills[]=
 	{	EQ::skills::Skill1HBlunt,
 	  	EQ::skills::Skill1HSlashing,
@@ -879,7 +880,7 @@ int Mob::GetBestMeleeSkill()
 		value = GetSkill(meleeSkills[i]);
 		bestSkill = std::max(value, bestSkill);
 	}
-		
+
 	return bestSkill;
 	}
 
@@ -892,7 +893,7 @@ int Mob::offense(EQ::skills::SkillType skill)
 		case EQ::skills::SkillArchery:
 		case EQ::skills::SkillThrowing:
 			stat_bonus = GetDEX();
-			break;	
+			break;
 
 		// Mobs with no weapons default to H2H.
 		// Since H2H is capped at 100 for many many classes,
@@ -943,7 +944,7 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
 	LuaParser::Instance()->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return;
 	}
@@ -1735,7 +1736,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (!RuleB(Character, UseDeathExpLossMult)) {
 		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
 	}
-	
+
 	if (RuleB(Zone, LevelBasedEXPMods)) {
 		// Death in levels with xp_mod (such as hell levels) was resulting
 		// in losing more that appropriate since the loss was the same but
@@ -1893,7 +1894,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
+		database.MoveCharacterToZone(this->CharacterID(), m_pp.zone_id);
 		Save();
 		GoToDeath();
 	}
@@ -2452,7 +2453,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	bool    allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
 	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTUREMERCHANT || MerchantType != 0);
-	
+
 	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
 		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
@@ -4093,7 +4094,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		if (IsPet() && hand != EQ::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
-		if (SpellProcs[i].base_spellID == POISON_PROC && 
+		if (SpellProcs[i].base_spellID == POISON_PROC &&
 		    	(!weapon || weapon->ItemType != EQ::item::ItemType1HPiercing))
 			continue; // Old school poison will only proc with 1HP equipped.
 
@@ -4113,7 +4114,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			// Spell procs (buffs)
 			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
 				if (SpellProcs[i].base_spellID == POISON_PROC) {
-					poison_slot=i;					
+					poison_slot=i;
 					continue; // Process the poison proc last per @mackal
 				}
 
@@ -4160,7 +4161,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 				RemoveProcFromWeapon(spell_id);
 			}
 		}
-	}	
+	}
 
 	if (HasSkillProcs() && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		uint16 skillinuse = 28;
@@ -4696,7 +4697,7 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
 	LuaParser::Instance()->ApplyDamageTable(this, hit, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return;
 	}

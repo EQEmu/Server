@@ -43,6 +43,7 @@ extern volatile bool RunLoops;
 #include "position.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "petitions.h"
 #include "command.h"
 #include "water_map.h"
@@ -2094,7 +2095,7 @@ void Client::ReadBook(BookRequest_Struct *book) {
 		return;
 	}
 
-	std::string booktxt2 = database.GetBook(txtfile, &book_language);
+	std::string booktxt2 = content_db.GetBook(txtfile, &book_language);
 	int length = booktxt2.length();
 
 	if (booktxt2[0] != '\0') {
@@ -4005,7 +4006,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 		PendingTranslocateData.heading = m_pp.binds[0].heading;
 	}
 	else {
-		PendingTranslocateData.zone_id = ts->ZoneID = database.GetZoneID(Spell.teleport_zone);
+		PendingTranslocateData.zone_id = ts->ZoneID = ZoneID(Spell.teleport_zone);
 		PendingTranslocateData.instance_id = 0;
 		PendingTranslocateData.y = ts->y = Spell.base[0];
 		PendingTranslocateData.x = ts->x = Spell.base[1];
@@ -5287,7 +5288,7 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	}
 
 	// check to make sure the zone is valid
-	const char *target_zone_name = database.GetZoneName(zoneid);
+	const char *target_zone_name = ZoneName(zoneid);
 	if(target_zone_name == nullptr)
 		return;
 
@@ -5296,8 +5297,9 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 		m_pp.binds[4].instance_id = zone->GetInstanceID();
 	}
 
-	if (x == 0 && y == 0 && z ==0)
-		database.GetSafePoints(m_pp.binds[4].zoneId, 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+	if (x == 0 && y == 0 && z == 0) {
+		content_db.GetSafePoints(ZoneName(m_pp.binds[4].zoneId), 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+	}
 	else {
 		m_pp.binds[4].x = x;
 		m_pp.binds[4].y = y;
@@ -6122,16 +6124,16 @@ void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 coun
 
 void Client::SendZonePoints()
 {
-	int count = 0;
-	LinkedListIterator<ZonePoint*> iterator(zone->zone_point_list);
+	int                             count = 0;
+	LinkedListIterator<ZonePoint *> iterator(zone->zone_point_list);
 	iterator.Reset();
-	while(iterator.MoreElements())
-	{
-		ZonePoint* data = iterator.GetData();
-		if(ClientVersionBit() & data->client_version_mask)
-		{
+	while (iterator.MoreElements()) {
+		ZonePoint *data = iterator.GetData();
+
+		if (ClientVersionBit() & data->client_version_mask) {
 			count++;
 		}
+
 		iterator.Advance();
 	}
 
@@ -6145,6 +6147,17 @@ void Client::SendZonePoints()
 	while(iterator.MoreElements())
 	{
 		ZonePoint* data = iterator.GetData();
+
+		LogZonePoints(
+			"Sending zone point to client [{}] mask [{}] x [{}] y [{}] z [{}] number [{}]",
+			GetCleanName(),
+			ClientVersionBit() & data->client_version_mask ? "true" : "false",
+			data->x,
+			data->y,
+			data->z,
+			data->number
+		);
+
 		if(ClientVersionBit() & data->client_version_mask)
 		{
 			zp->zpe[i].iterator = data->number;
@@ -6158,6 +6171,7 @@ void Client::SendZonePoints()
 		}
 		iterator.Advance();
 	}
+
 	FastQueuePacket(&outapp);
 }
 
@@ -6206,21 +6220,21 @@ void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 
 	if (id == "create") {
 		// extra tries to create the npc_type ID within the range for the current zone (zone_id * 1000)
-		database.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
+		content_db.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
 	}
 	else if (id == "add") {
 		// extra sets the respawn timer for add
-		database.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
+		content_db.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
 	}
 	else if (id == "update") {
-		database.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 	}
 	else if (id == "remove") {
-		database.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 		target_npc->Depop(false);
 	}
 	else if (id == "delete") {
-		database.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
+		content_db.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
 		target_npc->Depop(false);
 	}
 	else {
@@ -6324,7 +6338,7 @@ void Client::Doppelganger(uint16 spell_id, Mob *target, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(pet.npc_id);
 	if(npc_type == nullptr) {
 		LogError("Unknown npc type for doppelganger spell id: [{}]", spell_id);
 		Message(0,"Unable to find pet!");
@@ -6849,7 +6863,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	for (auto iter = item_faction_bonuses.begin(); iter != item_faction_bonuses.end(); ++iter) {
 		memset(&faction_buf, 0, sizeof(faction_buf));
 
-		if(!database.GetFactionName((int32)((*iter).first), faction_buf, sizeof(faction_buf)))
+		if(!content_db.GetFactionName((int32)((*iter).first), faction_buf, sizeof(faction_buf)))
 			strcpy(faction_buf, "Not in DB");
 
 		if((*iter).second > 0) {
@@ -7816,7 +7830,7 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 	if(pFaction > 0)
 	{
 		//Get the faction data from the database
-		if(database.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
+		if(content_db.GetFactionData(&fmods, p_class, p_race, p_deity, pFaction))
 		{
 			//Get the players current faction with pFaction
 			tmpFactionValue = GetCharacterFactionLevel(pFaction);
@@ -7851,10 +7865,11 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 	int32 current_value;
 
 	// Get the npc faction list
-	if (!database.GetNPCFactionList(npc_id, faction_id, npc_value, temp))
+	if (!content_db.GetNPCFactionList(npc_id, faction_id, npc_value, temp)) {
 		return;
-	for (int i = 0; i < MAX_NPC_FACTIONS; i++)
-	{
+	}
+
+	for (int i = 0; i < MAX_NPC_FACTIONS; i++) {
 		int32 faction_before_hit;
 		int32 faction_to_use_for_messaging;
 		FactionMods fm;
@@ -7867,8 +7882,7 @@ void Client::SetFactionLevel(uint32 char_id, uint32 npc_id, uint8 char_class, ui
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(),
-			faction_id[i]);
+		content_db.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(), faction_id[i]);
 
 		if (quest)
 		{
@@ -7917,7 +7931,7 @@ void Client::SetFactionLevel2(uint32 char_id, int32 faction_id, uint8 char_class
 		// Find out starting faction for this faction
 		// It needs to be used to adj max and min personal
 		// The range is still the same, 1200-3000(4200), but adjusted for base
-		database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(),
+		content_db.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(),
 			faction_id);
 
 		// Adjust the amount you can go up or down so the resulting range
@@ -8018,7 +8032,7 @@ return;
 int32 Client::GetModCharacterFactionLevel(int32 faction_id) {
 	int32 Modded = GetCharacterFactionLevel(faction_id);
 	FactionMods fm;
-	if (database.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(), faction_id))
+	if (content_db.GetFactionData(&fm, GetClass(), GetFactionRace(), GetDeity(), faction_id))
 	{
 		Modded += fm.base + fm.class_mod + fm.race_mod + fm.deity_mod;
 
@@ -8039,7 +8053,7 @@ void Client::MerchantRejectMessage(Mob *merchant, int primaryfaction)
 
 	// If a faction is involved, get the data.
 	if (primaryfaction > 0) {
-		if (database.GetFactionData(&fmod, GetClass(), GetFactionRace(), GetDeity(), primaryfaction)) {
+		if (content_db.GetFactionData(&fmod, GetClass(), GetFactionRace(), GetDeity(), primaryfaction)) {
 			tmpFactionValue = GetCharacterFactionLevel(primaryfaction);
 			lowestvalue = std::min(std::min(tmpFactionValue, fmod.deity_mod),
 						  std::min(fmod.class_mod, fmod.race_mod));
@@ -8124,7 +8138,7 @@ void Client::SendFactionMessage(int32 tmpvalue, int32 faction_id, int32 faction_
 		faction_value = faction_before_hit;
 
 	// default to Faction# if we couldn't get the name from the ID
-	if (database.GetFactionName(faction_id, name, sizeof(name)) == false)
+	if (content_db.GetFactionName(faction_id, name, sizeof(name)) == false)
 		snprintf(name, sizeof(name), "Faction%i", faction_id);
 
 	if (tmpvalue == 0 || temp == 1 || temp == 2)
@@ -9297,7 +9311,7 @@ void Client::SetBotOption(BotOwnerOption boo, bool flag) {
 void Client::SendToGuildHall()
 {
 	std::string zone_short_name = "guildhall";
-	uint32      zone_id         = database.GetZoneID(zone_short_name.c_str());
+	uint32      zone_id         = ZoneID(zone_short_name.c_str());
 	if (zone_id == 0) {
 		return;
 	}

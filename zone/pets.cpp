@@ -27,6 +27,7 @@
 
 #include "pets.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 #include <string>
 
@@ -211,14 +212,14 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 
 	//lookup our pets table record for this type
 	PetRecord record;
-	if(!database.GetPoweredPetEntry(pettype, act_power, &record)) {
+	if(!content_db.GetPoweredPetEntry(pettype, act_power, &record)) {
 		Message(Chat::Red, "Unable to find data for pet %s", pettype);
 		LogError("Unable to find data for pet [{}], check pets table", pettype);
 		return;
 	}
 
 	//find the NPC data for the specified NPC type
-	const NPCType *base = database.LoadNPCTypesData(record.npc_type);
+	const NPCType *base = content_db.LoadNPCTypesData(record.npc_type);
 	if(base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for pet %s", pettype);
 		LogError("Unable to load NPC data for pet [{}] (NPC ID [{}]), check pets and npc_types tables", pettype, record.npc_type);
@@ -230,7 +231,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memcpy(npc_type, base, sizeof(NPCType));
 
 	// If pet power is set to -1 in the DB, use stat scaling
-	if ((this->IsClient() 
+	if ((this->IsClient()
 #ifdef BOTS
 		|| this->IsBot()
 #endif
@@ -348,7 +349,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 									"130, 139, 141, 183, 236, 237, 238, 239, 254, 266, 329, 330, 378, 379, "
 									"380, 381, 382, 383, 404, 522) "
 									"ORDER BY RAND() LIMIT 1", zone->GetShortName());
-		auto results = database.QueryDatabase(query);
+		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
 			safe_delete(npc_type);
 			return;
@@ -364,7 +365,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 			monsterid = 567;
 
 		// give the summoned pet the attributes of the monster we found
-		const NPCType* monster = database.LoadNPCTypesData(monsterid);
+		const NPCType* monster = content_db.LoadNPCTypesData(monsterid);
 		if(monster) {
 			npc_type->race = monster->race;
 			npc_type->size = monster->size;
@@ -389,7 +390,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 	memset(petinv, 0, sizeof(petinv));
 	const EQ::ItemData *item = nullptr;
 
-	if (database.GetBasePetItems(record.equipmentset, petinv)) {
+	if (content_db.GetBasePetItems(record.equipmentset, petinv)) {
 		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++)
 			if (petinv[i]) {
 				item = database.GetItem(petinv[i]);
@@ -620,7 +621,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 
 		if (item2) {
 			bool noDrop=(item2->NoDrop == 0); // Field is reverse logic
-			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && 
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
 				_CLIENTPET(this) && GetPetType() <= petOther);
 
 			if (!noDrop || petCanHaveNoDrop) {

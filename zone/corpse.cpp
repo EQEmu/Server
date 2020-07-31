@@ -141,7 +141,7 @@ Corpse* Corpse::LoadCharacterCorpseEntity(uint32 in_dbid, uint32 in_charid, std:
 	pc->consented_guild_id = guild_consent_id;
 
 	pc->UpdateEquipmentLight(); // itemlist populated above..need to determine actual values
-	
+
 	safe_delete_array(pcs);
 
 	return pc;
@@ -339,7 +339,7 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 		// TODO soulbound items need not be added to corpse, but they need
 		// to go into the regular slots on the player, out of bags
 		std::list<uint32> removed_list;
-		
+
 		// ideally, we would start at invslot::slotGeneral1 and progress to invslot::slotCursor..
 		// ..then regress and process invslot::EQUIPMENT_BEGIN through invslot::EQUIPMENT_END...
 		// without additional work to database loading of player corpses, this order is not
@@ -837,7 +837,7 @@ bool Corpse::Process() {
 			spc->zone_id = zone->graveyard_zoneid();
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
-			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), database.GetZoneName(zone->graveyard_zoneid()));
+			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), ZoneName(zone->graveyard_zoneid()));
 			corpse_db_id = 0;
 		}
 
@@ -941,7 +941,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		SendLootReqErrorPacket(client, LootResponse::TooFar);
 		return;
 	}
-	
+
 	if (being_looted_by != 0xFFFFFFFF && being_looted_by != client->GetID()) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		return;
@@ -1078,16 +1078,15 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	auto loot_slot = EQ::invslot::CORPSE_BEGIN;
 	auto corpse_mask = client->GetInv().GetLookup()->CorpseBitmask;
-	
+
 	for (auto item_data : itemlist) {
 		// every loot session must either set all items' lootslots to 'invslot::SLOT_INVALID'
 		// or to a valid enumerated client-versioned corpse slot (lootslot is not equip_slot)
 		item_data->lootslot = 0xFFFF;
-		
+
 		// align server and client corpse slot mappings so translators can function properly
 		while (loot_slot <= EQ::invslot::CORPSE_END && (((uint64)1 << loot_slot) & corpse_mask) == 0)
 			++loot_slot;
-		
 		if (loot_slot > EQ::invslot::CORPSE_END)
 			continue;
 
@@ -1098,7 +1097,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			if (item_data->equip_slot < EQ::invslot::POSSESSIONS_BEGIN || item_data->equip_slot > EQ::invslot::POSSESSIONS_END)
 				continue;
 		}
-		
+
 		const auto *item = database.GetItem(item_data->item_id);
 		auto inst = database.CreateItem(
 			item,
@@ -1121,7 +1120,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 		client->SendItemPacket(loot_slot, inst, ItemPacketLoot);
 		safe_delete(inst);
-		
+
 		item_data->lootslot = loot_slot++;
 	}
 
@@ -1581,14 +1580,14 @@ void Corpse::UpdateEquipmentLight()
 		if (EQ::lightsource::IsLevelGreater(item->Light, m_Light.Type[EQ::lightsource::LightEquipment]))
 			m_Light.Type[EQ::lightsource::LightEquipment] = item->Light;
 	}
-	
+
 	uint8 general_light_type = 0;
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		if ((*iter)->equip_slot < EQ::invslot::GENERAL_BEGIN || (*iter)->equip_slot > EQ::invslot::GENERAL_END) { continue; }
 		
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
-		
+
 		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 

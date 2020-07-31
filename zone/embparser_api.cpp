@@ -17,6 +17,7 @@
 */
 
 #include "../common/features.h"
+#include "../common/content/world_content_service.h"
 
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
@@ -2913,7 +2914,7 @@ XS(XS__countitem) {
 }
 
 XS(XS__getitemname);
-XS(XS__getitemname) {	
+XS(XS__getitemname) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::getitemname(uint32 item_id)");
@@ -3216,7 +3217,7 @@ XS(XS__CheckInstanceByCharID) {
 	if (items != 2) {
 		Perl_croak(aTHX_ "Usage: quest::CheckInstanceByCharID(uint16 instance_id, uint32 char_id)");
 	}
-	
+
 	bool RETVAL;
 	dXSTARG;
 
@@ -5194,7 +5195,7 @@ XS(XS__log) {
 	else {
 		uint8       log_category = (uint8)SvIV(ST(0));
 		std::string log_message = (std::string) SvPV_nolen(ST(1));
-		
+
 		if (log_category >= Logs::MaxCategoryID) {
 			return;
 		}
@@ -5263,11 +5264,11 @@ XS(XS__set_rule) {
 	dXSARGS;
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::set_rule(string rule_name, string rule_value)");
-	
+
 	std::string rule_name = (std::string) SvPV_nolen(ST(0));
 	std::string rule_value = (std::string) SvPV_nolen(ST(1));
 	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
-	
+
 	XSRETURN_EMPTY;
 }
 
@@ -5351,6 +5352,682 @@ XS(XS__delete_data) {
 	XSRETURN(1);
 }
 
+
+XS(XS__IsClassicEnabled);
+XS(XS__IsClassicEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_classic_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsClassicEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheRuinsOfKunarkEnabled);
+XS(XS__IsTheRuinsOfKunarkEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_ruins_of_kunark_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheRuinsOfKunarkEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheScarsOfVeliousEnabled);
+XS(XS__IsTheScarsOfVeliousEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_scars_of_velious_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheScarsOfVeliousEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheShadowsOfLuclinEnabled);
+XS(XS__IsTheShadowsOfLuclinEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_shadows_of_luclin_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheShadowsOfLuclinEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsThePlanesOfPowerEnabled);
+XS(XS__IsThePlanesOfPowerEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_planes_of_power_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsThePlanesOfPowerEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheLegacyOfYkeshaEnabled);
+XS(XS__IsTheLegacyOfYkeshaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_legacy_of_ykesha_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheLegacyOfYkeshaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsLostDungeonsOfNorrathEnabled);
+XS(XS__IsLostDungeonsOfNorrathEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_lost_dungeons_of_norrath_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsLostDungeonsOfNorrathEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsGatesOfDiscordEnabled);
+XS(XS__IsGatesOfDiscordEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_gates_of_discord_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsGatesOfDiscordEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsOmensOfWarEnabled);
+XS(XS__IsOmensOfWarEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_omens_of_war_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsOmensOfWarEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsDragonsOfNorrathEnabled);
+XS(XS__IsDragonsOfNorrathEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_dragons_of_norrath_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsDragonsOfNorrathEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsDepthsOfDarkhollowEnabled);
+XS(XS__IsDepthsOfDarkhollowEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_depths_of_darkhollow_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsDepthsOfDarkhollowEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsProphecyOfRoEnabled);
+XS(XS__IsProphecyOfRoEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_prophecy_of_ro_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsProphecyOfRoEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheSerpentsSpineEnabled);
+XS(XS__IsTheSerpentsSpineEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_serpents_spine_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheSerpentsSpineEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBuriedSeaEnabled);
+XS(XS__IsTheBuriedSeaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_buried_sea_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBuriedSeaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsSecretsOfFaydwerEnabled);
+XS(XS__IsSecretsOfFaydwerEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_secrets_of_faydwer_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsSecretsOfFaydwerEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsSeedsOfDestructionEnabled);
+XS(XS__IsSeedsOfDestructionEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_seeds_of_destruction_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsSeedsOfDestructionEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsUnderfootEnabled);
+XS(XS__IsUnderfootEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_underfoot_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsUnderfootEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsHouseOfThuleEnabled);
+XS(XS__IsHouseOfThuleEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_house_of_thule_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsHouseOfThuleEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsVeilOfAlarisEnabled);
+XS(XS__IsVeilOfAlarisEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_veil_of_alaris_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsVeilOfAlarisEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsRainOfFearEnabled);
+XS(XS__IsRainOfFearEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_rain_of_fear_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsRainOfFearEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCallOfTheForsakenEnabled);
+XS(XS__IsCallOfTheForsakenEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_call_of_the_forsaken_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCallOfTheForsakenEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheDarkendSeaEnabled);
+XS(XS__IsTheDarkendSeaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_darkend_sea_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheDarkendSeaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBrokenMirrorEnabled);
+XS(XS__IsTheBrokenMirrorEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_broken_mirror_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBrokenMirrorEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsEmpiresOfKunarkEnabled);
+XS(XS__IsEmpiresOfKunarkEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_empires_of_kunark_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsEmpiresOfKunarkEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsRingOfScaleEnabled);
+XS(XS__IsRingOfScaleEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_ring_of_scale_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsRingOfScaleEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBurningLandsEnabled);
+XS(XS__IsTheBurningLandsEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_burning_lands_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBurningLandsEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTormentOfVeliousEnabled);
+XS(XS__IsTormentOfVeliousEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_torment_of_velious_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTormentOfVeliousEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionClassic);
+XS(XS__IsCurrentExpansionClassic) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_classic()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionClassic();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheRuinsOfKunark);
+XS(XS__IsCurrentExpansionTheRuinsOfKunark) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_ruins_of_kunark()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheRuinsOfKunark();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheScarsOfVelious);
+XS(XS__IsCurrentExpansionTheScarsOfVelious) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_scars_of_velious()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheScarsOfVelious();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheShadowsOfLuclin);
+XS(XS__IsCurrentExpansionTheShadowsOfLuclin) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_shadows_of_luclin()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheShadowsOfLuclin();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionThePlanesOfPower);
+XS(XS__IsCurrentExpansionThePlanesOfPower) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_planes_of_power()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionThePlanesOfPower();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheLegacyOfYkesha);
+XS(XS__IsCurrentExpansionTheLegacyOfYkesha) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_legacy_of_ykesha()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheLegacyOfYkesha();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionLostDungeonsOfNorrath);
+XS(XS__IsCurrentExpansionLostDungeonsOfNorrath) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_lost_dungeons_of_norrath()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionGatesOfDiscord);
+XS(XS__IsCurrentExpansionGatesOfDiscord) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_gates_of_discord()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionGatesOfDiscord();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionOmensOfWar);
+XS(XS__IsCurrentExpansionOmensOfWar) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_omens_of_war()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionOmensOfWar();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionDragonsOfNorrath);
+XS(XS__IsCurrentExpansionDragonsOfNorrath) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_dragons_of_norrath()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionDragonsOfNorrath();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionDepthsOfDarkhollow);
+XS(XS__IsCurrentExpansionDepthsOfDarkhollow) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_depths_of_darkhollow()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionDepthsOfDarkhollow();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionProphecyOfRo);
+XS(XS__IsCurrentExpansionProphecyOfRo) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_prophecy_of_ro()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionProphecyOfRo();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheSerpentsSpine);
+XS(XS__IsCurrentExpansionTheSerpentsSpine) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_serpents_spine()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheSerpentsSpine();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBuriedSea);
+XS(XS__IsCurrentExpansionTheBuriedSea) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_buried_sea()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBuriedSea();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionSecretsOfFaydwer);
+XS(XS__IsCurrentExpansionSecretsOfFaydwer) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_secrets_of_faydwer()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionSecretsOfFaydwer();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionSeedsOfDestruction);
+XS(XS__IsCurrentExpansionSeedsOfDestruction) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_seeds_of_destruction()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionSeedsOfDestruction();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionUnderfoot);
+XS(XS__IsCurrentExpansionUnderfoot) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_underfoot()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionUnderfoot();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionHouseOfThule);
+XS(XS__IsCurrentExpansionHouseOfThule) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_house_of_thule()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionHouseOfThule();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionVeilOfAlaris);
+XS(XS__IsCurrentExpansionVeilOfAlaris) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_veil_of_alaris()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionVeilOfAlaris();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionRainOfFear);
+XS(XS__IsCurrentExpansionRainOfFear) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_rain_of_fear()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionRainOfFear();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionCallOfTheForsaken);
+XS(XS__IsCurrentExpansionCallOfTheForsaken) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_call_of_the_forsaken()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionCallOfTheForsaken();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheDarkendSea);
+XS(XS__IsCurrentExpansionTheDarkendSea) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_darkend_sea()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheDarkendSea();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBrokenMirror);
+XS(XS__IsCurrentExpansionTheBrokenMirror) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_broken_mirror()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBrokenMirror();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionEmpiresOfKunark);
+XS(XS__IsCurrentExpansionEmpiresOfKunark) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_empires_of_kunark()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionEmpiresOfKunark();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionRingOfScale);
+XS(XS__IsCurrentExpansionRingOfScale) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_ring_of_scale()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionRingOfScale();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBurningLands);
+XS(XS__IsCurrentExpansionTheBurningLands) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_burning_lands()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBurningLands();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTormentOfVelious);
+XS(XS__IsCurrentExpansionTormentOfVelious) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_torment_of_velious()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTormentOfVelious();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsContentFlagEnabled);
+XS(XS__IsContentFlagEnabled) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_content_flag_enabled(string flag_name)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsContentFlagEnabled(flag_name);
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__SetContentFlag);
+XS(XS__SetContentFlag)
+{
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::set_content_flag(string flag_name, enabled)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+	bool        enabled   = (int) SvIV(ST(1)) != 0;
+	ZoneStore::SetContentFlag(flag_name, enabled);
+	XSRETURN_EMPTY;
+}
 
 /*
 This is the callback perl will look for to setup the
@@ -5691,6 +6368,70 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "zone"), XS__zone, file);
 	newXS(strcpy(buf, "zonegroup"), XS__zonegroup, file);
 	newXS(strcpy(buf, "zoneraid"), XS__zoneraid, file);
+
+	/**
+	 * Expansions
+	 */
+	newXS(strcpy(buf, "is_classic_enabled"), XS__IsClassicEnabled, file);
+	newXS(strcpy(buf, "is_the_ruins_of_kunark_enabled"), XS__IsTheRuinsOfKunarkEnabled, file);
+	newXS(strcpy(buf, "is_the_scars_of_velious_enabled"), XS__IsTheScarsOfVeliousEnabled, file);
+	newXS(strcpy(buf, "is_the_shadows_of_luclin_enabled"), XS__IsTheShadowsOfLuclinEnabled, file);
+	newXS(strcpy(buf, "is_the_planes_of_power_enabled"), XS__IsThePlanesOfPowerEnabled, file);
+	newXS(strcpy(buf, "is_the_legacy_of_ykesha_enabled"), XS__IsTheLegacyOfYkeshaEnabled, file);
+	newXS(strcpy(buf, "is_lost_dungeons_of_norrath_enabled"), XS__IsLostDungeonsOfNorrathEnabled, file);
+	newXS(strcpy(buf, "is_gates_of_discord_enabled"), XS__IsGatesOfDiscordEnabled, file);
+	newXS(strcpy(buf, "is_omens_of_war_enabled"), XS__IsOmensOfWarEnabled, file);
+	newXS(strcpy(buf, "is_dragons_of_norrath_enabled"), XS__IsDragonsOfNorrathEnabled, file);
+	newXS(strcpy(buf, "is_depths_of_darkhollow_enabled"), XS__IsDepthsOfDarkhollowEnabled, file);
+	newXS(strcpy(buf, "is_prophecy_of_ro_enabled"), XS__IsProphecyOfRoEnabled, file);
+	newXS(strcpy(buf, "is_the_serpents_spine_enabled"), XS__IsTheSerpentsSpineEnabled, file);
+	newXS(strcpy(buf, "is_the_buried_sea_enabled"), XS__IsTheBuriedSeaEnabled, file);
+	newXS(strcpy(buf, "is_secrets_of_faydwer_enabled"), XS__IsSecretsOfFaydwerEnabled, file);
+	newXS(strcpy(buf, "is_seeds_of_destruction_enabled"), XS__IsSeedsOfDestructionEnabled, file);
+	newXS(strcpy(buf, "is_underfoot_enabled"), XS__IsUnderfootEnabled, file);
+	newXS(strcpy(buf, "is_house_of_thule_enabled"), XS__IsHouseOfThuleEnabled, file);
+	newXS(strcpy(buf, "is_veil_of_alaris_enabled"), XS__IsVeilOfAlarisEnabled, file);
+	newXS(strcpy(buf, "is_rain_of_fear_enabled"), XS__IsRainOfFearEnabled, file);
+	newXS(strcpy(buf, "is_call_of_the_forsaken_enabled"), XS__IsCallOfTheForsakenEnabled, file);
+	newXS(strcpy(buf, "is_the_darkend_sea_enabled"), XS__IsTheDarkendSeaEnabled, file);
+	newXS(strcpy(buf, "is_the_broken_mirror_enabled"), XS__IsTheBrokenMirrorEnabled, file);
+	newXS(strcpy(buf, "is_empires_of_kunark_enabled"), XS__IsEmpiresOfKunarkEnabled, file);
+	newXS(strcpy(buf, "is_ring_of_scale_enabled"), XS__IsRingOfScaleEnabled, file);
+	newXS(strcpy(buf, "is_the_burning_lands_enabled"), XS__IsTheBurningLandsEnabled, file);
+	newXS(strcpy(buf, "is_torment_of_velious_enabled"), XS__IsTormentOfVeliousEnabled, file);
+	newXS(strcpy(buf, "is_current_expansion_classic"), XS__IsCurrentExpansionClassic, file);
+	newXS(strcpy(buf, "is_current_expansion_the_ruins_of_kunark"), XS__IsCurrentExpansionTheRuinsOfKunark, file);
+	newXS(strcpy(buf, "is_current_expansion_the_scars_of_velious"), XS__IsCurrentExpansionTheScarsOfVelious, file);
+	newXS(strcpy(buf, "is_current_expansion_the_shadows_of_luclin"), XS__IsCurrentExpansionTheShadowsOfLuclin, file);
+	newXS(strcpy(buf, "is_current_expansion_the_planes_of_power"), XS__IsCurrentExpansionThePlanesOfPower, file);
+	newXS(strcpy(buf, "is_current_expansion_the_legacy_of_ykesha"), XS__IsCurrentExpansionTheLegacyOfYkesha, file);
+	newXS(strcpy(buf, "is_current_expansion_lost_dungeons_of_norrath"), XS__IsCurrentExpansionLostDungeonsOfNorrath, file);
+	newXS(strcpy(buf, "is_current_expansion_gates_of_discord"), XS__IsCurrentExpansionGatesOfDiscord, file);
+	newXS(strcpy(buf, "is_current_expansion_omens_of_war"), XS__IsCurrentExpansionOmensOfWar, file);
+	newXS(strcpy(buf, "is_current_expansion_dragons_of_norrath"), XS__IsCurrentExpansionDragonsOfNorrath, file);
+	newXS(strcpy(buf, "is_current_expansion_depths_of_darkhollow"), XS__IsCurrentExpansionDepthsOfDarkhollow, file);
+	newXS(strcpy(buf, "is_current_expansion_prophecy_of_ro"), XS__IsCurrentExpansionProphecyOfRo, file);
+	newXS(strcpy(buf, "is_current_expansion_the_serpents_spine"), XS__IsCurrentExpansionTheSerpentsSpine, file);
+	newXS(strcpy(buf, "is_current_expansion_the_buried_sea"), XS__IsCurrentExpansionTheBuriedSea, file);
+	newXS(strcpy(buf, "is_current_expansion_secrets_of_faydwer"), XS__IsCurrentExpansionSecretsOfFaydwer, file);
+	newXS(strcpy(buf, "is_current_expansion_seeds_of_destruction"), XS__IsCurrentExpansionSeedsOfDestruction, file);
+	newXS(strcpy(buf, "is_current_expansion_underfoot"), XS__IsCurrentExpansionUnderfoot, file);
+	newXS(strcpy(buf, "is_current_expansion_house_of_thule"), XS__IsCurrentExpansionHouseOfThule, file);
+	newXS(strcpy(buf, "is_current_expansion_veil_of_alaris"), XS__IsCurrentExpansionVeilOfAlaris, file);
+	newXS(strcpy(buf, "is_current_expansion_rain_of_fear"), XS__IsCurrentExpansionRainOfFear, file);
+	newXS(strcpy(buf, "is_current_expansion_call_of_the_forsaken"), XS__IsCurrentExpansionCallOfTheForsaken, file);
+	newXS(strcpy(buf, "is_current_expansion_the_darkend_sea"), XS__IsCurrentExpansionTheDarkendSea, file);
+	newXS(strcpy(buf, "is_current_expansion_the_broken_mirror"), XS__IsCurrentExpansionTheBrokenMirror, file);
+	newXS(strcpy(buf, "is_current_expansion_empires_of_kunark"), XS__IsCurrentExpansionEmpiresOfKunark, file);
+	newXS(strcpy(buf, "is_current_expansion_ring_of_scale"), XS__IsCurrentExpansionRingOfScale, file);
+	newXS(strcpy(buf, "is_current_expansion_the_burning_lands"), XS__IsCurrentExpansionTheBurningLands, file);
+	newXS(strcpy(buf, "is_current_expansion_torment_of_velious"), XS__IsCurrentExpansionTormentOfVelious, file);
+
+	/**
+	 * Content flags
+	 */
+	newXS(strcpy(buf, "is_content_flag_enabled"), XS__IsContentFlagEnabled, file);
+	newXS(strcpy(buf, "set_content_flag"), XS__SetContentFlag, file);
 
 	XSRETURN_YES;
 }

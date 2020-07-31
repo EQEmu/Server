@@ -61,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -789,7 +790,7 @@ void Client::CompleteConnect()
 	//enforce some rules..
 	if (!CanBeInZone()) {
 		LogDebug("[CLIENT] Kicking char from zone, not allowed here");
-		GoToSafeCoords(database.GetZoneID("arena"), 0);
+		GoToSafeCoords(ZoneID("arena"), 0);
 		return;
 	}
 
@@ -6418,14 +6419,14 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	uint16 zid = gmzr->zone_id;
 	if (gmzr->zone_id == 0)
 		zid = zonesummon_id;
-	const char * zname = database.GetZoneName(zid);
+	const char * zname = ZoneName(zid);
 	if (zname == nullptr)
 		tarzone[0] = 0;
 	else
 		strcpy(tarzone, zname);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!database.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
+	if (!content_db.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
 		tarzone[0] = 0;
 	}
 
@@ -11796,7 +11797,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeskillFavorites_Struct)) {
 		LogError("Invalid size for TradeskillFavorites_Struct: Expected: [{}], Got: [{}]",
-			sizeof(TradeskillFavorites_Struct), app->size);
+				 sizeof(TradeskillFavorites_Struct), app->size);
 		return;
 	}
 
@@ -11846,90 +11847,155 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	if (first)	//no favorites....
 		return;
 
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list "
-		"WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		"AND tr.must_learn & 0x20 <> 0x20 AND "
-		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
+	// TODO: Clean this up
+	const std::string query = StringFormat(
+		SQL (
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			tr.tradeskill
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				tr.enabled <> 0
+				AND tr.id IN (%s)
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+			(
+				tr.must_learn & 0x3 <> 0
+			)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+				%s
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if(
+				tre.item_id %s
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= %u
 
-	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
-	return;
+				LIMIT
+				100
+		),
+		favoriteIDs.c_str(),
+		ContentFilterCriteria::apply().c_str(),
+		containers.c_str(),
+		combineObjectSlots
+	);
+
+	SendTradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 }
 
 void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipesSearch_Struct)) {
-		LogError("Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
-			sizeof(RecipesSearch_Struct), app->size);
+		LogError(
+			"Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
+			sizeof(RecipesSearch_Struct),
+			app->size
+		);
+
 		return;
 	}
 
-	RecipesSearch_Struct* rss = (RecipesSearch_Struct*)app->pBuffer;
-	rss->query[55] = '\0';	//just to be sure.
+	auto* p_recipes_search_struct = (RecipesSearch_Struct*)app->pBuffer;
+	p_recipes_search_struct->query[55] = '\0';	//just to be sure.
 
+	LogTradeskills(
+		"[Handle_OP_RecipesSearch] Requested search recipes for object_type [{}] some_id [{}]",
+		p_recipes_search_struct->object_type,
+		p_recipes_search_struct->some_id
+	);
 
-	LogDebug("Requested search recipes for: [{}] - [{}]\n", rss->object_type, rss->some_id);
-
-	// make where clause segment for container(s)
-	char containers[30];
-	uint32 combineObjectSlots;
-	if (rss->some_id == 0) {
+	char   containers_where_clause[30];
+	uint32 combine_object_slots;
+	if (p_recipes_search_struct->some_id == 0) {
 		// world combiner so no item number
-		snprintf(containers, 29, "= %u", rss->object_type);
-		combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "= %u", p_recipes_search_struct->object_type);
+		combine_object_slots = 10;
 	}
 	else {
 		// container in inventory
-		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
-		auto item = database.GetItem(rss->some_id);
-		if (!item)
-		{
-			LogError("Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.\n", rss->some_id);
-			combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "in (%u,%u)", p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
+		auto item = database.GetItem(p_recipes_search_struct->some_id);
+		if (!item) {
+			LogError(
+				"Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.",
+				p_recipes_search_struct->some_id
+			);
+			combine_object_slots = 10;
 		}
-		else
-		{
-			combineObjectSlots = item->BagSlots;
+		else {
+			combine_object_slots = item->BagSlots;
 		}
 	}
 
-	std::string searchClause;
-
-	//omit the rlike clause if query is empty
-	if (rss->query[0] != 0) {
+	std::string search_clause;
+	if (p_recipes_search_struct->query[0] != 0) {
 		char buf[120];	//larger than 2X rss->query
-		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-		searchClause = StringFormat("name rlike '%s' AND", buf);
+		database.DoEscapeString(buf, p_recipes_search_struct->query, strlen(p_recipes_search_struct->query));
+		search_clause = StringFormat("name rlike '%s' AND", buf);
 	}
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		"AND tr.must_learn & 0x20 <> 0x20 "
-		"AND ((tr.must_learn & 0x3 <> 0 "
-		"AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 200 ",
-		CharacterID(), searchClause.c_str(),
-		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots);
-	TradeskillSearchResults(query, rss->object_type, rss->some_id);
-	return;
+	// TODO: Clean this up
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			tr.tradeskill
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				{} tr.trivial >= {}
+				AND tr.trivial <= {}
+				AND tr.enabled <> 0
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+					(
+						tr.must_learn & 0x3 <> 0
+					)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+			{}
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if (
+				tre.item_id {}
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= {}
+
+				LIMIT
+				200
+		),
+		search_clause,
+		p_recipes_search_struct->mintrivial,
+		p_recipes_search_struct->maxtrivial,
+		ContentFilterCriteria::apply(),
+		containers_where_clause,
+		combine_object_slots
+	);
+
+	SendTradeskillSearchResults(query, p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
 }
 
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
@@ -12375,7 +12441,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
 	if (m_pp.binds[4].zoneId != 0 && m_pp.binds[4].zoneId != 189) {
-		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
+		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, ZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
 
@@ -12389,10 +12455,15 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	uint32 zoneid = 0;
 	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
-	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
-	auto results = database.QueryDatabase(query);
+	std::string query = StringFormat(
+		"SELECT zone_id, bind_id, x, y, z FROM start_zones "
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i %s",
+		m_pp.class_,
+		m_pp.deity,
+		m_pp.race,
+		ContentFilterCriteria::apply().c_str()
+	);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("No valid start zones found for /setstartcity");
 		return;
@@ -12423,7 +12494,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
 		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 		m_pp.class_, m_pp.deity, m_pp.race);
-	results = database.QueryDatabase(query);
+	results = content_db.QueryDatabase(query);
 	if (!results.Success())
 		return;
 
@@ -12436,7 +12507,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 			zoneid = atoi(row[0]);
 
 		char* name = nullptr;
-		database.GetZoneLongName(database.GetZoneName(zoneid), &name);
+		content_db.GetZoneLongName(ZoneName(zoneid), &name);
 		Message(Chat::Yellow, "%d - %s", zoneid, name);
 	}
 

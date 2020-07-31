@@ -77,7 +77,7 @@ namespace EQEmuCommand {
 			index++;
 		}
 
-		if (!arguments_filled || argc == 2) {
+		if (!arguments_filled || argc == 2 || cmd[{"-h", "--help"}]) {
 			std::string arguments_string;
 			for (auto &arg : arguments) {
 				arguments_string += " " + arg;
@@ -101,7 +101,7 @@ namespace EQEmuCommand {
 
 			std::cout << command_string.str() << std::endl;
 
-			exit(1);
+			exit(0);
 		}
 	}
 
@@ -168,6 +168,11 @@ namespace EQEmuCommand {
 				 * Print section header
 				 */
 				std::string command_prefix = it.first.substr(0, it.first.find(":"));
+
+				if (command_prefix.find("test") != std::string::npos) {
+					continue;
+				}
+
 				if (command_section != command_prefix) {
 					command_section = command_prefix;
 					std::cout << termcolor::reset << command_prefix << std::endl;
@@ -183,11 +188,11 @@ namespace EQEmuCommand {
 
 			std::cout << std::endl;
 
-			std::exit(1);
+			std::exit(0);
 		}
 
 		if (ran_command) {
-			std::exit(1);
+			std::exit(0);
 		}
 	}
 

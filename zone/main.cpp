@@ -1,20 +1,22 @@
-/*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2016 EQEMu Development Team (http://eqemu.org)
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; version 2 of the License.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY except by those people which sell it, which
-are required to give you total support for your newly bought product;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
 
 #define DONT_SHARED_OPCODES
 #define PLATFORM_ZONE 1
@@ -53,6 +55,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #ifdef BOTS
 #include "bot_command.h"
 #endif
+#include "zonedb.h"
+#include "zone_store.h"
 #include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
@@ -67,6 +71,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
 #include "../common/net/servertalk_server.h"
+#include "../common/content/world_content_service.h"
+#include "../common/repositories/content_flags_repository.h"
 
 #include <iostream>
 #include <string>
@@ -90,8 +96,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #else
 #include <pthread.h>
 #include "../common/unix.h"
+#include "zone_store.h"
+
 #endif
 
+volatile bool RunLoops = true;
 #ifdef __FreeBSD__
 #include <pthread_np.h>
 #endif
@@ -100,6 +109,7 @@ extern volatile bool is_zone_loaded;
 
 EntityList entity_list;
 WorldServer worldserver;
+ZoneStore zone_store;
 uint32 numclients = 0;
 char errorname[32];
 extern Zone* zone;
@@ -110,6 +120,7 @@ TaskManager *taskmanager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -240,6 +251,25 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	/**
+	 * Multi-tenancy: Content Database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort,
+			"content"
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
+	}
+
 	/* Register Log System and Settings */
 	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
 	database.LoadLogSettings(LogSys.log_settings);
@@ -293,7 +323,8 @@ int main(int argc, char** argv) {
 	}
 
 	LogInfo("Loading zone names");
-	database.LoadZoneNames();
+
+	zone_store.LoadZones();
 
 	LogInfo("Loading items");
 	if (!database.LoadItems(hotfix_name)) {
@@ -302,7 +333,7 @@ int main(int argc, char** argv) {
 	}
 
 	LogInfo("Loading npc faction lists");
-	if (!database.LoadNPCFactionLists(hotfix_name)) {
+	if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 		LogError("Loading npcs faction lists failed!");
 		return 1;
 	}
@@ -333,13 +364,13 @@ int main(int argc, char** argv) {
 	guild_mgr.LoadGuilds();
 
 	LogInfo("Loading factions");
-	database.LoadFactionData();
+	content_db.LoadFactionData();
 
 	LogInfo("Loading titles");
 	title_manager.LoadTitles();
 
 	LogInfo("Loading tributes");
-	database.LoadTributes();
+	content_db.LoadTributes();
 
 	LogInfo("Loading corpse timers");
 	database.GetDecayTimes(npcCorpseDecayTimes);
@@ -350,7 +381,7 @@ int main(int argc, char** argv) {
 
 	LogInfo("Loading commands");
 	int retval = command_init();
-	if (retval<0)
+	if (retval < 0)
 		LogError("Command loading failed");
 	else
 		LogInfo("{} commands loaded", retval);
@@ -376,6 +407,10 @@ int main(int argc, char** argv) {
 		EQ::InitializeDynamicLookups();
 		LogInfo("Initialized dynamic dictionary entries");
 	}
+
+	content_service.SetExpansionContext();
+
+	ZoneStore::LoadContentFlags();
 
 #ifdef BOTS
 	LogInfo("Loading bot commands");
@@ -426,9 +461,9 @@ int main(int argc, char** argv) {
 	if (!strlen(zone_name) || !strcmp(zone_name, ".")) {
 		LogInfo("Entering sleep mode");
 	}
-	else if (!Zone::Bootup(database.GetZoneID(zone_name), instance_id, true)) {
+	else if (!Zone::Bootup(ZoneID(zone_name), instance_id, true)) {
 		LogError("Zone Bootup failed :: Zone::Bootup");
-		zone = 0;
+		zone = nullptr;
 	}
 
 	//register all the patches we have avaliable with the stream identifier.
@@ -548,6 +583,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+			content_db.ping();
 			entity_list.UpdateWho();
 		}
 	};

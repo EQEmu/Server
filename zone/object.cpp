@@ -26,6 +26,8 @@
 
 #include "quest_parser_collection.h"
 #include "zonedb.h"
+#include "zone_store.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 
@@ -292,11 +294,11 @@ bool Object::Save()
 {
 	if (m_id) {
 		// Update existing
-		database.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
+		content_db.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
 	}
 	else {
 		// Doesn't yet exist, add now
-		m_id = database.AddObject(m_type, m_icon, m_data, m_inst);
+		m_id = content_db.AddObject(m_type, m_icon, m_data, m_inst);
 	}
 
 	return true;
@@ -306,11 +308,11 @@ uint16 Object::VarSave()
 {
 	if (m_id) {
 		// Update existing
-		database.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
+		content_db.UpdateObject(m_id, m_type, m_icon, m_data, m_inst);
 	}
 	else {
 		// Doesn't yet exist, add now
-		m_id = database.AddObject(m_type, m_icon, m_data, m_inst);
+		m_id = content_db.AddObject(m_type, m_icon, m_data, m_inst);
 	}
 	return m_id;
 }
@@ -319,7 +321,7 @@ uint16 Object::VarSave()
 void Object::Delete(bool reset_state)
 {
 	if (m_id != 0) {
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 	}
 
 	if (reset_state) {
@@ -436,7 +438,7 @@ bool Object::Process(){
 		safe_delete(outapp);
 
 		// Remove object
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 		return false;
 	}
 
@@ -460,7 +462,7 @@ void Object::RandomSpawn(bool send_packet) {
 
 	m_data.x = zone->random.Real(m_min_x, m_max_x);
 	m_data.y = zone->random.Real(m_min_y, m_max_y);
-	
+
 	if(m_data.z == BEST_Z_INVALID) {
 		glm::vec3 me;
 		me.x = m_data.x;
@@ -470,11 +472,11 @@ void Object::RandomSpawn(bool send_packet) {
 		float best_z = zone->zonemap->FindClosestZ(me, &hit);
 		if (best_z != BEST_Z_INVALID) {
 			m_data.z = best_z + 0.1f;
-		} 
+		}
 	}
 
 	LogInfo("Object::RandomSpawn([{}]): [{}] ([{}], [{}], [{}])", m_data.object_name, m_inst->GetID(), m_data.x, m_data.y, m_data.z);
-	
+
 	respawn_timer.Disable();
 
 	if(send_packet) {
@@ -520,7 +522,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 				co->drop_id = 0;
 				entity_list.QueueClients(nullptr, outapp, false);
 				safe_delete(outapp);
-				
+
 				// No longer using a tradeskill object
 				sender->SetTradeskillObject(nullptr);
 				user = nullptr;
@@ -553,7 +555,7 @@ bool Object::HandleClick(Client* sender, const ClickObject_Struct* click_object)
 		safe_delete(outapp);
 
 		// Remove object
-		database.DeleteObject(m_id);
+		content_db.DeleteObject(m_id);
 		if(!m_ground_spawn)
 			entity_list.RemoveEntity(this->GetID());
 	} else {
@@ -651,9 +653,10 @@ uint32 ZoneDatabase::AddObject(uint32 type, uint32 icon, const Object_Struct& ob
 		return 0;
 	}
 
-    // Save container contents, if container
-	if (inst && inst->IsType(EQ::item::ItemClassBag))
-        SaveWorldContainer(object.zone_id, database_id, inst);
+	// Save container contents, if container
+	if (inst && inst->IsType(EQ::item::ItemClassBag)) {
+		SaveWorldContainer(object.zone_id, database_id, inst);
+	}
 
 	return database_id;
 }
@@ -669,42 +672,53 @@ void ZoneDatabase::UpdateObject(uint32 id, uint32 type, uint32 icon, const Objec
 		charges = inst->GetCharges();
 	}
 
-	// SQL Escape object_name
-	uint32 len = strlen(object.object_name) * 2 + 1;
-	auto object_name = new char[len];
-	DoEscapeString(object_name, object.object_name, strlen(object.object_name));
+	if (inst && !inst->IsType(EQ::item::ItemClassBag)) {
+		uint32 len         = strlen(object.object_name) * 2 + 1;
+		auto   object_name = new char[len];
+		DoEscapeString(object_name, object.object_name, strlen(object.object_name));
 
-	// Save new record for object
-	std::string query = StringFormat("UPDATE object SET "
-                                    "zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
-                                    "itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
-									"size = %f, tilt_x = %f, tilt_y = %f "
-                                    "WHERE id = %i",
-                                    object.zone_id, object.x, object.y, object.z, object.heading,
-                                    item_id, charges, object_name, type, icon, 
-									object.size, object.tilt_x, object.tilt_y, id);
-    safe_delete_array(object_name);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
-		return;
+		// Save new record for object
+		std::string query = StringFormat(
+			"UPDATE object SET "
+			"zoneid = %i, xpos = %f, ypos = %f, zpos = %f, heading = %f, "
+			"itemid = %i, charges = %i, objectname = '%s', type = %i, icon = %i, "
+			"size = %f, tilt_x = %f, tilt_y = %f "
+			"WHERE id = %i",
+			object.zone_id, object.x, object.y, object.z, object.heading,
+			item_id, charges, object_name, type, icon,
+			object.size, object.tilt_x, object.tilt_y, id
+		);
+		safe_delete_array(object_name);
+		auto results = QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Unable to update object: [{}]", results.ErrorMessage().c_str());
+			return;
+		}
 	}
 
-    // Save container contents, if container
-	if (inst && inst->IsType(EQ::item::ItemClassBag))
-        SaveWorldContainer(object.zone_id, id, inst);
+	// Save container contents, if container
+	if (inst && inst->IsType(EQ::item::ItemClassBag)) {
+		SaveWorldContainer(object.zone_id, id, inst);
+	}
 }
 
+//
 Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Ground_Spawns* gs) {
 
-	std::string query = StringFormat("SELECT max_x, max_y, max_z, "
-                                    "min_x, min_y, heading, name, "
-                                    "item, max_allowed, respawn_timer "
-                                    "FROM ground_spawns "
-                                    "WHERE zoneid = %i AND (version = %u OR version = -1) "
-                                    "LIMIT 50", zone_id, version);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
+	std::string query = StringFormat(
+		"SELECT max_x, max_y, max_z, "
+		"min_x, min_y, heading, name, "
+		"item, max_allowed, respawn_timer "
+		"FROM ground_spawns "
+		"WHERE zoneid = %i AND (version = %u OR version = -1) %s "
+		"LIMIT 50",
+		zone_id,
+		version,
+		ContentFilterCriteria::apply().c_str()
+	);
+
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
 		return gs;
 	}
 
@@ -726,7 +740,10 @@ Ground_Spawns* ZoneDatabase::LoadGroundSpawns(uint32 zone_id, int16 version, Gro
 
 void ZoneDatabase::DeleteObject(uint32 id)
 {
-	// delete record of object
+	if (id == 0) {
+		return;
+	}
+
 	std::string query = StringFormat("DELETE FROM object WHERE id = %i", id);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {

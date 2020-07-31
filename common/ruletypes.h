@@ -770,6 +770,10 @@ RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is tr
 RULE_BOOL(HotReload, QuestsAutoReloadGlobalScripts, false, "When a quest, plugin, or global script changes, auto reload.")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Expansion)
+RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [-1 = ALL, 0 = Classic, 1 = Kunark etc.]")
+RULE_CATEGORY_END()
+
 RULE_CATEGORY(Instances)
 RULE_INT(Instances, ReservedInstances, 30, "Number of instance IDs which are reserved for globals. This value should not be changed while a server is running")
 RULE_BOOL(Instances, RecycleInstanceIds, true, "Setting whether free instance IDs should be recycled to prevent them from gradually running out at 32k")

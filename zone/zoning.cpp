@@ -35,6 +35,9 @@ extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern Zone* zone;
 
+#include "../common/repositories/zone_repository.h"
+#include "../common/content/world_content_service.h"
+
 
 void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 #ifdef BOTS
@@ -156,7 +159,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	}
 
 	/* Check for Valid Zone */
-	const char *target_zone_name = database.GetZoneName(target_zone_id);
+	const char *target_zone_name = ZoneName(target_zone_id);
 	if(target_zone_name == nullptr) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone ID.");
@@ -170,7 +173,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+	if(!content_db.GetSafePoints(target_zone_name, database.GetInstanceVersion(target_instance_id), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//invalid zone...
 		Message(Chat::Red, "Invalid target zone while getting safe points.");
 		LogError("Zoning [{}]: Unable to get safe coordinates for zone [{}]", GetName(), target_zone_name);
@@ -284,6 +287,55 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	//TODO: ADVENTURE ENTRANCE CHECK
 
+	/**
+	 * Expansion check
+	 */
+	if (content_service.GetCurrentExpansion() >= Expansion::Classic && !GetGM()) {
+
+		/**
+		 * Hit the zone cache first so we're not hitting the database every time someone attempts to zone
+		 */
+		bool      meets_zone_expansion_check = false;
+		bool      found_zone                 = false;
+		for (auto &z: zone_store.zones) {
+			if (z.short_name == target_zone_name && z.version == 0) {
+				found_zone = true;
+				if (z.expansion <= (content_service.GetCurrentExpansion() + 1)) {
+					meets_zone_expansion_check = true;
+					break;
+				}
+			}
+		}
+
+		/**
+		 * If we fail to find a cached zone lookup because someone just so happened to change some data, second attempt
+		 * In 99% of cases we would never get here and this would be fallback
+		 */
+		if (!found_zone) {
+			auto zones = ZoneRepository::GetWhere(
+				fmt::format(
+					"expansion <= {} AND short_name = '{}' and version = 0",
+					(content_service.GetCurrentExpansion() + 1),
+					target_zone_name
+				)
+			);
+
+			meets_zone_expansion_check = !zones.empty();
+		}
+
+		LogInfo(
+			"Checking zone request [{}] for expansion [{}] ({}) success [{}]",
+			target_zone_name,
+			(content_service.GetCurrentExpansion() + 1),
+			content_service.GetCurrentExpansionName(),
+			meets_zone_expansion_check ? "true" : "false"
+		);
+
+		if (!meets_zone_expansion_check) {
+			myerror = ZONE_ERROR_NOEXPANSION;
+		}
+	}
+
 	if(myerror == 1) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
@@ -348,7 +400,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
 
-	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, database.GetZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
+	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, ZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
 	//set the player's coordinates in the new zone so they have them
 	//when they zone into it
@@ -402,7 +454,7 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 }
 
 void Client::MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm) {
-	ProcessMovePC(database.GetZoneID(zonename), 0, x, y, z, heading, ignorerestrictions, zm);
+	ProcessMovePC(ZoneID(zonename), 0, x, y, z, heading, ignorerestrictions, zm);
 }
 
 //designed for in zone moving
@@ -424,7 +476,7 @@ void Client::MoveZone(const char *zone_short_name) {
 	ztz->response = 0;
 	ztz->current_zone_id = zone->GetZoneID();
 	ztz->current_instance_id = zone->GetInstanceID();
-	ztz->requested_zone_id = database.GetZoneID(zone_short_name);
+	ztz->requested_zone_id = ZoneID(zone_short_name);
 	ztz->admin = Admin();
 	strcpy(ztz->name, GetName());
 	ztz->guild_id = GuildID();
@@ -571,8 +623,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 	const char*	pShortZoneName = nullptr;
 	char* pZoneName = nullptr;
 
-	pShortZoneName = database.GetZoneName(zoneID);
-	database.GetZoneLongName(pShortZoneName, &pZoneName);
+	pShortZoneName = ZoneName(zoneID);
+	content_db.GetZoneLongName(pShortZoneName, &pZoneName);
 
 	if(!pZoneName) {
 		Message(Chat::Red, "Invalid zone number specified");
@@ -619,7 +671,7 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			heading = m_pp.binds[0].heading;
 
 			zonesummon_ignorerestrictions = 1;
-			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]", 
+			LogDebug("Player [{}] has died and will be zoned to bind point in zone: [{}] at LOC x=[{}], y=[{}], z=[{}], heading=[{}]",
 					GetName(), pZoneName, m_pp.binds[0].x, m_pp.binds[0].y, m_pp.binds[0].z, m_pp.binds[0].heading);
 			break;
 		case SummonPC:
@@ -628,8 +680,8 @@ void Client::ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z
 			SetHeading(heading);
 			break;
 		case Rewind:
-			LogDebug("[{}] has requested a /rewind from [{}], [{}], [{}], to [{}], [{}], [{}] in [{}]", GetName(), 
-					m_Position.x, m_Position.y, m_Position.z, 
+			LogDebug("[{}] has requested a /rewind from [{}], [{}], [{}], to [{}], [{}], [{}] in [{}]", GetName(),
+					m_Position.x, m_Position.y, m_Position.z,
 					m_RewindLocation.x, m_RewindLocation.y, m_RewindLocation.z, zone->GetShortName());
 			m_ZoneSummonLocation = glm::vec3(x, y, z);
 			m_Position = glm::vec4(m_ZoneSummonLocation, 0.0f);
@@ -917,10 +969,10 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for(; cur != end; ++cur) {
 		uint32 zoneid = *cur;
 
-		const char *short_name = database.GetZoneName(zoneid);
+		const char *short_name = ZoneName(zoneid);
 
 		char *long_name = nullptr;
-		database.GetZoneLongName(short_name, &long_name);
+		content_db.GetZoneLongName(short_name, &long_name);
 		if(long_name == nullptr)
 			long_name = empty;
 
@@ -928,7 +980,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		int16 minstatus = 0;
 		uint8 minlevel = 0;
 		char flag_name[128];
-		if(!database.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
+		if(!content_db.GetSafePoints(short_name, 0, &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_name)) {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
@@ -950,7 +1002,7 @@ bool Client::CanBeInZone() {
 	int16 minstatus = 0;
 	uint8 minlevel = 0;
 	char flag_needed[128];
-	if(!database.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
+	if(!content_db.GetSafePoints(zone->GetShortName(), zone->GetInstanceVersion(), &safe_x, &safe_y, &safe_z, &minstatus, &minlevel, flag_needed)) {
 		//this should not happen...
 		LogDebug("[CLIENT] Unable to query zone info for ourself [{}]", zone->GetShortName());
 		return(false);

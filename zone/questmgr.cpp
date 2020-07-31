@@ -35,6 +35,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 #include <iostream>
 #include <limits.h>
@@ -193,7 +194,7 @@ void QuestManager::write(const char *file, const char *str) {
 
 Mob* QuestManager::spawn2(int npc_type, int grid, int unused, const glm::vec4& position) {
 	const NPCType* tmp = 0;
-	if (tmp = database.LoadNPCTypesData(npc_type))
+	if (tmp = content_db.LoadNPCTypesData(npc_type))
 	{
 		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
@@ -217,7 +218,7 @@ Mob* QuestManager::unique_spawn(int npc_type, int grid, int unused, const glm::v
 	}
 
 	const NPCType* tmp = 0;
-	if (tmp = database.LoadNPCTypesData(npc_type))
+	if (tmp = content_db.LoadNPCTypesData(npc_type))
 	{
 		auto npc = new NPC(tmp, nullptr, position, GravityBehavior::Water);
 		npc->AddLootTable();
@@ -252,7 +253,7 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 	if (found_spawn) {
 		SpawnGroup *spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
 		if (!spawn_group) {
-			database.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
+			content_db.LoadSpawnGroupsByID(found_spawn->SpawnGroupID(), &zone->spawn_group_list);
 			spawn_group = zone->spawn_group_list.GetSpawnGroup(found_spawn->SpawnGroupID());
 			if (!spawn_group) {
 				return nullptr;
@@ -272,7 +273,7 @@ Mob *QuestManager::spawn_from_spawn2(uint32 spawn2_id)
 			return nullptr;
 		}
 
-		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		const NPCType *tmp = content_db.LoadNPCTypesData(npcid);
 		if (!tmp) {
 			return nullptr;
 		}
@@ -397,7 +398,7 @@ void QuestManager::Zone(const char *zone_name) {
 		ztz->response = 0;
 		ztz->current_zone_id = zone->GetZoneID();
 		ztz->current_instance_id = zone->GetInstanceID();
-		ztz->requested_zone_id = database.GetZoneID(zone_name);
+		ztz->requested_zone_id = ZoneID(zone_name);
 		ztz->admin = initiator->Admin();
 		strcpy(ztz->name, initiator->GetName());
 		ztz->guild_id = initiator->GuildID();
@@ -416,7 +417,7 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 			ztz->response = 0;
 			ztz->current_zone_id = zone->GetZoneID();
 			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->requested_zone_id = ZoneID(zone_name);
 			ztz->admin = initiator->Admin();
 			strcpy(ztz->name, initiator->GetName());
 			ztz->guild_id = initiator->GuildID();
@@ -433,7 +434,7 @@ void QuestManager::ZoneGroup(const char *zone_name) {
 					ztz->response = 0;
 					ztz->current_zone_id = zone->GetZoneID();
 					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->requested_zone_id = ZoneID(zone_name);
 					ztz->admin = group_member->Admin();
 					strcpy(ztz->name, group_member->GetName());
 					ztz->guild_id = group_member->GuildID();
@@ -455,7 +456,7 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 			ztz->response = 0;
 			ztz->current_zone_id = zone->GetZoneID();
 			ztz->current_instance_id = zone->GetInstanceID();
-			ztz->requested_zone_id = database.GetZoneID(zone_name);
+			ztz->requested_zone_id = ZoneID(zone_name);
 			ztz->admin = initiator->Admin();
 			strcpy(ztz->name, initiator->GetName());
 			ztz->guild_id = initiator->GuildID();
@@ -472,7 +473,7 @@ void QuestManager::ZoneRaid(const char *zone_name) {
 					ztz->response = 0;
 					ztz->current_zone_id = zone->GetZoneID();
 					ztz->current_instance_id = zone->GetInstanceID();
-					ztz->requested_zone_id = database.GetZoneID(zone_name);
+					ztz->requested_zone_id = ZoneID(zone_name);
 					ztz->admin = raid_member->Admin();
 					strcpy(ztz->name, raid_member->GetName());
 					ztz->guild_id = raid_member->GuildID();
@@ -717,9 +718,9 @@ void QuestManager::resumetimer(const char *timer_name) {
 
 bool QuestManager::ispausedtimer(const char *timer_name) {
 	QuestManagerCurrentQuestVars();
-	
+
 	std::list<PausedTimer>::iterator pcur = PTimerList.begin(), pend;
-	
+
 	pend = PTimerList.end();
 	while (pcur != pend)
 	{
@@ -1095,7 +1096,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
 				spell_id
 			);
-			
+
 			break;
 		}
 		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
@@ -1861,7 +1862,7 @@ void QuestManager::respawn(int npcTypeID, int grid) {
 	quests_running_.push(e);
 
 	const NPCType* npcType = nullptr;
-	if ((npcType = database.LoadNPCTypesData(npcTypeID)))
+	if ((npcType = content_db.LoadNPCTypesData(npcTypeID)))
 	{
 		owner = new NPC(npcType, nullptr, owner->GetPosition(), GravityBehavior::Water);
 		owner->CastToNPC()->AddLootTable();
@@ -1935,7 +1936,7 @@ void QuestManager::showgrid(int grid) {
 	std::string query = StringFormat("SELECT `x`,`y`,`z` FROM grid_entries "
                                     "WHERE `gridid` = %i AND `zoneid` = %i "
                                     "ORDER BY `number`", grid, zone->GetZoneID());
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         LogQuests("Error loading grid [{}] for showgrid(): [{}]", grid, results.ErrorMessage().c_str());
 		return;
@@ -2018,7 +2019,7 @@ int QuestManager::getplayercorpsecount(uint32 char_id) {
 		return database.CountCharacterCorpses(char_id);
 	}
 	return 0;
-	
+
 }
 
 int QuestManager::getplayercorpsecountbyzoneid(uint32 char_id, uint32 zone_id) {
@@ -2706,7 +2707,7 @@ int QuestManager::countitem(uint32 item_id) {
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);	
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
 	for (int slot_index = 0; slot_index < size; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = initiator->GetInv().GetItem(slot_id);
@@ -2831,7 +2832,7 @@ uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 dura
 	QuestManagerCurrentQuestVars();
 	if(initiator)
 	{
-		uint32 zone_id = database.GetZoneID(zone);
+		uint32 zone_id = ZoneID(zone);
 		if(zone_id == 0)
 			return 0;
 
@@ -2884,10 +2885,10 @@ uint32 QuestManager::GetInstanceTimer() {
 uint32 QuestManager::GetInstanceTimerByID(uint16 instance_id) {
 	if (instance_id == 0)
 		return 0;
-	
+
 	std::string query = StringFormat("SELECT ((start_time + duration) - UNIX_TIMESTAMP()) AS `remaining` FROM `instance_list` WHERE `id` = %lu", (unsigned long)instance_id);
 	auto results = database.QueryDatabase(query);
-	
+
 	if (results.Success()) {
 		auto row = results.begin();
 		uint32 timer = atoi(row[0]);
@@ -2901,13 +2902,13 @@ uint16 QuestManager::GetInstanceID(const char *zone, int16 version)
 	QuestManagerCurrentQuestVars();
 	if (initiator)
 	{
-		return database.GetInstanceID(zone, initiator->CharacterID(), version);
+		return database.GetInstanceID(ZoneID(zone), initiator->CharacterID(), version);
 	}
 	return 0;
 }
 
 uint16 QuestManager::GetInstanceIDByCharID(const char *zone, int16 version, uint32 char_id) {
-	return database.GetInstanceID(zone, char_id, version);
+	return database.GetInstanceID(ZoneID(zone), char_id, version);
 }
 
 void QuestManager::AssignToInstance(uint16 instance_id)
@@ -3259,12 +3260,12 @@ uint16 QuestManager::CreateDoor(const char* model, float x, float y, float z, fl
 }
 
 int32 QuestManager::GetZoneID(const char *zone) {
-	return static_cast<int32>(database.GetZoneID(zone));
+	return static_cast<int32>(ZoneID(zone));
 }
 
 const char* QuestManager::GetZoneLongName(const char *zone) {
 	char *long_name;
-	database.GetZoneLongName(zone, &long_name);
+	content_db.GetZoneLongName(zone, &long_name);
 	std::string ln = long_name;
 	safe_delete_array(long_name);
 
@@ -4141,7 +4142,7 @@ bool QuestManager::EnableRecipe(uint32 recipe_id)
 {
 	bool success = false;
 	if (recipe_id > 0)
-		success = database.EnableRecipe(recipe_id);
+		success = content_db.EnableRecipe(recipe_id);
 	return (success);
 }
 
@@ -4149,7 +4150,7 @@ bool QuestManager::DisableRecipe(uint32 recipe_id)
 {
 	bool success = false;
 	if (recipe_id > 0)
-		success = database.DisableRecipe(recipe_id);
+		success = content_db.DisableRecipe(recipe_id);
 	return (success);
 }
 

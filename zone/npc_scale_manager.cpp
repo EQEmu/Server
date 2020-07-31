@@ -166,7 +166,7 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 
 bool NpcScaleManager::LoadScaleData()
 {
-	auto results = database.QueryDatabase(
+	auto results = content_db.QueryDatabase(
 		"SELECT "
 		"type,"
 		"level,"
@@ -550,7 +550,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCStatically(NPC *&npc)
 		npc->GetNPCTypeID()
 	);
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 
 	return results.Success();
 }
@@ -610,7 +610,7 @@ bool NpcScaleManager::ApplyGlobalBaseScalingToNPCDynamically(NPC *&npc)
 		npc->GetNPCTypeID()
 	);
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 
 	return results.Success();
 }

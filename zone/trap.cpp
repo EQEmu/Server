@@ -24,6 +24,7 @@
 #include "entity.h"
 #include "mob.h"
 #include "trap.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 /*
 
@@ -104,7 +105,7 @@ bool Trap::Process()
 		reset_timer.Disable();
 		charid = 0;
 	}
-	
+
 	if (respawn_timer.Enabled() && respawn_timer.Check())
 	{
 		detected = false;
@@ -162,7 +163,7 @@ void Trap::Trigger(Mob* trigger)
 
 			for (i = 0; i < effectvalue2; i++)
 			{
-				if ((tmp = database.LoadNPCTypesData(effectvalue)))
+				if ((tmp = content_db.LoadNPCTypesData(effectvalue)))
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-5, 5),zone->random.Int(-5, 5),zone->random.Int(-5, 5), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
@@ -187,7 +188,7 @@ void Trap::Trigger(Mob* trigger)
 
 			for (i = 0; i < effectvalue2; i++)
 			{
-				if ((tmp = database.LoadNPCTypesData(effectvalue)))
+				if ((tmp = content_db.LoadNPCTypesData(effectvalue)))
 				{
 					auto randomOffset = glm::vec4(zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(-2, 2), zone->random.Int(0, 249));
 					auto spawnPosition = randomOffset + glm::vec4(m_Position, 0.0f);
@@ -225,13 +226,13 @@ void Trap::Trigger(Mob* trigger)
 				safe_delete(outapp);
 			}
 	}
-	
+
 	if (trigger && trigger->IsClient())
 	{
 		trigger->CastToClient()->trapid = trap_id;
 		charid = trigger->CastToClient()->CharacterID();
 	}
-	
+
 	bool update = false;
 	if (despawn_when_triggered)
 	{
@@ -242,16 +243,16 @@ void Trap::Trigger(Mob* trigger)
 	{
 		reset_timer.Start(5000);
 	}
-	
+
 	if (triggered_number > 0)
 		++times_triggered;
-	
+
 	if (triggered_number > 0 && triggered_number <= times_triggered)
 	{
 		Log(Logs::General, Logs::Traps, "Triggered number for trap %d reached. %d/%d", trap_id, times_triggered, triggered_number);
 		update = true;
 	}
-	
+
 	if (update)
 	{
 		UpdateTrap();
@@ -290,7 +291,7 @@ Trap* EntityList::FindNearbyTrap(Mob* searcher, float max_dist, float &trap_curd
 	}
 	else
 		 trap_curdist = INVALID_INDEX;
-	
+
 	return current_trap;
 }
 
@@ -399,9 +400,14 @@ void EntityList::ClearTrapPointers()
 
 bool ZoneDatabase::LoadTraps(const char* zonename, int16 version) {
 
-	std::string query = StringFormat("SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
+	std::string query = StringFormat(
+		"SELECT id, x, y, z, effect, effectvalue, effectvalue2, skill, "
 		"maxzdiff, radius, chance, message, respawn_time, respawn_var, level, "
-		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u", zonename, version);
+		"`group`, triggered_number, despawn_when_triggered, undetectable  FROM traps WHERE zone='%s' AND version=%u %s",
+		zonename,
+		version,
+		ContentFilterCriteria::apply().c_str()
+	);
 
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
@@ -452,7 +458,7 @@ void Trap::CreateHiddenTrigger()
 	if(hiddenTrigger)
 		return;
 
-	const NPCType *base_type = database.LoadNPCTypesData(500);
+	const NPCType *base_type = content_db.LoadNPCTypesData(500);
 	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 	make_npc->max_hp = 100000;
@@ -557,6 +563,6 @@ void Trap::UpdateTrap(bool respawn, bool repopnow)
 	charid = 0;
 	if (respawn)
 	{
-		database.SetTrapData(this, repopnow);
+		content_db.SetTrapData(this, repopnow);
 	}
 }

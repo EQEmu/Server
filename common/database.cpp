@@ -61,15 +61,15 @@ Database::Database(const char* host, const char* user, const char* passwd, const
 	Connect(host, user, passwd, database, port);
 }
 
-bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port) {
+bool Database::Connect(const char* host, const char* user, const char* passwd, const char* database, uint32 port, std::string connection_label) {
 	uint32 errnum= 0;
 	char errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(host, user, passwd, database, port, &errnum, errbuf)) {
-		LogError("Failed to connect to database: Error: {}", errbuf);
+		LogError("[MySQL] Connection [{}] Failed to connect to database: Error [{}]", connection_label, errbuf);
 		return false;
 	}
 	else {
-		LogInfo("Using database [{}] at [{}]:[{}]", database, host,port);
+		LogInfo("[MySQL] Connection [{}] database [{}] at [{}]:[{}]", connection_label, database, host,port);
 		return true;
 	}
 }
@@ -339,7 +339,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 	query = StringFormat("INSERT INTO `character_data` SET `account_id` = %i, `name` = '%s'", account_id, name);
 	results = QueryDatabase(query);
 	if (!results.Success() || results.ErrorMessage() != ""){ return false; }
-	
+
 	// Put character into the default guild if rule is being used.
 	int guild_id = RuleI(Character, DefaultGuild);
 
@@ -353,7 +353,7 @@ bool Database::ReserveName(uint32 account_id, char* name) {
 			}
 		}
 	}
-	
+
 	return true;
 }
 
@@ -512,96 +512,96 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"guild_auto_consent,"
 		"RestTimer) "
 		"VALUES ("
-		"%u,"  // id					
-		"%u,"  // account_id			
-		"'%s',"  // `name`				
-		"'%s',"  // last_name			
-		"%u,"  // gender				
-		"%u,"  // race					
-		"%u,"  // class					
-		"%u,"  // `level`				
-		"%u,"  // deity					
-		"%u,"  // birthday				
-		"%u,"  // last_login			
-		"%u,"  // time_played			
-		"%u,"  // pvp_status			
-		"%u,"  // level2				
-		"%u,"  // anon					
-		"%u,"  // gm					
-		"%u,"  // intoxication			
-		"%u,"  // hair_color			
-		"%u,"  // beard_color			
-		"%u,"  // eye_color_1			
-		"%u,"  // eye_color_2			
-		"%u,"  // hair_style			
-		"%u,"  // beard					
-		"%u,"  // ability_time_seconds	
-		"%u,"  // ability_number		
-		"%u,"  // ability_time_minutes	
-		"%u,"  // ability_time_hours	
-		"'%s',"  // title				
-		"'%s',"  // suffix				
-		"%u,"  // exp					
-		"%u,"  // points				
-		"%u,"  // mana					
-		"%u,"  // cur_hp				
-		"%u,"  // str					
-		"%u,"  // sta					
-		"%u,"  // cha					
-		"%u,"  // dex					
-		"%u,"  // `int`					
-		"%u,"  // agi					
-		"%u,"  // wis					
-		"%u,"  // face					
-		"%f,"  // y						
-		"%f,"  // x						
-		"%f,"  // z						
-		"%f,"  // heading				
-		"%u,"  // pvp2					
-		"%u,"  // pvp_type				
-		"%u,"  // autosplit_enabled		
-		"%u,"  // zone_change_count		
-		"%u,"  // drakkin_heritage		
-		"%u,"  // drakkin_tattoo		
-		"%u,"  // drakkin_details		
-		"%i,"  // toxicity				
-		"%i,"  // hunger_level			
-		"%i,"  // thirst_level			
-		"%u,"  // ability_up			
-		"%u,"  // zone_id				
-		"%u,"  // zone_instance			
-		"%u,"  // leadership_exp_on		
-		"%u,"  // ldon_points_guk		
-		"%u,"  // ldon_points_mir		
-		"%u,"  // ldon_points_mmc		
-		"%u,"  // ldon_points_ruj		
-		"%u,"  // ldon_points_tak		
-		"%u,"  // ldon_points_available	
+		"%u,"  // id
+		"%u,"  // account_id
+		"'%s',"  // `name`
+		"'%s',"  // last_name
+		"%u,"  // gender
+		"%u,"  // race
+		"%u,"  // class
+		"%u,"  // `level`
+		"%u,"  // deity
+		"%u,"  // birthday
+		"%u,"  // last_login
+		"%u,"  // time_played
+		"%u,"  // pvp_status
+		"%u,"  // level2
+		"%u,"  // anon
+		"%u,"  // gm
+		"%u,"  // intoxication
+		"%u,"  // hair_color
+		"%u,"  // beard_color
+		"%u,"  // eye_color_1
+		"%u,"  // eye_color_2
+		"%u,"  // hair_style
+		"%u,"  // beard
+		"%u,"  // ability_time_seconds
+		"%u,"  // ability_number
+		"%u,"  // ability_time_minutes
+		"%u,"  // ability_time_hours
+		"'%s',"  // title
+		"'%s',"  // suffix
+		"%u,"  // exp
+		"%u,"  // points
+		"%u,"  // mana
+		"%u,"  // cur_hp
+		"%u,"  // str
+		"%u,"  // sta
+		"%u,"  // cha
+		"%u,"  // dex
+		"%u,"  // `int`
+		"%u,"  // agi
+		"%u,"  // wis
+		"%u,"  // face
+		"%f,"  // y
+		"%f,"  // x
+		"%f,"  // z
+		"%f,"  // heading
+		"%u,"  // pvp2
+		"%u,"  // pvp_type
+		"%u,"  // autosplit_enabled
+		"%u,"  // zone_change_count
+		"%u,"  // drakkin_heritage
+		"%u,"  // drakkin_tattoo
+		"%u,"  // drakkin_details
+		"%i,"  // toxicity
+		"%i,"  // hunger_level
+		"%i,"  // thirst_level
+		"%u,"  // ability_up
+		"%u,"  // zone_id
+		"%u,"  // zone_instance
+		"%u,"  // leadership_exp_on
+		"%u,"  // ldon_points_guk
+		"%u,"  // ldon_points_mir
+		"%u,"  // ldon_points_mmc
+		"%u,"  // ldon_points_ruj
+		"%u,"  // ldon_points_tak
+		"%u,"  // ldon_points_available
 		"%u,"  // tribute_time_remaining
-		"%u,"  // show_helm				
-		"%u,"  // career_tribute_points	
-		"%u,"  // tribute_points		
-		"%u,"  // tribute_active		
-		"%u,"  // endurance				
-		"%u,"  // group_leadership_exp	
-		"%u,"  // raid_leadership_exp	
+		"%u,"  // show_helm
+		"%u,"  // career_tribute_points
+		"%u,"  // tribute_points
+		"%u,"  // tribute_active
+		"%u,"  // endurance
+		"%u,"  // group_leadership_exp
+		"%u,"  // raid_leadership_exp
 		"%u,"  // group_leadership_point
 		"%u,"  // raid_leadership_points
-		"%u,"  // air_remaining			
-		"%u,"  // pvp_kills				
-		"%u,"  // pvp_deaths			
-		"%u,"  // pvp_current_points	
-		"%u,"  // pvp_career_points		
-		"%u,"  // pvp_best_kill_streak	
+		"%u,"  // air_remaining
+		"%u,"  // pvp_kills
+		"%u,"  // pvp_deaths
+		"%u,"  // pvp_current_points
+		"%u,"  // pvp_career_points
+		"%u,"  // pvp_best_kill_streak
 		"%u,"  // pvp_worst_death_streak
 		"%u,"  // pvp_current_kill_strea
-		"%u,"  // aa_points_spent		
-		"%u,"  // aa_exp				
-		"%u,"  // aa_points				
-		"%u,"  // group_auto_consent	
-		"%u,"  // raid_auto_consent		
-		"%u,"  // guild_auto_consent	
-		"%u"  // RestTimer				
+		"%u,"  // aa_points_spent
+		"%u,"  // aa_exp
+		"%u,"  // aa_points
+		"%u,"  // group_auto_consent
+		"%u,"  // raid_auto_consent
+		"%u,"  // guild_auto_consent
+		"%u"  // RestTimer
 		")",
 		character_id,					  // " id,                        "
 		account_id,						  // " account_id,                "
@@ -747,61 +747,6 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 	}
 	results = QueryDatabase(query);
 
-	return true;
-}
-
-/* This only for new Character creation storing */
-bool Database::StoreCharacter(uint32 account_id, PlayerProfile_Struct* pp, EQ::InventoryProfile* inv) {
-	uint32 charid = 0;
-	char zone[50];
-	float x, y, z;
-	charid = GetCharacterID(pp->name);
-
-	if(!charid) {
-		LogError("StoreCharacter: no character id");
-		return false;
-	}
-
-	const char *zname = GetZoneName(pp->zone_id);
-	if(zname == nullptr) {
-		/* Zone not in the DB, something to prevent crash... */
-		strn0cpy(zone, "qeynos", 49);
-		pp->zone_id = 1;
-	}
-	else{ strn0cpy(zone, zname, 49); }
-
-	x = pp->x;
-	y = pp->y;
-	z = pp->z;
-
-	/* Saves Player Profile Data */
-	SaveCharacterCreate(charid, account_id, pp);
-
-	/* Insert starting inventory... */
-	std::string invquery;
-	for (int16 i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invbag::BANK_BAGS_END;) {
-		const EQ::ItemInstance* newinv = inv->GetItem(i);
-		if (newinv) {
-			invquery = StringFormat("INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
-				charid, i, newinv->GetItem()->ID, newinv->GetCharges(), newinv->GetColor());
-
-			auto results = QueryDatabase(invquery);
-		}
-
-		if (i == EQ::invslot::slotCursor) {
-			i = EQ::invbag::GENERAL_BAGS_BEGIN;
-			continue;
-		}
-		else if (i == EQ::invbag::CURSOR_BAG_END) {
-			i = EQ::invslot::BANK_BEGIN;
-			continue;
-		}
-		else if (i == EQ::invslot::BANK_END) {
-			i = EQ::invbag::BANK_BAGS_BEGIN;
-			continue;
-		}
-		i++;
-	}
 	return true;
 }
 
@@ -1137,50 +1082,6 @@ bool Database::GetZoneGraveyard(const uint32 graveyard_id, uint32* graveyard_zon
 	return true;
 }
 
-bool Database::LoadZoneNames() {
-	std::string query("SELECT zoneidnumber, short_name FROM zone");
-
-	auto results = QueryDatabase(query);
-
-	if (!results.Success())
-	{
-		return false;
-	}
-
-	for (auto row= results.begin();row != results.end();++row)
-	{
-		uint32 zoneid = atoi(row[0]);
-		std::string zonename = row[1];
-		zonename_array.insert(std::pair<uint32,std::string>(zoneid,zonename));
-	}
-
-	return true;
-}
-
-uint32 Database::GetZoneID(const char* zonename) {
-
-	if (zonename == nullptr)
-		return 0;
-
-	for (auto iter = zonename_array.begin(); iter != zonename_array.end(); ++iter)
-		if (strcasecmp(iter->second.c_str(), zonename) == 0)
-			return iter->first;
-
-	return 0;
-}
-
-const char* Database::GetZoneName(uint32 zoneID, bool ErrorUnknown) {
-	auto iter = zonename_array.find(zoneID);
-
-	if (iter != zonename_array.end())
-		return iter->second.c_str();
-
-	if (ErrorUnknown)
-		return "UNKNOWN";
-
-	return 0;
-}
-
 uint8 Database::GetPEQZone(uint32 zoneID, uint32 version){
 
 	std::string query = StringFormat("SELECT peqzone from zone where zoneidnumber='%i' AND (version=%i OR version=0) ORDER BY version DESC", zoneID, version);
@@ -1397,29 +1298,31 @@ uint8 Database::GetServerType() {
 	return atoi(row[0]);
 }
 
-bool Database::MoveCharacterToZone(const char* charname, const char* zonename, uint32 zoneid) {
-	if(zonename == nullptr || strlen(zonename) == 0)
-		return false;
+bool Database::MoveCharacterToZone(uint32 character_id, uint32 zone_id)
+{
+	std::string query = StringFormat(
+		"UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i",
+		zone_id,
+		character_id
+	);
 
-	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'", zoneid, charname);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
 		return false;
 	}
 
-	if (results.RowsAffected() == 0)
-		return false;
-
-	return true;
+	return results.RowsAffected() != 0;
 }
 
-bool Database::MoveCharacterToZone(const char* charname, const char* zonename) {
-	return MoveCharacterToZone(charname, zonename, GetZoneID(zonename));
-}
+bool Database::MoveCharacterToZone(const char *charname, uint32 zone_id)
+{
+	std::string query = StringFormat(
+		"UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `name` = '%s'",
+		zone_id,
+		charname
+	);
 
-bool Database::MoveCharacterToZone(uint32 iCharID, const char* iZonename) {
-	std::string query = StringFormat("UPDATE `character_data` SET `zone_id` = %i, `x` = -1, `y` = -1, `z` = -1 WHERE `id` = %i", GetZoneID(iZonename), iCharID);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success()) {
@@ -2404,5 +2307,143 @@ int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
 	}
 
 	return 0;
+}
+
+/**
+ * @param source_character_name
+ * @param destination_character_name
+ * @param destination_account_name
+ * @return
+ */
+bool Database::CopyCharacter(
+	std::string source_character_name,
+	std::string destination_character_name,
+	std::string destination_account_name
+)
+{
+	auto results = QueryDatabase(
+		fmt::format(
+			"SELECT id FROM character_data WHERE name = '{}' and deleted_at is NULL LIMIT 1",
+			source_character_name
+		)
+	);
+
+	if (results.RowCount() == 0) {
+		LogError("No character found with name [{}]", source_character_name);
+	}
+
+	auto        row                 = results.begin();
+	std::string source_character_id = row[0];
+
+	results = QueryDatabase(
+		fmt::format(
+			"SELECT id FROM account WHERE name = '{}' LIMIT 1",
+			destination_account_name
+		)
+	);
+
+	if (results.RowCount() == 0) {
+		LogError("No account found with name [{}]", destination_account_name);
+	}
+
+	row = results.begin();
+	std::string source_account_id = row[0];
+
+	/**
+	 * Fresh ID
+	 */
+	results = QueryDatabase("SELECT (MAX(id) + 1) as new_id from character_data");
+	row     = results.begin();
+	std::string new_character_id = row[0];
+
+	TransactionBegin();
+	for (const auto &iter : DatabaseSchema::GetCharacterTables()) {
+		std::string table_name               = iter.first;
+		std::string character_id_column_name = iter.second;
+
+		/**
+		 * Columns
+		 */
+		results = QueryDatabase(fmt::format("SHOW COLUMNS FROM {}", table_name));
+		std::vector<std::string> columns      = {};
+		int                      column_count = 0;
+		for (row = results.begin(); row != results.end(); ++row) {
+			columns.emplace_back(row[0]);
+			column_count++;
+		}
+
+		results = QueryDatabase(
+			fmt::format(
+				"SELECT {} FROM {} WHERE {} = {}",
+				implode(",", wrap(columns, "`")),
+				table_name,
+				character_id_column_name,
+				source_character_id
+			)
+		);
+
+		std::vector<std::vector<std::string>> new_rows;
+		for (row = results.begin(); row != results.end(); ++row) {
+			std::vector<std::string> new_values   = {};
+			for (int                 column_index = 0; column_index < column_count; column_index++) {
+				std::string column = columns[column_index];
+				std::string value  = row[column_index] ? row[column_index] : "null";
+
+				if (column == character_id_column_name) {
+					value = new_character_id;
+				}
+
+				if (column == "name" && table_name == "character_data") {
+					value = destination_character_name;
+				}
+
+				if (column == "account_id" && table_name == "character_data") {
+					value = source_account_id;
+				}
+
+				new_values.emplace_back(value);
+			}
+
+			new_rows.emplace_back(new_values);
+		}
+
+		std::string              insert_values;
+		std::vector<std::string> insert_rows;
+
+		for (auto &r: new_rows) {
+			std::string insert_row = "(" + implode(",", wrap(r, "'")) + ")";
+			insert_rows.emplace_back(insert_row);
+		}
+
+		if (!insert_rows.empty()) {
+			QueryDatabase(
+				fmt::format(
+					"DELETE FROM {} WHERE {} = {}",
+					table_name,
+					character_id_column_name,
+					new_character_id
+				)
+			);
+
+			auto insert = QueryDatabase(
+				fmt::format(
+					"INSERT INTO {} ({}) VALUES {}",
+					table_name,
+					implode(",", wrap(columns, "`")),
+					implode(",", insert_rows)
+				)
+			);
+
+			if (!insert.ErrorMessage().empty()) {
+				TransactionRollback();
+				return false;
+				break;
+			}
+		}
+	}
+
+	TransactionCommit();
+
+	return true;
 }
 
