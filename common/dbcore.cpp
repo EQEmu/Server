@@ -83,6 +83,13 @@ MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureO
 	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 }
 
+bool DBcore::DoesTableExist(std::string table_name)
+{
+	auto results = QueryDatabase(fmt::format("SHOW TABLES LIKE '{}'", table_name));
+
+	return results.RowCount() > 0;
+}
+
 MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce)
 {
 	BenchTimer timer;

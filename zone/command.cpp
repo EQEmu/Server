@@ -72,6 +72,7 @@
 #include "fastmath.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
+#include "../common/content/world_content_service.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -218,6 +219,7 @@ int command_init(void)
 		command_add("fov", "- Check wether you're behind or in your target's field of view", 80, command_fov) ||
 		command_add("freeze", "- Freeze your target", 80, command_freeze) ||
 		command_add("gassign", "[id] - Assign targetted NPC to predefined wandering grid id", 100, command_gassign) ||
+		command_add("gearup", "Developer tool to quickly equip a character", 200, command_gearup) ||
 		command_add("gender", "[0/1/2] - Change your or your target's gender to male/female/neuter", 50, command_gender) ||
 		command_add("getplayerburiedcorpsecount", "- Get the target's total number of buried player corpses.",  100, command_getplayerburiedcorpsecount) ||
 		command_add("getvariable", "[varname] - Get the value of a variable from the database", 200, command_getvariable) ||
@@ -2885,6 +2887,119 @@ void command_race(Client *c, const Seperator *sep)
 	else {
 		c->Message(Chat::White, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
 	}
+}
+
+void command_gearup(Client *c, const Seperator *sep)
+{
+	std::string tool_table_name = "tool_gearup_armor_sets";
+
+	if (!database.DoesTableExist(tool_table_name)) {
+		c->Message(
+			Chat::Red,
+			fmt::format(
+				"Table [{}] does not exist, please source in the optional SQL required for this tool",
+				tool_table_name
+			).c_str()
+		);
+		return;
+	}
+
+	std::string expansion_arg = sep->arg[1];
+	std::string expansion_filter;
+	if (expansion_arg.length() > 0) {
+		expansion_filter = fmt::format("and `expansion` = {}", expansion_arg);
+	}
+
+	auto results = database.QueryDatabase(
+		fmt::format(
+			SQL (
+				select
+				item_id,
+				slot
+				from
+				{}
+				where
+				`class` = {}
+				and `level` = {}
+				{}
+				order by score desc, expansion desc
+			),
+			tool_table_name,
+			c->GetClass(),
+			c->GetLevel(),
+			expansion_filter
+		)
+	);
+
+	std::set<int> equipped;
+	for (auto     row = results.begin(); row != results.end(); ++row) {
+		int item_id = atoi(row[0]);
+		int slot_id = atoi(row[1]);
+
+		if (equipped.find(slot_id) != equipped.end()) {
+			if (slot_id == EQ::invslot::slotEar1) {
+				slot_id = EQ::invslot::slotEar2;
+			}
+			if (slot_id == EQ::invslot::slotFinger1) {
+				slot_id = EQ::invslot::slotFinger2;
+			}
+			if (slot_id == EQ::invslot::slotWrist1) {
+				slot_id = EQ::invslot::slotWrist2;
+			}
+		}
+
+		if (equipped.find(slot_id) == equipped.end()) {
+			if (c->CastToMob()->CanClassEquipItem(item_id)) {
+				equipped.insert(slot_id);
+				c->SummonItem(
+					item_id,
+					0, 0, 0, 0, 0, 0, 0, 0,
+					slot_id
+				);
+			}
+		}
+	}
+
+	if (expansion_arg.empty()) {
+		results = database.QueryDatabase(
+			fmt::format(
+				SQL (
+					select
+					expansion
+					from
+					{}
+					where
+					class = {}
+					and level = {}
+					group by
+					expansion;
+				),
+				tool_table_name,
+				c->GetClass(),
+				c->GetLevel()
+			)
+		);
+
+		c->Message(Chat::White, "Choose armor from a specific era");
+		std::string message;
+		for (auto   row = results.begin(); row != results.end(); ++row) {
+			int expansion = atoi(row[0]);
+			message += "[" + EQ::SayLinkEngine::GenerateQuestSaylink(
+				fmt::format("#gearup {}", expansion),
+				false,
+				Expansion::ExpansionName[expansion]
+			) + "] ";
+
+			if (message.length() > 2000) {
+				c->Message(Chat::White, message.c_str());
+				message = "";
+			}
+		}
+		if (message.length() > 0) {
+			c->Message(Chat::White, message.c_str());
+		}
+	}
+
 }
 
 void command_gender(Client *c, const Seperator *sep)

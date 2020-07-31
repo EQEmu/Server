@@ -35,6 +35,8 @@ public:
 	const std::string &GetOriginHost() const;
 	void SetOriginHost(const std::string &origin_host);
 
+	bool DoesTableExist(std::string table_name);
+
 protected:
 	bool Open(
 		const char *iHost,
