@@ -605,35 +605,37 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 					continue;
 				} else if (cle->GetGM()) {
 					if (cle->Admin() >=250)
-						rankstring=5021;
+						rankstring = 5021;
 					else if (cle->Admin() >= 200)
-						rankstring=5020;
+						rankstring = 5020;
 					else if (cle->Admin() >= 180)
-						rankstring=5019;
+						rankstring = 5019;
 					else if (cle->Admin() >= 170)
-						rankstring=5018;
+						rankstring = 5018;
 					else if (cle->Admin() >= 160)
-						rankstring=5017;
+						rankstring = 5017;
 					else if (cle->Admin() >= 150)
-						rankstring=5016;
+						rankstring = 5016;
 					else if (cle->Admin() >= 100)
-						rankstring=5015;
+						rankstring = 5015;
 					else if (cle->Admin() >= 95)
-						rankstring=5014;
+						rankstring = 5014;
 					else if (cle->Admin() >= 90)
-						rankstring=5013;
+						rankstring = 5013;
 					else if (cle->Admin() >= 85)
-						rankstring=5012;
+						rankstring = 5012;
 					else if (cle->Admin() >= 81)
-						rankstring=5011;
+						rankstring = 5011;
 					else if (cle->Admin() >= 80)
-						rankstring=5010;
+						rankstring = 5010;
 					else if (cle->Admin() >= 50)
-						rankstring=5009;
+						rankstring = 5009;
 					else if (cle->Admin() >= 20)
-						rankstring=5008;
-					else if (cle->Admin() >= 10)
-						rankstring=5007;
+						rankstring = 5008;						
+				}
+				
+				if (cle->Admin() == 1) {
+					rankstring = 5007;
 				}
 			idx++;
 			char guildbuffer[67]={0};

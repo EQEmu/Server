@@ -2912,6 +2912,23 @@ XS(XS__countitem) {
 	XSRETURN_IV(quantity);
 }
 
+XS(XS__removeitem);
+XS(XS__removeitem) {
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: quest::removeitem(int item_id, [int quantity = 1])");
+
+	uint32 item_id = (int) SvIV(ST(0));
+	uint32 quantity = 1;
+	if (items > 1) {
+		quantity = (int) SvIV(ST(1));
+	}
+
+	quest_manager.removeitem(item_id, quantity);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__getitemname);
 XS(XS__getitemname) {	
 	dXSARGS;
@@ -5620,6 +5637,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "rain"), XS__rain, file);
 	newXS(strcpy(buf, "rebind"), XS__rebind, file);
 	newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
+	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
