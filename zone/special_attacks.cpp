@@ -200,6 +200,14 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 			SpellFinished(aabonuses.SkillAttackProc[2], who, EQ::spells::CastingSlot::Item, 0, -1,
 				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
+	
+	if (RuleB(Combat, CustomScaling) && IsClient()) {
+		int scale_value = itembonuses.DEX;
+		float skill_damage_scale = RuleR(Combat, CustomScalingSkillDamage);
+		if (scale_value > int(skill_damage_scale)) {
+			my_hit.damage_done = int(static_cast<float>(my_hit.damage_done) * static_cast<float>(scale_value / skill_damage_scale));
+		}
+	}
 
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
 

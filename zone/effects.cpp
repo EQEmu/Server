@@ -160,6 +160,14 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	if (IsNPC() && CastToNPC()->GetSpellScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
+	if (RuleB(Combat, CustomScaling) && IsClient()) {
+		int scale_value = itembonuses.INT;
+		float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+		if (scale_value > int(spell_damage_scale)) {
+			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+		}
+	}
+
 	return value;
 }
 
@@ -228,6 +236,14 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+
+	if (RuleB(Combat, CustomScaling) && IsClient()) {
+		int scale_value = itembonuses.INT;
+		float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+		if (scale_value > spell_damage_scale) {
+			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+		}
+	}
 
 	return value;
 }
@@ -316,6 +332,14 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 				MessageString(Chat::SpellCrit, YOU_CRIT_HEAL, itoa(value));
 		}
 
+		if (RuleB(Combat, CustomScaling) && IsClient()) {
+			int scale_value = itembonuses.WIS;
+			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+			if (scale_value > int(spell_damage_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+			}
+		}
+
 		return value;
 	}
 
@@ -335,6 +359,14 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	if (IsNPC() && CastToNPC()->GetHealScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
+
+	if (RuleB(Combat, CustomScaling) && IsClient()) {
+		int scale_value = itembonuses.WIS;
+		float spell_healing_scale = RuleR(Combat, CustomScalingSpellHealing);
+		if (scale_value > int(spell_healing_scale)) {
+			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_healing_scale));
+		}
+	}
 
 	return value;
 }
