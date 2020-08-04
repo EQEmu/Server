@@ -53,6 +53,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 extern QueryServ* QServ;
 extern Zone* zone;
@@ -129,7 +130,7 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), database.GetZoneName(m_pp.binds[0].zoneId));
+			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zoneId);
 
 			m_pp.zone_id = m_pp.binds[0].zoneId;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
@@ -256,9 +257,9 @@ bool Client::Process() {
 		 * Used in aggro checks
 		 */
 		if (mob_close_scan_timer.Check()) {
-			entity_list.ScanCloseMobs(close_mobs, this);
+			entity_list.ScanCloseMobs(close_mobs, this, true);
 		}
-		
+
 		bool may_use_attacks = false;
 		/*
 			Things which prevent us from attacking:
@@ -757,7 +758,7 @@ void Client::BulkSendInventoryItems()
 
 		if (ob.tellp() == last_pos)
 			LogInventory("Serialization failed on item slot [{}] during BulkSendInventoryItems. Item skipped", slot_id);
-		
+
 		last_pos = ob.tellp();
 	}
 
@@ -836,7 +837,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 		else {
 			cur_fac_level = GetModCharacterFactionLevel(fac);
 		}
-			
+
 		if (cur_fac_level < ml.faction_required)
 			continue;
 
@@ -1170,7 +1171,7 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 	{
 		return;
 	}
-	
+
 	// could just do a range, but this is clearer and explicit
 	if
 	(
@@ -2087,7 +2088,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 		m_pp.zone_id = chosen->zone_id;
 		m_pp.zoneInstance = chosen->instance_id;
-		database.MoveCharacterToZone(CharacterID(), database.GetZoneName(chosen->zone_id));
+		database.MoveCharacterToZone(CharacterID(), chosen->zone_id);
 
 		Save();
 

@@ -27,10 +27,15 @@
 namespace WorldserverCommandHandler {
 	void CommandHandler(int argc, char **argv);
 	void Version(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void CopyCharacter(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseVersion(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseSetAccountStatus(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseGetSchema(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void DatabaseDump(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void ExpansionTestCommand(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void TestRepository(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void TestRepository2(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 

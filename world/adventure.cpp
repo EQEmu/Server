@@ -11,6 +11,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
+#include "world_store.h"
 
 extern ZSList zoneserver_list;
 extern ClientList client_list;
@@ -143,7 +144,7 @@ bool Adventure::Process()
 
 bool Adventure::CreateInstance()
 {
-	uint32 zone_id = database.GetZoneID(adventure_template->zone);
+	uint32 zone_id = ZoneID(adventure_template->zone);
 	if(!zone_id)
 	{
 		return false;
@@ -362,7 +363,7 @@ void Adventure::Finished(AdventureWinStatus ws)
 				afe.points = 0;
 			}
 			adventure_manager.AddFinishedEvent(afe);
-			
+
 			database.UpdateAdventureStatsEntry(database.GetCharacterID((*iter).c_str()), GetTemplate()->theme, (ws != AWS_Lose) ? true : false);
 		}
 		++iter;

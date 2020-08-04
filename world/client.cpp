@@ -46,6 +46,7 @@
 #include "clientlist.h"
 #include "wguild_mgr.h"
 #include "sof_char_create_data.h"
+#include "world_store.h"
 
 #include <iostream>
 #include <iomanip>
@@ -64,7 +65,7 @@
 	#include <winsock2.h>
 	#include <windows.h>
 #else
-	
+
 	#ifdef FREEBSD //Timothy Whitman - January 7, 2003
 		#include <sys/types.h>
 	#endif
@@ -171,7 +172,7 @@ void Client::SendEnterWorld(std::string name)
 void Client::SendExpansionInfo() {
 	auto outapp = new EQApplicationPacket(OP_ExpansionInfo, sizeof(ExpansionInfo_Struct));
 	ExpansionInfo_Struct *eis = (ExpansionInfo_Struct*)outapp->pBuffer;
-	
+
 	if (RuleB(World, UseClientBasedExpansionSettings)) {
 		eis->Expansions = EQ::expansions::ConvertClientVersionToExpansionsMask(eqs->ClientVersion());
 	}
@@ -430,7 +431,7 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 		if (!is_player_zoning) {
 			// Track who is in and who is out of the game
 			char *inout= (char *) "";
-			
+
 			if (cle->GetOnline() == CLE_Status::Never){
 				// Desktop -> Char Select
 				inout = (char *) "In";
@@ -439,21 +440,21 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 				// Game -> Char Select
 				inout=(char *) "Out";
 			}
-		
+
 			// Always at Char select at this point.
 			// Either from a fresh client launch or coming back from the game.
 			// Exiting the game entirely does not come through here.
 			// Could use a Logging Out Completely message somewhere.
 			cle->SetOnline(CLE_Status::CharSelect);
-			
+
 			LogInfo("Account ({}) Logging({}) to character select :: LSID [{}] ", cle->AccountName(), inout, cle->LSID());
 		}
 		else {
 			cle->SetOnline();
 		}
-		
+
 		const WorldConfig *Config=WorldConfig::get();
-		
+
 		if(Config->UpdateStats) {
 			auto pack = new ServerPacket;
 			pack->opcode = ServerOP_LSPlayerJoinWorld;
@@ -466,10 +467,10 @@ bool Client::HandleSendLoginInfoPacket(const EQApplicationPacket *app)
 			loginserverlist.SendPacket(pack);
 			safe_delete(pack);
 		}
-		
+
 		if (!is_player_zoning)
 			SendGuildList();
-		
+
 		SendLogServer();
 		SendApproveWorld();
 		SendEnterWorld(cle->name());
@@ -509,18 +510,18 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	outapp->size = 1;
 
 	bool valid = false;
-	if(!database.CheckNameFilter(char_name)) { 
-		valid = false; 
+	if(!database.CheckNameFilter(char_name)) {
+		valid = false;
 	}
 	/* Name must begin with an upper-case letter. */
-	else if (islower(char_name[0])) { 
-		valid = false; 
-	} 
-	else if (database.ReserveName(GetAccountID(), char_name)) { 
-		valid = true; 	
+	else if (islower(char_name[0])) {
+		valid = false;
 	}
-	else { 
-		valid = false; 
+	else if (database.ReserveName(GetAccountID(), char_name)) {
+		valid = true;
+	}
+	else {
+		valid = false;
 	}
 
 	outapp->pBuffer[0] = valid? 1 : 0;
@@ -690,7 +691,7 @@ bool Client::HandleCharacterCreatePacket(const EQApplicationPacket *app) {
 	return true;
 }
 
-bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) { 
+bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	if (GetAccountID() == 0) {
 		LogInfo("Enter world with no logged in account");
 		eqs->Close();
@@ -785,7 +786,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 			if (tutorial_enabled) {
 				zone_id = RuleI(World, TutorialZoneID);
-				database.MoveCharacterToZone(charid, database.GetZoneName(zone_id));
+				database.MoveCharacterToZone(charid, zone_id);
 			}
 			else {
 				LogInfo("[{}] is trying to go to tutorial but are not allowed", char_name);
@@ -796,9 +797,9 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 		}
 	}
 
-	if (zone_id == 0 || !database.GetZoneName(zone_id)) {
+	if (zone_id == 0 || !ZoneName(zone_id)) {
 		// This is to save people in an invalid zone, once it's removed from the DB
-		database.MoveCharacterToZone(charid, "arena");
+		database.MoveCharacterToZone(charid, ZoneID("arena"));
 		LogInfo("Zone not found in database zone_id=[{}], moveing char to arena character:[{}]", zone_id, char_name);
 	}
 
@@ -856,7 +857,7 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	
+
 	// set mailkey - used for duration of character session
 	int MailKey = emu_random.Int(1, INT_MAX);
 
@@ -1154,7 +1155,7 @@ void Client::EnterWorld(bool TryBootup) {
 	else
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
 
-	const char *zone_name = database.GetZoneName(zone_id, true);
+	const char *zone_name = ZoneName(zone_id, true);
 	if (zone_server) {
 		if (false == enter_world_triggered) {
 			//Drop any clients we own in other zones.
@@ -1204,9 +1205,9 @@ void Client::EnterWorld(bool TryBootup) {
 	LogInfo(
 		"({}) [{}] [{}] (Zone ID [{}]: Instance ID: [{}]) ",
 		char_name,
-		(seen_character_select ? "Zoning from character select" : "Zoning to"), 
-		zone_name, 
-		zone_id, 
+		(seen_character_select ? "Zoning from character select" : "Zoning to"),
+		zone_name,
+		zone_id,
 		instance_id
 	);
 
@@ -1267,7 +1268,7 @@ void Client::Clearance(int8 response)
 		return;
 	}
 
-	const char* zonename = database.GetZoneName(zone_id);
+	const char* zonename = ZoneName(zone_id);
 	if (zonename == 0) {
 		LogInfo("zonename is nullptr in Client::Clearance!!");
 		TellClientZoneUnavailable();
@@ -1322,7 +1323,7 @@ void Client::Clearance(int8 response)
 void Client::TellClientZoneUnavailable() {
 	auto outapp = new EQApplicationPacket(OP_ZoneUnavail, sizeof(ZoneUnavail_Struct));
 	ZoneUnavail_Struct* ua = (ZoneUnavail_Struct*)outapp->pBuffer;
-	const char* zonename = database.GetZoneName(zone_id);
+	const char* zonename = ZoneName(zone_id);
 	if (zonename)
 		strcpy(ua->zonename, zonename);
 	QueuePacket(outapp);
@@ -1502,7 +1503,6 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 //	strcpy(pp.servername, WorldConfig::get()->ShortName.c_str());
 
 	memset(pp.spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
-	
 	memset(pp.mem_spells, 0xFF, (sizeof(uint32) * EQ::spells::SPELL_GEM_COUNT));
 
 	for(i = 0; i < BUFF_COUNT; i++)
@@ -1522,13 +1522,13 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	else {
 		LogInfo("Found 'TitaniumStartZoneID' rule setting: [{}]", RuleI(World, TitaniumStartZoneID));
 		if (RuleI(World, TitaniumStartZoneID) > 0) { 	/* if there's a startzone variable put them in there */
-		
+
 			pp.zone_id = RuleI(World, TitaniumStartZoneID);
 			cc->start_zone = pp.zone_id;
 		}
-	} 	
+	}
 	/* use normal starting zone logic to either get defaults, or if startzone was set, load that from the db table.*/
-	bool ValidStartZone = database.GetStartZone(&pp, cc, m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier);
+	bool ValidStartZone = content_db.GetStartZone(&pp, cc, m_ClientVersionBit & EQ::versions::maskTitaniumAndEarlier);
 
 	if (!ValidStartZone){
 		return false;
@@ -1568,7 +1568,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	/* Overrides if we have the tutorial flag set! */
 	if (cc->tutorial && RuleB(World, EnableTutorialButton)) {
 		pp.zone_id = RuleI(World, TutorialZoneID);
-		database.GetSafePoints(pp.zone_id, 0, &pp.x, &pp.y, &pp.z);
+		content_db.GetSafePoints(ZoneName(pp.zone_id), 0, &pp.x, &pp.y, &pp.z);
 	}
 
 	/*  Will either be the same as home or tutorial if enabled. */
@@ -1581,18 +1581,18 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	}
 
 	Log(Logs::Detail, Logs::WorldServer, "Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
-		database.GetZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
+		ZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
 	Log(Logs::Detail, Logs::WorldServer, "Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
-		database.GetZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
+		ZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
 	Log(Logs::Detail, Logs::WorldServer, "Home location: %s (%d) %0.2f, %0.2f, %0.2f",
-		database.GetZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
+		ZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
-	database.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
+	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());
 
 	// now we give the pp and the inv we made to StoreCharacter
 	// to see if we can store it
-	if (!database.StoreCharacter(GetAccountID(), &pp, &inv)) {
+	if (!StoreCharacter(GetAccountID(), &pp, &inv)) {
 		LogInfo("Character creation failed: [{}]", pp.name);
 		return false;
 	}
@@ -2075,3 +2075,63 @@ void Client::SetClassLanguages(PlayerProfile_Struct *pp)
 	}
 }
 
+bool Client::StoreCharacter(
+	uint32 account_id,
+	PlayerProfile_Struct *p_player_profile_struct,
+	EQ::InventoryProfile *p_inventory_profile
+)
+{
+	uint32 character_id = 0;
+	char   zone[50];
+	character_id = database.GetCharacterID(p_player_profile_struct->name);
+
+	if (!character_id) {
+		LogError("StoreCharacter: no character id");
+		return false;
+	}
+
+	const char *zone_name = ZoneName(p_player_profile_struct->zone_id);
+	if (zone_name == nullptr) {
+		/* Zone not in the DB, something to prevent crash... */
+		strn0cpy(zone, "qeynos", 49);
+		p_player_profile_struct->zone_id = 1;
+	}
+	else {
+		strn0cpy(zone, zone_name, 49);
+	}
+
+	database.SaveCharacterCreate(character_id, account_id, p_player_profile_struct);
+
+	std::string invquery;
+	for (int16  i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invbag::BANK_BAGS_END;) {
+		const EQ::ItemInstance *new_inventory_item = p_inventory_profile->GetItem(i);
+		if (new_inventory_item) {
+			invquery = StringFormat(
+				"INSERT INTO `inventory` (charid, slotid, itemid, charges, color) VALUES (%u, %i, %u, %i, %u)",
+				character_id,
+				i,
+				new_inventory_item->GetItem()->ID,
+				new_inventory_item->GetCharges(),
+				new_inventory_item->GetColor()
+			);
+
+			auto results = database.QueryDatabase(invquery);
+		}
+
+		if (i == EQ::invslot::slotCursor) {
+			i = EQ::invbag::GENERAL_BAGS_BEGIN;
+			continue;
+		}
+		else if (i == EQ::invbag::CURSOR_BAG_END) {
+			i = EQ::invslot::BANK_BEGIN;
+			continue;
+		}
+		else if (i == EQ::invslot::BANK_END) {
+			i = EQ::invbag::BANK_BAGS_BEGIN;
+			continue;
+		}
+		i++;
+	}
+
+	return true;
+}

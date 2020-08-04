@@ -62,7 +62,7 @@ void EntityList::DescribeAggro(Client *towho, NPC *from_who, float d, bool verbo
 		} else if(my_primary < 0) {
 			strcpy(namebuf, "(Special faction)");
 		} else {
-			if(!database.GetFactionName(my_primary, namebuf, sizeof(namebuf)))
+			if(!content_db.GetFactionName(my_primary, namebuf, sizeof(namebuf)))
 				strcpy(namebuf, "(Unknown)");
 		}
 		towho->Message(Chat::White, ".. I am on faction %s (%d)\n", namebuf, my_primary);
@@ -171,7 +171,7 @@ void NPC::DescribeAggro(Client *towho, Mob *mob, bool verbose) {
 			towho->Message(Chat::White, "...%s is on special faction %d", mob->GetName(), mob_primary);
 		} else {
 			char namebuf[256];
-			if(!database.GetFactionName(mob_primary, namebuf, sizeof(namebuf)))
+			if(!content_db.GetFactionName(mob_primary, namebuf, sizeof(namebuf)))
 				strcpy(namebuf, "(Unknown)");
 			std::list<struct NPCFaction*>::iterator cur,end;
 			cur = faction_list.begin();

@@ -33,6 +33,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 extern QueryServ* QServ;
 
@@ -55,7 +56,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	}
 
 	PetRecord record;
-	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
+	if (!content_db.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		LogError("Unknown swarm pet spell id: {}, check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
@@ -81,7 +82,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(pet.npc_id);
 	if (npc_type == nullptr) {
 		//log write
 		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
@@ -186,7 +187,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
 		LogError("Unknown npc type for swarm pet type id: [{}]", typesid);
@@ -281,7 +282,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		return;
 
 	//assuming we have pets in our table; we take the first pet as a base type.
-	const NPCType *base_type = database.LoadNPCTypesData(500);
+	const NPCType *base_type = content_db.LoadNPCTypesData(500);
 	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 
@@ -1595,7 +1596,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 
 void Zone::LoadAlternateAdvancement() {
 	LogInfo("Loading Alternate Advancement Data");
-	if(!database.LoadAlternateAdvancementAbilities(aa_abilities,
+	if(!content_db.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
 		aa_abilities.clear();

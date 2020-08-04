@@ -488,7 +488,7 @@ QuestInterface *QuestParserCollection::GetQIByNPCQuest(uint32 npcid, std::string
 	}
 
 	//second look for /quests/zone/npcname.ext (precedence)
-	const NPCType *npc_type = database.LoadNPCTypesData(npcid);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(npcid);
 	if (!npc_type && npcid != ZONE_CONTROLLER_NPC_ID) {
 		return nullptr;
 	}

@@ -23,6 +23,7 @@
 #include "mob.h"
 #include "qglobals.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "zonedump.h"
 
 #include <deque>
@@ -269,7 +270,7 @@ public:
 	void SetNPCFactionID(int32 in)
 	{
 		npc_faction_id = in;
-		database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
     glm::vec4 m_SpawnPoint;
@@ -303,7 +304,7 @@ public:
 	int					GetMaxWp() const { return max_wp; }
 	void				DisplayWaypointInfo(Client *to);
 	void				CalculateNewWaypoint();
-	void				AssignWaypoints(int32 grid, int start_wp = 0);
+	void				AssignWaypoints(int32 grid_id, int start_wp = 0);
 	void				SetWaypointPause();
 	void				UpdateWaypoint(int wp_index);
 
@@ -512,7 +513,7 @@ protected:
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
-	
+
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;

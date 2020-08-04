@@ -571,6 +571,26 @@
         OutF(LogSys, Logs::Detail, Logs::HotReload, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogMerchants(message, ...) do {\
+    if (LogSys.log_settings[Logs::Merchants].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Merchants, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogMerchantsDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Merchants].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Merchants, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogZonePoints(message, ...) do {\
+    if (LogSys.log_settings[Logs::ZonePoints].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::ZonePoints, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogZonePointsDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::ZonePoints].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::ZonePoints, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -908,6 +928,18 @@
 } while (0)
 
 #define LogHotReloadDetail(message, ...) do {\
+} while (0)
+
+#define LogMerchants(message, ...) do {\
+} while (0)
+
+#define LogMerchantsDetail(message, ...) do {\
+} while (0)
+
+#define LogZonePoints(message, ...) do {\
+} while (0)
+
+#define LogZonePointsDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

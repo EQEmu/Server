@@ -2657,7 +2657,6 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-
 		LogEntityManagement(
 			"Removing mob [{}] from [{}] close list entity_id ({})",
 			mob->GetCleanName(),
@@ -2694,7 +2693,11 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
  * @param close_mobs
  * @param scanning_mob
  */
-void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob)
+void EntityList::ScanCloseMobs(
+	std::unordered_map<uint16, Mob *> &close_mobs,
+	Mob *scanning_mob,
+	bool add_self_to_other_lists
+)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 
@@ -2712,11 +2715,23 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 		}
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
-		if (distance <= scan_range) {
+		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-		}
-		else if (mob->GetAggroRange() >= scan_range) {
-			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
+
+			if (add_self_to_other_lists && scanning_mob->GetID() > 0) {
+				bool has_mob = false;
+
+				for (auto &cm: mob->close_mobs) {
+					if (scanning_mob->GetID() == cm.first) {
+						has_mob = true;
+						break;
+					}
+				}
+
+				if (!has_mob) {
+					mob->close_mobs.insert(std::pair<uint16, Mob *>(scanning_mob->GetID(), scanning_mob));
+				}
+			}
 		}
 	}
 

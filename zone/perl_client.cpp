@@ -312,6 +312,34 @@ XS(XS_Client_Duck) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_DyeArmorBySlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_DyeArmorBySlot) {
+	dXSARGS;
+	if (items != 5 && items != 6)
+		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])");
+	{
+		Client *THIS;
+		uint8 slot = (uint8) SvUV(ST(1));
+		uint8 red = (uint8) SvUV(ST(2));
+		uint8 green = (uint8) SvUV(ST(3));
+		uint8 blue = (uint8) SvUV(ST(4));
+		uint8 use_tint = 0x00;
+		if (items == 6) {
+			use_tint = (uint8) SvUV(ST(5));
+		}
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->DyeArmorBySlot(slot, red, green, blue, use_tint);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Stand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Stand) {
 	dXSARGS;
@@ -1315,6 +1343,258 @@ XS(XS_Client_MovePCInstance) {
 
 			Perl_croak(aTHX_ "THIS is not of type Client");
 		}
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZone); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZone) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)");
+	{
+		Client *THIS;
+		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZone(zone_short_name);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZone) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneGroup); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneGroup) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)");
+	{
+		Client *THIS;
+		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneGroup(zone_short_name);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneGroup) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneRaid); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneRaid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)");
+	{
+		Client *THIS;
+		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneRaid(zone_short_name);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneRaid) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstance) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstance(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstance) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstanceGroup); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstanceGroup) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstanceGroup(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceGroup) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_MoveZoneInstanceRaid); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_MoveZoneInstanceRaid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)");
+	{
+		Client *THIS;
+		uint16 instance_id  = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		if (THIS->IsClient()) {
+			THIS->MoveZoneInstanceRaid(instance_id);
+		} else {
+			if (THIS->IsMerc()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Merc reference");
+			}
+#ifdef BOTS
+			else if (THIS->IsBot()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type Bot reference");
+			}
+#endif
+			else if (THIS->IsNPC()) {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process a type NPC reference");
+			}
+			else {
+				LogDebug("[CLIENT] Perl(XS_Client_MoveZoneInstanceRaid) attempted to process an Unknown type reference");
+			}
+
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		}
+
 	}
 	XSRETURN_EMPTY;
 }
@@ -3668,6 +3948,54 @@ XS(XS_Client_UseDiscipline) {
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
+}
+
+XS(XS_Client_GetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetDisciplineTimer) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)");
+	{
+		Client *THIS;
+		uint32 RETVAL;
+		dXSTARG;
+		uint32 timer_id = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetDisciplineTimer(timer_id);
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_ResetDisciplineTimer) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)");
+	{
+		Client *THIS;
+		uint32 timer_id = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->ResetDisciplineTimer(timer_id);
+	}
+	XSRETURN_EMPTY;
 }
 
 XS(XS_Client_GetCharacterFactionLevel); /* prototype to pass -Wmissing-prototypes */
@@ -6411,6 +6739,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
 	newXSproto(strcpy(buf, "DropItem"), XS_Client_DropItem, file, "$$");
 	newXSproto(strcpy(buf, "Duck"), XS_Client_Duck, file, "$");
+	newXSproto(strcpy(buf, "DyeArmorBySlot"), XS_Client_DyeArmorBySlot, file, "$$$$$;$");
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
@@ -6451,6 +6780,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetCorpseID"), XS_Client_GetCorpseID, file, "$$");
 	newXSproto(strcpy(buf, "GetCorpseItemAt"), XS_Client_GetCorpseItemAt, file, "$$$");
 	newXSproto(strcpy(buf, "GetCustomItemData"), XS_Client_GetCustomItemData, file, "$$$");
+	newXSproto(strcpy(buf, "GetDisciplineTimer"), XS_Client_GetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "GetDiscSlotBySpellID"), XS_Client_GetDiscSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetDuelTarget"), XS_Client_GetDuelTarget, file, "$");
 	newXSproto(strcpy(buf, "GetEbonCrystals"), XS_Client_GetEbonCrystals, file, "$");
@@ -6537,6 +6867,12 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 	newXSproto(strcpy(buf, "MovePC"), XS_Client_MovePC, file, "$$$$$$");
 	newXSproto(strcpy(buf, "MovePCInstance"), XS_Client_MovePCInstance, file, "$$$$$$$");
+	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneRaid"), XS_Client_MoveZoneRaid, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstance"), XS_Client_MoveZoneInstance, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstanceGroup"), XS_Client_MoveZoneInstanceGroup, file, "$$");
+	newXSproto(strcpy(buf, "MoveZoneInstanceRaid"), XS_Client_MoveZoneInstanceRaid, file, "$$");
 	newXSproto(strcpy(buf, "NPCSpawn"), XS_Client_NPCSpawn, file, "$$$;$");
 	newXSproto(strcpy(buf, "NukeItem"), XS_Client_NukeItem, file, "$$;$");
 	newXSproto(strcpy(buf, "OpenLFGuildWindow"), XS_Client_OpenLFGuildWindow, file, "$");
@@ -6548,6 +6884,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
+	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");
 	newXSproto(strcpy(buf, "SaveBackup"), XS_Client_SaveBackup, file, "$");

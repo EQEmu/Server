@@ -26,7 +26,9 @@
 #include "mob.h"
 #include "npc.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "global_loot_manager.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -463,42 +465,70 @@ void NPC::CheckGlobalLootTables()
 
 void ZoneDatabase::LoadGlobalLoot()
 {
-	auto query = StringFormat("SELECT id, loottable_id, description, min_level, max_level, rare, raid, race, "
-				  "class, bodytype, zone, hot_zone FROM global_loot WHERE enabled = 1");
+	auto query = fmt::format(
+		SQL
+		(
+			SELECT
+			  id,
+			  loottable_id,
+			  description,
+			  min_level,
+			  max_level,
+			  rare,
+			  raid,
+			  race,
+			  class,
+			  bodytype,
+			  zone,
+			  hot_zone
+			FROM
+			  global_loot
+			WHERE
+			  enabled = 1
+			  {}
+		),
+		ContentFilterCriteria::apply()
+	);
 
 	auto results = QueryDatabase(query);
-	if (!results.Success() || results.RowCount() == 0)
+	if (!results.Success() || results.RowCount() == 0) {
 		return;
+	}
 
 	// we might need this, lets not keep doing it in a loop
-	auto zoneid = std::to_string(zone->GetZoneID());
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	auto      zoneid = std::to_string(zone->GetZoneID());
+	for (auto row    = results.begin(); row != results.end(); ++row) {
 		// checking zone limits
 		if (row[10]) {
 			auto zones = SplitString(row[10], '|');
 
 			auto it = std::find(zones.begin(), zones.end(), zoneid);
-			if (it == zones.end())  // not in here, skip
+			if (it == zones.end()) {  // not in here, skip
 				continue;
+			}
 		}
 
 		GlobalLootEntry e(atoi(row[0]), atoi(row[1]), row[2] ? row[2] : "");
 
 		auto min_level = atoi(row[3]);
-		if (min_level)
+		if (min_level) {
 			e.AddRule(GlobalLoot::RuleTypes::LevelMin, min_level);
+		}
 
 		auto max_level = atoi(row[4]);
-		if (max_level)
+		if (max_level) {
 			e.AddRule(GlobalLoot::RuleTypes::LevelMax, max_level);
+		}
 
 		// null is not used
-		if (row[5])
+		if (row[5]) {
 			e.AddRule(GlobalLoot::RuleTypes::Rare, atoi(row[5]));
+		}
 
 		// null is not used
-		if (row[6])
+		if (row[6]) {
 			e.AddRule(GlobalLoot::RuleTypes::Raid, atoi(row[6]));
+		}
 
 		if (row[7]) {
 			auto races = SplitString(row[7], '|');
@@ -522,8 +552,9 @@ void ZoneDatabase::LoadGlobalLoot()
 		}
 
 		// null is not used
-		if (row[11])
+		if (row[11]) {
 			e.AddRule(GlobalLoot::RuleTypes::HotZone, atoi(row[11]));
+		}
 
 		zone->AddGlobalLootEntry(e);
 	}

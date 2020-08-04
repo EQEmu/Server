@@ -24,8 +24,10 @@
 #include "../../common/crash.h"
 #include "../../common/rulesys.h"
 #include "../../common/string_util.h"
+#include "../../common/content/world_content_service.h"
 
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 
 void ImportSpells(SharedDatabase *db);
 void ImportSkillCaps(SharedDatabase *db);
@@ -46,24 +48,48 @@ int main(int argc, char **argv) {
 	auto Config = EQEmuConfig::get();
 
 	SharedDatabase database;
+	SharedDatabase content_db;
+
 	LogInfo("Connecting to database");
-	if(!database.Connect(Config->DatabaseHost.c_str(), Config->DatabaseUsername.c_str(),
-		Config->DatabasePassword.c_str(), Config->DatabaseDB.c_str(), Config->DatabasePort)) {
-		LogError("Unable to connect to the database, cannot continue without a "
-			"database connection");
+	if (!database.Connect(
+		Config->DatabaseHost.c_str(),
+		Config->DatabaseUsername.c_str(),
+		Config->DatabasePassword.c_str(),
+		Config->DatabaseDB.c_str(),
+		Config->DatabasePort
+	)) {
+		LogError("Unable to connect to the database, cannot continue without a database connection");
 		return 1;
+	}
+
+	/**
+	 * Multi-tenancy: Content database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort
+		)) {
+			LogError("Cannot continue without a content database connection");
+			return 1;
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
 	}
 
 	database.LoadLogSettings(LogSys.log_settings);
 	LogSys.StartFileLogs();
 
-	ImportSpells(&database);
-	ImportSkillCaps(&database);
-	ImportBaseData(&database);
+	ImportSpells(&content_db);
+	ImportSkillCaps(&content_db);
+	ImportBaseData(&content_db);
 	ImportDBStrings(&database);
 
 	LogSys.CloseFileLogs();
-	
+
 	return 0;
 }
 
@@ -300,10 +326,10 @@ void ImportDBStrings(SharedDatabase *db) {
 		std::string sql;
 		int id, type;
 		std::string value;
-		
+
 		id = atoi(split[0].c_str());
 		type = atoi(split[1].c_str());
-		
+
 		if(split.size() >= 3) {
 			value = ::EscapeString(split[2]);
 		}

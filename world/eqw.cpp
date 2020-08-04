@@ -188,7 +188,7 @@ std::map<std::string,std::string> EQW::GetPlayerDetails(Const_char *char_name) {
 	res["character"] = cle->name();
 	res["account"] = cle->AccountName();
 	res["account_id"] = itoa(cle->AccountID());
-	res["location_short"] = cle->zone()?database.GetZoneName(cle->zone()):"No Zone";
+	res["location_short"] = cle->zone()?ZoneName(cle->zone()):"No Zone";
 	res["location_long"] = res["location_short"];
 	res["location_id"] = itoa(cle->zone());
 	res["ip"] = long2ip(cle->GetIP());

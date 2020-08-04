@@ -26,6 +26,7 @@
 #include "worldserver.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -165,8 +166,11 @@ bool Spawn2::Process() {
 			return (true);
 		}
 
-		if (spawn_group == nullptr) {
-			database.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
+		/**
+		 * Wait for init grids timer because we bulk load this data before trying to fetch it individually
+		 */
+		if (spawn_group == nullptr && zone->GetInitgridsTimer().Check()) {
+			content_db.LoadSpawnGroupsByID(spawngroup_id_, &zone->spawn_group_list);
 			spawn_group = zone->spawn_group_list.GetSpawnGroup(spawngroup_id_);
 		}
 
@@ -192,7 +196,7 @@ bool Spawn2::Process() {
 		}
 
 		//try to find our NPC type.
-		const NPCType *tmp = database.LoadNPCTypesData(npcid);
+		const NPCType *tmp = content_db.LoadNPCTypesData(npcid);
 		if (tmp == nullptr) {
 			LogSpawns("Spawn2 [{}]: Spawn group [{}] yeilded an invalid NPC type [{}]", spawn2_id, spawngroup_id_, npcid);
 			Reset();    //try again later
@@ -239,7 +243,7 @@ bool Spawn2::Process() {
 		if (spawn_group->wp_spawns && grid_ > 0)
 		{
 			glm::vec4 wploc;
-			starting_wp = database.GetRandomWaypointLocFromGrid(wploc, zone->GetZoneID(), grid_);
+			starting_wp = content_db.GetRandomWaypointLocFromGrid(wploc, zone->GetZoneID(), grid_);
 			if (wploc.x != 0.0f || wploc.y != 0.0f || wploc.z != 0.0f)
 			{
 				loc = wploc;
@@ -431,7 +435,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 	gettimeofday(&tv, nullptr);
 
 	/* Bulk Load NPC Types Data into the cache */
-	database.LoadNPCTypesData(0, true);
+	content_db.LoadNPCTypesData(0, true);
 
 	std::string spawn_query = StringFormat(
 		"SELECT "
@@ -458,7 +462,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		}
 	}
 
-	const char *zone_name = database.GetZoneName(zoneid);
+	const char *zone_name = ZoneName(zoneid);
 	std::string query = StringFormat(
 		"SELECT "
 		"id, "
@@ -480,7 +484,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		zone_name,
 		version
 		);
-	results = QueryDatabase(query);
+	results = database.QueryDatabase(query);
 
 	if (!results.Success()) {
 		return false;
@@ -504,7 +508,7 @@ bool ZoneDatabase::PopulateZoneSpawnListClose(uint32 zoneid, LinkedList<Spawn2*>
 		if (mob_distance > repop_distance)
 			continue;
 
-		new_spawn = new Spawn2(							   // 
+		new_spawn = new Spawn2(							   //
 			atoi(row[0]), 								   // uint32 in_spawn2_id
 			atoi(row[1]), 								   // uint32 spawngroup_id
 			atof(row[2]), 								   // float in_x
@@ -535,7 +539,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 	gettimeofday(&tv, nullptr);
 
 	/* Bulk Load NPC Types Data into the cache */
-	database.LoadNPCTypesData(0, true);
+	content_db.LoadNPCTypesData(0, true);
 
 	std::string spawn_query = StringFormat(
 		"SELECT "
@@ -547,7 +551,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		"WHERE instance_id = %u",
 		zone->GetInstanceID()
 	);
-	auto results = QueryDatabase(spawn_query);
+	auto results = database.QueryDatabase(spawn_query);
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		uint32 start_duration = atoi(row[1]) > 0 ? atoi(row[1]) : 0;
 		uint32 end_duration = atoi(row[2]) > 0 ? atoi(row[2]) : 0;
@@ -562,7 +566,7 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 		}
 	}
 
-	const char *zone_name = database.GetZoneName(zoneid);
+	const char *zone_name = ZoneName(zoneid);
 	std::string query = StringFormat(
 		"SELECT "
 		"id, "
@@ -592,14 +596,14 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		uint32 spawn_time_left = 0; 
-		Spawn2* new_spawn = 0; 
+		uint32 spawn_time_left = 0;
+		Spawn2* new_spawn = 0;
 		bool perl_enabled = atoi(row[11]) == 1 ? true : false;
 
 		if (spawn_times.count(atoi(row[0])) != 0)
 			spawn_time_left = spawn_times[atoi(row[0])];
 
-		new_spawn = new Spawn2(							   // 
+		new_spawn = new Spawn2(							   //
 			atoi(row[0]), 								   // uint32 in_spawn2_id
 			atoi(row[1]), 								   // uint32 spawngroup_id
 			atof(row[2]), 								   // float in_x
@@ -968,7 +972,7 @@ bool SpawnConditionManager::LoadSpawnConditions(const char* zone_name, uint32 in
 	std::string query = StringFormat("SELECT id, onchange, value "
                                     "FROM spawn_conditions "
                                     "WHERE zone = '%s'", zone_name);
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
@@ -1214,7 +1218,7 @@ void SpawnConditionManager::SetCondition(const char *zone_short, uint32 instance
 		auto pack = new ServerPacket(ServerOP_SpawnCondition, sizeof(ServerSpawnCondition_Struct));
 		ServerSpawnCondition_Struct* ssc = (ServerSpawnCondition_Struct*)pack->pBuffer;
 
-		ssc->zoneID = database.GetZoneID(zone_short);
+		ssc->zoneID = ZoneID(zone_short);
 		ssc->instanceID = instance_id;
 		ssc->condition_id = condition_id;
 		ssc->value = new_value;
@@ -1346,7 +1350,7 @@ void SpawnConditionManager::ToggleEvent(uint32 event_id, bool enabled, bool stri
 	auto pack = new ServerPacket(ServerOP_SpawnEvent, sizeof(ServerSpawnEvent_Struct));
 	ServerSpawnEvent_Struct* sse = (ServerSpawnEvent_Struct*)pack->pBuffer;
 
-	sse->zoneID = database.GetZoneID(zone_short_name.c_str());
+	sse->zoneID = ZoneID(zone_short_name.c_str());
 	sse->event_id = event_id;
 
 	worldserver.SendPacket(pack);

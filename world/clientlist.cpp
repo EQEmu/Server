@@ -33,6 +33,7 @@
 #include "../common/event_sub.h"
 #include "web_interface.h"
 #include "wguild_mgr.h"
+#include "world_store.h"
 #include <set>
 
 extern WebInterfaceList web_interface;
@@ -107,7 +108,7 @@ void ClientList::GetCLEIP(uint32 iIP) {
 	iterator.Reset();
 
 	while(iterator.MoreElements()) {
-		countCLEIPs = iterator.GetData();		
+		countCLEIPs = iterator.GetData();
 		if ((countCLEIPs->GetIP() == iIP) && ((countCLEIPs->Admin() < (RuleI(World, ExemptMaxClientsStatus))) || (RuleI(World, ExemptMaxClientsStatus) < 0))) { // If the IP matches, and the connection admin status is below the exempt status, or exempt status is less than 0 (no-one is exempt)
 			IPInstances++; // Increment the occurences of this IP address
 			LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str());
@@ -129,7 +130,7 @@ void ClientList::GetCLEIP(uint32 iIP) {
 				if (IPInstances > (RuleI(World, MaxClientsPerIP))) { // If the number of connections exceeds the lower limit
 					if (RuleB(World, MaxClientsSetByStatus)) { // If MaxClientsSetByStatus is set to True, override other IP Limit Rules
 						LogClientLogin("Account ID: [{}] Account Name: [{}] IP: [{}] IP Instances: [{}] Max IP Instances: [{}]", countCLEIPs->LSID(), countCLEIPs->LSName(), long2ip(countCLEIPs->GetIP()).c_str(), IPInstances, countCLEIPs->Admin());
-						if (IPInstances > countCLEIPs->Admin()) { // The IP Limit is set by the status of the account if status > MaxClientsPerIP	
+						if (IPInstances > countCLEIPs->Admin()) { // The IP Limit is set by the status of the account if status > MaxClientsPerIP
 							if(RuleB(World, IPLimitDisconnectAll)) {
 								LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 								DisconnectByIP(iIP);
@@ -142,7 +143,7 @@ void ClientList::GetCLEIP(uint32 iIP) {
 							}
 						}
 					} else if ((countCLEIPs->Admin() < RuleI(World, AddMaxClientsStatus)) || (RuleI(World, AddMaxClientsStatus) < 0)) { // Else if the Admin status of the connection is not eligible for the higher limit, or there is no higher limit (AddMaxClientStatus < 0)
-						if(RuleB(World, IPLimitDisconnectAll)) {								
+						if(RuleB(World, IPLimitDisconnectAll)) {
 							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 							DisconnectByIP(iIP);
 							return;
@@ -152,7 +153,7 @@ void ClientList::GetCLEIP(uint32 iIP) {
 							iterator.RemoveCurrent();
 							continue;
 						}
-					} else if (IPInstances > RuleI(World, AddMaxClientsPerIP)) { // else they are eligible for the higher limit, but if they exceed that	
+					} else if (IPInstances > RuleI(World, AddMaxClientsPerIP)) { // else they are eligible for the higher limit, but if they exceed that
 						if(RuleB(World, IPLimitDisconnectAll)) {
 							LogClientLogin("Disconnect: All accounts on IP [{}]", long2ip(countCLEIPs->GetIP()).c_str());
 							DisconnectByIP(iIP);
@@ -293,7 +294,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 			if (cle->LSID())
 				AppendAnyLenString(&output, &outsize, &outlen, "%s  LSID: %i  LSName: %s  WorldAdmin: %i", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
 			if (cle->CharID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), database.GetZoneName(cle->zone()), cle->zone());
+				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
 			if (outlen >= 3072) {
 				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
 				safe_delete(output);
@@ -500,7 +501,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	countclients.Reset();
 	while(countclients.MoreElements()){
 		countcle = countclients.GetData();
-		const char* tmpZone = database.GetZoneName(countcle->zone());
+		const char* tmpZone = ZoneName(countcle->zone());
 		if (
 	(countcle->Online() >= CLE_Status::Zoning) &&
 	(!countcle->GetGM() || countcle->Anon() != 1 || admin >= countcle->Admin()) &&
@@ -580,7 +581,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	while(iterator.MoreElements()) {
 		cle = iterator.GetData();
 
-		const char* tmpZone = database.GetZoneName(cle->zone());
+		const char* tmpZone = ZoneName(cle->zone());
 		if (
 	(cle->Online() >= CLE_Status::Zoning) &&
 	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) &&
@@ -965,7 +966,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
-		const char* tmpZone = database.GetZoneName(cle->zone());
+		const char* tmpZone = ZoneName(cle->zone());
 		if (
 			(cle->Online() >= CLE_Status::Zoning)
 			&& (whom == 0 || (
@@ -1086,7 +1087,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
 		else
 			AppendAnyLenString(&output, &outsize, &outlen, "\n");
-		
+
 		//console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
 	}
 	if (output)
@@ -1282,7 +1283,7 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 			iterator.Advance();
 		}
 	} else {
-		uint32 zoneid = database.GetZoneID(zone_name);
+		uint32 zoneid = ZoneID(zone_name);
 		while(iterator.MoreElements()) {
 			ClientListEntry* tmp = iterator.GetData();
 			if(tmp->zone() == zoneid)
@@ -1358,7 +1359,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 	}
 
 	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF, %i RoF2 clients currently connected.",
-		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count); 
+		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count);
 }
 
 void ClientList::OnTick(EQ::Timer *t)
@@ -1378,7 +1379,7 @@ void ClientList::OnTick(EQ::Timer *t)
 	while (Iterator.MoreElements())
 	{
 		ClientListEntry* cle = Iterator.GetData();
-		
+
 		Json::Value outclient;
 
 		outclient["Online"] = cle->Online();

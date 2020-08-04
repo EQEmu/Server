@@ -35,17 +35,31 @@
 DBcore::DBcore()
 {
 	mysql_init(&mysql);
-	pHost     = 0;
-	pUser     = 0;
-	pPassword = 0;
-	pDatabase = 0;
-	pCompress = false;
-	pSSL      = false;
-	pStatus   = Closed;
+	pHost           = nullptr;
+	pUser           = nullptr;
+	pPassword       = nullptr;
+	pDatabase       = nullptr;
+	pCompress       = false;
+	pSSL            = false;
+	pStatus         = Closed;
 }
 
 DBcore::~DBcore()
 {
+	/**
+	 * This prevents us from doing a double free in multi-tenancy setups where we
+	 * are re-using the default database connection pointer when we dont have an
+	 * external configuration setup ex: (content_database)
+	 */
+	std::string mysql_connection_host;
+	if (mysql.host) {
+		mysql_connection_host = mysql.host;
+	}
+
+	if (GetOriginHost() != mysql_connection_host) {
+		return;
+	}
+
 	mysql_close(&mysql);
 	safe_delete_array(pHost);
 	safe_delete_array(pUser);
@@ -69,6 +83,13 @@ MySQLRequestResult DBcore::QueryDatabase(std::string query, bool retryOnFailureO
 	return QueryDatabase(query.c_str(), query.length(), retryOnFailureOnce);
 }
 
+bool DBcore::DoesTableExist(std::string table_name)
+{
+	auto results = QueryDatabase(fmt::format("SHOW TABLES LIKE '{}'", table_name));
+
+	return results.RowCount() > 0;
+}
+
 MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, bool retryOnFailureOnce)
 {
 	BenchTimer timer;
@@ -80,6 +101,8 @@ MySQLRequestResult DBcore::QueryDatabase(const char *query, uint32 querylen, boo
 	if (pStatus != Connected) {
 		Open();
 	}
+
+
 
 	// request query. != 0 indicates some kind of error.
 	if (mysql_real_query(&mysql, query, querylen) != 0) {
@@ -244,6 +267,10 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	}
 	if (mysql_real_connect(&mysql, pHost, pUser, pPassword, pDatabase, pPort, 0, flags)) {
 		pStatus = Connected;
+
+		std::string connected_origin_host = pHost;
+		SetOriginHost(connected_origin_host);
+
 		return true;
 	}
 	else {
@@ -258,8 +285,17 @@ bool DBcore::Open(uint32 *errnum, char *errbuf)
 	}
 }
 
+void DBcore::SetMysql(MYSQL *mysql)
+{
+	DBcore::mysql = *mysql;
+}
 
+const std::string &DBcore::GetOriginHost() const
+{
+	return origin_host;
+}
 
-
-
-
+void DBcore::SetOriginHost(const std::string &origin_host)
+{
+	DBcore::origin_host = origin_host;
+}
