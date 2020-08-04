@@ -87,7 +87,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			break;
 		case EQ::item::ItemType2HBlunt: // 2H Blunt
 			skillinuse = EQ::skills::Skill2HBlunt;
-			type = anim2HWeapon; //anim2HWeapon
+			type = anim2HSlashing; //anim2HWeapon
 			break;
 		case EQ::item::ItemType2HPiercing: // 2H Piercing
 			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
@@ -121,7 +121,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = anim1HWeapon;
 			break;
 		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HWeapon; //anim2HWeapon
+			type = anim2HSlashing; //anim2HWeapon
 			break;
 		case EQ::skills::Skill2HPiercing: // 2H Piercing
 			type = anim2HWeapon;
@@ -1531,14 +1531,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 		if (zone->random.Roll(chance))
 			SpellFinished(aabonuses.SkillAttackProc[2], other, EQ::spells::CastingSlot::Item, 0, -1,
 				spells[aabonuses.SkillAttackProc[2]].ResistDiff);
-	}
-
-	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.STR;
-		float melee_damage_scale = RuleR(Combat, CustomScalingMeleeDamage);
-		if (scale_value > int(melee_damage_scale)) {
-			my_hit.damage_done = int(static_cast<float>(my_hit.damage_done) * static_cast<float>(scale_value / melee_damage_scale));
-		}
 	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 

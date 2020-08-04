@@ -5677,14 +5677,6 @@ int32 Mob::GetMeleeMitigation() {
 	mitigation += spellbonuses.MeleeMitigationEffect;
 	mitigation += itembonuses.MeleeMitigationEffect;
 	mitigation += aabonuses.MeleeMitigationEffect;
-
-	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.AGI;
-		float melee_mitigation_scale = RuleR(Combat, CustomScalingMeleeMitigation);
-		if (scale_value > int(melee_mitigation_scale)) {
-			mitigation = int(static_cast<float>(mitigation) + static_cast<float>(scale_value / melee_mitigation_scale));
-		}
-	}
 	return mitigation;
 }
 

@@ -2408,13 +2408,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					//need a bard version of this prolly...
 					//if(caster)
 					//	dmg = caster->GetActSpellDamage(spell_id, dmg);
-					if (RuleB(Combat, CustomScaling) && caster && caster->IsClient()) {
-						int scale_value = caster->GetItemBonuses().INT;
-						float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-						if (scale_value > int(spell_damage_scale)) {
-							dmg = int(static_cast<float>(dmg) * static_cast<float>(scale_value / spell_damage_scale));
-						}
-					}
+
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				} else if(dmg > 0) {
@@ -3581,14 +3575,6 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable ||
 			    /*effect_value > 0 ||*/ DivineAura())
 				break;
-			
-			if (RuleB(Combat, CustomScaling) && caster && caster->IsClient()) {
-				int scale_value = caster->GetItemBonuses().INT;
-				float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-				if (scale_value > int(spell_damage_scale)) {
-					effect_value = int(static_cast<float>(effect_value) * static_cast<float>(scale_value / spell_damage_scale));
-				}
-			}
 
 			if (effect_value < 0) {
 				effect_value = -effect_value;

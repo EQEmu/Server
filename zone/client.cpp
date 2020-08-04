@@ -1035,21 +1035,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 					return;
 				}
 			}
-			uint8 admin_level = Admin();
-			char *custom_rank = (
-				admin_level ? 
-				(
-					admin_level == 1 ?
-					"[Donator] " : 
-					(
-						admin_level == 255 ? 
-						"[Admin] " : 
-						""
-					)
-				) :
-				""
-			);
-			strn0cpy(message, strcat(custom_rank, message), 4096);
+
 			if (!worldserver.SendChannelMessage(this, 0, chan_num, 0, language, lang_skill, message))
 			{
 				Message(0, "Error: World server disconnected");
