@@ -4725,7 +4725,6 @@ XS(XS_Client_SetEbonCrystals) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetEbonCrystals(value);
-		THIS->SendCrystalCounts();
 	}
 	XSRETURN_EMPTY;
 }
@@ -4748,7 +4747,6 @@ XS(XS_Client_SetRadiantCrystals) {
 			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
 
 		THIS->SetRadiantCrystals(value);
-		THIS->SendCrystalCounts();
 	}
 	XSRETURN_EMPTY;
 }
