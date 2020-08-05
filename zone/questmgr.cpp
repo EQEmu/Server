@@ -1035,6 +1035,17 @@ void QuestManager::snow(int weather) {
 	safe_delete(outapp);
 }
 
+void QuestManager::name(const char *name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		if (initiator->ChangeFirstName(name, initiator->GetName())) {
+			initiator->Message(Chat::White, fmt::format("Successfully renamed to {}, kicking to character select.", name).c_str());
+			initiator->Kick("Name was changed.");
+		} else
+			initiator->Message(Chat::Red, fmt::format("Failed to rename {} to {}.", initiator->GetName(), name).c_str());
+	}
+}
+
 void QuestManager::surname(const char *name) {
 	QuestManagerCurrentQuestVars();
 	//Changes the last name.

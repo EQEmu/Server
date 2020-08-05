@@ -935,6 +935,19 @@ XS(XS__snow) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__name);
+XS(XS__name) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::surname(string name)");
+
+	char *name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.name(name);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__surname);
 XS(XS__surname) {
 	dXSARGS;
@@ -6292,6 +6305,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
 	newXS(strcpy(buf, "movepc"), XS__movepc, file);
 	newXS(strcpy(buf, "moveto"), XS__moveto, file);
+	newXS(strcpy(buf, "name"), XS__name, file);
 	newXS(strcpy(buf, "nexttaskinset"), XS__nexttaskinset, file);
 	newXS(strcpy(buf, "npcfeature"), XS__npcfeature, file);
 	newXS(strcpy(buf, "npcgender"), XS__npcgender, file);

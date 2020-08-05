@@ -498,6 +498,7 @@ RULE_BOOL(Combat, ClassicNPCBackstab, false, "True disables npc facestab - NPCge
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
 RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
 RULE_BOOL(Combat, CustomScaling, false, "Use Custom Scaling.")
+RULE_REAL(Combat, CustomScalingLifetapDamage, 100.0, "Custom Lifetap Damage Scaling (INT / VALUE)")
 RULE_REAL(Combat, CustomScalingMeleeMitigation, 2500.0, "Custom Melee Mitigation Scaling (AGI / VALUE)")
 RULE_REAL(Combat, CustomScalingMeleeDamage, 100.0, "Custom Melee Damage Scaling (STR / VALUE)")
 RULE_REAL(Combat, CustomScalingSkillDamage, 100.0, "Custom Skill Damage Scaling (DEX / VALUE)")

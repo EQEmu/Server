@@ -395,7 +395,7 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 		case NORRATHS_KEEPERS_MERCHANT:
 			return "Radiant Crystal Merchant";
 		case DARK_REIGN_MERCHANT:
-			return "Radiant Crystal Merchant";
+			return "Ebon Crystal Merchant";
 		case FELLOWSHIP_MASTER:
 			return "Fellowship Master";
 		case ALT_CURRENCY_MERCHANT:

@@ -123,6 +123,21 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
 				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
+			if (RuleB(Combat, CustomScaling) && IsClient()) {
+				int scale_value = itembonuses.INT;
+				if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
+					float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
+					if (scale_value > int(spell_lifetap_scale)) {
+						value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
+					}
+				} else {
+					float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+					if (scale_value > int(spell_damage_scale)) {
+						value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+					}
+				}
+			}
+
 			entity_list.MessageCloseString(
 				this, true, 100, Chat::SpellCrit,
 				OTHER_CRIT_BLAST, GetName(), itoa(-value));
@@ -162,9 +177,16 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
 		int scale_value = itembonuses.INT;
-		float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-		if (scale_value > int(spell_damage_scale)) {
-			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+		if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
+			float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
+			if (scale_value > int(spell_lifetap_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
+			}
+		} else {
+			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+			if (scale_value > int(spell_damage_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+			}
 		}
 	}
 
@@ -239,9 +261,16 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
 		int scale_value = itembonuses.INT;
-		float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-		if (scale_value > spell_damage_scale) {
-			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+		if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
+			float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
+			if (scale_value > int(spell_lifetap_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
+			}
+		} else {
+			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
+			if (scale_value > int(spell_damage_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
+			}
 		}
 	}
 
@@ -323,6 +352,14 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (IsNPC() && CastToNPC()->GetHealScale())
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 
+		if (RuleB(Combat, CustomScaling) && IsClient()) {
+			int scale_value = itembonuses.WIS;
+			float spell_healing_scale = RuleR(Combat, CustomScalingSpellHealing);
+			if (scale_value > int(spell_healing_scale)) {
+				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_healing_scale));
+			}
+		}
+
 		if (Critical) {
 			entity_list.MessageCloseString(
 				this, true, 100, Chat::SpellCrit,
@@ -330,14 +367,6 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 			if (IsClient())
 				MessageString(Chat::SpellCrit, YOU_CRIT_HEAL, itoa(value));
-		}
-
-		if (RuleB(Combat, CustomScaling) && IsClient()) {
-			int scale_value = itembonuses.WIS;
-			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-			if (scale_value > int(spell_damage_scale)) {
-				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
-			}
 		}
 
 		return value;

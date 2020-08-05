@@ -7732,14 +7732,10 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	else if(!strcasecmp(sep->arg[1], "radiant"))
 	{
 		t->SetRadiantCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->SaveCurrency();
 	}
 	else if(!strcasecmp(sep->arg[1], "ebon"))
 	{
 		t->SetEbonCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->SaveCurrency();
 	}
 	else
 	{

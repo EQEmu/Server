@@ -115,6 +115,7 @@ public:
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
+	void name(const char *name);
 	void surname(const char *name);
 	void permaclass(int class_id);
 	void permarace(int race_id);
