@@ -9603,8 +9603,7 @@ Expedition* Client::GetExpedition() const
 	return nullptr;
 }
 
-void Client::AddExpeditionLockout(
-	const ExpeditionLockoutTimer& lockout, bool update_db, bool update_client)
+void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db)
 {
 	// todo: support for account based lockouts like live AoC expeditions
 
@@ -9622,10 +9621,7 @@ void Client::AddExpeditionLockout(
 		ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { lockout }, true);
 	}
 
-	if (update_client)
-	{
-		SendExpeditionLockoutTimers();
-	}
+	SendExpeditionLockoutTimers();
 }
 
 void Client::AddNewExpeditionLockout(
@@ -9719,13 +9715,7 @@ bool Client::HasExpeditionLockout(
 
 void Client::LoadAllExpeditionLockouts()
 {
-	m_expedition_lockouts.clear();
-
-	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
-	for (const auto& lockout : lockouts)
-	{
-		AddExpeditionLockout(lockout, false, false);
-	}
+	m_expedition_lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
 	SendExpeditionLockoutTimers();
 }
 
