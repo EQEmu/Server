@@ -1117,7 +1117,7 @@ public:
 		Client* client, const std::string& client_name, uint16_t chat_type,
 		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
 
-	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false, bool update_client = true);
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
 	void AddNewExpeditionLockout(
 		const std::string& expedition_name, const std::string& event_name, uint32_t duration, std::string uuid = {});
 	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
