@@ -268,6 +268,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_HealOverTime: {				
+				int32 damage = effect_value;
+				if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
+					break;
+
+				if (caster)
+					damage = caster->GetActSpellHealing(spell_id, effect_value);
+
+				HealDamage(damage, caster, spell_id);
+				break;
+			}
+
 			case SE_CurrentHPOnce:	// used in buffs usually, see Courage
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -2910,7 +2922,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_TrueNorth:
 			case SE_WaterBreathing:
 			case SE_MovementSpeed:
-			case SE_HealOverTime:
 			case SE_PercentXPIncrease:
 			case SE_DivineSave:
 			case SE_Accuracy:

@@ -1533,13 +1533,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 				spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
 
-	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.STR;
-		float melee_damage_scale = RuleR(Combat, CustomScalingMeleeDamage);
-		if (scale_value > int(melee_damage_scale)) {
-			my_hit.damage_done = int(static_cast<float>(my_hit.damage_done) * static_cast<float>(scale_value / melee_damage_scale));
-		}
-	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
 	if (IsDead()) return false;
@@ -5113,6 +5106,14 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	min_mod = std::max(min_mod, extra_mincap);
 	if (min_mod && hit.damage_done < min_mod) // SPA 186
 		hit.damage_done = min_mod;
+
+	if (RuleB(Combat, CustomScaling) && IsClient()) {
+		int scale_value = itembonuses.STR;
+		float melee_damage_scale = RuleR(Combat, CustomScalingMeleeDamage);
+		if (scale_value > int(melee_damage_scale)) {
+			hit.damage_done = int(static_cast<float>(hit.damage_done) * static_cast<float>(scale_value / melee_damage_scale));
+		}
+	}
 
 	TryCriticalHit(defender, hit, opts);
 
