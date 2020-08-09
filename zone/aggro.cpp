@@ -800,7 +800,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	return false;
 }
 
-bool Mob::CombatRange(Mob* other)
+bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 {
 	if(!other)
 		return(false);
@@ -825,13 +825,25 @@ bool Mob::CombatRange(Mob* other)
 
 	// this could still use some work, but for now it's an improvement....
 
-	if (size_mod > 29)
+	if (size_mod > 29) {
 		size_mod *= size_mod;
-	else if (size_mod > 19)
+	} else if (size_mod > 19) {
 		size_mod *= size_mod * 2;
-	else
+	} else {
 		size_mod *= size_mod * 4;
+	}
 
+	if (other->GetRace() == 184)		// Lord Vyemm and other velious dragons
+	{
+		size_mod *= 1.75;
+	}
+	if (other->GetRace() == 122)		// Dracoliche in Fear.  Skeletal Dragon
+	{
+		size_mod *= 2.25;
+	}
+
+	size_mod *= RuleR(Combat,HitBoxMod);		// used for testing sizemods on different races.
+	size_mod *= fixed_size_mod;					// used to extend the size_mod
 
 	// prevention of ridiculously sized hit boxes
 	if (size_mod > 10000)
@@ -865,6 +877,15 @@ bool Mob::CombatRange(Mob* other)
 		else
 			SetPseudoRoot(false);
 	}
+	if(aeRampage) {
+		float multiplyer = GetSize() * RuleR(Combat, AERampageSafeZone);
+		float ramp_range = (size_mod * multiplyer);
+		if (_DistNoRoot <= ramp_range) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	if (_DistNoRoot <= size_mod)
 	{
@@ -872,13 +893,11 @@ bool Mob::CombatRange(Mob* other)
 		if (flymode != GravityBehavior::Flying && _zDist > 500 && !CheckLastLosState()) {
 			return false;
 		}
-
 		return true;
 	}
 	return false;
 }
 
-//Father Nitwit's LOS code
 bool Mob::CheckLosFN(Mob *other)
 {
 	bool Result = false;
