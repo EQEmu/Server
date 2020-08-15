@@ -2464,7 +2464,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				killer = killer->GetOwner();
 
 			if (killer->IsClient() && !killer->CastToClient()->GetGM())
-				this->CheckMinMaxLevel(killer);
+				this->CheckTrivialMinMaxLevelDrop(killer);
 		}
 
 		entity_list.RemoveFromAutoXTargets(this);
