@@ -509,7 +509,7 @@ void NPC::AddLootDrop(
 
 void NPC::AddItem(const EQ::ItemData* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
-	AddLootDrop(item, &itemlist, LootDropEntries_Struct{ .equip_item = equipitem }, true);
+	AddLootDrop(item, &itemlist, LootDropEntries_Struct{ .equip_item = static_cast<uint8>(equipitem ? 1 : 0) }, true);
 }
 
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {

@@ -902,7 +902,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 									tradingWith->CastToNPC()->AddLootDrop(
 										bagitem,
 										&tradingWith->CastToNPC()->itemlist,
-										LootDropEntries_Struct{.item_charges = static_cast<int8>(baginst->GetCharges()), .equip_item = true },
+										LootDropEntries_Struct{.item_charges = static_cast<int8>(baginst->GetCharges()), .equip_item = 1 },
 										true
 									);
 								}
@@ -916,7 +916,7 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 					tradingWith->CastToNPC()->AddLootDrop(
 						item,
 						&tradingWith->CastToNPC()->itemlist,
-						LootDropEntries_Struct{.item_charges = static_cast<int8>(inst->GetCharges()), .equip_item = true },
+						LootDropEntries_Struct{.item_charges = static_cast<int8>(inst->GetCharges()), .equip_item = 1 },
 						true
 					);
 				}
