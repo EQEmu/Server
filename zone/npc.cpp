@@ -576,25 +576,33 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	}
 }
 
-void NPC::CheckMinMaxLevel(Mob *them)
+void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 {
-	if(them == nullptr || !them->IsClient())
+	if (killer == nullptr || !killer->IsClient()) {
 		return;
+	}
 
-	uint16 themlevel = them->GetLevel();
-	uint8 material;
+	uint16 killer_level = killer->GetLevel();
+	uint8  material;
 
 	auto cur = itemlist.begin();
-	while(cur != itemlist.end())
-	{
-		if(!(*cur))
+	while (cur != itemlist.end()) {
+		if (!(*cur)) {
 			return;
+		}
 
-		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
-		{
+		uint16 trivial_min_level     = (*cur)->trivial_min_level;
+		uint16 trivial_max_level     = (*cur)->trivial_max_level;
+		bool   fits_trivial_criteria = (
+			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
+			(trivial_max_level > 0 && killer_level > trivial_max_level)
+		);
+
+		if (fits_trivial_criteria) {
 			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQ::textures::materialInvalid)
+			if (material != EQ::textures::materialInvalid) {
 				SendWearChange(material);
+			}
 
 			cur = itemlist.erase(cur);
 			continue;
@@ -603,8 +611,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
 void NPC::ClearItemList() {
@@ -647,8 +656,8 @@ void NPC::QueryLoot(Client* to)
 			item_count,
 			linker.GenerateLink().c_str(),
 			(*cur)->item_id,
-			(*cur)->min_level,
-			(*cur)->max_level
+			(*cur)->trivial_min_level,
+			(*cur)->trivial_max_level
 		);
 	}
 

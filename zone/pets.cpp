@@ -394,7 +394,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++)
 			if (petinv[i]) {
 				item = database.GetItem(petinv[i]);
-				npc->AddLootDrop(item, &npc->itemlist, 0, 1, 127, true, true);
+				npc->AddLootDrop(item, &npc->itemlist, LootDropEntries_Struct{ .equip_item =  true }, true);
 			}
 	}
 
@@ -625,7 +625,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 				_CLIENTPET(this) && GetPetType() <= petOther);
 
 			if (!noDrop || petCanHaveNoDrop) {
-				AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+				AddLootDrop(item2, &itemlist, LootDropEntries_Struct{.equip_item = true }, true);
 			}
 		}
 	}
