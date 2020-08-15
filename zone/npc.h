@@ -306,7 +306,7 @@ public:
 		uint32 aug6 = 0
 	);
 
-	bool MeetsLevelRequirements(LootDropEntries_Struct loot_drop);
+	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop);
 
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
