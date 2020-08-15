@@ -52,6 +52,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -79,6 +80,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -129,23 +131,24 @@ public:
 	{
 		GroundSpawns entry{};
 
-		entry.id            = 0;
-		entry.zoneid        = 0;
-		entry.version       = 0;
-		entry.max_x         = 2000;
-		entry.max_y         = 2000;
-		entry.max_z         = 10000;
-		entry.min_x         = -2000;
-		entry.min_y         = -2000;
-		entry.heading       = 0;
-		entry.name          = "";
-		entry.item          = 0;
-		entry.max_allowed   = 1;
-		entry.comment       = "";
-		entry.respawn_timer = 300;
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.id                     = 0;
+		entry.zoneid                 = 0;
+		entry.version                = 0;
+		entry.max_x                  = 2000;
+		entry.max_y                  = 2000;
+		entry.max_z                  = 10000;
+		entry.min_x                  = -2000;
+		entry.min_y                  = -2000;
+		entry.heading                = 0;
+		entry.name                   = "";
+		entry.item                   = 0;
+		entry.max_allowed            = 1;
+		entry.comment                = "";
+		entry.respawn_timer          = 300;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -180,23 +183,24 @@ public:
 		if (results.RowCount() == 1) {
 			GroundSpawns entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.max_x         = static_cast<float>(atof(row[3]));
-			entry.max_y         = static_cast<float>(atof(row[4]));
-			entry.max_z         = static_cast<float>(atof(row[5]));
-			entry.min_x         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.heading       = static_cast<float>(atof(row[8]));
-			entry.name          = row[9] ? row[9] : "";
-			entry.item          = atoi(row[10]);
-			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12] ? row[12] : "";
-			entry.respawn_timer = atoi(row[13]);
-			entry.min_expansion = atoi(row[14]);
-			entry.max_expansion = atoi(row[15]);
-			entry.content_flags = row[16] ? row[16] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.max_x                  = static_cast<float>(atof(row[3]));
+			entry.max_y                  = static_cast<float>(atof(row[4]));
+			entry.max_z                  = static_cast<float>(atof(row[5]));
+			entry.min_x                  = static_cast<float>(atof(row[6]));
+			entry.min_y                  = static_cast<float>(atof(row[7]));
+			entry.heading                = static_cast<float>(atof(row[8]));
+			entry.name                   = row[9] ? row[9] : "";
+			entry.item                   = atoi(row[10]);
+			entry.max_allowed            = atoi(row[11]);
+			entry.comment                = row[12] ? row[12] : "";
+			entry.respawn_timer          = atoi(row[13]);
+			entry.min_expansion          = atoi(row[14]);
+			entry.max_expansion          = atoi(row[15]);
+			entry.content_flags          = row[16] ? row[16] : "";
+			entry.content_flags_disabled = row[17] ? row[17] : "";
 
 			return entry;
 		}
@@ -244,6 +248,7 @@ public:
 		update_values.push_back(columns[14] + " = " + std::to_string(ground_spawns_entry.min_expansion));
 		update_values.push_back(columns[15] + " = " + std::to_string(ground_spawns_entry.max_expansion));
 		update_values.push_back(columns[16] + " = '" + EscapeString(ground_spawns_entry.content_flags) + "'");
+		update_values.push_back(columns[17] + " = '" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -280,6 +285,7 @@ public:
 		insert_values.push_back(std::to_string(ground_spawns_entry.min_expansion));
 		insert_values.push_back(std::to_string(ground_spawns_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -324,6 +330,7 @@ public:
 			insert_values.push_back(std::to_string(ground_spawns_entry.min_expansion));
 			insert_values.push_back(std::to_string(ground_spawns_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(ground_spawns_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -357,23 +364,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroundSpawns entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.max_x         = static_cast<float>(atof(row[3]));
-			entry.max_y         = static_cast<float>(atof(row[4]));
-			entry.max_z         = static_cast<float>(atof(row[5]));
-			entry.min_x         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.heading       = static_cast<float>(atof(row[8]));
-			entry.name          = row[9] ? row[9] : "";
-			entry.item          = atoi(row[10]);
-			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12] ? row[12] : "";
-			entry.respawn_timer = atoi(row[13]);
-			entry.min_expansion = atoi(row[14]);
-			entry.max_expansion = atoi(row[15]);
-			entry.content_flags = row[16] ? row[16] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.max_x                  = static_cast<float>(atof(row[3]));
+			entry.max_y                  = static_cast<float>(atof(row[4]));
+			entry.max_z                  = static_cast<float>(atof(row[5]));
+			entry.min_x                  = static_cast<float>(atof(row[6]));
+			entry.min_y                  = static_cast<float>(atof(row[7]));
+			entry.heading                = static_cast<float>(atof(row[8]));
+			entry.name                   = row[9] ? row[9] : "";
+			entry.item                   = atoi(row[10]);
+			entry.max_allowed            = atoi(row[11]);
+			entry.comment                = row[12] ? row[12] : "";
+			entry.respawn_timer          = atoi(row[13]);
+			entry.min_expansion          = atoi(row[14]);
+			entry.max_expansion          = atoi(row[15]);
+			entry.content_flags          = row[16] ? row[16] : "";
+			entry.content_flags_disabled = row[17] ? row[17] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -398,23 +406,24 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			GroundSpawns entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.version       = atoi(row[2]);
-			entry.max_x         = static_cast<float>(atof(row[3]));
-			entry.max_y         = static_cast<float>(atof(row[4]));
-			entry.max_z         = static_cast<float>(atof(row[5]));
-			entry.min_x         = static_cast<float>(atof(row[6]));
-			entry.min_y         = static_cast<float>(atof(row[7]));
-			entry.heading       = static_cast<float>(atof(row[8]));
-			entry.name          = row[9] ? row[9] : "";
-			entry.item          = atoi(row[10]);
-			entry.max_allowed   = atoi(row[11]);
-			entry.comment       = row[12] ? row[12] : "";
-			entry.respawn_timer = atoi(row[13]);
-			entry.min_expansion = atoi(row[14]);
-			entry.max_expansion = atoi(row[15]);
-			entry.content_flags = row[16] ? row[16] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.max_x                  = static_cast<float>(atof(row[3]));
+			entry.max_y                  = static_cast<float>(atof(row[4]));
+			entry.max_z                  = static_cast<float>(atof(row[5]));
+			entry.min_x                  = static_cast<float>(atof(row[6]));
+			entry.min_y                  = static_cast<float>(atof(row[7]));
+			entry.heading                = static_cast<float>(atof(row[8]));
+			entry.name                   = row[9] ? row[9] : "";
+			entry.item                   = atoi(row[10]);
+			entry.max_allowed            = atoi(row[11]);
+			entry.comment                = row[12] ? row[12] : "";
+			entry.respawn_timer          = atoi(row[13]);
+			entry.min_expansion          = atoi(row[14]);
+			entry.max_expansion          = atoi(row[15]);
+			entry.content_flags          = row[16] ? row[16] : "";
+			entry.content_flags_disabled = row[17] ? row[17] : "";
 
 			all_entries.push_back(entry);
 		}

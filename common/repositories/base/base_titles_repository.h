@@ -49,9 +49,6 @@ public:
 		std::string prefix;
 		std::string suffix;
 		int         title_set;
-		int         min_expansion;
-		int         max_expansion;
-		std::string content_flags;
 	};
 
 	static std::string PrimaryKey()
@@ -76,9 +73,6 @@ public:
 			"prefix",
 			"suffix",
 			"title_set",
-			"min_expansion",
-			"max_expansion",
-			"content_flags",
 		};
 	}
 
@@ -143,9 +137,6 @@ public:
 		entry.prefix          = "";
 		entry.suffix          = "";
 		entry.title_set       = 0;
-		entry.min_expansion   = 0;
-		entry.max_expansion   = 0;
-		entry.content_flags   = "";
 
 		return entry;
 	}
@@ -194,9 +185,6 @@ public:
 			entry.prefix          = row[11] ? row[11] : "";
 			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
-			entry.min_expansion   = atoi(row[14]);
-			entry.max_expansion   = atoi(row[15]);
-			entry.content_flags   = row[16] ? row[16] : "";
 
 			return entry;
 		}
@@ -241,9 +229,6 @@ public:
 		update_values.push_back(columns[11] + " = '" + EscapeString(titles_entry.prefix) + "'");
 		update_values.push_back(columns[12] + " = '" + EscapeString(titles_entry.suffix) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(titles_entry.title_set));
-		update_values.push_back(columns[14] + " = " + std::to_string(titles_entry.min_expansion));
-		update_values.push_back(columns[15] + " = " + std::to_string(titles_entry.max_expansion));
-		update_values.push_back(columns[16] + " = '" + EscapeString(titles_entry.content_flags) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -277,9 +262,6 @@ public:
 		insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
 		insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
 		insert_values.push_back(std::to_string(titles_entry.title_set));
-		insert_values.push_back(std::to_string(titles_entry.min_expansion));
-		insert_values.push_back(std::to_string(titles_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(titles_entry.content_flags) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -321,9 +303,6 @@ public:
 			insert_values.push_back("'" + EscapeString(titles_entry.prefix) + "'");
 			insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
 			insert_values.push_back(std::to_string(titles_entry.title_set));
-			insert_values.push_back(std::to_string(titles_entry.min_expansion));
-			insert_values.push_back(std::to_string(titles_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(titles_entry.content_flags) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -371,9 +350,6 @@ public:
 			entry.prefix          = row[11] ? row[11] : "";
 			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
-			entry.min_expansion   = atoi(row[14]);
-			entry.max_expansion   = atoi(row[15]);
-			entry.content_flags   = row[16] ? row[16] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -412,9 +388,6 @@ public:
 			entry.prefix          = row[11] ? row[11] : "";
 			entry.suffix          = row[12] ? row[12] : "";
 			entry.title_set       = atoi(row[13]);
-			entry.min_expansion   = atoi(row[14]);
-			entry.max_expansion   = atoi(row[15]);
-			entry.content_flags   = row[16] ? row[16] : "";
 
 			all_entries.push_back(entry);
 		}

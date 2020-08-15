@@ -59,6 +59,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -93,6 +94,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -167,6 +169,7 @@ public:
 		entry.min_expansion          = 0;
 		entry.max_expansion          = 0;
 		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -225,6 +228,7 @@ public:
 			entry.min_expansion          = atoi(row[21]);
 			entry.max_expansion          = atoi(row[22]);
 			entry.content_flags          = row[23] ? row[23] : "";
+			entry.content_flags_disabled = row[24] ? row[24] : "";
 
 			return entry;
 		}
@@ -279,6 +283,7 @@ public:
 		update_values.push_back(columns[21] + " = " + std::to_string(traps_entry.min_expansion));
 		update_values.push_back(columns[22] + " = " + std::to_string(traps_entry.max_expansion));
 		update_values.push_back(columns[23] + " = '" + EscapeString(traps_entry.content_flags) + "'");
+		update_values.push_back(columns[24] + " = '" + EscapeString(traps_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -322,6 +327,7 @@ public:
 		insert_values.push_back(std::to_string(traps_entry.min_expansion));
 		insert_values.push_back(std::to_string(traps_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(traps_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(traps_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -373,6 +379,7 @@ public:
 			insert_values.push_back(std::to_string(traps_entry.min_expansion));
 			insert_values.push_back(std::to_string(traps_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(traps_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(traps_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -430,6 +437,7 @@ public:
 			entry.min_expansion          = atoi(row[21]);
 			entry.max_expansion          = atoi(row[22]);
 			entry.content_flags          = row[23] ? row[23] : "";
+			entry.content_flags_disabled = row[24] ? row[24] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -478,6 +486,7 @@ public:
 			entry.min_expansion          = atoi(row[21]);
 			entry.max_expansion          = atoi(row[22]);
 			entry.content_flags          = row[23] ? row[23] : "";
+			entry.content_flags_disabled = row[24] ? row[24] : "";
 
 			all_entries.push_back(entry);
 		}

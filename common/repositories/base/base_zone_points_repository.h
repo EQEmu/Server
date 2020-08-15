@@ -55,6 +55,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -85,6 +86,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -135,26 +137,27 @@ public:
 	{
 		ZonePoints entry{};
 
-		entry.id                  = 0;
-		entry.zone                = "";
-		entry.version             = 0;
-		entry.number              = 1;
-		entry.y                   = 0;
-		entry.x                   = 0;
-		entry.z                   = 0;
-		entry.heading             = 0;
-		entry.target_y            = 0;
-		entry.target_x            = 0;
-		entry.target_z            = 0;
-		entry.target_heading      = 0;
-		entry.zoneinst            = 0;
-		entry.target_zone_id      = 0;
-		entry.target_instance     = 0;
-		entry.buffer              = 0;
-		entry.client_version_mask = 4294967295;
-		entry.min_expansion       = 0;
-		entry.max_expansion       = 0;
-		entry.content_flags       = "";
+		entry.id                     = 0;
+		entry.zone                   = "";
+		entry.version                = 0;
+		entry.number                 = 1;
+		entry.y                      = 0;
+		entry.x                      = 0;
+		entry.z                      = 0;
+		entry.heading                = 0;
+		entry.target_y               = 0;
+		entry.target_x               = 0;
+		entry.target_z               = 0;
+		entry.target_heading         = 0;
+		entry.zoneinst               = 0;
+		entry.target_zone_id         = 0;
+		entry.target_instance        = 0;
+		entry.buffer                 = 0;
+		entry.client_version_mask    = 4294967295;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -189,26 +192,27 @@ public:
 		if (results.RowCount() == 1) {
 			ZonePoints entry{};
 
-			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1] ? row[1] : "";
-			entry.version             = atoi(row[2]);
-			entry.number              = atoi(row[3]);
-			entry.y                   = static_cast<float>(atof(row[4]));
-			entry.x                   = static_cast<float>(atof(row[5]));
-			entry.z                   = static_cast<float>(atof(row[6]));
-			entry.heading             = static_cast<float>(atof(row[7]));
-			entry.target_y            = static_cast<float>(atof(row[8]));
-			entry.target_x            = static_cast<float>(atof(row[9]));
-			entry.target_z            = static_cast<float>(atof(row[10]));
-			entry.target_heading      = static_cast<float>(atof(row[11]));
-			entry.zoneinst            = atoi(row[12]);
-			entry.target_zone_id      = atoi(row[13]);
-			entry.target_instance     = atoi(row[14]);
-			entry.buffer              = static_cast<float>(atof(row[15]));
-			entry.client_version_mask = atoi(row[16]);
-			entry.min_expansion       = atoi(row[17]);
-			entry.max_expansion       = atoi(row[18]);
-			entry.content_flags       = row[19] ? row[19] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zone                   = row[1] ? row[1] : "";
+			entry.version                = atoi(row[2]);
+			entry.number                 = atoi(row[3]);
+			entry.y                      = static_cast<float>(atof(row[4]));
+			entry.x                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.target_y               = static_cast<float>(atof(row[8]));
+			entry.target_x               = static_cast<float>(atof(row[9]));
+			entry.target_z               = static_cast<float>(atof(row[10]));
+			entry.target_heading         = static_cast<float>(atof(row[11]));
+			entry.zoneinst               = atoi(row[12]);
+			entry.target_zone_id         = atoi(row[13]);
+			entry.target_instance        = atoi(row[14]);
+			entry.buffer                 = static_cast<float>(atof(row[15]));
+			entry.client_version_mask    = atoi(row[16]);
+			entry.min_expansion          = atoi(row[17]);
+			entry.max_expansion          = atoi(row[18]);
+			entry.content_flags          = row[19] ? row[19] : "";
+			entry.content_flags_disabled = row[20] ? row[20] : "";
 
 			return entry;
 		}
@@ -259,6 +263,7 @@ public:
 		update_values.push_back(columns[17] + " = " + std::to_string(zone_points_entry.min_expansion));
 		update_values.push_back(columns[18] + " = " + std::to_string(zone_points_entry.max_expansion));
 		update_values.push_back(columns[19] + " = '" + EscapeString(zone_points_entry.content_flags) + "'");
+		update_values.push_back(columns[20] + " = '" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -298,6 +303,7 @@ public:
 		insert_values.push_back(std::to_string(zone_points_entry.min_expansion));
 		insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -345,6 +351,7 @@ public:
 			insert_values.push_back(std::to_string(zone_points_entry.min_expansion));
 			insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -378,26 +385,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints entry{};
 
-			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1] ? row[1] : "";
-			entry.version             = atoi(row[2]);
-			entry.number              = atoi(row[3]);
-			entry.y                   = static_cast<float>(atof(row[4]));
-			entry.x                   = static_cast<float>(atof(row[5]));
-			entry.z                   = static_cast<float>(atof(row[6]));
-			entry.heading             = static_cast<float>(atof(row[7]));
-			entry.target_y            = static_cast<float>(atof(row[8]));
-			entry.target_x            = static_cast<float>(atof(row[9]));
-			entry.target_z            = static_cast<float>(atof(row[10]));
-			entry.target_heading      = static_cast<float>(atof(row[11]));
-			entry.zoneinst            = atoi(row[12]);
-			entry.target_zone_id      = atoi(row[13]);
-			entry.target_instance     = atoi(row[14]);
-			entry.buffer              = static_cast<float>(atof(row[15]));
-			entry.client_version_mask = atoi(row[16]);
-			entry.min_expansion       = atoi(row[17]);
-			entry.max_expansion       = atoi(row[18]);
-			entry.content_flags       = row[19] ? row[19] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zone                   = row[1] ? row[1] : "";
+			entry.version                = atoi(row[2]);
+			entry.number                 = atoi(row[3]);
+			entry.y                      = static_cast<float>(atof(row[4]));
+			entry.x                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.target_y               = static_cast<float>(atof(row[8]));
+			entry.target_x               = static_cast<float>(atof(row[9]));
+			entry.target_z               = static_cast<float>(atof(row[10]));
+			entry.target_heading         = static_cast<float>(atof(row[11]));
+			entry.zoneinst               = atoi(row[12]);
+			entry.target_zone_id         = atoi(row[13]);
+			entry.target_instance        = atoi(row[14]);
+			entry.buffer                 = static_cast<float>(atof(row[15]));
+			entry.client_version_mask    = atoi(row[16]);
+			entry.min_expansion          = atoi(row[17]);
+			entry.max_expansion          = atoi(row[18]);
+			entry.content_flags          = row[19] ? row[19] : "";
+			entry.content_flags_disabled = row[20] ? row[20] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -422,26 +430,27 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			ZonePoints entry{};
 
-			entry.id                  = atoi(row[0]);
-			entry.zone                = row[1] ? row[1] : "";
-			entry.version             = atoi(row[2]);
-			entry.number              = atoi(row[3]);
-			entry.y                   = static_cast<float>(atof(row[4]));
-			entry.x                   = static_cast<float>(atof(row[5]));
-			entry.z                   = static_cast<float>(atof(row[6]));
-			entry.heading             = static_cast<float>(atof(row[7]));
-			entry.target_y            = static_cast<float>(atof(row[8]));
-			entry.target_x            = static_cast<float>(atof(row[9]));
-			entry.target_z            = static_cast<float>(atof(row[10]));
-			entry.target_heading      = static_cast<float>(atof(row[11]));
-			entry.zoneinst            = atoi(row[12]);
-			entry.target_zone_id      = atoi(row[13]);
-			entry.target_instance     = atoi(row[14]);
-			entry.buffer              = static_cast<float>(atof(row[15]));
-			entry.client_version_mask = atoi(row[16]);
-			entry.min_expansion       = atoi(row[17]);
-			entry.max_expansion       = atoi(row[18]);
-			entry.content_flags       = row[19] ? row[19] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zone                   = row[1] ? row[1] : "";
+			entry.version                = atoi(row[2]);
+			entry.number                 = atoi(row[3]);
+			entry.y                      = static_cast<float>(atof(row[4]));
+			entry.x                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.target_y               = static_cast<float>(atof(row[8]));
+			entry.target_x               = static_cast<float>(atof(row[9]));
+			entry.target_z               = static_cast<float>(atof(row[10]));
+			entry.target_heading         = static_cast<float>(atof(row[11]));
+			entry.zoneinst               = atoi(row[12]);
+			entry.target_zone_id         = atoi(row[13]);
+			entry.target_instance        = atoi(row[14]);
+			entry.buffer                 = static_cast<float>(atof(row[15]));
+			entry.client_version_mask    = atoi(row[16]);
+			entry.min_expansion          = atoi(row[17]);
+			entry.max_expansion          = atoi(row[18]);
+			entry.content_flags          = row[19] ? row[19] : "";
+			entry.content_flags_disabled = row[20] ? row[20] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -41,9 +41,11 @@ public:
 		int   equip_item;
 		float chance;
 		float disabled_chance;
-		int   minlevel;
-		int   maxlevel;
+		int   trivial_min_level;
+		int   trivial_max_level;
 		int   multiplier;
+		int   npc_min_level;
+		int   npc_max_level;
 	};
 
 	static std::string PrimaryKey()
@@ -60,9 +62,11 @@ public:
 			"equip_item",
 			"chance",
 			"disabled_chance",
-			"minlevel",
-			"maxlevel",
+			"trivial_min_level",
+			"trivial_max_level",
 			"multiplier",
+			"npc_min_level",
+			"npc_max_level",
 		};
 	}
 
@@ -113,15 +117,17 @@ public:
 	{
 		LootdropEntries entry{};
 
-		entry.lootdrop_id     = 0;
-		entry.item_id         = 0;
-		entry.item_charges    = 1;
-		entry.equip_item      = 0;
-		entry.chance          = 1;
-		entry.disabled_chance = 0;
-		entry.minlevel        = 0;
-		entry.maxlevel        = 127;
-		entry.multiplier      = 1;
+		entry.lootdrop_id       = 0;
+		entry.item_id           = 0;
+		entry.item_charges      = 1;
+		entry.equip_item        = 0;
+		entry.chance            = 1;
+		entry.disabled_chance   = 0;
+		entry.trivial_min_level = 0;
+		entry.trivial_max_level = 0;
+		entry.multiplier        = 1;
+		entry.npc_min_level     = 0;
+		entry.npc_max_level     = 0;
 
 		return entry;
 	}
@@ -156,15 +162,17 @@ public:
 		if (results.RowCount() == 1) {
 			LootdropEntries entry{};
 
-			entry.lootdrop_id     = atoi(row[0]);
-			entry.item_id         = atoi(row[1]);
-			entry.item_charges    = atoi(row[2]);
-			entry.equip_item      = atoi(row[3]);
-			entry.chance          = static_cast<float>(atof(row[4]));
-			entry.disabled_chance = static_cast<float>(atof(row[5]));
-			entry.minlevel        = atoi(row[6]);
-			entry.maxlevel        = atoi(row[7]);
-			entry.multiplier      = atoi(row[8]);
+			entry.lootdrop_id       = atoi(row[0]);
+			entry.item_id           = atoi(row[1]);
+			entry.item_charges      = atoi(row[2]);
+			entry.equip_item        = atoi(row[3]);
+			entry.chance            = static_cast<float>(atof(row[4]));
+			entry.disabled_chance   = static_cast<float>(atof(row[5]));
+			entry.trivial_min_level = atoi(row[6]);
+			entry.trivial_max_level = atoi(row[7]);
+			entry.multiplier        = atoi(row[8]);
+			entry.npc_min_level     = atoi(row[9]);
+			entry.npc_max_level     = atoi(row[10]);
 
 			return entry;
 		}
@@ -202,9 +210,11 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entries_entry.equip_item));
 		update_values.push_back(columns[4] + " = " + std::to_string(lootdrop_entries_entry.chance));
 		update_values.push_back(columns[5] + " = " + std::to_string(lootdrop_entries_entry.disabled_chance));
-		update_values.push_back(columns[6] + " = " + std::to_string(lootdrop_entries_entry.minlevel));
-		update_values.push_back(columns[7] + " = " + std::to_string(lootdrop_entries_entry.maxlevel));
+		update_values.push_back(columns[6] + " = " + std::to_string(lootdrop_entries_entry.trivial_min_level));
+		update_values.push_back(columns[7] + " = " + std::to_string(lootdrop_entries_entry.trivial_max_level));
 		update_values.push_back(columns[8] + " = " + std::to_string(lootdrop_entries_entry.multiplier));
+		update_values.push_back(columns[9] + " = " + std::to_string(lootdrop_entries_entry.npc_min_level));
+		update_values.push_back(columns[10] + " = " + std::to_string(lootdrop_entries_entry.npc_max_level));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -231,9 +241,11 @@ public:
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.minlevel));
-		insert_values.push_back(std::to_string(lootdrop_entries_entry.maxlevel));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_min_level));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_max_level));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_min_level));
+		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_max_level));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -268,9 +280,11 @@ public:
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.equip_item));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.chance));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.disabled_chance));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.minlevel));
-			insert_values.push_back(std::to_string(lootdrop_entries_entry.maxlevel));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_min_level));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.trivial_max_level));
 			insert_values.push_back(std::to_string(lootdrop_entries_entry.multiplier));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_min_level));
+			insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_max_level));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -304,15 +318,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries entry{};
 
-			entry.lootdrop_id     = atoi(row[0]);
-			entry.item_id         = atoi(row[1]);
-			entry.item_charges    = atoi(row[2]);
-			entry.equip_item      = atoi(row[3]);
-			entry.chance          = static_cast<float>(atof(row[4]));
-			entry.disabled_chance = static_cast<float>(atof(row[5]));
-			entry.minlevel        = atoi(row[6]);
-			entry.maxlevel        = atoi(row[7]);
-			entry.multiplier      = atoi(row[8]);
+			entry.lootdrop_id       = atoi(row[0]);
+			entry.item_id           = atoi(row[1]);
+			entry.item_charges      = atoi(row[2]);
+			entry.equip_item        = atoi(row[3]);
+			entry.chance            = static_cast<float>(atof(row[4]));
+			entry.disabled_chance   = static_cast<float>(atof(row[5]));
+			entry.trivial_min_level = atoi(row[6]);
+			entry.trivial_max_level = atoi(row[7]);
+			entry.multiplier        = atoi(row[8]);
+			entry.npc_min_level     = atoi(row[9]);
+			entry.npc_max_level     = atoi(row[10]);
 
 			all_entries.push_back(entry);
 		}
@@ -337,15 +353,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			LootdropEntries entry{};
 
-			entry.lootdrop_id     = atoi(row[0]);
-			entry.item_id         = atoi(row[1]);
-			entry.item_charges    = atoi(row[2]);
-			entry.equip_item      = atoi(row[3]);
-			entry.chance          = static_cast<float>(atof(row[4]));
-			entry.disabled_chance = static_cast<float>(atof(row[5]));
-			entry.minlevel        = atoi(row[6]);
-			entry.maxlevel        = atoi(row[7]);
-			entry.multiplier      = atoi(row[8]);
+			entry.lootdrop_id       = atoi(row[0]);
+			entry.item_id           = atoi(row[1]);
+			entry.item_charges      = atoi(row[2]);
+			entry.equip_item        = atoi(row[3]);
+			entry.chance            = static_cast<float>(atof(row[4]));
+			entry.disabled_chance   = static_cast<float>(atof(row[5]));
+			entry.trivial_min_level = atoi(row[6]);
+			entry.trivial_max_level = atoi(row[7]);
+			entry.multiplier        = atoi(row[8]);
+			entry.npc_min_level     = atoi(row[9]);
+			entry.npc_max_level     = atoi(row[10]);
 
 			all_entries.push_back(entry);
 		}

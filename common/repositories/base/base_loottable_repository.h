@@ -44,6 +44,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -63,6 +64,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -113,15 +115,16 @@ public:
 	{
 		Loottable entry{};
 
-		entry.id            = 0;
-		entry.name          = "";
-		entry.mincash       = 0;
-		entry.maxcash       = 0;
-		entry.avgcoin       = 0;
-		entry.done          = 0;
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.id                     = 0;
+		entry.name                   = "";
+		entry.mincash                = 0;
+		entry.maxcash                = 0;
+		entry.avgcoin                = 0;
+		entry.done                   = 0;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -156,15 +159,16 @@ public:
 		if (results.RowCount() == 1) {
 			Loottable entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.mincash       = atoi(row[2]);
-			entry.maxcash       = atoi(row[3]);
-			entry.avgcoin       = atoi(row[4]);
-			entry.done          = atoi(row[5]);
-			entry.min_expansion = atoi(row[6]);
-			entry.max_expansion = atoi(row[7]);
-			entry.content_flags = row[8] ? row[8] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.mincash                = atoi(row[2]);
+			entry.maxcash                = atoi(row[3]);
+			entry.avgcoin                = atoi(row[4]);
+			entry.done                   = atoi(row[5]);
+			entry.min_expansion          = atoi(row[6]);
+			entry.max_expansion          = atoi(row[7]);
+			entry.content_flags          = row[8] ? row[8] : "";
+			entry.content_flags_disabled = row[9] ? row[9] : "";
 
 			return entry;
 		}
@@ -204,6 +208,7 @@ public:
 		update_values.push_back(columns[6] + " = " + std::to_string(loottable_entry.min_expansion));
 		update_values.push_back(columns[7] + " = " + std::to_string(loottable_entry.max_expansion));
 		update_values.push_back(columns[8] + " = '" + EscapeString(loottable_entry.content_flags) + "'");
+		update_values.push_back(columns[9] + " = '" + EscapeString(loottable_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -232,6 +237,7 @@ public:
 		insert_values.push_back(std::to_string(loottable_entry.min_expansion));
 		insert_values.push_back(std::to_string(loottable_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(loottable_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(loottable_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -268,6 +274,7 @@ public:
 			insert_values.push_back(std::to_string(loottable_entry.min_expansion));
 			insert_values.push_back(std::to_string(loottable_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(loottable_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(loottable_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -301,15 +308,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Loottable entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.mincash       = atoi(row[2]);
-			entry.maxcash       = atoi(row[3]);
-			entry.avgcoin       = atoi(row[4]);
-			entry.done          = atoi(row[5]);
-			entry.min_expansion = atoi(row[6]);
-			entry.max_expansion = atoi(row[7]);
-			entry.content_flags = row[8] ? row[8] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.mincash                = atoi(row[2]);
+			entry.maxcash                = atoi(row[3]);
+			entry.avgcoin                = atoi(row[4]);
+			entry.done                   = atoi(row[5]);
+			entry.min_expansion          = atoi(row[6]);
+			entry.max_expansion          = atoi(row[7]);
+			entry.content_flags          = row[8] ? row[8] : "";
+			entry.content_flags_disabled = row[9] ? row[9] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -334,15 +342,16 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Loottable entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.mincash       = atoi(row[2]);
-			entry.maxcash       = atoi(row[3]);
-			entry.avgcoin       = atoi(row[4]);
-			entry.done          = atoi(row[5]);
-			entry.min_expansion = atoi(row[6]);
-			entry.max_expansion = atoi(row[7]);
-			entry.content_flags = row[8] ? row[8] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.mincash                = atoi(row[2]);
+			entry.maxcash                = atoi(row[3]);
+			entry.avgcoin                = atoi(row[4]);
+			entry.done                   = atoi(row[5]);
+			entry.min_expansion          = atoi(row[6]);
+			entry.max_expansion          = atoi(row[7]);
+			entry.content_flags          = row[8] ? row[8] : "";
+			entry.content_flags_disabled = row[9] ? row[9] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -121,6 +121,10 @@ public:
 		int         fast_regen_endurance;
 		int         npc_max_aggro_dist;
 		int         max_movement_update_range;
+		int         min_expansion;
+		int         max_expansion;
+		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -217,6 +221,10 @@ public:
 			"fast_regen_endurance",
 			"npc_max_aggro_dist",
 			"max_movement_update_range",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -353,6 +361,10 @@ public:
 		entry.fast_regen_endurance      = 180;
 		entry.npc_max_aggro_dist        = 600;
 		entry.max_movement_update_range = 600;
+		entry.min_expansion             = 0;
+		entry.max_expansion             = 0;
+		entry.content_flags             = "";
+		entry.content_flags_disabled    = "";
 
 		return entry;
 	}
@@ -473,6 +485,10 @@ public:
 			entry.fast_regen_endurance      = atoi(row[83]);
 			entry.npc_max_aggro_dist        = atoi(row[84]);
 			entry.max_movement_update_range = atoi(row[85]);
+			entry.min_expansion             = atoi(row[86]);
+			entry.max_expansion             = atoi(row[87]);
+			entry.content_flags             = row[88] ? row[88] : "";
+			entry.content_flags_disabled    = row[89] ? row[89] : "";
 
 			return entry;
 		}
@@ -589,6 +605,10 @@ public:
 		update_values.push_back(columns[83] + " = " + std::to_string(zone_entry.fast_regen_endurance));
 		update_values.push_back(columns[84] + " = " + std::to_string(zone_entry.npc_max_aggro_dist));
 		update_values.push_back(columns[85] + " = " + std::to_string(zone_entry.max_movement_update_range));
+		update_values.push_back(columns[86] + " = " + std::to_string(zone_entry.min_expansion));
+		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.max_expansion));
+		update_values.push_back(columns[88] + " = '" + EscapeString(zone_entry.content_flags) + "'");
+		update_values.push_back(columns[89] + " = '" + EscapeString(zone_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -694,6 +714,10 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.fast_regen_endurance));
 		insert_values.push_back(std::to_string(zone_entry.npc_max_aggro_dist));
 		insert_values.push_back(std::to_string(zone_entry.max_movement_update_range));
+		insert_values.push_back(std::to_string(zone_entry.min_expansion));
+		insert_values.push_back(std::to_string(zone_entry.max_expansion));
+		insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -807,6 +831,10 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.fast_regen_endurance));
 			insert_values.push_back(std::to_string(zone_entry.npc_max_aggro_dist));
 			insert_values.push_back(std::to_string(zone_entry.max_movement_update_range));
+			insert_values.push_back(std::to_string(zone_entry.min_expansion));
+			insert_values.push_back(std::to_string(zone_entry.max_expansion));
+			insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -926,6 +954,10 @@ public:
 			entry.fast_regen_endurance      = atoi(row[83]);
 			entry.npc_max_aggro_dist        = atoi(row[84]);
 			entry.max_movement_update_range = atoi(row[85]);
+			entry.min_expansion             = atoi(row[86]);
+			entry.max_expansion             = atoi(row[87]);
+			entry.content_flags             = row[88] ? row[88] : "";
+			entry.content_flags_disabled    = row[89] ? row[89] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -1036,6 +1068,10 @@ public:
 			entry.fast_regen_endurance      = atoi(row[83]);
 			entry.npc_max_aggro_dist        = atoi(row[84]);
 			entry.max_movement_update_range = atoi(row[85]);
+			entry.min_expansion             = atoi(row[86]);
+			entry.max_expansion             = atoi(row[87]);
+			entry.content_flags             = row[88] ? row[88] : "";
+			entry.content_flags_disabled    = row[89] ? row[89] : "";
 
 			all_entries.push_back(entry);
 		}

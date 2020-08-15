@@ -49,6 +49,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -73,6 +74,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -123,20 +125,21 @@ public:
 	{
 		TradeskillRecipe entry{};
 
-		entry.id                = 0;
-		entry.name              = "";
-		entry.tradeskill        = 0;
-		entry.skillneeded       = 0;
-		entry.trivial           = 0;
-		entry.nofail            = 0;
-		entry.replace_container = 0;
-		entry.notes             = "";
-		entry.must_learn        = 0;
-		entry.quest             = 0;
-		entry.enabled           = 1;
-		entry.min_expansion     = 0;
-		entry.max_expansion     = 0;
-		entry.content_flags     = "";
+		entry.id                     = 0;
+		entry.name                   = "";
+		entry.tradeskill             = 0;
+		entry.skillneeded            = 0;
+		entry.trivial                = 0;
+		entry.nofail                 = 0;
+		entry.replace_container      = 0;
+		entry.notes                  = "";
+		entry.must_learn             = 0;
+		entry.quest                  = 0;
+		entry.enabled                = 1;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -171,20 +174,21 @@ public:
 		if (results.RowCount() == 1) {
 			TradeskillRecipe entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.name              = row[1] ? row[1] : "";
-			entry.tradeskill        = atoi(row[2]);
-			entry.skillneeded       = atoi(row[3]);
-			entry.trivial           = atoi(row[4]);
-			entry.nofail            = atoi(row[5]);
-			entry.replace_container = atoi(row[6]);
-			entry.notes             = row[7] ? row[7] : "";
-			entry.must_learn        = atoi(row[8]);
-			entry.quest             = atoi(row[9]);
-			entry.enabled           = atoi(row[10]);
-			entry.min_expansion     = atoi(row[11]);
-			entry.max_expansion     = atoi(row[12]);
-			entry.content_flags     = row[13] ? row[13] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.tradeskill             = atoi(row[2]);
+			entry.skillneeded            = atoi(row[3]);
+			entry.trivial                = atoi(row[4]);
+			entry.nofail                 = atoi(row[5]);
+			entry.replace_container      = atoi(row[6]);
+			entry.notes                  = row[7] ? row[7] : "";
+			entry.must_learn             = atoi(row[8]);
+			entry.quest                  = atoi(row[9]);
+			entry.enabled                = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			return entry;
 		}
@@ -229,6 +233,7 @@ public:
 		update_values.push_back(columns[11] + " = " + std::to_string(tradeskill_recipe_entry.min_expansion));
 		update_values.push_back(columns[12] + " = " + std::to_string(tradeskill_recipe_entry.max_expansion));
 		update_values.push_back(columns[13] + " = '" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
+		update_values.push_back(columns[14] + " = '" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -262,6 +267,7 @@ public:
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -303,6 +309,7 @@ public:
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.min_expansion));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -336,20 +343,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipe entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.name              = row[1] ? row[1] : "";
-			entry.tradeskill        = atoi(row[2]);
-			entry.skillneeded       = atoi(row[3]);
-			entry.trivial           = atoi(row[4]);
-			entry.nofail            = atoi(row[5]);
-			entry.replace_container = atoi(row[6]);
-			entry.notes             = row[7] ? row[7] : "";
-			entry.must_learn        = atoi(row[8]);
-			entry.quest             = atoi(row[9]);
-			entry.enabled           = atoi(row[10]);
-			entry.min_expansion     = atoi(row[11]);
-			entry.max_expansion     = atoi(row[12]);
-			entry.content_flags     = row[13] ? row[13] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.tradeskill             = atoi(row[2]);
+			entry.skillneeded            = atoi(row[3]);
+			entry.trivial                = atoi(row[4]);
+			entry.nofail                 = atoi(row[5]);
+			entry.replace_container      = atoi(row[6]);
+			entry.notes                  = row[7] ? row[7] : "";
+			entry.must_learn             = atoi(row[8]);
+			entry.quest                  = atoi(row[9]);
+			entry.enabled                = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -374,20 +382,21 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			TradeskillRecipe entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.name              = row[1] ? row[1] : "";
-			entry.tradeskill        = atoi(row[2]);
-			entry.skillneeded       = atoi(row[3]);
-			entry.trivial           = atoi(row[4]);
-			entry.nofail            = atoi(row[5]);
-			entry.replace_container = atoi(row[6]);
-			entry.notes             = row[7] ? row[7] : "";
-			entry.must_learn        = atoi(row[8]);
-			entry.quest             = atoi(row[9]);
-			entry.enabled           = atoi(row[10]);
-			entry.min_expansion     = atoi(row[11]);
-			entry.max_expansion     = atoi(row[12]);
-			entry.content_flags     = row[13] ? row[13] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.tradeskill             = atoi(row[2]);
+			entry.skillneeded            = atoi(row[3]);
+			entry.trivial                = atoi(row[4]);
+			entry.nofail                 = atoi(row[5]);
+			entry.replace_container      = atoi(row[6]);
+			entry.notes                  = row[7] ? row[7] : "";
+			entry.must_learn             = atoi(row[8]);
+			entry.quest                  = atoi(row[9]);
+			entry.enabled                = atoi(row[10]);
+			entry.min_expansion          = atoi(row[11]);
+			entry.max_expansion          = atoi(row[12]);
+			entry.content_flags          = row[13] ? row[13] : "";
+			entry.content_flags_disabled = row[14] ? row[14] : "";
 
 			all_entries.push_back(entry);
 		}

@@ -40,6 +40,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -55,6 +56,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -105,11 +107,12 @@ public:
 	{
 		Lootdrop entry{};
 
-		entry.id            = 0;
-		entry.name          = "";
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.id                     = 0;
+		entry.name                   = "";
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -144,11 +147,12 @@ public:
 		if (results.RowCount() == 1) {
 			Lootdrop entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.min_expansion = atoi(row[2]);
-			entry.max_expansion = atoi(row[3]);
-			entry.content_flags = row[4] ? row[4] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.min_expansion          = atoi(row[2]);
+			entry.max_expansion          = atoi(row[3]);
+			entry.content_flags          = row[4] ? row[4] : "";
+			entry.content_flags_disabled = row[5] ? row[5] : "";
 
 			return entry;
 		}
@@ -184,6 +188,7 @@ public:
 		update_values.push_back(columns[2] + " = " + std::to_string(lootdrop_entry.min_expansion));
 		update_values.push_back(columns[3] + " = " + std::to_string(lootdrop_entry.max_expansion));
 		update_values.push_back(columns[4] + " = '" + EscapeString(lootdrop_entry.content_flags) + "'");
+		update_values.push_back(columns[5] + " = '" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -208,6 +213,7 @@ public:
 		insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 		insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -240,6 +246,7 @@ public:
 			insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 			insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(lootdrop_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -273,11 +280,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lootdrop entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.min_expansion = atoi(row[2]);
-			entry.max_expansion = atoi(row[3]);
-			entry.content_flags = row[4] ? row[4] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.min_expansion          = atoi(row[2]);
+			entry.max_expansion          = atoi(row[3]);
+			entry.content_flags          = row[4] ? row[4] : "";
+			entry.content_flags_disabled = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -302,11 +310,12 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Lootdrop entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.name          = row[1] ? row[1] : "";
-			entry.min_expansion = atoi(row[2]);
-			entry.max_expansion = atoi(row[3]);
-			entry.content_flags = row[4] ? row[4] : "";
+			entry.id                     = atoi(row[0]);
+			entry.name                   = row[1] ? row[1] : "";
+			entry.min_expansion          = atoi(row[2]);
+			entry.max_expansion          = atoi(row[3]);
+			entry.content_flags          = row[4] ? row[4] : "";
+			entry.content_flags_disabled = row[5] ? row[5] : "";
 
 			all_entries.push_back(entry);
 		}

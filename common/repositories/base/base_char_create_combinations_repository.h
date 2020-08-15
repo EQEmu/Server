@@ -35,15 +35,12 @@
 class BaseCharCreateCombinationsRepository {
 public:
 	struct CharCreateCombinations {
-		int         allocation_id;
-		int         race;
-		int         class;
-		int         deity;
-		int         start_zone;
-		int         expansions_req;
-		int         min_expansion;
-		int         max_expansion;
-		std::string content_flags;
+		int allocation_id;
+		int race;
+		int class;
+		int deity;
+		int start_zone;
+		int expansions_req;
 	};
 
 	static std::string PrimaryKey()
@@ -60,9 +57,6 @@ public:
 			"deity",
 			"start_zone",
 			"expansions_req",
-			"min_expansion",
-			"max_expansion",
-			"content_flags",
 		};
 	}
 
@@ -119,9 +113,6 @@ public:
 		entry.deity          = 0;
 		entry.start_zone     = 0;
 		entry.expansions_req = 0;
-		entry.min_expansion  = 0;
-		entry.max_expansion  = 0;
-		entry.content_flags  = "";
 
 		return entry;
 	}
@@ -162,9 +153,6 @@ public:
 			entry.deity          = atoi(row[3]);
 			entry.start_zone     = atoi(row[4]);
 			entry.expansions_req = atoi(row[5]);
-			entry.min_expansion  = atoi(row[6]);
-			entry.max_expansion  = atoi(row[7]);
-			entry.content_flags  = row[8] ? row[8] : "";
 
 			return entry;
 		}
@@ -202,9 +190,6 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(char_create_combinations_entry.deity));
 		update_values.push_back(columns[4] + " = " + std::to_string(char_create_combinations_entry.start_zone));
 		update_values.push_back(columns[5] + " = " + std::to_string(char_create_combinations_entry.expansions_req));
-		update_values.push_back(columns[6] + " = " + std::to_string(char_create_combinations_entry.min_expansion));
-		update_values.push_back(columns[7] + " = " + std::to_string(char_create_combinations_entry.max_expansion));
-		update_values.push_back(columns[8] + " = '" + EscapeString(char_create_combinations_entry.content_flags) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -231,9 +216,6 @@ public:
 		insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.min_expansion));
-		insert_values.push_back(std::to_string(char_create_combinations_entry.max_expansion));
-		insert_values.push_back("'" + EscapeString(char_create_combinations_entry.content_flags) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -268,9 +250,6 @@ public:
 			insert_values.push_back(std::to_string(char_create_combinations_entry.deity));
 			insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
 			insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.min_expansion));
-			insert_values.push_back(std::to_string(char_create_combinations_entry.max_expansion));
-			insert_values.push_back("'" + EscapeString(char_create_combinations_entry.content_flags) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -310,9 +289,6 @@ public:
 			entry.deity          = atoi(row[3]);
 			entry.start_zone     = atoi(row[4]);
 			entry.expansions_req = atoi(row[5]);
-			entry.min_expansion  = atoi(row[6]);
-			entry.max_expansion  = atoi(row[7]);
-			entry.content_flags  = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -343,9 +319,6 @@ public:
 			entry.deity          = atoi(row[3]);
 			entry.start_zone     = atoi(row[4]);
 			entry.expansions_req = atoi(row[5]);
-			entry.min_expansion  = atoi(row[6]);
-			entry.max_expansion  = atoi(row[7]);
-			entry.content_flags  = row[8] ? row[8] : "";
 
 			all_entries.push_back(entry);
 		}

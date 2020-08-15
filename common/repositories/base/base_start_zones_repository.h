@@ -53,6 +53,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -81,6 +82,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -131,24 +133,25 @@ public:
 	{
 		StartZones entry{};
 
-		entry.x             = 0;
-		entry.y             = 0;
-		entry.z             = 0;
-		entry.heading       = 0;
-		entry.zone_id       = 0;
-		entry.bind_id       = 0;
-		entry.player_choice = 0;
-		entry.player_class  = 0;
-		entry.player_deity  = 0;
-		entry.player_race   = 0;
-		entry.start_zone    = 0;
-		entry.bind_x        = 0;
-		entry.bind_y        = 0;
-		entry.bind_z        = 0;
-		entry.select_rank   = 50;
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.x                      = 0;
+		entry.y                      = 0;
+		entry.z                      = 0;
+		entry.heading                = 0;
+		entry.zone_id                = 0;
+		entry.bind_id                = 0;
+		entry.player_choice          = 0;
+		entry.player_class           = 0;
+		entry.player_deity           = 0;
+		entry.player_race            = 0;
+		entry.start_zone             = 0;
+		entry.bind_x                 = 0;
+		entry.bind_y                 = 0;
+		entry.bind_z                 = 0;
+		entry.select_rank            = 50;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -183,24 +186,25 @@ public:
 		if (results.RowCount() == 1) {
 			StartZones entry{};
 
-			entry.x             = static_cast<float>(atof(row[0]));
-			entry.y             = static_cast<float>(atof(row[1]));
-			entry.z             = static_cast<float>(atof(row[2]));
-			entry.heading       = static_cast<float>(atof(row[3]));
-			entry.zone_id       = atoi(row[4]);
-			entry.bind_id       = atoi(row[5]);
-			entry.player_choice = atoi(row[6]);
-			entry.player_class  = atoi(row[7]);
-			entry.player_deity  = atoi(row[8]);
-			entry.player_race   = atoi(row[9]);
-			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = static_cast<float>(atof(row[11]));
-			entry.bind_y        = static_cast<float>(atof(row[12]));
-			entry.bind_z        = static_cast<float>(atof(row[13]));
-			entry.select_rank   = atoi(row[14]);
-			entry.min_expansion = atoi(row[15]);
-			entry.max_expansion = atoi(row[16]);
-			entry.content_flags = row[17] ? row[17] : "";
+			entry.x                      = static_cast<float>(atof(row[0]));
+			entry.y                      = static_cast<float>(atof(row[1]));
+			entry.z                      = static_cast<float>(atof(row[2]));
+			entry.heading                = static_cast<float>(atof(row[3]));
+			entry.zone_id                = atoi(row[4]);
+			entry.bind_id                = atoi(row[5]);
+			entry.player_choice          = atoi(row[6]);
+			entry.player_class           = atoi(row[7]);
+			entry.player_deity           = atoi(row[8]);
+			entry.player_race            = atoi(row[9]);
+			entry.start_zone             = atoi(row[10]);
+			entry.bind_x                 = static_cast<float>(atof(row[11]));
+			entry.bind_y                 = static_cast<float>(atof(row[12]));
+			entry.bind_z                 = static_cast<float>(atof(row[13]));
+			entry.select_rank            = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			return entry;
 		}
@@ -250,6 +254,7 @@ public:
 		update_values.push_back(columns[15] + " = " + std::to_string(start_zones_entry.min_expansion));
 		update_values.push_back(columns[16] + " = " + std::to_string(start_zones_entry.max_expansion));
 		update_values.push_back(columns[17] + " = '" + EscapeString(start_zones_entry.content_flags) + "'");
+		update_values.push_back(columns[18] + " = '" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -288,6 +293,7 @@ public:
 		insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 		insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -334,6 +340,7 @@ public:
 			insert_values.push_back(std::to_string(start_zones_entry.min_expansion));
 			insert_values.push_back(std::to_string(start_zones_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(start_zones_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -367,24 +374,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartZones entry{};
 
-			entry.x             = static_cast<float>(atof(row[0]));
-			entry.y             = static_cast<float>(atof(row[1]));
-			entry.z             = static_cast<float>(atof(row[2]));
-			entry.heading       = static_cast<float>(atof(row[3]));
-			entry.zone_id       = atoi(row[4]);
-			entry.bind_id       = atoi(row[5]);
-			entry.player_choice = atoi(row[6]);
-			entry.player_class  = atoi(row[7]);
-			entry.player_deity  = atoi(row[8]);
-			entry.player_race   = atoi(row[9]);
-			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = static_cast<float>(atof(row[11]));
-			entry.bind_y        = static_cast<float>(atof(row[12]));
-			entry.bind_z        = static_cast<float>(atof(row[13]));
-			entry.select_rank   = atoi(row[14]);
-			entry.min_expansion = atoi(row[15]);
-			entry.max_expansion = atoi(row[16]);
-			entry.content_flags = row[17] ? row[17] : "";
+			entry.x                      = static_cast<float>(atof(row[0]));
+			entry.y                      = static_cast<float>(atof(row[1]));
+			entry.z                      = static_cast<float>(atof(row[2]));
+			entry.heading                = static_cast<float>(atof(row[3]));
+			entry.zone_id                = atoi(row[4]);
+			entry.bind_id                = atoi(row[5]);
+			entry.player_choice          = atoi(row[6]);
+			entry.player_class           = atoi(row[7]);
+			entry.player_deity           = atoi(row[8]);
+			entry.player_race            = atoi(row[9]);
+			entry.start_zone             = atoi(row[10]);
+			entry.bind_x                 = static_cast<float>(atof(row[11]));
+			entry.bind_y                 = static_cast<float>(atof(row[12]));
+			entry.bind_z                 = static_cast<float>(atof(row[13]));
+			entry.select_rank            = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -409,24 +417,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartZones entry{};
 
-			entry.x             = static_cast<float>(atof(row[0]));
-			entry.y             = static_cast<float>(atof(row[1]));
-			entry.z             = static_cast<float>(atof(row[2]));
-			entry.heading       = static_cast<float>(atof(row[3]));
-			entry.zone_id       = atoi(row[4]);
-			entry.bind_id       = atoi(row[5]);
-			entry.player_choice = atoi(row[6]);
-			entry.player_class  = atoi(row[7]);
-			entry.player_deity  = atoi(row[8]);
-			entry.player_race   = atoi(row[9]);
-			entry.start_zone    = atoi(row[10]);
-			entry.bind_x        = static_cast<float>(atof(row[11]));
-			entry.bind_y        = static_cast<float>(atof(row[12]));
-			entry.bind_z        = static_cast<float>(atof(row[13]));
-			entry.select_rank   = atoi(row[14]);
-			entry.min_expansion = atoi(row[15]);
-			entry.max_expansion = atoi(row[16]);
-			entry.content_flags = row[17] ? row[17] : "";
+			entry.x                      = static_cast<float>(atof(row[0]));
+			entry.y                      = static_cast<float>(atof(row[1]));
+			entry.z                      = static_cast<float>(atof(row[2]));
+			entry.heading                = static_cast<float>(atof(row[3]));
+			entry.zone_id                = atoi(row[4]);
+			entry.bind_id                = atoi(row[5]);
+			entry.player_choice          = atoi(row[6]);
+			entry.player_class           = atoi(row[7]);
+			entry.player_deity           = atoi(row[8]);
+			entry.player_race            = atoi(row[9]);
+			entry.start_zone             = atoi(row[10]);
+			entry.bind_x                 = static_cast<float>(atof(row[11]));
+			entry.bind_y                 = static_cast<float>(atof(row[12]));
+			entry.bind_z                 = static_cast<float>(atof(row[13]));
+			entry.select_rank            = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}
