@@ -117,6 +117,7 @@ namespace Logs {
 		HotReload,
 		Merchants,
 		ZonePoints,
+		Loot,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -192,7 +193,8 @@ namespace Logs {
 		"Aura",
 		"HotReload",
 		"Merchants",
-		"ZonePoints"
+		"ZonePoints",
+		"Loot"
 	};
 }
 
