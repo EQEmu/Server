@@ -56,6 +56,7 @@ extern volatile bool RunLoops;
 #include "quest_parser_collection.h"
 #include "queryserv.h"
 #include "mob_movement_manager.h"
+#include "../common/content/world_content_service.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
@@ -9344,4 +9345,102 @@ void Client::SendToGuildHall()
 
 	AssignToInstance(instance_id);
 	MovePC(345, instance_id, -1.00, -1.00, 3.34, 0, 1);
+}
+
+void Client::CheckVirtualZoneLines()
+{
+	for (auto &virtual_zone_point : zone->virtual_zone_point_list) {
+		float half_width = ((float) virtual_zone_point.width / 2);
+
+		if (
+			GetX() > (virtual_zone_point.x - half_width) &&
+			GetX() < (virtual_zone_point.x + half_width) &&
+			GetY() > (virtual_zone_point.y - half_width) &&
+			GetY() < (virtual_zone_point.y + half_width) &&
+			GetZ() >= (virtual_zone_point.z - 10) &&
+			GetZ() < (virtual_zone_point.z + (float) virtual_zone_point.height)
+			) {
+
+			MovePC(
+				virtual_zone_point.target_zone_id,
+				virtual_zone_point.target_instance,
+				virtual_zone_point.target_x,
+				virtual_zone_point.target_y,
+				virtual_zone_point.target_z,
+				virtual_zone_point.target_heading
+			);
+
+			LogZonePoints(
+				"Virtual Zone Box Sending player [{}] to [{}]",
+				GetCleanName(),
+				zone_store.GetZoneLongName(virtual_zone_point.target_zone_id)
+			);
+		}
+	}
+}
+
+void Client::ShowDevToolsMenu()
+{
+	std::string menu_commands_search;
+	std::string menu_commands_show;
+	std::string reload_commands_show;
+	std::string window_toggle_command;
+
+	/**
+	 * Search entity commands
+	 */
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#fz", false, "Zones") + "] ";
+	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#fi", false, "Items") + "] ";
+
+	/**
+	 * Show
+	 */
+	menu_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonepoints", false, "Zone Points") + "] ";
+	menu_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#showzonegloballoot", false, "Zone Global Loot") + "] ";
+
+	/**
+	 * Reload
+	 */
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#rq", false, "Quests") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadmerchants", false, "Merchants") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadallrules", false, "Rules Globally") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Ground Spawns") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Alternate Currencies") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "DB Emotes") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadstatic", false, "Doors") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadtraps", false, "Traps") + "] ";
+	reload_commands_show += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#reloadzps", false, "Zone Points") + "] ";
+
+	/**
+	 * Show window status
+	 */
+	window_toggle_command = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
+	if (IsDevToolsWindowEnabled()) {
+		window_toggle_command = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
+	}
+
+	/**
+	 * Print menu
+	 */
+	SendChatLineBreak();
+	Message(
+		Chat::White, "| [Devtools] Window %s Show this menu with %s | Current expansion [%s]",
+		window_toggle_command.c_str(),
+		EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
+		content_service.GetCurrentExpansionName().c_str()
+	);
+	Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
+	Message(Chat::White, "| [Devtools] Show %s", menu_commands_show.c_str());
+	Message(Chat::White, "| [Devtools] Reload %s", reload_commands_show.c_str());
+	Message(Chat::White, "| [Devtools] Search commands with #help <search>");
+	SendChatLineBreak();
+}
+
+void Client::SendChatLineBreak(uint16 color) {
+	Message(color, "------------------------------------------------");
 }

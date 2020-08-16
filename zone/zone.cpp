@@ -58,6 +58,7 @@
 #include "zone_reload.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/repositories/content_flags_repository.h"
+#include "../common/repositories/zone_points_repository.h"
 
 #include <time.h>
 #include <ctime>
@@ -1944,41 +1945,59 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 {
 	zone_point_list->Clear();
 	zone->numzonepoints = 0;
+	zone->virtual_zone_point_list.clear();
 
-	std::string query = StringFormat(
-		"SELECT x, y, z, target_x, target_y, "
-		"target_z, target_zone_id, heading, target_heading, "
-		"number, target_instance, client_version_mask "
-		"FROM zone_points WHERE zone='%s' AND (version=%i OR version=-1) %s"
-		"ORDER BY number",
-		zonename,
-		version,
-		ContentFilterCriteria::apply().c_str()
+	auto zone_points = ZonePointsRepository::GetWhere(
+		fmt::format(
+			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY number",
+			zonename,
+			version,
+			ContentFilterCriteria::apply()
+		)
 	);
 
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto &zone_point : zone_points) {
 		auto zp = new ZonePoint;
 
-		zp->x = atof(row[0]);
-		zp->y = atof(row[1]);
-		zp->z = atof(row[2]);
-		zp->target_x = atof(row[3]);
-		zp->target_y = atof(row[4]);
-		zp->target_z = atof(row[5]);
-		zp->target_zone_id = atoi(row[6]);
-		zp->heading = atof(row[7]);
-		zp->target_heading = atof(row[8]);
-		zp->number = atoi(row[9]);
-		zp->target_zone_instance = atoi(row[10]);
-		zp->client_version_mask = (uint32)strtoul(row[11], nullptr, 0);
+		zp->x                    = zone_point.x;
+		zp->y                    = zone_point.y;
+		zp->z                    = zone_point.z;
+		zp->target_x             = zone_point.target_x;
+		zp->target_y             = zone_point.target_y;
+		zp->target_z             = zone_point.target_z;
+		zp->target_zone_id       = zone_point.target_zone_id;
+		zp->heading              = zone_point.heading;
+		zp->target_heading       = zone_point.target_heading;
+		zp->number               = zone_point.number;
+		zp->target_zone_instance = zone_point.target_instance;
+		zp->client_version_mask  = zone_point.client_version_mask;
+		zp->is_virtual           = zone_point.is_virtual > 0;
+		zp->height               = zone_point.height;
+		zp->width                = zone_point.width;
+
+		LogZonePoints(
+			"Loading ZP x [{}] y [{}] z [{}] heading [{}] target x y z zone_id instance_id [{}] [{}] [{}] [{}] [{}] number [{}] is_virtual [{}] height [{}] width [{}]",
+			zp->x,
+			zp->y,
+			zp->z,
+			zp->heading,
+			zp->target_x,
+			zp->target_y,
+			zp->target_z,
+			zp->target_zone_id,
+			zp->target_zone_instance,
+			zp->number,
+			zp->is_virtual ? "true" : "false",
+			zp->height,
+			zp->width
+		);
+
+		if (zone_point.is_virtual) {
+			zone->virtual_zone_point_list.emplace_back(zone_point);
+			continue;
+		}
 
 		zone_point_list->Insert(zp);
-
 		zone->numzonepoints++;
 	}
 
@@ -2671,3 +2690,4 @@ void Zone::SetInstanceTimeRemaining(uint32 instance_time_remaining)
 {
 	Zone::instance_time_remaining = instance_time_remaining;
 }
+

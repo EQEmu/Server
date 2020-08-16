@@ -918,6 +918,11 @@ void Client::CompleteConnect()
 	worldserver.RequestTellQueue(GetName());
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
+
+	if (GetGM()) {
+		ShowDevToolsMenu();
+	}
+
 }
 
 // connecting opcode handlers
@@ -4640,6 +4645,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		CheckRegionTypeChanges();
 	}
+
+	CheckVirtualZoneLines();
+
 }
 
 void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)

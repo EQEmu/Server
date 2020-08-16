@@ -290,6 +290,7 @@ void command_showskills(Client *c, const Seperator *sep);
 void command_showspellslist(Client *c, const Seperator *sep);
 void command_showstats(Client *c, const Seperator *sep);
 void command_showzonegloballoot(Client *c, const Seperator *sep);
+void command_showzonepoints(Client *c, const Seperator *sep);
 void command_shutdown(Client *c, const Seperator *sep);
 void command_size(Client *c, const Seperator *sep);
 void command_spawn(Client *c, const Seperator *sep);

@@ -101,6 +101,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #endif
 
 #include "mob_movement_manager.h"
+#include "client.h"
 
 
 extern Zone* zone;
@@ -6003,4 +6004,5 @@ bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
 		return true;
 	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
 }
+
 

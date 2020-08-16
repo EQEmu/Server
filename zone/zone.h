@@ -28,6 +28,7 @@
 #include "zone_store.h"
 #include "../common/repositories/grid_repository.h"
 #include "../common/repositories/grid_entries_repository.h"
+#include "../common/repositories/zone_points_repository.h"
 #include "qglobals.h"
 #include "spawn2.h"
 #include "spawngroup.h"
@@ -48,6 +49,9 @@ struct ZonePoint {
 	uint16 target_zone_id;
 	int32  target_zone_instance;
 	uint32 client_version_mask;
+	bool   is_virtual;
+	int    height;
+	int    width;
 };
 
 struct ZoneClientAuth_Struct {
@@ -171,10 +175,12 @@ public:
 	int SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold = false);
 	int32 MobsAggroCount() { return aggroedmobs; }
 
-	IPathfinder                    *pathing;
-	LinkedList<NPC_Emote_Struct *> NPCEmoteList;
-	LinkedList<Spawn2 *>           spawn2_list;
-	LinkedList<ZonePoint *>        zone_point_list;
+	IPathfinder                                   *pathing;
+	LinkedList<NPC_Emote_Struct *>                NPCEmoteList;
+	LinkedList<Spawn2 *>                          spawn2_list;
+	LinkedList<ZonePoint *>                       zone_point_list;
+	std::vector<ZonePointsRepository::ZonePoints> virtual_zone_point_list;
+
 	Map                            *zonemap;
 	MercTemplate *GetMercTemplate(uint32 template_id);
 	NewZone_Struct                 newzone_data;

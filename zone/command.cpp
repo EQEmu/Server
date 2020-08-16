@@ -387,6 +387,7 @@ int command_init(void)
 		command_add("showspellslist", "Shows spell list of targeted NPC", 100, command_showspellslist) ||
 		command_add("showstats", "- Show details about you or your target", 50, command_showstats) ||
 		command_add("showzonegloballoot", "Show GlobalLoot entires on this zone", 50, command_showzonegloballoot) ||
+		command_add("showzonepoints", "Show zone points for current zone", 50, command_showzonepoints) ||
 		command_add("shutdown", "- Shut this zone process down", 150, command_shutdown) ||
 		command_add("size", "[size] - Change size of you or your target", 50, command_size) ||
 		command_add("spawn", "[name] [race] [level] [material] [hp] [gender] [class] [priweapon] [secweapon] [merchantid] - Spawn an NPC", 10, command_spawn) ||
@@ -5364,7 +5365,6 @@ void command_memspell(Client *c, const Seperator *sep)
 		}
 	}
 }
-
 void command_save(Client *c, const Seperator *sep)
 {
 	if (c->GetTarget() == 0)
@@ -5397,6 +5397,153 @@ void command_showzonegloballoot(Client *c, const Seperator *sep)
 {
 	c->Message(Chat::White, "GlobalLoot for %s (%d:%d)", zone->GetShortName(), zone->GetZoneID(), zone->GetInstanceVersion());
 	zone->ShowZoneGlobalLoot(c);
+}
+
+void command_showzonepoints(Client *c, const Seperator *sep)
+{
+	auto      &mob_list = entity_list.GetMobList();
+	for (auto itr : mob_list) {
+		Mob *mob = itr.second;
+		if (mob->IsNPC() && mob->GetRace() == 2254) {
+			mob->Depop();
+		}
+	}
+
+	int found_zone_points = 0;
+
+	c->Message(Chat::White, "Listing zone points...");
+	c->SendChatLineBreak();
+
+	for (auto &virtual_zone_point : zone->virtual_zone_point_list) {
+		std::string zone_long_name = zone_store.GetZoneLongName(virtual_zone_point.target_zone_id);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Virtual Zone Point x [{}] y [{}] z [{}] h [{}] width [{}] height [{}] | To [{}] ({}) x [{}] y [{}] z [{}] h [{}]",
+				virtual_zone_point.x,
+				virtual_zone_point.y,
+				virtual_zone_point.z,
+				virtual_zone_point.heading,
+				virtual_zone_point.width,
+				virtual_zone_point.height,
+				zone_long_name.c_str(),
+				virtual_zone_point.target_zone_id,
+				virtual_zone_point.target_x,
+				virtual_zone_point.target_y,
+				virtual_zone_point.target_z,
+				virtual_zone_point.target_heading
+			).c_str()
+		);
+
+		std::string node_name = fmt::format("ZonePoint To [{}]", zone_long_name);
+
+		float half_width = ((float) virtual_zone_point.width / 2);
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x + half_width,
+			(float) virtual_zone_point.y + half_width,
+			virtual_zone_point.z,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x + half_width,
+			(float) virtual_zone_point.y - half_width,
+			virtual_zone_point.z,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x - half_width,
+			(float) virtual_zone_point.y - half_width,
+			virtual_zone_point.z,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x - half_width,
+			(float) virtual_zone_point.y + half_width,
+			virtual_zone_point.z,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x + half_width,
+			(float) virtual_zone_point.y + half_width,
+			(float) virtual_zone_point.z + (float) virtual_zone_point.height,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x + half_width,
+			(float) virtual_zone_point.y - half_width,
+			(float) virtual_zone_point.z + (float) virtual_zone_point.height,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x - half_width,
+			(float) virtual_zone_point.y - half_width,
+			(float) virtual_zone_point.z + (float) virtual_zone_point.height,
+			virtual_zone_point.heading
+		));
+
+		NPC::SpawnZonePointNodeNPC(node_name, glm::vec4(
+			(float) virtual_zone_point.x - half_width,
+			(float) virtual_zone_point.y + half_width,
+			(float) virtual_zone_point.z + (float) virtual_zone_point.height,
+			virtual_zone_point.heading
+		));
+
+		found_zone_points++;
+	}
+
+	LinkedListIterator<ZonePoint *> iterator(zone->zone_point_list);
+	iterator.Reset();
+	while (iterator.MoreElements()) {
+		ZonePoint   *zone_point    = iterator.GetData();
+		std::string zone_long_name = zone_store.GetZoneLongName(zone_point->target_zone_id);
+		std::string node_name      = fmt::format("ZonePoint To [{}]", zone_long_name);
+
+		NPC::SpawnZonePointNodeNPC(
+			node_name, glm::vec4(
+				zone_point->x,
+				zone_point->y,
+				zone_point->z,
+				zone_point->heading
+			)
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Client Side Zone Point x [{}] y [{}] z [{}] h [{}] number [{}] | To [{}] ({}) x [{}] y [{}] z [{}] h [{}]",
+				zone_point->x,
+				zone_point->y,
+				zone_point->z,
+				zone_point->heading,
+				zone_point->number,
+				zone_long_name.c_str(),
+				zone_point->target_zone_id,
+				zone_point->target_x,
+				zone_point->target_y,
+				zone_point->target_z,
+				zone_point->target_heading
+			).c_str()
+		);
+
+		iterator.Advance();
+
+		found_zone_points++;
+	}
+
+	if (found_zone_points == 0) {
+		c->Message(Chat::White, "There were no zone points found...");
+	}
+
+	c->SendChatLineBreak();
+
 }
 
 void command_mystats(Client *c, const Seperator *sep)
@@ -5445,18 +5592,6 @@ void command_depopzone(Client *c, const Seperator *sep)
 
 void command_devtools(Client *c, const Seperator *sep)
 {
-	std::string menu_commands_search;
-	std::string window_toggle_command;
-
-	/**
-	 * Search entity commands
-	 */
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list npcs", false, "NPC") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list players", false, "Players") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list corpses", false, "Corpses") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "Doors") + "] ";
-	menu_commands_search += "[" + EQ::SayLinkEngine::GenerateQuestSaylink("#list objects", false, "Objects") + "] ";
-
 	std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", c->AccountID());
 
 	/**
@@ -5471,19 +5606,7 @@ void command_devtools(Client *c, const Seperator *sep)
 		c->SetDevToolsWindowEnabled(true);
 	}
 
-	/**
-	 * Show window status
-	 */
-	window_toggle_command = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
-	if (c->IsDevToolsWindowEnabled()) {
-		window_toggle_command = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
-	}
-
-	/**
-	 * Print menu
-	 */
-	c->Message(Chat::White, "| [Devtools] Window %s", window_toggle_command.c_str());
-	c->Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
+	c->ShowDevToolsMenu();
 }
 
 void command_repop(Client *c, const Seperator *sep)

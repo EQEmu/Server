@@ -56,6 +56,9 @@ public:
 		int         max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
+		int         is_virtual;
+		int         height;
+		int         width;
 	};
 
 	static std::string PrimaryKey()
@@ -87,6 +90,9 @@ public:
 			"max_expansion",
 			"content_flags",
 			"content_flags_disabled",
+			"is_virtual",
+			"height",
+			"width",
 		};
 	}
 
@@ -158,6 +164,9 @@ public:
 		entry.max_expansion          = 0;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
+		entry.is_virtual             = 0;
+		entry.height                 = 0;
+		entry.width                  = 0;
 
 		return entry;
 	}
@@ -213,6 +222,9 @@ public:
 			entry.max_expansion          = atoi(row[18]);
 			entry.content_flags          = row[19] ? row[19] : "";
 			entry.content_flags_disabled = row[20] ? row[20] : "";
+			entry.is_virtual             = atoi(row[21]);
+			entry.height                 = atoi(row[22]);
+			entry.width                  = atoi(row[23]);
 
 			return entry;
 		}
@@ -264,6 +276,9 @@ public:
 		update_values.push_back(columns[18] + " = " + std::to_string(zone_points_entry.max_expansion));
 		update_values.push_back(columns[19] + " = '" + EscapeString(zone_points_entry.content_flags) + "'");
 		update_values.push_back(columns[20] + " = '" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[21] + " = " + std::to_string(zone_points_entry.is_virtual));
+		update_values.push_back(columns[22] + " = " + std::to_string(zone_points_entry.height));
+		update_values.push_back(columns[23] + " = " + std::to_string(zone_points_entry.width));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -304,6 +319,9 @@ public:
 		insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(zone_points_entry.is_virtual));
+		insert_values.push_back(std::to_string(zone_points_entry.height));
+		insert_values.push_back(std::to_string(zone_points_entry.width));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -352,6 +370,9 @@ public:
 			insert_values.push_back(std::to_string(zone_points_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(zone_points_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(zone_points_entry.is_virtual));
+			insert_values.push_back(std::to_string(zone_points_entry.height));
+			insert_values.push_back(std::to_string(zone_points_entry.width));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -406,6 +427,9 @@ public:
 			entry.max_expansion          = atoi(row[18]);
 			entry.content_flags          = row[19] ? row[19] : "";
 			entry.content_flags_disabled = row[20] ? row[20] : "";
+			entry.is_virtual             = atoi(row[21]);
+			entry.height                 = atoi(row[22]);
+			entry.width                  = atoi(row[23]);
 
 			all_entries.push_back(entry);
 		}
@@ -451,6 +475,9 @@ public:
 			entry.max_expansion          = atoi(row[18]);
 			entry.content_flags          = row[19] ? row[19] : "";
 			entry.content_flags_disabled = row[20] ? row[20] : "";
+			entry.is_virtual             = atoi(row[21]);
+			entry.height                 = atoi(row[22]);
+			entry.width                  = atoi(row[23]);
 
 			all_entries.push_back(entry);
 		}
