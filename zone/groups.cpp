@@ -498,6 +498,9 @@ void Group::SendEndurancePacketFrom(Mob* member)
 //if the group was in the zone already
 bool Group::UpdatePlayer(Mob* update){
 
+	if (!update)
+		return false;
+
 	bool updateSuccess = false;
 
 	VerifyGroup();
@@ -1009,6 +1012,7 @@ void Group::DisbandGroup(bool joinraid) {
 		Leader->UpdateLFP();
 	}
 
+	SetLeader(nullptr);
 	safe_delete(outapp);
 }
 
