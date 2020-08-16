@@ -857,6 +857,15 @@ void QuestManager::repopzone() {
 	}
 }
 
+void QuestManager::processmobswhilezoneempty(bool on) {
+	if(zone) {
+		zone->process_mobs_while_empty = on;
+	}
+	else {
+		LogQuests("QuestManager::processmobswhilezoneempty called with nullptr zone. Probably syntax error in quest file");
+	}
+}
+
 void QuestManager::settarget(const char *type, int target_id) {
 	QuestManagerCurrentQuestVars();
 	if (!owner || !owner->IsNPC())

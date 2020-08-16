@@ -390,6 +390,10 @@ void lua_repop_zone() {
 	quest_manager.repopzone();
 }
 
+void lua_process_mobs_while_zone_empty(bool on) {
+	quest_manager.processmobswhilezoneempty(on);
+}
+
 bool lua_is_disc_tome(int item_id) {
 	return quest_manager.isdisctome(item_id);
 }
@@ -2396,6 +2400,7 @@ luabind::scope lua_register_general() {
 		luabind::def("depop_all", (void(*)(int))&lua_depop_all),
 		luabind::def("depop_zone", &lua_depop_zone),
 		luabind::def("repop_zone", &lua_repop_zone),
+		luabind::def("process_mobs_while_zone_empty", &lua_process_mobs_while_zone_empty),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
 		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
 		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),

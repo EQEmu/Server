@@ -2071,6 +2071,19 @@ XS(XS__repopzone) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__processmobswhilezoneempty);
+XS(XS__processmobswhilezoneempty) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::processmobswhilezoneempty(bool on)");
+
+	bool ProcessingOn = ((int) SvIV(ST(0))) == 0 ? false : true;
+
+	quest_manager.processmobswhilezoneempty(ProcessingOn);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__npcrace);
 XS(XS__npcrace) {
 	dXSARGS;
@@ -6291,6 +6304,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "playersize"), XS__playersize, file);
 	newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
 	newXS(strcpy(buf, "popup"), XS__popup, file);
+	newXS(strcpy(buf, "processmobswhilezoneempty"), XS__processmobswhilezoneempty, file);
 	newXS(strcpy(buf, "pvp"), XS__pvp, file);
 	newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
 	newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file);
