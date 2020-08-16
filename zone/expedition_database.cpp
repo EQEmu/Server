@@ -23,6 +23,7 @@
 #include "expedition_lockout_timer.h"
 #include "zonedb.h"
 #include "../common/database.h"
+#include "../common/string_util.h"
 #include <fmt/core.h>
 
 uint32_t ExpeditionDatabase::InsertExpedition(
@@ -38,7 +39,7 @@ uint32_t ExpeditionDatabase::InsertExpedition(
 			(uuid, instance_id, expedition_name, leader_id, min_players, max_players)
 		VALUES
 			('{}', {}, '{}', {}, {}, {});
-	), uuid, instance_id, expedition_name, leader_id, min_players, max_players);
+	), uuid, instance_id, EscapeString(expedition_name), leader_id, min_players, max_players);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -149,7 +150,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 			AND is_pending = FALSE
 			AND expire_time > NOW()
 			AND expedition_name = '{}';
-	), character_id, expedition_name);
+	), character_id, EscapeString(expedition_name));
 
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
@@ -261,7 +262,7 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 				LEFT JOIN expedition_members member ON character_data.id = member.character_id
 			WHERE character_data.name IN ({})
 			ORDER BY character_data.id;
-		), expedition_name, in_character_names_query);
+		), EscapeString(expedition_name), in_character_names_query);
 
 		results = database.QueryDatabase(query);
 	}
@@ -294,7 +295,7 @@ void ExpeditionDatabase::DeleteAllCharacterLockouts(
 		std::string query = fmt::format(SQL(
 			DELETE FROM expedition_character_lockouts
 			WHERE character_id = {} AND expedition_name = '{}';
-		), character_id, expedition_name);
+		), character_id, EscapeString(expedition_name));
 
 		database.QueryDatabase(query);
 	}
@@ -314,7 +315,7 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 			AND is_pending = FALSE
 			AND expedition_name = '{}'
 			AND event_name = '{}';
-	), character_id, expedition_name, event_name);
+	), character_id, EscapeString(expedition_name), EscapeString(event_name));
 
 	database.QueryDatabase(query);
 }
@@ -342,7 +343,7 @@ void ExpeditionDatabase::DeleteMembersLockout(
 				AND is_pending = FALSE
 				AND expedition_name = '{}'
 				AND event_name = '{}';
-		), query_character_ids, expedition_name, event_name);
+		), query_character_ids, EscapeString(expedition_name), EscapeString(event_name));
 
 		database.QueryDatabase(query);
 	}
@@ -359,7 +360,7 @@ void ExpeditionDatabase::AssignPendingLockouts(uint32_t character_id, const std:
 			character_id = {}
 			AND is_pending = TRUE
 			AND expedition_name = '{}';
-	), character_id, expedition_name);
+	), character_id, EscapeString(expedition_name));
 
 	database.QueryDatabase(query);
 }
@@ -406,7 +407,7 @@ void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string
 	auto query = fmt::format(SQL(
 		DELETE FROM expedition_lockouts
 		WHERE expedition_id = {} AND event_name = '{}';
-	), expedition_id, event_name);
+	), expedition_id, EscapeString(event_name));
 
 	database.QueryDatabase(query);
 }
@@ -466,8 +467,8 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
-			lockout.GetExpeditionName(),
-			lockout.GetEventName(),
+			EscapeString(lockout.GetExpeditionName()),
+			EscapeString(lockout.GetEventName()),
 			is_pending
 		);
 	}
@@ -526,8 +527,8 @@ void ExpeditionDatabase::InsertMembersLockout(
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
-			lockout.GetExpeditionName(),
-			lockout.GetEventName()
+			EscapeString(lockout.GetExpeditionName()),
+			EscapeString(lockout.GetEventName())
 		);
 	}
 
@@ -569,7 +570,7 @@ void ExpeditionDatabase::InsertLockout(
 	),
 		expedition_id,
 		lockout.GetExpeditionUUID(),
-		lockout.GetEventName(),
+		EscapeString(lockout.GetEventName()),
 		lockout.GetExpireTime(),
 		lockout.GetDuration()
 	);
@@ -589,7 +590,7 @@ void ExpeditionDatabase::InsertLockouts(
 			"({}, '{}', '{}', FROM_UNIXTIME({}), {}),",
 			expedition_id,
 			lockout.second.GetExpeditionUUID(),
-			lockout.second.GetEventName(),
+			EscapeString(lockout.second.GetEventName()),
 			lockout.second.GetExpireTime(),
 			lockout.second.GetDuration()
 		);
