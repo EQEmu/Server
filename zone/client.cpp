@@ -56,6 +56,7 @@ extern volatile bool RunLoops;
 #include "quest_parser_collection.h"
 #include "queryserv.h"
 #include "mob_movement_manager.h"
+#include "../common/content/world_content_service.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
@@ -9427,7 +9428,12 @@ void Client::ShowDevToolsMenu()
 	 * Print menu
 	 */
 	SendChatLineBreak();
-	Message(Chat::White, "| [Devtools] Window %s Show this menu with %s", window_toggle_command.c_str(), EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str());
+	Message(
+		Chat::White, "| [Devtools] Window %s Show this menu with %s | Current expansion [%s]",
+		window_toggle_command.c_str(),
+		EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
+		content_service.GetCurrentExpansionName().c_str()
+	);
 	Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
 	Message(Chat::White, "| [Devtools] Show %s", menu_commands_show.c_str());
 	Message(Chat::White, "| [Devtools] Reload %s", reload_commands_show.c_str());
