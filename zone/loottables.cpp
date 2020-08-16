@@ -277,6 +277,22 @@ bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
 	return true;
 }
 
+LootDropEntries_Struct NPC::NewLootDropEntry()
+{
+	LootDropEntries_Struct loot_drop{};
+	loot_drop.item_id           = 0;
+	loot_drop.item_charges      = 1;
+	loot_drop.equip_item        = 1;
+	loot_drop.chance            = 0;
+	loot_drop.trivial_min_level = 0;
+	loot_drop.trivial_max_level = 0;
+	loot_drop.npc_min_level     = 0;
+	loot_drop.npc_max_level     = 0;
+	loot_drop.multiplier        = 0;
+
+	return loot_drop;
+}
+
 //if itemlist is null, just send wear changes
 void NPC::AddLootDrop(
 	const EQ::ItemData *item2,
@@ -509,7 +525,10 @@ void NPC::AddLootDrop(
 
 void NPC::AddItem(const EQ::ItemData* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
-	AddLootDrop(item, &itemlist, LootDropEntries_Struct{ .equip_item = static_cast<uint8>(equipitem ? 1 : 0) }, true);
+	auto loot_drop_entry = NPC::NewLootDropEntry();
+	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+
+	AddLootDrop(item, &itemlist, loot_drop_entry, true);
 }
 
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
@@ -517,7 +536,11 @@ void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, ui
 	const EQ::ItemData * i = database.GetItem(itemid);
 	if(i == nullptr)
 		return;
-	AddLootDrop(i, &itemlist, LootDropEntries_Struct{ .equip_item = equipitem }, true, aug1, aug2, aug3, aug4, aug5, aug6);
+
+	auto loot_drop_entry = NPC::NewLootDropEntry();
+	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+
+	AddLootDrop(i, &itemlist, loot_drop_entry, true, aug1, aug2, aug3, aug4, aug5, aug6);
 }
 
 void NPC::AddLootTable() {

@@ -495,6 +495,7 @@ public:
 
 	void RecalculateSkills();
 
+	static LootDropEntries_Struct NewLootDropEntry();
 protected:
 
 	const NPCType*	NPCTypedata;

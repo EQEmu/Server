@@ -899,10 +899,15 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							if (baginst) {
 								const EQ::ItemData* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
+
+									auto loot_drop_entry = NPC::NewLootDropEntry();
+									loot_drop_entry.equip_item   = 1;
+									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
+
 									tradingWith->CastToNPC()->AddLootDrop(
 										bagitem,
 										&tradingWith->CastToNPC()->itemlist,
-										LootDropEntries_Struct{.item_charges = static_cast<int8>(baginst->GetCharges()), .equip_item = 1 },
+										loot_drop_entry,
 										true
 									);
 								}
@@ -913,10 +918,14 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						}
 					}
 
+					auto new_loot_drop_entry = NPC::NewLootDropEntry();
+					new_loot_drop_entry.equip_item   = 1;
+					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
+
 					tradingWith->CastToNPC()->AddLootDrop(
 						item,
 						&tradingWith->CastToNPC()->itemlist,
-						LootDropEntries_Struct{.item_charges = static_cast<int8>(inst->GetCharges()), .equip_item = 1 },
+						new_loot_drop_entry,
 						true
 					);
 				}
