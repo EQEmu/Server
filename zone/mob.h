@@ -222,7 +222,7 @@ public:
 	inline int GetMitigationAC() { return mitigation_ac; }
 	void MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	double RollD20(int offense, int mitigation); // CALL THIS FROM THE DEFENDER
-	bool CombatRange(Mob* other);
+	bool CombatRange(Mob* other, float fixed_size_mod = 1.0, bool aeRampage = false);
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
