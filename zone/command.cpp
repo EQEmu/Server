@@ -5424,6 +5424,7 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 				virtual_zone_point.x,
 				virtual_zone_point.y,
 				virtual_zone_point.z,
+				virtual_zone_point.heading,
 				virtual_zone_point.width,
 				virtual_zone_point.height,
 				zone_long_name.c_str(),
