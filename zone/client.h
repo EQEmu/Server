@@ -238,6 +238,8 @@ public:
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
+	void SendChatLineBreak(uint16 color = Chat::White);
+
 	bool GotoPlayer(std::string player_name);
 
 	//abstract virtual function implementations required by base abstract class
@@ -445,6 +447,8 @@ public:
 	inline float ProximityY() const { return m_Proximity.y; }
 	inline float ProximityZ() const { return m_Proximity.z; }
 	inline void ClearAllProximities() { entity_list.ProcessMove(this, glm::vec3(FLT_MAX, FLT_MAX, FLT_MAX)); m_Proximity = glm::vec3(FLT_MAX,FLT_MAX,FLT_MAX); }
+
+	void CheckVirtualZoneLines();
 
 	/*
 			Begin client modifiers
@@ -1316,6 +1320,8 @@ public:
 	glm::vec4 &GetLastPositionBeforeBulkUpdate();
 
 	Raid *p_raid_instance;
+
+	void ShowDevToolsMenu();
 
 protected:
 	friend class Mob;
