@@ -207,7 +207,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			current_expedition->AddInternalMember(
 				row[col::member_name], member_id, ExpeditionMemberStatus::Offline
 			);
-			expedition_character_ids.emplace_back(std::make_pair(expedition_id, member_id));
+			expedition_character_ids.emplace_back(expedition_id, member_id);
 		}
 	}
 
@@ -490,7 +490,7 @@ void Expedition::AddInternalMember(
 
 	if (it == m_members.end())
 	{
-		m_members.emplace_back(ExpeditionMember{character_id, char_name, status});
+		m_members.emplace_back(character_id, char_name, status);
 	}
 }
 
@@ -1288,7 +1288,7 @@ void Expedition::ProcessLockoutUpdate(
 			Client* client = client_iter.second;
 			if (client && client->GetExpeditionID() != GetID())
 			{
-				non_members.emplace_back(ExpeditionMember{client->CharacterID(), client->GetName()});
+				non_members.emplace_back(client->CharacterID(), client->GetName());
 				client->AddExpeditionLockout(lockout);
 			}
 		}

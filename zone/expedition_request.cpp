@@ -208,7 +208,7 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 		if (character_id != last_character_id)
 		{
 			// defaults to online status, if offline group members implemented this needs to change
-			m_members.emplace_back(ExpeditionMember{character_id, character_name});
+			m_members.emplace_back(character_id, character_name);
 
 			// process event lockout conflict messages from the previous character
 			for (const auto& member_lockout : member_lockout_conflicts)
@@ -257,7 +257,7 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 						// leader doesn't have this lockout. queue instead of messaging
 						// now so message comes after any replay lockout messages
 						has_conflicts = true;
-						member_lockout_conflicts.emplace_back(ExpeditionRequestConflict{character_name, lockout});
+						member_lockout_conflicts.push_back({character_name, lockout});
 					}
 				}
 			}
