@@ -274,13 +274,13 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 
 			if (last_expedition_id != expedition_id)
 			{
-				expeditions.emplace_back(Expedition{
+				expeditions.emplace_back(
 					static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
 					static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_instance_id
 					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_zone_id
 					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // start_time
 					static_cast<uint32_t>(strtoul(row[4], nullptr, 10))  // duration
-				});
+				);
 			}
 
 			last_expedition_id = expedition_id;

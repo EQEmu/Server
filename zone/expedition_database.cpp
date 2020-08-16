@@ -118,13 +118,13 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 	{
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
-			lockouts.emplace_back(ExpeditionLockoutTimer{
+			lockouts.emplace_back(
 				row[0],                                             // expedition_uuid
 				row[1],                                             // expedition_name
 				row[2],                                             // event_name
 				strtoull(row[3], nullptr, 10),                      // expire_time
 				static_cast<uint32_t>(strtoul(row[4], nullptr, 10)) // duration
-			});
+			);
 		}
 	}
 
@@ -157,13 +157,13 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 	{
 		for (auto row = results.begin(); row != results.end(); ++row)
 		{
-			lockouts.emplace_back(ExpeditionLockoutTimer{
+			lockouts.emplace_back(
 				row[0],                                             // expedition_uuid
 				expedition_name,
 				row[1],                                             // event_name
 				strtoull(row[2], nullptr, 10),                      // expire_time
 				static_cast<uint32_t>(strtoul(row[3], nullptr, 10)) // duration
-			});
+			);
 		}
 	}
 
