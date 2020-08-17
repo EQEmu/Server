@@ -1236,7 +1236,22 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 	va_list argptr;
 	char buffer[4096];
 	char message_sender[64];
-
+	uint32 from_character_id = database.GetCharacterID(from);
+	uint32 from_account_id = database.GetAccountIDByChar(from_character_id);
+	int16 from_account_status = database.CheckStatus(from_account_id);
+	uint8 from_anon_flag = database.GetAnonByCharacterID(from_character_id);
+	std::string client_rank;
+	if (from_account_status == 1)
+		client_rank = "[Donator]";
+	else if (from_account_status == 2)
+		client_rank = "[Contributor]";
+	else if (from_account_status == 3)
+		client_rank = "[V.I.P.]";
+	else if (from_account_status == 249)
+		client_rank = "[GM]";
+	else if (from_account_status == 255)
+		client_rank = "[Admin]";
+		
 	va_start(argptr, message);
 	vsnprintf(buffer, 4096, message, argptr);
 	va_end(argptr);
@@ -1250,7 +1265,15 @@ void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num
 		strcpy(cm->sender, "ZServer");
 	else {
 		CleanMobName(from, message_sender);
-		strcpy(cm->sender, message_sender);
+		if (from_account_status == 0)
+			strcpy(cm->sender, message_sender);
+		else if (from_account_status > 0) {
+			if (from_anon_flag == 0) {
+				strcpy(cm->sender, fmt::format("{} {}", client_rank, message_sender).c_str());
+			} else {				
+				strcpy(cm->sender, message_sender);
+			}
+		}
 	}
 	if (to != 0)
 		strcpy((char *) cm->targetname, to);
@@ -2012,6 +2035,26 @@ bool Client::GMHideMe(Client* client) {
 	}
 	else
 		return false;
+}
+
+void Client::SetAnon(uint8 anon_flag) {
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
+	spawn_appearance->spawn_id = this->GetID();
+	spawn_appearance->type = AT_Anon;
+	spawn_appearance->parameter = anon_flag;
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
+}
+
+void Client::SetAFK(uint8 afk_flag) {
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
+	spawn_appearance->spawn_id = this->GetID();
+	spawn_appearance->type = AT_AFK;
+	spawn_appearance->parameter = afk_flag;
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
 }
 
 void Client::Duck() {

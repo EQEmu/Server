@@ -909,8 +909,30 @@ void Group::GroupMessage(Mob* sender, uint8 language, uint8 lang_skill, const ch
 		if(!members[i])
 			continue;
 
-		if (members[i]->IsClient() && members[i]->CastToClient()->GetFilter(FilterGroupChat)!=0)
-			members[i]->CastToClient()->ChannelMessageSend(sender->GetName(),members[i]->GetName(),ChatChannel_Group,language,lang_skill,message);
+		if (members[i]->IsClient() && members[i]->CastToClient()->GetFilter(FilterGroupChat) != 0) {
+			std::string check_from = sender->GetName();
+			uint32 character_id = members[i]->CastToClient()->CharacterID();
+			uint32 account_id = database.GetAccountIDByChar(character_id);
+			int16 account_status = database.CheckStatus(account_id);
+			std::string client_rank;
+			if (account_status == 1)
+				client_rank = "[Donator]";
+			else if (account_status == 2)
+				client_rank = "[Contributor]";
+			else if (account_status == 3)
+				client_rank = "[V.I.P.]";
+			else if (account_status == 249)
+				client_rank = "[GM]";
+			else if (account_status == 255)
+				client_rank = "[Admin]";
+
+			if (
+    			check_from.find(fmt::format("{} {}", client_rank, members[i]->CastToClient()->GetCleanName())) == std::string::npos && 
+    			check_from.find(fmt::format("{}", members[i]->CastToClient()->GetCleanName())) == std::string::npos
+			) {
+				members[i]->CastToClient()->ChannelMessageSend(sender->GetName(), members[i]->GetName(), ChatChannel_Group,language,lang_skill,message);
+			}
+		}
 	}
 
 	auto pack =

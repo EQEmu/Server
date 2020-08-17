@@ -652,11 +652,17 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		m_pp.aapoints += last_unspentAA;
 
 		//figure out how many points were actually gained
-		/*uint32 gained = m_pp.aapoints - last_unspentAA;*/	//unused
+		uint32 gained = (m_pp.aapoints - last_unspentAA);
 
 		//Message(Chat::Yellow, "You have gained %d skill points!!", m_pp.aapoints - last_unspentAA);
 		char val1[20]={0};
-		MessageString(Chat::Experience, GAIN_ABILITY_POINT, ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "" : "(s)");	//You have gained an ability point! You now have %1 ability point%2.
+		if (gained > 0) {
+			if (gained == 1)
+				MessageString(Chat::Experience, GAIN_ABILITY_POINT, ConvertArray(m_pp.aapoints, val1),m_pp.aapoints == 1 ? "." : "s.");	//You have gained an ability point! You now have %1 ability point%2.
+			else
+				Message(Chat::Experience, fmt::format("You have gained {} ability points! You now have {} ability points!", gained, m_pp.aapoints).c_str());
+		}
+			
 		if (RuleB(AA, SoundForAAEarned)) {
 			SendSound();
 		}

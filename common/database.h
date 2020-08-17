@@ -148,6 +148,7 @@ public:
 	uint32	GetAccountIDByChar(uint32 char_id);
 	uint32	GetAccountIDByName(const char* accname, const char *loginserver, int16* status = 0, uint32* lsid = 0);
 	uint32	GetCharacterID(const char *name);
+	uint8	GetAnonByCharacterID(uint32 character_id);
 	uint32	GetCharacterInfo(const char* iName, uint32* oAccID = 0, uint32* oZoneID = 0, uint32* oInstanceID = 0, float* oX = 0, float* oY = 0, float* oZ = 0);
 	uint32	GetGuildIDByCharID(uint32 char_id);
 	uint32  GetGroupIDByCharID(uint32 char_id);

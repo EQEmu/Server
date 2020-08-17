@@ -939,7 +939,7 @@ XS(XS__name);
 XS(XS__name) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::surname(string name)");
+		Perl_croak(aTHX_ "Usage: quest::name(string name)");
 
 	char *name = (char *) SvPV_nolen(ST(0));
 

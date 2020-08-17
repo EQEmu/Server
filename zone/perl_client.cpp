@@ -291,6 +291,50 @@ XS(XS_Client_GetAnon) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_SetAnon); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAnon) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)");
+	{
+		Client *THIS;
+		uint8 anon_flag = (uint8) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetAnon(anon_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetAFK); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAFK) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)");
+	{
+		Client *THIS;
+		uint8 afk_flag = (uint8) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetAFK(afk_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Duck); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Duck) {
 	dXSARGS;
@@ -6799,6 +6843,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
 	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
 	newXSproto(strcpy(buf, "GetAnon"), XS_Client_GetAnon, file, "$");
+	newXSproto(strcpy(buf, "SetAnon"), XS_Client_SetAnon, file, "$$");
+	newXSproto(strcpy(buf, "SetAFK"), XS_Client_SetAFK, file, "$$");
 	newXSproto(strcpy(buf, "GetAugmentAt"), XS_Client_GetAugmentAt, file, "$$$");
 	newXSproto(strcpy(buf, "GetAugmentIDAt"), XS_Client_GetAugmentIDAt, file, "$$$");
 	newXSproto(strcpy(buf, "GetBaseAGI"), XS_Client_GetBaseAGI, file, "$");

@@ -202,7 +202,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	}
 	
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.DEX;
+		int scale_value = GetItemBonuses().DEX;
 		float skill_damage_scale = RuleR(Combat, CustomScalingSkillDamage);
 		if (scale_value > int(skill_damage_scale)) {
 			my_hit.damage_done = int(static_cast<float>(my_hit.damage_done) * static_cast<float>(scale_value / skill_damage_scale));

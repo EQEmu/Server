@@ -713,7 +713,7 @@ struct SPDat_Spell_Struct
 /* 001 */	char name[64]; // Name of the spell -- SPELLNAME
 /* 002 */	char player_1[32]; // "PLAYER_1" -- ACTORTAG
 /* 003 */	char teleport_zone[64];	// Teleport zone, pet name summoned, or item summoned -- NPC_FILENAME
-/* 004 */	char you_cast[64]; // Message when you cast -- CASTERMETXT
+/* 004 */	char you_cast[64]; // Message when  -- CASTERMETXT
 /* 005 */	char other_casts[64]; // Message when other casts -- CASTEROTHERTXT
 /* 006 */	char cast_on_you[64]; // Message when spell is cast on you -- CASTEDMETXT
 /* 007 */	char cast_on_other[64]; // Message when spell is cast on someone else -- CASTEDOTHERTXT
@@ -981,6 +981,6 @@ uint32 GetNimbusEffect(uint16 spell_id);
 int32 GetFuriousBash(uint16 spell_id);
 bool IsShortDurationBuff(uint16 spell_id);
 bool IsSpellUsableThisZoneType(uint16 spell_id, uint8 zone_type);
-const char *GetSpellName(int16 spell_id);
+const char *GetSpellName(uint32 spell_id);
 
 #endif

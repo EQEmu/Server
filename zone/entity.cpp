@@ -1280,9 +1280,32 @@ void EntityList::ChannelMessage(Mob *from, uint8 chan_num, uint8 language,
 			filter = FilterAuctions;
 		//
 		// Only say is limited in range
-		if (chan_num != ChatChannel_Say || Distance(client->GetPosition(), from->GetPosition()) < 200)
-			if (filter == FilterNone || client->GetFilter(filter) != FilterHide)
-				client->ChannelMessageSend(from->GetName(), 0, chan_num, language, lang_skill, buffer);
+		if (chan_num != ChatChannel_Say || Distance(client->GetPosition(), from->GetPosition()) < 200) {
+			if (filter == FilterNone || client->GetFilter(filter) != FilterHide) {					
+				std::string check_from = from->GetName();
+				uint32 character_id = client->CharacterID();
+				uint32 account_id = database.GetAccountIDByChar(character_id);
+				int16 account_status = database.CheckStatus(account_id);
+				std::string client_rank;
+				if (account_status == 1)
+					client_rank = "[Donator]";
+				else if (account_status == 2)
+					client_rank = "[Contributor]";
+				else if (account_status == 3)
+					client_rank = "[V.I.P.]";
+				else if (account_status == 249)
+					client_rank = "[GM]";
+				else if (account_status == 255)
+					client_rank = "[Admin]";
+					
+				if (
+    				check_from.find(fmt::format("{} {}", client_rank, client->GetCleanName())) == std::string::npos && 
+    				check_from.find(fmt::format("{}", client->GetCleanName())) == std::string::npos
+				) {
+					client->ChannelMessageSend(from->GetName(), 0, chan_num, language, lang_skill, buffer);
+				}
+			}
+		}
 		++it;
 	}
 }
@@ -2088,7 +2111,28 @@ void EntityList::ChannelMessageFromWorld(const char *from, const char *to,
 			if (client->GetFilter(FilterOOC) == FilterHide)
 				continue;
 		}
-		client->ChannelMessageSend(from, to, chan_num, language, lang_skill, message);
+		std::string check_from = from;
+		uint32 character_id = client->CharacterID();
+		uint32 account_id = database.GetAccountIDByChar(character_id);
+		int16 account_status = database.CheckStatus(account_id);
+		std::string client_rank;
+		if (account_status == 1)
+			client_rank = "[Donator]";
+		else if (account_status == 2)
+			client_rank = "[Contributor]";
+		else if (account_status == 3)
+			client_rank = "[V.I.P.]";
+		else if (account_status == 249)
+			client_rank = "[GM]";
+		else if (account_status == 255)
+			client_rank = "[Admin]";
+			
+		if (
+    		check_from.find(fmt::format("{} {}", client_rank, client->GetCleanName())) == std::string::npos && 
+    		check_from.find(fmt::format("{}", client->GetCleanName())) == std::string::npos
+		) {
+			client->ChannelMessageSend(from, to, chan_num, language, lang_skill, message);
+		}
 	}
 }
 

@@ -628,16 +628,16 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 					else if (cle->Admin() >= 81)
 						rankstring = 5011;
 					else if (cle->Admin() >= 80)
-						rankstring = 5010;
-					else if (cle->Admin() >= 50)
-						rankstring = 5009;
-					else if (cle->Admin() >= 20)
-						rankstring = 5008;						
+						rankstring = 5010;				
 				}
 				
-				if (cle->Admin() == 1) {
+				
+				if (cle->Anon() == 0 && cle->Admin() == 3)
+					rankstring = 5009;
+				if (cle->Anon() == 0 && cle->Admin() == 2)
+					rankstring = 5008;		
+				if (cle->Anon() == 0 && cle->Admin() == 1)
 					rankstring = 5007;
-				}
 			idx++;
 			char guildbuffer[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)

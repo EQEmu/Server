@@ -300,12 +300,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
-				if (RuleB(Combat, CustomScaling) && IsClient()) {
-					int scale_value = itembonuses.WIS;
+				if (RuleB(Combat, CustomScaling) && caster && caster->IsClient()) {
+					int scale_value = caster->GetItemBonuses().INT;
 					float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
 					if (scale_value > int(spell_damage_scale)) {
 						dmg = int(static_cast<float>(dmg) * static_cast<float>(scale_value / spell_damage_scale));
 					}
+					caster->Message(Chat::Spells, fmt::format("[CHPO] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_damage_scale), dmg).c_str());
 				}
 				//do any AAs apply to these spells?
 				if(dmg < 0) {
@@ -2424,15 +2425,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					//handles AAs and what not...
 					//need a bard version of this prolly...
-					//if(caster)
-					//	dmg = caster->GetActSpellDamage(spell_id, dmg);
-					if (RuleB(Combat, CustomScaling) && caster && caster->IsClient()) {
-						int scale_value = caster->GetItemBonuses().INT;
-						float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-						if (scale_value > int(spell_damage_scale)) {
-							dmg = int(static_cast<float>(dmg) * static_cast<float>(scale_value / spell_damage_scale));
-						}
-					}
+					if(caster)
+						dmg = caster->GetActSpellDamage(spell_id, dmg);
+
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				} else if(dmg > 0) {
@@ -3598,14 +3593,6 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable ||
 			    /*effect_value > 0 ||*/ DivineAura())
 				break;
-			
-			if (RuleB(Combat, CustomScaling) && caster && caster->IsClient()) {
-				int scale_value = caster->GetItemBonuses().INT;
-				float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
-				if (scale_value > int(spell_damage_scale)) {
-					effect_value = int(static_cast<float>(effect_value) * static_cast<float>(scale_value / spell_damage_scale));
-				}
-			}
 
 			if (effect_value < 0) {
 				effect_value = -effect_value;
@@ -3614,9 +3601,14 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 						AddToHateList(caster, effect_value);
 					} else if (!caster->IsClient())
 						AddToHateList(caster, effect_value);
+
+					effect_value = caster->GetActSpellDamage(buff.spellid, effect_value);
 				}
 				Damage(caster, effect_value, buff.spellid, spell.skill, false, i, true);
 			} else if (effect_value > 0) {
+				if (caster)
+					effect_value = caster->GetActSpellDamage(buff.spellid, effect_value);
+					
 				// healing spell...
 				HealDamage(effect_value, caster);
 				// healing aggro would go here; removed for now

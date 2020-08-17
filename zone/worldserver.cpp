@@ -221,12 +221,54 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 						client->Tell_StringID(QUEUE_TELL_FULL, scm->to, scm->message);
 					else if (scm->queued == 3) // person was offline
 						client->MessageString(Chat::EchoTell, TOLD_NOT_ONLINE, scm->to);
-					else // normal tell echo "You told Soanso, 'something'"
-							// tell echo doesn't use language, so it looks normal to you even if nobody can understand your tells
-						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
+					else {
+						std::string check_from = scm->from;
+						uint32 character_id = database.GetCharacterID(scm->from);
+						uint32 account_id = database.GetAccountIDByChar(character_id);
+						int16 account_status = database.CheckStatus(account_id);
+						std::string client_rank;
+						if (account_status == 1)
+							client_rank = "[Donator]";
+						else if (account_status == 2)
+							client_rank = "[Contributor]";
+						else if (account_status == 3)
+							client_rank = "[V.I.P.]";
+						else if (account_status == 249)
+							client_rank = "[GM]";
+						else if (account_status == 255)
+							client_rank = "[Admin]";
+
+						if (
+    						check_from.find(fmt::format("{} {}", client_rank, client->GetCleanName())) == std::string::npos && 
+    						check_from.find(fmt::format("{}", client->GetCleanName())) == std::string::npos
+						) {
+							client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, 0, 100, scm->message);
+						}
+					}
 				}
 				else if (scm->chan_num == ChatChannel_Tell) {
-					client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
+					std::string check_from = scm->from;
+					uint32 character_id = database.GetCharacterID(scm->from);
+					uint32 account_id = database.GetAccountIDByChar(character_id);
+					int16 account_status = database.CheckStatus(account_id);
+					std::string client_rank;
+					if (account_status == 1)
+						client_rank = "[Donator]";	
+					else if (account_status == 2)
+						client_rank = "[Contributor]";
+					else if (account_status == 3)
+						client_rank = "[V.I.P.]";
+					else if (account_status == 249)
+						client_rank = "[GM]";
+					else if (account_status == 255)
+						client_rank = "[Admin]";
+
+					if (
+    					check_from.find(fmt::format("{} {}", client_rank, client->GetCleanName())) == std::string::npos && 
+    					check_from.find(fmt::format("{}", client->GetCleanName())) == std::string::npos
+					) {
+						client->ChannelMessageSend(scm->from, scm->to, scm->chan_num, scm->language, scm->lang_skill, scm->message);
+					}
 					if (scm->queued == 0) { // this is not a queued tell
 						// if it's a tell, echo back to acknowledge it and make it show on the sender's client
 						scm->chan_num = ChatChannel_TellEcho;

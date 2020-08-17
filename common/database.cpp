@@ -761,6 +761,20 @@ uint32 Database::GetCharacterID(const char *name) {
 	return 0;
 }
 
+uint8 Database::GetAnonByCharacterID(uint32 character_id) {
+	std::string query = fmt::format(
+		"SELECT `anon` FROM `character_data` WHERE `id` = {}",
+		character_id
+	);
+	auto results = QueryDatabase(query);
+	auto row = results.begin();
+	uint8 anon_flag = 0;
+	if (results.RowCount() == 1) {
+		anon_flag = atoi(row[0]);
+	}
+	return anon_flag;
+}
+
 /*
 	This function returns the account_id that owns the character with
 	the name "name" or zero if no character with that name was found

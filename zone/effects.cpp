@@ -124,17 +124,19 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 			if (RuleB(Combat, CustomScaling) && IsClient()) {
-				int scale_value = itembonuses.INT;
+				int scale_value = GetItemBonuses().INT;
 				if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
 					float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
 					if (scale_value > int(spell_lifetap_scale)) {
 						value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
 					}
+					Message(Chat::Spells, fmt::format("Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_lifetap_scale), value).c_str());
 				} else {
 					float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
 					if (scale_value > int(spell_damage_scale)) {
 						value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
 					}
+					Message(Chat::Spells, fmt::format("Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_damage_scale), value).c_str());
 				}
 			}
 
@@ -176,17 +178,19 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.INT;
+		int scale_value = GetItemBonuses().INT;
 		if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
 			float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
 			if (scale_value > int(spell_lifetap_scale)) {
 				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
 			}
+			Message(Chat::Spells, fmt::format("[GASD Lifetap] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_lifetap_scale), value).c_str());
 		} else {
 			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
 			if (scale_value > int(spell_damage_scale)) {
 				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
 			}
+			Message(Chat::Spells, fmt::format("[GASD Nuke] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_damage_scale), value).c_str());
 		}
 	}
 
@@ -260,17 +264,19 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.INT;
+		int scale_value = GetItemBonuses().INT;
 		if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap) {
 			float spell_lifetap_scale = RuleR(Combat, CustomScalingLifetapDamage);
 			if (scale_value > int(spell_lifetap_scale)) {
 				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_lifetap_scale));
 			}
+			Message(Chat::Spells, fmt::format("[GADD Lifetap] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_lifetap_scale), value).c_str());
 		} else {
 			float spell_damage_scale = RuleR(Combat, CustomScalingSpellDamage);
 			if (scale_value > int(spell_damage_scale)) {
 				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_damage_scale));
 			}
+			Message(Chat::Spells, fmt::format("[GADD Nuke] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_damage_scale), value).c_str());
 		}
 	}
 
@@ -353,11 +359,12 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 
 		if (RuleB(Combat, CustomScaling) && IsClient()) {
-			int scale_value = itembonuses.WIS;
+			int scale_value = GetItemBonuses().WIS;
 			float spell_healing_scale = RuleR(Combat, CustomScalingSpellHealing);
 			if (scale_value > int(spell_healing_scale)) {
 				value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_healing_scale));
 			}
+			Message(Chat::Spells, fmt::format("[GASH Heal] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_healing_scale), value).c_str());
 		}
 
 		if (Critical) {
@@ -390,11 +397,12 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.WIS;
+		int scale_value = GetItemBonuses().WIS;
 		float spell_healing_scale = RuleR(Combat, CustomScalingSpellHealing);
 		if (scale_value > int(spell_healing_scale)) {
 			value = int(static_cast<float>(value) * static_cast<float>(scale_value / spell_healing_scale));
 		}
+		Message(Chat::Spells, fmt::format("[GASH HoT] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_healing_scale), value).c_str());
 	}
 
 	return value;

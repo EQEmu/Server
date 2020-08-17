@@ -5108,7 +5108,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		hit.damage_done = min_mod;
 
 	if (RuleB(Combat, CustomScaling) && IsClient()) {
-		int scale_value = itembonuses.STR;
+		int scale_value = GetItemBonuses().STR;
 		float melee_damage_scale = RuleR(Combat, CustomScalingMeleeDamage);
 		if (scale_value > int(melee_damage_scale)) {
 			hit.damage_done = int(static_cast<float>(hit.damage_done) * static_cast<float>(scale_value / melee_damage_scale));
