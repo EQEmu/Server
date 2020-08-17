@@ -102,33 +102,33 @@ public:
 	int GetCurrentExpansion() const;
 	void SetCurrentExpansion(int current_expansion);
 
-	bool IsClassicEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::Classic; }
-	bool IsTheRuinsOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheRuinsOfKunark; }
-	bool IsTheScarsOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheScarsOfVelious; }
-	bool IsTheShadowsOfLuclinEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheShadowsOfLuclin; }
-	bool IsThePlanesOfPowerEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::ThePlanesOfPower; }
-	bool IsTheLegacyOfYkeshaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheLegacyOfYkesha; }
-	bool IsLostDungeonsOfNorrathEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::LostDungeonsOfNorrath; }
-	bool IsGatesOfDiscordEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::GatesOfDiscord; }
-	bool IsOmensOfWarEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::OmensOfWar; }
-	bool IsDragonsOfNorrathEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::DragonsOfNorrath; }
-	bool IsDepthsOfDarkhollowEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::DepthsOfDarkhollow; }
-	bool IsProphecyOfRoEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::ProphecyOfRo; }
-	bool IsTheSerpentsSpineEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheSerpentsSpine; }
-	bool IsTheBuriedSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBuriedSea; }
-	bool IsSecretsOfFaydwerEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::SecretsOfFaydwer; }
-	bool IsSeedsOfDestructionEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::SeedsOfDestruction; }
-	bool IsUnderfootEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::Underfoot; }
-	bool IsHouseOfThuleEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::HouseOfThule; }
-	bool IsVeilOfAlarisEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::VeilOfAlaris; }
-	bool IsRainOfFearEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RainOfFear; }
-	bool IsCallOfTheForsakenEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::CallOfTheForsaken; }
-	bool IsTheDarkendSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheDarkendSea; }
-	bool IsTheBrokenMirrorEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBrokenMirror; }
-	bool IsEmpiresOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::EmpiresOfKunark; }
-	bool IsRingOfScaleEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RingOfScale; }
-	bool IsTheBurningLandsEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBurningLands; }
-	bool IsTormentOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TormentOfVelious; }
+	bool IsClassicEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::Classic || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheRuinsOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheRuinsOfKunark || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheScarsOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheScarsOfVelious || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheShadowsOfLuclinEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheShadowsOfLuclin || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsThePlanesOfPowerEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::ThePlanesOfPower || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheLegacyOfYkeshaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheLegacyOfYkesha || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsLostDungeonsOfNorrathEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::LostDungeonsOfNorrath || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsGatesOfDiscordEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::GatesOfDiscord || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsOmensOfWarEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::OmensOfWar || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsDragonsOfNorrathEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::DragonsOfNorrath || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsDepthsOfDarkhollowEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::DepthsOfDarkhollow || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsProphecyOfRoEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::ProphecyOfRo || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheSerpentsSpineEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheSerpentsSpine || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheBuriedSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBuriedSea || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsSecretsOfFaydwerEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::SecretsOfFaydwer || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsSeedsOfDestructionEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::SeedsOfDestruction || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsUnderfootEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::Underfoot || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsHouseOfThuleEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::HouseOfThule || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsVeilOfAlarisEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::VeilOfAlaris || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsRainOfFearEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RainOfFear || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsCallOfTheForsakenEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::CallOfTheForsaken || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheDarkendSeaEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheDarkendSea || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheBrokenMirrorEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBrokenMirror || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsEmpiresOfKunarkEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::EmpiresOfKunark || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsRingOfScaleEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::RingOfScale || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTheBurningLandsEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TheBurningLands || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
+	bool IsTormentOfVeliousEnabled() { return GetCurrentExpansion() >= Expansion::ExpansionNumber::TormentOfVelious || GetCurrentExpansion() == Expansion::EXPANSION_ALL; }
 
 	bool IsCurrentExpansionClassic() { return current_expansion == Expansion::ExpansionNumber::Classic; }
 	bool IsCurrentExpansionTheRuinsOfKunark() { return current_expansion == Expansion::ExpansionNumber::TheRuinsOfKunark; }
