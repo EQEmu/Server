@@ -390,6 +390,10 @@ void lua_repop_zone() {
 	quest_manager.repopzone();
 }
 
+void lua_process_mobs_while_zone_empty(bool on) {
+	quest_manager.processmobswhilezoneempty(on);
+}
+
 bool lua_is_disc_tome(int item_id) {
 	return quest_manager.isdisctome(item_id);
 }
@@ -800,14 +804,6 @@ int lua_collect_items(uint32 item_id, bool remove) {
 
 int lua_count_item(uint32 item_id) {
 	return quest_manager.countitem(item_id);
-}
-
-void lua_remove_item(uint32 item_id) {
-	quest_manager.removeitem(item_id);
-}
-
-void lua_remove_item(uint32 item_id, uint32 quantity) {
-	quest_manager.removeitem(item_id, quantity);
 }
 
 void lua_update_spawn_timer(uint32 id, uint32 new_time) {
@@ -2404,6 +2400,7 @@ luabind::scope lua_register_general() {
 		luabind::def("depop_all", (void(*)(int))&lua_depop_all),
 		luabind::def("depop_zone", &lua_depop_zone),
 		luabind::def("repop_zone", &lua_repop_zone),
+		luabind::def("process_mobs_while_zone_empty", &lua_process_mobs_while_zone_empty),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
 		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
 		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),
@@ -2490,8 +2487,6 @@ luabind::scope lua_register_general() {
 		luabind::def("modify_npc_stat", &lua_modify_npc_stat),
 		luabind::def("collect_items", &lua_collect_items),
 		luabind::def("count_item", &lua_count_item),
-		luabind::def("remove_item", (void(*)(uint32))&lua_remove_item),
-		luabind::def("remove_item", (void(*)(uint32,uint32))&lua_remove_item),
 		luabind::def("update_spawn_timer", &lua_update_spawn_timer),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
 		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),

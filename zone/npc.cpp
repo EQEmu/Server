@@ -576,25 +576,33 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	}
 }
 
-void NPC::CheckMinMaxLevel(Mob *them)
+void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 {
-	if(them == nullptr || !them->IsClient())
+	if (killer == nullptr || !killer->IsClient()) {
 		return;
+	}
 
-	uint16 themlevel = them->GetLevel();
-	uint8 material;
+	uint16 killer_level = killer->GetLevel();
+	uint8  material;
 
 	auto cur = itemlist.begin();
-	while(cur != itemlist.end())
-	{
-		if(!(*cur))
+	while (cur != itemlist.end()) {
+		if (!(*cur)) {
 			return;
+		}
 
-		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
-		{
+		uint16 trivial_min_level     = (*cur)->trivial_min_level;
+		uint16 trivial_max_level     = (*cur)->trivial_max_level;
+		bool   fits_trivial_criteria = (
+			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
+			(trivial_max_level > 0 && killer_level > trivial_max_level)
+		);
+
+		if (fits_trivial_criteria) {
 			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQ::textures::materialInvalid)
+			if (material != EQ::textures::materialInvalid) {
 				SendWearChange(material);
+			}
 
 			cur = itemlist.erase(cur);
 			continue;
@@ -603,8 +611,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
 void NPC::ClearItemList() {
@@ -647,8 +656,8 @@ void NPC::QueryLoot(Client* to)
 			item_count,
 			linker.GenerateLink().c_str(),
 			(*cur)->item_id,
-			(*cur)->min_level,
-			(*cur)->max_level
+			(*cur)->trivial_min_level,
+			(*cur)->trivial_max_level
 		);
 	}
 
@@ -1093,6 +1102,44 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 z
 	npc_type->texture          = 1;
 	npc_type->light            = 1;
 	npc_type->size             = 1;
+	npc_type->runspeed         = 0;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name)-3] = (char) NULL;
+
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc);
+}
+
+void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
+{
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	char node_name[64];
+	strn0cpy(node_name, name.c_str(), 64);
+
+	strcpy(npc_type->name, entity_list.MakeNameUnique(node_name));
+
+	npc_type->current_hp       = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 5;
 	npc_type->runspeed         = 0;
 	npc_type->merchanttype     = 1;
 	npc_type->bodytype         = 1;

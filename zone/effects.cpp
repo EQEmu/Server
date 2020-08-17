@@ -193,7 +193,6 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			Message(Chat::Spells, fmt::format("[GASD Nuke] Your modifier is {} and your new damage is {}.", static_cast<float>(scale_value / spell_damage_scale), value).c_str());
 		}
 	}
-
 	return value;
 }
 

@@ -50,6 +50,10 @@ public:
 		int         cond_value;
 		int         enabled;
 		int         animation;
+		int         min_expansion;
+		int         max_expansion;
+		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -75,6 +79,10 @@ public:
 			"cond_value",
 			"enabled",
 			"animation",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -125,21 +133,25 @@ public:
 	{
 		Spawn2 entry{};
 
-		entry.id           = 0;
-		entry.spawngroupID = 0;
-		entry.zone         = "";
-		entry.version      = 0;
-		entry.x            = 0.000000;
-		entry.y            = 0.000000;
-		entry.z            = 0.000000;
-		entry.heading      = 0.000000;
-		entry.respawntime  = 0;
-		entry.variance     = 0;
-		entry.pathgrid     = 0;
-		entry._condition   = 0;
-		entry.cond_value   = 1;
-		entry.enabled      = 1;
-		entry.animation    = 0;
+		entry.id                     = 0;
+		entry.spawngroupID           = 0;
+		entry.zone                   = "";
+		entry.version                = 0;
+		entry.x                      = 0.000000;
+		entry.y                      = 0.000000;
+		entry.z                      = 0.000000;
+		entry.heading                = 0.000000;
+		entry.respawntime            = 0;
+		entry.variance               = 0;
+		entry.pathgrid               = 0;
+		entry._condition             = 0;
+		entry.cond_value             = 1;
+		entry.enabled                = 1;
+		entry.animation              = 0;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -174,21 +186,25 @@ public:
 		if (results.RowCount() == 1) {
 			Spawn2 entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2] ? row[2] : "";
-			entry.version      = atoi(row[3]);
-			entry.x            = static_cast<float>(atof(row[4]));
-			entry.y            = static_cast<float>(atof(row[5]));
-			entry.z            = static_cast<float>(atof(row[6]));
-			entry.heading      = static_cast<float>(atof(row[7]));
-			entry.respawntime  = atoi(row[8]);
-			entry.variance     = atoi(row[9]);
-			entry.pathgrid     = atoi(row[10]);
-			entry._condition   = atoi(row[11]);
-			entry.cond_value   = atoi(row[12]);
-			entry.enabled      = atoi(row[13]);
-			entry.animation    = atoi(row[14]);
+			entry.id                     = atoi(row[0]);
+			entry.spawngroupID           = atoi(row[1]);
+			entry.zone                   = row[2] ? row[2] : "";
+			entry.version                = atoi(row[3]);
+			entry.x                      = static_cast<float>(atof(row[4]));
+			entry.y                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.respawntime            = atoi(row[8]);
+			entry.variance               = atoi(row[9]);
+			entry.pathgrid               = atoi(row[10]);
+			entry._condition             = atoi(row[11]);
+			entry.cond_value             = atoi(row[12]);
+			entry.enabled                = atoi(row[13]);
+			entry.animation              = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			return entry;
 		}
@@ -234,6 +250,10 @@ public:
 		update_values.push_back(columns[12] + " = " + std::to_string(spawn2_entry.cond_value));
 		update_values.push_back(columns[13] + " = " + std::to_string(spawn2_entry.enabled));
 		update_values.push_back(columns[14] + " = " + std::to_string(spawn2_entry.animation));
+		update_values.push_back(columns[15] + " = " + std::to_string(spawn2_entry.min_expansion));
+		update_values.push_back(columns[16] + " = " + std::to_string(spawn2_entry.max_expansion));
+		update_values.push_back(columns[17] + " = '" + EscapeString(spawn2_entry.content_flags) + "'");
+		update_values.push_back(columns[18] + " = '" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -268,6 +288,10 @@ public:
 		insert_values.push_back(std::to_string(spawn2_entry.cond_value));
 		insert_values.push_back(std::to_string(spawn2_entry.enabled));
 		insert_values.push_back(std::to_string(spawn2_entry.animation));
+		insert_values.push_back(std::to_string(spawn2_entry.min_expansion));
+		insert_values.push_back(std::to_string(spawn2_entry.max_expansion));
+		insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -310,6 +334,10 @@ public:
 			insert_values.push_back(std::to_string(spawn2_entry.cond_value));
 			insert_values.push_back(std::to_string(spawn2_entry.enabled));
 			insert_values.push_back(std::to_string(spawn2_entry.animation));
+			insert_values.push_back(std::to_string(spawn2_entry.min_expansion));
+			insert_values.push_back(std::to_string(spawn2_entry.max_expansion));
+			insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -343,21 +371,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2 entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2] ? row[2] : "";
-			entry.version      = atoi(row[3]);
-			entry.x            = static_cast<float>(atof(row[4]));
-			entry.y            = static_cast<float>(atof(row[5]));
-			entry.z            = static_cast<float>(atof(row[6]));
-			entry.heading      = static_cast<float>(atof(row[7]));
-			entry.respawntime  = atoi(row[8]);
-			entry.variance     = atoi(row[9]);
-			entry.pathgrid     = atoi(row[10]);
-			entry._condition   = atoi(row[11]);
-			entry.cond_value   = atoi(row[12]);
-			entry.enabled      = atoi(row[13]);
-			entry.animation    = atoi(row[14]);
+			entry.id                     = atoi(row[0]);
+			entry.spawngroupID           = atoi(row[1]);
+			entry.zone                   = row[2] ? row[2] : "";
+			entry.version                = atoi(row[3]);
+			entry.x                      = static_cast<float>(atof(row[4]));
+			entry.y                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.respawntime            = atoi(row[8]);
+			entry.variance               = atoi(row[9]);
+			entry.pathgrid               = atoi(row[10]);
+			entry._condition             = atoi(row[11]);
+			entry.cond_value             = atoi(row[12]);
+			entry.enabled                = atoi(row[13]);
+			entry.animation              = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -382,21 +414,25 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Spawn2 entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.spawngroupID = atoi(row[1]);
-			entry.zone         = row[2] ? row[2] : "";
-			entry.version      = atoi(row[3]);
-			entry.x            = static_cast<float>(atof(row[4]));
-			entry.y            = static_cast<float>(atof(row[5]));
-			entry.z            = static_cast<float>(atof(row[6]));
-			entry.heading      = static_cast<float>(atof(row[7]));
-			entry.respawntime  = atoi(row[8]);
-			entry.variance     = atoi(row[9]);
-			entry.pathgrid     = atoi(row[10]);
-			entry._condition   = atoi(row[11]);
-			entry.cond_value   = atoi(row[12]);
-			entry.enabled      = atoi(row[13]);
-			entry.animation    = atoi(row[14]);
+			entry.id                     = atoi(row[0]);
+			entry.spawngroupID           = atoi(row[1]);
+			entry.zone                   = row[2] ? row[2] : "";
+			entry.version                = atoi(row[3]);
+			entry.x                      = static_cast<float>(atof(row[4]));
+			entry.y                      = static_cast<float>(atof(row[5]));
+			entry.z                      = static_cast<float>(atof(row[6]));
+			entry.heading                = static_cast<float>(atof(row[7]));
+			entry.respawntime            = atoi(row[8]);
+			entry.variance               = atoi(row[9]);
+			entry.pathgrid               = atoi(row[10]);
+			entry._condition             = atoi(row[11]);
+			entry.cond_value             = atoi(row[12]);
+			entry.enabled                = atoi(row[13]);
+			entry.animation              = atoi(row[14]);
+			entry.min_expansion          = atoi(row[15]);
+			entry.max_expansion          = atoi(row[16]);
+			entry.content_flags          = row[17] ? row[17] : "";
+			entry.content_flags_disabled = row[18] ? row[18] : "";
 
 			all_entries.push_back(entry);
 		}

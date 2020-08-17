@@ -47,6 +47,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -69,6 +70,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -119,18 +121,19 @@ public:
 	{
 		StartingItems entry{};
 
-		entry.id            = 0;
-		entry.race          = 0;
-		entry.class         = 0;
-		entry.deityid       = 0;
-		entry.zoneid        = 0;
-		entry.itemid        = 0;
-		entry.item_charges  = 1;
-		entry.gm            = 0;
-		entry.slot          = -1;
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.id                     = 0;
+		entry.race                   = 0;
+		entry.class                  = 0;
+		entry.deityid                = 0;
+		entry.zoneid                 = 0;
+		entry.itemid                 = 0;
+		entry.item_charges           = 1;
+		entry.gm                     = 0;
+		entry.slot                   = -1;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -165,18 +168,19 @@ public:
 		if (results.RowCount() == 1) {
 			StartingItems entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.race          = atoi(row[1]);
-			entry.class         = atoi(row[2]);
-			entry.deityid       = atoi(row[3]);
-			entry.zoneid        = atoi(row[4]);
-			entry.itemid        = atoi(row[5]);
-			entry.item_charges  = atoi(row[6]);
-			entry.gm            = atoi(row[7]);
-			entry.slot          = atoi(row[8]);
-			entry.min_expansion = atoi(row[9]);
-			entry.max_expansion = atoi(row[10]);
-			entry.content_flags = row[11] ? row[11] : "";
+			entry.id                     = atoi(row[0]);
+			entry.race                   = atoi(row[1]);
+			entry.class                  = atoi(row[2]);
+			entry.deityid                = atoi(row[3]);
+			entry.zoneid                 = atoi(row[4]);
+			entry.itemid                 = atoi(row[5]);
+			entry.item_charges           = atoi(row[6]);
+			entry.gm                     = atoi(row[7]);
+			entry.slot                   = atoi(row[8]);
+			entry.min_expansion          = atoi(row[9]);
+			entry.max_expansion          = atoi(row[10]);
+			entry.content_flags          = row[11] ? row[11] : "";
+			entry.content_flags_disabled = row[12] ? row[12] : "";
 
 			return entry;
 		}
@@ -219,6 +223,7 @@ public:
 		update_values.push_back(columns[9] + " = " + std::to_string(starting_items_entry.min_expansion));
 		update_values.push_back(columns[10] + " = " + std::to_string(starting_items_entry.max_expansion));
 		update_values.push_back(columns[11] + " = '" + EscapeString(starting_items_entry.content_flags) + "'");
+		update_values.push_back(columns[12] + " = '" + EscapeString(starting_items_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -250,6 +255,7 @@ public:
 		insert_values.push_back(std::to_string(starting_items_entry.min_expansion));
 		insert_values.push_back(std::to_string(starting_items_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -289,6 +295,7 @@ public:
 			insert_values.push_back(std::to_string(starting_items_entry.min_expansion));
 			insert_values.push_back(std::to_string(starting_items_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -322,18 +329,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartingItems entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.race          = atoi(row[1]);
-			entry.class         = atoi(row[2]);
-			entry.deityid       = atoi(row[3]);
-			entry.zoneid        = atoi(row[4]);
-			entry.itemid        = atoi(row[5]);
-			entry.item_charges  = atoi(row[6]);
-			entry.gm            = atoi(row[7]);
-			entry.slot          = atoi(row[8]);
-			entry.min_expansion = atoi(row[9]);
-			entry.max_expansion = atoi(row[10]);
-			entry.content_flags = row[11] ? row[11] : "";
+			entry.id                     = atoi(row[0]);
+			entry.race                   = atoi(row[1]);
+			entry.class                  = atoi(row[2]);
+			entry.deityid                = atoi(row[3]);
+			entry.zoneid                 = atoi(row[4]);
+			entry.itemid                 = atoi(row[5]);
+			entry.item_charges           = atoi(row[6]);
+			entry.gm                     = atoi(row[7]);
+			entry.slot                   = atoi(row[8]);
+			entry.min_expansion          = atoi(row[9]);
+			entry.max_expansion          = atoi(row[10]);
+			entry.content_flags          = row[11] ? row[11] : "";
+			entry.content_flags_disabled = row[12] ? row[12] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -358,18 +366,19 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			StartingItems entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.race          = atoi(row[1]);
-			entry.class         = atoi(row[2]);
-			entry.deityid       = atoi(row[3]);
-			entry.zoneid        = atoi(row[4]);
-			entry.itemid        = atoi(row[5]);
-			entry.item_charges  = atoi(row[6]);
-			entry.gm            = atoi(row[7]);
-			entry.slot          = atoi(row[8]);
-			entry.min_expansion = atoi(row[9]);
-			entry.max_expansion = atoi(row[10]);
-			entry.content_flags = row[11] ? row[11] : "";
+			entry.id                     = atoi(row[0]);
+			entry.race                   = atoi(row[1]);
+			entry.class                  = atoi(row[2]);
+			entry.deityid                = atoi(row[3]);
+			entry.zoneid                 = atoi(row[4]);
+			entry.itemid                 = atoi(row[5]);
+			entry.item_charges           = atoi(row[6]);
+			entry.gm                     = atoi(row[7]);
+			entry.slot                   = atoi(row[8]);
+			entry.min_expansion          = atoi(row[9]);
+			entry.max_expansion          = atoi(row[10]);
+			entry.content_flags          = row[11] ? row[11] : "";
+			entry.content_flags_disabled = row[12] ? row[12] : "";
 
 			all_entries.push_back(entry);
 		}

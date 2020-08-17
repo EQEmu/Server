@@ -39,13 +39,15 @@ struct LootTable_Struct {
 };
 
 struct LootDropEntries_Struct {
-	uint32	item_id;
-	int8	item_charges;
-	uint8	equip_item;
-	float	chance;
-	uint8	minlevel;
-	uint8	maxlevel;
-	uint8	multiplier;
+	uint32 item_id;
+	int8   item_charges;
+	uint8  equip_item;
+	float  chance;
+	uint16 trivial_min_level;
+	uint16 trivial_max_level;
+	uint16 npc_min_level;
+	uint16 npc_max_level;
+	uint8  multiplier;
 };
 
 struct LootDrop_Struct {

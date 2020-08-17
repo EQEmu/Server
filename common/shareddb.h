@@ -29,6 +29,7 @@
 #include "base_data.h"
 #include "fixed_memory_hash_set.h"
 #include "fixed_memory_variable_hash_set.h"
+#include "say_link.h"
 
 #include <list>
 #include <map>
@@ -188,6 +189,14 @@ public:
 	bool LoadBaseData(const std::string &prefix);
 	void LoadBaseData(void *data, int max_level);
 	const BaseDataStruct *GetBaseData(int lvl, int cl);
+
+	std::string CreateItemLink(uint32 item_id) {
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemData);
+		const EQ::ItemData *item = GetItem(item_id);
+		linker.SetItemData(item);
+		return linker.GenerateLink();
+	}
 
 protected:
 

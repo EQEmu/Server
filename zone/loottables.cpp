@@ -29,6 +29,7 @@
 #include "zone_store.h"
 #include "global_loot_manager.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/say_link.h"
 
 #include <iostream>
 #include <stdlib.h>
@@ -116,110 +117,128 @@ void ZoneDatabase::AddLootTableToNPC(NPC* npc,uint32 loottable_id, ItemList* ite
 
 // Called by AddLootTableToNPC
 // maxdrops = size of the array npcd
-void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop) {
-	const LootDrop_Struct* lds = GetLootDrop(lootdrop_id);
-	if (!lds) {
+void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item_list, uint8 droplimit, uint8 mindrop)
+{
+	const LootDrop_Struct *loot_drop = GetLootDrop(lootdrop_id);
+	if (!loot_drop) {
 		return;
 	}
 
-	if(lds->NumEntries == 0)
+	if (loot_drop->NumEntries == 0) {
 		return;
+	}
 
-	if(droplimit == 0 && mindrop == 0) {
-		for(uint32 i = 0; i < lds->NumEntries; ++i) {
-			int charges = lds->Entries[i].multiplier;
-			for(int j = 0; j < charges; ++j) {
-				if(zone->random.Real(0.0, 100.0) <= lds->Entries[i].chance) {
-					const EQ::ItemData* dbitem = GetItem(lds->Entries[i].item_id);
-					npc->AddLootDrop(dbitem, itemlist, lds->Entries[i].item_charges, lds->Entries[i].minlevel,
-									lds->Entries[i].maxlevel, lds->Entries[i].equip_item > 0 ? true : false, false);
+	if (droplimit == 0 && mindrop == 0) {
+		for (uint32 i = 0; i < loot_drop->NumEntries; ++i) {
+			int      charges = loot_drop->Entries[i].multiplier;
+			for (int j       = 0; j < charges; ++j) {
+				if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
+					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
+					const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
+					npc->AddLootDrop(
+						database_item,
+						item_list,
+						loot_drop->Entries[i]
+					);
 				}
 			}
 		}
 		return;
 	}
 
-	if(lds->NumEntries > 100 && droplimit == 0) {
+	if (loot_drop->NumEntries > 100 && droplimit == 0) {
 		droplimit = 10;
 	}
 
-	if(droplimit < mindrop) {
+	if (droplimit < mindrop) {
 		droplimit = mindrop;
 	}
 
-	float roll_t = 0.0f;
-	float roll_t_min = 0.0f;
-	bool active_item_list = false;
-	for(uint32 i = 0; i < lds->NumEntries; ++i) {
-		const EQ::ItemData* db_item = GetItem(lds->Entries[i].item_id);
-		if(db_item) {
-			roll_t += lds->Entries[i].chance;
+	float       roll_t           = 0.0f;
+	float       roll_t_min       = 0.0f;
+	bool        active_item_list = false;
+	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
+		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
+		if (db_item) {
+			roll_t += loot_drop->Entries[i].chance;
 			active_item_list = true;
 		}
 	}
 
 	roll_t_min = roll_t;
-	roll_t = EQ::ClampLower(roll_t, 100.0f);
+	roll_t     = EQ::ClampLower(roll_t, 100.0f);
 
-	if(!active_item_list) {
+	if (!active_item_list) {
 		return;
 	}
 
-	for(int i = 0; i < mindrop; ++i) {
-		float roll = (float)zone->random.Real(0.0, roll_t_min);
-		for(uint32 j = 0; j < lds->NumEntries; ++j) {
-			const EQ::ItemData* db_item = GetItem(lds->Entries[j].item_id);
-			if(db_item) {
-				if(roll < lds->Entries[j].chance) {
-					npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
-									 lds->Entries[j].maxlevel, lds->Entries[j].equip_item > 0 ? true : false, false);
+	for (int i = 0; i < mindrop; ++i) {
+		float       roll = (float) zone->random.Real(0.0, roll_t_min);
+		for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
+			const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
+			if (db_item) {
+				if (roll < loot_drop->Entries[j].chance && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+					npc->AddLootDrop(
+						db_item,
+						item_list,
+						loot_drop->Entries[j]
+					);
 
-					int charges = (int)lds->Entries[i].multiplier;
+					int charges = (int) loot_drop->Entries[i].multiplier;
 					charges = EQ::ClampLower(charges, 1);
 
-					for(int k = 1; k < charges; ++k) {
-						float c_roll = (float)zone->random.Real(0.0, 100.0);
-						if(c_roll <= lds->Entries[i].chance) {
-							npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
-											 lds->Entries[j].maxlevel, lds->Entries[j].equip_item > 0 ? true : false, false);
+					for (int k = 1; k < charges; ++k) {
+						float c_roll = (float) zone->random.Real(0.0, 100.0);
+						if (c_roll <= loot_drop->Entries[i].chance) {
+							npc->AddLootDrop(
+								db_item,
+								item_list,
+								loot_drop->Entries[i]
+							);
 						}
 					}
 
-					j = lds->NumEntries;
+					j = loot_drop->NumEntries;
 					break;
 				}
 				else {
-					roll -= lds->Entries[j].chance;
+					roll -= loot_drop->Entries[j].chance;
 				}
 			}
 		}
 	}
 
-	for(int i = mindrop; i < droplimit; ++i) {
-		float roll = (float)zone->random.Real(0.0, roll_t);
-		for(uint32 j = 0; j < lds->NumEntries; ++j) {
-			const EQ::ItemData* db_item = GetItem(lds->Entries[j].item_id);
-			if(db_item) {
-				if(roll < lds->Entries[j].chance) {
-					npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
-										lds->Entries[j].maxlevel, lds->Entries[j].equip_item > 0 ? true : false, false);
+	for (int i = mindrop; i < droplimit; ++i) {
+		float       roll = (float) zone->random.Real(0.0, roll_t);
+		for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
+			const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
+			if (db_item) {
+				if (roll < loot_drop->Entries[j].chance && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+					npc->AddLootDrop(
+						db_item,
+						item_list,
+						loot_drop->Entries[j]
+					);
 
-					int charges = (int)lds->Entries[i].multiplier;
+					int charges = (int) loot_drop->Entries[i].multiplier;
 					charges = EQ::ClampLower(charges, 1);
 
-					for(int k = 1; k < charges; ++k) {
-						float c_roll = (float)zone->random.Real(0.0, 100.0);
-						if(c_roll <= lds->Entries[i].chance) {
-							npc->AddLootDrop(db_item, itemlist, lds->Entries[j].item_charges, lds->Entries[j].minlevel,
-											lds->Entries[j].maxlevel, lds->Entries[j].equip_item > 0 ? true : false, false);
+					for (int k = 1; k < charges; ++k) {
+						float c_roll = (float) zone->random.Real(0.0, 100.0);
+						if (c_roll <= loot_drop->Entries[i].chance) {
+							npc->AddLootDrop(
+								db_item,
+								item_list,
+								loot_drop->Entries[i]
+							);
 						}
 					}
 
-					j = lds->NumEntries;
+					j = loot_drop->NumEntries;
 					break;
 				}
 				else {
-					roll -= lds->Entries[j].chance;
+					roll -= loot_drop->Entries[j].chance;
 				}
 			}
 		}
@@ -231,43 +250,116 @@ void ZoneDatabase::AddLootDropToNPC(NPC* npc,uint32 lootdrop_id, ItemList* iteml
 	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
 }
 
-//if itemlist is null, just send wear changes
-void NPC::AddLootDrop(const EQ::ItemData *item2, ItemList* itemlist, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
-	if(item2 == nullptr)
-		return;
-
-	//make sure we are doing something...
-	if(!itemlist && !wearchange)
-		return;
-
-	auto item = new ServerLootItem_Struct;
-#if EQDEBUG>=11
-		LogDebug("Adding drop to npc: [{}], Item: [{}]", GetName(), item2->ID);
-#endif
-
-	EQApplicationPacket* outapp = nullptr;
-	WearChange_Struct* wc = nullptr;
-	if(wearchange) {
-		outapp = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
-		wc = (WearChange_Struct*)outapp->pBuffer;
-		wc->spawn_id = GetID();
-		wc->material=0;
+bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
+{
+	if (loot_drop.npc_min_level > 0 && GetLevel() < loot_drop.npc_min_level) {
+		LogLootDetail(
+			"NPC [{}] does not meet loot_drop level requirements (min_level) level [{}] current [{}] for item [{}]",
+			GetCleanName(),
+			loot_drop.npc_min_level,
+			GetLevel(),
+			database.CreateItemLink(loot_drop.item_id)
+		);
+		return false;
 	}
 
-	item->item_id = item2->ID;
-	item->charges = charges;
-	item->aug_1 = aug1;
-	item->aug_2 = aug2;
-	item->aug_3 = aug3;
-	item->aug_4 = aug4;
-	item->aug_5 = aug5;
-	item->aug_6 = aug6;
-	item->attuned = 0;
-	item->min_level = minlevel;
-	item->max_level = maxlevel;
-	item->equip_slot = EQ::invslot::SLOT_INVALID;
+	if (loot_drop.npc_max_level > 0 && GetLevel() > loot_drop.npc_max_level) {
+		LogLootDetail(
+			"NPC [{}] does not meet loot_drop level requirements (max_level) level [{}] current [{}] for item [{}]",
+			GetCleanName(),
+			loot_drop.npc_max_level,
+			GetLevel(),
+			database.CreateItemLink(loot_drop.item_id)
+		);
+		return false;
+	}
 
-	if (equipit) {
+	return true;
+}
+
+LootDropEntries_Struct NPC::NewLootDropEntry()
+{
+	LootDropEntries_Struct loot_drop{};
+	loot_drop.item_id           = 0;
+	loot_drop.item_charges      = 1;
+	loot_drop.equip_item        = 1;
+	loot_drop.chance            = 0;
+	loot_drop.trivial_min_level = 0;
+	loot_drop.trivial_max_level = 0;
+	loot_drop.npc_min_level     = 0;
+	loot_drop.npc_max_level     = 0;
+	loot_drop.multiplier        = 0;
+
+	return loot_drop;
+}
+
+//if itemlist is null, just send wear changes
+void NPC::AddLootDrop(
+	const EQ::ItemData *item2,
+	ItemList *itemlist,
+	LootDropEntries_Struct loot_drop,
+	bool wear_change,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6
+)
+{
+	if (item2 == nullptr) {
+		return;
+	}
+
+	//make sure we are doing something...
+	if (!itemlist && !wear_change) {
+		return;
+	}
+
+	auto item = new ServerLootItem_Struct;
+
+	if (LogSys.log_settings[Logs::Loot].is_category_enabled == 1) {
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkItemData);
+		linker.SetItemData(item2);
+
+		LogLoot(
+			"[NPC::AddLootDrop] NPC [{}] Item ({}) [{}] charges [{}] chance [{}] trivial min/max [{}/{}] npc min/max [{}/{}]",
+			GetName(),
+			item2->ID,
+			linker.GenerateLink(),
+			loot_drop.item_charges,
+			loot_drop.chance,
+			loot_drop.trivial_min_level,
+			loot_drop.trivial_max_level,
+			loot_drop.npc_min_level,
+			loot_drop.npc_max_level
+		);
+	}
+
+	EQApplicationPacket *outapp               = nullptr;
+	WearChange_Struct   *p_wear_change_struct = nullptr;
+	if (wear_change) {
+		outapp               = new EQApplicationPacket(OP_WearChange, sizeof(WearChange_Struct));
+		p_wear_change_struct = (WearChange_Struct *) outapp->pBuffer;
+		p_wear_change_struct->spawn_id = GetID();
+		p_wear_change_struct->material = 0;
+	}
+
+	item->item_id           = item2->ID;
+	item->charges           = loot_drop.item_charges;
+	item->aug_1             = aug1;
+	item->aug_2             = aug2;
+	item->aug_3             = aug3;
+	item->aug_4             = aug4;
+	item->aug_5             = aug5;
+	item->aug_6             = aug6;
+	item->attuned           = 0;
+	item->trivial_min_level = loot_drop.trivial_min_level;
+	item->trivial_max_level = loot_drop.trivial_max_level;
+	item->equip_slot        = EQ::invslot::SLOT_INVALID;
+
+	if (loot_drop.equip_item > 0) {
 		uint8 eslot = 0xFF;
 		char newid[20];
 		const EQ::ItemData* compitem = nullptr;
@@ -403,9 +495,9 @@ void NPC::AddLootDrop(const EQ::ItemData *item2, ItemList* itemlist, int16 charg
 
 		//if we found an open slot it goes in...
 		if(eslot != 0xFF) {
-			if(wearchange) {
-				wc->wear_slot_id = eslot;
-				wc->material = emat;
+			if(wear_change) {
+				p_wear_change_struct->wear_slot_id = eslot;
+				p_wear_change_struct->material     = emat;
 			}
 
 		}
@@ -415,24 +507,28 @@ void NPC::AddLootDrop(const EQ::ItemData *item2, ItemList* itemlist, int16 charg
 		}
 	}
 
-	if(itemlist != nullptr)
+	if (itemlist != nullptr) {
 		itemlist->push_back(item);
-	else
-		safe_delete(item);
+	}
+	else safe_delete(item);
 
-	if(wearchange && outapp) {
+	if (wear_change && outapp) {
 		entity_list.QueueClients(this, outapp);
 		safe_delete(outapp);
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
 void NPC::AddItem(const EQ::ItemData* item, uint16 charges, bool equipitem) {
 	//slot isnt needed, its determined from the item.
-	AddLootDrop(item, &itemlist, charges, 1, 255, equipitem, equipitem);
+	auto loot_drop_entry = NPC::NewLootDropEntry();
+	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+
+	AddLootDrop(item, &itemlist, loot_drop_entry, true);
 }
 
 void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
@@ -440,7 +536,11 @@ void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, ui
 	const EQ::ItemData * i = database.GetItem(itemid);
 	if(i == nullptr)
 		return;
-	AddLootDrop(i, &itemlist, charges, 1, 255, equipitem, equipitem, aug1, aug2, aug3, aug4, aug5, aug6);
+
+	auto loot_drop_entry = NPC::NewLootDropEntry();
+	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+
+	AddLootDrop(i, &itemlist, loot_drop_entry, true, aug1, aug2, aug3, aug4, aug5, aug6);
 }
 
 void NPC::AddLootTable() {

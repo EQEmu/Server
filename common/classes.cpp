@@ -378,8 +378,6 @@ const char *GetClassIDName(uint8 class_id, uint8 level)
 			return "Berserker Guildmaster";
 		case MERCHANT:
 			return "Merchant";
-		case DISCORD_MERCHANT:
-			return "Discord Merchant";
 		case ADVENTURERECRUITER:
 			return "Adventure Recruiter";
 		case ADVENTUREMERCHANT:

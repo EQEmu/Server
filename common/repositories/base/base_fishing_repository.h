@@ -45,6 +45,7 @@ public:
 		int         min_expansion;
 		int         max_expansion;
 		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -65,6 +66,7 @@ public:
 			"min_expansion",
 			"max_expansion",
 			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -115,16 +117,17 @@ public:
 	{
 		Fishing entry{};
 
-		entry.id            = 0;
-		entry.zoneid        = 0;
-		entry.Itemid        = 0;
-		entry.skill_level   = 0;
-		entry.chance        = 0;
-		entry.npc_id        = 0;
-		entry.npc_chance    = 0;
-		entry.min_expansion = 0;
-		entry.max_expansion = 0;
-		entry.content_flags = "";
+		entry.id                     = 0;
+		entry.zoneid                 = 0;
+		entry.Itemid                 = 0;
+		entry.skill_level            = 0;
+		entry.chance                 = 0;
+		entry.npc_id                 = 0;
+		entry.npc_chance             = 0;
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -159,16 +162,17 @@ public:
 		if (results.RowCount() == 1) {
 			Fishing entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.Itemid        = atoi(row[2]);
-			entry.skill_level   = atoi(row[3]);
-			entry.chance        = atoi(row[4]);
-			entry.npc_id        = atoi(row[5]);
-			entry.npc_chance    = atoi(row[6]);
-			entry.min_expansion = atoi(row[7]);
-			entry.max_expansion = atoi(row[8]);
-			entry.content_flags = row[9] ? row[9] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.Itemid                 = atoi(row[2]);
+			entry.skill_level            = atoi(row[3]);
+			entry.chance                 = atoi(row[4]);
+			entry.npc_id                 = atoi(row[5]);
+			entry.npc_chance             = atoi(row[6]);
+			entry.min_expansion          = atoi(row[7]);
+			entry.max_expansion          = atoi(row[8]);
+			entry.content_flags          = row[9] ? row[9] : "";
+			entry.content_flags_disabled = row[10] ? row[10] : "";
 
 			return entry;
 		}
@@ -209,6 +213,7 @@ public:
 		update_values.push_back(columns[7] + " = " + std::to_string(fishing_entry.min_expansion));
 		update_values.push_back(columns[8] + " = " + std::to_string(fishing_entry.max_expansion));
 		update_values.push_back(columns[9] + " = '" + EscapeString(fishing_entry.content_flags) + "'");
+		update_values.push_back(columns[10] + " = '" + EscapeString(fishing_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -238,6 +243,7 @@ public:
 		insert_values.push_back(std::to_string(fishing_entry.min_expansion));
 		insert_values.push_back(std::to_string(fishing_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(fishing_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(fishing_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -275,6 +281,7 @@ public:
 			insert_values.push_back(std::to_string(fishing_entry.min_expansion));
 			insert_values.push_back(std::to_string(fishing_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(fishing_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(fishing_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -308,16 +315,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.Itemid        = atoi(row[2]);
-			entry.skill_level   = atoi(row[3]);
-			entry.chance        = atoi(row[4]);
-			entry.npc_id        = atoi(row[5]);
-			entry.npc_chance    = atoi(row[6]);
-			entry.min_expansion = atoi(row[7]);
-			entry.max_expansion = atoi(row[8]);
-			entry.content_flags = row[9] ? row[9] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.Itemid                 = atoi(row[2]);
+			entry.skill_level            = atoi(row[3]);
+			entry.chance                 = atoi(row[4]);
+			entry.npc_id                 = atoi(row[5]);
+			entry.npc_chance             = atoi(row[6]);
+			entry.min_expansion          = atoi(row[7]);
+			entry.max_expansion          = atoi(row[8]);
+			entry.content_flags          = row[9] ? row[9] : "";
+			entry.content_flags_disabled = row[10] ? row[10] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -342,16 +350,17 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Fishing entry{};
 
-			entry.id            = atoi(row[0]);
-			entry.zoneid        = atoi(row[1]);
-			entry.Itemid        = atoi(row[2]);
-			entry.skill_level   = atoi(row[3]);
-			entry.chance        = atoi(row[4]);
-			entry.npc_id        = atoi(row[5]);
-			entry.npc_chance    = atoi(row[6]);
-			entry.min_expansion = atoi(row[7]);
-			entry.max_expansion = atoi(row[8]);
-			entry.content_flags = row[9] ? row[9] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.Itemid                 = atoi(row[2]);
+			entry.skill_level            = atoi(row[3]);
+			entry.chance                 = atoi(row[4]);
+			entry.npc_id                 = atoi(row[5]);
+			entry.npc_chance             = atoi(row[6]);
+			entry.min_expansion          = atoi(row[7]);
+			entry.max_expansion          = atoi(row[8]);
+			entry.content_flags          = row[9] ? row[9] : "";
+			entry.content_flags_disabled = row[10] ? row[10] : "";
 
 			all_entries.push_back(entry);
 		}

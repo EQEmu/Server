@@ -2084,6 +2084,19 @@ XS(XS__repopzone) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__processmobswhilezoneempty);
+XS(XS__processmobswhilezoneempty) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::processmobswhilezoneempty(bool on)");
+
+	bool ProcessingOn = ((int) SvIV(ST(0))) == 0 ? false : true;
+
+	quest_manager.processmobswhilezoneempty(ProcessingOn);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__npcrace);
 XS(XS__npcrace) {
 	dXSARGS;
@@ -2924,23 +2937,6 @@ XS(XS__countitem) {
 	int quantity = quest_manager.countitem(item_id);
 
 	XSRETURN_IV(quantity);
-}
-
-XS(XS__removeitem);
-XS(XS__removeitem) {
-	dXSARGS;
-	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: quest::removeitem(int item_id, [int quantity = 1])");
-
-	uint32 item_id = (int) SvIV(ST(0));
-	uint32 quantity = 1;
-	if (items > 1) {
-		quantity = (int) SvIV(ST(1));
-	}
-
-	quest_manager.removeitem(item_id, quantity);
-
-	XSRETURN_EMPTY;
 }
 
 XS(XS__getitemname);
@@ -6322,13 +6318,13 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "playersize"), XS__playersize, file);
 	newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
 	newXS(strcpy(buf, "popup"), XS__popup, file);
+	newXS(strcpy(buf, "processmobswhilezoneempty"), XS__processmobswhilezoneempty, file);
 	newXS(strcpy(buf, "pvp"), XS__pvp, file);
 	newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
 	newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file);
 	newXS(strcpy(buf, "rain"), XS__rain, file);
 	newXS(strcpy(buf, "rebind"), XS__rebind, file);
 	newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
-	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);

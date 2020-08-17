@@ -408,6 +408,8 @@
 9152|2020_03_09_convert_myisam_to_innodb.sql|SELECT * FROM db_version WHERE version >= 9152|empty|
 9153|2020_05_09_items_subtype.sql|SHOW COLUMNS from `items` LIKE 'UNK219'|not_empty|
 9154|2020_04_11_expansions_content_filters.sql|SHOW COLUMNS from `zone` LIKE 'min_expansion'|empty|
+9155|2020_08_15_lootdrop_level_filtering.sql|SHOW COLUMNS from `lootdrop_entries` LIKE 'trivial_min_level'|empty|
+9156|2020_08_16_virtual_zonepoints.sql|SHOW COLUMNS from `zone_points` LIKE 'is_virtual'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

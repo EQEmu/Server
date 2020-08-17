@@ -101,6 +101,7 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
+	void processmobswhilezoneempty(bool on);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
@@ -227,7 +228,6 @@ public:
     int collectitems(uint32 item_id, bool remove);
     int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
 	int countitem(uint32 item_id);
-	void removeitem(uint32 item_id, uint32 quantity = 1);
 	std::string getitemname(uint32 item_id);
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);

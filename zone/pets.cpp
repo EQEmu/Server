@@ -394,7 +394,7 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++)
 			if (petinv[i]) {
 				item = database.GetItem(petinv[i]);
-				npc->AddLootDrop(item, &npc->itemlist, 0, 1, 127, true, true);
+				npc->AddLootDrop(item, &npc->itemlist, NPC::NewLootDropEntry(), true);
 			}
 	}
 
@@ -614,18 +614,18 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 
 	//restore their equipment...
 	for (i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++) {
-		if(items[i] == 0)
+		if (items[i] == 0) {
 			continue;
+		}
 
-		const EQ::ItemData* item2 = database.GetItem(items[i]);
+		const EQ::ItemData *item2 = database.GetItem(items[i]);
 
 		if (item2) {
-			bool noDrop=(item2->NoDrop == 0); // Field is reverse logic
-			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) &&
-				_CLIENTPET(this) && GetPetType() <= petOther);
+			bool noDrop           = (item2->NoDrop == 0); // Field is reverse logic
+			bool petCanHaveNoDrop = (RuleB(Pets, CanTakeNoDrop) && _CLIENTPET(this) && GetPetType() <= petOther);
 
 			if (!noDrop || petCanHaveNoDrop) {
-				AddLootDrop(item2, &itemlist, 0, 1, 255, true, true);
+				AddLootDrop(item2, &itemlist, NPC::NewLootDropEntry(), true);
 			}
 		}
 	}

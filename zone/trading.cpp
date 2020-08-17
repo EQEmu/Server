@@ -899,8 +899,17 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 							if (baginst) {
 								const EQ::ItemData* bagitem = baginst->GetItem();
 								if (bagitem && (GetGM() || (bagitem->NoDrop != 0 && baginst->IsAttuned() == false))) {
-									tradingWith->CastToNPC()->AddLootDrop(bagitem, &tradingWith->CastToNPC()->itemlist,
-										baginst->GetCharges(), 1, 127, true, true);
+
+									auto loot_drop_entry = NPC::NewLootDropEntry();
+									loot_drop_entry.equip_item   = 1;
+									loot_drop_entry.item_charges = static_cast<int8>(baginst->GetCharges());
+
+									tradingWith->CastToNPC()->AddLootDrop(
+										bagitem,
+										&tradingWith->CastToNPC()->itemlist,
+										loot_drop_entry,
+										true
+									);
 								}
 								else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {
 									PushItemOnCursor(*baginst, true);
@@ -909,8 +918,16 @@ void Client::FinishTrade(Mob* tradingWith, bool finalizer, void* event_entry, st
 						}
 					}
 
-					tradingWith->CastToNPC()->AddLootDrop(item, &tradingWith->CastToNPC()->itemlist,
-						inst->GetCharges(), 1, 127, true, true);
+					auto new_loot_drop_entry = NPC::NewLootDropEntry();
+					new_loot_drop_entry.equip_item   = 1;
+					new_loot_drop_entry.item_charges = static_cast<int8>(inst->GetCharges());
+
+					tradingWith->CastToNPC()->AddLootDrop(
+						item,
+						&tradingWith->CastToNPC()->itemlist,
+						new_loot_drop_entry,
+						true
+					);
 				}
 				// Return NO DROP and Attuned items being handed into a non-quest NPC if the rule is true
 				else if (RuleB(NPC, ReturnNonQuestNoDropItems)) {

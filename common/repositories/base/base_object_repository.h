@@ -61,6 +61,10 @@ public:
 		float       tilt_x;
 		float       tilt_y;
 		std::string display_name;
+		int         min_expansion;
+		int         max_expansion;
+		std::string content_flags;
+		std::string content_flags_disabled;
 	};
 
 	static std::string PrimaryKey()
@@ -97,6 +101,10 @@ public:
 			"tilt_x",
 			"tilt_y",
 			"display_name",
+			"min_expansion",
+			"max_expansion",
+			"content_flags",
+			"content_flags_disabled",
 		};
 	}
 
@@ -147,32 +155,36 @@ public:
 	{
 		Object entry{};
 
-		entry.id           = 0;
-		entry.zoneid       = 0;
-		entry.version      = 0;
-		entry.xpos         = 0;
-		entry.ypos         = 0;
-		entry.zpos         = 0;
-		entry.heading      = 0;
-		entry.itemid       = 0;
-		entry.charges      = 0;
-		entry.objectname   = "";
-		entry.type         = 0;
-		entry.icon         = 0;
-		entry.unknown08    = 0;
-		entry.unknown10    = 0;
-		entry.unknown20    = 0;
-		entry.unknown24    = 0;
-		entry.unknown60    = 0;
-		entry.unknown64    = 0;
-		entry.unknown68    = 0;
-		entry.unknown72    = 0;
-		entry.unknown76    = 0;
-		entry.unknown84    = 0;
-		entry.size         = 100;
-		entry.tilt_x       = 0;
-		entry.tilt_y       = 0;
-		entry.display_name = "";
+		entry.id                     = 0;
+		entry.zoneid                 = 0;
+		entry.version                = 0;
+		entry.xpos                   = 0;
+		entry.ypos                   = 0;
+		entry.zpos                   = 0;
+		entry.heading                = 0;
+		entry.itemid                 = 0;
+		entry.charges                = 0;
+		entry.objectname             = "";
+		entry.type                   = 0;
+		entry.icon                   = 0;
+		entry.unknown08              = 0;
+		entry.unknown10              = 0;
+		entry.unknown20              = 0;
+		entry.unknown24              = 0;
+		entry.unknown60              = 0;
+		entry.unknown64              = 0;
+		entry.unknown68              = 0;
+		entry.unknown72              = 0;
+		entry.unknown76              = 0;
+		entry.unknown84              = 0;
+		entry.size                   = 100;
+		entry.tilt_x                 = 0;
+		entry.tilt_y                 = 0;
+		entry.display_name           = "";
+		entry.min_expansion          = 0;
+		entry.max_expansion          = 0;
+		entry.content_flags          = "";
+		entry.content_flags_disabled = "";
 
 		return entry;
 	}
@@ -207,32 +219,36 @@ public:
 		if (results.RowCount() == 1) {
 			Object entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.zoneid       = atoi(row[1]);
-			entry.version      = atoi(row[2]);
-			entry.xpos         = static_cast<float>(atof(row[3]));
-			entry.ypos         = static_cast<float>(atof(row[4]));
-			entry.zpos         = static_cast<float>(atof(row[5]));
-			entry.heading      = static_cast<float>(atof(row[6]));
-			entry.itemid       = atoi(row[7]);
-			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9] ? row[9] : "";
-			entry.type         = atoi(row[10]);
-			entry.icon         = atoi(row[11]);
-			entry.unknown08    = atoi(row[12]);
-			entry.unknown10    = atoi(row[13]);
-			entry.unknown20    = atoi(row[14]);
-			entry.unknown24    = atoi(row[15]);
-			entry.unknown60    = atoi(row[16]);
-			entry.unknown64    = atoi(row[17]);
-			entry.unknown68    = atoi(row[18]);
-			entry.unknown72    = atoi(row[19]);
-			entry.unknown76    = atoi(row[20]);
-			entry.unknown84    = atoi(row[21]);
-			entry.size         = static_cast<float>(atof(row[22]));
-			entry.tilt_x       = static_cast<float>(atof(row[23]));
-			entry.tilt_y       = static_cast<float>(atof(row[24]));
-			entry.display_name = row[25] ? row[25] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.xpos                   = static_cast<float>(atof(row[3]));
+			entry.ypos                   = static_cast<float>(atof(row[4]));
+			entry.zpos                   = static_cast<float>(atof(row[5]));
+			entry.heading                = static_cast<float>(atof(row[6]));
+			entry.itemid                 = atoi(row[7]);
+			entry.charges                = atoi(row[8]);
+			entry.objectname             = row[9] ? row[9] : "";
+			entry.type                   = atoi(row[10]);
+			entry.icon                   = atoi(row[11]);
+			entry.unknown08              = atoi(row[12]);
+			entry.unknown10              = atoi(row[13]);
+			entry.unknown20              = atoi(row[14]);
+			entry.unknown24              = atoi(row[15]);
+			entry.unknown60              = atoi(row[16]);
+			entry.unknown64              = atoi(row[17]);
+			entry.unknown68              = atoi(row[18]);
+			entry.unknown72              = atoi(row[19]);
+			entry.unknown76              = atoi(row[20]);
+			entry.unknown84              = atoi(row[21]);
+			entry.size                   = static_cast<float>(atof(row[22]));
+			entry.tilt_x                 = static_cast<float>(atof(row[23]));
+			entry.tilt_y                 = static_cast<float>(atof(row[24]));
+			entry.display_name           = row[25] ? row[25] : "";
+			entry.min_expansion          = atoi(row[26]);
+			entry.max_expansion          = atoi(row[27]);
+			entry.content_flags          = row[28] ? row[28] : "";
+			entry.content_flags_disabled = row[29] ? row[29] : "";
 
 			return entry;
 		}
@@ -289,6 +305,10 @@ public:
 		update_values.push_back(columns[23] + " = " + std::to_string(object_entry.tilt_x));
 		update_values.push_back(columns[24] + " = " + std::to_string(object_entry.tilt_y));
 		update_values.push_back(columns[25] + " = '" + EscapeString(object_entry.display_name) + "'");
+		update_values.push_back(columns[26] + " = " + std::to_string(object_entry.min_expansion));
+		update_values.push_back(columns[27] + " = " + std::to_string(object_entry.max_expansion));
+		update_values.push_back(columns[28] + " = '" + EscapeString(object_entry.content_flags) + "'");
+		update_values.push_back(columns[29] + " = '" + EscapeString(object_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -334,6 +354,10 @@ public:
 		insert_values.push_back(std::to_string(object_entry.tilt_x));
 		insert_values.push_back(std::to_string(object_entry.tilt_y));
 		insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
+		insert_values.push_back(std::to_string(object_entry.min_expansion));
+		insert_values.push_back(std::to_string(object_entry.max_expansion));
+		insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
+		insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -387,6 +411,10 @@ public:
 			insert_values.push_back(std::to_string(object_entry.tilt_x));
 			insert_values.push_back(std::to_string(object_entry.tilt_y));
 			insert_values.push_back("'" + EscapeString(object_entry.display_name) + "'");
+			insert_values.push_back(std::to_string(object_entry.min_expansion));
+			insert_values.push_back(std::to_string(object_entry.max_expansion));
+			insert_values.push_back("'" + EscapeString(object_entry.content_flags) + "'");
+			insert_values.push_back("'" + EscapeString(object_entry.content_flags_disabled) + "'");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -420,32 +448,36 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Object entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.zoneid       = atoi(row[1]);
-			entry.version      = atoi(row[2]);
-			entry.xpos         = static_cast<float>(atof(row[3]));
-			entry.ypos         = static_cast<float>(atof(row[4]));
-			entry.zpos         = static_cast<float>(atof(row[5]));
-			entry.heading      = static_cast<float>(atof(row[6]));
-			entry.itemid       = atoi(row[7]);
-			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9] ? row[9] : "";
-			entry.type         = atoi(row[10]);
-			entry.icon         = atoi(row[11]);
-			entry.unknown08    = atoi(row[12]);
-			entry.unknown10    = atoi(row[13]);
-			entry.unknown20    = atoi(row[14]);
-			entry.unknown24    = atoi(row[15]);
-			entry.unknown60    = atoi(row[16]);
-			entry.unknown64    = atoi(row[17]);
-			entry.unknown68    = atoi(row[18]);
-			entry.unknown72    = atoi(row[19]);
-			entry.unknown76    = atoi(row[20]);
-			entry.unknown84    = atoi(row[21]);
-			entry.size         = static_cast<float>(atof(row[22]));
-			entry.tilt_x       = static_cast<float>(atof(row[23]));
-			entry.tilt_y       = static_cast<float>(atof(row[24]));
-			entry.display_name = row[25] ? row[25] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.xpos                   = static_cast<float>(atof(row[3]));
+			entry.ypos                   = static_cast<float>(atof(row[4]));
+			entry.zpos                   = static_cast<float>(atof(row[5]));
+			entry.heading                = static_cast<float>(atof(row[6]));
+			entry.itemid                 = atoi(row[7]);
+			entry.charges                = atoi(row[8]);
+			entry.objectname             = row[9] ? row[9] : "";
+			entry.type                   = atoi(row[10]);
+			entry.icon                   = atoi(row[11]);
+			entry.unknown08              = atoi(row[12]);
+			entry.unknown10              = atoi(row[13]);
+			entry.unknown20              = atoi(row[14]);
+			entry.unknown24              = atoi(row[15]);
+			entry.unknown60              = atoi(row[16]);
+			entry.unknown64              = atoi(row[17]);
+			entry.unknown68              = atoi(row[18]);
+			entry.unknown72              = atoi(row[19]);
+			entry.unknown76              = atoi(row[20]);
+			entry.unknown84              = atoi(row[21]);
+			entry.size                   = static_cast<float>(atof(row[22]));
+			entry.tilt_x                 = static_cast<float>(atof(row[23]));
+			entry.tilt_y                 = static_cast<float>(atof(row[24]));
+			entry.display_name           = row[25] ? row[25] : "";
+			entry.min_expansion          = atoi(row[26]);
+			entry.max_expansion          = atoi(row[27]);
+			entry.content_flags          = row[28] ? row[28] : "";
+			entry.content_flags_disabled = row[29] ? row[29] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -470,32 +502,36 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Object entry{};
 
-			entry.id           = atoi(row[0]);
-			entry.zoneid       = atoi(row[1]);
-			entry.version      = atoi(row[2]);
-			entry.xpos         = static_cast<float>(atof(row[3]));
-			entry.ypos         = static_cast<float>(atof(row[4]));
-			entry.zpos         = static_cast<float>(atof(row[5]));
-			entry.heading      = static_cast<float>(atof(row[6]));
-			entry.itemid       = atoi(row[7]);
-			entry.charges      = atoi(row[8]);
-			entry.objectname   = row[9] ? row[9] : "";
-			entry.type         = atoi(row[10]);
-			entry.icon         = atoi(row[11]);
-			entry.unknown08    = atoi(row[12]);
-			entry.unknown10    = atoi(row[13]);
-			entry.unknown20    = atoi(row[14]);
-			entry.unknown24    = atoi(row[15]);
-			entry.unknown60    = atoi(row[16]);
-			entry.unknown64    = atoi(row[17]);
-			entry.unknown68    = atoi(row[18]);
-			entry.unknown72    = atoi(row[19]);
-			entry.unknown76    = atoi(row[20]);
-			entry.unknown84    = atoi(row[21]);
-			entry.size         = static_cast<float>(atof(row[22]));
-			entry.tilt_x       = static_cast<float>(atof(row[23]));
-			entry.tilt_y       = static_cast<float>(atof(row[24]));
-			entry.display_name = row[25] ? row[25] : "";
+			entry.id                     = atoi(row[0]);
+			entry.zoneid                 = atoi(row[1]);
+			entry.version                = atoi(row[2]);
+			entry.xpos                   = static_cast<float>(atof(row[3]));
+			entry.ypos                   = static_cast<float>(atof(row[4]));
+			entry.zpos                   = static_cast<float>(atof(row[5]));
+			entry.heading                = static_cast<float>(atof(row[6]));
+			entry.itemid                 = atoi(row[7]);
+			entry.charges                = atoi(row[8]);
+			entry.objectname             = row[9] ? row[9] : "";
+			entry.type                   = atoi(row[10]);
+			entry.icon                   = atoi(row[11]);
+			entry.unknown08              = atoi(row[12]);
+			entry.unknown10              = atoi(row[13]);
+			entry.unknown20              = atoi(row[14]);
+			entry.unknown24              = atoi(row[15]);
+			entry.unknown60              = atoi(row[16]);
+			entry.unknown64              = atoi(row[17]);
+			entry.unknown68              = atoi(row[18]);
+			entry.unknown72              = atoi(row[19]);
+			entry.unknown76              = atoi(row[20]);
+			entry.unknown84              = atoi(row[21]);
+			entry.size                   = static_cast<float>(atof(row[22]));
+			entry.tilt_x                 = static_cast<float>(atof(row[23]));
+			entry.tilt_y                 = static_cast<float>(atof(row[24]));
+			entry.display_name           = row[25] ? row[25] : "";
+			entry.min_expansion          = atoi(row[26]);
+			entry.max_expansion          = atoi(row[27]);
+			entry.content_flags          = row[28] ? row[28] : "";
+			entry.content_flags_disabled = row[29] ? row[29] : "";
 
 			all_entries.push_back(entry);
 		}

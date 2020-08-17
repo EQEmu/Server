@@ -87,7 +87,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			break;
 		case EQ::item::ItemType2HBlunt: // 2H Blunt
 			skillinuse = EQ::skills::Skill2HBlunt;
-			type = anim2HWeapon; //anim2HWeapon
+			type = anim2HSlashing; //anim2HWeapon
 			break;
 		case EQ::item::ItemType2HPiercing: // 2H Piercing
 			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
@@ -121,7 +121,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = anim1HWeapon;
 			break;
 		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HWeapon; //anim2HWeapon
+			type = anim2HSlashing; //anim2HWeapon
 			break;
 		case EQ::skills::Skill2HPiercing: // 2H Piercing
 			type = anim2HWeapon;
@@ -1532,7 +1532,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			SpellFinished(aabonuses.SkillAttackProc[2], other, EQ::spells::CastingSlot::Item, 0, -1,
 				spells[aabonuses.SkillAttackProc[2]].ResistDiff);
 	}
-
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
 	if (IsDead()) return false;
@@ -2465,7 +2464,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				killer = killer->GetOwner();
 
 			if (killer->IsClient() && !killer->CastToClient()->GetGM())
-				this->CheckMinMaxLevel(killer);
+				this->CheckTrivialMinMaxLevelDrop(killer);
 		}
 
 		entity_list.RemoveFromAutoXTargets(this);

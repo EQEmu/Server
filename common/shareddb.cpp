@@ -2142,7 +2142,7 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 
 	EQ::FixedMemoryVariableHashSet<LootDrop_Struct> hash(reinterpret_cast<uint8*>(data), size);
 	uint8 loot_drop[sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260)];
-	LootDrop_Struct *ld = reinterpret_cast<LootDrop_Struct*>(loot_drop);
+	LootDrop_Struct *p_loot_drop_struct = reinterpret_cast<LootDrop_Struct*>(loot_drop);
 
 	const std::string query = fmt::format(
 		SQL(
@@ -2152,8 +2152,10 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 			  lootdrop_entries.item_charges,
 			  lootdrop_entries.equip_item,
 			  lootdrop_entries.chance,
-			  lootdrop_entries.minlevel,
-			  lootdrop_entries.maxlevel,
+			  lootdrop_entries.trivial_min_level,
+			  lootdrop_entries.trivial_max_level,
+			  lootdrop_entries.npc_min_level,
+			  lootdrop_entries.npc_max_level,
 			  lootdrop_entries.multiplier
 			FROM
 			  lootdrop
@@ -2171,37 +2173,44 @@ void SharedDatabase::LoadLootDrops(void *data, uint32 size) {
 		return;
     }
 
-    uint32 current_id = 0;
-    uint32 current_entry = 0;
+	uint32 current_id    = 0;
+	uint32 current_entry = 0;
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        uint32 id = static_cast<uint32>(atoul(row[0]));
-        if(id != current_id) {
-            if(current_id != 0)
-                hash.insert(current_id, loot_drop, (sizeof(LootDrop_Struct) +(sizeof(LootDropEntries_Struct) * ld->NumEntries)));
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto id = static_cast<uint32>(atoul(row[0]));
+		if (id != current_id) {
+			if (current_id != 0) {
+				hash.insert(
+					current_id,
+					loot_drop,
+					(sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * p_loot_drop_struct->NumEntries)));
+			}
 
-            memset(loot_drop, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260));
+			memset(loot_drop, 0, sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * 1260));
 			current_entry = 0;
-			current_id = id;
-        }
+			current_id    = id;
+		}
 
-		if(current_entry >= 1260)
-            continue;
+		if (current_entry >= 1260) {
+			continue;
+		}
 
-        ld->Entries[current_entry].item_id = static_cast<uint32>(atoul(row[1]));
-        ld->Entries[current_entry].item_charges = static_cast<int8>(atoi(row[2]));
-        ld->Entries[current_entry].equip_item = static_cast<uint8>(atoi(row[3]));
-        ld->Entries[current_entry].chance = static_cast<float>(atof(row[4]));
-        ld->Entries[current_entry].minlevel = static_cast<uint8>(atoi(row[5]));
-        ld->Entries[current_entry].maxlevel = static_cast<uint8>(atoi(row[6]));
-        ld->Entries[current_entry].multiplier = static_cast<uint8>(atoi(row[7]));
+		p_loot_drop_struct->Entries[current_entry].item_id           = static_cast<uint32>(atoul(row[1]));
+		p_loot_drop_struct->Entries[current_entry].item_charges      = static_cast<int8>(atoi(row[2]));
+		p_loot_drop_struct->Entries[current_entry].equip_item        = static_cast<uint8>(atoi(row[3]));
+		p_loot_drop_struct->Entries[current_entry].chance            = static_cast<float>(atof(row[4]));
+		p_loot_drop_struct->Entries[current_entry].trivial_min_level = static_cast<uint16>(atoi(row[5]));
+		p_loot_drop_struct->Entries[current_entry].trivial_max_level = static_cast<uint16>(atoi(row[6]));
+		p_loot_drop_struct->Entries[current_entry].npc_min_level     = static_cast<uint16>(atoi(row[7]));
+		p_loot_drop_struct->Entries[current_entry].npc_max_level     = static_cast<uint16>(atoi(row[8]));
+		p_loot_drop_struct->Entries[current_entry].multiplier        = static_cast<uint8>(atoi(row[9]));
 
-        ++(ld->NumEntries);
-        ++current_entry;
-    }
+		++(p_loot_drop_struct->NumEntries);
+		++current_entry;
+	}
 
-    if(current_id != 0)
-        hash.insert(current_id, loot_drop, (sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * ld->NumEntries)));
+	if(current_id != 0)
+        hash.insert(current_id, loot_drop, (sizeof(LootDrop_Struct) + (sizeof(LootDropEntries_Struct) * p_loot_drop_struct->NumEntries)));
 
 }
 

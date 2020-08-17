@@ -515,7 +515,7 @@ void EntityList::MobProcess()
 			mob_settle_timer->Disable();
 		}
 
-		if (numclients > 0 ||
+		if (zone->process_mobs_while_empty || numclients > 0 ||
 			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
 			mob_settle_timer->Enabled()) {
 			// Normal processing, or assuring that spawns that should
@@ -2520,7 +2520,7 @@ void EntityList::RemoveAllGroups()
 	while (group_list.size()) {
 		auto group = group_list.front();
 		group_list.pop_front();
-		delete group;
+		safe_delete(group);
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -2532,7 +2532,7 @@ void EntityList::RemoveAllRaids()
 	while (raid_list.size()) {
 		auto raid = raid_list.front();
 		raid_list.pop_front();
-		delete raid;
+		safe_delete(raid);
 	}
 }
 
@@ -2881,7 +2881,7 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	}
 	auto group = *it;
 	group_list.erase(it);
-	delete group;
+	safe_delete(group);
 	return true;
 }
 
@@ -2893,7 +2893,7 @@ bool EntityList::RemoveRaid(uint32 delete_id)
 		return false;
 	auto raid = *it;
 	raid_list.erase(it);
-	delete raid;
+	safe_delete(raid);
 	return true;
 }
 

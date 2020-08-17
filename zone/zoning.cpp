@@ -336,6 +336,10 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		}
 	}
 
+	if (content_service.GetCurrentExpansion() >= Expansion::Classic && GetGM()) {
+		LogInfo("[{}] Bypassing Expansion zone checks because GM status is set", GetCleanName());
+	}
+
 	if(myerror == 1) {
 		//we have successfully zoned
 		DoZoneSuccess(zc, target_zone_id, target_instance_id, dest_x, dest_y, dest_z, dest_h, ignorerestrictions);
