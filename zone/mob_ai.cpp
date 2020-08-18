@@ -117,7 +117,8 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				(
 				 (spells[AIspells[i].spellid].targettype == ST_HateList || spells[AIspells[i].spellid].targettype == ST_AETargetHateList) ||
 				 (
-				  (spells[AIspells[i].spellid].targettype==ST_AECaster || spells[AIspells[i].spellid].targettype==ST_AEBard)
+				  // note: I think this check is actually wrong and we should be checking range instead in all cases, BUT if range is 0, range check is skipped? Works for now
+				  (spells[AIspells[i].spellid].targettype==ST_AECaster || spells[AIspells[i].spellid].targettype==ST_AEBard || spells[AIspells[i].spellid].targettype==ST_AEClientV1)
 				  && dist2 <= spells[AIspells[i].spellid].aoerange*spells[AIspells[i].spellid].aoerange
 				 ) ||
 				 dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
