@@ -1144,7 +1144,9 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 
 	for (int o = 0; o < EFFECT_COUNT; o++) {
 		switch (spells[spell_id].effectid[o]) {
-		case SE_CurrentHP: {
+			case SE_CurrentHP:
+			case SE_PercentalHeal:
+			{
 			if (heal_possible == 0) {
 				AggroAmount += 1;
 				break;
