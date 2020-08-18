@@ -18,6 +18,8 @@
  *
  */
 
+#define PLATFORM_WORLD 1
+
 #include "../common/global_define.h"
 
 #include <iostream>
@@ -90,7 +92,11 @@ union semun {
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
 #include "world_server_command_handler.h"
+#include "../common/content/world_content_service.h"
+#include "../common/repositories/merchantlist_temp_repository.h"
+#include "world_store.h"
 
+WorldStore world_store;
 ClientList client_list;
 GroupLFPList LFPGroupList;
 ZSList zoneserver_list;
@@ -106,6 +112,7 @@ uint32 numzones = 0;
 bool holdzones = false;
 const WorldConfig *Config;
 EQEmuLogSys LogSys;
+WorldContentService content_service;
 WebInterfaceList web_interface;
 
 void CatchSignal(int sig_num);
@@ -137,6 +144,26 @@ void LoadDatabaseConnections()
 
 		std::exit(1);
 	}
+
+	/**
+	 * Multi-tenancy: Content database
+	 */
+	if (!Config->ContentDbHost.empty()) {
+		if (!content_db.Connect(
+			Config->ContentDbHost.c_str() ,
+			Config->ContentDbUsername.c_str(),
+			Config->ContentDbPassword.c_str(),
+			Config->ContentDbName.c_str(),
+			Config->ContentDbPort,
+			"content"
+		)) {
+			LogError("Cannot continue without a content database connection");
+			std::exit(1);
+		}
+	} else {
+		content_db.SetMysql(database.getMySQL());
+	}
+
 }
 
 void CheckForXMLConfigUpgrade()
@@ -228,17 +255,10 @@ int main(int argc, char** argv) {
 	if (argc > 1) {
 		LogSys.SilenceConsoleLogging();
 
-		/**
-		 * Get Config
-		 */
 		WorldConfig::LoadConfig();
 		Config = WorldConfig::get();
 
-		/**
-		 * Load database
-		 */
 		LoadDatabaseConnections();
-
 		LogSys.EnableConsoleLogging();
 
 		WorldserverCommandHandler::CommandHandler(argc, argv);
@@ -311,7 +331,9 @@ int main(int argc, char** argv) {
 	database.PurgeAllDeletedDataBuckets();
 
 	LogInfo("Loading zones");
-	database.LoadZoneNames();
+
+	world_store.LoadZones();
+
 	LogInfo("Clearing groups");
 	database.ClearGroup();
 	LogInfo("Clearing raids");
@@ -321,12 +343,18 @@ int main(int argc, char** argv) {
 	LogInfo("Clearing inventory snapshots");
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
-	if (!database.LoadItems(hotfix_name))
-		LogError("Error: Could not load item data. But ignoring");
-	LogInfo("Loading skill caps");
-	if (!database.LoadSkillCaps(std::string(hotfix_name)))
-		LogError("Error: Could not load skill cap data. But ignoring");
 
+	LogInfo("Purging player sold merchant items");
+	MerchantlistTempRepository::Truncate();
+
+	if (!content_db.LoadItems(hotfix_name)) {
+		LogError("Error: Could not load item data. But ignoring");
+	}
+
+	LogInfo("Loading skill caps");
+	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
+		LogError("Error: Could not load skill cap data. But ignoring");
+	}
 
 	LogInfo("Loading guilds");
 	guild_mgr.LoadGuilds();
@@ -405,8 +433,8 @@ int main(int argc, char** argv) {
 	PurgeInstanceTimer.Start(450000);
 
 	LogInfo("Loading char create info");
-	database.LoadCharacterCreateAllocations();
-	database.LoadCharacterCreateCombos();
+	content_db.LoadCharacterCreateAllocations();
+	content_db.LoadCharacterCreateCombos();
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
@@ -593,6 +621,7 @@ int main(int argc, char** argv) {
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();
 			database.ping();
+			content_db.ping();
 
 			std::string window_title = StringFormat("World: %s Clients: %i", Config->LongName.c_str(), client_list.GetClientCount());
 			UpdateWindowTitle(window_title);

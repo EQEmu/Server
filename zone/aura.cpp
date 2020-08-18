@@ -837,7 +837,7 @@ void Mob::MakeAura(uint16 spell_id)
 	}
 
 	AuraRecord record{};
-	if (!database.GetAuraEntry(spell_id, record)) {
+	if (!content_db.GetAuraEntry(spell_id, record)) {
 		Message(Chat::Red, "Unable to find data for aura %s", spells[spell_id].name);
 		LogError("Unable to find data for aura [{}], check auras table", spell_id);
 		return;
@@ -871,7 +871,7 @@ void Mob::MakeAura(uint16 spell_id)
 		return;
 	}
 
-	const auto base = database.LoadNPCTypesData(record.npc_type);
+	const auto base = content_db.LoadNPCTypesData(record.npc_type);
 	if (base == nullptr) {
 		Message(Chat::Red, "Unable to load NPC data for aura %s", spells[spell_id].teleport_zone);
 		LogError(

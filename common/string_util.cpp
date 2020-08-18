@@ -35,7 +35,7 @@
 	#define va_copy(d,s) ((d) = (s))
 #endif
 
-// original source: 
+// original source:
 // https://github.com/facebook/folly/blob/master/folly/String.cpp
 //
 const std::string vStringFormat(const char* format, va_list args)
@@ -142,6 +142,23 @@ std::string implode(std::string glue, std::vector<std::string> src)
 	final_output.resize (output.str().size () - glue.size());
 
 	return final_output;
+}
+
+std::vector<std::string> wrap(std::vector<std::string> &src, std::string character)
+{
+	std::vector<std::string> new_vector;
+	new_vector.reserve(src.size());
+
+	for (auto &e: src) {
+		if (e == "null") {
+			new_vector.emplace_back(e);
+			continue;
+		}
+
+		new_vector.emplace_back(character + e + character);
+	}
+
+	return new_vector;
 }
 
 std::string EscapeString(const std::string &s) {

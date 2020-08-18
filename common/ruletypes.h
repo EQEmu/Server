@@ -391,6 +391,7 @@ RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
+RULE_REAL(Combat, AERampageSafeZone, 0.018, "max hit ae ramp reduction range")
 RULE_INT(Combat, PetBaseCritChance, 0, "Pet base crit chance")
 RULE_INT(Combat, NPCBashKickLevel, 6, "The level that NPCcan KICK/BASH")
 RULE_INT(Combat, NPCBashKickStunChance, 15, "Percent chance that a bash/kick will stun")
@@ -492,6 +493,7 @@ RULE_INT(Combat, NPCAssistCap, 5, "Maxiumium number of NPCthat will assist anoth
 RULE_INT(Combat, NPCAssistCapTimer, 6000, "Time a NPC will take to clear assist aggro cap space (milliseconds)")
 RULE_BOOL(Combat, UseRevampHandToHand, false, "Use h2h revamped dmg/delays I believe this was implemented during SoF")
 RULE_BOOL(Combat, ClassicMasterWu, false, "Classic master wu uses a random special, modern doesn't")
+RULE_REAL(Combat, HitBoxMod, 1.00, "Added to test hit boxes.")
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "Level to stop damage caps. 1 will effectively disable them, 20 should give basically same results as old incorrect system")
 RULE_INT(Combat, LevelToStopACTwinkControl, 50, "Level to stop armorclass twink control. 1 will effectively disable it, 50 should give basically same results as current system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "True disables npc facestab - NPCget normal attack if not behind")
@@ -768,6 +770,10 @@ RULE_BOOL(HotReload, QuestsRepopWithReload, true, "When a hot reload is triggere
 RULE_BOOL(HotReload, QuestsRepopWhenPlayersNotInCombat, true, "When a hot reload is triggered, the zone will repop when no clients are in combat")
 RULE_BOOL(HotReload, QuestsResetTimersWithReload, true, "When a hot reload is triggered, quest timers will be reset")
 RULE_BOOL(HotReload, QuestsAutoReloadGlobalScripts, false, "When a quest, plugin, or global script changes, auto reload.")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Expansion)
+RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [-1 = ALL, 0 = Classic, 1 = Kunark etc.]")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Instances)

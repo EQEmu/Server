@@ -584,7 +584,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ZonePlayer: {
 		ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(szp->name);
-		printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, database.GetZoneID(szp->zone), szp->instance_id);
+		// printf("Zoning %s to %s(%u) - %u\n", client != nullptr ? client->GetCleanName() : "Unknown", szp->zone, ZoneID(szp->zone), szp->instance_id);
 		if (client) {
 			if (strcasecmp(szp->adminname, szp->name) == 0)
 				client->Message(Chat::White, "Zoning to: %s", szp->zone);
@@ -594,17 +594,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				SendEmoteMessage(szp->adminname, 0, 0, "Summoning %s to %s %1.1f, %1.1f, %1.1f", szp->name, szp->zone, szp->x_pos, szp->y_pos, szp->z_pos);
 			}
 			if (!szp->instance_id) {
-				client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 			}
 			else {
-				if (database.GetInstanceID(client->CharacterID(), database.GetZoneID(szp->zone)) == 0) {
+				if (database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)) == 0) {
 					client->AssignToInstance(szp->instance_id);
-					client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 				}
 				else {
-					client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), database.GetZoneID(szp->zone)));
+					client->RemoveFromInstance(database.GetInstanceID(client->CharacterID(), ZoneID(szp->zone)));
 					client->AssignToInstance(szp->instance_id);
-					client->MovePC(database.GetZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
+					client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
 				}
 			}
 		}
@@ -1951,7 +1951,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZMarqueeGroup_Struct* CZMS = (CZMarqueeGroup_Struct*) pack->pBuffer;
 		auto client_group = entity_list.GetGroupByID(CZMS->group_id);
 		std::string message = CZMS->message;
-		if (client_group) {			
+		if (client_group) {
 			for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 				if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 					auto group_member = client_group->members[member_index]->CastToClient();
@@ -1980,7 +1980,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		CZMarqueeGuild_Struct* CZMS = (CZMarqueeGuild_Struct*) pack->pBuffer;
 		std::string message = CZMS->message;
-		for (auto &client : entity_list.GetClientList()) {			
+		for (auto &client : entity_list.GetClientList()) {
 			if (client.second->GuildID() > 0 && client.second->GuildID() == CZMS->guild_id) {
 				client.second->SendMarqueeMessage(CZMS->type, CZMS->priority, CZMS->fade_in, CZMS->fade_out, CZMS->duration, message);
 			}
@@ -2081,7 +2081,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	
+
 	case ServerOP_CZMoveInstancePlayer:
 	{
 		CZMoveInstancePlayer_Struct* CZMP = (CZMoveInstancePlayer_Struct*) pack->pBuffer;
@@ -2851,32 +2851,32 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
 		LogInfo("Loading items");
-		if (!database.LoadItems(hotfix_name)) {
+		if (!content_db.LoadItems(hotfix_name)) {
 			LogError("Loading items failed!");
 		}
 
 		LogInfo("Loading npc faction lists");
-		if (!database.LoadNPCFactionLists(hotfix_name)) {
+		if (!content_db.LoadNPCFactionLists(hotfix_name)) {
 			LogError("Loading npcs faction lists failed!");
 		}
 
 		LogInfo("Loading loot tables");
-		if (!database.LoadLoot(hotfix_name)) {
+		if (!content_db.LoadLoot(hotfix_name)) {
 			LogError("Loading loot failed!");
 		}
 
 		LogInfo("Loading skill caps");
-		if (!database.LoadSkillCaps(std::string(hotfix_name))) {
+		if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 			LogError("Loading skill caps failed!");
 		}
 
 		LogInfo("Loading spells");
-		if (!database.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
+		if (!content_db.LoadSpells(hotfix_name, &SPDAT_RECORDS, &spells)) {
 			LogError("Loading spells failed!");
 		}
 
 		LogInfo("Loading base data");
-		if (!database.LoadBaseData(hotfix_name)) {
+		if (!content_db.LoadBaseData(hotfix_name)) {
 			LogError("Loading base data failed!");
 		}
 		break;

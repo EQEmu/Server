@@ -274,7 +274,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool r
 		Log(Logs::Detail, Logs::Rules, "Processing rule set '%s' (%d) load...", default_ruleset_name.c_str(), default_ruleset_id);
 
 		std::string query = StringFormat(
-			"SELECT `rule_name`, `rule_value` FROM `rule_values` WHERE `ruleset_id` = '%d'",
+			"SELECT `rule_name`, `rule_value` FROM `rule_values` WHERE `ruleset_id` = %d",
 			default_ruleset_id
 		);
 
@@ -292,7 +292,7 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool r
 
 	Log(Logs::Detail, Logs::Rules, "Processing rule set '%s' (%d) load...", ruleset_name, ruleset_id);
 
-	std::string query = StringFormat("SELECT `rule_name`, `rule_value` FROM `rule_values` WHERE `ruleset_id` = '%d'", ruleset_id);
+	std::string query = StringFormat("SELECT `rule_name`, `rule_value` FROM `rule_values` WHERE `ruleset_id` = %d", ruleset_id);
 
 	auto results = database->QueryDatabase(query);
 	if (!results.Success()) {

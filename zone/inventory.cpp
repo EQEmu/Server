@@ -23,6 +23,7 @@
 #include "quest_parser_collection.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 extern WorldServer worldserver;
 
@@ -231,7 +232,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
 	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
 	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-	
+
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
 		const EQ::ItemData* augtest = database.GetItem(augments[iter]);
 
@@ -249,7 +250,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
 				Message(Chat::Red, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
-				
+
 				return false;
 			}
 			// check that augment is an actual augment
@@ -257,7 +258,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				Message(Chat::Red, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
 				LogInventory("Player [{}] on account [{}] attempted to use a non-augment item (Aug[{}]) as an augment.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
 					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5, aug6);
-				
+
 				return false;
 			}
 
@@ -504,7 +505,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// validation passed..so, set the charges and create the actual item
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
-	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant 
+	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
 	if(charges <= 0 && item->Stackable)
 		charges = 1;
 
@@ -534,7 +535,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	// attune item
 	if(attuned && inst->GetItem()->Attuneable)
 		inst->SetAttuned(true);
-		
+
 	inst->SetOrnamentIcon(ornament_icon);
 	inst->SetOrnamentationIDFile(ornament_idfile);
 	inst->SetOrnamentHeroModel(ornament_hero_model);
@@ -584,7 +585,7 @@ void Client::DropItem(int16 slot_id, bool recurse)
 {
 	LogInventory("[{}] (char_id: [{}]) Attempting to drop item from slot [{}] on the ground",
 		GetCleanName(), CharacterID(), slot_id);
-	
+
 	if(GetInv().CheckNoDrop(slot_id, recurse) && RuleI(World, FVNoDropFlag) == 0 ||
 		RuleI(Character, MinStatusForNoDropExemptions) < Admin() && RuleI(World, FVNoDropFlag) == 2)
 	{
@@ -1016,7 +1017,7 @@ bool Client::PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, boo
 		SendItemPacket(slot_id, &inst, ((slot_id == EQ::invslot::slotCursor) ? ItemPacketLimbo : ItemPacketTrade));
 		//SendWearChange(EQ::InventoryProfile::CalcMaterialFromSlot(slot_id));
 	}
-		
+
 	if (slot_id == EQ::invslot::slotCursor) {
 		auto s = m_inv.cursor_cbegin(), e = m_inv.cursor_cend();
 		return database.SaveCursor(this->CharacterID(), s, e);
@@ -1054,7 +1055,7 @@ void Client::PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, Ser
 	else {
 		SendLootItemInPacket(&inst, slot_id);
 	}
-	
+
 	if (bag_item_data) {
 		for (int index = EQ::invbag::SLOT_BEGIN; index <= EQ::invbag::SLOT_END; ++index) {
 			if (bag_item_data[index] == nullptr)
@@ -1168,7 +1169,7 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 					if (worn_slot_material != EQ::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
-					
+
 					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}
@@ -1245,7 +1246,7 @@ bool MakeItemLink(char* &ret_link, const ItemData *item, uint32 aug0, uint32 aug
 
 	//int hash = GetItemLinkHash(inst);	//eventually this will work (currently crashes zone), but for now we'll skip the extra overhead
 	int hash = NOT_USED;
-	
+
 	// Tested with UF and RoF..there appears to be a problem with using non-augment arguments below...
 	// Currently, enabling them causes misalignments in what the client expects. I haven't looked
 	// into it further to determine the cause..but, the function is setup to accept the parameters.
@@ -1935,7 +1936,7 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				fail_message = "Your class, deity and/or race may not equip that item.";
 			else if (fail_state == EQ::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
-			
+
 			if (fail_message)
 				Message(Chat::Red, "%s", fail_message);
 
@@ -2203,7 +2204,7 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 				EQ::ItemInstance* inst = this->m_inv.GetItem(slot2);
 				if(inst){
 					uint32 armor_color = ((uint32)dye->Slot[i].Red << 16) | ((uint32)dye->Slot[i].Green << 8) | ((uint32)dye->Slot[i].Blue);
-					inst->SetColor(armor_color); 
+					inst->SetColor(armor_color);
 					database.SaveCharacterMaterialColor(this->CharacterID(), i, armor_color);
 					database.SaveInventory(CharacterID(),inst,slot2);
 					if(dye->Slot[i].UseTint)
@@ -2225,7 +2226,7 @@ void Client::DyeArmor(EQ::TintProfile* dye){
 	auto outapp = new EQApplicationPacket(OP_Dye, 0);
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	
+
 }
 
 void Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
@@ -2334,7 +2335,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 	for (x = EQ::invbag::CURSOR_BAG_BEGIN; x <= EQ::invbag::CURSOR_BAG_END; ++x) {
 		if (num >= amt)
 			break;
-		
+
 		TempItem = nullptr;
 		ins = GetInv().GetItem(x);
 		if (ins)
@@ -2359,7 +2360,7 @@ bool Client::DecreaseByID(uint32 type, uint8 amt) {
 			TempItem = ins->GetItem();
 		if (TempItem && TempItem->ID != type)
 			continue;
-		
+
 		if (ins->GetCharges() < amt) {
 			amt -= ins->GetCharges();
 			DeleteItemInInventory(x, amt, true);
@@ -2550,7 +2551,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 		if (!new_item) { continue; }
 		auto new_inst = database.CreateBaseItem(new_item);
 		if (!new_inst) { continue; }
-		
+
 		if (CopyBagContents(new_inst, inst)) {
 			LogInventory("Disenchant Summoned Bags: Replacing [{}] with [{}] in slot [{}]", inst->GetItem()->Name, new_inst->GetItem()->Name, slot_id);
 			PutItemInInventory(slot_id, *new_inst, client_update);
@@ -2724,7 +2725,7 @@ void Client::RemoveDuplicateLore(bool client_update)
 		}
 		safe_delete(inst);
 	}
-	
+
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
 		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
 			continue;
@@ -3028,7 +3029,7 @@ void Client::CreateBandolier(const EQApplicationPacket *app)
 	LogInventory("Char: [{}] Creating Bandolier Set [{}], Set Name: [{}]", GetName(), bs->Number, bs->Name);
 	strcpy(m_pp.bandoliers[bs->Number].Name, bs->Name);
 
-	const EQ::ItemInstance* InvItem = nullptr; 
+	const EQ::ItemInstance* InvItem = nullptr;
 	const EQ::ItemData *BaseItem = nullptr;
 	int16 WeaponSlot = 0;
 
@@ -3059,7 +3060,7 @@ void Client::RemoveBandolier(const EQApplicationPacket *app)
 	memset(m_pp.bandoliers[bds->Number].Name, 0, 32);
 	for(int i = bandolierPrimary; i <= bandolierAmmo; i++) {
 		m_pp.bandoliers[bds->Number].Items[i].ID = 0;
-		m_pp.bandoliers[bds->Number].Items[i].Icon = 0; 
+		m_pp.bandoliers[bds->Number].Items[i].Icon = 0;
 	}
 	database.DeleteCharacterBandolier(this->CharacterID(), bds->Number);
 }

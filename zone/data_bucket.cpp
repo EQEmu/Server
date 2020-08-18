@@ -2,6 +2,7 @@
 #include <utility>
 #include "../common/string_util.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include <ctime>
 #include <cctype>
 #include <algorithm>

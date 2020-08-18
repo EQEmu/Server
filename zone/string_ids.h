@@ -310,6 +310,7 @@
 #define WHOALL_NO_RESULTS			5029	//There are no players in EverQuest that match those who filters.
 #define TELL_QUEUED_MESSAGE			5045	//You told %1 '%T2. %3'
 #define TOLD_NOT_ONLINE				5046	//%1 is not online at this time.
+#define ZONING_NO_EXPANSION         5052	//The zone that you are attempting to enter is part of an expansion that you do not yet own.  You may need to return to the Login screen and enter an account key for that expansion.  If you have received this message in error, please /petition or send an email to EQAccounts@soe.sony.com
 #define PETITION_NO_DELETE			5053	//You do not have a petition in the queue.
 #define PETITION_DELETED			5054	//Your petition was successfully deleted.
 #define ALREADY_IN_RAID				5060	//%1 is already in a raid.

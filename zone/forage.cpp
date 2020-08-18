@@ -30,6 +30,8 @@
 #include "titles.h"
 #include "water_map.h"
 #include "zonedb.h"
+#include "zone_store.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <iostream>
 
@@ -54,9 +56,25 @@ uint32 ZoneDatabase::GetZoneForage(uint32 ZoneID, uint8 skill) {
 	}
 
 	uint32 chancepool = 0;
-    std::string query = StringFormat("SELECT itemid, chance FROM "
-                                    "forage WHERE zoneid = '%i' and level <= '%i' "
-                                    "LIMIT %i", ZoneID, skill, FORAGE_ITEM_LIMIT);
+    std::string query = fmt::format(
+    	SQL(
+    		SELECT
+			  itemid,
+			  chance
+			FROM
+			  forage
+			WHERE
+			  zoneid = '{}'
+			  and level <= '{}'
+			  {}
+			LIMIT
+			 {}
+    		),
+    	ZoneID,
+    	skill,
+    	ContentFilterCriteria::apply(),
+    	FORAGE_ITEM_LIMIT
+	);
     auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		return 0;
@@ -109,9 +127,24 @@ uint32 ZoneDatabase::GetZoneFishing(uint32 ZoneID, uint8 skill, uint32 &npc_id, 
 		chance[c]=0;
 	}
 
-    std::string query = StringFormat("SELECT itemid, chance, npc_id, npc_chance "
-                                    "FROM fishing WHERE (zoneid = '%i' || zoneid = 0) AND skill_level <= '%i'",
-                                    ZoneID, skill);
+    std::string query = fmt::format(
+    	SQL(
+    	SELECT
+		  itemid,
+		  chance,
+		  npc_id,
+		  npc_chance
+		FROM
+		  fishing
+		WHERE
+		  (zoneid = '{}' || zoneid = 0)
+		  AND skill_level <= '{}'
+		  {}
+		),
+		ZoneID,
+		skill,
+		ContentFilterCriteria::apply()
+	);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
 		return 0;
@@ -274,13 +307,13 @@ void Client::GoFish()
 		if (zone->random.Int(0, 399) <= fishing_skill ) {
 			uint32 npc_id = 0;
 			uint8 npc_chance = 0;
-			food_id = database.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
+			food_id = content_db.GetZoneFishing(m_pp.zone_id, fishing_skill, npc_id, npc_chance);
 
 			//check for add NPC
 			if (npc_chance > 0 && npc_id) {
 				if (zone->random.Roll(npc_chance)) {
 					if (zone->CanDoCombat()) {
-						const NPCType *tmp = database.LoadNPCTypesData(npc_id);
+						const NPCType *tmp = content_db.LoadNPCTypesData(npc_id);
 						if (tmp != nullptr) {
 							auto positionNPC = GetPosition();
 							positionNPC.x = positionNPC.x + 3;
@@ -407,7 +440,7 @@ void Client::ForageItem(bool guarantee) {
 		uint32 stringid = FORAGE_NOEAT;
 
 		if (zone->random.Roll(25)) {
-			foragedfood = database.GetZoneForage(m_pp.zone_id, skill_level);
+			foragedfood = content_db.GetZoneForage(m_pp.zone_id, skill_level);
 		}
 
 		//not an else in case theres no DB food
