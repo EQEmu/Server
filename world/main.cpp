@@ -326,10 +326,10 @@ int main(int argc, char** argv) {
 			LogInfo("Current hotfix in use: [{}]", hotfix_name.c_str());
 		}
 	}
-	
+
 	LogInfo("Purging expired data buckets");
 	database.PurgeAllDeletedDataBuckets();
-	
+
 	LogInfo("Loading zones");
 
 	world_store.LoadZones();
