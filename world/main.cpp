@@ -327,9 +327,6 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	LogInfo("Purging expired data buckets");
-	database.PurgeAllDeletedDataBuckets();
-
 	LogInfo("Loading zones");
 
 	world_store.LoadZones();
