@@ -9966,7 +9966,7 @@ void command_task(Client *c, const Seperator *sep) {
 			if(!strcasecmp(sep->arg[2], "task") && (sep->arg[3][0] != '\0')) {
 				int TaskID = atoi(sep->arg[3]);
 				if((TaskID > 0) && (TaskID < MAXTASKS)) {
-					c->Message(Chat::Yellow, "Sending reload task %i to world");
+					c->Message(Chat::Yellow, "Sending reload task %i to world", TaskID);
 					worldserver.SendReloadTasks(RELOADTASKS, TaskID);
 					c->Message(Chat::Yellow, "Back again");
 					return;
