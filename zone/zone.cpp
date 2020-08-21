@@ -2001,6 +2001,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 
 		if (zone_point.is_virtual) {
 			zone->virtual_zone_point_list.emplace_back(zone_point);
+			safe_delete(zp);
 			continue;
 		}
 
