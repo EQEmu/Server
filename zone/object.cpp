@@ -463,7 +463,7 @@ void Object::RandomSpawn(bool send_packet) {
 	m_data.x = zone->random.Real(m_min_x, m_max_x);
 	m_data.y = zone->random.Real(m_min_y, m_max_y);
 
-	if(m_data.z == BEST_Z_INVALID) {
+	if (m_data.z == BEST_Z_INVALID && zone->HasMap()) {
 		glm::vec3 me;
 		me.x = m_data.x;
 		me.y = m_data.y;
