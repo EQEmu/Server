@@ -523,22 +523,37 @@ void NPC::AddLootDrop(
 	}
 }
 
-void NPC::AddItem(const EQ::ItemData* item, uint16 charges, bool equipitem) {
+void NPC::AddItem(const EQ::ItemData *item, uint16 charges, bool equipitem)
+{
 	//slot isnt needed, its determined from the item.
 	auto loot_drop_entry = NPC::NewLootDropEntry();
-	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+	loot_drop_entry.equip_item   = static_cast<uint8>(equipitem ? 1 : 0);
+	loot_drop_entry.item_charges = charges;
 
 	AddLootDrop(item, &itemlist, loot_drop_entry, true);
 }
 
-void NPC::AddItem(uint32 itemid, uint16 charges, bool equipitem, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5, uint32 aug6) {
+void NPC::AddItem(
+	uint32 itemid,
+	uint16 charges,
+	bool equipitem,
+	uint32 aug1,
+	uint32 aug2,
+	uint32 aug3,
+	uint32 aug4,
+	uint32 aug5,
+	uint32 aug6
+)
+{
 	//slot isnt needed, its determined from the item.
-	const EQ::ItemData * i = database.GetItem(itemid);
-	if(i == nullptr)
+	const EQ::ItemData *i = database.GetItem(itemid);
+	if (i == nullptr) {
 		return;
+	}
 
 	auto loot_drop_entry = NPC::NewLootDropEntry();
-	loot_drop_entry.equip_item = static_cast<uint8>(equipitem ? 1 : 0);
+	loot_drop_entry.equip_item   = static_cast<uint8>(equipitem ? 1 : 0);
+	loot_drop_entry.item_charges = charges;
 
 	AddLootDrop(i, &itemlist, loot_drop_entry, true, aug1, aug2, aug3, aug4, aug5, aug6);
 }
