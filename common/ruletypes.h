@@ -52,6 +52,7 @@ RULE_BOOL(Character, LeaveCorpses, true, "Setting whether you leave a corpse beh
 RULE_BOOL(Character, LeaveNakedCorpses, false, "Setting whether you leave a corpse without items")
 RULE_INT(Character, MaxDraggedCorpses, 2, "Maximum number of corpses you can drag at once")
 RULE_REAL(Character, DragCorpseDistance, 400, "If a player is using /corpsedrag and moving, the corpse will not move until the player exceeds this distance")
+RULE_REAL(Character, FinalExpMultiplier, 1, "Added on top of everything else, easy for setting EXP events")
 RULE_REAL(Character, ExpMultiplier, 0.5, "If greater than 0, the experience gained is multiplied by this value. ")
 RULE_REAL(Character, AAExpMultiplier, 0.5, "If greater than 0, the AA experience gained is multiplied by this value. ")
 RULE_REAL(Character, GroupExpMultiplier, 0.5, "The experience in a group is multiplied by this value in addition to the group multiplier. The group multiplier is: 2 members=x 1.2, 3=x1.4, 4=x1.6, 5=x1.8, 6=x2.16")
