@@ -344,9 +344,6 @@ int main(int argc, char** argv) {
 	database.ClearInvSnapshots();
 	LogInfo("Loading items");
 
-	LogInfo("Purging player sold merchant items");
-	MerchantlistTempRepository::Truncate();
-
 	if (!content_db.LoadItems(hotfix_name)) {
 		LogError("Error: Could not load item data. But ignoring");
 	}

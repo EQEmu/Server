@@ -621,7 +621,7 @@ bool Corpse::Save() {
 	end = itemlist.end();
 	for (; cur != end; ++cur) {
 		ServerLootItem_Struct* item = *cur;
-		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(ServerLootItem_Struct));
+		memcpy((char*)&dbpc->items[x++], (char*)item, sizeof(player_lootitem::ServerLootItem_Struct));
 	}
 
 	/* Create New Corpse*/
@@ -1573,10 +1573,10 @@ void Corpse::UpdateEquipmentLight()
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		if ((*iter)->equip_slot < EQ::invslot::EQUIPMENT_BEGIN || (*iter)->equip_slot > EQ::invslot::EQUIPMENT_END) { continue; }
 		if ((*iter)->equip_slot == EQ::invslot::slotAmmo) { continue; }
-		
+
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
-		
+
 		if (EQ::lightsource::IsLevelGreater(item->Light, m_Light.Type[EQ::lightsource::LightEquipment]))
 			m_Light.Type[EQ::lightsource::LightEquipment] = item->Light;
 	}
@@ -1584,7 +1584,7 @@ void Corpse::UpdateEquipmentLight()
 	uint8 general_light_type = 0;
 	for (auto iter = itemlist.begin(); iter != itemlist.end(); ++iter) {
 		if ((*iter)->equip_slot < EQ::invslot::GENERAL_BEGIN || (*iter)->equip_slot > EQ::invslot::GENERAL_END) { continue; }
-		
+
 		auto item = database.GetItem((*iter)->item_id);
 		if (item == nullptr) { continue; }
 
