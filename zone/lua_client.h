@@ -122,6 +122,7 @@ public:
 	void IncreaseLanguageSkill(int skill_id);
 	void IncreaseLanguageSkill(int skill_id, int value);
 	int GetRawSkill(int skill_id);
+	int GetSkill(int skill_id);
 	bool HasSkill(int skill_id);
 	bool CanHaveSkill(int skill_id);
 	void SetSkill(int skill_id, int value);
