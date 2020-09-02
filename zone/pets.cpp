@@ -439,7 +439,6 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	// Deault to on in older clients, off in new clients that control state.
 	if (owner && owner->IsClient()) {
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
-			LogError("Titanium");
 			non_persistant_pet_states_client = true;
 		}
 
