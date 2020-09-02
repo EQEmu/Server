@@ -433,7 +433,7 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	petpower = power;
 	SetOwnerID(owner->GetID());
 	SetPetSpellID(spell_id);
-	taunting = true;
+	taunting = false;
 
 	// Class should use npc constructor to set light properties
 }

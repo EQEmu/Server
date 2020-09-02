@@ -155,6 +155,7 @@ struct PetInfo {
 	SpellBuff_Struct	Buffs[PET_BUFF_COUNT];
 	uint32	Items[EQ::invslot::EQUIPMENT_COUNT];
 	char	Name[64];
+	bool	taunting;
 };
 
 struct ZoneSpellsBlocked {
