@@ -433,7 +433,18 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	petpower = power;
 	SetOwnerID(owner->GetID());
 	SetPetSpellID(spell_id);
-	taunting = false;
+
+	bool non_persistant_pet_states_client = false;
+
+	// Deault to on in older clients, off in new clients that control state.
+	if (owner && owner->IsClient()) {
+		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
+			LogError("Titanium");
+			non_persistant_pet_states_client = true;
+		}
+
+	taunting = non_persistant_pet_states_client;
+	}
 
 	// Class should use npc constructor to set light properties
 }

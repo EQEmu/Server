@@ -1632,9 +1632,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			pet->CalcBonuses();
 			pet->SetHP(m_petinfo.HP);
 			pet->SetMana(m_petinfo.Mana);
-			// 1st login, client takes care of this from button status
-			if (!firstlogon) {
-				pet->SetTaunting(m_petinfo.taunting);
+
+			// Taunt persists when zoning on newer clients, overwrite default.
+			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+				if (!firstlogon) {
+					pet->SetTaunting(m_petinfo.taunting);
+				}
 			}
 		}
 		m_petinfo.SpellID = 0;
