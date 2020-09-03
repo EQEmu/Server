@@ -434,15 +434,19 @@ Pet::Pet(NPCType *type_data, Mob *owner, PetType type, uint16 spell_id, int16 po
 	SetOwnerID(owner->GetID());
 	SetPetSpellID(spell_id);
 
-	bool non_persistant_pet_states_client = false;
+	// All pets start at false on newer clients. The client
+	// turns it on and tracks the state.
+	taunting=false;
 
-	// Deault to on in older clients, off in new clients that control state.
+	// Older clients didn't track state, and default taunting is on (per @mackal)
+	// Familiar and animation pets don't get taunt until an AA.
 	if (owner && owner->IsClient()) {
 		if (!(owner->CastToClient()->ClientVersionBit() & EQ::versions::maskUFAndLater)) {
-			non_persistant_pet_states_client = true;
+			if ((typeofpet != petFamiliar && typeofpet != petAnimation) || 
+				GetAA(aaAnimationEmpathy) >= 3) {
+				taunting=true;
+			}
 		}
-
-	taunting = non_persistant_pet_states_client;
 	}
 
 	// Class should use npc constructor to set light properties
