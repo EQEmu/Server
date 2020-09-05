@@ -1652,24 +1652,37 @@ Lua_Expedition Lua_Client::CreateExpedition(luabind::object dz_info, luabind::ob
 	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
 	if (luabind::type(dz_info["compass"]) == LUA_TTABLE)
 	{
-		dz.SetCompass(DynamicZoneLocation{
-			luabind::object_cast<uint32_t>(dz_info["compass"][1]),
-			luabind::object_cast<float>(dz_info["compass"][2]),
-			luabind::object_cast<float>(dz_info["compass"][3]),
-			luabind::object_cast<float>(dz_info["compass"][4]),
-			0
-		});
+		luabind::object compass(dz_info["compass"]);
+		float x = luabind::object_cast<float>(compass[2]);
+		float y = luabind::object_cast<float>(compass[3]);
+		float z = luabind::object_cast<float>(compass[4]);
+
+		if (luabind::type(compass[1]) == LUA_TSTRING)
+		{
+			dz.SetCompass({ ZoneID(luabind::object_cast<std::string>(compass[1])), x, y, z, 0.0f });
+		}
+		else if (luabind::type(compass[1]) == LUA_TNUMBER)
+		{
+			dz.SetCompass({ luabind::object_cast<uint32_t>(compass[1]), x, y, z, 0.0f });
+		}
 	}
 
 	if (luabind::type(dz_info["safereturn"]) == LUA_TTABLE)
 	{
-		dz.SetSafeReturn(DynamicZoneLocation{
-			luabind::object_cast<uint32_t>(dz_info["safereturn"][1]),
-			luabind::object_cast<float>(dz_info["safereturn"][2]),
-			luabind::object_cast<float>(dz_info["safereturn"][3]),
-			luabind::object_cast<float>(dz_info["safereturn"][4]),
-			luabind::object_cast<float>(dz_info["safereturn"][5])
-		});
+		luabind::object safereturn(dz_info["safereturn"]);
+		float x = luabind::object_cast<float>(safereturn[2]);
+		float y = luabind::object_cast<float>(safereturn[3]);
+		float z = luabind::object_cast<float>(safereturn[4]);
+		float w = luabind::object_cast<float>(safereturn[5]);
+
+		if (luabind::type(safereturn[1]) == LUA_TSTRING)
+		{
+			dz.SetSafeReturn({ ZoneID(luabind::object_cast<std::string>(safereturn[1])), x, y, z, w });
+		}
+		else if (luabind::type(safereturn[1]) == LUA_TNUMBER)
+		{
+			dz.SetSafeReturn({ luabind::object_cast<uint32_t>(safereturn[1]), x, y, z, w });
+		}
 	}
 
 	if (luabind::type(dz_info["zonein"]) == LUA_TTABLE)
