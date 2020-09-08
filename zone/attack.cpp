@@ -3455,9 +3455,9 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 					if (GetPetOrder() == SPO_Sit) {
 						SetPetOrder(SPO_Follow);
 					}
-				// fix GUI sit button to be unpressed and stop sitting regen
-				owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
-				SetAppearance(eaStanding);
+					// fix GUI sit button to be unpressed and stop sitting regen
+					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					SetAppearance(eaStanding);
 				}	
 			}
 
