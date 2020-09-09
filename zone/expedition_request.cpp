@@ -30,6 +30,8 @@
 
 extern WorldServer worldserver;
 
+constexpr char SystemName[] = "expedition";
+
 struct ExpeditionRequestConflict
 {
 	std::string character_name;
@@ -75,7 +77,7 @@ bool ExpeditionRequest::Validate(Client* requester)
 		m_leader = m_requester;
 		m_leader_id = m_requester->CharacterID();
 		m_leader_name = m_requester->GetName();
-		requirements_met = ValidateMembers({m_leader_name});
+		requirements_met = CanMembersJoin({m_leader_name});
 	}
 
 	auto elapsed = benchmark.elapsed();
@@ -90,16 +92,34 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 	m_leader_name = raid->leadername;
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(raid->leadername);
 
-	std::vector<std::string> member_names;
-	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+	// live (as of September 16, 2020) supports creation even if raid count exceeds
+	// expedition max. members are added up to the max ordered by group number.
+	auto raid_members = raid->GetMembers();
+
+	if (raid_members.size() > m_max_players)
 	{
-		if (raid->members[i].membername[0])
-		{
-			member_names.emplace_back(raid->members[i].membername);
-		}
+		// stable_sort not needed, order within a raid group may not be what is displayed
+		std::sort(raid_members.begin(), raid_members.end(),
+			[&](const RaidMember& lhs, const RaidMember& rhs) {
+				if (m_leader_name == lhs.membername) { // leader always added first
+					return true;
+				} else if (m_leader_name == rhs.membername) {
+					return false;
+				}
+				return lhs.GroupNumber < rhs.GroupNumber;
+			});
+
+		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "raid", SystemName,
+			SystemName, m_max_players, "raid", raid_members.size());
 	}
 
-	return ValidateMembers(member_names);
+	std::vector<std::string> member_names;
+	for (int i = 0; i < raid_members.size() && member_names.size() < m_max_players; ++i)
+	{
+		member_names.emplace_back(raid_members[i].membername);
+	}
+
+	return CanMembersJoin(member_names);
 }
 
 bool ExpeditionRequest::CanGroupRequest(Group* group)
@@ -109,20 +129,31 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	{
 		m_leader = group->GetLeader()->CastToClient();
 	}
+
 	// Group::GetLeaderName() is broken if group formed across zones, ask database instead
 	m_leader_name = m_leader ? m_leader->GetName() : GetGroupLeaderName(group->GetID()); // group->GetLeaderName();
 	m_leader_id = m_leader ? m_leader->CharacterID() : database.GetCharacterID(m_leader_name.c_str());
 
 	std::vector<std::string> member_names;
+	member_names.emplace_back(m_leader_name); // leader always added first
+
 	for (int i = 0; i < MAX_GROUP_MEMBERS; ++i)
 	{
-		if (group->membername[i][0])
+		if (group->membername[i][0] && m_leader_name != group->membername[i])
 		{
 			member_names.emplace_back(group->membername[i]);
 		}
 	}
 
-	return ValidateMembers(member_names);
+	if (member_names.size() > m_max_players)
+	{
+		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "group", SystemName,
+			SystemName, m_max_players, "group", member_names.size());
+
+		member_names.resize(m_max_players);
+	}
+
+	return CanMembersJoin(member_names);
 }
 
 std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
@@ -132,7 +163,7 @@ std::string ExpeditionRequest::GetGroupLeaderName(uint32_t group_id)
 	return std::string(leader_name_buffer);
 }
 
-bool ExpeditionRequest::ValidateMembers(const std::vector<std::string>& member_names)
+bool ExpeditionRequest::CanMembersJoin(const std::vector<std::string>& member_names)
 {
 	if (member_names.empty())
 	{
@@ -354,7 +385,7 @@ bool ExpeditionRequest::IsPlayerCountValidated(uint32_t member_count)
 	{
 		requirements_met = false;
 
-		SendLeaderMessage(Chat::Red, REQUIRED_PLAYER_COUNT, {
+		SendLeaderMessage(Chat::System, REQUIRED_PLAYER_COUNT, {
 			fmt::format_int(member_count).str(),
 			fmt::format_int(m_min_players).str(),
 			fmt::format_int(m_max_players).str()

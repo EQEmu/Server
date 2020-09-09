@@ -40,6 +40,8 @@ const char* const EXPEDITION_OTHER_BELONGS   = "{} attempted to create an expedi
 const char* const DZADD_INVITE_WARNING       = "Warning! You will be given replay timers for the following events if you enter %s:";
 const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
 const char* const KICKPLAYERS_EVERYONE       = "Everyone";
+// message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
+const char* const CREATE_NOT_ALL_ADDED       = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
 
 const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
@@ -130,10 +132,14 @@ Expedition* Expedition::TryCreate(
 
 		inserted.first->second->SendUpdatesToZoneMembers();
 		inserted.first->second->SendWorldExpeditionUpdate(ServerOP_ExpeditionCreate); // cache in other zones
+		inserted.first->second->SendLeaderMessage(request.GetLeaderClient(),
+			Chat::System, EXPEDITION_AVAILABLE, { request.GetExpeditionName() });
 
-		inserted.first->second->SendLeaderMessage(
-			request.GetLeaderClient(), Chat::Yellow, EXPEDITION_AVAILABLE, { request.GetExpeditionName() }
-		);
+		if (!request.GetNotAllAddedMessage().empty())
+		{
+			Client::SendCrossZoneMessage(request.GetLeaderClient(), request.GetLeaderName(),
+				Chat::System, request.GetNotAllAddedMessage());
+		}
 
 		return inserted.first->second.get();
 	}
@@ -889,7 +895,7 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 
 	if (leader.char_id != requester->CharacterID())
 	{
-		requester->MessageString(Chat::Red, EXPEDITION_NOT_LEADER, leader.name.c_str());
+		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, leader.name.c_str());
 		return false;
 	}
 
