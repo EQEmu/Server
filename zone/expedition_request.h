@@ -47,13 +47,14 @@ public:
 	Client* GetLeaderClient() const { return m_leader; }
 	uint32_t GetLeaderID() const { return m_leader_id; }
 	const std::string& GetLeaderName() const { return m_leader_name; }
+	const std::string& GetNotAllAddedMessage() const { return m_not_all_added_msg; }
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	std::vector<ExpeditionMember> GetMembers() const { return m_members; }
 	std::unordered_map<std::string, ExpeditionLockoutTimer> GetLockouts() const { return m_lockouts; }
 
 private:
-	bool ValidateMembers(const std::vector<std::string>& member_names);
+	bool CanMembersJoin(const std::vector<std::string>& member_names);
 	bool CanRaidRequest(Raid* raid);
 	bool CanGroupRequest(Group* group);
 	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
@@ -74,6 +75,7 @@ private:
 	bool     m_disable_messages     = false;
 	std::string m_expedition_name;
 	std::string m_leader_name;
+	std::string m_not_all_added_msg;
 	std::vector<ExpeditionMember> m_members;
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
 };

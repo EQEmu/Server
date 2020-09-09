@@ -1849,3 +1849,16 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 		}
 	}
 }
+
+std::vector<RaidMember> Raid::GetMembers() const
+{
+	std::vector<RaidMember> raid_members;
+	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+	{
+		if (members[i].membername[0])
+		{
+			raid_members.emplace_back(members[i]);
+		}
+	}
+	return raid_members;
+}
