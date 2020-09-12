@@ -211,8 +211,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		{
 			auto member_id = strtoul(row[col::member_id], nullptr, 10);
 			current_expedition->AddInternalMember(
-				row[col::member_name], member_id, ExpeditionMemberStatus::Offline
-			);
+				row[col::member_name], member_id, ExpeditionMemberStatus::Offline);
 			expedition_character_ids.emplace_back(expedition_id, member_id);
 		}
 	}
@@ -654,11 +653,10 @@ void Expedition::SendClientExpeditionInvite(
 		m_id, client->GetName(), inviter_name, swap_remove_name
 	);
 
-	client->SetPendingExpeditionInvite(ExpeditionInvite{m_id, inviter_name, swap_remove_name});
+	client->SetPendingExpeditionInvite({ m_id, inviter_name, swap_remove_name });
 
-	client->MessageString(
-		Chat::System, EXPEDITION_ASKED_TO_JOIN, m_leader.name.c_str(), m_expedition_name.c_str()
-	);
+	client->MessageString(Chat::System, EXPEDITION_ASKED_TO_JOIN,
+		m_leader.name.c_str(), m_expedition_name.c_str());
 
 	// live (as of March 11 2020 patch) sends warnings for lockouts added
 	// during current expedition that client would receive on entering dz
@@ -1237,9 +1235,8 @@ void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint
 				member_client->SetExpeditionID(0);
 				member_client->SendDzCompassUpdate();
 				member_client->QueuePacket(CreateInfoPacket(true).get());
-				member_client->MessageString(
-					Chat::Yellow, EXPEDITION_REMOVED, it->name.c_str(), m_expedition_name.c_str()
-				);
+				member_client->MessageString(Chat::Yellow, EXPEDITION_REMOVED,
+					it->name.c_str(), m_expedition_name.c_str());
 			}
 		}
 
@@ -1325,9 +1322,8 @@ void Expedition::SendUpdatesToZoneMembers(bool clear, bool message_on_clear)
 				member_client->SendExpeditionLockoutTimers();
 				if (clear && message_on_clear)
 				{
-					member_client->MessageString(
-						Chat::Yellow, EXPEDITION_REMOVED, member_client->GetName(), m_expedition_name.c_str()
-					);
+					member_client->MessageString(Chat::Yellow, EXPEDITION_REMOVED,
+						member_client->GetName(), m_expedition_name.c_str());
 				}
 			}
 		}
