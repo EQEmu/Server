@@ -84,6 +84,10 @@ public:
 		const std::string& event_name, uint32_t seconds, const std::string& uuid = {});
 	static void AddLockoutByCharacterName(const std::string& character_name, const std::string& expedition_name,
 		const std::string& event_name, uint32_t seconds, const std::string& uuid = {});
+	static bool HasLockoutByCharacterID(uint32_t character_id,
+		const std::string& expedition_name, const std::string& event_name);
+	static bool HasLockoutByCharacterName(const std::string& character_name,
+		const std::string& expedition_name, const std::string& event_name);
 	static void RemoveLockoutsByCharacterID(uint32_t character_id,
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void RemoveLockoutsByCharacterName(const std::string& character_name,
