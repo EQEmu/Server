@@ -115,6 +115,11 @@ int Lua_Expedition::GetZoneID() {
 	return self->GetDynamicZone().GetZoneID();
 }
 
+int Lua_Expedition::GetZoneVersion() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZone().GetZoneVersion();
+}
+
 bool Lua_Expedition::HasLockout(std::string event_name) {
 	Lua_Safe_Call_Bool();
 	return self->HasLockout(event_name);
@@ -209,6 +214,7 @@ luabind::scope lua_register_expedition() {
 		.def("GetSecondsRemaining", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetSecondsRemaining)
 		.def("GetUUID", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetUUID)
 		.def("GetZoneID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetZoneID)
+		.def("GetZoneVersion", &Lua_Expedition::GetZoneVersion)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
 		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
 		.def("RemoveCompass", (void(Lua_Expedition::*)(void))&Lua_Expedition::RemoveCompass)

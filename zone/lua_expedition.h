@@ -66,6 +66,7 @@ public:
 	int             GetSecondsRemaining();
 	std::string     GetUUID();
 	int             GetZoneID();
+	int             GetZoneVersion();
 	bool            HasLockout(std::string event_name);
 	bool            HasReplayLockout();
 	void            RemoveCompass();
