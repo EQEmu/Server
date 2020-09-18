@@ -107,6 +107,18 @@ Lua_Mob Lua_Group::GetMember(int index) {
 	return self->members[index];
 }
 
+bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name)
+{
+	Lua_Safe_Call_Bool();
+	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name);
+}
+
+bool Lua_Group::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name, int max_check_count)
+{
+	Lua_Safe_Call_Bool();
+	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
+}
+
 luabind::scope lua_register_group() {
 	return luabind::class_<Lua_Group>("Group")
 		.def(luabind::constructor<>())
@@ -129,7 +141,9 @@ luabind::scope lua_register_group() {
 		.def("GetLowestLevel", (int(Lua_Group::*)(void))&Lua_Group::GetLowestLevel)
 		.def("TeleportGroup", (void(Lua_Group::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Group::TeleportGroup)
 		.def("GetID", (int(Lua_Group::*)(void))&Lua_Group::GetID)
-		.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember);
+		.def("GetMember", (Lua_Mob(Lua_Group::*)(int))&Lua_Group::GetMember)
+		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string))&Lua_Group::DoesAnyMemberHaveExpeditionLockout)
+		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Group::*)(std::string, std::string, int))&Lua_Group::DoesAnyMemberHaveExpeditionLockout);
 }
 
 #endif

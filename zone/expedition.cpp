@@ -1642,6 +1642,26 @@ void Expedition::AddLockoutByCharacterName(
 	}
 }
 
+bool Expedition::HasLockoutByCharacterID(
+	uint32_t character_id, const std::string& expedition_name, const std::string& event_name)
+{
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
+	return std::any_of(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
+		return lockout.IsSameLockout(expedition_name, event_name);
+	});
+}
+
+bool Expedition::HasLockoutByCharacterName(
+	const std::string& character_name, const std::string& expedition_name, const std::string& event_name)
+{
+	if (!character_name.empty())
+	{
+		uint32_t character_id = database.GetCharacterID(character_name.c_str());
+		return HasLockoutByCharacterID(character_id, expedition_name, event_name);
+	}
+	return false;
+}
+
 void Expedition::RemoveLockoutsByCharacterID(
 	uint32_t character_id, const std::string& expedition_name, const std::string& event_name)
 {
@@ -2069,6 +2089,10 @@ std::string Expedition::GetLootEventBySpawnID(uint32_t spawn_id)
 std::vector<ExpeditionLockoutTimer> Expedition::GetExpeditionLockoutsByCharacterID(uint32_t character_id)
 {
 	std::vector<ExpeditionLockoutTimer> lockouts;
+	if (character_id == 0)
+	{
+		return lockouts;
+	}
 
 	auto client = entity_list.GetClientByCharID(character_id);
 	if (client)
