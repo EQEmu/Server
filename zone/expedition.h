@@ -23,6 +23,7 @@
 
 #include "dynamiczone.h"
 #include "expedition_lockout_timer.h"
+#include "../common/eq_constants.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -47,6 +48,13 @@ enum class ExpeditionMemberStatus : uint8_t
 	Offline,
 	InDynamicZone,
 	LinkDead
+};
+
+enum class ExpeditionLockMessage : uint8_t
+{
+	None = 0,
+	Close,
+	Begin
 };
 
 struct ExpeditionMember
@@ -114,7 +122,8 @@ public:
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name);
 	void SwapMember(Client* add_client, const std::string& remove_char_name);
-	void SetLocked(bool lock_expedition, bool update_db = false);
+	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
+		bool update_db = false, uint32_t msg_color = Chat::Yellow);
 
 	void AddLockout(const std::string& event_name, uint32_t seconds);
 	void AddReplayLockout(uint32_t seconds);

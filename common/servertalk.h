@@ -2051,6 +2051,14 @@ struct ServerExpeditionLockout_Struct {
 	char   event_name[256];
 };
 
+struct ServerExpeditionLockState_Struct {
+	uint32 expedition_id;
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  enabled;
+	uint8  lock_msg; // 0: none, 1: closing 2: trial begin
+};
+
 struct ServerExpeditionSetting_Struct {
 	uint32 expedition_id;
 	uint32 sender_zone_id;

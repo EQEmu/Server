@@ -39,6 +39,7 @@ namespace luabind {
 }
 
 luabind::scope lua_register_expedition();
+luabind::scope lua_register_expedition_lock_messages();
 
 class Lua_Expedition : public Lua_Ptr<Expedition>
 {
@@ -74,6 +75,8 @@ public:
 	void            SetCompass(uint32_t zone_id, float x, float y, float z);
 	void            SetCompass(std::string zone_name, float x, float y, float z);
 	void            SetLocked(bool lock_expedition);
+	void            SetLocked(bool lock_expedition, int lock_msg);
+	void            SetLocked(bool lock_expedition, int lock_msg, uint32_t color);
 	void            SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name);
 	void            SetLootEventBySpawnID(uint32_t spawn_id, std::string event_name);
 	void            SetReplayLockoutOnMemberJoin(bool enable);
