@@ -410,6 +410,7 @@
 9154|2020_04_11_expansions_content_filters.sql|SHOW COLUMNS from `zone` LIKE 'min_expansion'|empty|
 9155|2020_08_15_lootdrop_level_filtering.sql|SHOW COLUMNS from `lootdrop_entries` LIKE 'trivial_min_level'|empty|
 9156|2020_08_16_virtual_zonepoints.sql|SHOW COLUMNS from `zone_points` LIKE 'is_virtual'|empty|
+9157|2020_09_02_pet_taunting.sql|SHOW COLUMNS from `character_pet_info` LIKE 'taunting'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

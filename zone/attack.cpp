@@ -3445,6 +3445,22 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				// emote goes with every one ... even npcs
 				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName());
 			}
+		
+			// If a client pet is damaged while sitting, stand, fix sit button,
+			// and remove sitting regen.  Removes bug where client clicks sit
+			// during battle and gains pet hp-regen and bugs the sit button.
+			if (IsPet()) {
+				Mob *owner = this->GetOwner();
+				if (owner && owner->IsClient()) {
+					if (GetPetOrder() == SPO_Sit) {
+						SetPetOrder(SPO_Follow);
+					}
+					// fix GUI sit button to be unpressed and stop sitting regen
+					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					SetAppearance(eaStanding);
+				}	
+			}
+
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
 		Mob *pet = GetPet();
@@ -3455,6 +3471,18 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		{
 			if (!pet->IsHeld()) {
 				LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
+				if (IsClient()) {
+					// if pet was sitting his new mode is follow
+					// following after the battle (live verified)
+					if (pet->GetPetOrder() == SPO_Sit) {
+						pet->SetPetOrder(SPO_Follow);
+					}
+
+					// fix GUI sit button to be unpressed and stop sitting regen
+					this->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					pet->SetAppearance(eaStanding);
+				}
+
 				pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
 				pet->SetTarget(attacker);
 				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
