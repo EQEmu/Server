@@ -152,7 +152,17 @@ void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
 	Lua_Safe_Call_Void();
-	self->SetLocked(lock_expedition, true);
+	self->SetLocked(lock_expedition, ExpeditionLockMessage::None, true);
+}
+
+void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg) {
+	Lua_Safe_Call_Void();
+	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true);
+}
+
+void Lua_Expedition::SetLocked(bool lock_expedition, int lock_msg, uint32_t msg_color) {
+	Lua_Safe_Call_Void();
+	self->SetLocked(lock_expedition, static_cast<ExpeditionLockMessage>(lock_msg), true, msg_color);
 }
 
 void Lua_Expedition::SetLootEventByNPCTypeID(uint32_t npc_type_id, std::string event_name) {
@@ -222,6 +232,8 @@ luabind::scope lua_register_expedition() {
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetCompass", (void(Lua_Expedition::*)(std::string, float, float, float))&Lua_Expedition::SetCompass)
 		.def("SetLocked", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetLocked)
+		.def("SetLocked", (void(Lua_Expedition::*)(bool, int))&Lua_Expedition::SetLocked)
+		.def("SetLocked", (void(Lua_Expedition::*)(bool, int, uint32_t))&Lua_Expedition::SetLocked)
 		.def("SetLootEventByNPCTypeID", (void(Lua_Expedition::*)(uint32_t, std::string))&Lua_Expedition::SetLootEventByNPCTypeID)
 		.def("SetLootEventBySpawnID", (void(Lua_Expedition::*)(uint32_t, std::string))&Lua_Expedition::SetLootEventBySpawnID)
 		.def("SetReplayLockoutOnMemberJoin", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetReplayLockoutOnMemberJoin)
@@ -230,6 +242,16 @@ luabind::scope lua_register_expedition() {
 		.def("SetZoneInLocation", (void(Lua_Expedition::*)(float, float, float, float))&Lua_Expedition::SetZoneInLocation)
 		.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t))&Lua_Expedition::UpdateLockoutDuration)
 		.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t, bool))&Lua_Expedition::UpdateLockoutDuration);
+}
+
+luabind::scope lua_register_expedition_lock_messages() {
+	return luabind::class_<ExpeditionLockMessage>("ExpeditionLockMessage")
+		.enum_("constants")
+		[
+			luabind::value("None", static_cast<int>(ExpeditionLockMessage::None)),
+			luabind::value("Close", static_cast<int>(ExpeditionLockMessage::Close)),
+			luabind::value("Begin", static_cast<int>(ExpeditionLockMessage::Begin))
+		];
 }
 
 #endif // LUA_EQEMU

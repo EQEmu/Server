@@ -42,6 +42,9 @@ const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
 const char* const KICKPLAYERS_EVERYONE       = "Everyone";
 // message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
 const char* const CREATE_NOT_ALL_ADDED       = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
+// various expeditions re-use these strings when locking
+constexpr char LOCK_CLOSE[]                  = "Your expedition is nearing its close. You cannot bring any additional people into your expedition at this time.";
+constexpr char LOCK_BEGIN[]                  = "The trial has begun. You cannot bring any additional people into your expedition at this time.";
 
 const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
@@ -198,7 +201,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			bool is_locked = (strtoul(row[col::is_locked], nullptr, 10) != 0);
 
 			expedition->SetReplayLockoutOnMemberJoin(add_replay_on_join);
-			expedition->SetLocked(is_locked);
+			expedition->SetLocked(is_locked, ExpeditionLockMessage::None);
 
 			zone->expedition_cache.emplace(expedition_id, std::move(expedition));
 		}
@@ -1114,9 +1117,22 @@ void Expedition::DzKickPlayers(Client* requester)
 	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, KICKPLAYERS_EVERYONE, m_expedition_name.c_str());
 }
 
-void Expedition::SetLocked(bool lock_expedition, bool update_db)
+void Expedition::SetLocked(
+	bool lock_expedition, ExpeditionLockMessage lock_msg, bool update_db, uint32_t msg_color)
 {
 	m_is_locked = lock_expedition;
+
+	if (m_is_locked && lock_msg != ExpeditionLockMessage::None && m_dynamiczone.IsCurrentZoneDzInstance())
+	{
+		auto msg = (lock_msg == ExpeditionLockMessage::Close) ? LOCK_CLOSE : LOCK_BEGIN;
+		for (const auto& client_iter : entity_list.GetClientList())
+		{
+			if (client_iter.second)
+			{
+				client_iter.second->Message(msg_color, msg);
+			}
+		}
+	}
 
 	if (update_db)
 	{
@@ -1813,6 +1829,18 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		break;
 	}
 	case ServerOP_ExpeditionLockState:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionLockState_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+			if (expedition)
+			{
+				expedition->SetLocked(buf->enabled, static_cast<ExpeditionLockMessage>(buf->lock_msg));
+			}
+		}
+		break;
+	}
 	case ServerOP_ExpeditionReplayOnJoin:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionSetting_Struct*>(pack->pBuffer);
@@ -1821,14 +1849,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 			if (expedition)
 			{
-				if (pack->opcode == ServerOP_ExpeditionLockState)
-				{
-					expedition->SetLocked(buf->enabled);
-				}
-				else if (pack->opcode == ServerOP_ExpeditionReplayOnJoin)
-				{
-					expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
-				}
+				expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
 			}
 		}
 		break;
