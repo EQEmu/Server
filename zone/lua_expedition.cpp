@@ -31,6 +31,16 @@ void Lua_Expedition::AddLockout(std::string event_name, uint32_t seconds) {
 	self->AddLockout(event_name, seconds);
 }
 
+void Lua_Expedition::AddLockoutDuration(std::string event_name, int seconds) {
+	Lua_Safe_Call_Void();
+	self->AddLockoutDuration(event_name, seconds);
+}
+
+void Lua_Expedition::AddLockoutDuration(std::string event_name, int seconds, bool members_only) {
+	Lua_Safe_Call_Void();
+	self->AddLockoutDuration(event_name, seconds, members_only);
+}
+
 void Lua_Expedition::AddReplayLockout(uint32_t seconds) {
 	Lua_Safe_Call_Void();
 	self->AddReplayLockout(seconds);
@@ -211,6 +221,8 @@ luabind::scope lua_register_expedition() {
 		.property("null", &Lua_Expedition::Null)
 		.property("valid", &Lua_Expedition::Valid)
 		.def("AddLockout", (void(Lua_Expedition::*)(std::string, uint32_t))&Lua_Expedition::AddLockout)
+		.def("AddLockoutDuration", (void(Lua_Expedition::*)(std::string, int))&Lua_Expedition::AddLockoutDuration)
+		.def("AddLockoutDuration", (void(Lua_Expedition::*)(std::string, int, bool))&Lua_Expedition::AddLockoutDuration)
 		.def("AddReplayLockout", (void(Lua_Expedition::*)(uint32_t))&Lua_Expedition::AddReplayLockout)
 		.def("GetID", (uint32_t(Lua_Expedition::*)(void))&Lua_Expedition::GetID)
 		.def("GetInstanceID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetInstanceID)

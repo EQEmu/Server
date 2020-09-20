@@ -9631,6 +9631,38 @@ void Client::AddNewExpeditionLockout(
 	AddExpeditionLockout(lockout, true);
 }
 
+void Client::AddExpeditionLockoutDuration(
+	const std::string& expedition_name, const std::string& event_name, int seconds,
+	const std::string& uuid, bool update_db)
+{
+	auto it = std::find_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
+		[&](const ExpeditionLockoutTimer& lockout) {
+			return lockout.IsSameLockout(expedition_name, event_name);
+		});
+
+	if (it != m_expedition_lockouts.end())
+	{
+		it->AddLockoutTime(seconds);
+
+		if (!uuid.empty())
+		{
+			it->SetUUID(uuid);
+		}
+
+		if (update_db)
+		{
+			ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { *it }, true);
+		}
+
+		SendExpeditionLockoutTimers();
+	}
+	else if (seconds > 0) // missing lockouts inserted for reductions would be instantly expired
+	{
+		auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
+		AddExpeditionLockout(lockout, update_db);
+	}
+}
+
 void Client::RemoveExpeditionLockout(
 	const std::string& expedition_name, const std::string& event_name, bool update_db, bool update_client)
 {

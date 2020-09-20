@@ -44,7 +44,8 @@ namespace ExpeditionDatabase
 	MySQLRequestResult LoadMembersForCreateRequest(
 		const std::vector<std::string>& character_names, const std::string& expedition_name);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id);
-	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
+	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id,
+		const std::string& expedition_name);
 	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>>
 		LoadMultipleExpeditionLockouts(const std::vector<uint32_t>& expedition_ids);
 	void DeleteAllMembers(uint32_t expedition_id);
@@ -60,6 +61,9 @@ namespace ExpeditionDatabase
 	void DeleteAllMembersPendingLockouts(const std::vector<ExpeditionMember>& members);
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
 	ExpeditionMember GetExpeditionLeader(uint32_t expedition_id);
+	std::pair<std::vector<ExpeditionLockoutTimer>, std::vector<uint32_t>> GetMembersLockout(
+		const std::vector<ExpeditionMember>& members, const std::string& expedition_name,
+		const std::string& event_name);
 	void InsertCharacterLockouts(
 		uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
 		bool replace_timer, bool is_pending = false);
@@ -71,6 +75,8 @@ namespace ExpeditionDatabase
 	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
+	void AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+		const ExpeditionLockoutTimer& lockout, int seconds);
 };
 
 namespace LoadExpeditionColumns

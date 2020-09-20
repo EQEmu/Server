@@ -85,3 +85,12 @@ bool ExpeditionLockoutTimer::IsSameLockout(
 {
 	return GetExpeditionName() == expedition_name && GetEventName() == event_name;
 }
+
+void ExpeditionLockoutTimer::AddLockoutTime(int seconds)
+{
+	auto new_duration = std::max(0, static_cast<int>(m_duration.count()) + seconds);
+
+	auto start_time = m_expire_time - m_duration;
+	m_duration = std::chrono::seconds(new_duration);
+	m_expire_time = start_time + m_duration;
+}

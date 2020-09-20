@@ -45,6 +45,7 @@ public:
 		std::string mins;
 	};
 
+	void AddLockoutTime(int seconds);
 	uint32_t GetDuration() const { return static_cast<uint32_t>(m_duration.count()); }
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint64_t GetStartTime() const { return std::chrono::system_clock::to_time_t(m_expire_time - m_duration); }
@@ -59,6 +60,7 @@ public:
 	bool IsSameLockout(const ExpeditionLockoutTimer& compare_lockout) const;
 	bool IsSameLockout(const std::string& expedition_name, const std::string& event_name) const;
 	void Reset() { m_expire_time = std::chrono::system_clock::now() + m_duration; }
+	void SetUUID(const std::string& uuid) { m_expedition_uuid = uuid; }
 
 private:
 	bool m_is_replay_timer = false;
