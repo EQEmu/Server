@@ -711,3 +711,42 @@ void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool 
 
 	database.QueryDatabase(query);
 }
+
+void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+	const ExpeditionLockoutTimer& lockout, int seconds)
+{
+	LogExpeditionsDetail(
+		"Adding duration [{}] seconds to members lockouts [{}]:[{}]",
+		seconds, lockout.GetExpeditionName(), lockout.GetEventName());
+
+	std::string insert_values;
+	for (const auto& member : members)
+	{
+		fmt::format_to(std::back_inserter(insert_values),
+			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
+			member.char_id,
+			lockout.GetExpireTime(),
+			lockout.GetDuration(),
+			lockout.GetExpeditionUUID(),
+			EscapeString(lockout.GetExpeditionName()),
+			EscapeString(lockout.GetEventName())
+		);
+	}
+
+	if (!insert_values.empty())
+	{
+		insert_values.pop_back(); // trailing comma
+
+		auto query = fmt::format(SQL(
+			INSERT INTO expedition_character_lockouts
+				(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
+			VALUES {}
+			ON DUPLICATE KEY UPDATE
+				from_expedition_uuid = VALUES(from_expedition_uuid),
+				expire_time = DATE_ADD(expire_time, INTERVAL {} SECOND),
+				duration = GREATEST(0, CAST(duration AS SIGNED) + {});
+		), insert_values, seconds, seconds);
+
+		database.QueryDatabase(query);
+	}
+}

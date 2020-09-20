@@ -1802,6 +1802,16 @@ void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string e
 	self->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
 }
 
+void Lua_Client::AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds) {
+	Lua_Safe_Call_Void();
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, {}, true);
+}
+
+void Lua_Client::AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds, std::string uuid) {
+	Lua_Safe_Call_Void();
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+}
+
 void Lua_Client::RemoveAllExpeditionLockouts() {
 	Lua_Safe_Call_Void();
 	self->RemoveAllExpeditionLockouts({}, true);
@@ -2148,6 +2158,8 @@ luabind::scope lua_register_client() {
 		.def("GetLockoutExpeditionUUID", (std::string(Lua_Client::*)(std::string, std::string))&Lua_Client::GetLockoutExpeditionUUID)
 		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32))&Lua_Client::AddExpeditionLockout)
 		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32, std::string))&Lua_Client::AddExpeditionLockout)
+		.def("AddExpeditionLockoutDuration", (void(Lua_Client::*)(std::string, std::string, int))&Lua_Client::AddExpeditionLockoutDuration)
+		.def("AddExpeditionLockoutDuration", (void(Lua_Client::*)(std::string, std::string, int, std::string))&Lua_Client::AddExpeditionLockoutDuration)
 		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
 		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
 		.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)

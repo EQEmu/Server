@@ -2894,6 +2894,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionDeleted:
 	case ServerOP_ExpeditionLeaderChanged:
 	case ServerOP_ExpeditionLockout:
+	case ServerOP_ExpeditionLockoutDuration:
 	case ServerOP_ExpeditionLockState:
 	case ServerOP_ExpeditionMemberChange:
 	case ServerOP_ExpeditionMemberSwap:

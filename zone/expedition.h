@@ -126,6 +126,7 @@ public:
 		bool update_db = false, uint32_t msg_color = Chat::Yellow);
 
 	void AddLockout(const std::string& event_name, uint32_t seconds);
+	void AddLockoutDuration(const std::string& event_name, int seconds, bool members_only = true);
 	void AddReplayLockout(uint32_t seconds);
 	bool HasLockout(const std::string& event_name);
 	bool HasReplayLockout();
@@ -168,11 +169,14 @@ private:
 	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
+	void AddLockoutDurationNonMembers(const ExpeditionLockoutTimer& lockout, int seconds);
+	void AddLockoutNonMembers(const ExpeditionLockoutTimer& lockout);
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name);
+	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader, const std::string& new_leader_name, bool is_online);
 	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
@@ -189,7 +193,10 @@ private:
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name,
 		const std::string& add_name, bool pending = false);
 	void SendWorldLeaderChanged();
-	void SendWorldLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
+	void SendWorldLockoutDuration(
+		const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
+	void SendWorldLockoutUpdate(
+		const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void SendWorldMakeLeaderRequest(const std::string& requester_name, const std::string& new_leader_name);
 	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);

@@ -54,6 +54,8 @@ public:
 	}
 
 	void            AddLockout(std::string event_name, uint32_t seconds);
+	void            AddLockoutDuration(std::string event_name, int seconds);
+	void            AddLockoutDuration(std::string event_name, int seconds, bool members_only);
 	void            AddReplayLockout(uint32_t seconds);
 	uint32_t        GetID();
 	int             GetInstanceID();

@@ -161,6 +161,7 @@
 #define ServerOP_ExpeditionLockState          0x0411
 #define ServerOP_ExpeditionMembersRemoved     0x0412
 #define ServerOP_ExpeditionDzDuration         0x0413
+#define ServerOP_ExpeditionLockoutDuration    0x0414
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2048,6 +2049,7 @@ struct ServerExpeditionLockout_Struct {
 	uint16 sender_instance_id;
 	uint8  remove;
 	uint8  members_only;
+	int    seconds_adjust;
 	char   event_name[256];
 };
 

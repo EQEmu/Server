@@ -348,6 +348,8 @@ public:
 	std::string     GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
 	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds, std::string uuid);
 	void            RemoveAllExpeditionLockouts();
 	void            RemoveAllExpeditionLockouts(std::string expedition_name);
 	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
