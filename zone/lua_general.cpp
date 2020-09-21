@@ -3085,9 +3085,13 @@ luabind::scope lua_register_skills() {
 		.enum_("constants")
 		[
 			luabind::value("1HBlunt", EQ::skills::Skill1HBlunt),
+			luabind::value("Blunt1H", EQ::skills::Skill1HBlunt),
 			luabind::value("1HSlashing", EQ::skills::Skill1HSlashing),
+			luabind::value("Slashing1H", EQ::skills::Skill1HSlashing),
 			luabind::value("2HBlunt", EQ::skills::Skill2HBlunt),
+			luabind::value("Blunt2H", EQ::skills::Skill2HBlunt),
 			luabind::value("2HSlashing", EQ::skills::Skill2HSlashing),
+			luabind::value("Slashing2H", EQ::skills::Skill2HSlashing),
 			luabind::value("Abjuration", EQ::skills::SkillAbjuration),
 			luabind::value("Alteration", EQ::skills::SkillAlteration),
 			luabind::value("ApplyPoison", EQ::skills::SkillApplyPoison),
@@ -3122,6 +3126,7 @@ luabind::scope lua_register_skills() {
 			luabind::value("Parry", EQ::skills::SkillParry),
 			luabind::value("PickLock", EQ::skills::SkillPickLock),
 			luabind::value("1HPiercing", EQ::skills::Skill1HPiercing),
+			luabind::value("Piercing1H", EQ::skills::Skill1HPiercing),
 			luabind::value("Riposte", EQ::skills::SkillRiposte),
 			luabind::value("RoundKick", EQ::skills::SkillRoundKick),
 			luabind::value("SafeFall", EQ::skills::SkillSafeFall),
@@ -3163,6 +3168,7 @@ luabind::scope lua_register_skills() {
 			luabind::value("RemoveTraps", EQ::skills::SkillRemoveTraps),
 			luabind::value("TripleAttack", EQ::skills::SkillTripleAttack),
 			luabind::value("2HPiercing", EQ::skills::Skill2HPiercing),
+			luabind::value("Piercing2H", EQ::skills::Skill2HPiercing),
 			luabind::value("HIGHEST_SKILL", EQ::skills::HIGHEST_SKILL)
 		];
 }
