@@ -5653,14 +5653,17 @@ void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 		return;
 	}
 
-	DynamicZone dz = DynamicZone::LoadDzFromDatabase(dzmsg->dz_instance_id);
-	DynamicZoneLocation loc = dz.GetZoneInLocation();
-	ZoneMode zone_mode = ZoneMode::ZoneToSafeCoords;
-	if (dz.HasZoneInLocation())
+	auto client_dzs = GetDynamicZones();
+	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZoneInfo dz_info) {
+		return dz_info.dynamic_zone.IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id);
+	});
+
+	if (it != client_dzs.end())
 	{
-		zone_mode = ZoneMode::ZoneSolicited;
+		DynamicZoneLocation loc = it->dynamic_zone.GetZoneInLocation();
+		ZoneMode zone_mode = it->dynamic_zone.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
 	}
-	MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
 }
 
 void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)

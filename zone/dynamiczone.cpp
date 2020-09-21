@@ -513,6 +513,11 @@ bool DynamicZone::IsInstanceID(uint32_t instance_id) const
 	return (GetInstanceID() != 0 && GetInstanceID() == instance_id);
 }
 
+bool DynamicZone::IsSameDz(uint32_t zone_id, uint32_t instance_id) const
+{
+	return zone_id == m_zone_id && instance_id == m_instance_id;
+}
+
 uint32_t DynamicZone::GetSecondsRemaining() const
 {
 	auto now = std::chrono::system_clock::now();

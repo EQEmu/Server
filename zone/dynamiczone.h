@@ -71,6 +71,7 @@ public:
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); };
 	uint32_t GetSecondsRemaining() const;
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); };
+	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
 	uint32_t GetZoneVersion() const { return m_version; };
 	DynamicZoneType GetType() const { return m_type; }
 	DynamicZoneLocation GetCompassLocation() const { return m_compass; }
@@ -83,6 +84,7 @@ public:
 	bool     IsCurrentZoneDzInstance() const;
 	bool     IsInstanceID(uint32_t instance_id) const;
 	bool     IsValid() const { return m_instance_id != 0; }
+	bool     IsSameDz(uint32_t zone_id, uint32_t instance_id) const;
 	void     LoadFromDatabase(uint32_t instance_id);
 	void     RemoveAllCharacters(bool enable_removal_timers = true);
 	void     RemoveCharacter(uint32_t character_id);
