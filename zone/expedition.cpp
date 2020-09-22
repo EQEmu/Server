@@ -1318,27 +1318,28 @@ void Expedition::ProcessLockoutDuration(
 
 	if (m_dynamiczone.IsCurrentZoneDzInstance())
 	{
-		AddLockoutDurationNonMembers(lockout, seconds);
+		AddLockoutDurationClients(lockout, seconds, GetID());
 	}
 }
 
-void Expedition::AddLockoutDurationNonMembers(const ExpeditionLockoutTimer& lockout, int seconds)
+void Expedition::AddLockoutDurationClients(
+	const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id)
 {
-	std::vector<ExpeditionMember> non_members;
+	std::vector<ExpeditionMember> lockout_clients;
 	for (const auto& client_iter : entity_list.GetClientList())
 	{
 		Client* client = client_iter.second;
-		if (client && client->GetExpeditionID() != GetID())
+		if (client && (exclude_id == 0 || client->GetExpeditionID() != exclude_id))
 		{
-			non_members.emplace_back(client->CharacterID(), client->GetName());
+			lockout_clients.emplace_back(client->CharacterID(), client->GetName());
 			client->AddExpeditionLockoutDuration(m_expedition_name,
 				lockout.GetEventName(), seconds, m_uuid);
 		}
 	}
 
-	if (!non_members.empty())
+	if (!lockout_clients.empty())
 	{
-		ExpeditionDatabase::AddLockoutDuration(non_members, lockout, seconds);
+		ExpeditionDatabase::AddLockoutDuration(lockout_clients, lockout, seconds);
 	}
 }
 
@@ -1378,26 +1379,27 @@ void Expedition::ProcessLockoutUpdate(
 	// members leave the expedition but haven't been kicked from zone yet
 	if (!remove && m_dynamiczone.IsCurrentZoneDzInstance())
 	{
-		AddLockoutNonMembers(lockout);
+		AddLockoutClients(lockout, GetID());
 	}
 }
 
-void Expedition::AddLockoutNonMembers(const ExpeditionLockoutTimer& lockout)
+void Expedition::AddLockoutClients(
+	const ExpeditionLockoutTimer& lockout, uint32_t exclude_expedition_id)
 {
-	std::vector<ExpeditionMember> non_members;
+	std::vector<ExpeditionMember> lockout_clients;
 	for (const auto& client_iter : entity_list.GetClientList())
 	{
 		Client* client = client_iter.second;
-		if (client && client->GetExpeditionID() != GetID())
+		if (client && (exclude_expedition_id == 0 || client->GetExpeditionID() != exclude_expedition_id))
 		{
-			non_members.emplace_back(client->CharacterID(), client->GetName());
+			lockout_clients.emplace_back(client->CharacterID(), client->GetName());
 			client->AddExpeditionLockout(lockout);
 		}
 	}
 
-	if (!non_members.empty())
+	if (!lockout_clients.empty())
 	{
-		ExpeditionDatabase::InsertMembersLockout(non_members, lockout);
+		ExpeditionDatabase::InsertMembersLockout(lockout_clients, lockout);
 	}
 }
 
