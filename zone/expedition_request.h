@@ -59,7 +59,7 @@ private:
 	bool CanGroupRequest(Group* group);
 	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
 	std::string GetGroupLeaderName(uint32_t group_id);
-	bool IsPlayerCountValidated(uint32_t member_count);
+	bool IsPlayerCountValidated();
 	bool LoadLeaderLockouts();
 	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);
 	void SendLeaderMemberReplayLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo);
