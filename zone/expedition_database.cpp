@@ -261,8 +261,8 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 					AND lockout.expedition_name = '{}'
 				LEFT JOIN expedition_members member ON character_data.id = member.character_id
 			WHERE character_data.name IN ({})
-			ORDER BY character_data.id;
-		), EscapeString(expedition_name), in_character_names_query);
+			ORDER BY FIELD(character_data.name, {})
+		), EscapeString(expedition_name), in_character_names_query, in_character_names_query);
 
 		results = database.QueryDatabase(query);
 	}

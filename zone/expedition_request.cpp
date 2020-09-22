@@ -113,8 +113,9 @@ bool ExpeditionRequest::CanRaidRequest(Raid* raid)
 			SystemName, m_max_players, "raid", raid_members.size());
 	}
 
+	// live still performs conflict checks for all members even those beyond max
 	std::vector<std::string> member_names;
-	for (int i = 0; i < raid_members.size() && member_names.size() < m_max_players; ++i)
+	for (int i = 0; i < raid_members.size(); ++i)
 	{
 		member_names.emplace_back(raid_members[i].membername);
 	}
@@ -149,8 +150,6 @@ bool ExpeditionRequest::CanGroupRequest(Group* group)
 	{
 		m_not_all_added_msg = fmt::format(CREATE_NOT_ALL_ADDED, "group", SystemName,
 			SystemName, m_max_players, "group", member_names.size());
-
-		member_names.resize(m_max_players);
 	}
 
 	return CanMembersJoin(member_names);
@@ -181,7 +180,7 @@ bool ExpeditionRequest::CanMembersJoin(const std::vector<std::string>& member_na
 	// maybe it's done intentionally as a way to preview lockout conflicts
 	if (requirements_met)
 	{
-		requirements_met = IsPlayerCountValidated(static_cast<uint32_t>(member_names.size()));
+		requirements_met = IsPlayerCountValidated();
 	}
 
 	return requirements_met;
@@ -373,7 +372,7 @@ void ExpeditionRequest::SendLeaderMemberEventLockout(
 	});
 }
 
-bool ExpeditionRequest::IsPlayerCountValidated(uint32_t member_count)
+bool ExpeditionRequest::IsPlayerCountValidated()
 {
 	// note: offline group members count towards requirement but not added to expedition
 	bool requirements_met = true;
@@ -381,12 +380,17 @@ bool ExpeditionRequest::IsPlayerCountValidated(uint32_t member_count)
 	auto bypass_status = RuleI(Expedition, MinStatusToBypassPlayerCountRequirements);
 	auto gm_bypass = (m_requester && m_requester->GetGM() && m_requester->Admin() >= bypass_status);
 
-	if (!gm_bypass && (member_count < m_min_players || member_count > m_max_players))
+	if (m_members.size() > m_max_players)
+	{
+		// members were sorted at start, truncate after conflict checks to act like live
+		m_members.resize(m_max_players);
+	}
+	else if (!gm_bypass && m_members.size() < m_min_players)
 	{
 		requirements_met = false;
 
 		SendLeaderMessage(Chat::System, REQUIRED_PLAYER_COUNT, {
-			fmt::format_int(member_count).str(),
+			fmt::format_int(m_members.size()).str(),
 			fmt::format_int(m_min_players).str(),
 			fmt::format_int(m_max_players).str()
 		});
