@@ -100,6 +100,7 @@ public:
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void RemoveLockoutsByCharacterName(const std::string& character_name,
 		const std::string& expedition_name = {}, const std::string& event_name = {});
+	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return m_dynamiczone.GetInstanceID(); }
@@ -169,8 +170,7 @@ private:
 	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
-	void AddLockoutDurationNonMembers(const ExpeditionLockoutTimer& lockout, int seconds);
-	void AddLockoutNonMembers(const ExpeditionLockoutTimer& lockout);
+	void AddLockoutDurationClients(const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id = 0);
 	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);
 	bool ChooseNewLeader();
 	bool ConfirmLeaderCommand(Client* requester);

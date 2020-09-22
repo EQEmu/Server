@@ -2250,6 +2250,16 @@ luabind::object lua_get_expedition_lockouts_by_char_id(lua_State* L, uint32 char
 	return lua_table;
 }
 
+void lua_add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds) {
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds);
+	Expedition::AddLockoutClients(lockout);
+}
+
+void lua_add_expedition_lockout_all_clients(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid) {
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
+	Expedition::AddLockoutClients(lockout);
+}
+
 void lua_add_expedition_lockout_by_char_id(uint32 char_id, std::string expedition_name, std::string event_name, uint32 seconds) {
 	Expedition::AddLockoutByCharacterID(char_id, expedition_name, event_name, seconds);
 }
@@ -2873,6 +2883,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_expedition_lockout_by_char_id", &lua_get_expedition_lockout_by_char_id),
 		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32))&lua_get_expedition_lockouts_by_char_id),
 		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32, std::string))&lua_get_expedition_lockouts_by_char_id),
+		luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32))&lua_add_expedition_lockout_all_clients),
+		luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32, std::string))&lua_add_expedition_lockout_all_clients),
 		luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32))&lua_add_expedition_lockout_by_char_id),
 		luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32, std::string))&lua_add_expedition_lockout_by_char_id),
 		luabind::def("remove_expedition_lockout_by_char_id", &lua_remove_expedition_lockout_by_char_id),
