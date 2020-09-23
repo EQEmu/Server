@@ -22,6 +22,7 @@
 
 #include "lua_expedition.h"
 #include "expedition.h"
+#include "zone_store.h"
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
@@ -123,6 +124,11 @@ std::string Lua_Expedition::GetUUID() {
 int Lua_Expedition::GetZoneID() {
 	Lua_Safe_Call_Int();
 	return self->GetDynamicZone().GetZoneID();
+}
+
+std::string Lua_Expedition::GetZoneName() {
+	Lua_Safe_Call_String();
+	return ZoneName(self->GetDynamicZone().GetZoneID());
 }
 
 int Lua_Expedition::GetZoneVersion() {
@@ -236,6 +242,7 @@ luabind::scope lua_register_expedition() {
 		.def("GetSecondsRemaining", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetSecondsRemaining)
 		.def("GetUUID", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetUUID)
 		.def("GetZoneID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetZoneID)
+		.def("GetZoneName", &Lua_Expedition::GetZoneName)
 		.def("GetZoneVersion", &Lua_Expedition::GetZoneVersion)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
 		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
