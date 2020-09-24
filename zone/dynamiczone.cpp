@@ -535,6 +535,9 @@ void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 	m_duration = std::chrono::seconds(new_duration);
 	m_expire_time = m_start_time + m_duration;
 
+	LogDynamicZones("Updated zone [{}]:[{}] seconds remaining: [{}]",
+		m_zone_id, m_instance_id, GetSecondsRemaining());
+
 	if (zone && IsCurrentZoneDzInstance())
 	{
 		zone->SetInstanceTimer(GetSecondsRemaining());

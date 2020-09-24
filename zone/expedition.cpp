@@ -1736,6 +1736,16 @@ void Expedition::SendWorldCharacterLockout(
 	worldserver.SendPacket(pack.get());
 }
 
+void Expedition::SendWorldSetSecondsRemaining(uint32_t seconds_remaining)
+{
+	uint32_t pack_size = sizeof(ServerExpeditionUpdateDuration_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionSecondsRemaining, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->new_duration_seconds = seconds_remaining;
+	worldserver.SendPacket(pack.get());
+}
+
 void Expedition::AddLockoutByCharacterID(
 	uint32_t character_id, const std::string& expedition_name, const std::string& event_name,
 	uint32_t seconds, const std::string& uuid)
@@ -2074,7 +2084,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (expedition)
 		{
-			expedition->SetDzDuration(buf->new_duration_seconds);
+			expedition->UpdateDzDuration(buf->new_duration_seconds);
 		}
 		break;
 	}
@@ -2123,6 +2133,11 @@ void Expedition::SetDzSafeReturn(const std::string& zone_name, float x, float y,
 {
 	auto zone_id = ZoneID(zone_name.c_str());
 	SetDzSafeReturn(zone_id, x, y, z, heading, update_db);
+}
+
+void Expedition::SetDzSecondsRemaining(uint32_t seconds_remaining)
+{
+	SendWorldSetSecondsRemaining(seconds_remaining); // async
 }
 
 void Expedition::SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db)

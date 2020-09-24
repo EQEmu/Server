@@ -162,6 +162,7 @@
 #define ServerOP_ExpeditionMembersRemoved     0x0412
 #define ServerOP_ExpeditionDzDuration         0x0413
 #define ServerOP_ExpeditionLockoutDuration    0x0414
+#define ServerOP_ExpeditionSecondsRemaining   0x0415
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451

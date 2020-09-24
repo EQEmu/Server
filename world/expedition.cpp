@@ -157,6 +157,18 @@ void ExpeditionCache::RemoveAllMembers(uint32_t expedition_id)
 	}
 }
 
+void ExpeditionCache::SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining)
+{
+	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
+		return expedition.GetID() == expedition_id;
+	});
+
+	if (it != m_expeditions.end())
+	{
+		it->UpdateDzSecondsRemaining(seconds_remaining);
+	}
+}
+
 void ExpeditionCache::Process()
 {
 	if (!m_process_throttle_timer.Check())
@@ -446,6 +458,12 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionRequestInvite:
 	{
 		ExpeditionMessage::RequestInvite(pack);
+		break;
+	}
+	case ServerOP_ExpeditionSecondsRemaining:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
+		expedition_cache.SetSecondsRemaining(buf->expedition_id, buf->new_duration_seconds);
 		break;
 	}
 	}
