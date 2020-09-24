@@ -206,6 +206,12 @@ void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, floa
 	self->SetDzSafeReturn(zone_name, x, y, z, heading, true);
 }
 
+void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
+{
+	Lua_Safe_Call_Void();
+	self->SetDzSecondsRemaining(seconds_remaining);
+}
+
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	self->SetDzZoneInLocation(x, y, z, heading, true);
@@ -258,6 +264,7 @@ luabind::scope lua_register_expedition() {
 		.def("SetReplayLockoutOnMemberJoin", (void(Lua_Expedition::*)(bool))&Lua_Expedition::SetReplayLockoutOnMemberJoin)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(uint32_t, float, float, float, float))&Lua_Expedition::SetSafeReturn)
 		.def("SetSafeReturn", (void(Lua_Expedition::*)(std::string, float, float, float, float))&Lua_Expedition::SetSafeReturn)
+		.def("SetSecondsRemaining", &Lua_Expedition::SetSecondsRemaining)
 		.def("SetZoneInLocation", (void(Lua_Expedition::*)(float, float, float, float))&Lua_Expedition::SetZoneInLocation)
 		.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t))&Lua_Expedition::UpdateLockoutDuration)
 		.def("UpdateLockoutDuration", (void(Lua_Expedition::*)(std::string, uint32_t, bool))&Lua_Expedition::UpdateLockoutDuration);

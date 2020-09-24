@@ -158,8 +158,8 @@ public:
 	void SetDzCompass(const std::string& zone_name, float x, float y, float z, bool update_db = false);
 	void SetDzSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
 	void SetDzSafeReturn(const std::string& zone_name, float x, float y, float z, float heading, bool update_db = false);
+	void SetDzSecondsRemaining(uint32_t seconds_remaining);
 	void SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
-	void SetDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }
 
 	static const int32_t REPLAY_TIMER_ID;
 	static const int32_t EVENT_TIMER_ID;
@@ -202,9 +202,11 @@ private:
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
 	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
 		const std::string& add_char_name, uint32_t add_char_id);
+	void SendWorldSetSecondsRemaining(uint32_t seconds_remaining);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
+	void UpdateDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
 	ExpeditionMember GetMemberData(uint32_t character_id);

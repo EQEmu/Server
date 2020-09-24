@@ -60,6 +60,7 @@ public:
 	void LoadActiveExpeditions();
 	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
 	void RemoveAllMembers(uint32_t expedition_id);
+	void SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining);
 	void Process();
 
 private:

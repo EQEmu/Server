@@ -1385,6 +1385,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionCharacterLockout:
 	case ServerOP_ExpeditionSaveInvite:
 	case ServerOP_ExpeditionRequestInvite:
+	case ServerOP_ExpeditionSecondsRemaining:
 	{
 		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
