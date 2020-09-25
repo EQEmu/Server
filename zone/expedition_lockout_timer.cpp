@@ -20,6 +20,7 @@
 
 #include "expedition_lockout_timer.h"
 #include "../common/string_util.h"
+#include "../common/rulesys.h"
 #include "../common/util/uuid.h"
 #include <fmt/format.h>
 
@@ -44,6 +45,8 @@ ExpeditionLockoutTimer::ExpeditionLockoutTimer(
 ExpeditionLockoutTimer ExpeditionLockoutTimer::CreateLockout(
 	const std::string& expedition_name, const std::string& event_name, uint32_t seconds, std::string uuid)
 {
+	seconds = static_cast<uint32_t>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+
 	if (uuid.empty())
 	{
 		uuid = EQ::Util::UUID::Generate().ToString();
@@ -88,6 +91,8 @@ bool ExpeditionLockoutTimer::IsSameLockout(
 
 void ExpeditionLockoutTimer::AddLockoutTime(int seconds)
 {
+	seconds = static_cast<uint32_t>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+
 	auto new_duration = std::max(0, static_cast<int>(m_duration.count()) + seconds);
 
 	auto start_time = m_expire_time - m_duration;

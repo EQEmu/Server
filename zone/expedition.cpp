@@ -485,7 +485,10 @@ void Expedition::AddLockoutDuration(const std::string& event_name, int seconds, 
 		}
 	}
 
-	ExpeditionDatabase::AddLockoutDuration(m_members, lockout, seconds);
+	// processing lockout duration applies multiplier again in client methods,
+	// update database with modified value now but pass original on
+	int modified_seconds = static_cast<int>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+	ExpeditionDatabase::AddLockoutDuration(m_members, lockout, modified_seconds);
 
 	ProcessLockoutDuration(lockout, seconds, members_only);
 	SendWorldLockoutDuration(lockout, seconds, members_only);
@@ -498,6 +501,8 @@ void Expedition::UpdateLockoutDuration(
 	auto it = m_lockouts.find(event_name);
 	if (it != m_lockouts.end())
 	{
+		seconds = static_cast<uint32_t>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+
 		uint64_t expire_time = it->second.GetStartTime() + seconds;
 		AddLockout({ m_uuid, m_expedition_name, event_name, expire_time, seconds }, members_only);
 	}
@@ -1339,7 +1344,8 @@ void Expedition::AddLockoutDurationClients(
 
 	if (!lockout_clients.empty())
 	{
-		ExpeditionDatabase::AddLockoutDuration(lockout_clients, lockout, seconds);
+		int modified_seconds = static_cast<int>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
+		ExpeditionDatabase::AddLockoutDuration(lockout_clients, lockout, modified_seconds);
 	}
 }
 
