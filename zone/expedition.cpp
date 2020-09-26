@@ -908,25 +908,15 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 		return false;
 	}
 
-	ExpeditionMember leader;
-	if (RuleB(Expedition, UseDatabaseToVerifyLeaderCommands))
-	{
-		leader = ExpeditionDatabase::GetExpeditionLeader(m_id);
-	}
-	else
-	{
-		leader = m_leader;
-	}
-
-	if (leader.char_id == 0)
+	if (m_leader.char_id == 0)
 	{
 		requester->MessageString(Chat::Red, UNABLE_RETRIEVE_LEADER); // unconfirmed message
 		return false;
 	}
 
-	if (leader.char_id != requester->CharacterID())
+	if (m_leader.char_id != requester->CharacterID())
 	{
-		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, leader.name.c_str());
+		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, m_leader.name.c_str());
 		return false;
 	}
 

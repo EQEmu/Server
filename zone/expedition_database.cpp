@@ -430,28 +430,6 @@ uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_i
 	return expedition_id;
 }
 
-ExpeditionMember ExpeditionDatabase::GetExpeditionLeader(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Getting expedition leader for expedition [{}]", expedition_id);
-
-	auto query = fmt::format(SQL(
-		SELECT expedition_details.leader_id, character_data.name
-		FROM expedition_details
-			INNER JOIN character_data ON expedition_details.leader_id = character_data.id
-		WHERE expedition_id = {}
-	), expedition_id);
-
-	ExpeditionMember leader;
-	auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0)
-	{
-		auto row = results.begin();
-		leader.char_id = strtoul(row[0], nullptr, 10);
-		leader.name    = row[1];
-	}
-	return leader;
-}
-
 void ExpeditionDatabase::InsertCharacterLockouts(
 	uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
 	bool replace_timer, bool is_pending)
