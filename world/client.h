@@ -1,5 +1,5 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
+/*	EQ Everquest Server Emulator
+	Copyright (C) 2001-2002 EQ:: Development Team (http://EQ::.org)
 
 	This program is free software; you can redistribute it and/or modify
 	it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 
 #include "../common/linked_list.h"
 #include "../common/timer.h"
+#include "../common/inventory_profile.h"
 //#include "zoneserver.h"
 
 #include "../common/eq_packet_structs.h"
@@ -68,9 +69,15 @@ public:
 	inline const char*	GetLSKey()			{ if (cle) { return cle->GetLSKey(); } return "NOKEY"; }
 	inline uint32		GetCharID()			{ return charid; }
 	inline const char*	GetCharName()		{ return char_name; }
-	inline EQEmu::versions::ClientVersion	GetClientVersion()	{ return m_ClientVersion; }
+	inline EQ::versions::ClientVersion	GetClientVersion()	{ return m_ClientVersion; }
 	inline ClientListEntry* GetCLE()		{ return cle; }
 	inline void			SetCLE(ClientListEntry* iCLE)			{ cle = iCLE; }
+	bool StoreCharacter(
+		uint32 account_id,
+		PlayerProfile_Struct *p_player_profile_struct,
+		EQ::InventoryProfile *p_inventory_profile
+	);
+
 private:
 
 	uint32	ip;
@@ -85,7 +92,7 @@ private:
 	bool	enter_world_triggered;
 
 	bool StartInTutorial;
-	EQEmu::versions::ClientVersion m_ClientVersion;
+	EQ::versions::ClientVersion m_ClientVersion;
 	uint32 m_ClientVersionBit;
 	bool OPCharCreate(char *name, CharCreate_Struct *cc);
 

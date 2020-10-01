@@ -22,7 +22,7 @@
 #include <string>
 #include "types.h"
 
-namespace EQEmu {
+namespace EQ {
 
 	//! Memory Backed Shared Memory
 	/*!

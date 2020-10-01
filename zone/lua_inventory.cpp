@@ -20,7 +20,7 @@ Lua_ItemInst Lua_Inventory::GetItem(int slot_id, int bag_slot) {
 
 int Lua_Inventory::PutItem(int slot_id, Lua_ItemInst item) {
 	Lua_Safe_Call_Int();
-	EQEmu::ItemInstance *inst = item;
+	EQ::ItemInstance *inst = item;
 	if(!inst) {
 		return 0;
 	}
@@ -30,7 +30,7 @@ int Lua_Inventory::PutItem(int slot_id, Lua_ItemInst item) {
 
 int Lua_Inventory::PushCursor(Lua_ItemInst item) {
 	Lua_Safe_Call_Int();
-	EQEmu::ItemInstance *inst = item;
+	EQ::ItemInstance *inst = item;
 	if(!inst) {
 		return 0;
 	}
@@ -40,7 +40,7 @@ int Lua_Inventory::PushCursor(Lua_ItemInst item) {
 
 bool Lua_Inventory::SwapItem(int source_slot, int destination_slot) {
 	Lua_Safe_Call_Bool();
-	EQEmu::InventoryProfile::SwapItemFailState fail_state = EQEmu::InventoryProfile::swapInvalid;
+	EQ::InventoryProfile::SwapItemFailState fail_state = EQ::InventoryProfile::swapInvalid;
 	return self->SwapItem(source_slot, destination_slot, fail_state);
 }
 

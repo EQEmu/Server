@@ -28,7 +28,7 @@
 static std::list<std::string> profanity_list;
 static bool update_originator_flag = false;
 
-bool EQEmu::ProfanityManager::LoadProfanityList(DBcore *db) {
+bool EQ::ProfanityManager::LoadProfanityList(DBcore *db) {
 	if (update_originator_flag == true) {
 		update_originator_flag = false;
 		return true;
@@ -40,7 +40,7 @@ bool EQEmu::ProfanityManager::LoadProfanityList(DBcore *db) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::UpdateProfanityList(DBcore *db) {
+bool EQ::ProfanityManager::UpdateProfanityList(DBcore *db) {
 	if (!load_database_entries(db))
 		return false;
 
@@ -49,7 +49,7 @@ bool EQEmu::ProfanityManager::UpdateProfanityList(DBcore *db) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::DeleteProfanityList(DBcore *db) {
+bool EQ::ProfanityManager::DeleteProfanityList(DBcore *db) {
 	if (!clear_database_entries(db))
 		return false;
 
@@ -58,7 +58,7 @@ bool EQEmu::ProfanityManager::DeleteProfanityList(DBcore *db) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::AddProfanity(DBcore *db, const char *profanity) {
+bool EQ::ProfanityManager::AddProfanity(DBcore *db, const char *profanity) {
 	if (!db || !profanity)
 		return false;
 
@@ -86,7 +86,7 @@ bool EQEmu::ProfanityManager::AddProfanity(DBcore *db, const char *profanity) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::RemoveProfanity(DBcore *db, const char *profanity) {
+bool EQ::ProfanityManager::RemoveProfanity(DBcore *db, const char *profanity) {
 	if (!db || !profanity)
 		return false;
 
@@ -111,7 +111,7 @@ bool EQEmu::ProfanityManager::RemoveProfanity(DBcore *db, const char *profanity)
 	return true;
 }
 
-void EQEmu::ProfanityManager::RedactMessage(char *message) {
+void EQ::ProfanityManager::RedactMessage(char *message) {
 	if (!message)
 		return;
 
@@ -142,7 +142,7 @@ void EQEmu::ProfanityManager::RedactMessage(char *message) {
 	}
 }
 
-void EQEmu::ProfanityManager::RedactMessage(std::string &message) {
+void EQ::ProfanityManager::RedactMessage(std::string &message) {
 	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096)
 		return;
 
@@ -169,14 +169,14 @@ void EQEmu::ProfanityManager::RedactMessage(std::string &message) {
 	}
 }
 
-bool EQEmu::ProfanityManager::ContainsCensoredLanguage(const char *message) {
+bool EQ::ProfanityManager::ContainsCensoredLanguage(const char *message) {
 	if (!message)
 		return false;
 
 	return ContainsCensoredLanguage(std::string(message));
 }
 
-bool EQEmu::ProfanityManager::ContainsCensoredLanguage(const std::string &message) {
+bool EQ::ProfanityManager::ContainsCensoredLanguage(const std::string &message) {
 	if (message.length() < REDACTION_LENGTH_MIN || message.length() >= 4096)
 		return false;
 
@@ -192,15 +192,15 @@ bool EQEmu::ProfanityManager::ContainsCensoredLanguage(const std::string &messag
 	return false;
 }
 
-const std::list<std::string> &EQEmu::ProfanityManager::GetProfanityList() {
+const std::list<std::string> &EQ::ProfanityManager::GetProfanityList() {
 	return profanity_list;
 }
 
-bool EQEmu::ProfanityManager::IsCensorshipActive() {
+bool EQ::ProfanityManager::IsCensorshipActive() {
 	return (profanity_list.size() != 0);
 }
 
-bool EQEmu::ProfanityManager::load_database_entries(DBcore *db) {
+bool EQ::ProfanityManager::load_database_entries(DBcore *db) {
 	if (!db)
 		return false;
 
@@ -223,7 +223,7 @@ bool EQEmu::ProfanityManager::load_database_entries(DBcore *db) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::clear_database_entries(DBcore *db) {
+bool EQ::ProfanityManager::clear_database_entries(DBcore *db) {
 	if (!db)
 		return false;
 
@@ -237,7 +237,7 @@ bool EQEmu::ProfanityManager::clear_database_entries(DBcore *db) {
 	return true;
 }
 
-bool EQEmu::ProfanityManager::check_for_existing_entry(const char *profanity) {
+bool EQ::ProfanityManager::check_for_existing_entry(const char *profanity) {
 	if (!profanity)
 		return false;
 

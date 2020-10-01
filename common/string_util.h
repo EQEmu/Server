@@ -42,7 +42,22 @@ const std::string ucfirst(std::string s);
 std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
+std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
 std::string implode(std::string glue, std::vector<std::string> src);
+std::string convert2digit(int n, std::string suffix);
+std::string numberToWords(unsigned long long int n);
+
+// For converstion of numerics into English
+// Used for grid nodes, as NPC names remove numerals.
+// But general purpose
+
+const std::string NUM_TO_ENGLISH_X[] = { "", "One ", "Two ", "Three ", "Four ",
+				"Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ",
+				"Twelve ", "Thirteen ", "Fourteen ", "Fifteen ",
+				"Sixteen ", "Seventeen ", "Eighteen ", "Nineteen " };
+
+const std::string NUM_TO_ENGLISH_Y[] = { "", "", "Twenty ", "Thirty ", "Forty ",
+				"Fifty ", "Sixty ", "Seventy ", "Eighty ", "Ninety " };
 
 /**
  * @param str
@@ -84,14 +99,14 @@ std::string implode(const std::string &glue, const std::pair<char, char> &encaps
 	}
 
 	std::ostringstream oss;
-	
+
 	for (const T &src_iter : src) {
 		oss << encapsulation.first << src_iter << encapsulation.second << glue;
 	}
 
 	std::string output(oss.str());
 	output.resize(output.size() - glue.size());
-	
+
 	return output;
 }
 
@@ -107,7 +122,7 @@ std::vector<std::string> join_pair(const std::string &glue, const std::pair<char
 
 	for (const std::pair<T1, T2> &src_iter : src) {
 		output.push_back(
-			
+
 			fmt::format(
 				"{}{}{}{}{}{}{}",
 				encapsulation.first,
@@ -137,7 +152,7 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 	for (const std::tuple<T1, T2, T3, T4> &src_iter : src) {
 
 		output.push_back(
-			
+
 			fmt::format(
 				"{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
 				encapsulation.first,
@@ -189,5 +204,8 @@ uint32 hextoi(const char* num);
 uint64 hextoi64(const char* num);
 void MakeLowerString(const char *source, char *target);
 void RemoveApostrophes(std::string &s);
+std::string convert2digit(int n, std::string suffix);
+std::string numberToWords(unsigned long long int n);
+
 
 #endif

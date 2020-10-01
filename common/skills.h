@@ -26,7 +26,7 @@
 #include <map>
 
 
-namespace EQEmu
+namespace EQ
 {
 	namespace skills {
 		enum SkillType : int {
@@ -287,7 +287,7 @@ namespace EQEmu
 
 		uint32* GetSkills() { return reinterpret_cast<uint32*>(&Skill); }
 
-		skills::SkillType GetLastUseableSkill() { return EQEmu::skills::Skill2HPiercing; }
+		skills::SkillType GetLastUseableSkill() { return EQ::skills::Skill2HPiercing; }
 
 		size_t GetSkillsArraySize() { return PACKET_SKILL_ARRAY_SIZE; }
 		uint32 GetSkill(int skill_id);

@@ -219,6 +219,34 @@ XS(XS_EntityList_GetNPCByNPCTypeID) {
 	XSRETURN(1);
 }
 
+XS(XS_EntityList_GetNPCBySpawnID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_EntityList_GetNPCBySpawnID) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: EntityList::GetNPCBySpawnID(THIS, spawn_id)");
+	{
+		EntityList *THIS;
+		NPC 	   *RETVAL;
+		uint32	   spawn_id = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "EntityList")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(EntityList *, tmp);
+		} else {
+			Perl_croak(aTHX_ "THIS is not of type EntityList");
+		}
+
+		if (THIS == nullptr) {
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		}
+
+		RETVAL = THIS->GetNPCBySpawnID(spawn_id);
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_EntityList_GetClientByName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetClientByName) {
 	dXSARGS;
@@ -1998,6 +2026,7 @@ XS(boot_EntityList) {
 	newXSproto(strcpy(buf, "IsMobSpawnedByNpcTypeID"), XS_EntityList_IsMobSpawnedByNpcTypeID, file, "$$");
 	newXSproto(strcpy(buf, "GetNPCByID"), XS_EntityList_GetNPCByID, file, "$$");
 	newXSproto(strcpy(buf, "GetNPCByNPCTypeID"), XS_EntityList_GetNPCByNPCTypeID, file, "$$");
+	newXSproto(strcpy(buf, "GetNPCBySpawnID"), XS_EntityList_GetNPCBySpawnID, file, "$$");
 	newXSproto(strcpy(buf, "GetClientByName"), XS_EntityList_GetClientByName, file, "$$");
 	newXSproto(strcpy(buf, "GetClientByAccID"), XS_EntityList_GetClientByAccID, file, "$$");
 	newXSproto(strcpy(buf, "GetClientByID"), XS_EntityList_GetClientByID, file, "$$");

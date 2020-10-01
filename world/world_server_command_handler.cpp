@@ -25,6 +25,11 @@
 #include "worlddb.h"
 #include "../common/database_schema.h"
 #include "../common/database/database_dump_service.h"
+#include "../common/content/world_content_service.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/rulesys.h"
+#include "../common/repositories/instance_list_repository.h"
+#include "../common/repositories/zone_repository.h"
 
 namespace WorldserverCommandHandler {
 
@@ -49,10 +54,15 @@ namespace WorldserverCommandHandler {
 		 * Register commands
 		 */
 		function_map["world:version"]               = &WorldserverCommandHandler::Version;
+		function_map["character:copy-character"]    = &WorldserverCommandHandler::CopyCharacter;
 		function_map["database:version"]            = &WorldserverCommandHandler::DatabaseVersion;
 		function_map["database:set-account-status"] = &WorldserverCommandHandler::DatabaseSetAccountStatus;
 		function_map["database:schema"]             = &WorldserverCommandHandler::DatabaseGetSchema;
 		function_map["database:dump"]               = &WorldserverCommandHandler::DatabaseDump;
+		function_map["test:test"]                   = &WorldserverCommandHandler::TestCommand;
+		function_map["test:expansion"]              = &WorldserverCommandHandler::ExpansionTestCommand;
+		function_map["test:repository"]             = &WorldserverCommandHandler::TestRepository;
+		function_map["test:repository2"]            = &WorldserverCommandHandler::TestRepository2;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -214,10 +224,6 @@ namespace WorldserverCommandHandler {
 	{
 		description = "Dumps server database tables";
 
-		if (cmd[{"-h", "--help"}]) {
-			return;
-		}
-
 		std::vector<std::string> arguments = {};
 		std::vector<std::string> options   = {
 			"--all",
@@ -235,11 +241,11 @@ namespace WorldserverCommandHandler {
 			"--compress"
 		};
 
-
-		if (argc < 3) {
-			EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+		if (cmd[{"-h", "--help"}]) {
 			return;
 		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
 
 		auto database_dump_service = new DatabaseDumpService();
 		bool dump_all              = cmd[{"-a", "--all"}];
@@ -269,6 +275,224 @@ namespace WorldserverCommandHandler {
 		 * Dump
 		 */
 		database_dump_service->Dump();
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void ExpansionTestCommand(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Expansion test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		if (!RuleManager::Instance()->LoadRules(&database, "default", false)) {
+			LogInfo("No rule set configured, using default rules");
+		}
+
+		content_service.SetCurrentExpansion(RuleI(Expansion, CurrentExpansion));
+
+		std::vector<std::string> flags = {
+			"hateplane_enabled",
+			"patch_nerf_7077",
+		};
+
+		content_service.SetContentFlags(flags);
+
+		LogInfo(
+			"Current expansion is [{}] ({}) is Velious Enabled [{}] Criteria [{}]",
+			content_service.GetCurrentExpansion(),
+			content_service.GetCurrentExpansionName(),
+			content_service.IsTheScarsOfVeliousEnabled() ? "true" : "false",
+			ContentFilterCriteria::apply()
+		);
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestRepository(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		/**
+		 * Insert one
+		 */
+		auto instance_list_entry = InstanceListRepository::NewEntity();
+
+		instance_list_entry.zone          = 999;
+		instance_list_entry.version       = 1;
+		instance_list_entry.is_global     = 1;
+		instance_list_entry.start_time    = 0;
+		instance_list_entry.duration      = 0;
+		instance_list_entry.never_expires = 1;
+
+		auto instance_list_inserted = InstanceListRepository::InsertOne(instance_list_entry);
+
+		LogInfo("Inserted ID is [{}] zone [{}]", instance_list_inserted.id, instance_list_inserted.zone);
+
+		/**
+		 * Find one
+		 */
+		auto found_instance_list = InstanceListRepository::FindOne(instance_list_inserted.id);
+
+		LogInfo("Found ID is [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
+
+		/**
+		 * Update one
+		 */
+		LogInfo("Updating instance id [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
+
+		int update_instance_list_count = InstanceListRepository::UpdateOne(found_instance_list);
+
+		found_instance_list.zone = 777;
+
+		LogInfo(
+			"Updated instance id [{}] zone [{}] affected [{}]",
+			found_instance_list.id,
+			found_instance_list.zone,
+			update_instance_list_count
+		);
+
+
+		/**
+		 * Delete one
+		 */
+		int deleted = InstanceListRepository::DeleteOne(found_instance_list.id);
+
+		LogInfo("Deleting one instance [{}] deleted count [{}]", found_instance_list.id, deleted);
+
+		/**
+		 * Insert many
+		 */
+		std::vector<InstanceListRepository::InstanceList> instance_lists;
+
+		auto instance_list_entry_bulk = InstanceListRepository::NewEntity();
+
+		instance_list_entry_bulk.zone          = 999;
+		instance_list_entry_bulk.version       = 1;
+		instance_list_entry_bulk.is_global     = 1;
+		instance_list_entry_bulk.start_time    = 0;
+		instance_list_entry_bulk.duration      = 0;
+		instance_list_entry_bulk.never_expires = 1;
+
+		for (int i = 0; i < 10; i++) {
+			instance_lists.push_back(instance_list_entry_bulk);
+		}
+
+		/**
+		 * Fetch all
+		 */
+		int inserted_count = InstanceListRepository::InsertMany(instance_lists);
+
+		LogInfo("Bulk insertion test, inserted [{}]", inserted_count);
+
+		for (auto &entry: InstanceListRepository::GetWhere(fmt::format("zone = {}", 999))) {
+			LogInfo("Iterating through entry id [{}] zone [{}]", entry.id, entry.zone);
+		}
+
+		/**
+		 * Delete where
+		 */
+		int deleted_count = InstanceListRepository::DeleteWhere(fmt::format("zone = {}", 999));
+
+		LogInfo("Bulk deletion test, deleted [{}]", deleted_count);
+
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void TestRepository2(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Test command";
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		auto zones = ZoneRepository::GetWhere("short_name = 'anguish'");
+
+		for (auto &zone: zones) {
+			LogInfo(
+				"Zone [{}] long_name [{}] id [{}]",
+				zone.short_name,
+				zone.long_name,
+				zone.id
+			);
+		}
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void CopyCharacter(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Copies a character into a destination account";
+
+		std::vector<std::string> arguments = {
+			"source_character_name",
+			"destination_character_name",
+			"destination_account_name"
+		};
+		std::vector<std::string> options   = { };
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
+
+		std::string source_character_name      = cmd(2).str();
+		std::string destination_character_name = cmd(3).str();
+		std::string destination_account_name   = cmd(4).str();
+
+		LogInfo(
+			"Attempting to copy character [{}] to [{}] via account [{}]",
+			source_character_name,
+			destination_character_name,
+			destination_account_name
+		);
+
+		database.CopyCharacter(
+			source_character_name,
+			destination_character_name,
+			destination_account_name
+		);
 	}
 
 }

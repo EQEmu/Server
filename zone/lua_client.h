@@ -42,6 +42,8 @@ public:
 	void SendToGuildHall();
 	bool GetAnon();
 	void Duck();
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue);
+	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint);
 	void Stand();
 	void SetGM(bool v);
 	void SetPVP(bool v);
@@ -91,6 +93,12 @@ public:
 	uint32 GetBindZoneID(int index);
 	void MovePC(int zone, float x, float y, float z, float heading);
 	void MovePCInstance(int zone, int instance, float x, float y, float z, float heading);
+	void MoveZone(const char *zone_short_name);
+	void MoveZoneGroup(const char *zone_short_name);
+	void MoveZoneRaid(const char *zone_short_name);
+	void MoveZoneInstance(uint16 instance_id);
+	void MoveZoneInstanceGroup(uint16 instance_id);
+	void MoveZoneInstanceRaid(uint16 instance_id);
 	void ChangeLastName(const char *in);
 	int GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 race, uint32 class_, uint32 deity, uint32 faction, Lua_NPC npc);
 	void SetFactionLevel(uint32 char_id, uint32 npc_id, int char_class, int char_race, int char_deity);
@@ -196,6 +204,8 @@ public:
 	void ForageItem(bool guarantee);
 	float CalcPriceMod(Lua_Mob other, bool reverse);
 	void ResetTrade();
+	uint32 GetDisciplineTimer(uint32 timer_id);
+	void ResetDisciplineTimer(uint32 timer_id);
 	bool UseDiscipline(int spell_id, int target_id);
 	int GetCharacterFactionLevel(int faction_id);
 	void SetZoneFlag(int zone_id);
@@ -269,6 +279,7 @@ public:
 	uint64 GetAllMoney();
 	uint32 GetMoney(uint8 type, uint8 subtype);
 	void OpenLFGuildWindow();
+	void NotifyNewTitlesAvailable();
 	void Signal(uint32 id);
 	void AddAlternateCurrencyValue(uint32 currency, int amount);
 	void SetAlternateCurrencyValue(uint32 currency, int amount);

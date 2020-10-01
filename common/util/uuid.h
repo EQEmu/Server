@@ -2,7 +2,7 @@
 
 #include <string>
 #include <vector>
-#include <ios>
+#include <ostream>
 
 namespace EQ
 {

@@ -7,6 +7,7 @@
 #include <list>
 #include <map>
 
+#include "../common/content/world_content_service.h"
 #include "../common/timer.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/classes.h"
@@ -71,7 +72,7 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 	entity_list.AddEncounter(enc);
 	lua_encounters[name] = enc;
 	lua_encounters_loaded[name] = true;
-	std::vector<EQEmu::Any> info_ptrs;
+	std::vector<EQ::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
@@ -133,7 +134,7 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 	lua_encounters[name]->Depop();
 	lua_encounters.erase(name);
 	lua_encounters_loaded.erase(name);
-	std::vector<EQEmu::Any> info_ptrs;
+	std::vector<EQ::Any> info_ptrs;
 	info_ptrs.push_back(&info_str);
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
@@ -387,6 +388,10 @@ void lua_depop_zone(bool start_spawn_status) {
 
 void lua_repop_zone() {
 	quest_manager.repopzone();
+}
+
+void lua_process_mobs_while_zone_empty(bool on) {
+	quest_manager.processmobswhilezoneempty(on);
 }
 
 bool lua_is_disc_tome(int item_id) {
@@ -1022,24 +1027,480 @@ void lua_send_mail(const char *to, const char *from, const char *subject, const 
 	quest_manager.SendMail(to, from, subject, message);
 }
 
-void lua_cross_zone_signal_client_by_char_id(uint32 player_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByCharID(player_id, signal);
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id);
 }
 
-void lua_cross_zone_signal_client_by_name(const char *player, int signal) {
-	quest_manager.CrossZoneSignalPlayerByName(player, signal);
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
 }
 
-void lua_cross_zone_message_player_by_name(uint32 type, const char *player, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByName(type, player, message);
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id);
 }
 
-void lua_cross_zone_set_entity_variable_by_client_name(const char *player, const char *id, const char *m_var) {
-	quest_manager.CrossZoneSetEntityVariableByClientName(player, id, m_var);
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
 }
 
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fadein, uint32 fadeout, uint32 duration, const char *message) {
-	quest_manager.WorldWideMarquee(type, priority, fadein, fadeout, duration, message);
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
+}
+
+void lua_cross_zone_cast_spell_by_char_id(int character_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByCharID(character_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_group_id(int group_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByGroupID(group_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByRaidID(raid_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	quest_manager.CrossZoneCastSpellByGuildID(guild_id, spell_id);
+}
+
+void lua_cross_zone_disable_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_disable_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_disable_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_disable_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneDisableTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_enable_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneEnableTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_fail_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByCharID(character_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByGroupID(group_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByRaidID(raid_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.CrossZoneMarqueeByGuildID(guild_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_message_player_by_name(uint32 type, const char *character_name, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByName(type, character_name, message);
+}
+
+void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
+}
+
+void lua_cross_zone_message_player_by_raid_id(uint32 type, int raid_id, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
+}
+
+void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const char *message) {
+	quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
+}
+
+void lua_cross_zone_move_player_by_char_id(int character_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_group_id(int group_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_raid_id(int raid_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
+}
+
+void lua_cross_zone_move_player_by_guild_id(int guild_id, const char *zone_short_name) {
+	quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
+}
+
+void lua_cross_zone_move_instance_by_char_id(int character_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByCharID(character_id, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_group_id(int group_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByGroupID(group_id, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_raid_id(int raid_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByRaidID(raid_id, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_guild_id(int guild_id, uint16 instance_id) {
+	quest_manager.CrossZoneMoveInstanceByGuildID(guild_id, instance_id);
+}
+
+void lua_cross_zone_remove_spell_by_char_id(int character_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByCharID(character_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_group_id(int group_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByGroupID(group_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByRaidID(raid_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	quest_manager.CrossZoneRemoveSpellByGuildID(guild_id, spell_id);
+}
+
+void lua_cross_zone_remove_task_by_char_id(int character_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByCharID(character_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_group_id(int group_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByGroupID(group_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_raid_id(int raid_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByRaidID(raid_id, task_id);
+}
+
+void lua_cross_zone_remove_task_by_guild_id(int guild_id, uint32 task_id) {
+	quest_manager.CrossZoneRemoveTaskByGuildID(guild_id, task_id);
+}
+
+void lua_cross_zone_reset_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByCharID(character_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByGroupID(group_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByRaidID(raid_id, task_id, activity_id);
+}
+
+void lua_cross_zone_reset_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
+}
+
+void lua_cross_zone_set_entity_variable_by_client_name(const char *character_name, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByClientName(character_name, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char *variable_name, const char *variable_value) {
+	quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByCharID(character_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
+	quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_name(const char *character_name, int signal) {
+	quest_manager.CrossZoneSignalPlayerByName(character_name, signal);
+}
+
+void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal) {
+	quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, signal);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id, activity_count);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id, activity_count);
+}
+
+void lua_world_wide_assign_task(uint32 task_id) {
+	quest_manager.WorldWideAssignTask(task_id);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id) {
+	quest_manager.WorldWideCastSpell(spell_id);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status) {
+	quest_manager.WorldWideCastSpell(spell_id, min_status);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideCastSpell(spell_id, min_status, max_status);
+}
+
+void lua_world_wide_disable_task(uint32 task_id) {
+	quest_manager.WorldWideDisableTask(task_id);
+}
+
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideDisableTask(task_id, min_status);
+}
+
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideDisableTask(task_id, min_status, max_status);
+}
+
+void lua_world_wide_enable_task(uint32 task_id) {
+	quest_manager.WorldWideEnableTask(task_id);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideEnableTask(task_id, min_status);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideEnableTask(task_id, min_status, max_status);
+}
+
+void lua_world_wide_fail_task(uint32 task_id) {
+	quest_manager.WorldWideFailTask(task_id);
+}
+
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideFailTask(task_id, min_status);
+}
+
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideFailTask(task_id, min_status, max_status);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
+}
+
+void lua_world_wide_message(uint32 type, const char *message) {
+	quest_manager.WorldWideMessage(type, message);
+}
+
+void lua_world_wide_message(uint32 type, const char *message, uint8 min_status) {
+	quest_manager.WorldWideMessage(type, message, min_status);
+}
+
+void lua_world_wide_message(uint32 type, const char *message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMessage(type, message, min_status, max_status);
+}
+
+void lua_world_wide_move(const char *zone_short_name) {
+	quest_manager.WorldWideMove(zone_short_name);
+}
+
+void lua_world_wide_move(const char *zone_short_name, uint8 min_status) {
+	quest_manager.WorldWideMove(zone_short_name, min_status);
+}
+
+void lua_world_wide_move(const char *zone_short_name, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMove(zone_short_name, min_status, max_status);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id) {
+	quest_manager.WorldWideMoveInstance(instance_id);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status) {
+	quest_manager.WorldWideMoveInstance(instance_id, min_status);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMoveInstance(instance_id, min_status, max_status);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id) {
+	quest_manager.WorldWideRemoveSpell(spell_id);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status) {
+	quest_manager.WorldWideRemoveSpell(spell_id, min_status);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideRemoveSpell(spell_id, min_status, max_status);
+}
+
+void lua_world_wide_remove_task(uint32 task_id) {
+	quest_manager.WorldWideRemoveTask(task_id);
+}
+
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status) {
+	quest_manager.WorldWideRemoveTask(task_id, min_status);
+}
+
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideRemoveTask(task_id, min_status, max_status);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status, max_status);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status);
+}
+
+void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status, max_status);
+}
+
+void lua_world_wide_set_entity_variable_npc(const char *variable_name, const char *variable_value) {
+	quest_manager.WorldWideSetEntityVariableNPC(variable_name, variable_value);
+}
+
+void lua_world_wide_signal_client(uint32 signal) {
+	quest_manager.WorldWideSignalClient(signal);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status) {
+	quest_manager.WorldWideSignalClient(signal, min_status);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideSignalClient(signal, min_status, max_status);
+}
+
+void lua_world_wide_signal_npc(uint32 signal) {
+	quest_manager.WorldWideSignalNPC(signal);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status, max_status);
 }
 
 luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
@@ -1108,6 +1569,18 @@ luabind::adl::object lua_get_qglobals(lua_State *L) {
 
 Lua_EntityList lua_get_entity_list() {
 	return Lua_EntityList(&entity_list);
+}
+
+void lua_zone(const char* zone_name) {
+	quest_manager.Zone(zone_name);
+}
+
+void lua_zone_group(const char* zone_name) {
+	quest_manager.ZoneGroup(zone_name);
+}
+
+void lua_zone_raid(const char* zone_name) {
+	quest_manager.ZoneRaid(zone_name);
 }
 
 int lua_get_zone_id() {
@@ -1469,6 +1942,234 @@ void lua_update_zone_header(std::string type, std::string value) {
 	quest_manager.UpdateZoneHeader(type, value);
 }
 
+/**
+ * Expansions
+ */
+
+bool lua_is_classic_enabled() {
+	return content_service.IsClassicEnabled();
+}
+
+bool lua_is_the_ruins_of_kunark_enabled() {
+	return content_service.IsTheRuinsOfKunarkEnabled();
+}
+
+bool lua_is_the_scars_of_velious_enabled() {
+	return content_service.IsTheScarsOfVeliousEnabled();
+}
+
+bool lua_is_the_shadows_of_luclin_enabled() {
+	return content_service.IsTheShadowsOfLuclinEnabled();
+}
+
+bool lua_is_the_planes_of_power_enabled() {
+	return content_service.IsThePlanesOfPowerEnabled();
+}
+
+bool lua_is_the_legacy_of_ykesha_enabled() {
+	return content_service.IsTheLegacyOfYkeshaEnabled();
+}
+
+bool lua_is_lost_dungeons_of_norrath_enabled() {
+	return content_service.IsLostDungeonsOfNorrathEnabled();
+}
+
+bool lua_is_gates_of_discord_enabled() {
+	return content_service.IsGatesOfDiscordEnabled();
+}
+
+bool lua_is_omens_of_war_enabled() {
+	return content_service.IsOmensOfWarEnabled();
+}
+
+bool lua_is_dragons_of_norrath_enabled() {
+	return content_service.IsDragonsOfNorrathEnabled();
+}
+
+bool lua_is_depths_of_darkhollow_enabled() {
+	return content_service.IsDepthsOfDarkhollowEnabled();
+}
+
+bool lua_is_prophecy_of_ro_enabled() {
+	return content_service.IsProphecyOfRoEnabled();
+}
+
+bool lua_is_the_serpents_spine_enabled() {
+	return content_service.IsTheSerpentsSpineEnabled();
+}
+
+bool lua_is_the_buried_sea_enabled() {
+	return content_service.IsTheBuriedSeaEnabled();
+}
+
+bool lua_is_secrets_of_faydwer_enabled() {
+	return content_service.IsSecretsOfFaydwerEnabled();
+}
+
+bool lua_is_seeds_of_destruction_enabled() {
+	return content_service.IsSeedsOfDestructionEnabled();
+}
+
+bool lua_is_underfoot_enabled() {
+	return content_service.IsUnderfootEnabled();
+}
+
+bool lua_is_house_of_thule_enabled() {
+	return content_service.IsHouseOfThuleEnabled();
+}
+
+bool lua_is_veil_of_alaris_enabled() {
+	return content_service.IsVeilOfAlarisEnabled();
+}
+
+bool lua_is_rain_of_fear_enabled() {
+	return content_service.IsRainOfFearEnabled();
+}
+
+bool lua_is_call_of_the_forsaken_enabled() {
+	return content_service.IsCallOfTheForsakenEnabled();
+}
+
+bool lua_is_the_darkend_sea_enabled() {
+	return content_service.IsTheDarkendSeaEnabled();
+}
+
+bool lua_is_the_broken_mirror_enabled() {
+	return content_service.IsTheBrokenMirrorEnabled();
+}
+
+bool lua_is_empires_of_kunark_enabled() {
+	return content_service.IsEmpiresOfKunarkEnabled();
+}
+
+bool lua_is_ring_of_scale_enabled() {
+	return content_service.IsRingOfScaleEnabled();
+}
+
+bool lua_is_the_burning_lands_enabled() {
+	return content_service.IsTheBurningLandsEnabled();
+}
+
+bool lua_is_torment_of_velious_enabled() {
+	return content_service.IsTormentOfVeliousEnabled();
+}
+
+bool lua_is_current_expansion_classic() {
+	return content_service.IsCurrentExpansionClassic();
+}
+
+bool lua_is_current_expansion_the_ruins_of_kunark() {
+	return content_service.IsCurrentExpansionTheRuinsOfKunark();
+}
+
+bool lua_is_current_expansion_the_scars_of_velious() {
+	return content_service.IsCurrentExpansionTheScarsOfVelious();
+}
+
+bool lua_is_current_expansion_the_shadows_of_luclin() {
+	return content_service.IsCurrentExpansionTheShadowsOfLuclin();
+}
+
+bool lua_is_current_expansion_the_planes_of_power() {
+	return content_service.IsCurrentExpansionThePlanesOfPower();
+}
+
+bool lua_is_current_expansion_the_legacy_of_ykesha() {
+	return content_service.IsCurrentExpansionTheLegacyOfYkesha();
+}
+
+bool lua_is_current_expansion_lost_dungeons_of_norrath() {
+	return content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+}
+
+bool lua_is_current_expansion_gates_of_discord() {
+	return content_service.IsCurrentExpansionGatesOfDiscord();
+}
+
+bool lua_is_current_expansion_omens_of_war() {
+	return content_service.IsCurrentExpansionOmensOfWar();
+}
+
+bool lua_is_current_expansion_dragons_of_norrath() {
+	return content_service.IsCurrentExpansionDragonsOfNorrath();
+}
+
+bool lua_is_current_expansion_depths_of_darkhollow() {
+	return content_service.IsCurrentExpansionDepthsOfDarkhollow();
+}
+
+bool lua_is_current_expansion_prophecy_of_ro() {
+	return content_service.IsCurrentExpansionProphecyOfRo();
+}
+
+bool lua_is_current_expansion_the_serpents_spine() {
+	return content_service.IsCurrentExpansionTheSerpentsSpine();
+}
+
+bool lua_is_current_expansion_the_buried_sea() {
+	return content_service.IsCurrentExpansionTheBuriedSea();
+}
+
+bool lua_is_current_expansion_secrets_of_faydwer() {
+	return content_service.IsCurrentExpansionSecretsOfFaydwer();
+}
+
+bool lua_is_current_expansion_seeds_of_destruction() {
+	return content_service.IsCurrentExpansionSeedsOfDestruction();
+}
+
+bool lua_is_current_expansion_underfoot() {
+	return content_service.IsCurrentExpansionUnderfoot();
+}
+
+bool lua_is_current_expansion_house_of_thule() {
+	return content_service.IsCurrentExpansionHouseOfThule();
+}
+
+bool lua_is_current_expansion_veil_of_alaris() {
+	return content_service.IsCurrentExpansionVeilOfAlaris();
+}
+
+bool lua_is_current_expansion_rain_of_fear() {
+	return content_service.IsCurrentExpansionRainOfFear();
+}
+
+bool lua_is_current_expansion_call_of_the_forsaken() {
+	return content_service.IsCurrentExpansionCallOfTheForsaken();
+}
+
+bool lua_is_current_expansion_the_darkend_sea() {
+	return content_service.IsCurrentExpansionTheDarkendSea();
+}
+
+bool lua_is_current_expansion_the_broken_mirror() {
+	return content_service.IsCurrentExpansionTheBrokenMirror();
+}
+
+bool lua_is_current_expansion_empires_of_kunark() {
+	return content_service.IsCurrentExpansionEmpiresOfKunark();
+}
+
+bool lua_is_current_expansion_ring_of_scale() {
+	return content_service.IsCurrentExpansionRingOfScale();
+}
+
+bool lua_is_current_expansion_the_burning_lands() {
+	return content_service.IsCurrentExpansionTheBurningLands();
+}
+
+bool lua_is_current_expansion_torment_of_velious() {
+	return content_service.IsCurrentExpansionTormentOfVelious();
+}
+
+bool lua_is_content_flag_enabled(std::string content_flag){
+	return content_service.IsContentFlagEnabled(content_flag);
+}
+
+void lua_set_content_flag(std::string flag_name, bool enabled){
+	ZoneStore::SetContentFlag(flag_name, enabled);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -1699,6 +2400,7 @@ luabind::scope lua_register_general() {
 		luabind::def("depop_all", (void(*)(int))&lua_depop_all),
 		luabind::def("depop_zone", &lua_depop_zone),
 		luabind::def("repop_zone", &lua_repop_zone),
+		luabind::def("process_mobs_while_zone_empty", &lua_process_mobs_while_zone_empty),
 		luabind::def("is_disc_tome", &lua_is_disc_tome),
 		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
 		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),
@@ -1838,16 +2540,133 @@ luabind::scope lua_register_general() {
 		luabind::def("wear_change", &lua_wear_change),
 		luabind::def("voice_tell", &lua_voice_tell),
 		luabind::def("send_mail", &lua_send_mail),
-		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
-		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
+		luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
+		luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
+		luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
+		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
+		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
+		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
+		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
+		luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
+		luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
+		luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
+		luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
+		luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
+		luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
+		luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
+		luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
+		luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
+		luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
+		luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
+		luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
+		luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
 		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
+		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
+		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
+		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
+		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
+		luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
+		luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
+		luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
+		luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
+		luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
+		luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
+		luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
+		luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
+		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
 		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
-		luabind::def("world_wide_marquee", &lua_world_wide_marquee),
+		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
+		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
+		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
+		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
+		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
+		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
+		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
+		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+		luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_move", (void(*)(const char*))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move_instance", (void(*)(uint16))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_task", (void(*)(uint32))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
+		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8,uint8))&lua_world_wide_update_activity),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*))&lua_get_qglobals),
 		luabind::def("get_entity_list", &lua_get_entity_list),
+		luabind::def("zone", &lua_zone),
+		luabind::def("zone_group", &lua_zone_group),
+		luabind::def("zone_raid", &lua_zone_raid),
 		luabind::def("get_zone_id", &lua_get_zone_id),
 		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
 		luabind::def("get_zone_short_name", &lua_get_zone_short_name),
@@ -1876,12 +2695,77 @@ luabind::scope lua_register_general() {
 		luabind::def("disable_recipe", &lua_disable_recipe),
 		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
 		luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
+		luabind::def("update_zone_header", &lua_update_zone_header),
 		luabind::def("clock", &lua_clock),
 		luabind::def("create_npc", &lua_create_npc),
 		luabind::def("log", (void(*)(int, std::string))&lua_log),
 		luabind::def("debug", (void(*)(std::string))&lua_debug),
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
-		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat)
+		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
+
+		/**
+		 * Expansions
+		 */
+		luabind::def("is_classic_enabled", &lua_is_classic_enabled),
+		luabind::def("is_the_ruins_of_kunark_enabled", &lua_is_the_ruins_of_kunark_enabled),
+		luabind::def("is_the_scars_of_velious_enabled", &lua_is_the_scars_of_velious_enabled),
+		luabind::def("is_the_shadows_of_luclin_enabled", &lua_is_the_shadows_of_luclin_enabled),
+		luabind::def("is_the_planes_of_power_enabled", &lua_is_the_planes_of_power_enabled),
+		luabind::def("is_the_legacy_of_ykesha_enabled", &lua_is_the_legacy_of_ykesha_enabled),
+		luabind::def("is_lost_dungeons_of_norrath_enabled", &lua_is_lost_dungeons_of_norrath_enabled),
+		luabind::def("is_gates_of_discord_enabled", &lua_is_gates_of_discord_enabled),
+		luabind::def("is_omens_of_war_enabled", &lua_is_omens_of_war_enabled),
+		luabind::def("is_dragons_of_norrath_enabled", &lua_is_dragons_of_norrath_enabled),
+		luabind::def("is_depths_of_darkhollow_enabled", &lua_is_depths_of_darkhollow_enabled),
+		luabind::def("is_prophecy_of_ro_enabled", &lua_is_prophecy_of_ro_enabled),
+		luabind::def("is_the_serpents_spine_enabled", &lua_is_the_serpents_spine_enabled),
+		luabind::def("is_the_buried_sea_enabled", &lua_is_the_buried_sea_enabled),
+		luabind::def("is_secrets_of_faydwer_enabled", &lua_is_secrets_of_faydwer_enabled),
+		luabind::def("is_seeds_of_destruction_enabled", &lua_is_seeds_of_destruction_enabled),
+		luabind::def("is_underfoot_enabled", &lua_is_underfoot_enabled),
+		luabind::def("is_house_of_thule_enabled", &lua_is_house_of_thule_enabled),
+		luabind::def("is_veil_of_alaris_enabled", &lua_is_veil_of_alaris_enabled),
+		luabind::def("is_rain_of_fear_enabled", &lua_is_rain_of_fear_enabled),
+		luabind::def("is_call_of_the_forsaken_enabled", &lua_is_call_of_the_forsaken_enabled),
+		luabind::def("is_the_darkend_sea_enabled", &lua_is_the_darkend_sea_enabled),
+		luabind::def("is_the_broken_mirror_enabled", &lua_is_the_broken_mirror_enabled),
+		luabind::def("is_empires_of_kunark_enabled", &lua_is_empires_of_kunark_enabled),
+		luabind::def("is_ring_of_scale_enabled", &lua_is_ring_of_scale_enabled),
+		luabind::def("is_the_burning_lands_enabled", &lua_is_the_burning_lands_enabled),
+		luabind::def("is_torment_of_velious_enabled", &lua_is_torment_of_velious_enabled),
+		luabind::def("is_current_expansion_classic", &lua_is_current_expansion_classic),
+		luabind::def("is_current_expansion_the_ruins_of_kunark", &lua_is_current_expansion_the_ruins_of_kunark),
+		luabind::def("is_current_expansion_the_scars_of_velious", &lua_is_current_expansion_the_scars_of_velious),
+		luabind::def("is_current_expansion_the_shadows_of_luclin", &lua_is_current_expansion_the_shadows_of_luclin),
+		luabind::def("is_current_expansion_the_planes_of_power", &lua_is_current_expansion_the_planes_of_power),
+		luabind::def("is_current_expansion_the_legacy_of_ykesha", &lua_is_current_expansion_the_legacy_of_ykesha),
+		luabind::def("is_current_expansion_lost_dungeons_of_norrath", &lua_is_current_expansion_lost_dungeons_of_norrath),
+		luabind::def("is_current_expansion_gates_of_discord", &lua_is_current_expansion_gates_of_discord),
+		luabind::def("is_current_expansion_omens_of_war", &lua_is_current_expansion_omens_of_war),
+		luabind::def("is_current_expansion_dragons_of_norrath", &lua_is_current_expansion_dragons_of_norrath),
+		luabind::def("is_current_expansion_depths_of_darkhollow", &lua_is_current_expansion_depths_of_darkhollow),
+		luabind::def("is_current_expansion_prophecy_of_ro", &lua_is_current_expansion_prophecy_of_ro),
+		luabind::def("is_current_expansion_the_serpents_spine", &lua_is_current_expansion_the_serpents_spine),
+		luabind::def("is_current_expansion_the_buried_sea", &lua_is_current_expansion_the_buried_sea),
+		luabind::def("is_current_expansion_secrets_of_faydwer", &lua_is_current_expansion_secrets_of_faydwer),
+		luabind::def("is_current_expansion_seeds_of_destruction", &lua_is_current_expansion_seeds_of_destruction),
+		luabind::def("is_current_expansion_underfoot", &lua_is_current_expansion_underfoot),
+		luabind::def("is_current_expansion_house_of_thule", &lua_is_current_expansion_house_of_thule),
+		luabind::def("is_current_expansion_veil_of_alaris", &lua_is_current_expansion_veil_of_alaris),
+		luabind::def("is_current_expansion_rain_of_fear", &lua_is_current_expansion_rain_of_fear),
+		luabind::def("is_current_expansion_call_of_the_forsaken", &lua_is_current_expansion_call_of_the_forsaken),
+		luabind::def("is_current_expansion_the_darkend_sea", &lua_is_current_expansion_the_darkend_sea),
+		luabind::def("is_current_expansion_the_broken_mirror", &lua_is_current_expansion_the_broken_mirror),
+		luabind::def("is_current_expansion_empires_of_kunark", &lua_is_current_expansion_empires_of_kunark),
+		luabind::def("is_current_expansion_ring_of_scale", &lua_is_current_expansion_ring_of_scale),
+		luabind::def("is_current_expansion_the_burning_lands", &lua_is_current_expansion_the_burning_lands),
+		luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious),
+
+		/**
+		 * Content flags
+		 */
+		luabind::def("is_content_flag_enabled", (bool(*)(std::string))&lua_is_content_flag_enabled),
+		luabind::def("set_content_flag", (void(*)(std::string, bool))&lua_set_content_flag)
 	];
 }
 
@@ -2002,95 +2886,95 @@ luabind::scope lua_register_slot() {
 	return luabind::class_<Slots>("Slot")
 		.enum_("constants")
 		[
-			luabind::value("Charm", static_cast<int>(EQEmu::invslot::slotCharm)),
-			luabind::value("Ear1", static_cast<int>(EQEmu::invslot::slotEar1)),
-			luabind::value("Head", static_cast<int>(EQEmu::invslot::slotHead)),
-			luabind::value("Face", static_cast<int>(EQEmu::invslot::slotFace)),
-			luabind::value("Ear2", static_cast<int>(EQEmu::invslot::slotEar2)),
-			luabind::value("Neck", static_cast<int>(EQEmu::invslot::slotNeck)),
-			luabind::value("Shoulders", static_cast<int>(EQEmu::invslot::slotShoulders)),
-			luabind::value("Arms", static_cast<int>(EQEmu::invslot::slotArms)),
-			luabind::value("Back", static_cast<int>(EQEmu::invslot::slotBack)),
-			luabind::value("Wrist1", static_cast<int>(EQEmu::invslot::slotWrist1)),
-			luabind::value("Wrist2", static_cast<int>(EQEmu::invslot::slotWrist2)),
-			luabind::value("Range", static_cast<int>(EQEmu::invslot::slotRange)),
-			luabind::value("Hands", static_cast<int>(EQEmu::invslot::slotHands)),
-			luabind::value("Primary", static_cast<int>(EQEmu::invslot::slotPrimary)),
-			luabind::value("Secondary", static_cast<int>(EQEmu::invslot::slotSecondary)),
-			luabind::value("Finger1", static_cast<int>(EQEmu::invslot::slotFinger1)),
-			luabind::value("Finger2", static_cast<int>(EQEmu::invslot::slotFinger2)),
-			luabind::value("Chest", static_cast<int>(EQEmu::invslot::slotChest)),
-			luabind::value("Legs", static_cast<int>(EQEmu::invslot::slotLegs)),
-			luabind::value("Feet", static_cast<int>(EQEmu::invslot::slotFeet)),
-			luabind::value("Waist", static_cast<int>(EQEmu::invslot::slotWaist)),
-			luabind::value("PowerSource", static_cast<int>(EQEmu::invslot::slotPowerSource)),
-			luabind::value("Ammo", static_cast<int>(EQEmu::invslot::slotAmmo)),
-			luabind::value("General1", static_cast<int>(EQEmu::invslot::slotGeneral1)),
-			luabind::value("General2", static_cast<int>(EQEmu::invslot::slotGeneral2)),
-			luabind::value("General3", static_cast<int>(EQEmu::invslot::slotGeneral3)),
-			luabind::value("General4", static_cast<int>(EQEmu::invslot::slotGeneral4)),
-			luabind::value("General5", static_cast<int>(EQEmu::invslot::slotGeneral5)),
-			luabind::value("General6", static_cast<int>(EQEmu::invslot::slotGeneral6)),
-			luabind::value("General7", static_cast<int>(EQEmu::invslot::slotGeneral7)),
-			luabind::value("General8", static_cast<int>(EQEmu::invslot::slotGeneral8)),
-			luabind::value("General9", static_cast<int>(EQEmu::invslot::slotGeneral9)),
-			luabind::value("General10", static_cast<int>(EQEmu::invslot::slotGeneral10)),
-			luabind::value("Cursor", static_cast<int>(EQEmu::invslot::slotCursor)),
-			luabind::value("PossessionsBegin", static_cast<int>(EQEmu::invslot::POSSESSIONS_BEGIN)),
-			luabind::value("PossessionsEnd", static_cast<int>(EQEmu::invslot::POSSESSIONS_END)),
-			luabind::value("EquipmentBegin", static_cast<int>(EQEmu::invslot::EQUIPMENT_BEGIN)),
-			luabind::value("EquipmentEnd", static_cast<int>(EQEmu::invslot::EQUIPMENT_END)),
-			luabind::value("GeneralBegin", static_cast<int>(EQEmu::invslot::GENERAL_BEGIN)),
-			luabind::value("GeneralEnd", static_cast<int>(EQEmu::invslot::GENERAL_END)),
-			luabind::value("PossessionsBagsBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN)),
-			luabind::value("PossessionsBagsEnd", static_cast<int>(EQEmu::invbag::CURSOR_BAG_END)),
-			luabind::value("GeneralBagsBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN)),
-			luabind::value("GeneralBagsEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_END)),
-			luabind::value("General1BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN)),
-			luabind::value("General1BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 9),
-			luabind::value("General2BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 10),
-			luabind::value("General2BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 19),
-			luabind::value("General3BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 20),
-			luabind::value("General3BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 29),
-			luabind::value("General4BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 30),
-			luabind::value("General4BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 39),
-			luabind::value("General5BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 40),
-			luabind::value("General5BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 49),
-			luabind::value("General6BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 50),
-			luabind::value("General6BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 59),
-			luabind::value("General7BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 60),
-			luabind::value("General7BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 69),
-			luabind::value("General8BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 70),
-			luabind::value("General8BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 79),
-			luabind::value("General9BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 80),
-			luabind::value("General9BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 89),
-			luabind::value("General10BagBegin", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 90),
-			luabind::value("General10BagEnd", static_cast<int>(EQEmu::invbag::GENERAL_BAGS_BEGIN) + 99),
-			luabind::value("CursorBagBegin", static_cast<int>(EQEmu::invbag::CURSOR_BAG_BEGIN)),
-			luabind::value("CursorBagEnd", static_cast<int>(EQEmu::invbag::CURSOR_BAG_END)),
-			luabind::value("Tradeskill", static_cast<int>(EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE)),
-			luabind::value("Augment", static_cast<int>(EQEmu::invslot::SLOT_AUGMENT_GENERIC_RETURN)),
-			luabind::value("BankBegin", static_cast<int>(EQEmu::invslot::BANK_BEGIN)),
-			luabind::value("BankEnd", static_cast<int>(EQEmu::invslot::BANK_END)),
-			luabind::value("BankBagsBegin", static_cast<int>(EQEmu::invbag::BANK_BAGS_BEGIN)),
-			luabind::value("BankBagsEnd", static_cast<int>(EQEmu::invbag::BANK_BAGS_END)),
-			luabind::value("SharedBankBegin", static_cast<int>(EQEmu::invslot::SHARED_BANK_BEGIN)),
-			luabind::value("SharedBankEnd", static_cast<int>(EQEmu::invslot::SHARED_BANK_END)),
-			luabind::value("SharedBankBagsBegin", static_cast<int>(EQEmu::invbag::SHARED_BANK_BAGS_BEGIN)),
-			luabind::value("SharedBankBagsEnd", static_cast<int>(EQEmu::invbag::SHARED_BANK_BAGS_END)),
-			luabind::value("BagSlotBegin", static_cast<int>(EQEmu::invbag::SLOT_BEGIN)),
-			luabind::value("BagSlotEnd", static_cast<int>(EQEmu::invbag::SLOT_END)),
-			luabind::value("AugSocketBegin", static_cast<int>(EQEmu::invaug::SOCKET_BEGIN)),
-			luabind::value("AugSocketEnd", static_cast<int>(EQEmu::invaug::SOCKET_END)),
-			luabind::value("Invalid", static_cast<int>(EQEmu::invslot::SLOT_INVALID)),
+			luabind::value("Charm", static_cast<int>(EQ::invslot::slotCharm)),
+			luabind::value("Ear1", static_cast<int>(EQ::invslot::slotEar1)),
+			luabind::value("Head", static_cast<int>(EQ::invslot::slotHead)),
+			luabind::value("Face", static_cast<int>(EQ::invslot::slotFace)),
+			luabind::value("Ear2", static_cast<int>(EQ::invslot::slotEar2)),
+			luabind::value("Neck", static_cast<int>(EQ::invslot::slotNeck)),
+			luabind::value("Shoulders", static_cast<int>(EQ::invslot::slotShoulders)),
+			luabind::value("Arms", static_cast<int>(EQ::invslot::slotArms)),
+			luabind::value("Back", static_cast<int>(EQ::invslot::slotBack)),
+			luabind::value("Wrist1", static_cast<int>(EQ::invslot::slotWrist1)),
+			luabind::value("Wrist2", static_cast<int>(EQ::invslot::slotWrist2)),
+			luabind::value("Range", static_cast<int>(EQ::invslot::slotRange)),
+			luabind::value("Hands", static_cast<int>(EQ::invslot::slotHands)),
+			luabind::value("Primary", static_cast<int>(EQ::invslot::slotPrimary)),
+			luabind::value("Secondary", static_cast<int>(EQ::invslot::slotSecondary)),
+			luabind::value("Finger1", static_cast<int>(EQ::invslot::slotFinger1)),
+			luabind::value("Finger2", static_cast<int>(EQ::invslot::slotFinger2)),
+			luabind::value("Chest", static_cast<int>(EQ::invslot::slotChest)),
+			luabind::value("Legs", static_cast<int>(EQ::invslot::slotLegs)),
+			luabind::value("Feet", static_cast<int>(EQ::invslot::slotFeet)),
+			luabind::value("Waist", static_cast<int>(EQ::invslot::slotWaist)),
+			luabind::value("PowerSource", static_cast<int>(EQ::invslot::slotPowerSource)),
+			luabind::value("Ammo", static_cast<int>(EQ::invslot::slotAmmo)),
+			luabind::value("General1", static_cast<int>(EQ::invslot::slotGeneral1)),
+			luabind::value("General2", static_cast<int>(EQ::invslot::slotGeneral2)),
+			luabind::value("General3", static_cast<int>(EQ::invslot::slotGeneral3)),
+			luabind::value("General4", static_cast<int>(EQ::invslot::slotGeneral4)),
+			luabind::value("General5", static_cast<int>(EQ::invslot::slotGeneral5)),
+			luabind::value("General6", static_cast<int>(EQ::invslot::slotGeneral6)),
+			luabind::value("General7", static_cast<int>(EQ::invslot::slotGeneral7)),
+			luabind::value("General8", static_cast<int>(EQ::invslot::slotGeneral8)),
+			luabind::value("General9", static_cast<int>(EQ::invslot::slotGeneral9)),
+			luabind::value("General10", static_cast<int>(EQ::invslot::slotGeneral10)),
+			luabind::value("Cursor", static_cast<int>(EQ::invslot::slotCursor)),
+			luabind::value("PossessionsBegin", static_cast<int>(EQ::invslot::POSSESSIONS_BEGIN)),
+			luabind::value("PossessionsEnd", static_cast<int>(EQ::invslot::POSSESSIONS_END)),
+			luabind::value("EquipmentBegin", static_cast<int>(EQ::invslot::EQUIPMENT_BEGIN)),
+			luabind::value("EquipmentEnd", static_cast<int>(EQ::invslot::EQUIPMENT_END)),
+			luabind::value("GeneralBegin", static_cast<int>(EQ::invslot::GENERAL_BEGIN)),
+			luabind::value("GeneralEnd", static_cast<int>(EQ::invslot::GENERAL_END)),
+			luabind::value("PossessionsBagsBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN)),
+			luabind::value("PossessionsBagsEnd", static_cast<int>(EQ::invbag::CURSOR_BAG_END)),
+			luabind::value("GeneralBagsBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN)),
+			luabind::value("GeneralBagsEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_END)),
+			luabind::value("General1BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN)),
+			luabind::value("General1BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 9),
+			luabind::value("General2BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 10),
+			luabind::value("General2BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 19),
+			luabind::value("General3BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 20),
+			luabind::value("General3BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 29),
+			luabind::value("General4BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 30),
+			luabind::value("General4BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 39),
+			luabind::value("General5BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 40),
+			luabind::value("General5BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 49),
+			luabind::value("General6BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 50),
+			luabind::value("General6BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 59),
+			luabind::value("General7BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 60),
+			luabind::value("General7BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 69),
+			luabind::value("General8BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 70),
+			luabind::value("General8BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 79),
+			luabind::value("General9BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 80),
+			luabind::value("General9BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 89),
+			luabind::value("General10BagBegin", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 90),
+			luabind::value("General10BagEnd", static_cast<int>(EQ::invbag::GENERAL_BAGS_BEGIN) + 99),
+			luabind::value("CursorBagBegin", static_cast<int>(EQ::invbag::CURSOR_BAG_BEGIN)),
+			luabind::value("CursorBagEnd", static_cast<int>(EQ::invbag::CURSOR_BAG_END)),
+			luabind::value("Tradeskill", static_cast<int>(EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE)),
+			luabind::value("Augment", static_cast<int>(EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN)),
+			luabind::value("BankBegin", static_cast<int>(EQ::invslot::BANK_BEGIN)),
+			luabind::value("BankEnd", static_cast<int>(EQ::invslot::BANK_END)),
+			luabind::value("BankBagsBegin", static_cast<int>(EQ::invbag::BANK_BAGS_BEGIN)),
+			luabind::value("BankBagsEnd", static_cast<int>(EQ::invbag::BANK_BAGS_END)),
+			luabind::value("SharedBankBegin", static_cast<int>(EQ::invslot::SHARED_BANK_BEGIN)),
+			luabind::value("SharedBankEnd", static_cast<int>(EQ::invslot::SHARED_BANK_END)),
+			luabind::value("SharedBankBagsBegin", static_cast<int>(EQ::invbag::SHARED_BANK_BAGS_BEGIN)),
+			luabind::value("SharedBankBagsEnd", static_cast<int>(EQ::invbag::SHARED_BANK_BAGS_END)),
+			luabind::value("BagSlotBegin", static_cast<int>(EQ::invbag::SLOT_BEGIN)),
+			luabind::value("BagSlotEnd", static_cast<int>(EQ::invbag::SLOT_END)),
+			luabind::value("AugSocketBegin", static_cast<int>(EQ::invaug::SOCKET_BEGIN)),
+			luabind::value("AugSocketEnd", static_cast<int>(EQ::invaug::SOCKET_END)),
+			luabind::value("Invalid", static_cast<int>(EQ::invslot::SLOT_INVALID)),
 
-			luabind::value("Shoulder", static_cast<int>(EQEmu::invslot::slotShoulders)), // deprecated
-			luabind::value("Bracer1", static_cast<int>(EQEmu::invslot::slotWrist1)), // deprecated
-			luabind::value("Bracer2", static_cast<int>(EQEmu::invslot::slotWrist2)), // deprecated
-			luabind::value("Ring1", static_cast<int>(EQEmu::invslot::slotFinger1)), // deprecated
-			luabind::value("Ring2", static_cast<int>(EQEmu::invslot::slotFinger2)), // deprecated
-			luabind::value("PersonalBegin", static_cast<int>(EQEmu::invslot::GENERAL_BEGIN)), // deprecated
-			luabind::value("PersonalEnd", static_cast<int>(EQEmu::invslot::GENERAL_END)), // deprecated
+			luabind::value("Shoulder", static_cast<int>(EQ::invslot::slotShoulders)), // deprecated
+			luabind::value("Bracer1", static_cast<int>(EQ::invslot::slotWrist1)), // deprecated
+			luabind::value("Bracer2", static_cast<int>(EQ::invslot::slotWrist2)), // deprecated
+			luabind::value("Ring1", static_cast<int>(EQ::invslot::slotFinger1)), // deprecated
+			luabind::value("Ring2", static_cast<int>(EQ::invslot::slotFinger2)), // deprecated
+			luabind::value("PersonalBegin", static_cast<int>(EQ::invslot::GENERAL_BEGIN)), // deprecated
+			luabind::value("PersonalEnd", static_cast<int>(EQ::invslot::GENERAL_END)), // deprecated
 			luabind::value("CursorEnd", 0xFFFE) // deprecated (not in use..and never valid vis-a-vis client behavior)
 		];
 }
@@ -2099,20 +2983,20 @@ luabind::scope lua_register_material() {
 	return luabind::class_<Materials>("Material")
 		.enum_("constants")
 		[
-			luabind::value("Head", static_cast<int>(EQEmu::textures::armorHead)),
-			luabind::value("Chest", static_cast<int>(EQEmu::textures::armorChest)),
-			luabind::value("Arms", static_cast<int>(EQEmu::textures::armorArms)),
-			luabind::value("Wrist", static_cast<int>(EQEmu::textures::armorWrist)),
-			luabind::value("Hands", static_cast<int>(EQEmu::textures::armorHands)),
-			luabind::value("Legs", static_cast<int>(EQEmu::textures::armorLegs)),
-			luabind::value("Feet", static_cast<int>(EQEmu::textures::armorFeet)),
-			luabind::value("Primary", static_cast<int>(EQEmu::textures::weaponPrimary)),
-			luabind::value("Secondary", static_cast<int>(EQEmu::textures::weaponSecondary)),
-			luabind::value("Count", static_cast<int>(EQEmu::textures::materialCount)),
-			luabind::value("Invalid", static_cast<int>(EQEmu::textures::materialInvalid)),
+			luabind::value("Head", static_cast<int>(EQ::textures::armorHead)),
+			luabind::value("Chest", static_cast<int>(EQ::textures::armorChest)),
+			luabind::value("Arms", static_cast<int>(EQ::textures::armorArms)),
+			luabind::value("Wrist", static_cast<int>(EQ::textures::armorWrist)),
+			luabind::value("Hands", static_cast<int>(EQ::textures::armorHands)),
+			luabind::value("Legs", static_cast<int>(EQ::textures::armorLegs)),
+			luabind::value("Feet", static_cast<int>(EQ::textures::armorFeet)),
+			luabind::value("Primary", static_cast<int>(EQ::textures::weaponPrimary)),
+			luabind::value("Secondary", static_cast<int>(EQ::textures::weaponSecondary)),
+			luabind::value("Count", static_cast<int>(EQ::textures::materialCount)),
+			luabind::value("Invalid", static_cast<int>(EQ::textures::materialInvalid)),
 
-			luabind::value("Bracer", static_cast<int>(EQEmu::textures::armorWrist)), // deprecated
-			luabind::value("Max", static_cast<int>(EQEmu::textures::materialCount)) // deprecated
+			luabind::value("Bracer", static_cast<int>(EQ::textures::armorWrist)), // deprecated
+			luabind::value("Max", static_cast<int>(EQ::textures::materialCount)) // deprecated
 		];
 }
 
@@ -2120,14 +3004,14 @@ luabind::scope lua_register_client_version() {
 	return luabind::class_<ClientVersions>("ClientVersion")
 		.enum_("constants")
 		[
-			luabind::value("Unknown", static_cast<int>(EQEmu::versions::ClientVersion::Unknown)),
-			luabind::value("Titanium", static_cast<int>(EQEmu::versions::ClientVersion::Titanium)),
-			luabind::value("SoF", static_cast<int>(EQEmu::versions::ClientVersion::SoF)),
-			luabind::value("SoD", static_cast<int>(EQEmu::versions::ClientVersion::SoD)),
-			luabind::value("Underfoot", static_cast<int>(EQEmu::versions::ClientVersion::UF)), // deprecated
-			luabind::value("UF", static_cast<int>(EQEmu::versions::ClientVersion::UF)),
-			luabind::value("RoF", static_cast<int>(EQEmu::versions::ClientVersion::RoF)),
-			luabind::value("RoF2", static_cast<int>(EQEmu::versions::ClientVersion::RoF2))
+			luabind::value("Unknown", static_cast<int>(EQ::versions::ClientVersion::Unknown)),
+			luabind::value("Titanium", static_cast<int>(EQ::versions::ClientVersion::Titanium)),
+			luabind::value("SoF", static_cast<int>(EQ::versions::ClientVersion::SoF)),
+			luabind::value("SoD", static_cast<int>(EQ::versions::ClientVersion::SoD)),
+			luabind::value("Underfoot", static_cast<int>(EQ::versions::ClientVersion::UF)), // deprecated
+			luabind::value("UF", static_cast<int>(EQ::versions::ClientVersion::UF)),
+			luabind::value("RoF", static_cast<int>(EQ::versions::ClientVersion::RoF)),
+			luabind::value("RoF2", static_cast<int>(EQ::versions::ClientVersion::RoF2))
 		];
 }
 
@@ -2200,86 +3084,92 @@ luabind::scope lua_register_skills() {
 	return luabind::class_<Skills>("Skill")
 		.enum_("constants")
 		[
-			luabind::value("1HBlunt", EQEmu::skills::Skill1HBlunt),
-			luabind::value("1HSlashing", EQEmu::skills::Skill1HSlashing),
-			luabind::value("2HBlunt", EQEmu::skills::Skill2HBlunt),
-			luabind::value("2HSlashing", EQEmu::skills::Skill2HSlashing),
-			luabind::value("Abjuration", EQEmu::skills::SkillAbjuration),
-			luabind::value("Alteration", EQEmu::skills::SkillAlteration),
-			luabind::value("ApplyPoison", EQEmu::skills::SkillApplyPoison),
-			luabind::value("Archery", EQEmu::skills::SkillArchery),
-			luabind::value("Backstab", EQEmu::skills::SkillBackstab),
-			luabind::value("BindWound", EQEmu::skills::SkillBindWound),
-			luabind::value("Bash", EQEmu::skills::SkillBash),
-			luabind::value("Block", EQEmu::skills::SkillBlock),
-			luabind::value("BrassInstruments", EQEmu::skills::SkillBrassInstruments),
-			luabind::value("Channeling", EQEmu::skills::SkillChanneling),
-			luabind::value("Conjuration", EQEmu::skills::SkillConjuration),
-			luabind::value("Defense", EQEmu::skills::SkillDefense),
-			luabind::value("Disarm", EQEmu::skills::SkillDisarm),
-			luabind::value("DisarmTraps", EQEmu::skills::SkillDisarmTraps),
-			luabind::value("Divination", EQEmu::skills::SkillDivination),
-			luabind::value("Dodge", EQEmu::skills::SkillDodge),
-			luabind::value("DoubleAttack", EQEmu::skills::SkillDoubleAttack),
-			luabind::value("DragonPunch", EQEmu::skills::SkillDragonPunch),
-			luabind::value("TailRake", EQEmu::skills::SkillTailRake),
-			luabind::value("DualWield", EQEmu::skills::SkillDualWield),
-			luabind::value("EagleStrike", EQEmu::skills::SkillEagleStrike),
-			luabind::value("Evocation", EQEmu::skills::SkillEvocation),
-			luabind::value("FeignDeath", EQEmu::skills::SkillFeignDeath),
-			luabind::value("FlyingKick", EQEmu::skills::SkillFlyingKick),
-			luabind::value("Forage", EQEmu::skills::SkillForage),
-			luabind::value("HandtoHand", EQEmu::skills::SkillHandtoHand),
-			luabind::value("Hide", EQEmu::skills::SkillHide),
-			luabind::value("Kick", EQEmu::skills::SkillKick),
-			luabind::value("Meditate", EQEmu::skills::SkillMeditate),
-			luabind::value("Mend", EQEmu::skills::SkillMend),
-			luabind::value("Offense", EQEmu::skills::SkillOffense),
-			luabind::value("Parry", EQEmu::skills::SkillParry),
-			luabind::value("PickLock", EQEmu::skills::SkillPickLock),
-			luabind::value("1HPiercing", EQEmu::skills::Skill1HPiercing),
-			luabind::value("Riposte", EQEmu::skills::SkillRiposte),
-			luabind::value("RoundKick", EQEmu::skills::SkillRoundKick),
-			luabind::value("SafeFall", EQEmu::skills::SkillSafeFall),
-			luabind::value("SenseHeading", EQEmu::skills::SkillSenseHeading),
-			luabind::value("Singing", EQEmu::skills::SkillSinging),
-			luabind::value("Sneak", EQEmu::skills::SkillSneak),
-			luabind::value("SpecializeAbjure", EQEmu::skills::SkillSpecializeAbjure),
-			luabind::value("SpecializeAlteration", EQEmu::skills::SkillSpecializeAlteration),
-			luabind::value("SpecializeConjuration", EQEmu::skills::SkillSpecializeConjuration),
-			luabind::value("SpecializeDivination", EQEmu::skills::SkillSpecializeDivination),
-			luabind::value("SpecializeEvocation", EQEmu::skills::SkillSpecializeEvocation),
-			luabind::value("PickPockets", EQEmu::skills::SkillPickPockets),
-			luabind::value("StringedInstruments", EQEmu::skills::SkillStringedInstruments),
-			luabind::value("Swimming", EQEmu::skills::SkillSwimming),
-			luabind::value("Throwing", EQEmu::skills::SkillThrowing),
-			luabind::value("TigerClaw", EQEmu::skills::SkillTigerClaw),
-			luabind::value("Tracking", EQEmu::skills::SkillTracking),
-			luabind::value("WindInstruments", EQEmu::skills::SkillWindInstruments),
-			luabind::value("Fishing", EQEmu::skills::SkillFishing),
-			luabind::value("MakePoison", EQEmu::skills::SkillMakePoison),
-			luabind::value("Tinkering", EQEmu::skills::SkillTinkering),
-			luabind::value("Research", EQEmu::skills::SkillResearch),
-			luabind::value("Alchemy", EQEmu::skills::SkillAlchemy),
-			luabind::value("Baking", EQEmu::skills::SkillBaking),
-			luabind::value("Tailoring", EQEmu::skills::SkillTailoring),
-			luabind::value("SenseTraps", EQEmu::skills::SkillSenseTraps),
-			luabind::value("Blacksmithing", EQEmu::skills::SkillBlacksmithing),
-			luabind::value("Fletching", EQEmu::skills::SkillFletching),
-			luabind::value("Brewing", EQEmu::skills::SkillBrewing),
-			luabind::value("AlcoholTolerance", EQEmu::skills::SkillAlcoholTolerance),
-			luabind::value("Begging", EQEmu::skills::SkillBegging),
-			luabind::value("JewelryMaking", EQEmu::skills::SkillJewelryMaking),
-			luabind::value("Pottery", EQEmu::skills::SkillPottery),
-			luabind::value("PercussionInstruments", EQEmu::skills::SkillPercussionInstruments),
-			luabind::value("Intimidation", EQEmu::skills::SkillIntimidation),
-			luabind::value("Berserking", EQEmu::skills::SkillBerserking),
-			luabind::value("Taunt", EQEmu::skills::SkillTaunt),
-			luabind::value("Frenzy", EQEmu::skills::SkillFrenzy),
-			luabind::value("RemoveTraps", EQEmu::skills::SkillRemoveTraps),
-			luabind::value("TripleAttack", EQEmu::skills::SkillTripleAttack),
-			luabind::value("2HPiercing", EQEmu::skills::Skill2HPiercing),
-			luabind::value("HIGHEST_SKILL", EQEmu::skills::HIGHEST_SKILL)
+			luabind::value("1HBlunt", EQ::skills::Skill1HBlunt),
+			luabind::value("Blunt1H", EQ::skills::Skill1HBlunt),
+			luabind::value("1HSlashing", EQ::skills::Skill1HSlashing),
+			luabind::value("Slashing1H", EQ::skills::Skill1HSlashing),
+			luabind::value("2HBlunt", EQ::skills::Skill2HBlunt),
+			luabind::value("Blunt2H", EQ::skills::Skill2HBlunt),
+			luabind::value("2HSlashing", EQ::skills::Skill2HSlashing),
+			luabind::value("Slashing2H", EQ::skills::Skill2HSlashing),
+			luabind::value("Abjuration", EQ::skills::SkillAbjuration),
+			luabind::value("Alteration", EQ::skills::SkillAlteration),
+			luabind::value("ApplyPoison", EQ::skills::SkillApplyPoison),
+			luabind::value("Archery", EQ::skills::SkillArchery),
+			luabind::value("Backstab", EQ::skills::SkillBackstab),
+			luabind::value("BindWound", EQ::skills::SkillBindWound),
+			luabind::value("Bash", EQ::skills::SkillBash),
+			luabind::value("Block", EQ::skills::SkillBlock),
+			luabind::value("BrassInstruments", EQ::skills::SkillBrassInstruments),
+			luabind::value("Channeling", EQ::skills::SkillChanneling),
+			luabind::value("Conjuration", EQ::skills::SkillConjuration),
+			luabind::value("Defense", EQ::skills::SkillDefense),
+			luabind::value("Disarm", EQ::skills::SkillDisarm),
+			luabind::value("DisarmTraps", EQ::skills::SkillDisarmTraps),
+			luabind::value("Divination", EQ::skills::SkillDivination),
+			luabind::value("Dodge", EQ::skills::SkillDodge),
+			luabind::value("DoubleAttack", EQ::skills::SkillDoubleAttack),
+			luabind::value("DragonPunch", EQ::skills::SkillDragonPunch),
+			luabind::value("TailRake", EQ::skills::SkillTailRake),
+			luabind::value("DualWield", EQ::skills::SkillDualWield),
+			luabind::value("EagleStrike", EQ::skills::SkillEagleStrike),
+			luabind::value("Evocation", EQ::skills::SkillEvocation),
+			luabind::value("FeignDeath", EQ::skills::SkillFeignDeath),
+			luabind::value("FlyingKick", EQ::skills::SkillFlyingKick),
+			luabind::value("Forage", EQ::skills::SkillForage),
+			luabind::value("HandtoHand", EQ::skills::SkillHandtoHand),
+			luabind::value("Hide", EQ::skills::SkillHide),
+			luabind::value("Kick", EQ::skills::SkillKick),
+			luabind::value("Meditate", EQ::skills::SkillMeditate),
+			luabind::value("Mend", EQ::skills::SkillMend),
+			luabind::value("Offense", EQ::skills::SkillOffense),
+			luabind::value("Parry", EQ::skills::SkillParry),
+			luabind::value("PickLock", EQ::skills::SkillPickLock),
+			luabind::value("1HPiercing", EQ::skills::Skill1HPiercing),
+			luabind::value("Piercing1H", EQ::skills::Skill1HPiercing),
+			luabind::value("Riposte", EQ::skills::SkillRiposte),
+			luabind::value("RoundKick", EQ::skills::SkillRoundKick),
+			luabind::value("SafeFall", EQ::skills::SkillSafeFall),
+			luabind::value("SenseHeading", EQ::skills::SkillSenseHeading),
+			luabind::value("Singing", EQ::skills::SkillSinging),
+			luabind::value("Sneak", EQ::skills::SkillSneak),
+			luabind::value("SpecializeAbjure", EQ::skills::SkillSpecializeAbjure),
+			luabind::value("SpecializeAlteration", EQ::skills::SkillSpecializeAlteration),
+			luabind::value("SpecializeConjuration", EQ::skills::SkillSpecializeConjuration),
+			luabind::value("SpecializeDivination", EQ::skills::SkillSpecializeDivination),
+			luabind::value("SpecializeEvocation", EQ::skills::SkillSpecializeEvocation),
+			luabind::value("PickPockets", EQ::skills::SkillPickPockets),
+			luabind::value("StringedInstruments", EQ::skills::SkillStringedInstruments),
+			luabind::value("Swimming", EQ::skills::SkillSwimming),
+			luabind::value("Throwing", EQ::skills::SkillThrowing),
+			luabind::value("TigerClaw", EQ::skills::SkillTigerClaw),
+			luabind::value("Tracking", EQ::skills::SkillTracking),
+			luabind::value("WindInstruments", EQ::skills::SkillWindInstruments),
+			luabind::value("Fishing", EQ::skills::SkillFishing),
+			luabind::value("MakePoison", EQ::skills::SkillMakePoison),
+			luabind::value("Tinkering", EQ::skills::SkillTinkering),
+			luabind::value("Research", EQ::skills::SkillResearch),
+			luabind::value("Alchemy", EQ::skills::SkillAlchemy),
+			luabind::value("Baking", EQ::skills::SkillBaking),
+			luabind::value("Tailoring", EQ::skills::SkillTailoring),
+			luabind::value("SenseTraps", EQ::skills::SkillSenseTraps),
+			luabind::value("Blacksmithing", EQ::skills::SkillBlacksmithing),
+			luabind::value("Fletching", EQ::skills::SkillFletching),
+			luabind::value("Brewing", EQ::skills::SkillBrewing),
+			luabind::value("AlcoholTolerance", EQ::skills::SkillAlcoholTolerance),
+			luabind::value("Begging", EQ::skills::SkillBegging),
+			luabind::value("JewelryMaking", EQ::skills::SkillJewelryMaking),
+			luabind::value("Pottery", EQ::skills::SkillPottery),
+			luabind::value("PercussionInstruments", EQ::skills::SkillPercussionInstruments),
+			luabind::value("Intimidation", EQ::skills::SkillIntimidation),
+			luabind::value("Berserking", EQ::skills::SkillBerserking),
+			luabind::value("Taunt", EQ::skills::SkillTaunt),
+			luabind::value("Frenzy", EQ::skills::SkillFrenzy),
+			luabind::value("RemoveTraps", EQ::skills::SkillRemoveTraps),
+			luabind::value("TripleAttack", EQ::skills::SkillTripleAttack),
+			luabind::value("2HPiercing", EQ::skills::Skill2HPiercing),
+			luabind::value("Piercing2H", EQ::skills::Skill2HPiercing),
+			luabind::value("HIGHEST_SKILL", EQ::skills::HIGHEST_SKILL)
 		];
 }
 

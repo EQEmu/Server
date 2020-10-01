@@ -6,7 +6,7 @@
         {
             "label": "make",
             "type": "shell",
-            "command": "cd build && make",
+            "command": "cd bin && make",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -18,7 +18,7 @@
         {
             "label": "make clean",
             "type": "shell",
-            "command": "cd build && make clean",
+            "command": "cd bin && make clean",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -30,7 +30,7 @@
         {
             "label": "cmake",
             "type": "shell",
-            "command": "mkdir -p build && cd build && rm CMakeCache.txt && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G 'Unix Makefiles' ..",
+            "command": "mkdir -p bin && cd bin && rm CMakeCache.txt && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G 'Unix Makefiles' ..",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -52,7 +52,7 @@
         {
             "label": "download maps",
             "type": "shell",
-            "command": "mkdir -p build/bin && cd build/bin && wget https://codeload.github.com/Akkadius/EQEmuMaps/zip/master -O maps.zip && unzip -o maps.zip && rm ./maps -rf && mv EQEmuMaps-master maps && rm maps.zip",
+            "command": "mkdir -p bin && cd bin && wget https://codeload.github.com/Akkadius/EQEmuMaps/zip/master -O maps.zip && unzip -o maps.zip && rm ./maps -rf && mv EQEmuMaps-master maps && rm maps.zip",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -64,7 +64,7 @@
         {
             "label": "download quests",
             "type": "shell",
-            "command": "mkdir -p build/bin && cd build/bin && cd server && git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests",
+            "command": "mkdir -p bin && cd bin && cd server && git -C ./quests pull 2> /dev/null || git clone https://github.com/ProjectEQ/projecteqquests.git quests",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -76,7 +76,7 @@
         {
             "label": "download eqemu_config",
             "type": "shell",
-            "command": "mkdir -p build/bin && cd build/bin && wget --no-check-certificate https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/eqemu_config_docker.json -O eqemu_config.json",
+            "command": "mkdir -p bin && cd bin && wget --no-check-certificate https://raw.githubusercontent.com/Akkadius/EQEmuInstall/master/eqemu_config_docker.json -O eqemu_config.json",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -88,7 +88,7 @@
         {
             "label": "rebuild database (mariadb must be started)",
             "type": "shell",
-            "command": "mkdir -p build/bin && cd build/bin && docker run -i --rm --privileged -v ${HOST_PROJECT_PATH}/build/bin:/src --network=eqemu -it eqemu/server:0.0.3 bash -c './eqemu_server.pl source_peq_db && ./eqemu_server.pl check_db_updates && ./eqemu_server.pl linux_login_server_setup'",
+            "command": "mkdir -p bin && cd bin && docker run -i --rm --privileged -v ${HOST_PROJECT_PATH}/bin:/src --network=eqemu -it eqemu/server:0.0.3 bash -c './eqemu_server.pl source_peq_db && ./eqemu_server.pl check_db_updates && ./eqemu_server.pl linux_login_server_setup'",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -100,7 +100,7 @@
         {
             "label": "zone 7000",
             "type": "shell",
-            "command": "docker stop zone7000 | true && docker network create eqemu | true && docker run -i --rm --name zone7000 --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/build/bin:/src --ulimit core=10000000 --network=eqemu -p 7000:7000/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./zone dynamic_zone7000:7000",
+            "command": "docker stop zone7000 | true && docker network create eqemu | true && docker run -i --rm --name zone7000 --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/bin:/src --ulimit core=10000000 --network=eqemu -p 7000:7000/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./zone dynamic_zone7000:7000",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -109,7 +109,7 @@
         {
             "label": "zone 7001",
             "type": "shell",
-            "command": "docker stop zone7001 | true && docker network create eqemu | true && docker run -i --rm --name zone7001 --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/build/bin:/src --ulimit core=10000000 --network=eqemu -p 7001:7001/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./zone dynamic_zone7001:7001",
+            "command": "docker stop zone7001 | true && docker network create eqemu | true && docker run -i --rm --name zone7001 --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/bin:/src --ulimit core=10000000 --network=eqemu -p 7001:7001/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./zone dynamic_zone7001:7001",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -118,7 +118,7 @@
         {
             "label": "loginserver",
             "type": "shell",
-            "command": "docker stop loginserver | true && docker network create eqemu | true && docker run -i --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/build/bin:/src --ulimit core=10000000 --network=eqemu --name loginserver -p 5999:5999/udp -p 5998:5998/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./loginserver",
+            "command": "docker stop loginserver | true && docker network create eqemu | true && docker run -i --rm --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --privileged -v ${HOST_PROJECT_PATH}/bin:/src --ulimit core=10000000 --network=eqemu --name loginserver -p 5999:5999/udp -p 5998:5998/udp -e LD_LIBRARY_PATH=/src/ eqemu/server:0.0.3 gdb -ex run --args ./loginserver",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -127,7 +127,7 @@
         {
             "label": "shared_memory, world",
             "type": "shell",
-            "command": "docker stop sharedmemory | true &&  docker stop world | true && docker network create eqemu | true && docker run --rm -v ${HOST_PROJECT_PATH}/build/bin:/src --network=eqemu --name sharedmemory eqemu/server:0.0.3 ./shared_memory && docker run --rm -v ${HOST_PROJECT_PATH}/build/bin:/src --ulimit core=10000000 -e LD_LIBRARY_PATH=/src/ --network=eqemu --name world -p 9000:9000 -p 9000:9000/udp -p 9001:9001 -p 9080:9080 eqemu/server:0.0.3 gdb -ex run ./world",
+            "command": "docker stop sharedmemory | true &&  docker stop world | true && docker network create eqemu | true && docker run --rm -v ${HOST_PROJECT_PATH}/bin:/src --network=eqemu --name sharedmemory eqemu/server:0.0.3 ./shared_memory && docker run --rm -v ${HOST_PROJECT_PATH}/bin:/src --ulimit core=10000000 -e LD_LIBRARY_PATH=/src/ --network=eqemu --name world -p 9000:9000 -p 9000:9000/udp -p 9001:9001 -p 9080:9080 eqemu/server:0.0.3 gdb -ex run ./world",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -136,7 +136,7 @@
         {
             "label": "queryserv",
             "type": "shell",
-            "command": "docker stop queryserv | true && docker run --rm -v ${HOST_PROJECT_PATH}/build/bin:/src --ulimit core=10000000 -e LD_LIBRARY_PATH=/src/ --network=eqemu --name queryserv eqemu/server:0.0.3 gdb -ex run ./queryserv",
+            "command": "docker stop queryserv | true && docker run --rm -v ${HOST_PROJECT_PATH}/bin:/src --ulimit core=10000000 -e LD_LIBRARY_PATH=/src/ --network=eqemu --name queryserv eqemu/server:0.0.3 gdb -ex run ./queryserv",
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -145,7 +145,16 @@
         {
             "label": "mariadb",
             "type": "shell",
-            "command": "docker stop mariadb | true && cd build/bin && docker network create eqemu | true && docker run --rm -v ${HOST_PROJECT_PATH}/build/bin/db:/bitnami/mariadb -p 3306:3306 -e MARIADB_DATABASE=peq -e MARIADB_USER=eqemu -e MARIADB_PASSWORD=eqemupass -e ALLOW_EMPTY_PASSWORD=yes --name mariadb --network=eqemu bitnami/mariadb:latest",
+            "command": "docker stop mariadb | true && cd bin && docker network create eqemu | true && docker run --rm -v ${HOST_PROJECT_PATH}/bin/db:/bitnami/mariadb -p 3306:3306 -e MARIADB_DATABASE=peq -e MARIADB_USER=eqemu -e MARIADB_PASSWORD=eqemupass -e ALLOW_EMPTY_PASSWORD=yes --name mariadb --network=eqemu bitnami/mariadb:latest",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "ucs",
+            "type": "shell",
+            "command": "docker stop ucs | true && cd bin && docker network create eqemu | true && docker run --rm -v ${HOST_PROJECT_PATH}/bin:/src -p 7778:7778 --name ucs --network=eqemu eqemu/server:0.0.3 gdb -ex run ./ucs",
             "group": {
                 "kind": "test",
                 "isDefault": true

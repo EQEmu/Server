@@ -634,7 +634,7 @@ typedef enum {
 #define SE_LimitRace					412 // implemented - Limits to spells cast by a certain race (Note: not used in any known live spells)
 #define SE_FcBaseEffects				413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
 #define SE_LimitCastingSkill			414 // implemented - Limit a focus to include spells cast using a specific skill.
-//#define SE_FFItemClass				415 // not used
+//#define SE_FFItemClass				415 // not used - base1 matches ItemType, base2 matches SubType, -1 ignored, max is bitmask of valid slots
 #define SE_ACv2							416 // implemented - New AC spell effect
 #define SE_ManaRegen_v2					417 // implemented - New mana regen effect
 #define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks
@@ -748,7 +748,7 @@ struct SPDat_Spell_Struct
 /* 086 */	int effectid[EFFECT_COUNT];	// Spell's effects -- SPELLAFFECT1 ... SPELLAFFECT12
 /* 098 */	SpellTargetType targettype;	// Spell's Target -- TYPENUMBER
 /* 099 */	int basediff; // base difficulty fizzle adjustment -- BASEDIFFICULTY
-/* 100 */	EQEmu::skills::SkillType skill; // -- CASTINGSKILL
+/* 100 */	EQ::skills::SkillType skill; // -- CASTINGSKILL
 /* 101 */	int8 zonetype; // 01=Outdoors, 02=dungeons, ff=Any -- ZONETYPE
 /* 102 */	int8 EnvironmentType; // -- ENVIRONMENTTYPE
 /* 103 */	int8 TimeOfDay; // -- TIMEOFDAY

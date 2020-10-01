@@ -75,6 +75,16 @@ void Lua_Client::Duck() {
 	self->Duck();
 }
 
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue);
+}
+
+void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint) {
+	Lua_Safe_Call_Void();
+	self->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
 void Lua_Client::Stand() {
 	Lua_Safe_Call_Void();
 	self->Stand();
@@ -325,6 +335,36 @@ void Lua_Client::MovePCInstance(int zone, int instance, float x, float y, float 
 	self->MovePC(zone, instance, x, y, z, heading);
 }
 
+void Lua_Client::MoveZone(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZone(zone_short_name);
+}
+
+void Lua_Client::MoveZoneGroup(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneGroup(zone_short_name);
+}
+
+void Lua_Client::MoveZoneRaid(const char *zone_short_name) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneRaid(zone_short_name);
+}
+
+void Lua_Client::MoveZoneInstance(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstance(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceGroup(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceGroup(instance_id);
+}
+
+void Lua_Client::MoveZoneInstanceRaid(uint16 instance_id) {
+	Lua_Safe_Call_Void();
+	self->MoveZoneInstanceRaid(instance_id);
+}
+
 void Lua_Client::ChangeLastName(const char *in) {
 	Lua_Safe_Call_Void();
 	self->ChangeLastName(in);
@@ -442,27 +482,27 @@ void Lua_Client::IncreaseLanguageSkill(int skill_id, int value) {
 
 int Lua_Client::GetRawSkill(int skill_id) {
 	Lua_Safe_Call_Int();
-	return self->GetRawSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
+	return self->GetRawSkill(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::HasSkill(int skill_id) {
 	Lua_Safe_Call_Bool();
-	return self->HasSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
+	return self->HasSkill(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::CanHaveSkill(int skill_id) {
 	Lua_Safe_Call_Bool();
-	return self->CanHaveSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
+	return self->CanHaveSkill(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
 void Lua_Client::SetSkill(int skill_id, int value) {
 	Lua_Safe_Call_Void();
-	self->SetSkill(static_cast<EQEmu::skills::SkillType>(skill_id), value);
+	self->SetSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
 }
 
 void Lua_Client::AddSkill(int skill_id, int value) {
 	Lua_Safe_Call_Void();
-	self->AddSkill(static_cast<EQEmu::skills::SkillType>(skill_id), value);
+	self->AddSkill(static_cast<EQ::skills::SkillType>(skill_id), value);
 }
 
 void Lua_Client::CheckSpecializeIncrease(int spell_id) {
@@ -472,12 +512,12 @@ void Lua_Client::CheckSpecializeIncrease(int spell_id) {
 
 void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target) {
 	Lua_Safe_Call_Void();
-	self->CheckIncreaseSkill(static_cast<EQEmu::skills::SkillType>(skill_id), target);
+	self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), target);
 }
 
 void Lua_Client::CheckIncreaseSkill(int skill_id, Lua_Mob target, int chance_mod) {
 	Lua_Safe_Call_Void();
-	self->CheckIncreaseSkill(static_cast<EQEmu::skills::SkillType>(skill_id), target, chance_mod);
+	self->CheckIncreaseSkill(static_cast<EQ::skills::SkillType>(skill_id), target, chance_mod);
 }
 
 void Lua_Client::SetLanguageSkill(int language, int value) {
@@ -487,7 +527,7 @@ void Lua_Client::SetLanguageSkill(int language, int value) {
 
 int Lua_Client::MaxSkill(int skill_id) {
 	Lua_Safe_Call_Int();
-	return self->MaxSkill(static_cast<EQEmu::skills::SkillType>(skill_id));
+	return self->MaxSkill(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
 bool Lua_Client::IsMedding() {
@@ -843,6 +883,16 @@ float Lua_Client::CalcPriceMod(Lua_Mob other, bool reverse) {
 void Lua_Client::ResetTrade() {
 	Lua_Safe_Call_Void();
 	self->ResetTrade();
+}
+
+uint32 Lua_Client::GetDisciplineTimer(uint32 timer_id) {
+	Lua_Safe_Call_Int();
+	return self->GetDisciplineTimer(timer_id);
+}
+
+void Lua_Client::ResetDisciplineTimer(uint32 timer_id) {
+	Lua_Safe_Call_Void();
+	self->ResetDisciplineTimer(timer_id);
 }
 
 bool Lua_Client::UseDiscipline(int spell_id, int target_id) {
@@ -1210,6 +1260,11 @@ void Lua_Client::OpenLFGuildWindow() {
 	self->OpenLFGuildWindow();
 }
 
+void Lua_Client::NotifyNewTitlesAvailable() {
+	Lua_Safe_Call_Void();
+	self->NotifyNewTitlesAvailable();
+}
+
 void Lua_Client::Signal(uint32 id) {
 	Lua_Safe_Call_Void();
 	self->Signal(id);
@@ -1262,13 +1317,13 @@ Lua_Raid Lua_Client::GetRaid() {
 
 bool Lua_Client::PutItemInInventory(int slot_id, Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	EQEmu::ItemInstance *rinst = inst;
+	EQ::ItemInstance *rinst = inst;
 	return self->PutItemInInventory(slot_id, *rinst, true);
 }
 
 bool Lua_Client::PushItemOnCursor(Lua_ItemInst inst) {
 	Lua_Safe_Call_Bool();
-	EQEmu::ItemInstance *rinst = inst;
+	EQ::ItemInstance *rinst = inst;
 	return self->PushItemOnCursor(*rinst, true);
 }
 
@@ -1592,6 +1647,8 @@ luabind::scope lua_register_client() {
 		.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
 		.def("GetAnon", (bool(Lua_Client::*)(void))&Lua_Client::GetAnon)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
+		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
 		.def("Stand", (void(Lua_Client::*)(void))&Lua_Client::Stand)
 		.def("SetGM", (void(Lua_Client::*)(bool))&Lua_Client::SetGM)
 		.def("SetPVP", (void(Lua_Client::*)(bool))&Lua_Client::SetPVP)
@@ -1643,6 +1700,12 @@ luabind::scope lua_register_client() {
 		.def("SetSecondaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetSecondaryWeaponOrnamentation)
 		.def("MovePC", (void(Lua_Client::*)(int,float,float,float,float))&Lua_Client::MovePC)
 		.def("MovePCInstance", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::MovePCInstance)
+		.def("MoveZone", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZone)
+		.def("MoveZoneGroup", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneGroup)
+		.def("MoveZoneRaid", (void(Lua_Client::*)(const char*))&Lua_Client::MoveZoneRaid)
+		.def("MoveZoneInstance", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstance)
+		.def("MoveZoneInstanceGroup", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceGroup)
+		.def("MoveZoneInstanceRaid", (void(Lua_Client::*)(uint16))&Lua_Client::MoveZoneInstanceRaid)
 		.def("ChangeLastName", (void(Lua_Client::*)(const char *in))&Lua_Client::ChangeLastName)
 		.def("GetFactionLevel", (int(Lua_Client::*)(uint32,uint32,uint32,uint32,uint32,uint32,Lua_NPC))&Lua_Client::GetFactionLevel)
 		.def("SetFactionLevel", (void(Lua_Client::*)(uint32,uint32,int,int,int))&Lua_Client::SetFactionLevel)
@@ -1747,6 +1810,8 @@ luabind::scope lua_register_client() {
 		.def("ForageItem", (void(Lua_Client::*)(bool))&Lua_Client::ForageItem)
 		.def("CalcPriceMod", (float(Lua_Client::*)(Lua_Mob,bool))&Lua_Client::CalcPriceMod)
 		.def("ResetTrade", (void(Lua_Client::*)(void))&Lua_Client::ResetTrade)
+		.def("GetDisciplineTimer", (uint32(Lua_Client::*)(uint32))&Lua_Client::GetDisciplineTimer)
+		.def("ResetDisciplineTimer", (void(Lua_Client::*)(uint32))&Lua_Client::ResetDisciplineTimer)
 		.def("UseDiscipline", (bool(Lua_Client::*)(int,int))&Lua_Client::UseDiscipline)
 		.def("GetCharacterFactionLevel", (int(Lua_Client::*)(int))&Lua_Client::GetCharacterFactionLevel)
 		.def("SetZoneFlag", (void(Lua_Client::*)(int))&Lua_Client::SetZoneFlag)
@@ -1820,6 +1885,7 @@ luabind::scope lua_register_client() {
 		.def("GetAllMoney", (uint64(Lua_Client::*)(void))&Lua_Client::GetAllMoney)
 		.def("GetMoney", (uint32(Lua_Client::*)(uint8, uint8))&Lua_Client::GetMoney)
 		.def("OpenLFGuildWindow", (void(Lua_Client::*)(void))&Lua_Client::OpenLFGuildWindow)
+		.def("NotifyNewTitlesAvailable", (void(Lua_Client::*)(void))&Lua_Client::NotifyNewTitlesAvailable)
 		.def("Signal", (void(Lua_Client::*)(uint32))&Lua_Client::Signal)
 		.def("AddAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddAlternateCurrencyValue)
 		.def("SetAlternateCurrencyValue", (void(Lua_Client::*)(uint32,int))&Lua_Client::SetAlternateCurrencyValue)

@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "adventure_manager.h"
 #include "ucs.h"
 #include "queryserv.h"
+#include "world_store.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -86,7 +87,7 @@ ZoneServer::~ZoneServer() {
 bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	is_booting_up = false;
 
-	const char* zn = MakeLowerString(database.GetZoneName(iZoneID));
+	const char* zn = MakeLowerString(ZoneName(iZoneID));
 	char*	longname;
 
 	if (iZoneID)
@@ -108,7 +109,7 @@ bool ZoneServer::SetZone(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	if (zn)
 	{
 		strn0cpy(zone_name, zn, sizeof(zone_name));
-		if (database.GetZoneLongName((char*)zone_name, &longname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr))
+		if (content_db.GetZoneLongName((char*)zone_name, &longname, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr))
 		{
 			strn0cpy(long_name, longname, sizeof(long_name));
 			safe_delete_array(longname);
@@ -566,7 +567,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 		SetZone_Struct* szs = (SetZone_Struct*)pack->pBuffer;
 		if (szs->zoneid != 0) {
-			if (database.GetZoneName(szs->zoneid))
+			if (ZoneName(szs->zoneid))
 				SetZone(szs->zoneid, szs->instanceid, szs->staticzone);
 			else
 				SetZone(0);
@@ -648,7 +649,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (s->ZoneServerID != 0)
 			zs = zoneserver_list.FindByID(s->ZoneServerID);
 		else if (s->zoneid != 0)
-			zs = zoneserver_list.FindByName(database.GetZoneName(s->zoneid));
+			zs = zoneserver_list.FindByName(ZoneName(s->zoneid));
 		else
 			zoneserver_list.SendEmoteMessage(s->adminname, 0, 0, 0, "Error: SOP_ZoneShutdown: neither ID nor name specified");
 
@@ -660,7 +661,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ZoneBootup: {
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *)pack->pBuffer;
-		zoneserver_list.SOPZoneBootup(s->adminname, s->ZoneServerID, database.GetZoneName(s->zoneid), s->makestatic);
+		zoneserver_list.SOPZoneBootup(s->adminname, s->ZoneServerID, ZoneName(s->zoneid), s->makestatic);
 		break;
 	}
 	case ServerOP_ZoneStatus: {
@@ -1018,13 +1019,13 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 		case 1:
 			if (zoneserver_list.SetLockedZone(s->zoneID, true))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", database.GetZoneName(s->zoneID));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(s->zoneID));
 			else
 				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
 			break;
 		case 2:
 			if (zoneserver_list.SetLockedZone(s->zoneID, false))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", database.GetZoneName(s->zoneID));
+				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(s->zoneID));
 			else
 				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
 			break;
@@ -1078,7 +1079,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Unable to locate zone record for zone id [{}] or instance id [{}] in zoneserver list for ServerOP_Consent_Response operation", s->zone_id, s->instance_id);
 		}
 
-		if (s->consent_type == EQEmu::consent::Normal) {
+		if (s->consent_type == EQ::consent::Normal) {
 			// send the message to the client being granted or denied permission
 			ClientListEntry* cle = client_list.FindCharacter(s->grantname);
 			if (cle) {
@@ -1236,13 +1237,86 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		QSLink.SendPacket(pack);
 		break;
 	}
-	case ServerOP_CZSignalClientByName:
+	case ServerOP_CZCastSpellPlayer:
+	case ServerOP_CZCastSpellGroup:
+	case ServerOP_CZCastSpellRaid:
+	case ServerOP_CZCastSpellGuild:
+	case ServerOP_CZMarqueePlayer:
+	case ServerOP_CZMarqueeGroup:
+	case ServerOP_CZMarqueeRaid:
+	case ServerOP_CZMarqueeGuild:
 	case ServerOP_CZMessagePlayer:
-	case ServerOP_CZSignalNPC:
-	case ServerOP_CZSetEntityVariableByNPCTypeID:
-	case ServerOP_CZSignalClient:
+	case ServerOP_CZMessageGroup:
+	case ServerOP_CZMessageRaid:
+	case ServerOP_CZMessageGuild:
+	case ServerOP_CZMovePlayer:
+	case ServerOP_CZMoveGroup:
+	case ServerOP_CZMoveRaid:
+	case ServerOP_CZMoveGuild:
+	case ServerOP_CZMoveInstancePlayer:
+	case ServerOP_CZMoveInstanceGroup:
+	case ServerOP_CZMoveInstanceRaid:
+	case ServerOP_CZMoveInstanceGuild:
+	case ServerOP_CZRemoveSpellPlayer:
+	case ServerOP_CZRemoveSpellGroup:
+	case ServerOP_CZRemoveSpellRaid:
+	case ServerOP_CZRemoveSpellGuild:
 	case ServerOP_CZSetEntityVariableByClientName:
+	case ServerOP_CZSetEntityVariableByNPCTypeID:
+	case ServerOP_CZSetEntityVariableByGroupID:
+	case ServerOP_CZSetEntityVariableByRaidID:
+	case ServerOP_CZSetEntityVariableByGuildID:
+	case ServerOP_CZSignalNPC:
+	case ServerOP_CZSignalClient:
+	case ServerOP_CZSignalClientByName:
+	case ServerOP_CZSignalGroup:
+	case ServerOP_CZSignalRaid:
+	case ServerOP_CZSignalGuild:
+	case ServerOP_CZTaskActivityResetPlayer:
+	case ServerOP_CZTaskActivityResetGroup:
+	case ServerOP_CZTaskActivityResetRaid:
+	case ServerOP_CZTaskActivityResetGuild:
+	case ServerOP_CZTaskActivityUpdatePlayer:
+	case ServerOP_CZTaskActivityUpdateGroup:
+	case ServerOP_CZTaskActivityUpdateRaid:
+	case ServerOP_CZTaskActivityUpdateGuild:
+	case ServerOP_CZTaskAssignPlayer:
+	case ServerOP_CZTaskAssignGroup:
+	case ServerOP_CZTaskAssignRaid:
+	case ServerOP_CZTaskAssignGuild:
+	case ServerOP_CZTaskDisablePlayer:
+	case ServerOP_CZTaskDisableGroup:
+	case ServerOP_CZTaskDisableRaid:
+	case ServerOP_CZTaskDisableGuild:	
+	case ServerOP_CZTaskEnablePlayer:
+	case ServerOP_CZTaskEnableGroup:
+	case ServerOP_CZTaskEnableRaid:
+	case ServerOP_CZTaskEnableGuild:	
+	case ServerOP_CZTaskFailPlayer:
+	case ServerOP_CZTaskFailGroup:
+	case ServerOP_CZTaskFailRaid:
+	case ServerOP_CZTaskFailGuild:
+	case ServerOP_CZTaskRemovePlayer:
+	case ServerOP_CZTaskRemoveGroup:
+	case ServerOP_CZTaskRemoveRaid:
+	case ServerOP_CZTaskRemoveGuild:
+	case ServerOP_WWAssignTask:
+	case ServerOP_WWCastSpell:
+	case ServerOP_WWDisableTask:
+	case ServerOP_WWEnableTask:
+	case ServerOP_WWFailTask:
 	case ServerOP_WWMarquee:
+	case ServerOP_WWMessage:
+	case ServerOP_WWMove:
+	case ServerOP_WWMoveInstance:
+	case ServerOP_WWRemoveSpell:
+	case ServerOP_WWRemoveTask:
+	case ServerOP_WWResetActivity:
+	case ServerOP_WWSetEntityVariableClient:
+	case ServerOP_WWSetEntityVariableNPC:
+	case ServerOP_WWSignalClient:
+	case ServerOP_WWSignalNPC:
+	case ServerOP_WWUpdateActivity:
 	case ServerOP_DepopAllPlayersCorpses:
 	case ServerOP_DepopPlayerCorpse:
 	case ServerOP_ReloadTitles:

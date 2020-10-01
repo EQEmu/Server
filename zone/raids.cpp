@@ -279,6 +279,8 @@ void Raid::SetRaidLeader(const char *wasLead, const char *name)
 	Client *c = entity_list.GetClientByName(name);
 	if(c)
 		SetLeader(c);
+	else
+		SetLeader(nullptr); //sanity check, should never get hit but we want to prefer to NOT crash if we do VerifyRaid and leader never gets set there (raid without a leader?)
 
 	LearnMembers();
 	VerifyRaid();
@@ -1549,6 +1551,11 @@ void Raid::VerifyRaid()
 				SetLeader(members[x].member);
 				strn0cpy(leadername, members[x].membername, 64);
 			}
+			else
+			{
+				//should never happen, but maybe it is?
+				SetLeader(nullptr);
+			}
 		}
 	}
 }
@@ -1557,6 +1564,11 @@ void Raid::MemberZoned(Client *c)
 {
 	if(!c)
 		return;
+
+	if (leader == c)
+	{
+		leader = nullptr;
+	}
 
 	// Raid::GetGroup() goes over the members as well, this way we go over once
 	uint32 gid = RAID_GROUPLESS;
@@ -1592,7 +1604,7 @@ void Raid::SendHPManaEndPacketsTo(Client *client)
 				safe_delete_array(hp_packet.pBuffer);
 
 				hp_packet.size = 0;
-				if (client->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (client->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
@@ -1629,7 +1641,7 @@ void Raid::SendHPManaEndPacketsFrom(Mob *mob)
 		if(members[x].member) {
 			if(!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
 				members[x].member->QueuePacket(&hpapp, false);
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
@@ -1661,7 +1673,7 @@ void Raid::SendManaPacketFrom(Mob *mob)
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if (members[x].member) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobManaUpdate);
 					MobManaUpdate_Struct *mana_update = (MobManaUpdate_Struct *)outapp.pBuffer;
 					mana_update->spawn_id = mob->GetID();
@@ -1688,7 +1700,7 @@ void Raid::SendEndurancePacketFrom(Mob *mob)
 	for (int x = 0; x < MAX_RAID_MEMBERS; x++) {
 		if (members[x].member) {
 			if (!mob->IsClient() || ((members[x].member != mob->CastToClient()) && (members[x].GroupNumber == group_id))) {
-				if (members[x].member->ClientVersion() >= EQEmu::versions::ClientVersion::SoD) {
+				if (members[x].member->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 					outapp.SetOpcode(OP_MobEnduranceUpdate);
 					MobEnduranceUpdate_Struct *endurance_update = (MobEnduranceUpdate_Struct *)outapp.pBuffer;
 					endurance_update->spawn_id = mob->GetID();

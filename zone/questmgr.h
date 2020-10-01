@@ -28,7 +28,7 @@ class Client;
 class Mob;
 class NPC;
 
-namespace EQEmu
+namespace EQ
 {
 	class ItemInstance;
 }
@@ -37,7 +37,7 @@ class QuestManager {
 	struct running_quest {
 		Mob *owner;
 		Client *initiator;
-		EQEmu::ItemInstance* questitem;
+		EQ::ItemInstance* questitem;
 		bool depop_npc;
 		std::string encounter;
 	};
@@ -51,7 +51,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQEmu::ItemInstance* _questitem = nullptr, std::string encounter = "");
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -77,15 +77,17 @@ public:
 	void selfcast(int spell_id);
 	void addloot(int item_id, int charges = 0, bool equipitem = true, int aug1 = 0, int aug2 = 0, int aug3 = 0, int aug4 = 0, int aug5 = 0, int aug6 = 0);
 	void Zone(const char *zone_name);
+	void ZoneGroup(const char *zone_name);
+	void ZoneRaid(const char *zone_name);
 	void settimer(const char *timer_name, int seconds);
 	void settimerMS(const char *timer_name, int milliseconds);
-	void settimerMS(const char *timer_name, int milliseconds, EQEmu::ItemInstance *inst);
+	void settimerMS(const char *timer_name, int milliseconds, EQ::ItemInstance *inst);
 	void settimerMS(const char *timer_name, int milliseconds, Mob *mob);
 	void stoptimer(const char *timer_name);
-	void stoptimer(const char *timer_name, EQEmu::ItemInstance *inst);
+	void stoptimer(const char *timer_name, EQ::ItemInstance *inst);
 	void stoptimer(const char *timer_name, Mob *mob);
 	void stopalltimers();
-	void stopalltimers(EQEmu::ItemInstance *inst);
+	void stopalltimers(EQ::ItemInstance *inst);
 	void stopalltimers(Mob *mob);
 	void pausetimer(const char *timer_name);
 	void resumetimer(const char *timer_name);
@@ -99,6 +101,7 @@ public:
 	void depopall(int npc_type = 0);
 	void depopzone(bool StartSpawnTimer = true);
 	void repopzone();
+	void processmobswhilezoneempty(bool on);
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
@@ -278,13 +281,86 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     const char *GetZoneLongName(const char *zone);
-	void CrossZoneSignalPlayerByCharID(int charid, uint32 data);
-	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 data);
-	void CrossZoneSignalPlayerByName(const char *CharName, uint32 data);
-	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *id, const char *m_var);
-	void CrossZoneSetEntityVariableByClientName(const char *CharName, const char *id, const char *m_var);
-	void CrossZoneMessagePlayerByName(uint32 Type, const char *CharName, const char *Message);
-	void WorldWideMarquee(uint32 Type, uint32 Priority, uint32 FadeIn, uint32 FadeOut, uint32 Duration, const char *Message);
+	void CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement = false);
+	void CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement = false);
+	void CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement = false);
+	void CrossZoneAssignTaskByGuildID(int guild_id, uint32 task_id, bool enforce_level_requirement = false);
+	void CrossZoneCastSpellByCharID(int character_id, uint32 spell_id);
+	void CrossZoneCastSpellByGroupID(int group_id, uint32 spell_id);
+	void CrossZoneCastSpellByRaidID(int raid_id, uint32 spell_id);
+	void CrossZoneCastSpellByGuildID(int guild_id, uint32 spell_id);
+	void CrossZoneDisableTaskByCharID(int character_id, uint32 task_id);
+	void CrossZoneDisableTaskByGroupID(int group_id, uint32 task_id);
+	void CrossZoneDisableTaskByRaidID(int raid_id, uint32 task_id);
+	void CrossZoneDisableTaskByGuildID(int guild_id, uint32 task_id);
+	void CrossZoneEnableTaskByCharID(int character_id, uint32 task_id);
+	void CrossZoneEnableTaskByGroupID(int group_id, uint32 task_id);
+	void CrossZoneEnableTaskByRaidID(int raid_id, uint32 task_id);
+	void CrossZoneEnableTaskByGuildID(int guild_id, uint32 task_id);
+	void CrossZoneFailTaskByCharID(int character_id, uint32 task_id);
+	void CrossZoneFailTaskByGroupID(int group_id, uint32 task_id);
+	void CrossZoneFailTaskByRaidID(int raid_id, uint32 task_id);
+	void CrossZoneFailTaskByGuildID(int guild_id, uint32 task_id);
+	void CrossZoneMarqueeByCharID(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
+	void CrossZoneMarqueeByGroupID(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
+	void CrossZoneMarqueeByRaidID(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
+	void CrossZoneMarqueeByGuildID(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
+	void CrossZoneMessagePlayerByName(uint32 type, const char *character_name, const char *message);
+	void CrossZoneMessagePlayerByGroupID(uint32 type, int group_id, const char *message);
+	void CrossZoneMessagePlayerByRaidID(uint32 type, int raid_id, const char *message);
+	void CrossZoneMessagePlayerByGuildID(uint32 type, int guild_id, const char *message);
+	void CrossZoneMovePlayerByCharID(int character_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByGroupID(int group_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByRaidID(int raid_id, const char *zone_short_name);
+	void CrossZoneMovePlayerByGuildID(int guild_id, const char *zone_short_name);
+	void CrossZoneMoveInstanceByCharID(int character_id, uint16 instance_id);
+	void CrossZoneMoveInstanceByGroupID(int group_id, uint16 instance_id);
+	void CrossZoneMoveInstanceByRaidID(int raid_id, uint16 instance_id);
+	void CrossZoneMoveInstanceByGuildID(int guild_id, uint16 instance_id);
+	void CrossZoneRemoveSpellByCharID(int character_id, uint32 spell_id);
+	void CrossZoneRemoveSpellByGroupID(int group_id, uint32 spell_id);
+	void CrossZoneRemoveSpellByRaidID(int raid_id, uint32 spell_id);
+	void CrossZoneRemoveSpellByGuildID(int guild_id, uint32 spell_id);
+	void CrossZoneRemoveTaskByCharID(int character_id, uint32 task_id);
+	void CrossZoneRemoveTaskByGroupID(int group_id, uint32 task_id);
+	void CrossZoneRemoveTaskByRaidID(int raid_id, uint32 task_id);
+	void CrossZoneRemoveTaskByGuildID(int guild_id, uint32 task_id);
+	void CrossZoneResetActivityByCharID(int character_id, uint32 task_id, int activity_id);
+	void CrossZoneResetActivityByGroupID(int group_id, uint32 task_id, int activity_id);
+	void CrossZoneResetActivityByRaidID(int raid_id, uint32 task_id, int activity_id);
+	void CrossZoneResetActivityByGuildID(int guild_id, uint32 task_id, int activity_id);
+	void CrossZoneSetEntityVariableByNPCTypeID(uint32 npctype_id, const char *variable_name, const char *variable_value);
+	void CrossZoneSetEntityVariableByClientName(const char *character_name, const char *variable_name, const char *variable_value);
+	void CrossZoneSetEntityVariableByGroupID(int group_id, const char *variable_name, const char *variable_value);
+	void CrossZoneSetEntityVariableByRaidID(int raid_id, const char *variable_name, const char *variable_value);
+	void CrossZoneSetEntityVariableByGuildID(int guild_id, const char *variable_name, const char *variable_value);
+	void CrossZoneSignalPlayerByCharID(int charid, uint32 signal);
+	void CrossZoneSignalPlayerByGroupID(int group_id, uint32 signal);
+	void CrossZoneSignalPlayerByRaidID(int raid_id, uint32 signal);
+	void CrossZoneSignalPlayerByGuildID(int guild_id, uint32 signal);
+	void CrossZoneSignalNPCByNPCTypeID(uint32 npctype_id, uint32 signal);
+	void CrossZoneSignalPlayerByName(const char *character_name, uint32 signal);
+	void CrossZoneUpdateActivityByCharID(int character_id, uint32 task_id, int activity_id, int activity_count = 1);
+	void CrossZoneUpdateActivityByGroupID(int group_id, uint32 task_id, int activity_id, int activity_count = 1);
+	void CrossZoneUpdateActivityByRaidID(int raid_id, uint32 task_id, int activity_id, int activity_count = 1);
+	void CrossZoneUpdateActivityByGuildID(int guild_id, uint32 task_id, int activity_id, int activity_count = 1);
+	void WorldWideAssignTask(uint32 task_id, bool enforce_level_requirement = false, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideCastSpell(uint32 spell_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideDisableTask(uint32 task_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideEnableTask(uint32 task_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideFailTask(uint32 task_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideMarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideMessage(uint32 type, const char *message, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideMove(const char *zone_short_name, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideMoveInstance(uint16 instance_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideRemoveSpell(uint32 spell_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideRemoveTask(uint32 task_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideResetActivity(uint32 task_id, int activity_id, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideSetEntityVariableClient(const char *variable_name, const char *variable_value, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideSetEntityVariableNPC(const char *variable_name, const char *variable_value);
+	void WorldWideSignalClient(uint32 signal, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideSignalNPC(uint32 signal);
+	void WorldWideUpdateActivity(uint32 task_id, int activity_id, int activity_count = 1, uint8 min_status = 0, uint8 max_status = 0);
 	bool EnableRecipe(uint32 recipe_id);
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
@@ -293,7 +369,7 @@ public:
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
-	EQEmu::ItemInstance *GetQuestItem() const;
+	EQ::ItemInstance *GetQuestItem() const;
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 

@@ -117,7 +117,7 @@ int main() {
 		}
 	}
 
-	EQEmu::InitializeDynamicLookups();
+	EQ::InitializeDynamicLookups();
 	LogInfo("Initialized dynamic dictionary entries");
 
 	database.ExpireMail();

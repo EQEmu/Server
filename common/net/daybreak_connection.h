@@ -318,7 +318,7 @@ namespace EQ
 			void Attach(uv_loop_t *loop);
 			void Detach();
 
-			EQEmu::Random m_rand;
+			EQ::Random m_rand;
 			uv_timer_t m_timer;
 			uv_udp_t m_socket;
 			uv_loop_t *m_attached;

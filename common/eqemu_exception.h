@@ -22,7 +22,7 @@
 #include <sstream>
 #include <exception>
 
-namespace EQEmu
+namespace EQ
 {
 	//! EQEmu Exception Class
 	/*!
@@ -104,7 +104,7 @@ namespace EQEmu
 } // EQEmu
 
 #ifndef EQ_EXCEPT
-#define EQ_EXCEPT(n, d) throw EQEmu::Exception(n, d, __FILE__, __LINE__)
+#define EQ_EXCEPT(n, d) throw EQ::Exception(n, d, __FILE__, __LINE__)
 #endif
 
 #endif

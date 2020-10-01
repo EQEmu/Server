@@ -27,7 +27,7 @@
 
 struct ServerLootItem_Struct;
 
-namespace EQEmu
+namespace EQ
 {
 	struct ItemData;
 	class ItemInstance;
@@ -72,7 +72,7 @@ namespace EQEmu
 		SayLinkEngine();
 
 		void SetLinkType(saylink::SayLinkType link_type) { m_LinkType = link_type; }
-		void SetItemData(const EQEmu::ItemData* item_data) { m_ItemData = item_data; }
+		void SetItemData(const EQ::ItemData* item_data) { m_ItemData = item_data; }
 		void SetLootData(const ServerLootItem_Struct* loot_data) { m_LootData = loot_data; }
 		void SetItemInst(const ItemInstance* item_inst) { m_ItemInst = item_inst; }
 

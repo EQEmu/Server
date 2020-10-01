@@ -498,11 +498,30 @@ void EntityList::MobProcess()
 		size_t sz = mob_list.size();
 
 #ifdef IDLE_WHEN_EMPTY
-		if (numclients > 0 ||
-			mob->GetWanderType() == 4 || mob->GetWanderType() == 6) {
+		static int old_client_count=0;
+		static Timer *mob_settle_timer = new Timer();
+
+		if (numclients == 0 && old_client_count > 0 &&
+			RuleI(Zone, SecondsBeforeIdle) > 0) {
+			// Start Timer to allow any mobs that chased chars from zone
+			// to return home.
+			mob_settle_timer->Start(RuleI(Zone, SecondsBeforeIdle) * 1000);
+		}
+
+		old_client_count = numclients;
+
+		// Disable settle timer if someone zones into empty zone
+		if (numclients > 0 || mob_settle_timer->Check()) {
+			mob_settle_timer->Disable();
+		}
+
+		if (zone->process_mobs_while_empty || numclients > 0 ||
+			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
+			mob_settle_timer->Enabled()) {
 			// Normal processing, or assuring that spawns that should
 			// path and depop do that.  Otherwise all of these type mobs
-			// will be up and at starting positions when idle zone wakes up.
+			// will be up and at starting positions, or waiting at the zoneline
+			// if they chased the PCs  when idle zone wakes up.
 			mob_dead = !mob->Process();
 		}
 		else {
@@ -1097,6 +1116,22 @@ NPC *EntityList::GetNPCByNPCTypeID(uint32 npc_id)
 	return nullptr;
 }
 
+NPC *EntityList::GetNPCBySpawnID(uint32 spawn_id)
+{
+	if (spawn_id == 0 || npc_list.empty()) {
+		return nullptr;
+	}
+
+	auto it = npc_list.begin();
+	while (it != npc_list.end()) {
+		if (it->second->GetSpawnGroupId() == spawn_id) {
+			return it->second;
+		}
+		++it;
+	}
+	return nullptr;
+}
+
 Mob *EntityList::GetMob(uint16 get_id)
 {
 	Entity *ent = nullptr;
@@ -1563,7 +1598,7 @@ void EntityList::QueueClientsByTarget(Mob *sender, const EQApplicationPacket *ap
 	}
 }
 
-void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQEmu::versions::ClientVersionBitmask client_version_bits)
+void EntityList::QueueClientsByXTarget(Mob *sender, const EQApplicationPacket *app, bool iSendToSender, EQ::versions::ClientVersionBitmask client_version_bits)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -1693,7 +1728,7 @@ void EntityList::QueueClientsStatus(Mob *sender, const EQApplicationPacket *app,
 void EntityList::DuelMessage(Mob *winner, Mob *loser, bool flee)
 {
 	if (winner->GetLevelCon(winner->GetLevel(), loser->GetLevel()) > 2) {
-		std::vector<EQEmu::Any> args;
+		std::vector<EQ::Any> args;
 		args.push_back(winner);
 		args.push_back(loser);
 
@@ -2095,7 +2130,7 @@ void EntityList::QueueClientsGuildBankItemUpdate(const GuildBankItemUpdate_Struc
 
 	memcpy(outgbius, gbius, sizeof(GuildBankItemUpdate_Struct));
 
-	const EQEmu::ItemData *Item = database.GetItem(gbius->ItemID);
+	const EQ::ItemData *Item = database.GetItem(gbius->ItemID);
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -2441,7 +2476,7 @@ void EntityList::RemoveAllGroups()
 	while (group_list.size()) {
 		auto group = group_list.front();
 		group_list.pop_front();
-		delete group;
+		safe_delete(group);
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -2453,7 +2488,7 @@ void EntityList::RemoveAllRaids()
 	while (raid_list.size()) {
 		auto raid = raid_list.front();
 		raid_list.pop_front();
-		delete raid;
+		safe_delete(raid);
 	}
 }
 
@@ -2471,7 +2506,11 @@ void EntityList::RemoveAllDoors()
 void EntityList::DespawnAllDoors()
 {
 	auto outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
-	this->QueueClients(0,outapp);
+	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
+		if (it->second) {
+			it->second->QueuePacket(outapp);
+		}
+	}
 	safe_delete(outapp);
 }
 
@@ -2618,7 +2657,6 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-
 		LogEntityManagement(
 			"Removing mob [{}] from [{}] close list entity_id ({})",
 			mob->GetCleanName(),
@@ -2655,7 +2693,11 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
  * @param close_mobs
  * @param scanning_mob
  */
-void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob)
+void EntityList::ScanCloseMobs(
+	std::unordered_map<uint16, Mob *> &close_mobs,
+	Mob *scanning_mob,
+	bool add_self_to_other_lists
+)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 
@@ -2673,11 +2715,23 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 		}
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
-		if (distance <= scan_range) {
+		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-		}
-		else if (mob->GetAggroRange() >= scan_range) {
-			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
+
+			if (add_self_to_other_lists && scanning_mob->GetID() > 0) {
+				bool has_mob = false;
+
+				for (auto &cm: mob->close_mobs) {
+					if (scanning_mob->GetID() == cm.first) {
+						has_mob = true;
+						break;
+					}
+				}
+
+				if (!has_mob) {
+					mob->close_mobs.insert(std::pair<uint16, Mob *>(scanning_mob->GetID(), scanning_mob));
+				}
+			}
 		}
 	}
 
@@ -2783,7 +2837,7 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	}
 	auto group = *it;
 	group_list.erase(it);
-	delete group;
+	safe_delete(group);
 	return true;
 }
 
@@ -2795,7 +2849,7 @@ bool EntityList::RemoveRaid(uint32 delete_id)
 		return false;
 	auto raid = *it;
 	raid_list.erase(it);
-	delete raid;
+	safe_delete(raid);
 	return true;
 }
 
@@ -3343,7 +3397,7 @@ void EntityList::ClearFeignAggro(Mob *targ)
 			}
 
 			if (targ->IsClient()) {
-				std::vector<EQEmu::Any> args;
+				std::vector<EQ::Any> args;
 				args.push_back(it->second);
 				int i = parse->EventPlayer(EVENT_FEIGN_DEATH, targ->CastToClient(), "", 0, &args);
 				if (i != 0) {
@@ -3410,11 +3464,11 @@ bool EntityList::MakeTrackPacket(Client *client)
 	float MobDistance;
 
 	if (client->GetClass() == DRUID)
-		distance = (client->GetSkill(EQEmu::skills::SkillTracking) * 10);
+		distance = (client->GetSkill(EQ::skills::SkillTracking) * 10);
 	else if (client->GetClass() == RANGER)
-		distance = (client->GetSkill(EQEmu::skills::SkillTracking) * 12);
+		distance = (client->GetSkill(EQ::skills::SkillTracking) * 12);
 	else if (client->GetClass() == BARD)
-		distance = (client->GetSkill(EQEmu::skills::SkillTracking) * 7);
+		distance = (client->GetSkill(EQ::skills::SkillTracking) * 7);
 	if (distance <= 0)
 		return false;
 	if (distance < 300)
@@ -3675,10 +3729,10 @@ void EntityList::ProcessMove(Client *c, const glm::vec3& location)
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event& evt = (*iter);
 		if (evt.npc) {
-			std::vector<EQEmu::Any> args;
+			std::vector<EQ::Any> args;
 			parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
 		} else {
-			std::vector<EQEmu::Any> args;
+			std::vector<EQ::Any> args;
 			args.push_back(&evt.area_id);
 			args.push_back(&evt.area_type);
 			parse->EventPlayer(evt.event_id, evt.client, "", 0, &args);
@@ -3734,7 +3788,7 @@ void EntityList::ProcessMove(NPC *n, float x, float y, float z) {
 
 	for (auto iter = events.begin(); iter != events.end(); ++iter) {
 		quest_proximity_event   &evt = (*iter);
-		std::vector<EQEmu::Any> args;
+		std::vector<EQ::Any> args;
 		args.push_back(&evt.area_id);
 		args.push_back(&evt.area_type);
 		parse->EventNPC(evt.event_id, evt.npc, evt.client, "", 0, &args);
@@ -4227,11 +4281,11 @@ void EntityList::GroupMessage(uint32 gid, const char *from, const char *message)
 
 uint16 EntityList::CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time)
 {
-	const EQEmu::ItemData *is = database.GetItem(itemid);
+	const EQ::ItemData *is = database.GetItem(itemid);
 	if (!is)
 		return 0;
 
-	auto i = new EQEmu::ItemInstance(is, is->MaxCharges);
+	auto i = new EQ::ItemInstance(is, is->MaxCharges);
 	if (!i)
 		return 0;
 
@@ -4813,7 +4867,7 @@ void EntityList::UpdateFindableNPCState(NPC *n, bool Remove)
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if (c && (c->ClientVersion() >= EQEmu::versions::ClientVersion::SoD))
+		if (c && (c->ClientVersion() >= EQ::versions::ClientVersion::SoD))
 			c->QueuePacket(outapp);
 
 		++it;

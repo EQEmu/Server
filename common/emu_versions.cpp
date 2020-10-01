@@ -21,7 +21,7 @@
 #include "emu_constants.h"
 
 
-bool EQEmu::versions::IsValidClientVersion(ClientVersion client_version)
+bool EQ::versions::IsValidClientVersion(ClientVersion client_version)
 {
 	if (client_version <= ClientVersion::Unknown || client_version > LastClientVersion)
 		return false;
@@ -29,7 +29,7 @@ bool EQEmu::versions::IsValidClientVersion(ClientVersion client_version)
 	return true;
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ValidateClientVersion(ClientVersion client_version)
+EQ::versions::ClientVersion EQ::versions::ValidateClientVersion(ClientVersion client_version)
 {
 	if (client_version <= ClientVersion::Unknown || client_version > LastClientVersion)
 		return ClientVersion::Unknown;
@@ -37,7 +37,7 @@ EQEmu::versions::ClientVersion EQEmu::versions::ValidateClientVersion(ClientVers
 	return client_version;
 }
 
-const char* EQEmu::versions::ClientVersionName(ClientVersion client_version)
+const char* EQ::versions::ClientVersionName(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Unknown:
@@ -61,7 +61,7 @@ const char* EQEmu::versions::ClientVersionName(ClientVersion client_version)
 	};
 }
 
-uint32 EQEmu::versions::ConvertClientVersionToClientVersionBit(ClientVersion client_version)
+uint32 EQ::versions::ConvertClientVersionToClientVersionBit(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Titanium:
@@ -81,7 +81,7 @@ uint32 EQEmu::versions::ConvertClientVersionToClientVersionBit(ClientVersion cli
 	}
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientVersion(uint32 client_version_bit)
+EQ::versions::ClientVersion EQ::versions::ConvertClientVersionBitToClientVersion(uint32 client_version_bit)
 {
 	switch (client_version_bit) {
 	case ((uint32)1 << (static_cast<unsigned int>(ClientVersion::Titanium) - 1)) :
@@ -101,7 +101,7 @@ EQEmu::versions::ClientVersion EQEmu::versions::ConvertClientVersionBitToClientV
 	}
 }
 
-bool EQEmu::versions::IsValidMobVersion(MobVersion mob_version)
+bool EQ::versions::IsValidMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= MobVersion::Unknown || mob_version > LastMobVersion)
 		return false;
@@ -109,7 +109,7 @@ bool EQEmu::versions::IsValidMobVersion(MobVersion mob_version)
 	return true;
 }
 
-bool EQEmu::versions::IsValidPCMobVersion(MobVersion mob_version)
+bool EQ::versions::IsValidPCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= MobVersion::Unknown || mob_version > LastPCMobVersion)
 		return false;
@@ -117,7 +117,7 @@ bool EQEmu::versions::IsValidPCMobVersion(MobVersion mob_version)
 	return true;
 }
 
-bool EQEmu::versions::IsValidNonPCMobVersion(MobVersion mob_version)
+bool EQ::versions::IsValidNonPCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= LastPCMobVersion || mob_version > LastNonPCMobVersion)
 		return false;
@@ -125,7 +125,7 @@ bool EQEmu::versions::IsValidNonPCMobVersion(MobVersion mob_version)
 	return true;
 }
 
-bool EQEmu::versions::IsValidOfflinePCMobVersion(MobVersion mob_version)
+bool EQ::versions::IsValidOfflinePCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= LastNonPCMobVersion || mob_version > LastOfflinePCMobVersion)
 		return false;
@@ -133,7 +133,7 @@ bool EQEmu::versions::IsValidOfflinePCMobVersion(MobVersion mob_version)
 	return true;
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ValidateMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ValidateMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= MobVersion::Unknown || mob_version > LastMobVersion)
 		return MobVersion::Unknown;
@@ -141,7 +141,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ValidateMobVersion(MobVersion mob_v
 	return mob_version;
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ValidatePCMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ValidatePCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= MobVersion::Unknown || mob_version > LastPCMobVersion)
 		return MobVersion::Unknown;
@@ -149,7 +149,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ValidatePCMobVersion(MobVersion mob
 	return mob_version;
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ValidateNonPCMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ValidateNonPCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= LastPCMobVersion || mob_version > LastNonPCMobVersion)
 		return MobVersion::Unknown;
@@ -157,7 +157,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ValidateNonPCMobVersion(MobVersion 
 	return mob_version;
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ValidateOfflinePCMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ValidateOfflinePCMobVersion(MobVersion mob_version)
 {
 	if (mob_version <= LastNonPCMobVersion || mob_version > LastOfflinePCMobVersion)
 		return MobVersion::Unknown;
@@ -165,7 +165,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ValidateOfflinePCMobVersion(MobVers
 	return mob_version;
 }
 
-const char* EQEmu::versions::MobVersionName(MobVersion mob_version)
+const char* EQ::versions::MobVersionName(MobVersion mob_version)
 {
 	switch (mob_version) {
 	case MobVersion::Unknown:
@@ -217,7 +217,7 @@ const char* EQEmu::versions::MobVersionName(MobVersion mob_version)
 	};
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ConvertMobVersionToClientVersion(MobVersion mob_version)
+EQ::versions::ClientVersion EQ::versions::ConvertMobVersionToClientVersion(MobVersion mob_version)
 {
 	switch (mob_version) {
 	case MobVersion::Unknown:
@@ -240,7 +240,7 @@ EQEmu::versions::ClientVersion EQEmu::versions::ConvertMobVersionToClientVersion
 	}
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToMobVersion(ClientVersion client_version)
+EQ::versions::MobVersion EQ::versions::ConvertClientVersionToMobVersion(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Unknown:
@@ -263,7 +263,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToMobVersion(Cl
 	}
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ConvertPCMobVersionToOfflinePCMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ConvertPCMobVersionToOfflinePCMobVersion(MobVersion mob_version)
 {
 	switch (mob_version) {
 	case MobVersion::Titanium:
@@ -283,7 +283,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertPCMobVersionToOfflinePCMobVe
 	}
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ConvertOfflinePCMobVersionToPCMobVersion(MobVersion mob_version)
+EQ::versions::MobVersion EQ::versions::ConvertOfflinePCMobVersionToPCMobVersion(MobVersion mob_version)
 {
 	switch (mob_version) {
 	case MobVersion::OfflineTitanium:
@@ -303,7 +303,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertOfflinePCMobVersionToPCMobVe
 	}
 }
 
-EQEmu::versions::ClientVersion EQEmu::versions::ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version)
+EQ::versions::ClientVersion EQ::versions::ConvertOfflinePCMobVersionToClientVersion(MobVersion mob_version)
 {
 	switch (mob_version) {
 	case MobVersion::OfflineTitanium:
@@ -323,7 +323,7 @@ EQEmu::versions::ClientVersion EQEmu::versions::ConvertOfflinePCMobVersionToClie
 	}
 }
 
-EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version)
+EQ::versions::MobVersion EQ::versions::ConvertClientVersionToOfflinePCMobVersion(ClientVersion client_version)
 {
 	switch (client_version) {
 	case ClientVersion::Titanium:
@@ -343,7 +343,7 @@ EQEmu::versions::MobVersion EQEmu::versions::ConvertClientVersionToOfflinePCMobV
 	}
 }
 
-const char* EQEmu::expansions::ExpansionName(Expansion expansion)
+const char* EQ::expansions::ExpansionName(Expansion expansion)
 {
 	switch (expansion) {
 	case Expansion::EverQuest:
@@ -393,12 +393,12 @@ const char* EQEmu::expansions::ExpansionName(Expansion expansion)
 	}
 }
 
-const char* EQEmu::expansions::ExpansionName(uint32 expansion_bit)
+const char* EQ::expansions::ExpansionName(uint32 expansion_bit)
 {
 	return ExpansionName(ConvertExpansionBitToExpansion(expansion_bit));
 }
 
-uint32 EQEmu::expansions::ConvertExpansionToExpansionBit(Expansion expansion)
+uint32 EQ::expansions::ConvertExpansionToExpansionBit(Expansion expansion)
 {
 	switch (expansion) {
 	case Expansion::RoK:
@@ -446,7 +446,7 @@ uint32 EQEmu::expansions::ConvertExpansionToExpansionBit(Expansion expansion)
 	}
 }
 
-EQEmu::expansions::Expansion EQEmu::expansions::ConvertExpansionBitToExpansion(uint32 expansion_bit)
+EQ::expansions::Expansion EQ::expansions::ConvertExpansionBitToExpansion(uint32 expansion_bit)
 {
 	switch (expansion_bit) {
 	case bitRoK:
@@ -494,7 +494,7 @@ EQEmu::expansions::Expansion EQEmu::expansions::ConvertExpansionBitToExpansion(u
 	}
 }
 
-uint32 EQEmu::expansions::ConvertExpansionToExpansionsMask(Expansion expansion)
+uint32 EQ::expansions::ConvertExpansionToExpansionsMask(Expansion expansion)
 {
 	switch (expansion) {
 	case Expansion::RoK:
@@ -542,17 +542,17 @@ uint32 EQEmu::expansions::ConvertExpansionToExpansionsMask(Expansion expansion)
 	}
 }
 
-EQEmu::expansions::Expansion EQEmu::expansions::ConvertClientVersionToExpansion(versions::ClientVersion client_version)
+EQ::expansions::Expansion EQ::expansions::ConvertClientVersionToExpansion(versions::ClientVersion client_version)
 {
-	return EQEmu::constants::StaticLookup(client_version)->Expansion;
+	return EQ::constants::StaticLookup(client_version)->Expansion;
 }
 
-uint32 EQEmu::expansions::ConvertClientVersionToExpansionBit(versions::ClientVersion client_version)
+uint32 EQ::expansions::ConvertClientVersionToExpansionBit(versions::ClientVersion client_version)
 {
-	return EQEmu::constants::StaticLookup(client_version)->ExpansionBit;
+	return EQ::constants::StaticLookup(client_version)->ExpansionBit;
 }
 
-uint32 EQEmu::expansions::ConvertClientVersionToExpansionsMask(versions::ClientVersion client_version)
+uint32 EQ::expansions::ConvertClientVersionToExpansionsMask(versions::ClientVersion client_version)
 {
-	return EQEmu::constants::StaticLookup(client_version)->ExpansionsMask;
+	return EQ::constants::StaticLookup(client_version)->ExpansionsMask;
 }

@@ -22,7 +22,7 @@
 #include <string.h>
 
 
-bool EQEmu::skills::IsTradeskill(SkillType skill)
+bool EQ::skills::IsTradeskill(SkillType skill)
 {
 	switch (skill) {
 	case SkillFishing:
@@ -43,7 +43,7 @@ bool EQEmu::skills::IsTradeskill(SkillType skill)
 	}
 }
 
-bool EQEmu::skills::IsSpecializedSkill(SkillType skill)
+bool EQ::skills::IsSpecializedSkill(SkillType skill)
 {
 	// this could be a simple if, but if this is more portable if any IDs change (probably won't)
 	// or any other specialized are added (also unlikely)
@@ -59,7 +59,7 @@ bool EQEmu::skills::IsSpecializedSkill(SkillType skill)
 	}
 }
 
-float EQEmu::skills::GetSkillMeleePushForce(SkillType skill)
+float EQ::skills::GetSkillMeleePushForce(SkillType skill)
 {
 	// This is the force/magnitude of the push from an attack of this skill type
 	// You can find these numbers in the clients skill struct
@@ -96,7 +96,7 @@ float EQEmu::skills::GetSkillMeleePushForce(SkillType skill)
 	}
 }
 
-bool EQEmu::skills::IsBardInstrumentSkill(SkillType skill)
+bool EQ::skills::IsBardInstrumentSkill(SkillType skill)
 {
 	switch (skill) {
 	case SkillBrassInstruments:
@@ -110,7 +110,7 @@ bool EQEmu::skills::IsBardInstrumentSkill(SkillType skill)
 	}
 }
 
-bool EQEmu::skills::IsCastingSkill(SkillType skill)
+bool EQ::skills::IsCastingSkill(SkillType skill)
 {
 	switch (skill) {
 	case SkillAbjuration:
@@ -124,7 +124,7 @@ bool EQEmu::skills::IsCastingSkill(SkillType skill)
 	}
 }
 
-int32 EQEmu::skills::GetBaseDamage(SkillType skill)
+int32 EQ::skills::GetBaseDamage(SkillType skill)
 {
 	switch (skill) {
 	case SkillBash:
@@ -148,7 +148,7 @@ int32 EQEmu::skills::GetBaseDamage(SkillType skill)
 	}
 }
 
-bool EQEmu::skills::IsMeleeDmg(SkillType skill)
+bool EQ::skills::IsMeleeDmg(SkillType skill)
 {
 	switch (skill) {
 	case Skill1HBlunt:
@@ -175,7 +175,7 @@ bool EQEmu::skills::IsMeleeDmg(SkillType skill)
 	}
 }
 
-const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTypeMap()
+const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap()
 {
 	/* VS2013 code
 	static const std::map<SkillUseTypes, std::string> skill_use_types_map = {
@@ -355,12 +355,12 @@ const std::map<EQEmu::skills::SkillType, std::string>& EQEmu::skills::GetSkillTy
 	return skill_type_map;
 }
 
-EQEmu::SkillProfile::SkillProfile()
+EQ::SkillProfile::SkillProfile()
 {
 	memset(&Skill, 0, (sizeof(uint32) * PACKET_SKILL_ARRAY_SIZE));
 }
 
-uint32 EQEmu::SkillProfile::GetSkill(int skill_id)
+uint32 EQ::SkillProfile::GetSkill(int skill_id)
 {
 	if (skill_id < 0 || skill_id >= PACKET_SKILL_ARRAY_SIZE)
 		return 0;

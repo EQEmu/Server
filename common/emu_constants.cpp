@@ -20,7 +20,7 @@
 #include "emu_constants.h"
 
 
-int16 EQEmu::invtype::GetInvTypeSize(int16 inv_type) {
+int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
 	static const int16 local_array[] = {
 		POSSESSIONS_SIZE,
 		BANK_SIZE,
@@ -55,7 +55,7 @@ int16 EQEmu::invtype::GetInvTypeSize(int16 inv_type) {
 	return local_array[inv_type];
 }
 
-const char* EQEmu::bug::CategoryIDToCategoryName(CategoryID category_id) {
+const char* EQ::bug::CategoryIDToCategoryName(CategoryID category_id) {
 	switch (category_id) {
 	case catVideo:
 		return "Video";
@@ -87,7 +87,7 @@ const char* EQEmu::bug::CategoryIDToCategoryName(CategoryID category_id) {
 	}
 }
 
-EQEmu::bug::CategoryID EQEmu::bug::CategoryNameToCategoryID(const char* category_name) {
+EQ::bug::CategoryID EQ::bug::CategoryNameToCategoryID(const char* category_name) {
 	if (!category_name)
 		return catOther;
 
@@ -119,7 +119,7 @@ EQEmu::bug::CategoryID EQEmu::bug::CategoryNameToCategoryID(const char* category
 	return catOther;
 }
 
-const char *EQEmu::constants::GetStanceName(StanceType stance_type) {
+const char *EQ::constants::GetStanceName(StanceType stance_type) {
 	switch (stance_type) {
 	case stanceUnknown:
 		return "Unknown";
@@ -146,9 +146,9 @@ const char *EQEmu::constants::GetStanceName(StanceType stance_type) {
 	}
 }
 
-int EQEmu::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
-	if (stance_type >= EQEmu::constants::stancePassive && stance_type <= EQEmu::constants::stanceBurnAE)
-		return (stance_type - EQEmu::constants::stancePassive);
+int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
+	if (stance_type >= EQ::constants::stancePassive && stance_type <= EQ::constants::stanceBurnAE)
+		return (stance_type - EQ::constants::stancePassive);
 
 	return 0;
 }

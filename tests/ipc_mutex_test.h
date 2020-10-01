@@ -40,24 +40,24 @@ public:
 
 	private:
 	void LockMutexTest() {
-		EQEmu::IPCMutex mutex("TestMutex1");
+		EQ::IPCMutex mutex("TestMutex1");
 		TEST_ASSERT(mutex.Lock());
 		TEST_ASSERT(mutex.Unlock());
 	}
 
 	void UnlockMutexTest() {
-		EQEmu::IPCMutex mutex("TestMutex2");
+		EQ::IPCMutex mutex("TestMutex2");
 		TEST_ASSERT(!mutex.Unlock());
 	}
 
 	void DoubleLockMutexTest() {
-		EQEmu::IPCMutex mutex("TestMutex3");
+		EQ::IPCMutex mutex("TestMutex3");
 		TEST_ASSERT(mutex.Lock());
 		TEST_ASSERT(!mutex.Lock());
 	}
 
 	void DoubleUnlockMutexTest() {
-		EQEmu::IPCMutex mutex("TestMutex4");
+		EQ::IPCMutex mutex("TestMutex4");
 		TEST_ASSERT(mutex.Lock());
 		TEST_ASSERT(mutex.Unlock());
 		TEST_ASSERT(!mutex.Unlock());

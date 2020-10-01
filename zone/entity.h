@@ -166,6 +166,7 @@ public:
 		return nullptr;
 	}
 	NPC *GetNPCByNPCTypeID(uint32 npc_id);
+	NPC *GetNPCBySpawnID(uint32 spawn_id);
 	inline Merc *GetMercByID(uint16 id)
 	{
 		auto it = merc_list.find(id);
@@ -393,14 +394,14 @@ public:
 	void	QueueClientsByTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, Mob* SkipThisMob = 0, bool ackreq = true,
 						bool HoTT = true, uint32 ClientVersionBits = 0xFFFFFFFF, bool inspect_buffs = false);
 
-	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQEmu::versions::ClientVersionBitmask client_version_bits = EQEmu::versions::ClientVersionBitmask::maskAllClients);
+	void	QueueClientsByXTarget(Mob* sender, const EQApplicationPacket* app, bool iSendToSender = true, EQ::versions::ClientVersionBitmask client_version_bits = EQ::versions::ClientVersionBitmask::maskAllClients);
 	void	QueueToGroupsForNPCHealthAA(Mob* sender, const EQApplicationPacket* app);
 	void	QueueManaged(Mob* sender, const EQApplicationPacket* app, bool ignore_sender=false, bool ackreq = true);
 
 	void AEAttack(
 		Mob *attacker,
 		float distance,
-		int Hand = EQEmu::invslot::slotPrimary,
+		int Hand = EQ::invslot::slotPrimary,
 		int count = 0,
 		bool is_from_spell = false
 	);
@@ -522,7 +523,11 @@ public:
 	void RefreshAutoXTargets(Client *c);
 	void RefreshClientXTargets(Client *c);
 	void SendAlternateAdvancementStats();
-	void ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob);
+	void ScanCloseMobs(
+		std::unordered_map<uint16, Mob *> &close_mobs,
+		Mob *scanning_mob,
+		bool add_self_to_other_lists = false
+	);
 
 	void GetTrapInfo(Client* client);
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
@@ -581,7 +586,7 @@ private:
 
 		bool Bot_AICheckCloseBeneficialSpells(Bot* caster, uint8 iChance, float iRange, uint32 iSpellTypes); // TODO: Evaluate this closesly in hopes to eliminate
 		void ShowSpawnWindow(Client* client, int Distance, bool NamedOnly); // TODO: Implement ShowSpawnWindow in the bot class but it needs entity list stuff
-	
+
 		void ScanCloseClientMobs(std::unordered_map<uint16, Mob*>& close_mobs, Mob* scanning_mob);
 	private:
 		std::list<Bot*> bot_list;

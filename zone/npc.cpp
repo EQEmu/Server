@@ -303,8 +303,8 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 
 	//give NPCs skill values...
 	int r;
-	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, moblevel);
+	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, moblevel);
 	}
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
@@ -319,15 +319,15 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	}
 	else {
 		if (moblevel > 50) {
-			skills[EQEmu::skills::SkillDoubleAttack] = 250;
-			skills[EQEmu::skills::SkillDualWield] = 250;
+			skills[EQ::skills::SkillDoubleAttack] = 250;
+			skills[EQ::skills::SkillDualWield] = 250;
 		}
 		else if (moblevel > 3) {
-			skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
-			skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
+			skills[EQ::skills::SkillDoubleAttack] = moblevel * 5;
+			skills[EQ::skills::SkillDualWield] = skills[EQ::skills::SkillDoubleAttack];
 		}
 		else {
-			skills[EQEmu::skills::SkillDoubleAttack] = moblevel * 5;
+			skills[EQ::skills::SkillDoubleAttack] = moblevel * 5;
 		}
 	}
 
@@ -527,7 +527,7 @@ void NPC::SetTarget(Mob* mob) {
 
 	if (owner) {
 		auto client = owner->CastToClient();
-		if (client->ClientVersionBit() & EQEmu::versions::maskUFAndLater) {
+		if (client->ClientVersionBit() & EQ::versions::maskUFAndLater) {
 			auto app = new EQApplicationPacket(OP_PetHoTT, sizeof(ClientTarget_Struct));
 			auto ct = (ClientTarget_Struct *)app->pBuffer;
 			ct->new_target = mob ? mob->GetID() : 0;
@@ -576,25 +576,33 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	}
 }
 
-void NPC::CheckMinMaxLevel(Mob *them)
+void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 {
-	if(them == nullptr || !them->IsClient())
+	if (killer == nullptr || !killer->IsClient()) {
 		return;
+	}
 
-	uint16 themlevel = them->GetLevel();
-	uint8 material;
+	uint16 killer_level = killer->GetLevel();
+	uint8  material;
 
 	auto cur = itemlist.begin();
-	while(cur != itemlist.end())
-	{
-		if(!(*cur))
+	while (cur != itemlist.end()) {
+		if (!(*cur)) {
 			return;
+		}
 
-		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
-		{
-			material = EQEmu::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQEmu::textures::materialInvalid)
+		uint16 trivial_min_level     = (*cur)->trivial_min_level;
+		uint16 trivial_max_level     = (*cur)->trivial_max_level;
+		bool   fits_trivial_criteria = (
+			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
+			(trivial_max_level > 0 && killer_level > trivial_max_level)
+		);
+
+		if (fits_trivial_criteria) {
+			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
+			if (material != EQ::textures::materialInvalid) {
 				SendWearChange(material);
+			}
 
 			cur = itemlist.erase(cur);
 			continue;
@@ -603,8 +611,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
 void NPC::ClearItemList() {
@@ -637,8 +646,8 @@ void NPC::QueryLoot(Client* to)
 			continue;
 		}
 
-		EQEmu::SayLinkEngine linker;
-		linker.SetLinkType(EQEmu::saylink::SayLinkLootItem);
+		EQ::SayLinkEngine linker;
+		linker.SetLinkType(EQ::saylink::SayLinkLootItem);
 		linker.SetLootData(*cur);
 
 		to->Message(
@@ -647,8 +656,8 @@ void NPC::QueryLoot(Client* to)
 			item_count,
 			linker.GenerateLink().c_str(),
 			(*cur)->item_id,
-			(*cur)->min_level,
-			(*cur)->max_level
+			(*cur)->trivial_min_level,
+			(*cur)->trivial_max_level
 		);
 	}
 
@@ -790,7 +799,7 @@ bool NPC::Process()
 		if (GetMana() < GetMaxMana()) {
 			if (RuleB(NPC, UseMeditateBasedManaRegen)) {
 				int32 npc_idle_mana_regen_bonus = 2;
-				uint16 meditate_skill = GetSkill(EQEmu::skills::SkillMeditate);
+				uint16 meditate_skill = GetSkill(EQ::skills::SkillMeditate);
 				if (!IsEngaged() && meditate_skill > 0) {
 					uint8 clevel = GetLevel();
 					npc_idle_mana_regen_bonus =
@@ -916,18 +925,18 @@ uint32 NPC::CountLoot() {
 
 void NPC::UpdateEquipmentLight()
 {
-	m_Light.Type[EQEmu::lightsource::LightEquipment] = 0;
-	m_Light.Level[EQEmu::lightsource::LightEquipment] = 0;
+	m_Light.Type[EQ::lightsource::LightEquipment] = 0;
+	m_Light.Level[EQ::lightsource::LightEquipment] = 0;
 
-	for (int index = EQEmu::invslot::EQUIPMENT_BEGIN; index <= EQEmu::invslot::EQUIPMENT_END; ++index) {
-		if (index == EQEmu::invslot::slotAmmo) { continue; }
+	for (int index = EQ::invslot::EQUIPMENT_BEGIN; index <= EQ::invslot::EQUIPMENT_END; ++index) {
+		if (index == EQ::invslot::slotAmmo) { continue; }
 
 		auto item = database.GetItem(equipment[index]);
 		if (item == nullptr) { continue; }
 
-		if (EQEmu::lightsource::IsLevelGreater(item->Light, m_Light.Type[EQEmu::lightsource::LightEquipment])) {
-			m_Light.Type[EQEmu::lightsource::LightEquipment] = item->Light;
-			m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]);
+		if (EQ::lightsource::IsLevelGreater(item->Light, m_Light.Type[EQ::lightsource::LightEquipment])) {
+			m_Light.Type[EQ::lightsource::LightEquipment] = item->Light;
+			m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]);
 		}
 	}
 
@@ -939,14 +948,14 @@ void NPC::UpdateEquipmentLight()
 		if (!item->IsClassCommon()) { continue; }
 		if (item->Light < 9 || item->Light > 13) { continue; }
 
-		if (EQEmu::lightsource::TypeToLevel(item->Light))
+		if (EQ::lightsource::TypeToLevel(item->Light))
 			general_light_type = item->Light;
 	}
 
-	if (EQEmu::lightsource::IsLevelGreater(general_light_type, m_Light.Type[EQEmu::lightsource::LightEquipment]))
-		m_Light.Type[EQEmu::lightsource::LightEquipment] = general_light_type;
+	if (EQ::lightsource::IsLevelGreater(general_light_type, m_Light.Type[EQ::lightsource::LightEquipment]))
+		m_Light.Type[EQ::lightsource::LightEquipment] = general_light_type;
 
-	m_Light.Level[EQEmu::lightsource::LightEquipment] = EQEmu::lightsource::TypeToLevel(m_Light.Type[EQEmu::lightsource::LightEquipment]);
+	m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]);
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
@@ -1068,14 +1077,20 @@ bool NPC::SpawnZoneController()
 	return true;
 }
 
-NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause) {
+void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 zoffset) {
+
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
-	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
-	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
+	std::string str_zoffset = numberToWords(zoffset);
+	std::string str_number = numberToWords(grid_number);
 
-	npc_type->current_hp           = 4000000;
+	strcpy(npc_type->name, str_number.c_str());
+	if (zoffset != 0) {
+		strcat(npc_type->name, "(Stacked)");
+	}
+
+	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1095,11 +1110,50 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
 	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name)-3] = (char) NULL;
+
 	npc->GiveNPCTypeData(npc_type);
 
-	entity_list.AddNPC(npc, true, true);
+	entity_list.AddNPC(npc);
+}
 
-	return npc;
+void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
+{
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	char node_name[64];
+	strn0cpy(node_name, name.c_str(), 64);
+
+	strcpy(npc_type->name, entity_list.MakeNameUnique(node_name));
+
+	npc_type->current_hp       = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 5;
+	npc_type->runspeed         = 0;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name)-3] = (char) NULL;
+
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc);
 }
 
 NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position) {
@@ -1586,34 +1640,34 @@ int32 NPC::GetEquipmentMaterial(uint8 material_slot) const
 		return texture_profile_material;
 	}
 
-	if (material_slot >= EQEmu::textures::materialCount) {
+	if (material_slot >= EQ::textures::materialCount) {
 		return 0;
 	}
 
-	int16 invslot = EQEmu::InventoryProfile::CalcSlotFromMaterial(material_slot);
+	int16 invslot = EQ::InventoryProfile::CalcSlotFromMaterial(material_slot);
 	if (invslot == INVALID_INDEX) {
 		return 0;
 	}
 
 	if (equipment[invslot] == 0) {
 		switch (material_slot) {
-			case EQEmu::textures::armorHead:
+			case EQ::textures::armorHead:
 				return helmtexture;
-			case EQEmu::textures::armorChest:
+			case EQ::textures::armorChest:
 				return texture;
-			case EQEmu::textures::armorArms:
+			case EQ::textures::armorArms:
 				return armtexture;
-			case EQEmu::textures::armorWrist:
+			case EQ::textures::armorWrist:
 				return bracertexture;
-			case EQEmu::textures::armorHands:
+			case EQ::textures::armorHands:
 				return handtexture;
-			case EQEmu::textures::armorLegs:
+			case EQ::textures::armorLegs:
 				return legtexture;
-			case EQEmu::textures::armorFeet:
+			case EQ::textures::armorFeet:
 				return feettexture;
-			case EQEmu::textures::weaponPrimary:
+			case EQ::textures::weaponPrimary:
 				return d_melee_texture1;
-			case EQEmu::textures::weaponSecondary:
+			case EQ::textures::weaponSecondary:
 				return d_melee_texture2;
 			default:
 				//they have nothing in the slot, and its not a special slot... they get nothing.
@@ -1641,7 +1695,7 @@ uint32 NPC::GetMaxDamage(uint8 tlevel)
 
 void NPC::PickPocket(Client* thief)
 {
-	thief->CheckIncreaseSkill(EQEmu::skills::SkillPickPockets, nullptr, 5);
+	thief->CheckIncreaseSkill(EQ::skills::SkillPickPockets, nullptr, 5);
 
 	//make sure were allowed to target them:
 	int over_level = GetLevel();
@@ -1661,7 +1715,7 @@ void NPC::PickPocket(Client* thief)
 		return;
 	}
 
-	int steal_skill = thief->GetSkill(EQEmu::skills::SkillPickPockets);
+	int steal_skill = thief->GetSkill(EQ::skills::SkillPickPockets);
 	int steal_chance = steal_skill * 100 / (5 * over_level + 5);
 
 	// Determine whether to steal money or an item.
@@ -1671,7 +1725,7 @@ void NPC::PickPocket(Client* thief)
 
 	// still needs to have FindFreeSlot vs PutItemInInventory issue worked out
 	while (steal_item) {
-		std::vector<std::pair<const EQEmu::ItemData*, uint16>> loot_selection; // <const ItemData*, charges>
+		std::vector<std::pair<const EQ::ItemData*, uint16>> loot_selection; // <const ItemData*, charges>
 		for (auto item_iter : itemlist) {
 			if (!item_iter || !item_iter->item_id)
 				continue;
@@ -1688,7 +1742,7 @@ void NPC::PickPocket(Client* thief)
 		}
 
 		int random = zone->random.Int(0, (loot_selection.size() - 1));
-		uint16 slot_id = thief->GetInv().FindFreeSlot(false, true, (loot_selection[random].first->Size), (loot_selection[random].first->ItemType == EQEmu::item::ItemTypeArrow));
+		uint16 slot_id = thief->GetInv().FindFreeSlot(false, true, (loot_selection[random].first->Size), (loot_selection[random].first->ItemType == EQ::item::ItemTypeArrow));
 		if (slot_id == INVALID_INDEX) {
 			steal_item = false;
 			break;
@@ -1769,12 +1823,12 @@ void NPC::PickPocket(Client* thief)
 
 void NPC::Disarm(Client* client, int chance) {
 	// disarm primary if available, otherwise disarm secondary
-	const EQEmu::ItemData* weapon = NULL;
+	const EQ::ItemData* weapon = NULL;
 	uint8 eslot = 0xFF;
-	if (equipment[EQEmu::invslot::slotPrimary] != 0)
-		eslot = EQEmu::invslot::slotPrimary;
-	else if (equipment[EQEmu::invslot::slotSecondary] != 0)
-		eslot = EQEmu::invslot::slotSecondary;
+	if (equipment[EQ::invslot::slotPrimary] != 0)
+		eslot = EQ::invslot::slotPrimary;
+	else if (equipment[EQ::invslot::slotSecondary] != 0)
+		eslot = EQ::invslot::slotSecondary;
 	if (eslot != 0xFF) {
 		if (zone->random.Int(0, 1000) <= chance) {
 			weapon = database.GetItem(equipment[eslot]);
@@ -1792,7 +1846,7 @@ void NPC::Disarm(Client* client, int chance) {
 							break;
 						}
 					}
-					EQEmu::ItemInstance *inst = NULL;
+					EQ::ItemInstance *inst = NULL;
 					inst = database.CreateItem(weapon->ID, charges);
 					// Remove item from loot table
 					RemoveItem(weapon->ID);
@@ -1808,19 +1862,19 @@ void NPC::Disarm(Client* client, int chance) {
 			}
 			// Update Appearance
 			equipment[eslot] = 0;
-			int matslot = eslot == EQEmu::invslot::slotPrimary ? EQEmu::textures::weaponPrimary : EQEmu::textures::weaponSecondary;
+			int matslot = eslot == EQ::invslot::slotPrimary ? EQ::textures::weaponPrimary : EQ::textures::weaponSecondary;
 			if (matslot != -1)
 				SendWearChange(matslot);
-			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQEmu::invslot::slotPrimary)
+			if ((CastToMob()->GetBodyType() == BT_Humanoid || CastToMob()->GetBodyType() == BT_Summoned) && eslot == EQ::invslot::slotPrimary)
 				Say("Ahh! My weapon!");
 			client->MessageString(Chat::Skills, DISARM_SUCCESS, this->GetCleanName());
 			if (chance != 1000)
-				client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 4);
+				client->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 4);
 			return;
 		}
 		client->MessageString(Chat::Skills, DISARM_FAILED);
 		if (chance != 1000)
-			client->CheckIncreaseSkill(EQEmu::skills::SkillDisarm, nullptr, 2);
+			client->CheckIncreaseSkill(EQ::skills::SkillDisarm, nullptr, 2);
 		return;
 	}
 	client->MessageString(Chat::Skills, DISARM_FAILED);
@@ -1969,7 +2023,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 
 	if(permtag == 1 && this->GetNPCTypeID() > 0)
 	{
-		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
+		if(content_db.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
 			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
@@ -2443,18 +2497,27 @@ void NPC::LevelScale() {
 
 	if (RuleB(NPC, NewLevelScaling)) {
 		if (scalerate == 0 || maxlevel <= 25) {
-			// pre-pop seems to scale by 20 HP increments while newer by 100
-			// We also don't want 100 increments on newer noobie zones, check level
-			if (zone->GetZoneID() < 200 || level < 48) {
-				max_hp += (random_level - level) * 20;
-				base_hp += (random_level - level) * 20;
-			} else {
-				max_hp += (random_level - level) * 100;
-				base_hp += (random_level - level) * 100;
+			// Don't add HP to dynamically scaled NPCs since this will be calculated later
+			if (max_hp > 0 || skip_auto_scale)
+			{
+				// pre-pop seems to scale by 20 HP increments while newer by 100
+				// We also don't want 100 increments on newer noobie zones, check level
+				if (zone->GetZoneID() < 200 || level < 48) {
+					max_hp += (random_level - level) * 20;
+					base_hp += (random_level - level) * 20;
+				} else {
+					max_hp += (random_level - level) * 100;
+					base_hp += (random_level - level) * 100;
+				}
+				
+				current_hp = max_hp;
 			}
-
-			current_hp = max_hp;
-			max_dmg += (random_level - level) * 2;
+			
+			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
+			if (max_dmg > 0  || skip_auto_scale)
+			{
+				max_dmg += (random_level - level) * 2;
+			}
 		} else {
 			uint8 scale_adjust = 1;
 
@@ -3195,7 +3258,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 			if (mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY) {
 				bool use_primary_faction = false;
 				if (mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction()) {
-					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
+					const NPCFactionList *cf = content_db.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
 					if (cf) {
 						if (cf->assistprimaryfaction != 0) {
 							use_primary_faction = true;
@@ -3227,8 +3290,8 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 void NPC::RecalculateSkills()
 {
   	int r;
-	for (r = 0; r <= EQEmu::skills::HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(), (EQEmu::skills::SkillType)r, level);
+	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
+		skills[r] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, level);
 	}
 
 	// some overrides -- really we need to be able to set skills for mobs in the DB
@@ -3236,15 +3299,15 @@ void NPC::RecalculateSkills()
 	// the theory of needing to be able to set skills for each mob separately
 	if (!IsBot()) {
 		if (level > 50) {
-			skills[EQEmu::skills::SkillDoubleAttack] = 250;
-			skills[EQEmu::skills::SkillDualWield] = 250;
+			skills[EQ::skills::SkillDoubleAttack] = 250;
+			skills[EQ::skills::SkillDualWield] = 250;
 		}
 		else if (level > 3) {
-			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
-			skills[EQEmu::skills::SkillDualWield] = skills[EQEmu::skills::SkillDoubleAttack];
+			skills[EQ::skills::SkillDoubleAttack] = level * 5;
+			skills[EQ::skills::SkillDualWield] = skills[EQ::skills::SkillDoubleAttack];
 		}
 		else {
-			skills[EQEmu::skills::SkillDoubleAttack] = level * 5;
+			skills[EQ::skills::SkillDoubleAttack] = level * 5;
 		}
 	}
 }

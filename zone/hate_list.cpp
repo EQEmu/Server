@@ -297,7 +297,7 @@ int HateList::GetHateRatio(Mob *top, Mob *other)
 	if (!top_entry || top_entry->stored_hate_amount < 1)
 		return 999; // shouldn't happen if you call it right :P
 
-	return EQEmu::Clamp(static_cast<int>((other_entry->stored_hate_amount * 100) / top_entry->stored_hate_amount), 1, 999);
+	return EQ::Clamp(static_cast<int>((other_entry->stored_hate_amount * 100) / top_entry->stored_hate_amount), 1, 999);
 }
 
 // skip is used to ignore a certain mob on the list
@@ -675,10 +675,12 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 	std::vector<uint16> id_list;
 	for (auto &h : list) {
 		if (h->entity_on_hatelist && h->entity_on_hatelist != caster && h->entity_on_hatelist != target &&
-		    caster->CombatRange(h->entity_on_hatelist))
+			caster->CombatRange(h->entity_on_hatelist, 1.0, true)) {
 			id_list.push_back(h->entity_on_hatelist->GetID());
-		if (count != -1 && id_list.size() > count)
+		}
+		if (count != -1 && id_list.size() > count) {
 			break;
+		}
 	}
 
 	for (auto &id : id_list) {
@@ -688,7 +690,6 @@ int HateList::AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOption
 			caster->ProcessAttackRounds(mob, opts);
 		}
 	}
-
 	return hit_count;
 }
 

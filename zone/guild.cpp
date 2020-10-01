@@ -63,7 +63,7 @@ void Client::SendGuildMOTD(bool GetGuildMOTDReply) {
 
 void Client::SendGuildURL()
 {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
+	if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
@@ -85,7 +85,7 @@ void Client::SendGuildURL()
 
 void Client::SendGuildChannel()
 {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::SoF)
+	if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 		return;
 
 	if(IsInAGuild())
@@ -108,7 +108,7 @@ void Client::SendGuildChannel()
 
 void Client::SendGuildRanks()
 {
-	if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF)
 		return;
 
 	int permissions = 30 + 1; //Static number of permissions in all EQ clients as of May 2014
@@ -152,7 +152,7 @@ void Client::SendGuildSpawnAppearance() {
 		uint8 rank = guild_mgr.GetDisplayedRank(GuildID(), GuildRank(), CharacterID());
 		LogGuilds("Sending spawn appearance for guild [{}] at rank [{}]", GuildID(), rank);
 		SendAppearancePacket(AT_GuildID, GuildID());
-		if (ClientVersion() >= EQEmu::versions::ClientVersion::RoF)
+		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
 		{
 			switch (rank) {
 				case 0: { rank = 5; break; }	// GUILD_MEMBER	0
@@ -253,7 +253,7 @@ void Client::RefreshGuildInfo()
 		if((guild_id != OldGuildID) && GuildBanks)
 		{
 			// Unsure about this for RoF+ ... But they don't have that action anymore so fuck it
-			if (ClientVersion() < EQEmu::versions::ClientVersion::RoF)
+			if (ClientVersion() < EQ::versions::ClientVersion::RoF)
 				ClearGuildBank();
 
 			if(guild_id != GUILD_NONE)
@@ -407,36 +407,4 @@ void Client::GuildChangeRank(const char* name, uint32 guild_id, uint32 oldrank, 
 	safe_delete(outapp);
 	SendGuildMembers(guild_id, true);
 }*/
-
-
-bool ZoneDatabase::CheckGuildDoor(uint8 doorid, uint16 guild_id, const char* zone) {
-
-	std::string query = StringFormat("SELECT guild FROM doors WHERE doorid = %i AND zone = '%s'",
-                                    doorid-128, zone);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-		return false;
-	}
-
-	if (results.RowCount() != 1)
-        return false;
-
-    auto row = results.begin();
-    return atoi(row[0]) == guild_id;
-}
-
-bool ZoneDatabase::SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone) {
-
-	if (doorid > 127)
-		doorid = doorid - 128;
-
-    std::string query = StringFormat("UPDATE doors SET guild = %i WHERE (doorid=%i) AND (zone='%s')",
-                                        guild_id, doorid, zone);
-    auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	return (results.RowsAffected() > 0);
-}
 

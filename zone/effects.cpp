@@ -28,6 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
@@ -432,14 +433,14 @@ int32 Client::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 bool Client::TrainDiscipline(uint32 itemid) {
 
 	//get the item info
-	const EQEmu::ItemData *item = database.GetItem(itemid);
+	const EQ::ItemData *item = database.GetItem(itemid);
 	if(item == nullptr) {
 		Message(Chat::Red, "Unable to find the tome you turned in!");
 		LogError("Unable to find turned in tome id [{}]\n", (unsigned long)itemid);
 		return(false);
 	}
 
-	if (!item->IsClassCommon() || item->ItemType != EQEmu::item::ItemTypeSpell) {
+	if (!item->IsClassCommon() || item->ItemType != EQ::item::ItemTypeSpell) {
 		Message(Chat::Red, "Invalid item type, you cannot learn from this item.");
 		//summon them the item back...
 		SummonItem(itemid);
@@ -554,7 +555,7 @@ int Client::GetDiscSlotBySpellID(int32 spellid)
 		if(m_pp.disciplines.values[i] == spellid)
 			return i;
 	}
-	
+
 	return -1;
 }
 
@@ -645,9 +646,9 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		}
 
 		if (reduced_recast > 0)
-			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
+			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline, -1, -1, 0, -1, (uint32)DiscTimer, reduced_recast);
 		else{
-			CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
+			CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 			return true;
 		}
 
@@ -655,9 +656,26 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 	else
 	{
-		CastSpell(spell_id, target, EQEmu::spells::CastingSlot::Discipline);
+		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 	}
 	return(true);
+}
+
+uint32 Client::GetDisciplineTimer(uint32 timer_id) {
+	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
+	uint32 disc_timer = 0;
+	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
+		disc_timer = GetPTimers().GetRemainingTime(disc_timer_id);
+	}
+	return disc_timer;
+}
+
+void Client::ResetDisciplineTimer(uint32 timer_id) {
+	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
+	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
+		GetPTimers().Clear(&database, (uint32)disc_timer_id);
+	}
+	SendDisciplineTimer(timer_id, 0);
 }
 
 void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)

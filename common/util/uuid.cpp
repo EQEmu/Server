@@ -1,5 +1,6 @@
 #include "uuid.h"
 
+#include <ios>
 #include <fmt/format.h>
 
 #ifdef _WIN32
@@ -12,6 +13,10 @@
 
 #ifdef __APPLE__
 #include <CoreFoundation/CFUUID.h>
+#endif
+
+#ifdef __FreeBSD__
+#include <uuid.h>
 #endif
 
 unsigned char hexDigitToChar(char ch)
@@ -125,6 +130,15 @@ EQ::Util::UUID EQ::Util::UUID::Generate()
 	CFRelease(id);
 
 	return buffer;
+#endif
+
+#ifdef __FreeBSD__
+	uuid_t l_id;
+	char l_uuid[37];
+	uint32_t l_ignored;
+	uuid_create(&l_id, &l_ignored);
+	uuid_to_string(&l_id, (char**) &l_uuid, &l_ignored);
+	return FromString(l_uuid);
 #endif
 }
 

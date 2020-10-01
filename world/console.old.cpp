@@ -230,7 +230,7 @@ bool Console::Process() {
 		std::string connecting_ip = inet_ntoa(in);
 
 		SendMessage(2, StringFormat("Establishing connection from IP: %s Port: %d", inet_ntoa(in), GetPort()).c_str());
-		
+
 		if (connecting_ip.find("127.0.0.1") != std::string::npos) {
 			SendMessage(2, StringFormat("Connecting established from local host, auto assuming admin").c_str());
 			state = CONSOLE_STATE_CONNECTED;
@@ -244,7 +244,7 @@ bool Console::Process() {
 		}
 
 		prompt_timer.Disable();
-			
+
 	}
 
 	if (timeout_timer.Check()) {
@@ -269,7 +269,7 @@ bool Console::Process() {
 			LogInfo("New launcher from [{}]:[{}]", inet_ntoa(in), GetPort());
 			launcher_list.Add(tcpc);
 			tcpc = 0;
-		} 
+		}
 		else if(tcpc->GetPacketMode() == EmuTCPConnection::packetModeUCS)
 		{
 			LogInfo("New UCS Connection from [{}]:[{}]", inet_ntoa(in), GetPort());
@@ -281,7 +281,7 @@ bool Console::Process() {
 			LogInfo("New QS Connection from [{}]:[{}]", inet_ntoa(in), GetPort());
 			QSLink.SetConnection(tcpc);
 			tcpc = 0;
-		}  
+		}
 		else {
 			LogInfo("Unsupported packet mode from [{}]:[{}]", inet_ntoa(in), GetPort());
 		}
@@ -616,7 +616,7 @@ void Console::ProcessCommand(const char* command) {
 				if(sep.arg[1][0]==0 || sep.arg[2][0] == 0)
 					SendMessage(1, "Usage: movechar [charactername] [zonename]");
 				else {
-					if (!database.GetZoneID(sep.arg[2]))
+					if (!ZoneID(sep.arg[2]))
 						SendMessage(1, "Error: Zone '%s' not found", sep.arg[2]);
 					else if (!database.CheckUsedName((char*) sep.arg[1])) {
 						if (!database.MoveCharacterToZone((char*) sep.arg[1], (char*) sep.arg[2]))
@@ -711,13 +711,13 @@ void Console::ProcessCommand(const char* command) {
 					if (sep.arg[1][0] >= '0' && sep.arg[1][0] <= '9')
 						s->ZoneServerID = atoi(sep.arg[1]);
 					else
-						s->zoneid = database.GetZoneID(sep.arg[1]);
+						s->zoneid = ZoneID(sep.arg[1]);
 
 					ZoneServer* zs = 0;
 					if (s->ZoneServerID != 0)
 						zs = zoneserver_list.FindByID(s->ZoneServerID);
 					else if (s->zoneid != 0)
-						zs = zoneserver_list.FindByName(database.GetZoneName(s->zoneid));
+						zs = zoneserver_list.FindByName(ZoneName(s->zoneid));
 					else
 						SendMessage(1, "Error: ZoneShutdown: neither ID nor name specified");
 
@@ -828,10 +828,10 @@ void Console::ProcessCommand(const char* command) {
 					zoneserver_list.ListLockedZones(0, this);
 				}
 				else if (strcasecmp(sep.arg[1], "lock") == 0 && admin >= 101) {
-					uint16 tmp = database.GetZoneID(sep.arg[2]);
+					uint16 tmp = ZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, true))
-							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", database.GetZoneName(tmp));
+							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(tmp));
 						else
 							SendMessage(1, "Failed to change lock");
 					}
@@ -839,10 +839,10 @@ void Console::ProcessCommand(const char* command) {
 						SendMessage(1, "Usage: #zonelock lock [zonename]");
 				}
 				else if (strcasecmp(sep.arg[1], "unlock") == 0 && admin >= 101) {
-					uint16 tmp = database.GetZoneID(sep.arg[2]);
+					uint16 tmp = ZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, false))
-							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", database.GetZoneName(tmp));
+							zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(tmp));
 						else
 							SendMessage(1, "Failed to change lock");
 					}

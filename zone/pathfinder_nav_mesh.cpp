@@ -432,7 +432,7 @@ void PathfinderNavmesh::Load(const std::string &path)
 
 		std::vector<char> buffer;
 		buffer.resize(buffer_size);
-		uint32_t v = EQEmu::InflateData(&data[0], data_size, &buffer[0], buffer_size);
+		uint32_t v = EQ::InflateData(&data[0], data_size, &buffer[0], buffer_size);
 		fclose(f);
 
 		char *buf = &buffer[0];

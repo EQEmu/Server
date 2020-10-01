@@ -17,6 +17,7 @@
 */
 
 #include "../common/features.h"
+#include "../common/content/world_content_service.h"
 
 #ifdef EMBPERL
 #ifdef EMBPERL_XS
@@ -109,7 +110,7 @@ XS(XS_QuestItem_new) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::QuestItem::new()");
 
-	EQEmu::ItemInstance *RETVAL;
+	EQ::ItemInstance *RETVAL;
 
 	RETVAL = quest_manager.GetQuestItem();
 	ST(0) = sv_newmortal();
@@ -372,7 +373,7 @@ XS(XS__getinventoryslotid) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::getinventoryslotid(string identifier)");
 
-	int16 RETVAL = EQEmu::invslot::SLOT_INVALID;
+	int16 RETVAL = EQ::invslot::SLOT_INVALID;
 	dXSTARG;
 
 	std::string identifier = (Const_char *)SvPV_nolen(ST(0));
@@ -380,89 +381,89 @@ XS(XS__getinventoryslotid) {
 		identifier[i] = std::tolower(identifier[i]);
 
 	if (identifier.find('.') == std::string::npos) {
-		if (identifier == "invalid")                    RETVAL = EQEmu::invslot::SLOT_INVALID;
-		else if (identifier == "charm")                 RETVAL = EQEmu::invslot::slotCharm;
-		else if (identifier == "ear1")                  RETVAL = EQEmu::invslot::slotEar1;
-		else if (identifier == "head")                  RETVAL = EQEmu::invslot::slotHead;
-		else if (identifier == "face")                  RETVAL = EQEmu::invslot::slotFace;
-		else if (identifier == "ear2")                  RETVAL = EQEmu::invslot::slotEar2;
-		else if (identifier == "neck")                  RETVAL = EQEmu::invslot::slotNeck;
-		else if (identifier == "shoulders")             RETVAL = EQEmu::invslot::slotShoulders;
-		else if (identifier == "arms")                  RETVAL = EQEmu::invslot::slotArms;
-		else if (identifier == "back")                  RETVAL = EQEmu::invslot::slotBack;
-		else if (identifier == "wrist1")                RETVAL = EQEmu::invslot::slotWrist1;
-		else if (identifier == "wrist2")                RETVAL = EQEmu::invslot::slotWrist2;
-		else if (identifier == "range")                 RETVAL = EQEmu::invslot::slotRange;
-		else if (identifier == "hands")                 RETVAL = EQEmu::invslot::slotHands;
-		else if (identifier == "primary")               RETVAL = EQEmu::invslot::slotPrimary;
-		else if (identifier == "secondary")             RETVAL = EQEmu::invslot::slotSecondary;
-		else if (identifier == "finger1")               RETVAL = EQEmu::invslot::slotFinger1;
-		else if (identifier == "finger2")               RETVAL = EQEmu::invslot::slotFinger2;
-		else if (identifier == "chest")                 RETVAL = EQEmu::invslot::slotChest;
-		else if (identifier == "legs")                  RETVAL = EQEmu::invslot::slotLegs;
-		else if (identifier == "feet")                  RETVAL = EQEmu::invslot::slotFeet;
-		else if (identifier == "waist")                 RETVAL = EQEmu::invslot::slotWaist;
-		else if (identifier == "powersource")           RETVAL = EQEmu::invslot::slotPowerSource;
-		else if (identifier == "ammo")                  RETVAL = EQEmu::invslot::slotAmmo;
-		else if (identifier == "general1")              RETVAL = EQEmu::invslot::slotGeneral1;
-		else if (identifier == "general2")              RETVAL = EQEmu::invslot::slotGeneral2;
-		else if (identifier == "general3")              RETVAL = EQEmu::invslot::slotGeneral3;
-		else if (identifier == "general4")              RETVAL = EQEmu::invslot::slotGeneral4;
-		else if (identifier == "general5")              RETVAL = EQEmu::invslot::slotGeneral5;
-		else if (identifier == "general6")              RETVAL = EQEmu::invslot::slotGeneral6;
-		else if (identifier == "general7")              RETVAL = EQEmu::invslot::slotGeneral7;
-		else if (identifier == "general8")              RETVAL = EQEmu::invslot::slotGeneral8;
-		else if (identifier == "general9")              RETVAL = EQEmu::invslot::slotGeneral9;
-		else if (identifier == "general10")             RETVAL = EQEmu::invslot::slotGeneral10;
-		else if (identifier == "cursor")                RETVAL = EQEmu::invslot::slotCursor;
-		else if (identifier == "tradeskill")            RETVAL = EQEmu::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
-		else if (identifier == "augment")               RETVAL = EQEmu::invslot::SLOT_AUGMENT_GENERIC_RETURN;
+		if (identifier == "invalid")                    RETVAL = EQ::invslot::SLOT_INVALID;
+		else if (identifier == "charm")                 RETVAL = EQ::invslot::slotCharm;
+		else if (identifier == "ear1")                  RETVAL = EQ::invslot::slotEar1;
+		else if (identifier == "head")                  RETVAL = EQ::invslot::slotHead;
+		else if (identifier == "face")                  RETVAL = EQ::invslot::slotFace;
+		else if (identifier == "ear2")                  RETVAL = EQ::invslot::slotEar2;
+		else if (identifier == "neck")                  RETVAL = EQ::invslot::slotNeck;
+		else if (identifier == "shoulders")             RETVAL = EQ::invslot::slotShoulders;
+		else if (identifier == "arms")                  RETVAL = EQ::invslot::slotArms;
+		else if (identifier == "back")                  RETVAL = EQ::invslot::slotBack;
+		else if (identifier == "wrist1")                RETVAL = EQ::invslot::slotWrist1;
+		else if (identifier == "wrist2")                RETVAL = EQ::invslot::slotWrist2;
+		else if (identifier == "range")                 RETVAL = EQ::invslot::slotRange;
+		else if (identifier == "hands")                 RETVAL = EQ::invslot::slotHands;
+		else if (identifier == "primary")               RETVAL = EQ::invslot::slotPrimary;
+		else if (identifier == "secondary")             RETVAL = EQ::invslot::slotSecondary;
+		else if (identifier == "finger1")               RETVAL = EQ::invslot::slotFinger1;
+		else if (identifier == "finger2")               RETVAL = EQ::invslot::slotFinger2;
+		else if (identifier == "chest")                 RETVAL = EQ::invslot::slotChest;
+		else if (identifier == "legs")                  RETVAL = EQ::invslot::slotLegs;
+		else if (identifier == "feet")                  RETVAL = EQ::invslot::slotFeet;
+		else if (identifier == "waist")                 RETVAL = EQ::invslot::slotWaist;
+		else if (identifier == "powersource")           RETVAL = EQ::invslot::slotPowerSource;
+		else if (identifier == "ammo")                  RETVAL = EQ::invslot::slotAmmo;
+		else if (identifier == "general1")              RETVAL = EQ::invslot::slotGeneral1;
+		else if (identifier == "general2")              RETVAL = EQ::invslot::slotGeneral2;
+		else if (identifier == "general3")              RETVAL = EQ::invslot::slotGeneral3;
+		else if (identifier == "general4")              RETVAL = EQ::invslot::slotGeneral4;
+		else if (identifier == "general5")              RETVAL = EQ::invslot::slotGeneral5;
+		else if (identifier == "general6")              RETVAL = EQ::invslot::slotGeneral6;
+		else if (identifier == "general7")              RETVAL = EQ::invslot::slotGeneral7;
+		else if (identifier == "general8")              RETVAL = EQ::invslot::slotGeneral8;
+		else if (identifier == "general9")              RETVAL = EQ::invslot::slotGeneral9;
+		else if (identifier == "general10")             RETVAL = EQ::invslot::slotGeneral10;
+		else if (identifier == "cursor")                RETVAL = EQ::invslot::slotCursor;
+		else if (identifier == "tradeskill")            RETVAL = EQ::invslot::SLOT_TRADESKILL_EXPERIMENT_COMBINE;
+		else if (identifier == "augment")               RETVAL = EQ::invslot::SLOT_AUGMENT_GENERIC_RETURN;
 	}
 	else {
-		if (identifier == "possessions.begin")          RETVAL = EQEmu::invslot::POSSESSIONS_BEGIN;
-		else if (identifier == "possessions.end")       RETVAL = EQEmu::invslot::POSSESSIONS_END;
-		else if (identifier == "equipment.begin")       RETVAL = EQEmu::invslot::EQUIPMENT_BEGIN;
-		else if (identifier == "equipment.end")         RETVAL = EQEmu::invslot::EQUIPMENT_END;
-		else if (identifier == "general.begin")         RETVAL = EQEmu::invslot::GENERAL_BEGIN;
-		else if (identifier == "general.end")           RETVAL = EQEmu::invslot::GENERAL_END;
-		else if (identifier == "possessionsbags.begin") RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "possessionsbags.end")   RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-		else if (identifier == "generalbags.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "generalbags.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_END;
-		else if (identifier == "general1bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN;
-		else if (identifier == "general1bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 9;
-		else if (identifier == "general2bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 10;
-		else if (identifier == "general2bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 19;
-		else if (identifier == "general3bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 20;
-		else if (identifier == "general3bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 29;
-		else if (identifier == "general4bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 30;
-		else if (identifier == "general4bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 39;
-		else if (identifier == "general5bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 40;
-		else if (identifier == "general5bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 49;
-		else if (identifier == "general6bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 50;
-		else if (identifier == "general6bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 59;
-		else if (identifier == "general7bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 60;
-		else if (identifier == "general7bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 69;
-		else if (identifier == "general8bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 70;
-		else if (identifier == "general8bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 79;
-		else if (identifier == "general9bag.begin")     RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 80;
-		else if (identifier == "general9bag.end")       RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 89;
-		else if (identifier == "general10bag.begin")    RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 90;
-		else if (identifier == "general10bag.end")      RETVAL = EQEmu::invbag::GENERAL_BAGS_BEGIN + 99;
-		else if (identifier == "cursorbag.begin")       RETVAL = EQEmu::invbag::CURSOR_BAG_BEGIN;
-		else if (identifier == "cursorbag.end")         RETVAL = EQEmu::invbag::CURSOR_BAG_END;
-		else if (identifier == "bank.begin")            RETVAL = EQEmu::invslot::BANK_BEGIN;
-		else if (identifier == "bank.end")              RETVAL = EQEmu::invslot::BANK_END;
-		else if (identifier == "bankbags.begin")        RETVAL = EQEmu::invbag::BANK_BAGS_BEGIN;
-		else if (identifier == "bankbags.end")          RETVAL = EQEmu::invbag::BANK_BAGS_END;
-		else if (identifier == "sharedbank.begin")      RETVAL = EQEmu::invslot::SHARED_BANK_BEGIN;
-		else if (identifier == "sharedbank.end")        RETVAL = EQEmu::invslot::SHARED_BANK_END;
-		else if (identifier == "sharedbankbags.begin")  RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_BEGIN;
-		else if (identifier == "sharedbankbags.end")    RETVAL = EQEmu::invbag::SHARED_BANK_BAGS_END;
-		else if (identifier == "bagslot.begin")         RETVAL = EQEmu::invbag::SLOT_BEGIN;
-		else if (identifier == "bagslot.end")           RETVAL = EQEmu::invbag::SLOT_END;
-		else if (identifier == "augsocket.begin")       RETVAL = EQEmu::invaug::SOCKET_BEGIN;
-		else if (identifier == "augsocket.end")         RETVAL = EQEmu::invaug::SOCKET_END;
+		if (identifier == "possessions.begin")          RETVAL = EQ::invslot::POSSESSIONS_BEGIN;
+		else if (identifier == "possessions.end")       RETVAL = EQ::invslot::POSSESSIONS_END;
+		else if (identifier == "equipment.begin")       RETVAL = EQ::invslot::EQUIPMENT_BEGIN;
+		else if (identifier == "equipment.end")         RETVAL = EQ::invslot::EQUIPMENT_END;
+		else if (identifier == "general.begin")         RETVAL = EQ::invslot::GENERAL_BEGIN;
+		else if (identifier == "general.end")           RETVAL = EQ::invslot::GENERAL_END;
+		else if (identifier == "possessionsbags.begin") RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "possessionsbags.end")   RETVAL = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "generalbags.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "generalbags.end")       RETVAL = EQ::invbag::GENERAL_BAGS_END;
+		else if (identifier == "general1bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN;
+		else if (identifier == "general1bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 9;
+		else if (identifier == "general2bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 10;
+		else if (identifier == "general2bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 19;
+		else if (identifier == "general3bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 20;
+		else if (identifier == "general3bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 29;
+		else if (identifier == "general4bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 30;
+		else if (identifier == "general4bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 39;
+		else if (identifier == "general5bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 40;
+		else if (identifier == "general5bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 49;
+		else if (identifier == "general6bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 50;
+		else if (identifier == "general6bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 59;
+		else if (identifier == "general7bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 60;
+		else if (identifier == "general7bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 69;
+		else if (identifier == "general8bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 70;
+		else if (identifier == "general8bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 79;
+		else if (identifier == "general9bag.begin")     RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 80;
+		else if (identifier == "general9bag.end")       RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 89;
+		else if (identifier == "general10bag.begin")    RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 90;
+		else if (identifier == "general10bag.end")      RETVAL = EQ::invbag::GENERAL_BAGS_BEGIN + 99;
+		else if (identifier == "cursorbag.begin")       RETVAL = EQ::invbag::CURSOR_BAG_BEGIN;
+		else if (identifier == "cursorbag.end")         RETVAL = EQ::invbag::CURSOR_BAG_END;
+		else if (identifier == "bank.begin")            RETVAL = EQ::invslot::BANK_BEGIN;
+		else if (identifier == "bank.end")              RETVAL = EQ::invslot::BANK_END;
+		else if (identifier == "bankbags.begin")        RETVAL = EQ::invbag::BANK_BAGS_BEGIN;
+		else if (identifier == "bankbags.end")          RETVAL = EQ::invbag::BANK_BAGS_END;
+		else if (identifier == "sharedbank.begin")      RETVAL = EQ::invslot::SHARED_BANK_BEGIN;
+		else if (identifier == "sharedbank.end")        RETVAL = EQ::invslot::SHARED_BANK_END;
+		else if (identifier == "sharedbankbags.begin")  RETVAL = EQ::invbag::SHARED_BANK_BAGS_BEGIN;
+		else if (identifier == "sharedbankbags.end")    RETVAL = EQ::invbag::SHARED_BANK_BAGS_END;
+		else if (identifier == "bagslot.begin")         RETVAL = EQ::invbag::SLOT_BEGIN;
+		else if (identifier == "bagslot.end")           RETVAL = EQ::invbag::SLOT_END;
+		else if (identifier == "augsocket.begin")       RETVAL = EQ::invaug::SOCKET_BEGIN;
+		else if (identifier == "augsocket.end")         RETVAL = EQ::invaug::SOCKET_END;
 	}
 
 	XSprePUSH; PUSHu((IV)RETVAL);
@@ -526,6 +527,32 @@ XS(XS__zone) {
 	char *zone_name = (char *) SvPV_nolen(ST(0));
 
 	quest_manager.Zone(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__zonegroup);
+XS(XS__zonegroup) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zonegroup(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneGroup(zone_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__zoneraid);
+XS(XS__zoneraid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::zoneraid(string zone_name)");
+
+	char *zone_name = (char *) SvPV_nolen(ST(0));
+
+	quest_manager.ZoneRaid(zone_name);
 
 	XSRETURN_EMPTY;
 }
@@ -1523,12 +1550,12 @@ XS(XS__addldonpoints) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonpoints(int points, int theme_id)");
 
-	long          points   = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+long          points = (long)SvIV(ST(0));
+unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
-	quest_manager.addldonpoints(points, theme_id);
+quest_manager.addldonpoints(points, theme_id);
 
-	XSRETURN_EMPTY;
+XSRETURN_EMPTY;
 }
 
 XS(XS__addldonwin);
@@ -1537,8 +1564,8 @@ XS(XS__addldonwin) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonwin(int wins, int theme_id)");
 
-	long          wins     = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+	long          wins = (long)SvIV(ST(0));
+	unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
 	quest_manager.addldonwin(wins, theme_id);
 
@@ -1551,8 +1578,8 @@ XS(XS__addldonloss) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonloss(int losses, int theme_id)");
 
-	long          losses   = (long) SvIV(ST(0));
-	unsigned long theme_id = (unsigned long) SvUV(ST(1));
+	long          losses = (long)SvIV(ST(0));
+	unsigned long theme_id = (unsigned long)SvUV(ST(1));
 
 	quest_manager.addldonloss(losses, theme_id);
 
@@ -1565,7 +1592,7 @@ XS(XS__setnexthpevent) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::setnexthpevent(int at_mob_percentage)");
 
-	int at = (int) SvIV(ST(0));
+	int at = (int)SvIV(ST(0));
 
 	quest_manager.setnexthpevent(at);
 
@@ -1578,7 +1605,7 @@ XS(XS__setnextinchpevent) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::setnextinchpevent(int at_mob_percentage)");
 
-	int at = (int) SvIV(ST(0));
+	int at = (int)SvIV(ST(0));
 
 	quest_manager.setnextinchpevent(at);
 
@@ -1591,7 +1618,7 @@ XS(XS__sethp) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::sethp(int mob_health_percentage [0-100])");
 
-	int hpperc = (int) SvIV(ST(0));
+	int hpperc = (int)SvIV(ST(0));
 
 	quest_manager.sethp(hpperc);
 
@@ -1604,13 +1631,20 @@ XS(XS__respawn) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::respawn(int npc_type_id, int grid_id)");
 
-	int npc_type_id = (int) SvIV(ST(0));
-	int grid_id     = (int) SvIV(ST(1));
+	int npc_type_id = (int)SvIV(ST(0));
+	int grid_id = (int)SvIV(ST(1));
 
 	quest_manager.respawn(npc_type_id, grid_id);
 
 	XSRETURN_EMPTY;
 }
+
+//64 bit windows seems to optimize something poorly here causing access violations.
+//If you don't do anything with index before passing it to perl it gets optimized out
+//Disabling optimization right now for msvc on this function is the best solution.
+#ifdef _MSC_VER
+#pragma optimize( "", off )
+#endif
 
 XS(XS__ChooseRandom);
 XS(XS__ChooseRandom) {
@@ -1618,14 +1652,19 @@ XS(XS__ChooseRandom) {
 	if (items < 1)
 		Perl_croak(aTHX_ "Usage: quest::ChooseRandom(option1, option2, option3, option4, option5...[no limit])");
 
+	dXSTARG;
 	int index = zone->random.Int(0, items - 1);
+	SV* RETVAL = ST(index);
 
-	SV *tmp = ST(0);
-	ST(0)     = ST(index);
-	ST(index) = tmp;
+	XSprePUSH;
+	PUSHs(RETVAL);
 
 	XSRETURN(1);    //return 1 element from the stack (ST(0))
 }
+
+#ifdef _MSC_VER
+#pragma optimize( "", on )
+#endif
 
 XS(XS__set_proximity);
 XS(XS__set_proximity) {
@@ -2028,6 +2067,19 @@ XS(XS__repopzone) {
 		Perl_croak(aTHX_ "Usage: quest::repopzone()");
 
 	quest_manager.repopzone();
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__processmobswhilezoneempty);
+XS(XS__processmobswhilezoneempty) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::processmobswhilezoneempty(bool on)");
+
+	bool ProcessingOn = ((int) SvIV(ST(0))) == 0 ? false : true;
+
+	quest_manager.processmobswhilezoneempty(ProcessingOn);
 
 	XSRETURN_EMPTY;
 }
@@ -2875,7 +2927,7 @@ XS(XS__countitem) {
 }
 
 XS(XS__getitemname);
-XS(XS__getitemname) {	
+XS(XS__getitemname) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::getitemname(uint32 item_id)");
@@ -3178,7 +3230,7 @@ XS(XS__CheckInstanceByCharID) {
 	if (items != 2) {
 		Perl_croak(aTHX_ "Usage: quest::CheckInstanceByCharID(uint16 instance_id, uint32 char_id)");
 	}
-	
+
 	bool RETVAL;
 	dXSTARG;
 
@@ -3703,19 +3755,883 @@ XS(XS__GetTimeSeconds) {
 	XSRETURN_UV(seconds);
 }
 
+XS(XS__crosszoneassigntaskbycharid);
+XS(XS__crosszoneassigntaskbycharid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbycharid(int character_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int character_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}	
+		quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbygroupid);
+XS(XS__crosszoneassigntaskbygroupid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbygroupid(int group_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+		quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneassigntaskbyraidid);
+XS(XS__crosszoneassigntaskbyraidid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyraidid(int raid_id, uint32 task_id, [bool enforce_level_requirement = false])");\
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+	
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+		quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneassigntaskbyguildid);
+XS(XS__crosszoneassigntaskbyguildid) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneassigntaskbyguildid(int guild_id, uint32 task_id, [bool enforce_level_requirement = false])");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvIV(ST(1));
+		bool enforce_level_requirement = false;
+
+		if (items == 3) {
+			enforce_level_requirement = (bool) SvTRUE(ST(2));
+		}
+		quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonecastspellbycharid);
+XS(XS__crosszonecastspellbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbycharid(int character_id, uint32 spell_id)");
+	{
+		int character_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneCastSpellByCharID(character_id, spell_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonecastspellbygroupid);
+XS(XS__crosszonecastspellbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbygroupid(int group_id, uint32 spell_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneCastSpellByGroupID(group_id, spell_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonecastspellbyraidid);
+XS(XS__crosszonecastspellbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyraidid(int raid_id, uint32 spell_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvIV(ST(1));
+		quest_manager.CrossZoneCastSpellByRaidID(raid_id, spell_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonecastspellbyguildid);
+XS(XS__crosszonecastspellbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonecastspellbyguildid(int guild_id, uint32 spell_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneCastSpellByGuildID(guild_id, spell_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonedisabletaskbycharid);
+XS(XS__crosszonedisabletaskbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbycharid(int character_id, uint32 task_id)");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneDisableTaskByCharID(char_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonedisabletaskbygroupid);
+XS(XS__crosszonedisabletaskbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbygroupid(int group_id, uint32 task_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneDisableTaskByGroupID(group_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonedisabletaskbyraidid);
+XS(XS__crosszonedisabletaskbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyraidid(int raid_id, uint32 task_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneDisableTaskByRaidID(raid_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonedisabletaskbyguildid);
+XS(XS__crosszonedisabletaskbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedisabletaskbyguildid(int guild_id, uint32 task_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneDisableTaskByGuildID(guild_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneenabletaskbycharid);
+XS(XS__crosszoneenabletaskbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbycharid(int character_id, uint32 task_id)");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneEnableTaskByCharID(char_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneenabletaskbygroupid);
+XS(XS__crosszoneenabletaskbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbygroupid(int group_id, uint32 task_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneEnableTaskByGroupID(group_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneenabletaskbyraidid);
+XS(XS__crosszoneenabletaskbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyraidid(int raid_id, uint32 task_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneEnableTaskByRaidID(raid_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneenabletaskbyguildid);
+XS(XS__crosszoneenabletaskbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneenabletaskbyguildid(int guild_id, uint32 task_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneEnableTaskByGuildID(guild_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonefailtaskbycharid);
+XS(XS__crosszonefailtaskbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbycharid(int character_id, uint32 task_id)");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneFailTaskByCharID(char_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonefailtaskbygroupid);
+XS(XS__crosszonefailtaskbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbygroupid(int group_id, uint32 task_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneFailTaskByGroupID(group_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonefailtaskbyraidid);
+XS(XS__crosszonefailtaskbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyraidid(int raid_id, uint32 task_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneFailTaskByRaidID(raid_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonefailtaskbyguildid);
+XS(XS__crosszonefailtaskbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonefailtaskbyguildid(int guild_id, uint32 task_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonemarqueebycharid);
+XS(XS__crosszonemarqueebycharid) {
+	dXSARGS;
+
+	if (items != 7)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebycharid(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
+
+	if (items == 7) {
+		int character_id = (int) SvIV(ST(0));
+		int type = (int) SvIV(ST(1));
+		int priority = (int) SvIV(ST(2));
+		int fade_in = (int) SvIV(ST(3));
+		int fade_out = (int) SvIV(ST(4));
+		int duration = (int) SvIV(ST(5));
+		char *message = (char *) SvPV_nolen(ST(6));
+		quest_manager.CrossZoneMarqueeByCharID(character_id, type, priority, fade_in, fade_out, duration, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemarqueebygroupid);
+XS(XS__crosszonemarqueebygroupid) {
+	dXSARGS;
+
+	if (items != 7)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebygroupid(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
+
+	if (items == 7) {
+		int group_id = (int) SvIV(ST(0));
+		int type = (int) SvIV(ST(1));
+		int priority = (int) SvIV(ST(2));
+		int fade_in = (int) SvIV(ST(3));
+		int fade_out = (int) SvIV(ST(4));
+		int duration = (int) SvIV(ST(5));
+		char *message = (char *) SvPV_nolen(ST(6));
+		quest_manager.CrossZoneMarqueeByGroupID(group_id, type, priority, fade_in, fade_out, duration, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemarqueebyraidid);
+XS(XS__crosszonemarqueebyraidid) {
+	dXSARGS;
+
+	if (items != 7)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyraidid(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
+
+	if (items == 7) {
+		int raid_id = (int) SvIV(ST(0));
+		int type = (int) SvIV(ST(1));
+		int priority = (int) SvIV(ST(2));
+		int fade_in = (int) SvIV(ST(3));
+		int fade_out = (int) SvIV(ST(4));
+		int duration = (int) SvIV(ST(5));
+		char *message = (char *) SvPV_nolen(ST(6));
+		quest_manager.CrossZoneMarqueeByRaidID(raid_id, type, priority, fade_in, fade_out, duration, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemarqueebyguildid);
+XS(XS__crosszonemarqueebyguildid) {
+	dXSARGS;
+
+	if (items != 7)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemarqueebyguildid(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message)");
+
+	if (items == 7) {
+		int guild_id = (int) SvIV(ST(0));
+		int type = (int) SvIV(ST(1));
+		int priority = (int) SvIV(ST(2));
+		int fade_in = (int) SvIV(ST(3));
+		int fade_out = (int) SvIV(ST(4));
+		int duration = (int) SvIV(ST(5));
+		char *message = (char *) SvPV_nolen(ST(6));
+		quest_manager.CrossZoneMarqueeByGuildID(guild_id, type, priority, fade_in, fade_out, duration, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyname);
+XS(XS__crosszonemessageplayerbyname) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyname(uint32 type, string name, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvUV(ST(0));
+		char *name = (char *) SvPV_nolen(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByName(type, name, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbygroupid);
+XS(XS__crosszonemessageplayerbygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbygroupid(uint32 type, int group_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvUV(ST(0));
+		int group_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyraidid);
+XS(XS__crosszonemessageplayerbyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyraidid(uint32 type, int raid_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvUV(ST(0));
+		int raid_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemessageplayerbyguildid);
+XS(XS__crosszonemessageplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyguildid(uint32 type, int guild_id, string message)");
+
+	if (items == 3) {
+		uint32 type = (uint32) SvUV(ST(0));
+		int guild_id = (int) SvIV(ST(1));
+		char *message = (char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbycharid);
+XS(XS__crosszonemoveplayerbycharid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbycharid(int character_id, string zone_short_name)");
+
+	if (items == 2) {
+		int character_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbygroupid);
+XS(XS__crosszonemoveplayerbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbygroupid(int group_id, string zone_short_name)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbyraidid);
+XS(XS__crosszonemoveplayerbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyraidid(int raid_id, string zone_short_name)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveplayerbyguildid);
+XS(XS__crosszonemoveplayerbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyguildid(int guild_id, string zone_short_name)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		char *zone_short_name = (char *) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveinstancebycharid);
+XS(XS__crosszonemoveinstancebycharid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebycharid(int character_id, uint16 instance_id)");
+
+	if (items == 2) {
+		int character_id = (int) SvIV(ST(0));
+		uint16 instance_id = (uint16) SvUV(ST(1));
+		quest_manager.CrossZoneMoveInstanceByCharID(character_id, instance_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveinstancebygroupid);
+XS(XS__crosszonemoveinstancebygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebygroupid(int group_id, uint16 instance_id)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		uint16 instance_id = (uint16) SvUV(ST(1));
+		quest_manager.CrossZoneMoveInstanceByGroupID(group_id, instance_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveinstancebyraidid);
+XS(XS__crosszonemoveinstancebyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyraidid(int raid_id, uint16 instance_id)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		uint16 instance_id = (uint16) SvUV(ST(1));
+		quest_manager.CrossZoneMoveInstanceByRaidID(raid_id, instance_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonemoveinstancebyguildid);
+XS(XS__crosszonemoveinstancebyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyguildid(int guild_id, uint16 instance_id)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		uint16 instance_id = (uint16) SvUV(ST(1));
+		quest_manager.CrossZoneMoveInstanceByGuildID(guild_id, instance_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneremovespellbycharid);
+XS(XS__crosszoneremovespellbycharid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbycharid(int character_id, uint32 spell_id)");
+
+	if (items == 2) {
+		int character_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveSpellByCharID(character_id, spell_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneremovespellbygroupid);
+XS(XS__crosszoneremovespellbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbygroupid(int group_id, uint32 spell_id)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveSpellByGroupID(group_id, spell_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneremovespellbyraidid);
+XS(XS__crosszoneremovespellbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyraidid(int raid_id, uint32 spell_id)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveSpellByRaidID(raid_id, spell_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneremovespellbyguildid);
+XS(XS__crosszoneremovespellbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovespellbyguildid(int guild_id, uint32 spell_id)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		uint32 spell_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveSpellByGuildID(guild_id, spell_id);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneremovetaskbycharid);
+XS(XS__crosszoneremovetaskbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbycharid(int character_id, uint32 task_id)");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveTaskByCharID(char_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneremovetaskbygroupid);
+XS(XS__crosszoneremovetaskbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbygroupid(int group_id, uint32 task_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveTaskByGroupID(group_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneremovetaskbyraidid);
+XS(XS__crosszoneremovetaskbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyraidid(int raid_id, uint32 task_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveTaskByRaidID(raid_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneremovetaskbyguildid);
+XS(XS__crosszoneremovetaskbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneremovetaskbyguildid(int guild_id, uint32 task_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneRemoveTaskByGuildID(guild_id, task_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneresetactivitybycharid);
+XS(XS__crosszoneresetactivitybycharid) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybycharid(int char_id, uint32 task_id, int activity_id)");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		quest_manager.CrossZoneResetActivityByCharID(char_id, task_id, activity_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneresetactivitybygroupid);
+XS(XS__crosszoneresetactivitybygroupid) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybygroupid(int group_id, uint32 task_id, int activity_id)");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		quest_manager.CrossZoneResetActivityByGroupID(group_id, task_id, activity_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneresetactivitybyraidid);
+XS(XS__crosszoneresetactivitybyraidid) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyraidid(int raid_id, uint32 task_id, int activity_id)");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		quest_manager.CrossZoneResetActivityByRaidID(raid_id, task_id, activity_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneresetactivitybyguildid);
+XS(XS__crosszoneresetactivitybyguildid) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneresetactivitybyguildid(int guild_id, uint32 task_id, int activity_id)");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszonesetentityvariablebynpctypeid);
+XS(XS__crosszonesetentityvariablebynpctypeid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
+
+	if (items == 3) {
+		uint32     npc_type_id = (uint32) SvUV(ST(0));
+		const char *key        = (const char *) SvPV_nolen(ST(1));
+		const char *str_value  = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByNPCTypeID(npc_type_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyclientname);
+XS(XS__crosszonesetentityvariablebyclientname) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
+
+	if (items == 3) {
+		const char *client_name = (const char *) SvPV_nolen(ST(0));
+		const char *key         = (const char *) SvPV_nolen(ST(1));
+		const char *str_value   = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByClientName(client_name, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebygroupid);
+XS(XS__crosszonesetentityvariablebygroupid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebygroupid(int group_id, string key, string value)");
+
+	if (items == 3) {
+		int group_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyraidid);
+XS(XS__crosszonesetentityvariablebyraidid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyraidid(int raid_id, string key, string value)");
+
+	if (items == 3) {
+		int raid_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesetentityvariablebyguildid);
+XS(XS__crosszonesetentityvariablebyguildid) {
+	dXSARGS;
+
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyguildid(int guild_id, string key, string value)");
+
+	if (items == 3) {
+		int guild_id = SvIV(ST(0));
+		const char *key = (const char *) SvPV_nolen(ST(1));
+		const char *str_value = (const char *) SvPV_nolen(ST(2));
+		quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, key, str_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonesignalclientbycharid);
 XS(XS__crosszonesignalclientbycharid) {
 	dXSARGS;
 
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(int character_id, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(int character_id, uint32 signal)");
 
 	if (items == 2) {
-		int    char_id   = (int) SvIV(ST(0));
-		uint32 int_value = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSignalPlayerByCharID(char_id, int_value);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(int character_id, int value)");
+		int char_id = (int) SvIV(ST(0));
+		uint32 signal = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByCharID(char_id, signal);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbygroupid);
+XS(XS__crosszonesignalclientbygroupid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbygroupid(int group_id, uint32 signal)");
+
+	if (items == 2) {
+		int group_id = (int) SvIV(ST(0));
+		uint32 signal = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyraidid);
+XS(XS__crosszonesignalclientbyraidid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyraidid(int raid_id, uint32 signal)");
+
+	if (items == 2) {
+		int raid_id = (int) SvIV(ST(0));
+		uint32 signal = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, signal);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonesignalclientbyguildid);
+XS(XS__crosszonesignalclientbyguildid) {
+	dXSARGS;
+
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyguildid(int guild_id, uint32 signal)");
+
+	if (items == 2) {
+		int guild_id = (int) SvIV(ST(0));
+		uint32 signal = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
 	}
 
 	XSRETURN_EMPTY;
@@ -3726,32 +4642,471 @@ XS(XS__crosszonesignalclientbyname) {
 	dXSARGS;
 
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbyname(string name, uint32 signal)");
 
 	if (items == 2) {
-		char   *name     = (char *) SvPV_nolen(ST(0));
-		uint32 int_value = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSignalPlayerByName(name, int_value);
-	} else {
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalclientbycharid(string name, int value)");
+		char *name = (char *) SvPV_nolen(ST(0));
+		uint32 signal = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalPlayerByName(name, signal);
 	}
 
 	XSRETURN_EMPTY;
 }
 
-
-XS(XS__crosszonemessageplayerbyname);
-XS(XS__crosszonemessageplayerbyname) {
+XS(XS__crosszonesignalnpcbynpctypeid);
+XS(XS__crosszonesignalnpcbynpctypeid) {
 	dXSARGS;
 
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonemessageplayerbyname(int channel_id, string name, string message)");
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonesignalnpcbynpctypeid(uint32 npc_type_id, uint32 value)");
 
-	if (items == 3) {
-		uint32 channel_id = (uint32) SvIV(ST(0));
-		char   *name      = (char *) SvPV_nolen(ST(1));
-		char   *message   = (char *) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneMessagePlayerByName(channel_id, name, message);
+	if (items == 2) {
+		uint32 npc_type_id = (uint32) SvUV(ST(0));
+		uint32 int_value   = (uint32) SvUV(ST(1));
+		quest_manager.CrossZoneSignalNPCByNPCTypeID(npc_type_id, int_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszoneupdateactivitybycharid);
+XS(XS__crosszoneupdateactivitybycharid) {
+	dXSARGS;
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybycharid(int char_id, uint32 task_id, int activity_id, [int activity_count = 1])");
+	{
+		int char_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		int activity_count = 1;
+		if (items == 4) {
+			activity_count = (int) SvIV(ST(3));
+		}
+		quest_manager.CrossZoneUpdateActivityByCharID(char_id, task_id, activity_id, activity_count);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneupdateactivitybygroupid);
+XS(XS__crosszoneupdateactivitybygroupid) {
+	dXSARGS;
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybygroupid(int group_id, uint32 task_id, int activity_id, [int activity_count = 1])");
+	{
+		int group_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		int activity_count = 1;
+		if (items == 4) {
+			activity_count = (int) SvIV(ST(3));
+		}
+		quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id, activity_count);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneupdateactivitybyraidid);
+XS(XS__crosszoneupdateactivitybyraidid) {
+	dXSARGS;
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyraidid(int raid_id, uint32 task_id, int activity_id, [int activity_count = 1])");
+	{
+		int raid_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		int activity_count = 1;
+		if (items == 4) {
+			activity_count = (int) SvIV(ST(3));
+		}
+		quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id, activity_count);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__crosszoneupdateactivitybyguildid);
+XS(XS__crosszoneupdateactivitybyguildid) {
+	dXSARGS;
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::crosszoneupdateactivitybyguildid(int guild_id, uint32 task_id, int activity_id, [int activity_count = 1])");
+	{
+		int guild_id = (int) SvIV(ST(0));
+		uint32 task_id = (uint32) SvUV(ST(1));
+		int activity_id = (int) SvIV(ST(2));
+		int activity_count = 1;
+		if (items == 4) {
+			activity_count = (int) SvIV(ST(3));
+		}
+		quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id, activity_count);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS__worldwideassigntask);
+XS(XS__worldwideassigntask) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwideassigntask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideAssignTask(task_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidecastspell);
+XS(XS__worldwidecastspell) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidecastspell(uint32 spell_id, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 spell_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideCastSpell(spell_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidedisabletask);
+XS(XS__worldwidedisabletask) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidedisabletask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideDisableTask(task_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwideenabletask);
+XS(XS__worldwideenabletask) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwideenabletask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideEnableTask(task_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidefailtask);
+XS(XS__worldwidefailtask) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidefailtask(uint32 task_id, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideFailTask(task_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidemarquee);
+XS(XS__worldwidemarquee) {
+	dXSARGS;
+	if (items < 6 || items > 8)
+		Perl_croak(aTHX_ "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 color_id = (uint32) SvUV(ST(0));
+		uint32 priority = (uint32) SvUV(ST(1));
+		uint32 fade_in  = (uint32) SvUV(ST(2));
+		uint32 fade_out = (uint32) SvUV(ST(3));
+		uint32 duration = (uint32) SvUV(ST(4));
+		char   *message = (char *) SvPV_nolen(ST(5));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 7) {
+			min_status = (uint8) SvUV(ST(6));
+		}
+		
+		if (items == 8) {
+			max_status = (uint8) SvUV(ST(7));
+		}
+		quest_manager.WorldWideMarquee(color_id, priority, fade_in, fade_out, duration, message, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidemessage);
+XS(XS__worldwidemessage) {
+	dXSARGS;
+	if (items < 2 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::worldwidemessage(uint32 type, string message, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		uint32 type = (uint32)SvUV(ST(0));
+		const char *message = (const char*) SvPV_nolen(ST(1));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 3) {
+			min_status = (uint8) SvUV(ST(2));
+		}
+		
+		if (items == 4) {
+			max_status = (uint8) SvUV(ST(3));
+		}
+		quest_manager.WorldWideMessage(type, message, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidemove);
+XS(XS__worldwidemove) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidemove(string zone_short_name, [uint8 min_status = 0, uint8 max_status = 0])");
+
+	if (items == 1) {
+		const char *zone_short_name = (const char*) SvPV_nolen(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideMove(zone_short_name, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidemoveinstance);
+XS(XS__worldwidemoveinstance) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidemoveinstance(uint16 instance_id, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint16 instance_id = (uint16) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideMoveInstance(instance_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwideremovespell);
+XS(XS__worldwideremovespell) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwideremovespell(uint32 spell_id, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint32 spell_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideRemoveSpell(spell_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwideremovetask);
+XS(XS__worldwideremovetask) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwideremovetask(uint32 task_id, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(2));
+		}
+		quest_manager.WorldWideRemoveTask(task_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwideresetactivity);
+XS(XS__worldwideresetactivity) {
+	dXSARGS;
+	if (items < 2 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::worldwideresetactivity(uint32 task_id, int activity_id, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		int activity_id = (int) SvIV(ST(1));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 3) {
+			min_status = (uint8) SvUV(ST(2));
+		}
+		
+		if (items == 4) {
+			max_status = (uint8) SvUV(ST(3));
+		}
+		quest_manager.WorldWideResetActivity(task_id, activity_id, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidesetentityvariableclient);
+XS(XS__worldwidesetentityvariableclient) {
+	dXSARGS;
+	if (items < 2 || items > 4)
+		Perl_croak(aTHX_ "Usage: quest::worldwidesetentityvariableclient(string variable_name, string variable_value, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		const char *variable_name = (const char*) SvPV_nolen(ST(0));
+		const char *variable_value = (const char*) SvPV_nolen(ST(1));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 3) {
+			min_status = (uint8) SvUV(ST(2));
+		}
+		
+		if (items == 4) {
+			max_status = (uint8) SvUV(ST(3));
+		}
+		quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidesetentityvariablenpc);
+XS(XS__worldwidesetentityvariablenpc) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::worldwidesetentityvariablenpc(string variable_name, string variable_value)");
+	{
+		const char *variable_name = (const char*) SvPV_nolen(ST(0));
+		const char *variable_value = (const char*) SvPV_nolen(ST(1));
+		quest_manager.WorldWideSetEntityVariableNPC(variable_name, variable_value);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidesignalnpc);
+XS(XS__worldwidesignalnpc) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::worldwidesignalnpc(uint32 signal)");
+	{
+		uint32 signal = (uint32) SvUV(ST(0));
+		quest_manager.WorldWideSignalNPC(signal);
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__worldwidesignalclient);
+XS(XS__worldwidesignalclient) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidesignalclient(uint32 signal, [uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint32 signal = (uint32) SvUV(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2) {
+			min_status = (uint8) SvUV(ST(1));
+		}
+		
+		if (items == 3) {
+			max_status = (uint8) SvUV(ST(1));
+		}
+		quest_manager.WorldWideSignalClient(signal, min_status, max_status);
+	}
+
+	XSRETURN_EMPTY;
+}
+XS(XS__worldwideupdateactivity);
+XS(XS__worldwideupdateactivity) {
+	dXSARGS;
+	if (items < 2 || items > 5)
+		Perl_croak(aTHX_ "Usage: quest::worldwideupdateactivity(uint32 task_id, int activity_id, [int activity_count = 1, uint8 min_status = 0, uint max_status = 0])");
+	{
+		uint32 task_id = (uint32) SvUV(ST(0));
+		int activity_id = (int) SvIV(ST(1));
+		int activity_count = 1;
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 3) {
+			activity_count = (int) SvIV(ST(2));
+		}
+
+		if (items == 4) {
+			min_status = (uint8) SvUV(ST(3));
+		}
+		
+		if (items == 5) {
+			max_status = (uint8) SvUV(ST(4));
+		}
+		quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status, max_status);
 	}
 
 	XSRETURN_EMPTY;
@@ -3842,74 +5197,7 @@ XS(XS__qs_player_event) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS__crosszonesetentityvariablebynpctypeid);
-XS(XS__crosszonesetentityvariablebynpctypeid) {
-	dXSARGS;
 
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebynpctypeid(int npc_type_id, string key, string value)");
-
-	if (items == 3) {
-		uint32     npc_type_id = (uint32) SvIV(ST(0));
-		const char *key        = (const char *) SvPV_nolen(ST(1));
-		const char *str_value  = (const char *) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariableByNPCTypeID(npc_type_id, key, str_value);
-	}
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__crosszonesetentityvariablebyclientname);
-XS(XS__crosszonesetentityvariablebyclientname) {
-	dXSARGS;
-
-	if (items != 3)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesetentityvariablebyclientname(string client_name, string key, string value)");
-
-	if (items == 3) {
-		const char *client_name = (const char *) SvPV_nolen(ST(0));
-		const char *key         = (const char *) SvPV_nolen(ST(1));
-		const char *str_value   = (const char *) SvPV_nolen(ST(2));
-		quest_manager.CrossZoneSetEntityVariableByClientName(client_name, key, str_value);
-	}
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__crosszonesignalnpcbynpctypeid);
-XS(XS__crosszonesignalnpcbynpctypeid) {
-	dXSARGS;
-
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::crosszonesignalnpcbynpctypeid(uint32 npc_type_id, uint32 value)");
-
-	if (items == 2) {
-		uint32 npc_type_id = (uint32) SvIV(ST(0));
-		uint32 int_value   = (uint32) SvIV(ST(1));
-		quest_manager.CrossZoneSignalNPCByNPCTypeID(npc_type_id, int_value);
-	}
-
-	XSRETURN_EMPTY;
-}
-
-XS(XS__worldwidemarquee);
-XS(XS__worldwidemarquee) {
-	dXSARGS;
-	if (items != 6)
-		Perl_croak(aTHX_ "Usage: quest::worldwidemarquee(uint32 color_id, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string message)");
-
-	if (items == 6) {
-		uint32 color_id = (uint32) SvIV(ST(0));
-		uint32 priority = (uint32) SvIV(ST(1));
-		uint32 fade_in  = (uint32) SvIV(ST(2));
-		uint32 fade_out = (uint32) SvIV(ST(3));
-		uint32 duration = (uint32) SvIV(ST(4));
-		char   *message = (char *) SvPV_nolen(ST(5));
-		quest_manager.WorldWideMarquee(color_id, priority, fade_in, fade_out, duration, message);
-	}
-
-	XSRETURN_EMPTY;
-}
 
 XS(XS__log);
 XS(XS__log) {
@@ -3920,7 +5208,7 @@ XS(XS__log) {
 	else {
 		uint8       log_category = (uint8)SvIV(ST(0));
 		std::string log_message = (std::string) SvPV_nolen(ST(1));
-		
+
 		if (log_category >= Logs::MaxCategoryID) {
 			return;
 		}
@@ -3989,11 +5277,11 @@ XS(XS__set_rule) {
 	dXSARGS;
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::set_rule(string rule_name, string rule_value)");
-	
+
 	std::string rule_name = (std::string) SvPV_nolen(ST(0));
 	std::string rule_value = (std::string) SvPV_nolen(ST(1));
 	RuleManager::Instance()->SetRule(rule_name.c_str(), rule_value.c_str());
-	
+
 	XSRETURN_EMPTY;
 }
 
@@ -4077,6 +5365,682 @@ XS(XS__delete_data) {
 	XSRETURN(1);
 }
 
+
+XS(XS__IsClassicEnabled);
+XS(XS__IsClassicEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_classic_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsClassicEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheRuinsOfKunarkEnabled);
+XS(XS__IsTheRuinsOfKunarkEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_ruins_of_kunark_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheRuinsOfKunarkEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheScarsOfVeliousEnabled);
+XS(XS__IsTheScarsOfVeliousEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_scars_of_velious_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheScarsOfVeliousEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheShadowsOfLuclinEnabled);
+XS(XS__IsTheShadowsOfLuclinEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_shadows_of_luclin_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheShadowsOfLuclinEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsThePlanesOfPowerEnabled);
+XS(XS__IsThePlanesOfPowerEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_planes_of_power_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsThePlanesOfPowerEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheLegacyOfYkeshaEnabled);
+XS(XS__IsTheLegacyOfYkeshaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_legacy_of_ykesha_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheLegacyOfYkeshaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsLostDungeonsOfNorrathEnabled);
+XS(XS__IsLostDungeonsOfNorrathEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_lost_dungeons_of_norrath_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsLostDungeonsOfNorrathEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsGatesOfDiscordEnabled);
+XS(XS__IsGatesOfDiscordEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_gates_of_discord_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsGatesOfDiscordEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsOmensOfWarEnabled);
+XS(XS__IsOmensOfWarEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_omens_of_war_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsOmensOfWarEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsDragonsOfNorrathEnabled);
+XS(XS__IsDragonsOfNorrathEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_dragons_of_norrath_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsDragonsOfNorrathEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsDepthsOfDarkhollowEnabled);
+XS(XS__IsDepthsOfDarkhollowEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_depths_of_darkhollow_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsDepthsOfDarkhollowEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsProphecyOfRoEnabled);
+XS(XS__IsProphecyOfRoEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_prophecy_of_ro_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsProphecyOfRoEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheSerpentsSpineEnabled);
+XS(XS__IsTheSerpentsSpineEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_serpents_spine_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheSerpentsSpineEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBuriedSeaEnabled);
+XS(XS__IsTheBuriedSeaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_buried_sea_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBuriedSeaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsSecretsOfFaydwerEnabled);
+XS(XS__IsSecretsOfFaydwerEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_secrets_of_faydwer_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsSecretsOfFaydwerEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsSeedsOfDestructionEnabled);
+XS(XS__IsSeedsOfDestructionEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_seeds_of_destruction_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsSeedsOfDestructionEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsUnderfootEnabled);
+XS(XS__IsUnderfootEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_underfoot_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsUnderfootEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsHouseOfThuleEnabled);
+XS(XS__IsHouseOfThuleEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_house_of_thule_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsHouseOfThuleEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsVeilOfAlarisEnabled);
+XS(XS__IsVeilOfAlarisEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_veil_of_alaris_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsVeilOfAlarisEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsRainOfFearEnabled);
+XS(XS__IsRainOfFearEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_rain_of_fear_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsRainOfFearEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCallOfTheForsakenEnabled);
+XS(XS__IsCallOfTheForsakenEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_call_of_the_forsaken_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCallOfTheForsakenEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheDarkendSeaEnabled);
+XS(XS__IsTheDarkendSeaEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_darkend_sea_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheDarkendSeaEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBrokenMirrorEnabled);
+XS(XS__IsTheBrokenMirrorEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_broken_mirror_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBrokenMirrorEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsEmpiresOfKunarkEnabled);
+XS(XS__IsEmpiresOfKunarkEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_empires_of_kunark_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsEmpiresOfKunarkEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsRingOfScaleEnabled);
+XS(XS__IsRingOfScaleEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_ring_of_scale_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsRingOfScaleEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTheBurningLandsEnabled);
+XS(XS__IsTheBurningLandsEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_the_burning_lands_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTheBurningLandsEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsTormentOfVeliousEnabled);
+XS(XS__IsTormentOfVeliousEnabled) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_torment_of_velious_enabled()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsTormentOfVeliousEnabled();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionClassic);
+XS(XS__IsCurrentExpansionClassic) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_classic()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionClassic();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheRuinsOfKunark);
+XS(XS__IsCurrentExpansionTheRuinsOfKunark) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_ruins_of_kunark()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheRuinsOfKunark();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheScarsOfVelious);
+XS(XS__IsCurrentExpansionTheScarsOfVelious) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_scars_of_velious()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheScarsOfVelious();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheShadowsOfLuclin);
+XS(XS__IsCurrentExpansionTheShadowsOfLuclin) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_shadows_of_luclin()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheShadowsOfLuclin();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionThePlanesOfPower);
+XS(XS__IsCurrentExpansionThePlanesOfPower) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_planes_of_power()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionThePlanesOfPower();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheLegacyOfYkesha);
+XS(XS__IsCurrentExpansionTheLegacyOfYkesha) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_legacy_of_ykesha()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheLegacyOfYkesha();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionLostDungeonsOfNorrath);
+XS(XS__IsCurrentExpansionLostDungeonsOfNorrath) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_lost_dungeons_of_norrath()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionLostDungeonsOfNorrath();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionGatesOfDiscord);
+XS(XS__IsCurrentExpansionGatesOfDiscord) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_gates_of_discord()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionGatesOfDiscord();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionOmensOfWar);
+XS(XS__IsCurrentExpansionOmensOfWar) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_omens_of_war()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionOmensOfWar();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionDragonsOfNorrath);
+XS(XS__IsCurrentExpansionDragonsOfNorrath) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_dragons_of_norrath()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionDragonsOfNorrath();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionDepthsOfDarkhollow);
+XS(XS__IsCurrentExpansionDepthsOfDarkhollow) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_depths_of_darkhollow()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionDepthsOfDarkhollow();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionProphecyOfRo);
+XS(XS__IsCurrentExpansionProphecyOfRo) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_prophecy_of_ro()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionProphecyOfRo();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheSerpentsSpine);
+XS(XS__IsCurrentExpansionTheSerpentsSpine) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_serpents_spine()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheSerpentsSpine();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBuriedSea);
+XS(XS__IsCurrentExpansionTheBuriedSea) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_buried_sea()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBuriedSea();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionSecretsOfFaydwer);
+XS(XS__IsCurrentExpansionSecretsOfFaydwer) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_secrets_of_faydwer()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionSecretsOfFaydwer();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionSeedsOfDestruction);
+XS(XS__IsCurrentExpansionSeedsOfDestruction) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_seeds_of_destruction()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionSeedsOfDestruction();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionUnderfoot);
+XS(XS__IsCurrentExpansionUnderfoot) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_underfoot()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionUnderfoot();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionHouseOfThule);
+XS(XS__IsCurrentExpansionHouseOfThule) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_house_of_thule()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionHouseOfThule();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionVeilOfAlaris);
+XS(XS__IsCurrentExpansionVeilOfAlaris) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_veil_of_alaris()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionVeilOfAlaris();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionRainOfFear);
+XS(XS__IsCurrentExpansionRainOfFear) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_rain_of_fear()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionRainOfFear();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionCallOfTheForsaken);
+XS(XS__IsCurrentExpansionCallOfTheForsaken) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_call_of_the_forsaken()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionCallOfTheForsaken();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheDarkendSea);
+XS(XS__IsCurrentExpansionTheDarkendSea) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_darkend_sea()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheDarkendSea();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBrokenMirror);
+XS(XS__IsCurrentExpansionTheBrokenMirror) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_broken_mirror()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBrokenMirror();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionEmpiresOfKunark);
+XS(XS__IsCurrentExpansionEmpiresOfKunark) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_empires_of_kunark()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionEmpiresOfKunark();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionRingOfScale);
+XS(XS__IsCurrentExpansionRingOfScale) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_ring_of_scale()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionRingOfScale();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTheBurningLands);
+XS(XS__IsCurrentExpansionTheBurningLands) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_the_burning_lands()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTheBurningLands();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsCurrentExpansionTormentOfVelious);
+XS(XS__IsCurrentExpansionTormentOfVelious) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_current_expansion_torment_of_velious()");
+	}
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsCurrentExpansionTormentOfVelious();
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__IsContentFlagEnabled);
+XS(XS__IsContentFlagEnabled) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::is_content_flag_enabled(string flag_name)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+
+	bool RETVAL; dXSTARG;
+	RETVAL = content_service.IsContentFlagEnabled(flag_name);
+	XSprePUSH; PUSHu((IV) RETVAL); XSRETURN(1);
+}
+
+XS(XS__SetContentFlag);
+XS(XS__SetContentFlag)
+{
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::set_content_flag(string flag_name, enabled)");
+	}
+
+	std::string flag_name = (std::string) SvPV_nolen(ST(0));
+	bool        enabled   = (int) SvIV(ST(1)) != 0;
+	ZoneStore::SetContentFlag(flag_name, enabled);
+	XSRETURN_EMPTY;
+}
 
 /*
 This is the callback perl will look for to setup the
@@ -4172,13 +6136,85 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbycharid"), XS__crosszoneassigntaskbycharid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbygroupid"), XS__crosszoneassigntaskbygroupid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyraidid"), XS__crosszoneassigntaskbyraidid, file);
+	newXS(strcpy(buf, "crosszoneassigntaskbyguildid"), XS__crosszoneassigntaskbyguildid, file);
+	newXS(strcpy(buf, "crosszonecastspellbycharid"), XS__crosszonecastspellbycharid, file);
+	newXS(strcpy(buf, "crosszonecastspellbygroupid"), XS__crosszonecastspellbygroupid, file);
+	newXS(strcpy(buf, "crosszonecastspellbyraidid"), XS__crosszonecastspellbyraidid, file);
+	newXS(strcpy(buf, "crosszonecastspellbyguildid"), XS__crosszonecastspellbyguildid, file);
+	newXS(strcpy(buf, "crosszonedisabletaskbycharid"), XS__crosszonedisabletaskbycharid, file);
+	newXS(strcpy(buf, "crosszonedisabletaskbygroupid"), XS__crosszonedisabletaskbygroupid, file);
+	newXS(strcpy(buf, "crosszonedisabletaskbyraidid"), XS__crosszonedisabletaskbyraidid, file);
+	newXS(strcpy(buf, "crosszonedisabletaskbyguildid"), XS__crosszonedisabletaskbyguildid, file);
+	newXS(strcpy(buf, "crosszoneenabletaskbycharid"), XS__crosszoneenabletaskbycharid, file);
+	newXS(strcpy(buf, "crosszoneenabletaskbygroupid"), XS__crosszoneenabletaskbygroupid, file);
+	newXS(strcpy(buf, "crosszoneenabletaskbyraidid"), XS__crosszoneenabletaskbyraidid, file);
+	newXS(strcpy(buf, "crosszoneenabletaskbyguildid"), XS__crosszoneenabletaskbyguildid, file);
+	newXS(strcpy(buf, "crosszonefailtaskbycharid"), XS__crosszonefailtaskbycharid, file);
+	newXS(strcpy(buf, "crosszonefailtaskbygroupid"), XS__crosszonefailtaskbygroupid, file);
+	newXS(strcpy(buf, "crosszonefailtaskbyraidid"), XS__crosszonefailtaskbyraidid, file);
+	newXS(strcpy(buf, "crosszonefailtaskbyguildid"), XS__crosszonefailtaskbyguildid, file);
+	newXS(strcpy(buf, "crosszonemarqueebycharid"), XS__crosszonemarqueebycharid, file);
+	newXS(strcpy(buf, "crosszonemarqueebygroupid"), XS__crosszonemarqueebygroupid, file);
+	newXS(strcpy(buf, "crosszonemarqueebyraidid"), XS__crosszonemarqueebyraidid, file);
+	newXS(strcpy(buf, "crosszonemarqueebyguildid"), XS__crosszonemarqueebyguildid, file);
 	newXS(strcpy(buf, "crosszonemessageplayerbyname"), XS__crosszonemessageplayerbyname, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbygroupid"), XS__crosszonemessageplayerbygroupid, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyraidid"), XS__crosszonemessageplayerbyraidid, file);
+	newXS(strcpy(buf, "crosszonemessageplayerbyguildid"), XS__crosszonemessageplayerbyguildid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbycharid"), XS__crosszonemoveplayerbycharid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbygroupid"), XS__crosszonemoveplayerbygroupid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbyraidid"), XS__crosszonemoveplayerbyraidid, file);
+	newXS(strcpy(buf, "crosszonemoveplayerbyguildid"), XS__crosszonemoveplayerbyguildid, file);
+	newXS(strcpy(buf, "crosszonemoveinstancebycharid"), XS__crosszonemoveinstancebycharid, file);
+	newXS(strcpy(buf, "crosszonemoveinstancebygroupid"), XS__crosszonemoveinstancebygroupid, file);
+	newXS(strcpy(buf, "crosszonemoveinstancebyraidid"), XS__crosszonemoveinstancebyraidid, file);
+	newXS(strcpy(buf, "crosszonemoveinstancebyguildid"), XS__crosszonemoveinstancebyguildid, file);	
+	newXS(strcpy(buf, "crosszoneremovespellbycharid"), XS__crosszoneremovespellbycharid, file);
+	newXS(strcpy(buf, "crosszoneremovespellbygroupid"), XS__crosszoneremovespellbygroupid, file);
+	newXS(strcpy(buf, "crosszoneremovespellbyraidid"), XS__crosszoneremovespellbyraidid, file);
+	newXS(strcpy(buf, "crosszoneremovespellbyguildid"), XS__crosszoneremovespellbyguildid, file);
+	newXS(strcpy(buf, "crosszoneremovetaskbycharid"), XS__crosszoneremovetaskbycharid, file);
+	newXS(strcpy(buf, "crosszoneremovetaskbygroupid"), XS__crosszoneremovetaskbygroupid, file);
+	newXS(strcpy(buf, "crosszoneremovetaskbyraidid"), XS__crosszoneremovetaskbyraidid, file);
+	newXS(strcpy(buf, "crosszoneremovetaskbyguildid"), XS__crosszoneremovetaskbyguildid, file);
+	newXS(strcpy(buf, "crosszoneresetactivitybycharid"), XS__crosszoneresetactivitybycharid, file);
+	newXS(strcpy(buf, "crosszoneresetactivitybygroupid"), XS__crosszoneresetactivitybygroupid, file);
+	newXS(strcpy(buf, "crosszoneresetactivitybyraidid"), XS__crosszoneresetactivitybyraidid, file);
+	newXS(strcpy(buf, "crosszoneresetactivitybyguildid"), XS__crosszoneresetactivitybyguildid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebynpctypeid"), XS__crosszonesetentityvariablebynpctypeid, file);
 	newXS(strcpy(buf, "crosszonesetentityvariablebyclientname"), XS__crosszonesetentityvariablebyclientname, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebygroupid"), XS__crosszonesetentityvariablebygroupid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyraidid"), XS__crosszonesetentityvariablebyraidid, file);
+	newXS(strcpy(buf, "crosszonesetentityvariablebyguildid"), XS__crosszonesetentityvariablebyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbycharid"), XS__crosszonesignalclientbycharid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbygroupid"), XS__crosszonesignalclientbygroupid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyraidid"), XS__crosszonesignalclientbyraidid, file);
+	newXS(strcpy(buf, "crosszonesignalclientbyguildid"), XS__crosszonesignalclientbyguildid, file);
 	newXS(strcpy(buf, "crosszonesignalclientbyname"), XS__crosszonesignalclientbyname, file);
 	newXS(strcpy(buf, "crosszonesignalnpcbynpctypeid"), XS__crosszonesignalnpcbynpctypeid, file);
+	newXS(strcpy(buf, "crosszoneupdateactivitybycharid"), XS__crosszoneupdateactivitybycharid, file);
+	newXS(strcpy(buf, "crosszoneupdateactivitybygroupid"), XS__crosszoneupdateactivitybygroupid, file);
+	newXS(strcpy(buf, "crosszoneupdateactivitybyraidid"), XS__crosszoneupdateactivitybyraidid, file);
+	newXS(strcpy(buf, "crosszoneupdateactivitybyguildid"), XS__crosszoneupdateactivitybyguildid, file);
+	newXS(strcpy(buf, "worldwidecastspell"), XS__worldwidecastspell, file);
+	newXS(strcpy(buf, "worldwidedisabletask"), XS__worldwidedisabletask, file);
+	newXS(strcpy(buf, "worldwideenabletask"), XS__worldwideenabletask, file);
+	newXS(strcpy(buf, "worldwidefailtask"), XS__worldwidefailtask, file);
 	newXS(strcpy(buf, "worldwidemarquee"), XS__worldwidemarquee, file);
+	newXS(strcpy(buf, "worldwidemessage"), XS__worldwidemessage, file);
+	newXS(strcpy(buf, "worldwidemove"), XS__worldwidemove, file);
+	newXS(strcpy(buf, "worldwidemoveinstance"), XS__worldwidemoveinstance, file);
+	newXS(strcpy(buf, "worldwideremovespell"), XS__worldwideremovespell, file);
+	newXS(strcpy(buf, "worldwideremovetask"), XS__worldwideremovetask, file);
+	newXS(strcpy(buf, "worldwideresetactivity"), XS__worldwideresetactivity, file);
+	newXS(strcpy(buf, "worldwidesetentityvariableclient"), XS__worldwidesetentityvariableclient, file);
+	newXS(strcpy(buf, "worldwidesetentityvariablenpc"), XS__worldwidesetentityvariablenpc, file);
+	newXS(strcpy(buf, "worldwidesignalclient"), XS__worldwidesignalclient, file);
+	newXS(strcpy(buf, "worldwidesignalnpc"), XS__worldwidesignalnpc, file);
+	newXS(strcpy(buf, "worldwideupdateactivity"), XS__worldwideupdateactivity, file);
 	newXS(strcpy(buf, "debug"), XS__debug, file);
 	newXS(strcpy(buf, "delglobal"), XS__delglobal, file);
 	newXS(strcpy(buf, "depop"), XS__depop, file);
@@ -4268,6 +6304,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "playersize"), XS__playersize, file);
 	newXS(strcpy(buf, "playertexture"), XS__playertexture, file);
 	newXS(strcpy(buf, "popup"), XS__popup, file);
+	newXS(strcpy(buf, "processmobswhilezoneempty"), XS__processmobswhilezoneempty, file);
 	newXS(strcpy(buf, "pvp"), XS__pvp, file);
 	newXS(strcpy(buf, "qs_player_event"), XS__qs_player_event, file);
 	newXS(strcpy(buf, "qs_send_query"), XS__qs_send_query, file);
@@ -4343,6 +6380,72 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "write"), XS__write, file);
 	newXS(strcpy(buf, "ze"), XS__ze, file);
 	newXS(strcpy(buf, "zone"), XS__zone, file);
+	newXS(strcpy(buf, "zonegroup"), XS__zonegroup, file);
+	newXS(strcpy(buf, "zoneraid"), XS__zoneraid, file);
+
+	/**
+	 * Expansions
+	 */
+	newXS(strcpy(buf, "is_classic_enabled"), XS__IsClassicEnabled, file);
+	newXS(strcpy(buf, "is_the_ruins_of_kunark_enabled"), XS__IsTheRuinsOfKunarkEnabled, file);
+	newXS(strcpy(buf, "is_the_scars_of_velious_enabled"), XS__IsTheScarsOfVeliousEnabled, file);
+	newXS(strcpy(buf, "is_the_shadows_of_luclin_enabled"), XS__IsTheShadowsOfLuclinEnabled, file);
+	newXS(strcpy(buf, "is_the_planes_of_power_enabled"), XS__IsThePlanesOfPowerEnabled, file);
+	newXS(strcpy(buf, "is_the_legacy_of_ykesha_enabled"), XS__IsTheLegacyOfYkeshaEnabled, file);
+	newXS(strcpy(buf, "is_lost_dungeons_of_norrath_enabled"), XS__IsLostDungeonsOfNorrathEnabled, file);
+	newXS(strcpy(buf, "is_gates_of_discord_enabled"), XS__IsGatesOfDiscordEnabled, file);
+	newXS(strcpy(buf, "is_omens_of_war_enabled"), XS__IsOmensOfWarEnabled, file);
+	newXS(strcpy(buf, "is_dragons_of_norrath_enabled"), XS__IsDragonsOfNorrathEnabled, file);
+	newXS(strcpy(buf, "is_depths_of_darkhollow_enabled"), XS__IsDepthsOfDarkhollowEnabled, file);
+	newXS(strcpy(buf, "is_prophecy_of_ro_enabled"), XS__IsProphecyOfRoEnabled, file);
+	newXS(strcpy(buf, "is_the_serpents_spine_enabled"), XS__IsTheSerpentsSpineEnabled, file);
+	newXS(strcpy(buf, "is_the_buried_sea_enabled"), XS__IsTheBuriedSeaEnabled, file);
+	newXS(strcpy(buf, "is_secrets_of_faydwer_enabled"), XS__IsSecretsOfFaydwerEnabled, file);
+	newXS(strcpy(buf, "is_seeds_of_destruction_enabled"), XS__IsSeedsOfDestructionEnabled, file);
+	newXS(strcpy(buf, "is_underfoot_enabled"), XS__IsUnderfootEnabled, file);
+	newXS(strcpy(buf, "is_house_of_thule_enabled"), XS__IsHouseOfThuleEnabled, file);
+	newXS(strcpy(buf, "is_veil_of_alaris_enabled"), XS__IsVeilOfAlarisEnabled, file);
+	newXS(strcpy(buf, "is_rain_of_fear_enabled"), XS__IsRainOfFearEnabled, file);
+	newXS(strcpy(buf, "is_call_of_the_forsaken_enabled"), XS__IsCallOfTheForsakenEnabled, file);
+	newXS(strcpy(buf, "is_the_darkend_sea_enabled"), XS__IsTheDarkendSeaEnabled, file);
+	newXS(strcpy(buf, "is_the_broken_mirror_enabled"), XS__IsTheBrokenMirrorEnabled, file);
+	newXS(strcpy(buf, "is_empires_of_kunark_enabled"), XS__IsEmpiresOfKunarkEnabled, file);
+	newXS(strcpy(buf, "is_ring_of_scale_enabled"), XS__IsRingOfScaleEnabled, file);
+	newXS(strcpy(buf, "is_the_burning_lands_enabled"), XS__IsTheBurningLandsEnabled, file);
+	newXS(strcpy(buf, "is_torment_of_velious_enabled"), XS__IsTormentOfVeliousEnabled, file);
+	newXS(strcpy(buf, "is_current_expansion_classic"), XS__IsCurrentExpansionClassic, file);
+	newXS(strcpy(buf, "is_current_expansion_the_ruins_of_kunark"), XS__IsCurrentExpansionTheRuinsOfKunark, file);
+	newXS(strcpy(buf, "is_current_expansion_the_scars_of_velious"), XS__IsCurrentExpansionTheScarsOfVelious, file);
+	newXS(strcpy(buf, "is_current_expansion_the_shadows_of_luclin"), XS__IsCurrentExpansionTheShadowsOfLuclin, file);
+	newXS(strcpy(buf, "is_current_expansion_the_planes_of_power"), XS__IsCurrentExpansionThePlanesOfPower, file);
+	newXS(strcpy(buf, "is_current_expansion_the_legacy_of_ykesha"), XS__IsCurrentExpansionTheLegacyOfYkesha, file);
+	newXS(strcpy(buf, "is_current_expansion_lost_dungeons_of_norrath"), XS__IsCurrentExpansionLostDungeonsOfNorrath, file);
+	newXS(strcpy(buf, "is_current_expansion_gates_of_discord"), XS__IsCurrentExpansionGatesOfDiscord, file);
+	newXS(strcpy(buf, "is_current_expansion_omens_of_war"), XS__IsCurrentExpansionOmensOfWar, file);
+	newXS(strcpy(buf, "is_current_expansion_dragons_of_norrath"), XS__IsCurrentExpansionDragonsOfNorrath, file);
+	newXS(strcpy(buf, "is_current_expansion_depths_of_darkhollow"), XS__IsCurrentExpansionDepthsOfDarkhollow, file);
+	newXS(strcpy(buf, "is_current_expansion_prophecy_of_ro"), XS__IsCurrentExpansionProphecyOfRo, file);
+	newXS(strcpy(buf, "is_current_expansion_the_serpents_spine"), XS__IsCurrentExpansionTheSerpentsSpine, file);
+	newXS(strcpy(buf, "is_current_expansion_the_buried_sea"), XS__IsCurrentExpansionTheBuriedSea, file);
+	newXS(strcpy(buf, "is_current_expansion_secrets_of_faydwer"), XS__IsCurrentExpansionSecretsOfFaydwer, file);
+	newXS(strcpy(buf, "is_current_expansion_seeds_of_destruction"), XS__IsCurrentExpansionSeedsOfDestruction, file);
+	newXS(strcpy(buf, "is_current_expansion_underfoot"), XS__IsCurrentExpansionUnderfoot, file);
+	newXS(strcpy(buf, "is_current_expansion_house_of_thule"), XS__IsCurrentExpansionHouseOfThule, file);
+	newXS(strcpy(buf, "is_current_expansion_veil_of_alaris"), XS__IsCurrentExpansionVeilOfAlaris, file);
+	newXS(strcpy(buf, "is_current_expansion_rain_of_fear"), XS__IsCurrentExpansionRainOfFear, file);
+	newXS(strcpy(buf, "is_current_expansion_call_of_the_forsaken"), XS__IsCurrentExpansionCallOfTheForsaken, file);
+	newXS(strcpy(buf, "is_current_expansion_the_darkend_sea"), XS__IsCurrentExpansionTheDarkendSea, file);
+	newXS(strcpy(buf, "is_current_expansion_the_broken_mirror"), XS__IsCurrentExpansionTheBrokenMirror, file);
+	newXS(strcpy(buf, "is_current_expansion_empires_of_kunark"), XS__IsCurrentExpansionEmpiresOfKunark, file);
+	newXS(strcpy(buf, "is_current_expansion_ring_of_scale"), XS__IsCurrentExpansionRingOfScale, file);
+	newXS(strcpy(buf, "is_current_expansion_the_burning_lands"), XS__IsCurrentExpansionTheBurningLands, file);
+	newXS(strcpy(buf, "is_current_expansion_torment_of_velious"), XS__IsCurrentExpansionTormentOfVelious, file);
+
+	/**
+	 * Content flags
+	 */
+	newXS(strcpy(buf, "is_content_flag_enabled"), XS__IsContentFlagEnabled, file);
+	newXS(strcpy(buf, "set_content_flag"), XS__SetContentFlag, file);
 
 	XSRETURN_YES;
 }

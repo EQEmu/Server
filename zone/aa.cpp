@@ -33,6 +33,7 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 #include "string_ids.h"
 #include "titles.h"
 #include "zonedb.h"
+#include "zone_store.h"
 
 extern QueryServ* QServ;
 
@@ -55,7 +56,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 	}
 
 	PetRecord record;
-	if (!database.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
+	if (!content_db.GetPoweredPetEntry(spells[spell_id].teleport_zone, act_power, &record))
 	{
 		LogError("Unknown swarm pet spell id: {}, check pets table", spell_id);
 		Message(Chat::Red, "Unable to find data for pet %s", spells[spell_id].teleport_zone);
@@ -81,7 +82,7 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(pet.npc_id);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(pet.npc_id);
 	if (npc_type == nullptr) {
 		//log write
 		LogError("Unknown npc type for swarm pet spell id: [{}]", spell_id);
@@ -186,7 +187,7 @@ void Mob::TypesTemporaryPets(uint32 typesid, Mob *targ, const char *name_overrid
 
 	NPCType *made_npc = nullptr;
 
-	const NPCType *npc_type = database.LoadNPCTypesData(typesid);
+	const NPCType *npc_type = content_db.LoadNPCTypesData(typesid);
 	if(npc_type == nullptr) {
 		//log write
 		LogError("Unknown npc type for swarm pet type id: [{}]", typesid);
@@ -281,7 +282,7 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 		return;
 
 	//assuming we have pets in our table; we take the first pet as a base type.
-	const NPCType *base_type = database.LoadNPCTypesData(500);
+	const NPCType *base_type = content_db.LoadNPCTypesData(500);
 	auto make_npc = new NPCType;
 	memcpy(make_npc, base_type, sizeof(NPCType));
 
@@ -441,13 +442,13 @@ void Mob::WakeTheDead(uint16 spell_id, Mob *target, uint32 duration)
 
 	//gear stuff, need to make sure there's
 	//no situation where this stuff can be duped
-	for (int x = EQEmu::invslot::EQUIPMENT_BEGIN; x <= EQEmu::invslot::EQUIPMENT_END; x++)
+	for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
 	{
 		uint32 sitem = 0;
 		sitem = CorpseToUse->GetWornItem(x);
 		if(sitem){
-			const EQEmu::ItemData * itm = database.GetItem(sitem);
-			npca->AddLootDrop(itm, &npca->itemlist, 1, 1, 255, true, true);
+			const EQ::ItemData * itm = database.GetItem(sitem);
+			npca->AddLootDrop(itm, &npca->itemlist, NPC::NewLootDropEntry(), true);
 		}
 	}
 
@@ -494,7 +495,7 @@ void Client::ResetAA() {
 
 	database.DeleteCharacterLeadershipAAs(CharacterID());
 	// undefined for these clients
-	if (ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier)
+	if (ClientVersionBit() & EQ::versions::maskTitaniumAndEarlier)
 		Kick("AA Reset on client that doesn't support it");
 }
 
@@ -1245,12 +1246,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	// Bards can cast instant cast AAs while they are casting another song
 	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQEmu::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
 			return;
 		}
 		ExpendAlternateAdvancementCharge(ability->id);
 	} else {
-		if(!CastSpell(rank->spell, target_id, EQEmu::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+		if(!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
 			return;
 		}
 	}
@@ -1479,7 +1480,7 @@ bool Mob::CanUseAlternateAdvancementRank(AA::Rank *rank) {
 	//the one titanium hack i will allow
 	//just to make sure we dont crash the client with newer aas
 	//we'll exclude any expendable ones
-	if(IsClient() && CastToClient()->ClientVersionBit() & EQEmu::versions::maskTitaniumAndEarlier) {
+	if(IsClient() && CastToClient()->ClientVersionBit() & EQ::versions::maskTitaniumAndEarlier) {
 		if(ability->charges > 0) {
 			return false;
 		}
@@ -1595,7 +1596,7 @@ bool Mob::CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, 
 
 void Zone::LoadAlternateAdvancement() {
 	LogInfo("Loading Alternate Advancement Data");
-	if(!database.LoadAlternateAdvancementAbilities(aa_abilities,
+	if(!content_db.LoadAlternateAdvancementAbilities(aa_abilities,
 		aa_ranks))
 	{
 		aa_abilities.clear();
