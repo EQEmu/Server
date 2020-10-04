@@ -2175,7 +2175,7 @@ void lua_set_content_flag(std::string flag_name, bool enabled){
 Lua_Expedition lua_get_expedition() {
 	if (zone && zone->GetInstanceID() != 0)
 	{
-		return Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
+		return Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
 	}
 	return nullptr;
 }
@@ -2184,8 +2184,8 @@ Lua_Expedition lua_get_expedition_by_char_id(uint32 char_id) {
 	return Expedition::FindCachedExpeditionByCharacterID(char_id);
 }
 
-Lua_Expedition lua_get_expedition_by_instance_id(uint32 instance_id) {
-	return Expedition::FindCachedExpeditionByInstanceID(instance_id);
+Lua_Expedition lua_get_expedition_by_zone_instance(uint32 zone_id, uint32 instance_id) {
+	return Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
 }
 
 luabind::object lua_get_expedition_lockout_by_char_id(lua_State* L, uint32 char_id, std::string expedition_name, std::string event_name) {
@@ -2879,7 +2879,7 @@ luabind::scope lua_register_general() {
 
 		luabind::def("get_expedition", &lua_get_expedition),
 		luabind::def("get_expedition_by_char_id", &lua_get_expedition_by_char_id),
-		luabind::def("get_expedition_by_instance_id", &lua_get_expedition_by_instance_id),
+		luabind::def("get_expedition_by_zone_instance", &lua_get_expedition_by_zone_instance),
 		luabind::def("get_expedition_lockout_by_char_id", &lua_get_expedition_lockout_by_char_id),
 		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32))&lua_get_expedition_lockouts_by_char_id),
 		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32, std::string))&lua_get_expedition_lockouts_by_char_id),

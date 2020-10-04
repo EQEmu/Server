@@ -353,13 +353,14 @@ Expedition* Expedition::FindCachedExpeditionByID(uint32_t expedition_id)
 	return nullptr;
 }
 
-Expedition* Expedition::FindCachedExpeditionByInstanceID(uint32_t instance_id)
+Expedition* Expedition::FindCachedExpeditionByZoneInstance(uint32_t zone_id, uint32_t instance_id)
 {
-	if (instance_id && zone)
+	if (zone && zone_id != 0 && instance_id != 0)
 	{
 		for (const auto& cached_expedition : zone->expedition_cache)
 		{
-			if (cached_expedition.second->GetInstanceID() == instance_id)
+			if (cached_expedition.second->GetDynamicZone().GetZoneID() == zone_id &&
+			    cached_expedition.second->GetDynamicZone().GetInstanceID() == instance_id)
 			{
 				return cached_expedition.second.get();
 			}

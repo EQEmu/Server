@@ -6053,7 +6053,7 @@ XS(XS__get_expedition) {
 	Expedition* RETVAL = nullptr;
 	if (zone && zone->GetInstanceID() != 0)
 	{
-		RETVAL = Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
+		RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
 	}
 
 	EXTEND(sp, 1); // grow stack, function had 0 arguments
@@ -6084,16 +6084,17 @@ XS(XS__get_expedition_by_char_id) {
 	XSRETURN(1);
 }
 
-XS(XS__get_expedition_by_instance_id);
-XS(XS__get_expedition_by_instance_id) {
+XS(XS__get_expedition_by_zone_instance);
+XS(XS__get_expedition_by_zone_instance) {
 	dXSARGS;
-	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::GetExpeditionByInstanceID(uint16 instance_id)");
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::GetExpeditionByZoneInstance(uint16 zone_id, uint16 instance_id)");
 	}
 
-	uint16 instance_id = (uint16)SvUV(ST(0));
+	uint16 zone_id = (uint16)SvUV(ST(0));
+	uint16 instance_id = (uint16)SvUV(ST(1));
 
-	Expedition* RETVAL = Expedition::FindCachedExpeditionByInstanceID(instance_id);
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
 
 	ST(0) = sv_newmortal();
 	if (RETVAL) {
@@ -6495,7 +6496,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
 	newXS(strcpy(buf, "get_expedition_by_char_id"), XS__get_expedition_by_char_id, file);
-	newXS(strcpy(buf, "get_expedition_by_instance_id"), XS__get_expedition_by_instance_id, file);
+	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
 	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);

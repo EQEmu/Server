@@ -1279,7 +1279,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (zone && zone->GetInstanceID() != 0)
 		{
 			// expeditions may prevent looting based on client's lockouts
-			auto expedition = Expedition::FindCachedExpeditionByInstanceID(zone->GetInstanceID());
+			auto expedition = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
 			if (expedition && !expedition->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
 			{
 				client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
