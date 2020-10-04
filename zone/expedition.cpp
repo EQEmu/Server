@@ -163,7 +163,6 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 
 	using col = LoadExpeditionColumns::eLoadExpeditionColumns;
 
-	Expedition* current_expedition = nullptr;
 	uint32_t last_expedition_id = 0;
 
 	for (auto row = results.begin(); row != results.end(); ++row)
@@ -172,12 +171,6 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 
 		if (expedition_id != last_expedition_id)
 		{
-			// finished parsing previous expedition members, send member updates
-			if (current_expedition)
-			{
-				current_expedition->SendUpdatesToZoneMembers();
-			}
-
 			expedition_ids.emplace_back(expedition_id);
 
 			uint32_t leader_id = strtoul(row[col::leader_id], nullptr, 10);
@@ -209,7 +202,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		last_expedition_id = expedition_id;
 
 		// looping expedition members
-		current_expedition = Expedition::FindCachedExpeditionByID(last_expedition_id);
+		auto current_expedition = Expedition::FindCachedExpeditionByID(last_expedition_id);
 		if (current_expedition)
 		{
 			auto member_id = strtoul(row[col::member_id], nullptr, 10);
@@ -217,12 +210,6 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 				row[col::member_name], member_id, ExpeditionMemberStatus::Offline);
 			expedition_character_ids.emplace_back(expedition_id, member_id);
 		}
-	}
-
-	// update for the last cached expedition
-	if (current_expedition)
-	{
-		current_expedition->SendUpdatesToZoneMembers();
 	}
 
 	// ask world for online members from all cached expeditions at once
@@ -248,6 +235,9 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			{
 				expedition->m_lockouts = lockout_iter->second;
 			}
+
+			// send member updates now that all data is loaded for the cached expedition(s)
+			expedition->SendUpdatesToZoneMembers();
 		}
 	}
 }
