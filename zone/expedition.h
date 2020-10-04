@@ -85,7 +85,7 @@ public:
 	static Expedition* FindCachedExpeditionByCharacterID(uint32_t character_id);
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
-	static Expedition* FindCachedExpeditionByInstanceID(uint32_t instance_id);
+	static Expedition* FindCachedExpeditionByZoneInstance(uint32_t zone_id, uint32_t instance_id);
 	static std::vector<ExpeditionLockoutTimer> GetExpeditionLockoutsByCharacterID(uint32_t character_id);
 	static void HandleWorldMessage(ServerPacket* pack);
 	static void AddLockoutByCharacterID(uint32_t character_id, const std::string& expedition_name,
