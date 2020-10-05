@@ -1508,19 +1508,31 @@ bool Zone::Process() {
 				if(Instance_Warning_timer == nullptr)
 				{
 					uint32 rem_time = Instance_Timer->GetRemainingTime();
+					uint32_t minutes_warning = 0;
 					if(rem_time < 60000 && rem_time > 55000)
 					{
-						entity_list.ExpeditionWarning(1);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 1;
 					}
 					else if(rem_time < 300000 && rem_time > 295000)
 					{
-						entity_list.ExpeditionWarning(5);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 5;
 					}
 					else if(rem_time < 900000 && rem_time > 895000)
 					{
-						entity_list.ExpeditionWarning(15);
+						minutes_warning = 15;
+					}
+
+					if (minutes_warning > 0)
+					{
+						auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+						if (expedition)
+						{
+							expedition->SendWorldExpireWarning(minutes_warning);
+						}
+						else
+						{
+							entity_list.ExpeditionWarning(minutes_warning);
+						}
 						Instance_Warning_timer = new Timer(10000);
 					}
 				}

@@ -163,6 +163,7 @@
 #define ServerOP_ExpeditionDzDuration         0x0413
 #define ServerOP_ExpeditionLockoutDuration    0x0414
 #define ServerOP_ExpeditionSecondsRemaining   0x0415
+#define ServerOP_ExpeditionExpireWarning      0x0416
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2086,6 +2087,11 @@ struct ServerExpeditionCharacterID_Struct {
 struct ServerExpeditionUpdateDuration_Struct {
 	uint32_t expedition_id;
 	uint32_t new_duration_seconds;
+};
+
+struct ServerExpeditionExpireWarning_Struct {
+	uint32_t expedition_id;
+	uint32_t minutes_remaining;
 };
 
 struct ServerDzCommand_Struct {
