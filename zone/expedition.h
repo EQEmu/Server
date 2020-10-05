@@ -142,6 +142,7 @@ public:
 	void SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name);
 
 	void SendClientExpeditionInfo(Client* client);
+	void SendWorldExpireWarning(uint32_t minutes);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 
 	void DzAddPlayer(Client* requester, const std::string& add_char_name, const std::string& swap_remove_name = {});
@@ -187,6 +188,7 @@ private:
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
+	void SendMembersExpireWarning(uint32_t minutes);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
@@ -211,6 +213,7 @@ private:
 
 	ExpeditionMember GetMemberData(uint32_t character_id);
 	ExpeditionMember GetMemberData(const std::string& character_name);
+	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
 	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);

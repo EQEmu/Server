@@ -1436,6 +1436,15 @@ void Expedition::SendWorldPendingInvite(const ExpeditionInvite& invite, const st
 	SendWorldAddPlayerInvite(invite.inviter_name, invite.swap_remove_name, add_name, true);
 }
 
+std::unique_ptr<EQApplicationPacket> Expedition::CreateExpireWarningPacket(uint32_t minutes_remaining)
+{
+	uint32_t outsize = sizeof(ExpeditionExpireWarning);
+	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzExpeditionEndsWarning, outsize));
+	auto buf = reinterpret_cast<ExpeditionExpireWarning*>(outapp->pBuffer);
+	buf->minutes_remaining = minutes_remaining;
+	return outapp;
+}
+
 std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 {
 	uint32_t outsize = sizeof(ExpeditionInfo_Struct);
@@ -1730,6 +1739,16 @@ void Expedition::SendWorldSetSecondsRemaining(uint32_t seconds_remaining)
 	auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->new_duration_seconds = seconds_remaining;
+	worldserver.SendPacket(pack.get());
+}
+
+void Expedition::SendWorldExpireWarning(uint32_t minutes_remaining)
+{
+	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpireWarning, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->minutes_remaining = minutes_remaining;
 	worldserver.SendPacket(pack.get());
 }
 
@@ -2075,6 +2094,16 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_ExpeditionExpireWarning:
+	{
+		auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
+		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+		if (expedition)
+		{
+			expedition->SendMembersExpireWarning(buf->minutes_remaining);
+		}
+		break;
+	}
 	}
 }
 
@@ -2237,4 +2266,20 @@ std::vector<ExpeditionLockoutTimer> Expedition::GetExpeditionLockoutsByCharacter
 	}
 
 	return lockouts;
+}
+
+void Expedition::SendMembersExpireWarning(uint32_t minutes_remaining)
+{
+	// expeditions warn members in all zones not just the dz
+	auto outapp = CreateExpireWarningPacket(minutes_remaining);
+	for (const auto& member : m_members)
+	{
+		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		if (member_client)
+		{
+			member_client->QueuePacket(outapp.get());
+			member_client->MessageString(Chat::Yellow, EXPEDITION_MIN_REMAIN,
+				fmt::format_int(minutes_remaining).c_str());
+		}
+	}
 }
