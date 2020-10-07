@@ -79,6 +79,7 @@ public:
 	void AddMember(uint32_t character_id) { m_member_ids.emplace(character_id); }
 	void RemoveMember(uint32_t character_id) { m_member_ids.erase(character_id); }
 	void RemoveAllMembers() { m_member_ids.clear(); }
+	void CheckExpireWarning();
 	uint32_t GetID() const { return m_expedition_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_dz_instance_id); }
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_dz_zone_id); }
@@ -87,14 +88,17 @@ public:
 	bool IsPendingDelete() const { return m_pending_delete; }
 	void SendZonesDurationUpdate();
 	void SendZonesExpeditionDeleted();
+	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetPendingDelete(bool pending) { m_pending_delete = pending; }
 	void UpdateDzSecondsRemaining(uint32_t seconds_remaining);
+	std::chrono::system_clock::duration GetRemainingDuration() const;
 
 private:
 	uint32_t m_expedition_id  = 0;
 	uint32_t m_dz_instance_id = 0;
 	uint32_t m_dz_zone_id     = 0;
 	bool     m_pending_delete = false;
+	Timer    m_warning_cooldown_timer;
 	std::unordered_set<uint32_t> m_member_ids;
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;

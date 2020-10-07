@@ -43,6 +43,7 @@ Expedition::Expedition(
 	m_duration(duration)
 {
 	m_expire_time = m_start_time + m_duration;
+	m_warning_cooldown_timer.Enable();
 }
 
 void Expedition::SendZonesExpeditionDeleted()
@@ -61,6 +62,16 @@ void Expedition::SendZonesDurationUpdate()
 	auto packbuf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
 	packbuf->expedition_id = GetID();
 	packbuf->new_duration_seconds = static_cast<uint32_t>(m_duration.count());
+	zoneserver_list.SendPacket(pack.get());
+}
+
+void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
+{
+	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpireWarning, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->minutes_remaining = minutes_remaining;
 	zoneserver_list.SendPacket(pack.get());
 }
 
@@ -85,6 +96,28 @@ void Expedition::UpdateDzSecondsRemaining(uint32_t seconds_remaining)
 
 		// update zone level caches and update the actual dz instance's timer
 		SendZonesDurationUpdate();
+	}
+}
+
+std::chrono::system_clock::duration Expedition::GetRemainingDuration() const
+{
+	return m_expire_time - std::chrono::system_clock::now();
+}
+
+void Expedition::CheckExpireWarning()
+{
+	if (m_warning_cooldown_timer.Check(false))
+	{
+		using namespace std::chrono_literals;
+		auto remaining = GetRemainingDuration();
+		if ((remaining > 14min && remaining < 15min) ||
+		    (remaining > 4min && remaining < 5min) ||
+		    (remaining > 0min && remaining < 1min))
+		{
+			int minutes = std::chrono::duration_cast<std::chrono::minutes>(remaining).count() + 1;
+			SendZonesExpireWarning(minutes);
+			m_warning_cooldown_timer.Start(70000); // 1 minute 10 seconds
+		}
 	}
 }
 
@@ -204,6 +237,10 @@ void ExpeditionCache::Process()
 			}
 
 			it->SetPendingDelete(true);
+		}
+		else
+		{
+			it->CheckExpireWarning();
 		}
 
 		it = is_deleted ? m_expeditions.erase(it) : it + 1;
