@@ -1524,16 +1524,13 @@ bool Zone::Process() {
 
 					if (minutes_warning > 0)
 					{
+						// expedition expire warnings are handled by world
 						auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
-						if (expedition)
-						{
-							expedition->SendWorldExpireWarning(minutes_warning);
-						}
-						else
+						if (!expedition)
 						{
 							entity_list.ExpeditionWarning(minutes_warning);
+							Instance_Warning_timer = new Timer(10000);
 						}
-						Instance_Warning_timer = new Timer(10000);
 					}
 				}
 				else if(Instance_Warning_timer->Check())

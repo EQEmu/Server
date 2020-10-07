@@ -142,7 +142,6 @@ public:
 	void SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name);
 
 	void SendClientExpeditionInfo(Client* client);
-	void SendWorldExpireWarning(uint32_t minutes);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 
 	void DzAddPlayer(Client* requester, const std::string& add_char_name, const std::string& swap_remove_name = {});

@@ -1742,16 +1742,6 @@ void Expedition::SendWorldSetSecondsRemaining(uint32_t seconds_remaining)
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldExpireWarning(uint32_t minutes_remaining)
-{
-	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpireWarning, pack_size));
-	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->minutes_remaining = minutes_remaining;
-	worldserver.SendPacket(pack.get());
-}
-
 void Expedition::AddLockoutByCharacterID(
 	uint32_t character_id, const std::string& expedition_name, const std::string& event_name,
 	uint32_t seconds, const std::string& uuid)
