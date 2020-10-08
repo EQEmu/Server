@@ -9766,6 +9766,10 @@ void Client::SendExpeditionLockoutTimers()
 {
 	std::vector<ExpeditionLockoutTimerEntry_Struct> lockout_entries;
 
+	// client displays lockouts rounded down to nearest minute, send lockouts
+	// with 60s offset added to compensate (live does this too)
+	constexpr uint32_t rounding_seconds = 60;
+
 	// erases expired lockouts while building lockout timer list
 	for (auto it = m_expedition_lockouts.begin(); it != m_expedition_lockouts.end();)
 	{
@@ -9778,7 +9782,7 @@ void Client::SendExpeditionLockoutTimers()
 		{
 			ExpeditionLockoutTimerEntry_Struct lockout;
 			strn0cpy(lockout.expedition_name, it->GetExpeditionName().c_str(), sizeof(lockout.expedition_name));
-			lockout.seconds_remaining = seconds_remaining;
+			lockout.seconds_remaining = seconds_remaining + rounding_seconds;
 			lockout.event_type = it->IsReplayTimer() ? Expedition::REPLAY_TIMER_ID : Expedition::EVENT_TIMER_ID;
 			strn0cpy(lockout.event_name, it->GetEventName().c_str(), sizeof(lockout.event_name));
 
