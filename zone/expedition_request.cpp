@@ -191,12 +191,9 @@ bool ExpeditionRequest::LoadLeaderLockouts()
 	// leader's lockouts are used to check member conflicts and later stored in expedition
 	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(m_leader_id, m_expedition_name);
 
-	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
-
 	for (auto& lockout : lockouts)
 	{
-		bool is_expired = lockout.IsExpired() || lockout.GetSecondsRemaining() <= leeway_seconds;
-		if (!is_expired)
+		if (!lockout.IsExpired())
 		{
 			m_lockouts.emplace(lockout.GetEventName(), lockout);
 
@@ -225,8 +222,6 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 	bool has_conflicts = false;
 
 	std::vector<ExpeditionRequestConflict> member_lockout_conflicts;
-
-	auto leeway_seconds = static_cast<uint32_t>(RuleI(Expedition, RequestExpiredLockoutLeewaySeconds));
 
 	uint32_t last_character_id = 0;
 	for (auto row = results.begin(); row != results.end(); ++row)
@@ -270,9 +265,7 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 
 			ExpeditionLockoutTimer lockout{row[3], m_expedition_name, row[6], expire_time, duration};
 
-			// client window hides timers with less than 60s remaining, optionally count as expired
-			bool is_expired = lockout.IsExpired() || lockout.GetSecondsRemaining() <= leeway_seconds;
-			if (!is_expired)
+			if (!lockout.IsExpired())
 			{
 				if (lockout.IsReplayTimer())
 				{
