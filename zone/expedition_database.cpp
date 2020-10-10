@@ -109,7 +109,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 			event_name,
 			UNIX_TIMESTAMP(expire_time),
 			duration
-		FROM expedition_character_lockouts
+		FROM character_expedition_lockouts
 		WHERE character_id = {} AND is_pending = FALSE AND expire_time > NOW();
 	), character_id);
 
@@ -144,7 +144,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 			event_name,
 			UNIX_TIMESTAMP(expire_time),
 			duration
-		FROM expedition_character_lockouts
+		FROM character_expedition_lockouts
 		WHERE
 			character_id = {}
 			AND is_pending = FALSE
@@ -254,7 +254,7 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 				lockout.duration,
 				lockout.event_name
 			FROM character_data
-				LEFT JOIN expedition_character_lockouts lockout
+				LEFT JOIN character_expedition_lockouts lockout
 					ON character_data.id = lockout.character_id
 					AND lockout.is_pending = FALSE
 					AND lockout.expire_time > NOW()
@@ -277,7 +277,7 @@ void ExpeditionDatabase::DeleteAllCharacterLockouts(uint32_t character_id)
 	if (character_id != 0)
 	{
 		std::string query = fmt::format(SQL(
-			DELETE FROM expedition_character_lockouts
+			DELETE FROM character_expedition_lockouts
 			WHERE character_id = {};
 		), character_id);
 
@@ -293,7 +293,7 @@ void ExpeditionDatabase::DeleteAllCharacterLockouts(
 	if (character_id != 0 && !expedition_name.empty())
 	{
 		std::string query = fmt::format(SQL(
-			DELETE FROM expedition_character_lockouts
+			DELETE FROM character_expedition_lockouts
 			WHERE character_id = {} AND expedition_name = '{}';
 		), character_id, EscapeString(expedition_name));
 
@@ -309,7 +309,7 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 	);
 
 	auto query = fmt::format(SQL(
-		DELETE FROM expedition_character_lockouts
+		DELETE FROM character_expedition_lockouts
 		WHERE
 			character_id = {}
 			AND is_pending = FALSE
@@ -337,7 +337,7 @@ void ExpeditionDatabase::DeleteMembersLockout(
 		query_character_ids.pop_back(); // trailing comma
 
 		auto query = fmt::format(SQL(
-			DELETE FROM expedition_character_lockouts
+			DELETE FROM character_expedition_lockouts
 			WHERE character_id
 				IN ({})
 				AND is_pending = FALSE
@@ -354,7 +354,7 @@ void ExpeditionDatabase::AssignPendingLockouts(uint32_t character_id, const std:
 	LogExpeditionsDetail("Assigning character [{}] pending lockouts [{}]", character_id, expedition_name);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_character_lockouts
+		UPDATE character_expedition_lockouts
 		SET is_pending = FALSE
 		WHERE
 			character_id = {}
@@ -370,7 +370,7 @@ void ExpeditionDatabase::DeletePendingLockouts(uint32_t character_id)
 	LogExpeditionsDetail("Deleting character [{}] pending lockouts", character_id);
 
 	auto query = fmt::format(SQL(
-		DELETE FROM expedition_character_lockouts
+		DELETE FROM character_expedition_lockouts
 		WHERE character_id = {} AND is_pending = TRUE;
 	), character_id);
 
@@ -392,7 +392,7 @@ void ExpeditionDatabase::DeleteAllMembersPendingLockouts(const std::vector<Exped
 		query_character_ids.pop_back(); // trailing comma
 
 		auto query = fmt::format(SQL(
-			DELETE FROM expedition_character_lockouts
+			DELETE FROM character_expedition_lockouts
 			WHERE character_id IN ({}) AND is_pending = TRUE;
 		), query_character_ids);
 
@@ -470,7 +470,7 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 		}
 
 		auto query = fmt::format(SQL(
-			INSERT INTO expedition_character_lockouts
+			INSERT INTO character_expedition_lockouts
 				(
 					character_id,
 					expire_time,
@@ -515,7 +515,7 @@ void ExpeditionDatabase::InsertMembersLockout(
 		insert_values.pop_back(); // trailing comma
 
 		auto query = fmt::format(SQL(
-			INSERT INTO expedition_character_lockouts
+			INSERT INTO character_expedition_lockouts
 				(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
 			VALUES {}
 			ON DUPLICATE KEY UPDATE
@@ -716,7 +716,7 @@ void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>&
 		insert_values.pop_back(); // trailing comma
 
 		auto query = fmt::format(SQL(
-			INSERT INTO expedition_character_lockouts
+			INSERT INTO character_expedition_lockouts
 				(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
 			VALUES {}
 			ON DUPLICATE KEY UPDATE

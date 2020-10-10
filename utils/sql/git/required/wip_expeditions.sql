@@ -40,7 +40,7 @@ COLLATE='utf8mb4_general_ci'
 ENGINE=InnoDB
 ;
 
-CREATE TABLE `expedition_character_lockouts` (
+CREATE TABLE `character_expedition_lockouts` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`character_id` INT(10) UNSIGNED NOT NULL,
 	`expedition_name` VARCHAR(128) NOT NULL,
