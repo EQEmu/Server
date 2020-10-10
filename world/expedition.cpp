@@ -287,7 +287,7 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 {
 	std::string query = SQL(
-		DELETE FROM expedition_character_lockouts
+		DELETE FROM character_expedition_lockouts
 		WHERE expire_time <= NOW();
 	);
 
