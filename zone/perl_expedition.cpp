@@ -90,6 +90,7 @@ XS(XS_Expedition_AddLockoutDuration) {
 
 	XSRETURN_EMPTY;
 }
+
 XS(XS_Expedition_AddReplayLockout);
 XS(XS_Expedition_AddReplayLockout) {
 	dXSARGS;
@@ -103,6 +104,30 @@ XS(XS_Expedition_AddReplayLockout) {
 	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(1)));
 
 	THIS->AddReplayLockout(seconds);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Expedition_AddReplayLockoutDuration);
+XS(XS_Expedition_AddReplayLockoutDuration) {
+	dXSARGS;
+	if (items != 2 && items != 3) {
+		Perl_croak(aTHX_ "Usage: Expedition::AddReplayLockoutDuration(THIS, int seconds [, bool members_only = true])");
+	}
+
+	Expedition* THIS = nullptr;
+	VALIDATE_THIS_IS_EXPEDITION;
+
+	int seconds = static_cast<int>(SvUV(ST(1)));
+	if (items == 3)
+	{
+		bool members_only = (bool)SvTRUE(ST(2));
+		THIS->AddReplayLockoutDuration(seconds, members_only);
+	}
+	else
+	{
+		THIS->AddReplayLockoutDuration(seconds);
+	}
 
 	XSRETURN_EMPTY;
 }
@@ -597,6 +622,7 @@ XS(boot_Expedition) {
 	newXSproto(strcpy(buf, "AddLockout"), XS_Expedition_AddLockout, file, "$$$");
 	newXSproto(strcpy(buf, "AddLockoutDuration"), XS_Expedition_AddLockoutDuration, file, "$$$;$");
 	newXSproto(strcpy(buf, "AddReplayLockout"), XS_Expedition_AddReplayLockout, file, "$$");
+	newXSproto(strcpy(buf, "AddReplayLockoutDuration"), XS_Expedition_AddReplayLockoutDuration, file, "$$;$");
 	newXSproto(strcpy(buf, "GetID"), XS_Expedition_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Expedition_GetInstanceID, file, "$");
 	newXSproto(strcpy(buf, "GetLeaderName"), XS_Expedition_GetLeaderName, file, "$");

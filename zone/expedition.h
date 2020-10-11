@@ -129,6 +129,7 @@ public:
 	void AddLockout(const std::string& event_name, uint32_t seconds);
 	void AddLockoutDuration(const std::string& event_name, int seconds, bool members_only = true);
 	void AddReplayLockout(uint32_t seconds);
+	void AddReplayLockoutDuration(int seconds, bool members_only = true);
 	bool HasLockout(const std::string& event_name);
 	bool HasReplayLockout();
 	void RemoveLockout(const std::string& event_name);
