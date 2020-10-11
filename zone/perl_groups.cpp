@@ -580,7 +580,7 @@ XS(XS_Group_DoesAnyMemberHaveExpeditionLockout);
 XS(XS_Group_DoesAnyMemberHaveExpeditionLockout) {
 	dXSARGS;
 	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Group::DoesAnyMemberHaveExpeditionLockout(THIS, string expedition_name, string event_name [, int max_check_count = 0])");
+		Perl_croak(aTHX_ "Usage: Group::DoesAnyMemberHaveExpeditionLockout(THIS, string expedition_name, string event_name, [int max_check_count = 0])");
 	}
 
 	Group* THIS = nullptr;

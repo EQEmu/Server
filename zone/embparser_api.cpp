@@ -6108,8 +6108,7 @@ XS(XS__get_expedition_lockout_by_char_id);
 XS(XS__get_expedition_lockout_by_char_id) {
 	dXSARGS;
 	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockout_by_char_id"
-			"(uint32 character_id, string expedition_name, string event_name)");
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
 	}
 
 	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
@@ -6138,8 +6137,7 @@ XS(XS__get_expedition_lockouts_by_char_id);
 XS(XS__get_expedition_lockouts_by_char_id) {
 	dXSARGS;
 	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockouts_by_char_id"
-			"(uint32 character_id [, string expedition_name])");
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockouts_by_char_id(uint32 character_id, [string expedition_name])");
 	}
 
 	HV* hash = newHV(); // hash refcnt +1 (non-mortal, newRV_noinc to not inc)
@@ -6208,8 +6206,7 @@ XS(XS__add_expedition_lockout_all_clients);
 XS(XS__add_expedition_lockout_all_clients) {
 	dXSARGS;
 	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_all_clients"
-			"(string expedition_name, string event_name, uint32 seconds [, string uuid])");
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_all_clients(string expedition_name, string event_name, uint32 seconds, [string uuid])");
 	}
 
 	std::string expedition_name = SvPV_nolen(ST(0));
@@ -6232,8 +6229,7 @@ XS(XS__add_expedition_lockout_by_char_id);
 XS(XS__add_expedition_lockout_by_char_id) {
 	dXSARGS;
 	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_by_char_id"
-			"(uint32 character_id, string expedition_name, string event_name, uint32 seconds [, string uuid])");
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name, uint32 seconds, [string uuid])");
 	}
 
 	std::string uuid;
@@ -6256,8 +6252,7 @@ XS(XS__remove_expedition_lockout_by_char_id);
 XS(XS__remove_expedition_lockout_by_char_id) {
 	dXSARGS;
 	if (items != 3) {
-		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id"
-			"(uint32 character_id, string expedition_name, string event_name)");
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
 	}
 
 	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
@@ -6273,8 +6268,7 @@ XS(XS__remove_all_expedition_lockouts_by_char_id);
 XS(XS__remove_all_expedition_lockouts_by_char_id) {
 	dXSARGS;
 	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id"
-			"(uint32 character_id [, string expedition_name])");
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, [string expedition_name])");
 	}
 
 	std::string expedition_name;

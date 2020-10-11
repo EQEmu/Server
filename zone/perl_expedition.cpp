@@ -70,7 +70,7 @@ XS(XS_Expedition_AddLockoutDuration);
 XS(XS_Expedition_AddLockoutDuration) {
 	dXSARGS;
 	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Expedition::AddLockout(THIS, string event_name, int seconds [, bool members_only = true])");
+		Perl_croak(aTHX_ "Usage: Expedition::AddLockout(THIS, string event_name, int seconds, [bool members_only = true])");
 	}
 
 	Expedition* THIS = nullptr;
@@ -112,7 +112,7 @@ XS(XS_Expedition_AddReplayLockoutDuration);
 XS(XS_Expedition_AddReplayLockoutDuration) {
 	dXSARGS;
 	if (items != 2 && items != 3) {
-		Perl_croak(aTHX_ "Usage: Expedition::AddReplayLockoutDuration(THIS, int seconds [, bool members_only = true])");
+		Perl_croak(aTHX_ "Usage: Expedition::AddReplayLockoutDuration(THIS, int seconds, [bool members_only = true])");
 	}
 
 	Expedition* THIS = nullptr;
@@ -406,7 +406,7 @@ XS(XS_Expedition_SetCompass);
 XS(XS_Expedition_SetCompass) {
 	dXSARGS;
 	if (items != 5) {
-		Perl_croak(aTHX_ "Usage: Expedition::SetCompass(THIS, uint32 zone_id|string zone_name, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Expedition::SetCompass(THIS, uint32 zone_id | string zone_name, float x, float y, float z)");
 	}
 
 	Expedition* THIS = nullptr;
@@ -438,7 +438,7 @@ XS(XS_Expedition_SetLocked);
 XS(XS_Expedition_SetLocked) {
 	dXSARGS;
 	if (items != 2 && items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Expedition::SetLocked(THIS, bool locked [, int lock_msg = 0, uint32 color = 15])");
+		Perl_croak(aTHX_ "Usage: Expedition::SetLocked(THIS, bool locked, [int lock_msg = 0], [uint32 color = 15])");
 	}
 
 	Expedition* THIS = nullptr;
@@ -515,7 +515,7 @@ XS(XS_Expedition_SetSafeReturn);
 XS(XS_Expedition_SetSafeReturn) {
 	dXSARGS;
 	if (items != 6) {
-		Perl_croak(aTHX_ "Usage: Expedition::SetSafeReturn(THIS, uint32 zone_id|string zone_name, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Expedition::SetSafeReturn(THIS, uint32 zone_id | string zone_name, float x, float y, float z, float heading)");
 	}
 
 	Expedition* THIS = nullptr;
@@ -584,7 +584,7 @@ XS(XS_Expedition_UpdateLockoutDuration);
 XS(XS_Expedition_UpdateLockoutDuration) {
 	dXSARGS;
 	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Expedition::UpdateLockoutDuration(THIS, string event_name, uint32 seconds [, bool members_only])");
+		Perl_croak(aTHX_ "Usage: Expedition::UpdateLockoutDuration(THIS, string event_name, uint32 seconds, [bool members_only = true])");
 	}
 
 	Expedition* THIS = nullptr;

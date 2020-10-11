@@ -549,7 +549,7 @@ XS(XS_Raid_DoesAnyMemberHaveExpeditionLockout);
 XS(XS_Raid_DoesAnyMemberHaveExpeditionLockout) {
 	dXSARGS;
 	if (items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Raid::DoesAnyMemberHaveExpeditionLockout(THIS, string expedition_name, string event_name [, int max_check_count = 0])");
+		Perl_croak(aTHX_ "Usage: Raid::DoesAnyMemberHaveExpeditionLockout(THIS, string expedition_name, string event_name, [int max_check_count = 0])");
 	}
 
 	Raid* THIS = nullptr;
