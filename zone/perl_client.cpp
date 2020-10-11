@@ -6777,9 +6777,7 @@ XS(XS_Client_CreateExpedition);
 XS(XS_Client_CreateExpedition) {
 	dXSARGS;
 	if (items != 7 && items != 8) {
-		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, string zone_name, uint32 zone_version, "
-			"uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, "
-			"[, bool disable_messages = false])");
+		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, string zone_name, uint32 zone_version, uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, [bool disable_messages = false])");
 	}
 
 	Client* THIS = nullptr;
@@ -6823,7 +6821,7 @@ XS(XS_Client_GetExpeditionLockouts);
 XS(XS_Client_GetExpeditionLockouts) {
 	dXSARGS;
 	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS [, string expedition_name])");
+		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS, [string expedition_name])");
 	}
 
 	Client* THIS = nullptr;
@@ -6905,7 +6903,7 @@ XS(XS_Client_AddExpeditionLockout);
 XS(XS_Client_AddExpeditionLockout) {
 	dXSARGS;
 	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds [, string uuid])");
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds, [string uuid])");
 	}
 
 	Client* THIS = nullptr;
@@ -6930,7 +6928,7 @@ XS(XS_Client_AddExpeditionLockoutDuration);
 XS(XS_Client_AddExpeditionLockoutDuration) {
 	dXSARGS;
 	if (items != 4 && items != 5) {
-		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds [, string uuid])");
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds, [string uuid])");
 	}
 
 	Client* THIS = nullptr;
@@ -6955,7 +6953,7 @@ XS(XS_Client_RemoveAllExpeditionLockouts);
 XS(XS_Client_RemoveAllExpeditionLockouts) {
 	dXSARGS;
 	if (items != 1 && items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS [, string expedition_name])");
+		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS, [string expedition_name])");
 	}
 
 	Client* THIS = nullptr;
@@ -7013,8 +7011,7 @@ XS(XS_Client_MovePCDynamicZone);
 XS(XS_Client_MovePCDynamicZone) {
 	dXSARGS;
 	if (items != 2 && items != 3 && items != 4) {
-		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id [, int zone_version = -1, bool message_if_invalid = true])\n"
-		                 "Usage: Client::MovePCDynamicZone(THIS, string zone_name [, int zone_version = -1, bool message_if_invalid = true])");
+		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id | string zone_name, [int zone_version = -1], [bool message_if_invalid = true])");
 	}
 
 	Client* THIS = nullptr;
