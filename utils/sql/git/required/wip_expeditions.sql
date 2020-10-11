@@ -11,7 +11,7 @@ CREATE TABLE `expedition_details` (
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `instance_id` (`instance_id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
@@ -36,7 +36,7 @@ CREATE TABLE `expedition_members` (
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `expedition_id_character_id` (`expedition_id`, `character_id`)
 )
-COLLATE='utf8mb4_general_ci'
+COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
 ;
 
