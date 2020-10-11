@@ -485,6 +485,11 @@ void Expedition::AddLockoutDuration(const std::string& event_name, int seconds, 
 	SendWorldLockoutDuration(lockout, seconds, members_only);
 }
 
+void Expedition::AddReplayLockoutDuration(int seconds, bool members_only)
+{
+	AddLockoutDuration(DZ_REPLAY_TIMER_NAME, seconds, members_only);
+}
+
 void Expedition::UpdateLockoutDuration(
 	const std::string& event_name, uint32_t seconds, bool members_only)
 {
