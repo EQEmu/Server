@@ -1633,77 +1633,92 @@ int Lua_Client::GetClientMaxLevel() {
 	return self->GetClientMaxLevel();
 }
 
-Lua_Expedition Lua_Client::CreateExpedition(luabind::object dz_info, luabind::object expedition_info) {
+DynamicZoneLocation GetDynamicZoneLocationFromTable(const luabind::object& lua_table)
+{
+	DynamicZoneLocation zone_location;
+
+	if (luabind::type(lua_table) == LUA_TTABLE)
+	{
+		luabind::object lua_zone = lua_table["zone"];
+
+		// default invalid/missing args to 0
+		uint32_t zone_id = 0;
+		if (luabind::type(lua_zone) == LUA_TSTRING)
+		{
+			zone_id = ZoneID(luabind::object_cast<std::string>(lua_zone));
+		}
+		else if (luabind::type(lua_zone) == LUA_TNUMBER)
+		{
+			zone_id = luabind::object_cast<uint32_t>(lua_zone);
+		}
+
+		float x = (luabind::type(lua_table["x"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["x"]) : 0.0f;
+		float y = (luabind::type(lua_table["y"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["y"]) : 0.0f;
+		float z = (luabind::type(lua_table["z"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["z"]) : 0.0f;
+		float h = (luabind::type(lua_table["h"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["h"]) : 0.0f;
+
+		zone_location = { zone_id, x, y, z, h };
+	}
+
+	return zone_location;
+}
+
+Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
 	Lua_Safe_Call_Class(Lua_Expedition);
 
-	if (luabind::type(dz_info) != LUA_TTABLE || luabind::type(expedition_info) != LUA_TTABLE)
+	if (luabind::type(expedition_table) != LUA_TTABLE)
 	{
 		return nullptr;
 	}
 
-	// luabind will catch thrown cast_failed exceptions for invalid args, we
-	// shouldn't need to validate here unless we want non-ambiguous quest errors
-	std::string zone_name  = luabind::object_cast<std::string>(dz_info[1]);
-	uint32_t zone_version  = luabind::object_cast<uint32_t>(dz_info[2]);
-	uint32_t zone_duration = luabind::object_cast<uint32_t>(dz_info[3]);
+	// luabind will catch thrown cast_failed exceptions for invalid/missing args
+	luabind::object instance_info = expedition_table["instance"];
+	luabind::object zone = instance_info["zone"];
 
-	DynamicZone dz{ zone_name, zone_version, zone_duration, DynamicZoneType::Expedition };
+	uint32_t zone_id = 0;
+	if (luabind::type(zone) == LUA_TSTRING)
+	{
+		zone_id = ZoneID(luabind::object_cast<std::string>(zone));
+	}
+	else if (luabind::type(zone) == LUA_TNUMBER)
+	{
+		zone_id = luabind::object_cast<uint32_t>(zone);
+	}
+
+	uint32_t zone_version  = luabind::object_cast<uint32_t>(instance_info["version"]);
+	uint32_t zone_duration = luabind::object_cast<uint32_t>(instance_info["duration"]);
+
+	DynamicZone dz{ zone_id, zone_version, zone_duration, DynamicZoneType::Expedition };
 
 	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
-	if (luabind::type(dz_info["compass"]) == LUA_TTABLE)
+	if (luabind::type(expedition_table["compass"]) == LUA_TTABLE)
 	{
-		luabind::object compass(dz_info["compass"]);
-		float x = luabind::object_cast<float>(compass[2]);
-		float y = luabind::object_cast<float>(compass[3]);
-		float z = luabind::object_cast<float>(compass[4]);
-
-		if (luabind::type(compass[1]) == LUA_TSTRING)
-		{
-			dz.SetCompass({ ZoneID(luabind::object_cast<std::string>(compass[1])), x, y, z, 0.0f });
-		}
-		else if (luabind::type(compass[1]) == LUA_TNUMBER)
-		{
-			dz.SetCompass({ luabind::object_cast<uint32_t>(compass[1]), x, y, z, 0.0f });
-		}
+		auto compass_loc = GetDynamicZoneLocationFromTable(expedition_table["compass"]);
+		dz.SetCompass(compass_loc);
 	}
 
-	if (luabind::type(dz_info["safereturn"]) == LUA_TTABLE)
+	if (luabind::type(expedition_table["safereturn"]) == LUA_TTABLE)
 	{
-		luabind::object safereturn(dz_info["safereturn"]);
-		float x = luabind::object_cast<float>(safereturn[2]);
-		float y = luabind::object_cast<float>(safereturn[3]);
-		float z = luabind::object_cast<float>(safereturn[4]);
-		float w = luabind::object_cast<float>(safereturn[5]);
-
-		if (luabind::type(safereturn[1]) == LUA_TSTRING)
-		{
-			dz.SetSafeReturn({ ZoneID(luabind::object_cast<std::string>(safereturn[1])), x, y, z, w });
-		}
-		else if (luabind::type(safereturn[1]) == LUA_TNUMBER)
-		{
-			dz.SetSafeReturn({ luabind::object_cast<uint32_t>(safereturn[1]), x, y, z, w });
-		}
+		auto safereturn_loc = GetDynamicZoneLocationFromTable(expedition_table["safereturn"]);
+		dz.SetSafeReturn(safereturn_loc);
 	}
 
-	if (luabind::type(dz_info["zonein"]) == LUA_TTABLE)
+	if (luabind::type(expedition_table["zonein"]) == LUA_TTABLE)
 	{
-		dz.SetZoneInLocation(DynamicZoneLocation{
-			0,
-			luabind::object_cast<float>(dz_info["zonein"][1]),
-			luabind::object_cast<float>(dz_info["zonein"][2]),
-			luabind::object_cast<float>(dz_info["zonein"][3]),
-			luabind::object_cast<float>(dz_info["zonein"][4])
-		});
+		auto zonein_loc = GetDynamicZoneLocationFromTable(expedition_table["zonein"]);
+		dz.SetZoneInLocation(zonein_loc);
 	}
 
-	std::string expedition_name = luabind::object_cast<std::string>(expedition_info[1]);
-	uint32_t min_players        = luabind::object_cast<uint32_t>(expedition_info[2]);
-	uint32_t max_players        = luabind::object_cast<uint32_t>(expedition_info[3]);
+	luabind::object expedition_info = expedition_table["expedition"];
+
+	std::string expedition_name = luabind::object_cast<std::string>(expedition_info["name"]);
+	uint32_t min_players        = luabind::object_cast<uint32_t>(expedition_info["min_players"]);
+	uint32_t max_players        = luabind::object_cast<uint32_t>(expedition_info["max_players"]);
 	bool disable_messages       = false;
 
-	if (luabind::type(expedition_info[4]) == LUA_TBOOLEAN)
+	if (luabind::type(expedition_info["disable_messages"]) == LUA_TBOOLEAN)
 	{
-		disable_messages = luabind::object_cast<bool>(expedition_info[4]);
+		disable_messages = luabind::object_cast<bool>(expedition_info["disable_messages"]);
 	}
 
 	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
@@ -2151,7 +2166,7 @@ luabind::scope lua_register_client() {
 		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
 		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
 		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
-		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object, luabind::object))&Lua_Client::CreateExpedition)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
 		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
 		.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
