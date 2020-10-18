@@ -19,7 +19,7 @@
  */
 
 #include "expedition_message.h"
-#include "expedition_cache.h"
+#include "expedition_state.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -37,29 +37,29 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionCreate:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_cache.AddExpedition(buf->expedition_id);
+		expedition_state.AddExpedition(buf->expedition_id);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
 	case ServerOP_ExpeditionMemberChange:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-		expedition_cache.MemberChange(buf->expedition_id, buf->char_id, buf->removed);
+		expedition_state.MemberChange(buf->expedition_id, buf->char_id, buf->removed);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
 	case ServerOP_ExpeditionMemberSwap:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionMemberSwap_Struct*>(pack->pBuffer);
-		expedition_cache.MemberChange(buf->expedition_id, buf->remove_char_id, true);
-		expedition_cache.MemberChange(buf->expedition_id, buf->add_char_id, false);
+		expedition_state.MemberChange(buf->expedition_id, buf->remove_char_id, true);
+		expedition_state.MemberChange(buf->expedition_id, buf->add_char_id, false);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
 	case ServerOP_ExpeditionMembersRemoved:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_cache.RemoveAllMembers(buf->expedition_id);
+		expedition_state.RemoveAllMembers(buf->expedition_id);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
@@ -101,7 +101,7 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionSecondsRemaining:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-		expedition_cache.SetSecondsRemaining(buf->expedition_id, buf->new_duration_seconds);
+		expedition_state.SetSecondsRemaining(buf->expedition_id, buf->new_duration_seconds);
 		break;
 	}
 	}
