@@ -742,11 +742,11 @@ namespace UF
 
 		SerializeBuffer buf;
 		buf.WriteUInt32(emu->client_id);
-		buf.WriteUInt32(emu->count);
-		for (uint32 i = 0; i < emu->count; ++i)
+		buf.WriteUInt32(emu->member_count);
+		for (uint32 i = 0; i < emu->member_count; ++i)
 		{
 			buf.WriteString(emu->members[i].name);
-			buf.WriteUInt8(emu->members[i].status);
+			buf.WriteUInt8(emu->members[i].expedition_status);
 		}
 
 		__packet->size = buf.size();
@@ -771,7 +771,7 @@ namespace UF
 	ENCODE(OP_DzMemberListStatus)
 	{
 		auto emu = reinterpret_cast<ExpeditionMemberList_Struct*>((*p)->pBuffer);
-		if (emu->count == 1)
+		if (emu->member_count == 1)
 		{
 			ENCODE_FORWARD(OP_DzMemberList);
 		}

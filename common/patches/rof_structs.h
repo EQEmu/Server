@@ -4853,14 +4853,14 @@ struct ExpeditionInfo_Struct
 
 struct ExpeditionMemberEntry_Struct
 {
-/*000*/ char name[1]; // variable length, null terminated, max 0x40 (64)
-/*000*/ uint8 status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
+/*000*/ char name[1];            // variable length, null terminated, max 0x40 (64)
+/*000*/ uint8 expedition_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
 };
 
 struct ExpeditionMemberList_Struct
 {
 /*000*/ uint32 client_id;
-/*004*/ uint32 count; // number of players in window
+/*004*/ uint32 member_count; // number of players in window
 /*008*/ ExpeditionMemberEntry_Struct members[0]; // variable length
 };
 
