@@ -88,8 +88,8 @@ union semun {
 #include "queryserv.h"
 #include "web_interface.h"
 #include "console.h"
-#include "expedition_cache.h"
 #include "expedition_database.h"
+#include "expedition_state.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -436,7 +436,7 @@ int main(int argc, char** argv) {
 	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 
 	LogInfo("Loading active expeditions");
-	expedition_cache.LoadActiveExpeditions();
+	expedition_state.LoadActiveExpeditions();
 
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();
@@ -624,7 +624,7 @@ int main(int argc, char** argv) {
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
-		expedition_cache.Process();
+		expedition_state.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();

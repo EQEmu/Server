@@ -18,19 +18,19 @@
  *
  */
 
-#ifndef WORLD_EXPEDITION_CACHE_H
-#define WORLD_EXPEDITION_CACHE_H
+#ifndef WORLD_EXPEDITION_STATE_H
+#define WORLD_EXPEDITION_STATE_H
 
 #include "../common/rulesys.h"
 #include "../common/timer.h"
 #include <cstdint>
 #include <vector>
 
-extern class ExpeditionCache expedition_cache;
+extern class ExpeditionState expedition_state;
 
 class Expedition;
 
-class ExpeditionCache
+class ExpeditionState
 {
 public:
 	void AddExpedition(uint32_t expedition_id);
