@@ -221,14 +221,16 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 	bool is_solo = (member_names.size() == 1);
 	bool has_conflicts = false;
 
+	using col = LoadMembersForCreateRequestColumns::eLoadMembersForCreateRequestColumns;
+
 	std::vector<ExpeditionRequestConflict> member_lockout_conflicts;
 
 	uint32_t last_character_id = 0;
 	for (auto row = results.begin(); row != results.end(); ++row)
 	{
-		auto character_id = static_cast<uint32_t>(std::strtoul(row[0], nullptr, 10));
-		std::string character_name(row[1]);
-		bool has_expedition = (row[2] != nullptr); // in expedition_members with another expedition
+		uint32_t character_id      = std::strtoul(row[col::character_id], nullptr, 10);
+		std::string character_name = row[col::character_name];
+		bool has_expedition        = (row[col::character_expedition_id] != nullptr);
 
 		if (character_id != last_character_id)
 		{
@@ -258,12 +260,14 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 		last_character_id = character_id;
 
 		// compare member lockouts with leader lockouts
-		if (row[3] && row[4] && row[5] && row[6])
+		if (row[col::lockout_uuid]) // lockout results may be null
 		{
-			auto expire_time = strtoull(row[4], nullptr, 10);
-			auto duration = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			auto expire_time = strtoull(row[col::lockout_expire_time], nullptr, 10);
+			uint32_t duration = strtoul(row[col::lockout_duration], nullptr, 10);
 
-			ExpeditionLockoutTimer lockout{row[3], m_expedition_name, row[6], expire_time, duration};
+			ExpeditionLockoutTimer lockout{
+				row[col::lockout_uuid], m_expedition_name, row[col::lockout_event_name], expire_time, duration
+			};
 
 			if (!lockout.IsExpired())
 			{

@@ -97,4 +97,18 @@ namespace LoadExpeditionColumns
 	};
 };
 
+namespace LoadMembersForCreateRequestColumns
+{
+	enum eLoadMembersForCreateRequestColumns
+	{
+		character_id = 0,
+		character_name,
+		character_expedition_id,
+		lockout_uuid,
+		lockout_expire_time,
+		lockout_duration,
+		lockout_event_name
+	};
+};
+
 #endif
