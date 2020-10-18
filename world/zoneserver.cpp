@@ -36,7 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ucs.h"
 #include "queryserv.h"
 #include "world_store.h"
-#include "expedition.h"
+#include "expedition_message.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
