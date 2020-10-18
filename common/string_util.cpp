@@ -593,6 +593,7 @@ std::string numberToWords(unsigned long long int n)
 	return res;
 }
 
+// first letter capitalized and rest made lower case
 std::string FormatName(const std::string& char_name)
 {
 	std::string formatted(char_name);
