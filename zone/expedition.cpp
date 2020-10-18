@@ -1488,14 +1488,14 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListPacket(bool cle
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzMemberList, outsize));
 	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
 
-	buf->count = member_count;
+	buf->member_count = member_count;
 
 	if (!clear)
 	{
 		for (auto i = 0; i < m_members.size(); ++i)
 		{
 			strn0cpy(buf->members[i].name, m_members[i].name.c_str(), sizeof(buf->members[i].name));
-			buf->members[i].status = static_cast<uint8_t>(m_members[i].status);
+			buf->members[i].expedition_status = static_cast<uint8_t>(m_members[i].status);
 		}
 	}
 
@@ -1520,11 +1520,11 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 	uint32_t outsize = sizeof(ExpeditionMemberList_Struct) + sizeof(ExpeditionMemberEntry_Struct);
 	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzMemberListStatus, outsize));
 	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
-	buf->count = 1;
+	buf->member_count = 1;
 
 	auto entry = reinterpret_cast<ExpeditionMemberEntry_Struct*>(buf->members);
 	strn0cpy(entry->name, name.c_str(), sizeof(entry->name));
-	entry->status = static_cast<uint8_t>(status);
+	entry->expedition_status = static_cast<uint8_t>(status);
 
 	return outapp;
 }
