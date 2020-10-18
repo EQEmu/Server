@@ -1,4 +1,4 @@
-CREATE TABLE `expedition_details` (
+CREATE TABLE `expeditions` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`uuid` VARCHAR(36) NOT NULL,
 	`instance_id` INT(10) NULL DEFAULT 0,
