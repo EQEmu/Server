@@ -35,7 +35,7 @@ uint32_t ExpeditionDatabase::InsertExpedition(
 	);
 
 	std::string query = fmt::format(SQL(
-		INSERT INTO expedition_details
+		INSERT INTO expeditions
 			(uuid, instance_id, expedition_name, leader_id, min_players, max_players)
 		VALUES
 			('{}', {}, '{}', {}, {}, {});
@@ -55,21 +55,21 @@ std::string ExpeditionDatabase::LoadExpeditionsSelectQuery()
 {
 	return std::string(SQL(
 		SELECT
-			expedition_details.id,
-			expedition_details.uuid,
-			expedition_details.instance_id,
-			expedition_details.expedition_name,
-			expedition_details.leader_id,
-			expedition_details.min_players,
-			expedition_details.max_players,
-			expedition_details.add_replay_on_join,
-			expedition_details.is_locked,
+			expeditions.id,
+			expeditions.uuid,
+			expeditions.instance_id,
+			expeditions.expedition_name,
+			expeditions.leader_id,
+			expeditions.min_players,
+			expeditions.max_players,
+			expeditions.add_replay_on_join,
+			expeditions.is_locked,
 			character_data.name leader_name,
 			expedition_members.character_id,
 			member_data.name
-		FROM expedition_details
-			INNER JOIN character_data ON expedition_details.leader_id = character_data.id
-			INNER JOIN expedition_members ON expedition_details.id = expedition_members.expedition_id
+		FROM expeditions
+			INNER JOIN character_data ON expeditions.leader_id = character_data.id
+			INNER JOIN expedition_members ON expeditions.id = expedition_members.expedition_id
 			INNER JOIN character_data member_data ON expedition_members.character_id = member_data.id
 	));
 }
@@ -79,7 +79,7 @@ MySQLRequestResult ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 	LogExpeditionsDetail("Loading expedition [{}]", expedition_id);
 
 	std::string query = fmt::format(SQL(
-		{} WHERE expedition_details.id = {};
+		{} WHERE expeditions.id = {};
 	), LoadExpeditionsSelectQuery(), expedition_id);
 
 	return database.QueryDatabase(query);
@@ -90,7 +90,7 @@ MySQLRequestResult ExpeditionDatabase::LoadAllExpeditions()
 	LogExpeditionsDetail("Loading all expeditions from database");
 
 	std::string query = fmt::format(SQL(
-		{} ORDER BY expedition_details.id;
+		{} ORDER BY expeditions.id;
 	), LoadExpeditionsSelectQuery());
 
 	return database.QueryDatabase(query);
@@ -193,12 +193,12 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 			SELECT
 				expedition_lockouts.expedition_id,
 				expedition_lockouts.from_expedition_uuid,
-				expedition_details.expedition_name,
+				expeditions.expedition_name,
 				expedition_lockouts.event_name,
 				UNIX_TIMESTAMP(expedition_lockouts.expire_time),
 				expedition_lockouts.duration
 			FROM expedition_lockouts
-				INNER JOIN expedition_details ON expedition_lockouts.expedition_id = expedition_details.id
+				INNER JOIN expeditions ON expedition_lockouts.expedition_id = expeditions.id
 			WHERE expedition_id IN ({})
 			ORDER BY expedition_id;
 		), in_expedition_ids_query);
@@ -640,7 +640,7 @@ void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_
 	LogExpeditionsDetail("Updating leader [{}] for expedition [{}]", leader_id, expedition_id);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_details SET leader_id = {} WHERE id = {};
+		UPDATE expeditions SET leader_id = {} WHERE id = {};
 	), leader_id, expedition_id);
 
 	database.QueryDatabase(query);
@@ -651,7 +651,7 @@ void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 	LogExpeditionsDetail("Updating lock state [{}] for expedition [{}]", is_locked, expedition_id);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_details SET is_locked = {} WHERE id = {};
+		UPDATE expeditions SET is_locked = {} WHERE id = {};
 	), is_locked, expedition_id);
 
 	database.QueryDatabase(query);
@@ -684,7 +684,7 @@ void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool 
 	LogExpeditionsDetail("Updating replay lockout on join [{}] for expedition [{}]", add_on_join, expedition_id);
 
 	auto query = fmt::format(SQL(
-		UPDATE expedition_details SET add_replay_on_join = {} WHERE id = {};
+		UPDATE expeditions SET add_replay_on_join = {} WHERE id = {};
 	), add_on_join, expedition_id);
 
 	database.QueryDatabase(query);

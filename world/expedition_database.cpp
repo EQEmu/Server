@@ -26,16 +26,16 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 {
 	std::string query = SQL(
 		SELECT
-			expedition_details.id
-		FROM expedition_details
-			LEFT JOIN instance_list ON expedition_details.instance_id = instance_list.id
+			expeditions.id
+		FROM expeditions
+			LEFT JOIN instance_list ON expeditions.instance_id = instance_list.id
 			LEFT JOIN
 				(
 					SELECT expedition_id, COUNT(*) member_count
 					FROM expedition_members
 					GROUP BY expedition_id
 				) expedition_members
-				ON expedition_members.expedition_id = expedition_details.id
+				ON expedition_members.expedition_id = expeditions.id
 		WHERE
 			instance_list.id IS NULL
 			OR expedition_members.member_count IS NULL
@@ -70,16 +70,16 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 
 	std::string query = SQL(
 		SELECT
-			expedition_details.id,
-			expedition_details.instance_id,
+			expeditions.id,
+			expeditions.instance_id,
 			instance_list.zone,
 			instance_list.start_time,
 			instance_list.duration,
 			expedition_members.character_id
-		FROM expedition_details
-			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
-			INNER JOIN expedition_members ON expedition_members.expedition_id = expedition_details.id
-		ORDER BY expedition_details.id;
+		FROM expeditions
+			INNER JOIN instance_list ON expeditions.instance_id = instance_list.id
+			INNER JOIN expedition_members ON expedition_members.expedition_id = expeditions.id
+		ORDER BY expeditions.id;
 	);
 
 	auto results = database.QueryDatabase(query);
@@ -120,16 +120,16 @@ Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 
 	std::string query = fmt::format(SQL(
 		SELECT
-			expedition_details.id,
-			expedition_details.instance_id,
+			expeditions.id,
+			expeditions.instance_id,
 			instance_list.zone,
 			instance_list.start_time,
 			instance_list.duration,
 			expedition_members.character_id
-		FROM expedition_details
-			INNER JOIN instance_list ON expedition_details.instance_id = instance_list.id
-			INNER JOIN expedition_members ON expedition_members.expedition_id = expedition_details.id
-		WHERE expedition_details.id = {};
+		FROM expeditions
+			INNER JOIN instance_list ON expeditions.instance_id = instance_list.id
+			INNER JOIN expedition_members ON expedition_members.expedition_id = expeditions.id
+		WHERE expeditions.id = {};
 	), expedition_id);
 
 	auto results = database.QueryDatabase(query);
@@ -173,7 +173,7 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 		expedition_ids_query.pop_back(); // trailing comma
 
 		std::string query = fmt::format(
-			"DELETE FROM expedition_details WHERE id IN ({});", expedition_ids_query
+			"DELETE FROM expeditions WHERE id IN ({});", expedition_ids_query
 		);
 		database.QueryDatabase(query);
 
