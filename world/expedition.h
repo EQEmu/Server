@@ -21,59 +21,16 @@
 #ifndef WORLD_EXPEDITION_H
 #define WORLD_EXPEDITION_H
 
-#include "../common/rulesys.h"
 #include "../common/timer.h"
 #include <chrono>
+#include <cstdint>
 #include <unordered_set>
-#include <vector>
-
-extern class ExpeditionCache expedition_cache;
-
-class Expedition;
-class ServerPacket;
-
-namespace ExpeditionDatabase
-{
-	void PurgeExpiredExpeditions();
-	void PurgeExpiredCharacterLockouts();
-	std::vector<Expedition> LoadExpeditions();
-	Expedition LoadExpedition(uint32_t expedition_id);
-	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
-	void UpdateDzDuration(uint16_t instance_id, uint32_t new_duration);
-};
-
-namespace ExpeditionMessage
-{
-	void HandleZoneMessage(ServerPacket* pack);
-	void AddPlayer(ServerPacket* pack);
-	void MakeLeader(ServerPacket* pack);
-	void GetOnlineMembers(ServerPacket* pack);
-	void SaveInvite(ServerPacket* pack);
-	void RequestInvite(ServerPacket* pack);
-};
-
-class ExpeditionCache
-{
-public:
-	void AddExpedition(uint32_t expedition_id);
-	void RemoveExpedition(uint32_t expedition_id);
-	void LoadActiveExpeditions();
-	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
-	void RemoveAllMembers(uint32_t expedition_id);
-	void SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining);
-	void Process();
-
-private:
-	std::vector<Expedition> m_expeditions;
-	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(Expedition, WorldExpeditionProcessRateMS))};
-};
 
 class Expedition
 {
 public:
 	Expedition() = default;
-	Expedition(
-		uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
+	Expedition(uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
 		uint32_t expire_time, uint32_t duration);
 
 	void AddMember(uint32_t character_id) { m_member_ids.emplace(character_id); }

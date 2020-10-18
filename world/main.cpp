@@ -88,7 +88,8 @@ union semun {
 #include "queryserv.h"
 #include "web_interface.h"
 #include "console.h"
-#include "expedition.h"
+#include "expedition_cache.h"
+#include "expedition_database.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
