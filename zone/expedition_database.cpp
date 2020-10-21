@@ -27,7 +27,7 @@
 #include <fmt/core.h>
 
 uint32_t ExpeditionDatabase::InsertExpedition(
-	const std::string& uuid, uint32_t instance_id, const std::string& expedition_name,
+	const std::string& uuid, uint32_t dz_id, const std::string& expedition_name,
 	uint32_t leader_id, uint32_t min_players, uint32_t max_players)
 {
 	LogExpeditionsDetail(
@@ -36,10 +36,10 @@ uint32_t ExpeditionDatabase::InsertExpedition(
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO expeditions
-			(uuid, instance_id, expedition_name, leader_id, min_players, max_players)
+			(uuid, dynamic_zone_id, expedition_name, leader_id, min_players, max_players)
 		VALUES
 			('{}', {}, '{}', {}, {}, {});
-	), uuid, instance_id, EscapeString(expedition_name), leader_id, min_players, max_players);
+	), uuid, dz_id, EscapeString(expedition_name), leader_id, min_players, max_players);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
@@ -57,7 +57,7 @@ std::string ExpeditionDatabase::LoadExpeditionsSelectQuery()
 		SELECT
 			expeditions.id,
 			expeditions.uuid,
-			expeditions.instance_id,
+			expeditions.dynamic_zone_id,
 			expeditions.expedition_name,
 			expeditions.leader_id,
 			expeditions.min_players,

@@ -28,7 +28,8 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 		SELECT
 			expeditions.id
 		FROM expeditions
-			LEFT JOIN instance_list ON expeditions.instance_id = instance_list.id
+			LEFT JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
+			LEFT JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 			LEFT JOIN
 				(
 					SELECT expedition_id, COUNT(*) member_count
@@ -64,23 +65,33 @@ void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 	database.QueryDatabase(query);
 }
 
-std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
+std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expedition_id)
 {
 	std::vector<Expedition> expeditions;
 
 	std::string query = SQL(
 		SELECT
 			expeditions.id,
-			expeditions.instance_id,
+			expeditions.dynamic_zone_id,
+			instance_list.id,
 			instance_list.zone,
 			instance_list.start_time,
 			instance_list.duration,
 			expedition_members.character_id
 		FROM expeditions
-			INNER JOIN instance_list ON expeditions.instance_id = instance_list.id
+			INNER JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
+			INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 			INNER JOIN expedition_members ON expedition_members.expedition_id = expeditions.id
-		ORDER BY expeditions.id;
 	);
+
+	if (select_expedition_id != 0)
+	{
+		query.append(fmt::format(" WHERE expeditions.id = {};", select_expedition_id));
+	}
+	else
+	{
+		query.append(" ORDER BY expeditions.id;");
+	}
 
 	auto results = database.QueryDatabase(query);
 	if (results.Success())
@@ -95,16 +106,17 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions()
 			{
 				expeditions.emplace_back(
 					static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
-					static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_instance_id
-					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_zone_id
-					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // start_time
-					static_cast<uint32_t>(strtoul(row[4], nullptr, 10))  // duration
+					static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_id
+					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_instance_id
+					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // dz_zone_id
+					static_cast<uint32_t>(strtoul(row[4], nullptr, 10)), // start_time
+					static_cast<uint32_t>(strtoul(row[5], nullptr, 10))  // duration
 				);
 			}
 
 			last_expedition_id = expedition_id;
 
-			uint32_t member_id = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
+			uint32_t member_id = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
 			expeditions.back().AddMember(member_id);
 		}
 	}
@@ -118,41 +130,10 @@ Expedition ExpeditionDatabase::LoadExpedition(uint32_t expedition_id)
 
 	Expedition expedition;
 
-	std::string query = fmt::format(SQL(
-		SELECT
-			expeditions.id,
-			expeditions.instance_id,
-			instance_list.zone,
-			instance_list.start_time,
-			instance_list.duration,
-			expedition_members.character_id
-		FROM expeditions
-			INNER JOIN instance_list ON expeditions.instance_id = instance_list.id
-			INNER JOIN expedition_members ON expedition_members.expedition_id = expeditions.id
-		WHERE expeditions.id = {};
-	), expedition_id);
-
-	auto results = database.QueryDatabase(query);
-	if (results.Success())
+	auto expeditions = LoadExpeditions(expedition_id);
+	if (!expeditions.empty())
 	{
-		bool created = false;
-		for (auto row = results.begin(); row != results.end(); ++row)
-		{
-			if (!created)
-			{
-				expedition = Expedition{
-					static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
-					static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_instance_id
-					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_zone_id
-					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // start_time
-					static_cast<uint32_t>(strtoul(row[4], nullptr, 10))  // duration
-				};
-				created = true;
-			}
-
-			auto member_id = static_cast<uint32_t>(strtoul(row[5], nullptr, 10));
-			expedition.AddMember(member_id);
-		}
+		expedition = expeditions.front();
 	}
 
 	return expedition;

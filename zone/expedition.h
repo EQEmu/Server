@@ -74,8 +74,7 @@ class Expedition
 {
 public:
 	Expedition() = delete;
-	Expedition(
-		uint32_t id, const std::string& uuid, const DynamicZone& dz, const std::string& expedition_name,
+	Expedition(uint32_t id, const std::string& uuid, const DynamicZone& dz, const std::string& expedition_name,
 		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
@@ -84,6 +83,7 @@ public:
 	static bool CacheAllFromDatabase();
 	static Expedition* FindCachedExpeditionByCharacterID(uint32_t character_id);
 	static Expedition* FindCachedExpeditionByCharacterName(const std::string& char_name);
+	static Expedition* FindCachedExpeditionByDynamicZoneID(uint32_t dz_id);
 	static Expedition* FindCachedExpeditionByID(uint32_t expedition_id);
 	static Expedition* FindCachedExpeditionByZoneInstance(uint32_t zone_id, uint32_t instance_id);
 	static std::vector<ExpeditionLockoutTimer> GetExpeditionLockoutsByCharacterID(uint32_t character_id);
@@ -102,6 +102,7 @@ public:
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
+	uint32_t GetDynamicZoneID() const { return m_dynamiczone.GetID(); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return m_dynamiczone.GetInstanceID(); }
 	uint32_t GetLeaderID() const { return m_leader.char_id; }

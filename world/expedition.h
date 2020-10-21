@@ -30,8 +30,8 @@ class Expedition
 {
 public:
 	Expedition() = default;
-	Expedition(uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
-		uint32_t expire_time, uint32_t duration);
+	Expedition(uint32_t expedition_id, uint32_t dz_id, uint32_t dz_instance_id,
+		uint32_t dz_zone_id, uint32_t expire_time, uint32_t duration);
 
 	void AddMember(uint32_t character_id) { m_member_ids.emplace(character_id); }
 	void RemoveMember(uint32_t character_id) { m_member_ids.erase(character_id); }
@@ -43,6 +43,7 @@ public:
 	bool IsEmpty() const { return m_member_ids.empty(); }
 	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
 	bool IsPendingDelete() const { return m_pending_delete; }
+	bool IsValid() const { return m_expedition_id != 0; }
 	void SendZonesDurationUpdate();
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
@@ -52,6 +53,7 @@ public:
 
 private:
 	uint32_t m_expedition_id  = 0;
+	uint32_t m_dz_id          = 0;
 	uint32_t m_dz_instance_id = 0;
 	uint32_t m_dz_zone_id     = 0;
 	bool     m_pending_delete = false;

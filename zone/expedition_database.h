@@ -84,7 +84,7 @@ namespace LoadExpeditionColumns
 	{
 		id = 0,
 		uuid,
-		instance_id,
+		dz_id,
 		expedition_name,
 		leader_id,
 		min_players,

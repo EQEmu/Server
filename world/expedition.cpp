@@ -26,12 +26,12 @@
 
 extern ZSList zoneserver_list;
 
-Expedition::Expedition(
-	uint32_t expedition_id, uint32_t instance_id, uint32_t dz_zone_id,
-	uint32_t start_time, uint32_t duration
+Expedition::Expedition(uint32_t expedition_id, uint32_t dz_id, uint32_t dz_instance_id,
+	uint32_t dz_zone_id, uint32_t start_time, uint32_t duration
 ) :
 	m_expedition_id(expedition_id),
-	m_dz_instance_id(instance_id),
+	m_dz_id(dz_id),
+	m_dz_instance_id(dz_instance_id),
 	m_dz_zone_id(dz_zone_id),
 	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
 	m_duration(duration)
