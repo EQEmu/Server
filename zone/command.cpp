@@ -6844,8 +6844,9 @@ void command_dz(Client* c, const Seperator* sep)
 				auto seconds = expedition.second->GetDynamicZone().GetSecondsRemaining();
 
 				c->Message(Chat::White, fmt::format(
-					"Expedition id: [{}] name: [{}] leader: [{}] zone: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] zone: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					expedition.second->GetID(),
+					expedition.second->GetDynamicZoneID(),
 					expedition.second->GetName(),
 					expedition.second->GetLeaderName(),
 					ZoneName(expedition.second->GetDynamicZone().GetZoneID()),
@@ -6900,6 +6901,7 @@ void command_dz(Client* c, const Seperator* sep)
 	{
 		std::string query = SQL(
 			SELECT
+				dynamic_zones.id,
 				dynamic_zones.type,
 				instance_list.id,
 				instance_list.zone,
@@ -6919,8 +6921,8 @@ void command_dz(Client* c, const Seperator* sep)
 			c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", results.RowCount()).c_str());
 			for (auto row = results.begin(); row != results.end(); ++row)
 			{
-				auto start_time = strtoul(row[4], nullptr, 10);
-				auto duration = strtoul(row[5], nullptr, 10);
+				auto start_time  = strtoul(row[5], nullptr, 10);
+				auto duration    = strtoul(row[6], nullptr, 10);
 				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
 
 				auto now = std::chrono::system_clock::now();
@@ -6931,12 +6933,13 @@ void command_dz(Client* c, const Seperator* sep)
 				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
 				{
 					c->Message(Chat::White, fmt::format(
-						"type: [{}] zone: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
-						strtoul(row[0], nullptr, 10),
-						strtoul(row[2], nullptr, 10),
-						strtoul(row[1], nullptr, 10),
-						strtoul(row[3], nullptr, 10),
-						strtoul(row[6], nullptr, 10),
+						"dz id: [{}] type: [{}] zone: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+						strtoul(row[0], nullptr, 10), // dynamic_zone_id
+						strtoul(row[1], nullptr, 10), // dynamic_zone_type
+						strtoul(row[3], nullptr, 10), // instance_zone_id
+						strtoul(row[2], nullptr, 10), // instance_id
+						strtoul(row[4], nullptr, 10), // instance_zone_version
+						strtoul(row[7], nullptr, 10), // instance member_count
 						seconds / 3600,      // hours
 						(seconds / 60) % 60, // minutes
 						seconds % 60         // seconds

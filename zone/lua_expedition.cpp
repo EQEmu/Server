@@ -57,6 +57,11 @@ void Lua_Expedition::AddReplayLockoutDuration(int seconds, bool members_only) {
 	self->AddReplayLockoutDuration(seconds, members_only);
 }
 
+uint32_t Lua_Expedition::GetDynamicZoneID() {
+	Lua_Safe_Call_Int();
+	return self->GetDynamicZoneID();
+}
+
 uint32_t Lua_Expedition::GetID() {
 	Lua_Safe_Call_Int();
 	return self->GetID();
@@ -248,6 +253,7 @@ luabind::scope lua_register_expedition() {
 		.def("AddReplayLockout", (void(Lua_Expedition::*)(uint32_t))&Lua_Expedition::AddReplayLockout)
 		.def("AddReplayLockoutDuration", (void(Lua_Expedition::*)(int))&Lua_Expedition::AddReplayLockoutDuration)
 		.def("AddReplayLockoutDuration", (void(Lua_Expedition::*)(int, bool))&Lua_Expedition::AddReplayLockoutDuration)
+		.def("GetDynamicZoneID", &Lua_Expedition::GetDynamicZoneID)
 		.def("GetID", (uint32_t(Lua_Expedition::*)(void))&Lua_Expedition::GetID)
 		.def("GetInstanceID", (int(Lua_Expedition::*)(void))&Lua_Expedition::GetInstanceID)
 		.def("GetLeaderName", (std::string(Lua_Expedition::*)(void))&Lua_Expedition::GetLeaderName)

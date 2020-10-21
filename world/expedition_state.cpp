@@ -49,7 +49,7 @@ void ExpeditionState::AddExpedition(uint32_t expedition_id)
 
 	auto expedition = ExpeditionDatabase::LoadExpedition(expedition_id);
 
-	if (expedition.GetID() == expedition_id)
+	if (expedition.IsValid())
 	{
 		auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
 			return expedition.GetID() == expedition_id;

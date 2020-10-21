@@ -78,12 +78,8 @@ Expedition* Expedition::TryCreate(
 		return nullptr;
 	}
 
-	if (dynamiczone.GetInstanceID() == 0)
-	{
-		dynamiczone.CreateInstance();
-	}
-
-	if (dynamiczone.GetInstanceID() == 0)
+	auto dynamic_zone_id = dynamiczone.Create();
+	if (dynamic_zone_id == 0)
 	{
 		// live uses this message when trying to enter an instance that isn't ready
 		// we can use it as the client error message if instance creation fails
@@ -97,7 +93,7 @@ Expedition* Expedition::TryCreate(
 	// unique expedition ids are created from database via auto-increment column
 	auto expedition_id = ExpeditionDatabase::InsertExpedition(
 		expedition_uuid,
-		dynamiczone.GetInstanceID(),
+		dynamiczone.GetID(),
 		request.GetExpeditionName(),
 		request.GetLeaderID(),
 		request.GetMinPlayers(),
@@ -106,8 +102,6 @@ Expedition* Expedition::TryCreate(
 
 	if (expedition_id)
 	{
-		dynamiczone.SaveToDatabase();
-
 		auto expedition = std::unique_ptr<Expedition>(new Expedition(
 			expedition_id,
 			expedition_uuid,
@@ -158,7 +152,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 	}
 
 	std::vector<uint32_t> expedition_ids;
-	std::vector<uint32_t> instance_ids;
+	std::vector<uint32_t> dynamic_zone_ids;;
 	std::vector<std::pair<uint32_t, uint32_t>> expedition_character_ids;
 
 	using col = LoadExpeditionColumns::eLoadExpeditionColumns;
@@ -174,16 +168,14 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			expedition_ids.emplace_back(expedition_id);
 
 			uint32_t leader_id = strtoul(row[col::leader_id], nullptr, 10);
-			uint32_t instance_id = row[col::instance_id] ? strtoul(row[col::instance_id], nullptr, 10) : 0;
-			if (instance_id) // can be null from fk constraint
-			{
-				instance_ids.emplace_back(instance_id);
-			}
+			uint32_t dynamic_zone_id = strtoul(row[col::dz_id], nullptr, 10);
+
+			dynamic_zone_ids.emplace_back(dynamic_zone_id);
 
 			std::unique_ptr<Expedition> expedition = std::unique_ptr<Expedition>(new Expedition(
 				expedition_id,
 				row[col::uuid],                                         // expedition uuid
-				DynamicZone{ instance_id },
+				DynamicZone{ dynamic_zone_id },
 				row[col::expedition_name],                              // expedition name
 				ExpeditionMember{ leader_id, row[col::leader_name] },   // expedition leader id, name
 				strtoul(row[col::min_players], nullptr, 10),            // min_players
@@ -216,7 +208,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 	Expedition::SendWorldGetOnlineMembers(expedition_character_ids);
 
 	// bulk load dynamic zone data and expedition lockouts for cached expeditions
-	auto dynamic_zones = DynamicZone::LoadMultipleDzFromDatabase(instance_ids);
+	auto dynamic_zones = DynamicZone::LoadMultipleDzFromDatabase(dynamic_zone_ids);
 	auto expedition_lockouts = ExpeditionDatabase::LoadMultipleExpeditionLockouts(expedition_ids);
 
 	for (const auto& expedition_id : expedition_ids)
@@ -224,7 +216,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 		auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
 		if (expedition)
 		{
-			auto dz_iter = dynamic_zones.find(expedition->GetInstanceID());
+			auto dz_iter = dynamic_zones.find(expedition->GetDynamicZoneID());
 			if (dz_iter != dynamic_zones.end())
 			{
 				expedition->m_dynamiczone = dz_iter->second;
@@ -236,7 +228,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 				expedition->m_lockouts = lockout_iter->second;
 			}
 
-			// send member updates now that all data is loaded for the cached expedition(s)
+			// send member updates now that all data is loaded for the cached expedition
 			expedition->SendUpdatesToZoneMembers();
 		}
 	}
@@ -334,6 +326,21 @@ Expedition* Expedition::FindCachedExpeditionByCharacterName(const std::string& c
 			if (expedition.second->HasMember(char_name))
 			{
 				return expedition.second.get();
+			}
+		}
+	}
+	return nullptr;
+}
+
+Expedition* Expedition::FindCachedExpeditionByDynamicZoneID(uint32_t dz_id)
+{
+	if (zone && dz_id != 0)
+	{
+		for (const auto& cached_expedition : zone->expedition_cache)
+		{
+			if (cached_expedition.second->GetDynamicZone().GetID() == dz_id)
+			{
+				return cached_expedition.second.get();
 			}
 		}
 	}

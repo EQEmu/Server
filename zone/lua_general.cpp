@@ -2192,6 +2192,10 @@ Lua_Expedition lua_get_expedition_by_char_id(uint32 char_id) {
 	return Expedition::FindCachedExpeditionByCharacterID(char_id);
 }
 
+Lua_Expedition lua_get_expedition_by_dz_id(uint32 dz_id) {
+	return Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
+}
+
 Lua_Expedition lua_get_expedition_by_zone_instance(uint32 zone_id, uint32 instance_id) {
 	return Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
 }
@@ -2889,6 +2893,7 @@ luabind::scope lua_register_general() {
 
 		luabind::def("get_expedition", &lua_get_expedition),
 		luabind::def("get_expedition_by_char_id", &lua_get_expedition_by_char_id),
+		luabind::def("get_expedition_by_dz_id", &lua_get_expedition_by_dz_id),
 		luabind::def("get_expedition_by_zone_instance", &lua_get_expedition_by_zone_instance),
 		luabind::def("get_expedition_lockout_by_char_id", &lua_get_expedition_lockout_by_char_id),
 		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32))&lua_get_expedition_lockouts_by_char_id),

@@ -59,37 +59,36 @@ public:
 	DynamicZone() = default;
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
 	DynamicZone(std::string zone_shortname, uint32_t version, uint32_t duration, DynamicZoneType type);
-	DynamicZone(uint32_t instance_id) : m_instance_id(instance_id) {}
+	DynamicZone(uint32_t dz_id) : m_id(dz_id) {}
 	DynamicZone(DynamicZoneType type) : m_type(type) {}
 
-	static DynamicZone LoadDzFromDatabase(uint32_t instance_id);
 	static std::unordered_map<uint32_t, DynamicZone> LoadMultipleDzFromDatabase(
-		const std::vector<uint32_t>& instance_ids);
+		const std::vector<uint32_t>& dynamic_zone_ids);
 	static void HandleWorldMessage(ServerPacket* pack);
 
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
-	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); };
+	uint32_t GetID() const { return m_id; }
+	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
 	uint32_t GetSecondsRemaining() const;
-	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); };
+	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); }
 	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
-	uint32_t GetZoneVersion() const { return m_version; };
+	uint32_t GetZoneVersion() const { return m_version; }
 	DynamicZoneType GetType() const { return m_type; }
 	DynamicZoneLocation GetCompassLocation() const { return m_compass; }
 	DynamicZoneLocation GetSafeReturnLocation() const { return m_safereturn; }
 	DynamicZoneLocation GetZoneInLocation() const { return m_zonein; }
 
 	void     AddCharacter(uint32_t character_id);
+	uint32_t Create();
 	uint32_t CreateInstance();
 	bool     HasZoneInLocation() const { return m_has_zonein; }
 	bool     IsCurrentZoneDzInstance() const;
 	bool     IsInstanceID(uint32_t instance_id) const;
 	bool     IsValid() const { return m_instance_id != 0; }
 	bool     IsSameDz(uint32_t zone_id, uint32_t instance_id) const;
-	void     LoadFromDatabase(uint32_t instance_id);
 	void     RemoveAllCharacters(bool enable_removal_timers = true);
 	void     RemoveCharacter(uint32_t character_id);
 	void     SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids);
-	uint32_t SaveToDatabase();
 	void     SendInstanceCharacterChange(uint32_t character_id, bool removed);
 	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void     SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
@@ -99,11 +98,12 @@ public:
 private:
 	static std::string DynamicZoneSelectQuery();
 	void LoadDatabaseResult(MySQLRequestRow& row);
-	void DeleteFromDatabase();
 	void SaveCompassToDatabase();
 	void SaveSafeReturnToDatabase();
 	void SaveZoneInLocationToDatabase();
+	uint32_t SaveToDatabase();
 
+	uint32_t m_id            = 0;
 	uint32_t m_zone_id       = 0;
 	uint32_t m_instance_id   = 0;
 	uint32_t m_version       = 0;

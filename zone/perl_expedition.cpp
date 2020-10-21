@@ -132,6 +132,19 @@ XS(XS_Expedition_AddReplayLockoutDuration) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Expedition_GetDynamicZoneID);
+XS(XS_Expedition_GetDynamicZoneID) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Expedition::GetDynamicZoneID(THIS)");
+	}
+
+	Expedition* THIS = nullptr;
+	VALIDATE_THIS_IS_EXPEDITION;
+
+	XSRETURN_UV(THIS->GetDynamicZoneID());
+}
+
 XS(XS_Expedition_GetID);
 XS(XS_Expedition_GetID) {
 	dXSARGS;
@@ -623,6 +636,7 @@ XS(boot_Expedition) {
 	newXSproto(strcpy(buf, "AddLockoutDuration"), XS_Expedition_AddLockoutDuration, file, "$$$;$");
 	newXSproto(strcpy(buf, "AddReplayLockout"), XS_Expedition_AddReplayLockout, file, "$$");
 	newXSproto(strcpy(buf, "AddReplayLockoutDuration"), XS_Expedition_AddReplayLockoutDuration, file, "$$;$");
+	newXSproto(strcpy(buf, "GetDynamicZoneID"), XS_Expedition_GetDynamicZoneID, file, "$");
 	newXSproto(strcpy(buf, "GetID"), XS_Expedition_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Expedition_GetInstanceID, file, "$");
 	newXSproto(strcpy(buf, "GetLeaderName"), XS_Expedition_GetLeaderName, file, "$");

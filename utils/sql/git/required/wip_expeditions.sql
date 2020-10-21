@@ -1,7 +1,7 @@
 CREATE TABLE `expeditions` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`uuid` VARCHAR(36) NOT NULL,
-	`instance_id` INT(10) NULL DEFAULT 0,
+	`dynamic_zone_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
 	`expedition_name` VARCHAR(128) NOT NULL,
 	`leader_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
 	`min_players` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
@@ -9,7 +9,7 @@ CREATE TABLE `expeditions` (
 	`add_replay_on_join` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
 	`is_locked` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
-	UNIQUE INDEX `instance_id` (`instance_id`)
+	UNIQUE INDEX `dynamic_zone_id` (`dynamic_zone_id`)
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
