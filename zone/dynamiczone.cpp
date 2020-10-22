@@ -56,18 +56,12 @@ std::unordered_map<uint32_t, DynamicZone> DynamicZone::LoadMultipleDzFromDatabas
 {
 	LogDynamicZonesDetail("Loading dynamic zone data for [{}] instances", dynamic_zone_ids.size());
 
-	std::string in_dynamic_zone_ids_query;
-	for (const auto& dynamic_zone_id : dynamic_zone_ids)
-	{
-		fmt::format_to(std::back_inserter(in_dynamic_zone_ids_query), "{},", dynamic_zone_id);
-	}
+	std::string in_dynamic_zone_ids_query = fmt::format("{}", fmt::join(dynamic_zone_ids, ","));
 
 	std::unordered_map<uint32_t, DynamicZone> dynamic_zones;
 
 	if (!in_dynamic_zone_ids_query.empty())
 	{
-		in_dynamic_zone_ids_query.pop_back(); // trailing comma
-
 		std::string query = fmt::format(SQL(
 			{} WHERE dynamic_zones.id IN ({});
 		), DynamicZoneSelectQuery(), in_dynamic_zone_ids_query);

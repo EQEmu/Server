@@ -176,19 +176,13 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 {
 	LogExpeditionsDetail("Loading internal lockouts for [{}] expeditions", expedition_ids.size());
 
-	std::string in_expedition_ids_query;
-	for (const auto& expedition_id : expedition_ids)
-	{
-		fmt::format_to(std::back_inserter(in_expedition_ids_query), "{},", expedition_id);
-	}
+	std::string in_expedition_ids_query = fmt::format("{}", fmt::join(expedition_ids, ","));
 
 	// these are loaded into the same container type expeditions use to store lockouts
 	std::unordered_map<uint32_t, std::unordered_map<std::string, ExpeditionLockoutTimer>> lockouts;
 
 	if (!in_expedition_ids_query.empty())
 	{
-		in_expedition_ids_query.pop_back(); // trailing comma
-
 		std::string query = fmt::format(SQL(
 			SELECT
 				expedition_lockouts.expedition_id,

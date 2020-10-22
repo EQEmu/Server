@@ -143,29 +143,17 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 {
 	LogExpeditionsDetail("Deleting [{}] expedition(s)", expedition_ids.size());
 
-	std::string expedition_ids_query;
-	for (const auto& expedition_id : expedition_ids)
-	{
-		fmt::format_to(std::back_inserter(expedition_ids_query), "{},", expedition_id);
-	}
+	std::string expedition_ids_query = fmt::format("{}", fmt::join(expedition_ids, ","));
 
 	if (!expedition_ids_query.empty())
 	{
-		expedition_ids_query.pop_back(); // trailing comma
-
-		std::string query = fmt::format(
-			"DELETE FROM expeditions WHERE id IN ({});", expedition_ids_query
-		);
+		auto query = fmt::format("DELETE FROM expeditions WHERE id IN ({});", expedition_ids_query);
 		database.QueryDatabase(query);
 
-		query = fmt::format(
-			"DELETE FROM expedition_members WHERE expedition_id IN ({});", expedition_ids_query
-		);
+		query = fmt::format("DELETE FROM expedition_members WHERE expedition_id IN ({});", expedition_ids_query);
 		database.QueryDatabase(query);
 
-		query = fmt::format(
-			"DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query
-		);
+		query = fmt::format("DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query);
 		database.QueryDatabase(query);
 	}
 }
