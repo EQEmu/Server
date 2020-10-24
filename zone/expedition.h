@@ -181,7 +181,7 @@ private:
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader, const std::string& new_leader_name, bool is_online);
-	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
+	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id, bool was_swapped = false);
 	void ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
 	void SaveMembers(ExpeditionRequest& request);
@@ -190,6 +190,7 @@ private:
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
 	void SendMembersExpireWarning(uint32_t minutes);
+	void SendNewMemberAddedToZoneMembers(const std::string& added_name, bool was_swapped);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);

@@ -607,7 +607,7 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	m_dynamiczone.AddCharacter(add_client->CharacterID());
 
 	ProcessMemberRemoved(member.name, member.char_id);
-	ProcessMemberAdded(add_client->GetName(), add_client->CharacterID());
+	ProcessMemberAdded(add_client->GetName(), add_client->CharacterID(), true);
 	SendWorldMemberSwapped(member.name, member.char_id, add_client->GetName(), add_client->CharacterID());
 
 	if (!m_members.empty() && member.char_id == m_leader.char_id)
@@ -1223,7 +1223,7 @@ void Expedition::ProcessMakeLeader(
 	}
 }
 
-void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added_char_id)
+void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added_char_id, bool was_swapped)
 {
 	// adds the member to this expedition and notifies both leader and new member
 	Client* leader_client = entity_list.GetClientByCharID(m_leader.char_id);
@@ -1231,6 +1231,8 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 	{
 		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
 	}
+
+	AddInternalMember(char_name, added_char_id, ExpeditionMemberStatus::Online);
 
 	Client* member_client = entity_list.GetClientByCharID(added_char_id);
 	if (member_client)
@@ -1241,9 +1243,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 		member_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
 	}
 
-	AddInternalMember(char_name, added_char_id, ExpeditionMemberStatus::Online);
-
-	SendUpdatesToZoneMembers(); // live sends full update when member added
+	SendNewMemberAddedToZoneMembers(char_name, was_swapped);
 }
 
 void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id)
@@ -1399,6 +1399,33 @@ void Expedition::AddLockoutClients(
 	if (!lockout_clients.empty())
 	{
 		ExpeditionDatabase::InsertMembersLockout(lockout_clients, lockout);
+	}
+}
+
+void Expedition::SendNewMemberAddedToZoneMembers(const std::string& added_name, bool was_swapped)
+{
+	// live only sends a MemberListName update when members are added from a swap
+	// otherwise it updates info (for player count change) and the full member list
+	auto outapp_info = was_swapped ? nullptr : CreateInfoPacket(false);
+
+	// always send full list, MemberListName adds as "unknown" status (missing packet fields or client change)
+	//auto outapp_members = was_swapped ? CreateMemberListNamePacket(added_name, false) : CreateMemberListPacket(false);
+	auto outapp_members = CreateMemberListPacket(false);
+
+	for (const auto& member : m_members)
+	{
+		if (member.name != added_name) // new member already updated
+		{
+			Client* member_client = entity_list.GetClientByCharID(member.char_id);
+			if (member_client)
+			{
+				if (outapp_info)
+				{
+					member_client->QueuePacket(outapp_info.get());
+				}
+				member_client->QueuePacket(outapp_members.get());
+			}
+		}
 	}
 }
 
@@ -1937,7 +1964,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			if (expedition)
 			{
 				expedition->ProcessMemberRemoved(buf->remove_char_name, buf->remove_char_id);
-				expedition->ProcessMemberAdded(buf->add_char_name, buf->add_char_id);
+				expedition->ProcessMemberAdded(buf->add_char_name, buf->add_char_id, true);
 			}
 		}
 		break;
