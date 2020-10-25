@@ -723,22 +723,27 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if (mob_scan_close.Check()) {
-
+	if (mob_close_scan_timer.Check()) {
 		entity_list.ScanCloseMobs(close_mobs, this);
-
-		if (moving) {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(3000, 6000));
-		}
-		else {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(6000, 60000));
-		}
 	}
 
-	if (mob_check_moving_timer.Check() && moving) {
-		mob_scan_close.Trigger();
+	const uint16 npc_mob_close_scan_timer_moving = 6000;
+	const uint16 npc_mob_close_scan_timer_idle   = 60000;
+
+	if (mob_check_moving_timer.Check()) {
+		if (moving) {
+			if (mob_close_scan_timer.GetRemainingTime() > npc_mob_close_scan_timer_moving) {
+				LogAIScanCloseDetail("NPC [{}] Restarting with moving timer", GetCleanName());
+				mob_close_scan_timer.Disable();
+				mob_close_scan_timer.Start(npc_mob_close_scan_timer_moving);
+				mob_close_scan_timer.Trigger();
+			}
+		}
+		else if (mob_close_scan_timer.GetDuration() == npc_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("NPC [{}] Restarting with idle timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(npc_mob_close_scan_timer_idle);
+		}
 	}
 
 	if (tic_timer.Check()) {
