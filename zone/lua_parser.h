@@ -99,6 +99,8 @@ public:
 	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
 	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+	bool CheckFizzle(Client *self, uint16 &spell_id, SPDat_Spell_Struct spell_struct, bool &ignoreDefault);
+	
 
 private:
 	LuaParser();

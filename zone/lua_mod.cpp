@@ -632,4 +632,59 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 	}
 }
 
+void LuaMod::CheckFizzle(Client *self, uint16 &spell_id, SPDat_Spell_Struct spell_struct, bool &returnValue, bool &ignoreDefault) {
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_check_fizzle) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "CheckFizzle");
+
+		Lua_Client l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		e["spell_id"] = spell_id;
+
+		e.push(L);
+
+		Lua_Spell l_spell(&spell_struct);
+		auto l_spell_o = luabind::adl::object(L, l_spell);
+
+		l_spell_o.push(L);
+		lua_setfield(L, -2, "spell");
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TBOOLEAN) {
+				returnValue = returnValue || luabind::object_cast<bool>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception& ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
 #endif
