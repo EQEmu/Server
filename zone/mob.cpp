@@ -1857,7 +1857,7 @@ void Mob::SendIllusionPacket(
 		}
 	}
 
-	// update internal values fo mob
+	// update internal values for mob
 	size             = (in_size <= 0.0f) ? GetSize() : in_size;
 	texture          = new_texture;
 	helmtexture      = new_helmtexture;
