@@ -172,8 +172,8 @@ public:
 	void DisplayInfo(Mob *mob);
 
 	std::unordered_map<uint16, Mob *> close_mobs;
-	Timer mob_scan_close;
-	Timer mob_check_moving_timer;
+	Timer                             mob_close_scan_timer;
+	Timer                             mob_check_moving_timer;
 
 	//Somewhat sorted: needs documenting!
 

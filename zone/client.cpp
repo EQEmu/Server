@@ -139,7 +139,7 @@ Client::Client(EQStreamInterface* ieqs)
   endupkeep_timer(1000),
   forget_timer(0),
   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
   client_zone_wide_full_position_update_timer(5 * 60 * 1000),
   tribute_timer(Tribute_duration),
   proximity_timer(ClientProximity_interval),

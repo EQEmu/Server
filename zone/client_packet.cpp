@@ -4533,22 +4533,62 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		rewind_timer.Start(30000, true);
 	}
 
-	/* Handle client aggro scanning timers NPCs */
-	is_client_moving = (cy == m_Position.y && cx == m_Position.x) ? false : true;
+
+	is_client_moving = !(cy == m_Position.y && cx == m_Position.x);
+
+
+	/**
+	 * Client aggro scanning
+	 */
+	const uint16 client_scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
+	const uint16 client_scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
+
+	LogAggroDetail(
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		client_scan_npc_aggro_timer.GetRemainingTime()
+	);
 
 	if (is_client_moving) {
-		LogDebug("ClientUpdate: Client is moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
+		if (client_scan_npc_aggro_timer.GetRemainingTime() > client_scan_npc_aggro_timer_moving) {
+			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
 			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(500);
+			client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_moving);
+			client_scan_npc_aggro_timer.Trigger();
 		}
 	}
-	else {
-		LogDebug("ClientUpdate: Client is NOT moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
-			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(3000);
+	else if (client_scan_npc_aggro_timer.GetDuration() == client_scan_npc_aggro_timer_moving) {
+		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		client_scan_npc_aggro_timer.Disable();
+		client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_idle);
+	}
+
+	/**
+	 * Client mob close list cache scan timer
+	 */
+	const uint16 client_mob_close_scan_timer_moving = 6000;
+	const uint16 client_mob_close_scan_timer_idle   = 60000;
+
+	LogAIScanCloseDetail(
+		"Client [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		mob_close_scan_timer.GetRemainingTime()
+	);
+
+	if (is_client_moving) {
+		if (mob_close_scan_timer.GetRemainingTime() > client_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("Client [{}] Restarting with moving timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(client_mob_close_scan_timer_moving);
+			mob_close_scan_timer.Trigger();
 		}
+	}
+	else if (mob_close_scan_timer.GetDuration() == client_mob_close_scan_timer_moving) {
+		LogAIScanCloseDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		mob_close_scan_timer.Disable();
+		mob_close_scan_timer.Start(client_mob_close_scan_timer_idle);
 	}
 
 	/**
