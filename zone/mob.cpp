@@ -118,7 +118,7 @@ Mob::Mob(
 	attack_anim_timer(500),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
-	mob_scan_close(6000),
+	mob_close_scan_timer(6000),
 	mob_check_moving_timer(1000)
 {
 	mMovementManager = &MobMovementManager::Get();
@@ -463,7 +463,7 @@ Mob::Mob(
 	m_manual_follow = false;
 #endif
 
-	mob_scan_close.Trigger();
+	mob_close_scan_timer.Trigger();
 }
 
 Mob::~Mob()
