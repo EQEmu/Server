@@ -485,11 +485,6 @@ int Lua_Client::GetRawSkill(int skill_id) {
 	return self->GetRawSkill(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
-int Lua_Client::GetSkill(int skill_id) {
-	Lua_Safe_Call_Int();
-	return self->GetSkill(static_cast<EQ::skills::SkillType>(skill_id));
-}
-
 bool Lua_Client::HasSkill(int skill_id) {
 	Lua_Safe_Call_Bool();
 	return self->HasSkill(static_cast<EQ::skills::SkillType>(skill_id));
@@ -1735,7 +1730,6 @@ luabind::scope lua_register_client() {
 		.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int))&Lua_Client::IncreaseLanguageSkill)
 		.def("IncreaseLanguageSkill", (void(Lua_Client::*)(int,int))&Lua_Client::IncreaseLanguageSkill)
 		.def("GetRawSkill", (int(Lua_Client::*)(int))&Lua_Client::GetRawSkill)
-		.def("GetSkill", (int(Lua_Client::*)(int))&Lua_Client::GetSkill)
 		.def("HasSkill", (bool(Lua_Client::*)(int))&Lua_Client::HasSkill)
 		.def("CanHaveSkill", (bool(Lua_Client::*)(int))&Lua_Client::CanHaveSkill)
 		.def("SetSkill", (void(Lua_Client::*)(int,int))&Lua_Client::SetSkill)

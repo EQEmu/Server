@@ -82,7 +82,6 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "string_ids.h"
 #include "worldserver.h"
 #include "fastmath.h"
-#include "lua_parser.h"
 
 #include <assert.h>
 #include <math.h>
@@ -735,16 +734,6 @@ bool Mob::CheckFizzle(uint16 spell_id)
 
 bool Client::CheckFizzle(uint16 spell_id)
 {
-#ifdef LUA_EQEMU
-	bool ignoreDefault = false;
-	bool fizzle = LuaParser::Instance()->CheckFizzle(this, spell_id, spells[spell_id], ignoreDefault);
-
-	if (!fizzle) {
-		return false;
-	} else if (ignoreDefault) {
-		return true;
-	}
-#endif
 	// GMs don't fizzle
 	if (GetGM()) return(true);
 

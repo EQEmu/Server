@@ -1377,13 +1377,4 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	return retval;
 }
 
-bool LuaParser::CheckFizzle(Client *self, uint16 &spell_id, SPDat_Spell_Struct spell_struct, bool &ignoreDefault)
-{
-	bool retValue = false;
-	for (auto &mod : mods_) {
-		mod.CheckFizzle(self, spell_id, spell_struct, retValue, ignoreDefault);
-	}
-	return retValue;
-}
-
 #endif
