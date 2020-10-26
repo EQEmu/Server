@@ -1322,8 +1322,8 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	const glm::vec4 &client_position       = client->GetPosition();
 	const float     distance_max           = (600.0 * 600.0);
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		spawn = it->second;
+	for (auto & it : mob_list) {
+		spawn = it.second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
 			if (!spawn->ShouldISpawnFor(client)) {
 				continue;
