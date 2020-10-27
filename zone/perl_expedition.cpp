@@ -664,6 +664,12 @@ XS(boot_Expedition) {
 	newXSproto(strcpy(buf, "SetSecondsRemaining"), XS_Expedition_SetSecondsRemaining, file, "$$");
 	newXSproto(strcpy(buf, "SetZoneInLocation"), XS_Expedition_SetZoneInLocation, file, "$$$$$");
 	newXSproto(strcpy(buf, "UpdateLockoutDuration"), XS_Expedition_UpdateLockoutDuration, file, "$$$;$");
+
+	HV* stash = gv_stashpvs("ExpeditionLockMessage", GV_ADD);
+	newCONSTSUB(stash, "None", newSViv(static_cast<int>(ExpeditionLockMessage::None)));
+	newCONSTSUB(stash, "Close", newSViv(static_cast<int>(ExpeditionLockMessage::Close)));
+	newCONSTSUB(stash, "Begin", newSViv(static_cast<int>(ExpeditionLockMessage::Begin)));
+
 	XSRETURN_YES;
 }
 
