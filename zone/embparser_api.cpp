@@ -6389,6 +6389,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
 	newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
 	newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
+	newXS(strcpy(buf, "add_expedition_lockout_all_clients"), XS__add_expedition_lockout_all_clients, file);
 	newXS(strcpy(buf, "add_expedition_lockout_by_char_id"), XS__add_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "addldonloss"), XS__addldonpoints, file);
 	newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
