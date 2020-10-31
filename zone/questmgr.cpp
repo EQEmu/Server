@@ -3272,13 +3272,11 @@ int32 QuestManager::GetZoneID(const char *zone) {
 	return static_cast<int32>(ZoneID(zone));
 }
 
-const char* QuestManager::GetZoneLongName(const char *zone) {
-	char *long_name;
-	content_db.GetZoneLongName(zone, &long_name);
-	std::string ln = long_name;
-	safe_delete_array(long_name);
-
-	return ln.c_str();
+std::string QuestManager::GetZoneLongName(std::string zone_short_name)
+{
+	return zone_store.GetZoneLongName(
+		zone_store.GetZoneID(zone_short_name)
+	);
 }
 
 void QuestManager::CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement) {
@@ -3958,7 +3956,7 @@ void QuestManager::CrossZoneUpdateActivityByGuildID(int guild_id, uint32 task_id
 	}
 }
 
-void QuestManager::WorldWideAssignTask(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {	
+void QuestManager::WorldWideAssignTask(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
 	QuestManagerCurrentQuestVars();
 	if (initiator && owner) {
 		auto pack = new ServerPacket(ServerOP_WWAssignTask, sizeof(WWAssignTask_Struct));
