@@ -6225,9 +6225,9 @@ XS(XS__get_expedition_lockouts_by_char_id) {
 
 	SV* rv = &PL_sv_undef;
 
-	if (!expedition_name.empty() && hash_ref)
+	if (!expedition_name.empty())
 	{
-		rv = sv_2mortal(hash_ref); // ref that owns event hash
+		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
 	}
 	else
 	{
