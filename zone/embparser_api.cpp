@@ -6144,8 +6144,8 @@ XS(XS__get_expedition_lockout_by_char_id) {
 
 	if (it != lockouts.end())
 	{
-		hv_store(hash, "remaining", 9, newSVuv(it->GetSecondsRemaining()), 0);
-		hv_store(hash, "uuid",      4, newSVpv(it->GetExpeditionUUID().c_str(), 0), 0);
+		hv_store(hash, "remaining", strlen("remaining"), newSVuv(it->GetSecondsRemaining()), 0);
+		hv_store(hash, "uuid", strlen("uuid"), newSVpv(it->GetExpeditionUUID().c_str(), 0), 0);
 	}
 
 	ST(0) = sv_2mortal(newRV((SV*)hash)); // hash refcnt: 2 (-1 mortal), reference: 1 (-1 mortal)
@@ -6197,8 +6197,8 @@ XS(XS__get_expedition_lockouts_by_char_id) {
 		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV) // is ref to hash type
 		{
 			HV* details_hash = newHV(); // refcnt +1, reference will take ownership
-			hv_store(details_hash, "remaining", 9, newSVuv(lockout.GetSecondsRemaining()), 0);
-			hv_store(details_hash, "uuid",      4, newSVpv(lockout.GetExpeditionUUID().c_str(), 0), 0);
+			hv_store(details_hash, "remaining", strlen("remaining"), newSVuv(lockout.GetSecondsRemaining()), 0);
+			hv_store(details_hash, "uuid", strlen("uuid"), newSVpv(lockout.GetExpeditionUUID().c_str(), 0), 0);
 
 			HV* event_hash = (HV*)SvRV(*entry);
 			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
