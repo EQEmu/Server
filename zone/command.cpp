@@ -6984,20 +6984,15 @@ void command_dz(Client* c, const Seperator* sep)
 		auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
 		if (expedition)
 		{
-			uint32_t char_id = database.GetCharacterID(sep->arg[3]);
 			auto char_name = FormatName(sep->arg[3]);
-			if (char_id == 0)
-			{
-				c->Message(Chat::Red, fmt::format("Failed to find character id for [{}]", char_name).c_str());
-			}
-			else if (!expedition->HasMember(char_id))
+			if (!expedition->HasMember(char_name))
 			{
 				c->Message(Chat::Red, fmt::format("Character [{}] is not in that expedition", char_name).c_str());
 			}
 			else
 			{
 				c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
-				expedition->SetNewLeader(char_id, char_name);
+				expedition->SendWorldMakeLeaderRequest(c->GetName(), char_name);
 			}
 		}
 		else

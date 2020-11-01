@@ -34,6 +34,7 @@ namespace ExpeditionDatabase
 	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();
 	void UpdateDzDuration(uint16_t instance_id, uint32_t new_duration);
+	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
 };
 
 #endif

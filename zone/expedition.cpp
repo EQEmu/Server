@@ -578,12 +578,6 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 	ProcessMemberRemoved(member.name, member.char_id);
 	SendWorldMemberChanged(member.name, member.char_id, true);
 
-	// live always sends a leader update but we can send only if leader changes
-	if (member.char_id == m_leader.char_id)
-	{
-		ChooseNewLeader();
-	}
-
 	return true;
 }
 
@@ -609,11 +603,6 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	ProcessMemberRemoved(member.name, member.char_id);
 	ProcessMemberAdded(add_client->GetName(), add_client->CharacterID());
 	SendWorldMemberSwapped(member.name, member.char_id, add_client->GetName(), add_client->CharacterID());
-
-	if (!m_members.empty() && member.char_id == m_leader.char_id)
-	{
-		ChooseNewLeader();
-	}
 }
 
 void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
@@ -623,11 +612,11 @@ void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
 		UpdateMemberStatus(client->CharacterID(), status);
 		SendWorldMemberStatus(client->CharacterID(), status);
 
-		// we either changed leader status here or leader was already offline and
-		// a member coming online needs to trigger a leader change
+		// world could detect this itself but it'd have to process member status updates
+		// a member coming online will trigger a leader change if all members were offline
 		if (m_leader.status == ExpeditionMemberStatus::Offline)
 		{
-			ChooseNewLeader();
+			SendWorldExpeditionUpdate(ServerOP_ExpeditionChooseNewLeader);
 		}
 	}
 }
@@ -660,20 +649,6 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 	{
 		m_leader.status = status;
 	}
-}
-
-bool Expedition::ChooseNewLeader()
-{
-	for (const auto& member : m_members)
-	{
-		if (member.char_id != m_leader.char_id && member.status == ExpeditionMemberStatus::Online)
-		{
-			LogExpeditionsModerate("Replacing leader [{}] with [{}]", m_leader.name, member.name);
-			SetNewLeader(member.char_id, member.name);
-			return true;
-		}
-	}
-	return false;
 }
 
 void Expedition::SendClientExpeditionInvite(
@@ -1051,17 +1026,8 @@ void Expedition::DzMakeLeader(Client* requester, std::string new_leader_name)
 		return;
 	}
 
-	// database is not updated until new leader client validated
-	Client* new_leader_client = entity_list.GetClientByName(new_leader_name.c_str());
-	if (new_leader_client)
-	{
-		ProcessMakeLeader(requester, new_leader_client, new_leader_name, true);
-	}
-	else
-	{
-		// new leader not in this zone, let world verify and pass to new leader's zone
-		SendWorldMakeLeaderRequest(requester->GetName(), new_leader_name);
-	}
+	// leader can only be changed by world
+	SendWorldMakeLeaderRequest(requester->GetName(), new_leader_name);
 }
 
 void Expedition::DzRemovePlayer(Client* requester, std::string char_name)
@@ -1164,16 +1130,18 @@ void Expedition::SetLocked(
 	}
 }
 
-void Expedition::SetNewLeader(uint32_t new_leader_id, const std::string& new_leader_name)
+void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 {
-	ExpeditionDatabase::UpdateLeaderID(m_id, new_leader_id);
-	ProcessLeaderChanged(new_leader_id, new_leader_name);
-	SendWorldLeaderChanged();
-}
+	auto new_leader = GetMemberData(new_leader_id);
+	if (new_leader.char_id == 0)
+	{
+		LogExpeditions("Processed invalid new leader id [{}] for expedition [{}]", new_leader_id, m_id);
+		return;
+	}
 
-void Expedition::ProcessLeaderChanged(uint32_t new_leader_id, const std::string& new_leader_name)
-{
-	m_leader = { new_leader_id, new_leader_name, ExpeditionMemberStatus::Online };
+	LogExpeditionsModerate("Replaced [{}] leader [{}] with [{}]", m_id, m_leader.name, new_leader.name);
+
+	m_leader = new_leader;
 
 	// update each client's expedition window in this zone
 	auto outapp_leader = CreateLeaderNamePacket();
@@ -1219,7 +1187,6 @@ void Expedition::ProcessMakeLeader(
 		{
 			new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 		}
-		SetNewLeader(new_leader_client->CharacterID(), new_leader_client->GetName());
 	}
 }
 
@@ -1592,19 +1559,6 @@ void Expedition::SendWorldAddPlayerInvite(
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldLeaderChanged()
-{
-	uint32_t pack_size = sizeof(ServerExpeditionMemberChange_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLeaderChanged, pack_size));
-	auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
-	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
-	buf->char_id = m_leader.char_id;
-	strn0cpy(buf->char_name, m_leader.name.c_str(), sizeof(buf->char_name));
-	worldserver.SendPacket(pack.get());
-}
-
 void Expedition::SendWorldLockoutDuration(
 	const ExpeditionLockoutTimer& lockout, int seconds, bool members_only)
 {
@@ -1894,14 +1848,11 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionLeaderChanged:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
+		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+		if (expedition)
 		{
-			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-			if (expedition)
-			{
-				expedition->ProcessLeaderChanged(buf->char_id, buf->char_name);
-			}
+			expedition->ProcessLeaderChanged(buf->leader_id);
 		}
 		break;
 	}

@@ -30,6 +30,14 @@ extern ZSList zoneserver_list;
 
 ExpeditionState expedition_state;
 
+Expedition* ExpeditionState::GetExpedition(uint32_t expedition_id)
+{
+	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(),
+		[&](const Expedition& expedition) { return expedition.GetID() == expedition_id; });
+
+	return (it != m_expeditions.end()) ? &(*it) : nullptr;
+}
+
 void ExpeditionState::LoadActiveExpeditions()
 {
 	BenchTimer benchmark;
@@ -51,11 +59,8 @@ void ExpeditionState::AddExpedition(uint32_t expedition_id)
 
 	if (expedition.IsValid())
 	{
-		auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
-			return expedition.GetID() == expedition_id;
-		});
-
-		if (it == m_expeditions.end())
+		auto existing_expedition = GetExpedition(expedition_id);
+		if (!existing_expedition)
 		{
 			m_expeditions.emplace_back(expedition);
 		}
@@ -73,41 +78,32 @@ void ExpeditionState::RemoveExpedition(uint32_t expedition_id)
 
 void ExpeditionState::MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove)
 {
-	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
-		return expedition.GetID() == expedition_id;
-	});
-
-	if (it != m_expeditions.end())
+	auto expedition = GetExpedition(expedition_id);
+	if (expedition)
 	{
 		if (remove) {
-			it->RemoveMember(character_id);
+			expedition->RemoveMember(character_id);
 		} else {
-			it->AddMember(character_id);
+			expedition->AddMember(character_id);
 		}
 	}
 }
 
 void ExpeditionState::RemoveAllMembers(uint32_t expedition_id)
 {
-	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
-		return expedition.GetID() == expedition_id;
-	});
-
-	if (it != m_expeditions.end())
+	auto expedition = GetExpedition(expedition_id);
+	if (expedition)
 	{
-		it->RemoveAllMembers();
+		expedition->RemoveAllMembers();
 	}
 }
 
 void ExpeditionState::SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining)
 {
-	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(), [&](const Expedition& expedition) {
-		return expedition.GetID() == expedition_id;
-	});
-
-	if (it != m_expeditions.end())
+	auto expedition = GetExpedition(expedition_id);
+	if (expedition)
 	{
-		it->UpdateDzSecondsRemaining(seconds_remaining);
+		expedition->UpdateDzSecondsRemaining(seconds_remaining);
 	}
 }
 

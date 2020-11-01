@@ -34,6 +34,7 @@ class ExpeditionState
 {
 public:
 	void AddExpedition(uint32_t expedition_id);
+	Expedition* GetExpedition(uint32_t expedition_id);
 	void LoadActiveExpeditions();
 	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
 	void Process();
