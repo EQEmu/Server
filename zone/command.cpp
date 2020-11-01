@@ -6841,14 +6841,20 @@ void command_dz(Client* c, const Seperator* sep)
 			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", zone->expedition_cache.size()).c_str());
 			for (const auto& expedition : zone->expedition_cache)
 			{
+				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#goto {}", expedition.second->GetLeaderName()), false, expedition.second->GetLeaderName());
+				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#zoneinstance {}", expedition.second->GetInstanceID()), false, "zone");
+
 				auto seconds = expedition.second->GetDynamicZone().GetSecondsRemaining();
 
 				c->Message(Chat::White, fmt::format(
-					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] zone: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] {}: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					expedition.second->GetID(),
 					expedition.second->GetDynamicZoneID(),
 					expedition.second->GetName(),
-					expedition.second->GetLeaderName(),
+					leader_saylink,
+					zone_saylink,
 					ZoneName(expedition.second->GetDynamicZone().GetZoneID()),
 					expedition.second->GetDynamicZone().GetZoneID(),
 					expedition.second->GetInstanceID(),
@@ -6932,12 +6938,17 @@ void command_dz(Client* c, const Seperator* sep)
 				bool is_expired = now > expire_time;
 				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
 				{
+					uint32_t instance_id = strtoul(row[2], nullptr, 10);
+					auto zone_saylink = is_expired ? "zone" : EQ::SayLinkEngine::GenerateQuestSaylink(
+						fmt::format("#zoneinstance {}", instance_id), false, "zone");
+
 					c->Message(Chat::White, fmt::format(
-						"dz id: [{}] type: [{}] zone: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+						"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 						strtoul(row[0], nullptr, 10), // dynamic_zone_id
 						strtoul(row[1], nullptr, 10), // dynamic_zone_type
+						zone_saylink,
 						strtoul(row[3], nullptr, 10), // instance_zone_id
-						strtoul(row[2], nullptr, 10), // instance_id
+						instance_id,                  // instance_id
 						strtoul(row[4], nullptr, 10), // instance_zone_version
 						strtoul(row[7], nullptr, 10), // instance member_count
 						seconds / 3600,      // hours
