@@ -164,6 +164,7 @@
 #define ServerOP_ExpeditionLockoutDuration    0x0414
 #define ServerOP_ExpeditionSecondsRemaining   0x0415
 #define ServerOP_ExpeditionExpireWarning      0x0416
+#define ServerOP_ExpeditionChooseNewLeader    0x0417
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -1999,6 +2000,11 @@ struct ServerExpeditionID_Struct {
 	uint32 expedition_id;
 	uint32 sender_zone_id;
 	uint32 sender_instance_id;
+};
+
+struct ServerExpeditionLeaderID_Struct {
+	uint32 expedition_id;
+	uint32 leader_id;
 };
 
 struct ServerExpeditionMemberChange_Struct {

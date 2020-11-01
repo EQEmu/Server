@@ -20,24 +20,81 @@
 
 #include "expedition.h"
 #include "expedition_database.h"
+#include "cliententry.h"
+#include "clientlist.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
 
+extern ClientList client_list;
 extern ZSList zoneserver_list;
 
 Expedition::Expedition(uint32_t expedition_id, uint32_t dz_id, uint32_t dz_instance_id,
-	uint32_t dz_zone_id, uint32_t start_time, uint32_t duration
+	uint32_t dz_zone_id, uint32_t start_time, uint32_t duration, uint32_t leader_id
 ) :
 	m_expedition_id(expedition_id),
 	m_dz_id(dz_id),
 	m_dz_instance_id(dz_instance_id),
 	m_dz_zone_id(dz_zone_id),
 	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
-	m_duration(duration)
+	m_duration(duration),
+	m_leader_id(leader_id)
 {
 	m_expire_time = m_start_time + m_duration;
 	m_warning_cooldown_timer.Enable();
+}
+
+void Expedition::AddMember(uint32_t character_id)
+{
+	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(),
+		[&](uint32_t member_id) { return member_id == character_id; });
+
+	if (it == m_member_ids.end())
+	{
+		m_member_ids.emplace_back(character_id);
+	}
+}
+
+void Expedition::RemoveMember(uint32_t character_id)
+{
+	m_member_ids.erase(std::remove_if(m_member_ids.begin(), m_member_ids.end(),
+		[&](uint32_t member_id) { return member_id == character_id; }
+	), m_member_ids.end());
+
+	if (!m_member_ids.empty() && character_id == m_leader_id)
+	{
+		ChooseNewLeader();
+	}
+}
+
+void Expedition::ChooseNewLeader()
+{
+	// we don't track expedition member status in world so may choose a linkdead member
+	// this is fine since it will trigger another change when that member goes offline
+	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(), [&](uint32_t member_id) {
+		auto member_cle = (member_id != m_leader_id) ? client_list.FindCLEByCharacterID(member_id) : nullptr;
+		return (member_id != m_leader_id && member_cle && member_cle->GetOnline() == CLE_Status::InZone);
+	});
+
+	if (it == m_member_ids.end())
+	{
+		// no online members found, fallback to choosing any member
+		it = std::find_if(m_member_ids.begin(), m_member_ids.end(),
+			[&](uint32_t member_id) { return (member_id != m_leader_id); });
+	}
+
+	if (it != m_member_ids.end())
+	{
+		SetNewLeader(*it);
+	}
+}
+
+void Expedition::SetNewLeader(uint32_t character_id)
+{
+	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_expedition_id, m_leader_id, character_id);
+	ExpeditionDatabase::UpdateLeaderID(m_expedition_id, character_id);
+	m_leader_id = character_id;
+	SendZonesLeaderChanged();
 }
 
 void Expedition::SendZonesExpeditionDeleted()
@@ -66,6 +123,16 @@ void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->minutes_remaining = minutes_remaining;
+	zoneserver_list.SendPacket(pack.get());
+}
+
+void Expedition::SendZonesLeaderChanged()
+{
+	uint32_t pack_size = sizeof(ServerExpeditionLeaderID_Struct);
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLeaderChanged, pack_size));
+	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->leader_id = m_leader_id;
 	zoneserver_list.SendPacket(pack.get());
 }
 

@@ -1362,7 +1362,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		client_list.SendPacket(buf->character_name, pack);
 		break;
 	}
-	case ServerOP_ExpeditionLeaderChanged:
 	case ServerOP_ExpeditionLockout:
 	case ServerOP_ExpeditionLockoutDuration:
 	case ServerOP_ExpeditionLockState:
@@ -1376,6 +1375,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_ExpeditionChooseNewLeader:
 	case ServerOP_ExpeditionCreate:
 	case ServerOP_ExpeditionGetOnlineMembers:
 	case ServerOP_ExpeditionMemberChange:

@@ -77,6 +77,7 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expe
 			instance_list.zone,
 			instance_list.start_time,
 			instance_list.duration,
+			expeditions.leader_id,
 			expedition_members.character_id
 		FROM expeditions
 			INNER JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
@@ -110,13 +111,14 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expe
 					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_instance_id
 					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // dz_zone_id
 					static_cast<uint32_t>(strtoul(row[4], nullptr, 10)), // start_time
-					static_cast<uint32_t>(strtoul(row[5], nullptr, 10))  // duration
+					static_cast<uint32_t>(strtoul(row[5], nullptr, 10)), // duration
+					static_cast<uint32_t>(strtoul(row[6], nullptr, 10))  // leader_id
 				);
 			}
 
 			last_expedition_id = expedition_id;
 
-			uint32_t member_id = static_cast<uint32_t>(strtoul(row[6], nullptr, 10));
+			uint32_t member_id = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
 			expeditions.back().AddMember(member_id);
 		}
 	}
@@ -164,6 +166,17 @@ void ExpeditionDatabase::UpdateDzDuration(uint16_t instance_id, uint32_t new_dur
 		"UPDATE instance_list SET duration = {} WHERE id = {};",
 		new_duration, instance_id
 	);
+
+	database.QueryDatabase(query);
+}
+
+void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id)
+{
+	LogExpeditionsDetail("Updating leader [{}] for expedition [{}]", leader_id, expedition_id);
+
+	auto query = fmt::format(SQL(
+		UPDATE expeditions SET leader_id = {} WHERE id = {};
+	), leader_id, expedition_id);
 
 	database.QueryDatabase(query);
 }

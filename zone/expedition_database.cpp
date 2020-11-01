@@ -629,17 +629,6 @@ void ExpeditionDatabase::InsertMembers(
 	}
 }
 
-void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id)
-{
-	LogExpeditionsDetail("Updating leader [{}] for expedition [{}]", leader_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expeditions SET leader_id = {} WHERE id = {};
-	), leader_id, expedition_id);
-
-	database.QueryDatabase(query);
-}
-
 void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 {
 	LogExpeditionsDetail("Updating lock state [{}] for expedition [{}]", is_locked, expedition_id);

@@ -18,6 +18,7 @@
  *
  */
 
+#include "expedition.h"
 #include "expedition_message.h"
 #include "expedition_state.h"
 #include "cliententry.h"
@@ -34,6 +35,11 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
+	case ServerOP_ExpeditionChooseNewLeader:
+	{
+		ExpeditionMessage::ChooseNewLeader(pack);
+		break;
+	}
 	case ServerOP_ExpeditionCreate:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
@@ -51,8 +57,8 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionMemberSwap:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionMemberSwap_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, buf->remove_char_id, true);
 		expedition_state.MemberChange(buf->expedition_id, buf->add_char_id, false);
+		expedition_state.MemberChange(buf->expedition_id, buf->remove_char_id, true);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
@@ -141,6 +147,12 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 		buf->is_char_online = true;
 		new_leader_zs = new_leader_cle->Server();
 		new_leader_zs->SendPacket(pack);
+
+		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
+		if (expedition)
+		{
+			expedition->SetNewLeader(new_leader_cle->CharID());
+		}
 	}
 
 	// if old and new leader are in the same zone only send one message
@@ -203,5 +215,15 @@ void ExpeditionMessage::RequestInvite(ServerPacket* pack)
 		{
 			cle->Server()->SendPacket(invite_pack.get());
 		}
+	}
+}
+
+void ExpeditionMessage::ChooseNewLeader(ServerPacket* pack)
+{
+	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
+	if (expedition)
+	{
+		expedition->ChooseNewLeader();
 	}
 }
