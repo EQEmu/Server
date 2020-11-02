@@ -559,20 +559,17 @@ bool Client::Process() {
 	}
 
 	if (client_state != CLIENT_LINKDEAD && !eqs->CheckState(ESTABLISHED)) {
+		OnDisconnect(true);
 		LogInfo("Client linkdead: {}", name);
 
 		if (Admin() > 100) {
-			OnDisconnect(true);
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
 			}
 			return false;
 		}
-
-		OnDisconnect(true, true);
-
-		if (!linkdead_timer.Enabled()) {
+		else if (!linkdead_timer.Enabled()) {
 			linkdead_timer.Start(RuleI(Zone, ClientLinkdeadMS));
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
@@ -691,7 +688,7 @@ bool Client::Process() {
 }
 
 /* Just a set of actions preformed all over in Client::Process */
-void Client::OnDisconnect(bool hard_disconnect, bool linkdead) {
+void Client::OnDisconnect(bool hard_disconnect) {
 	if(hard_disconnect)
 	{
 		LeaveGroup();
@@ -715,7 +712,7 @@ void Client::OnDisconnect(bool hard_disconnect, bool linkdead) {
 	}
 
 	Expedition* expedition = GetExpedition();
-	if (expedition && !bZoning && !linkdead && !linkdead_timer.Enabled())
+	if (expedition && !bZoning)
 	{
 		expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
 	}
