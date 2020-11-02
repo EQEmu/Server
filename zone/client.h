@@ -739,7 +739,7 @@ public:
 
 	bool TGB() const { return tgb; }
 
-	void OnDisconnect(bool hard_disconnect, bool linkdead = false);
+	void OnDisconnect(bool hard_disconnect);
 
 	uint16 GetSkillPoints() { return m_pp.points;}
 	void SetSkillPoints(int inp) { m_pp.points = inp;}
