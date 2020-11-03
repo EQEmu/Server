@@ -567,7 +567,7 @@ void Expedition::RemoveAllMembers(bool enable_removal_timers)
 bool Expedition::RemoveMember(const std::string& remove_char_name)
 {
 	auto member = GetMemberData(remove_char_name);
-	if (member.char_id == 0 || member.name.empty())
+	if (!member.IsValid())
 	{
 		return false;
 	}
@@ -589,7 +589,7 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	}
 
 	auto member = GetMemberData(remove_char_name);
-	if (member.char_id == 0 || member.name.empty())
+	if (!member.IsValid())
 	{
 		return;
 	}
@@ -624,7 +624,7 @@ void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
 void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberStatus status)
 {
 	auto member_data = GetMemberData(update_member_id);
-	if (member_data.char_id == 0 || member_data.name.empty())
+	if (!member_data.IsValid())
 	{
 		return;
 	}
@@ -886,7 +886,7 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 		return false;
 	}
 
-	if (m_leader.char_id == 0)
+	if (!m_leader.IsValid())
 	{
 		requester->MessageString(Chat::Red, UNABLE_RETRIEVE_LEADER); // unconfirmed message
 		return false;
@@ -958,7 +958,7 @@ void Expedition::DzAddPlayer(
 	else
 	{
 		auto member_data = GetMemberData(add_char_name);
-		if (member_data.char_id != 0)
+		if (member_data.IsValid())
 		{
 			// live prioritizes offline message before already a member message
 			if (member_data.status == ExpeditionMemberStatus::Offline)
@@ -1020,7 +1020,7 @@ void Expedition::DzMakeLeader(Client* requester, std::string new_leader_name)
 	}
 
 	auto new_leader_data = GetMemberData(new_leader_name);
-	if (new_leader_data.char_id == 0)
+	if (!new_leader_data.IsValid())
 	{
 		requester->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, new_leader_name.c_str());
 		return;
@@ -1133,7 +1133,7 @@ void Expedition::SetLocked(
 void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 {
 	auto new_leader = GetMemberData(new_leader_id);
-	if (new_leader.char_id == 0)
+	if (!new_leader.IsValid())
 	{
 		LogExpeditions("Processed invalid new leader id [{}] for expedition [{}]", new_leader_id, m_id);
 		return;
