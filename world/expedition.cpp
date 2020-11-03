@@ -55,6 +55,12 @@ void Expedition::AddMember(uint32_t character_id)
 	}
 }
 
+bool Expedition::HasMember(uint32_t character_id)
+{
+	return std::any_of(m_member_ids.begin(), m_member_ids.end(),
+		[&](uint32_t member_id) { return member_id == character_id; });
+}
+
 void Expedition::RemoveMember(uint32_t character_id)
 {
 	m_member_ids.erase(std::remove_if(m_member_ids.begin(), m_member_ids.end(),
@@ -89,12 +95,18 @@ void Expedition::ChooseNewLeader()
 	}
 }
 
-void Expedition::SetNewLeader(uint32_t character_id)
+bool Expedition::SetNewLeader(uint32_t character_id)
 {
+	if (!HasMember(character_id))
+	{
+		return false;
+	}
+
 	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_expedition_id, m_leader_id, character_id);
 	ExpeditionDatabase::UpdateLeaderID(m_expedition_id, character_id);
 	m_leader_id = character_id;
 	SendZonesLeaderChanged();
+	return true;
 }
 
 void Expedition::SendZonesExpeditionDeleted()

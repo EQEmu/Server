@@ -41,6 +41,7 @@ public:
 	uint32_t GetID() const { return m_expedition_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_dz_instance_id); }
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_dz_zone_id); }
+	bool HasMember(uint32_t character_id);
 	bool IsEmpty() const { return m_member_ids.empty(); }
 	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
 	bool IsPendingDelete() const { return m_pending_delete; }
@@ -48,7 +49,7 @@ public:
 	void SendZonesDurationUpdate();
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
-	void SetNewLeader(uint32_t new_leader_id);
+	bool SetNewLeader(uint32_t new_leader_id);
 	void SetPendingDelete(bool pending) { m_pending_delete = pending; }
 	void UpdateDzSecondsRemaining(uint32_t seconds_remaining);
 	std::chrono::system_clock::duration GetRemainingDuration() const;

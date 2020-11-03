@@ -181,7 +181,8 @@ private:
 	void ProcessLeaderChanged(uint32_t new_leader_id);
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
-	void ProcessMakeLeader(Client* old_leader, Client* new_leader, const std::string& new_leader_name, bool is_online);
+	void ProcessMakeLeader(Client* old_leader, Client* new_leader,
+		const std::string& new_leader_name, bool is_success, bool is_online);
 	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
 	void ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
