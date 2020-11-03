@@ -6985,15 +6985,8 @@ void command_dz(Client* c, const Seperator* sep)
 		if (expedition)
 		{
 			auto char_name = FormatName(sep->arg[3]);
-			if (!expedition->HasMember(char_name))
-			{
-				c->Message(Chat::Red, fmt::format("Character [{}] is not in that expedition", char_name).c_str());
-			}
-			else
-			{
-				c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
-				expedition->SendWorldMakeLeaderRequest(c->GetName(), char_name);
-			}
+			c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
+			expedition->SendWorldMakeLeaderRequest(c->GetName(), char_name);
 		}
 		else
 		{

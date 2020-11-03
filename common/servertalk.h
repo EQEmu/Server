@@ -2108,6 +2108,14 @@ struct ServerDzCommand_Struct {
 	char   remove_name[64];    // used for swap command
 };
 
+struct ServerDzCommandMakeLeader_Struct {
+	uint32 expedition_id;
+	uint8  is_online;  // set by world, 0: new leader name offline, 1: online
+	uint8  is_success; // set by world, 0: makeleader failed, 1: success (is online member)
+	char   requester_name[64];
+	char   new_leader_name[64];
+};
+
 struct ServerDzLocation_Struct {
 	uint32 owner_id;           // system associated with the dz (expedition, shared task, etc)
 	uint16 dz_zone_id;

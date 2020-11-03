@@ -1010,24 +1010,14 @@ void Expedition::DzMakeLeader(Client* requester, std::string new_leader_name)
 		return;
 	}
 
-	// live uses sanitized input name for all /dzmakeleader messages
-	new_leader_name = FormatName(new_leader_name);
-
 	if (new_leader_name.empty())
 	{
 		requester->MessageString(Chat::Red, DZMAKELEADER_NOT_ONLINE, new_leader_name.c_str());
 		return;
 	}
 
-	auto new_leader_data = GetMemberData(new_leader_name);
-	if (!new_leader_data.IsValid())
-	{
-		requester->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, new_leader_name.c_str());
-		return;
-	}
-
 	// leader can only be changed by world
-	SendWorldMakeLeaderRequest(requester->GetName(), new_leader_name);
+	SendWorldMakeLeaderRequest(requester->GetName(), FormatName(new_leader_name));
 }
 
 void Expedition::DzRemovePlayer(Client* requester, std::string char_name)
@@ -1160,33 +1150,29 @@ void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 	}
 }
 
-void Expedition::ProcessMakeLeader(
-	Client* old_leader_client, Client* new_leader_client, const std::string& new_leader_name, bool is_online)
+void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader_client,
+	const std::string& new_leader_name, bool is_success, bool is_online)
 {
 	if (old_leader_client)
 	{
-		// online flag is set by world to verify new leader is online or not
-		if (is_online)
+		// success flag is set by world to indicate new leader set to an online member
+		if (is_success)
 		{
 			old_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_NAME, new_leader_name.c_str());
 		}
-		else
+		else if (!is_online)
 		{
 			old_leader_client->MessageString(Chat::Red, DZMAKELEADER_NOT_ONLINE, new_leader_name.c_str());
 		}
-	}
-
-	if (!new_leader_client)
-	{
-		new_leader_client = entity_list.GetClientByName(new_leader_name.c_str());
-	}
-
-	if (new_leader_client)
-	{
-		if (!RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+		else
 		{
-			new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
+			old_leader_client->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, new_leader_name.c_str());
 		}
+	}
+
+	if (is_success && new_leader_client && !RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+	{
+		new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 	}
 }
 
@@ -1596,13 +1582,12 @@ void Expedition::SendWorldLockoutUpdate(
 void Expedition::SendWorldMakeLeaderRequest(
 	const std::string& requester_name, const std::string& new_leader_name)
 {
-	uint32_t pack_size = sizeof(ServerDzCommand_Struct);
+	uint32_t pack_size = sizeof(ServerDzCommandMakeLeader_Struct);
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzMakeLeader, pack_size));
-	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
+	auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	buf->is_char_online = false;
 	strn0cpy(buf->requester_name, requester_name.c_str(), sizeof(buf->requester_name));
-	strn0cpy(buf->target_name, new_leader_name.c_str(), sizeof(buf->target_name));
+	strn0cpy(buf->new_leader_name, new_leader_name.c_str(), sizeof(buf->new_leader_name));
 	worldserver.SendPacket(pack.get());
 }
 
@@ -1999,13 +1984,14 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	}
 	case ServerOP_ExpeditionDzMakeLeader:
 	{
-		auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
+		auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (expedition)
 		{
 			auto old_leader_client = entity_list.GetClientByName(buf->requester_name);
-			auto new_leader_client = entity_list.GetClientByName(buf->target_name);
-			expedition->ProcessMakeLeader(old_leader_client, new_leader_client, buf->target_name, buf->is_char_online);
+			auto new_leader_client = entity_list.GetClientByName(buf->new_leader_name);
+			expedition->ProcessMakeLeader(old_leader_client, new_leader_client,
+				buf->new_leader_name, buf->is_success, buf->is_online);
 		}
 		break;
 	}

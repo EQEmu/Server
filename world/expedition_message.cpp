@@ -137,22 +137,22 @@ void ExpeditionMessage::AddPlayer(ServerPacket* pack)
 
 void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 {
-	auto buf = reinterpret_cast<ServerDzCommand_Struct*>(pack->pBuffer);
+	auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
 
 	// notify requester (old leader) and new leader of the result
 	ZoneServer* new_leader_zs = nullptr;
-	ClientListEntry* new_leader_cle = client_list.FindCharacter(buf->target_name);
+	ClientListEntry* new_leader_cle = client_list.FindCharacter(buf->new_leader_name);
 	if (new_leader_cle && new_leader_cle->Server())
 	{
-		buf->is_char_online = true;
-		new_leader_zs = new_leader_cle->Server();
-		new_leader_zs->SendPacket(pack);
-
 		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
 		if (expedition)
 		{
-			expedition->SetNewLeader(new_leader_cle->CharID());
+			buf->is_success = expedition->SetNewLeader(new_leader_cle->CharID());
 		}
+
+		buf->is_online = true;
+		new_leader_zs = new_leader_cle->Server();
+		new_leader_zs->SendPacket(pack);
 	}
 
 	// if old and new leader are in the same zone only send one message
