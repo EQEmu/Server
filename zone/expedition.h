@@ -68,6 +68,8 @@ struct ExpeditionMember
 		: char_id(char_id_), name(name_) {}
 	ExpeditionMember(uint32_t char_id_, const std::string& name_, ExpeditionMemberStatus status_)
 		: char_id(char_id_), name(name_), status(status_) {}
+
+	bool IsValid() const { return char_id != 0 && !name.empty(); }
 };
 
 class Expedition
