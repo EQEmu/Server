@@ -634,6 +634,20 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 		status = ExpeditionMemberStatus::Online;
 	}
 
+	if (update_member_id == m_leader.char_id)
+	{
+		m_leader.status = status;
+	}
+
+	// if zone already had this member status cached avoid packet update to clients
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const ExpeditionMember& member) { return member.char_id == update_member_id; });
+
+	if (it != m_members.end() && it->status == status)
+	{
+		return;
+	}
+
 	auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, status);
 
 	for (auto& member : m_members)
@@ -648,11 +662,6 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 		{
 			member_client->QueuePacket(outapp_member_status.get());
 		}
-	}
-
-	if (update_member_id == m_leader.char_id)
-	{
-		m_leader.status = status;
 	}
 }
 
