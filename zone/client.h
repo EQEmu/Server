@@ -1136,8 +1136,8 @@ public:
 	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
 	bool IsInExpedition() const { return m_expedition_id != 0; }
 	void RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db = false);
-	void RemoveExpeditionLockout(
-		const std::string& expedition_name, const std::string& event_name, bool update_db = false, bool update_client = true);
+	void RemoveExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, bool update_db = false);
 	void RequestPendingExpeditionInvite();
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
