@@ -6986,7 +6986,7 @@ void command_dz(Client* c, const Seperator* sep)
 		{
 			auto char_name = FormatName(sep->arg[3]);
 			c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
-			expedition->SendWorldMakeLeaderRequest(c->GetName(), char_name);
+			expedition->SendWorldMakeLeaderRequest(c->CharacterID(), char_name);
 		}
 		else
 		{

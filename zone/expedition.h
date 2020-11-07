@@ -145,7 +145,7 @@ public:
 	void SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name);
 
 	void SendClientExpeditionInfo(Client* client);
-	void SendWorldMakeLeaderRequest(const std::string& requester_name, const std::string& new_leader_name);
+	void SendWorldMakeLeaderRequest(uint32_t requester_id, const std::string& new_leader_name);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 
 	void DzAddPlayer(Client* requester, const std::string& add_char_name, const std::string& swap_remove_name = {});

@@ -156,7 +156,7 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	}
 
 	// if old and new leader are in the same zone only send one message
-	ClientListEntry* requester_cle = client_list.FindCharacter(buf->requester_name);
+	ClientListEntry* requester_cle = client_list.FindCLEByCharacterID(buf->requester_id);
 	if (requester_cle && requester_cle->Server() && requester_cle->Server() != new_leader_zs)
 	{
 		requester_cle->Server()->SendPacket(pack);
