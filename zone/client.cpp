@@ -9675,7 +9675,7 @@ void Client::AddExpeditionLockoutDuration(
 }
 
 void Client::RemoveExpeditionLockout(
-	const std::string& expedition_name, const std::string& event_name, bool update_db, bool update_client)
+	const std::string& expedition_name, const std::string& event_name, bool update_db)
 {
 	m_expedition_lockouts.erase(std::remove_if(m_expedition_lockouts.begin(), m_expedition_lockouts.end(),
 		[&](const ExpeditionLockoutTimer& lockout) {
@@ -9688,10 +9688,7 @@ void Client::RemoveExpeditionLockout(
 		ExpeditionDatabase::DeleteCharacterLockout(CharacterID(), expedition_name, event_name);
 	}
 
-	if (update_client)
-	{
-		SendExpeditionLockoutTimers();
-	}
+	SendExpeditionLockoutTimers();
 }
 
 void Client::RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db)
