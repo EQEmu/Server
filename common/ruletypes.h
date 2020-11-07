@@ -790,6 +790,7 @@ RULE_INT(Expedition, EmptyDzShutdownDelaySeconds, 1500, "Seconds to set dynamic 
 RULE_INT(Expedition, WorldExpeditionProcessRateMS, 6000, "Timer interval (ms) that world checks expedition states")
 RULE_BOOL(Expedition, AlwaysNotifyNewLeaderOnChange, false, "Always notify clients when made expedition leader. If false (live-like) new leaders are only notified when made leader via /dzmakeleader")
 RULE_REAL(Expedition, LockoutDurationMultiplier, 1.0, "Multiplies lockout duration by this value when new lockouts are added")
+RULE_BOOL(Expedition, EnableInDynamicZoneStatus, false, "Enables the 'In Dynamic Zone' member status in expedition window. If false (live-like) players inside the dz will show as 'Online'")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(DynamicZone)

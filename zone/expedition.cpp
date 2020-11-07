@@ -629,6 +629,11 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 		return;
 	}
 
+	if (status == ExpeditionMemberStatus::InDynamicZone && !RuleB(Expedition, EnableInDynamicZoneStatus))
+	{
+		status = ExpeditionMemberStatus::Online;
+	}
+
 	auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, status);
 
 	for (auto& member : m_members)
