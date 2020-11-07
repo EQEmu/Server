@@ -1022,7 +1022,7 @@ void Expedition::DzMakeLeader(Client* requester, std::string new_leader_name)
 	}
 
 	// leader can only be changed by world
-	SendWorldMakeLeaderRequest(requester->GetName(), FormatName(new_leader_name));
+	SendWorldMakeLeaderRequest(requester->CharacterID(), FormatName(new_leader_name));
 }
 
 void Expedition::DzRemovePlayer(Client* requester, std::string char_name)
@@ -1584,14 +1584,13 @@ void Expedition::SendWorldLockoutUpdate(
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldMakeLeaderRequest(
-	const std::string& requester_name, const std::string& new_leader_name)
+void Expedition::SendWorldMakeLeaderRequest(uint32_t requester_id, const std::string& new_leader_name)
 {
 	uint32_t pack_size = sizeof(ServerDzCommandMakeLeader_Struct);
 	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzMakeLeader, pack_size));
 	auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	strn0cpy(buf->requester_name, requester_name.c_str(), sizeof(buf->requester_name));
+	buf->requester_id = requester_id;
 	strn0cpy(buf->new_leader_name, new_leader_name.c_str(), sizeof(buf->new_leader_name));
 	worldserver.SendPacket(pack.get());
 }
@@ -1993,7 +1992,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 		if (expedition)
 		{
-			auto old_leader_client = entity_list.GetClientByName(buf->requester_name);
+			auto old_leader_client = entity_list.GetClientByCharID(buf->requester_id);
 			auto new_leader_client = entity_list.GetClientByName(buf->new_leader_name);
 			expedition->ProcessMakeLeader(old_leader_client, new_leader_client,
 				buf->new_leader_name, buf->is_success, buf->is_online);
