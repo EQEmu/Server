@@ -6838,28 +6838,39 @@ void command_dz(Client* c, const Seperator* sep)
 	{
 		if (strcasecmp(sep->arg[2], "list") == 0)
 		{
-			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", zone->expedition_cache.size()).c_str());
+			std::vector<Expedition*> expeditions;
 			for (const auto& expedition : zone->expedition_cache)
 			{
-				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
-					"#goto {}", expedition.second->GetLeaderName()), false, expedition.second->GetLeaderName());
-				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
-					"#zoneinstance {}", expedition.second->GetInstanceID()), false, "zone");
+				expeditions.emplace_back(expedition.second.get());
+			}
 
-				auto seconds = expedition.second->GetDynamicZone().GetSecondsRemaining();
+			std::sort(expeditions.begin(), expeditions.end(),
+				[](const Expedition* lhs, const Expedition* rhs) {
+					return lhs->GetID() < rhs->GetID();
+				});
+
+			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", expeditions.size()).c_str());
+			for (const auto& expedition : expeditions)
+			{
+				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#goto {}", expedition->GetLeaderName()), false, expedition->GetLeaderName());
+				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#zoneinstance {}", expedition->GetInstanceID()), false, "zone");
+
+				auto seconds = expedition->GetDynamicZone().GetSecondsRemaining();
 
 				c->Message(Chat::White, fmt::format(
 					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] {}: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
-					expedition.second->GetID(),
-					expedition.second->GetDynamicZoneID(),
-					expedition.second->GetName(),
+					expedition->GetID(),
+					expedition->GetDynamicZoneID(),
+					expedition->GetName(),
 					leader_saylink,
 					zone_saylink,
-					ZoneName(expedition.second->GetDynamicZone().GetZoneID()),
-					expedition.second->GetDynamicZone().GetZoneID(),
-					expedition.second->GetInstanceID(),
-					expedition.second->GetDynamicZone().GetZoneVersion(),
-					expedition.second->GetMemberCount(),
+					ZoneName(expedition->GetDynamicZone().GetZoneID()),
+					expedition->GetDynamicZone().GetZoneID(),
+					expedition->GetInstanceID(),
+					expedition->GetDynamicZone().GetZoneVersion(),
+					expedition->GetMemberCount(),
 					seconds / 3600,      // hours
 					(seconds / 60) % 60, // minutes
 					seconds % 60         // seconds
@@ -6918,7 +6929,8 @@ void command_dz(Client* c, const Seperator* sep)
 			FROM dynamic_zones
 				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
-			GROUP BY instance_list.id;
+			GROUP BY instance_list.id
+			ORDER BY dynamic_zones.id;
 		);
 
 		auto results = database.QueryDatabase(query);
