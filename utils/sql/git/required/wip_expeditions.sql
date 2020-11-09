@@ -48,7 +48,6 @@ CREATE TABLE `character_expedition_lockouts` (
 	`expire_time` DATETIME NOT NULL DEFAULT current_timestamp(),
 	`duration` INT(10) UNSIGNED NOT NULL DEFAULT 0,
 	`from_expedition_uuid` VARCHAR(36) NOT NULL,
-	`is_pending` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `character_id_expedition_name_event_name` (`character_id`, `expedition_name`, `event_name`)
 )

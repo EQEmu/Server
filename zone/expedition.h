@@ -136,6 +136,7 @@ public:
 	bool HasReplayLockout();
 	void RemoveLockout(const std::string& event_name);
 	void SetReplayLockoutOnMemberJoin(bool add_on_join, bool update_db = false);
+	void SyncCharacterLockouts(uint32_t character_id, std::vector<ExpeditionLockoutTimer>& client_lockouts);
 	void UpdateLockoutDuration(const std::string& event_name, uint32_t seconds, bool members_only = true);
 
 	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t spawn_id);

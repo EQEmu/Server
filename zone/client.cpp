@@ -9552,16 +9552,18 @@ void Client::UpdateExpeditionInfoAndLockouts()
 	// this is processed by client after entering a zone
 	SendDzCompassUpdate();
 
+	m_expedition_lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
+
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
 		expedition->SendClientExpeditionInfo(this);
 
-		// live only adds lockouts obtained during the active expedition to new
+		// live synchronizes lockouts obtained during the active expedition to
 		// members once they zone into the expedition's dynamic zone instance
 		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
 		{
-			ExpeditionDatabase::AssignPendingLockouts(CharacterID(), expedition->GetName());
+			expedition->SyncCharacterLockouts(CharacterID(), m_expedition_lockouts);
 			expedition->SetMemberStatus(this, ExpeditionMemberStatus::InDynamicZone);
 		}
 		else
@@ -9570,7 +9572,7 @@ void Client::UpdateExpeditionInfoAndLockouts()
 		}
 	}
 
-	LoadAllExpeditionLockouts();
+	SendExpeditionLockoutTimers();
 
 	// ask world for any pending invite we saved from a previous zone
 	RequestPendingExpeditionInvite();
@@ -9618,7 +9620,7 @@ void Client::AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool up
 
 	if (update_db) // for quest api
 	{
-		ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { lockout }, true);
+		ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { lockout });
 	}
 
 	SendExpeditionLockoutTimers();
@@ -9651,7 +9653,7 @@ void Client::AddExpeditionLockoutDuration(
 
 		if (update_db)
 		{
-			ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { *it }, true);
+			ExpeditionDatabase::InsertCharacterLockouts(CharacterID(), { *it });
 		}
 
 		SendExpeditionLockoutTimers();
@@ -9740,12 +9742,6 @@ bool Client::HasExpeditionLockout(
 	const std::string& expedition_name, const std::string& event_name, bool include_expired)
 {
 	return (GetExpeditionLockout(expedition_name, event_name, include_expired) != nullptr);
-}
-
-void Client::LoadAllExpeditionLockouts()
-{
-	m_expedition_lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
-	SendExpeditionLockoutTimers();
 }
 
 void Client::SendExpeditionLockoutTimers()

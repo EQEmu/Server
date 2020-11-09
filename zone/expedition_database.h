@@ -52,23 +52,22 @@ namespace ExpeditionDatabase
 	void DeleteMember(uint32_t expedition_id, uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id);
 	void DeleteAllCharacterLockouts(uint32_t character_id, const std::string& expedition_name);
-	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name, const std::string& event_name);
+	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name,
+		const std::string& event_name);
 	void DeleteLockout(uint32_t expedition_id, const std::string& event_name);
-	void DeleteMembersLockout(
-		const std::vector<ExpeditionMember>& members, const std::string& expedition_name, const std::string& event_name);
-	void AssignPendingLockouts(uint32_t character_id, const std::string& expedition_name);
-	void DeletePendingLockouts(uint32_t character_id);
-	void DeleteAllMembersPendingLockouts(const std::vector<ExpeditionMember>& members);
+	void DeleteMembersLockout(const std::vector<ExpeditionMember>& members,
+		const std::string& expedition_name, const std::string& event_name);
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
 	std::pair<std::vector<ExpeditionLockoutTimer>, std::vector<uint32_t>> GetMembersLockout(
 		const std::vector<ExpeditionMember>& members, const std::string& expedition_name,
 		const std::string& event_name);
-	void InsertCharacterLockouts(
-		uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
-		bool replace_timer, bool is_pending = false);
-	void InsertMembersLockout(const std::vector<ExpeditionMember>& members, const ExpeditionLockoutTimer& lockout);
+	void InsertCharacterLockouts(uint32_t character_id,
+		const std::vector<ExpeditionLockoutTimer>& lockouts);
+	void InsertMembersLockout(const std::vector<ExpeditionMember>& members,
+		const ExpeditionLockoutTimer& lockout);
 	void InsertLockout(uint32_t expedition_id, const ExpeditionLockoutTimer& lockout);
-	void InsertLockouts(uint32_t expedition_id, const std::unordered_map<std::string, ExpeditionLockoutTimer>& lockouts);
+	void InsertLockouts(uint32_t expedition_id,
+		const std::unordered_map<std::string, ExpeditionLockoutTimer>& lockouts);
 	void InsertMember(uint32_t expedition_id, uint32_t character_id);
 	void InsertMembers(uint32_t expedition_id, const std::vector<ExpeditionMember>& members);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
