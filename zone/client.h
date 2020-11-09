@@ -1143,7 +1143,6 @@ public:
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
 	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
-	void LoadAllExpeditionLockouts();
 	void UpdateExpeditionInfoAndLockouts();
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);

@@ -298,7 +298,6 @@ void Expedition::SaveMembers(ExpeditionRequest& request)
 	}
 
 	ExpeditionDatabase::InsertMembers(m_id, m_members);
-	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
 	m_dynamiczone.SaveInstanceMembersToDatabase(member_ids);
 }
 
@@ -555,7 +554,6 @@ void Expedition::RemoveAllMembers(bool enable_removal_timers)
 {
 	m_dynamiczone.RemoveAllCharacters(enable_removal_timers);
 
-	ExpeditionDatabase::DeleteAllMembersPendingLockouts(m_members);
 	ExpeditionDatabase::DeleteAllMembers(m_id);
 
 	SendUpdatesToZoneMembers(true);
@@ -849,38 +847,19 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 	{
 		SendLeaderMessage(leader_client, Chat::Yellow, EXPEDITION_INVITE_ACCEPTED, { add_client->GetName() });
 
-		// insert pending lockouts client will receive when entering dynamic zone.
-		// only lockouts missing from client when they join are added. client may
-		// have a lockout that expires after joining and shouldn't receive it again
-		ExpeditionDatabase::DeletePendingLockouts(add_client->CharacterID());
-
-		std::vector<ExpeditionLockoutTimer> pending_lockouts;
-		for (const auto& lockout_iter : m_lockouts)
+		// replay timers are optionally added to new members on join with fresh expire time
+		if (m_add_replay_on_join)
 		{
-			const ExpeditionLockoutTimer& lockout = lockout_iter.second;
-			if (lockout.IsFromExpedition(m_uuid) &&
-			    !add_client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
+			auto replay_lockout = m_lockouts.find(DZ_REPLAY_TIMER_NAME);
+			if (replay_lockout != m_lockouts.end() &&
+			    replay_lockout->second.IsFromExpedition(m_uuid) &&
+			    !add_client->HasExpeditionLockout(m_expedition_name, DZ_REPLAY_TIMER_NAME))
 			{
-				// replay timers are optionally added to new members immediately on
-				// join with a fresh expire time using the original duration.
-				if (lockout.IsReplayTimer())
-				{
-					if (m_add_replay_on_join)
-					{
-						ExpeditionLockoutTimer replay_timer = lockout;
-						replay_timer.Reset();
-						add_client->AddExpeditionLockout(replay_timer, true);
-					}
-				}
-				else if (!lockout.IsExpired())
-				{
-					pending_lockouts.emplace_back(lockout);
-				}
+				ExpeditionLockoutTimer replay_timer = replay_lockout->second; // copy
+				replay_timer.Reset();
+				add_client->AddExpeditionLockout(replay_timer, true);
 			}
 		}
-
-		ExpeditionDatabase::InsertCharacterLockouts(
-			add_client->CharacterID(), pending_lockouts, false, true);
 
 		if (was_swap_invite)
 		{
@@ -1237,7 +1216,6 @@ void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint
 				// live doesn't clear expedition info on clients removed while inside dz.
 				// it instead let's the dz kick timer do it even if character zones out
 				// before it triggers. for simplicity we'll always clear immediately
-				ExpeditionDatabase::DeletePendingLockouts(member_client->CharacterID());
 				member_client->SetExpeditionID(0);
 				member_client->SendDzCompassUpdate();
 				member_client->QueuePacket(CreateInfoPacket(true).get());
@@ -1734,7 +1712,7 @@ void Expedition::AddLockoutByCharacterID(
 	if (character_id)
 	{
 		auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
-		ExpeditionDatabase::InsertCharacterLockouts(character_id, { lockout }, true);
+		ExpeditionDatabase::InsertCharacterLockouts(character_id, { lockout });
 		SendWorldCharacterLockout(character_id, lockout, false);
 	}
 }
@@ -2255,4 +2233,48 @@ void Expedition::SendMembersExpireWarning(uint32_t minutes_remaining)
 				fmt::format_int(minutes_remaining).c_str());
 		}
 	}
+}
+
+void Expedition::SyncCharacterLockouts(
+	uint32_t character_id, std::vector<ExpeditionLockoutTimer>& client_lockouts)
+{
+	// adds missing event lockouts to client for this expedition and replaces
+	// client timers that are both shorter and from another expedition
+	BenchTimer benchmark;
+
+	bool modified = false;
+
+	for (const auto& lockout_iter : m_lockouts)
+	{
+		const ExpeditionLockoutTimer& lockout = lockout_iter.second;
+		if (lockout.IsReplayTimer() || lockout.IsExpired() || lockout.GetExpeditionUUID() != m_uuid)
+		{
+			continue;
+		}
+
+		auto client_lockout_iter = std::find_if(client_lockouts.begin(), client_lockouts.end(),
+			[&](const ExpeditionLockoutTimer& client_lockout) {
+				return client_lockout.IsSameLockout(lockout);
+			});
+
+		if (client_lockout_iter == client_lockouts.end())
+		{
+			modified = true;
+			client_lockouts.emplace_back(lockout); // insert missing
+		}
+		else if (client_lockout_iter->GetSecondsRemaining() < lockout.GetSecondsRemaining() &&
+		         client_lockout_iter->GetExpeditionUUID() != m_uuid)
+		{
+			modified = true;
+			client_lockouts.erase(client_lockout_iter);
+			client_lockouts.emplace_back(lockout); // replaced existing
+		}
+	}
+
+	if (modified)
+	{
+		ExpeditionDatabase::InsertCharacterLockouts(character_id, client_lockouts);
+	}
+
+	LogExpeditionsDetail("Syncing character lockouts with expedition took [{}] s", benchmark.elapsed());
 }

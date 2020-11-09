@@ -110,7 +110,7 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(ui
 			UNIX_TIMESTAMP(expire_time),
 			duration
 		FROM character_expedition_lockouts
-		WHERE character_id = {} AND is_pending = FALSE AND expire_time > NOW();
+		WHERE character_id = {} AND expire_time > NOW();
 	), character_id);
 
 	auto results = database.QueryDatabase(query);
@@ -147,7 +147,6 @@ std::vector<ExpeditionLockoutTimer> ExpeditionDatabase::LoadCharacterLockouts(
 		FROM character_expedition_lockouts
 		WHERE
 			character_id = {}
-			AND is_pending = FALSE
 			AND expire_time > NOW()
 			AND expedition_name = '{}';
 	), character_id, EscapeString(expedition_name));
@@ -250,7 +249,6 @@ MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
 			FROM character_data
 				LEFT JOIN character_expedition_lockouts lockout
 					ON character_data.id = lockout.character_id
-					AND lockout.is_pending = FALSE
 					AND lockout.expire_time > NOW()
 					AND lockout.expedition_name = '{}'
 				LEFT JOIN expedition_members member ON character_data.id = member.character_id
@@ -306,7 +304,6 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 		DELETE FROM character_expedition_lockouts
 		WHERE
 			character_id = {}
-			AND is_pending = FALSE
 			AND expedition_name = '{}'
 			AND event_name = '{}';
 	), character_id, EscapeString(expedition_name), EscapeString(event_name));
@@ -334,61 +331,9 @@ void ExpeditionDatabase::DeleteMembersLockout(
 			DELETE FROM character_expedition_lockouts
 			WHERE character_id
 				IN ({})
-				AND is_pending = FALSE
 				AND expedition_name = '{}'
 				AND event_name = '{}';
 		), query_character_ids, EscapeString(expedition_name), EscapeString(event_name));
-
-		database.QueryDatabase(query);
-	}
-}
-
-void ExpeditionDatabase::AssignPendingLockouts(uint32_t character_id, const std::string& expedition_name)
-{
-	LogExpeditionsDetail("Assigning character [{}] pending lockouts [{}]", character_id, expedition_name);
-
-	auto query = fmt::format(SQL(
-		UPDATE character_expedition_lockouts
-		SET is_pending = FALSE
-		WHERE
-			character_id = {}
-			AND is_pending = TRUE
-			AND expedition_name = '{}';
-	), character_id, EscapeString(expedition_name));
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeletePendingLockouts(uint32_t character_id)
-{
-	LogExpeditionsDetail("Deleting character [{}] pending lockouts", character_id);
-
-	auto query = fmt::format(SQL(
-		DELETE FROM character_expedition_lockouts
-		WHERE character_id = {} AND is_pending = TRUE;
-	), character_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteAllMembersPendingLockouts(const std::vector<ExpeditionMember>& members)
-{
-	LogExpeditionsDetail("Deleting pending lockouts for [{}] characters", members.size());
-
-	std::string query_character_ids;
-	for (const auto& member : members)
-	{
-		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.char_id);
-	}
-
-	if (!query_character_ids.empty())
-	{
-		query_character_ids.pop_back(); // trailing comma
-
-		auto query = fmt::format(SQL(
-			DELETE FROM character_expedition_lockouts
-			WHERE character_id IN ({}) AND is_pending = TRUE;
-		), query_character_ids);
 
 		database.QueryDatabase(query);
 	}
@@ -424,9 +369,8 @@ uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_i
 	return expedition_id;
 }
 
-void ExpeditionDatabase::InsertCharacterLockouts(
-	uint32_t character_id, const std::vector<ExpeditionLockoutTimer>& lockouts,
-	bool replace_timer, bool is_pending)
+void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
+	const std::vector<ExpeditionLockoutTimer>& lockouts)
 {
 	LogExpeditionsDetail("Inserting [{}] lockouts for character [{}]", lockouts.size(), character_id);
 
@@ -434,14 +378,13 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 	for (const auto& lockout : lockouts)
 	{
 		fmt::format_to(std::back_inserter(insert_values),
-			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}', {}),",
+			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
 			character_id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
 			EscapeString(lockout.GetExpeditionName()),
-			EscapeString(lockout.GetEventName()),
-			is_pending
+			EscapeString(lockout.GetEventName())
 		);
 	}
 
@@ -449,34 +392,15 @@ void ExpeditionDatabase::InsertCharacterLockouts(
 	{
 		insert_values.pop_back(); // trailing comma
 
-		std::string on_duplicate;
-		if (replace_timer)
-		{
-			on_duplicate = SQL(
-				from_expedition_uuid = VALUES(from_expedition_uuid),
-				expire_time = VALUES(expire_time),
-				duration = VALUES(duration)
-			);
-		}
-		else
-		{
-			on_duplicate = "character_id = VALUES(character_id)";
-		}
-
 		auto query = fmt::format(SQL(
 			INSERT INTO character_expedition_lockouts
-				(
-					character_id,
-					expire_time,
-					duration,
-					from_expedition_uuid,
-					expedition_name,
-					event_name,
-					is_pending
-				)
+				(character_id, expire_time, duration, from_expedition_uuid, expedition_name, event_name)
 			VALUES {}
-			ON DUPLICATE KEY UPDATE {};
-		), insert_values, on_duplicate);
+			ON DUPLICATE KEY UPDATE
+				from_expedition_uuid = VALUES(from_expedition_uuid),
+				expire_time = VALUES(expire_time),
+				duration = VALUES(duration);
+		), insert_values);
 
 		database.QueryDatabase(query);
 	}
