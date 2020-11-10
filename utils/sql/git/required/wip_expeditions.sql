@@ -33,6 +33,7 @@ CREATE TABLE `expedition_members` (
 	`id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
 	`expedition_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
 	`character_id` INT(10) UNSIGNED NOT NULL DEFAULT 0,
+	`is_current_member` TINYINT(3) UNSIGNED NOT NULL DEFAULT 1,
 	PRIMARY KEY (`id`),
 	UNIQUE INDEX `expedition_id_character_id` (`expedition_id`, `character_id`)
 )
