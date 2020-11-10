@@ -152,6 +152,7 @@ void ExpeditionState::Process()
 
 	if (!expedition_ids.empty())
 	{
+		ExpeditionDatabase::MoveMembersToSafeReturn(expedition_ids);
 		ExpeditionDatabase::DeleteExpeditions(expedition_ids);
 	}
 }

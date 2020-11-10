@@ -425,15 +425,15 @@ int main(int argc, char** argv) {
 
 	adventure_manager.LoadLeaderboardInfo();
 
+	LogInfo("Purging expired expeditions");
+	ExpeditionDatabase::PurgeExpiredExpeditions();
+	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
+
 	LogInfo("Purging expired instances");
 	database.PurgeExpiredInstances();
 
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
-
-	LogInfo("Purging expired expeditions");
-	ExpeditionDatabase::PurgeExpiredExpeditions();
-	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 
 	LogInfo("Loading active expeditions");
 	expedition_state.LoadActiveExpeditions();

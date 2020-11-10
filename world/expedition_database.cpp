@@ -32,7 +32,7 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 			LEFT JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 			LEFT JOIN
 				(
-					SELECT expedition_id, COUNT(*) member_count
+					SELECT expedition_id, COUNT(IF(is_current_member = TRUE, 1, NULL)) member_count
 					FROM expedition_members
 					GROUP BY expedition_id
 				) expedition_members
@@ -40,6 +40,7 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 		WHERE
 			instance_list.id IS NULL
 			OR expedition_members.member_count IS NULL
+			OR expedition_members.member_count = 0
 			OR (instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP();
 	);
 
@@ -51,7 +52,12 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 		{
 			expedition_ids.emplace_back(static_cast<uint32_t>(strtoul(row[0], nullptr, 10)));
 		}
-		ExpeditionDatabase::DeleteExpeditions(expedition_ids);
+
+		if (!expedition_ids.empty())
+		{
+			ExpeditionDatabase::MoveMembersToSafeReturn(expedition_ids);
+			ExpeditionDatabase::DeleteExpeditions(expedition_ids);
+		}
 	}
 }
 
@@ -83,6 +89,7 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expe
 			INNER JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
 			INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 			INNER JOIN expedition_members ON expedition_members.expedition_id = expeditions.id
+				AND expedition_members.is_current_member = TRUE
 	);
 
 	if (select_expedition_id != 0)
@@ -177,6 +184,32 @@ void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_
 	auto query = fmt::format(SQL(
 		UPDATE expeditions SET leader_id = {} WHERE id = {};
 	), leader_id, expedition_id);
+
+	database.QueryDatabase(query);
+}
+
+void ExpeditionDatabase::MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids)
+{
+	LogExpeditionsDetail("Moving members from [{}] expedition(s) to safereturn", expedition_ids.size());
+
+	// only offline members still in expired dz zones should be updated here
+	std::string query = fmt::format(SQL(
+		UPDATE character_data
+			INNER JOIN expedition_members ON character_data.id = expedition_members.character_id
+			INNER JOIN expeditions ON expedition_members.expedition_id = expeditions.id
+			INNER JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
+			INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
+				AND character_data.zone_instance = instance_list.id
+				AND character_data.zone_id = instance_list.zone
+		SET
+			zone_id       = IF(safe_return_zone_id > 0, safe_return_zone_id, zone_id),
+			zone_instance = IF(safe_return_zone_id > 0, 0, zone_instance),
+			x             = IF(safe_return_zone_id > 0, safe_return_x, x),
+			y             = IF(safe_return_zone_id > 0, safe_return_y, y),
+			z             = IF(safe_return_zone_id > 0, safe_return_z, z),
+			heading       = IF(safe_return_zone_id > 0, safe_return_heading, heading)
+		WHERE expeditions.id IN ({});
+	), fmt::join(expedition_ids, ","));
 
 	database.QueryDatabase(query);
 }
