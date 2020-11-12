@@ -60,6 +60,8 @@ public:
 	bool IsSameLockout(const ExpeditionLockoutTimer& compare_lockout) const;
 	bool IsSameLockout(const std::string& expedition_name, const std::string& event_name) const;
 	void Reset() { m_expire_time = std::chrono::system_clock::now() + m_duration; }
+	void SetDuration(uint32_t seconds) { m_duration = std::chrono::seconds(seconds); }
+	void SetExpireTime(uint64_t expire_time) { m_expire_time = std::chrono::system_clock::from_time_t(expire_time); }
 	void SetUUID(const std::string& uuid) { m_expedition_uuid = uuid; }
 
 private:
