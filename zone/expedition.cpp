@@ -2238,7 +2238,7 @@ void Expedition::SendMembersExpireWarning(uint32_t minutes_remaining)
 void Expedition::SyncCharacterLockouts(
 	uint32_t character_id, std::vector<ExpeditionLockoutTimer>& client_lockouts)
 {
-	// adds missing event lockouts to client for this expedition and replaces
+	// adds missing event lockouts to client for this expedition and updates
 	// client timers that are both shorter and from another expedition
 	BenchTimer benchmark;
 
@@ -2265,9 +2265,10 @@ void Expedition::SyncCharacterLockouts(
 		else if (client_lockout_iter->GetSecondsRemaining() < lockout.GetSecondsRemaining() &&
 		         client_lockout_iter->GetExpeditionUUID() != m_uuid)
 		{
+			// only update lockout timer not uuid so loot event apis still work
 			modified = true;
-			client_lockouts.erase(client_lockout_iter);
-			client_lockouts.emplace_back(lockout); // replaced existing
+			client_lockout_iter->SetDuration(lockout.GetDuration());
+			client_lockout_iter->SetExpireTime(lockout.GetExpireTime());
 		}
 	}
 
