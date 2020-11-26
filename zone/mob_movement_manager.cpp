@@ -1225,7 +1225,7 @@ void MobMovementManager::UpdatePathGround(Mob *who, float x, float y, float z, M
 				)
 			);
 		}
-		else {
+		else if(!next_node.teleport) {
 			if (zone->watermap->InLiquid(previous_pos)) {
 				PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
 			}
@@ -1345,7 +1345,7 @@ void MobMovementManager::UpdatePathUnderwater(Mob *who, float x, float y, float 
 					next_node.pos.y
 				));
 		}
-		else {
+		else if(!next_node.teleport) {
 			PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, movement_mode);
 		}
 	}
