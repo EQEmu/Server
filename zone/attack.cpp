@@ -2248,16 +2248,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
 	d->bindzoneid = 0;
 
-	// Stop DoT landing message from showing up at death.
-	if (spell && spell != SPELL_UNKNOWN) {
-		const SPDat_Spell_Struct &sp1 = spells[spell];
-		int effect = sp1.effectid[0];
-		if (effect == SE_CurrentHP && IsDetrimentalSpell(spell)) {
-			spell = SPELL_UNKNOWN;
-		}
-	}
-
-	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
+	d->spell_id = 0xffffffff; // Sending spell was causing extra DoT land msg
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage = damage;
 	app->priority = 6;
