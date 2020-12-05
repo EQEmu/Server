@@ -37,6 +37,8 @@ public:
 	GroupIDConsumer() { id = 0; }
 	GroupIDConsumer(uint32 gid) { id = gid; }
 	inline const uint32 GetID()	const { return id; }
+	void	SetOldLeaderName(const char* oldleader) { strcpy(oldleadername, oldleader); }
+	char*	GetOldLeaderName() { return oldleadername; }
 
 protected:
 	friend class EntityList;
@@ -44,6 +46,7 @@ protected:
 	inline void SetID(uint32 set_id) { id = set_id; }
 private:
 	uint32 id;
+	char	oldleadername[64]; // Keeps the previous leader name, so when the entity is destroyed we can still transfer leadership.
 };
 
 class Group : public GroupIDConsumer {
@@ -58,6 +61,7 @@ public:
 	void	SendLeadershipAAUpdate();
 	void	SendWorldGroup(uint32 zone_id,Mob* zoningmember);
 	bool	DelMemberOOZ(const char *Name);
+	bool	DelMemberOOZ(const char *Name, bool checkleader);
 	bool	DelMember(Mob* oldmember,bool ignoresender = false);
 	void	DisbandGroup(bool joinraid = false);
 	void	GetMemberList(std::list<Mob*>& member_list, bool clear_list = true);
