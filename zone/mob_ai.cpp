@@ -1605,6 +1605,7 @@ void NPC::AI_DoMovement() {
 			 * if the roam box was sloppily configured
 			 */
 			if (!this->GetWasSpawnedInWater()) {
+				roambox_destination_z = GetGroundZ(roambox_destination_x, roambox_destination_y);
 				if (zone->HasMap() && zone->HasWaterMap()) {
 					auto position = glm::vec3(
 						roambox_destination_x,
@@ -1629,6 +1630,17 @@ void NPC::AI_DoMovement() {
 					}
 				}
 			}
+			else { // Mob was in water, make sure new spot is in water also
+				roambox_destination_z = m_Position.z;
+				auto position = glm::vec3( roambox_destination_x,
+										    roambox_destination_y,
+											m_Position.z + 15);
+				if (!zone->watermap->InLiquid(position)) {
+						roambox_destination_x = m_SpawnPoint.x;
+						roambox_destination_y = m_SpawnPoint.y;
+						roambox_destination_z = m_SpawnPoint.z;
+				}	
+			}
 
 			PathfinderOptions opts;
 			opts.smooth_path = true;
@@ -1643,7 +1655,7 @@ void NPC::AI_DoMovement() {
 				glm::vec3(
 					roambox_destination_x,
 					roambox_destination_y,
-					GetGroundZ(roambox_destination_x, roambox_destination_y)
+					roambox_destination_z
 				),
 				partial,
 				stuck,
@@ -1658,8 +1670,6 @@ void NPC::AI_DoMovement() {
 				);
 				return;
 			}
-
-			roambox_destination_z = 0;
 
 			Log(
 				Logs::General,
