@@ -1,0 +1,16 @@
+---
+kind: pipeline
+type: docker
+name: EQEmulator Server Linux CI
+
+# Limits how many of these builds can run on the drone runner at a time, this isn't about cores
+concurrency:
+  limit: 1
+
+steps:
+  - name: server-build
+    # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
+    image: akkadius/eqemu-server:latest
+    commands:
+      - sudo chown eqemu:eqemu /drone/src/ * -R
+      - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_BOTS=ON -DEQEMU_BUILD_LUA=ON -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
