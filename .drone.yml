@@ -14,3 +14,4 @@ steps:
     commands:
       - sudo chown eqemu:eqemu /drone/src/ * -R
       - git submodule init && git submodule update && mkdir -p build && cd build && cmake -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_BOTS=ON -DEQEMU_BUILD_LUA=ON -G 'Unix Makefiles' .. && make -j$((`nproc`-4))
+      - ./bin/tests
