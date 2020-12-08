@@ -10,6 +10,7 @@ concurrency:
 steps:
   - name: server-build
     # Source build script https://github.com/Akkadius/akk-stack/blob/master/containers/eqemu-server/Dockerfile#L20
+    # 
     image: akkadius/eqemu-server:latest
     commands:
       - sudo chown eqemu:eqemu /drone/src/ * -R
