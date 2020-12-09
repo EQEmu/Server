@@ -1353,6 +1353,7 @@ namespace SoD
 		OUT(FastRegenHP);
 		OUT(FastRegenMana);
 		OUT(FastRegenEndurance);
+		OUT(underworld_teleport_index);
 
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
