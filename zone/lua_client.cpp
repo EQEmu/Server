@@ -1160,6 +1160,11 @@ int Lua_Client::GetNextAvailableSpellBookSlot() {
 	return self->GetNextAvailableSpellBookSlot();
 }
 
+uint32 Lua_Client::GetSpellIDByBookSlot(int slot_id) {
+	Lua_Safe_Call_Int();
+	return self->GetSpellIDByBookSlot(slot_id);
+}
+
 int Lua_Client::GetNextAvailableSpellBookSlot(int start) {
 	Lua_Safe_Call_Int();
 	return self->GetNextAvailableSpellBookSlot(start);
@@ -1866,6 +1871,7 @@ luabind::scope lua_register_client() {
 		.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
+		.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))& Lua_Client::GetSpellIDByBookSlot)
 		.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)
 		.def("UpdateTaskActivity", (void(Lua_Client::*)(int,int,int))&Lua_Client::UpdateTaskActivity)
 		.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
