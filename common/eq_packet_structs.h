@@ -375,13 +375,16 @@ struct NewZone_Struct {
 /*0686*/	uint16	zone_instance;
 /*0688*/	uint32	unknown688;
 /*0692*/	uint8	unknown692[8];
+// Titanium doesn't have a translator, but we can still safely add stuff under here without issues since client memcpy's only what it knows
+// Just wastes some bandwidth sending to tit clients /shrug
 /*0700*/	float	fog_density;
 /*0704*/	uint32	SuspendBuffs;
 /*0708*/	uint32	FastRegenHP;
 /*0712*/	uint32	FastRegenMana;
 /*0716*/	uint32	FastRegenEndurance;
 /*0720*/	uint32	NPCAggroMaxDist;
-/*0724*/
+/*0724*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
+/*0728*/
 };
 
 /*
