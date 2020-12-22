@@ -4887,7 +4887,8 @@ bool Mob::IsBoat() const {
 		race == RACE_SHIP_404 ||
 		race == RACE_MERCHANT_SHIP_550 ||
 		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552
+		race == RACE_GHOST_SHIP_552 ||
+		race == RACE_BOAT_533
 	);
 }
 
