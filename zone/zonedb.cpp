@@ -167,7 +167,7 @@ bool ZoneDatabase::GetZoneCFG(
 		"fast_regen_endurance, "		// 59
 		"npc_max_aggro_dist, "			// 60
 		"max_movement_update_range, "	// 61
-		"underwold_teleport_index "		// 62
+		"underworld_teleport_index "	// 62
 		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
 		zoneid,
 		instance_id,
