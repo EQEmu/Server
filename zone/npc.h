@@ -23,7 +23,9 @@
 #include "mob.h"
 #include "qglobals.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "zonedump.h"
+#include "../common/loottable.h"
 
 #include <deque>
 #include <list>
@@ -112,7 +114,8 @@ public:
 	virtual ~NPC();
 
 	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
-	static NPC *SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause);
+	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 zoffset);
+	static void SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
 
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
@@ -192,7 +195,7 @@ public:
 	void	CheckGlobalLootTables();
 	void	DescribeAggro(Client *towho, Mob *mob, bool verbose);
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
-	void	CheckMinMaxLevel(Mob *them);
+	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void	ClearItemList();
 	ServerLootItem_Struct*	GetItem(int slot_id);
 	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
@@ -269,7 +272,7 @@ public:
 	void SetNPCFactionID(int32 in)
 	{
 		npc_faction_id = in;
-		database.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
+		content_db.GetFactionIdsForNPC(npc_faction_id, &faction_list, &primary_faction);
 	}
 
     glm::vec4 m_SpawnPoint;
@@ -290,7 +293,22 @@ public:
 	void	PickPocket(Client* thief);
 	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
-	void	AddLootDrop(const EQ::ItemData*dbitem, ItemList* itemlistconst, int16 charges, uint8 minlevel, uint8 maxlevel, bool equipit, bool wearchange = false, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0);
+
+	void AddLootDrop(
+		const EQ::ItemData *item2,
+		ItemList *itemlist,
+		LootDropEntries_Struct loot_drop,
+		bool wear_change = false,
+		uint32 aug1 = 0,
+		uint32 aug2 = 0,
+		uint32 aug3 = 0,
+		uint32 aug4 = 0,
+		uint32 aug5 = 0,
+		uint32 aug6 = 0
+	);
+
+	bool MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop);
+
 	virtual void DoClassAttacks(Mob *target);
 	void	CheckSignal();
 	inline bool IsNotTargetableWithHotkey() const { return no_target_hotkey; }
@@ -303,7 +321,7 @@ public:
 	int					GetMaxWp() const { return max_wp; }
 	void				DisplayWaypointInfo(Client *to);
 	void				CalculateNewWaypoint();
-	void				AssignWaypoints(int32 grid, int start_wp = 0);
+	void				AssignWaypoints(int32 grid_id, int start_wp = 0);
 	void				SetWaypointPause();
 	void				UpdateWaypoint(int wp_index);
 
@@ -478,6 +496,7 @@ public:
 
 	void RecalculateSkills();
 
+	static LootDropEntries_Struct NewLootDropEntry();
 protected:
 
 	const NPCType*	NPCTypedata;
@@ -512,7 +531,7 @@ protected:
 
 	uint32	npc_spells_id;
 	uint8	casting_spell_AIindex;
-	
+
 	uint32*	pDontCastBefore_casting_spell;
 	std::vector<AISpells_Struct> AIspells;
 	bool HasAISpell;
@@ -619,12 +638,12 @@ protected:
 	bool ignore_despawn; //NPCs with this set to 1 will ignore the despawn value in spawngroup
 
 
-
 private:
 	uint32	loottable_id;
 	bool	skip_global_loot;
 	bool	skip_auto_scale;
 	bool	p_depop;
+
 };
 
 #endif

@@ -10,6 +10,7 @@
 #include "zonelist.h"
 #include "clientlist.h"
 #include "cliententry.h"
+#include "world_store.h"
 #include <sstream>
 #include <stdio.h>
 
@@ -632,53 +633,90 @@ AdventureTemplate *AdventureManager::GetAdventureTemplate(int id)
 
 bool AdventureManager::LoadAdventureTemplates()
 {
-	std::string query = "SELECT id, zone, zone_version, "
-		"is_hard, min_level, max_level, type, type_data, type_count, assa_x, "
-		"assa_y, assa_z, assa_h, text, duration, zone_in_time, win_points, lose_points, "
-		"theme, zone_in_zone_id, zone_in_x, zone_in_y, zone_in_object_id, dest_x, dest_y, "
-		"dest_z, dest_h, graveyard_zone_id, graveyard_x, graveyard_y, graveyard_z, "
-		"graveyard_radius FROM adventure_template";
-    auto results = database.QueryDatabase(query);
+	std::string query =
+		SQL (
+			SELECT
+			id,
+			zone,
+			zone_version,
+			is_hard,
+			min_level,
+			max_level,
+			type,
+			type_data,
+			type_count,
+			assa_x,
+			assa_y,
+			assa_z,
+			assa_h,
+			text,
+			duration,
+			zone_in_time,
+			win_points,
+			lose_points,
+			theme,
+			zone_in_zone_id,
+			zone_in_x,
+			zone_in_y,
+			zone_in_object_id,
+			dest_x,
+			dest_y,
+			dest_z,
+			dest_h,
+			graveyard_zone_id,
+			graveyard_x,
+			graveyard_y,
+			graveyard_z,
+			graveyard_radius
+			FROM
+			adventure_template
+		)
+	;
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
 		return false;
     }
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-	    auto aTemplate = new AdventureTemplate;
-		aTemplate->id = atoi(row[0]);
-		strcpy(aTemplate->zone, row[1]);
-		aTemplate->zone_version = atoi(row[2]);
-		aTemplate->is_hard = atoi(row[3]);
-		aTemplate->min_level = atoi(row[4]);
-		aTemplate->max_level = atoi(row[5]);
-		aTemplate->type = atoi(row[6]);
-		aTemplate->type_data = atoi(row[7]);
-		aTemplate->type_count = atoi(row[8]);
-		aTemplate->assa_x = atof(row[9]);
-		aTemplate->assa_y = atof(row[10]);
-		aTemplate->assa_z = atof(row[11]);
-		aTemplate->assa_h = atof(row[12]);
-		strn0cpy(aTemplate->text, row[13], sizeof(aTemplate->text));
-		aTemplate->duration = atoi(row[14]);
-		aTemplate->zone_in_time = atoi(row[15]);
-		aTemplate->win_points = atoi(row[16]);
-		aTemplate->lose_points = atoi(row[17]);
-		aTemplate->theme = atoi(row[18]);
-		aTemplate->zone_in_zone_id = atoi(row[19]);
-		aTemplate->zone_in_x = atof(row[20]);
-		aTemplate->zone_in_y = atof(row[21]);
-		aTemplate->zone_in_object_id = atoi(row[22]);
-		aTemplate->dest_x = atof(row[23]);
-		aTemplate->dest_y = atof(row[24]);
-		aTemplate->dest_z = atof(row[25]);
-		aTemplate->dest_h = atof(row[26]);
-		aTemplate->graveyard_zone_id = atoi(row[27]);
-		aTemplate->graveyard_x = atof(row[28]);
-		aTemplate->graveyard_y = atof(row[29]);
-		aTemplate->graveyard_z = atof(row[30]);
-		aTemplate->graveyard_radius = atof(row[31]);
-		adventure_templates[aTemplate->id] = aTemplate;
-    }
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		auto adventure_template = new AdventureTemplate;
+		adventure_template->id = atoi(row[0]);
+		strcpy(adventure_template->zone, row[1]);
+
+		adventure_template->zone_version = atoi(row[2]);
+		adventure_template->is_hard      = atoi(row[3]);
+		adventure_template->min_level    = atoi(row[4]);
+		adventure_template->max_level    = atoi(row[5]);
+		adventure_template->type         = atoi(row[6]);
+		adventure_template->type_data    = atoi(row[7]);
+		adventure_template->type_count   = atoi(row[8]);
+		adventure_template->assa_x       = atof(row[9]);
+		adventure_template->assa_y       = atof(row[10]);
+		adventure_template->assa_z       = atof(row[11]);
+		adventure_template->assa_h       = atof(row[12]);
+
+		strn0cpy(adventure_template->text, row[13], sizeof(adventure_template->text));
+
+		adventure_template->duration          = atoi(row[14]);
+		adventure_template->zone_in_time      = atoi(row[15]);
+		adventure_template->win_points        = atoi(row[16]);
+		adventure_template->lose_points       = atoi(row[17]);
+		adventure_template->theme             = atoi(row[18]);
+		adventure_template->zone_in_zone_id   = atoi(row[19]);
+		adventure_template->zone_in_x         = atof(row[20]);
+		adventure_template->zone_in_y         = atof(row[21]);
+		adventure_template->zone_in_object_id = atoi(row[22]);
+		adventure_template->dest_x            = atof(row[23]);
+		adventure_template->dest_y            = atof(row[24]);
+		adventure_template->dest_z            = atof(row[25]);
+		adventure_template->dest_h            = atof(row[26]);
+		adventure_template->graveyard_zone_id = atoi(row[27]);
+		adventure_template->graveyard_x       = atof(row[28]);
+		adventure_template->graveyard_y       = atof(row[29]);
+		adventure_template->graveyard_z       = atof(row[30]);
+		adventure_template->graveyard_radius  = atof(row[31]);
+
+		adventure_templates[adventure_template->id] = adventure_template;
+	}
 
     return true;
 }
@@ -686,7 +724,7 @@ bool AdventureManager::LoadAdventureTemplates()
 bool AdventureManager::LoadAdventureEntries()
 {
 	std::string query = "SELECT id, template_id FROM adventure_template_entry";
-    auto results = database.QueryDatabase(query);
+    auto results = content_db.QueryDatabase(query);
     if (!results.Success())
 	{
 		return false;
@@ -734,7 +772,7 @@ void AdventureManager::PlayerClickedDoor(const char *player, int zone_id, int do
 							     sizeof(ServerPlayerClickedAdventureDoorReply_Struct));
 					ServerPlayerClickedAdventureDoorReply_Struct *sr = (ServerPlayerClickedAdventureDoorReply_Struct*)pack->pBuffer;
 					strcpy(sr->player, player);
-					sr->zone_id = database.GetZoneID(t->zone);
+					sr->zone_id = ZoneID(t->zone);
 					sr->instance_id = (*iter)->GetInstanceID();
 					sr->x = t->dest_x;
 					sr->y = t->dest_y;

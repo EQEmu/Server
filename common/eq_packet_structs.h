@@ -375,13 +375,16 @@ struct NewZone_Struct {
 /*0686*/	uint16	zone_instance;
 /*0688*/	uint32	unknown688;
 /*0692*/	uint8	unknown692[8];
+// Titanium doesn't have a translator, but we can still safely add stuff under here without issues since client memcpy's only what it knows
+// Just wastes some bandwidth sending to tit clients /shrug
 /*0700*/	float	fog_density;
 /*0704*/	uint32	SuspendBuffs;
 /*0708*/	uint32	FastRegenHP;
 /*0712*/	uint32	FastRegenMana;
 /*0716*/	uint32	FastRegenEndurance;
 /*0720*/	uint32	NPCAggroMaxDist;
-/*0724*/
+/*0724*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, if this value is 0, it prevents you from running off edges that would end up underworld
+/*0728*/
 };
 
 /*
@@ -5341,18 +5344,20 @@ struct MercenaryMerchantResponse_Struct {
 
 struct ServerLootItem_Struct {
 	uint32	item_id;	  // uint32	item_id;
-	int16	equip_slot;	  // int16	equip_slot;
-	uint16	charges;	  // uint8	charges;
-	uint16	lootslot;	  // uint16	lootslot;
-	uint32	aug_1;		  // uint32	aug_1;
-	uint32	aug_2;		  // uint32	aug_2;
-	uint32	aug_3;		  // uint32	aug_3;
-	uint32	aug_4;		  // uint32	aug_4;
-	uint32	aug_5;		  // uint32	aug_5;
-	uint32	aug_6;		  // uint32	aug_5;
-	uint8	attuned;
-	uint8	min_level;
-	uint8	max_level;
+	int16  equip_slot;	  // int16	equip_slot;
+	uint16 charges;	  // uint8	charges;
+	uint16 lootslot;	  // uint16	lootslot;
+	uint32 aug_1;		  // uint32	aug_1;
+	uint32 aug_2;		  // uint32	aug_2;
+	uint32 aug_3;		  // uint32	aug_3;
+	uint32 aug_4;		  // uint32	aug_4;
+	uint32 aug_5;		  // uint32	aug_5;
+	uint32 aug_6;		  // uint32	aug_5;
+	uint8  attuned;
+	uint16 trivial_min_level;
+	uint16 trivial_max_level;
+	uint16 npc_min_level;
+	uint16 npc_max_level;
 };
 
 //Found in client near a ref to the string:

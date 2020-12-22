@@ -2506,6 +2506,31 @@ XS(XS_Mob_GetAC) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetDisplayAC); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetDisplayAC) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetDisplayAC(THIS)");
+	{
+		Mob *THIS;
+		uint32 RETVAL;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Mob *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetDisplayAC();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Mob_GetATK); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetATK) {
 	dXSARGS;
@@ -8676,6 +8701,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetMana"), XS_Mob_SetMana, file, "$$");
 	newXSproto(strcpy(buf, "GetManaRatio"), XS_Mob_GetManaRatio, file, "$");
 	newXSproto(strcpy(buf, "GetAC"), XS_Mob_GetAC, file, "$");
+	newXSproto(strcpy(buf, "GetDisplayAC"), XS_Mob_GetDisplayAC, file, "$");
 	newXSproto(strcpy(buf, "GetATK"), XS_Mob_GetATK, file, "$");
 	newXSproto(strcpy(buf, "GetSTR"), XS_Mob_GetSTR, file, "$");
 	newXSproto(strcpy(buf, "GetSTA"), XS_Mob_GetSTA, file, "$");

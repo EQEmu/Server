@@ -11,7 +11,9 @@
 #include "merc.h"
 #include "zone.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "aura.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #include <ctime>
 #include <iostream>
@@ -20,6 +22,7 @@
 extern Zone* zone;
 
 ZoneDatabase database;
+ZoneDatabase content_db;
 
 ZoneDatabase::ZoneDatabase()
 : SharedDatabase()
@@ -82,19 +85,19 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 }
 
 bool ZoneDatabase::GetZoneCFG(
-	uint32 zoneid, 
-	uint16 instance_id, 
-	NewZone_Struct *zone_data, 
-	bool &can_bind, 
-	bool &can_combat, 
-	bool &can_levitate, 
-	bool &can_castoutdoor, 
-	bool &is_city, 
-	bool &is_hotzone, 
-	bool &allow_mercs, 
+	uint32 zoneid,
+	uint16 instance_id,
+	NewZone_Struct *zone_data,
+	bool &can_bind,
+	bool &can_combat,
+	bool &can_levitate,
+	bool &can_castoutdoor,
+	bool &is_city,
+	bool &is_hotzone,
+	bool &allow_mercs,
 	double &max_movement_update_range,
-	uint8 &zone_type, 
-	int &ruleset, 
+	uint8 &zone_type,
+	int &ruleset,
 	char **map_filename) {
 
 	*map_filename = new char[100];
@@ -102,70 +105,74 @@ bool ZoneDatabase::GetZoneCFG(
 
 	std::string query = StringFormat(
 		"SELECT "
-		"ztype, "					 // 0
-		"fog_red, "					 // 1
-		"fog_green, "				 // 2
-		"fog_blue, "				 // 3
-		"fog_minclip, "				 // 4
-		"fog_maxclip, "				 // 5
-		"fog_red2, "				 // 6
-		"fog_green2, "				 // 7
-		"fog_blue2, "				 // 8
-		"fog_minclip2, "			 // 9
-		"fog_maxclip2, "			 // 10
-		"fog_red3, "				 // 11
-		"fog_green3, "				 // 12
-		"fog_blue3, "				 // 13
-		"fog_minclip3, "			 // 14
-		"fog_maxclip3, "			 // 15
-		"fog_red4, "				 // 16
-		"fog_green4, "				 // 17
-		"fog_blue4, "				 // 18
-		"fog_minclip4, "			 // 19
-		"fog_maxclip4, "			 // 20
-		"fog_density, "				 // 21
-		"sky, "						 // 22
-		"zone_exp_multiplier, "		 // 23
-		"safe_x, "					 // 24
-		"safe_y, "					 // 25
-		"safe_z, "					 // 26
-		"underworld, "				 // 27
-		"minclip, "					 // 28
-		"maxclip, "					 // 29
-		"time_type, "				 // 30
-		"canbind, "					 // 31
-		"cancombat, "				 // 32
-		"canlevitate, "				 // 33
-		"castoutdoor, "				 // 34
-		"hotzone, "					 // 35
-		"ruleset, "					 // 36
-		"suspendbuffs, "			 // 37
-		"map_file_name, "			 // 38
-		"short_name, "				 // 39
-		"rain_chance1, "			 // 40
-		"rain_chance2, "			 // 41
-		"rain_chance3, "			 // 42
-		"rain_chance4, "			 // 43
-		"rain_duration1, "			 // 44
-		"rain_duration2, "			 // 45
-		"rain_duration3, "			 // 46
-		"rain_duration4, "			 // 47
-		"snow_chance1, "			 // 48
-		"snow_chance2, "			 // 49
-		"snow_chance3, "			 // 50
-		"snow_chance4, "			 // 51
-		"snow_duration1, "			 // 52
-		"snow_duration2, "			 // 53
-		"snow_duration3, "			 // 54
-		"snow_duration4, "			 // 55
-		"gravity, "					 // 56
-		"fast_regen_hp, "			 // 57
-		"fast_regen_mana, "			 // 58
-		"fast_regen_endurance, "	 // 59
-		"npc_max_aggro_dist, "		 // 60
-		"max_movement_update_range " // 61
-		"FROM zone WHERE zoneidnumber = %i AND version = %i",
-		zoneid, instance_id);
+		"ztype, "						// 0
+		"fog_red, "						// 1
+		"fog_green, "					// 2
+		"fog_blue, "					// 3
+		"fog_minclip, "					// 4
+		"fog_maxclip, "					// 5
+		"fog_red2, "					// 6
+		"fog_green2, "					// 7
+		"fog_blue2, "					// 8
+		"fog_minclip2, "				// 9
+		"fog_maxclip2, "				// 10
+		"fog_red3, "					// 11
+		"fog_green3, "					// 12
+		"fog_blue3, "					// 13
+		"fog_minclip3, "				// 14
+		"fog_maxclip3, "				// 15
+		"fog_red4, "					// 16
+		"fog_green4, "					// 17
+		"fog_blue4, "					// 18
+		"fog_minclip4, "				// 19
+		"fog_maxclip4, "				// 20
+		"fog_density, "					// 21
+		"sky, "							// 22
+		"zone_exp_multiplier, "			// 23
+		"safe_x, "						// 24
+		"safe_y, "						// 25
+		"safe_z, "						// 26
+		"underworld, "					// 27
+		"minclip, "						// 28
+		"maxclip, "						// 29
+		"time_type, "					// 30
+		"canbind, "						// 31
+		"cancombat, "					// 32
+		"canlevitate, "					// 33
+		"castoutdoor, "					// 34
+		"hotzone, "						// 35
+		"ruleset, "						// 36
+		"suspendbuffs, "				// 37
+		"map_file_name, "				// 38
+		"short_name, "					// 39
+		"rain_chance1, "				// 40
+		"rain_chance2, "				// 41
+		"rain_chance3, "				// 42
+		"rain_chance4, "				// 43
+		"rain_duration1, "				// 44
+		"rain_duration2, "				// 45
+		"rain_duration3, "				// 46
+		"rain_duration4, "				// 47
+		"snow_chance1, "				// 48
+		"snow_chance2, "				// 49
+		"snow_chance3, "				// 50
+		"snow_chance4, "				// 51
+		"snow_duration1, "				// 52
+		"snow_duration2, "				// 53
+		"snow_duration3, "				// 54
+		"snow_duration4, "				// 55
+		"gravity, "						// 56
+		"fast_regen_hp, "				// 57
+		"fast_regen_mana, "				// 58
+		"fast_regen_endurance, "		// 59
+		"npc_max_aggro_dist, "			// 60
+		"max_movement_update_range, "	// 61
+		"underwold_teleport_index "		// 62
+		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
+		zoneid,
+		instance_id,
+		ContentFilterCriteria::apply().c_str()
+	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
 		strcpy(*map_filename, "default");
@@ -212,6 +219,7 @@ bool ZoneDatabase::GetZoneCFG(
 	zone_data->FastRegenMana = atoi(row[58]);
 	zone_data->FastRegenEndurance = atoi(row[59]);
 	zone_data->NPCAggroMaxDist = atoi(row[60]);
+	zone_data->underworld_teleport_index = atoi(row[62]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);
@@ -360,7 +368,7 @@ void ZoneDatabase::RegisterBug(BugReport_Struct* bug_report) {
 	char* type_ = nullptr;
 	char* target_ = nullptr;
 	char* bug_ = nullptr;
-	
+
 	len = strlen(bug_report->reporter_name);
 	if (len) {
 		if (len > 63) // check against db column size
@@ -426,7 +434,7 @@ void ZoneDatabase::RegisterBug(BugReport_Struct* bug_report) {
 	safe_delete_array(type_);
 	safe_delete_array(target_);
 	safe_delete_array(bug_);
-	
+
 	QueryDatabase(query);
 }
 
@@ -584,7 +592,7 @@ void ZoneDatabase::RegisterBug(Client* client, BugReport_Struct* bug_report) {
 	safe_delete_array(target_name_);
 	safe_delete_array(bug_report_);
 	safe_delete_array(system_info_);
-	
+
 	auto result = QueryDatabase(query);
 
 	// TODO: Entity dumping [RuleB(Bugs, DumpTargetEntity)]
@@ -750,27 +758,37 @@ void ZoneDatabase::SaveWorldContainer(uint32 zone_id, uint32 parent_id, const EQ
             }
         }
 
-        std::string query = StringFormat("REPLACE INTO object_contents "
-                                        "(zoneid, parentid, bagidx, itemid, charges, "
-                                        "augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
-                                        "VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
-                                        zone_id, parent_id, index, item_id, inst->GetCharges(),
-										augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]);
-        auto results = QueryDatabase(query);
-        if (!results.Success())
-      LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
+		std::string query   = StringFormat(
+			"REPLACE INTO object_contents "
+			"(zoneid, parentid, bagidx, itemid, charges, "
+			"augslot1, augslot2, augslot3, augslot4, augslot5, augslot6, droptime) "
+			"VALUES (%i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, now())",
+			zone_id, parent_id, index, item_id, inst->GetCharges(),
+			augslot[0], augslot[1], augslot[2], augslot[3], augslot[4], augslot[5]
+		);
 
-    }
+		auto results = database.QueryDatabase(query);
+		if (!results.Success()) {
+			LogError("Error in ZoneDatabase::SaveWorldContainer: [{}]", results.ErrorMessage().c_str());
+		}
+
+	}
 
 }
 
 // Remove all child objects inside a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::DeleteWorldContainer(uint32 parent_id, uint32 zone_id)
 {
-	std::string query = StringFormat("DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i", parent_id, zone_id);
-    auto results = QueryDatabase(query);
-	if (!results.Success())
+	std::string query = StringFormat(
+		"DELETE FROM object_contents WHERE parentid = %i AND zoneid = %i",
+		parent_id,
+		zone_id
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
 		LogError("Error in ZoneDatabase::DeleteWorldContainer: [{}]", results.ErrorMessage().c_str());
+	}
 
 }
 
@@ -1243,9 +1261,9 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 		"`character_spells`		"
 		"WHERE `id` = %u ORDER BY `slot_id`", character_id);
 	auto results = database.QueryDatabase(query);
-	
+
 	/* Initialize Spells */
-	
+
 	memset(pp->spell_book, 0xFF, (sizeof(uint32) * EQ::spells::SPELLBOOK_SIZE));
 
 	// We have the ability to block loaded spells by max id on a per-client basis..
@@ -1261,7 +1279,7 @@ bool ZoneDatabase::LoadCharacterSpellBook(uint32 character_id, PlayerProfile_Str
 			continue;
 		if (id < 3 || id > SPDAT_RECORDS) // 3 ("Summon Corpse") is the first scribable spell in spells_us.txt
 			continue;
-		
+
 		pp->spell_book[idx] = id;
 	}
 
@@ -1605,11 +1623,11 @@ bool ZoneDatabase::SaveCharacterLeadershipAA(uint32 character_id, PlayerProfile_
 }
 
 bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, PlayerProfile_Struct* pp, ExtendedProfile_Struct* m_epp){
-	
+
 	/* If this is ever zero - the client hasn't fully loaded and potentially crashed during zone */
 	if (account_id <= 0)
 		return false;
-	
+
 	std::string mail_key = database.GetMailKey(character_id);
 
 	clock_t t = std::clock(); /* Function timer start */
@@ -3551,7 +3569,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
     client->Message(Chat::White, "%s is part of the following instances:", name);
 
     for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(Chat::White, "%s - id: %lu, version: %lu", database.GetZoneName(atoi(row[1])),
+        client->Message(Chat::White, "%s - id: %lu, version: %lu", ZoneName(atoi(row[1])),
 				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
     }
 }
@@ -3772,13 +3790,14 @@ void ZoneDatabase::SavePetInfo(Client *client)
 			continue;
 
 		query = StringFormat("INSERT INTO `character_pet_info` "
-				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`) "
-				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f) "
+				"(`char_id`, `pet`, `petname`, `petpower`, `spell_id`, `hp`, `mana`, `size`, `taunting`) "
+				"VALUES (%u, %u, '%s', %i, %u, %u, %u, %f, %u) "
 				"ON DUPLICATE KEY UPDATE `petname` = '%s', `petpower` = %i, `spell_id` = %u, "
-				"`hp` = %u, `mana` = %u, `size` = %f",
+				"`hp` = %u, `mana` = %u, `size` = %f, `taunting` = %u",
 				client->CharacterID(), pet, petinfo->Name, petinfo->petpower, petinfo->SpellID,
-				petinfo->HP, petinfo->Mana, petinfo->size, // and now the ON DUPLICATE ENTRIES
-				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size);
+				petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0, 
+				// and now the ON DUPLICATE ENTRIES
+				petinfo->Name, petinfo->petpower, petinfo->SpellID, petinfo->HP, petinfo->Mana, petinfo->size, (petinfo->taunting) ? 1 : 0);
 		results = database.QueryDatabase(query);
 		if (!results.Success())
 			return;
@@ -3850,7 +3869,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 	memset(suspended, 0, sizeof(PetInfo));
 
 	std::string query = StringFormat("SELECT `pet`, `petname`, `petpower`, `spell_id`, "
-					 "`hp`, `mana`, `size` FROM `character_pet_info` "
+					 "`hp`, `mana`, `size` , `taunting` FROM `character_pet_info` "
 					 "WHERE `char_id` = %u",
 					 client->CharacterID());
 	auto results = database.QueryDatabase(query);
@@ -3875,6 +3894,7 @@ void ZoneDatabase::LoadPetInfo(Client *client)
 		pi->HP = atoul(row[4]);
 		pi->Mana = atoul(row[5]);
 		pi->size = atof(row[6]);
+		pi->taunting = (bool) atoi(row[7]);
 	}
 
 	query = StringFormat("SELECT `pet`, `slot`, `spell_id`, `caster_level`, `castername`, "
@@ -4089,9 +4109,9 @@ bool ZoneDatabase::LoadFactionData()
 	faction_array = new Faction *[max_faction + 1];
 
 	memset(faction_array, 0, (sizeof(Faction*) * (max_faction + 1)));
-	
-	std::vector<size_t> faction_ids;
-	
+
+	std::vector<std::string> faction_ids;
+
 	// load factions
     query = "SELECT `id`, `name`, `base` FROM `faction_list`";
 
@@ -4119,13 +4139,13 @@ bool ZoneDatabase::LoadFactionData()
 		faction_array[index]->base = atoi(fr_row[2]);
 		faction_array[index]->min = MIN_PERSONAL_FACTION;
 		faction_array[index]->max = MAX_PERSONAL_FACTION;
-		
-		faction_ids.push_back(index);
+
+		faction_ids.push_back(fr_row[0]);
 	}
 
 	LogInfo("[{}] Faction(s) loaded...", faction_ids.size());
 
-	const std::string faction_id_criteria(implode(",", std::pair<char, char>('\'', '\''), faction_ids));
+	const std::string faction_id_criteria(implode(",", faction_ids));
 
 	// load faction mins/maxes
 	query = fmt::format("SELECT `client_faction_id`, `min`, `max` FROM `faction_base_data` WHERE `client_faction_id` IN ({})", faction_id_criteria);
@@ -4155,7 +4175,7 @@ bool ZoneDatabase::LoadFactionData()
 	else {
 		LogInfo("Unable to load Faction Base data...");
 	}
-	
+
 	// load race, class and diety modifiers
 	query = fmt::format("SELECT `faction_id`, `mod`, `mod_name` FROM `faction_list_mod` WHERE `faction_id` IN ({})", faction_id_criteria);
 
@@ -4878,7 +4898,7 @@ uint32 ZoneDatabase::LoadSaylinkID(const char* saylink_text, bool auto_insert)
 {
 	if (!saylink_text || saylink_text[0] == '\0')
 		return 0;
-	
+
 	std::string query = StringFormat("SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1", saylink_text);
 	auto results = QueryDatabase(query);
 	if (!results.Success())
@@ -4903,6 +4923,6 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 	auto results = QueryDatabase(query);
 	if (!results.Success())
 		return 0;
-	
+
 	return results.LastInsertedID();
 }

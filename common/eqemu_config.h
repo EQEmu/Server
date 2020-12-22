@@ -74,6 +74,13 @@ class EQEmuConfig
 		std::string DatabaseDB;
 		uint16 DatabasePort;
 
+		// From <content_database/>
+		std::string ContentDbHost;
+		std::string ContentDbUsername;
+		std::string ContentDbPassword;
+		std::string ContentDbName;
+		uint16      ContentDbPort;
+
 		// From <qsdatabase> // QueryServ
 		std::string QSDatabaseHost;
 		std::string QSDatabaseUsername;

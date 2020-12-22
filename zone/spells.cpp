@@ -101,6 +101,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #endif
 
 #include "mob_movement_manager.h"
+#include "client.h"
 
 
 extern Zone* zone;
@@ -2352,7 +2353,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 					SpellOnTarget(spell_id, spell_target);
 	#ifdef GROUP_BUFF_PETS
 					//pet too
-					if (spells[spell_id].targettype != ST_GroupNoPets && spell_target->GetPet() && HasPetAffinity() && !spell_target->GetPet()->IsCharmed())
+					if (spells[spell_id].targettype != ST_GroupNoPets && spell_target->GetPet() && spell_target->HasPetAffinity() && !spell_target->GetPet()->IsCharmed())
 						SpellOnTarget(spell_id, spell_target->GetPet());
 	#endif
 				}
@@ -5089,6 +5090,13 @@ void Client::UnmemSpellAll(bool update_client)
 			UnmemSpell(i, update_client);
 }
 
+uint32 Client::GetSpellIDByBookSlot(int book_slot) {
+	if (book_slot <= EQ::spells::SPELLBOOK_SIZE) {
+		return GetSpellByBookSlot(book_slot);
+	}
+	return -1;	//default
+}
+
 uint16 Client::FindMemmedSpellBySlot(int slot) {
 	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
 		return m_pp.mem_spells[slot];
@@ -6003,4 +6011,5 @@ bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
 		return true;
 	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
 }
+
 

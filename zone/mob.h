@@ -172,8 +172,8 @@ public:
 	void DisplayInfo(Mob *mob);
 
 	std::unordered_map<uint16, Mob *> close_mobs;
-	Timer mob_scan_close;
-	Timer mob_check_moving_timer;
+	Timer                             mob_close_scan_timer;
+	Timer                             mob_check_moving_timer;
 
 	//Somewhat sorted: needs documenting!
 
@@ -211,7 +211,8 @@ public:
 	int TryAssassinate(Mob* defender, EQ::skills::SkillType skillInUse);
 	virtual void DoRiposte(Mob* defender);
 	void ApplyMeleeDamageMods(uint16 skill, int &damage, Mob * defender = nullptr, ExtraAttackOptions *opts = nullptr);
-	int ACSum();
+	int ACSum(bool skip_caps = false);
+	inline int GetDisplayAC() { return 1000 * (ACSum(true) + compute_defense()) / 847; }
 	int offense(EQ::skills::SkillType skill);
 	int GetBestMeleeSkill();
 	void CalcAC() { mitigation_ac = ACSum(); }
@@ -221,7 +222,7 @@ public:
 	inline int GetMitigationAC() { return mitigation_ac; }
 	void MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);
 	double RollD20(int offense, int mitigation); // CALL THIS FROM THE DEFENDER
-	bool CombatRange(Mob* other);
+	bool CombatRange(Mob* other, float fixed_size_mod = 1.0, bool aeRampage = false);
 	virtual inline bool IsBerserk() { return false; } // only clients
 	void RogueEvade(Mob *other);
 	void CommonOutgoingHitSuccess(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr);

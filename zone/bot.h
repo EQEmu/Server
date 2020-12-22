@@ -29,6 +29,7 @@
 #include "groups.h"
 #include "corpse.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "string_ids.h"
 #include "../common/misc_functions.h"
 #include "../common/global_define.h"
@@ -320,7 +321,7 @@ public:
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
 	void SetHoldMode();
-	
+
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
 	virtual void AI_Stop();
@@ -351,7 +352,7 @@ public:
 	virtual void UpdateEquipmentLight() { m_Light.Type[EQ::lightsource::LightEquipment] = m_inv.FindBrightestLightType(); m_Light.Level[EQ::lightsource::LightEquipment] = EQ::lightsource::TypeToLevel(m_Light.Type[EQ::lightsource::LightEquipment]); }
 	const EQ::InventoryProfile& GetBotInv() const { return m_inv; }
 
-	// Static Class Methods	
+	// Static Class Methods
 	//static void DestroyBotRaidObjects(Client* client);	// Can be removed after bot raids are dumped
 	static Bot* LoadBot(uint32 botID);
 	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID);
@@ -405,7 +406,7 @@ public:
 	static BotSpell GetDebuffBotSpell(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForCure(Bot* botCaster, Mob* target);
 	static BotSpell GetBestBotSpellForResistDebuff(Bot* botCaster, Mob* target);
-	
+
 	static NPCType *CreateDefaultNPCTypeStructForBot(std::string botName, std::string botLastName, uint8 botLevel, uint16 botRace, uint8 botClass, uint8 gender);
 
 	// Static Bot Group Methods
@@ -451,7 +452,7 @@ public:
 	bool IsBotNonSpellFighter() { return IsNonSpellFighterClass(GetClass()); }
 	bool CanHeal();
 	int GetRawACNoShield(int &shield_ac);
-	
+
 	// new heal rotation code
 	bool CreateHealRotation(uint32 cycle_duration_ms = 5000, bool fast_heals = false, bool adaptive_targeting = false, bool casting_override = false);
 	bool DestroyHealRotation();
@@ -597,7 +598,7 @@ public:
 	int32 GetBasePR() { return _basePR; }
 	int32 GetBaseDR() { return _baseDR; }
 	int32 GetBaseCorrup() { return _baseCorrup; }
-	
+
 protected:
 	virtual void PetAIProcess();
 	virtual void BotMeditate(bool isSitting);
@@ -656,7 +657,7 @@ private:
 	int32	max_end;
 	int32	end_regen;
 	uint32 timers[MaxTimer];
-	
+
 	Timer m_evade_timer; // can be moved to pTimers at some point
 	Timer m_alt_combat_hate_timer;
 	Timer m_auto_defend_timer;

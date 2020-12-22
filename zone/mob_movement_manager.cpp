@@ -1088,6 +1088,17 @@ void MobMovementManager::UpdatePath(Mob *who, float x, float y, float z, MobMove
 		PushFlyTo(ent.second, x, y, z, mob_movement_mode);
 		PushStopMoving(ent.second);
 		}
+	// Below for npcs that can traverse land or water so they don't sink
+	else if (who->GetFlyMode() == GravityBehavior::Water &&
+			 zone->watermap->InLiquid(who->GetPosition()) && 
+			 zone->watermap->InLiquid(glm::vec3(x, y, z)) &&
+			 zone->zonemap->CheckLoS(who->GetPosition(), glm::vec3(x, y, z))) {
+		auto iter = _impl->Entries.find(who);
+		auto &ent = (*iter);
+
+		PushSwimTo(ent.second, x, y, z, mob_movement_mode);
+		PushStopMoving(ent.second);
+	}
 	else {
 		UpdatePathGround(who, x, y, z, mob_movement_mode);
 	}
@@ -1214,7 +1225,7 @@ void MobMovementManager::UpdatePathGround(Mob *who, float x, float y, float z, M
 				)
 			);
 		}
-		else {
+		else if(!next_node.teleport) {
 			if (zone->watermap->InLiquid(previous_pos)) {
 				PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, mode);
 			}
@@ -1334,7 +1345,7 @@ void MobMovementManager::UpdatePathUnderwater(Mob *who, float x, float y, float 
 					next_node.pos.y
 				));
 		}
-		else {
+		else if(!next_node.teleport) {
 			PushSwimTo(ent.second, next_node.pos.x, next_node.pos.y, next_node.pos.z, movement_mode);
 		}
 	}

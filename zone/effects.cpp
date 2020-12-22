@@ -28,6 +28,7 @@
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
+#include "zone_store.h"
 #include "position.h"
 
 float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
@@ -554,7 +555,7 @@ int Client::GetDiscSlotBySpellID(int32 spellid)
 		if(m_pp.disciplines.values[i] == spellid)
 			return i;
 	}
-	
+
 	return -1;
 }
 
@@ -658,6 +659,23 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		CastSpell(spell_id, target, EQ::spells::CastingSlot::Discipline);
 	}
 	return(true);
+}
+
+uint32 Client::GetDisciplineTimer(uint32 timer_id) {
+	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
+	uint32 disc_timer = 0;
+	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
+		disc_timer = GetPTimers().GetRemainingTime(disc_timer_id);
+	}
+	return disc_timer;
+}
+
+void Client::ResetDisciplineTimer(uint32 timer_id) {
+	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
+	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
+		GetPTimers().Clear(&database, (uint32)disc_timer_id);
+	}
+	SendDisciplineTimer(timer_id, 0);
 }
 
 void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)

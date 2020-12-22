@@ -29,7 +29,7 @@ struct CharacterSelect_Struct;
 
 class WorldDatabase : public SharedDatabase {
 public:
-	bool GetStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc, bool isTitanium);
+	bool GetStartZone(PlayerProfile_Struct* p_player_profile_struct, CharCreate_Struct* p_char_create_struct, bool is_titanium);
 	void GetCharSelectInfo(uint32 account_id, EQApplicationPacket **out_app, uint32 client_version_bit);
 	int MoveCharacterToBind(int CharID, uint8 bindnum = 0);
 
@@ -38,6 +38,13 @@ public:
 
 	bool LoadCharacterCreateAllocations();
 	bool LoadCharacterCreateCombos();
+
+	bool StoreCharacter(
+		uint32 account_id,
+		PlayerProfile_Struct *p_player_profile_struct,
+		EQ::InventoryProfile *p_inventory_profile
+	);
+
 private:
 	void SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
 	void SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc);
@@ -46,5 +53,6 @@ private:
 };
 
 extern WorldDatabase database;
+extern WorldDatabase content_db;
 
 #endif /*WORLDDB_H_*/

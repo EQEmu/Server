@@ -61,7 +61,7 @@ class SharedDatabase;
 namespace EQ
 {
 	class InventoryProfile;
-	
+
 	class ItemInstance {
 	public:
 		/////////////////////////

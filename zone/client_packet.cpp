@@ -61,6 +61,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/criteria/content_filter_criteria.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -789,7 +790,7 @@ void Client::CompleteConnect()
 	//enforce some rules..
 	if (!CanBeInZone()) {
 		LogDebug("[CLIENT] Kicking char from zone, not allowed here");
-		GoToSafeCoords(database.GetZoneID("arena"), 0);
+		GoToSafeCoords(ZoneID("arena"), 0);
 		return;
 	}
 
@@ -903,7 +904,8 @@ void Client::CompleteConnect()
 		SetPetCommandState(PET_BUTTON_REGROUP, 0);
 		SetPetCommandState(PET_BUTTON_FOLLOW, 1);
 		SetPetCommandState(PET_BUTTON_GUARD, 0);
-		SetPetCommandState(PET_BUTTON_TAUNT, 1);
+		// Taunt saved on client side for logging on with pet
+		// In our db for when we zone.
 		SetPetCommandState(PET_BUTTON_HOLD, 0);
 		SetPetCommandState(PET_BUTTON_GHOLD, 0);
 		SetPetCommandState(PET_BUTTON_FOCUS, 0);
@@ -916,7 +918,12 @@ void Client::CompleteConnect()
 
 	worldserver.RequestTellQueue(GetName());
 
-	entity_list.ScanCloseMobs(close_mobs, this);
+	entity_list.ScanCloseMobs(close_mobs, this, true);
+
+	if (GetGM()) {
+		ShowDevToolsMenu();
+	}
+
 }
 
 // connecting opcode handlers
@@ -1625,6 +1632,13 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			pet->CalcBonuses();
 			pet->SetHP(m_petinfo.HP);
 			pet->SetMana(m_petinfo.Mana);
+
+			// Taunt persists when zoning on newer clients, overwrite default.
+			if (m_ClientVersionBit & EQ::versions::maskUFAndLater) {
+				if (!firstlogon) {
+					pet->SetTaunting(m_petinfo.taunting);
+				}
+			}
 		}
 		m_petinfo.SpellID = 0;
 	}
@@ -4519,22 +4533,62 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		rewind_timer.Start(30000, true);
 	}
 
-	/* Handle client aggro scanning timers NPCs */
-	is_client_moving = (cy == m_Position.y && cx == m_Position.x) ? false : true;
+
+	is_client_moving = !(cy == m_Position.y && cx == m_Position.x);
+
+
+	/**
+	 * Client aggro scanning
+	 */
+	const uint16 client_scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
+	const uint16 client_scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
+
+	LogAggroDetail(
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		client_scan_npc_aggro_timer.GetRemainingTime()
+	);
 
 	if (is_client_moving) {
-		LogDebug("ClientUpdate: Client is moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
+		if (client_scan_npc_aggro_timer.GetRemainingTime() > client_scan_npc_aggro_timer_moving) {
+			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
 			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(500);
+			client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_moving);
+			client_scan_npc_aggro_timer.Trigger();
 		}
 	}
-	else {
-		LogDebug("ClientUpdate: Client is NOT moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
-			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(3000);
+	else if (client_scan_npc_aggro_timer.GetDuration() == client_scan_npc_aggro_timer_moving) {
+		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		client_scan_npc_aggro_timer.Disable();
+		client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_idle);
+	}
+
+	/**
+	 * Client mob close list cache scan timer
+	 */
+	const uint16 client_mob_close_scan_timer_moving = 6000;
+	const uint16 client_mob_close_scan_timer_idle   = 60000;
+
+	LogAIScanCloseDetail(
+		"Client [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		mob_close_scan_timer.GetRemainingTime()
+	);
+
+	if (is_client_moving) {
+		if (mob_close_scan_timer.GetRemainingTime() > client_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("Client [{}] Restarting with moving timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(client_mob_close_scan_timer_moving);
+			mob_close_scan_timer.Trigger();
 		}
+	}
+	else if (mob_close_scan_timer.GetDuration() == client_mob_close_scan_timer_moving) {
+		LogAIScanCloseDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		mob_close_scan_timer.Disable();
+		mob_close_scan_timer.Start(client_mob_close_scan_timer_idle);
 	}
 
 	/**
@@ -4639,6 +4693,9 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		CheckRegionTypeChanges();
 	}
+
+	CheckVirtualZoneLines();
+
 }
 
 void Client::Handle_OP_CombatAbility(const EQApplicationPacket *app)
@@ -6418,14 +6475,14 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	uint16 zid = gmzr->zone_id;
 	if (gmzr->zone_id == 0)
 		zid = zonesummon_id;
-	const char * zname = database.GetZoneName(zid);
+	const char * zname = ZoneName(zid);
 	if (zname == nullptr)
 		tarzone[0] = 0;
 	else
 		strcpy(tarzone, zname);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!database.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
+	if (!content_db.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
 		tarzone[0] = 0;
 	}
 
@@ -10060,6 +10117,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					mypet->SetPetRegroup(false);
 					SetPetCommandState(PET_BUTTON_REGROUP, 0);
 				}
+
+				// fix GUI sit button to be unpressed and stop sitting regen
+				SetPetCommandState(PET_BUTTON_SIT, 0);
+				mypet->SetAppearance(eaStanding);
+
 				zone->AddAggroMob();
 				// classic acts like qattack
 				int hate = 1;
@@ -10101,6 +10163,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 					mypet->SetPetRegroup(false);
 					SetPetCommandState(PET_BUTTON_REGROUP, 0);
 				}
+
+				// fix GUI sit button to be unpressed and stop sitting regen
+				SetPetCommandState(PET_BUTTON_SIT, 0);
+				mypet->SetAppearance(eaStanding);
+
 				zone->AddAggroMob();
 				mypet->AddToHateList(GetTarget(), 1, 0, true, false, false, SPELL_UNKNOWN, true);
 				MessageString(Chat::PetResponse, PET_ATTACKING, mypet->GetCleanName(), GetTarget()->GetCleanName());
@@ -10161,6 +10228,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			if (mypet->IsNPC()) {
+
+				// Set Sit button to unpressed - send stand anim/end hpregen
+				SetPetCommandState(PET_BUTTON_SIT, 0);
+				mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+
 				mypet->SayString(this, Chat::PetResponse, PET_GUARDINGLIFE);
 				mypet->SetPetOrder(SPO_Guard);
 				mypet->CastToNPC()->SaveGuardSpot(mypet->GetPosition());
@@ -10180,7 +10252,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SayString(this, Chat::PetResponse, PET_FOLLOWING);
 			mypet->SetPetOrder(SPO_Follow);
+
+			// fix GUI sit button to be unpressed - send stand anim/end hpregen
+			SetPetCommandState(PET_BUTTON_SIT, 0);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 				SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10223,7 +10299,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SayString(this, Chat::PetResponse, PET_GUARDME_STRING);
 			mypet->SetPetOrder(SPO_Follow);
+
+			// Set Sit button to unpressed - send stand anim/end hpregen
+			SetPetCommandState(PET_BUTTON_SIT, 0);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
+
 			if (mypet->IsPetStop()) {
 				mypet->SetPetStop(false);
 				SetPetCommandState(PET_BUTTON_STOP, 0);
@@ -10258,6 +10338,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
+			SetPetCommandState(PET_BUTTON_SIT, 0);
 			mypet->SetPetOrder(SPO_Follow);
 			mypet->SendAppearancePacket(AT_Anim, ANIM_STAND);
 		}
@@ -10268,6 +10349,7 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if ((mypet->GetPetType() == petAnimation && aabonuses.PetCommands[PetCommand]) || mypet->GetPetType() != petAnimation) {
 			mypet->SayString(this, Chat::PetResponse, PET_SIT_STRING);
+			SetPetCommandState(PET_BUTTON_SIT, 1);
 			mypet->SetPetOrder(SPO_Sit);
 			mypet->SetRunAnimSpeed(0);
 			if (!mypet->UseBardSpellLogic())	//maybe we can have a bard pet
@@ -11796,7 +11878,7 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(TradeskillFavorites_Struct)) {
 		LogError("Invalid size for TradeskillFavorites_Struct: Expected: [{}], Got: [{}]",
-			sizeof(TradeskillFavorites_Struct), app->size);
+				 sizeof(TradeskillFavorites_Struct), app->size);
 		return;
 	}
 
@@ -11846,90 +11928,155 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 	if (first)	//no favorites....
 		return;
 
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id=tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list "
-		"WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE tr.enabled <> 0 AND tr.id IN (%s) "
-		"AND tr.must_learn & 0x20 <> 0x20 AND "
-		"((tr.must_learn & 0x3 <> 0 AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 100 ", CharacterID(), favoriteIDs.c_str(), containers.c_str(), combineObjectSlots);
+	// TODO: Clean this up
+	const std::string query = StringFormat(
+		SQL (
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			tr.tradeskill
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				tr.enabled <> 0
+				AND tr.id IN (%s)
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+			(
+				tr.must_learn & 0x3 <> 0
+			)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+				%s
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if(
+				tre.item_id %s
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= %u
 
-	TradeskillSearchResults(query, tsf->object_type, tsf->some_id);
-	return;
+				LIMIT
+				100
+		),
+		favoriteIDs.c_str(),
+		ContentFilterCriteria::apply().c_str(),
+		containers.c_str(),
+		combineObjectSlots
+	);
+
+	SendTradeskillSearchResults(query, tsf->object_type, tsf->some_id);
 }
 
 void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(RecipesSearch_Struct)) {
-		LogError("Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
-			sizeof(RecipesSearch_Struct), app->size);
+		LogError(
+			"Invalid size for RecipesSearch_Struct: Expected: [{}], Got: [{}]",
+			sizeof(RecipesSearch_Struct),
+			app->size
+		);
+
 		return;
 	}
 
-	RecipesSearch_Struct* rss = (RecipesSearch_Struct*)app->pBuffer;
-	rss->query[55] = '\0';	//just to be sure.
+	auto* p_recipes_search_struct = (RecipesSearch_Struct*)app->pBuffer;
+	p_recipes_search_struct->query[55] = '\0';	//just to be sure.
 
+	LogTradeskills(
+		"[Handle_OP_RecipesSearch] Requested search recipes for object_type [{}] some_id [{}]",
+		p_recipes_search_struct->object_type,
+		p_recipes_search_struct->some_id
+	);
 
-	LogDebug("Requested search recipes for: [{}] - [{}]\n", rss->object_type, rss->some_id);
-
-	// make where clause segment for container(s)
-	char containers[30];
-	uint32 combineObjectSlots;
-	if (rss->some_id == 0) {
+	char   containers_where_clause[30];
+	uint32 combine_object_slots;
+	if (p_recipes_search_struct->some_id == 0) {
 		// world combiner so no item number
-		snprintf(containers, 29, "= %u", rss->object_type);
-		combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "= %u", p_recipes_search_struct->object_type);
+		combine_object_slots = 10;
 	}
 	else {
 		// container in inventory
-		snprintf(containers, 29, "in (%u,%u)", rss->object_type, rss->some_id);
-		auto item = database.GetItem(rss->some_id);
-		if (!item)
-		{
-			LogError("Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.\n", rss->some_id);
-			combineObjectSlots = 10;
+		snprintf(containers_where_clause, 29, "in (%u,%u)", p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
+		auto item = database.GetItem(p_recipes_search_struct->some_id);
+		if (!item) {
+			LogError(
+				"Invalid container ID: [{}]. GetItem returned null. Defaulting to BagSlots = 10.",
+				p_recipes_search_struct->some_id
+			);
+			combine_object_slots = 10;
 		}
-		else
-		{
-			combineObjectSlots = item->BagSlots;
+		else {
+			combine_object_slots = item->BagSlots;
 		}
 	}
 
-	std::string searchClause;
-
-	//omit the rlike clause if query is empty
-	if (rss->query[0] != 0) {
+	std::string search_clause;
+	if (p_recipes_search_struct->query[0] != 0) {
 		char buf[120];	//larger than 2X rss->query
-		database.DoEscapeString(buf, rss->query, strlen(rss->query));
-		searchClause = StringFormat("name rlike '%s' AND", buf);
+		database.DoEscapeString(buf, p_recipes_search_struct->query, strlen(p_recipes_search_struct->query));
+		search_clause = StringFormat("name rlike '%s' AND", buf);
 	}
 
 	//arbitrary limit of 200 recipes, makes sense to me.
-	const std::string query = StringFormat("SELECT tr.id, tr.name, tr.trivial, "
-		"SUM(tre.componentcount), crl.madecount,tr.tradeskill "
-		"FROM tradeskill_recipe AS tr "
-		"LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id "
-		"LEFT JOIN (SELECT recipe_id, madecount "
-		"FROM char_recipe_list WHERE char_id = %u) AS crl ON tr.id=crl.recipe_id "
-		"WHERE %s tr.trivial >= %u AND tr.trivial <= %u AND tr.enabled <> 0 "
-		"AND tr.must_learn & 0x20 <> 0x20 "
-		"AND ((tr.must_learn & 0x3 <> 0 "
-		"AND crl.madecount IS NOT NULL) "
-		"OR (tr.must_learn & 0x3 = 0)) "
-		"GROUP BY tr.id "
-		"HAVING sum(if(tre.item_id %s AND tre.iscontainer > 0,1,0)) > 0 AND SUM(tre.componentcount) <= %u "
-		"LIMIT 200 ",
-		CharacterID(), searchClause.c_str(),
-		rss->mintrivial, rss->maxtrivial, containers, combineObjectSlots);
-	TradeskillSearchResults(query, rss->object_type, rss->some_id);
-	return;
+	// TODO: Clean this up
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			tr.id,
+			tr.name,
+			tr.trivial,
+			SUM(tre.componentcount),
+			tr.tradeskill
+				FROM
+				tradeskill_recipe AS tr
+				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
+				WHERE
+				{} tr.trivial >= {}
+				AND tr.trivial <= {}
+				AND tr.enabled <> 0
+				AND tr.must_learn & 0x20 <> 0x20
+				AND (
+					(
+						tr.must_learn & 0x3 <> 0
+					)
+				OR (tr.must_learn & 0x3 = 0)
+			)
+			{}
+				GROUP BY
+				tr.id
+				HAVING
+				sum(
+				if (
+				tre.item_id {}
+				AND tre.iscontainer > 0,
+				1,
+				0
+			)
+			) > 0
+				AND SUM(tre.componentcount) <= {}
+
+				LIMIT
+				200
+		),
+		search_clause,
+		p_recipes_search_struct->mintrivial,
+		p_recipes_search_struct->maxtrivial,
+		ContentFilterCriteria::apply(),
+		containers_where_clause,
+		combine_object_slots
+	);
+
+	SendTradeskillSearchResults(query, p_recipes_search_struct->object_type, p_recipes_search_struct->some_id);
 }
 
 void Client::Handle_OP_ReloadUI(const EQApplicationPacket *app)
@@ -12375,7 +12522,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
 	if (m_pp.binds[4].zoneId != 0 && m_pp.binds[4].zoneId != 189) {
-		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, database.GetZoneName(m_pp.binds[4].zoneId));
+		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, ZoneName(m_pp.binds[4].zoneId));
 		return;
 	}
 
@@ -12389,10 +12536,15 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	uint32 zoneid = 0;
 	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
 
-	std::string query = StringFormat("SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
-	auto results = database.QueryDatabase(query);
+	std::string query = StringFormat(
+		"SELECT zone_id, bind_id, x, y, z FROM start_zones "
+		"WHERE player_class=%i AND player_deity=%i AND player_race=%i %s",
+		m_pp.class_,
+		m_pp.deity,
+		m_pp.race,
+		ContentFilterCriteria::apply().c_str()
+	);
+	auto results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		LogError("No valid start zones found for /setstartcity");
 		return;
@@ -12423,7 +12575,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
 		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
 		m_pp.class_, m_pp.deity, m_pp.race);
-	results = database.QueryDatabase(query);
+	results = content_db.QueryDatabase(query);
 	if (!results.Success())
 		return;
 
@@ -12436,7 +12588,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 			zoneid = atoi(row[0]);
 
 		char* name = nullptr;
-		database.GetZoneLongName(database.GetZoneName(zoneid), &name);
+		content_db.GetZoneLongName(ZoneName(zoneid), &name);
 		Message(Chat::Yellow, "%d - %s", zoneid, name);
 	}
 
@@ -14167,12 +14319,19 @@ void Client::Handle_OP_TradeRequest(const EQApplicationPacket *app)
 	// Client requesting a trade session from an npc/client
 	// Trade session not started until OP_TradeRequestAck is sent
 
-	CommonBreakInvisible();
-
-	// Pass trade request on to recipient
 	TradeRequest_Struct* msg = (TradeRequest_Struct*)app->pBuffer;
 	Mob* tradee = entity_list.GetMob(msg->to_mob_id);
 
+	// If the tradee is an untargettable mob - ignore
+	// Helps in cases where servers use invisible_man, body type 11 for quests
+	// and the client opens a trade by mistake.
+	if (tradee && (tradee->GetBodyType() == 11)) {
+		return;
+	}
+
+	CommonBreakInvisible();
+
+	// Pass trade request on to recipient
 	if (tradee && tradee->IsClient()) {
 		tradee->CastToClient()->QueuePacket(app);
 	}

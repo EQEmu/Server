@@ -105,6 +105,15 @@ void EQEmuConfig::parse_config()
 	DatabaseDB       = _root["server"]["database"].get("db", "eq").asString();
 
 	/**
+	 * Content Database
+	 */
+	ContentDbUsername = _root["server"]["content_database"].get("username", "").asString();
+	ContentDbPassword = _root["server"]["content_database"].get("password", "").asString();
+	ContentDbHost     = _root["server"]["content_database"].get("host", "").asString();
+	ContentDbPort     = atoi(_root["server"]["content_database"].get("port", 0).asString().c_str());
+	ContentDbName     = _root["server"]["content_database"].get("db", "").asString();
+
+	/**
 	 * QS
 	 */
 	QSDatabaseHost     = _root["server"]["qsdatabase"].get("host", "localhost").asString();

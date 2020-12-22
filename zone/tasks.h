@@ -217,6 +217,7 @@ public:
 	void CancelTask(Client *c, int SequenceNumber, TaskType type, bool RemoveFromDB = true);
 	void CancelAllTasks(Client *c);
 	void RemoveTask(Client *c, int SequenceNumber, TaskType type);
+	void RemoveTaskByTaskID(Client *c, uint32 task_id);
 	bool UpdateTasksByNPC(Client *c, int ActivityType, int NPCTypeID);
 	void UpdateTasksOnKill(Client *c, int NPCTypeID);
 	void UpdateTasksForItem(Client *c, ActivityType Type, int ItemID, int Count=1);
@@ -300,6 +301,7 @@ public:
 	int GetTaskMinLevel(int TaskID);
 	int GetTaskMaxLevel(int TaskID);
 	std::string GetTaskName(uint32 task_id);
+	TaskType GetTaskType(uint32 task_id);
 	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
 	void TaskQuestSetSelector(Client *c, ClientTaskState *state, Mob *mob, int count, int *tasks); // task list provided by QuestManager (perl/lua)
 	void SendActiveTasksToClient(Client *c, bool TaskComplete=false);

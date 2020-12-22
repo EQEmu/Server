@@ -283,7 +283,7 @@ bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 	bool lua_ret = false;
 	bool ignoreDefault = false;
 	lua_ret = LuaParser::Instance()->CheckHitChance(this, other, hit, ignoreDefault);
-	
+
 	if(ignoreDefault) {
 		return lua_ret;
 	}
@@ -323,7 +323,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	bool lua_ret = false;
 	bool ignoreDefault = false;
 	lua_ret = LuaParser::Instance()->AvoidDamage(this, other, hit, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return lua_ret;
 	}
@@ -780,7 +780,7 @@ int Mob::GetClassRaceACBonus()
 	return ac_bonus;
 }
 
-int Mob::ACSum()
+int Mob::ACSum(bool skip_caps)
 {
 	int ac = 0; // this should be base AC whenever shrouds come around
 	ac += itembonuses.AC; // items + food + tribute
@@ -799,7 +799,7 @@ int Mob::ACSum()
 	// EQ math
 	ac = (ac * 4) / 3;
 	// anti-twink
-	if (IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
+	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
 		ac = std::min(ac, 25 + 6 * GetLevel());
 	ac = std::max(0, ac + GetClassRaceACBonus());
 	if (IsNPC()) {
@@ -835,11 +835,11 @@ int Mob::ACSum()
 	if (ac < 0)
 		ac = 0;
 
-	if (IsClient()
+	if (!skip_caps && (IsClient()
 #ifdef BOTS
 		|| IsBot()
 #endif
-		) {
+	)) {
 		auto softcap = GetACSoftcap();
 		auto returns = GetSoftcapReturns();
 		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
@@ -862,6 +862,7 @@ int Mob::ACSum()
 int Mob::GetBestMeleeSkill()
 	{
 	int bestSkill=0;
+
 	EQ::skills::SkillType meleeSkills[]=
 	{	EQ::skills::Skill1HBlunt,
 	  	EQ::skills::Skill1HSlashing,
@@ -879,7 +880,7 @@ int Mob::GetBestMeleeSkill()
 		value = GetSkill(meleeSkills[i]);
 		bestSkill = std::max(value, bestSkill);
 	}
-		
+
 	return bestSkill;
 	}
 
@@ -892,7 +893,7 @@ int Mob::offense(EQ::skills::SkillType skill)
 		case EQ::skills::SkillArchery:
 		case EQ::skills::SkillThrowing:
 			stat_bonus = GetDEX();
-			break;	
+			break;
 
 		// Mobs with no weapons default to H2H.
 		// Since H2H is capped at 100 for many many classes,
@@ -943,7 +944,7 @@ void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions 
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
 	LuaParser::Instance()->MeleeMitigation(this, attacker, hit, opts, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return;
 	}
@@ -1735,7 +1736,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (!RuleB(Character, UseDeathExpLossMult)) {
 		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
 	}
-	
+
 	if (RuleB(Zone, LevelBasedEXPMods)) {
 		// Death in levels with xp_mod (such as hell levels) was resulting
 		// in losing more that appropriate since the loss was the same but
@@ -1893,7 +1894,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		dead_timer.Start(5000, true);
 		m_pp.zone_id = m_pp.binds[0].zoneId;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
-		database.MoveCharacterToZone(this->CharacterID(), database.GetZoneName(m_pp.zone_id));
+		database.MoveCharacterToZone(this->CharacterID(), m_pp.zone_id);
 		Save();
 		GoToDeath();
 	}
@@ -2246,7 +2247,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	d->spawn_id = GetID();
 	d->killer_id = killer_mob ? killer_mob->GetID() : 0;
 	d->bindzoneid = 0;
-	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
+	d->spell_id = 0xffffffff; // Sending spell was causing extra DoT land msg
 	d->attack_skill = SkillDamageTypes[attack_skill];
 	d->damage = damage;
 	app->priority = 6;
@@ -2452,7 +2453,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	bool    allow_merchant_corpse = RuleB(Merchant, AllowCorpse);
 	bool    is_merchant = (class_ == MERCHANT || class_ == ADVENTUREMERCHANT || MerchantType != 0);
-	
+
 	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
 		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
@@ -2463,7 +2464,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				killer = killer->GetOwner();
 
 			if (killer->IsClient() && !killer->CastToClient()->GetGM())
-				this->CheckMinMaxLevel(killer);
+				this->CheckTrivialMinMaxLevelDrop(killer);
 		}
 
 		entity_list.RemoveFromAutoXTargets(this);
@@ -3444,6 +3445,22 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				// emote goes with every one ... even npcs
 				entity_list.MessageClose(this, true, RuleI(Range, SpellMessages), Chat::Emote, "%s beams a smile at %s", attacker->GetCleanName(), this->GetCleanName());
 			}
+		
+			// If a client pet is damaged while sitting, stand, fix sit button,
+			// and remove sitting regen.  Removes bug where client clicks sit
+			// during battle and gains pet hp-regen and bugs the sit button.
+			if (IsPet()) {
+				Mob *owner = this->GetOwner();
+				if (owner && owner->IsClient()) {
+					if (GetPetOrder() == SPO_Sit) {
+						SetPetOrder(SPO_Follow);
+					}
+					// fix GUI sit button to be unpressed and stop sitting regen
+					owner->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					SetAppearance(eaStanding);
+				}	
+			}
+
 		}	//end `if there is some damage being done and theres anattacker person involved`
 
 		Mob *pet = GetPet();
@@ -3454,6 +3471,18 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		{
 			if (!pet->IsHeld()) {
 				LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
+				if (IsClient()) {
+					// if pet was sitting his new mode is follow
+					// following after the battle (live verified)
+					if (pet->GetPetOrder() == SPO_Sit) {
+						pet->SetPetOrder(SPO_Follow);
+					}
+
+					// fix GUI sit button to be unpressed and stop sitting regen
+					this->CastToClient()->SetPetCommandState(PET_BUTTON_SIT, 0);
+					pet->SetAppearance(eaStanding);
+				}
+
 				pet->AddToHateList(attacker, 1, 0, true, false, false, spell_id);
 				pet->SetTarget(attacker);
 				MessageString(Chat::NPCQuestSay, PET_ATTACKING, pet->GetCleanName(), attacker->GetCleanName());
@@ -4093,7 +4122,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		if (IsPet() && hand != EQ::invslot::slotPrimary) //Pets can only proc spell procs from their primay hand (ie; beastlord pets)
 			continue; // If pets ever can proc from off hand, this will need to change
 
-		if (SpellProcs[i].base_spellID == POISON_PROC && 
+		if (SpellProcs[i].base_spellID == POISON_PROC &&
 		    	(!weapon || weapon->ItemType != EQ::item::ItemType1HPiercing))
 			continue; // Old school poison will only proc with 1HP equipped.
 
@@ -4113,7 +4142,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			// Spell procs (buffs)
 			if (SpellProcs[i].spellID != SPELL_UNKNOWN) {
 				if (SpellProcs[i].base_spellID == POISON_PROC) {
-					poison_slot=i;					
+					poison_slot=i;
 					continue; // Process the poison proc last per @mackal
 				}
 
@@ -4160,7 +4189,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 				RemoveProcFromWeapon(spell_id);
 			}
 		}
-	}	
+	}
 
 	if (HasSkillProcs() && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		uint16 skillinuse = 28;
@@ -4696,7 +4725,7 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 #ifdef LUA_EQEMU
 	bool ignoreDefault = false;
 	LuaParser::Instance()->ApplyDamageTable(this, hit, ignoreDefault);
-	
+
 	if (ignoreDefault) {
 		return;
 	}

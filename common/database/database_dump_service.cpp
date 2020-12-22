@@ -128,12 +128,23 @@ std::string DatabaseDumpService::GetMySQLVersion()
 std::string DatabaseDumpService::GetBaseMySQLDumpCommand()
 {
 	auto config = EQEmuConfig::get();
+	if (IsDumpContentTables() && !config->ContentDbHost.empty()) {
+		return fmt::format(
+			"mysqldump -u {} -p{} -h {} --port={} {}",
+			config->ContentDbUsername,
+			config->ContentDbPassword,
+			config->ContentDbHost,
+			config->ContentDbPort,
+			config->ContentDbName
+		);
+	};
 
 	return fmt::format(
-		"mysqldump -u {} -p{} -h {} {}",
+		"mysqldump -u {} -p{} -h {} --port={} {}",
 		config->DatabaseUsername,
 		config->DatabasePassword,
 		config->DatabaseHost,
+		config->DatabasePort,
 		config->DatabaseDB
 	);
 }

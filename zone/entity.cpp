@@ -515,7 +515,7 @@ void EntityList::MobProcess()
 			mob_settle_timer->Disable();
 		}
 
-		if (numclients > 0 ||
+		if (zone->process_mobs_while_empty || numclients > 0 ||
 			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
 			mob_settle_timer->Enabled()) {
 			// Normal processing, or assuring that spawns that should
@@ -711,6 +711,8 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
+
+	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
 
 	/* Zone controller process EVENT_SPAWN_ZONE */
 	if (RuleB(Zone, UseZoneController)) {
@@ -1322,8 +1324,8 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	const glm::vec4 &client_position       = client->GetPosition();
 	const float     distance_max           = (600.0 * 600.0);
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		spawn = it->second;
+	for (auto & it : mob_list) {
+		spawn = it.second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
 			if (!spawn->ShouldISpawnFor(client)) {
 				continue;
@@ -2476,7 +2478,7 @@ void EntityList::RemoveAllGroups()
 	while (group_list.size()) {
 		auto group = group_list.front();
 		group_list.pop_front();
-		delete group;
+		safe_delete(group);
 	}
 #if EQDEBUG >= 5
 	CheckGroupList (__FILE__, __LINE__);
@@ -2488,7 +2490,7 @@ void EntityList::RemoveAllRaids()
 	while (raid_list.size()) {
 		auto raid = raid_list.front();
 		raid_list.pop_front();
-		delete raid;
+		safe_delete(raid);
 	}
 }
 
@@ -2657,7 +2659,6 @@ bool EntityList::RemoveMobFromCloseLists(Mob *mob)
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
-
 		LogEntityManagement(
 			"Removing mob [{}] from [{}] close list entity_id ({})",
 			mob->GetCleanName(),
@@ -2694,7 +2695,11 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
  * @param close_mobs
  * @param scanning_mob
  */
-void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mob *scanning_mob)
+void EntityList::ScanCloseMobs(
+	std::unordered_map<uint16, Mob *> &close_mobs,
+	Mob *scanning_mob,
+	bool add_self_to_other_lists
+)
 {
 	float scan_range = RuleI(Range, MobCloseScanDistance) * RuleI(Range, MobCloseScanDistance);
 
@@ -2712,11 +2717,23 @@ void EntityList::ScanCloseMobs(std::unordered_map<uint16, Mob *> &close_mobs, Mo
 		}
 
 		float distance = DistanceSquared(scanning_mob->GetPosition(), mob->GetPosition());
-		if (distance <= scan_range) {
+		if (distance <= scan_range || mob->GetAggroRange() >= scan_range) {
 			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
-		}
-		else if (mob->GetAggroRange() >= scan_range) {
-			close_mobs.insert(std::pair<uint16, Mob *>(mob->GetID(), mob));
+
+			if (add_self_to_other_lists && scanning_mob->GetID() > 0) {
+				bool has_mob = false;
+
+				for (auto &cm: mob->close_mobs) {
+					if (scanning_mob->GetID() == cm.first) {
+						has_mob = true;
+						break;
+					}
+				}
+
+				if (!has_mob) {
+					mob->close_mobs.insert(std::pair<uint16, Mob *>(scanning_mob->GetID(), scanning_mob));
+				}
+			}
 		}
 	}
 
@@ -2822,7 +2839,7 @@ bool EntityList::RemoveGroup(uint32 delete_id)
 	}
 	auto group = *it;
 	group_list.erase(it);
-	delete group;
+	safe_delete(group);
 	return true;
 }
 
@@ -2834,7 +2851,7 @@ bool EntityList::RemoveRaid(uint32 delete_id)
 		return false;
 	auto raid = *it;
 	raid_list.erase(it);
-	delete raid;
+	safe_delete(raid);
 	return true;
 }
 

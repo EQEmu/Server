@@ -576,25 +576,33 @@ void NPC::RemoveItem(uint32 item_id, uint16 quantity, uint16 slot) {
 	}
 }
 
-void NPC::CheckMinMaxLevel(Mob *them)
+void NPC::CheckTrivialMinMaxLevelDrop(Mob *killer)
 {
-	if(them == nullptr || !them->IsClient())
+	if (killer == nullptr || !killer->IsClient()) {
 		return;
+	}
 
-	uint16 themlevel = them->GetLevel();
-	uint8 material;
+	uint16 killer_level = killer->GetLevel();
+	uint8  material;
 
 	auto cur = itemlist.begin();
-	while(cur != itemlist.end())
-	{
-		if(!(*cur))
+	while (cur != itemlist.end()) {
+		if (!(*cur)) {
 			return;
+		}
 
-		if(themlevel < (*cur)->min_level || themlevel > (*cur)->max_level)
-		{
+		uint16 trivial_min_level     = (*cur)->trivial_min_level;
+		uint16 trivial_max_level     = (*cur)->trivial_max_level;
+		bool   fits_trivial_criteria = (
+			(trivial_min_level > 0 && killer_level < trivial_min_level) ||
+			(trivial_max_level > 0 && killer_level > trivial_max_level)
+		);
+
+		if (fits_trivial_criteria) {
 			material = EQ::InventoryProfile::CalcMaterialFromSlot((*cur)->equip_slot);
-			if (material != EQ::textures::materialInvalid)
+			if (material != EQ::textures::materialInvalid) {
 				SendWearChange(material);
+			}
 
 			cur = itemlist.erase(cur);
 			continue;
@@ -603,8 +611,9 @@ void NPC::CheckMinMaxLevel(Mob *them)
 	}
 
 	UpdateEquipmentLight();
-	if (UpdateActiveLight())
+	if (UpdateActiveLight()) {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
+	}
 }
 
 void NPC::ClearItemList() {
@@ -647,8 +656,8 @@ void NPC::QueryLoot(Client* to)
 			item_count,
 			linker.GenerateLink().c_str(),
 			(*cur)->item_id,
-			(*cur)->min_level,
-			(*cur)->max_level
+			(*cur)->trivial_min_level,
+			(*cur)->trivial_max_level
 		);
 	}
 
@@ -714,22 +723,27 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if (mob_scan_close.Check()) {
-
+	if (mob_close_scan_timer.Check()) {
 		entity_list.ScanCloseMobs(close_mobs, this);
-
-		if (moving) {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(3000, 6000));
-		}
-		else {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(6000, 60000));
-		}
 	}
 
-	if (mob_check_moving_timer.Check() && moving) {
-		mob_scan_close.Trigger();
+	const uint16 npc_mob_close_scan_timer_moving = 6000;
+	const uint16 npc_mob_close_scan_timer_idle   = 60000;
+
+	if (mob_check_moving_timer.Check()) {
+		if (moving) {
+			if (mob_close_scan_timer.GetRemainingTime() > npc_mob_close_scan_timer_moving) {
+				LogAIScanCloseDetail("NPC [{}] Restarting with moving timer", GetCleanName());
+				mob_close_scan_timer.Disable();
+				mob_close_scan_timer.Start(npc_mob_close_scan_timer_moving);
+				mob_close_scan_timer.Trigger();
+			}
+		}
+		else if (mob_close_scan_timer.GetDuration() == npc_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("NPC [{}] Restarting with idle timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(npc_mob_close_scan_timer_idle);
+		}
 	}
 
 	if (tic_timer.Check()) {
@@ -1068,14 +1082,20 @@ bool NPC::SpawnZoneController()
 	return true;
 }
 
-NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 grid_id, uint32 grid_number, uint32 pause) {
+void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 zoffset) {
+
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
-	sprintf(npc_type->name, "%u_%u", grid_id, grid_number);
-	sprintf(npc_type->lastname, "Number: %u Grid: %u Pause: %u", grid_number, grid_id, pause);
+	std::string str_zoffset = numberToWords(zoffset);
+	std::string str_number = numberToWords(grid_number);
 
-	npc_type->current_hp           = 4000000;
+	strcpy(npc_type->name, str_number.c_str());
+	if (zoffset != 0) {
+		strcat(npc_type->name, "(Stacked)");
+	}
+
+	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
 	npc_type->race             = 2254;
 	npc_type->gender           = 2;
@@ -1095,11 +1115,50 @@ NPC * NPC::SpawnGridNodeNPC(std::string name, const glm::vec4 &position, uint32 
 
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
 	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name)-3] = (char) NULL;
+
 	npc->GiveNPCTypeData(npc_type);
 
-	entity_list.AddNPC(npc, true, true);
+	entity_list.AddNPC(npc);
+}
 
-	return npc;
+void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
+{
+	auto npc_type = new NPCType;
+	memset(npc_type, 0, sizeof(NPCType));
+
+	char node_name[64];
+	strn0cpy(node_name, name.c_str(), 64);
+
+	strcpy(npc_type->name, entity_list.MakeNameUnique(node_name));
+
+	npc_type->current_hp       = 4000000;
+	npc_type->max_hp           = 4000000;
+	npc_type->race             = 2254;
+	npc_type->gender           = 2;
+	npc_type->class_           = 9;
+	npc_type->deity            = 1;
+	npc_type->level            = 200;
+	npc_type->npc_id           = 0;
+	npc_type->loottable_id     = 0;
+	npc_type->texture          = 1;
+	npc_type->light            = 1;
+	npc_type->size             = 5;
+	npc_type->runspeed         = 0;
+	npc_type->merchanttype     = 1;
+	npc_type->bodytype         = 1;
+	npc_type->show_name        = true;
+	npc_type->findable         = true;
+
+	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
+	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name)-3] = (char) NULL;
+
+	npc->GiveNPCTypeData(npc_type);
+
+	entity_list.AddNPC(npc);
 }
 
 NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position) {
@@ -1969,7 +2028,7 @@ void Mob::NPCSpecialAttacks(const char* parse, int permtag, bool reset, bool rem
 
 	if(permtag == 1 && this->GetNPCTypeID() > 0)
 	{
-		if(database.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
+		if(content_db.SetSpecialAttkFlag(this->GetNPCTypeID(), orig_parse))
 		{
 			LogInfo("NPCTypeID: [{}] flagged to [{}] for Special Attacks.\n",this->GetNPCTypeID(),orig_parse);
 		}
@@ -3204,7 +3263,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 			if (mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY) {
 				bool use_primary_faction = false;
 				if (mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction()) {
-					const NPCFactionList *cf = database.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
+					const NPCFactionList *cf = content_db.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
 					if (cf) {
 						if (cf->assistprimaryfaction != 0) {
 							use_primary_faction = true;

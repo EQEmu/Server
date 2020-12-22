@@ -575,7 +575,11 @@ struct NewZone_Struct {
 /*0848*/	int32	unknown848;
 /*0852*/	uint16	zone_id;
 /*0854*/	uint16	zone_instance;
-/*0856*/	char	unknown856[20];
+/*0856*/	uint32	scriptNPCReceivedanItem;
+/*0860*/	uint32	bCheck;					// padded bool
+/*0864*/	uint32	scriptIDSomething;
+/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
+/*0872*/	uint32	scriptIDSomething3;
 /*0876*/	uint32	SuspendBuffs;
 /*0880*/	uint32	unknown880;		// Seen 50
 /*0884*/	uint32	unknown884;		// Seen 10

@@ -192,7 +192,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 
 	DoAttack(who, my_hit);
 
-	who->AddToHateList(this, hate, 0, false);
+	who->AddToHateList(this, hate, 0);
 	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
@@ -870,7 +870,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 	}
 
 	if (IsClient() && !CastToClient()->GetFeigned())
-		other->AddToHateList(this, hate, 0, false);
+		other->AddToHateList(this, hate, 0);
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
@@ -1200,9 +1200,9 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 	if (TotalDmg > 0) {
 		TotalDmg += TotalDmg * damage_mod / 100;
-		other->AddToHateList(this, TotalDmg, 0, false);
+		other->AddToHateList(this, TotalDmg, 0);
 	} else {
-		other->AddToHateList(this, 0, 0, false);
+		other->AddToHateList(this, 0, 0);
 	}
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillInUse);
@@ -1384,7 +1384,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	}
 
 	if (IsClient() && !CastToClient()->GetFeigned())
-		other->AddToHateList(this, WDmg, 0, false);
+		other->AddToHateList(this, WDmg, 0);
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillThrowing);
 
@@ -2158,7 +2158,7 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		CanSkillProc = false;			    // Disable skill procs
 	}
 
-	other->AddToHateList(this, hate, 0, false);
+	other->AddToHateList(this, hate, 0);
 	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
 	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
 		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;

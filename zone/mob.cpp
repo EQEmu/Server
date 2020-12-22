@@ -115,10 +115,10 @@ Mob::Mob(
 	tmHidden(-1),
 	mitigation_ac(0),
 	m_specialattacks(eSpecialAttacks::None),
-	attack_anim_timer(1000),
+	attack_anim_timer(500),
 	position_update_melee_push_timer(500),
 	hate_list_cleanup_timer(6000),
-	mob_scan_close(6000),
+	mob_close_scan_timer(6000),
 	mob_check_moving_timer(1000)
 {
 	mMovementManager = &MobMovementManager::Get();
@@ -463,7 +463,7 @@ Mob::Mob(
 	m_manual_follow = false;
 #endif
 
-	mob_scan_close.Trigger();
+	mob_close_scan_timer.Trigger();
 }
 
 Mob::~Mob()
@@ -501,7 +501,7 @@ Mob::~Mob()
 	if (HasTempPetsActive()) {
 		entity_list.DestroyTempPets(this);
 	}
-	
+
 	entity_list.UnMarkNPC(GetID());
 	UninitializeBuffSlots();
 
@@ -1206,15 +1206,22 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 
 	//for (i = 0; i < _MaterialCount; i++)
-	for (i = 0; i < 9; i++)
-	{
+	for (i = 0; i < 9; i++) {
 		// Only Player Races Wear Armor
-		if (Mob::IsPlayerRace(race) || i > 6)
-		{
-			ns->spawn.equipment.Slot[i].Material = GetEquipmentMaterial(i);
-			ns->spawn.equipment.Slot[i].EliteModel = IsEliteMaterialItem(i);
+		if (Mob::IsPlayerRace(race) || i > 6) {
+			ns->spawn.equipment.Slot[i].Material        = GetEquipmentMaterial(i);
+			ns->spawn.equipment.Slot[i].EliteModel      = IsEliteMaterialItem(i);
 			ns->spawn.equipment.Slot[i].HerosForgeModel = GetHerosForgeModel(i);
-			ns->spawn.equipment_tint.Slot[i].Color = GetEquipmentColor(i);
+			ns->spawn.equipment_tint.Slot[i].Color      = GetEquipmentColor(i);
+		}
+	}
+
+	if (texture > 0) {
+		for (i = 0; i < 9; i++) {
+			if (i == EQ::textures::weaponPrimary || i == EQ::textures::weaponSecondary || texture == 255) {
+				continue;
+			}
+			ns->spawn.equipment.Slot[i].Material = texture;
 		}
 	}
 
@@ -1645,21 +1652,23 @@ void Mob::ShowStats(Client* client)
 	}
 }
 
-void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter) {
-	if (!attack_anim_timer.Check())
+void Mob::DoAnim(const int animnum, int type, bool ackreq, eqFilterType filter)
+{
+	if (!attack_anim_timer.Check()) {
 		return;
+	}
 
 	auto outapp = new EQApplicationPacket(OP_Animation, sizeof(Animation_Struct));
-	Animation_Struct* anim = (Animation_Struct*)outapp->pBuffer;
+	auto *anim  = (Animation_Struct *) outapp->pBuffer;
 	anim->spawnid = GetID();
 
-	if(type == 0){
+	if (type == 0) {
 		anim->action = animnum;
-		anim->speed = 10;
+		anim->speed  = 10;
 	}
 	else {
 		anim->action = animnum;
-		anim->speed = type;
+		anim->speed  = type;
 	}
 
 	entity_list.QueueCloseClients(
@@ -1755,78 +1764,69 @@ void Mob::SendIllusionPacket(
 	float in_size
 )
 {
-	uint8 new_texture = in_texture;
-	uint8 new_helmtexture = in_helmtexture;
-	uint8 new_haircolor;
-	uint8 new_beardcolor;
-	uint8 new_eyecolor1;
-	uint8 new_eyecolor2;
-	uint8 new_hairstyle;
-	uint8 new_luclinface;
-	uint8 new_beard;
-	uint8 new_aa_title;
+	uint8  new_texture     = in_texture;
+	uint8  new_helmtexture = in_helmtexture;
+	uint8  new_haircolor;
+	uint8  new_beardcolor;
+	uint8  new_eyecolor1;
+	uint8  new_eyecolor2;
+	uint8  new_hairstyle;
+	uint8  new_luclinface;
+	uint8  new_beard;
+	uint8  new_aa_title;
 	uint32 new_drakkin_heritage;
 	uint32 new_drakkin_tattoo;
 	uint32 new_drakkin_details;
 
 	race = in_race;
-	if (race == 0)
-		{
+	if (race == 0) {
 		race = (use_model) ? use_model : GetBaseRace();
-		}
+	}
 
-	if (in_gender != 0xFF)
-		{
+	if (in_gender != 0xFF) {
 		gender = in_gender;
-		}
-	else
-		{
+	}
+	else {
 		gender = (in_race) ? GetDefaultGender(race, gender) : GetBaseGender();
-		}
+	}
 
-	if (in_texture == 0xFF && !IsPlayerRace(in_race))
-		{
+	if (in_texture == 0xFF && !IsPlayerRace(in_race)) {
 		new_texture = GetTexture();
-		}
+	}
 
-	if (in_helmtexture == 0xFF && !IsPlayerRace(in_race))
-		{
+	if (in_helmtexture == 0xFF && !IsPlayerRace(in_race)) {
 		new_helmtexture = GetHelmTexture();
-		}
+	}
 
-	new_haircolor = (in_haircolor == 0xFF) ? GetHairColor() : in_haircolor;
-	new_beardcolor = (in_beardcolor == 0xFF) ? GetBeardColor() : in_beardcolor;
-	new_eyecolor1 = (in_eyecolor1 == 0xFF) ? GetEyeColor1() : in_eyecolor1;
-	new_eyecolor2 = (in_eyecolor2 == 0xFF) ? GetEyeColor2() : in_eyecolor2;
-	new_hairstyle = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
-	new_luclinface = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
-	new_beard = (in_beard == 0xFF) ? GetBeard() : in_beard;
-	new_drakkin_heritage = 
-		(in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
-	new_drakkin_tattoo = 
-		(in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
-	new_drakkin_details = 
-		(in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
-	new_aa_title = in_aa_title;
-	size = (in_size <= 0.0f) ? GetSize() : in_size;
+	new_haircolor        = (in_haircolor == 0xFF) ? GetHairColor() : in_haircolor;
+	new_beardcolor       = (in_beardcolor == 0xFF) ? GetBeardColor() : in_beardcolor;
+	new_eyecolor1        = (in_eyecolor1 == 0xFF) ? GetEyeColor1() : in_eyecolor1;
+	new_eyecolor2        = (in_eyecolor2 == 0xFF) ? GetEyeColor2() : in_eyecolor2;
+	new_hairstyle        = (in_hairstyle == 0xFF) ? GetHairStyle() : in_hairstyle;
+	new_luclinface       = (in_luclinface == 0xFF) ? GetLuclinFace() : in_luclinface;
+	new_beard            = (in_beard == 0xFF) ? GetBeard() : in_beard;
+	new_drakkin_heritage = (in_drakkin_heritage == 0xFFFFFFFF) ? GetDrakkinHeritage() : in_drakkin_heritage;
+	new_drakkin_tattoo   = (in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
+	new_drakkin_details  = (in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
+	new_aa_title         = in_aa_title;
 
 	// Reset features to Base from the Player Profile
 	if (IsClient() && in_race == 0) {
-		race							= CastToClient()->GetBaseRace();
-		gender							= CastToClient()->GetBaseGender();
-		new_texture = texture			= 0xFF;
-		new_helmtexture = helmtexture	= 0xFF;
-		new_haircolor = haircolor		= CastToClient()->GetBaseHairColor();
-		new_beardcolor = beardcolor		= CastToClient()->GetBaseBeardColor();
-		new_eyecolor1 = eyecolor1		= CastToClient()->GetBaseEyeColor();
-		new_eyecolor2 = eyecolor2		= CastToClient()->GetBaseEyeColor();
-		new_hairstyle = hairstyle		= CastToClient()->GetBaseHairStyle();
-		new_luclinface = luclinface		= CastToClient()->GetBaseFace();
-		new_beard = beard				= CastToClient()->GetBaseBeard();
-		new_aa_title = aa_title			= 0xFF;
-		new_drakkin_heritage = drakkin_heritage	= CastToClient()->GetBaseHeritage();
-		new_drakkin_tattoo = drakkin_tattoo	= CastToClient()->GetBaseTattoo();
-		new_drakkin_details = drakkin_details	= CastToClient()->GetBaseDetails();
+		race                 = CastToClient()->GetBaseRace();
+		gender               = CastToClient()->GetBaseGender();
+		new_texture          = texture          = 0xFF;
+		new_helmtexture      = helmtexture      = 0xFF;
+		new_haircolor        = haircolor        = CastToClient()->GetBaseHairColor();
+		new_beardcolor       = beardcolor       = CastToClient()->GetBaseBeardColor();
+		new_eyecolor1        = eyecolor1        = CastToClient()->GetBaseEyeColor();
+		new_eyecolor2        = eyecolor2        = CastToClient()->GetBaseEyeColor();
+		new_hairstyle        = hairstyle        = CastToClient()->GetBaseHairStyle();
+		new_luclinface       = luclinface       = CastToClient()->GetBaseFace();
+		new_beard            = beard            = CastToClient()->GetBaseBeard();
+		new_aa_title         = aa_title         = 0xFF;
+		new_drakkin_heritage = drakkin_heritage = CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo   = drakkin_tattoo   = CastToClient()->GetBaseTattoo();
+		new_drakkin_details  = drakkin_details  = CastToClient()->GetBaseDetails();
 		switch (race) {
 			case OGRE:
 				size = 9;
@@ -1857,6 +1857,21 @@ void Mob::SendIllusionPacket(
 		}
 	}
 
+	// update internal values for mob
+	size             = (in_size <= 0.0f) ? GetSize() : in_size;
+	texture          = new_texture;
+	helmtexture      = new_helmtexture;
+	haircolor        = new_haircolor;
+	beardcolor       = new_beardcolor;
+	eyecolor1        = new_eyecolor1;
+	eyecolor2        = new_eyecolor2;
+	hairstyle        = new_hairstyle;
+	luclinface       = new_luclinface;
+	beard            = new_beard;
+	drakkin_heritage = new_drakkin_heritage;
+	drakkin_tattoo   = new_drakkin_tattoo;
+	drakkin_details  = new_drakkin_details;
+
 	auto            outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
 	Illusion_Struct *is    = (Illusion_Struct *) outapp->pBuffer;
 	is->spawnid = GetID();
@@ -1881,9 +1896,10 @@ void Mob::SendIllusionPacket(
 	safe_delete(outapp);
 
 	/* Refresh armor and tints after send illusion packet */
-	this->SendArmorAppearance();
+	SendArmorAppearance();
 
-	LogSpells("Illusion: Race = [{}], Gender = [{}], Texture = [{}], HelmTexture = [{}], HairColor = [{}], BeardColor = [{}], EyeColor1 = [{}], EyeColor2 = [{}], HairStyle = [{}], Face = [{}], DrakkinHeritage = [{}], DrakkinTattoo = [{}], DrakkinDetails = [{}], Size = [{}]",
+	LogSpells(
+		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
 		race,
 		gender,
 		new_texture,
@@ -1897,7 +1913,8 @@ void Mob::SendIllusionPacket(
 		new_drakkin_heritage,
 		new_drakkin_tattoo,
 		new_drakkin_details,
-		size);
+		size
+	);
 }
 
 bool Mob::RandomizeFeatures(bool send_illusion, bool set_variables)
@@ -2110,8 +2127,8 @@ bool Mob::IsPlayerRace(uint16 in_race) {
 }
 
 uint16 Mob::GetFactionRace() {
-	uint16 current_race = GetRace();	
-	if (IsPlayerRace(current_race) || current_race == TREE || 
+	uint16 current_race = GetRace();
+	if (IsPlayerRace(current_race) || current_race == TREE ||
 		current_race == MINOR_ILL_OBJ) {
 		return current_race;
 	}
@@ -2403,7 +2420,7 @@ void Mob::ChangeSize(float in_size = 0, bool bNoRestriction) {
 	if (in_size > 255.0)
 		in_size = 255.0;
 	//End of Size Code
-	this->size = in_size;
+	size = in_size;
 	SendAppearancePacket(AT_Size, (uint32) in_size);
 }
 
@@ -5898,7 +5915,7 @@ bool Mob::LeaveHealRotationTargetPool()
 
 	m_target_of_heal_rotation->RemoveTargetFromPool(this);
 	m_target_of_heal_rotation.reset();
-	
+
 	return !IsHealRotationTarget();
 }
 

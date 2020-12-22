@@ -155,6 +155,7 @@ struct PetInfo {
 	SpellBuff_Struct	Buffs[PET_BUFF_COUNT];
 	uint32	Items[EQ::invslot::EQUIPMENT_COUNT];
 	char	Name[64];
+	bool	taunting;
 };
 
 struct ZoneSpellsBlocked {
@@ -453,7 +454,7 @@ public:
 	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
-	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* itemlist, uint8 droplimit, uint8 mindrop);
+	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
 	uint32		GetMaxNPCSpellsID();
 	uint32		GetMaxNPCSpellsEffectsID();
 	bool GetAuraEntry(uint16 spell_id, AuraRecord &record);
@@ -503,8 +504,6 @@ public:
 	bool	DoorIsOpen(uint8 door_id,const char* zone_name);
 	void	SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name);
 	bool	LoadDoors(int32 door_count, Door *into, const char *zone_name, int16 version);
-	bool	CheckGuildDoor(uint8 doorid,uint16 guild_id, const char* zone);
-	bool	SetGuildDoor(uint8 doorid,uint16 guild_id, const char* zone);
 	uint32	GetGuildEQID(uint32 guilddbid);
 	void	UpdateDoorGuildID(int doorid, int guild_id);
 	int32	GetDoorsCount(uint32* oMaxID, const char *zone_name, int16 version);
@@ -577,6 +576,7 @@ protected:
 };
 
 extern ZoneDatabase database;
+extern ZoneDatabase content_db;
 
 #endif /*ZONEDB_H_*/
 
