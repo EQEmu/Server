@@ -5090,6 +5090,13 @@ void Client::UnmemSpellAll(bool update_client)
 			UnmemSpell(i, update_client);
 }
 
+uint32 Client::GetSpellIDByBookSlot(int book_slot) {
+	if (book_slot <= EQ::spells::SPELLBOOK_SIZE) {
+		return GetSpellByBookSlot(book_slot);
+	}
+	return -1;	//default
+}
+
 uint16 Client::FindMemmedSpellBySlot(int slot) {
 	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
 		return m_pp.mem_spells[slot];

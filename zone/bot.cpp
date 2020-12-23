@@ -2211,12 +2211,12 @@ bool Bot::Process()
 		return false;
 	}
 
-	if (mob_scan_close.Check()) {
+	if (mob_close_scan_timer.Check()) {
 		LogAIScanClose(
 			"is_moving [{}] bot [{}] timer [{}]",
 			moving ? "true" : "false",
 			GetCleanName(),
-			mob_scan_close.GetDuration()
+			mob_close_scan_timer.GetDuration()
 		);
 
 		entity_list.ScanCloseClientMobs(close_mobs, this);

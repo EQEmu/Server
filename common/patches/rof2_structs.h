@@ -628,7 +628,7 @@ struct NewZone_Struct {
 	/*0856*/	uint32	scriptNPCReceivedanItem;
 	/*0860*/	uint32	bCheck;					// padded bool
 	/*0864*/	uint32	scriptIDSomething;
-	/*0868*/	uint32	scriptIDSomething2;
+	/*0868*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
 	/*0872*/	uint32	scriptIDSomething3;
 	/*0876*/	uint32	SuspendBuffs;			// padded bool
 	/*0880*/	uint32	LavaDamage;				// LavaDamage value

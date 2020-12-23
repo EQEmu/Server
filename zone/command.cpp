@@ -7086,7 +7086,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 	int results_count = 0;
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (results.Success() && results.RowCount()) {
 
 		results_count = results.RowCount();
@@ -7113,7 +7113,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 			if (change_apply) {
 
-				results = database.QueryDatabase(
+				results = content_db.QueryDatabase(
 					fmt::format(
 						SQL(
 							UPDATE spawn2

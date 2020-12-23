@@ -80,3 +80,4 @@ forum, although pull requests will be much quicker and easier on all parties.
 <a href="https://github.com/EQEmu/server/graphs/contributors">
   <img src="https://contributors-img.firebaseapp.com/image?repo=EQEmu/server" />
 </a>
+

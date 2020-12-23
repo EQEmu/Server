@@ -105,68 +105,69 @@ bool ZoneDatabase::GetZoneCFG(
 
 	std::string query = StringFormat(
 		"SELECT "
-		"ztype, "					 // 0
-		"fog_red, "					 // 1
-		"fog_green, "				 // 2
-		"fog_blue, "				 // 3
-		"fog_minclip, "				 // 4
-		"fog_maxclip, "				 // 5
-		"fog_red2, "				 // 6
-		"fog_green2, "				 // 7
-		"fog_blue2, "				 // 8
-		"fog_minclip2, "			 // 9
-		"fog_maxclip2, "			 // 10
-		"fog_red3, "				 // 11
-		"fog_green3, "				 // 12
-		"fog_blue3, "				 // 13
-		"fog_minclip3, "			 // 14
-		"fog_maxclip3, "			 // 15
-		"fog_red4, "				 // 16
-		"fog_green4, "				 // 17
-		"fog_blue4, "				 // 18
-		"fog_minclip4, "			 // 19
-		"fog_maxclip4, "			 // 20
-		"fog_density, "				 // 21
-		"sky, "						 // 22
-		"zone_exp_multiplier, "		 // 23
-		"safe_x, "					 // 24
-		"safe_y, "					 // 25
-		"safe_z, "					 // 26
-		"underworld, "				 // 27
-		"minclip, "					 // 28
-		"maxclip, "					 // 29
-		"time_type, "				 // 30
-		"canbind, "					 // 31
-		"cancombat, "				 // 32
-		"canlevitate, "				 // 33
-		"castoutdoor, "				 // 34
-		"hotzone, "					 // 35
-		"ruleset, "					 // 36
-		"suspendbuffs, "			 // 37
-		"map_file_name, "			 // 38
-		"short_name, "				 // 39
-		"rain_chance1, "			 // 40
-		"rain_chance2, "			 // 41
-		"rain_chance3, "			 // 42
-		"rain_chance4, "			 // 43
-		"rain_duration1, "			 // 44
-		"rain_duration2, "			 // 45
-		"rain_duration3, "			 // 46
-		"rain_duration4, "			 // 47
-		"snow_chance1, "			 // 48
-		"snow_chance2, "			 // 49
-		"snow_chance3, "			 // 50
-		"snow_chance4, "			 // 51
-		"snow_duration1, "			 // 52
-		"snow_duration2, "			 // 53
-		"snow_duration3, "			 // 54
-		"snow_duration4, "			 // 55
-		"gravity, "					 // 56
-		"fast_regen_hp, "			 // 57
-		"fast_regen_mana, "			 // 58
-		"fast_regen_endurance, "	 // 59
-		"npc_max_aggro_dist, "		 // 60
-		"max_movement_update_range " // 61
+		"ztype, "						// 0
+		"fog_red, "						// 1
+		"fog_green, "					// 2
+		"fog_blue, "					// 3
+		"fog_minclip, "					// 4
+		"fog_maxclip, "					// 5
+		"fog_red2, "					// 6
+		"fog_green2, "					// 7
+		"fog_blue2, "					// 8
+		"fog_minclip2, "				// 9
+		"fog_maxclip2, "				// 10
+		"fog_red3, "					// 11
+		"fog_green3, "					// 12
+		"fog_blue3, "					// 13
+		"fog_minclip3, "				// 14
+		"fog_maxclip3, "				// 15
+		"fog_red4, "					// 16
+		"fog_green4, "					// 17
+		"fog_blue4, "					// 18
+		"fog_minclip4, "				// 19
+		"fog_maxclip4, "				// 20
+		"fog_density, "					// 21
+		"sky, "							// 22
+		"zone_exp_multiplier, "			// 23
+		"safe_x, "						// 24
+		"safe_y, "						// 25
+		"safe_z, "						// 26
+		"underworld, "					// 27
+		"minclip, "						// 28
+		"maxclip, "						// 29
+		"time_type, "					// 30
+		"canbind, "						// 31
+		"cancombat, "					// 32
+		"canlevitate, "					// 33
+		"castoutdoor, "					// 34
+		"hotzone, "						// 35
+		"ruleset, "						// 36
+		"suspendbuffs, "				// 37
+		"map_file_name, "				// 38
+		"short_name, "					// 39
+		"rain_chance1, "				// 40
+		"rain_chance2, "				// 41
+		"rain_chance3, "				// 42
+		"rain_chance4, "				// 43
+		"rain_duration1, "				// 44
+		"rain_duration2, "				// 45
+		"rain_duration3, "				// 46
+		"rain_duration4, "				// 47
+		"snow_chance1, "				// 48
+		"snow_chance2, "				// 49
+		"snow_chance3, "				// 50
+		"snow_chance4, "				// 51
+		"snow_duration1, "				// 52
+		"snow_duration2, "				// 53
+		"snow_duration3, "				// 54
+		"snow_duration4, "				// 55
+		"gravity, "						// 56
+		"fast_regen_hp, "				// 57
+		"fast_regen_mana, "				// 58
+		"fast_regen_endurance, "		// 59
+		"npc_max_aggro_dist, "			// 60
+		"max_movement_update_range, "	// 61
+		"underworld_teleport_index "	// 62
 		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
 		zoneid,
 		instance_id,
@@ -218,6 +219,7 @@ bool ZoneDatabase::GetZoneCFG(
 	zone_data->FastRegenMana = atoi(row[58]);
 	zone_data->FastRegenEndurance = atoi(row[59]);
 	zone_data->NPCAggroMaxDist = atoi(row[60]);
+	zone_data->underworld_teleport_index = atoi(row[62]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);

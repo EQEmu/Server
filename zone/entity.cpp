@@ -713,6 +713,8 @@ void EntityList::AddNPC(NPC *npc, bool SendSpawnPacket, bool dontqueue)
 	npc_list.insert(std::pair<uint16, NPC *>(npc->GetID(), npc));
 	mob_list.insert(std::pair<uint16, Mob *>(npc->GetID(), npc));
 
+	entity_list.ScanCloseMobs(npc->close_mobs, npc, true);
+
 	/* Zone controller process EVENT_SPAWN_ZONE */
 	if (RuleB(Zone, UseZoneController)) {
 		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && npc->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID){
@@ -1323,8 +1325,8 @@ void EntityList::SendZoneSpawnsBulk(Client *client)
 	const glm::vec4 &client_position       = client->GetPosition();
 	const float     distance_max           = (600.0 * 600.0);
 
-	for (auto it = mob_list.begin(); it != mob_list.end(); ++it) {
-		spawn = it->second;
+	for (auto & it : mob_list) {
+		spawn = it.second;
 		if (spawn && spawn->GetID() > 0 && spawn->Spawned()) {
 			if (!spawn->ShouldISpawnFor(client)) {
 				continue;

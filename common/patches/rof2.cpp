@@ -1905,6 +1905,7 @@ namespace RoF2
 		OUT(FastRegenHP);
 		OUT(FastRegenMana);
 		OUT(FastRegenEndurance);
+		OUT(underworld_teleport_index);
 
 		eq->FogDensity = emu->fog_density;
 

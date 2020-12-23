@@ -143,7 +143,7 @@ Client::Client(EQStreamInterface* ieqs)
   endupkeep_timer(1000),
   forget_timer(0),
   autosave_timer(RuleI(Character, AutosaveIntervalS) * 1000),
-  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckInterval) * 1000),
+  client_scan_npc_aggro_timer(RuleI(Aggro, ClientAggroCheckIdleInterval)),
   client_zone_wide_full_position_update_timer(5 * 60 * 1000),
   tribute_timer(Tribute_duration),
   proximity_timer(ClientProximity_interval),
@@ -4758,6 +4758,12 @@ void Client::IncrementAggroCount(bool raid_target)
 
 	uint32 newtimer = raid_target ? RuleI(Character, RestRegenRaidTimeToActivate) : RuleI(Character, RestRegenTimeToActivate);
 
+	// When our aggro count is 1 here, we are exiting rest state. We need to pause our current timer, if we have time remaining
+	// We should not actually have to do anything to the Timer object since the AggroCount counter blocks it from being checked
+	// and will have it's timer changed when we exit combat so let's not do any extra work
+	if (AggroCount == 1 && rest_timer.GetRemainingTime()) // the Client::rest_timer is never disabled, so don't need to check
+		m_pp.RestTimer = std::max(1u, rest_timer.GetRemainingTime() / 1000); // I guess round up?
+
 	// save the new timer if it's higher
 	m_pp.RestTimer = std::max(m_pp.RestTimer, newtimer);
 
@@ -4766,10 +4772,6 @@ void Client::IncrementAggroCount(bool raid_target)
 	//
 	if(AggroCount > 1)
 		return;
-
-	// Pause the rest timer, it's possible the new timer is a non-raid timer we're currently ticking down on a raid timer
-	if (AggroCount == 1)
-		m_pp.RestTimer = std::max(m_pp.RestTimer, rest_timer.GetRemainingTime() / 1000);
 
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF) {
 		auto outapp = new EQApplicationPacket(OP_RestState, 1);
@@ -8648,7 +8650,7 @@ void Client::QuestReward(Mob* target, uint32 copper, uint32 silver, uint32 gold,
 		AddMoneyToPP(copper, silver, gold, platinum, false);
 
 	if (itemid > 0)
-		SummonItem(itemid, 0, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
+		SummonItem(itemid, -1, 0, 0, 0, 0, 0, false, EQ::invslot::slotCursor);
 
 	if (faction)
 	{

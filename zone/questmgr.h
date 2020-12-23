@@ -280,7 +280,7 @@ public:
     void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
-    const char *GetZoneLongName(const char *zone);
+    static std::string GetZoneLongName(std::string zone_short_name);
 	void CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement = false);
