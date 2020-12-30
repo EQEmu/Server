@@ -5745,6 +5745,18 @@ void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
 	SendCrystalCounts();
 }
 
+void Client::SetEbonCrystals(uint32 value) {
+	m_pp.currentEbonCrystals = value;
+	SaveCurrency();
+	SendCrystalCounts();
+}
+
+void Client::SetRadiantCrystals(uint32 value) {
+	m_pp.currentRadCrystals = value;
+	SaveCurrency();
+	SendCrystalCounts();
+}
+
 // Processes a client request to inspect a SoF+ client's equipment.
 void Client::ProcessInspectRequest(Client* requestee, Client* requester) {
 	if(requestee && requester) {
