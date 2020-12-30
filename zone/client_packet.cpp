@@ -920,7 +920,7 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	if (GetGM()) {
+	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}
 
@@ -1705,9 +1705,9 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	 * DevTools Load Settings
 	 */
 	if (Admin() >= EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
-		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
-			dev_tools_window_enabled = false;
+			dev_tools_enabled = false;
 		}
 	}
 
@@ -10910,8 +10910,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case EQ::popupresponse::MOB_INFO_DISMISS:
-			this->SetDisplayMobInfoWindow(false);
-			this->Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
+			SetDisplayMobInfoWindow(false);
+			Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
 			break;
 		default:
 			break;

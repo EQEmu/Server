@@ -640,7 +640,7 @@ void Mob::DisplayInfo(Mob *mob)
 
 		Client *client = this->CastToClient();
 
-		if (!client->IsDevToolsWindowEnabled()) {
+		if (!client->IsDevToolsEnabled()) {
 			return;
 		}
 
