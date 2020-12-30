@@ -293,8 +293,47 @@
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
-#define EXPEDITION_MIN_REMAIN		3551	//You only have %1 minutes remaining before this expedition comes to an end.
+#define EXPEDITION_YOU_BELONG       3500    //You cannot create this expedition since you already belong to another.
+#define EXPEDITION_YOU_PLAYED_HERE  3501    //You cannot create this expedition for another %1d:%2h:%3m since you have recently played here.
+#define REQUIRED_PLAYER_COUNT       3503    //You do not meet the player count requirement.  You have %1 players.  You must have at least %2 and no more than %3.
+#define EXPEDITION_REPLAY_TIMER     3504    //%1 cannot be added to this expedition for another %2D:%3H:%4M since they have recently played in this area.
+#define EXPEDITION_AVAILABLE        3507    //%1 is now available to you.
+#define DZADD_INVITE                3508    //Sending an invitation to: %1.
+#define DZ_PREVENT_ENTERING         3510    //A strange magical presence prevents you from entering.  It's too dangerous to enter at the moment.
+#define DZADD_INVITE_FAIL           3511    //%1 could not be invited to join you.
+#define UNABLE_RETRIEVE_LEADER      3512    //Unable to retrieve information on the leader to check permissions.
+#define EXPEDITION_NOT_LEADER       3513    //You are not the expedition leader, only %1 can issue this command.
+#define EXPEDITION_NOT_MEMBER       3514    //%1 is not a member of this expedition.
+#define EXPEDITION_REMOVED          3516    //%1 has been removed from %2.
+#define DZSWAP_INVITE               3517    //Sending an invitation to: %1.  They must accept in order to swap party members.
+#define DZMAKELEADER_NOT_ONLINE     3518    //%1 is not currently online.  You can only transfer leadership to an online member of the expedition you are in.
+#define DZLIST_REPLAY_TIMER         3519    //You have %1d:%2h:%3m remaining until you may enter %4.
+#define DZMAKELEADER_NAME           3520    //%1 has been made the leader for this expedition.
+#define DZMAKELEADER_YOU            3521    //You have been made the leader of this expedition.
+#define EXPEDITION_INVITE_ACCEPTED  3522    //%1 has accepted your offer to join your expedition.
+#define EXPEDITION_MEMBER_ADDED     3523    //%1 has been added to %2.
+#define EXPEDITION_INVITE_ERROR     3524    //%1 accepted your offer to join your expedition but could not due to error(s).
+#define EXPEDITION_INVITE_DECLINED  3525    //%1 has declined your offer to join your expedition.
+#define EXPEDITION_ASKED_TO_JOIN    3527    //%1 has asked you to join the expedition:  %2.        Would you like to join?
+#define DYNAMICZONE_WAY_IS_BLOCKED  3528    //The way is blocked to you.  Perhaps you would be able to enter if there was a reason to come here.
+#define EXPEDITION_NO_TIMERS        3529    //You have no outstanding timers.
+#define EXPEDITION_MIN_REMAIN       3551    //You only have %1 minutes remaining before this expedition comes to an end.
+#define EXPEDITION_LEADER           3552    //Expedition Leader: %1
+#define EXPEDITION_MEMBERS          3553    //Expedition Members: %1
+#define EXPEDITION_EVENT_TIMER      3561    //%1 cannot be added to this expedition since they have recently experienced %2.  They must wait another %3D:%4H:%5M until they can experience it again.  They may be added to the expedition later, once %2 has been completed.
 #define LOOT_NOT_ALLOWED			3562	//You are not allowed to loot the item: %1.
+#define DZ_UNABLE_RETRIEVE_LEADER   3583    //Unable to retrieve dynamic zone leader to check permissions.
+#define DZADD_NOT_ALLOWING          3585    //The expedition is not allowing players to be added.
+#define DZADD_NOT_ONLINE            3586    //%1 is not currently online.  A player needs to be online to be added to a Dynamic Zone
+#define DZADD_EXCEED_MAX            3587    //You can not add another player since you currently have the maximum number of players allowed (%1) in this zone.
+#define DZADD_ALREADY_PART          3588    //You can not add %1 since they are already part of this zone.
+#define DZADD_LEAVE_ZONE_FIRST      3589    //You can not add %1 since they first need to leave the zone before being allowed back in.
+#define DZADD_ALREADY_ASSIGNED      3590    //%1 can not be added to this dynamic zone since they are already assigned to another dynamic zone.
+#define DZADD_REPLAY_TIMER          3591    //%1 can not be added to this dynamic zone for another %2D:%3H:%4M since they have recently played this zone.
+#define DZADD_EVENT_TIMER           3592    //%1 can not be added to this dynamic zone since they have recently experienced %2.  They must wait for another %3D:%4H:%5M, or until event %2 has occurred.
+#define DZADD_PENDING               3593    //%1 currently has an outstanding invitation to join this Dynamic Zone.
+#define DZADD_PENDING_OTHER         3594    //%1 currently has an outstanding invitation to join another Dynamic Zone.  Players may only have one invitation outstanding.
+#define DZSWAP_CANNOT_REMOVE        3595    //%1 can not be removed from this dynamic zone since they are not assigned to it.
 #define NOT_YOUR_TRAP				3671	//You cannot remove this, you are only allowed to remove traps you have set.
 #define NO_CAST_ON_PET				4045	//You cannot cast this spell on your pet.
 #define REWIND_WAIT					4059	//You must wait a bit longer before using the rewind command again.

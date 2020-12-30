@@ -49,6 +49,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
+#include "expedition.h"
+#include "expedition_database.h"
 #include "guild_mgr.h"
 #include "merc.h"
 #include "petitions.h"
@@ -191,6 +193,15 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_DuelResponse2] = &Client::Handle_OP_DuelResponse2;
 	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_Dye] = &Client::Handle_OP_Dye;
+	ConnectedOpcodes[OP_DzAddPlayer] = &Client::Handle_OP_DzAddPlayer;
+	ConnectedOpcodes[OP_DzChooseZoneReply] = &Client::Handle_OP_DzChooseZoneReply;
+	ConnectedOpcodes[OP_DzExpeditionInviteResponse] = &Client::Handle_OP_DzExpeditionInviteResponse;
+	ConnectedOpcodes[OP_DzListTimers] = &Client::Handle_OP_DzListTimers;
+	ConnectedOpcodes[OP_DzMakeLeader] = &Client::Handle_OP_DzMakeLeader;
+	ConnectedOpcodes[OP_DzPlayerList] = &Client::Handle_OP_DzPlayerList;
+	ConnectedOpcodes[OP_DzRemovePlayer] = &Client::Handle_OP_DzRemovePlayer;
+	ConnectedOpcodes[OP_DzSwapPlayer] = &Client::Handle_OP_DzSwapPlayer;
+	ConnectedOpcodes[OP_DzQuit] = &Client::Handle_OP_DzQuit;
 	ConnectedOpcodes[OP_Emote] = &Client::Handle_OP_Emote;
 	ConnectedOpcodes[OP_EndLootRequest] = &Client::Handle_OP_EndLootRequest;
 	ConnectedOpcodes[OP_EnvDamage] = &Client::Handle_OP_EnvDamage;
@@ -266,6 +277,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
+	ConnectedOpcodes[OP_KickPlayers] = &Client::Handle_OP_KickPlayers;
 	ConnectedOpcodes[OP_LDoNButton] = &Client::Handle_OP_LDoNButton;
 	ConnectedOpcodes[OP_LDoNDisarmTraps] = &Client::Handle_OP_LDoNDisarmTraps;
 	ConnectedOpcodes[OP_LDoNInspect] = &Client::Handle_OP_LDoNInspect;
@@ -884,6 +896,8 @@ void Client::CompleteConnect()
 		guild_mgr.SendGuildMemberUpdateToWorld(GetName(), GuildID(), zone->GetZoneID(), time(nullptr));
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
+
+	UpdateExpeditionInfoAndLockouts();
 
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
@@ -1700,6 +1714,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/* Task Packets */
 	LoadClientTaskState();
+
+	m_expedition_id = ExpeditionDatabase::GetExpeditionIDFromCharacterID(CharacterID());
 
 	/**
 	 * DevTools Load Settings
@@ -5606,6 +5622,116 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 	return;
 }
 
+void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzAddPlayer(this, dzcmd->name);
+	}
+	else
+	{
+		// the only /dz command that sends an error message if no active expedition
+		Message(Chat::System, DZ_YOU_NOT_ASSIGNED);
+	}
+}
+
+void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
+{
+	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
+	LogDynamicZones(
+		"Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
+		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2
+	);
+
+	if (!dzmsg->dz_instance_id || !database.VerifyInstanceAlive(dzmsg->dz_instance_id, CharacterID()))
+	{
+		// live just no-ops this without a message
+		LogDynamicZones(
+			"Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
+			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id
+		);
+		return;
+	}
+
+	auto client_dzs = GetDynamicZones();
+	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZoneInfo dz_info) {
+		return dz_info.dynamic_zone.IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id);
+	});
+
+	if (it != client_dzs.end())
+	{
+		DynamicZoneLocation loc = it->dynamic_zone.GetZoneInLocation();
+		ZoneMode zone_mode = it->dynamic_zone.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
+	}
+}
+
+void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
+{
+	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
+	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
+	m_pending_expedition_invite = { 0 }; // clear before re-validating
+
+	if (expedition)
+	{
+		auto dzmsg = reinterpret_cast<ExpeditionInviteResponse_Struct*>(app->pBuffer);
+		expedition->DzInviteResponse(this, dzmsg->accepted, swap_remove_name);
+	}
+}
+
+void Client::Handle_OP_DzListTimers(const EQApplicationPacket *app)
+{
+	DzListTimers();
+}
+
+void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzMakeLeader(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzPlayerList(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzPlayerList(this);
+	}
+}
+
+void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzRemovePlayer(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommandSwap_Struct*>(app->pBuffer);
+		expedition->DzSwapPlayer(this, dzcmd->rem_player_name, dzcmd->add_player_name);
+	}
+}
+
+void Client::Handle_OP_DzQuit(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzQuit(this);
+	}
+}
+
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
 {
 	if (app->size != sizeof(Emote_Struct)) {
@@ -8874,6 +9000,23 @@ void Client::Handle_OP_Jump(const EQApplicationPacket *app)
 void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 {
 	KeyRingList();
+}
+
+void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
+{
+	auto buf = reinterpret_cast<KickPlayers_Struct*>(app->pBuffer);
+	if (buf->kick_expedition)
+	{
+		auto expedition = GetExpedition();
+		if (expedition)
+		{
+			expedition->DzKickPlayers(this);
+		}
+	}
+	else if (buf->kick_task)
+	{
+		// todo: shared tasks
+	}
 }
 
 void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)

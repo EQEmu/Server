@@ -786,5 +786,12 @@ struct DamageHitInfo {
 	EQ::skills::SkillType skill;
 };
 
+struct ExpeditionInvite
+{
+	uint32_t    expedition_id;
+	std::string inviter_name;
+	std::string swap_remove_name;
+};
+
 #endif
 

@@ -5,6 +5,7 @@
 #include "lua_mob.h"
 
 class Client;
+class Lua_Expedition;
 class Lua_Group;
 class Lua_Raid;
 class Lua_Inventory;
@@ -330,12 +331,33 @@ public:
 	void EnableAreaRegens(int value);
 	void DisableAreaRegens();
 
-
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
 	void SetClientMaxLevel(int value);
 	int GetClientMaxLevel();
+
+	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages);
+	Lua_Expedition  GetExpedition();
+	luabind::object GetExpeditionLockouts(lua_State* L);
+	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);
+	std::string     GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name);
+	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
+	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds, std::string uuid);
+	void            RemoveAllExpeditionLockouts();
+	void            RemoveAllExpeditionLockouts(std::string expedition_name);
+	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
+	bool            HasExpeditionLockout(std::string expedition_name, std::string event_name);
+	void            MovePCDynamicZone(uint32 zone_id);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid);
+	void            MovePCDynamicZone(std::string zone_name);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
 };
 
 #endif

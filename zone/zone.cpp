@@ -37,6 +37,7 @@
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
 
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "npc.h"
@@ -1183,6 +1184,9 @@ bool Zone::Init(bool iStaticZone) {
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
+	LogInfo("Loading active Expeditions");
+	Expedition::CacheAllFromDatabase();
+
 	LogInfo("Loading timezone data");
 	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
 
@@ -1487,7 +1491,14 @@ bool Zone::Process() {
 		{
 			if(Instance_Timer->Check())
 			{
-				entity_list.GateAllClients();
+				// if this is a dynamic zone instance notify system associated with it
+				auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+				if (expedition)
+				{
+					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately
+				}
+				// todo: move corpses to non-instanced version of dz at same coords (if no graveyard)
+				entity_list.GateAllClientsToSafeReturn();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
 			}
@@ -1497,20 +1508,29 @@ bool Zone::Process() {
 				if(Instance_Warning_timer == nullptr)
 				{
 					uint32 rem_time = Instance_Timer->GetRemainingTime();
+					uint32_t minutes_warning = 0;
 					if(rem_time < 60000 && rem_time > 55000)
 					{
-						entity_list.ExpeditionWarning(1);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 1;
 					}
 					else if(rem_time < 300000 && rem_time > 295000)
 					{
-						entity_list.ExpeditionWarning(5);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 5;
 					}
 					else if(rem_time < 900000 && rem_time > 895000)
 					{
-						entity_list.ExpeditionWarning(15);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 15;
+					}
+
+					if (minutes_warning > 0)
+					{
+						// expedition expire warnings are handled by world
+						auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+						if (!expedition)
+						{
+							entity_list.ExpeditionWarning(minutes_warning);
+							Instance_Warning_timer = new Timer(10000);
+						}
 					}
 				}
 				else if(Instance_Warning_timer->Check())
@@ -2699,3 +2719,25 @@ void Zone::SetInstanceTimeRemaining(uint32 instance_time_remaining)
 	Zone::instance_time_remaining = instance_time_remaining;
 }
 
+bool Zone::IsZone(uint32 zone_id, uint16 instance_id) const
+{
+	return (zoneid == zone_id && instanceid == instance_id);
+}
+
+DynamicZone Zone::GetDynamicZone()
+{
+	if (GetInstanceID() == 0)
+	{
+		return {}; // invalid
+	}
+
+	auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+	if (expedition)
+	{
+		return expedition->GetDynamicZone();
+	}
+
+	// todo: tasks, missions, and quests with an associated dz for this instance id
+
+	return {}; // invalid
+}

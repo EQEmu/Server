@@ -49,6 +49,7 @@ class Raid;
 class Spawn2;
 class Trap;
 
+struct DynamicZoneSafeReturn;
 struct GuildBankItemUpdate_Struct;
 struct NewSpawn_Struct;
 struct QGlobal;
@@ -495,6 +496,8 @@ public:
 	void	SendFindableNPCList(Client *c);
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
+
+	void GateAllClientsToSafeReturn();
 
 	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);

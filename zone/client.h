@@ -21,12 +21,18 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
+class DynamicZone;
+class Expedition;
+class ExpeditionLockoutTimer;
+class ExpeditionRequest;
 class Group;
 class NPC;
 class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+struct DynamicZoneInfo;
+struct DynamicZoneLocation;
 enum WaterRegionType : int;
 
 namespace EQ
@@ -283,6 +289,7 @@ public:
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(const CZClientMessageString_Struct* msg);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
@@ -1104,6 +1111,47 @@ public:
 
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
 
+	// cross zone client messaging helpers (null client argument will fallback to messaging by name)
+	static void SendCrossZoneMessage(
+		Client* client, const std::string& client_name, uint16_t chat_type, const std::string& message);
+	static void SendCrossZoneMessageString(
+		Client* client, const std::string& client_name, uint16_t chat_type,
+		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
+
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
+	void AddExpeditionLockoutDuration(const std::string& expedition_name,
+		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
+	void AddNewExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, uint32_t duration, std::string uuid = {});
+	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
+	Expedition* CreateExpedition(
+		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
+		uint32 min_players, uint32 max_players, bool disable_messages = false);
+	Expedition* GetExpedition() const;
+	uint32 GetExpeditionID() const { return m_expedition_id; }
+	const ExpeditionLockoutTimer* GetExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
+	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
+	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name, bool include_expired = false);
+	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
+	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
+	bool IsInExpedition() const { return m_expedition_id != 0; }
+	void RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db = false);
+	void RemoveExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, bool update_db = false);
+	void RequestPendingExpeditionInvite();
+	void SendExpeditionLockoutTimers();
+	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
+	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
+	void UpdateExpeditionInfoAndLockouts();
+	void DzListTimers();
+	void SetDzRemovalTimer(bool enable_timer);
+	void SendDzCompassUpdate();
+	void GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone);
+	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
+	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
+	std::vector<DynamicZoneInfo> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
+
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
 	void DoItemEnterZone();
@@ -1557,6 +1605,7 @@ private:
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
+	Timer dynamiczone_removal_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -1657,6 +1706,12 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
 	int client_max_level;
+
+	uint32 m_expedition_id = 0;
+	ExpeditionInvite m_pending_expedition_invite { 0 };
+	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
+	glm::vec3 m_quest_compass;
+	bool m_has_quest_compass = false;
 
 #ifdef BOTS
 

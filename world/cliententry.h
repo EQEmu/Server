@@ -127,6 +127,9 @@ public:
 	inline void PushToTellQueue(ServerChannelMessage_Struct *scm) { tell_queue.push_back(scm); }
 	void ProcessTellQueue();
 
+	void SetPendingExpeditionInvite(ServerPacket* pack) { p_pending_expedition_invite.reset(pack->Copy()); };
+	std::unique_ptr<ServerPacket> GetPendingExpeditionInvite() { return std::move(p_pending_expedition_invite); }
+
 private:
 	void	ClearVars(bool iAll = false);
 
@@ -171,6 +174,8 @@ private:
 
 	// Tell Queue -- really a vector :D
 	std::vector<ServerChannelMessage_Struct *> tell_queue;
+
+	std::unique_ptr<ServerPacket> p_pending_expedition_invite = nullptr;
 };
 
 #endif /*CLIENTENTRY_H_*/
