@@ -350,8 +350,8 @@ Client::Client(EQStreamInterface* ieqs)
 	/**
 	 * GM
 	 */
-	display_mob_info_window  = true;
-	dev_tools_window_enabled = true;
+	SetDisplayMobInfoWindow(true);
+	SetDevToolsEnabled(true);
 
 #ifdef BOTS
 	bot_owner_options[booDeathMarquee] = false;
@@ -9171,17 +9171,14 @@ void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
 	Client::display_mob_info_window = display_mob_info_window;
 }
 
-bool Client::IsDevToolsWindowEnabled() const
+bool Client::IsDevToolsEnabled() const
 {
-	return dev_tools_window_enabled;
+	return dev_tools_enabled && RuleB(World, EnableDevTools);
 }
 
-/**
- * @param in_dev_tools_window_enabled
- */
-void Client::SetDevToolsWindowEnabled(bool in_dev_tools_window_enabled)
+void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)
 {
-	Client::dev_tools_window_enabled = in_dev_tools_window_enabled;
+	Client::dev_tools_enabled = in_dev_tools_enabled;
 }
 
 /**
@@ -9390,7 +9387,7 @@ void Client::ShowDevToolsMenu()
 	std::string menu_commands_search;
 	std::string menu_commands_show;
 	std::string reload_commands_show;
-	std::string window_toggle_command;
+	std::string devtools_toggle;
 
 	/**
 	 * Search entity commands
@@ -9425,9 +9422,9 @@ void Client::ShowDevToolsMenu()
 	/**
 	 * Show window status
 	 */
-	window_toggle_command = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable_window", false, "Enable") + "] ";
-	if (IsDevToolsWindowEnabled()) {
-		window_toggle_command = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable_window", false, "Disable") + "] ";
+	devtools_toggle = "Disabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools enable", false, "Enable") + "] ";
+	if (IsDevToolsEnabled()) {
+		devtools_toggle = "Enabled [" + EQ::SayLinkEngine::GenerateQuestSaylink("#devtools disable", false, "Disable") + "] ";
 	}
 
 	/**
@@ -9435,8 +9432,8 @@ void Client::ShowDevToolsMenu()
 	 */
 	SendChatLineBreak();
 	Message(
-		Chat::White, "| [Devtools] Window %s Show this menu with %s | Current expansion [%s]",
-		window_toggle_command.c_str(),
+		Chat::White, "| [Devtools] %s Show this menu with %s | Current expansion [%s]",
+		devtools_toggle.c_str(),
 		EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
 		content_service.GetCurrentExpansionName().c_str()
 	);
