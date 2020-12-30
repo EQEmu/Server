@@ -235,6 +235,8 @@ public:
 	bool KeyRingCheck(uint32 item);
 	void AddPVPPoints(uint32 points);
 	void AddCrystals(uint32 radiant, uint32 ebon);
+	void SetEbonCrystals(uint32 value);
+	void SetRadiantCrystals(uint32 value);
 	uint32 GetPVPPoints();
 	uint32 GetRadiantCrystals();
 	uint32 GetEbonCrystals();

@@ -594,9 +594,9 @@ public:
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void AddPVPPoints(uint32 Points);
 	uint32 GetRadiantCrystals() { return m_pp.currentRadCrystals; }
-	void SetRadiantCrystals(uint32 Crystals) { m_pp.currentRadCrystals = Crystals; }
+	void SetRadiantCrystals(uint32 value);
 	uint32 GetEbonCrystals() { return m_pp.currentEbonCrystals; }
-	void SetEbonCrystals(uint32 Crystals) { m_pp.currentEbonCrystals = Crystals; }
+	void SetEbonCrystals(uint32 value);
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 

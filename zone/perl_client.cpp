@@ -4707,6 +4707,50 @@ XS(XS_Client_AddCrystals) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetEbonCrystals);
+XS(XS_Client_SetEbonCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetEbonCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetEbonCrystals(value);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetRadiantCrystals);
+XS(XS_Client_SetRadiantCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetRadiantCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetRadiantCrystals(value);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVPPoints) {
 	dXSARGS;
@@ -6942,6 +6986,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
 	newXSproto(strcpy(buf, "SetDuelTarget"), XS_Client_SetDuelTarget, file, "$$");
+	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
 	newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
@@ -6954,6 +6999,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
+	newXSproto(strcpy(buf, "SetRadiantCrystals"), XS_Client_SetRadiantCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetSecondaryWeaponOrnamentation"), XS_Client_SetSecondaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetSkill"), XS_Client_SetSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetSkillPoints"), XS_Client_SetSkillPoints, file, "$$");

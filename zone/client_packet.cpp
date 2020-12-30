@@ -2025,12 +2025,10 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	else if (aps->Type == NorrathsKeepersMerchant)
 	{
 		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	else if (aps->Type == DarkReignMerchant)
 	{
 		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	int16 charges = 1;
 	if (item->MaxCharges != 0)
