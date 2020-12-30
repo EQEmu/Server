@@ -9173,7 +9173,7 @@ void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
 
 bool Client::IsDevToolsWindowEnabled() const
 {
-	return dev_tools_window_enabled;
+	return (dev_tools_window_enabled && RuleB(World, EnableDevToolsWindow));
 }
 
 /**
@@ -9433,18 +9433,20 @@ void Client::ShowDevToolsMenu()
 	/**
 	 * Print menu
 	 */
-	SendChatLineBreak();
-	Message(
-		Chat::White, "| [Devtools] Window %s Show this menu with %s | Current expansion [%s]",
-		window_toggle_command.c_str(),
-		EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
-		content_service.GetCurrentExpansionName().c_str()
-	);
-	Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
-	Message(Chat::White, "| [Devtools] Show %s", menu_commands_show.c_str());
-	Message(Chat::White, "| [Devtools] Reload %s", reload_commands_show.c_str());
-	Message(Chat::White, "| [Devtools] Search commands with #help <search>");
-	SendChatLineBreak();
+	if (RuleB(World, EnableDevToolsWindow)) {
+		SendChatLineBreak();
+		Message(
+			Chat::White, "| [Devtools] Window %s Show this menu with %s | Current expansion [%s]",
+			window_toggle_command.c_str(),
+			EQ::SayLinkEngine::GenerateQuestSaylink("#dev", false, "#dev").c_str(),
+			content_service.GetCurrentExpansionName().c_str()
+		);
+		Message(Chat::White, "| [Devtools] Search %s", menu_commands_search.c_str());
+		Message(Chat::White, "| [Devtools] Show %s", menu_commands_show.c_str());
+		Message(Chat::White, "| [Devtools] Reload %s", reload_commands_show.c_str());
+		Message(Chat::White, "| [Devtools] Search commands with #help <search>");
+		SendChatLineBreak();
+	}
 }
 
 void Client::SendChatLineBreak(uint16 color) {
