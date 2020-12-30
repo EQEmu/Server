@@ -232,8 +232,8 @@ public:
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;
 
-	bool IsDevToolsWindowEnabled() const;
-	void SetDevToolsWindowEnabled(bool dev_tools_window_enabled);
+	bool IsDevToolsEnabled() const;
+	void SetDevToolsEnabled(bool in_dev_tools_enabled);
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
@@ -1477,7 +1477,7 @@ private:
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
 	bool display_mob_info_window;
-	bool dev_tools_window_enabled;
+	bool dev_tools_enabled;
 
 	int32 max_end;
 	int32 current_endurance;

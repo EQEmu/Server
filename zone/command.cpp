@@ -5599,11 +5599,11 @@ void command_devtools(Client *c, const Seperator *sep)
 	 */
 	if (strcasecmp(sep->arg[1], "disable_window") == 0) {
 		DataBucket::SetData(dev_tools_window_key, "true");
-		c->SetDevToolsWindowEnabled(false);
+		c->SetDevToolsEnabled(false);
 	}
 	if (strcasecmp(sep->arg[1], "enable_window") == 0) {
 		DataBucket::DeleteData(dev_tools_window_key);
-		c->SetDevToolsWindowEnabled(true);
+		c->SetDevToolsEnabled(true);
 	}
 
 	c->ShowDevToolsMenu();

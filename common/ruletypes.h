@@ -246,6 +246,7 @@ RULE_BOOL(World, MaxClientsSimplifiedLogic, false, "New logic that only uses Exe
 RULE_INT (World, TellQueueSize, 20, "Maximum tell queue size")
 RULE_BOOL(World, StartZoneSameAsBindOnCreation, true, "Should the start zone always be the same location as your bind?")
 RULE_BOOL(World, EnforceCharacterLimitAtLogin, false, "Enforce the limit for characters that are online at login")
+RULE_BOOL(World, EnableDevTools, true, "Enable or Disable the Developer Tools globally (Most of the time you want this enabled)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Zone)
