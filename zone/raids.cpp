@@ -20,6 +20,7 @@
 
 #include "client.h"
 #include "entity.h"
+#include "expedition.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
@@ -1848,4 +1849,43 @@ void Raid::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_re
 			}
 		}
 	}
+}
+
+std::vector<RaidMember> Raid::GetMembers() const
+{
+	std::vector<RaidMember> raid_members;
+	for (int i = 0; i < MAX_RAID_MEMBERS; ++i)
+	{
+		if (members[i].membername[0])
+		{
+			raid_members.emplace_back(members[i]);
+		}
+	}
+	return raid_members;
+}
+
+bool Raid::DoesAnyMemberHaveExpeditionLockout(
+	const std::string& expedition_name, const std::string& event_name, int max_check_count)
+{
+	auto raid_members = GetMembers();
+
+	if (max_check_count > 0)
+	{
+		// priority is leader, group number, then ungrouped members
+		std::sort(raid_members.begin(), raid_members.end(),
+			[&](const RaidMember& lhs, const RaidMember& rhs) {
+				if (lhs.IsRaidLeader) {
+					return true;
+				} else if (rhs.IsRaidLeader) {
+					return false;
+				}
+				return lhs.GroupNumber < rhs.GroupNumber;
+			});
+
+		raid_members.resize(max_check_count);
+	}
+
+	return std::any_of(raid_members.begin(), raid_members.end(), [&](const RaidMember& raid_member) {
+		return Expedition::HasLockoutByCharacterName(raid_member.membername, expedition_name, event_name);
+	});
 }

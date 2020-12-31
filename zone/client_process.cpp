@@ -44,6 +44,7 @@
 #include "../common/spdat.h"
 #include "../common/string_util.h"
 #include "event_codes.h"
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "petitions.h"
@@ -160,6 +161,12 @@ bool Client::Process() {
 		if (TaskPeriodic_Timer.Check() && taskstate)
 			taskstate->TaskPeriodicChecks(this);
 
+		if (dynamiczone_removal_timer.Check() && zone && zone->GetInstanceID() != 0)
+		{
+			dynamiczone_removal_timer.Disable();
+			GoToDzSafeReturnOrBind(zone->GetDynamicZone());
+		}
+
 		if (linkdead_timer.Check()) {
 			LeaveGroup();
 			Save();
@@ -172,6 +179,13 @@ bool Client::Process() {
 			if (myraid) {
 				myraid->MemberZoned(this);
 			}
+
+			Expedition* expedition = GetExpedition();
+			if (expedition)
+			{
+				expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
+			}
+
 			return false; //delete client
 		}
 
@@ -560,6 +574,12 @@ bool Client::Process() {
 			client_state = CLIENT_LINKDEAD;
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
+
+			Expedition* expedition = GetExpedition();
+			if (expedition)
+			{
+				expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
+			}
 		}
 	}
 
@@ -689,6 +709,12 @@ void Client::OnDisconnect(bool hard_disconnect) {
 			std::string event_desc = StringFormat("Disconnect :: in zoneid:%i instid:%i", this->GetZoneID(), this->GetInstanceID());
 			QServ->PlayerLogEvent(Player_Log_Connect_State, this->CharacterID(), event_desc);
 		}
+	}
+
+	Expedition* expedition = GetExpedition();
+	if (expedition && !bZoning)
+	{
+		expedition->SetMemberStatus(this, ExpeditionMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();

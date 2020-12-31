@@ -545,6 +545,31 @@ XS(XS_Raid_GetMember) {
 	XSRETURN(1);
 }
 
+XS(XS_Raid_DoesAnyMemberHaveExpeditionLockout);
+XS(XS_Raid_DoesAnyMemberHaveExpeditionLockout) {
+	dXSARGS;
+	if (items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: Raid::DoesAnyMemberHaveExpeditionLockout(THIS, string expedition_name, string event_name, [int max_check_count = 0])");
+	}
+
+	Raid* THIS = nullptr;
+	if (sv_derived_from(ST(0), "Raid")) {
+		IV tmp = SvIV((SV *) SvRV(ST(0)));
+		THIS = INT2PTR(Raid *, tmp);
+	} else
+		Perl_croak(aTHX_ "THIS is not of type Raid");
+	if (THIS == nullptr)
+		Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	int max_check_count = (items == 4) ? static_cast<int>(SvIV(ST(3))) : 0;
+
+	bool result = THIS->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
+	ST(0) = boolSV(result);
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -581,6 +606,7 @@ XS(boot_Raid) {
 	newXSproto(strcpy(buf, "TeleportRaid"), XS_Raid_TeleportRaid, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "GetID"), XS_Raid_GetID, file, "$");
 	newXSproto(strcpy(buf, "GetMember"), XS_Raid_GetMember, file, "$$");
+	newXSproto(strcpy(buf, "DoesAnyMemberHaveExpeditionLockout"), XS_Raid_DoesAnyMemberHaveExpeditionLockout, file, "$$$;$");
 	XSRETURN_YES;
 }
 

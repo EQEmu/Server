@@ -42,6 +42,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "client.h"
 #include "corpse.h"
 #include "entity.h"
+#include "expedition.h"
 #include "quest_parser_collection.h"
 #include "guild_mgr.h"
 #include "mob.h"
@@ -2846,7 +2847,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 
 		break;
 	}
-
 	case ServerOP_ChangeSharedMem:
 	{
 		std::string hotfix_name = std::string((char*)pack->pBuffer);
@@ -2879,6 +2879,45 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (!content_db.LoadBaseData(hotfix_name)) {
 			LogError("Loading base data failed!");
 		}
+		break;
+	}
+	case ServerOP_CZClientMessageString:
+	{
+		auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
+		Client* client = entity_list.GetClientByName(buf->character_name);
+		if (client) {
+			client->MessageString(buf);
+		}
+		break;
+	}
+	case ServerOP_ExpeditionCreate:
+	case ServerOP_ExpeditionDeleted:
+	case ServerOP_ExpeditionLeaderChanged:
+	case ServerOP_ExpeditionLockout:
+	case ServerOP_ExpeditionLockoutDuration:
+	case ServerOP_ExpeditionLockState:
+	case ServerOP_ExpeditionMemberChange:
+	case ServerOP_ExpeditionMemberSwap:
+	case ServerOP_ExpeditionMemberStatus:
+	case ServerOP_ExpeditionMembersRemoved:
+	case ServerOP_ExpeditionReplayOnJoin:
+	case ServerOP_ExpeditionGetOnlineMembers:
+	case ServerOP_ExpeditionDzAddPlayer:
+	case ServerOP_ExpeditionDzMakeLeader:
+	case ServerOP_ExpeditionDzCompass:
+	case ServerOP_ExpeditionDzSafeReturn:
+	case ServerOP_ExpeditionDzZoneIn:
+	case ServerOP_ExpeditionDzDuration:
+	case ServerOP_ExpeditionCharacterLockout:
+	case ServerOP_ExpeditionExpireWarning:
+	{
+		Expedition::HandleWorldMessage(pack);
+		break;
+	}
+	case ServerOP_DzCharacterChange:
+	case ServerOP_DzRemoveAllCharacters:
+	{
+		DynamicZone::HandleWorldMessage(pack);
 		break;
 	}
 	default: {

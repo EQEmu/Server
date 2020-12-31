@@ -18,6 +18,7 @@
 
 #include "../common/global_define.h"
 #include "../common/eqemu_logsys.h"
+#include "expedition.h"
 #include "masterentity.h"
 #include "npc_ai.h"
 #include "../common/packet_functions.h"
@@ -2502,4 +2503,25 @@ void Group::QueueClients(Mob *sender, const EQApplicationPacket *app, bool ack_r
 			}
 		}
 	}
+}
+
+bool Group::DoesAnyMemberHaveExpeditionLockout(
+	const std::string& expedition_name, const std::string& event_name, int max_check_count)
+{
+	if (max_check_count <= 0)
+	{
+		max_check_count = MAX_GROUP_MEMBERS;
+	}
+
+	for (int i = 0; i < MAX_GROUP_MEMBERS && i < max_check_count; ++i)
+	{
+		if (membername[i][0])
+		{
+			if (Expedition::HasLockoutByCharacterName(membername[i], expedition_name, event_name))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }

@@ -4,7 +4,11 @@
 #include <luabind/luabind.hpp>
 
 #include "client.h"
+#include "dynamiczone.h"
+#include "expedition_lockout_timer.h"
+#include "expedition_request.h"
 #include "lua_client.h"
+#include "lua_expedition.h"
 #include "lua_npc.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
@@ -1644,7 +1648,234 @@ int Lua_Client::GetClientMaxLevel() {
 	return self->GetClientMaxLevel();
 }
 
+DynamicZoneLocation GetDynamicZoneLocationFromTable(const luabind::object& lua_table)
+{
+	DynamicZoneLocation zone_location;
 
+	if (luabind::type(lua_table) == LUA_TTABLE)
+	{
+		luabind::object lua_zone = lua_table["zone"];
+
+		// default invalid/missing args to 0
+		uint32_t zone_id = 0;
+		if (luabind::type(lua_zone) == LUA_TSTRING)
+		{
+			zone_id = ZoneID(luabind::object_cast<std::string>(lua_zone));
+		}
+		else if (luabind::type(lua_zone) == LUA_TNUMBER)
+		{
+			zone_id = luabind::object_cast<uint32_t>(lua_zone);
+		}
+
+		float x = (luabind::type(lua_table["x"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["x"]) : 0.0f;
+		float y = (luabind::type(lua_table["y"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["y"]) : 0.0f;
+		float z = (luabind::type(lua_table["z"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["z"]) : 0.0f;
+		float h = (luabind::type(lua_table["h"]) != LUA_TNIL) ? luabind::object_cast<float>(lua_table["h"]) : 0.0f;
+
+		zone_location = { zone_id, x, y, z, h };
+	}
+
+	return zone_location;
+}
+
+Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+
+	if (luabind::type(expedition_table) != LUA_TTABLE)
+	{
+		return nullptr;
+	}
+
+	// luabind will catch thrown cast_failed exceptions for invalid/missing args
+	luabind::object instance_info = expedition_table["instance"];
+	luabind::object zone = instance_info["zone"];
+
+	uint32_t zone_id = 0;
+	if (luabind::type(zone) == LUA_TSTRING)
+	{
+		zone_id = ZoneID(luabind::object_cast<std::string>(zone));
+	}
+	else if (luabind::type(zone) == LUA_TNUMBER)
+	{
+		zone_id = luabind::object_cast<uint32_t>(zone);
+	}
+
+	uint32_t zone_version  = luabind::object_cast<uint32_t>(instance_info["version"]);
+	uint32_t zone_duration = luabind::object_cast<uint32_t>(instance_info["duration"]);
+
+	DynamicZone dz{ zone_id, zone_version, zone_duration, DynamicZoneType::Expedition };
+
+	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
+	if (luabind::type(expedition_table["compass"]) == LUA_TTABLE)
+	{
+		auto compass_loc = GetDynamicZoneLocationFromTable(expedition_table["compass"]);
+		dz.SetCompass(compass_loc);
+	}
+
+	if (luabind::type(expedition_table["safereturn"]) == LUA_TTABLE)
+	{
+		auto safereturn_loc = GetDynamicZoneLocationFromTable(expedition_table["safereturn"]);
+		dz.SetSafeReturn(safereturn_loc);
+	}
+
+	if (luabind::type(expedition_table["zonein"]) == LUA_TTABLE)
+	{
+		auto zonein_loc = GetDynamicZoneLocationFromTable(expedition_table["zonein"]);
+		dz.SetZoneInLocation(zonein_loc);
+	}
+
+	luabind::object expedition_info = expedition_table["expedition"];
+
+	std::string expedition_name = luabind::object_cast<std::string>(expedition_info["name"]);
+	uint32_t min_players        = luabind::object_cast<uint32_t>(expedition_info["min_players"]);
+	uint32_t max_players        = luabind::object_cast<uint32_t>(expedition_info["max_players"]);
+	bool disable_messages       = false;
+
+	if (luabind::type(expedition_info["disable_messages"]) == LUA_TBOOLEAN)
+	{
+		disable_messages = luabind::object_cast<bool>(expedition_info["disable_messages"]);
+	}
+
+	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
+
+	return self->CreateExpedition(dz, request);
+}
+
+Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players);
+}
+
+Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages) {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->CreateExpedition(zone_name, version, duration, expedition_name, min_players, max_players, disable_messages);
+}
+
+Lua_Expedition Lua_Client::GetExpedition() {
+	Lua_Safe_Call_Class(Lua_Expedition);
+	return self->GetExpedition();
+}
+
+luabind::object Lua_Client::GetExpeditionLockouts(lua_State* L)
+{
+	auto lua_table = luabind::newtable(L);
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto lockouts = self->GetExpeditionLockouts();
+
+		for (const auto& lockout : lockouts)
+		{
+			auto lockout_table = lua_table[lockout.GetExpeditionName()];
+			if (luabind::type(lockout_table) != LUA_TTABLE)
+			{
+				lockout_table = luabind::newtable(L);
+			}
+			lockout_table[lockout.GetEventName()] = lockout.GetSecondsRemaining();
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetExpeditionLockouts(lua_State* L, std::string expedition_name)
+{
+	auto lua_table = luabind::newtable(L);
+	if (d_)
+	{
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto lockouts = self->GetExpeditionLockouts();
+
+		for (const auto& lockout : lockouts)
+		{
+			if (lockout.GetExpeditionName() == expedition_name)
+			{
+				lua_table[lockout.GetEventName()] = lockout.GetSecondsRemaining();
+			}
+		}
+	}
+	return lua_table;
+}
+
+std::string Lua_Client::GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_String();
+	std::string uuid;
+	auto lockout = self->GetExpeditionLockout(expedition_name, event_name);
+	if (lockout)
+	{
+		uuid = lockout->GetExpeditionUUID();
+	}
+	return uuid;
+}
+
+void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds) {
+	Lua_Safe_Call_Void();
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds);
+}
+
+void Lua_Client::AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid) {
+	Lua_Safe_Call_Void();
+	self->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
+}
+
+void Lua_Client::AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds) {
+	Lua_Safe_Call_Void();
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, {}, true);
+}
+
+void Lua_Client::AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds, std::string uuid) {
+	Lua_Safe_Call_Void();
+	self->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+}
+
+void Lua_Client::RemoveAllExpeditionLockouts() {
+	Lua_Safe_Call_Void();
+	self->RemoveAllExpeditionLockouts({}, true);
+}
+
+void Lua_Client::RemoveAllExpeditionLockouts(std::string expedition_name) {
+	Lua_Safe_Call_Void();
+	self->RemoveAllExpeditionLockouts(expedition_name, true);
+}
+
+void Lua_Client::RemoveExpeditionLockout(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_Void();
+	self->RemoveExpeditionLockout(expedition_name, event_name, true);
+}
+
+bool Lua_Client::HasExpeditionLockout(std::string expedition_name, std::string event_name) {
+	Lua_Safe_Call_Bool();
+	return self->HasExpeditionLockout(expedition_name, event_name);
+}
+
+void Lua_Client::MovePCDynamicZone(uint32 zone_id) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_id);
+}
+
+void Lua_Client::MovePCDynamicZone(uint32 zone_id, int zone_version) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_id, zone_version);
+}
+
+void Lua_Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
+}
+
+void Lua_Client::MovePCDynamicZone(std::string zone_name) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_name);
+}
+
+void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_name, zone_version);
+}
+
+void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid) {
+	Lua_Safe_Call_Void();
+	return self->MovePCDynamicZone(zone_name, zone_version, msg_if_invalid);
+}
 
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
@@ -1952,7 +2183,28 @@ luabind::scope lua_register_client() {
 		.def("EnableAreaRegens", &Lua_Client::EnableAreaRegens)
 		.def("DisableAreaRegens", &Lua_Client::DisableAreaRegens)
 		.def("SetClientMaxLevel", (void(Lua_Client::*)(int))&Lua_Client::SetClientMaxLevel)
-		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel);
+		.def("GetClientMaxLevel", (int(Lua_Client::*)(void))&Lua_Client::GetClientMaxLevel)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(luabind::object))&Lua_Client::CreateExpedition)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32))&Lua_Client::CreateExpedition)
+		.def("CreateExpedition", (Lua_Expedition(Lua_Client::*)(std::string, uint32, uint32, std::string, uint32, uint32, bool))&Lua_Client::CreateExpedition)
+		.def("GetExpedition", (Lua_Expedition(Lua_Client::*)(void))&Lua_Client::GetExpedition)
+		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetExpeditionLockouts)
+		.def("GetExpeditionLockouts", (luabind::object(Lua_Client::*)(lua_State* L, std::string))&Lua_Client::GetExpeditionLockouts)
+		.def("GetLockoutExpeditionUUID", (std::string(Lua_Client::*)(std::string, std::string))&Lua_Client::GetLockoutExpeditionUUID)
+		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32))&Lua_Client::AddExpeditionLockout)
+		.def("AddExpeditionLockout", (void(Lua_Client::*)(std::string, std::string, uint32, std::string))&Lua_Client::AddExpeditionLockout)
+		.def("AddExpeditionLockoutDuration", (void(Lua_Client::*)(std::string, std::string, int))&Lua_Client::AddExpeditionLockoutDuration)
+		.def("AddExpeditionLockoutDuration", (void(Lua_Client::*)(std::string, std::string, int, std::string))&Lua_Client::AddExpeditionLockoutDuration)
+		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(void))&Lua_Client::RemoveAllExpeditionLockouts)
+		.def("RemoveAllExpeditionLockouts", (void(Lua_Client::*)(std::string))&Lua_Client::RemoveAllExpeditionLockouts)
+		.def("RemoveExpeditionLockout", (void(Lua_Client::*)(std::string, std::string))&Lua_Client::RemoveExpeditionLockout)
+		.def("HasExpeditionLockout", (bool(Lua_Client::*)(std::string, std::string))&Lua_Client::HasExpeditionLockout)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int, bool))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int))&Lua_Client::MovePCDynamicZone)
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone);
 }
 
 luabind::scope lua_register_inventory_where() {

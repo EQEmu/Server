@@ -38,6 +38,7 @@ Child of the Mob class.
 
 #include "corpse.h"
 #include "entity.h"
+#include "expedition.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
@@ -1275,6 +1276,20 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			return;
 		}
 
+		if (zone && zone->GetInstanceID() != 0)
+		{
+			// expeditions may prevent looting based on client's lockouts
+			auto expedition = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+			if (expedition && !expedition->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
+			{
+				client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+				client->QueuePacket(app);
+				SendEndLootErrorPacket(client);
+				ResetLooter();
+				delete inst;
+				return;
+			}
+		}
 
 		// do we want this to have a fail option too?
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
