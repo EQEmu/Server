@@ -2693,6 +2693,36 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 }
 
 /**
+ * The purpose of this system is so that we cache relevant entities that are "close"
+ *
+ * In general; it becomes incredibly expensive to run zone-wide checks against every single mob in the zone when in reality
+ * we only care about entities closest to us
+ *
+ * A very simple example of where this is relevant is Aggro, the below example is skewed because the overall implementation
+ * of Aggro was also tweaked in conjunction with close lists. We also scan more aggressively when entities are moving (1-6 seconds)
+ * versus 60 seconds when idle. We also have entities that are moving add themselves to those closest to them so that their close
+ * lists remain always up to date
+ *
+ * Before: Aggro checks for NPC to Client aggro | (40 clients in zone) x (525 npcs) x 2 (times a second) = 2,520,000 checks a minute
+ * After: Aggro checks for NPC to Client aggro | (40 clients in zone) x (20-30 npcs) x 2 (times a second) = 144,000 checks a minute (This is actually far less today)
+ *
+ * Places in the code where this logic makes a huge impact
+ *
+ * Aggro checks (zone wide -> close)
+ * Aura processing (zone wide -> close)
+ * AE Taunt (zone wide -> close)
+ * AOE Spells (zone wide -> close)
+ * Bard Pulse AOE (zone wide -> close)
+ * Mass Group Buff (zone wide -> close)
+ * AE Attack (zone wide -> close)
+ * Packet QueueCloseClients (zone wide -> close)
+ * Check Close Beneficial Spells (Buffs; should I heal other npcs) (zone wide -> close)
+ * AI Yell for Help (NPC Assist other NPCs) (zone wide -> close)
+ *
+ * All of the above makes a tremendous impact on the bottom line of cpu cycle performance because we run an order of magnitude
+ * less checks by focusing our hot path logic down to a very small subset of relevant entities instead of looping an entire
+ * entity list (zone wide)
+ *
  * @param close_mobs
  * @param scanning_mob
  */
@@ -5189,6 +5219,8 @@ void EntityList::ReloadMerchants() {
 /**
  * If we have a distance requested that is greater than our scanning distance
  * then we return the full list
+ *
+ * See comments @EntityList::ScanCloseMobs for system explanation
  *
  * @param mob
  * @param distance
