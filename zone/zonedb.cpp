@@ -4300,6 +4300,18 @@ uint32 ZoneDatabase::SendCharacterCorpseToGraveyard(uint32 dbid, uint32 zone_id,
 	return dbid;
 }
 
+void ZoneDatabase::SendCharacterCorpseToNonInstance(uint32 corpse_db_id)
+{
+	if (corpse_db_id != 0)
+	{
+		auto query = fmt::format(SQL(
+			UPDATE character_corpses SET instance_id = 0 WHERE id = {};
+		), corpse_db_id);
+
+		QueryDatabase(query);
+	}
+}
+
 uint32 ZoneDatabase::GetCharacterCorpseDecayTimer(uint32 corpse_db_id){
 	std::string query = StringFormat("SELECT(UNIX_TIMESTAMP() - UNIX_TIMESTAMP(time_of_death)) FROM `character_corpses` WHERE `id` = %d AND NOT `time_of_death` = 0", corpse_db_id);
 	auto results = QueryDatabase(query);

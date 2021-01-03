@@ -537,6 +537,8 @@ public:
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();
 
+	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
+
 protected:
 	friend class Zone;
 	void	Depop(bool StartSpawnTimer = false);

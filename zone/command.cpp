@@ -4840,6 +4840,10 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Insufficient status to depop player corpse.");
 
 	}
+	else if (strcasecmp(sep->arg[1], "moveallgraveyard") == 0) {
+		int count = entity_list.MovePlayerCorpsesToGraveyard(true);
+		c->Message(Chat::White, "Moved [%d] player corpse(s) to zone graveyard", count);
+	}
 	else if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1], "help") == 0) {
 		c->Message(Chat::White, "#Corpse Sub-Commands:");
 		c->Message(Chat::White, "  DeleteNPCCorpses");
@@ -4847,6 +4851,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "  ListNPC");
 		c->Message(Chat::White, "  ListPlayer");
 		c->Message(Chat::White, "  Lock - GM locks the corpse - cannot be looted by non-GM");
+		c->Message(Chat::White, "  MoveAllGraveyard - move all player corpses to zone's graveyard or non-instance");
 		c->Message(Chat::White, "  UnLock");
 		c->Message(Chat::White, "  RemoveCash");
 		c->Message(Chat::White, "  InspectLoot");

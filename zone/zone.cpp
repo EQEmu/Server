@@ -1497,7 +1497,10 @@ bool Zone::Process() {
 				{
 					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately
 				}
-				// todo: move corpses to non-instanced version of dz at same coords (if no graveyard)
+
+				// instance shutting down, move corpses to graveyard or non-instanced zone at same coords
+				entity_list.MovePlayerCorpsesToGraveyard(true);
+
 				entity_list.GateAllClientsToSafeReturn();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds

@@ -5225,3 +5225,43 @@ void EntityList::GateAllClientsToSafeReturn()
 		}
 	}
 }
+
+int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
+{
+	if (!zone)
+	{
+		return 0;
+	}
+
+	int moved_count = 0;
+
+	for (auto it = corpse_list.begin(); it != corpse_list.end();)
+	{
+		bool moved = false;
+		if (it->second && it->second->IsPlayerCorpse())
+		{
+			if (zone->HasGraveyard())
+			{
+				moved = it->second->MovePlayerCorpseToGraveyard();
+			}
+			else if (force_move_from_instance && zone->GetInstanceID() != 0)
+			{
+				moved = it->second->MovePlayerCorpseToNonInstance();
+			}
+		}
+
+		if (moved)
+		{
+			safe_delete(it->second);
+			free_ids.push(it->first);
+			it = corpse_list.erase(it);
+			++moved_count;
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+	return moved_count;
+}
