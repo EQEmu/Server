@@ -1892,6 +1892,21 @@ void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version, bool
 	return self->MovePCDynamicZone(zone_name, zone_version, msg_if_invalid);
 }
 
+void Lua_Client::Fling(float value, float target_x, float target_y, float target_z) {
+	Lua_Safe_Call_Void();
+	self->Fling(value, target_x, target_y, target_z);
+}
+
+void Lua_Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los) {
+	Lua_Safe_Call_Void();
+	self->Fling(value, target_x, target_y, target_z, ignore_los);
+}
+
+void Lua_Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {
+	Lua_Safe_Call_Void();
+	self->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2222,7 +2237,10 @@ luabind::scope lua_register_client() {
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(uint32, int, bool))&Lua_Client::MovePCDynamicZone)
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string))&Lua_Client::MovePCDynamicZone)
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int))&Lua_Client::MovePCDynamicZone)
-		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone);
+		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone)
+		.def("Fling", (void(Lua_Client::*)(float,float,float,float))&Lua_Client::Fling)
+		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool))&Lua_Client::Fling)
+		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool,bool))&Lua_Client::Fling);
 }
 
 luabind::scope lua_register_inventory_where() {

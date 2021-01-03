@@ -9988,3 +9988,25 @@ void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, b
 	auto zone_id = ZoneID(zone_name.c_str());
 	MovePCDynamicZone(zone_id, zone_version, msg_if_invalid);
 }
+
+void Client::Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping) {	
+	BuffFadeByEffect(SE_Levitate);
+	if (CheckLosFN(target_x, target_y, target_z, 6.0f) || ignore_los) {
+		auto outapp_fling = new EQApplicationPacket(OP_Fling, sizeof(fling_struct));
+		fling_struct* flingTo = (fling_struct*)outapp_fling->pBuffer;
+		if(clipping)
+			flingTo->collision = 0;
+		else
+			flingTo->collision = -1;
+		
+		flingTo->travel_time = -1;
+		flingTo->unk3 = 1;
+		flingTo->disable_fall_damage = 1;
+		flingTo->speed_z = value;
+		flingTo->new_y = target_y;
+		flingTo->new_x = target_x;
+		flingTo->new_z = target_z;
+		outapp_fling->priority = 6;
+		FastQueuePacket(&outapp_fling);
+	}
+}

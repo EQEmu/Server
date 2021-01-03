@@ -7051,6 +7051,41 @@ XS(XS_Client_MovePCDynamicZone) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_Fling); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_Fling) {
+	dXSARGS;
+	if (items < 5 || items > 7)
+		Perl_croak(aTHX_ "Usage: Client::Fling(THIS, value, target_x, target_y, target_z, ignore_los, clipping)");
+	{
+		Client*		THIS;
+		float value = (float) SvNV(ST(1));
+		float target_x = (float) SvNV(ST(2));
+		float target_y = (float) SvNV(ST(3));
+		float target_z = (float) SvNV(ST(4));
+		bool ignore_los = false;
+		bool clipping = false;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		
+		if (items > 5)
+			ignore_los = (bool) SvTRUE(ST(5));
+			
+		if (items > 6)
+			clipping = (bool) SvTRUE(ST(6));
+
+		THIS->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -7108,6 +7143,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
+	newXSproto(strcpy(buf, "Fling"), XS_Client_Fling, file, "$$$$$;$$");
 	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
 	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
 	newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
