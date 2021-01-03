@@ -724,7 +724,7 @@ bool NPC::Process()
 	SpellProcess();
 
 	if (mob_close_scan_timer.Check()) {
-		entity_list.ScanCloseMobs(close_mobs, this, true);
+		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}
 
 	const uint16 npc_mob_close_scan_timer_moving = 6000;
