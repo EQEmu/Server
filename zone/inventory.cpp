@@ -1154,9 +1154,34 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 						}
 					}
 				}
+				if( i == EQ::invslot::slotPrimary && m_inv[EQ::invslot::slotSecondary] ) {
+					uint8 instrument = m_inv[EQ::invslot::slotSecondary]->GetItem()->ItemType;
+					if(
+							instrument == EQ::item::ItemTypeWindInstrument ||
+							instrument == EQ::item::ItemTypeStringedInstrument ||
+							instrument == EQ::item::ItemTypeBrassInstrument ||
+							instrument == EQ::item::ItemTypePercussionInstrument
+							) {
+						LogInventory("Cannot equip a primary item with [{}] already in the secondary.", m_inv[EQ::invslot::slotSecondary]->GetItem()->Name);
+						continue; // Do not auto-equip Primary when instrument is in Secondary
+					}
+				}
 				if (i == EQ::invslot::slotSecondary && m_inv[EQ::invslot::slotPrimary]) { // check to see if primary slot is a two hander
-					if (m_inv[EQ::invslot::slotPrimary]->GetItem()->IsType2HWeapon())
+					uint8 instrument = inst.GetItem()->ItemType;
+					if(
+							instrument == EQ::item::ItemTypeWindInstrument ||
+							instrument == EQ::item::ItemTypeStringedInstrument ||
+							instrument == EQ::item::ItemTypeBrassInstrument ||
+							instrument == EQ::item::ItemTypePercussionInstrument
+							) {
+						LogInventory("Cannot equip a secondary instrument with [{}] already in the primary.", m_inv[EQ::invslot::slotPrimary]->GetItem()->Name);
+						continue; // Do not auto-equip instrument in Secondary when Primary is equipped.
+					}
+
+					uint8 use = m_inv[EQ::invslot::slotPrimary]->GetItem()->ItemType;
+					if(use == EQ::item::ItemType2HSlash || use == EQ::item::ItemType2HBlunt || use == EQ::item::ItemType2HPiercing) {
 						continue;
+					}
 				}
 				if (i == EQ::invslot::slotSecondary && inst.IsWeapon() && !CanThisClassDualWield()) {
 					continue;
@@ -1169,7 +1194,6 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 					if (worn_slot_material != EQ::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
-
 					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}
