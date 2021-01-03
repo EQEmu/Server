@@ -92,6 +92,9 @@ public:
 	float GetBindHeading(int index);
 	uint32 GetBindZoneID();
 	uint32 GetBindZoneID(int index);
+	float GetTargetRingX();
+	float GetTargetRingY();
+	float GetTargetRingZ();
 	void MovePC(int zone, float x, float y, float z, float heading);
 	void MovePCInstance(int zone, int instance, float x, float y, float z, float heading);
 	void MoveZone(const char *zone_short_name);
@@ -360,6 +363,9 @@ public:
 	void            MovePCDynamicZone(std::string zone_name);
 	void            MovePCDynamicZone(std::string zone_name, int zone_version);
 	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
+	void            Fling(float value, float target_x, float target_y, float target_z);
+	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los);
+	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping);
 };
 
 #endif

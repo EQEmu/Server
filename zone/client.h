@@ -794,6 +794,8 @@ public:
 	uint32 GetCharMaxLevelFromQGlobal();
 	uint32 GetCharMaxLevelFromBucket();
 
+	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clipping = false);
+
 	inline bool IsStanding() const {return (playeraction == 0);}
 	inline bool IsSitting() const {return (playeraction == 1);}
 	inline bool IsCrouching() const {return (playeraction == 2);}
