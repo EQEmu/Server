@@ -166,6 +166,11 @@
         OutF(LogSys, Logs::General, Logs::Group, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogGroupDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Group].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Group, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define LogGuilds(message, ...) do {\
     if (LogSys.log_settings[Logs::Guilds].is_category_enabled == 1)\
         OutF(LogSys, Logs::General, Logs::Guilds, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -725,6 +730,9 @@
 } while (0)
 
 #define LogGroup(message, ...) do {\
+} while (0)
+
+#define LogGroupDetail(message, ...) do {\
 } while (0)
 
 #define LogGuilds(message, ...) do {\
