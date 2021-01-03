@@ -438,7 +438,7 @@ int command_init(void)
 		command_add("wp", "[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid", 170, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path", 170, command_wpadd) ||
 		command_add("wpinfo", "- Show waypoint info about your NPC target", 170, command_wpinfo) ||
-		command_add("ww", "Casts the provided spell ID to all players currently online. Use caution with this!", 250, command_ww) ||
+		command_add("wwcast", "Casts the provided spell ID to all players currently online. Use caution with this!", 250, command_ww) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.",  250, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", 80, command_zclip) ||
 		command_add("zcolor", "[red] [green] [blue] - Change sky color", 80, command_zcolor) ||
@@ -738,7 +738,7 @@ void command_logcommand(Client *c, const char *message)
 /*
  * commands go below here
  */
-void command_ww(Client *c, const Seperator *sep)
+void command_wwcast(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] && Seperator::IsNumber(sep->arg[1])) {
 		int spell_id = atoi(sep->arg[1]);
