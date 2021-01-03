@@ -92,6 +92,9 @@ public:
 	float GetBindHeading(int index);
 	uint32 GetBindZoneID();
 	uint32 GetBindZoneID(int index);
+	float GetTargetRingX();
+	float GetTargetRingY();
+	float GetTargetRingZ();
 	void MovePC(int zone, float x, float y, float z, float heading);
 	void MovePCInstance(int zone, int instance, float x, float y, float z, float heading);
 	void MoveZone(const char *zone_short_name);

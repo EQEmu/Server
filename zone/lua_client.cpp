@@ -329,6 +329,21 @@ uint32 Lua_Client::GetBindZoneID(int index) {
 	return self->GetBindZoneID(index);
 }
 
+float Lua_Client::GetTargetRingX() {
+	Lua_Safe_Call_Real();
+	return self->GetTargetRingX();
+}
+
+float Lua_Client::GetTargetRingY() {
+	Lua_Safe_Call_Real();
+	return self->GetTargetRingY();
+}
+
+float Lua_Client::GetTargetRingZ() {
+	Lua_Safe_Call_Real();
+	return self->GetTargetRingZ();
+}
+
 void Lua_Client::MovePC(int zone, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
 	self->MovePC(zone, x, y, z, heading);
@@ -1942,6 +1957,9 @@ luabind::scope lua_register_client() {
 		.def("GetBindHeading", (float(Lua_Client::*)(int))&Lua_Client::GetBindHeading)
 		.def("GetBindZoneID", (uint32(Lua_Client::*)(void))&Lua_Client::GetBindZoneID)
 		.def("GetBindZoneID", (uint32(Lua_Client::*)(int))&Lua_Client::GetBindZoneID)
+		.def("GetTargetRingX", (float(Lua_Client::*)(void))&Lua_Client::GetTargetRingX)
+		.def("GetTargetRingY", (float(Lua_Client::*)(void))&Lua_Client::GetTargetRingY)
+		.def("GetTargetRingZ", (float(Lua_Client::*)(void))&Lua_Client::GetTargetRingZ)
 		.def("SetPrimaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetPrimaryWeaponOrnamentation)
 		.def("SetSecondaryWeaponOrnamentation", (void(Lua_Client::*)(uint32))&Lua_Client::SetSecondaryWeaponOrnamentation)
 		.def("MovePC", (void(Lua_Client::*)(int,float,float,float,float))&Lua_Client::MovePC)
