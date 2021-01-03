@@ -376,6 +376,7 @@ public:
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
 	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid);
 	uint32		GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
+	void        SendCharacterCorpseToNonInstance(uint32 corpse_db_id);
 
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);

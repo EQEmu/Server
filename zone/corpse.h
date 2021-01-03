@@ -79,6 +79,9 @@ class Corpse : public Mob {
 	void			SetConsentGuildID(uint32 guild_id) { if (IsPlayerCorpse()) { consented_guild_id = guild_id; } }
 	void			AddConsentName(std::string consent_player_name);
 	void			RemoveConsentName(std::string consent_player_name);
+	void            SendWorldSpawnPlayerCorpseInZone(uint32_t zone_id);
+	bool            MovePlayerCorpseToGraveyard();
+	bool            MovePlayerCorpseToNonInstance();
 
 	void			Delete();
 	void			Bury();
