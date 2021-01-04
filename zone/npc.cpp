@@ -715,7 +715,7 @@ bool NPC::Process()
 		}
 		return false;
 	}
-	
+
 	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
 		this->spun_timer.Disable();
@@ -724,7 +724,7 @@ bool NPC::Process()
 	SpellProcess();
 
 	if (mob_close_scan_timer.Check()) {
-		entity_list.ScanCloseMobs(close_mobs, this);
+		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}
 
 	const uint16 npc_mob_close_scan_timer_moving = 6000;
@@ -1752,7 +1752,7 @@ void NPC::PickPocket(Client* thief)
 			steal_item = false;
 			break;
 		}
-		
+
 		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second);
 		if (item_inst == nullptr) {
 			steal_item = false;
@@ -1778,7 +1778,7 @@ void NPC::PickPocket(Client* thief)
 
 	while (!steal_item && has_coin) {
 		uint32 coin_amount = zone->random.Int(1, (steal_skill / 25) + 1);
-		
+
 		int coin_type = PickPocketPlatinum;
 		while (coin_type <= PickPocketCopper) {
 			if (money[coin_type]) {
@@ -2514,10 +2514,10 @@ void NPC::LevelScale() {
 					max_hp += (random_level - level) * 100;
 					base_hp += (random_level - level) * 100;
 				}
-				
+
 				current_hp = max_hp;
 			}
-			
+
 			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
 			if (max_dmg > 0  || skip_auto_scale)
 			{
@@ -2817,7 +2817,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 
 	// I believe that the assumption is, barring no entry in npc_faction_entries
 	// that two npcs on like faction con ally to each other.  This catches cases
-	// where an npc is on a faction but has no hits (hence no entry in 
+	// where an npc is on a faction but has no hits (hence no entry in
 	// npc_faction_entries).
 
 	if (GetPrimaryFaction() == other_faction)
