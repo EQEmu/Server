@@ -413,7 +413,7 @@
 9157|2020_09_02_pet_taunting.sql|SHOW COLUMNS from `character_pet_info` LIKE 'taunting'|empty|
 9158|2020_12_09_underworld.sql|SHOW COLUMNS from `zone` LIKE 'underworld_teleport_index'|empty|
 9159|2020_12_22_expedition_system.sql|SELECT * FROM db_version WHERE version >= 9159|empty|
-9160|2020_01_04_boats_float.sql|SELECT id FROM npc_types WHERE (race IN (72,73,114,404,550,551,552) && flymode != 4)|not empty|
+9160|2020_01_04_boats_float.sql|SELECT id FROM npc_types WHERE (race IN (72,73,114,404,550,551,552) && flymode != 4)|not_empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
