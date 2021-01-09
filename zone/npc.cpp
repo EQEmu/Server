@@ -968,9 +968,12 @@ void NPC::Depop(bool StartSpawnTimer) {
 	if(emoteid != 0)
 		this->DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
-	if (StartSpawnTimer) {
-		if (respawn2 != 0) {
+	if (respawn2)
+	{
+		if (StartSpawnTimer) {
 			respawn2->DeathReset();
+		} else {
+			respawn2->Depop();
 		}
 	}
 }
