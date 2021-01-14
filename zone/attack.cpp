@@ -1574,11 +1574,15 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 	//should this be applied to all damage? comments sound like some is for spell DMG
 	//patch notes on PVP reductions only mention archery/throwing ... not normal dmg
 	if (other && other->IsClient() && (other != this) && damage > 0) {
-		int PvPMitigation = 100;
-		if (attack_skill == EQ::skills::SkillArchery || attack_skill == EQ::skills::SkillThrowing)
-			PvPMitigation = 80;
-		else
-			PvPMitigation = 67;
+		int PvPMitigation = RuleI(World, PVPMeleeMitigation);
+ 		if (attack_skill == EQ::skills::SkillAbjuration ||  //spells
+ 			attack_skill == EQ::skills::SkillAlteration ||
+ 			attack_skill == EQ::skills::SkillConjuration || 
+ 			attack_skill == EQ::skills::SkillDivination ||
+ 			attack_skill == EQ::skills::SkillEvocation) PvPMitigation = RuleI(World, PVPSpellMitigation);
+ 		if (attack_skill == EQ::skills::SkillArchery ||  //ranged
+ 			attack_skill == EQ::skills::SkillThrowing) PvPMitigation = RuleI(World, PVPRangedMitigation);
+
 		damage = std::max((damage * PvPMitigation) / 100, 1);
 	}
 
@@ -1754,7 +1758,27 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	{
 		if (killerMob->IsClient())
 		{
-			exploss = 0;
+			int pvpleveldifference = 0;
+			
+			if (RuleI(World, PVPSettings) == 4) 
+				pvpleveldifference = 5; //Sullon Zek 
+			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0) 
+				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
+
+			if (pvpleveldifference > 0) {
+ 				int level_difference = 0;
+ 				if (GetLevel() > killerMob->GetLevel()) 
+					level_difference = GetLevel() - killerMob->GetLevel();
+ 				else 
+					level_difference = killerMob->GetLevel() - GetLevel();
+ 
+ 				if (level_difference > pvpleveldifference) 
+					exploss = 0;
+ 			}
+ 			else 
+ 			{
+ 				exploss = 0;
+ 			}
 		}
 		else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient())
 		{
@@ -2068,14 +2092,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		other->AddToHateList(this, hate);
 
-		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
-
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
-			//pets do half damage to clients in pvp
-			my_hit.damage_done /= 2;
-			if (my_hit.damage_done < 1)
-				my_hit.damage_done = 1;
+			my_hit.damage_done = std::max(my_hit.damage_done * RuleI(World, PVPPetDamageMitigation) / 100, 1);
 		}
+
+		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
 	}
 	else {
 		my_hit.damage_done = DMG_INVULNERABLE;
@@ -4976,6 +4997,12 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 
 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot) {
 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+		if (attacker && attacker->IsClient() && IsClient()) {
+			if (RuleI(World, PVPSettings) > 0) BreakChance = 75; //All PVP servers is default 75% chance for root to break
+				
+			
+			if (RuleI(Spells, PVPRootBreakFromSpells) > 0) BreakChance = RuleI(Spells, PVPRootBreakFromSpells);
+		}
 
 		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance / 100;
 		int level_diff = attacker->GetLevel() - GetLevel();

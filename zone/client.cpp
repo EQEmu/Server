@@ -10010,3 +10010,82 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 		FastQueuePacket(&outapp_fling);
 	}
 }
+
+
+//CanPvP returns true if provided player can attack this player
+bool Client::CanPvP(Client *c) {
+	if (c == nullptr) 
+		return false;
+
+	//Dueling overrides normal PvP logic
+	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
+		return true;
+
+	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
+	int rule_level_diff = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_level_diff = 100; //Sullon Zek rules can attack anyone of opposing deity.
+	if (RuleI(World, PVPLevelDifference) > 0)
+		rule_level_diff = RuleI(World, PVPLevelDifference);
+
+	if (rule_level_diff > 0) {
+		int level_diff = 0;
+		if (c->GetLevel() > GetLevel())
+			level_diff = c->GetLevel() - GetLevel();
+		else 
+			level_diff = GetLevel() - c->GetLevel();
+		if (level_diff > rule_level_diff)
+			return false;
+	}
+
+	//players need to be proper level for pvp
+	int rule_min_level = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_min_level = 6;
+	if (RuleI(World, PVPMinLevel) > 0)
+		rule_min_level = RuleI(World, PVPMinLevel);
+
+	if (rule_min_level > 0 && (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level))
+		return false;
+
+	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
+	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment())
+		return false;
+	
+	//VZTZ Zek PVP Setting
+	if ((RuleI(World, PVPSettings) == 2 || RuleB(World, PVPUseTeamsBySizeBasedPVP)) && GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
+		return false;
+
+	//Check if players are flagged pvp. This may need to be removed later
+	if (!GetPVP() || !c->GetPVP()) return false;
+
+	return true;
+}
+
+
+//GetAlignment returns 0 = neutral, 1 = good, 2 = evil, used for pvp sullon zek rules
+int Client::GetAlignment() {
+	if (GetDeity() == EQ::deity::DeityErollisiMarr || 
+		GetDeity() == EQ::deity::DeityMithanielMarr ||
+		GetDeity() == EQ::deity::DeityRodcetNife || 
+		GetDeity() == EQ::deity::DeityQuellious || 
+		GetDeity() == EQ::deity::DeityTunare) return 1; //good
+	if (GetDeity() == EQ::deity::DeityBertoxxulous ||
+		GetDeity() == EQ::deity::DeityCazicThule ||
+		GetDeity() == EQ::deity::DeityInnoruuk || 
+		GetDeity() == EQ::deity::DeityRallosZek) return 2; //evil
+	return 0; //neutral
+}
+
+//GetPVPRaceSize returns based on racial divisions
+int Client::GetPVPRaceTeamBySize() {
+	if (GetRace() == HUMAN || GetRace() == BARBARIAN || GetRace() == ERUDITE || GetRace() == DRAKKIN)
+		return 1;
+	if (GetRace() == GNOME || GetRace() == HALFLING || GetRace() == DWARF || GetRace() == FROGLOK)
+		return 2;
+	if (GetRace() == HIGH_ELF || GetRace() == WOOD_ELF || GetRace() == HALF_ELF || GetRace() == VAHSHIR)
+		return 3;
+	if (GetRace() == DARK_ELF || GetRace() == OGRE || GetRace() == TROLL || GetRace() == IKSAR)
+		return 4;
+	return 1;
+}
