@@ -92,6 +92,8 @@ public:
 	int GetBaseGender();
 	int GetDeity();
 	int GetRace();
+	const char *GetClassName();
+	const char *GetRaceName();
 	int GetGender();
 	int GetTexture();
 	int GetHelmTexture();
