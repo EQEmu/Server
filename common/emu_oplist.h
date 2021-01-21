@@ -1,8 +1,6 @@
 // system use
 N(OP_ExploreUnknown),
 // start (please add new opcodes in descending order and re-order any name changes where applicable)
-N(OP_0x0193),
-N(OP_0x0347),
 N(OP_AAAction),
 N(OP_AAExpUpdate),
 N(OP_AcceptNewTask),

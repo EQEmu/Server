@@ -50,7 +50,7 @@ struct lua_registered_event {
 
 extern std::map<std::string, std::list<lua_registered_event>> lua_encounter_events_registered;
 extern std::map<std::string, bool> lua_encounters_loaded;
-extern std::map<std::string, Encounter *> lua_encounters;
+extern std::map<std::string, Encounter*> lua_encounters;
 
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
@@ -58,7 +58,7 @@ extern void ClearMappedOpcode(EmuOpcode op);
 void unregister_event(std::string package_name, std::string name, int evt);
 
 void load_encounter(std::string name) {
-	if(lua_encounters_loaded.count(name) > 0)
+	if (lua_encounters_loaded.count(name) > 0)
 		return;
 	auto enc = new Encounter(name.c_str());
 	entity_list.AddEncounter(enc);
@@ -68,7 +68,7 @@ void load_encounter(std::string name) {
 }
 
 void load_encounter_with_data(std::string name, std::string info_str) {
-	if(lua_encounters_loaded.count(name) > 0)
+	if (lua_encounters_loaded.count(name) > 0)
 		return;
 	auto enc = new Encounter(name.c_str());
 	entity_list.AddEncounter(enc);
@@ -80,24 +80,26 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 }
 
 void unload_encounter(std::string name) {
-	if(lua_encounters_loaded.count(name) == 0)
+	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
 	auto liter = lua_encounter_events_registered.begin();
-	while(liter != lua_encounter_events_registered.end()) {
-		std::list<lua_registered_event> &elist = liter->second;
+	while (liter != lua_encounter_events_registered.end()) {
+		std::list<lua_registered_event>& elist = liter->second;
 		auto iter = elist.begin();
-		while(iter != elist.end()) {
-			if((*iter).encounter_name.compare(name) == 0) {
+		while (iter != elist.end()) {
+			if ((*iter).encounter_name.compare(name) == 0) {
 				iter = elist.erase(iter);
-			} else {
+			}
+			else {
 				++iter;
 			}
 		}
 
-		if(elist.size() == 0) {
+		if (elist.size() == 0) {
 			lua_encounter_events_registered.erase(liter++);
-		} else {
+		}
+		else {
 			++liter;
 		}
 	}
@@ -109,15 +111,15 @@ void unload_encounter(std::string name) {
 }
 
 void unload_encounter_with_data(std::string name, std::string info_str) {
-	if(lua_encounters_loaded.count(name) == 0)
+	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
 	auto liter = lua_encounter_events_registered.begin();
-	while(liter != lua_encounter_events_registered.end()) {
-		std::list<lua_registered_event> &elist = liter->second;
+	while (liter != lua_encounter_events_registered.end()) {
+		std::list<lua_registered_event>& elist = liter->second;
 		auto iter = elist.begin();
-		while(iter != elist.end()) {
-			if((*iter).encounter_name.compare(name) == 0) {
+		while (iter != elist.end()) {
+			if ((*iter).encounter_name.compare(name) == 0) {
 				iter = elist.erase(iter);
 			}
 			else {
@@ -125,7 +127,7 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 			}
 		}
 
-		if(elist.size() == 0) {
+		if (elist.size() == 0) {
 			lua_encounter_events_registered.erase(liter++);
 		}
 		else {
@@ -142,7 +144,7 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 }
 
 void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
-	if(lua_encounters_loaded.count(name) == 0)
+	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
 	unregister_event(package_name, name, evt);
@@ -153,23 +155,24 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 	e.event_id = static_cast<QuestEventID>(evt);
 
 	auto liter = lua_encounter_events_registered.find(package_name);
-	if(liter == lua_encounter_events_registered.end()) {
+	if (liter == lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist;
 		elist.push_back(e);
 		lua_encounter_events_registered[package_name] = elist;
-	} else {
-		std::list<lua_registered_event> &elist = liter->second;
+	}
+	else {
+		std::list<lua_registered_event>& elist = liter->second;
 		elist.push_back(e);
 	}
 }
 
 void unregister_event(std::string package_name, std::string name, int evt) {
 	auto liter = lua_encounter_events_registered.find(package_name);
-	if(liter != lua_encounter_events_registered.end()) {
+	if (liter != lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist = liter->second;
 		auto iter = elist.begin();
-		while(iter != elist.end()) {
-			if(iter->event_id == evt && iter->encounter_name.compare(name) == 0) {
+		while (iter != elist.end()) {
+			if (iter->event_id == evt && iter->encounter_name.compare(name) == 0) {
 				iter = elist.erase(iter);
 				break;
 			}
@@ -180,7 +183,7 @@ void unregister_event(std::string package_name, std::string name, int evt) {
 }
 
 void register_npc_event(std::string name, int evt, int npc_id, luabind::adl::object func) {
-	if(luabind::type(func) == LUA_TFUNCTION) {
+	if (luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "npc_" << npc_id;
 
@@ -206,7 +209,7 @@ void unregister_npc_event(int evt, int npc_id) {
 }
 
 void register_player_event(std::string name, int evt, luabind::adl::object func) {
-	if(luabind::type(func) == LUA_TFUNCTION) {
+	if (luabind::type(func) == LUA_TFUNCTION) {
 		register_event("player", name, evt, func);
 	}
 }
@@ -229,7 +232,7 @@ void register_item_event(std::string name, int evt, int item_id, luabind::adl::o
 	std::string package_name = "item_";
 	package_name += std::to_string(item_id);
 
-	if(luabind::type(func) == LUA_TFUNCTION) {
+	if (luabind::type(func) == LUA_TFUNCTION) {
 		register_event(package_name, name, evt, func);
 	}
 }
@@ -252,7 +255,7 @@ void unregister_item_event(int evt, int item_id) {
 }
 
 void register_spell_event(std::string name, int evt, int spell_id, luabind::adl::object func) {
-	if(luabind::type(func) == LUA_TFUNCTION) {
+	if (luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "spell_" << spell_id;
 
@@ -299,35 +302,35 @@ void lua_disable_spawn2(int spawn2_id) {
 	quest_manager.disable_spawn2(spawn2_id);
 }
 
-void lua_set_timer(const char *timer, int time_ms) {
+void lua_set_timer(const char* timer, int time_ms) {
 	quest_manager.settimerMS(timer, time_ms);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_ItemInst inst) {
+void lua_set_timer(const char* timer, int time_ms, Lua_ItemInst inst) {
 	quest_manager.settimerMS(timer, time_ms, inst);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_Mob mob) {
+void lua_set_timer(const char* timer, int time_ms, Lua_Mob mob) {
 	quest_manager.settimerMS(timer, time_ms, mob);
 }
 
-void lua_set_timer(const char *timer, int time_ms, Lua_Encounter enc) {
+void lua_set_timer(const char* timer, int time_ms, Lua_Encounter enc) {
 	quest_manager.settimerMS(timer, time_ms, enc);
 }
 
-void lua_stop_timer(const char *timer) {
+void lua_stop_timer(const char* timer) {
 	quest_manager.stoptimer(timer);
 }
 
-void lua_stop_timer(const char *timer, Lua_ItemInst inst) {
+void lua_stop_timer(const char* timer, Lua_ItemInst inst) {
 	quest_manager.stoptimer(timer, inst);
 }
 
-void lua_stop_timer(const char *timer, Lua_Mob mob) {
+void lua_stop_timer(const char* timer, Lua_Mob mob) {
 	quest_manager.stoptimer(timer, mob);
 }
 
-void lua_stop_timer(const char *timer, Lua_Encounter enc) {
+void lua_stop_timer(const char* timer, Lua_Encounter enc) {
 	quest_manager.stoptimer(timer, enc);
 }
 
@@ -347,16 +350,16 @@ void lua_stop_all_timers(Lua_Encounter enc) {
 	quest_manager.stopalltimers(enc);
 }
 
-void lua_pause_timer(const char *timer) {
+void lua_pause_timer(const char* timer) {
 	quest_manager.pausetimer(timer);
 
 }
 
-void lua_resume_timer(const char *timer) {
+void lua_resume_timer(const char* timer) {
 	quest_manager.resumetimer(timer);
 }
 
-bool lua_is_paused_timer(const char *timer) {
+bool lua_is_paused_timer(const char* timer) {
 	return quest_manager.ispausedtimer(timer);
 }
 
@@ -448,7 +451,7 @@ void lua_set_guild(int guild_id, int rank) {
 	quest_manager.setguild(guild_id, rank);
 }
 
-void lua_create_guild(const char *name, const char *leader) {
+void lua_create_guild(const char* name, const char* leader) {
 	quest_manager.CreateGuild(name, leader);
 }
 
@@ -468,15 +471,15 @@ void lua_signal(int npc_id, int signal_id, int wait) {
 	quest_manager.signalwith(npc_id, signal_id, wait);
 }
 
-void lua_set_global(const char *name, const char *value, int options, const char *duration) {
+void lua_set_global(const char* name, const char* value, int options, const char* duration) {
 	quest_manager.setglobal(name, value, options, duration);
 }
 
-void lua_target_global(const char *name, const char *value, const char *duration, int npc_id, int char_id, int zone_id) {
+void lua_target_global(const char* name, const char* value, const char* duration, int npc_id, int char_id, int zone_id) {
 	quest_manager.targlobal(name, value, duration, npc_id, char_id, zone_id);
 }
 
-void lua_delete_global(const char *name) {
+void lua_delete_global(const char* name) {
 	quest_manager.delglobal(name);
 }
 
@@ -548,11 +551,11 @@ void lua_set_anim(int npc_type, int anim_num) {
 	quest_manager.setanim(npc_type, anim_num);
 }
 
-void lua_spawn_condition(const char *zone, uint32 instance_id, int condition_id, int value) {
+void lua_spawn_condition(const char* zone, uint32 instance_id, int condition_id, int value) {
 	quest_manager.spawn_condition(zone, instance_id, condition_id, value);
 }
 
-int lua_get_spawn_condition(const char *zone, uint32 instance_id, int condition_id) {
+int lua_get_spawn_condition(const char* zone, uint32 instance_id, int condition_id) {
 	return quest_manager.get_spawn_condition(zone, instance_id, condition_id);
 }
 
@@ -585,22 +588,24 @@ bool lua_bury_player_corpse(uint32 char_id) {
 }
 
 void lua_task_selector(luabind::adl::object table) {
-	if(luabind::type(table) != LUA_TTABLE) {
+	if (luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
 
 	int tasks[MAXCHOOSERENTRIES] = { 0 };
 	int count = 0;
 
-	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+	for (int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
 		auto cur = table[i];
 		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
 			}
-		} else {
+			catch (luabind::cast_failed&) {
+			}
+		}
+		else {
 			count = i - 1;
 			break;
 		}
@@ -615,22 +620,24 @@ void lua_task_set_selector(int task_set) {
 }
 
 void lua_enable_task(luabind::adl::object table) {
-	if(luabind::type(table) != LUA_TTABLE) {
+	if (luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
 
 	int tasks[MAXCHOOSERENTRIES] = { 0 };
 	int count = 0;
 
-	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+	for (int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
 		auto cur = table[i];
 		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
 			}
-		} else {
+			catch (luabind::cast_failed&) {
+			}
+		}
+		else {
 			count = i - 1;
 			break;
 		}
@@ -642,22 +649,24 @@ void lua_enable_task(luabind::adl::object table) {
 }
 
 void lua_disable_task(luabind::adl::object table) {
-	if(luabind::type(table) != LUA_TTABLE) {
+	if (luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
 
 	int tasks[MAXCHOOSERENTRIES] = { 0 };
 	int count = 0;
 
-	for(int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
+	for (int i = 1; i <= MAXCHOOSERENTRIES; ++i) {
 		auto cur = table[i];
 		int cur_value = 0;
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				cur_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
 			}
-		} else {
+			catch (luabind::cast_failed&) {
+			}
+		}
+		else {
 			count = i - 1;
 			break;
 		}
@@ -752,7 +761,7 @@ std::string lua_get_task_name(uint32 task_id) {
 	return quest_manager.gettaskname(task_id);
 }
 
-void lua_popup(const char *title, const char *text, uint32 id, uint32 buttons, uint32 duration) {
+void lua_popup(const char* title, const char* text, uint32 id, uint32 buttons, uint32 duration) {
 	quest_manager.popup(title, text, id, buttons, duration);
 }
 
@@ -760,11 +769,11 @@ void lua_clear_spawn_timers() {
 	quest_manager.clearspawntimers();
 }
 
-void lua_zone_emote(int type, const char *str) {
+void lua_zone_emote(int type, const char* str) {
 	quest_manager.ze(type, str);
 }
 
-void lua_world_emote(int type, const char *str) {
+void lua_world_emote(int type, const char* str) {
 	quest_manager.we(type, str);
 }
 
@@ -780,23 +789,23 @@ void lua_create_ground_object(uint32 item_id, float x, float y, float z, float h
 	quest_manager.CreateGroundObject(item_id, glm::vec4(x, y, z, h), decay_time);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h) {
+void lua_create_ground_object_from_model(const char* model, float x, float y, float z, float h) {
 	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h));
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type) {
+void lua_create_ground_object_from_model(const char* model, float x, float y, float z, float h, int type) {
 	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type);
 }
 
-void lua_create_ground_object_from_model(const char *model, float x, float y, float z, float h, int type, uint32 decay_time) {
+void lua_create_ground_object_from_model(const char* model, float x, float y, float z, float h, int type, uint32 decay_time) {
 	quest_manager.CreateGroundObjectFromModel(model, glm::vec4(x, y, z, h), type, decay_time);
 }
 
-void lua_create_door(const char *model, float x, float y, float z, float h, int open_type, int size) {
+void lua_create_door(const char* model, float x, float y, float z, float h, int open_type, int size) {
 	quest_manager.CreateDoor(model, x, y, z, h, open_type, size);
 }
 
-void lua_modify_npc_stat(const char *id, const char *value) {
+void lua_modify_npc_stat(const char* id, const char* value) {
 	quest_manager.ModifyNPCStat(id, value);
 }
 
@@ -842,21 +851,21 @@ std::string lua_get_item_name(uint32 item_id) {
 	return quest_manager.getitemname(item_id);
 }
 
-std::string lua_say_link(const char *phrase, bool silent, const char *link_name) {
+std::string lua_say_link(const char* phrase, bool silent, const char* link_name) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
 
 	return quest_manager.saylink(text, silent, link_name);
 }
 
-std::string lua_say_link(const char *phrase, bool silent) {
+std::string lua_say_link(const char* phrase, bool silent) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
 
 	return quest_manager.saylink(text, silent, text);
 }
 
-std::string lua_say_link(const char *phrase) {
+std::string lua_say_link(const char* phrase) {
 	char text[256] = { 0 };
 	strncpy(text, phrase, 255);
 
@@ -893,7 +902,7 @@ bool lua_delete_data(std::string bucket_key) {
 	return DataBucket::DeleteData(bucket_key);
 }
 
-const char *lua_get_char_name_by_id(uint32 char_id) {
+const char* lua_get_char_name_by_id(uint32 char_id) {
 	return database.GetCharNameByID(char_id);
 }
 
@@ -917,7 +926,7 @@ int lua_get_currency_item_id(int currency_id) {
 	return quest_manager.getcurrencyitemid(currency_id);
 }
 
-const char *lua_get_guild_name_by_id(uint32 guild_id) {
+const char* lua_get_guild_name_by_id(uint32 guild_id) {
 	return quest_manager.getguildnamebyid(guild_id);
 }
 
@@ -929,7 +938,7 @@ int lua_get_group_id_by_char_id(uint32 char_id) {
 	return database.GetGroupIDByCharID(char_id);
 }
 
-const char *lua_get_npc_name_by_id(uint32 npc_id) {
+const char* lua_get_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getnpcnamebyid(npc_id);
 }
 
@@ -937,7 +946,7 @@ int lua_get_raid_id_by_char_id(uint32 char_id) {
 	return database.GetRaidIDByCharID(char_id);
 }
 
-uint32 lua_create_instance(const char *zone, uint32 version, uint32 duration) {
+uint32 lua_create_instance(const char* zone, uint32 version, uint32 duration) {
 	return quest_manager.CreateInstance(zone, version, duration);
 }
 
@@ -957,11 +966,11 @@ uint32 lua_get_instance_timer_by_id(uint16 instance_id) {
 	return quest_manager.GetInstanceTimerByID(instance_id);
 }
 
-int lua_get_instance_id(const char *zone, uint32 version) {
+int lua_get_instance_id(const char* zone, uint32 version) {
 	return quest_manager.GetInstanceID(zone, version);
 }
 
-int lua_get_instance_id_by_char_id(const char *zone, uint32 version, uint32 char_id) {
+int lua_get_instance_id_by_char_id(const char* zone, uint32 version, uint32 char_id) {
 	return quest_manager.GetInstanceIDByCharID(zone, version, char_id);
 }
 
@@ -1029,11 +1038,11 @@ void lua_wear_change(uint32 slot, uint32 texture) {
 	quest_manager.wearchange(slot, texture);
 }
 
-void lua_voice_tell(const char *str, uint32 macro_num, uint32 race_num, uint32 gender_num) {
+void lua_voice_tell(const char* str, uint32 macro_num, uint32 race_num, uint32 gender_num) {
 	quest_manager.voicetell(str, macro_num, race_num, gender_num);
 }
 
-void lua_send_mail(const char *to, const char *from, const char *subject, const char *message) {
+void lua_send_mail(const char* to, const char* from, const char* subject, const char* message) {
 	quest_manager.SendMail(to, from, subject, message);
 }
 
@@ -1133,51 +1142,51 @@ void lua_cross_zone_fail_task_by_guild_id(int guild_id, uint32 task_id) {
 	quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
 }
 
-void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
 	quest_manager.CrossZoneMarqueeByCharID(character_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
 	quest_manager.CrossZoneMarqueeByGroupID(group_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
 	quest_manager.CrossZoneMarqueeByRaidID(raid_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
 	quest_manager.CrossZoneMarqueeByGuildID(guild_id, type, priority, fade_in, fade_out, duration, message);
 }
 
-void lua_cross_zone_message_player_by_name(uint32 type, const char *character_name, const char *message) {
+void lua_cross_zone_message_player_by_name(uint32 type, const char* character_name, const char* message) {
 	quest_manager.CrossZoneMessagePlayerByName(type, character_name, message);
 }
 
-void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char *message) {
+void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char* message) {
 	quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
 }
 
-void lua_cross_zone_message_player_by_raid_id(uint32 type, int raid_id, const char *message) {
+void lua_cross_zone_message_player_by_raid_id(uint32 type, int raid_id, const char* message) {
 	quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
 }
 
-void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const char *message) {
+void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const char* message) {
 	quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
 }
 
-void lua_cross_zone_move_player_by_char_id(int character_id, const char *zone_short_name) {
+void lua_cross_zone_move_player_by_char_id(int character_id, const char* zone_short_name) {
 	quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
 }
 
-void lua_cross_zone_move_player_by_group_id(int group_id, const char *zone_short_name) {
+void lua_cross_zone_move_player_by_group_id(int group_id, const char* zone_short_name) {
 	quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
 }
 
-void lua_cross_zone_move_player_by_raid_id(int raid_id, const char *zone_short_name) {
+void lua_cross_zone_move_player_by_raid_id(int raid_id, const char* zone_short_name) {
 	quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
 }
 
-void lua_cross_zone_move_player_by_guild_id(int guild_id, const char *zone_short_name) {
+void lua_cross_zone_move_player_by_guild_id(int guild_id, const char* zone_short_name) {
 	quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
 }
 
@@ -1245,19 +1254,19 @@ void lua_cross_zone_reset_activity_by_guild_id(int guild_id, uint32 task_id, int
 	quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
 }
 
-void lua_cross_zone_set_entity_variable_by_client_name(const char *character_name, const char *variable_name, const char *variable_value) {
+void lua_cross_zone_set_entity_variable_by_client_name(const char* character_name, const char* variable_name, const char* variable_value) {
 	quest_manager.CrossZoneSetEntityVariableByClientName(character_name, variable_name, variable_value);
 }
 
-void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char *variable_name, const char *variable_value) {
+void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char* variable_name, const char* variable_value) {
 	quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, variable_name, variable_value);
 }
 
-void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char *variable_name, const char *variable_value) {
+void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char* variable_name, const char* variable_value) {
 	quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, variable_name, variable_value);
 }
 
-void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char *variable_name, const char *variable_value) {
+void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char* variable_name, const char* variable_value) {
 	quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, variable_name, variable_value);
 }
 
@@ -1277,7 +1286,7 @@ void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
 	quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
 }
 
-void lua_cross_zone_signal_client_by_name(const char *character_name, int signal) {
+void lua_cross_zone_signal_client_by_name(const char* character_name, int signal) {
 	quest_manager.CrossZoneSignalPlayerByName(character_name, signal);
 }
 
@@ -1381,39 +1390,39 @@ void lua_world_wide_fail_task(uint32 task_id, uint8 min_status, uint8 max_status
 	quest_manager.WorldWideFailTask(task_id, min_status, max_status);
 }
 
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
 	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
 }
 
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status) {
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status) {
 	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
 }
 
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status, uint8 max_status) {
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status, uint8 max_status) {
 	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
 }
 
-void lua_world_wide_message(uint32 type, const char *message) {
+void lua_world_wide_message(uint32 type, const char* message) {
 	quest_manager.WorldWideMessage(type, message);
 }
 
-void lua_world_wide_message(uint32 type, const char *message, uint8 min_status) {
+void lua_world_wide_message(uint32 type, const char* message, uint8 min_status) {
 	quest_manager.WorldWideMessage(type, message, min_status);
 }
 
-void lua_world_wide_message(uint32 type, const char *message, uint8 min_status, uint8 max_status) {
+void lua_world_wide_message(uint32 type, const char* message, uint8 min_status, uint8 max_status) {
 	quest_manager.WorldWideMessage(type, message, min_status, max_status);
 }
 
-void lua_world_wide_move(const char *zone_short_name) {
+void lua_world_wide_move(const char* zone_short_name) {
 	quest_manager.WorldWideMove(zone_short_name);
 }
 
-void lua_world_wide_move(const char *zone_short_name, uint8 min_status) {
+void lua_world_wide_move(const char* zone_short_name, uint8 min_status) {
 	quest_manager.WorldWideMove(zone_short_name, min_status);
 }
 
-void lua_world_wide_move(const char *zone_short_name, uint8 min_status, uint8 max_status) {
+void lua_world_wide_move(const char* zone_short_name, uint8 min_status, uint8 max_status) {
 	quest_manager.WorldWideMove(zone_short_name, min_status, max_status);
 }
 
@@ -1465,19 +1474,19 @@ void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_st
 	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status, max_status);
 }
 
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value) {
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value) {
 	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value);
 }
 
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status) {
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value, uint8 min_status) {
 	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status);
 }
 
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status, uint8 max_status) {
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value, uint8 min_status, uint8 max_status) {
 	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status, max_status);
 }
 
-void lua_world_wide_set_entity_variable_npc(const char *variable_name, const char *variable_value) {
+void lua_world_wide_set_entity_variable_npc(const char* variable_name, const char* variable_value) {
 	quest_manager.WorldWideSetEntityVariableNPC(variable_name, variable_value);
 }
 
@@ -1513,27 +1522,11 @@ void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activit
 	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status, max_status);
 }
 
-luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
+luabind::adl::object lua_get_qglobals(lua_State* L, Lua_NPC npc, Lua_Client client) {
 	luabind::adl::object ret = luabind::newtable(L);
 
-	NPC *n = npc;
-	Client *c = client;
-
-	std::list<QGlobal> global_map;
-	QGlobalCache::GetQGlobals(global_map, n, c, zone);
-	auto iter = global_map.begin();
-	while(iter != global_map.end()) {
-		ret[(*iter).name] = (*iter).value;
-		++iter;
-	}
-	return ret;
-}
-
-luabind::adl::object lua_get_qglobals(lua_State *L, Lua_Client client) {
-	luabind::adl::object ret = luabind::newtable(L);
-
-	NPC *n = nullptr;
-	Client *c = client;
+	NPC* n = npc;
+	Client* c = client;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -1545,11 +1538,11 @@ luabind::adl::object lua_get_qglobals(lua_State *L, Lua_Client client) {
 	return ret;
 }
 
-luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
+luabind::adl::object lua_get_qglobals(lua_State* L, Lua_Client client) {
 	luabind::adl::object ret = luabind::newtable(L);
 
-	NPC *n = npc;
-	Client *c = nullptr;
+	NPC* n = nullptr;
+	Client* c = client;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -1561,11 +1554,27 @@ luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc) {
 	return ret;
 }
 
-luabind::adl::object lua_get_qglobals(lua_State *L) {
+luabind::adl::object lua_get_qglobals(lua_State* L, Lua_NPC npc) {
 	luabind::adl::object ret = luabind::newtable(L);
 
-	NPC *n = nullptr;
-	Client *c = nullptr;
+	NPC* n = npc;
+	Client* c = nullptr;
+
+	std::list<QGlobal> global_map;
+	QGlobalCache::GetQGlobals(global_map, n, c, zone);
+	auto iter = global_map.begin();
+	while (iter != global_map.end()) {
+		ret[(*iter).name] = (*iter).value;
+		++iter;
+	}
+	return ret;
+}
+
+luabind::adl::object lua_get_qglobals(lua_State* L) {
+	luabind::adl::object ret = luabind::newtable(L);
+
+	NPC* n = nullptr;
+	Client* c = nullptr;
 
 	std::list<QGlobal> global_map;
 	QGlobalCache::GetQGlobals(global_map, n, c, zone);
@@ -1594,48 +1603,48 @@ void lua_zone_raid(const char* zone_name) {
 }
 
 int lua_get_zone_id() {
-	if(!zone)
+	if (!zone)
 		return 0;
 
 	return zone->GetZoneID();
 }
 
-const char *lua_get_zone_long_name() {
-	if(!zone)
+const char* lua_get_zone_long_name() {
+	if (!zone)
 		return "";
 
 	return zone->GetLongName();
 }
 
-const char *lua_get_zone_short_name() {
-	if(!zone)
+const char* lua_get_zone_short_name() {
+	if (!zone)
 		return "";
 
 	return zone->GetShortName();
 }
 
 int lua_get_zone_instance_id() {
-	if(!zone)
+	if (!zone)
 		return 0;
 
 	return zone->GetInstanceID();
 }
 
 int lua_get_zone_instance_version() {
-	if(!zone)
+	if (!zone)
 		return 0;
 
 	return zone->GetInstanceVersion();
 }
 
-luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instance_id) {
+luabind::adl::object lua_get_characters_in_instance(lua_State* L, uint16 instance_id) {
 	luabind::adl::object ret = luabind::newtable(L);
 
 	std::list<uint32> charid_list;
 	uint16 i = 1;
-	database.GetCharactersInInstance(instance_id,charid_list);
+	database.GetCharactersInInstance(instance_id, charid_list);
 	auto iter = charid_list.begin();
-	while(iter != charid_list.end()) {
+	while (iter != charid_list.end()) {
 		ret[i] = *iter;
 		++i;
 		++iter;
@@ -1644,13 +1653,13 @@ luabind::adl::object lua_get_characters_in_instance(lua_State *L, uint16 instanc
 }
 
 int lua_get_zone_weather() {
-	if(!zone)
+	if (!zone)
 		return 0;
 
 	return zone->zone_weather;
 }
 
-luabind::adl::object lua_get_zone_time(lua_State *L) {
+luabind::adl::object lua_get_zone_time(lua_State* L) {
 	TimeOfDay_Struct eqTime;
 	zone->zone_time.GetCurrentEQTimeOfDay(time(0), &eqTime);
 
@@ -1674,13 +1683,13 @@ void lua_clear_areas() {
 }
 
 void lua_remove_spawn_point(uint32 spawn2_id) {
-	if(zone) {
+	if (zone) {
 		LinkedListIterator<Spawn2*> iter(zone->spawn2_list);
 		iter.Reset();
 
-		while(iter.MoreElements()) {
+		while (iter.MoreElements()) {
 			Spawn2* cur = iter.GetData();
-			if(cur->GetID() == spawn2_id) {
+			if (cur->GetID() == spawn2_id) {
 				cur->ForceDespawn();
 				iter.RemoveCurrent(true);
 				return;
@@ -1692,10 +1701,10 @@ void lua_remove_spawn_point(uint32 spawn2_id) {
 }
 
 void lua_add_spawn_point(luabind::adl::object table) {
-	if(!zone)
+	if (!zone)
 		return;
 
-	if(luabind::type(table) == LUA_TTABLE) {
+	if (luabind::type(table) == LUA_TTABLE) {
 		uint32 spawn2_id;
 		uint32 spawngroup_id;
 		float x;
@@ -1712,150 +1721,172 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		int animation = 0;
 
 		auto cur = table["spawn2_id"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawn2_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["spawngroup_id"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				spawngroup_id = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["x"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				x = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["y"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				y = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["z"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				z = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["heading"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				heading = luabind::object_cast<float>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["respawn"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				respawn = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["variance"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				variance = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 				return;
 			}
-		} else {
+		}
+		else {
 			return;
 		}
 
 		cur = table["timeleft"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				timeleft = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		cur = table["grid"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				grid = luabind::object_cast<uint32>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		cur = table["condition_id"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_id = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		cur = table["condition_min_value"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				condition_min_value = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		cur = table["enabled"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				enabled = luabind::object_cast<bool>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		cur = table["animation"];
-		if(luabind::type(cur) != LUA_TNIL) {
+		if (luabind::type(cur) != LUA_TNIL) {
 			try {
 				animation = luabind::object_cast<int>(cur);
-			} catch(luabind::cast_failed &) {
+			}
+			catch (luabind::cast_failed&) {
 			}
 		}
 
 		lua_remove_spawn_point(spawn2_id);
 
 		auto t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn, variance, timeleft, grid,
-				    condition_id, condition_min_value, enabled, static_cast<EmuAppearance>(animation));
+			condition_id, condition_min_value, enabled, static_cast<EmuAppearance>(animation));
 		zone->spawn2_list.Insert(t);
 	}
 }
 
-void lua_attack(const char *client_name) {
+void lua_attack(const char* client_name) {
 	quest_manager.attack(client_name);
 }
 
@@ -2172,11 +2203,11 @@ bool lua_is_current_expansion_torment_of_velious() {
 	return content_service.IsCurrentExpansionTormentOfVelious();
 }
 
-bool lua_is_content_flag_enabled(std::string content_flag){
+bool lua_is_content_flag_enabled(std::string content_flag) {
 	return content_service.IsContentFlagEnabled(content_flag);
 }
 
-void lua_set_content_flag(std::string flag_name, bool enabled){
+void lua_set_content_flag(std::string flag_name, bool enabled) {
 	ZoneStore::SetContentFlag(flag_name, enabled);
 }
 
@@ -2207,7 +2238,7 @@ luabind::object lua_get_expedition_lockout_by_char_id(lua_State* L, uint32 char_
 
 	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
 		return lockout.IsSameLockout(expedition_name, event_name);
-	});
+		});
 
 	if (it != lockouts.end())
 	{
@@ -2324,7 +2355,7 @@ void lua_remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string e
 } while(0)
 
 void lua_create_npc(luabind::adl::object table, float x, float y, float z, float heading) {
-	if(luabind::type(table) != LUA_TTABLE) {
+	if (luabind::type(table) != LUA_TTABLE) {
 		return;
 	}
 
@@ -2472,440 +2503,440 @@ bool get_ruleb(int rule) {
 
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
-	[
-		luabind::def("load_encounter", &load_encounter),
-		luabind::def("unload_encounter", &unload_encounter),
-		luabind::def("load_encounter_with_data", &load_encounter_with_data),
-		luabind::def("unload_encounter_with_data", &unload_encounter_with_data),
-		luabind::def("register_npc_event", (void(*)(std::string, int, int, luabind::adl::object))&register_npc_event),
-		luabind::def("register_npc_event", (void(*)(int, int, luabind::adl::object))&register_npc_event),
-		luabind::def("unregister_npc_event", (void(*)(std::string, int, int))&unregister_npc_event),
-		luabind::def("unregister_npc_event", (void(*)(int, int))&unregister_npc_event),
-		luabind::def("register_player_event", (void(*)(std::string, int, luabind::adl::object))&register_player_event),
-		luabind::def("register_player_event", (void(*)(int, luabind::adl::object))&register_player_event),
-		luabind::def("unregister_player_event", (void(*)(std::string, int))&unregister_player_event),
-		luabind::def("unregister_player_event", (void(*)(int))&unregister_player_event),
-		luabind::def("register_item_event", (void(*)(std::string, int, int, luabind::adl::object))&register_item_event),
-		luabind::def("register_item_event", (void(*)(int, int, luabind::adl::object))&register_item_event),
-		luabind::def("unregister_item_event", (void(*)(std::string, int, int))&unregister_item_event),
-		luabind::def("unregister_item_event", (void(*)(int, int))&unregister_item_event),
-		luabind::def("register_spell_event", (void(*)(std::string, int, int, luabind::adl::object func))&register_spell_event),
-		luabind::def("register_spell_event", (void(*)(int, int, luabind::adl::object func))&register_spell_event),
-		luabind::def("unregister_spell_event", (void(*)(std::string, int, int))&unregister_spell_event),
-		luabind::def("unregister_spell_event", (void(*)(int, int))&unregister_spell_event),
-		luabind::def("spawn2", (Lua_Mob(*)(int,int,int,double,double,double,double))&lua_spawn2),
-		luabind::def("unique_spawn", (Lua_Mob(*)(int,int,int,double,double,double))&lua_unique_spawn),
-		luabind::def("unique_spawn", (Lua_Mob(*)(int,int,int,double,double,double,double))&lua_unique_spawn),
-		luabind::def("spawn_from_spawn2", (Lua_Mob(*)(uint32))&lua_spawn_from_spawn2),
-		luabind::def("enable_spawn2", &lua_enable_spawn2),
-		luabind::def("disable_spawn2", &lua_disable_spawn2),
-		luabind::def("set_timer", (void(*)(const char*, int))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob))&lua_set_timer),
-		luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter))&lua_set_timer),
-		luabind::def("stop_timer", (void(*)(const char*))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_Mob))&lua_stop_timer),
-		luabind::def("stop_timer", (void(*)(const char*, Lua_Encounter))&lua_stop_timer),
-		luabind::def("pause_timer", (void(*)(const char*))&lua_pause_timer),
-		luabind::def("resume_timer", (void(*)(const char*))&lua_resume_timer),
-		luabind::def("is_paused_timer", (bool(*)(const char*))&lua_is_paused_timer),
-		luabind::def("stop_all_timers", (void(*)(void))&lua_stop_all_timers),
-		luabind::def("stop_all_timers", (void(*)(Lua_ItemInst))&lua_stop_all_timers),
-		luabind::def("stop_all_timers", (void(*)(Lua_Mob))&lua_stop_all_timers),
-		luabind::def("stop_all_timers", (void(*)(Lua_Encounter))&lua_stop_all_timers),
-		luabind::def("depop", (void(*)(void))&lua_depop),
-		luabind::def("depop", (void(*)(int))&lua_depop),
-		luabind::def("depop_with_timer", (void(*)(void))&lua_depop_with_timer),
-		luabind::def("depop_with_timer", (void(*)(int))&lua_depop_with_timer),
-		luabind::def("depop_all", (void(*)(void))&lua_depop_all),
-		luabind::def("depop_all", (void(*)(int))&lua_depop_all),
-		luabind::def("depop_zone", &lua_depop_zone),
-		luabind::def("repop_zone", &lua_repop_zone),
-		luabind::def("process_mobs_while_zone_empty", &lua_process_mobs_while_zone_empty),
-		luabind::def("is_disc_tome", &lua_is_disc_tome),
-		luabind::def("get_race_name", (std::string(*)(uint16))&lua_get_race_name),
-		luabind::def("get_spell_name", (std::string(*)(uint32))&lua_get_spell_name),
-		luabind::def("get_skill_name", (std::string(*)(int))&lua_get_skill_name),
-		luabind::def("safe_move", &lua_safe_move),
-		luabind::def("rain", &lua_rain),
-		luabind::def("snow", &lua_snow),
-		luabind::def("scribe_spells", (int(*)(int))&lua_scribe_spells),
-		luabind::def("scribe_spells", (int(*)(int,int))&lua_scribe_spells),
-		luabind::def("train_discs", (int(*)(int))&lua_train_discs),
-		luabind::def("train_discs", (int(*)(int,int))&lua_train_discs),
-		luabind::def("set_sky", &lua_set_sky),
-		luabind::def("set_guild", &lua_set_guild),
-		luabind::def("create_guild", &lua_create_guild),
-		luabind::def("set_time", (void(*)(int, int))&lua_set_time),
-		luabind::def("set_time", (void(*)(int, int, bool))&lua_set_time),
-		luabind::def("signal", (void(*)(int,int))&lua_signal),
-		luabind::def("signal", (void(*)(int,int,int))&lua_signal),
-		luabind::def("set_global", &lua_set_global),
-		luabind::def("target_global", &lua_target_global),
-		luabind::def("delete_global", &lua_delete_global),
-		luabind::def("start", &lua_start),
-		luabind::def("stop", &lua_stop),
-		luabind::def("pause", &lua_pause),
-		luabind::def("move_to", (void(*)(float,float,float))&lua_move_to),
-		luabind::def("move_to", (void(*)(float,float,float,float))&lua_move_to),
-		luabind::def("move_to", (void(*)(float,float,float,float,bool))&lua_move_to),
-		luabind::def("resume", &lua_path_resume),
-		luabind::def("set_next_hp_event", &lua_set_next_hp_event),
-		luabind::def("set_next_inc_hp_event", &lua_set_next_inc_hp_event),
-		luabind::def("respawn", &lua_respawn),
-		luabind::def("set_proximity", (void(*)(float,float,float,float))&lua_set_proximity),
-		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float))&lua_set_proximity),
-		luabind::def("set_proximity", (void(*)(float,float,float,float,float,float,bool))&lua_set_proximity),
-		luabind::def("clear_proximity", &lua_clear_proximity),
-		luabind::def("enable_proximity_say", &lua_enable_proximity_say),
-		luabind::def("disable_proximity_say", &lua_disable_proximity_say),
-		luabind::def("set_anim", &lua_set_anim),
-		luabind::def("spawn_condition", &lua_spawn_condition),
-		luabind::def("get_spawn_condition", &lua_get_spawn_condition),
-		luabind::def("toggle_spawn_event", &lua_toggle_spawn_event),
-		luabind::def("summon_buried_player_corpse", &lua_summon_buried_player_corpse),
-		luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
-		luabind::def("get_player_corpse_count", &lua_get_player_corpse_count),
-		luabind::def("get_player_corpse_count_by_zone_id", &lua_get_player_corpse_count_by_zone_id),
-		luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
-		luabind::def("bury_player_corpse", &lua_bury_player_corpse),
-		luabind::def("task_selector", &lua_task_selector),
-		luabind::def("task_set_selector", &lua_task_set_selector),
-		luabind::def("enable_task", &lua_enable_task),
-		luabind::def("disable_task", &lua_disable_task),
-		luabind::def("is_task_enabled", &lua_is_task_enabled),
-		luabind::def("is_task_active", &lua_is_task_active),
-		luabind::def("is_task_activity_active", &lua_is_task_activity_active),
-		luabind::def("get_task_activity_done_count", &lua_get_task_activity_done_count),
-		luabind::def("update_task_activity", &lua_update_task_activity),
-		luabind::def("reset_task_activity", &lua_reset_task_activity),
-		luabind::def("task_explored_area", &lua_task_explored_area),
-		luabind::def("assign_task", &lua_assign_task),
-		luabind::def("fail_task", &lua_fail_task),
-		luabind::def("task_time_left", &lua_task_time_left),
-		luabind::def("is_task_completed", &lua_is_task_completed),
-		luabind::def("enabled_task_count", &lua_enabled_task_count),
-		luabind::def("first_task_in_set", &lua_first_task_in_set),
-		luabind::def("last_task_in_set", &lua_last_task_in_set),
-		luabind::def("next_task_in_set", &lua_next_task_in_set),
-		luabind::def("active_speak_task", &lua_active_speak_task),
-		luabind::def("active_speak_activity", &lua_active_speak_activity),
-		luabind::def("active_tasks_in_set", &lua_active_tasks_in_set),
-		luabind::def("completed_tasks_in_set", &lua_completed_tasks_in_set),
-		luabind::def("is_task_appropriate", &lua_is_task_appropriate),
-		luabind::def("get_task_name", (std::string(*)(uint32))&lua_get_task_name),
-		luabind::def("popup", &lua_popup),
-		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
-		luabind::def("zone_emote", &lua_zone_emote),
-		luabind::def("world_emote", &lua_world_emote),
-		luabind::def("get_level", &lua_get_level),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float))&lua_create_ground_object),
-		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int))&lua_create_ground_object_from_model),
-		luabind::def("create_ground_object_from_model", (void(*)(const char*,float,float,float,float,int,uint32))&lua_create_ground_object_from_model),
-		luabind::def("create_door", &lua_create_door),
-		luabind::def("modify_npc_stat", &lua_modify_npc_stat),
-		luabind::def("collect_items", &lua_collect_items),
-		luabind::def("count_item", &lua_count_item),
-		luabind::def("remove_item", (void(*)(uint32))&lua_remove_item),
-		luabind::def("remove_item", (void(*)(uint32,uint32))&lua_remove_item),
-		luabind::def("update_spawn_timer", &lua_update_spawn_timer),
-		luabind::def("merchant_set_item", (void(*)(uint32,uint32))&lua_merchant_set_item),
-		luabind::def("merchant_set_item", (void(*)(uint32,uint32,uint32))&lua_merchant_set_item),
-		luabind::def("merchant_count_item", &lua_merchant_count_item),
-		luabind::def("item_link", &lua_item_link),
-		luabind::def("get_item_name", (std::string(*)(uint32))&lua_get_item_name),
-		luabind::def("say_link", (std::string(*)(const char*,bool,const char*))&lua_say_link),
-		luabind::def("say_link", (std::string(*)(const char*,bool))&lua_say_link),
-		luabind::def("say_link", (std::string(*)(const char*))&lua_say_link),
-		luabind::def("set_rule", (void(*)(std::string, std::string))&lua_set_rule),
-		luabind::def("get_rule", (std::string(*)(std::string))&lua_get_rule),
-		luabind::def("get_data", (std::string(*)(std::string))&lua_get_data),
-		luabind::def("get_data_expires", (std::string(*)(std::string))&lua_get_data_expires),
-		luabind::def("set_data", (void(*)(std::string, std::string))&lua_set_data),
-		luabind::def("set_data", (void(*)(std::string, std::string, std::string))&lua_set_data),
-		luabind::def("delete_data", (bool(*)(std::string))&lua_delete_data),
-		luabind::def("get_char_name_by_id", &lua_get_char_name_by_id),
-		luabind::def("get_char_id_by_name", (uint32(*)(const char*))&lua_get_char_id_by_name),
-		luabind::def("get_class_name", (std::string(*)(uint8))&lua_get_class_name),
-		luabind::def("get_class_name", (std::string(*)(uint8,uint8))&lua_get_class_name),
-		luabind::def("get_currency_id", &lua_get_currency_id),
-		luabind::def("get_currency_item_id", &lua_get_currency_item_id),
-		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
-		luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
-		luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),
-		luabind::def("get_npc_name_by_id", &lua_get_npc_name_by_id),
-		luabind::def("get_raid_id_by_char_id", &lua_get_raid_id_by_char_id),
-		luabind::def("create_instance", &lua_create_instance),
-		luabind::def("destroy_instance", &lua_destroy_instance),
-		luabind::def("update_instance_timer", &lua_update_instance_timer),
-		luabind::def("get_instance_id", &lua_get_instance_id),
-		luabind::def("get_instance_id_by_char_id", &lua_get_instance_id_by_char_id),
-		luabind::def("get_instance_timer", &lua_get_instance_timer),
-		luabind::def("get_instance_timer_by_id", &lua_get_instance_timer_by_id),
-		luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
-		luabind::def("assign_to_instance", &lua_assign_to_instance),
-		luabind::def("assign_to_instance_by_char_id", &lua_assign_to_instance_by_char_id),
-		luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
-		luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
-		luabind::def("remove_from_instance", &lua_remove_from_instance),
-		luabind::def("remove_from_instance_by_char_id", &lua_remove_from_instance_by_char_id),
-		luabind::def("check_instance_by_char_id", (bool(*)(uint16, uint32))&lua_check_instance_by_char_id),
-		luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
-		luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
-		luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),
-		luabind::def("fly_mode", &lua_fly_mode),
-		luabind::def("faction_value", &lua_faction_value),
-		luabind::def("check_title", &lua_check_title),
-		luabind::def("enable_title", &lua_enable_title),
-		luabind::def("remove_title", &lua_remove_title),
-		luabind::def("wear_change", &lua_wear_change),
-		luabind::def("voice_tell", &lua_voice_tell),
-		luabind::def("send_mail", &lua_send_mail),
-		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_char_id),
-		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_char_id),
-		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_group_id),
-		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_group_id),
-		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_raid_id),
-		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
-		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
-		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
-		luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
-		luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
-		luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
-		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
-		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
-		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
-		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
-		luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
-		luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
-		luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
-		luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
-		luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
-		luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
-		luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
-		luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
-		luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
-		luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
-		luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
-		luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
-		luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
-		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
-		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
-		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
-		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
-		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
-		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
-		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
-		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
-		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
-		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
-		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
-		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
-		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
-		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
-		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
-		luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
-		luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
-		luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
-		luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
-		luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
-		luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
-		luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
-		luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
-		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
-		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
-		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
-		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
-		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
-		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
-		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
-		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
-		luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
-		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_char_id),
-		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_char_id),
-		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_group_id),
-		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_group_id),
-		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_raid_id),
-		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_raid_id),
-		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_guild_id),
-		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
-		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8,uint8))&lua_world_wide_assign_task),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
-		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
-		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32))&lua_world_wide_enable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8))&lua_world_wide_enable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_enable_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32))&lua_world_wide_fail_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8))&lua_world_wide_fail_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_fail_task),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*))&lua_world_wide_marquee),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8))&lua_world_wide_marquee),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8,uint8))&lua_world_wide_marquee),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*))&lua_world_wide_message),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8))&lua_world_wide_message),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8,uint8))&lua_world_wide_message),
-		luabind::def("world_wide_move", (void(*)(const char*))&lua_world_wide_move),
-		luabind::def("world_wide_move", (void(*)(const char*,uint8))&lua_world_wide_move),
-		luabind::def("world_wide_move", (void(*)(const char*,uint8,uint8))&lua_world_wide_move),
-		luabind::def("world_wide_move_instance", (void(*)(uint16))&lua_world_wide_move_instance),
-		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8))&lua_world_wide_move_instance),
-		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8,uint8))&lua_world_wide_move_instance),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_task", (void(*)(uint32))&lua_world_wide_remove_task),
-		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8))&lua_world_wide_remove_task),
-		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_task),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
-		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8,uint8))&lua_world_wide_update_activity),
-		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
-		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*))&lua_get_qglobals),
-		luabind::def("get_entity_list", &lua_get_entity_list),
-		luabind::def("zone", &lua_zone),
-		luabind::def("zone_group", &lua_zone_group),
-		luabind::def("zone_raid", &lua_zone_raid),
-		luabind::def("get_zone_id", &lua_get_zone_id),
-		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
-		luabind::def("get_zone_short_name", &lua_get_zone_short_name),
-		luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
-		luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
-		luabind::def("get_zone_weather", &lua_get_zone_weather),
-		luabind::def("get_zone_time", &lua_get_zone_time),
-		luabind::def("add_area", &lua_add_area),
-		luabind::def("remove_area", &lua_remove_area),
-		luabind::def("clear_areas", &lua_clear_areas),
-		luabind::def("add_spawn_point", &lua_add_spawn_point),
-		luabind::def("remove_spawn_point", &lua_remove_spawn_point),
-		luabind::def("attack", &lua_attack),
-		luabind::def("attack_npc", &lua_attack_npc),
-		luabind::def("attack_npc_type", &lua_attack_npc_type),
-		luabind::def("follow", (void(*)(int))&lua_follow),
-		luabind::def("follow", (void(*)(int,int))&lua_follow),
-		luabind::def("stop_follow", &lua_stop_follow),
-		luabind::def("get_initiator", &lua_get_initiator),
-		luabind::def("get_owner", &lua_get_owner),
-		luabind::def("get_quest_item", &lua_get_quest_item),
-		luabind::def("get_encounter", &lua_get_encounter),
-		luabind::def("map_opcodes", &lua_map_opcodes),
-		luabind::def("clear_opcode", &lua_clear_opcode),
-		luabind::def("enable_recipe", &lua_enable_recipe),
-		luabind::def("disable_recipe", &lua_disable_recipe),
-		luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
-		luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
-		luabind::def("update_zone_header", &lua_update_zone_header),
-		luabind::def("clock", &lua_clock),
-		luabind::def("create_npc", &lua_create_npc),
-		luabind::def("log", (void(*)(int, std::string))&lua_log),
-		luabind::def("debug", (void(*)(std::string))&lua_debug),
-		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
-		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
+		[
+			luabind::def("load_encounter", &load_encounter),
+			luabind::def("unload_encounter", &unload_encounter),
+			luabind::def("load_encounter_with_data", &load_encounter_with_data),
+			luabind::def("unload_encounter_with_data", &unload_encounter_with_data),
+			luabind::def("register_npc_event", (void(*)(std::string, int, int, luabind::adl::object)) & register_npc_event),
+			luabind::def("register_npc_event", (void(*)(int, int, luabind::adl::object)) & register_npc_event),
+			luabind::def("unregister_npc_event", (void(*)(std::string, int, int)) & unregister_npc_event),
+			luabind::def("unregister_npc_event", (void(*)(int, int)) & unregister_npc_event),
+			luabind::def("register_player_event", (void(*)(std::string, int, luabind::adl::object)) & register_player_event),
+			luabind::def("register_player_event", (void(*)(int, luabind::adl::object)) & register_player_event),
+			luabind::def("unregister_player_event", (void(*)(std::string, int)) & unregister_player_event),
+			luabind::def("unregister_player_event", (void(*)(int)) & unregister_player_event),
+			luabind::def("register_item_event", (void(*)(std::string, int, int, luabind::adl::object)) & register_item_event),
+			luabind::def("register_item_event", (void(*)(int, int, luabind::adl::object)) & register_item_event),
+			luabind::def("unregister_item_event", (void(*)(std::string, int, int)) & unregister_item_event),
+			luabind::def("unregister_item_event", (void(*)(int, int)) & unregister_item_event),
+			luabind::def("register_spell_event", (void(*)(std::string, int, int, luabind::adl::object func)) & register_spell_event),
+			luabind::def("register_spell_event", (void(*)(int, int, luabind::adl::object func)) & register_spell_event),
+			luabind::def("unregister_spell_event", (void(*)(std::string, int, int)) & unregister_spell_event),
+			luabind::def("unregister_spell_event", (void(*)(int, int)) & unregister_spell_event),
+			luabind::def("spawn2", (Lua_Mob(*)(int, int, int, double, double, double, double)) & lua_spawn2),
+			luabind::def("unique_spawn", (Lua_Mob(*)(int, int, int, double, double, double)) & lua_unique_spawn),
+			luabind::def("unique_spawn", (Lua_Mob(*)(int, int, int, double, double, double, double)) & lua_unique_spawn),
+			luabind::def("spawn_from_spawn2", (Lua_Mob(*)(uint32)) & lua_spawn_from_spawn2),
+			luabind::def("enable_spawn2", &lua_enable_spawn2),
+			luabind::def("disable_spawn2", &lua_disable_spawn2),
+			luabind::def("set_timer", (void(*)(const char*, int)) & lua_set_timer),
+			luabind::def("set_timer", (void(*)(const char*, int, Lua_ItemInst)) & lua_set_timer),
+			luabind::def("set_timer", (void(*)(const char*, int, Lua_Mob)) & lua_set_timer),
+			luabind::def("set_timer", (void(*)(const char*, int, Lua_Encounter)) & lua_set_timer),
+			luabind::def("stop_timer", (void(*)(const char*)) & lua_stop_timer),
+			luabind::def("stop_timer", (void(*)(const char*, Lua_ItemInst)) & lua_stop_timer),
+			luabind::def("stop_timer", (void(*)(const char*, Lua_Mob)) & lua_stop_timer),
+			luabind::def("stop_timer", (void(*)(const char*, Lua_Encounter)) & lua_stop_timer),
+			luabind::def("pause_timer", (void(*)(const char*)) & lua_pause_timer),
+			luabind::def("resume_timer", (void(*)(const char*)) & lua_resume_timer),
+			luabind::def("is_paused_timer", (bool(*)(const char*)) & lua_is_paused_timer),
+			luabind::def("stop_all_timers", (void(*)(void)) & lua_stop_all_timers),
+			luabind::def("stop_all_timers", (void(*)(Lua_ItemInst)) & lua_stop_all_timers),
+			luabind::def("stop_all_timers", (void(*)(Lua_Mob)) & lua_stop_all_timers),
+			luabind::def("stop_all_timers", (void(*)(Lua_Encounter)) & lua_stop_all_timers),
+			luabind::def("depop", (void(*)(void)) & lua_depop),
+			luabind::def("depop", (void(*)(int)) & lua_depop),
+			luabind::def("depop_with_timer", (void(*)(void)) & lua_depop_with_timer),
+			luabind::def("depop_with_timer", (void(*)(int)) & lua_depop_with_timer),
+			luabind::def("depop_all", (void(*)(void)) & lua_depop_all),
+			luabind::def("depop_all", (void(*)(int)) & lua_depop_all),
+			luabind::def("depop_zone", &lua_depop_zone),
+			luabind::def("repop_zone", &lua_repop_zone),
+			luabind::def("process_mobs_while_zone_empty", &lua_process_mobs_while_zone_empty),
+			luabind::def("is_disc_tome", &lua_is_disc_tome),
+			luabind::def("get_race_name", (std::string(*)(uint16)) & lua_get_race_name),
+			luabind::def("get_spell_name", (std::string(*)(uint32)) & lua_get_spell_name),
+			luabind::def("get_skill_name", (std::string(*)(int)) & lua_get_skill_name),
+			luabind::def("safe_move", &lua_safe_move),
+			luabind::def("rain", &lua_rain),
+			luabind::def("snow", &lua_snow),
+			luabind::def("scribe_spells", (int(*)(int)) & lua_scribe_spells),
+			luabind::def("scribe_spells", (int(*)(int, int)) & lua_scribe_spells),
+			luabind::def("train_discs", (int(*)(int)) & lua_train_discs),
+			luabind::def("train_discs", (int(*)(int, int)) & lua_train_discs),
+			luabind::def("set_sky", &lua_set_sky),
+			luabind::def("set_guild", &lua_set_guild),
+			luabind::def("create_guild", &lua_create_guild),
+			luabind::def("set_time", (void(*)(int, int)) & lua_set_time),
+			luabind::def("set_time", (void(*)(int, int, bool)) & lua_set_time),
+			luabind::def("signal", (void(*)(int, int)) & lua_signal),
+			luabind::def("signal", (void(*)(int, int, int)) & lua_signal),
+			luabind::def("set_global", &lua_set_global),
+			luabind::def("target_global", &lua_target_global),
+			luabind::def("delete_global", &lua_delete_global),
+			luabind::def("start", &lua_start),
+			luabind::def("stop", &lua_stop),
+			luabind::def("pause", &lua_pause),
+			luabind::def("move_to", (void(*)(float, float, float)) & lua_move_to),
+			luabind::def("move_to", (void(*)(float, float, float, float)) & lua_move_to),
+			luabind::def("move_to", (void(*)(float, float, float, float, bool)) & lua_move_to),
+			luabind::def("resume", &lua_path_resume),
+			luabind::def("set_next_hp_event", &lua_set_next_hp_event),
+			luabind::def("set_next_inc_hp_event", &lua_set_next_inc_hp_event),
+			luabind::def("respawn", &lua_respawn),
+			luabind::def("set_proximity", (void(*)(float, float, float, float)) & lua_set_proximity),
+			luabind::def("set_proximity", (void(*)(float, float, float, float, float, float)) & lua_set_proximity),
+			luabind::def("set_proximity", (void(*)(float, float, float, float, float, float, bool)) & lua_set_proximity),
+			luabind::def("clear_proximity", &lua_clear_proximity),
+			luabind::def("enable_proximity_say", &lua_enable_proximity_say),
+			luabind::def("disable_proximity_say", &lua_disable_proximity_say),
+			luabind::def("set_anim", &lua_set_anim),
+			luabind::def("spawn_condition", &lua_spawn_condition),
+			luabind::def("get_spawn_condition", &lua_get_spawn_condition),
+			luabind::def("toggle_spawn_event", &lua_toggle_spawn_event),
+			luabind::def("summon_buried_player_corpse", &lua_summon_buried_player_corpse),
+			luabind::def("summon_all_player_corpses", &lua_summon_all_player_corpses),
+			luabind::def("get_player_corpse_count", &lua_get_player_corpse_count),
+			luabind::def("get_player_corpse_count_by_zone_id", &lua_get_player_corpse_count_by_zone_id),
+			luabind::def("get_player_buried_corpse_count", &lua_get_player_buried_corpse_count),
+			luabind::def("bury_player_corpse", &lua_bury_player_corpse),
+			luabind::def("task_selector", &lua_task_selector),
+			luabind::def("task_set_selector", &lua_task_set_selector),
+			luabind::def("enable_task", &lua_enable_task),
+			luabind::def("disable_task", &lua_disable_task),
+			luabind::def("is_task_enabled", &lua_is_task_enabled),
+			luabind::def("is_task_active", &lua_is_task_active),
+			luabind::def("is_task_activity_active", &lua_is_task_activity_active),
+			luabind::def("get_task_activity_done_count", &lua_get_task_activity_done_count),
+			luabind::def("update_task_activity", &lua_update_task_activity),
+			luabind::def("reset_task_activity", &lua_reset_task_activity),
+			luabind::def("task_explored_area", &lua_task_explored_area),
+			luabind::def("assign_task", &lua_assign_task),
+			luabind::def("fail_task", &lua_fail_task),
+			luabind::def("task_time_left", &lua_task_time_left),
+			luabind::def("is_task_completed", &lua_is_task_completed),
+			luabind::def("enabled_task_count", &lua_enabled_task_count),
+			luabind::def("first_task_in_set", &lua_first_task_in_set),
+			luabind::def("last_task_in_set", &lua_last_task_in_set),
+			luabind::def("next_task_in_set", &lua_next_task_in_set),
+			luabind::def("active_speak_task", &lua_active_speak_task),
+			luabind::def("active_speak_activity", &lua_active_speak_activity),
+			luabind::def("active_tasks_in_set", &lua_active_tasks_in_set),
+			luabind::def("completed_tasks_in_set", &lua_completed_tasks_in_set),
+			luabind::def("is_task_appropriate", &lua_is_task_appropriate),
+			luabind::def("get_task_name", (std::string(*)(uint32)) & lua_get_task_name),
+			luabind::def("popup", &lua_popup),
+			luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
+			luabind::def("zone_emote", &lua_zone_emote),
+			luabind::def("world_emote", &lua_world_emote),
+			luabind::def("get_level", &lua_get_level),
+			luabind::def("create_ground_object", (void(*)(uint32, float, float, float, float)) & lua_create_ground_object),
+			luabind::def("create_ground_object", (void(*)(uint32, float, float, float, float, uint32)) & lua_create_ground_object),
+			luabind::def("create_ground_object_from_model", (void(*)(const char*, float, float, float, float)) & lua_create_ground_object_from_model),
+			luabind::def("create_ground_object_from_model", (void(*)(const char*, float, float, float, float, int)) & lua_create_ground_object_from_model),
+			luabind::def("create_ground_object_from_model", (void(*)(const char*, float, float, float, float, int, uint32)) & lua_create_ground_object_from_model),
+			luabind::def("create_door", &lua_create_door),
+			luabind::def("modify_npc_stat", &lua_modify_npc_stat),
+			luabind::def("collect_items", &lua_collect_items),
+			luabind::def("count_item", &lua_count_item),
+			luabind::def("remove_item", (void(*)(uint32)) & lua_remove_item),
+			luabind::def("remove_item", (void(*)(uint32, uint32)) & lua_remove_item),
+			luabind::def("update_spawn_timer", &lua_update_spawn_timer),
+			luabind::def("merchant_set_item", (void(*)(uint32, uint32)) & lua_merchant_set_item),
+			luabind::def("merchant_set_item", (void(*)(uint32, uint32, uint32)) & lua_merchant_set_item),
+			luabind::def("merchant_count_item", &lua_merchant_count_item),
+			luabind::def("item_link", &lua_item_link),
+			luabind::def("get_item_name", (std::string(*)(uint32)) & lua_get_item_name),
+			luabind::def("say_link", (std::string(*)(const char*, bool, const char*)) & lua_say_link),
+			luabind::def("say_link", (std::string(*)(const char*, bool)) & lua_say_link),
+			luabind::def("say_link", (std::string(*)(const char*)) & lua_say_link),
+			luabind::def("set_rule", (void(*)(std::string, std::string)) & lua_set_rule),
+			luabind::def("get_rule", (std::string(*)(std::string)) & lua_get_rule),
+			luabind::def("get_data", (std::string(*)(std::string)) & lua_get_data),
+			luabind::def("get_data_expires", (std::string(*)(std::string)) & lua_get_data_expires),
+			luabind::def("set_data", (void(*)(std::string, std::string)) & lua_set_data),
+			luabind::def("set_data", (void(*)(std::string, std::string, std::string)) & lua_set_data),
+			luabind::def("delete_data", (bool(*)(std::string)) & lua_delete_data),
+			luabind::def("get_char_name_by_id", &lua_get_char_name_by_id),
+			luabind::def("get_char_id_by_name", (uint32(*)(const char*)) & lua_get_char_id_by_name),
+			luabind::def("get_class_name", (std::string(*)(uint8)) & lua_get_class_name),
+			luabind::def("get_class_name", (std::string(*)(uint8, uint8)) & lua_get_class_name),
+			luabind::def("get_currency_id", &lua_get_currency_id),
+			luabind::def("get_currency_item_id", &lua_get_currency_item_id),
+			luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),
+			luabind::def("get_guild_id_by_char_id", &lua_get_guild_id_by_char_id),
+			luabind::def("get_group_id_by_char_id", &lua_get_group_id_by_char_id),
+			luabind::def("get_npc_name_by_id", &lua_get_npc_name_by_id),
+			luabind::def("get_raid_id_by_char_id", &lua_get_raid_id_by_char_id),
+			luabind::def("create_instance", &lua_create_instance),
+			luabind::def("destroy_instance", &lua_destroy_instance),
+			luabind::def("update_instance_timer", &lua_update_instance_timer),
+			luabind::def("get_instance_id", &lua_get_instance_id),
+			luabind::def("get_instance_id_by_char_id", &lua_get_instance_id_by_char_id),
+			luabind::def("get_instance_timer", &lua_get_instance_timer),
+			luabind::def("get_instance_timer_by_id", &lua_get_instance_timer_by_id),
+			luabind::def("get_characters_in_instance", &lua_get_characters_in_instance),
+			luabind::def("assign_to_instance", &lua_assign_to_instance),
+			luabind::def("assign_to_instance_by_char_id", &lua_assign_to_instance_by_char_id),
+			luabind::def("assign_group_to_instance", &lua_assign_group_to_instance),
+			luabind::def("assign_raid_to_instance", &lua_assign_raid_to_instance),
+			luabind::def("remove_from_instance", &lua_remove_from_instance),
+			luabind::def("remove_from_instance_by_char_id", &lua_remove_from_instance_by_char_id),
+			luabind::def("check_instance_by_char_id", (bool(*)(uint16, uint32)) & lua_check_instance_by_char_id),
+			luabind::def("remove_all_from_instance", &lua_remove_all_from_instance),
+			luabind::def("flag_instance_by_group_leader", &lua_flag_instance_by_group_leader),
+			luabind::def("flag_instance_by_raid_leader", &lua_flag_instance_by_raid_leader),
+			luabind::def("fly_mode", &lua_fly_mode),
+			luabind::def("faction_value", &lua_faction_value),
+			luabind::def("check_title", &lua_check_title),
+			luabind::def("enable_title", &lua_enable_title),
+			luabind::def("remove_title", &lua_remove_title),
+			luabind::def("wear_change", &lua_wear_change),
+			luabind::def("voice_tell", &lua_voice_tell),
+			luabind::def("send_mail", &lua_send_mail),
+			luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int, uint32)) & lua_cross_zone_assign_task_by_char_id),
+			luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int, uint32, bool)) & lua_cross_zone_assign_task_by_char_id),
+			luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int, uint32)) & lua_cross_zone_assign_task_by_group_id),
+			luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int, uint32, bool)) & lua_cross_zone_assign_task_by_group_id),
+			luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int, uint32)) & lua_cross_zone_assign_task_by_raid_id),
+			luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int, uint32, bool)) & lua_cross_zone_assign_task_by_raid_id),
+			luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int, uint32)) & lua_cross_zone_assign_task_by_guild_id),
+			luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int, uint32, bool)) & lua_cross_zone_assign_task_by_guild_id),
+			luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
+			luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
+			luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
+			luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
+			luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
+			luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
+			luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
+			luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
+			luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
+			luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
+			luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
+			luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
+			luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
+			luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
+			luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
+			luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
+			luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
+			luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
+			luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
+			luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
+			luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+			luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
+			luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
+			luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
+			luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
+			luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
+			luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
+			luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
+			luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
+			luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
+			luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
+			luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
+			luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
+			luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
+			luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
+			luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
+			luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
+			luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
+			luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
+			luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
+			luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
+			luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
+			luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
+			luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
+			luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
+			luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
+			luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
+			luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
+			luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
+			luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
+			luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
+			luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
+			luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+			luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
+			luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int, uint32, int)) & lua_cross_zone_update_activity_by_char_id),
+			luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int, uint32, int, int)) & lua_cross_zone_update_activity_by_char_id),
+			luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int, uint32, int)) & lua_cross_zone_update_activity_by_group_id),
+			luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int, uint32, int, int)) & lua_cross_zone_update_activity_by_group_id),
+			luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int, uint32, int)) & lua_cross_zone_update_activity_by_raid_id),
+			luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int, uint32, int, int)) & lua_cross_zone_update_activity_by_raid_id),
+			luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int, uint32, int)) & lua_cross_zone_update_activity_by_guild_id),
+			luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int, uint32, int, int)) & lua_cross_zone_update_activity_by_guild_id),
+			luabind::def("world_wide_assign_task", (void(*)(uint32)) & lua_world_wide_assign_task),
+			luabind::def("world_wide_assign_task", (void(*)(uint32, bool)) & lua_world_wide_assign_task),
+			luabind::def("world_wide_assign_task", (void(*)(uint32, bool, uint8)) & lua_world_wide_assign_task),
+			luabind::def("world_wide_assign_task", (void(*)(uint32, bool, uint8, uint8)) & lua_world_wide_assign_task),
+			luabind::def("world_wide_cast_spell", (void(*)(uint32)) & lua_world_wide_cast_spell),
+			luabind::def("world_wide_cast_spell", (void(*)(uint32, uint8)) & lua_world_wide_cast_spell),
+			luabind::def("world_wide_cast_spell", (void(*)(uint32, uint8, uint8)) & lua_world_wide_cast_spell),
+			luabind::def("world_wide_disable_task", (void(*)(uint32)) & lua_world_wide_disable_task),
+			luabind::def("world_wide_disable_task", (void(*)(uint32, uint8)) & lua_world_wide_disable_task),
+			luabind::def("world_wide_disable_task", (void(*)(uint32, uint8, uint8)) & lua_world_wide_disable_task),
+			luabind::def("world_wide_enable_task", (void(*)(uint32)) & lua_world_wide_enable_task),
+			luabind::def("world_wide_enable_task", (void(*)(uint32, uint8)) & lua_world_wide_enable_task),
+			luabind::def("world_wide_enable_task", (void(*)(uint32, uint8, uint8)) & lua_world_wide_enable_task),
+			luabind::def("world_wide_fail_task", (void(*)(uint32)) & lua_world_wide_fail_task),
+			luabind::def("world_wide_fail_task", (void(*)(uint32, uint8)) & lua_world_wide_fail_task),
+			luabind::def("world_wide_fail_task", (void(*)(uint32, uint8, uint8)) & lua_world_wide_fail_task),
+			luabind::def("world_wide_marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*)) & lua_world_wide_marquee),
+			luabind::def("world_wide_marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*, uint8)) & lua_world_wide_marquee),
+			luabind::def("world_wide_marquee", (void(*)(uint32, uint32, uint32, uint32, uint32, const char*, uint8, uint8)) & lua_world_wide_marquee),
+			luabind::def("world_wide_message", (void(*)(uint32, const char*)) & lua_world_wide_message),
+			luabind::def("world_wide_message", (void(*)(uint32, const char*, uint8)) & lua_world_wide_message),
+			luabind::def("world_wide_message", (void(*)(uint32, const char*, uint8, uint8)) & lua_world_wide_message),
+			luabind::def("world_wide_move", (void(*)(const char*)) & lua_world_wide_move),
+			luabind::def("world_wide_move", (void(*)(const char*, uint8)) & lua_world_wide_move),
+			luabind::def("world_wide_move", (void(*)(const char*, uint8, uint8)) & lua_world_wide_move),
+			luabind::def("world_wide_move_instance", (void(*)(uint16)) & lua_world_wide_move_instance),
+			luabind::def("world_wide_move_instance", (void(*)(uint16, uint8)) & lua_world_wide_move_instance),
+			luabind::def("world_wide_move_instance", (void(*)(uint16, uint8, uint8)) & lua_world_wide_move_instance),
+			luabind::def("world_wide_remove_spell", (void(*)(uint32)) & lua_world_wide_remove_spell),
+			luabind::def("world_wide_remove_spell", (void(*)(uint32, uint8)) & lua_world_wide_remove_spell),
+			luabind::def("world_wide_remove_spell", (void(*)(uint32, uint8, uint8)) & lua_world_wide_remove_spell),
+			luabind::def("world_wide_remove_task", (void(*)(uint32)) & lua_world_wide_remove_task),
+			luabind::def("world_wide_remove_task", (void(*)(uint32, uint8)) & lua_world_wide_remove_task),
+			luabind::def("world_wide_remove_task", (void(*)(uint32, uint8, uint8)) & lua_world_wide_remove_task),
+			luabind::def("world_wide_reset_activity", (void(*)(uint32, int)) & lua_world_wide_reset_activity),
+			luabind::def("world_wide_reset_activity", (void(*)(uint32, int, uint8)) & lua_world_wide_reset_activity),
+			luabind::def("world_wide_reset_activity", (void(*)(uint32, int, uint8, uint8)) & lua_world_wide_reset_activity),
+			luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*, const char*)) & lua_world_wide_set_entity_variable_client),
+			luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*, const char*, uint8)) & lua_world_wide_set_entity_variable_client),
+			luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*, const char*, uint8, uint8)) & lua_world_wide_set_entity_variable_client),
+			luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
+			luabind::def("world_wide_signal_client", (void(*)(uint32)) & lua_world_wide_signal_client),
+			luabind::def("world_wide_signal_client", (void(*)(uint32, uint8)) & lua_world_wide_signal_client),
+			luabind::def("world_wide_signal_client", (void(*)(uint32, uint8, uint8)) & lua_world_wide_signal_client),
+			luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
+			luabind::def("world_wide_update_activity", (void(*)(uint32, int)) & lua_world_wide_update_activity),
+			luabind::def("world_wide_update_activity", (void(*)(uint32, int, int)) & lua_world_wide_update_activity),
+			luabind::def("world_wide_update_activity", (void(*)(uint32, int, int, uint8)) & lua_world_wide_update_activity),
+			luabind::def("world_wide_update_activity", (void(*)(uint32, int, int, uint8, uint8)) & lua_world_wide_update_activity),
+			luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*, Lua_NPC, Lua_Client)) & lua_get_qglobals),
+			luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*, Lua_Client)) & lua_get_qglobals),
+			luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*, Lua_NPC)) & lua_get_qglobals),
+			luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*)) & lua_get_qglobals),
+			luabind::def("get_entity_list", &lua_get_entity_list),
+			luabind::def("zone", &lua_zone),
+			luabind::def("zone_group", &lua_zone_group),
+			luabind::def("zone_raid", &lua_zone_raid),
+			luabind::def("get_zone_id", &lua_get_zone_id),
+			luabind::def("get_zone_long_name", &lua_get_zone_long_name),
+			luabind::def("get_zone_short_name", &lua_get_zone_short_name),
+			luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
+			luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
+			luabind::def("get_zone_weather", &lua_get_zone_weather),
+			luabind::def("get_zone_time", &lua_get_zone_time),
+			luabind::def("add_area", &lua_add_area),
+			luabind::def("remove_area", &lua_remove_area),
+			luabind::def("clear_areas", &lua_clear_areas),
+			luabind::def("add_spawn_point", &lua_add_spawn_point),
+			luabind::def("remove_spawn_point", &lua_remove_spawn_point),
+			luabind::def("attack", &lua_attack),
+			luabind::def("attack_npc", &lua_attack_npc),
+			luabind::def("attack_npc_type", &lua_attack_npc_type),
+			luabind::def("follow", (void(*)(int)) & lua_follow),
+			luabind::def("follow", (void(*)(int, int)) & lua_follow),
+			luabind::def("stop_follow", &lua_stop_follow),
+			luabind::def("get_initiator", &lua_get_initiator),
+			luabind::def("get_owner", &lua_get_owner),
+			luabind::def("get_quest_item", &lua_get_quest_item),
+			luabind::def("get_encounter", &lua_get_encounter),
+			luabind::def("map_opcodes", &lua_map_opcodes),
+			luabind::def("clear_opcode", &lua_clear_opcode),
+			luabind::def("enable_recipe", &lua_enable_recipe),
+			luabind::def("disable_recipe", &lua_disable_recipe),
+			luabind::def("clear_npctype_cache", &lua_clear_npctype_cache),
+			luabind::def("reloadzonestaticdata", &lua_reloadzonestaticdata),
+			luabind::def("update_zone_header", &lua_update_zone_header),
+			luabind::def("clock", &lua_clock),
+			luabind::def("create_npc", &lua_create_npc),
+			luabind::def("log", (void(*)(int, std::string)) & lua_log),
+			luabind::def("debug", (void(*)(std::string)) & lua_debug),
+			luabind::def("debug", (void(*)(std::string, int)) & lua_debug),
+			luabind::def("log_combat", (void(*)(std::string)) & lua_log_combat),
 
-		/**
-		 * Expansions
-		 */
-		luabind::def("is_classic_enabled", &lua_is_classic_enabled),
-		luabind::def("is_the_ruins_of_kunark_enabled", &lua_is_the_ruins_of_kunark_enabled),
-		luabind::def("is_the_scars_of_velious_enabled", &lua_is_the_scars_of_velious_enabled),
-		luabind::def("is_the_shadows_of_luclin_enabled", &lua_is_the_shadows_of_luclin_enabled),
-		luabind::def("is_the_planes_of_power_enabled", &lua_is_the_planes_of_power_enabled),
-		luabind::def("is_the_legacy_of_ykesha_enabled", &lua_is_the_legacy_of_ykesha_enabled),
-		luabind::def("is_lost_dungeons_of_norrath_enabled", &lua_is_lost_dungeons_of_norrath_enabled),
-		luabind::def("is_gates_of_discord_enabled", &lua_is_gates_of_discord_enabled),
-		luabind::def("is_omens_of_war_enabled", &lua_is_omens_of_war_enabled),
-		luabind::def("is_dragons_of_norrath_enabled", &lua_is_dragons_of_norrath_enabled),
-		luabind::def("is_depths_of_darkhollow_enabled", &lua_is_depths_of_darkhollow_enabled),
-		luabind::def("is_prophecy_of_ro_enabled", &lua_is_prophecy_of_ro_enabled),
-		luabind::def("is_the_serpents_spine_enabled", &lua_is_the_serpents_spine_enabled),
-		luabind::def("is_the_buried_sea_enabled", &lua_is_the_buried_sea_enabled),
-		luabind::def("is_secrets_of_faydwer_enabled", &lua_is_secrets_of_faydwer_enabled),
-		luabind::def("is_seeds_of_destruction_enabled", &lua_is_seeds_of_destruction_enabled),
-		luabind::def("is_underfoot_enabled", &lua_is_underfoot_enabled),
-		luabind::def("is_house_of_thule_enabled", &lua_is_house_of_thule_enabled),
-		luabind::def("is_veil_of_alaris_enabled", &lua_is_veil_of_alaris_enabled),
-		luabind::def("is_rain_of_fear_enabled", &lua_is_rain_of_fear_enabled),
-		luabind::def("is_call_of_the_forsaken_enabled", &lua_is_call_of_the_forsaken_enabled),
-		luabind::def("is_the_darkend_sea_enabled", &lua_is_the_darkend_sea_enabled),
-		luabind::def("is_the_broken_mirror_enabled", &lua_is_the_broken_mirror_enabled),
-		luabind::def("is_empires_of_kunark_enabled", &lua_is_empires_of_kunark_enabled),
-		luabind::def("is_ring_of_scale_enabled", &lua_is_ring_of_scale_enabled),
-		luabind::def("is_the_burning_lands_enabled", &lua_is_the_burning_lands_enabled),
-		luabind::def("is_torment_of_velious_enabled", &lua_is_torment_of_velious_enabled),
-		luabind::def("is_current_expansion_classic", &lua_is_current_expansion_classic),
-		luabind::def("is_current_expansion_the_ruins_of_kunark", &lua_is_current_expansion_the_ruins_of_kunark),
-		luabind::def("is_current_expansion_the_scars_of_velious", &lua_is_current_expansion_the_scars_of_velious),
-		luabind::def("is_current_expansion_the_shadows_of_luclin", &lua_is_current_expansion_the_shadows_of_luclin),
-		luabind::def("is_current_expansion_the_planes_of_power", &lua_is_current_expansion_the_planes_of_power),
-		luabind::def("is_current_expansion_the_legacy_of_ykesha", &lua_is_current_expansion_the_legacy_of_ykesha),
-		luabind::def("is_current_expansion_lost_dungeons_of_norrath", &lua_is_current_expansion_lost_dungeons_of_norrath),
-		luabind::def("is_current_expansion_gates_of_discord", &lua_is_current_expansion_gates_of_discord),
-		luabind::def("is_current_expansion_omens_of_war", &lua_is_current_expansion_omens_of_war),
-		luabind::def("is_current_expansion_dragons_of_norrath", &lua_is_current_expansion_dragons_of_norrath),
-		luabind::def("is_current_expansion_depths_of_darkhollow", &lua_is_current_expansion_depths_of_darkhollow),
-		luabind::def("is_current_expansion_prophecy_of_ro", &lua_is_current_expansion_prophecy_of_ro),
-		luabind::def("is_current_expansion_the_serpents_spine", &lua_is_current_expansion_the_serpents_spine),
-		luabind::def("is_current_expansion_the_buried_sea", &lua_is_current_expansion_the_buried_sea),
-		luabind::def("is_current_expansion_secrets_of_faydwer", &lua_is_current_expansion_secrets_of_faydwer),
-		luabind::def("is_current_expansion_seeds_of_destruction", &lua_is_current_expansion_seeds_of_destruction),
-		luabind::def("is_current_expansion_underfoot", &lua_is_current_expansion_underfoot),
-		luabind::def("is_current_expansion_house_of_thule", &lua_is_current_expansion_house_of_thule),
-		luabind::def("is_current_expansion_veil_of_alaris", &lua_is_current_expansion_veil_of_alaris),
-		luabind::def("is_current_expansion_rain_of_fear", &lua_is_current_expansion_rain_of_fear),
-		luabind::def("is_current_expansion_call_of_the_forsaken", &lua_is_current_expansion_call_of_the_forsaken),
-		luabind::def("is_current_expansion_the_darkend_sea", &lua_is_current_expansion_the_darkend_sea),
-		luabind::def("is_current_expansion_the_broken_mirror", &lua_is_current_expansion_the_broken_mirror),
-		luabind::def("is_current_expansion_empires_of_kunark", &lua_is_current_expansion_empires_of_kunark),
-		luabind::def("is_current_expansion_ring_of_scale", &lua_is_current_expansion_ring_of_scale),
-		luabind::def("is_current_expansion_the_burning_lands", &lua_is_current_expansion_the_burning_lands),
-		luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious),
+			/**
+			 * Expansions
+			 */
+			 luabind::def("is_classic_enabled", &lua_is_classic_enabled),
+			 luabind::def("is_the_ruins_of_kunark_enabled", &lua_is_the_ruins_of_kunark_enabled),
+			 luabind::def("is_the_scars_of_velious_enabled", &lua_is_the_scars_of_velious_enabled),
+			 luabind::def("is_the_shadows_of_luclin_enabled", &lua_is_the_shadows_of_luclin_enabled),
+			 luabind::def("is_the_planes_of_power_enabled", &lua_is_the_planes_of_power_enabled),
+			 luabind::def("is_the_legacy_of_ykesha_enabled", &lua_is_the_legacy_of_ykesha_enabled),
+			 luabind::def("is_lost_dungeons_of_norrath_enabled", &lua_is_lost_dungeons_of_norrath_enabled),
+			 luabind::def("is_gates_of_discord_enabled", &lua_is_gates_of_discord_enabled),
+			 luabind::def("is_omens_of_war_enabled", &lua_is_omens_of_war_enabled),
+			 luabind::def("is_dragons_of_norrath_enabled", &lua_is_dragons_of_norrath_enabled),
+			 luabind::def("is_depths_of_darkhollow_enabled", &lua_is_depths_of_darkhollow_enabled),
+			 luabind::def("is_prophecy_of_ro_enabled", &lua_is_prophecy_of_ro_enabled),
+			 luabind::def("is_the_serpents_spine_enabled", &lua_is_the_serpents_spine_enabled),
+			 luabind::def("is_the_buried_sea_enabled", &lua_is_the_buried_sea_enabled),
+			 luabind::def("is_secrets_of_faydwer_enabled", &lua_is_secrets_of_faydwer_enabled),
+			 luabind::def("is_seeds_of_destruction_enabled", &lua_is_seeds_of_destruction_enabled),
+			 luabind::def("is_underfoot_enabled", &lua_is_underfoot_enabled),
+			 luabind::def("is_house_of_thule_enabled", &lua_is_house_of_thule_enabled),
+			 luabind::def("is_veil_of_alaris_enabled", &lua_is_veil_of_alaris_enabled),
+			 luabind::def("is_rain_of_fear_enabled", &lua_is_rain_of_fear_enabled),
+			 luabind::def("is_call_of_the_forsaken_enabled", &lua_is_call_of_the_forsaken_enabled),
+			 luabind::def("is_the_darkend_sea_enabled", &lua_is_the_darkend_sea_enabled),
+			 luabind::def("is_the_broken_mirror_enabled", &lua_is_the_broken_mirror_enabled),
+			 luabind::def("is_empires_of_kunark_enabled", &lua_is_empires_of_kunark_enabled),
+			 luabind::def("is_ring_of_scale_enabled", &lua_is_ring_of_scale_enabled),
+			 luabind::def("is_the_burning_lands_enabled", &lua_is_the_burning_lands_enabled),
+			 luabind::def("is_torment_of_velious_enabled", &lua_is_torment_of_velious_enabled),
+			 luabind::def("is_current_expansion_classic", &lua_is_current_expansion_classic),
+			 luabind::def("is_current_expansion_the_ruins_of_kunark", &lua_is_current_expansion_the_ruins_of_kunark),
+			 luabind::def("is_current_expansion_the_scars_of_velious", &lua_is_current_expansion_the_scars_of_velious),
+			 luabind::def("is_current_expansion_the_shadows_of_luclin", &lua_is_current_expansion_the_shadows_of_luclin),
+			 luabind::def("is_current_expansion_the_planes_of_power", &lua_is_current_expansion_the_planes_of_power),
+			 luabind::def("is_current_expansion_the_legacy_of_ykesha", &lua_is_current_expansion_the_legacy_of_ykesha),
+			 luabind::def("is_current_expansion_lost_dungeons_of_norrath", &lua_is_current_expansion_lost_dungeons_of_norrath),
+			 luabind::def("is_current_expansion_gates_of_discord", &lua_is_current_expansion_gates_of_discord),
+			 luabind::def("is_current_expansion_omens_of_war", &lua_is_current_expansion_omens_of_war),
+			 luabind::def("is_current_expansion_dragons_of_norrath", &lua_is_current_expansion_dragons_of_norrath),
+			 luabind::def("is_current_expansion_depths_of_darkhollow", &lua_is_current_expansion_depths_of_darkhollow),
+			 luabind::def("is_current_expansion_prophecy_of_ro", &lua_is_current_expansion_prophecy_of_ro),
+			 luabind::def("is_current_expansion_the_serpents_spine", &lua_is_current_expansion_the_serpents_spine),
+			 luabind::def("is_current_expansion_the_buried_sea", &lua_is_current_expansion_the_buried_sea),
+			 luabind::def("is_current_expansion_secrets_of_faydwer", &lua_is_current_expansion_secrets_of_faydwer),
+			 luabind::def("is_current_expansion_seeds_of_destruction", &lua_is_current_expansion_seeds_of_destruction),
+			 luabind::def("is_current_expansion_underfoot", &lua_is_current_expansion_underfoot),
+			 luabind::def("is_current_expansion_house_of_thule", &lua_is_current_expansion_house_of_thule),
+			 luabind::def("is_current_expansion_veil_of_alaris", &lua_is_current_expansion_veil_of_alaris),
+			 luabind::def("is_current_expansion_rain_of_fear", &lua_is_current_expansion_rain_of_fear),
+			 luabind::def("is_current_expansion_call_of_the_forsaken", &lua_is_current_expansion_call_of_the_forsaken),
+			 luabind::def("is_current_expansion_the_darkend_sea", &lua_is_current_expansion_the_darkend_sea),
+			 luabind::def("is_current_expansion_the_broken_mirror", &lua_is_current_expansion_the_broken_mirror),
+			 luabind::def("is_current_expansion_empires_of_kunark", &lua_is_current_expansion_empires_of_kunark),
+			 luabind::def("is_current_expansion_ring_of_scale", &lua_is_current_expansion_ring_of_scale),
+			 luabind::def("is_current_expansion_the_burning_lands", &lua_is_current_expansion_the_burning_lands),
+			 luabind::def("is_current_expansion_torment_of_velious", &lua_is_current_expansion_torment_of_velious),
 
-		/**
-		 * Content flags
-		 */
-		luabind::def("is_content_flag_enabled", (bool(*)(std::string))&lua_is_content_flag_enabled),
-		luabind::def("set_content_flag", (void(*)(std::string, bool))&lua_set_content_flag),
+			 /**
+			  * Content flags
+			  */
+			  luabind::def("is_content_flag_enabled", (bool(*)(std::string)) & lua_is_content_flag_enabled),
+			  luabind::def("set_content_flag", (void(*)(std::string, bool)) & lua_set_content_flag),
 
-		luabind::def("get_expedition", &lua_get_expedition),
-		luabind::def("get_expedition_by_char_id", &lua_get_expedition_by_char_id),
-		luabind::def("get_expedition_by_dz_id", &lua_get_expedition_by_dz_id),
-		luabind::def("get_expedition_by_zone_instance", &lua_get_expedition_by_zone_instance),
-		luabind::def("get_expedition_lockout_by_char_id", &lua_get_expedition_lockout_by_char_id),
-		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32))&lua_get_expedition_lockouts_by_char_id),
-		luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32, std::string))&lua_get_expedition_lockouts_by_char_id),
-		luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32))&lua_add_expedition_lockout_all_clients),
-		luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32, std::string))&lua_add_expedition_lockout_all_clients),
-		luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32))&lua_add_expedition_lockout_by_char_id),
-		luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32, std::string))&lua_add_expedition_lockout_by_char_id),
-		luabind::def("remove_expedition_lockout_by_char_id", &lua_remove_expedition_lockout_by_char_id),
-		luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32))&lua_remove_all_expedition_lockouts_by_char_id),
-		luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32, std::string))&lua_remove_all_expedition_lockouts_by_char_id)
-	];
+			  luabind::def("get_expedition", &lua_get_expedition),
+			  luabind::def("get_expedition_by_char_id", &lua_get_expedition_by_char_id),
+			  luabind::def("get_expedition_by_dz_id", &lua_get_expedition_by_dz_id),
+			  luabind::def("get_expedition_by_zone_instance", &lua_get_expedition_by_zone_instance),
+			  luabind::def("get_expedition_lockout_by_char_id", &lua_get_expedition_lockout_by_char_id),
+			  luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32)) & lua_get_expedition_lockouts_by_char_id),
+			  luabind::def("get_expedition_lockouts_by_char_id", (luabind::object(*)(lua_State*, uint32, std::string)) & lua_get_expedition_lockouts_by_char_id),
+			  luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32)) & lua_add_expedition_lockout_all_clients),
+			  luabind::def("add_expedition_lockout_all_clients", (void(*)(std::string, std::string, uint32, std::string)) & lua_add_expedition_lockout_all_clients),
+			  luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32)) & lua_add_expedition_lockout_by_char_id),
+			  luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32, std::string)) & lua_add_expedition_lockout_by_char_id),
+			  luabind::def("remove_expedition_lockout_by_char_id", &lua_remove_expedition_lockout_by_char_id),
+			  luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32)) & lua_remove_all_expedition_lockouts_by_char_id),
+			  luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32, std::string)) & lua_remove_all_expedition_lockouts_by_char_id)
+		];
 }
 
 luabind::scope lua_register_random() {
@@ -2964,8 +2995,8 @@ luabind::scope lua_register_events() {
 			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_BUFF_TIC_CLIENT)),
 			luabind::value("spell_fade", static_cast<int>(EVENT_SPELL_FADE)),
 			luabind::value("spell_effect_translocate_complete", static_cast<int>(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)),
-			luabind::value("combine_success ", static_cast<int>(EVENT_COMBINE_SUCCESS )),
-			luabind::value("combine_failure ", static_cast<int>(EVENT_COMBINE_FAILURE )),
+			luabind::value("combine_success ", static_cast<int>(EVENT_COMBINE_SUCCESS)),
+			luabind::value("combine_failure ", static_cast<int>(EVENT_COMBINE_FAILURE)),
 			luabind::value("item_click", static_cast<int>(EVENT_ITEM_CLICK)),
 			luabind::value("item_click_cast", static_cast<int>(EVENT_ITEM_CLICK_CAST)),
 			luabind::value("group_change", static_cast<int>(EVENT_GROUP_CHANGE)),
@@ -3487,22 +3518,22 @@ luabind::scope lua_register_message_types() {
 luabind::scope lua_register_rules_const() {
 	return luabind::class_<Rule>("Rule")
 		.enum_("constants")
-	[
+		[
 #define RULE_INT(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Int__##rule),
 #include "../common/ruletypes.h"
-		luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
+			luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
 #undef RULE_INT
 #define RULE_REAL(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Real__##rule),
 #include "../common/ruletypes.h"
-		luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
+			luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
 #undef RULE_REAL
 #define RULE_BOOL(cat, rule, default_value, notes) \
 		luabind::value(#rule, RuleManager::Bool__##rule),
 #include "../common/ruletypes.h"
-		luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
-	];
+			luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
+		];
 }
 
 luabind::scope lua_register_rulei() {
