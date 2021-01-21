@@ -578,8 +578,6 @@ RULE_INT(Range, CriticalDamage, 80, "The packet range in which critical hit mess
 RULE_INT(Range, MobCloseScanDistance, 600, "Close scan distance")
 RULE_CATEGORY_END()
 
-
-#ifdef BOTS
 RULE_CATEGORY(Bots)
 RULE_INT(Bots, BotExpansionSettings, 16383, "Sets the expansion settings for bot use. Defaults to all expansions enabled up to TSS")
 RULE_BOOL(Bots, AllowCamelCaseNames, false, "Allows the use of 'MyBot' type names")
@@ -612,7 +610,6 @@ RULE_BOOL(Bots, AllowApplyPoisonCommand, true, "Allows the use of the bot comman
 RULE_BOOL(Bots, AllowApplyPotionCommand, true, "Allows the use of the bot command 'applypotion'")
 RULE_BOOL(Bots, RestrictApplyPotionToRogue, true, "Restricts the bot command 'applypotion' to rogue-usable potions (i.e., poisons)")
 RULE_CATEGORY_END()
-#endif
 
 RULE_CATEGORY(Chat)
 RULE_BOOL(Chat, ServerWideOOC, true, "Enable server wide ooc-chat")
