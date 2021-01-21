@@ -55,9 +55,9 @@ extern std::map<std::string, Encounter*> lua_encounters;
 extern void MapOpcodes();
 extern void ClearMappedOpcode(EmuOpcode op);
 
-void unregister_event(std::string package_name, std::string name, int evt);
+void lua_unregister_event(std::string package_name, std::string name, int evt);
 
-void load_encounter(std::string name) {
+void lua_load_encounter(std::string name) {
 	if (lua_encounters_loaded.count(name) > 0)
 		return;
 	auto enc = new Encounter(name.c_str());
@@ -67,7 +67,7 @@ void load_encounter(std::string name) {
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0);
 }
 
-void load_encounter_with_data(std::string name, std::string info_str) {
+void lua_load_encounter_with_data(std::string name, std::string info_str) {
 	if (lua_encounters_loaded.count(name) > 0)
 		return;
 	auto enc = new Encounter(name.c_str());
@@ -79,7 +79,7 @@ void load_encounter_with_data(std::string name, std::string info_str) {
 	parse->EventEncounter(EVENT_ENCOUNTER_LOAD, name, "", 0, &info_ptrs);
 }
 
-void unload_encounter(std::string name) {
+void lua_unload_encounter(std::string name) {
 	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
@@ -110,7 +110,7 @@ void unload_encounter(std::string name) {
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0);
 }
 
-void unload_encounter_with_data(std::string name, std::string info_str) {
+void lua_unload_encounter_with_data(std::string name, std::string info_str) {
 	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
@@ -143,11 +143,11 @@ void unload_encounter_with_data(std::string name, std::string info_str) {
 	parse->EventEncounter(EVENT_ENCOUNTER_UNLOAD, name, "", 0, &info_ptrs);
 }
 
-void register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
+void lua_register_event(std::string package_name, std::string name, int evt, luabind::adl::object func) {
 	if (lua_encounters_loaded.count(name) == 0)
 		return;
 
-	unregister_event(package_name, name, evt);
+	lua_unregister_event(package_name, name, evt);
 
 	lua_registered_event e;
 	e.encounter_name = name;
@@ -166,7 +166,7 @@ void register_event(std::string package_name, std::string name, int evt, luabind
 	}
 }
 
-void unregister_event(std::string package_name, std::string name, int evt) {
+void lua_unregister_event(std::string package_name, std::string name, int evt) {
 	auto liter = lua_encounter_events_registered.find(package_name);
 	if (liter != lua_encounter_events_registered.end()) {
 		std::list<lua_registered_event> elist = liter->second;
@@ -182,102 +182,102 @@ void unregister_event(std::string package_name, std::string name, int evt) {
 	}
 }
 
-void register_npc_event(std::string name, int evt, int npc_id, luabind::adl::object func) {
+void lua_register_npc_event(std::string name, int evt, int npc_id, luabind::adl::object func) {
 	if (luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "npc_" << npc_id;
 
-		register_event(package_name.str(), name, evt, func);
+		lua_register_event(package_name.str(), name, evt, func);
 	}
 }
 
-void register_npc_event(int evt, int npc_id, luabind::adl::object func) {
+void lua_register_npc_event(int evt, int npc_id, luabind::adl::object func) {
 	std::string name = quest_manager.GetEncounter();
-	register_npc_event(name, evt, npc_id, func);
+	lua_register_npc_event(name, evt, npc_id, func);
 }
 
-void unregister_npc_event(std::string name, int evt, int npc_id) {
+void lua_unregister_npc_event(std::string name, int evt, int npc_id) {
 	std::stringstream package_name;
 	package_name << "npc_" << npc_id;
 
-	unregister_event(package_name.str(), name, evt);
+	lua_unregister_event(package_name.str(), name, evt);
 }
 
-void unregister_npc_event(int evt, int npc_id) {
+void lua_unregister_npc_event(int evt, int npc_id) {
 	std::string name = quest_manager.GetEncounter();
-	unregister_npc_event(name, evt, npc_id);
+	lua_unregister_npc_event(name, evt, npc_id);
 }
 
-void register_player_event(std::string name, int evt, luabind::adl::object func) {
+void lua_register_player_event(std::string name, int evt, luabind::adl::object func) {
 	if (luabind::type(func) == LUA_TFUNCTION) {
-		register_event("player", name, evt, func);
+		lua_register_event("player", name, evt, func);
 	}
 }
 
-void register_player_event(int evt, luabind::adl::object func) {
+void lua_register_player_event(int evt, luabind::adl::object func) {
 	std::string name = quest_manager.GetEncounter();
-	register_player_event(name, evt, func);
+	lua_register_player_event(name, evt, func);
 }
 
-void unregister_player_event(std::string name, int evt) {
-	unregister_event("player", name, evt);
+void lua_unregister_player_event(std::string name, int evt) {
+	lua_unregister_event("player", name, evt);
 }
 
-void unregister_player_event(int evt) {
+void lua_unregister_player_event(int evt) {
 	std::string name = quest_manager.GetEncounter();
-	unregister_player_event(name, evt);
+	lua_unregister_player_event(name, evt);
 }
 
-void register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
+void lua_register_item_event(std::string name, int evt, int item_id, luabind::adl::object func) {
 	std::string package_name = "item_";
 	package_name += std::to_string(item_id);
 
 	if (luabind::type(func) == LUA_TFUNCTION) {
-		register_event(package_name, name, evt, func);
+		lua_register_event(package_name, name, evt, func);
 	}
 }
 
-void register_item_event(int evt, int item_id, luabind::adl::object func) {
+void lua_register_item_event(int evt, int item_id, luabind::adl::object func) {
 	std::string name = quest_manager.GetEncounter();
-	register_item_event(name, evt, item_id, func);
+	lua_register_item_event(name, evt, item_id, func);
 }
 
-void unregister_item_event(std::string name, int evt, int item_id) {
+void lua_unregister_item_event(std::string name, int evt, int item_id) {
 	std::string package_name = "item_";
 	package_name += std::to_string(item_id);
 
-	unregister_event(package_name, name, evt);
+	lua_unregister_event(package_name, name, evt);
 }
 
-void unregister_item_event(int evt, int item_id) {
+void lua_unregister_item_event(int evt, int item_id) {
 	std::string name = quest_manager.GetEncounter();
-	unregister_item_event(name, evt, item_id);
+	lua_unregister_item_event(name, evt, item_id);
 }
 
-void register_spell_event(std::string name, int evt, int spell_id, luabind::adl::object func) {
+void lua_register_spell_event(std::string name, int evt, int spell_id, luabind::adl::object func) {
 	if (luabind::type(func) == LUA_TFUNCTION) {
 		std::stringstream package_name;
 		package_name << "spell_" << spell_id;
 
-		register_event(package_name.str(), name, evt, func);
+		lua_register_event(package_name.str(), name, evt, func);
 	}
 }
 
-void register_spell_event(int evt, int spell_id, luabind::adl::object func) {
+void lua_register_spell_event(int evt, int spell_id, luabind::adl::object func) {
 	std::string name = quest_manager.GetEncounter();
-	register_spell_event(name, evt, spell_id, func);
+	lua_register_spell_event(name, evt, spell_id, func);
 }
 
-void unregister_spell_event(std::string name, int evt, int spell_id) {
+void lua_unregister_spell_event(std::string name, int evt, int spell_id) {
 	std::stringstream package_name;
 	package_name << "spell_" << spell_id;
 
-	unregister_event(package_name.str(), name, evt);
+	lua_unregister_event(package_name.str(), name, evt);
 }
 
-void unregister_spell_event(int evt, int spell_id) {
+void lua_unregister_spell_event(int evt, int spell_id) {
 	std::string name = quest_manager.GetEncounter();
-	unregister_spell_event(name, evt, spell_id);
+	lua_unregister_spell_event(name, evt, spell_id);
 }
 
 Lua_Mob lua_spawn2(int npc_type, int grid, int unused, double x, double y, double z, double heading) {
@@ -2504,26 +2504,26 @@ bool get_ruleb(int rule) {
 luabind::scope lua_register_general() {
 	return luabind::namespace_("eq")
 		[
-			luabind::def("load_encounter", &load_encounter),
-			luabind::def("unload_encounter", &unload_encounter),
-			luabind::def("load_encounter_with_data", &load_encounter_with_data),
-			luabind::def("unload_encounter_with_data", &unload_encounter_with_data),
-			luabind::def("register_npc_event", (void(*)(std::string, int, int, luabind::adl::object)) & register_npc_event),
-			luabind::def("register_npc_event", (void(*)(int, int, luabind::adl::object)) & register_npc_event),
-			luabind::def("unregister_npc_event", (void(*)(std::string, int, int)) & unregister_npc_event),
-			luabind::def("unregister_npc_event", (void(*)(int, int)) & unregister_npc_event),
-			luabind::def("register_player_event", (void(*)(std::string, int, luabind::adl::object)) & register_player_event),
-			luabind::def("register_player_event", (void(*)(int, luabind::adl::object)) & register_player_event),
-			luabind::def("unregister_player_event", (void(*)(std::string, int)) & unregister_player_event),
-			luabind::def("unregister_player_event", (void(*)(int)) & unregister_player_event),
-			luabind::def("register_item_event", (void(*)(std::string, int, int, luabind::adl::object)) & register_item_event),
-			luabind::def("register_item_event", (void(*)(int, int, luabind::adl::object)) & register_item_event),
-			luabind::def("unregister_item_event", (void(*)(std::string, int, int)) & unregister_item_event),
-			luabind::def("unregister_item_event", (void(*)(int, int)) & unregister_item_event),
-			luabind::def("register_spell_event", (void(*)(std::string, int, int, luabind::adl::object func)) & register_spell_event),
-			luabind::def("register_spell_event", (void(*)(int, int, luabind::adl::object func)) & register_spell_event),
-			luabind::def("unregister_spell_event", (void(*)(std::string, int, int)) & unregister_spell_event),
-			luabind::def("unregister_spell_event", (void(*)(int, int)) & unregister_spell_event),
+			luabind::def("load_encounter", &lua_load_encounter),
+			luabind::def("unload_encounter", &lua_unload_encounter),
+			luabind::def("load_encounter_with_data", &lua_load_encounter_with_data),
+			luabind::def("unload_encounter_with_data", &lua_unload_encounter_with_data),
+			luabind::def("register_npc_event", (void(*)(std::string, int, int, luabind::adl::object)) & lua_register_npc_event),
+			luabind::def("register_npc_event", (void(*)(int, int, luabind::adl::object)) & lua_register_npc_event),
+			luabind::def("unregister_npc_event", (void(*)(std::string, int, int)) & lua_unregister_npc_event),
+			luabind::def("unregister_npc_event", (void(*)(int, int)) & lua_unregister_npc_event),
+			luabind::def("register_player_event", (void(*)(std::string, int, luabind::adl::object)) & lua_register_player_event),
+			luabind::def("register_player_event", (void(*)(int, luabind::adl::object)) & lua_register_player_event),
+			luabind::def("unregister_player_event", (void(*)(std::string, int)) & lua_unregister_player_event),
+			luabind::def("unregister_player_event", (void(*)(int)) & lua_unregister_player_event),
+			luabind::def("register_item_event", (void(*)(std::string, int, int, luabind::adl::object)) & lua_register_item_event),
+			luabind::def("register_item_event", (void(*)(int, int, luabind::adl::object)) & lua_register_item_event),
+			luabind::def("unregister_item_event", (void(*)(std::string, int, int)) & lua_unregister_item_event),
+			luabind::def("unregister_item_event", (void(*)(int, int)) & lua_unregister_item_event),
+			luabind::def("register_spell_event", (void(*)(std::string, int, int, luabind::adl::object func)) & lua_register_spell_event),
+			luabind::def("register_spell_event", (void(*)(int, int, luabind::adl::object func)) & lua_register_spell_event),
+			luabind::def("unregister_spell_event", (void(*)(std::string, int, int)) & lua_unregister_spell_event),
+			luabind::def("unregister_spell_event", (void(*)(int, int)) & lua_unregister_spell_event),
 			luabind::def("spawn2", (Lua_Mob(*)(int, int, int, double, double, double, double)) & lua_spawn2),
 			luabind::def("unique_spawn", (Lua_Mob(*)(int, int, int, double, double, double)) & lua_unique_spawn),
 			luabind::def("unique_spawn", (Lua_Mob(*)(int, int, int, double, double, double, double)) & lua_unique_spawn),
