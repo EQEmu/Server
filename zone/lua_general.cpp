@@ -3001,7 +3001,9 @@ luabind::scope lua_register_events() {
 			luabind::value("tick", static_cast<int>(EVENT_TICK)),
 			luabind::value("spawn_zone", static_cast<int>(EVENT_SPAWN_ZONE)),
 			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE)),
-			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL))
+			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL)),
+			luabind::value("combine_validate", static_cast<int>(EVENT_COMBINE_VALIDATE)),
+			luabind::value("bot_command", static_cast<int>(EVENT_BOT_COMMAND))
 		];
 }
 
