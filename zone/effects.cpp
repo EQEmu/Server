@@ -683,6 +683,7 @@ bool Client::HasDisciplineLearned(uint16 spell_id) {
 	for (auto index = 0; index < MAX_PP_DISCIPLINES; ++index) {
 		if (GetPP().disciplines.values[index] == spell_id) {
 			has_learned = true;
+			break;
 		}
 	}
 	return has_learned;
