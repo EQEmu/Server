@@ -439,7 +439,7 @@ int command_init(void)
 		command_add("wp", "[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid", 170, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path", 170, command_wpadd) ||
 		command_add("wpinfo", "- Show waypoint info about your NPC target", 170, command_wpinfo) ||
-		command_add("wwcast", "Casts the provided spell ID to all players currently online. Use caution with this!!", 250, command_wwcast) ||
+		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", 250, command_worldwide) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.",  250, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", 80, command_zclip) ||
 		command_add("zcolor", "[red] [green] [blue] - Change sky color", 80, command_zcolor) ||
@@ -739,15 +739,28 @@ void command_logcommand(Client *c, const char *message)
 /*
  * commands go below here
  */
-void command_wwcast(Client *c, const Seperator *sep)
+void command_worldwide(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] && Seperator::IsNumber(sep->arg[1])) {
-		int spell_id = atoi(sep->arg[1]);
-		quest_manager.WorldWideCastSpell(spell_id, 0, 0);
-		worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast {} world-wide!", GetSpellName(spell_id)).c_str());
+	std::string sub_command;
+	if (sep->arg[1]) {
+		sub_command = sep->arg[1];
 	}
-	else
-		c->Message(Chat::Yellow, "Usage: #wwcast <spellid>");
+
+	if (sub_command == "cast") {
+		if (sep->arg[2][0] && Seperator::IsNumber(sep->arg[2])) {
+			int spell_id = atoi(sep->arg[2]);
+			quest_manager.WorldWideCastSpell(spell_id, 0, 0);
+			worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast [{}] world-wide!", GetSpellName(spell_id)).c_str());
+		}
+		else {
+			c->Message(Chat::Yellow, "Usage: #worldwide cast [spellid]");
+		}
+	}
+
+	if (!sep->arg[1]) {
+		c->Message(Chat::White, "This command is used to perform world-wide tasks");
+		c->Message(Chat::White, "Usage: #worldwide cast [spellid]");
+	}
 }
 void command_endurance(Client *c, const Seperator *sep)
 {
