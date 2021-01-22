@@ -7978,13 +7978,6 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			return;
 		}
 
-		std::vector<std::string> amounts = {
-			"1",
-			"10",
-			"100",
-			"1000"
-		};
-
 		int count = 0;
 		char sName[64];
 		char sCriteria[255];
@@ -7998,14 +7991,25 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
 				linker.SetItemData(item);
-
-				std::string saylink_commands;
-				for (auto   &amount : amounts) {
-					saylink_commands += EQ::SayLinkEngine::GenerateQuestSaylink(
-						"#si " + std::to_string(item->ID) + " " + amount,
+				std::string item_id = std::to_string(item->ID);
+				std::string saylink_commands = 
+					"[" + 
+					EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#si " + item_id,
 						false,
-						"[" + amount + "] "
-					);
+						"X"
+					) + 
+					"] ";
+				if (item->Stackable && item->StackSize > 1) {
+					std::string stack_size = std::to_string(item->StackSize);
+					saylink_commands += 
+					"[" + 
+					EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#si " + item_id + " " + stack_size,
+						false,
+						stack_size
+					) + 
+					"]";
 				}
 
 				c->Message(
@@ -8013,8 +8017,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 					fmt::format(
 						" Summon {} [{}] [{}]",
 						saylink_commands,
-						item->ID,
-						linker.GenerateLink()
+						linker.GenerateLink(),
+						item->ID
 					).c_str()
 				);
 
