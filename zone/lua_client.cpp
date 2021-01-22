@@ -134,6 +134,16 @@ void Lua_Client::SetBaseGender(int v) {
 	self->SetBaseGender(v);
 }
 
+int Lua_Client::GetClassBitmask() {
+	Lua_Safe_Call_Int();
+	return GetPlayerClassBit(self->GetClass());
+}
+
+int Lua_Client::GetRaceBitmask() {
+	Lua_Safe_Call_Int();
+	return GetPlayerRaceBit(self->GetBaseRace());
+}
+
 int Lua_Client::GetBaseFace() {
 	Lua_Safe_Call_Int();
 	return self->GetBaseFace();
@@ -1933,6 +1943,8 @@ luabind::scope lua_register_client() {
 		.def("SetBaseClass", (void(Lua_Client::*)(int))&Lua_Client::SetBaseClass)
 		.def("SetBaseRace", (void(Lua_Client::*)(int))&Lua_Client::SetBaseRace)
 		.def("SetBaseGender", (void(Lua_Client::*)(int))&Lua_Client::SetBaseGender)
+		.def("GetClassBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetClassBitmask)
+		.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 		.def("GetBaseFace", (int(Lua_Client::*)(void))&Lua_Client::GetBaseFace)
 		.def("GetLanguageSkill", (int(Lua_Client::*)(int))&Lua_Client::GetLanguageSkill)
 		.def("GetLastName", (const char *(Lua_Client::*)(void))&Lua_Client::GetLastName)

@@ -8594,6 +8594,60 @@ XS(XS_Mob_TryMoveAlong) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_GetClassName);
+XS(XS_Mob_GetClassName) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetClassName(THIS)");
+	{
+		Mob* THIS;
+		Const_char *class_name;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		class_name = GetClassIDName(THIS->GetClass());
+		sv_setpv(TARG, class_name);
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);	
+}
+
+XS(XS_Mob_GetRaceName);
+XS(XS_Mob_GetRaceName) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetRaceName(THIS)");
+	{
+		Mob* THIS;
+		Const_char *race_name;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Mob")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Mob*, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Mob");
+
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		race_name = GetRaceIDName(THIS->GetRace());
+		sv_setpv(TARG, race_name);
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -8668,6 +8722,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetBaseGender"), XS_Mob_GetBaseGender, file, "$");
 	newXSproto(strcpy(buf, "GetDeity"), XS_Mob_GetDeity, file, "$");
 	newXSproto(strcpy(buf, "GetRace"), XS_Mob_GetRace, file, "$");
+	newXSproto(strcpy(buf, "GetRaceName"), XS_Mob_GetRaceName, file, "$");
 	newXSproto(strcpy(buf, "GetGender"), XS_Mob_GetGender, file, "$");
 	newXSproto(strcpy(buf, "GetTexture"), XS_Mob_GetTexture, file, "$");
 	newXSproto(strcpy(buf, "GetHelmTexture"), XS_Mob_GetHelmTexture, file, "$");
@@ -8682,6 +8737,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetDrakkinTattoo"), XS_Mob_GetDrakkinTattoo, file, "$");
 	newXSproto(strcpy(buf, "GetDrakkinDetails"), XS_Mob_GetDrakkinDetails, file, "$");
 	newXSproto(strcpy(buf, "GetClass"), XS_Mob_GetClass, file, "$");
+	newXSproto(strcpy(buf, "GetClassName"), XS_Mob_GetClassName, file, "$");
 	newXSproto(strcpy(buf, "GetLevel"), XS_Mob_GetLevel, file, "$");
 	newXSproto(strcpy(buf, "GetCleanName"), XS_Mob_GetCleanName, file, "$");
 	newXSproto(strcpy(buf, "GetTarget"), XS_Mob_GetTarget, file, "$");

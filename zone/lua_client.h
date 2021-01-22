@@ -52,7 +52,9 @@ public:
 	bool GetGM();
 	void SetBaseClass(int v);
 	void SetBaseRace(int v);
-	void SetBaseGender(int v);
+	void SetBaseGender(int v);	
+	int GetClassBitmask();
+	int GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
 	const char *GetLastName();
