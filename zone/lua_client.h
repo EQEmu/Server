@@ -213,6 +213,7 @@ public:
 	uint32 GetDisciplineTimer(uint32 timer_id);
 	void ResetDisciplineTimer(uint32 timer_id);
 	bool UseDiscipline(int spell_id, int target_id);
+	bool HasDisciplineLearned(uint16 spell_id);
 	int GetCharacterFactionLevel(int faction_id);
 	void SetZoneFlag(int zone_id);
 	void ClearZoneFlag(int zone_id);

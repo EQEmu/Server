@@ -678,6 +678,17 @@ void Client::ResetDisciplineTimer(uint32 timer_id) {
 	SendDisciplineTimer(timer_id, 0);
 }
 
+bool Client::HasDisciplineLearned(uint16 spell_id) {
+	bool has_learned = false;
+	for (auto index = 0; index < MAX_PP_DISCIPLINES; ++index) {
+		if (GetPP().disciplines.values[index] == spell_id) {
+			has_learned = true;
+			break;
+		}
+	}
+	return has_learned;
+}
+
 void Client::SendDisciplineTimer(uint32 timer_id, uint32 duration)
 {
 	if (timer_id < MAX_DISCIPLINE_TIMERS)

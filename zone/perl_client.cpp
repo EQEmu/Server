@@ -7086,6 +7086,32 @@ XS(XS_Client_Fling) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_HasDisciplineLearned); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_HasDisciplineLearned) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasDisciplineLearned(THIS, uint16 spell_id)");
+	{
+		Client *THIS;
+		bool has_learned;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		has_learned = THIS->HasDisciplineLearned(spell_id);
+		ST(0) = boolSV(has_learned);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 XS(XS_Client_GetClassBitmask);
 XS(XS_Client_GetClassBitmask) {
 	dXSARGS;
@@ -7294,6 +7320,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
 	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
+	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
 	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
