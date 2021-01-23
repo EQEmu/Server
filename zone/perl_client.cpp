@@ -6634,7 +6634,7 @@ XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Popup2) {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
+		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
 	{
 		Client *THIS;
 		char   *Title = (char *) SvPV_nolen(ST(1));
