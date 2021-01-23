@@ -768,6 +768,14 @@ void lua_world_emote(int type, const char *str) {
 	quest_manager.we(type, str);
 }
 
+void lua_message(int color, const char *message) {
+	quest_manager.message(color, message);
+}
+
+void lua_whisper(const char *message) {
+	quest_manager.whisper(message);
+}
+
 int lua_get_level(int type) {
 	return quest_manager.getlevel(type);
 }
@@ -2599,6 +2607,8 @@ luabind::scope lua_register_general() {
 		luabind::def("clear_spawn_timers", &lua_clear_spawn_timers),
 		luabind::def("zone_emote", &lua_zone_emote),
 		luabind::def("world_emote", &lua_world_emote),
+		luabind::def("message", &lua_message),
+		luabind::def("whisper", &lua_whisper),
 		luabind::def("get_level", &lua_get_level),
 		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float))&lua_create_ground_object),
 		luabind::def("create_ground_object", (void(*)(uint32,float,float,float,float,uint32))&lua_create_ground_object),
