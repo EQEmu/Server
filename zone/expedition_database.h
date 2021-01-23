@@ -58,9 +58,8 @@ namespace ExpeditionDatabase
 	void DeleteMembersLockout(const std::vector<ExpeditionMember>& members,
 		const std::string& expedition_name, const std::string& event_name);
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
-	std::pair<std::vector<ExpeditionLockoutTimer>, std::vector<uint32_t>> GetMembersLockout(
-		const std::vector<ExpeditionMember>& members, const std::string& expedition_name,
-		const std::string& event_name);
+	uint32_t GetMemberCount(uint32_t expedition_id);
+	bool HasMember(uint32_t expedition_id, uint32_t character_id);
 	void InsertCharacterLockouts(uint32_t character_id,
 		const std::vector<ExpeditionLockoutTimer>& lockouts);
 	void InsertMembersLockout(const std::vector<ExpeditionMember>& members,

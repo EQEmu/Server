@@ -1197,10 +1197,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	else
 		ns->spawn.flymode = flymode;
 
-	if(IsBoat()) {
-		ns->spawn.flymode = GravityBehavior::Floating;
-	}
-
 	ns->spawn.lastName[0] = '\0';
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));

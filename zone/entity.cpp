@@ -2511,7 +2511,7 @@ void EntityList::DespawnAllDoors()
 	auto outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		if (it->second) {
-			it->second->QueuePacket(outapp);
+			it->second->QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 		}
 	}
 	safe_delete(outapp);
@@ -2524,7 +2524,7 @@ void EntityList::RespawnAllDoors()
 		if (it->second) {
 			auto outapp = new EQApplicationPacket();
 			MakeDoorSpawnPacket(outapp, it->second);
-			it->second->FastQueuePacket(&outapp);
+			it->second->FastQueuePacket(&outapp, true, Client::CLIENT_CONNECTED);
 		}
 		++it;
 	}

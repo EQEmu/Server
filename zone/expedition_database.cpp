@@ -373,6 +373,48 @@ uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_i
 	return expedition_id;
 }
 
+uint32_t ExpeditionDatabase::GetMemberCount(uint32_t expedition_id)
+{
+	LogExpeditionsDetail("Getting expedition [{}] member count from db", expedition_id);
+
+	uint32_t member_count = 0;
+	if (expedition_id != 0)
+	{
+		auto query = fmt::format(SQL(
+			SELECT COUNT(*)
+			FROM expedition_members
+			WHERE expedition_id = {} AND is_current_member = TRUE;
+		), expedition_id);
+
+		auto results = database.QueryDatabase(query);
+		if (results.Success() && results.RowCount() > 0)
+		{
+			auto row = results.begin();
+			member_count = strtoul(row[0], nullptr, 10);
+		}
+	}
+	return member_count;
+}
+
+bool ExpeditionDatabase::HasMember(uint32_t expedition_id, uint32_t character_id)
+{
+	LogExpeditionsDetail("Checking db expedition [{}] for character [{}]", expedition_id, character_id);
+
+	if (expedition_id == 0 || character_id == 0)
+	{
+		return false;
+	}
+
+	auto query = fmt::format(SQL(
+		SELECT id
+		FROM expedition_members
+		WHERE expedition_id = {} AND character_id = {} AND is_current_member = TRUE;
+	), expedition_id, character_id);
+
+	auto results = database.QueryDatabase(query);
+	return (results.Success() && results.RowCount() > 0);
+}
+
 void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
 	const std::vector<ExpeditionLockoutTimer>& lockouts)
 {

@@ -275,7 +275,9 @@ bool Zone::LoadZoneObjects()
 		position.y = data.y;
 		position.z = data.z;
 
-		data.z = zone->zonemap->FindBestZ(position, nullptr);
+		if (zone->HasMap()) {
+			data.z = zone->zonemap->FindBestZ(position, nullptr);
+		}
 
 		EQ::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...

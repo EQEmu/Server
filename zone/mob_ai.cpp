@@ -1637,7 +1637,7 @@ void NPC::AI_DoMovement() {
 					roambox_destination_y,
 					m_Position.z + 15
 				);
-				if (!zone->watermap->InLiquid(position)) {
+				if (zone->HasWaterMap() && !zone->watermap->InLiquid(position)) {
 					roambox_destination_x = m_SpawnPoint.x;
 					roambox_destination_y = m_SpawnPoint.y;
 					roambox_destination_z = m_SpawnPoint.z;
