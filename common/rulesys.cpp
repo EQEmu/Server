@@ -37,35 +37,35 @@
 	values [catname] -> show the values of all rules in the specified category/
 */
 
-const char *RuleManager::s_categoryNames[_CatCount+1] = {
+const char* RuleManager::s_categoryNames[_CatCount + 1] = {
 	#define RULE_CATEGORY(catname) \
 		#catname ,
 	#include "ruletypes.h"
 	"InvalidCategory"
 };
 
-const RuleManager::RuleInfo RuleManager::s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount+1] = {
+const RuleManager::RuleInfo RuleManager::s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount + 1] = {
 	/* this is done in three steps so we can reliably get to them by index*/
 	#define RULE_INT(cat, rule, default_value, notes) \
-		{ #cat ":" #rule, Category__##cat, IntRule, Int__##rule, notes },
+		{ #cat ":" #rule, Category__##cat, IntRule, Int__##cat__##rule, notes },
 	#include "ruletypes.h"
 	#define RULE_REAL(cat, rule, default_value, notes) \
-		{ #cat ":" #rule, Category__##cat, RealRule, Real__##rule, notes },
+		{ #cat ":" #rule, Category__##cat, RealRule, Real__##cat__##rule, notes },
 	#include "ruletypes.h"
 	#define RULE_BOOL(cat, rule, default_value, notes) \
-		{ #cat ":" #rule, Category__##cat, BoolRule, Bool__##rule, notes },
+		{ #cat ":" #rule, Category__##cat, BoolRule, Bool__##cat__##rule, notes },
 	#include "ruletypes.h"
 	{ "Invalid Rule", _CatCount, IntRule }
 };
 
 RuleManager::RuleManager()
-:	m_activeRuleset(0),
+	: m_activeRuleset(0),
 	m_activeName("default")
 {
 	ResetRules(false);
 }
 
-RuleManager::CategoryType RuleManager::FindCategory(const char *catname) {
+RuleManager::CategoryType RuleManager::FindCategory(const char* catname) {
 	int i;
 	for (i = 0; i < _CatCount; i++) {
 		if (strcasecmp(catname, s_categoryNames[i]) == 0)
@@ -74,7 +74,7 @@ RuleManager::CategoryType RuleManager::FindCategory(const char *catname) {
 	return(InvalidCategory);
 }
 
-bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into) {
+bool RuleManager::ListRules(const char* catname, std::vector<const char*>& into) {
 	CategoryType cat = InvalidCategory;
 	if (catname != nullptr) {
 		cat = FindCategory(catname);
@@ -86,7 +86,7 @@ bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into
 	int i;
 	int rule_count = CountRules();
 	for (i = 0; i < rule_count; i++) {
-		const RuleInfo &rule = s_RuleInfo[i];
+		const RuleInfo& rule = s_RuleInfo[i];
 		if (catname == nullptr || cat == rule.category) {
 			into.push_back(rule.name);
 		}
@@ -94,7 +94,7 @@ bool RuleManager::ListRules(const char *catname, std::vector<const char *> &into
 	return(true);
 }
 
-bool RuleManager::ListCategories(std::vector<const char *> &into) {
+bool RuleManager::ListCategories(std::vector<const char*>& into) {
 	int i;
 	for (i = 0; i < _CatCount; i++) {
 		into.push_back(s_categoryNames[i]);
@@ -102,24 +102,24 @@ bool RuleManager::ListCategories(std::vector<const char *> &into) {
 	return(true);
 }
 
-bool RuleManager::GetRule(const char *rule_name, std::string &return_value) {
+bool RuleManager::GetRule(const char* rule_name, std::string& return_value) {
 	RuleType type;
 	uint16 index;
 	if (!_FindRule(rule_name, type, index))
 		return false;
 
 	char tmp[255] = "";
-	switch(type) {
-		case IntRule:
-			sprintf(tmp, "%i", m_RuleIntValues[index]);
-			break;
-		case RealRule:
-			sprintf(tmp, "%f", m_RuleRealValues[index]);
-			break;
-		case BoolRule:
-			std::string tmp_val = m_RuleBoolValues[index] ? "true" : "false";
-			sprintf(tmp, "%s", tmp_val.c_str());
-			break;
+	switch (type) {
+	case IntRule:
+		sprintf(tmp, "%i", m_RuleIntValues[index]);
+		break;
+	case RealRule:
+		sprintf(tmp, "%f", m_RuleRealValues[index]);
+		break;
+	case BoolRule:
+		std::string tmp_val = m_RuleBoolValues[index] ? "true" : "false";
+		sprintf(tmp, "%s", tmp_val.c_str());
+		break;
 	}
 
 	return_value = tmp;
@@ -127,13 +127,13 @@ bool RuleManager::GetRule(const char *rule_name, std::string &return_value) {
 	return true;
 }
 
-bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Database *database, bool db_save, bool reload) {
-	if(rule_name == nullptr || rule_value == nullptr)
+bool RuleManager::SetRule(const char* rule_name, const char* rule_value, Database* database, bool db_save, bool reload) {
+	if (rule_name == nullptr || rule_value == nullptr)
 		return(false);
 
 	RuleType type;
 	uint16 index;
-	if(!_FindRule(rule_name, type, index))
+	if (!_FindRule(rule_name, type, index))
 		return(false);
 
 	if (reload) {
@@ -143,26 +143,26 @@ bool RuleManager::SetRule(const char *rule_name, const char *rule_value, Databas
 			return(false);
 	}
 
-	switch(type) {
-		case IntRule:
-			m_RuleIntValues[index] = atoi(rule_value);
-			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
-			break;
-		case RealRule:
-			m_RuleRealValues[index] = atof(rule_value);
-			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleRealValues[index]);
-			break;
-		case BoolRule:
-			uint32 val = 0;
-			if (!strcasecmp(rule_value, "on") || !strcasecmp(rule_value, "true") || !strcasecmp(rule_value, "yes") || !strcasecmp(rule_value, "enabled") || !strcmp(rule_value, "1"))
-				val = 1;
+	switch (type) {
+	case IntRule:
+		m_RuleIntValues[index] = atoi(rule_value);
+		LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleIntValues[index]);
+		break;
+	case RealRule:
+		m_RuleRealValues[index] = atof(rule_value);
+		LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleRealValues[index]);
+		break;
+	case BoolRule:
+		uint32 val = 0;
+		if (!strcasecmp(rule_value, "on") || !strcasecmp(rule_value, "true") || !strcasecmp(rule_value, "yes") || !strcasecmp(rule_value, "enabled") || !strcmp(rule_value, "1"))
+			val = 1;
 
-			m_RuleBoolValues[index] = val;
-			LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
-			break;
+		m_RuleBoolValues[index] = val;
+		LogRules("Set rule [{}] to value [{}]", rule_name, m_RuleBoolValues[index] == 1 ? "true" : "false");
+		break;
 	}
 
-	if(db_save)
+	if (db_save)
 		_SaveRule(database, type, index);
 
 	return(true);
@@ -179,13 +179,13 @@ void RuleManager::ResetRules(bool reload) {
 	}
 
 	Log(Logs::Detail, Logs::Rules, "Resetting running rules to default values");
-	#define RULE_INT(cat, rule, default_value, notes) \
-		m_RuleIntValues[ Int__##rule ] = default_value;
-	#define RULE_REAL(cat, rule, default_value, notes) \
-		m_RuleRealValues[ Real__##rule ] = default_value;
-	#define RULE_BOOL(cat, rule, default_value, notes) \
-		m_RuleBoolValues[ Bool__##rule ] = default_value;
-	#include "ruletypes.h"
+#define RULE_INT(cat, rule, default_value, notes) \
+		m_RuleIntValues[ Int__##cat__##rule ] = default_value;
+#define RULE_REAL(cat, rule, default_value, notes) \
+		m_RuleRealValues[ Real__##cat__##rule ] = default_value;
+#define RULE_BOOL(cat, rule, default_value, notes) \
+		m_RuleBoolValues[ Bool__##cat__##rule ] = default_value;
+#include "ruletypes.h"
 
 	// restore these rules to their pre-reset values
 	if (reload) {
@@ -194,14 +194,14 @@ void RuleManager::ResetRules(bool reload) {
 	}
 }
 
-bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &index_into) {
+bool RuleManager::_FindRule(const char* rule_name, RuleType& type_into, uint16& index_into) {
 	if (rule_name == nullptr)
 		return(false);
 
 	int i;
 	int rule_count = CountRules();
 	for (i = 0; i < rule_count; i++) {
-		const RuleInfo &rule = s_RuleInfo[i];
+		const RuleInfo& rule = s_RuleInfo[i];
 		if (strcmp(rule_name, rule.name) == 0) {
 			type_into = rule.type;
 			index_into = rule.rule_index;
@@ -213,38 +213,38 @@ bool RuleManager::_FindRule(const char *rule_name, RuleType &type_into, uint16 &
 }
 
 //assumes index is valid!
-const char *RuleManager::_GetRuleName(RuleType type, uint16 index) {
+const char* RuleManager::_GetRuleName(RuleType type, uint16 index) {
 	switch (type) {
 	case IntRule:
 		return(s_RuleInfo[index].name);
 	case RealRule:
-		return(s_RuleInfo[index+_IntRuleCount].name);
+		return(s_RuleInfo[index + _IntRuleCount].name);
 	case BoolRule:
-		return(s_RuleInfo[index+_IntRuleCount+_RealRuleCount].name);
+		return(s_RuleInfo[index + _IntRuleCount + _RealRuleCount].name);
 	default:
 		break;
 	}
 	//should never happen
-	return(s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount].name); // no need to create a string when one already exists...
+	return(s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount].name); // no need to create a string when one already exists...
 }
 
 //assumes index is valid!
-const std::string &RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
+const std::string& RuleManager::_GetRuleNotes(RuleType type, uint16 index) {
 	switch (type) {
 	case IntRule:
 		return(s_RuleInfo[index].notes);
 	case RealRule:
-		return(s_RuleInfo[index+_IntRuleCount].notes);
+		return(s_RuleInfo[index + _IntRuleCount].notes);
 	case BoolRule:
-		return(s_RuleInfo[index+_IntRuleCount+_RealRuleCount].notes);
+		return(s_RuleInfo[index + _IntRuleCount + _RealRuleCount].notes);
 	default:
 		break;
 	}
 	//should never happen
-	return(s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount].notes);
+	return(s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount].notes);
 }
 
-bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool reload) {
+bool RuleManager::LoadRules(Database* database, const char* ruleset_name, bool reload) {
 
 	int ruleset_id = this->GetRulesetID(database, ruleset_name);
 	if (ruleset_id < 0) {
@@ -308,8 +308,8 @@ bool RuleManager::LoadRules(Database *database, const char *ruleset_name, bool r
 	return true;
 }
 
-void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
-	
+void RuleManager::SaveRules(Database* database, const char* ruleset_name) {
+
 	if (ruleset_name != nullptr) {
 		//saving to a specific name
 		if (m_activeName != ruleset_name) {
@@ -340,43 +340,43 @@ void RuleManager::SaveRules(Database *database, const char *ruleset_name) {
 	}
 }
 
-void RuleManager::_SaveRule(Database *database, RuleType type, uint16 index) {
+void RuleManager::_SaveRule(Database* database, RuleType type, uint16 index) {
 	char value_string[100];
 
 	if (type == IntRule && strcasecmp(_GetRuleName(type, index), "World:ExpansionSettings") == 0)
 		return;
 	if (type == BoolRule && strcasecmp(_GetRuleName(type, index), "World:UseClientBasedExpansionSettings") == 0)
 		return;
-	
+
 	switch (type) {
-		case IntRule:
-			sprintf(value_string, "%d", m_RuleIntValues[index]);
-			break;
-		case RealRule:
-			sprintf(value_string, "%.13f", m_RuleRealValues[index]);
-			break;
-		case BoolRule:
-			sprintf(value_string, "%s", m_RuleBoolValues[index] ? "true" : "false");
-			break;
+	case IntRule:
+		sprintf(value_string, "%d", m_RuleIntValues[index]);
+		break;
+	case RealRule:
+		sprintf(value_string, "%.13f", m_RuleRealValues[index]);
+		break;
+	case BoolRule:
+		sprintf(value_string, "%s", m_RuleBoolValues[index] ? "true" : "false");
+		break;
 	}
 
 	std::string query = StringFormat(
-			"REPLACE INTO `rule_values`"
-			"(`ruleset_id`, `rule_name`, `rule_value`, `notes`)"
-			" VALUES('%d', '%s', '%s', '%s')",
-			m_activeRuleset,
-			_GetRuleName(type, index),
-			value_string,
-			EscapeString(_GetRuleNotes(type, index)).c_str()
+		"REPLACE INTO `rule_values`"
+		"(`ruleset_id`, `rule_name`, `rule_value`, `notes`)"
+		" VALUES('%d', '%s', '%s', '%s')",
+		m_activeRuleset,
+		_GetRuleName(type, index),
+		value_string,
+		EscapeString(_GetRuleNotes(type, index)).c_str()
 	);
 
 	database->QueryDatabase(query);
 }
 
-bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bool quiet_update)
+bool RuleManager::UpdateInjectedRules(Database* db, const char* ruleset_name, bool quiet_update)
 {
 	std::vector<std::string> database_data;
-	std::map<std::string, std::pair<std::string, const std::string *>> rule_data;
+	std::map<std::string, std::pair<std::string, const std::string*>> rule_data;
 	std::vector<std::tuple<int, std::string, std::string, std::string>> injected_rule_entries;
 
 	if (ruleset_name == nullptr) {
@@ -402,7 +402,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 	}
 
 	// build rule data entries
-	for (const auto &ri_iter : s_RuleInfo) {
+	for (const auto& ri_iter : s_RuleInfo) {
 		if (strcasecmp(ri_iter.name, "Invalid Rule") == 0) {
 			continue;
 		}
@@ -431,9 +431,9 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 	}
 
 	// build injected entries
-	for (const auto &rd_iter : rule_data) {
-		
-		const auto &dd_iter = std::find(database_data.begin(), database_data.end(), rd_iter.first);
+	for (const auto& rd_iter : rule_data) {
+
+		const auto& dd_iter = std::find(database_data.begin(), database_data.end(), rd_iter.first);
 		if (dd_iter == database_data.end()) {
 
 			injected_rule_entries.push_back(
@@ -442,7 +442,7 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 					rd_iter.first,							// `rule_name`
 					rd_iter.second.first,					// `rule_value`	
 					EscapeString(*rd_iter.second.second)	// `notes`
-				)
+					)
 			);
 
 			if (!quiet_update) {
@@ -481,11 +481,11 @@ bool RuleManager::UpdateInjectedRules(Database *db, const char *ruleset_name, bo
 			ruleset_id
 		);
 	}
-	
+
 	return true;
 }
 
-bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
+bool RuleManager::UpdateOrphanedRules(Database* db, bool quiet_update)
 {
 	std::vector<std::string> rule_data;
 	std::vector<std::string> orphaned_rule_entries;
@@ -499,7 +499,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 	}
 
 	// build rule data entries
-	for (const auto &ri_iter : s_RuleInfo) {
+	for (const auto& ri_iter : s_RuleInfo) {
 		if (strcasecmp(ri_iter.name, "Invalid Rule") == 0) {
 			continue;
 		}
@@ -509,8 +509,8 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 	// build orphaned entries
 	for (auto row : results) {
-		
-		const auto &rd_iter = std::find(rule_data.begin(), rule_data.end(), row[0]);
+
+		const auto& rd_iter = std::find(rule_data.begin(), rule_data.end(), row[0]);
 		if (rd_iter == rule_data.end()) {
 
 			orphaned_rule_entries.push_back(std::string(row[0]));
@@ -526,7 +526,7 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 	if (orphaned_rule_entries.size()) {
 
-		std::string query (
+		std::string query(
 			fmt::format(
 				"DELETE FROM `rule_values` WHERE `rule_name` IN ({})",
 				implode(",", std::pair<char, char>('\'', '\''), orphaned_rule_entries)
@@ -539,11 +539,11 @@ bool RuleManager::UpdateOrphanedRules(Database *db, bool quiet_update)
 
 		LogInfo("[{}] Orphaned Rule(s) Deleted from [All Rulesets] (-1)", orphaned_rule_entries.size());
 	}
-	
+
 	return true;
 }
 
-bool RuleManager::RestoreRuleNotes(Database *db)
+bool RuleManager::RestoreRuleNotes(Database* db)
 {
 	std::string query("SELECT `ruleset_id`, `rule_name`, `notes` FROM `rule_values`");
 
@@ -555,7 +555,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	int update_count = 0;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 
-		auto rule = [](const char *rule_name) {
+		auto rule = [](const char* rule_name) {
 
 			for (auto rule_iter : s_RuleInfo) {
 				if (strcasecmp(rule_iter.name, rule_name) == 0) {
@@ -563,7 +563,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 				}
 			}
 
-			return s_RuleInfo[_IntRuleCount+_RealRuleCount+_BoolRuleCount];
+			return s_RuleInfo[_IntRuleCount + _RealRuleCount + _BoolRuleCount];
 		}(row[1]);
 
 		if (strcasecmp(rule.name, row[1]) != 0) {
@@ -586,7 +586,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 		if (!db->QueryDatabase(query).Success()) {
 			continue;
 		}
-		
+
 		++update_count;
 	}
 
@@ -597,7 +597,7 @@ bool RuleManager::RestoreRuleNotes(Database *db)
 	return true;
 }
 
-int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
+int RuleManager::GetRulesetID(Database* database, const char* ruleset_name) {
 
 	uint32 len = static_cast<uint32>(strlen(ruleset_name));
 	auto rst = new char[2 * len + 1];
@@ -617,7 +617,7 @@ int RuleManager::GetRulesetID(Database *database, const char *ruleset_name) {
 	return atoi(row[0]);
 }
 
-int RuleManager::_FindOrCreateRuleset(Database *database, const char *in_ruleset_name) {
+int RuleManager::_FindOrCreateRuleset(Database* database, const char* in_ruleset_name) {
 
 	int ruleset_id = GetRulesetID(database, in_ruleset_name);
 	if (ruleset_id >= 0)
@@ -636,7 +636,7 @@ int RuleManager::_FindOrCreateRuleset(Database *database, const char *in_ruleset
 	return results.LastInsertedID();
 }
 
-std::string RuleManager::GetRulesetName(Database *database, int ruleset_id) {
+std::string RuleManager::GetRulesetName(Database* database, int ruleset_id) {
 	std::string query = StringFormat("SELECT name FROM rule_sets WHERE ruleset_id=%d", ruleset_id);
 	auto results = database->QueryDatabase(query);
 	if (!results.Success())
@@ -650,7 +650,7 @@ std::string RuleManager::GetRulesetName(Database *database, int ruleset_id) {
 	return row[0];
 }
 
-bool RuleManager::ListRulesets(Database *database, std::map<int, std::string> &into) {
+bool RuleManager::ListRulesets(Database* database, std::map<int, std::string>& into) {
 
 	//start out with the default set which is always present.
 	into[0] = "default";

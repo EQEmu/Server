@@ -3520,17 +3520,17 @@ luabind::scope lua_register_rules_const() {
 		.enum_("constants")
 		[
 #define RULE_INT(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Int__##rule),
+		luabind::value(#cat #rule, RuleManager::Int__##cat__##rule),
 #include "../common/ruletypes.h"
 			luabind::value("_IntRuleCount", RuleManager::_IntRuleCount),
 #undef RULE_INT
 #define RULE_REAL(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Real__##rule),
+		luabind::value(#rule, RuleManager::Real__##cat__##rule),
 #include "../common/ruletypes.h"
 			luabind::value("_RealRuleCount", RuleManager::_RealRuleCount),
 #undef RULE_REAL
 #define RULE_BOOL(cat, rule, default_value, notes) \
-		luabind::value(#rule, RuleManager::Bool__##rule),
+		luabind::value(#rule, RuleManager::Bool__##cat__##rule),
 #include "../common/ruletypes.h"
 			luabind::value("_BoolRuleCount", RuleManager::_BoolRuleCount)
 		];
