@@ -2469,35 +2469,35 @@ void lua_create_npc(luabind::adl::object table, float x, float y, float z, float
 	entity_list.AddNPC(npc);
 }
 
-int random_int(int low, int high) {
+int lua_random_int(int low, int high) {
 	return zone->random.Int(low, high);
 }
 
-double random_real(double low, double high) {
+double lua_random_real(double low, double high) {
 	return zone->random.Real(low, high);
 }
 
-bool random_roll_int(int required) {
+bool lua_random_roll_int(int required) {
 	return zone->random.Roll(required);
 }
 
-bool random_roll_real(double required) {
+bool lua_random_roll_real(double required) {
 	return zone->random.Roll(required);
 }
 
-int random_roll0(int max) {
+int lua_random_roll0(int max) {
 	return zone->random.Roll0(max);
 }
 
-int get_rulei(int rule) {
+int lua_get_rulei(int rule) {
 	return RuleManager::Instance()->GetIntRule((RuleManager::IntType)rule);
 }
 
-float get_ruler(int rule) {
+float lua_get_ruler(int rule) {
 	return RuleManager::Instance()->GetRealRule((RuleManager::RealType)rule);
 }
 
-bool get_ruleb(int rule) {
+bool lua_get_ruleb(int rule) {
 	return RuleManager::Instance()->GetBoolRule((RuleManager::BoolType)rule);
 }
 
@@ -2942,11 +2942,11 @@ luabind::scope lua_register_general() {
 luabind::scope lua_register_random() {
 	return luabind::namespace_("Random")
 		[
-			luabind::def("Int", &random_int),
-			luabind::def("Real", &random_real),
-			luabind::def("Roll", &random_roll_int),
-			luabind::def("RollReal", &random_roll_real),
-			luabind::def("Roll0", &random_roll0)
+			luabind::def("Int", &lua_random_int),
+			luabind::def("Real", &lua_random_real),
+			luabind::def("Roll", &lua_random_roll_int),
+			luabind::def("RollReal", &lua_random_roll_real),
+			luabind::def("Roll0", &lua_random_roll0)
 		];
 }
 
@@ -3539,21 +3539,21 @@ luabind::scope lua_register_rules_const() {
 luabind::scope lua_register_rulei() {
 	return luabind::namespace_("RuleI")
 		[
-			luabind::def("Get", &get_rulei)
+			luabind::def("Get", &lua_get_rulei)
 		];
 }
 
 luabind::scope lua_register_ruler() {
 	return luabind::namespace_("RuleR")
 		[
-			luabind::def("Get", &get_ruler)
+			luabind::def("Get", &lua_get_ruler)
 		];
 }
 
 luabind::scope lua_register_ruleb() {
 	return luabind::namespace_("RuleB")
 		[
-			luabind::def("Get", &get_ruleb)
+			luabind::def("Get", &lua_get_ruleb)
 		];
 }
 
