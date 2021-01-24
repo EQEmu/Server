@@ -770,6 +770,9 @@ public:
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQ::skills::SkillType tradeskill);
 	void InitInnates();
+	bool CanPvP(Client * c);
+ 	int GetAlignment();
+	int GetPVPRaceTeamBySize();
 
 	void GMKill();
 	inline bool IsMedding() const {return medding;}
@@ -903,7 +906,7 @@ public:
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id, bool recurse = true);
 	void DropItemQS(EQ::ItemInstance* inst, bool pickup);
-
+	
 	int GetItemLinkHash(const EQ::ItemInstance* inst); // move to ItemData..or make use of the pre-calculated database field
 
 	void SendItemLink(const EQ::ItemInstance* inst, bool sendtoall=false);

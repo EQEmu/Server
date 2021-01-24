@@ -4,10 +4,13 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/include/mysql"
+                "/usr/include/mysql",
+                "/usr/local/include",
+                "/usr/include",
+                "/usr/include/lua5.1"                
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/c++",
             "cStandard": "c11",
             "cppStandard": "c++17"
         }
