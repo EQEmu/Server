@@ -3132,6 +3132,12 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
+	if (on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
+		return;
+
+	if (on->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
+		return;
+
 	if (IsNoCast())
 		return;
 
