@@ -468,6 +468,9 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return false;
 	}
 
+	if (target->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_NPC) && IsClient())
+		return false;
+
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
 	Mob *our_owner = GetOwner();

@@ -3132,6 +3132,9 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		return;
 	}
 
+	if (on->GetSpecialAbility(IMMUNE_MELEE_EXCEPT_NPC) && IsClient())
+		return;
+
 	if (IsNoCast())
 		return;
 
