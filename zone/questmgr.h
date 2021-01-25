@@ -223,6 +223,8 @@ public:
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
+	void message(int color, const char *message);
+	void whisper(const char *message);
     int getlevel(uint8 type);
     int collectitems(uint32 item_id, bool remove);
     int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);

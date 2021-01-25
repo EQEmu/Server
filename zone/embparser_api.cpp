@@ -2793,6 +2793,29 @@ XS(XS__we) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__message);
+XS(XS__message) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::message(int color, string message)");
+
+	int color = (int) SvIV(ST(0));
+	char *message = (char *) SvPV_nolen(ST(1));
+	quest_manager.message(color, message);
+	XSRETURN_EMPTY;
+}
+
+XS(XS__whisper);
+XS(XS__whisper) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::whisper(string message)");
+
+	char *message = (char *) SvPV_nolen(ST(0));
+	quest_manager.whisper(message);
+	XSRETURN_EMPTY;
+}
+
 XS(XS__getlevel);
 XS(XS__getlevel) {
 	dXSARGS;
@@ -6569,6 +6592,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "log"), XS__log, file);
 	newXS(strcpy(buf, "log_combat"), XS__log_combat, file);
 	newXS(strcpy(buf, "me"), XS__me, file);
+	newXS(strcpy(buf, "message"), XS__message, file);
 	newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
 	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
 	newXS(strcpy(buf, "movepc"), XS__movepc, file);
@@ -6665,6 +6689,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
 	newXS(strcpy(buf, "we"), XS__we, file);
 	newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
+	newXS(strcpy(buf, "whisper"), XS__whisper, file);
 	newXS(strcpy(buf, "write"), XS__write, file);
 	newXS(strcpy(buf, "ze"), XS__ze, file);
 	newXS(strcpy(buf, "zone"), XS__zone, file);

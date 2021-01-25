@@ -2580,6 +2580,24 @@ void QuestManager::we(int type, const char *str) {
 	worldserver.SendEmoteMessage(0, 0, type, str);
 }
 
+void QuestManager::message(int color, const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator)
+		return;
+	
+	initiator->Message(color, message);
+}
+
+void QuestManager::whisper(const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator || !owner)
+		return;
+
+	std::string mob_name = owner->GetCleanName();
+	std::string new_message = fmt::format("{} whispers, '{}'", mob_name, message);
+	initiator->Message(315, new_message.c_str());
+}
+
 int QuestManager::getlevel(uint8 type)
 {
 	QuestManagerCurrentQuestVars();
