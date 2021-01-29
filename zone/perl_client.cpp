@@ -7164,6 +7164,130 @@ XS(XS_Client_GetRaceBitmask) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetLearnableDisciplines);
+XS(XS_Client_GetLearnableDisciplines) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnableDisciplines(THIS, [uint8 min_level, uint8 max_level])");
+
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learnable_disciplines = THIS->GetLearnableDisciplines(min_level, max_level);
+	auto learnable_size = learnable_disciplines.size();
+	if (learnable_size > 0) {
+		EXTEND(sp, learnable_size);
+		for (int index = 0; index < learnable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learnable_disciplines[index]));
+		}
+		XSRETURN(learnable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLearnedDisciplines);
+XS(XS_Client_GetLearnedDisciplines) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnedDisciplines(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learned_disciplines = THIS->GetLearnedDisciplines();
+	auto learned_size = learned_disciplines.size();
+	if (learned_size > 0) {
+		EXTEND(sp, learned_size);
+		for (int index = 0; index < learned_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learned_disciplines[index]));
+		}
+		XSRETURN(learned_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetMemmedSpells);
+XS(XS_Client_GetMemmedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetMemmedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto memmed_spells = THIS->GetMemmedSpells();
+	auto memmed_size = memmed_spells.size();
+	if (memmed_size > 0) {
+		EXTEND(sp, memmed_size);
+		for (int index = 0; index < memmed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(memmed_spells[index]));
+		}
+		XSRETURN(memmed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribeableSpells);
+XS(XS_Client_GetScribeableSpells) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetScribeableSpells(THIS, [uint8 min_level, uint8 max_level])");
+	
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribeable_spells = THIS->GetScribeableSpells(min_level, max_level);
+	auto scribeable_size = scribeable_spells.size();
+	if (scribeable_size > 0) {
+		EXTEND(sp, scribeable_size);
+		for (int index = 0; index < scribeable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribeable_spells[index]));
+		}
+		XSRETURN(scribeable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribedSpells);
+XS(XS_Client_GetScribedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetScribedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribed_spells = THIS->GetScribedSpells();
+	auto scribed_size = scribed_spells.size();
+	if (scribed_size > 0) {
+		EXTEND(sp, scribed_size);
+		for (int index = 0; index < scribed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribed_spells[index]));
+		}
+		XSRETURN(scribed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -7291,8 +7415,11 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
+	newXSproto(strcpy(buf, "GetLearnableDisciplines"), XS_Client_GetLearnableDisciplines, file, "$;$$");
+	newXSproto(strcpy(buf, "GetLearnedDisciplines"), XS_Client_GetLearnedDisciplines, file, "$");
 	newXSproto(strcpy(buf, "GetLockoutExpeditionUUID"), XS_Client_GetLockoutExpeditionUUID, file, "$$$");
 	newXSproto(strcpy(buf, "GetMaxEndurance"), XS_Client_GetMaxEndurance, file, "$");
+	newXSproto(strcpy(buf, "GetMemmedSpells"), XS_Client_GetMemmedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
 	newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
 	newXSproto(strcpy(buf, "GetPVP"), XS_Client_GetPVP, file, "$");
@@ -7303,6 +7430,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
 	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
 	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
+	newXSproto(strcpy(buf, "GetScribeableSpells"), XS_Client_GetScribeableSpells, file, "$;$$");
+	newXSproto(strcpy(buf, "GetScribedSpells"), XS_Client_GetScribedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");

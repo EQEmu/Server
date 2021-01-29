@@ -634,6 +634,132 @@ int Lua_Client::MemmedCount() {
 	return self->MemmedCount();
 }
 
+luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto learnable_disciplines = self->GetLearnableDisciplines();
+		int index = 0;
+		for (auto spell_id : learnable_disciplines) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L, uint8 min_level) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto learnable_disciplines = self->GetLearnableDisciplines(min_level);
+		int index = 0;
+		for (auto spell_id : learnable_disciplines) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetLearnableDisciplines(lua_State* L, uint8 min_level, uint8 max_level) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto learnable_disciplines = self->GetLearnableDisciplines(min_level, max_level);
+		int index = 0;
+		for (auto spell_id : learnable_disciplines) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetLearnedDisciplines(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto learned_disciplines = self->GetLearnedDisciplines();
+		int index = 0;
+		for (auto spell_id : learned_disciplines) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetMemmedSpells(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto memmed_spells = self->GetMemmedSpells();
+		int index = 0;
+		for (auto spell_id : memmed_spells) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetScribeableSpells(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto scribeable_spells = self->GetScribeableSpells();
+		int index = 0;
+		for (auto spell_id : scribeable_spells) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetScribeableSpells(lua_State* L, uint8 min_level) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto scribeable_spells = self->GetScribeableSpells(min_level);
+		int index = 0;
+		for (auto spell_id : scribeable_spells) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto scribeable_spells = self->GetScribeableSpells(min_level, max_level);
+		int index = 0;
+		for (auto spell_id : scribeable_spells) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
+luabind::object Lua_Client::GetScribedSpells(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto scribed_spells = self->GetScribedSpells();
+		int index = 0;
+		for (auto spell_id : scribed_spells) {
+			lua_table[index] = spell_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
 void Lua_Client::ScribeSpell(int spell_id, int slot) {
 	Lua_Safe_Call_Void();
 	self->ScribeSpell(spell_id, slot);
@@ -2050,6 +2176,15 @@ luabind::scope lua_register_client() {
 		.def("UnmemSpellAll", (void(Lua_Client::*)(bool))&Lua_Client::UnmemSpellAll)
 		.def("FindMemmedSpellBySlot", (uint16(Lua_Client::*)(int))&Lua_Client::FindMemmedSpellBySlot)
 		.def("MemmedCount", (int(Lua_Client::*)(void))&Lua_Client::MemmedCount)
+		.def("GetLearnableDisciplines", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetLearnableDisciplines)
+		.def("GetLearnableDisciplines", (luabind::object(Lua_Client::*)(lua_State* L,uint8))&Lua_Client::GetLearnableDisciplines)
+		.def("GetLearnableDisciplines", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetLearnableDisciplines)
+		.def("GetLearnedDisciplines", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetLearnedDisciplines)
+		.def("GetMemmedSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetMemmedSpells)
+		.def("GetScribedSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribedSpells)
+		.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L))&Lua_Client::GetScribeableSpells)
+		.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8))&Lua_Client::GetScribeableSpells)
+		.def("GetScribeableSpells", (luabind::object(Lua_Client::*)(lua_State* L,uint8,uint8))&Lua_Client::GetScribeableSpells)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int))&Lua_Client::ScribeSpell)
 		.def("ScribeSpell", (void(Lua_Client::*)(int,int,bool))&Lua_Client::ScribeSpell)
 		.def("UnscribeSpell", (void(Lua_Client::*)(int))&Lua_Client::UnscribeSpell)
