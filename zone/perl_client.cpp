@@ -7308,9 +7308,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
 	newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
+	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$");
 	newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
 	newXSproto(strcpy(buf, "GetThirst"), XS_Client_GetThirst, file, "$$");
 	newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
