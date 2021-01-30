@@ -10014,3 +10014,123 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 		FastQueuePacket(&outapp_fling);
 	}
 }
+
+std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
+	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
+	bool SpellGlobalCheckResult = false;
+	bool SpellBucketCheckResult = false;
+	std::vector<int> learnable_disciplines;
+	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+		bool learnable = false;
+		if (!IsValidSpell(spell_id))
+			continue;
+		if (!IsDiscipline(spell_id))
+			continue;
+		if (spells[spell_id].classes[WARRIOR] == 0)
+			continue;
+		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
+			continue;
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
+			continue;
+		if (spells[spell_id].skill == 52)
+			continue;
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+			continue;
+		if (HasDisciplineLearned(spell_id))
+			continue;
+
+		if (SpellGlobalRule) {
+			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
+			if (SpellGlobalCheckResult) {
+				learnable = true;
+			}
+		} else if (SpellBucketRule) {
+			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
+			if (SpellBucketCheckResult) {
+				learnable = true;
+			}
+		} else {
+			learnable = true;
+		}
+
+		if (learnable) {
+			learnable_disciplines.push_back(spell_id);
+		}
+	}		
+	return learnable_disciplines;
+}
+
+std::vector<int> Client::GetLearnedDisciplines() {
+	std::vector<int> learned_disciplines;
+	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
+		if (IsValidSpell(m_pp.disciplines.values[index])) {
+			learned_disciplines.push_back(m_pp.disciplines.values[index]);
+		}
+	}		
+	return learned_disciplines;
+}
+
+std::vector<int> Client::GetMemmedSpells() {
+	std::vector<int> memmed_spells;
+	for (int index = 0; index < EQ::spells::SPELL_GEM_COUNT; index++) {
+		if (IsValidSpell(m_pp.mem_spells[index])) {
+			memmed_spells.push_back(m_pp.mem_spells[index]);
+		}
+	}		
+	return memmed_spells;
+}
+
+std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
+	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
+	bool SpellGlobalCheckResult = false;
+	bool SpellBucketCheckResult = false;
+	std::vector<int> scribeable_spells;
+	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+		bool scribeable = false;
+		if (!IsValidSpell(spell_id))
+			continue;
+		if (spells[spell_id].classes[WARRIOR] == 0)
+			continue;
+		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
+			continue;
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
+			continue;
+		if (spells[spell_id].skill == 52)
+			continue;
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+			continue;
+		if (HasSpellScribed(spell_id))
+			continue;
+
+		if (SpellGlobalRule) {
+			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
+			if (SpellGlobalCheckResult) {
+				scribeable = true;
+			}
+		} else if (SpellBucketRule) {
+			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
+			if (SpellBucketCheckResult) {
+				scribeable = true;
+			}
+		} else {
+			scribeable = true;
+		}
+
+		if (scribeable) {
+			scribeable_spells.push_back(spell_id);
+		}
+	}		
+	return scribeable_spells;
+}
+
+std::vector<int> Client::GetScribedSpells() {
+	std::vector<int> scribed_spells;
+	for(int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+		if (IsValidSpell(m_pp.spell_book[index])) {
+			scribed_spells.push_back(m_pp.spell_book[index]);
+		}
+	}		
+	return scribed_spells;
+}

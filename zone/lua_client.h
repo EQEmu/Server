@@ -152,6 +152,15 @@ public:
 	void UnmemSpellAll(bool update_client);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	luabind::object GetLearnableDisciplines(lua_State* L);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level, uint8 max_level);
+	luabind::object GetLearnedDisciplines(lua_State* L);
+	luabind::object GetMemmedSpells(lua_State* L);
+	luabind::object GetScribedSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level);
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	void UnscribeSpell(int slot);

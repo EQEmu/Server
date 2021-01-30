@@ -784,6 +784,11 @@ public:
 	void UnmemSpellAll(bool update_client = true);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	std::vector<int> GetLearnableDisciplines(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetLearnedDisciplines();
+	std::vector<int> GetMemmedSpells();
+	std::vector<int> GetScribeableSpells(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetScribedSpells();
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
 	void UnscribeSpellAll(bool update_client = true);
