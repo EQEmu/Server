@@ -880,6 +880,10 @@ bool Mob::CheckLosFN(Mob *other)
 		Result = CheckLosFN(other->GetX(), other->GetY(), other->GetZ(), other->GetSize());
 	}
 
+	if (other && other->IsClient() && IsClient() && CastToClient()->CanPvP(other->CastToClient()) && RuleB(Character, PVPIsAutoAttackAlwaysLoS)) {
+		Result = true;
+	}
+
 	SetLastLosState(Result);
 
 	return Result;
