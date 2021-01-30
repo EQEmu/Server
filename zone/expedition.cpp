@@ -781,11 +781,19 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 		}
 	}
 
-	// swapping ignores the max player count check since it's a 1:1 change
-	if (!swapping && ExpeditionDatabase::GetMemberCount(m_id) >= m_max_players)
+	// member swapping integrity is handled by invite response
+	if (!swapping)
 	{
-		SendLeaderMessage(leader_client, Chat::Red, DZADD_EXCEED_MAX, { fmt::format_int(m_max_players).str() });
-		has_conflict = true;
+		auto member_count = ExpeditionDatabase::GetMemberCount(m_id);
+		if (member_count == 0)
+		{
+			has_conflict = true;
+		}
+		else if (member_count >= m_max_players)
+		{
+			SendLeaderMessage(leader_client, Chat::Red, DZADD_EXCEED_MAX, { fmt::format_int(m_max_players).str() });
+			has_conflict = true;
+		}
 	}
 
 	auto invite_id = add_client->GetPendingExpeditionInviteID();
