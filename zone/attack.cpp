@@ -1758,6 +1758,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	{
 		if (killerMob->IsClient())
 		{
+			LogCombat("killer mob is client [{}]", killerMob->GetName());
 			int pvpleveldifference = 0;
 			
 			if (RuleI(World, PVPSettings) == 4) 
@@ -1766,12 +1767,13 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
 
 			if (pvpleveldifference > 0) {
+				
  				int level_difference = 0;
  				if (GetLevel() > killerMob->GetLevel()) 
 					level_difference = GetLevel() - killerMob->GetLevel();
  				else 
 					level_difference = killerMob->GetLevel() - GetLevel();
- 
+ 				LogCombat("pvpleveldifference is [{}] and level_difference is [{}]", pvpleveldifference, level_difference);
  				if (level_difference > pvpleveldifference) 
 					exploss = 0;
  			}
@@ -1779,6 +1781,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
  			{
  				exploss = 0;
  			}
+			LogCombat("exp loss via pvp set to [{}]", exploss);
 		}
 		else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient())
 		{
@@ -1801,6 +1804,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 
 	bool LeftCorpse = false;
 
+	LogCombat("exp loss is [{}]", exploss);
 	// now we apply the exp loss, unmem their spells, and make a corpse
 	// unless they're a GM (or less than lvl 10
 	if (!GetGM())
