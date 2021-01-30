@@ -683,7 +683,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
 
-				return c1->CanPvP(c2);
+				return !c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client to npc
 			{
