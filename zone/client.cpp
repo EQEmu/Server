@@ -10020,6 +10020,10 @@ bool Client::CanPvP(Client *c) {
 	//Dueling overrides normal PvP logic
 	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
 		return true;
+	
+	// if both are in a pvp area, or discord, return true
+	if (GetPVP() && c->GetPVP()) 
+		return true;
 
 	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
 	int rule_level_diff = 0;
