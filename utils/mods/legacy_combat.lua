@@ -998,3 +998,21 @@ function ApplyMeleeDamageBonus(e)
 	e.hit.damage_done = e.hit.damage_done + (e.hit.damage_done * dmgbonusmod / 100);
 	return e;
 end
+
+-- Source Function: Client::Damage()
+-- Parameters:
+-- mob e.self: Client
+-- mob e.other: Target of damage
+-- int e.in_damage: calculated damage prior to this call
+-- int e.spell_id: Spell ID client is using to deal damage
+-- int e.attack_skill: Skill ID client is using to deal damage
+-- bool e.avoidable: Is this damage avoidable?
+-- int e.buffslot: Buff Slot
+-- bool e.ibufftic: Is Buff Tic
+-- int e.special: 
+-- int e.out_damage: final damage calculated (set to value you want damage set to)
+-- bool e.IgnoreDefault: set to true when you want out_damage to override default (in_damage)
+function ClientDamage(e)
+	e.IgnoreDefault = false;
+	return e;
+end

@@ -164,6 +164,7 @@ RULE_BOOL(Character, SoftDeletes, true, "When characters are deleted in characte
 RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the guild # indicated")
 RULE_BOOL(Character, ProcessFearedProximity, false, "Processes proximity checks when feared")
 RULE_INT(Character, PVPRespawnManaPercent, 100, "How much mana to respawn with")
+RULE_BOOL(Character, PVPIsAutoAttackAlwaysLoS, false, "When set to true, auto attack in pvp always has line of sight")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

@@ -26,6 +26,7 @@ public:
 	void GetRequiredAAExperience(Client *self, uint32 &returnValue, bool &ignoreDefault);
 	void GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, bool &ignoreDefault);
 	void GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault);
+	void ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id,  int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
 	lua_State *L;
@@ -40,4 +41,5 @@ private:
 	bool m_has_get_required_aa_experience;
 	bool m_has_get_exp_for_level;
 	bool m_has_get_experience_for_kill;
+	bool m_has_client_damage;
 };

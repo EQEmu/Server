@@ -1589,6 +1589,19 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 	if (!ClientFinishedLoading())
 		damage = -5;
 
+#ifdef LUA_EQEMU
+	bool ignoreDefault = false;
+	int32 inDamage = damage;
+	int32 outDamage;
+	int askill = (int)attack_skill;
+	int spec = (int)special;
+	LuaParser::Instance()->ClientDamage(this, other, inDamage, spell_id, askill, avoidable, buffslot, iBuffTic, spec, outDamage, ignoreDefault);
+	
+	if (ignoreDefault) {
+		damage = outDamage;
+	}
+#endif
+	//ClientDamage
 	//do a majority of the work...
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
 

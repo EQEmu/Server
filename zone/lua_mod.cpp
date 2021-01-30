@@ -45,6 +45,7 @@ void LuaMod::Init()
 	m_has_get_exp_for_level = parser_->HasFunction("GetEXPForLevel", package_name_);
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
+	m_has_client_damage = parser_->HasFunction("ClientDamage", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -618,6 +619,59 @@ void LuaMod::GetExperienceForKill(Client *self, Mob *against, uint32 &returnValu
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
 				returnValue = luabind::object_cast<uint32>(returnValueObj);
+			}
+		}
+	}
+	catch (std::exception &ex) {
+		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
+	}
+}
+
+
+void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id, int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault) {
+	int start = lua_gettop(L);
+
+	try {
+		if (!m_has_apply_damage_table) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "ClientDamage");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+		e["self"] = l_self;
+		Lua_Mob l_other(other);
+		e["other"] = l_other;
+		e["in_damage"] = in_damage;
+		e["spell_id"] = spell_id;
+		e["attack_skill"] = attack_skill;
+		e["avoidable"] = avoidable;
+		e["buffslot"] = buffslot;
+		e["ibufftic"] = iBuffTic;
+		e["special"] = special;
+		e["out_damage"] = out_damage;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
 			}
 		}
 	}

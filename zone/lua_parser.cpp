@@ -1380,4 +1380,11 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	return retval;
 }
 
+void LuaParser::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id,  int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.ClientDamage(self, other, in_damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special, out_damage, ignoreDefault);
+	}
+}
+
 #endif
