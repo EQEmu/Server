@@ -540,6 +540,45 @@ uint32 Mob::GetAppearanceValue(EmuAppearance iAppearance) {
 	return(ANIM_STAND);
 }
 
+bool Mob::IsGood()
+{
+	return(
+	
+			deity == EQ::deity::DeityErollisiMarr ||
+			deity == EQ::deity::DeityMithanielMarr ||
+			deity == EQ::deity::DeityRodcetNife ||
+			deity == EQ::deity::DeityQuellious ||
+			deity == EQ::deity::DeityTunare
+			);
+}
+
+bool Mob::IsEvil()
+{
+	return(
+		
+			deity == EQ::deity::DeityBertoxxulous ||
+			deity == EQ::deity::DeityCazicThule ||
+			deity == EQ::deity::DeityInnoruuk ||
+			deity == EQ::deity::DeityRallosZek
+			);
+}
+
+bool Mob::IsNeutral()
+{
+	return(
+		
+			deity == EQ::deity::DeityAgnostic ||
+			deity == EQ::deity::DeityBrellSirilis ||
+			deity == EQ::deity::DeityBristlebane ||
+			deity == EQ::deity::DeityKarana ||
+			deity == EQ::deity::DeityPrexus ||
+			deity == EQ::deity::DeitySolusekRo ||
+			deity == EQ::deity::DeityTheTribunal ||
+			deity == EQ::deity::DeityVeeshan
+			);
+			
+}
+			
 void Mob::SetInvisible(uint8 state)
 {
 	invisible = state;
@@ -1196,6 +1235,10 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 		ns->spawn.flymode = FindType(SE_Levitate) ? 2 : 0;
 	else
 		ns->spawn.flymode = flymode;
+
+	if(IsBoat()) {
+		ns->spawn.flymode = GravityBehavior::Floating;
+	}
 
 	ns->spawn.lastName[0] = '\0';
 
