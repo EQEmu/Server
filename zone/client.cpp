@@ -501,8 +501,14 @@ void Client::SendZoneInPackets()
 	if (!GetHideMe()) entity_list.QueueClients(this, outapp, true);
 	safe_delete(outapp);
 	SetSpawned();
-	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
+	//if (GetPVP(false))	//force a PVP update until we fix the spawn struct
+		//SendAppearancePacket(AT_PVP, GetPVP(false), true, false);	 Commented out 1/28/21 Darksinga edits
+	if (IsEvil())  //Evil has a red tag
+		SendAppearancePacket(AT_PVP, IsEvil(), true, false); //rencro via xachary
+	if (IsGood())  //Good has a green tag
+		SendAppearancePacket(AT_GM, IsGood(), true, false); //Darksinga edits
+	if (IsNeutral())  //Neutral has a blue tag
+		SendAppearancePacket(AT_PVP, 0, false); //Darksinga edits
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -10041,7 +10047,7 @@ bool Client::CanPvP(Client *c) {
 	//players need to be proper level for pvp
 	int rule_min_level = 0;
 	if (RuleI(World, PVPSettings) == 4)
-		rule_min_level = 6;
+		rule_min_level = 1;
 	if (RuleI(World, PVPMinLevel) > 0)
 		rule_min_level = RuleI(World, PVPMinLevel);
 

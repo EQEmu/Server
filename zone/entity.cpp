@@ -1388,8 +1388,14 @@ void EntityList::SendZonePVPUpdates(Client *to)
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *c = it->second;
-		if(c->GetPVP())
-			c->SendAppearancePacket(AT_PVP, c->GetPVP(), true, false, to);
+		//if(c->GetPVP())
+			//c->SendAppearancePacket(AT_PVP, c->GetPVP(), true, false, to);
+		if (c->IsEvil()) //Evil Deity have red tags -Darksinga edits
+			c->SendAppearancePacket(AT_PVP, c->IsEvil(), true, false, to);
+		if (c->IsGood()) //Good Deity have green tags -Darksinga edits
+			c->SendAppearancePacket(AT_GM, c->IsGood(), true, false, to);
+		if (c->IsNeutral()) //Neutral people have blue tags -Darksinga edits
+			c->SendAppearancePacket(AT_PVP, c->IsNeutral(), false, false, to);
 		++it;
 	}
 }
@@ -2511,7 +2517,7 @@ void EntityList::DespawnAllDoors()
 	auto outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		if (it->second) {
-			it->second->QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
+			it->second->QueuePacket(outapp);
 		}
 	}
 	safe_delete(outapp);
@@ -2524,7 +2530,7 @@ void EntityList::RespawnAllDoors()
 		if (it->second) {
 			auto outapp = new EQApplicationPacket();
 			MakeDoorSpawnPacket(outapp, it->second);
-			it->second->FastQueuePacket(&outapp, true, Client::CLIENT_CONNECTED);
+			it->second->FastQueuePacket(&outapp);
 		}
 		++it;
 	}

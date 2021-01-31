@@ -590,6 +590,11 @@ public:
 
 	//Faction
 	virtual inline int32 GetPrimaryFaction() const { return 0; }
+	
+	//PvP Deity Colors
+	bool IsEvil();
+	bool IsGood();
+	bool IsNeutral();
 
 	//Movement
 	inline bool IsMoving() const { return moving; }
