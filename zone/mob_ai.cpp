@@ -1723,7 +1723,9 @@ void NPC::AI_DoMovement() {
 							// reached our randomly selected destination; force a pause
 							if (cur_wp_pause == 0)
 							{
-								if (Waypoints.size() > 0 && Waypoints[0].pause)
+								if (Waypoints.size() >= cur_wp && Waypoints[cur_wp].pause)
+									cur_wp_pause = Waypoints[cur_wp].pause;
+								else if (Waypoints.size() > 0 && Waypoints[0].pause)
 									cur_wp_pause = Waypoints[0].pause;
 								else
 									cur_wp_pause = 38;

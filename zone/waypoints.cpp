@@ -385,8 +385,49 @@ void NPC::CalculateNewWaypoint()
 		{
 			if (cur_wp == patrol) // reutilizing patrol member instead of making new member for this wander type; here we use it to save a random waypoint
 			{
+				if (!Waypoints[cur_wp].centerpoint)
+				{
+					// if we have arrived at a waypoint that is NOT a centerpoint, then check for the existence of any centerpoint waypoint
+					// if any exists then randomly go to it otherwise go to one that exist.
+					std::vector<wplist> random_centerpoints;
+					for (auto& w : Waypoints)
+					{
+						wplist wpl = w;
+						if (wpl.index != cur_wp && wpl.centerpoint)
+						{
+							random_centerpoints.push_back(w);
+						}
+					}
+
+					if (random_centerpoints.size() == 1)
+					{
+						patrol = random_centerpoints[0].index;
+						break;
+					}
+					else if (random_centerpoints.size() > 1)
+					{
+						int windex = zone->random.Roll0(random_centerpoints.size());
+						patrol = random_centerpoints[windex].index;
+						break;
+					}
+				}
+
 				while (patrol == cur_wp)
-					patrol = zone->random.Int(0, Waypoints.size() - 1);
+				{
+					// Setting a negative number in pause of the select waypoints will NOT be included in the group of waypoints to be random.
+					// This will cause the NPC to not stop and pause in any of the waypoints that is not part of random waypoints.
+					std::vector<wplist> random_waypoints;
+					for (auto& w : Waypoints)
+					{
+						wplist wpl = w;
+						if (wpl.index != cur_wp && wpl.pause >= 0 && !wpl.centerpoint)
+						{
+							random_waypoints.push_back(w);
+						}
+					}
+					int windex = zone->random.Roll0(random_waypoints.size());
+					patrol = random_waypoints[windex].index;
+				}
 			}
 			if (patrol > cur_wp)
 				cur_wp = cur_wp + 1;
