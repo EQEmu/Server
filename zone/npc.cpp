@@ -230,8 +230,13 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	adventure_template_id = npc_type_data->adventure_template;
 	flymode               = iflymode;
 
+	// If server has set a flymode in db honor it over all else.
+	// If server has not set a flymde in db, and this is a boat - force floating.
 	if (npc_type_data->flymode >= 0) {
 		flymode = static_cast<GravityBehavior>(npc_type_data->flymode);
+	}
+	else if (IsBoat()) {
+		flymode = GravityBehavior::Floating;
 	}
 
 	guard_anim            = eaStanding;
@@ -715,7 +720,7 @@ bool NPC::Process()
 		}
 		return false;
 	}
-	
+
 	if (IsStunned() && stunned_timer.Check()) {
 		Mob::UnStun();
 		this->spun_timer.Disable();
@@ -723,22 +728,27 @@ bool NPC::Process()
 
 	SpellProcess();
 
-	if (mob_scan_close.Check()) {
-
-		entity_list.ScanCloseMobs(close_mobs, this);
-
-		if (moving) {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(3000, 6000));
-		}
-		else {
-			mob_scan_close.Disable();
-			mob_scan_close.Start(RandomTimer(6000, 60000));
-		}
+	if (mob_close_scan_timer.Check()) {
+		entity_list.ScanCloseMobs(close_mobs, this, IsMoving());
 	}
 
-	if (mob_check_moving_timer.Check() && moving) {
-		mob_scan_close.Trigger();
+	const uint16 npc_mob_close_scan_timer_moving = 6000;
+	const uint16 npc_mob_close_scan_timer_idle   = 60000;
+
+	if (mob_check_moving_timer.Check()) {
+		if (moving) {
+			if (mob_close_scan_timer.GetRemainingTime() > npc_mob_close_scan_timer_moving) {
+				LogAIScanCloseDetail("NPC [{}] Restarting with moving timer", GetCleanName());
+				mob_close_scan_timer.Disable();
+				mob_close_scan_timer.Start(npc_mob_close_scan_timer_moving);
+				mob_close_scan_timer.Trigger();
+			}
+		}
+		else if (mob_close_scan_timer.GetDuration() == npc_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("NPC [{}] Restarting with idle timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(npc_mob_close_scan_timer_idle);
+		}
 	}
 
 	if (tic_timer.Check()) {
@@ -963,9 +973,12 @@ void NPC::Depop(bool StartSpawnTimer) {
 	if(emoteid != 0)
 		this->DoNPCEmote(ONDESPAWN,emoteid);
 	p_depop = true;
-	if (StartSpawnTimer) {
-		if (respawn2 != 0) {
+	if (respawn2)
+	{
+		if (StartSpawnTimer) {
 			respawn2->DeathReset();
+		} else {
+			respawn2->Depop();
 		}
 	}
 }
@@ -1747,7 +1760,7 @@ void NPC::PickPocket(Client* thief)
 			steal_item = false;
 			break;
 		}
-		
+
 		auto item_inst = database.CreateItem(loot_selection[random].first, loot_selection[random].second);
 		if (item_inst == nullptr) {
 			steal_item = false;
@@ -1773,7 +1786,7 @@ void NPC::PickPocket(Client* thief)
 
 	while (!steal_item && has_coin) {
 		uint32 coin_amount = zone->random.Int(1, (steal_skill / 25) + 1);
-		
+
 		int coin_type = PickPocketPlatinum;
 		while (coin_type <= PickPocketCopper) {
 			if (money[coin_type]) {
@@ -2509,10 +2522,10 @@ void NPC::LevelScale() {
 					max_hp += (random_level - level) * 100;
 					base_hp += (random_level - level) * 100;
 				}
-				
+
 				current_hp = max_hp;
 			}
-			
+
 			// Don't add max_dmg to dynamically scaled NPCs since this will be calculated later
 			if (max_dmg > 0  || skip_auto_scale)
 			{
@@ -2812,7 +2825,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 
 	// I believe that the assumption is, barring no entry in npc_faction_entries
 	// that two npcs on like faction con ally to each other.  This catches cases
-	// where an npc is on a faction but has no hits (hence no entry in 
+	// where an npc is on a faction but has no hits (hence no entry in
 	// npc_faction_entries).
 
 	if (GetPrimaryFaction() == other_faction)

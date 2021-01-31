@@ -223,10 +223,13 @@ public:
     void clearspawntimers();
 	void ze(int type, const char *str);
 	void we(int type, const char *str);
+	void message(int color, const char *message);
+	void whisper(const char *message);
     int getlevel(uint8 type);
     int collectitems(uint32 item_id, bool remove);
     int collectitems_processSlot(int16 slot_id, uint32 item_id, bool remove);
 	int countitem(uint32 item_id);
+	void removeitem(uint32 item_id, uint32 quantity = 1);
 	std::string getitemname(uint32 item_id);
     void enabletitle(int titleset);
    	bool checktitle(int titlecheck);
@@ -280,7 +283,7 @@ public:
     void SendMail(const char *to, const char *from, const char *subject, const char *message);
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
-    const char *GetZoneLongName(const char *zone);
+    static std::string GetZoneLongName(std::string zone_short_name);
 	void CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement = false);

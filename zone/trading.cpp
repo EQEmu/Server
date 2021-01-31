@@ -2648,6 +2648,11 @@ void Client::SellToBuyer(const EQApplicationPacket *app) {
 		return;
 	}
 
+	if(item->IsClassBag()) {
+		Message(Chat::Red, "That item is a Bag.");
+		return;
+	}
+
 	if(!item->Stackable) {
 
 		for(uint32 i = 0; i < Quantity; i++) {
@@ -3001,29 +3006,27 @@ void Client::UpdateBuyLine(const EQApplicationPacket *app) {
 	LogTrading("UpdateBuyLine: Char: [{}] BuySlot: [{}] ItemID [{}] [{}] Quantity [{}] Toggle: [{}] Price [{}] ItemCount [{}] LoreConflict [{}]",
 					GetName(), BuySlot, ItemID, item->Name, Quantity, ToggleOnOff, Price, ItemCount, LoreConflict);
 
-	if((item->NoDrop != 0) && !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) && ToggleOnOff && (ItemCount == 0)) {
+	if((item->NoDrop != 0) && (!item->IsClassBag())&& !LoreConflict && (Quantity > 0) && HasMoney(Quantity * Price) && ToggleOnOff && (ItemCount == 0)) {
 		LogTrading("Adding to database");
 		database.AddBuyLine(CharacterID(), BuySlot, ItemID, ItemName, Quantity, Price);
 		QueuePacket(app);
 	}
 	else {
-		if(ItemCount > 0)
+		if(ItemCount > 0) {
 			Message(Chat::Red, "Buy line %s disabled as Item Compensation is not currently supported.", ItemName);
-
-		else if(Quantity <= 0)
+		} else if(Quantity <= 0) {
 			Message(Chat::Red, "Buy line %s disabled as the quantity is invalid.", ItemName);
-
-		else if(LoreConflict)
+		} else if(LoreConflict) {
 			Message(Chat::Red, "Buy line %s disabled as the item is LORE and you have one already.", ItemName);
-
-		else if(item->NoDrop == 0)
+		} else if(item->NoDrop == 0) {
 			Message(Chat::Red, "Buy line %s disabled as the item is NODROP.", ItemName);
-
-		else if(ToggleOnOff)
+		} else if(item->IsClassBag()) {
+			Message(Chat::Red, "Buy line %s disabled as the item is a Bag.", ItemName);
+		} else if(ToggleOnOff) {
 			Message(Chat::Red, "Buy line %s disabled due to insufficient funds.", ItemName);
-
-		else
+		} else {
 			database.RemoveBuyLine(CharacterID(), BuySlot);
+		}
 
 		auto outapp = new EQApplicationPacket(OP_Barter, 936);
 

@@ -49,6 +49,7 @@ class Raid;
 class Spawn2;
 class Trap;
 
+struct DynamicZoneSafeReturn;
 struct GuildBankItemUpdate_Struct;
 struct NewSpawn_Struct;
 struct QGlobal;
@@ -477,8 +478,9 @@ public:
 	void	CameraEffect(uint32 duration, uint32 intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType);
 	void	ForceGroupUpdate(uint32 gid);
-	void	SendGroupLeave(uint32 gid, const char *name);
+	void	SendGroupLeave(uint32 gid, const char *name, bool checkleader);
 	void	SendGroupJoin(uint32 gid, const char *name);
+	void	SendGroupLeader(uint32 gid, const char *lname, const char *oldlname);
 
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int TaskID=0);
@@ -495,6 +497,8 @@ public:
 	void	SendFindableNPCList(Client *c);
 	void	UpdateFindableNPCState(NPC *n, bool Remove);
 	void	HideCorpses(Client *c, uint8 CurrentMode, uint8 NewMode);
+
+	void GateAllClientsToSafeReturn();
 
 	uint16 GetClientCount();
 	void GetMobList(std::list<Mob*> &m_list);
@@ -533,6 +537,8 @@ public:
 	bool IsTrapGroupSpawned(uint32 trap_id, uint8 group);
 	void UpdateAllTraps(bool respawn, bool repopnow = false);
 	void ClearTrapPointers();
+
+	int MovePlayerCorpsesToGraveyard(bool force_move_from_instance = false);
 
 protected:
 	friend class Zone;

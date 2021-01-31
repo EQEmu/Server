@@ -38,6 +38,7 @@ Child of the Mob class.
 
 #include "corpse.h"
 #include "entity.h"
+#include "expedition.h"
 #include "groups.h"
 #include "mob.h"
 #include "raids.h"
@@ -825,22 +826,7 @@ bool Corpse::Process() {
 	}
 
 	if (corpse_graveyard_timer.Check()) {
-		if (zone->HasGraveyard()) {
-			Save();
-			player_corpse_depop = true;
-			database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(),
-				(zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0, zone->GetGraveyardPoint());
-			corpse_graveyard_timer.Disable();
-			auto pack = new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
-			SpawnPlayerCorpse_Struct* spc = (SpawnPlayerCorpse_Struct*)pack->pBuffer;
-			spc->player_corpse_id = corpse_db_id;
-			spc->zone_id = zone->graveyard_zoneid();
-			worldserver.SendPacket(pack);
-			safe_delete(pack);
-			LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", this->GetName(), ZoneName(zone->graveyard_zoneid()));
-			corpse_db_id = 0;
-		}
-
+		MovePlayerCorpseToGraveyard();
 		corpse_graveyard_timer.Disable();
 		return false;
 	}
@@ -1275,6 +1261,20 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			return;
 		}
 
+		if (zone && zone->GetInstanceID() != 0)
+		{
+			// expeditions may prevent looting based on client's lockouts
+			auto expedition = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+			if (expedition && !expedition->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
+			{
+				client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+				client->QueuePacket(app);
+				SendEndLootErrorPacket(client);
+				ResetLooter();
+				delete inst;
+				return;
+			}
+		}
 
 		// do we want this to have a fail option too?
 		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
@@ -1627,4 +1627,54 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id){
 	else {
 		corpse_graveyard_timer.SetTimer(3000);
 	}
+}
+
+void Corpse::SendWorldSpawnPlayerCorpseInZone(uint32_t zone_id)
+{
+	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct)));
+	SpawnPlayerCorpse_Struct* spc = reinterpret_cast<SpawnPlayerCorpse_Struct*>(pack->pBuffer);
+	spc->player_corpse_id = corpse_db_id;
+	spc->zone_id = zone_id;
+	worldserver.SendPacket(pack.get());
+}
+
+bool Corpse::MovePlayerCorpseToGraveyard()
+{
+	if (IsPlayerCorpse() && zone && zone->HasGraveyard())
+	{
+		Save();
+
+		uint16_t instance_id = (zone->GetZoneID() == zone->graveyard_zoneid()) ? zone->GetInstanceID() : 0;
+		database.SendCharacterCorpseToGraveyard(corpse_db_id, zone->graveyard_zoneid(), instance_id, zone->GetGraveyardPoint());
+		SendWorldSpawnPlayerCorpseInZone(zone->graveyard_zoneid());
+
+		corpse_db_id = 0;
+		player_corpse_depop = true;
+		corpse_graveyard_timer.Disable();
+
+		LogDebug("Moved [{}] player corpse to the designated graveyard in zone [{}]", GetName(), ZoneName(zone->graveyard_zoneid()));
+		return true;
+	}
+
+	return false;
+}
+
+bool Corpse::MovePlayerCorpseToNonInstance()
+{
+	if (IsPlayerCorpse() && zone && zone->GetInstanceID() != 0)
+	{
+		Save();
+
+		database.SendCharacterCorpseToNonInstance(corpse_db_id);
+		SendWorldSpawnPlayerCorpseInZone(zone->GetZoneID());
+
+		corpse_db_id = 0;
+		player_corpse_depop = true;
+		corpse_graveyard_timer.Disable();
+
+		LogDebug("Moved [{}] player corpse to non-instance version of zone [{}]", GetName(), ZoneName(zone->GetZoneID()));
+		return true;
+	}
+
+	return false;
 }

@@ -60,6 +60,7 @@
 
 #include "data_bucket.h"
 #include "command.h"
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "qglobals.h"
@@ -198,11 +199,14 @@ int command_init(void)
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
+		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
+		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", 80, command_emoteview) ||
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
+		command_add("endurance", "Restores you or your target's endurance.", 50, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
 		command_add("face", "- Change the face of your target", 80, command_face) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", 80, command_faction) ||
@@ -435,6 +439,7 @@ int command_init(void)
 		command_add("wp", "[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid", 170, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path", 170, command_wpadd) ||
 		command_add("wpinfo", "- Show waypoint info about your NPC target", 170, command_wpinfo) ||
+		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", 250, command_worldwide) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.",  250, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", 80, command_zclip) ||
 		command_add("zcolor", "[red] [green] [blue] - Change sky color", 80, command_zcolor) ||
@@ -734,6 +739,42 @@ void command_logcommand(Client *c, const char *message)
 /*
  * commands go below here
  */
+void command_worldwide(Client *c, const Seperator *sep)
+{
+	std::string sub_command;
+	if (sep->arg[1]) {
+		sub_command = sep->arg[1];
+	}
+
+	if (sub_command == "cast") {
+		if (sep->arg[2][0] && Seperator::IsNumber(sep->arg[2])) {
+			int spell_id = atoi(sep->arg[2]);
+			quest_manager.WorldWideCastSpell(spell_id, 0, 0);
+			worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast [{}] world-wide!", GetSpellName(spell_id)).c_str());
+		}
+		else {
+			c->Message(Chat::Yellow, "Usage: #worldwide cast [spellid]");
+		}
+	}
+
+	if (!sep->arg[1]) {
+		c->Message(Chat::White, "This command is used to perform world-wide tasks");
+		c->Message(Chat::White, "Usage: #worldwide cast [spellid]");
+	}
+}
+void command_endurance(Client *c, const Seperator *sep)
+{
+	Mob *t;
+
+	t = c->GetTarget() ? c->GetTarget() : c;
+
+	if (t->IsClient())
+		t->CastToClient()->SetEndurance(t->CastToClient()->GetMaxEndurance());
+	else
+		t->SetEndurance(t->GetMaxEndurance());
+
+	t->Message(Chat::White, "Your endurance has been refilled.");
+}
 void command_setstat(Client* c, const Seperator* sep){
 	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
 		c->GetTarget()->CastToClient()->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
@@ -4837,6 +4878,10 @@ void command_corpse(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Insufficient status to depop player corpse.");
 
 	}
+	else if (strcasecmp(sep->arg[1], "moveallgraveyard") == 0) {
+		int count = entity_list.MovePlayerCorpsesToGraveyard(true);
+		c->Message(Chat::White, "Moved [%d] player corpse(s) to zone graveyard", count);
+	}
 	else if (sep->arg[1][0] == 0 || strcasecmp(sep->arg[1], "help") == 0) {
 		c->Message(Chat::White, "#Corpse Sub-Commands:");
 		c->Message(Chat::White, "  DeleteNPCCorpses");
@@ -4844,6 +4889,7 @@ void command_corpse(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "  ListNPC");
 		c->Message(Chat::White, "  ListPlayer");
 		c->Message(Chat::White, "  Lock - GM locks the corpse - cannot be looted by non-GM");
+		c->Message(Chat::White, "  MoveAllGraveyard - move all player corpses to zone's graveyard or non-instance");
 		c->Message(Chat::White, "  UnLock");
 		c->Message(Chat::White, "  RemoveCash");
 		c->Message(Chat::White, "  InspectLoot");
@@ -5592,18 +5638,18 @@ void command_depopzone(Client *c, const Seperator *sep)
 
 void command_devtools(Client *c, const Seperator *sep)
 {
-	std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", c->AccountID());
+	std::string dev_tools_key = StringFormat("%i-dev-tools-disabled", c->AccountID());
 
 	/**
 	 * Handle window toggle
 	 */
-	if (strcasecmp(sep->arg[1], "disable_window") == 0) {
-		DataBucket::SetData(dev_tools_window_key, "true");
-		c->SetDevToolsWindowEnabled(false);
+	if (strcasecmp(sep->arg[1], "disable") == 0) {
+		DataBucket::SetData(dev_tools_key, "true");
+		c->SetDevToolsEnabled(false);
 	}
-	if (strcasecmp(sep->arg[1], "enable_window") == 0) {
-		DataBucket::DeleteData(dev_tools_window_key);
-		c->SetDevToolsWindowEnabled(true);
+	if (strcasecmp(sep->arg[1], "enable") == 0) {
+		DataBucket::DeleteData(dev_tools_key);
+		c->SetDevToolsEnabled(true);
 	}
 
 	c->ShowDevToolsMenu();
@@ -6825,6 +6871,210 @@ void command_doanim(Client *c, const Seperator *sep)
 			c->DoAnim(atoi(sep->arg[1]),atoi(sep->arg[2]));
 }
 
+void command_dz(Client* c, const Seperator* sep)
+{
+	if (!c || !zone) {
+		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "expedition") == 0)
+	{
+		if (strcasecmp(sep->arg[2], "list") == 0)
+		{
+			std::vector<Expedition*> expeditions;
+			for (const auto& expedition : zone->expedition_cache)
+			{
+				expeditions.emplace_back(expedition.second.get());
+			}
+
+			std::sort(expeditions.begin(), expeditions.end(),
+				[](const Expedition* lhs, const Expedition* rhs) {
+					return lhs->GetID() < rhs->GetID();
+				});
+
+			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", expeditions.size()).c_str());
+			for (const auto& expedition : expeditions)
+			{
+				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#goto {}", expedition->GetLeaderName()), false, expedition->GetLeaderName());
+				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
+					"#zoneinstance {}", expedition->GetInstanceID()), false, "zone");
+
+				auto seconds = expedition->GetDynamicZone().GetSecondsRemaining();
+
+				c->Message(Chat::White, fmt::format(
+					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] {}: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+					expedition->GetID(),
+					expedition->GetDynamicZoneID(),
+					expedition->GetName(),
+					leader_saylink,
+					zone_saylink,
+					ZoneName(expedition->GetDynamicZone().GetZoneID()),
+					expedition->GetDynamicZone().GetZoneID(),
+					expedition->GetInstanceID(),
+					expedition->GetDynamicZone().GetZoneVersion(),
+					expedition->GetMemberCount(),
+					seconds / 3600,      // hours
+					(seconds / 60) % 60, // minutes
+					seconds % 60         // seconds
+				).c_str());
+			}
+		}
+		else if (strcasecmp(sep->arg[2], "reload") == 0)
+		{
+			Expedition::CacheAllFromDatabase();
+			c->Message(Chat::White, fmt::format(
+				"Reloaded [{}] expeditions to cache from database.", zone->expedition_cache.size()
+			).c_str());
+		}
+		else if (strcasecmp(sep->arg[2], "destroy") == 0 && sep->IsNumber(3))
+		{
+			auto expedition_id = std::strtoul(sep->arg[3], nullptr, 10);
+			auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+			if (expedition)
+			{
+				c->Message(Chat::White, fmt::format("Destroying expedition [{}] ({})",
+					expedition_id, expedition->GetName()).c_str());
+				expedition->RemoveAllMembers();
+			}
+			else
+			{
+				c->Message(Chat::Red, fmt::format("Failed to destroy expedition [{}]", sep->arg[3]).c_str());
+			}
+		}
+		else if (strcasecmp(sep->arg[2], "unlock") == 0 && sep->IsNumber(3))
+		{
+			auto expedition_id = std::strtoul(sep->arg[3], nullptr, 10);
+			auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+			if (expedition)
+			{
+				c->Message(Chat::White, fmt::format("Unlocking expedition [{}]", expedition_id).c_str());
+				expedition->SetLocked(false, ExpeditionLockMessage::None, true);
+			}
+			else
+			{
+				c->Message(Chat::Red, fmt::format("Failed to find expedition [{}]", sep->arg[3]).c_str());
+			}
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "list") == 0)
+	{
+		std::string query = SQL(
+			SELECT
+				dynamic_zones.id,
+				dynamic_zones.type,
+				instance_list.id,
+				instance_list.zone,
+				instance_list.version,
+				instance_list.start_time,
+				instance_list.duration,
+				COUNT(instance_list_player.id) member_count
+			FROM dynamic_zones
+				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
+				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
+			GROUP BY instance_list.id
+			ORDER BY dynamic_zones.id;
+		);
+
+		auto results = database.QueryDatabase(query);
+		if (results.Success())
+		{
+			c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", results.RowCount()).c_str());
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				auto start_time  = strtoul(row[5], nullptr, 10);
+				auto duration    = strtoul(row[6], nullptr, 10);
+				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
+
+				auto now = std::chrono::system_clock::now();
+				auto remaining = std::chrono::duration_cast<std::chrono::seconds>(expire_time - now);
+				auto seconds = std::max(0, static_cast<int>(remaining.count()));
+
+				bool is_expired = now > expire_time;
+				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
+				{
+					uint32_t instance_id = strtoul(row[2], nullptr, 10);
+					auto zone_saylink = is_expired ? "zone" : EQ::SayLinkEngine::GenerateQuestSaylink(
+						fmt::format("#zoneinstance {}", instance_id), false, "zone");
+
+					c->Message(Chat::White, fmt::format(
+						"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+						strtoul(row[0], nullptr, 10), // dynamic_zone_id
+						strtoul(row[1], nullptr, 10), // dynamic_zone_type
+						zone_saylink,
+						strtoul(row[3], nullptr, 10), // instance_zone_id
+						instance_id,                  // instance_id
+						strtoul(row[4], nullptr, 10), // instance_zone_version
+						strtoul(row[7], nullptr, 10), // instance member_count
+						seconds / 3600,      // hours
+						(seconds / 60) % 60, // minutes
+						seconds % 60         // seconds
+					).c_str());
+				}
+			}
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "lockouts") == 0)
+	{
+		if (strcasecmp(sep->arg[2], "remove") == 0 && sep->arg[3][0] != '\0')
+		{
+			if (sep->arg[5][0] == '\0')
+			{
+				c->Message(Chat::White, fmt::format(
+					"Removing [{}] lockouts on [{}].", sep->arg[4][0] ? sep->arg[4] : "all", sep->arg[3]
+				).c_str());
+			}
+			else
+			{
+				c->Message(Chat::White, fmt::format(
+					"Removing [{}]:[{}] lockout on [{}].", sep->arg[4], sep->arg[5], sep->arg[3]
+				).c_str());
+			}
+			Expedition::RemoveLockoutsByCharacterName(sep->arg[3], sep->arg[4], sep->arg[5]);
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "makeleader") == 0 && sep->IsNumber(2) && sep->arg[3][0] != '\0')
+	{
+		auto expedition_id = std::strtoul(sep->arg[2], nullptr, 10);
+		auto expedition = Expedition::FindCachedExpeditionByID(expedition_id);
+		if (expedition)
+		{
+			auto char_name = FormatName(sep->arg[3]);
+			c->Message(Chat::White, fmt::format("Setting expedition [{}] leader to [{}]", expedition_id, char_name).c_str());
+			expedition->SendWorldMakeLeaderRequest(c->CharacterID(), char_name);
+		}
+		else
+		{
+			c->Message(Chat::Red, fmt::format("Failed to find expedition [{}]", expedition_id).c_str());
+		}
+	}
+	else
+	{
+		c->Message(Chat::White, "#dz usage:");
+		c->Message(Chat::White, "#dz expedition list - list expeditions in current zone cache");
+		c->Message(Chat::White, "#dz expedition reload - reload expedition zone cache from database");
+		c->Message(Chat::White, "#dz expedition destroy <expedition_id> - destroy expedition globally (must be in cache)");
+		c->Message(Chat::White, "#dz expedition unlock <expedition_id> - unlock expedition");
+		c->Message(Chat::White, "#dz list [all] - list dynamic zone instances from database -- 'all' includes expired");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
+		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" \"<event_name>\" - delete lockout by expedition event");
+		c->Message(Chat::White, "#dz makeleader <expedition_id> <character_name> - set new expedition leader");
+	}
+}
+
+void command_dzkickplayers(Client* c, const Seperator* sep)
+{
+	if (c)
+	{
+		auto expedition = c->GetExpedition();
+		if (expedition)
+		{
+			expedition->DzKickPlayers(c);
+		}
+	}
+}
+
 void command_editmassrespawn(Client* c, const Seperator* sep)
 {
 	if (strcasecmp(sep->arg[1], "usage") == 0) {
@@ -6879,7 +7129,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 	int results_count = 0;
 
-	auto results = database.QueryDatabase(query);
+	auto results = content_db.QueryDatabase(query);
 	if (results.Success() && results.RowCount()) {
 
 		results_count = results.RowCount();
@@ -6906,7 +7156,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep)
 
 			if (change_apply) {
 
-				results = database.QueryDatabase(
+				results = content_db.QueryDatabase(
 					fmt::format(
 						SQL(
 							UPDATE spawn2
@@ -7741,13 +7991,6 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			return;
 		}
 
-		std::vector<std::string> amounts = {
-			"1",
-			"10",
-			"100",
-			"1000"
-		};
-
 		int count = 0;
 		char sName[64];
 		char sCriteria[255];
@@ -7761,14 +8004,25 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			pdest = strstr(sName, sCriteria);
 			if (pdest != nullptr) {
 				linker.SetItemData(item);
-
-				std::string saylink_commands;
-				for (auto   &amount : amounts) {
-					saylink_commands += EQ::SayLinkEngine::GenerateQuestSaylink(
-						"#si " + std::to_string(item->ID) + " " + amount,
+				std::string item_id = std::to_string(item->ID);
+				std::string saylink_commands = 
+					"[" + 
+					EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#si " + item_id,
 						false,
-						"[" + amount + "] "
-					);
+						"X"
+					) + 
+					"] ";
+				if (item->Stackable && item->StackSize > 1) {
+					std::string stack_size = std::to_string(item->StackSize);
+					saylink_commands += 
+					"[" + 
+					EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#si " + item_id + " " + stack_size,
+						false,
+						stack_size
+					) + 
+					"]";
 				}
 
 				c->Message(
@@ -7776,8 +8030,8 @@ void command_itemsearch(Client *c, const Seperator *sep)
 					fmt::format(
 						" Summon {} [{}] [{}]",
 						saylink_commands,
-						item->ID,
-						linker.GenerateLink()
+						linker.GenerateLink(),
+						item->ID
 					).c_str()
 				);
 
@@ -7855,14 +8109,10 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	else if(!strcasecmp(sep->arg[1], "radiant"))
 	{
 		t->SetRadiantCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->SaveCurrency();
 	}
 	else if(!strcasecmp(sep->arg[1], "ebon"))
 	{
 		t->SetEbonCrystals(atoi(sep->arg[2]));
-		t->SendCrystalCounts();
-		t->SaveCurrency();
 	}
 	else
 	{

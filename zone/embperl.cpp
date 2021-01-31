@@ -37,6 +37,7 @@ EXTERN_C XS(boot_HateEntry);
 EXTERN_C XS(boot_Object);
 EXTERN_C XS(boot_Doors);
 EXTERN_C XS(boot_PerlPacket);
+EXTERN_C XS(boot_Expedition);
 #endif
 #endif
 
@@ -87,6 +88,7 @@ EXTERN_C void xs_init(pTHX)
 	newXS(strcpy(buf, "HateEntry::boot_HateEntry"), boot_HateEntry, file);
 	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
 	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
+	newXS(strcpy(buf, "Expedition::boot_Expedition"), boot_Expedition, file);
 ;
 #endif
 #endif

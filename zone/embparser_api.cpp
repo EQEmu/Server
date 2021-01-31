@@ -29,6 +29,7 @@
 #include "embparser.h"
 #include "embxs.h"
 #include "entity.h"
+#include "expedition.h"
 #include "queryserv.h"
 #include "questmgr.h"
 #include "zone.h"
@@ -2792,6 +2793,29 @@ XS(XS__we) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__message);
+XS(XS__message) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::message(int color, string message)");
+
+	int color = (int) SvIV(ST(0));
+	char *message = (char *) SvPV_nolen(ST(1));
+	quest_manager.message(color, message);
+	XSRETURN_EMPTY;
+}
+
+XS(XS__whisper);
+XS(XS__whisper) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::whisper(string message)");
+
+	char *message = (char *) SvPV_nolen(ST(0));
+	quest_manager.whisper(message);
+	XSRETURN_EMPTY;
+}
+
 XS(XS__getlevel);
 XS(XS__getlevel) {
 	dXSARGS;
@@ -2924,6 +2948,22 @@ XS(XS__countitem) {
 	int quantity = quest_manager.countitem(item_id);
 
 	XSRETURN_IV(quantity);
+}
+
+XS(XS__removeitem);
+XS(XS__removeitem) {
+	dXSARGS;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: quest::removeitem(int item_id, [int quantity = 1])");
+
+	uint32 item_id = (int) SvIV(ST(0));
+	uint32 quantity = 1;
+	if (items > 1)
+		quantity = (int) SvIV(ST(1));
+
+	quest_manager.removeitem(item_id, quantity);
+
+	XSRETURN_EMPTY;
 }
 
 XS(XS__getitemname);
@@ -3733,10 +3773,11 @@ XS(XS__GetZoneLongName) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::GetZoneLongName(string zone)");
 	dXSTARG;
-	char       *zone   = (char *) SvPV_nolen(ST(0));
-	Const_char *RETVAL = quest_manager.GetZoneLongName(zone);
 
-	sv_setpv(TARG, RETVAL);
+	std::string zone = (std::string) SvPV_nolen(ST(0));
+	std::string RETVAL = quest_manager.GetZoneLongName(zone);
+
+	sv_setpv(TARG, RETVAL.c_str());
 	XSprePUSH;
 	PUSHTARG;
 	XSRETURN(1);
@@ -3767,7 +3808,7 @@ XS(XS__crosszoneassigntaskbycharid) {
 
 		if (items == 3) {
 			enforce_level_requirement = (bool) SvTRUE(ST(2));
-		}	
+		}
 		quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
 	}
 
@@ -3801,13 +3842,13 @@ XS(XS__crosszoneassigntaskbyraidid) {
 		int raid_id = (int) SvIV(ST(0));
 		uint32 task_id = (uint32) SvIV(ST(1));
 		bool enforce_level_requirement = false;
-	
+
 		if (items == 3) {
 			enforce_level_requirement = (bool) SvTRUE(ST(2));
 		}
 		quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneassigntaskbyguildid);
@@ -3825,7 +3866,7 @@ XS(XS__crosszoneassigntaskbyguildid) {
 		}
 		quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonecastspellbycharid);
@@ -3838,7 +3879,7 @@ XS(XS__crosszonecastspellbycharid) {
 		uint32 spell_id = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneCastSpellByCharID(character_id, spell_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonecastspellbygroupid);
@@ -3851,7 +3892,7 @@ XS(XS__crosszonecastspellbygroupid) {
 		uint32 spell_id = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneCastSpellByGroupID(group_id, spell_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonecastspellbyraidid);
@@ -3864,7 +3905,7 @@ XS(XS__crosszonecastspellbyraidid) {
 		uint32 spell_id = (uint32) SvIV(ST(1));
 		quest_manager.CrossZoneCastSpellByRaidID(raid_id, spell_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonecastspellbyguildid);
@@ -3877,7 +3918,7 @@ XS(XS__crosszonecastspellbyguildid) {
 		uint32 spell_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneCastSpellByGuildID(guild_id, spell_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonedisabletaskbycharid);
@@ -3890,7 +3931,7 @@ XS(XS__crosszonedisabletaskbycharid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneDisableTaskByCharID(char_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonedisabletaskbygroupid);
@@ -3903,7 +3944,7 @@ XS(XS__crosszonedisabletaskbygroupid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneDisableTaskByGroupID(group_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonedisabletaskbyraidid);
@@ -3916,7 +3957,7 @@ XS(XS__crosszonedisabletaskbyraidid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneDisableTaskByRaidID(raid_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonedisabletaskbyguildid);
@@ -3929,7 +3970,7 @@ XS(XS__crosszonedisabletaskbyguildid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneDisableTaskByGuildID(guild_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneenabletaskbycharid);
@@ -3942,7 +3983,7 @@ XS(XS__crosszoneenabletaskbycharid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneEnableTaskByCharID(char_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneenabletaskbygroupid);
@@ -3955,7 +3996,7 @@ XS(XS__crosszoneenabletaskbygroupid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneEnableTaskByGroupID(group_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneenabletaskbyraidid);
@@ -3968,7 +4009,7 @@ XS(XS__crosszoneenabletaskbyraidid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneEnableTaskByRaidID(raid_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneenabletaskbyguildid);
@@ -3981,7 +4022,7 @@ XS(XS__crosszoneenabletaskbyguildid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneEnableTaskByGuildID(guild_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonefailtaskbycharid);
@@ -3994,7 +4035,7 @@ XS(XS__crosszonefailtaskbycharid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneFailTaskByCharID(char_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonefailtaskbygroupid);
@@ -4007,7 +4048,7 @@ XS(XS__crosszonefailtaskbygroupid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneFailTaskByGroupID(group_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonefailtaskbyraidid);
@@ -4020,7 +4061,7 @@ XS(XS__crosszonefailtaskbyraidid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneFailTaskByRaidID(raid_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonefailtaskbyguildid);
@@ -4033,7 +4074,7 @@ XS(XS__crosszonefailtaskbyguildid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonemarqueebycharid);
@@ -4390,7 +4431,7 @@ XS(XS__crosszoneremovetaskbycharid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneRemoveTaskByCharID(char_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneremovetaskbygroupid);
@@ -4403,7 +4444,7 @@ XS(XS__crosszoneremovetaskbygroupid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneRemoveTaskByGroupID(group_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneremovetaskbyraidid);
@@ -4416,7 +4457,7 @@ XS(XS__crosszoneremovetaskbyraidid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneRemoveTaskByRaidID(raid_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneremovetaskbyguildid);
@@ -4429,7 +4470,7 @@ XS(XS__crosszoneremovetaskbyguildid) {
 		uint32 task_id = (uint32) SvUV(ST(1));
 		quest_manager.CrossZoneRemoveTaskByGuildID(guild_id, task_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneresetactivitybycharid);
@@ -4443,7 +4484,7 @@ XS(XS__crosszoneresetactivitybycharid) {
 		int activity_id = (int) SvIV(ST(2));
 		quest_manager.CrossZoneResetActivityByCharID(char_id, task_id, activity_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneresetactivitybygroupid);
@@ -4457,7 +4498,7 @@ XS(XS__crosszoneresetactivitybygroupid) {
 		int activity_id = (int) SvIV(ST(2));
 		quest_manager.CrossZoneResetActivityByGroupID(group_id, task_id, activity_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneresetactivitybyraidid);
@@ -4471,7 +4512,7 @@ XS(XS__crosszoneresetactivitybyraidid) {
 		int activity_id = (int) SvIV(ST(2));
 		quest_manager.CrossZoneResetActivityByRaidID(raid_id, task_id, activity_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneresetactivitybyguildid);
@@ -4485,7 +4526,7 @@ XS(XS__crosszoneresetactivitybyguildid) {
 		int activity_id = (int) SvIV(ST(2));
 		quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszonesetentityvariablebynpctypeid);
@@ -4684,7 +4725,7 @@ XS(XS__crosszoneupdateactivitybycharid) {
 		}
 		quest_manager.CrossZoneUpdateActivityByCharID(char_id, task_id, activity_id, activity_count);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneupdateactivitybygroupid);
@@ -4702,7 +4743,7 @@ XS(XS__crosszoneupdateactivitybygroupid) {
 		}
 		quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id, activity_count);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneupdateactivitybyraidid);
@@ -4720,7 +4761,7 @@ XS(XS__crosszoneupdateactivitybyraidid) {
 		}
 		quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id, activity_count);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__crosszoneupdateactivitybyguildid);
@@ -4738,7 +4779,7 @@ XS(XS__crosszoneupdateactivitybyguildid) {
 		}
 		quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id, activity_count);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS__worldwideassigntask);
@@ -4753,7 +4794,7 @@ XS(XS__worldwideassigntask) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4775,7 +4816,7 @@ XS(XS__worldwidecastspell) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4797,7 +4838,7 @@ XS(XS__worldwidedisabletask) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4819,7 +4860,7 @@ XS(XS__worldwideenabletask) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4841,7 +4882,7 @@ XS(XS__worldwidefailtask) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4868,7 +4909,7 @@ XS(XS__worldwidemarquee) {
 		if (items == 7) {
 			min_status = (uint8) SvUV(ST(6));
 		}
-		
+
 		if (items == 8) {
 			max_status = (uint8) SvUV(ST(7));
 		}
@@ -4891,7 +4932,7 @@ XS(XS__worldwidemessage) {
 		if (items == 3) {
 			min_status = (uint8) SvUV(ST(2));
 		}
-		
+
 		if (items == 4) {
 			max_status = (uint8) SvUV(ST(3));
 		}
@@ -4914,7 +4955,7 @@ XS(XS__worldwidemove) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4936,7 +4977,7 @@ XS(XS__worldwidemoveinstance) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4958,7 +4999,7 @@ XS(XS__worldwideremovespell) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -4980,7 +5021,7 @@ XS(XS__worldwideremovetask) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(2));
 		}
@@ -5003,7 +5044,7 @@ XS(XS__worldwideresetactivity) {
 		if (items == 3) {
 			min_status = (uint8) SvUV(ST(2));
 		}
-		
+
 		if (items == 4) {
 			max_status = (uint8) SvUV(ST(3));
 		}
@@ -5026,7 +5067,7 @@ XS(XS__worldwidesetentityvariableclient) {
 		if (items == 3) {
 			min_status = (uint8) SvUV(ST(2));
 		}
-		
+
 		if (items == 4) {
 			max_status = (uint8) SvUV(ST(3));
 		}
@@ -5075,7 +5116,7 @@ XS(XS__worldwidesignalclient) {
 		if (items == 2) {
 			min_status = (uint8) SvUV(ST(1));
 		}
-		
+
 		if (items == 3) {
 			max_status = (uint8) SvUV(ST(1));
 		}
@@ -5102,7 +5143,7 @@ XS(XS__worldwideupdateactivity) {
 		if (items == 4) {
 			min_status = (uint8) SvUV(ST(3));
 		}
-		
+
 		if (items == 5) {
 			max_status = (uint8) SvUV(ST(4));
 		}
@@ -6042,6 +6083,265 @@ XS(XS__SetContentFlag)
 	XSRETURN_EMPTY;
 }
 
+XS(XS__get_expedition);
+XS(XS__get_expedition) {
+	dXSARGS;
+	if (items != 0) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition()");
+	}
+
+	Expedition* RETVAL = nullptr;
+	if (zone && zone->GetInstanceID() != 0)
+	{
+		RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+	}
+
+	EXTEND(sp, 1); // grow stack, function had 0 arguments
+	ST(0) = sv_newmortal(); // PUSHs(sv_newmortal());
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_by_char_id);
+XS(XS__get_expedition_by_char_id) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_by_char_id(uint32 character_id)");
+	}
+
+	uint32 character_id = (int)SvUV(ST(0));
+
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByCharacterID(character_id);
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_by_dz_id);
+XS(XS__get_expedition_by_dz_id) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_by_dz_id(uint32 dynamic_zone_id)");
+	}
+
+	uint32 dz_id = (int)SvUV(ST(0));
+
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_by_zone_instance);
+XS(XS__get_expedition_by_zone_instance) {
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::GetExpeditionByZoneInstance(uint16 zone_id, uint16 instance_id)");
+	}
+
+	uint16 zone_id = (uint16)SvUV(ST(0));
+	uint16 instance_id = (uint16)SvUV(ST(1));
+
+	Expedition* RETVAL = Expedition::FindCachedExpeditionByZoneInstance(zone_id, instance_id);
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+	}
+
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_lockout_by_char_id);
+XS(XS__get_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
+	auto it = std::find_if(lockouts.begin(), lockouts.end(), [&](const ExpeditionLockoutTimer& lockout) {
+		return lockout.IsSameLockout(expedition_name, event_name);
+	});
+
+	// mortalize so its refcnt is auto decremented on function exit to avoid leak
+	HV* hash = (HV*)sv_2mortal((SV*)newHV()); // hash refcnt +1 (mortal -1)
+
+	if (it != lockouts.end())
+	{
+		hv_store(hash, "remaining", strlen("remaining"), newSVuv(it->GetSecondsRemaining()), 0);
+		hv_store(hash, "uuid", strlen("uuid"), newSVpv(it->GetExpeditionUUID().c_str(), 0), 0);
+	}
+
+	ST(0) = sv_2mortal(newRV((SV*)hash)); // hash refcnt: 2 (-1 mortal), reference: 1 (-1 mortal)
+	XSRETURN(1);
+}
+
+XS(XS__get_expedition_lockouts_by_char_id);
+XS(XS__get_expedition_lockouts_by_char_id) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::get_expedition_lockouts_by_char_id(uint32 character_id, [string expedition_name])");
+	}
+
+	HV* hash = newHV(); // hash refcnt +1 (non-mortal, newRV_noinc to not inc)
+	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	auto lockouts = Expedition::GetExpeditionLockoutsByCharacterID(character_id);
+
+	for (const auto& lockout : lockouts)
+	{
+		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
+		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
+
+		// hashes are stored through references inside other hashes/arrays. we need
+		// to wrap newHV in newRV references when inserting nested hash values.
+		// we use newRV_noinc to not increment the hash's ref count; rv will own it
+
+		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
+		if (!entry)
+		{
+			// create expedition entry in hash with its value as ref to event hash
+			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // ref takes ownership
+			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
+			{
+				hash_ref = event_hash_ref; // save ref for filtered expedition return
+			}
+			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+		}
+
+		// *entry is a reference to expedition's event hash (which it owns). the
+		// event entry in the hash will contain ref to a lockout detail hash
+		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV) // is ref to hash type
+		{
+			HV* details_hash = newHV(); // refcnt +1, reference will take ownership
+			hv_store(details_hash, "remaining", strlen("remaining"), newSVuv(lockout.GetSecondsRemaining()), 0);
+			hv_store(details_hash, "uuid", strlen("uuid"), newSVpv(lockout.GetExpeditionUUID().c_str(), 0), 0);
+
+			HV* event_hash = (HV*)SvRV(*entry);
+			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
+				(SV*)newRV_noinc((SV*)details_hash), 0);
+		}
+	}
+
+	SV* rv = &PL_sv_undef;
+
+	if (!expedition_name.empty())
+	{
+		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
+	}
+	else
+	{
+		rv = sv_2mortal(newRV_noinc((SV*)hash)); // takes ownership of expedition hash
+	}
+
+	ST(0) = rv;
+	XSRETURN(1);
+}
+
+XS(XS__add_expedition_lockout_all_clients);
+XS(XS__add_expedition_lockout_all_clients) {
+	dXSARGS;
+	if (items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_all_clients(string expedition_name, string event_name, uint32 seconds, [string uuid])");
+	}
+
+	std::string expedition_name = SvPV_nolen(ST(0));
+	std::string event_name = SvPV_nolen(ST(1));
+	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(2)));
+	std::string uuid;
+
+	if (items == 4)
+	{
+		uuid = SvPV_nolen(ST(3));
+	}
+
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(expedition_name, event_name, seconds, uuid);
+	Expedition::AddLockoutClients(lockout);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__add_expedition_lockout_by_char_id);
+XS(XS__add_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: quest::add_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name, uint32 seconds, [string uuid])");
+	}
+
+	std::string uuid;
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+	uint32_t seconds = static_cast<uint32_t>(SvUV(ST(3)));
+
+	Expedition::AddLockoutByCharacterID(character_id, expedition_name, event_name, seconds, uuid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__remove_expedition_lockout_by_char_id);
+XS(XS__remove_expedition_lockout_by_char_id) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, string expedition_name, string event_name)");
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name, event_name);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS__remove_all_expedition_lockouts_by_char_id);
+XS(XS__remove_all_expedition_lockouts_by_char_id) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: quest::remove_expedition_lockout_by_char_id(uint32 character_id, [string expedition_name])");
+	}
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	uint32_t character_id = static_cast<uint32_t>(SvUV(ST(0)));
+	Expedition::RemoveLockoutsByCharacterID(character_id, expedition_name);
+
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6112,6 +6412,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "activespeakactivity"), XS__activespeakactivity, file);
 	newXS(strcpy(buf, "activespeaktask"), XS__activespeaktask, file);
 	newXS(strcpy(buf, "activetasksinset"), XS__activetasksinset, file);
+	newXS(strcpy(buf, "add_expedition_lockout_all_clients"), XS__add_expedition_lockout_all_clients, file);
+	newXS(strcpy(buf, "add_expedition_lockout_by_char_id"), XS__add_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "addldonloss"), XS__addldonpoints, file);
 	newXS(strcpy(buf, "addldonpoints"), XS__addldonpoints, file);
 	newXS(strcpy(buf, "addldonwin"), XS__addldonpoints, file);
@@ -6171,7 +6473,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "crosszonemoveinstancebycharid"), XS__crosszonemoveinstancebycharid, file);
 	newXS(strcpy(buf, "crosszonemoveinstancebygroupid"), XS__crosszonemoveinstancebygroupid, file);
 	newXS(strcpy(buf, "crosszonemoveinstancebyraidid"), XS__crosszonemoveinstancebyraidid, file);
-	newXS(strcpy(buf, "crosszonemoveinstancebyguildid"), XS__crosszonemoveinstancebyguildid, file);	
+	newXS(strcpy(buf, "crosszonemoveinstancebyguildid"), XS__crosszonemoveinstancebyguildid, file);
 	newXS(strcpy(buf, "crosszoneremovespellbycharid"), XS__crosszoneremovespellbycharid, file);
 	newXS(strcpy(buf, "crosszoneremovespellbygroupid"), XS__crosszoneremovespellbygroupid, file);
 	newXS(strcpy(buf, "crosszoneremovespellbyraidid"), XS__crosszoneremovespellbyraidid, file);
@@ -6246,6 +6548,12 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
+	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
+	newXS(strcpy(buf, "get_expedition_by_char_id"), XS__get_expedition_by_char_id, file);
+	newXS(strcpy(buf, "get_expedition_by_dz_id"), XS__get_expedition_by_dz_id, file);
+	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
+	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
+	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
@@ -6284,6 +6592,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "log"), XS__log, file);
 	newXS(strcpy(buf, "log_combat"), XS__log_combat, file);
 	newXS(strcpy(buf, "me"), XS__me, file);
+	newXS(strcpy(buf, "message"), XS__message, file);
 	newXS(strcpy(buf, "modifynpcstat"), XS__ModifyNPCStat, file);
 	newXS(strcpy(buf, "movegrp"), XS__movegrp, file);
 	newXS(strcpy(buf, "movepc"), XS__movepc, file);
@@ -6311,6 +6620,9 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "rain"), XS__rain, file);
 	newXS(strcpy(buf, "rebind"), XS__rebind, file);
 	newXS(strcpy(buf, "reloadzonestaticdata"), XS__reloadzonestaticdata, file);
+	newXS(strcpy(buf, "remove_all_expedition_lockouts_by_char_id"), XS__remove_all_expedition_lockouts_by_char_id, file);
+	newXS(strcpy(buf, "remove_expedition_lockout_by_char_id"), XS__remove_expedition_lockout_by_char_id, file);
+	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
@@ -6377,6 +6689,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "voicetell"), XS__voicetell, file);
 	newXS(strcpy(buf, "we"), XS__we, file);
 	newXS(strcpy(buf, "wearchange"), XS__wearchange, file);
+	newXS(strcpy(buf, "whisper"), XS__whisper, file);
 	newXS(strcpy(buf, "write"), XS__write, file);
 	newXS(strcpy(buf, "ze"), XS__ze, file);
 	newXS(strcpy(buf, "zone"), XS__zone, file);

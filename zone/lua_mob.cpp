@@ -372,6 +372,11 @@ int Lua_Mob::GetRace() {
 	return self->GetRace();
 }
 
+const char *Lua_Mob::GetRaceName() {
+	Lua_Safe_Call_String();
+	return GetRaceIDName(self->GetRace());
+}
+
 int Lua_Mob::GetGender() {
 	Lua_Safe_Call_Int();
 	return self->GetGender();
@@ -440,6 +445,11 @@ int Lua_Mob::GetDrakkinDetails() {
 int Lua_Mob::GetClass() {
 	Lua_Safe_Call_Int();
 	return self->GetClass();
+}
+
+const char *Lua_Mob::GetClassName() {
+	Lua_Safe_Call_String();
+	return GetClassIDName(self->GetClass());
 }
 
 int Lua_Mob::GetLevel() {
@@ -2316,6 +2326,7 @@ luabind::scope lua_register_mob() {
 		.def("GetBaseGender", &Lua_Mob::GetBaseGender)
 		.def("GetDeity", &Lua_Mob::GetDeity)
 		.def("GetRace", &Lua_Mob::GetRace)
+		.def("GetRaceName", &Lua_Mob::GetRaceName)
 		.def("GetGender", &Lua_Mob::GetGender)
 		.def("GetTexture", &Lua_Mob::GetTexture)
 		.def("GetHelmTexture", &Lua_Mob::GetHelmTexture)
@@ -2330,6 +2341,7 @@ luabind::scope lua_register_mob() {
 		.def("GetDrakkinTattoo", &Lua_Mob::GetDrakkinTattoo)
 		.def("GetDrakkinDetails", &Lua_Mob::GetDrakkinDetails)
 		.def("GetClass", &Lua_Mob::GetClass)
+		.def("GetClassName", &Lua_Mob::GetClassName)
 		.def("GetLevel", &Lua_Mob::GetLevel)
 		.def("GetCleanName", &Lua_Mob::GetCleanName)
 		.def("GetTarget", &Lua_Mob::GetTarget)
@@ -2696,7 +2708,11 @@ luabind::scope lua_register_special_abilities() {
 				luabind::value("ignore_root_aggro_rules", static_cast<int>(IGNORE_ROOT_AGGRO_RULES)),
 				luabind::value("casting_resist_diff", static_cast<int>(CASTING_RESIST_DIFF)),
 				luabind::value("counter_avoid_damage", static_cast<int>(COUNTER_AVOID_DAMAGE)),
-				luabind::value("immune_ranged_attacks", static_cast<int>(IMMUNE_RANGED_ATTACKS))
+				luabind::value("immune_ranged_attacks", static_cast<int>(IMMUNE_RANGED_ATTACKS)),
+				luabind::value("immune_damage_client", static_cast<int>(IMMUNE_DAMAGE_CLIENT)),
+				luabind::value("immune_damage_npc", static_cast<int>(IMMUNE_DAMAGE_NPC)),
+				luabind::value("immune_aggro_client", static_cast<int>(IMMUNE_AGGRO_CLIENT)),
+				luabind::value("immune_aggro_npc", static_cast<int>(IMMUNE_AGGRO_NPC))
 		];
 }
 

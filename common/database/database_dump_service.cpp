@@ -300,8 +300,7 @@ void DatabaseDumpService::Dump()
 		config->DatabaseUsername
 	);
 
-	std::string options = "--allow-keywords --extended-insert";
-
+	std::string options = "--allow-keywords --extended-insert --max-allowed-packet=1G --net-buffer-length=32704";
 	if (IsDumpWithNoData()) {
 		options += " --no-data";
 	}

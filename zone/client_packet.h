@@ -101,6 +101,15 @@
 	void Handle_OP_DuelResponse2(const EQApplicationPacket *app);
 	void Handle_OP_DumpName(const EQApplicationPacket *app);
 	void Handle_OP_Dye(const EQApplicationPacket *app);
+	void Handle_OP_DzAddPlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app);
+	void Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_DzListTimers(const EQApplicationPacket *app);
+	void Handle_OP_DzMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_DzPlayerList(const EQApplicationPacket *app);
+	void Handle_OP_DzRemovePlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzSwapPlayer(const EQApplicationPacket *app);
+	void Handle_OP_DzQuit(const EQApplicationPacket *app);
 	void Handle_OP_Emote(const EQApplicationPacket *app);
 	void Handle_OP_EndLootRequest(const EQApplicationPacket *app);
 	void Handle_OP_EnvDamage(const EQApplicationPacket *app);
@@ -174,6 +183,7 @@
 	void Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app);
 	void Handle_OP_Jump(const EQApplicationPacket *app);
 	void Handle_OP_KeyRing(const EQApplicationPacket *app);
+	void Handle_OP_KickPlayers(const EQApplicationPacket *app);
 	void Handle_OP_LDoNButton(const EQApplicationPacket *app);
 	void Handle_OP_LDoNDisarmTraps(const EQApplicationPacket *app);
 	void Handle_OP_LDoNInspect(const EQApplicationPacket *app);

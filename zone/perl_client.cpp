@@ -37,11 +37,25 @@
 #endif
 
 #include "client.h"
+#include "expedition.h"
 #include "titles.h"
 
 #ifdef THIS        /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
+
+#define VALIDATE_THIS_IS_CLIENT \
+	do { \
+		if (sv_derived_from(ST(0), "Client")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Client*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Client"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_Client_SendSound); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendSound) {
@@ -4707,6 +4721,50 @@ XS(XS_Client_AddCrystals) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetEbonCrystals);
+XS(XS_Client_SetEbonCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetEbonCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetEbonCrystals(value);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetRadiantCrystals);
+XS(XS_Client_SetRadiantCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetRadiantCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		THIS->SetRadiantCrystals(value);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVPPoints) {
 	dXSARGS;
@@ -5293,6 +5351,33 @@ XS(XS_Client_GetSpellBookSlotBySpellID) {
 		RETVAL = THIS->FindSpellBookSlotBySpellID(spell_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetSpellIDByBookSlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetSpellIDByBookSlot) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetSpellIDByBookSlot(THIS, int slot_id)");
+	{
+		Client* THIS;
+		int    RETVAL;
+		int	   slot_id = SvUV(ST(1));
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		RETVAL = THIS->GetSpellIDByBookSlot(slot_id);
+		XSprePUSH;
+		PUSHi((IV)RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6549,7 +6634,7 @@ XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Popup2) {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
+		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
 	{
 		Client *THIS;
 		char   *Title = (char *) SvPV_nolen(ST(1));
@@ -6688,6 +6773,520 @@ XS(XS_Client_GetClientMaxLevel) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_CreateExpedition);
+XS(XS_Client_CreateExpedition) {
+	dXSARGS;
+	if (items != 7 && items != 8) {
+		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, string zone_name, uint32 zone_version, uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, [bool disable_messages = false])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string zone_name(SvPV_nolen(ST(1)));
+	uint32 zone_version = (uint32)SvUV(ST(2));
+	uint32 duration = (uint32)SvUV(ST(3));
+	std::string expedition_name(SvPV_nolen(ST(4)));
+	uint32 min_players = (uint32)SvUV(ST(5));
+	uint32 max_players = (uint32)SvUV(ST(6));
+	bool disable_messages = (items > 7) ? (bool)SvTRUE(ST(7)) : false;
+
+	Expedition* RETVAL = THIS->CreateExpedition(zone_name, zone_version, duration,
+		expedition_name, min_players, max_players, disable_messages);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpedition);
+XS(XS_Client_GetExpedition) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpedition(THIS)");
+	}
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	Expedition* RETVAL = THIS->GetExpedition();
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpeditionLockouts);
+XS(XS_Client_GetExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS, [string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	HV* hash = newHV();
+	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	auto lockouts = THIS->GetExpeditionLockouts();
+
+	for (const auto& lockout : lockouts)
+	{
+		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
+		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
+
+		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
+		if (!entry)
+		{
+			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // takes ownership of hash
+			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
+			{
+				hash_ref = event_hash_ref; // save ref to event hash for return
+			}
+			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+		}
+
+		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV)
+		{
+			HV* event_hash = (HV*)SvRV(*entry);
+			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
+				newSVuv(lockout.GetSecondsRemaining()), 0);
+		}
+	}
+
+	SV* rv = &PL_sv_undef;
+
+	if (!expedition_name.empty())
+	{
+		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
+	}
+	else
+	{
+		rv = sv_2mortal(newRV_noinc((SV*)hash)); // owns expedition hash
+	}
+
+	ST(0) = rv;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLockoutExpeditionUUID);
+XS(XS_Client_GetLockoutExpeditionUUID) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::GetLockoutExpeditionUUID(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	auto lockout = THIS->GetExpeditionLockout(expedition_name, event_name);
+	if (lockout)
+	{
+		XSRETURN_PV(lockout->GetExpeditionUUID().c_str());
+	}
+
+	XSRETURN_UNDEF;
+}
+
+XS(XS_Client_AddExpeditionLockout);
+XS(XS_Client_AddExpeditionLockout) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds, [string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	uint32 seconds = (uint32)SvUV(ST(3));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_AddExpeditionLockoutDuration);
+XS(XS_Client_AddExpeditionLockoutDuration) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds, [string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	int seconds = static_cast<int>(SvUV(ST(3)));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveAllExpeditionLockouts);
+XS(XS_Client_RemoveAllExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS, [string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	THIS->RemoveAllExpeditionLockouts(expedition_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveExpeditionLockout);
+XS(XS_Client_RemoveExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	THIS->RemoveExpeditionLockout(expedition_name, event_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasExpeditionLockout);
+XS(XS_Client_HasExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::HasExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	bool result = THIS->HasExpeditionLockout(expedition_name, event_name);
+	ST(0) = boolSV(result);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_MovePCDynamicZone);
+XS(XS_Client_MovePCDynamicZone) {
+	dXSARGS;
+	if (items != 2 && items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id | string zone_name, [int zone_version = -1], [bool message_if_invalid = true])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	if (SvTYPE(ST(1)) == SVt_PV)
+	{
+		std::string zone_name(SvPV_nolen(ST(1)));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 4)
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version, (bool)SvTRUE(ST(3)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version);
+		}
+	}
+	else if (SvTYPE(ST(1)) == SVt_IV)
+	{
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 3)
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version, (bool)SvTRUE(ST(2)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version);
+		}
+	}
+	else
+	{
+		Perl_croak(aTHX_ "Client::MovePCDynamicZone expected an integer or string");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_Fling); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_Fling) {
+	dXSARGS;
+	if (items < 5 || items > 7)
+		Perl_croak(aTHX_ "Usage: Client::Fling(THIS, value, target_x, target_y, target_z, ignore_los, clipping)");
+	{
+		Client*		THIS;
+		float value = (float) SvNV(ST(1));
+		float target_x = (float) SvNV(ST(2));
+		float target_y = (float) SvNV(ST(3));
+		float target_z = (float) SvNV(ST(4));
+		bool ignore_los = false;
+		bool clipping = false;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client *,tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+
+		if(THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+		
+		if (items > 5)
+			ignore_los = (bool) SvTRUE(ST(5));
+			
+		if (items > 6)
+			clipping = (bool) SvTRUE(ST(6));
+
+		THIS->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasDisciplineLearned); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_HasDisciplineLearned) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasDisciplineLearned(THIS, uint16 spell_id)");
+	{
+		Client *THIS;
+		bool has_learned;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV *) SvRV(ST(0)));
+			THIS = INT2PTR(Client *, tmp);
+		} else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		has_learned = THIS->HasDisciplineLearned(spell_id);
+		ST(0) = boolSV(has_learned);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetClassBitmask);
+XS(XS_Client_GetClassBitmask) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetClassBitmask(THIS)");
+	{
+		Client* THIS;
+		int client_bitmask = 0;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		client_bitmask = GetPlayerClassBit(THIS->GetClass());
+		XSprePUSH;
+		PUSHu((UV) client_bitmask);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetRaceBitmask);
+XS(XS_Client_GetRaceBitmask) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetRaceBitmask(THIS)");
+	{
+		Client* THIS;
+		int client_bitmask = 0;
+		dXSTARG;
+
+		if (sv_derived_from(ST(0), "Client")) {
+			IV tmp = SvIV((SV*)SvRV(ST(0)));
+			THIS = INT2PTR(Client*, tmp);
+		}
+		else
+			Perl_croak(aTHX_ "THIS is not of type Client");
+		if (THIS == nullptr)
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
+
+		client_bitmask = GetPlayerRaceBit(THIS->GetBaseRace());
+		XSprePUSH;
+		PUSHu((UV) client_bitmask);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLearnableDisciplines);
+XS(XS_Client_GetLearnableDisciplines) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnableDisciplines(THIS, [uint8 min_level, uint8 max_level])");
+
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learnable_disciplines = THIS->GetLearnableDisciplines(min_level, max_level);
+	auto learnable_size = learnable_disciplines.size();
+	if (learnable_size > 0) {
+		EXTEND(sp, learnable_size);
+		for (int index = 0; index < learnable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learnable_disciplines[index]));
+		}
+		XSRETURN(learnable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLearnedDisciplines);
+XS(XS_Client_GetLearnedDisciplines) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnedDisciplines(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learned_disciplines = THIS->GetLearnedDisciplines();
+	auto learned_size = learned_disciplines.size();
+	if (learned_size > 0) {
+		EXTEND(sp, learned_size);
+		for (int index = 0; index < learned_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learned_disciplines[index]));
+		}
+		XSRETURN(learned_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetMemmedSpells);
+XS(XS_Client_GetMemmedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetMemmedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto memmed_spells = THIS->GetMemmedSpells();
+	auto memmed_size = memmed_spells.size();
+	if (memmed_size > 0) {
+		EXTEND(sp, memmed_size);
+		for (int index = 0; index < memmed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(memmed_spells[index]));
+		}
+		XSRETURN(memmed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribeableSpells);
+XS(XS_Client_GetScribeableSpells) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetScribeableSpells(THIS, [uint8 min_level, uint8 max_level])");
+	
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribeable_spells = THIS->GetScribeableSpells(min_level, max_level);
+	auto scribeable_size = scribeable_spells.size();
+	if (scribeable_size > 0) {
+		EXTEND(sp, scribeable_size);
+		for (int index = 0; index < scribeable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribeable_spells[index]));
+		}
+		XSRETURN(scribeable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribedSpells);
+XS(XS_Client_GetScribedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetScribedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribed_spells = THIS->GetScribedSpells();
+	auto scribed_size = scribed_spells.size();
+	if (scribed_size > 0) {
+		EXTEND(sp, scribed_size);
+		for (int index = 0; index < scribed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribed_spells[index]));
+		}
+		XSRETURN(scribed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -6715,6 +7314,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
+	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
+	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
 	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
@@ -6733,6 +7334,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "CheckSpecializeIncrease"), XS_Client_CheckSpecializeIncrease, file, "$$");
 	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
+	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
@@ -6743,6 +7345,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
+	newXSproto(strcpy(buf, "Fling"), XS_Client_Fling, file, "$$$$$;$$");
 	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
 	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
 	newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
@@ -6773,6 +7376,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetBindZoneID"), XS_Client_GetBindZoneID, file, "$$");
 	newXSproto(strcpy(buf, "GetCarriedMoney"), XS_Client_GetCarriedMoney, file, "$");
 	newXSproto(strcpy(buf, "GetCharacterFactionLevel"), XS_Client_GetCharacterFactionLevel, file, "$$");
+	newXSproto(strcpy(buf, "GetClassBitmask"), XS_Client_GetClassBitmask, file, "$");
 	newXSproto(strcpy(buf, "GetClientMaxLevel"), XS_Client_GetClientMaxLevel, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersion"), XS_Client_GetClientVersion, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersionBit"), XS_Client_GetClientVersionBit, file, "$");
@@ -6787,6 +7391,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetEndurance"), XS_Client_GetEndurance, file, "$");
 	newXSproto(strcpy(buf, "GetEnduranceRatio"), XS_Client_GetEnduranceRatio, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
+	newXSproto(strcpy(buf, "GetExpedition"), XS_Client_GetExpedition, file, "$");
+	newXSproto(strcpy(buf, "GetExpeditionLockouts"), XS_Client_GetExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "GetFace"), XS_Client_GetFace, file, "$");
 	newXSproto(strcpy(buf, "GetFactionLevel"), XS_Client_GetFactionLevel, file, "$$$$$$$$");
 	newXSproto(strcpy(buf, "GetFeigned"), XS_Client_GetFeigned, file, "$");
@@ -6809,23 +7415,31 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
+	newXSproto(strcpy(buf, "GetLearnableDisciplines"), XS_Client_GetLearnableDisciplines, file, "$;$$");
+	newXSproto(strcpy(buf, "GetLearnedDisciplines"), XS_Client_GetLearnedDisciplines, file, "$");
+	newXSproto(strcpy(buf, "GetLockoutExpeditionUUID"), XS_Client_GetLockoutExpeditionUUID, file, "$$$");
 	newXSproto(strcpy(buf, "GetMaxEndurance"), XS_Client_GetMaxEndurance, file, "$");
+	newXSproto(strcpy(buf, "GetMemmedSpells"), XS_Client_GetMemmedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
 	newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
 	newXSproto(strcpy(buf, "GetPVP"), XS_Client_GetPVP, file, "$");
 	newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
+	newXSproto(strcpy(buf, "GetRaceBitmask"), XS_Client_GetRaceBitmask, file, "$");
 	newXSproto(strcpy(buf, "GetRadiantCrystals"), XS_Client_GetRadiantCrystals, file, "$");
 	newXSproto(strcpy(buf, "GetRaid"), XS_Client_GetRaid, file, "$");
 	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
 	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
 	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
+	newXSproto(strcpy(buf, "GetScribeableSpells"), XS_Client_GetScribeableSpells, file, "$;$$");
+	newXSproto(strcpy(buf, "GetScribedSpells"), XS_Client_GetScribedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
+	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
 	newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
+	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$");
 	newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
 	newXSproto(strcpy(buf, "GetThirst"), XS_Client_GetThirst, file, "$$");
 	newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
@@ -6835,6 +7449,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
 	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
+	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
+	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
@@ -6866,6 +7482,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MaxSkill"), XS_Client_MaxSkill, file, "$$;$$");
 	newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 	newXSproto(strcpy(buf, "MovePC"), XS_Client_MovePC, file, "$$$$$$");
+	newXSproto(strcpy(buf, "MovePCDynamicZone"), XS_Client_MovePCDynamicZone, file, "$$;$$");
 	newXSproto(strcpy(buf, "MovePCInstance"), XS_Client_MovePCInstance, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
@@ -6882,6 +7499,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 	newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
+	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
@@ -6914,6 +7533,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
 	newXSproto(strcpy(buf, "SetDuelTarget"), XS_Client_SetDuelTarget, file, "$$");
+	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
 	newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
@@ -6926,6 +7546,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
+	newXSproto(strcpy(buf, "SetRadiantCrystals"), XS_Client_SetRadiantCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetSecondaryWeaponOrnamentation"), XS_Client_SetSecondaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetSkill"), XS_Client_SetSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetSkillPoints"), XS_Client_SetSkillPoints, file, "$$");

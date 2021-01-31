@@ -49,6 +49,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
+#include "expedition.h"
+#include "expedition_database.h"
 #include "guild_mgr.h"
 #include "merc.h"
 #include "petitions.h"
@@ -191,6 +193,15 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_DuelResponse2] = &Client::Handle_OP_DuelResponse2;
 	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_Dye] = &Client::Handle_OP_Dye;
+	ConnectedOpcodes[OP_DzAddPlayer] = &Client::Handle_OP_DzAddPlayer;
+	ConnectedOpcodes[OP_DzChooseZoneReply] = &Client::Handle_OP_DzChooseZoneReply;
+	ConnectedOpcodes[OP_DzExpeditionInviteResponse] = &Client::Handle_OP_DzExpeditionInviteResponse;
+	ConnectedOpcodes[OP_DzListTimers] = &Client::Handle_OP_DzListTimers;
+	ConnectedOpcodes[OP_DzMakeLeader] = &Client::Handle_OP_DzMakeLeader;
+	ConnectedOpcodes[OP_DzPlayerList] = &Client::Handle_OP_DzPlayerList;
+	ConnectedOpcodes[OP_DzRemovePlayer] = &Client::Handle_OP_DzRemovePlayer;
+	ConnectedOpcodes[OP_DzSwapPlayer] = &Client::Handle_OP_DzSwapPlayer;
+	ConnectedOpcodes[OP_DzQuit] = &Client::Handle_OP_DzQuit;
 	ConnectedOpcodes[OP_Emote] = &Client::Handle_OP_Emote;
 	ConnectedOpcodes[OP_EndLootRequest] = &Client::Handle_OP_EndLootRequest;
 	ConnectedOpcodes[OP_EnvDamage] = &Client::Handle_OP_EnvDamage;
@@ -266,6 +277,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
+	ConnectedOpcodes[OP_KickPlayers] = &Client::Handle_OP_KickPlayers;
 	ConnectedOpcodes[OP_LDoNButton] = &Client::Handle_OP_LDoNButton;
 	ConnectedOpcodes[OP_LDoNDisarmTraps] = &Client::Handle_OP_LDoNDisarmTraps;
 	ConnectedOpcodes[OP_LDoNInspect] = &Client::Handle_OP_LDoNInspect;
@@ -885,6 +897,8 @@ void Client::CompleteConnect()
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
+	UpdateExpeditionInfoAndLockouts();
+
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
 	strcpy((char*)pack->pBuffer, GetName());
@@ -920,7 +934,7 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	if (GetGM()) {
+	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}
 
@@ -1701,13 +1715,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	m_expedition_id = ExpeditionDatabase::GetExpeditionIDFromCharacterID(CharacterID());
+
 	/**
 	 * DevTools Load Settings
 	 */
 	if (Admin() >= EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
-		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
-			dev_tools_window_enabled = false;
+			dev_tools_enabled = false;
 		}
 	}
 
@@ -2025,12 +2041,10 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	else if (aps->Type == NorrathsKeepersMerchant)
 	{
 		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	else if (aps->Type == DarkReignMerchant)
 	{
 		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	int16 charges = 1;
 	if (item->MaxCharges != 0)
@@ -4533,22 +4547,62 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		rewind_timer.Start(30000, true);
 	}
 
-	/* Handle client aggro scanning timers NPCs */
-	is_client_moving = (cy == m_Position.y && cx == m_Position.x) ? false : true;
+
+	is_client_moving = !(cy == m_Position.y && cx == m_Position.x);
+
+
+	/**
+	 * Client aggro scanning
+	 */
+	const uint16 client_scan_npc_aggro_timer_idle   = RuleI(Aggro, ClientAggroCheckIdleInterval);
+	const uint16 client_scan_npc_aggro_timer_moving = RuleI(Aggro, ClientAggroCheckMovingInterval);
+
+	LogAggroDetail(
+		"ClientUpdate [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		client_scan_npc_aggro_timer.GetRemainingTime()
+	);
 
 	if (is_client_moving) {
-		LogDebug("ClientUpdate: Client is moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() > 1000) {
+		if (client_scan_npc_aggro_timer.GetRemainingTime() > client_scan_npc_aggro_timer_moving) {
+			LogAggroDetail("Client [{}] Restarting with moving timer", GetCleanName());
 			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(500);
+			client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_moving);
+			client_scan_npc_aggro_timer.Trigger();
 		}
 	}
-	else {
-		LogDebug("ClientUpdate: Client is NOT moving - scan timer is: [{}]", client_scan_npc_aggro_timer.GetDuration());
-		if (client_scan_npc_aggro_timer.GetDuration() < 1000) {
-			client_scan_npc_aggro_timer.Disable();
-			client_scan_npc_aggro_timer.Start(3000);
+	else if (client_scan_npc_aggro_timer.GetDuration() == client_scan_npc_aggro_timer_moving) {
+		LogAggroDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		client_scan_npc_aggro_timer.Disable();
+		client_scan_npc_aggro_timer.Start(client_scan_npc_aggro_timer_idle);
+	}
+
+	/**
+	 * Client mob close list cache scan timer
+	 */
+	const uint16 client_mob_close_scan_timer_moving = 6000;
+	const uint16 client_mob_close_scan_timer_idle   = 60000;
+
+	LogAIScanCloseDetail(
+		"Client [{}] {}moving, scan timer [{}]",
+		GetCleanName(),
+		is_client_moving ? "" : "NOT ",
+		mob_close_scan_timer.GetRemainingTime()
+	);
+
+	if (is_client_moving) {
+		if (mob_close_scan_timer.GetRemainingTime() > client_mob_close_scan_timer_moving) {
+			LogAIScanCloseDetail("Client [{}] Restarting with moving timer", GetCleanName());
+			mob_close_scan_timer.Disable();
+			mob_close_scan_timer.Start(client_mob_close_scan_timer_moving);
+			mob_close_scan_timer.Trigger();
 		}
+	}
+	else if (mob_close_scan_timer.GetDuration() == client_mob_close_scan_timer_moving) {
+		LogAIScanCloseDetail("Client [{}] Restarting with idle timer", GetCleanName());
+		mob_close_scan_timer.Disable();
+		mob_close_scan_timer.Start(client_mob_close_scan_timer_idle);
 	}
 
 	/**
@@ -5564,6 +5618,116 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 		DyeArmor(dye);
 	}
 	return;
+}
+
+void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzAddPlayer(this, dzcmd->name);
+	}
+	else
+	{
+		// the only /dz command that sends an error message if no active expedition
+		Message(Chat::System, DZ_YOU_NOT_ASSIGNED);
+	}
+}
+
+void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
+{
+	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
+	LogDynamicZones(
+		"Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
+		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2
+	);
+
+	if (!dzmsg->dz_instance_id || !database.VerifyInstanceAlive(dzmsg->dz_instance_id, CharacterID()))
+	{
+		// live just no-ops this without a message
+		LogDynamicZones(
+			"Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
+			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id
+		);
+		return;
+	}
+
+	auto client_dzs = GetDynamicZones();
+	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZoneInfo dz_info) {
+		return dz_info.dynamic_zone.IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id);
+	});
+
+	if (it != client_dzs.end())
+	{
+		DynamicZoneLocation loc = it->dynamic_zone.GetZoneInLocation();
+		ZoneMode zone_mode = it->dynamic_zone.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
+	}
+}
+
+void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
+{
+	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
+	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
+	m_pending_expedition_invite = { 0 }; // clear before re-validating
+
+	if (expedition)
+	{
+		auto dzmsg = reinterpret_cast<ExpeditionInviteResponse_Struct*>(app->pBuffer);
+		expedition->DzInviteResponse(this, dzmsg->accepted, swap_remove_name);
+	}
+}
+
+void Client::Handle_OP_DzListTimers(const EQApplicationPacket *app)
+{
+	DzListTimers();
+}
+
+void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzMakeLeader(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzPlayerList(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzPlayerList(this);
+	}
+}
+
+void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzRemovePlayer(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommandSwap_Struct*>(app->pBuffer);
+		expedition->DzSwapPlayer(this, dzcmd->rem_player_name, dzcmd->add_player_name);
+	}
+}
+
+void Client::Handle_OP_DzQuit(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzQuit(this);
+	}
 }
 
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
@@ -8836,6 +9000,23 @@ void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 	KeyRingList();
 }
 
+void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
+{
+	auto buf = reinterpret_cast<KickPlayers_Struct*>(app->pBuffer);
+	if (buf->kick_expedition)
+	{
+		auto expedition = GetExpedition();
+		if (expedition)
+		{
+			expedition->DzKickPlayers(this);
+		}
+	}
+	else if (buf->kick_task)
+	{
+		// todo: shared tasks
+	}
+}
+
 void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(bool))
@@ -10872,8 +11053,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case EQ::popupresponse::MOB_INFO_DISMISS:
-			this->SetDisplayMobInfoWindow(false);
-			this->Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
+			SetDisplayMobInfoWindow(false);
+			Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
 			break;
 		default:
 			break;

@@ -132,6 +132,17 @@ int Lua_Raid::GetGroupNumber(int index) {
 	return self->members[index].GroupNumber;
 }
 
+bool Lua_Raid::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name)
+{
+	Lua_Safe_Call_Bool();
+	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name);
+}
+
+bool Lua_Raid::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name, int max_check_count)
+{
+	Lua_Safe_Call_Bool();
+	return self->DoesAnyMemberHaveExpeditionLockout(expedition_name, event_name, max_check_count);
+}
 
 luabind::scope lua_register_raid() {
 	return luabind::class_<Lua_Raid>("Raid")
@@ -158,7 +169,9 @@ luabind::scope lua_register_raid() {
 		.def("TeleportRaid", (int(Lua_Raid::*)(Lua_Mob,uint32,uint32,float,float,float,float))&Lua_Raid::TeleportRaid)
 		.def("GetID", (int(Lua_Raid::*)(void))&Lua_Raid::GetID)
 		.def("GetMember", (Lua_Client(Lua_Raid::*)(int))&Lua_Raid::GetMember)
-		.def("GetGroupNumber", (int(Lua_Raid::*)(int))&Lua_Raid::GetGroupNumber);
+		.def("GetGroupNumber", (int(Lua_Raid::*)(int))&Lua_Raid::GetGroupNumber)
+		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Raid::*)(std::string, std::string))&Lua_Raid::DoesAnyMemberHaveExpeditionLockout)
+		.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Raid::*)(std::string, std::string, int))&Lua_Raid::DoesAnyMemberHaveExpeditionLockout);
 }
 
 #endif

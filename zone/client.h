@@ -21,12 +21,18 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
+class DynamicZone;
+class Expedition;
+class ExpeditionLockoutTimer;
+class ExpeditionRequest;
 class Group;
 class NPC;
 class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+struct DynamicZoneInfo;
+struct DynamicZoneLocation;
 enum WaterRegionType : int;
 
 namespace EQ
@@ -232,8 +238,8 @@ public:
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;
 
-	bool IsDevToolsWindowEnabled() const;
-	void SetDevToolsWindowEnabled(bool dev_tools_window_enabled);
+	bool IsDevToolsEnabled() const;
+	void SetDevToolsEnabled(bool in_dev_tools_enabled);
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
@@ -283,6 +289,7 @@ public:
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(const CZClientMessageString_Struct* msg);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
@@ -594,9 +601,9 @@ public:
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void AddPVPPoints(uint32 Points);
 	uint32 GetRadiantCrystals() { return m_pp.currentRadCrystals; }
-	void SetRadiantCrystals(uint32 Crystals) { m_pp.currentRadCrystals = Crystals; }
+	void SetRadiantCrystals(uint32 value);
 	uint32 GetEbonCrystals() { return m_pp.currentEbonCrystals; }
-	void SetEbonCrystals(uint32 Crystals) { m_pp.currentEbonCrystals = Crystals; }
+	void SetEbonCrystals(uint32 value);
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 
@@ -777,6 +784,11 @@ public:
 	void UnmemSpellAll(bool update_client = true);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	std::vector<int> GetLearnableDisciplines(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetLearnedDisciplines();
+	std::vector<int> GetMemmedSpells();
+	std::vector<int> GetScribeableSpells(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetScribedSpells();
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
 	void UnscribeSpellAll(bool update_client = true);
@@ -786,6 +798,8 @@ public:
 	bool SpellBucketCheck(uint16 spell_id, uint32 char_id);
 	uint32 GetCharMaxLevelFromQGlobal();
 	uint32 GetCharMaxLevelFromBucket();
+
+	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clipping = false);
 
 	inline bool IsStanding() const {return (playeraction == 0);}
 	inline bool IsSitting() const {return (playeraction == 1);}
@@ -966,6 +980,7 @@ public:
 	void SendDisciplineUpdate();
 	void SendDisciplineTimer(uint32 timer_id, uint32 duration);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
+	bool HasDisciplineLearned(uint16 spell_id);
 
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
@@ -988,6 +1003,7 @@ public:
 	void ProcessInspectRequest(Client* requestee, Client* requester);
 	bool ClientFinishedLoading() { return (conn_state == ClientConnectFinished); }
 	int FindSpellBookSlotBySpellID(uint16 spellid);
+	uint32 GetSpellIDByBookSlot(int book_slot);
 	int GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
@@ -1102,6 +1118,47 @@ public:
 	int LDoNChest_SkillCheck(NPC *target, int skill);
 
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
+
+	// cross zone client messaging helpers (null client argument will fallback to messaging by name)
+	static void SendCrossZoneMessage(
+		Client* client, const std::string& client_name, uint16_t chat_type, const std::string& message);
+	static void SendCrossZoneMessageString(
+		Client* client, const std::string& client_name, uint16_t chat_type,
+		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
+
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
+	void AddExpeditionLockoutDuration(const std::string& expedition_name,
+		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
+	void AddNewExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, uint32_t duration, std::string uuid = {});
+	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
+	Expedition* CreateExpedition(
+		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
+		uint32 min_players, uint32 max_players, bool disable_messages = false);
+	Expedition* GetExpedition() const;
+	uint32 GetExpeditionID() const { return m_expedition_id; }
+	const ExpeditionLockoutTimer* GetExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
+	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
+	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name, bool include_expired = false);
+	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
+	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
+	bool IsInExpedition() const { return m_expedition_id != 0; }
+	void RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db = false);
+	void RemoveExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, bool update_db = false);
+	void RequestPendingExpeditionInvite();
+	void SendExpeditionLockoutTimers();
+	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
+	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
+	void UpdateExpeditionInfoAndLockouts();
+	void DzListTimers();
+	void SetDzRemovalTimer(bool enable_timer);
+	void SendDzCompassUpdate();
+	void GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone);
+	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
+	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
+	std::vector<DynamicZoneInfo> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
@@ -1476,7 +1533,7 @@ private:
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
 	bool display_mob_info_window;
-	bool dev_tools_window_enabled;
+	bool dev_tools_enabled;
 
 	int32 max_end;
 	int32 current_endurance;
@@ -1556,6 +1613,7 @@ private:
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
+	Timer dynamiczone_removal_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -1656,6 +1714,12 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
 	int client_max_level;
+
+	uint32 m_expedition_id = 0;
+	ExpeditionInvite m_pending_expedition_invite { 0 };
+	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
+	glm::vec3 m_quest_compass;
+	bool m_has_quest_compass = false;
 
 #ifdef BOTS
 

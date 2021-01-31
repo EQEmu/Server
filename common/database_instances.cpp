@@ -493,6 +493,9 @@ void Database::DeleteInstance(uint16 instance_id)
 	query = StringFormat("DELETE FROM spawn_condition_values WHERE instance_id=%u", instance_id);
 	QueryDatabase(query);
 
+	query = fmt::format("DELETE FROM dynamic_zones WHERE instance_id={}", instance_id);
+	QueryDatabase(query);
+
 	BuryCorpsesInInstance(instance_id);
 }
 
@@ -582,8 +585,7 @@ void Database::PurgeExpiredInstances()
 	QueryDatabase(fmt::format("DELETE FROM respawn_times WHERE instance_id IN ({})", imploded_instance_ids));
 	QueryDatabase(fmt::format("DELETE FROM spawn_condition_values WHERE instance_id IN ({})", imploded_instance_ids));
 	QueryDatabase(fmt::format("UPDATE character_corpses SET is_buried = 1, instance_id = 0 WHERE instance_id IN ({})", imploded_instance_ids));
-
-	
+	QueryDatabase(fmt::format("DELETE FROM dynamic_zones WHERE instance_id IN ({})", imploded_instance_ids));
 }
 
 void Database::SetInstanceDuration(uint16 instance_id, uint32 new_duration)
