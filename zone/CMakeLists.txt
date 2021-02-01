@@ -109,6 +109,7 @@ SET(zone_sources
 	perl_expedition.cpp
 	perl_groups.cpp
 	perl_hateentry.cpp
+	perl_inventory.cpp
 	perl_mob.cpp
 	perl_npc.cpp
 	perl_object.cpp

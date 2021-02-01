@@ -4129,6 +4129,15 @@ Mob *QuestManager::GetOwner() const {
 	return nullptr;
 }
 
+EQ::InventoryProfile *QuestManager::GetInventory() const {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return &e.initiator->GetInv();
+	}
+
+	return nullptr;
+}
+
 EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -4217,4 +4226,11 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
+}
+
+EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned) const {
+	if (database.GetItem(item_id)) {
+		return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
+	}
+	return nullptr;
 }
