@@ -308,13 +308,12 @@ void NPC::CalculateNewWaypoint()
 	{
 		bool on_center = Waypoints[cur_wp].centerpoint;
 		std::vector<wplist> random_waypoints;
-		for (auto &w : Waypoints)
+		for (auto &wpl : Waypoints)
 		{
-			wplist wpl = w;
 			if (wpl.index != cur_wp &&
 				((on_center && !wpl.centerpoint) || (!on_center && wpl.centerpoint)))
 			{
-				random_waypoints.push_back(w);
+				random_waypoints.push_back(wpl);
 			}
 		}
 
@@ -390,12 +389,11 @@ void NPC::CalculateNewWaypoint()
 					// if we have arrived at a waypoint that is NOT a centerpoint, then check for the existence of any centerpoint waypoint
 					// if any exists then randomly go to it otherwise go to one that exist.
 					std::vector<wplist> random_centerpoints;
-					for (auto& w : Waypoints)
+					for (auto& wpl : Waypoints)
 					{
-						wplist wpl = w;
 						if (wpl.index != cur_wp && wpl.centerpoint)
 						{
-							random_centerpoints.push_back(w);
+							random_centerpoints.push_back(wpl);
 						}
 					}
 
@@ -417,12 +415,11 @@ void NPC::CalculateNewWaypoint()
 					// Setting a negative number in pause of the select waypoints will NOT be included in the group of waypoints to be random.
 					// This will cause the NPC to not stop and pause in any of the waypoints that is not part of random waypoints.
 					std::vector<wplist> random_waypoints;
-					for (auto& w : Waypoints)
+					for (auto& wpl : Waypoints)
 					{
-						wplist wpl = w;
 						if (wpl.index != cur_wp && wpl.pause >= 0 && !wpl.centerpoint)
 						{
-							random_waypoints.push_back(w);
+							random_waypoints.push_back(wpl);
 						}
 					}
 					int windex = zone->random.Roll0(random_waypoints.size());
