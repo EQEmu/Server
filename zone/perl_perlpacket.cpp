@@ -41,6 +41,19 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_PACKET \
+	do { \
+		if (sv_derived_from(ST(0), "PerlPacket")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(PerlPacket*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type PerlPacket"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
+
 XS(XS_PerlPacket_new); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlPacket_new)
 {
@@ -80,16 +93,7 @@ XS(XS_PerlPacket_DESTROY)
 		Perl_croak(aTHX_ "Usage: PerlPacket::DESTROY(THIS)");
 	{
 		PerlPacket *		THIS;
-
-		if (SvROK(ST(0))) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not a reference");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		delete THIS;
 	}
 	XSRETURN_EMPTY;
@@ -105,16 +109,7 @@ XS(XS_PerlPacket_SetOpcode)
 		PerlPacket *		THIS;
 		bool		RETVAL;
 		char *		opcode = (char *)SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->SetOpcode(opcode);
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -131,16 +126,7 @@ XS(XS_PerlPacket_Resize)
 	{
 		PerlPacket *		THIS;
 		uint32		len = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->Resize(len);
 	}
 	XSRETURN_EMPTY;
@@ -155,16 +141,7 @@ XS(XS_PerlPacket_SendTo)
 	{
 		PerlPacket *		THIS;
 		Client *		who;
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV*)SvRV(ST(1)));
 			who = INT2PTR(Client *,tmp);
@@ -187,16 +164,7 @@ XS(XS_PerlPacket_SendToAll)
 		Perl_croak(aTHX_ "Usage: PerlPacket::SendToAll(THIS)");
 	{
 		PerlPacket *		THIS;
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SendToAll();
 	}
 	XSRETURN_EMPTY;
@@ -210,16 +178,7 @@ XS(XS_PerlPacket_Zero)
 		Perl_croak(aTHX_ "Usage: PerlPacket::Zero(THIS)");
 	{
 		PerlPacket *		THIS;
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->Zero();
 	}
 	XSRETURN_EMPTY;
@@ -235,16 +194,7 @@ XS(XS_PerlPacket_FromArray)
 		PerlPacket *		THIS;
 		int *		numbers;
 		uint32		length = (uint32)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		AV *av_numbers;
 		if (SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVAV)
 			av_numbers = (AV*)SvRV(ST(1));
@@ -277,16 +227,7 @@ XS(XS_PerlPacket_SetByte)
 		PerlPacket *		THIS;
 		uint32		pos = (uint32)SvUV(ST(1));
 		uint8		val = (uint8)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetByte(pos, val);
 	}
 	XSRETURN_EMPTY;
@@ -302,16 +243,7 @@ XS(XS_PerlPacket_SetShort)
 		PerlPacket *		THIS;
 		uint32		pos = (uint32)SvUV(ST(1));
 		uint16		val = (uint16)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetShort(pos, val);
 	}
 	XSRETURN_EMPTY;
@@ -327,16 +259,7 @@ XS(XS_PerlPacket_SetLong)
 		PerlPacket *		THIS;
 		uint32		pos = (uint32)SvUV(ST(1));
 		uint32		val = (uint32)SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetLong(pos, val);
 	}
 	XSRETURN_EMPTY;
@@ -352,16 +275,7 @@ XS(XS_PerlPacket_SetFloat)
 		PerlPacket *		THIS;
 		uint32		pos = (uint32)SvUV(ST(1));
 		float		val = (float)SvNV(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetFloat(pos, val);
 	}
 	XSRETURN_EMPTY;
@@ -377,16 +291,7 @@ XS(XS_PerlPacket_SetString)
 		PerlPacket *		THIS;
 		uint32		pos = (uint32)SvUV(ST(1));
 		char *		str = (char *)SvPV_nolen(ST(2));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetString(pos, str);
 	}
 	XSRETURN_EMPTY;
@@ -403,16 +308,7 @@ XS(XS_PerlPacket_SetEQ1319)
 		uint32		pos = (uint32)SvUV(ST(1));
 		float		part13 = (float)SvNV(ST(2));
 		float		part19 = (float)SvNV(ST(3));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetEQ1319(pos, part13, part19);
 	}
 	XSRETURN_EMPTY;
@@ -429,16 +325,7 @@ XS(XS_PerlPacket_SetEQ1913)
 		uint32		pos = (uint32)SvUV(ST(1));
 		float		part19 = (float)SvNV(ST(2));
 		float		part13 = (float)SvNV(ST(3));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		THIS->SetEQ1913(pos, part19, part13);
 	}
 	XSRETURN_EMPTY;
@@ -455,16 +342,7 @@ XS(XS_PerlPacket_GetByte)
 		uint8		RETVAL;
 		dXSTARG;
 		uint32		pos = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetByte(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
@@ -482,16 +360,7 @@ XS(XS_PerlPacket_GetShort)
 		uint16		RETVAL;
 		dXSTARG;
 		uint32		pos = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetShort(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
@@ -509,16 +378,7 @@ XS(XS_PerlPacket_GetLong)
 		uint32		RETVAL;
 		dXSTARG;
 		uint32		pos = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetLong(pos);
 		XSprePUSH; PUSHu((UV)RETVAL);
 	}
@@ -536,16 +396,7 @@ XS(XS_PerlPacket_GetFloat)
 		float		RETVAL;
 		dXSTARG;
 		uint32		pos = (uint32)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "PerlPacket")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(PerlPacket *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type PerlPacket");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_PACKET;
 		RETVAL = THIS->GetFloat(pos);
 		XSprePUSH; PUSHn((double)RETVAL);
 	}
