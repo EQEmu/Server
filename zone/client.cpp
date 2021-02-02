@@ -9862,13 +9862,13 @@ void Client::SendDzCompassUpdate()
 
 	for (const auto& client_dz : GetDynamicZones())
 	{
-		auto compass = client_dz.dynamic_zone.GetCompassLocation();
-		if (zone && zone->GetZoneID() == compass.zone_id && zone->GetInstanceID() == 0)
+		auto compass = client_dz->GetCompassLocation();
+		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
 			DynamicZoneCompassEntry_Struct entry;
-			entry.dz_zone_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetZoneID());
-			entry.dz_instance_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetInstanceID());
-			entry.dz_type = static_cast<uint32_t>(client_dz.dynamic_zone.GetType());
+			entry.dz_zone_id = client_dz->GetZoneID();
+			entry.dz_instance_id = client_dz->GetInstanceID();
+			entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
 			entry.x = compass.x;
 			entry.y = compass.y;
 			entry.z = compass.z;
@@ -9919,9 +9919,9 @@ void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
 	}
 }
 
-std::vector<DynamicZoneInfo> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
+std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
 {
-	std::vector<DynamicZoneInfo> client_dzs;
+	std::vector<DynamicZone*> client_dzs;
 
 	// check client systems for any associated dynamic zones optionally filtered by zone
 	Expedition* expedition = GetExpedition();
@@ -9929,7 +9929,7 @@ std::vector<DynamicZoneInfo> Client::GetDynamicZones(uint32_t zone_id, int zone_
 	   (zone_id == 0 || expedition->GetDynamicZone().GetZoneID() == zone_id) &&
 	   (zone_version < 0 || expedition->GetDynamicZone().GetZoneVersion() == zone_version))
 	{
-		client_dzs.emplace_back(expedition->GetName(), expedition->GetLeaderName(), expedition->GetDynamicZone());
+		client_dzs.emplace_back(&expedition->GetDynamicZone());
 	}
 
 	// todo: tasks, missions (shared tasks), and quests with an associated dz to zone_id
@@ -9955,36 +9955,39 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 	}
 	else if (client_dzs.size() == 1)
 	{
-		const DynamicZone& dz = client_dzs[0].dynamic_zone;
-		DynamicZoneLocation zonein = dz.GetZoneInLocation();
-		ZoneMode zone_mode = dz.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
-		MovePC(zone_id, dz.GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
+		auto dz = client_dzs.front();
+		DynamicZoneLocation zonein = dz->GetZoneInLocation();
+		ZoneMode zone_mode = dz->HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(zone_id, dz->GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
 	}
 	else
 	{
-		LogDynamicZonesDetail(
-			"Sending DzSwitchListWnd to character [{}] associated with [{}] dynamic zone(s)",
-			CharacterID(), client_dzs.size());
+		LogDynamicZonesDetail("Sending DzSwitchListWnd to [{}] for zone [{}] with [{}] dynamic zone(s)",
+			CharacterID(), zone_id, client_dzs.size());
 
-		// more than one dynamic zone to this zone, send out the switchlist window
-		// note that this will most likely crash clients if they've reloaded the ui
-		// this occurs on live as well so it may just be a long lasting client bug
-		uint32 count = static_cast<uint32_t>(client_dzs.size());
-		uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
-		uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
-		auto outapp = std::make_unique<EQApplicationPacket>(OP_DzChooseZone, outsize);
-		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
-		outbuf->count = count;
-		for (int i = 0; i < client_dzs.size(); ++i)
-		{
-			outbuf->choices[i].dz_zone_id = client_dzs[i].dynamic_zone.GetZoneID();
-			outbuf->choices[i].dz_instance_id = client_dzs[i].dynamic_zone.GetInstanceID();
-			outbuf->choices[i].dz_type = static_cast<uint32_t>(client_dzs[i].dynamic_zone.GetType());
-			strn0cpy(outbuf->choices[i].description, client_dzs[i].description.c_str(), sizeof(outbuf->choices[i].description));
-			strn0cpy(outbuf->choices[i].leader_name, client_dzs[i].leader_name.c_str(), sizeof(outbuf->choices[i].leader_name));
-		}
-		QueuePacket(outapp.get());
+		// client has more than one dz for this zone, send out the switchlist window
+		QueuePacket(CreateDzSwitchListPacket(client_dzs).get());
 	}
+}
+
+std::unique_ptr<EQApplicationPacket> Client::CreateDzSwitchListPacket(
+	const std::vector<DynamicZone*>& client_dzs)
+{
+	uint32 count = static_cast<uint32_t>(client_dzs.size());
+	uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
+	uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzChooseZone, outsize);
+	auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
+	outbuf->count = count;
+	for (int i = 0; i < client_dzs.size(); ++i)
+	{
+		outbuf->choices[i].dz_zone_id = client_dzs[i]->GetZoneID();
+		outbuf->choices[i].dz_instance_id = client_dzs[i]->GetInstanceID();
+		outbuf->choices[i].dz_type = static_cast<uint32_t>(client_dzs[i]->GetType());
+		strn0cpy(outbuf->choices[i].description, client_dzs[i]->GetName().c_str(), sizeof(outbuf->choices[i].description));
+		strn0cpy(outbuf->choices[i].leader_name, client_dzs[i]->GetLeaderName().c_str(), sizeof(outbuf->choices[i].leader_name));
+	}
+	return outapp;
 }
 
 void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, bool msg_if_invalid)
