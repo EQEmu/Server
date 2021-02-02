@@ -35,6 +35,19 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_HATE \
+	do { \
+		if (sv_derived_from(ST(0), "HateEntry")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(struct_HateList*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type HateEntry"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
+
 XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
@@ -43,15 +56,7 @@ XS(XS_HateEntry_GetEnt) {
 	{
 		struct_HateList *THIS;
 		Mob             *RETVAL;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->entity_on_hatelist;
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -68,15 +73,7 @@ XS(XS_HateEntry_GetHate) {
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->stored_hate_amount;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -93,15 +90,7 @@ XS(XS_HateEntry_GetDamage) {
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->hatelist_damage;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
