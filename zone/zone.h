@@ -33,7 +33,7 @@
 #include "spawn2.h"
 #include "spawngroup.h"
 #include "aa_ability.h"
-#include "dynamiczone.h"
+#include "dynamic_zone.h"
 #include "pathfinder_interface.h"
 #include "global_loot_manager.h"
 

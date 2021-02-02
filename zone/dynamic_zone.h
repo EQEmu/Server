@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef DYNAMICZONE_H
-#define DYNAMICZONE_H
+#ifndef DYNAMIC_ZONE_H
+#define DYNAMIC_ZONE_H
 
 #include <chrono>
 #include <cstdint>
