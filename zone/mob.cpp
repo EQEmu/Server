@@ -94,7 +94,8 @@ Mob::Mob(
 	uint8 in_legtexture,
 	uint8 in_feettexture,
 	uint16 in_usemodel,
-	bool in_always_aggro
+	bool in_always_aggro,
+	bool in_can_open_doors
 ) :
 	attack_timer(2000),
 	attack_dw_timer(2000),
@@ -277,6 +278,7 @@ Mob::Mob(
 	spawned           = false;
 	rare_spawn        = false;
 	always_aggro      = in_always_aggro;
+	can_open_doors	  = in_can_open_doors;
 
 	InitializeBuffSlots();
 

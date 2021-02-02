@@ -148,6 +148,7 @@ struct NPCType
 	uint16	use_model;
 	int8	flymode;
 	bool	always_aggro;
+	bool	can_open_doors;
 };
 
 namespace player_lootitem {

@@ -978,36 +978,33 @@ void Mob::AI_Process() {
 		engaged = false;
 	}
 
-	if (moving) {
-		if (AI_scan_door_open_timer->Check()) {
+	if (can_open_doors && moving && AI_scan_door_open_timer->Check()) {
+		auto      &door_list = entity_list.GetDoorsList();
+		for (auto itr : door_list) {
+			Doors *door = itr.second;
 
-			auto      &door_list = entity_list.GetDoorsList();
-			for (auto itr : door_list) {
-				Doors *door = itr.second;
+			if (door->GetKeyItem())
+				continue;
 
-				if (door->GetKeyItem())
+			if (door->GetLockpick())
+				continue;
+
+			if (door->IsDoorOpen())
+				continue;
+
+			float distance                = DistanceSquared(this->m_Position, door->GetPosition());
+			float distance_scan_door_open = 20;
+
+			if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
+
+				/**
+				 * Make sure we're opening a door within height relevance and not platforms
+				 * above or below
+				 */
+				if (std::abs(this->m_Position.z - door->GetPosition().z) > 10)
 					continue;
 
-				if (door->GetLockpick())
-					continue;
-
-				if (door->IsDoorOpen())
-					continue;
-
-				float distance                = DistanceSquared(this->m_Position, door->GetPosition());
-				float distance_scan_door_open = 20;
-
-				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
-
-					/**
-					 * Make sure we're opening a door within height relevance and not platforms
-					 * above or below
-					 */
-					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10)
-						continue;
-
-					door->ForceOpen(this);
-				}
+				door->ForceOpen(this);
 			}
 		}
 	}
@@ -1860,7 +1857,9 @@ void NPC::AI_SetupNextWaypoint() {
 		
 		SetAppearance(eaStanding, false);
 		
-		entity_list.OpenDoorsNear(this);
+		if (can_open_doors) {
+			entity_list.OpenDoorsNear(this);
+		}
 		
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart

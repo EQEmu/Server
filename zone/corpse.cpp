@@ -155,7 +155,7 @@ Corpse::Corpse(NPC* in_npc, ItemList* in_itemlist, uint32 in_npctypeid, const NP
 	in_npc->GetPosition(), in_npc->GetInnateLightType(), in_npc->GetTexture(),in_npc->GetHelmTexture(),
 	0,0,0,0,0,0,0,0,0,
 	0,0,0,0,0,0,0,0,0,0,EQ::TintProfile(),0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-	(*in_npctypedata)->use_model, false),
+	(*in_npctypedata)->use_model, false, false),
 	corpse_decay_timer(in_decaytime),
 	corpse_rez_timer(0),
 	corpse_delay_timer(RuleI(NPC, CorpseUnlockTimer)),
@@ -263,7 +263,8 @@ Corpse::Corpse(Client* client, int32 in_rezexp) : Mob (
 	0,								  // uint8		in_legtexture,
 	0,								  // uint8		in_feettexture,
 	0,								  // uint8		in_usemodel,
-	0								  // bool		in_always_aggro
+	0,								  // bool		in_always_aggro
+	0								  // bool		in_can_open_doors
 	),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),
@@ -503,6 +504,7 @@ EQ::TintProfile(),
 0,
 0,
 0,
+false,
 false),
 	corpse_decay_timer(RuleI(Character, CorpseDecayTimeMS)),
 	corpse_rez_timer(RuleI(Character, CorpseResTimeMS)),

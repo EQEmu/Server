@@ -162,7 +162,8 @@ public:
 		uint8 in_legtexture,
 		uint8 in_feettexture,
 		uint16 in_usemodel,
-		bool in_always_aggros_foes
+		bool in_always_aggros_foes,
+		bool can_open_doors
 	);
 	virtual ~Mob();
 
@@ -581,6 +582,7 @@ public:
 	bool IsBoat() const;
 	bool IsControllableBoat() const;
 	inline const bool AlwaysAggro() const { return always_aggro; }
+	inline const bool CanOpenDoors() const { return can_open_doors; }
 
 	//Group
 	virtual bool HasRaid() = 0;
@@ -1393,6 +1395,7 @@ protected:
 	float attack_speed; //% increase/decrease in attack speed (not haste)
 	int attack_delay; //delay between attacks in 10ths of seconds
 	bool always_aggro;
+	bool can_open_doors; // Allows mobs to open doors while pathing
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
