@@ -64,15 +64,7 @@ XS(XS_Client_SendSound) {
 		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendSound();
 	}
 	XSRETURN_EMPTY;
@@ -87,15 +79,7 @@ XS(XS_Client_Save) {
 		Client *THIS;
 		bool  RETVAL;
 		uint8 iCommitNow = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Save(iCommitNow);
 		ST(0)            = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -110,15 +94,7 @@ XS(XS_Client_SaveBackup) {
 		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SaveBackup();
 	}
 	XSRETURN_EMPTY;
@@ -132,15 +108,7 @@ XS(XS_Client_Connected) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Connected();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -156,15 +124,7 @@ XS(XS_Client_InZone) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->InZone();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -179,15 +139,7 @@ XS(XS_Client_Kick) {
 		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Kick("Perl Quest");
 	}
 	XSRETURN_EMPTY;
@@ -200,15 +152,7 @@ XS(XS_Client_Disconnect) {
 		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Disconnect();
 	}
 	XSRETURN_EMPTY;
@@ -222,15 +166,7 @@ XS(XS_Client_IsLD) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsLD();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -245,15 +181,7 @@ XS(XS_Client_WorldKick) {
 		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->WorldKick();
 	}
 	XSRETURN_EMPTY;
@@ -266,15 +194,7 @@ XS(XS_Client_SendToGuildHall) {
 		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendToGuildHall();
 	}
 	XSRETURN_EMPTY;
@@ -289,15 +209,7 @@ XS(XS_Client_GetAnon) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAnon();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -312,15 +224,7 @@ XS(XS_Client_Duck) {
 		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Duck();
 	}
 	XSRETURN_EMPTY;
@@ -341,14 +245,7 @@ XS(XS_Client_DyeArmorBySlot) {
 		if (items == 6) {
 			use_tint = (uint8) SvUV(ST(5));
 		}
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->DyeArmorBySlot(slot, red, green, blue, use_tint);
 	}
 	XSRETURN_EMPTY;
@@ -361,15 +258,7 @@ XS(XS_Client_Stand) {
 		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Stand();
 	}
 	XSRETURN_EMPTY;
@@ -383,15 +272,7 @@ XS(XS_Client_SetGM) {
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetGM(toggle);
 	}
 	XSRETURN_EMPTY;
@@ -405,15 +286,7 @@ XS(XS_Client_SetPVP) {
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetPVP(toggle);
 	}
 	XSRETURN_EMPTY;
@@ -427,15 +300,7 @@ XS(XS_Client_GetPVP) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetPVP();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -451,15 +316,7 @@ XS(XS_Client_GetGM) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGM();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -475,15 +332,7 @@ XS(XS_Client_SetBaseClass) {
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseClass(i);
 	}
 	XSRETURN_EMPTY;
@@ -497,15 +346,7 @@ XS(XS_Client_SetBaseRace) {
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseRace(i);
 	}
 	XSRETURN_EMPTY;
@@ -519,15 +360,7 @@ XS(XS_Client_SetBaseGender) {
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseGender(i);
 	}
 	XSRETURN_EMPTY;
@@ -542,15 +375,7 @@ XS(XS_Client_GetBaseFace) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseFace();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -568,15 +393,7 @@ XS(XS_Client_GetLanguageSkill) {
 		uint8  RETVAL;
 		dXSTARG;
 		uint16 n = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLanguageSkill(n);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -593,15 +410,7 @@ XS(XS_Client_GetLastName) {
 		Client     *THIS;
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLastName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -620,15 +429,7 @@ XS(XS_Client_GetLDoNPointsTheme) {
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNPointsTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -645,15 +446,7 @@ XS(XS_Client_GetBaseSTR) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseSTR();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -670,15 +463,7 @@ XS(XS_Client_GetBaseSTA) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseSTA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -695,15 +480,7 @@ XS(XS_Client_GetBaseCHA) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseCHA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -720,15 +497,7 @@ XS(XS_Client_GetBaseDEX) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseDEX();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -745,15 +514,7 @@ XS(XS_Client_GetBaseINT) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseINT();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -770,15 +531,7 @@ XS(XS_Client_GetBaseAGI) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseAGI();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -795,15 +548,7 @@ XS(XS_Client_GetBaseWIS) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseWIS();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -820,15 +565,7 @@ XS(XS_Client_GetWeight) {
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetWeight();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -845,15 +582,7 @@ XS(XS_Client_GetEXP) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEXP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -870,15 +599,7 @@ XS(XS_Client_GetAAExp) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAXP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -895,15 +616,7 @@ XS(XS_Client_GetAAPercent) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAPercent();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -920,15 +633,7 @@ XS(XS_Client_GetTotalSecondsPlayed) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTotalSecondsPlayed();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -946,15 +651,7 @@ XS(XS_Client_UpdateLDoNPoints) {
 		bool   RETVAL;
 		int32  points = (int32) SvIV(ST(1));
 		uint32 theme  = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->UpdateLDoNPoints(points, theme);
 		ST(0)         = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -970,15 +667,7 @@ XS(XS_Client_SetDeity) {
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDeity(i);
 	}
 	XSRETURN_EMPTY;
@@ -994,15 +683,7 @@ XS(XS_Client_AddEXP) {
 		uint32 add_exp = (uint32) SvUV(ST(1));
 		uint8  conlevel;
 		bool   resexp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			conlevel = 0xFF;
 		else {
@@ -1030,15 +711,7 @@ XS(XS_Client_SetEXP) {
 		uint32 set_exp  = (uint32) SvUV(ST(1));
 		uint32 set_aaxp = (uint32) SvUV(ST(2));
 		bool   resexp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			resexp = false;
 		else {
@@ -1062,15 +735,7 @@ XS(XS_Client_SetBindPoint) {
 		float new_x;
 		float new_y;
 		float new_z;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			to_zone = -1;
 		else {
@@ -1116,15 +781,7 @@ XS(XS_Client_GetBindX) {
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1148,15 +805,7 @@ XS(XS_Client_GetBindY) {
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1180,15 +829,7 @@ XS(XS_Client_GetBindZ) {
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1212,15 +853,7 @@ XS(XS_Client_GetBindHeading) {
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1244,15 +877,7 @@ XS(XS_Client_GetBindZoneID) {
 		uint32 index = 0;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1279,15 +904,7 @@ XS(XS_Client_MovePC) {
 		float  y       = (float) SvNV(ST(3));
 		float  z       = (float) SvNV(ST(4));
 		float  heading = (float) SvNV(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MovePC(zoneID, x, y, z, heading);
 		} else {
@@ -1326,15 +943,7 @@ XS(XS_Client_MovePCInstance) {
 		float  y          = (float) SvNV(ST(4));
 		float  z          = (float) SvNV(ST(5));
 		float  heading    = (float) SvNV(ST(6));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
 		} else {
@@ -1369,15 +978,7 @@ XS(XS_Client_MoveZone) {
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZone(zone_short_name);
 		} else {
@@ -1411,15 +1012,7 @@ XS(XS_Client_MoveZoneGroup) {
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneGroup(zone_short_name);
 		} else {
@@ -1453,15 +1046,7 @@ XS(XS_Client_MoveZoneRaid) {
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneRaid(zone_short_name);
 		} else {
@@ -1495,15 +1080,7 @@ XS(XS_Client_MoveZoneInstance) {
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstance(instance_id);
 		} else {
@@ -1537,15 +1114,7 @@ XS(XS_Client_MoveZoneInstanceGroup) {
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstanceGroup(instance_id);
 		} else {
@@ -1579,15 +1148,7 @@ XS(XS_Client_MoveZoneInstanceRaid) {
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstanceRaid(instance_id);
 		} else {
@@ -1621,15 +1182,7 @@ XS(XS_Client_ChangeLastName) {
 	{
 		Client *THIS;
 		char   *in_lastname = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ChangeLastName(in_lastname);
 	}
 	XSRETURN_EMPTY;
@@ -1651,15 +1204,7 @@ XS(XS_Client_GetFactionLevel) {
 		uint32        p_deity  = (uint32) SvUV(ST(5));
 		int32         pFaction = (int32) SvIV(ST(6));
 		Mob *tnpc;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(7), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(7)));
 			tnpc = INT2PTR(Mob *, tmp);
@@ -1687,15 +1232,7 @@ XS(XS_Client_SetFactionLevel) {
 		uint8  char_class = (uint8) SvUV(ST(3));
 		uint8  char_race  = (uint8) SvUV(ST(4));
 		uint8  char_deity = (uint8) SvUV(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
 	}
 	XSRETURN_EMPTY;
@@ -1715,15 +1252,7 @@ XS(XS_Client_SetFactionLevel2) {
 		uint8  char_deity = (uint8) SvUV(ST(5));
 		int32  value      = (int32) SvIV(ST(6));
 		uint8  temp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 7)
 			temp = 0;
 		else {
@@ -1744,15 +1273,7 @@ XS(XS_Client_GetRawItemAC) {
 		Client *THIS;
 		int16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRawItemAC();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1769,15 +1290,7 @@ XS(XS_Client_AccountID) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AccountID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1794,15 +1307,7 @@ XS(XS_Client_AccountName) {
 		Client     *THIS;
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AccountName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -1820,15 +1325,7 @@ XS(XS_Client_Admin) {
 		Client *THIS;
 		int16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Admin();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1845,15 +1342,7 @@ XS(XS_Client_CharacterID) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CharacterID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1869,15 +1358,7 @@ XS(XS_Client_UpdateAdmin) {
 	{
 		Client *THIS;
 		bool iFromDB;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			iFromDB = true;
 		else {
@@ -1897,15 +1378,7 @@ XS(XS_Client_UpdateWho) {
 	{
 		Client *THIS;
 		uint8  remove;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			remove = 0;
 		else {
@@ -1926,15 +1399,7 @@ XS(XS_Client_GuildRank) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GuildRank();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1951,15 +1416,7 @@ XS(XS_Client_GuildID) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GuildID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1976,15 +1433,7 @@ XS(XS_Client_GetFace) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetFace();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2002,15 +1451,7 @@ XS(XS_Client_TakeMoneyFromPP) {
 		bool   RETVAL;
 		bool   updateclient = false;
 		uint32 copper       = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			updateclient = (bool) SvTRUE(ST(2));
 
@@ -2033,15 +1474,7 @@ XS(XS_Client_AddMoneyToPP) {
 		uint32 gold         = (uint32) SvUV(ST(3));
 		uint32 platinum     = (uint32) SvUV(ST(4));
 		bool   updateclient = (bool) SvTRUE(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddMoneyToPP(copper, silver, gold, platinum, updateclient);
 	}
 	XSRETURN_EMPTY;
@@ -2055,15 +1488,7 @@ XS(XS_Client_TGB) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->TGB();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2080,15 +1505,7 @@ XS(XS_Client_GetSkillPoints) {
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSkillPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2104,15 +1521,7 @@ XS(XS_Client_SetSkillPoints) {
 	{
 		Client *THIS;
 		int inp = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSkillPoints(inp);
 	}
 	XSRETURN_EMPTY;
@@ -2127,15 +1536,7 @@ XS(XS_Client_IncreaseSkill) {
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
 		int value;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			value = 1;
 		else {
@@ -2156,15 +1557,7 @@ XS(XS_Client_IncreaseLanguageSkill) {
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
 		int value;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			value = 1;
 		else {
@@ -2186,15 +1579,7 @@ XS(XS_Client_GetRawSkill) {
 		uint32                   RETVAL;
 		dXSTARG;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRawSkill(skill_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2211,15 +1596,7 @@ XS(XS_Client_HasSkill) {
 		Client *THIS;
 		bool                     RETVAL;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasSkill(skill_id);
 		ST(0)                             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2236,15 +1613,7 @@ XS(XS_Client_CanHaveSkill) {
 		Client *THIS;
 		bool                     RETVAL;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CanHaveSkill(skill_id);
 		ST(0)                             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2261,15 +1630,7 @@ XS(XS_Client_SetSkill) {
 		Client *THIS;
 		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value     = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSkill(skill_num, value);
 	}
 	XSRETURN_EMPTY;
@@ -2284,15 +1645,7 @@ XS(XS_Client_AddSkill) {
 		Client                   *THIS;
 		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value   = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddSkill(skillid, value);
 	}
 	XSRETURN_EMPTY;
@@ -2306,15 +1659,7 @@ XS(XS_Client_CheckSpecializeIncrease) {
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->CheckSpecializeIncrease(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2330,15 +1675,7 @@ XS(XS_Client_CheckIncreaseSkill) {
 		bool                     RETVAL;
 		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		int                      chancemodi;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			chancemodi = 0;
 		else {
@@ -2361,15 +1698,7 @@ XS(XS_Client_SetLanguageSkill) {
 		Client *THIS;
 		int    langid = (int) SvIV(ST(1));
 		int    value  = (int) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetLanguageSkill(langid, value);
 	}
 	XSRETURN_EMPTY;
@@ -2388,15 +1717,7 @@ XS(XS_Client_MaxSkill) {
 		uint16                   class_  = 0;
 		uint16                   level   = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			class_ = (uint16) SvUV(ST(2));
 		else
@@ -2421,15 +1742,7 @@ XS(XS_Client_GMKill) {
 		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GMKill();
 	}
 	XSRETURN_EMPTY;
@@ -2443,15 +1756,7 @@ XS(XS_Client_IsMedding) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsMedding();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2468,15 +1773,7 @@ XS(XS_Client_GetDuelTarget) {
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDuelTarget();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2492,15 +1789,7 @@ XS(XS_Client_IsDueling) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsDueling();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2516,15 +1805,7 @@ XS(XS_Client_SetDuelTarget) {
 	{
 		Client *THIS;
 		uint16 set_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDuelTarget(set_id);
 	}
 	XSRETURN_EMPTY;
@@ -2538,15 +1819,7 @@ XS(XS_Client_SetDueling) {
 	{
 		Client *THIS;
 		bool duel = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDueling(duel);
 	}
 	XSRETURN_EMPTY;
@@ -2559,15 +1832,7 @@ XS(XS_Client_ResetAA) {
 		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetAA();
 	}
 	XSRETURN_EMPTY;
@@ -2583,15 +1848,7 @@ XS(XS_Client_MemSpell) {
 		uint16 spell_id = (uint16) SvUV(ST(1));
 		int    slot     = (int) SvIV(ST(2));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			update_client = true;
 		else {
@@ -2612,15 +1869,7 @@ XS(XS_Client_UnmemSpell) {
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2640,15 +1889,7 @@ XS(XS_Client_UnmemSpellBySpellID) {
 	{
 		Client *THIS;
 		int32  spell_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UnmemSpellBySpellID(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2662,15 +1903,7 @@ XS(XS_Client_UnmemSpellAll) {
 	{
 		Client *THIS;
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2692,15 +1925,7 @@ XS(XS_Client_FindMemmedSpellBySlot) {
 		uint16 RETVAL;
 		dXSTARG;
 		int slot = SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->FindMemmedSpellBySlot(slot);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2717,15 +1942,7 @@ XS(XS_Client_MemmedCount) {
 		Client *THIS;
 		uint32  RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->MemmedCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2743,15 +1960,7 @@ XS(XS_Client_ScribeSpell) {
 		uint16 spell_id = (uint16) SvUV(ST(1));
 		int    slot     = (int) SvIV(ST(2));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			update_client = true;
 		else {
@@ -2772,15 +1981,7 @@ XS(XS_Client_UnscribeSpell) {
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2800,15 +2001,7 @@ XS(XS_Client_UnscribeSpellAll) {
 	{
 		Client *THIS;
 		bool update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2828,15 +2021,7 @@ XS(XS_Client_TrainDiscBySpellID) {
 	{
 		Client *THIS;
 		int32 spell_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->TrainDiscBySpellID(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2852,15 +2037,7 @@ XS(XS_Client_GetDiscSlotBySpellID) {
 		int   RETVAL;
 		int32 spell_id = (int32) SvIV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDiscSlotBySpellID(spell_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -2877,15 +2054,7 @@ XS(XS_Client_UntrainDisc) {
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2905,15 +2074,7 @@ XS(XS_Client_UntrainDiscAll) {
 	{
 		Client *THIS;
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2934,16 +2095,7 @@ XS(XS_Client_IsStanding)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsStanding();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2959,15 +2111,7 @@ XS(XS_Client_IsSitting) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsSitting();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2984,16 +2128,7 @@ XS(XS_Client_IsCrouching)
 	{
 		Client *		THIS;
 		bool		RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsCrouching();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3009,15 +2144,7 @@ XS(XS_Client_IsBecomeNPC) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsBecomeNPC();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3034,15 +2161,7 @@ XS(XS_Client_GetBecomeNPCLevel) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBecomeNPCLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3058,15 +2177,7 @@ XS(XS_Client_SetBecomeNPC) {
 	{
 		Client *THIS;
 		bool flag = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBecomeNPC(flag);
 	}
 	XSRETURN_EMPTY;
@@ -3080,15 +2191,7 @@ XS(XS_Client_SetBecomeNPCLevel) {
 	{
 		Client *THIS;
 		uint8 level = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBecomeNPCLevel(level);
 	}
 	XSRETURN_EMPTY;
@@ -3102,15 +2205,7 @@ XS(XS_Client_SetFeigned) {
 	{
 		Client *THIS;
 		bool in_feigned = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetFeigned(in_feigned);
 	}
 	XSRETURN_EMPTY;
@@ -3124,15 +2219,7 @@ XS(XS_Client_GetFeigned) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetFeigned();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3148,15 +2235,7 @@ XS(XS_Client_AutoSplitEnabled) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AutoSplitEnabled();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3172,15 +2251,7 @@ XS(XS_Client_SetHorseId) {
 	{
 		Client *THIS;
 		uint16 horseid_in = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetHorseId(horseid_in);
 	}
 	XSRETURN_EMPTY;
@@ -3195,15 +2266,7 @@ XS(XS_Client_GetHorseId) {
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetHorseId();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3222,15 +2285,7 @@ XS(XS_Client_NukeItem) {
 		dXSTARG;
 		uint32 itemnum = (uint32) SvUV(ST(1));
 		uint8  where_to_check;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3) {
 			where_to_check = 0xFF;
 		}
@@ -3254,15 +2309,7 @@ XS(XS_Client_SetTint) {
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
 		uint32 color   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetTint(slot_id, color);
 	}
 	XSRETURN_EMPTY;
@@ -3277,15 +2324,7 @@ XS(XS_Client_SetMaterial) {
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
 		uint32 item_id = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetMaterial(slot_id, item_id);
 	}
 	XSRETURN_EMPTY;
@@ -3298,15 +2337,7 @@ XS(XS_Client_Undye) {
 		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Undye();
 	}
 	XSRETURN_EMPTY;
@@ -3322,15 +2353,7 @@ XS(XS_Client_GetItemIDAt) {
 		int32 RETVAL;
 		dXSTARG;
 		int16 slot_id = (int16) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetItemIDAt(slot_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -3349,15 +2372,7 @@ XS(XS_Client_GetAugmentIDAt) {
 		dXSTARG;
 		int16 slot_id = (int16) SvIV(ST(1));
 		int16 augslot = (uint8) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAugmentIDAt(slot_id, augslot);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -3375,15 +2390,7 @@ XS(XS_Client_DeleteItemInInventory) {
 		int16  slot_id = (int16) SvIV(ST(1));
 		int8   quantity;
 		bool   client_update;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			quantity = 0;
 		else {
@@ -3417,15 +2424,7 @@ XS(XS_Client_SummonItem) {
 		uint32 aug4    = 0;
 		uint32 aug5    = 0;
 		uint16 slot_id = EQ::invslot::slotCursor;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2) {
 			charges = (int16) SvIV(ST(2));
 		}
@@ -3465,15 +2464,7 @@ XS(XS_Client_SetStats) {
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
 		int16 increase_val = (int16) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetStats(type, increase_val);
 	}
 	XSRETURN_EMPTY;
@@ -3488,15 +2479,7 @@ XS(XS_Client_IncStats) {
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
 		int16 increase_val = (int16) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->IncStats(type, increase_val);
 	}
 	XSRETURN_EMPTY;
@@ -3510,15 +2493,7 @@ XS(XS_Client_DropItem) {
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->DropItem(slot_id);
 	}
 	XSRETURN_EMPTY;
@@ -3531,15 +2506,7 @@ XS(XS_Client_BreakInvis) {
 		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->BreakInvis();
 	}
 	XSRETURN_EMPTY;
@@ -3553,15 +2520,7 @@ XS(XS_Client_GetGroup) {
 	{
 		Client *THIS;
 		Group  *RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGroup();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
@@ -3576,15 +2535,7 @@ XS(XS_Client_LeaveGroup) {
 		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LeaveGroup();
 	}
 	XSRETURN_EMPTY;
@@ -3598,15 +2549,7 @@ XS(XS_Client_GetRaid) {
 	{
 		Client *THIS;
 		Raid   *RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRaid();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
@@ -3622,15 +2565,7 @@ XS(XS_Client_IsGrouped) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsGrouped();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3646,15 +2581,7 @@ XS(XS_Client_IsRaidGrouped) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsRaidGrouped();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3670,15 +2597,7 @@ XS(XS_Client_Hungry) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Hungry();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3694,15 +2613,7 @@ XS(XS_Client_Thirsty) {
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Thirsty();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3720,15 +2631,7 @@ XS(XS_Client_GetInstrumentMod) {
 		uint16 RETVAL;
 		dXSTARG;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInstrumentMod(spell_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3746,15 +2649,7 @@ XS(XS_Client_DecreaseByID) {
 		bool   RETVAL;
 		uint32 type = (uint32) SvUV(ST(1));
 		uint8  amt  = (uint8) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->DecreaseByID(type, amt);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3772,15 +2667,7 @@ XS(XS_Client_SlotConvert2) {
 		uint8 RETVAL;
 		dXSTARG;
 		uint8 slot = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->SlotConvert2(slot);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3795,15 +2682,7 @@ XS(XS_Client_Escape) {
 		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Escape();
 	}
 	XSRETURN_EMPTY;
@@ -3816,15 +2695,7 @@ XS(XS_Client_RemoveNoRent) {
 		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RemoveNoRent();
 	}
 	XSRETURN_EMPTY;
@@ -3837,15 +2708,7 @@ XS(XS_Client_GoFish) {
 		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GoFish();
 	}
 	XSRETURN_EMPTY;
@@ -3858,15 +2721,7 @@ XS(XS_Client_ForageItem) {
 		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ForageItem();
 	}
 	XSRETURN_EMPTY;
@@ -3883,15 +2738,7 @@ XS(XS_Client_CalcPriceMod) {
 		dXSTARG;
 		Mob    *other;
 		bool   reverse;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			other = 0;
 		else {
@@ -3924,15 +2771,7 @@ XS(XS_Client_ResetTrade) {
 		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetTrade();
 	}
 	XSRETURN_EMPTY;
@@ -3948,15 +2787,7 @@ XS(XS_Client_UseDiscipline) {
 		bool   RETVAL;
 		uint32 spell_id = (uint32) SvUV(ST(1));
 		uint32 target   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->UseDiscipline(spell_id, target);
 		ST(0)           = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3974,15 +2805,7 @@ XS(XS_Client_GetDisciplineTimer) {
 		uint32 RETVAL;
 		dXSTARG;
 		uint32 timer_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDisciplineTimer(timer_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3998,15 +2821,7 @@ XS(XS_Client_ResetDisciplineTimer) {
 	{
 		Client *THIS;
 		uint32 timer_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetDisciplineTimer(timer_id);
 	}
 	XSRETURN_EMPTY;
@@ -4022,15 +2837,7 @@ XS(XS_Client_GetCharacterFactionLevel) {
 		int32  RETVAL;
 		dXSTARG;
 		int32  faction_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCharacterFactionLevel(faction_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -4046,15 +2853,7 @@ XS(XS_Client_SetZoneFlag) {
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetZoneFlag(zone_id);
 	}
 	XSRETURN_EMPTY;
@@ -4068,15 +2867,7 @@ XS(XS_Client_ClearZoneFlag) {
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ClearZoneFlag(zone_id);
 	}
 	XSRETURN_EMPTY;
@@ -4091,15 +2882,7 @@ XS(XS_Client_HasZoneFlag) {
 		Client *THIS;
 		bool   RETVAL;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasZoneFlag(zone_id);
 		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -4115,15 +2898,7 @@ XS(XS_Client_SendZoneFlagInfo) {
 	{
 		Client *THIS;
 		Client *to;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			to = INT2PTR(Client *, tmp);
@@ -4144,15 +2919,7 @@ XS(XS_Client_LoadZoneFlags) {
 		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LoadZoneFlags();
 	}
 	XSRETURN_EMPTY;
@@ -4167,15 +2934,7 @@ XS(XS_Client_SetAATitle) {
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
 		bool SaveTitle = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (strlen(txt) > 31)
 			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
@@ -4199,15 +2958,7 @@ XS(XS_Client_GetClientVersion) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = static_cast<unsigned int>(THIS->ClientVersion());
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4224,15 +2975,7 @@ XS(XS_Client_GetClientVersionBit) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->ClientVersionBit();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4249,15 +2992,7 @@ XS(XS_Client_SetTitleSuffix) {
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
 		bool SaveSuffix = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (strlen(txt) > 31)
 			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
@@ -4280,15 +3015,7 @@ XS(XS_Client_SetAAPoints) {
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAAPoints(points);
 	}
 	XSRETURN_EMPTY;
@@ -4303,15 +3030,7 @@ XS(XS_Client_GetAAPoints) {
 	{
 		Client *THIS;
 		uint32 RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4328,15 +3047,7 @@ XS(XS_Client_GetSpentAA) {
 	{
 		Client *THIS;
 		uint32 RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSpentAA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4352,15 +3063,7 @@ XS(XS_Client_AddAAPoints) {
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddAAPoints(points);
 	}
 	XSRETURN_EMPTY;
@@ -4373,15 +3076,7 @@ XS(XS_Client_RefundAA) {
 		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RefundAA();
 	}
 	XSRETURN_EMPTY;
@@ -4397,15 +3092,7 @@ XS(XS_Client_GetModCharacterFactionLevel) {
 		int32 RETVAL;
 		dXSTARG;
 		int32 faction_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetModCharacterFactionLevel(faction_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -4422,15 +3109,7 @@ XS(XS_Client_GetLDoNWins) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNWins();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4447,15 +3126,7 @@ XS(XS_Client_GetLDoNLosses) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNLosses();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4473,15 +3144,7 @@ XS(XS_Client_GetLDoNWinsTheme) {
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNWinsTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4499,15 +3162,7 @@ XS(XS_Client_GetLDoNLossesTheme) {
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNLossesTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4524,15 +3179,7 @@ XS(XS_Client_GetItemAt) {
 		Client              *THIS;
 		EQ::ItemInstance *RETVAL;
 		uint32 slot = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInv().GetItem(slot);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
@@ -4550,15 +3197,7 @@ XS(XS_Client_GetAugmentAt) {
 		EQ::ItemInstance *RETVAL;
 		uint32 slot     = (int32) SvIV(ST(1));
 		uint32 aug_slot = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		EQ::ItemInstance *inst = THIS->GetInv().GetItem(slot);
 		if (inst) {
 			RETVAL = inst->GetAugment(aug_slot);
@@ -4581,15 +3220,7 @@ XS(XS_Client_GetStartZone) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetStartZone();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4609,15 +3240,7 @@ XS(XS_Client_SetStartZone) {
 		float  x      = 0;
 		float  y      = 0;
 		float  z      = 0;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 5) {
 			x = SvNV(ST(2));
 			y = SvNV(ST(3));
@@ -4637,15 +3260,7 @@ XS(XS_Client_KeyRingAdd) {
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->KeyRingAdd(item_id);;
 	}
 	XSRETURN_EMPTY;
@@ -4660,15 +3275,7 @@ XS(XS_Client_KeyRingCheck) {
 		Client *THIS;
 		bool   RETVAL;
 		uint32 item_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->KeyRingCheck(item_id);;
 		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -4684,15 +3291,7 @@ XS(XS_Client_AddPVPPoints) {
 	{
 		Client *THIS;
 		uint32 Points = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddPVPPoints(Points);
 	}
 	XSRETURN_EMPTY;
@@ -4707,15 +3306,7 @@ XS(XS_Client_AddCrystals) {
 		Client *THIS;
 		uint32 Radiant = (uint32) SvUV(ST(1));
 		uint32 Ebon    = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddCrystals(Radiant, Ebon);
 	}
 	XSRETURN_EMPTY;
@@ -4729,15 +3320,7 @@ XS(XS_Client_SetEbonCrystals) {
 	{
 		Client *THIS;
 		uint32 value = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetEbonCrystals(value);
 	}
 	XSRETURN_EMPTY;
@@ -4751,15 +3334,7 @@ XS(XS_Client_SetRadiantCrystals) {
 	{
 		Client *THIS;
 		uint32 value = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetRadiantCrystals(value);
 	}
 	XSRETURN_EMPTY;
@@ -4774,15 +3349,7 @@ XS(XS_Client_GetPVPPoints) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetPVPPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4799,15 +3366,7 @@ XS(XS_Client_GetRadiantCrystals) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRadiantCrystals();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4824,15 +3383,7 @@ XS(XS_Client_GetEbonCrystals) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEbonCrystals();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4849,15 +3400,7 @@ XS(XS_Client_ReadBook) {
 		Client *THIS;
 		char   *in_txt = (char *) SvPV_nolen(ST(1));
 		uint8 type = (uint8) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->QuestReadBook(in_txt, type);
 	}
 	XSRETURN_EMPTY;
@@ -4872,15 +3415,7 @@ XS(XS_Client_UpdateGroupAAs) {
 		Client *THIS;
 		int32  points = (int32) SvIV(ST(1));
 		uint32 type   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UpdateGroupAAs(points, type);
 	}
 	XSRETURN(1);
@@ -4895,15 +3430,7 @@ XS(XS_Client_GetGroupPoints) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGroupPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4920,15 +3447,7 @@ XS(XS_Client_GetRaidPoints) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRaidPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4944,15 +3463,7 @@ XS(XS_Client_LearnRecipe) {
 	{
 		Client *THIS;
 		uint32 recipe_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LearnRecipe(recipe_id);;
 	}
 	XSRETURN_EMPTY;
@@ -4967,15 +3478,7 @@ XS(XS_Client_GetEndurance) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEndurance();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4992,15 +3495,7 @@ XS(XS_Client_GetMaxEndurance) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetMaxEndurance();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5017,15 +3512,7 @@ XS(XS_Client_GetEnduranceRatio) {
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEndurancePercent();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5041,15 +3528,7 @@ XS(XS_Client_SetEndurance) {
 	{
 		Client *THIS;
 		int32 Endurance = (int32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetEndurance(Endurance);
 	}
 	XSRETURN_EMPTY;
@@ -5064,15 +3543,7 @@ XS(XS_Client_SendOPTranslocateConfirm) {
 		Client *THIS;
 		Mob    *caster = nullptr;
 		int32 spell_id = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			caster = INT2PTR(Mob *, tmp);
@@ -5096,15 +3567,7 @@ XS(XS_Client_NPCSpawn) {
 		NPC        *target_npc = nullptr;
 		Const_char *option     = (Const_char *) SvPV_nolen(ST(2));
 		uint32 respawntime = 1200;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "NPC")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			target_npc = INT2PTR(NPC *, tmp);
@@ -5130,15 +3593,7 @@ XS(XS_Client_GetIP) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetIP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5156,15 +3611,7 @@ XS(XS_Client_AddLevelBasedExp) {
 		uint8 exp_percentage = (uint8) SvUV(ST(1));
 		uint8 max_level      = 0;
 		bool ignore_mods	 = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			max_level = (uint8) SvUV(ST(2));
 
@@ -5184,15 +3631,7 @@ XS(XS_Client_IncrementAA) {
 	{
 		Client *THIS;
 		uint32 aaskillid = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->IncrementAlternateAdvancementRank(aaskillid);
 	}
 	XSRETURN_EMPTY;
@@ -5209,15 +3648,7 @@ XS(XS_Client_GrantAlternateAdvancementAbility) {
 		int  aa_id       = (int) SvIV(ST(1));
 		int  points      = (int) SvIV(ST(2));
 		bool ignore_cost = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 3) {
 			ignore_cost = (bool) SvTRUE(ST(3));
 		}
@@ -5239,15 +3670,7 @@ XS(XS_Client_GetAALevel) {
 		uint32 RETVAL;
 		dXSTARG;
 		uint32 aaskillid = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAA(aaskillid);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5265,15 +3688,7 @@ XS(XS_Client_MarkCompassLoc) {
 		float x = SvNV(ST(1));
 		float y = SvNV(ST(2));
 		float z = SvNV(ST(3));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->MarkSingleCompassLoc(x, y, z);
 	}
 	XSRETURN_EMPTY;
@@ -5286,15 +3701,7 @@ XS(XS_Client_ClearCompassMark) {
 		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->MarkSingleCompassLoc(0, 0, 0, 0);
 	}
 	XSRETURN_EMPTY;
@@ -5310,15 +3717,7 @@ XS(XS_Client_GetFreeSpellBookSlot) {
 		int    RETVAL;
 		uint32 start_slot = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1)
 			start_slot = SvUV(ST(1));
 
@@ -5339,15 +3738,7 @@ XS(XS_Client_GetSpellBookSlotBySpellID) {
 		int    RETVAL;
 		uint32 spell_id = SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->FindSpellBookSlotBySpellID(spell_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5365,16 +3756,7 @@ XS(XS_Client_GetSpellIDByBookSlot) {
 		int    RETVAL;
 		int	   slot_id = SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSpellIDByBookSlot(slot_id);
 		XSprePUSH;
 		PUSHi((IV)RETVAL);
@@ -5399,15 +3781,7 @@ XS(XS_Client_UpdateTaskActivity) {
 		if (items == 5) {
 			ignore_quest_update = (bool) SvTRUE(ST(4));
 		}
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UpdateTaskActivity(TaskID, ActivityID, Count, ignore_quest_update);
 	}
 	XSRETURN_EMPTY;
@@ -5424,15 +3798,7 @@ XS(XS_Client_GetTaskActivityDoneCount) {
 		int TaskID     = (int) SvIV(ST(1));
 		int ActivityID = (int) SvIV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 
 		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
 		XSprePUSH;
@@ -5456,14 +3822,7 @@ XS(XS_Client_AssignTask) {
 				enforce_level_requirement = true;
 			}
 		}
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS   = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AssignTask(TaskID, NPCID, enforce_level_requirement);
 	}
 	XSRETURN_EMPTY;
@@ -5477,15 +3836,7 @@ XS(XS_Client_FailTask) {
 	{
 		Client *THIS;
 		int TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->FailTask(TaskID);
 	}
 	XSRETURN_EMPTY;
@@ -5500,15 +3851,7 @@ XS(XS_Client_IsTaskCompleted) {
 		Client *THIS;
 		int RETVAL;
 		int TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskCompleted(TaskID);
 		ST(0)      = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5525,15 +3868,7 @@ XS(XS_Client_IsTaskActive) {
 		Client *THIS;
 		bool RETVAL;
 		int  TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActive(TaskID);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5551,15 +3886,7 @@ XS(XS_Client_IsTaskActivityActive) {
 		bool RETVAL;
 		int  TaskID     = (int) SvIV(ST(1));
 		int  ActivityID = (int) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActivityActive(TaskID, ActivityID);
 		ST(0)           = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5576,15 +3903,7 @@ XS(XS_Client_GetCorpseCount) {
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseCount();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5602,15 +3921,7 @@ XS(XS_Client_GetCorpseID) {
 		uint8  corpse = (uint8) SvIV(ST(1));
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseID(corpse);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5629,15 +3940,7 @@ XS(XS_Client_GetCorpseItemAt) {
 		uint16 slotid    = (uint16) SvIV(ST(2));
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseItemAt(corpse_id, slotid);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5653,15 +3956,7 @@ XS(XS_Client_AssignToInstance) {
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AssignToInstance(instance_id);
 	}
 	XSRETURN_EMPTY;
@@ -5675,15 +3970,7 @@ XS(XS_Client_RemoveFromInstance) {
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RemoveFromInstance(instance_id);
 	}
 	XSRETURN_EMPTY;
@@ -5696,15 +3983,7 @@ XS(XS_Client_Freeze) {
 		Perl_croak(aTHX_ "Usage: Client:Freeze(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 	}
 	XSRETURN_EMPTY;
@@ -5717,15 +3996,7 @@ XS(XS_Client_UnFreeze) {
 		Perl_croak(aTHX_ "Usage: Client:UnFreeze(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendAppearancePacket(AT_Anim, ANIM_STAND);
 	}
 	XSRETURN_EMPTY;
@@ -5741,15 +4012,7 @@ XS(XS_Client_GetAggroCount) {
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAggroCount();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5767,15 +4030,7 @@ XS(XS_Client_GetCarriedMoney) {
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCarriedMoney();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5793,15 +4048,7 @@ XS(XS_Client_GetAllMoney) {
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAllMoney();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5819,15 +4066,7 @@ XS(XS_Client_GetItemInInventory) {
 		Client *THIS;
 		int16               slot_id = (int16) SvIV(ST(1));
 		EQ::ItemInstance *RETVAL = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInv().GetItem(slot_id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
@@ -5845,15 +4084,7 @@ XS(XS_Client_SetCustomItemData) {
 		int16 slot_id = (int16) SvIV(ST(1));
 		Const_char *identifier = SvPV_nolen(ST(2));
 		Const_char *value      = SvPV_nolen(ST(3));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GetInv().SetCustomItemData(THIS->CharacterID(), slot_id, std::string(identifier), std::string(value));
 	}
 	XSRETURN_EMPTY;
@@ -5870,15 +4101,7 @@ XS(XS_Client_GetCustomItemData) {
 		Const_char *identifier = SvPV_nolen(ST(2));
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		std::string ret_val = THIS->GetInv().GetCustomItemData(slot_id, std::string(identifier));
 		RETVAL = ret_val.c_str();
 		sv_setpv(TARG, RETVAL);
@@ -5895,15 +4118,7 @@ XS(XS_Client_OpenLFGuildWindow) {
 		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->OpenLFGuildWindow();
 	}
 	XSRETURN_EMPTY;
@@ -5916,15 +4131,7 @@ XS(XS_Client_NotifyNewTitlesAvailable) {
 		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->NotifyNewTitlesAvailable();
 	}
 	XSRETURN_EMPTY;
@@ -5939,15 +4146,7 @@ XS(XS_Client_AddAlternateCurrencyValue) {
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  amount      = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddAlternateCurrencyValue(currency_id, amount);
 	}
 	XSRETURN_EMPTY;
@@ -5962,15 +4161,7 @@ XS(XS_Client_SetAlternateCurrencyValue) {
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  amount      = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAlternateCurrencyValue(currency_id, amount);
 	}
 	XSRETURN_EMPTY;
@@ -5986,15 +4177,7 @@ XS(XS_Client_GetAlternateCurrencyValue) {
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  RETVAL 	   = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAlternateCurrencyValue(currency_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6010,15 +4193,7 @@ XS(XS_Client_SendWebLink) {
 	{
 		Client *THIS;
 		char   *website = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1) { website = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->SendWebLink(website);
@@ -6035,15 +4210,7 @@ XS(XS_Client_GetInstanceID) {
 		Client *THIS;
 		int8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInstanceID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -6060,15 +4227,7 @@ XS(XS_Client_HasSpellScribed) {
 		Client *THIS;
 		bool RETVAL;
 		int  spell_id = (int) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasSpellScribed(spell_id);
 		ST(0)         = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -6088,15 +4247,7 @@ XS(XS_Client_SetAccountFlag) {
 
 		std::string flag((char *) SvPV_nolen(ST(1)));
 		std::string value((char *) SvTRUE(ST(2)));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAccountFlag(flag, value);
 	}
 	XSRETURN_EMPTY;
@@ -6114,15 +4265,7 @@ XS(XS_Client_GetAccountFlag) {
 
 		std::string flag((char *) SvPV_nolen(ST(1)));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		std::string value = THIS->GetAccountFlag(flag);
 
 		sv_setpv(TARG, value.c_str());
@@ -6141,15 +4284,7 @@ XS(XS_Client_GetHunger) {
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetHunger();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6166,15 +4301,7 @@ XS(XS_Client_GetThirst) {
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetThirst();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6190,15 +4317,7 @@ XS(XS_Client_SetHunger) {
 	{
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetHunger(in_hunger);
 	}
 	XSRETURN_EMPTY;
@@ -6212,15 +4331,7 @@ XS(XS_Client_SetThirst) {
 	{
 		Client *THIS;
 		int32 in_thirst = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetThirst(in_thirst);
 	}
 	XSRETURN_EMPTY;
@@ -6234,15 +4345,7 @@ XS(XS_Client_SendTargetCommand) {
 	{
 		Client *THIS;
 		int32 in_entid = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendTargetCommand(in_entid);
 	}
 	XSRETURN_EMPTY;
@@ -6257,15 +4360,7 @@ XS(XS_Client_SetConsumption) {
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
 		int32 in_thirst = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetConsumption(in_hunger, in_thirst);
 	}
 	XSRETURN_EMPTY;
@@ -6279,14 +4374,7 @@ XS(XS_Client_SilentMessage) {
 	{
 		Client *THIS;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->GetTarget() != NULL) {
 			if (THIS->GetTarget()->IsNPC()) {
 				if (DistanceSquaredNoZ(THIS->GetPosition(), THIS->GetTarget()->GetPosition()) <= 200) {
@@ -6309,15 +4397,7 @@ XS(XS_Client_PlayMP3) {
 	{
 		Client *THIS;
 		char   *fname = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1) { fname = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->PlayMP3(fname);
@@ -6335,15 +4415,7 @@ XS(XS_Client_ExpeditionMessage) {
 		int ExpdID = (int) SvUV(ST(1));
 		const char *Message = (const char *) SvPV_nolen(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ExpeditionSay(Message, ExpdID);
 	}
 	XSRETURN_EMPTY;
@@ -6365,15 +4437,7 @@ XS(XS_Client_SendMarqueeMessage) {
 		uint32      duration = (uint32) SvUV(ST(5));
 		std::string msg      = (std::string) SvPV_nolen(ST(6));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
 	}
 	XSRETURN_EMPTY;
@@ -6389,15 +4453,7 @@ XS(XS_Client_SendColoredText) {
 		uint32      color = (uint32) SvUV(ST(1));
 		std::string msg   = (std::string) SvPV_nolen(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendColoredText(color, msg);
 	}
 	XSRETURN_EMPTY;
@@ -6413,15 +4469,7 @@ XS(XS_Client_SendSpellAnim) {
 		uint16 targetid = (uint16) SvUV(ST(1));
 		uint16 spell_id = (uint16) SvUV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendSpellAnim(targetid, spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -6436,15 +4484,7 @@ XS(XS_Client_GetTargetRingX) {
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingX();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6461,15 +4501,7 @@ XS(XS_Client_GetTargetRingY) {
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingY();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6486,15 +4518,7 @@ XS(XS_Client_GetTargetRingZ) {
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingZ();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6514,15 +4538,7 @@ XS(XS_Client_CalcEXP) {
 		if (items == 2)
 			conlevel = (uint16) SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CalcEXP(conlevel);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6587,16 +4603,7 @@ XS(XS_Client_GetMoney) {
 		uint8  type    = (uint8) SvUV(ST(1));
 		uint8  subtype = (uint8) SvUV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetMoney(type, subtype);
 		XSprePUSH;
 		PUSHn((uint32) RETVAL);
@@ -6613,16 +4620,7 @@ XS(XS_Client_GetAccountAge) {
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAccountAge();
 		XSprePUSH;
 		PUSHn((int) RETVAL);
@@ -6646,15 +4644,7 @@ XS(XS_Client_Popup2) {
 		char *ButtonName0 = 0;
 		char *ButtonName1 = 0;
 		uint32 SoundControls = 0;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 3) { PopupID = (uint32) SvUV(ST(3)); }
 		if (items > 4) { NegativeID = (uint32) SvUV(ST(4)); }
 		if (items > 5) { Buttons = (uint32) SvUV(ST(5)); }
@@ -6680,18 +4670,7 @@ XS(XS_Client_SetPrimaryWeaponOrnamentation)
 	{
 		Client *THIS;
 		uint32 model_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		}
-		else {
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetPrimaryWeaponOrnamentation(model_id);
 	}
 	XSRETURN_EMPTY;
@@ -6707,18 +4686,7 @@ XS(XS_Client_SetSecondaryWeaponOrnamentation)
 	{
 		Client *THIS;
 		uint32 model_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		}
-		else {
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSecondaryWeaponOrnamentation(model_id);
 	}
 	XSRETURN_EMPTY;
@@ -6732,16 +4700,7 @@ XS(XS_Client_SetClientMaxLevel) {
 	{
 		Client* THIS;
 		int in_level = (int)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetClientMaxLevel(in_level);
 	}
 	XSRETURN_EMPTY;
@@ -6756,16 +4715,7 @@ XS(XS_Client_GetClientMaxLevel) {
 		Client* THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetClientMaxLevel();
 		XSprePUSH;
 		PUSHu((UV)RETVAL);
@@ -7064,17 +5014,7 @@ XS(XS_Client_Fling) {
 		float target_z = (float) SvNV(ST(4));
 		bool ignore_los = false;
 		bool clipping = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 5)
 			ignore_los = (bool) SvTRUE(ST(5));
 			
@@ -7095,16 +5035,7 @@ XS(XS_Client_HasDisciplineLearned) {
 		Client *THIS;
 		bool has_learned;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		has_learned = THIS->HasDisciplineLearned(spell_id);
 		ST(0) = boolSV(has_learned);
 		sv_2mortal(ST(0));
@@ -7121,16 +5052,7 @@ XS(XS_Client_GetClassBitmask) {
 		Client* THIS;
 		int client_bitmask = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		client_bitmask = GetPlayerClassBit(THIS->GetClass());
 		XSprePUSH;
 		PUSHu((UV) client_bitmask);
@@ -7147,16 +5069,7 @@ XS(XS_Client_GetRaceBitmask) {
 		Client* THIS;
 		int client_bitmask = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		client_bitmask = GetPlayerRaceBit(THIS->GetBaseRace());
 		XSprePUSH;
 		PUSHu((UV) client_bitmask);
