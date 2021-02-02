@@ -43,6 +43,18 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_ENTITY \
+	do { \
+		if (sv_derived_from(ST(0), "EntityList")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(EntityList*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type EntityList"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_EntityList_GetMobID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetMobID) {
@@ -53,15 +65,7 @@ XS(XS_EntityList_GetMobID) {
 		EntityList *THIS;
 		Mob        *RETVAL;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMobID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -78,15 +82,7 @@ XS(XS_EntityList_GetMob) {
 		EntityList *THIS;
 		Mob        *RETVAL;
 		char       *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMob(name);
 		ST(0)            = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -103,15 +99,7 @@ XS(XS_EntityList_GetMobByID) {
 		EntityList *THIS;
 		Mob        *RETVAL;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMob(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -128,15 +116,7 @@ XS(XS_EntityList_GetMobByNpcTypeID) {
 		EntityList *THIS;
 		Mob        *RETVAL;
 		uint32     get_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetMobByNpcTypeID(get_id);
 		ST(0)             = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -153,15 +133,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint32     get_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->IsMobSpawnedByNpcTypeID(get_id);
 		ST(0)             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -178,15 +150,7 @@ XS(XS_EntityList_GetNPCByID) {
 		EntityList *THIS;
 		NPC        *RETVAL;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetNPCByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
@@ -203,15 +167,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID) {
 		EntityList *THIS;
 		NPC        *RETVAL;
 		uint32     npc_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetNPCByNPCTypeID(npc_id);
 		ST(0)             = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
@@ -228,18 +184,7 @@ XS(XS_EntityList_GetNPCBySpawnID) {
 		EntityList *THIS;
 		NPC 	   *RETVAL;
 		uint32	   spawn_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else {
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		}
-
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetNPCBySpawnID(spawn_id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
@@ -256,15 +201,7 @@ XS(XS_EntityList_GetClientByName) {
 		EntityList *THIS;
 		Client     *RETVAL;
 		char       *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByName(name);
 		ST(0)            = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -281,15 +218,7 @@ XS(XS_EntityList_GetClientByAccID) {
 		EntityList *THIS;
 		Client     *RETVAL;
 		uint32     accid = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByAccID(accid);
 		ST(0)            = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -306,15 +235,7 @@ XS(XS_EntityList_GetClientByID) {
 		EntityList *THIS;
 		Client     *RETVAL;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -331,15 +252,7 @@ XS(XS_EntityList_GetClientByCharID) {
 		EntityList *THIS;
 		Client     *RETVAL;
 		uint32     iCharID = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByCharID(iCharID);
 		ST(0)              = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -356,15 +269,7 @@ XS(XS_EntityList_GetClientByWID) {
 		EntityList *THIS;
 		Client     *RETVAL;
 		uint32     iWID = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetClientByWID(iWID);
 		ST(0)           = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -381,15 +286,7 @@ XS(XS_EntityList_GetObjectByDBID) {
 		EntityList *THIS;
 		Object     *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetObjectByDBID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
@@ -406,15 +303,7 @@ XS(XS_EntityList_GetObjectByID) {
 		EntityList *THIS;
 		Object     *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetObjectByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Object", (void *) RETVAL);
@@ -431,15 +320,7 @@ XS(XS_EntityList_GetDoorsByDBID) {
 		EntityList *THIS;
 		Doors      *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByDBID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
@@ -456,15 +337,7 @@ XS(XS_EntityList_GetDoorsByDoorID) {
 		EntityList *THIS;
 		Doors      *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByDoorID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
@@ -481,15 +354,7 @@ XS(XS_EntityList_GetDoorsByID) {
 		EntityList *THIS;
 		Doors      *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetDoorsByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
@@ -506,15 +371,7 @@ XS(XS_EntityList_FindDoor) {
 		EntityList *THIS;
 		Doors      *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->FindDoor(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Doors", (void *) RETVAL);
@@ -531,15 +388,7 @@ XS(XS_EntityList_GetGroupByMob) {
 		EntityList *THIS;
 		Group      *RETVAL;
 		Mob        *mob;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			mob = INT2PTR(Mob *, tmp);
@@ -564,15 +413,7 @@ XS(XS_EntityList_GetGroupByClient) {
 		EntityList *THIS;
 		Group      *RETVAL;
 		Client     *client;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			client = INT2PTR(Client *, tmp);
@@ -597,15 +438,7 @@ XS(XS_EntityList_GetGroupByID) {
 		EntityList *THIS;
 		Group      *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetGroupByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
@@ -622,15 +455,7 @@ XS(XS_EntityList_GetGroupByLeaderName) {
 		EntityList *THIS;
 		Group      *RETVAL;
 		char       *leader = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetGroupByLeaderName(leader);
 		ST(0)              = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
@@ -647,15 +472,7 @@ XS(XS_EntityList_GetRaidByID) {
 		EntityList *THIS;
 		Raid       *RETVAL;
 		uint32     id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetRaidByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
@@ -672,15 +489,7 @@ XS(XS_EntityList_GetRaidByClient) {
 		EntityList *THIS;
 		Raid       *RETVAL;
 		Client     *client;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			client = INT2PTR(Client *, tmp);
@@ -705,15 +514,7 @@ XS(XS_EntityList_GetCorpseByOwner) {
 		EntityList *THIS;
 		Corpse     *RETVAL;
 		Client     *client;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			client = INT2PTR(Client *, tmp);
@@ -738,15 +539,7 @@ XS(XS_EntityList_GetCorpseByID) {
 		EntityList *THIS;
 		Corpse     *RETVAL;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetCorpseByID(id);
 		ST(0)         = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
@@ -763,15 +556,7 @@ XS(XS_EntityList_GetCorpseByName) {
 		EntityList *THIS;
 		Corpse     *RETVAL;
 		char       *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->GetCorpseByName(name);
 		ST(0)            = sv_newmortal();
 		sv_setref_pv(ST(0), "Corpse", (void *) RETVAL);
@@ -786,15 +571,7 @@ XS(XS_EntityList_ClearClientPetitionQueue) {
 		Perl_croak(aTHX_ "Usage: EntityList::ClearClientPetitionQueue(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->ClearClientPetitionQueue();
 	}
 	XSRETURN_EMPTY;
@@ -809,15 +586,7 @@ XS(XS_EntityList_CanAddHateForMob) {
 		EntityList *THIS;
 		bool       RETVAL;
 		Mob        *p;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			p = INT2PTR(Mob *, tmp);
@@ -840,15 +609,7 @@ XS(XS_EntityList_Clear) {
 		Perl_croak(aTHX_ "Usage: EntityList::Clear(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->Clear();
 	}
 	XSRETURN_EMPTY;
@@ -863,15 +624,7 @@ XS(XS_EntityList_RemoveMob) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveMob(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -888,15 +641,7 @@ XS(XS_EntityList_RemoveClient) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveClient(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -913,15 +658,7 @@ XS(XS_EntityList_RemoveNPC) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveNPC(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -938,15 +675,7 @@ XS(XS_EntityList_RemoveGroup) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint32     delete_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveGroup(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -963,15 +692,7 @@ XS(XS_EntityList_RemoveCorpse) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveCorpse(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -988,15 +709,7 @@ XS(XS_EntityList_RemoveDoor) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveDoor(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -1013,15 +726,7 @@ XS(XS_EntityList_RemoveTrap) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveTrap(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -1038,15 +743,7 @@ XS(XS_EntityList_RemoveObject) {
 		EntityList *THIS;
 		bool       RETVAL;
 		uint16     delete_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->RemoveObject(delete_id);
 		ST(0)                = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -1061,15 +758,7 @@ XS(XS_EntityList_RemoveAllMobs) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllMobs(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllMobs();
 	}
 	XSRETURN_EMPTY;
@@ -1082,15 +771,7 @@ XS(XS_EntityList_RemoveAllClients) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllClients(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllClients();
 	}
 	XSRETURN_EMPTY;
@@ -1103,15 +784,7 @@ XS(XS_EntityList_RemoveAllNPCs) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllNPCs(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllNPCs();
 	}
 	XSRETURN_EMPTY;
@@ -1124,15 +797,7 @@ XS(XS_EntityList_RemoveAllGroups) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllGroups(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllGroups();
 	}
 	XSRETURN_EMPTY;
@@ -1145,15 +810,7 @@ XS(XS_EntityList_RemoveAllCorpses) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllCorpses(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllCorpses();
 	}
 	XSRETURN_EMPTY;
@@ -1166,15 +823,7 @@ XS(XS_EntityList_RemoveAllDoors) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllDoors(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllDoors();
 	}
 	XSRETURN_EMPTY;
@@ -1187,15 +836,7 @@ XS(XS_EntityList_RemoveAllTraps) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllTraps(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllTraps();
 	}
 	XSRETURN_EMPTY;
@@ -1208,15 +849,7 @@ XS(XS_EntityList_RemoveAllObjects) {
 		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllObjects(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveAllObjects();
 	}
 	XSRETURN_EMPTY;
@@ -1232,15 +865,7 @@ XS(XS_EntityList_Message) {
 		uint32     to_guilddbid = (uint32) SvUV(ST(1));
 		uint32     type         = (uint32) SvUV(ST(2));
 		char       *message     = (char *) SvPV_nolen(ST(3));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->Message(to_guilddbid, type, message);
 	}
 	XSRETURN_EMPTY;
@@ -1257,15 +882,7 @@ XS(XS_EntityList_MessageStatus) {
 		int        to_minstatus = (int) SvIV(ST(2));
 		uint32     type         = (uint32) SvUV(ST(3));
 		char       *message     = (char *) SvPV_nolen(ST(4));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->MessageStatus(to_guilddbid, to_minstatus, type, message);
 	}
 	XSRETURN_EMPTY;
@@ -1283,15 +900,7 @@ XS(XS_EntityList_MessageClose) {
 		float      dist       = (float) SvNV(ST(3));
 		uint32     type       = (uint32) SvUV(ST(4));
 		char       *message   = (char *) SvPV_nolen(ST(5));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -1313,15 +922,7 @@ XS(XS_EntityList_RemoveFromTargets) {
 	{
 		EntityList *THIS;
 		Mob        *mob;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			mob = INT2PTR(Mob *, tmp);
@@ -1344,15 +945,7 @@ XS(XS_EntityList_ReplaceWithTarget) {
 		EntityList *THIS;
 		Mob        *pOldMob;
 		Mob        *pNewTarget;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			pOldMob = INT2PTR(Mob *, tmp);
@@ -1382,15 +975,7 @@ XS(XS_EntityList_OpenDoorsNear) {
 	{
 		EntityList *THIS;
 		Mob        *opener;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			opener = INT2PTR(Mob *, tmp);
@@ -1414,15 +999,7 @@ XS(XS_EntityList_MakeNameUnique) {
 		char       *RETVAL;
 		dXSTARG;
 		char       *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->MakeNameUnique(name);
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -1458,15 +1035,7 @@ XS(XS_EntityList_SignalMobsByNPCID) {
 		EntityList *THIS;
 		uint32     npc_type  = (uint32) SvUV(ST(1));
 		int        signal_id = (int) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->SignalMobsByNPCID(npc_type, signal_id);
 	}
 	XSRETURN_EMPTY;
@@ -1480,15 +1049,7 @@ XS(XS_EntityList_RemoveEntity) {
 	{
 		EntityList *THIS;
 		uint16     id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		THIS->RemoveEntity(id);
 	}
 	XSRETURN_EMPTY;
@@ -1503,15 +1064,7 @@ XS(XS_EntityList_DeleteNPCCorpses) {
 		EntityList *THIS;
 		int32      RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->DeleteNPCCorpses();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1528,15 +1081,7 @@ XS(XS_EntityList_DeletePlayerCorpses) {
 		EntityList *THIS;
 		int32      RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		RETVAL = THIS->DeletePlayerCorpses();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1552,15 +1097,7 @@ XS(XS_EntityList_HalveAggro) {
 	{
 		EntityList *THIS;
 		Mob        *who;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			who = INT2PTR(Mob *, tmp);
@@ -1582,15 +1119,7 @@ XS(XS_EntityList_DoubleAggro) {
 	{
 		EntityList *THIS;
 		Mob        *who;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			who = INT2PTR(Mob *, tmp);
@@ -1612,15 +1141,7 @@ XS(XS_EntityList_ClearFeignAggro) {
 	{
 		EntityList *THIS;
 		Mob        *targ;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			targ = INT2PTR(Mob *, tmp);
@@ -1643,15 +1164,7 @@ XS(XS_EntityList_Fighting) {
 		EntityList *THIS;
 		bool       RETVAL;
 		Mob        *targ;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			targ = INT2PTR(Mob *, tmp);
@@ -1676,15 +1189,7 @@ XS(XS_EntityList_RemoveFromHateLists) {
 		EntityList *THIS;
 		Mob        *mob;
 		bool       settoone;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			mob = INT2PTR(Mob *, tmp);
@@ -1715,15 +1220,7 @@ XS(XS_EntityList_MessageGroup) {
 		bool       skipclose = (bool) SvTRUE(ST(2));
 		uint32     type      = (uint32) SvUV(ST(3));
 		char       *message  = (char *) SvPV_nolen(ST(4));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -1749,16 +1246,7 @@ XS(XS_EntityList_GetRandomClient) {
 		float      y           = (float) SvNV(ST(2));
 		float      z           = (float) SvNV(ST(3));
 		float      d           = (float) SvNV(ST(4));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		if (items == 6) {
 			if (sv_derived_from(ST(5), "Client")) {
 				IV tmp = SvIV((SV *) SvRV(ST(5)));
@@ -1780,16 +1268,7 @@ XS(XS_EntityList_GetMobList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetMobList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<Mob *> mob_list;
 		entity_list.GetMobList(mob_list);
 		auto iter = mob_list.begin();
@@ -1814,16 +1293,7 @@ XS(XS_EntityList_GetClientList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetClientList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<Client *> client_list;
 		entity_list.GetClientList(client_list);
 		auto iter = client_list.begin();
@@ -1848,16 +1318,7 @@ XS(XS_EntityList_GetNPCList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetNPCList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<NPC *> npc_list;
 		entity_list.GetNPCList(npc_list);
 		auto iter = npc_list.begin();
@@ -1882,16 +1343,7 @@ XS(XS_EntityList_GetCorpseList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<Corpse *> corpse_list;
 		entity_list.GetCorpseList(corpse_list);
 		auto iter = corpse_list.begin();
@@ -1916,16 +1368,7 @@ XS(XS_EntityList_GetObjectList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetObjectList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<Object *> object_list;
 		entity_list.GetObjectList(object_list);
 		auto iter = object_list.begin();
@@ -1950,16 +1393,7 @@ XS(XS_EntityList_GetDoorsList) {
 		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsList(THIS)");
 	{
 		EntityList *THIS;
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		std::list<Doors *> door_list;
 		entity_list.GetDoorsList(door_list);
 		auto iter = door_list.begin();
@@ -1984,16 +1418,7 @@ XS(XS_EntityList_SignalAllClients) {
 	{
 		EntityList *THIS;
 		uint32     data = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "EntityList")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(EntityList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type EntityList");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_ENTITY;
 		entity_list.SignalAllClients(data);
 	}
 	XSRETURN_EMPTY;
