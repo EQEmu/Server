@@ -65,6 +65,7 @@ public:
 	void say(const char *str, Journal::Options &opts);
 	void me(const char *str);
 	void summonitem(uint32 itemid, int16 charges = -1);
+	EQ::ItemInstance* CreateItem(uint32 item_id, int16 charges = 0, uint32 augment_one = 0, uint32 augment_two = 0, uint32 augment_three = 0, uint32 augment_four = 0, uint32 augment_five = 0, uint32 augment_six = 0, bool attuned = false) const;
 	void write(const char *file, const char *str);
 	Mob* spawn2(int npc_type, int grid, int unused, const glm::vec4& position);
 	Mob* unique_spawn(int npc_type, int grid, int unused, const glm::vec4& position);
@@ -372,6 +373,7 @@ public:
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
+	EQ::InventoryProfile* GetInventory() const;
 	EQ::ItemInstance *GetQuestItem() const;
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }

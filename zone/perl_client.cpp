@@ -7288,6 +7288,22 @@ XS(XS_Client_GetScribedSpells) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetInventory);
+XS(XS_Client_GetInventory) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetInventory(THIS)");
+	{
+		Client* THIS;
+		EQ::InventoryProfile* RETVAL;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = &THIS->GetInv();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Inventory", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -7404,6 +7420,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
+	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
 	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");

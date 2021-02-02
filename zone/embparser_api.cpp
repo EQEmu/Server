@@ -104,6 +104,23 @@ XS(XS_EntityList_new) {
 	XSRETURN(1);
 }
 
+//Any creation of new inventory gets the curreny inventory
+XS(XS_Inventory_new);
+XS(XS_Inventory_new) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::Inventory::new()");
+
+	EQ::InventoryProfile* RETVAL;
+
+	RETVAL = quest_manager.GetInventory();
+	ST(0) = sv_newmortal();
+	if (RETVAL)
+		sv_setref_pv(ST(0), "Inventory", (void *) RETVAL);
+
+	XSRETURN(1);
+}
+
 //Any creation of new quest items gets the current quest item
 XS(XS_QuestItem_new);
 XS(XS_QuestItem_new) {
@@ -6342,6 +6359,51 @@ XS(XS__remove_all_expedition_lockouts_by_char_id) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__createitem);
+XS(XS__createitem) {
+	dXSARGS;
+	if (items < 1 || items > 9) {
+		Perl_croak(aTHX_ "Usage: quest::createitem(uint32 item_id, [int16 charges = 0, uint32 augment_one = 0, uint32 augment_two = 0, uint32 augment_three = 0, uint32 augment_four = 0, uint32 augment_five = 0, uint32 augment_six = 0, bool attuned = false])");
+	}
+
+	EQ::ItemInstance* RETVAL = nullptr;
+	uint32 item_id = (uint32)SvUV(ST(0));
+	int16 charges = 0;
+	uint32 augment_one = 0;
+	uint32 augment_two = 0;
+	uint32 augment_three = 0;
+	uint32 augment_four = 0;
+	uint32 augment_five = 0;
+	uint32 augment_six = 0;
+	bool attuned = false;
+	if (items > 1)
+		charges = (int16)SvIV(ST(1));
+	if (items > 2)
+		augment_one = (uint32)SvUV(ST(2));
+	if (items > 3)
+		augment_two = (uint32)SvUV(ST(3));
+	if (items > 4)
+		augment_three = (uint32)SvUV(ST(4));
+	if (items > 5)
+		augment_four = (uint32)SvUV(ST(5));
+	if (items > 6)
+		augment_five = (uint32)SvUV(ST(6));
+	if (items > 7)
+		augment_six = (uint32)SvUV(ST(7));
+	if (items > 8)
+		attuned = (bool)SvNV(ST(8));
+
+	if (database.GetItem(item_id)) {
+		RETVAL = database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
+	}
+
+	ST(0) = sv_newmortal();
+	if (RETVAL) {
+		sv_setref_pv(ST(0), "QuestItem", (void*)RETVAL);
+	}
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6438,6 +6500,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
 	newXS(strcpy(buf, "createguild"), XS__createguild, file);
+	newXS(strcpy(buf, "createitem"), XS__createitem, file);
 	newXS(strcpy(buf, "crosszoneassigntaskbycharid"), XS__crosszoneassigntaskbycharid, file);
 	newXS(strcpy(buf, "crosszoneassigntaskbygroupid"), XS__crosszoneassigntaskbygroupid, file);
 	newXS(strcpy(buf, "crosszoneassigntaskbyraidid"), XS__crosszoneassigntaskbyraidid, file);
