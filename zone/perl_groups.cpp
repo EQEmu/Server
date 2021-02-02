@@ -42,6 +42,18 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_GROUP \
+	do { \
+		if (sv_derived_from(ST(0), "Group")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Group*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Group"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_Group_DisbandGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_DisbandGroup) {
@@ -50,15 +62,7 @@ XS(XS_Group_DisbandGroup) {
 		Perl_croak(aTHX_ "Usage: Group::DisbandGroup(THIS)");
 	{
 		Group *THIS;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		THIS->DisbandGroup();
 	}
 	XSRETURN_EMPTY;
@@ -73,15 +77,7 @@ XS(XS_Group_IsGroupMember) {
 		Group *THIS;
 		bool  RETVAL;
 		Mob   *client;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			client = INT2PTR(Mob *, tmp);
@@ -106,15 +102,7 @@ XS(XS_Group_CastGroupSpell) {
 		Group  *THIS;
 		Mob    *caster;
 		uint16 spellid = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			caster = INT2PTR(Mob *, tmp);
@@ -137,15 +125,7 @@ XS(XS_Group_SplitExp) {
 		Group  *THIS;
 		uint32 exp = (uint32) SvUV(ST(1));
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(2)));
 			other = INT2PTR(Mob *, tmp);
@@ -169,15 +149,7 @@ XS(XS_Group_GroupMessage) {
 		Mob   *sender;
 		uint8 language;
 		char  *message;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -210,15 +182,7 @@ XS(XS_Group_GetTotalGroupDamage) {
 		uint32 RETVAL;
 		dXSTARG;
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			other = INT2PTR(Mob *, tmp);
@@ -245,15 +209,7 @@ XS(XS_Group_SplitMoney) {
 		uint32 silver   = (uint32) SvUV(ST(2));
 		uint32 gold     = (uint32) SvUV(ST(3));
 		uint32 platinum = (uint32) SvUV(ST(4));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		THIS->SplitMoney(copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
@@ -267,15 +223,7 @@ XS(XS_Group_SetLeader) {
 	{
 		Group *THIS;
 		Mob   *newleader;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newleader = INT2PTR(Mob *, tmp);
@@ -297,15 +245,7 @@ XS(XS_Group_GetLeader) {
 	{
 		Group *THIS;
 		Mob   *RETVAL;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetLeader();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -322,15 +262,7 @@ XS(XS_Group_GetLeaderName) {
 		Group      *THIS;
 		const char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetLeaderName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -347,15 +279,7 @@ XS(XS_Group_SendHPPacketsTo) {
 	{
 		Group *THIS;
 		Mob   *newmember;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newmember = INT2PTR(Mob *, tmp);
@@ -377,15 +301,7 @@ XS(XS_Group_SendHPPacketsFrom) {
 	{
 		Group *THIS;
 		Mob   *newmember;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newmember = INT2PTR(Mob *, tmp);
@@ -408,15 +324,7 @@ XS(XS_Group_IsLeader) {
 		Group *THIS;
 		bool  RETVAL;
 		Mob   *leadertest;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			leadertest = INT2PTR(Mob *, tmp);
@@ -441,15 +349,7 @@ XS(XS_Group_GroupCount) {
 		Group *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GroupCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -466,15 +366,7 @@ XS(XS_Group_GetHighestLevel) {
 		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetHighestLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -495,15 +387,7 @@ XS(XS_Group_TeleportGroup) {
 		float  y       = (float) SvNV(ST(4));
 		float  z       = (float) SvNV(ST(5));
 		float  heading = (float) SvNV(ST(6));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -526,15 +410,7 @@ XS(XS_Group_GetID) {
 		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -552,15 +428,7 @@ XS(XS_Group_GetMember) {
 		Mob    *member;
 		Client *RETVAL = nullptr;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		int index = (int) SvUV(ST(1));
 		if (index < 0 || index > 5)
 			RETVAL = nullptr;
@@ -584,14 +452,7 @@ XS(XS_Group_DoesAnyMemberHaveExpeditionLockout) {
 	}
 
 	Group* THIS = nullptr;
-	if (sv_derived_from(ST(0), "Group")) {
-		IV tmp = SvIV((SV *) SvRV(ST(0)));
-		THIS = INT2PTR(Group *, tmp);
-	} else
-		Perl_croak(aTHX_ "THIS is not of type Group");
-	if (THIS == nullptr)
-		Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+	VALIDATE_THIS_IS_GROUP;
 	std::string expedition_name(SvPV_nolen(ST(1)));
 	std::string event_name(SvPV_nolen(ST(2)));
 	int max_check_count = (items == 4) ? static_cast<int>(SvIV(ST(3))) : 0;
