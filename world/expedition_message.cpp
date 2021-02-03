@@ -104,12 +104,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		ExpeditionMessage::RequestInvite(pack);
 		break;
 	}
-	case ServerOP_ExpeditionSecondsRemaining:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-		expedition_state.SetSecondsRemaining(buf->expedition_id, buf->new_duration_seconds);
-		break;
-	}
 	}
 }
 

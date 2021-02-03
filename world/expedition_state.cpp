@@ -38,6 +38,14 @@ Expedition* ExpeditionState::GetExpedition(uint32_t expedition_id)
 	return (it != m_expeditions.end()) ? &(*it) : nullptr;
 }
 
+Expedition* ExpeditionState::GetExpeditionByDynamicZoneID(uint32_t dz_id)
+{
+	auto it = std::find_if(m_expeditions.begin(), m_expeditions.end(),
+		[&](Expedition& expedition) { return expedition.GetDynamicZone().GetID() == dz_id; });
+
+	return (it != m_expeditions.end()) ? &(*it) : nullptr;
+}
+
 void ExpeditionState::LoadActiveExpeditions()
 {
 	BenchTimer benchmark;
@@ -98,15 +106,6 @@ void ExpeditionState::RemoveAllMembers(uint32_t expedition_id)
 	}
 }
 
-void ExpeditionState::SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining)
-{
-	auto expedition = GetExpedition(expedition_id);
-	if (expedition)
-	{
-		expedition->UpdateDzSecondsRemaining(seconds_remaining);
-	}
-}
-
 void ExpeditionState::Process()
 {
 	if (!m_process_throttle_timer.Check())
@@ -120,13 +119,13 @@ void ExpeditionState::Process()
 	{
 		bool is_deleted = false;
 
-		if (it->IsEmpty() || it->IsExpired())
+		if (it->IsEmpty() || it->GetDynamicZone().IsExpired())
 		{
 			// don't delete expedition until its dz instance is empty. this prevents
 			// an exploit where all members leave expedition and complete an event
 			// before being kicked from removal timer. the lockout could never be
 			// applied because the zone expedition cache was already invalidated.
-			auto dz_zoneserver = zoneserver_list.FindByInstanceID(it->GetInstanceID());
+			auto dz_zoneserver = zoneserver_list.FindByInstanceID(it->GetDynamicZone().GetInstanceID());
 			if (!dz_zoneserver || dz_zoneserver->NumPlayers() == 0)
 			{
 				LogExpeditions("Expedition [{}] expired or empty, notifying zones and deleting", it->GetID());
@@ -137,7 +136,7 @@ void ExpeditionState::Process()
 
 			if (it->IsEmpty() && !it->IsPendingDelete() && RuleB(Expedition, EmptyDzShutdownEnabled))
 			{
-				it->UpdateDzSecondsRemaining(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
+				it->GetDynamicZone().SetSecondsRemaining(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
 			}
 
 			it->SetPendingDelete(true);

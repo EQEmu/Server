@@ -81,6 +81,7 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expe
 			expeditions.dynamic_zone_id,
 			instance_list.id,
 			instance_list.zone,
+			instance_list.version,
 			instance_list.start_time,
 			instance_list.duration,
 			expeditions.leader_id,
@@ -112,20 +113,26 @@ std::vector<Expedition> ExpeditionDatabase::LoadExpeditions(uint32_t select_expe
 
 			if (last_expedition_id != expedition_id)
 			{
-				expeditions.emplace_back(
-					static_cast<uint32_t>(strtoul(row[0], nullptr, 10)), // expedition_id
+				DynamicZone dynamic_zone{
 					static_cast<uint32_t>(strtoul(row[1], nullptr, 10)), // dz_id
-					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_instance_id
 					static_cast<uint32_t>(strtoul(row[3], nullptr, 10)), // dz_zone_id
-					static_cast<uint32_t>(strtoul(row[4], nullptr, 10)), // start_time
-					static_cast<uint32_t>(strtoul(row[5], nullptr, 10)), // duration
-					static_cast<uint32_t>(strtoul(row[6], nullptr, 10))  // leader_id
+					static_cast<uint32_t>(strtoul(row[2], nullptr, 10)), // dz_instance_id
+					static_cast<uint32_t>(strtoul(row[4], nullptr, 10)), // dz_zone_version
+					static_cast<uint32_t>(strtoul(row[5], nullptr, 10)), // start_time
+					static_cast<uint32_t>(strtoul(row[6], nullptr, 10)), // duration
+					DynamicZoneType::Expedition
+				};
+
+				expeditions.emplace_back(
+					expedition_id,
+					dynamic_zone,
+					static_cast<uint32_t>(strtoul(row[7], nullptr, 10)) // leader_id
 				);
 			}
 
 			last_expedition_id = expedition_id;
 
-			uint32_t member_id = static_cast<uint32_t>(strtoul(row[7], nullptr, 10));
+			uint32_t member_id = static_cast<uint32_t>(strtoul(row[8], nullptr, 10));
 			expeditions.back().AddMember(member_id);
 		}
 	}
@@ -165,16 +172,6 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 		query = fmt::format("DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query);
 		database.QueryDatabase(query);
 	}
-}
-
-void ExpeditionDatabase::UpdateDzDuration(uint16_t instance_id, uint32_t new_duration)
-{
-	std::string query = fmt::format(
-		"UPDATE instance_list SET duration = {} WHERE id = {};",
-		new_duration, instance_id
-	);
-
-	database.QueryDatabase(query);
 }
 
 void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id)

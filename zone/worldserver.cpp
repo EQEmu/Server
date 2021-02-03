@@ -2900,10 +2900,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionGetOnlineMembers:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
-	case ServerOP_ExpeditionDzCompass:
-	case ServerOP_ExpeditionDzSafeReturn:
-	case ServerOP_ExpeditionDzZoneIn:
-	case ServerOP_ExpeditionDzDuration:
 	case ServerOP_ExpeditionCharacterLockout:
 	case ServerOP_ExpeditionExpireWarning:
 	{
@@ -2912,6 +2908,10 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_DzCharacterChange:
 	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzDurationUpdate:
+	case ServerOP_DzSetCompass:
+	case ServerOP_DzSetSafeReturn:
+	case ServerOP_DzSetZoneIn:
 	{
 		DynamicZone::HandleWorldMessage(pack);
 		break;

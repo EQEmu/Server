@@ -151,23 +151,23 @@
 #define ServerOP_ExpeditionGetOnlineMembers   0x0407
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
-#define ServerOP_ExpeditionDzCompass          0x040a
-#define ServerOP_ExpeditionDzSafeReturn       0x040b
-#define ServerOP_ExpeditionDzZoneIn           0x040c
 #define ServerOP_ExpeditionCharacterLockout   0x040d
 #define ServerOP_ExpeditionSaveInvite         0x040e
 #define ServerOP_ExpeditionRequestInvite      0x040f
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
 #define ServerOP_ExpeditionLockState          0x0411
 #define ServerOP_ExpeditionMembersRemoved     0x0412
-#define ServerOP_ExpeditionDzDuration         0x0413
 #define ServerOP_ExpeditionLockoutDuration    0x0414
-#define ServerOP_ExpeditionSecondsRemaining   0x0415
 #define ServerOP_ExpeditionExpireWarning      0x0416
 #define ServerOP_ExpeditionChooseNewLeader    0x0417
 
 #define ServerOP_DzCharacterChange            0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
+#define ServerOP_DzSetSecondsRemaining        0x0452
+#define ServerOP_DzDurationUpdate             0x0453
+#define ServerOP_DzSetCompass                 0x0454
+#define ServerOP_DzSetSafeReturn              0x0455
+#define ServerOP_DzSetZoneIn                  0x0456
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2090,11 +2090,6 @@ struct ServerExpeditionCharacterID_Struct {
 	uint32_t character_id;
 };
 
-struct ServerExpeditionUpdateDuration_Struct {
-	uint32_t expedition_id;
-	uint32_t new_duration_seconds;
-};
-
 struct ServerExpeditionExpireWarning_Struct {
 	uint32_t expedition_id;
 	uint32_t minutes_remaining;
@@ -2117,12 +2112,10 @@ struct ServerDzCommandMakeLeader_Struct {
 };
 
 struct ServerDzLocation_Struct {
-	uint32 owner_id;           // system associated with the dz (expedition, shared task, etc)
-	uint16 dz_zone_id;
-	uint16 dz_instance_id;
+	uint32 dz_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
-	uint32 zone_id;            // compass or safereturn zone id
+	uint32 zone_id;
 	float  y;
 	float  x;
 	float  z;
@@ -2134,6 +2127,11 @@ struct ServerDzCharacter_Struct {
 	uint16 instance_id;
 	uint8  remove; // 0: added 1: removed
 	uint32 character_id;
+};
+
+struct ServerDzSetDuration_Struct {
+	uint32 dz_id;
+	uint32 seconds;
 };
 
 #pragma pack()

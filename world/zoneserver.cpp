@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ucs.h"
 #include "queryserv.h"
 #include "world_store.h"
+#include "dynamic_zone.h"
 #include "expedition_message.h"
 
 extern ClientList client_list;
@@ -1367,9 +1368,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionLockState:
 	case ServerOP_ExpeditionMemberStatus:
 	case ServerOP_ExpeditionReplayOnJoin:
-	case ServerOP_ExpeditionDzCompass:
-	case ServerOP_ExpeditionDzSafeReturn:
-	case ServerOP_ExpeditionDzZoneIn:
 	case ServerOP_ExpeditionExpireWarning:
 	{
 		zoneserver_list.SendPacket(pack);
@@ -1386,20 +1384,18 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionCharacterLockout:
 	case ServerOP_ExpeditionSaveInvite:
 	case ServerOP_ExpeditionRequestInvite:
-	case ServerOP_ExpeditionSecondsRemaining:
 	{
 		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
 	}
 	case ServerOP_DzCharacterChange:
 	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzSetSecondsRemaining:
+	case ServerOP_DzSetCompass:
+	case ServerOP_DzSetSafeReturn:
+	case ServerOP_DzSetZoneIn:
 	{
-		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-		ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(buf->instance_id);
-		if (instance_zs)
-		{
-			instance_zs->SendPacket(pack);
-		}
+		DynamicZone::HandleZoneMessage(pack);
 		break;
 	}
 	default:
