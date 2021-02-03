@@ -9901,21 +9901,20 @@ std::unique_ptr<EQApplicationPacket> Client::CreateCompassPacket(
 	return outapp;
 }
 
-void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
+void Client::GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone)
 {
-	auto safereturn = dynamic_zone.GetSafeReturnLocation();
-	LogDynamicZonesDetail(
-		"Sending character [{}] to safereturn zone [{}] or bind", CharacterID(), safereturn.zone_id
-	);
+	if (dynamic_zone)
+	{
+		auto safereturn = dynamic_zone->GetSafeReturnLocation();
+		if (safereturn.zone_id != 0)
+		{
+			LogDynamicZonesDetail("Sending [{}] to safereturn zone [{}]", CharacterID(), safereturn.zone_id);
+			MovePC(safereturn.zone_id, 0, safereturn.x, safereturn.y, safereturn.z, safereturn.heading);
+			return;
+		}
+	}
 
-	if (!dynamic_zone.IsValid() || safereturn.zone_id == 0)
-	{
-		GoToBind();
-	}
-	else
-	{
-		MovePC(safereturn.zone_id, 0, safereturn.x, safereturn.y, safereturn.z, safereturn.heading);
-	}
+	GoToBind();
 }
 
 std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
