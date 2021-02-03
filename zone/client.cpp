@@ -6161,17 +6161,10 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
 {
-	if (count == 0)
-	{
-		m_has_quest_compass = false;
-	}
-	else
-	{
-		m_has_quest_compass = true;
-		m_quest_compass.x = in_x;
-		m_quest_compass.y = in_y;
-		m_quest_compass.z = in_z;
-	}
+	m_has_quest_compass = (count != 0);
+	m_quest_compass.x = in_x;
+	m_quest_compass.y = in_y;
+	m_quest_compass.z = in_z;
 
 	SendDzCompassUpdate();
 }
@@ -9891,6 +9884,12 @@ void Client::SendDzCompassUpdate()
 		compass_entries.emplace_back(entry);
 	}
 
+	QueuePacket(CreateCompassPacket(compass_entries).get());
+}
+
+std::unique_ptr<EQApplicationPacket> Client::CreateCompassPacket(
+	const std::vector<DynamicZoneCompassEntry_Struct>& compass_entries)
+{
 	uint32 count = static_cast<uint32_t>(compass_entries.size());
 	uint32 entries_size = sizeof(DynamicZoneCompassEntry_Struct) * count;
 	uint32 outsize = sizeof(DynamicZoneCompass_Struct) + entries_size;
@@ -9899,7 +9898,7 @@ void Client::SendDzCompassUpdate()
 	outbuf->count = count;
 	memcpy(outbuf->entries, compass_entries.data(), entries_size);
 
-	QueuePacket(outapp.get());
+	return outapp;
 }
 
 void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
