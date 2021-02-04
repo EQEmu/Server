@@ -57,6 +57,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/profanity_manager.h"
 #include "../common/net/eqstream.h"
+#include "../common/repositories/dynamic_zones_repository.h"
 
 #include "data_bucket.h"
 #include "command.h"
@@ -6960,58 +6961,36 @@ void command_dz(Client* c, const Seperator* sep)
 	}
 	else if (strcasecmp(sep->arg[1], "list") == 0)
 	{
-		std::string query = SQL(
-			SELECT
-				dynamic_zones.id,
-				dynamic_zones.type,
-				instance_list.id,
-				instance_list.zone,
-				instance_list.version,
-				instance_list.start_time,
-				instance_list.duration,
-				COUNT(instance_list_player.id) member_count
-			FROM dynamic_zones
-				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
-				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
-			GROUP BY instance_list.id
-			ORDER BY dynamic_zones.id;
-		);
+		auto dz_list = DynamicZonesRepository::AllDzInstancePlayerCounts(database);
+		c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", dz_list.size()).c_str());
 
-		auto results = database.QueryDatabase(query);
-		if (results.Success())
+		auto now = std::chrono::system_clock::now();
+
+		for (const auto& dz : dz_list)
 		{
-			c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", results.RowCount()).c_str());
-			for (auto row = results.begin(); row != results.end(); ++row)
+			auto expire_time = std::chrono::system_clock::from_time_t(dz.start_time + dz.duration);
+			auto remaining = std::chrono::duration_cast<std::chrono::seconds>(expire_time - now);
+			auto seconds = std::max(0, static_cast<int>(remaining.count()));
+			bool is_expired = now > expire_time;
+
+			if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
 			{
-				auto start_time  = strtoul(row[5], nullptr, 10);
-				auto duration    = strtoul(row[6], nullptr, 10);
-				auto expire_time = std::chrono::system_clock::from_time_t(start_time + duration);
+				auto zone_saylink = is_expired ? "zone" : EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format("#zoneinstance {}", dz.instance), false, "zone");
 
-				auto now = std::chrono::system_clock::now();
-				auto remaining = std::chrono::duration_cast<std::chrono::seconds>(expire_time - now);
-				auto seconds = std::max(0, static_cast<int>(remaining.count()));
-
-				bool is_expired = now > expire_time;
-				if (!is_expired || strcasecmp(sep->arg[2], "all") == 0)
-				{
-					uint32_t instance_id = strtoul(row[2], nullptr, 10);
-					auto zone_saylink = is_expired ? "zone" : EQ::SayLinkEngine::GenerateQuestSaylink(
-						fmt::format("#zoneinstance {}", instance_id), false, "zone");
-
-					c->Message(Chat::White, fmt::format(
-						"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
-						strtoul(row[0], nullptr, 10), // dynamic_zone_id
-						strtoul(row[1], nullptr, 10), // dynamic_zone_type
-						zone_saylink,
-						strtoul(row[3], nullptr, 10), // instance_zone_id
-						instance_id,                  // instance_id
-						strtoul(row[4], nullptr, 10), // instance_zone_version
-						strtoul(row[7], nullptr, 10), // instance member_count
-						seconds / 3600,      // hours
-						(seconds / 60) % 60, // minutes
-						seconds % 60         // seconds
-					).c_str());
-				}
+				c->Message(Chat::White, fmt::format(
+					"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+					dz.id,
+					dz.type,
+					zone_saylink,
+					dz.zone,
+					dz.instance,
+					dz.version,
+					dz.player_count,
+					seconds / 3600,      // hours
+					(seconds / 60) % 60, // minutes
+					seconds % 60         // seconds
+				).c_str());
 			}
 		}
 	}

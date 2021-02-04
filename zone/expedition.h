@@ -39,7 +39,6 @@ class ServerPacket;
 
 extern const char* const DZ_YOU_NOT_ASSIGNED;
 extern const char* const EXPEDITION_OTHER_BELONGS;
-extern const char* const CREATE_NOT_ALL_ADDED;
 
 enum class ExpeditionMemberStatus : uint8_t
 {

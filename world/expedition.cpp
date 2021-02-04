@@ -142,7 +142,7 @@ void Expedition::CheckExpireWarning()
 	if (m_warning_cooldown_timer.Check(false))
 	{
 		using namespace std::chrono_literals;
-		auto remaining = GetDynamicZone().GetRemainingDuration();
+		auto remaining = GetDynamicZone().GetDurationRemaining();
 		if ((remaining > 14min && remaining < 15min) ||
 		    (remaining > 4min && remaining < 5min) ||
 		    (remaining > 0min && remaining < 1min))

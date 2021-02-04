@@ -2906,7 +2906,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Expedition::HandleWorldMessage(pack);
 		break;
 	}
-	case ServerOP_DzCharacterChange:
+	case ServerOP_DzAddRemoveCharacter:
 	case ServerOP_DzRemoveAllCharacters:
 	case ServerOP_DzDurationUpdate:
 	case ServerOP_DzSetCompass:

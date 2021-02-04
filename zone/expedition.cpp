@@ -39,9 +39,6 @@ const char* const EXPEDITION_OTHER_BELONGS   = "{} attempted to create an expedi
 // lockout warnings were added to live in March 11 2020 patch
 const char* const DZADD_INVITE_WARNING       = "Warning! You will be given replay timers for the following events if you enter %s:";
 const char* const DZADD_INVITE_WARNING_TIMER = "%s - %sD:%sH:%sM";
-const char* const KICKPLAYERS_EVERYONE       = "Everyone";
-// message string 8312 added in September 08 2020 Test patch (used by both dz and shared tasks)
-const char* const CREATE_NOT_ALL_ADDED       = "Not all players in your {} were added to the {}. The {} can take a maximum of {} players, and your {} has {}.";
 // various expeditions re-use these strings when locking
 constexpr char LOCK_CLOSE[]                  = "Your expedition is nearing its close. You cannot bring any additional people into your expedition at this time.";
 constexpr char LOCK_BEGIN[]                  = "The trial has begun. You cannot bring any additional people into your expedition at this time.";
@@ -1107,7 +1104,7 @@ void Expedition::DzKickPlayers(Client* requester)
 	}
 
 	RemoveAllMembers();
-	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, KICKPLAYERS_EVERYONE, m_expedition_name.c_str());
+	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, "Everyone", m_expedition_name.c_str());
 }
 
 void Expedition::SetLocked(
