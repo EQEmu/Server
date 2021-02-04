@@ -21,12 +21,8 @@
 #include "expedition_state.h"
 #include "expedition.h"
 #include "expedition_database.h"
-#include "zonelist.h"
-#include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
 #include <algorithm>
-
-extern ZSList zoneserver_list;
 
 ExpeditionState expedition_state;
 
@@ -117,36 +113,11 @@ void ExpeditionState::Process()
 
 	for (auto it = m_expeditions.begin(); it != m_expeditions.end();)
 	{
-		bool is_deleted = false;
-
-		if (it->IsEmpty() || it->GetDynamicZone().IsExpired())
+		bool is_deleted = it->Process();
+		if (is_deleted)
 		{
-			// don't delete expedition until its dz instance is empty. this prevents
-			// an exploit where all members leave expedition and complete an event
-			// before being kicked from removal timer. the lockout could never be
-			// applied because the zone expedition cache was already invalidated.
-			auto dz_zoneserver = zoneserver_list.FindByInstanceID(it->GetDynamicZone().GetInstanceID());
-			if (!dz_zoneserver || dz_zoneserver->NumPlayers() == 0)
-			{
-				LogExpeditions("Expedition [{}] expired or empty, notifying zones and deleting", it->GetID());
-				expedition_ids.emplace_back(it->GetID());
-				it->SendZonesExpeditionDeleted();
-				is_deleted = true;
-			}
-
-			if (it->IsEmpty() && !it->IsPendingDelete() && RuleB(Expedition, EmptyDzShutdownEnabled))
-			{
-				it->GetDynamicZone().SetSecondsRemaining(RuleI(Expedition, EmptyDzShutdownDelaySeconds));
-			}
-
-			it->SetPendingDelete(true);
+			expedition_ids.emplace_back(it->GetID());
 		}
-		else
-		{
-			it->CheckExpireWarning();
-			it->CheckLeader();
-		}
-
 		it = is_deleted ? m_expeditions.erase(it) : it + 1;
 	}
 

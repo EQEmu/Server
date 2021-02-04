@@ -6,6 +6,14 @@
 
 class ServerPacket;
 
+enum class DynamicZoneStatus
+{
+	Unknown = 0,
+	Normal,
+	Expired,
+	ExpiredEmpty,
+};
+
 class DynamicZone
 {
 public:
@@ -23,6 +31,7 @@ public:
 	std::chrono::system_clock::duration GetRemainingDuration() const {
 		return m_expire_time - std::chrono::system_clock::now(); }
 
+	DynamicZoneStatus Process(bool force_expire);
 	bool IsExpired() const { return m_expire_time < std::chrono::system_clock::now(); }
 	void SetSecondsRemaining(uint32_t seconds_remaining);
 
@@ -33,6 +42,7 @@ private:
 	uint32_t m_instance_id = 0;
 	uint32_t m_zone_id = 0;
 	uint32_t m_zone_version = 0;
+	bool m_is_pending_early_shutdown = false;
 	DynamicZoneType m_type{ DynamicZoneType::None };
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;

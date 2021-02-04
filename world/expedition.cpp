@@ -161,3 +161,21 @@ void Expedition::CheckLeader()
 		ChooseNewLeader();
 	}
 }
+
+bool Expedition::Process()
+{
+	// returns true if expedition needs to be deleted from world cache and db
+	// expedition is not deleted until its dz has no clients to prevent exploits
+	auto status = m_dynamic_zone.Process(IsEmpty()); // force expire if no members
+	if (status == DynamicZoneStatus::ExpiredEmpty)
+	{
+		LogExpeditions("Expedition [{}] expired or empty, notifying zones and deleting", GetID());
+		SendZonesExpeditionDeleted();
+		return true;
+	}
+
+	CheckExpireWarning();
+	CheckLeader();
+
+	return false;
+}
