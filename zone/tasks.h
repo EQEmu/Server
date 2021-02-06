@@ -1,22 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-Copyright (C) 2001-2004 EQEMu Development Team (http://eqemulator.net)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
-
 #ifndef TASKS_H
 #define TASKS_H
 
@@ -61,28 +42,31 @@ struct TaskGoalList_Struct {
 // This is used for handling lists, loading them from the database, searching them.
 // Used for lists of NPCs to kill, items to loot, etc, as well as lists of items to
 // reward the player with on completion of the task.
-//
 class TaskGoalListManager {
 
 public:
 	TaskGoalListManager();
 	~TaskGoalListManager();
 	bool LoadLists();
-	int GetListByID(int ListID);
-	bool IsInList(int ListID, int Entry);
-	int GetFirstEntry(int ListID);
-	std::vector<int> GetListContents(int ListIndex);
+	int GetListByID(int list_id);
+	bool IsInList(int list_id, int entry);
+	int GetFirstEntry(int list_id);
+	std::vector<int> GetListContents(int list_index);
 
 private:
-
-	std::vector<TaskGoalList_Struct> TaskGoalLists;
-	int                              NumberOfLists;
+	std::vector<TaskGoalList_Struct> task_goal_lists;
+	int                              goal_lists_count;
 };
 
-typedef struct {
-	int   ExploreID;
-	float MinX, MaxX, MinY, MaxY, MinZ, MaxZ;
-} TaskProximity;
+struct TaskProximity {
+	int   explore_id;
+	float min_x;
+	float max_x;
+	float min_y;
+	float max_y;
+	float min_z;
+	float max_z;
+};
 
 // This class is used for managing proximities so that Quest NPC proximities don't need to be used.
 class TaskProximityManager {
@@ -90,48 +74,49 @@ class TaskProximityManager {
 public:
 	TaskProximityManager();
 	~TaskProximityManager();
-	bool LoadProximities(int ZoneID);
-	int CheckProximities(float X, float Y, float Z);
+	bool LoadProximities(int zone_id);
+	int CheckProximities(float x, float y, float z);
 
 private:
-	std::vector<TaskProximity> TaskProximities;
+	std::vector<TaskProximity> task_proximities;
 };
 
 typedef enum {
 	METHODSINGLEID = 0,
-	METHODLIST = 1,
-	METHODQUEST = 2
+	METHODLIST     = 1,
+	METHODQUEST    = 2
 } TaskMethodType;
 
 struct ActivityInformation {
-	int              StepNumber;
-	int              Type;
+	int              step_number;
+	int              activity_type;
 	std::string      target_name; // name mob, location -- default empty
 	std::string      item_list; // likely defaults to empty
 	std::string      skill_list; // IDs ; separated -- default -1
 	std::string      spell_list; // IDs ; separated -- default 0
-	std::string      desc_override; // overrides auto generated description -- default empty
+	std::string      description_override; // overrides auto generated description -- default empty
 	int              skill_id; // older clients, first id from above
 	int              spell_id; // older clients, first id from above
-	int              GoalID;
-	TaskMethodType   GoalMethod;
-	int              GoalCount;
-	int              DeliverToNPC;
-	std::vector<int> ZoneIDs;
+	int              goal_id;
+	TaskMethodType   goal_method;
+	int              goal_count;
+	int              deliver_to_npc;
+	std::vector<int> zone_ids;
 	std::string      zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
-	bool             Optional;
+	bool             optional;
 
 	inline bool CheckZone(int zone_id)
 	{
-		if (ZoneIDs.empty()) {
+		if (zone_ids.empty()) {
 			return true;
 		}
-		return std::find(ZoneIDs.begin(), ZoneIDs.end(), zone_id) != ZoneIDs.end();
+		return std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
 	}
 };
 
 typedef enum {
-	ActivitiesSequential = 0, ActivitiesStepped = 1
+	ActivitiesSequential = 0,
+	ActivitiesStepped    = 1
 } SequenceType;
 
 enum class TaskType {
