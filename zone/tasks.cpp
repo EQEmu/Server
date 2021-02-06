@@ -3303,31 +3303,49 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 			client, task_id, state->active_tasks[task_index], start_time, p_task_data[task_id]->duration,
 			false
 		);
-		Log(Logs::General, Logs::Tasks, "[UPDATE] SendActiveTasksToClient: Task %i, Activities: %i", task_id,
-			GetActivityCount(task_id));
+		LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}]", task_id, GetActivityCount(task_id));
 
 		int      sequence    = 0;
 		int      fixed_index = p_task_data[task_id]->type == TaskType::Task ? 0 : task_index - 1; // hmmm fuck
 		for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
 			if (client->GetTaskActivityState(p_task_data[task_id]->type, fixed_index, activity_id) != ActivityHidden) {
-				Log(Logs::General, Logs::Tasks, "[UPDATE]   Long: %i, %i, %i Complete=%i", task_id,
-					activity_id, fixed_index, task_complete);
+				LogTasks(
+					"[SendActiveTasksToClient] (Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
+					task_id,
+					activity_id,
+					fixed_index,
+					task_complete ? "true" : "false"
+				);
+
 				if (activity_id == GetActivityCount(task_id) - 1) {
 					SendTaskActivityLong(
-						client, task_id, activity_id, fixed_index,
-						p_task_data[task_id]->activity_information[activity_id].optional, task_complete
+						client,
+						task_id,
+						activity_id,
+						fixed_index,
+						p_task_data[task_id]->activity_information[activity_id].optional,
+						task_complete
 					);
 				}
 				else {
 					SendTaskActivityLong(
-						client, task_id, activity_id, fixed_index,
-						p_task_data[task_id]->activity_information[activity_id].optional, 0
+						client,
+						task_id,
+						activity_id,
+						fixed_index,
+						p_task_data[task_id]->activity_information[activity_id].optional,
+						0
 					);
 				}
 			}
 			else {
-				Log(Logs::General, Logs::Tasks, "[UPDATE]   Short: %i, %i, %i", task_id, activity_id,
-					fixed_index);
+				LogTasks(
+					"[SendActiveTasksToClient] (Short Update) task_id [{}] activity_id [{}] fixed_index [{}]",
+					task_id,
+					activity_id,
+					fixed_index
+				);
+
 				SendTaskActivityShort(client, task_id, activity_id, fixed_index);
 			}
 			sequence++;
@@ -4078,7 +4096,7 @@ int TaskProximityManager::CheckProximities(float x, float y, float z)
 		Log(
 			Logs::General,
 			Logs::Tasks,
-			"[PROXIMITY] Checking %8.3f, %8.3f, %8.3f against %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f",
+			"[Proximity] Checking %8.3f, %8.3f, %8.3f against %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f",
 			x,
 			y,
 			z,
