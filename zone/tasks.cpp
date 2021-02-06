@@ -3329,7 +3329,10 @@ void TaskManager::SendSingleActiveTaskToClient(
 
 	for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
 		if (task_info.activity[activity_id].activity_state != ActivityHidden) {
-			LogTasks("[SendSingleActiveTaskToClient] Long [{}] [{}] complete [{}]", task_id, activity_id, task_complete);
+			LogTasks("[SendSingleActiveTaskToClient] Long [{}] [{}] complete [{}]",
+					 task_id,
+					 activity_id,
+					 task_complete);
 			if (activity_id == GetActivityCount(task_id) - 1) {
 				SendTaskActivityLong(
 					client, task_id, activity_id, task_info.slot,
@@ -3647,31 +3650,16 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 {
 	auto task_type    = p_task_manager->GetTaskType(task_id);
 	int  character_id = client->CharacterID();
-	Log(Logs::General, Logs::Tasks, "[UPDATE] RemoveTaskByTaskID: %d", task_id);
-	std::string query   = fmt::format(
-		"DELETE FROM character_activities WHERE charid = {} AND taskid = {}",
-		character_id,
-		task_id
-	);
-	auto        results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("[TASKS] Error in CientTaskState::RemoveTaskByTaskID [{}]", results.ErrorMessage().c_str());
-		return;
-	}
-	LogTasks("[UPDATE] RemoveTaskByTaskID: {}", query.c_str());
 
-	query   = fmt::format(
-		"DELETE FROM character_tasks WHERE charid = {} AND taskid = {} AND type = {}",
-		character_id,
-		task_id,
-		(int) task_type
+	CharacterActivitiesRepository::DeleteWhere(
+		database,
+		fmt::format("charid = {} AND taskid = {}", character_id, task_id)
 	);
-	results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("[TASKS] Error in ClientTaskState::RemoveTaskByTaskID [{}]", results.ErrorMessage().c_str());
-	}
 
-	LogTasks("[UPDATE] RemoveTaskByTaskID: {}", query.c_str());
+	CharacterTasksRepository::DeleteWhere(
+		database,
+		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, (int) task_type)
+	);
 
 	switch (task_type) {
 		case TaskType::Task: {
