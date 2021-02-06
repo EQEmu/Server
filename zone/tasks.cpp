@@ -42,6 +42,8 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "quest_parser_collection.h"
 #include "../common/repositories/completed_tasks_repository.h"
 #include "../common/repositories/tasksets_repository.h"
+#include "../common/repositories/tasks_repository.h"
+#include "../common/repositories/task_activities_repository.h"
 
 extern QueryServ *QServ;
 
@@ -69,7 +71,7 @@ bool TaskManager::LoadTaskSets()
 		task_set.clear();
 	}
 
-	auto task_set_results = TasksetsRepository::GetWhere(
+	auto rows = TasksetsRepository::GetWhere(
 		content_db,
 		fmt::format(
 			"`id` > 0 AND `id` < {} AND `taskid` >= 0 AND `taskid` < {} ORDER BY `id`, `taskid` ASC",
@@ -78,7 +80,7 @@ bool TaskManager::LoadTaskSets()
 		)
 	);
 
-	for (auto &task_set: task_set_results) {
+	for (auto &task_set: rows) {
 		task_sets[task_set.id].push_back(task_set.taskid);
 		LogTasksDetail("[LoadTaskSets] Adding task_id [{}] to task_set [{}]", task_set.taskid, task_set.id);
 	}
@@ -95,204 +97,192 @@ void TaskManager::ReloadGoalLists()
 
 bool TaskManager::LoadTasks(int single_task)
 {
-	// If task_id !=0, then just load the task specified.
-	Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] TaskManager::LoadTasks Called");
-
+	std::string task_query_filter = fmt::format("id = {}", single_task);
 	std::string query;
 	if (single_task == 0) {
-		if (!goal_list_manager.LoadLists())
-			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadLists failed");
+		if (!goal_list_manager.LoadLists()) {
+			LogTasks("[TaskManager::LoadTasks] LoadLists failed");
+		}
 
-		if (!LoadTaskSets())
-			Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadTaskSets failed");
+		if (!LoadTaskSets()) {
+			LogTasks("[TaskManager::LoadTasks] LoadTaskSets failed");
+		}
 
-		query = StringFormat(
-			"SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-			"`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-			"`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` < %i",
-			MAXTASKS
-		);
-	}
-	else {
-		query = StringFormat(
-			"SELECT `id`, `type`, `duration`, `duration_code`, `title`, `description`, "
-			"`reward`, `rewardid`, `cashreward`, `xpreward`, `rewardmethod`, `faction_reward`,"
-			"`minlevel`, `maxlevel`, `repeatable`, `completion_emote` FROM `tasks` WHERE `id` = %i",
-			single_task
-		);
+		task_query_filter = fmt::format("id < {}", MAXTASKS);
 	}
 
-	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::LoadTasks: %s";
+	// load task level data
+	auto repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
+	for (auto &task: repo_tasks) {
+		int task_id = task.id;
 
-	auto results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-		return false;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int taskID = atoi(row[0]);
-
-		if ((taskID <= 0) || (taskID >= MAXTASKS)) {
+		if ((task_id <= 0) || (task_id >= MAXTASKS)) {
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			LogError("[TASKS]Task ID [{}] out of range while loading tasks from database", taskID);
+			LogError("[TASKS]Task ID [{}] out of range while loading tasks from database", task_id);
 			continue;
 		}
 
-		p_task_data[taskID] = new TaskInformation;
-		p_task_data[taskID]->type              = static_cast<TaskType>(atoi(row[1]));
-		p_task_data[taskID]->duration          = atoi(row[2]);
-		p_task_data[taskID]->duration_code     = static_cast<DurationCode>(atoi(row[3]));
-		p_task_data[taskID]->title             = row[4];
-		p_task_data[taskID]->description       = row[5];
-		p_task_data[taskID]->reward            = row[6];
-		p_task_data[taskID]->reward_id         = atoi(row[7]);
-		p_task_data[taskID]->cash_reward       = atoi(row[8]);
-		p_task_data[taskID]->experience_reward = atoi(row[9]);
-		p_task_data[taskID]->reward_method     = (TaskMethodType) atoi(row[10]);
-		p_task_data[taskID]->faction_reward    = atoi(row[11]);
-		p_task_data[taskID]->min_level         = atoi(row[12]);
-		p_task_data[taskID]->max_level         = atoi(row[13]);
-		p_task_data[taskID]->repeatable        = atoi(row[14]);
-		p_task_data[taskID]->completion_emote  = row[15];
-		p_task_data[taskID]->activity_count    = 0;
-		p_task_data[taskID]->sequence_mode     = ActivitiesSequential;
-		p_task_data[taskID]->last_step         = 0;
+		// load task data
+		p_task_data[task_id] = new TaskInformation;
+		p_task_data[task_id]->type              = static_cast<TaskType>(task.type);
+		p_task_data[task_id]->duration          = task.duration;
+		p_task_data[task_id]->duration_code     = static_cast<DurationCode>(task.duration_code);
+		p_task_data[task_id]->title             = task.title;
+		p_task_data[task_id]->description       = task.description;
+		p_task_data[task_id]->reward            = task.reward;
+		p_task_data[task_id]->reward_id         = task.rewardid;
+		p_task_data[task_id]->cash_reward       = task.cashreward;
+		p_task_data[task_id]->experience_reward = task.xpreward;
+		p_task_data[task_id]->reward_method     = (TaskMethodType) task.rewardmethod;
+		p_task_data[task_id]->faction_reward    = task.faction_reward;
+		p_task_data[task_id]->min_level         = task.minlevel;
+		p_task_data[task_id]->max_level         = task.maxlevel;
+		p_task_data[task_id]->repeatable        = task.repeatable;
+		p_task_data[task_id]->completion_emote  = task.completion_emote;
+		p_task_data[task_id]->activity_count    = 0;
+		p_task_data[task_id]->sequence_mode     = ActivitiesSequential;
+		p_task_data[task_id]->last_step         = 0;
 
-		Log(Logs::General,
-			Logs::Tasks,
-			"[GLOBALLOAD] task_id: %5i, duration: %8i, reward: %s min_level %i max_level %i "
-			"repeatable: %s",
-			taskID,
-			p_task_data[taskID]->duration,
-			p_task_data[taskID]->reward.c_str(),
-			p_task_data[taskID]->min_level,
-			p_task_data[taskID]->max_level,
-			p_task_data[taskID]->repeatable ? "Yes" : "No");
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] title: %s", p_task_data[taskID]->title.c_str());
+		LogTasksDetail(
+			"[LoadTasks] (Task) task_id [{}] type [{}] duration [{}] duration_code [{}] title [{}] description [{}] "
+			" reward [{}] rewardid [{}] cashreward [{}] xpreward [{}] rewardmethod [{}] faction_reward [{}] minlevel [{}] "
+			" maxlevel [{}] repeatable [{}] completion_emote [{}] ",
+			task.id,
+			task.type,
+			task.duration,
+			task.duration_code,
+			task.title,
+			task.description,
+			task.reward,
+			task.rewardid,
+			task.cashreward,
+			task.xpreward,
+			task.rewardmethod,
+			task.faction_reward,
+			task.minlevel,
+			task.maxlevel,
+			task.repeatable,
+			task.completion_emote
+		);
 	}
 
+	LogTasks("Loaded [{}] Tasks", repo_tasks.size());
+
+	std::string activities_query_filter = fmt::format(
+		"taskid = {} and activityid < {} ORDER BY taskid, activityid ASC",
+		single_task,
+		MAXACTIVITIESPERTASK
+	);
+
+	// if loading only a single task
 	if (single_task == 0) {
-		query =
-			StringFormat(
-				"SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
-				"`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
-				"`goalcount`, `delivertonpc`, `zones`, `optional` FROM `task_activities` WHERE `taskid` < "
-				"%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
-				MAXTASKS, MAXACTIVITIESPERTASK
-			);
-	}
-	else {
-		query =
-			StringFormat(
-				"SELECT `taskid`, `step`, `activityid`, `activitytype`, `target_name`, `item_list`, "
-				"`skill_list`, `spell_list`, `description_override`, `goalid`, `goalmethod`, "
-				"`goalcount`, `delivertonpc`, `zones`, `optional` FROM `task_activities` WHERE `taskid` = "
-				"%i AND `activityid` < %i ORDER BY taskid, activityid ASC",
-				single_task, MAXACTIVITIESPERTASK
-			);
-	}
-	results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
-		return false;
+		activities_query_filter = fmt::format(
+			"taskid < {} and activityid < {} ORDER BY taskid, activityid ASC",
+			MAXTASKS,
+			MAXACTIVITIESPERTASK
+		);
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int taskID = atoi(row[0]);
-		int step   = atoi(row[1]);
+	// load activity data
+	auto task_activities = TaskActivitiesRepository::GetWhere(content_db, activities_query_filter);
+	for (auto &task_activity: task_activities) {
+		int task_id     = task_activity.taskid;
+		int step        = task_activity.step;
+		int activity_id = task_activity.activityid;
 
-		int activityID = atoi(row[2]);
+		// create pointer to activity data since declarations get unruly long
+		int                 activity_index   = p_task_data[task_id]->activity_count;
+		ActivityInformation *p_activity_data = &p_task_data[task_id]->activity_information[activity_index];
 
-		if ((taskID <= 0) || (taskID >= MAXTASKS) || (activityID < 0) || (activityID >= MAXACTIVITIESPERTASK)) {
+		if ((task_id <= 0) || (task_id >= MAXTASKS) || (activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
+
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
-			LogError(
-				"[TASKS]Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
-				taskID,
-				activityID);
+			LogTasks(
+				"Error: Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
+				task_id,
+				activity_id
+			);
 			continue;
 		}
 
-		if (p_task_data[taskID] == nullptr) {
-			LogError(
-				"[TASKS]activity_information for non-existent task ([{}], [{}]) while loading activities from database",
-				taskID,
-				activityID);
+		if (p_task_data[task_id] == nullptr) {
+			LogTasks(
+				"Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
+				task_id,
+				activity_id
+			);
 			continue;
 		}
 
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].step_number = step;
+		p_task_data[task_id]->activity_information[p_task_data[task_id]->activity_count].step_number = step;
 
 		if (step != 0) {
-			p_task_data[taskID]->sequence_mode = ActivitiesStepped;
+			p_task_data[task_id]->sequence_mode = ActivitiesStepped;
 		}
 
-		if (step > p_task_data[taskID]->last_step) {
-			p_task_data[taskID]->last_step = step;
+		if (step > p_task_data[task_id]->last_step) {
+			p_task_data[task_id]->last_step = step;
 		}
 
 		// Task Activities MUST be numbered sequentially from 0. If not, log an error
 		// and set the task to nullptr. Subsequent activities for this task will raise
 		// ERR_NOTASK errors.
 		// Change to (activityID != (Tasks[taskID]->activity_count + 1)) to index from 1
-		if (activityID != p_task_data[taskID]->activity_count) {
-			LogError("[TASKS]Activities for Task [{}] are not sequential starting at 0. Not loading task", taskID,
-					 activityID);
-			p_task_data[taskID] = nullptr;
+		if (activity_id != p_task_data[task_id]->activity_count) {
+			LogError("[TASKS]Activities for Task [{}] are not sequential starting at 0. Not loading task", task_id, activity_id);
+			p_task_data[task_id] = nullptr;
 			continue;
 		}
 
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].activity_type = atoi(row[3]);
+		// set activity data
+		p_activity_data->activity_type        = task_activity.activitytype;
+		p_activity_data->target_name          = task_activity.target_name;
+		p_activity_data->item_list            = task_activity.item_list;
+		p_activity_data->skill_list           = task_activity.skill_list;
+		p_activity_data->skill_id             = std::stoi(task_activity.skill_list); // for older clients
+		p_activity_data->spell_list           = task_activity.spell_list;
+		p_activity_data->spell_id             = std::stoi(task_activity.spell_list); // for older clients
+		p_activity_data->description_override = task_activity.description_override;
+		p_activity_data->goal_id              = task_activity.goalid;
+		p_activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
+		p_activity_data->goal_count           = task_activity.goalcount;
+		p_activity_data->deliver_to_npc       = task_activity.delivertonpc;
 
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].target_name          = row[4];
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].item_list            = row[5];
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].skill_list           = row[6];
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].skill_id             = atoi(row[6]); // for older clients
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].spell_list           = row[7];
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].spell_id             = atoi(row[7]); // for older clients
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].description_override = row[8];
-
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_id        = atoi(row[9]);
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_method    = (TaskMethodType) atoi(
-			row[10]
-		);
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_count     = atoi(row[11]);
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].deliver_to_npc = atoi(row[12]);
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].zones          = row[13];
-		auto      zones = SplitString(
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].zones,
+		// zones
+		p_activity_data->zones = task_activity.zones;
+		auto zones = SplitString(
+			task_activity.zones,
 			';'
 		);
-		for (auto &&e : zones)
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].zone_ids.push_back(
-				std::stoi(
-					e
-				));
-		p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].optional = atoi(row[14]);
 
-		Log(Logs::General, Logs::Tasks,
-			"[GLOBALLOAD] activity_information Slot %2i: ID %i for Task %5i. Type: %3i, GoalID: %8i, "
-			"GoalMethod: %i, GoalCount: %3i, Zones:%s",
-			p_task_data[taskID]->activity_count, activityID, taskID,
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].activity_type,
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_id,
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_method,
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].goal_count,
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].zones.c_str());
+		for (auto &&e : zones) {
+			p_activity_data->zone_ids.push_back(std::stoi(e));
+		}
 
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] target_name: %s",
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].target_name.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] item_list: %s",
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].item_list.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] skill_list: %s",
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].skill_list.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] spell_list: %s",
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].spell_list.c_str());
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] description_override: %s",
-			p_task_data[taskID]->activity_information[p_task_data[taskID]->activity_count].description_override.c_str());
+		p_activity_data->optional = task_activity.optional;
 
-		p_task_data[taskID]->activity_count++;
+		LogTasksDetail(
+			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_id [{}] goal_method [{}] goal_count [{}] zones [{}]"
+			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
+			task_id,
+			activity_id,
+			p_task_data[task_id]->activity_count,
+			p_activity_data->activity_type,
+			p_activity_data->goal_id,
+			p_activity_data->goal_method,
+			p_activity_data->goal_count,
+			p_activity_data->zones.c_str(),
+			p_activity_data->target_name.c_str(),
+			p_activity_data->item_list.c_str(),
+			p_activity_data->skill_list.c_str(),
+			p_activity_data->spell_list.c_str(),
+			p_activity_data->description_override.c_str()
+		);
+
+		p_task_data[task_id]->activity_count++;
 	}
+
+	LogTasks("Loaded [{}] Task Activities", task_activities.size());
 
 	return true;
 }
@@ -309,39 +299,38 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState %s";
 
-	int characterID = client->CharacterID();
+	int character_id = client->CharacterID();
 
-	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", characterID);
+	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", character_id);
 
 	if (client_task_state->active_task_count > 0 ||
 		client_task_state->active_task.task_id != TASKSLOTEMPTY) { // TODO: tasks
-		for (auto &ActiveTask : client_task_state->ActiveTasks) {
-			int taskID = ActiveTask.task_id;
-			if (taskID == TASKSLOTEMPTY) {
+		for (auto &active_task : client_task_state->ActiveTasks) {
+			int task_id = active_task.task_id;
+			if (task_id == TASKSLOTEMPTY) {
 				continue;
 			}
 
-			int slot = ActiveTask.slot;
-
-			if (ActiveTask.updated) {
+			int slot = active_task.slot;
+			if (active_task.updated) {
 
 				Log(Logs::General, Logs::Tasks,
 					"[CLIENTSAVE] TaskManager::SaveClientState for character ID %d, Updating TaskIndex "
 					"%i task_id %i",
-					characterID, slot, taskID);
+					character_id, slot, task_id);
 
 				std::string query   = StringFormat(
 					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
 					"VALUES (%i, %i, %i, %i, %i)",
-					characterID, taskID, slot, static_cast<int>(p_task_data[taskID]->type),
-					ActiveTask.accepted_time
+					character_id, task_id, slot, static_cast<int>(p_task_data[task_id]->type),
+					active_task.accepted_time
 				);
 				auto        results = database.QueryDatabase(query);
 				if (!results.Success()) {
 					LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				}
 				else {
-					ActiveTask.updated = false;
+					active_task.updated = false;
 				}
 			}
 
@@ -350,32 +339,32 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 							"VALUES ";
 
 			int      updatedActivityCount = 0;
-			for (int activityIndex        = 0; activityIndex < p_task_data[taskID]->activity_count; ++activityIndex) {
+			for (int activityIndex        = 0; activityIndex < p_task_data[task_id]->activity_count; ++activityIndex) {
 
-				if (!ActiveTask.activity[activityIndex].updated) {
+				if (!active_task.activity[activityIndex].updated) {
 					continue;
 				}
 
 				Log(Logs::General, Logs::Tasks,
 					"[CLIENTSAVE] TaskManager::SaveClientSate for character ID %d, Updating activity_information "
 					"%i, %i",
-					characterID, slot, activityIndex);
+					character_id, slot, activityIndex);
 
 				if (updatedActivityCount == 0) {
 					query +=
 						StringFormat(
-							"(%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
-							ActiveTask.activity[activityIndex].done_count,
-							ActiveTask.activity[activityIndex].activity_state ==
+							"(%i, %i, %i, %i, %i)", character_id, task_id, activityIndex,
+							active_task.activity[activityIndex].done_count,
+							active_task.activity[activityIndex].activity_state ==
 							ActivityCompleted
 						);
 				}
 				else {
 					query +=
 						StringFormat(
-							", (%i, %i, %i, %i, %i)", characterID, taskID, activityIndex,
-							ActiveTask.activity[activityIndex].done_count,
-							ActiveTask.activity[activityIndex].activity_state ==
+							", (%i, %i, %i, %i, %i)", character_id, task_id, activityIndex,
+							active_task.activity[activityIndex].done_count,
+							active_task.activity[activityIndex].activity_state ==
 							ActivityCompleted
 						);
 				}
@@ -395,11 +384,11 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 				continue;
 			}
 
-			ActiveTask.updated = false;
-			for (int activityIndex                         = 0;
-				activityIndex < p_task_data[taskID]->activity_count;
+			active_task.updated = false;
+			for (int activityIndex                          = 0;
+				activityIndex < p_task_data[task_id]->activity_count;
 				++activityIndex)
-				ActiveTask.activity[activityIndex].updated = false;
+				active_task.activity[activityIndex].updated = false;
 		}
 	}
 
@@ -431,7 +420,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		std::string query   =
 						StringFormat(
 							completedTaskQuery,
-							characterID,
+							character_id,
 							client_task_state->completed_tasks[i].completed_time,
 							taskID,
 							-1
@@ -456,7 +445,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			}
 
 			query   = StringFormat(
-				completedTaskQuery, characterID, client_task_state->completed_tasks[i].completed_time,
+				completedTaskQuery, character_id, client_task_state->completed_tasks[i].completed_time,
 				taskID, j
 			);
 			results = database.QueryDatabase(query);
@@ -3222,17 +3211,19 @@ void TaskManager::SendTaskActivityNew(
 
 	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].description_override); // description override
 
-	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash)
+	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
 		buf.WriteUInt32(
 			client->GetTaskActivityDoneCount(
 				p_task_data[task_id]->type,
 				client_task_index,
 				activity_id
 			));    // done_count
-	else
+	}
+	else {
 		// For internal activity_information types, done_count is either 1 if the activity_information is complete, 0 otherwise.
 		buf.WriteUInt32((client->GetTaskActivityDoneCount(p_task_data[task_id]->type, client_task_index, activity_id) >=
 						 p_task_data[task_id]->activity_information[activity_id].goal_count));
+	}
 
 	buf.WriteUInt8(1);    // unknown9
 
@@ -3883,9 +3874,6 @@ TaskGoalListManager::~TaskGoalListManager() {}
 
 bool TaskGoalListManager::LoadLists()
 {
-
-	Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] TaskGoalListManager::LoadLists Called");
-
 	task_goal_lists.clear();
 
 	const char *ERR_MYSQLERROR = "Error in TaskGoalListManager::LoadLists: %s %s";
@@ -3901,7 +3889,7 @@ bool TaskGoalListManager::LoadLists()
 	}
 
 	goal_lists_count = results.RowCount();
-	LogTasks("Loading GoalLists [{}] lists", goal_lists_count);
+	LogTasks("Loaded GoalLists [{}]", goal_lists_count);
 
 	task_goal_lists.reserve(goal_lists_count);
 
