@@ -41,51 +41,46 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "../common/repositories/completed_tasks_repository.h"
+#include "../common/repositories/tasksets_repository.h"
 
 extern QueryServ *QServ;
 
 TaskManager::TaskManager()
 {
-	for (auto &Task : p_task_data)
-		Task = nullptr;
+	for (auto &task : p_task_data) {
+		task = nullptr;
+	}
 }
 
 TaskManager::~TaskManager()
 {
-	for (auto &Task : p_task_data) {
-		if (Task != nullptr) {
-			safe_delete(Task);
+	for (auto &task : p_task_data) {
+		if (task != nullptr) {
+			safe_delete(task);
 		}
 	}
 }
 
 bool TaskManager::LoadTaskSets()
 {
-
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
 	// this method again.
-	for (auto &TaskSet : task_sets)
-		TaskSet.clear();
-
-	std::string query   = StringFormat(
-		"SELECT `id`, `taskid` from `tasksets` "
-		"WHERE `id` > 0 AND `id` < %i "
-		"AND `taskid` >= 0 AND `taskid` < %i "
-		"ORDER BY `id`, `taskid` ASC",
-		MAXTASKSETS, MAXTASKS
-	);
-	auto        results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("Error in TaskManager::LoadTaskSets: [{}]", results.ErrorMessage().c_str());
-		return false;
+	for (auto &task_set : task_sets) {
+		task_set.clear();
 	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int taskSet = atoi(row[0]);
-		int taskID  = atoi(row[1]);
+	auto task_set_results = TasksetsRepository::GetWhere(
+		content_db,
+		fmt::format(
+			"`id` > 0 AND `id` < {} AND `taskid` >= 0 AND `taskid` < {} ORDER BY `id`, `taskid` ASC",
+			MAXTASKSETS,
+			MAXTASKS
+		)
+	);
 
-		task_sets[taskSet].push_back(taskID);
-		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Adding task_id %4i to TaskSet %4i", taskID, taskSet);
+	for (auto &task_set: task_set_results) {
+		task_sets[task_set.id].push_back(task_set.taskid);
+		LogTasksDetail("[LoadTaskSets] Adding task_id [{}] to task_set [{}]", task_set.taskid, task_set.id);
 	}
 
 	return true;
@@ -93,9 +88,9 @@ bool TaskManager::LoadTaskSets()
 
 void TaskManager::ReloadGoalLists()
 {
-
-	if (!goal_list_manager.LoadLists())
+	if (!goal_list_manager.LoadLists()) {
 		Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadLists failed");
+	}
 }
 
 bool TaskManager::LoadTasks(int single_task)

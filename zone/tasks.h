@@ -365,7 +365,7 @@ public:
 private:
 	TaskGoalListManager  goal_list_manager;
 	TaskProximityManager proximity_manager;
-	TaskInformation      *p_task_data[MAXTASKS];
+	TaskInformation      *p_task_data[MAXTASKS]{};
 	std::vector<int>     task_sets[MAXTASKSETS];
 	void SendActiveTaskDescription(
 		Client *client,
