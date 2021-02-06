@@ -3618,27 +3618,15 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 			break;
 	}
 
-	std::string query   = StringFormat(
-		"DELETE FROM character_activities WHERE charid=%i AND taskid = %i",
-		character_id, task_id
+	CharacterActivitiesRepository::DeleteWhere(
+		database,
+		fmt::format("charid = {} AND taskid = {}", character_id, task_id)
 	);
-	auto        results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		LogError("[TASKS] Error in CientTaskState::CancelTask [{}]",
-				 results.ErrorMessage().c_str());
-		return;
-	}
-	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
 
-	query   = StringFormat(
-		"DELETE FROM character_tasks WHERE charid=%i AND taskid = %i AND type=%i", character_id,
-		task_id, static_cast<int>(task_type));
-	results = database.QueryDatabase(query);
-	if (!results.Success())
-		LogError("[TASKS] Error in CientTaskState::CancelTask [{}]",
-				 results.ErrorMessage().c_str());
-
-	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask: %s", query.c_str());
+	CharacterTasksRepository::DeleteWhere(
+		database,
+		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, static_cast<int>(task_type))
+	);
 
 	switch (task_type) {
 		case TaskType::Task:
