@@ -289,7 +289,7 @@ private:
 			ClientTaskInformation active_task; // only one
 			ClientTaskInformation active_quests[MAXACTIVEQUESTS];
 		};
-		ClientTaskInformation ActiveTasks[MAXACTIVEQUESTS + 1];
+		ClientTaskInformation active_tasks[MAXACTIVEQUESTS + 1];
 	};
 	// Shared tasks should be limited to 1 as well
 	std::vector<int>                      enabled_tasks;
