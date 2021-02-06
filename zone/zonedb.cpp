@@ -2728,8 +2728,8 @@ const NPCType *ZoneDatabase::LoadNPCTypesData(uint32 npc_type_id, bool bulk_load
 		temp_npctype_data->stuck_behavior   	= atoi(row[109]);
 		temp_npctype_data->use_model        	= atoi(row[110]);
 		temp_npctype_data->flymode          	= atoi(row[111]);
-		temp_npctype_data->always_aggro	        = atoi(row[112]);
-		temp_npctype_data->can_open_doors		= atoi(row[113]);
+		temp_npctype_data->always_aggro	        = atoi(row[112]) != 0;
+		temp_npctype_data->can_open_doors		= atoi(row[113]) != 0;
 
 		temp_npctype_data->skip_auto_scale = false; // hardcoded here for now
 
