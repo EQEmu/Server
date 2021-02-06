@@ -964,7 +964,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	lootvar = 0;
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		taskmanager->LoadProximities(zoneid);
+		p_task_manager->LoadProximities(zoneid);
 	}
 
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);

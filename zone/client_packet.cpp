@@ -1821,8 +1821,8 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 	}
 	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
-	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->AcceptNewTask(this, ant->task_id, ant->task_master_id);
+	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id);
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
@@ -4004,8 +4004,8 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 	}
 	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
+	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
 }
 
 void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
@@ -13996,8 +13996,8 @@ void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app)
 	}
 	TaskHistoryRequest_Struct *ths = (TaskHistoryRequest_Struct*)app->pBuffer;
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->SendTaskHistory(this, ths->TaskIndex);
+	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->SendTaskHistory(this, ths->TaskIndex);
 }
 
 void Client::Handle_OP_Taunt(const EQApplicationPacket *app)

@@ -115,8 +115,8 @@ char errorname[32];
 extern Zone* zone;
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
-QueryServ *QServ = 0;
-TaskManager *taskmanager = 0;
+QueryServ *QServ            = 0;
+TaskManager *p_task_manager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
@@ -427,8 +427,8 @@ int main(int argc, char** argv) {
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
 		Log(Logs::General, Logs::Tasks, "[INIT] Loading Tasks");
-		taskmanager = new TaskManager;
-		taskmanager->LoadTasks();
+		p_task_manager = new TaskManager;
+		p_task_manager->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -607,7 +607,7 @@ int main(int argc, char** argv) {
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
-	safe_delete(taskmanager);
+	safe_delete(p_task_manager);
 	command_deinit();
 #ifdef BOTS
 	bot_command_deinit();
