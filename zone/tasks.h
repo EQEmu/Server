@@ -269,17 +269,17 @@ public:
 private:
 	bool UnlockActivities(int character_id, ClientTaskInformation &task_info);
 	void IncrementDoneCount(
-		Client *c,
-		TaskInformation *Task,
-		int TaskIndex,
-		int ActivityID,
-		int Count = 1,
+		Client *client,
+		TaskInformation *task_information,
+		int task_index,
+		int activity_id,
+		int count = 1,
 		bool ignore_quest_update = false
 	);
-	inline ClientTaskInformation *GetClientTaskInfo(TaskType type, int index)
+	inline ClientTaskInformation *GetClientTaskInfo(TaskType task_type, int index)
 	{
 		ClientTaskInformation *info = nullptr;
-		switch (type) {
+		switch (task_type) {
 			case TaskType::Task:
 				if (index == 0) {
 					info = &active_task;
@@ -298,6 +298,7 @@ private:
 		return info;
 	}
 	int                                   active_task_count;
+
 	union { // easier to loop over
 		struct {
 			ClientTaskInformation active_task; // only one
@@ -318,67 +319,76 @@ class TaskManager {
 public:
 	TaskManager();
 	~TaskManager();
-	int GetActivityCount(int TaskID);
-	bool LoadSingleTask(int TaskID);
-	bool LoadTasks(int SingleTask = 0);
+	int GetActivityCount(int task_id);
+	bool LoadTasks(int single_task = 0);
 	void ReloadGoalLists();
-	inline void LoadProximities(int ZoneID) { ProximityManager.LoadProximities(ZoneID); }
+	inline void LoadProximities(int zone_id)
+	{
+		proximity_manager.LoadProximities(zone_id);
+	}
 	bool LoadTaskSets();
-	bool LoadClientState(Client *c, ClientTaskState *state);
-	bool SaveClientState(Client *c, ClientTaskState *state);
-	void SendTaskSelector(Client *c, Mob *mob, int TaskCount, int *TaskList);
-	void SendTaskSelectorNew(Client *c, Mob *mob, int TaskCount, int *TaskList);
-	bool ValidateLevel(int TaskID, int PlayerLevel);
-	int GetTaskMinLevel(int TaskID);
-	int GetTaskMaxLevel(int TaskID);
+	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
+	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
+	void SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list);
+	void SendTaskSelectorNew(Client *client, Mob *mob, int task_count, int *task_list);
+	bool ValidateLevel(int task_id, int player_level);
 	std::string GetTaskName(uint32 task_id);
 	TaskType GetTaskType(uint32 task_id);
-	void TaskSetSelector(Client *c, ClientTaskState *state, Mob *mob, int TaskSetID);
+	void TaskSetSelector(Client *client, ClientTaskState *client_task_state, Mob *mob, int task_set_id);
+	// task list provided by QuestManager (perl/lua)
 	void TaskQuestSetSelector(
-		Client *c,
-		ClientTaskState *state,
+		Client *client,
+		ClientTaskState *client_task_state,
 		Mob *mob,
 		int count,
 		int *tasks
-	); // task list provided by QuestManager (perl/lua)
-	void SendActiveTasksToClient(Client *c, bool TaskComplete = false);
-	void SendSingleActiveTaskToClient(
-		Client *c,
-		ClientTaskInformation &task_info,
-		bool TaskComplete,
-		bool BringUpTaskJournal = false
 	);
-	void SendTaskActivityShort(Client *c, int TaskID, int ActivityID, int ClientTaskIndex);
+	void SendActiveTasksToClient(Client *client, bool task_complete = false);
+	void SendSingleActiveTaskToClient(
+		Client *client,
+		ClientTaskInformation &task_info,
+		bool task_complete,
+		bool bring_up_task_journal = false
+	);
+	void SendTaskActivityShort(Client *client, int task_id, int activity_id, int client_task_index);
 	void SendTaskActivityLong(
-		Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
-		bool Optional, bool TaskComplete = false
+		Client *client,
+		int task_id,
+		int activity_id,
+		int client_task_index,
+		bool optional,
+		bool task_complete = false
 	);
 	void SendTaskActivityNew(
-		Client *c, int TaskID, int ActivityID, int ClientTaskIndex,
-		bool Optional, bool TaskComplete = false
+		Client *client,
+		int task_id,
+		int activity_id,
+		int client_task_index,
+		bool optional,
+		bool task_complete = false
 	);
-	void SendCompletedTasksToClient(Client *c, ClientTaskState *state);
-	void ExplainTask(Client *c, int TaskID);
-	int FirstTaskInSet(int TaskSet);
-	int LastTaskInSet(int TaskSet);
-	int NextTaskInSet(int TaskSet, int TaskID);
-	bool IsTaskRepeatable(int TaskID);
+	void SendCompletedTasksToClient(Client *c, ClientTaskState *client_task_state);
+	void ExplainTask(Client *client, int task_id);
+	int FirstTaskInSet(int task_set);
+	int LastTaskInSet(int task_set);
+	int NextTaskInSet(int task_set, int task_id);
+	bool IsTaskRepeatable(int task_id);
 
 	friend class ClientTaskState;
 
 
 private:
-	TaskGoalListManager  GoalListManager;
-	TaskProximityManager ProximityManager;
-	TaskInformation      *Tasks[MAXTASKS];
-	std::vector<int>     TaskSets[MAXTASKSETS];
+	TaskGoalListManager  goal_list_manager;
+	TaskProximityManager proximity_manager;
+	TaskInformation      *p_task_data[MAXTASKS];
+	std::vector<int>     task_sets[MAXTASKSETS];
 	void SendActiveTaskDescription(
-		Client *c,
-		int TaskID,
+		Client *client,
+		int task_id,
 		ClientTaskInformation &task_info,
-		int StartTime,
-		int Duration,
-		bool BringUpTaskJournal = false
+		int start_time,
+		int duration,
+		bool bring_up_task_journal = false
 	);
 
 };
