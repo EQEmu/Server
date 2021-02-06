@@ -165,6 +165,7 @@ RULE_INT(Character, DefaultGuild, 0, "If not 0, new characters placed into the g
 RULE_BOOL(Character, ProcessFearedProximity, false, "Processes proximity checks when feared")
 RULE_INT(Character, PVPRespawnManaPercent, 100, "How much mana to respawn with")
 RULE_BOOL(Character, PVPIsAutoAttackAlwaysLoS, false, "When set to true, auto attack in pvp always has line of sight")
+RULE_BOOL(Character, PVPFacingInMeleeRequired, true, "When set to false, pvp melee can attack 360 degrees instead of just front")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

@@ -5524,6 +5524,8 @@ bool Mob::IsFacingMob(Mob *other)
 {
 	if (!other)
 		return false;
+	if (IsClient() && other && other->IsClient() && !RuleB(Character, PVPFacingInMeleeRequired))
+		return true;
 	float angle = HeadingAngleToMob(other);
 	float heading = GetHeading();
 
