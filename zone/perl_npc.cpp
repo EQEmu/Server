@@ -924,19 +924,13 @@ XS(XS_NPC_MoveTo) {
 		float mtx = (float) SvNV(ST(1));
 		float mty = (float) SvNV(ST(2));
 		float mtz = (float) SvNV(ST(3));
-		float mth;
-		bool  saveguard;
-
+		float mth = 0;
+		bool  saveguard = false;
+		VALIDATE_THIS_IS_NPC;
 		if (items > 4)
 			mth = (float) SvNV(ST(4));
-		else
-			mth = 0;
-
 		if (items > 5)
 			saveguard = (bool) SvTRUE(ST(5));
-		else
-			saveguard = false;
-			VALIDATE_THIS_IS_NPC;
 		auto position = glm::vec4(mtx, mty, mtz, mth);
 		THIS->MoveTo(position, saveguard);
 	}
@@ -1064,7 +1058,6 @@ XS(XS_NPC_GetSpawnPointX) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetSpawnPoint().x;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1082,7 +1075,6 @@ XS(XS_NPC_GetSpawnPointY) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetSpawnPoint().y;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1100,7 +1092,6 @@ XS(XS_NPC_GetSpawnPointZ) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetSpawnPoint().z;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1118,7 +1109,6 @@ XS(XS_NPC_GetSpawnPointH) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetSpawnPoint().w;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1136,7 +1126,6 @@ XS(XS_NPC_GetGuardPointX) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetGuardPoint().x;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1154,7 +1143,6 @@ XS(XS_NPC_GetGuardPointY) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetGuardPoint().y;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1172,7 +1160,6 @@ XS(XS_NPC_GetGuardPointZ) {
 		float RETVAL;
 		dXSTARG;
 		VALIDATE_THIS_IS_NPC;
-
 		RETVAL = THIS->GetGuardPoint().z;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
