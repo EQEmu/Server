@@ -43,6 +43,7 @@ public:
 		int         hp;
 		int         mana;
 		float       size;
+		int         taunting;
 	};
 
 	static std::string PrimaryKey()
@@ -61,6 +62,7 @@ public:
 			"hp",
 			"mana",
 			"size",
+			"taunting",
 		};
 	}
 
@@ -119,6 +121,7 @@ public:
 		entry.hp       = 0;
 		entry.mana     = 0;
 		entry.size     = 0;
+		entry.taunting = 1;
 
 		return entry;
 	}
@@ -161,6 +164,7 @@ public:
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
 			entry.size     = static_cast<float>(atof(row[7]));
+			entry.taunting = atoi(row[8]);
 
 			return entry;
 		}
@@ -200,6 +204,7 @@ public:
 		update_values.push_back(columns[5] + " = " + std::to_string(character_pet_info_entry.hp));
 		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_info_entry.mana));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_info_entry.size));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_info_entry.taunting));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -228,6 +233,7 @@ public:
 		insert_values.push_back(std::to_string(character_pet_info_entry.hp));
 		insert_values.push_back(std::to_string(character_pet_info_entry.mana));
 		insert_values.push_back(std::to_string(character_pet_info_entry.size));
+		insert_values.push_back(std::to_string(character_pet_info_entry.taunting));
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -264,6 +270,7 @@ public:
 			insert_values.push_back(std::to_string(character_pet_info_entry.hp));
 			insert_values.push_back(std::to_string(character_pet_info_entry.mana));
 			insert_values.push_back(std::to_string(character_pet_info_entry.size));
+			insert_values.push_back(std::to_string(character_pet_info_entry.taunting));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -305,6 +312,7 @@ public:
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
 			entry.size     = static_cast<float>(atof(row[7]));
+			entry.taunting = atoi(row[8]);
 
 			all_entries.push_back(entry);
 		}
@@ -337,6 +345,7 @@ public:
 			entry.hp       = atoi(row[5]);
 			entry.mana     = atoi(row[6]);
 			entry.size     = static_cast<float>(atof(row[7]));
+			entry.taunting = atoi(row[8]);
 
 			all_entries.push_back(entry);
 		}
