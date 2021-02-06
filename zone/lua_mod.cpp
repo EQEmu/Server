@@ -638,7 +638,7 @@ void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &sp
 	int start = lua_gettop(L);
 
 	try {
-		if (!m_has_apply_damage_table) {
+		if (!m_has_client_damage) {
 			return;
 		}
 
@@ -657,7 +657,6 @@ void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &sp
 		e["buffslot"] = buffslot;
 		e["ibufftic"] = iBuffTic;
 		e["special"] = special;
-		e["out_damage"] = out_damage;
 		e.push(L);
 
 		if (lua_pcall(L, 1, 1, 0)) {
@@ -672,6 +671,11 @@ void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &sp
 			auto IgnoreDefaultObj = ret["IgnoreDefault"];
 			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
 				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				out_damage = luabind::object_cast<int32>(returnValueObj);
 			}
 		}
 	}
