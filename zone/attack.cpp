@@ -1774,9 +1774,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			LogCombat("killer mob is client [{}]", killerMob->GetName());
 			int pvpleveldifference = 0;
 			
-			if (RuleI(World, PVPSettings) == 4) 
-				pvpleveldifference = 5; //Sullon Zek 
-			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0) 
+			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0)
 				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
 
 			if (pvpleveldifference > 0) {
