@@ -31,10 +31,8 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/string_util.h"
 #include "../common/say_link.h"
 #include "zonedb.h"
-#include "zone_store.h"
 #include "../common/repositories/goallists_repository.h"
 #include "client.h"
-#include "entity.h"
 #include "mob.h"
 #include "string_ids.h"
 
@@ -324,13 +322,17 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 					"%i task_id %i",
 					character_id, slot, task_id);
 
-				std::string query   = StringFormat(
+				std::string query = StringFormat(
 					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
 					"VALUES (%i, %i, %i, %i, %i)",
-					character_id, task_id, slot, static_cast<int>(p_task_data[task_id]->type),
+					character_id,
+					task_id,
+					slot,
+					static_cast<int>(p_task_data[task_id]->type),
 					active_task.accepted_time
 				);
-				auto        results = database.QueryDatabase(query);
+
+				auto results = database.QueryDatabase(query);
 				if (!results.Success()) {
 					LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 				}
@@ -343,41 +345,41 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 							"REPLACE INTO character_activities (charid, taskid, activityid, donecount, completed) "
 							"VALUES ";
 
-			int      updatedActivityCount = 0;
-			for (int activityIndex        = 0; activityIndex < p_task_data[task_id]->activity_count; ++activityIndex) {
+			int updated_activity_count = 0;
 
-				if (!active_task.activity[activityIndex].updated) {
+			for (int activity_index = 0; activity_index < p_task_data[task_id]->activity_count; ++activity_index) {
+				if (!active_task.activity[activity_index].updated) {
 					continue;
 				}
 
 				Log(Logs::General, Logs::Tasks,
 					"[CLIENTSAVE] TaskManager::SaveClientSate for character ID %d, Updating activity_information "
 					"%i, %i",
-					character_id, slot, activityIndex);
+					character_id, slot, activity_index);
 
-				if (updatedActivityCount == 0) {
+				if (updated_activity_count == 0) {
 					query +=
 						StringFormat(
-							"(%i, %i, %i, %i, %i)", character_id, task_id, activityIndex,
-							active_task.activity[activityIndex].done_count,
-							active_task.activity[activityIndex].activity_state ==
+							"(%i, %i, %i, %i, %i)", character_id, task_id, activity_index,
+							active_task.activity[activity_index].done_count,
+							active_task.activity[activity_index].activity_state ==
 							ActivityCompleted
 						);
 				}
 				else {
 					query +=
 						StringFormat(
-							", (%i, %i, %i, %i, %i)", character_id, task_id, activityIndex,
-							active_task.activity[activityIndex].done_count,
-							active_task.activity[activityIndex].activity_state ==
+							", (%i, %i, %i, %i, %i)", character_id, task_id, activity_index,
+							active_task.activity[activity_index].done_count,
+							active_task.activity[activity_index].activity_state ==
 							ActivityCompleted
 						);
 				}
 
-				updatedActivityCount++;
+				updated_activity_count++;
 			}
 
-			if (updatedActivityCount == 0) {
+			if (updated_activity_count == 0) {
 				continue;
 			}
 
@@ -390,10 +392,10 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			}
 
 			active_task.updated = false;
-			for (int activityIndex                          = 0;
-				activityIndex < p_task_data[task_id]->activity_count;
-				++activityIndex)
-				active_task.activity[activityIndex].updated = false;
+			for (int activity_index                          = 0;
+				activity_index < p_task_data[task_id]->activity_count;
+				++activity_index)
+				active_task.activity[activity_index].updated = false;
 		}
 	}
 
@@ -403,18 +405,18 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		return true;
 	}
 
-	const char *completedTaskQuery = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
-									 "VALUES (%i, %i, %i, %i)";
+	const char *completed_task_query = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
+									   "VALUES (%i, %i, %i, %i)";
 
-	for (unsigned int i = client_task_state->last_completed_task_loaded;
-		i < client_task_state->completed_tasks.size();
-		i++) {
+	for (unsigned int task_index = client_task_state->last_completed_task_loaded;
+		task_index < client_task_state->completed_tasks.size();
+		task_index++) {
 
 		Log(Logs::General, Logs::Tasks,
-			"[CLIENTSAVE] TaskManager::SaveClientState Saving Completed Task at slot %i", i);
-		int taskID = client_task_state->completed_tasks[i].task_id;
+			"[CLIENTSAVE] TaskManager::SaveClientState Saving Completed Task at slot %i", task_index);
+		int task_id = client_task_state->completed_tasks[task_index].task_id;
 
-		if ((taskID <= 0) || (taskID >= MAXTASKS) || (p_task_data[taskID] == nullptr)) {
+		if ((task_id <= 0) || (task_id >= MAXTASKS) || (p_task_data[task_id] == nullptr)) {
 			continue;
 		}
 
@@ -422,15 +424,15 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		// This indicates this task was completed at the given time. We infer that all
 		// none optional activities were completed.
 		//
-		std::string query   =
-						StringFormat(
-							completedTaskQuery,
-							character_id,
-							client_task_state->completed_tasks[i].completed_time,
-							taskID,
-							-1
-						);
-		auto        results = database.QueryDatabase(query);
+		std::string query = StringFormat(
+			completed_task_query,
+			character_id,
+			client_task_state->completed_tasks[task_index].completed_time,
+			task_id,
+			-1
+		);
+
+		auto results = database.QueryDatabase(query);
 		if (!results.Success()) {
 			LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
 			continue;
@@ -442,20 +444,23 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		// Insert one record for each completed optional task.
-
-		for (int j = 0; j < p_task_data[taskID]->activity_count; j++) {
-			if (!p_task_data[taskID]->activity_information[j].optional ||
-				!client_task_state->completed_tasks[i].activity_done[j]) {
+		for (int activity_id = 0; activity_id < p_task_data[task_id]->activity_count; activity_id++) {
+			if (!p_task_data[task_id]->activity_information[activity_id].optional ||
+				!client_task_state->completed_tasks[task_index].activity_done[activity_id]) {
 				continue;
 			}
 
-			query   = StringFormat(
-				completedTaskQuery, character_id, client_task_state->completed_tasks[i].completed_time,
-				taskID, j
+			query = StringFormat(
+				completed_task_query,
+				character_id,
+				client_task_state->completed_tasks[task_index].completed_time,
+				task_id, activity_id
 			);
+
 			results = database.QueryDatabase(query);
-			if (!results.Success())
+			if (!results.Success()) {
 				LogError(ERR_MYSQLERROR, results.ErrorMessage().c_str());
+			}
 		}
 	}
 
@@ -714,8 +719,8 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	// Check that there is an entry in the client task state for every activity_information in each task
 	// This should only break if a ServerOP adds or deletes activites for a task that players already
 	// have active, or due to a bug.
-	for (int i = 0; i < MAXACTIVEQUESTS + 1; i++) {
-		int task_id = client_task_state->active_tasks[i].task_id;
+	for (int task_index = 0; task_index < MAXACTIVEQUESTS + 1; task_index++) {
+		int task_id = client_task_state->active_tasks[task_index].task_id;
 		if (task_id == TASKSLOTEMPTY) {
 			continue;
 		}
@@ -724,15 +729,16 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 				Chat::Red,
 				"Active Task Slot %i, references a task (%i), that does not exist. "
 				"Removing from memory. Contact a GM to resolve this.",
-				i, task_id
+				task_index,
+				task_id
 			);
 
 			LogError("[LoadClientState] Character [{}] has task [{}] which does not exist", character_id, task_id);
-			client_task_state->active_tasks[i].task_id = TASKSLOTEMPTY;
+			client_task_state->active_tasks[task_index].task_id = TASKSLOTEMPTY;
 			continue;
 		}
 		for (int activity_index = 0; activity_index < p_task_data[task_id]->activity_count; activity_index++) {
-			if (client_task_state->active_tasks[i].activity[activity_index].activity_id != activity_index) {
+			if (client_task_state->active_tasks[task_index].activity[activity_index].activity_id != activity_index) {
 				client->Message(
 					Chat::Red,
 					"Active Task %i, %s. activity_information count does not match expected value."
@@ -746,7 +752,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 					activity_index,
 					task_id
 				);
-				client_task_state->active_tasks[i].task_id = TASKSLOTEMPTY;
+				client_task_state->active_tasks[task_index].task_id = TASKSLOTEMPTY;
 				break;
 			}
 		}
@@ -826,7 +832,7 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 {
 
 	// Check if the Task is enabled for this client
-	std::vector<int> tasksDisabled;
+	std::vector<int> tasks_disabled;
 
 	for (int i = 0; i < task_count; i++) {
 		auto iterator   = enabled_tasks.begin();
@@ -847,7 +853,7 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 
 		if (removeTask) {
 			enabled_tasks.erase(iterator);
-			tasksDisabled.push_back(task_list[i]);
+			tasks_disabled.push_back(task_list[i]);
 		}
 	}
 
@@ -856,22 +862,25 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 		LogTasks("[DisableTask] enabled_tasks [{}]", enabled_task);
 	}
 
-	if (tasksDisabled.empty()) {
+	if (tasks_disabled.empty()) {
 		return;
 	}
 
 	std::stringstream queryStream;
 	queryStream << StringFormat("DELETE FROM character_enabledtasks WHERE charid = %i AND (", character_id);
 
-	for (unsigned int i = 0; i < tasksDisabled.size(); i++)
+	for (unsigned int i = 0; i < tasks_disabled.size(); i++)
 		queryStream
-			<< (i ? StringFormat("taskid = %i ", tasksDisabled[i]) : StringFormat("OR taskid = %i ", tasksDisabled[i]));
+			<< (i ? StringFormat("taskid = %i ", tasks_disabled[i]) : StringFormat(
+				"OR taskid = %i ",
+				tasks_disabled[i]
+			));
 
 	queryStream << ")";
 
 	std::string query = queryStream.str();
 
-	if (tasksDisabled.size()) {
+	if (tasks_disabled.size()) {
 		Log(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
 		database.QueryDatabase(query);
 	}
@@ -885,7 +894,6 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 
 bool ClientTaskState::IsTaskEnabled(int task_id)
 {
-
 	std::vector<int>::iterator Iterator;
 
 	Iterator = enabled_tasks.begin();
@@ -904,48 +912,47 @@ int ClientTaskState::EnabledTaskCount(int task_set_id)
 
 	// Return the number of tasks in TaskSet that this character is enabled for.
 
-	unsigned int EnabledTaskIndex = 0;
-	unsigned int TaskSetIndex     = 0;
-	int          EnabledTaskCount = 0;
+	unsigned int enabled_task_index = 0;
+	unsigned int task_set_index     = 0;
+	int          enabled_task_count = 0;
 
 	if ((task_set_id <= 0) || (task_set_id >= MAXTASKSETS)) { return -1; }
 
-	while ((EnabledTaskIndex < enabled_tasks.size()) &&
-		   (TaskSetIndex < p_task_manager->task_sets[task_set_id].size())) {
+	while ((enabled_task_index < enabled_tasks.size()) &&
+		   (task_set_index < p_task_manager->task_sets[task_set_id].size())) {
 
-		if (enabled_tasks[EnabledTaskIndex] == p_task_manager->task_sets[task_set_id][TaskSetIndex]) {
-
-			EnabledTaskCount++;
-			EnabledTaskIndex++;
-			TaskSetIndex++;
+		if (enabled_tasks[enabled_task_index] == p_task_manager->task_sets[task_set_id][task_set_index]) {
+			enabled_task_count++;
+			enabled_task_index++;
+			task_set_index++;
 			continue;
 		}
 
-		if (enabled_tasks[EnabledTaskIndex] < p_task_manager->task_sets[task_set_id][TaskSetIndex]) {
-			EnabledTaskIndex++;
+		if (enabled_tasks[enabled_task_index] < p_task_manager->task_sets[task_set_id][task_set_index]) {
+			enabled_task_index++;
 		}
 		else {
-			TaskSetIndex++;
+			task_set_index++;
 		}
 
 	}
 
-	return EnabledTaskCount;
+	return enabled_task_count;
 }
 int ClientTaskState::ActiveTasksInSet(int task_set_id)
 {
+	if ((task_set_id <= 0) || (task_set_id >= MAXTASKSETS)) {
+		return -1;
+	}
 
-
-	if ((task_set_id <= 0) || (task_set_id >= MAXTASKSETS)) { return -1; }
-
-	int Count = 0;
-
-	for (unsigned int i = 0; i < p_task_manager->task_sets[task_set_id].size(); i++)
-		if (IsTaskActive(p_task_manager->task_sets[task_set_id][i])) {
-			Count++;
+	int      active_task_in_set_count = 0;
+	for (int i : p_task_manager->task_sets[task_set_id]) {
+		if (IsTaskActive(i)) {
+			active_task_in_set_count++;
 		}
+	}
 
-	return Count;
+	return active_task_in_set_count;
 }
 
 int ClientTaskState::CompletedTasksInSet(int task_set_id)
@@ -1294,7 +1301,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 {
 	LogTasks("SendTaskSelectorNew for [{}] Tasks", task_count);
 
-	int PlayerLevel = client->GetLevel();
+	int player_level = client->GetLevel();
 
 	// Check if any of the tasks exist
 	for (int i = 0; i < task_count; i++) {
@@ -1303,10 +1310,9 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 		}
 	}
 
-	int valid_tasks_count = 0;
-
-	for (int task_index = 0; task_index < task_count; task_index++) {
-		if (!ValidateLevel(task_list[task_index], PlayerLevel)) {
+	int      valid_tasks_count = 0;
+	for (int task_index        = 0; task_index < task_count; task_index++) {
+		if (!ValidateLevel(task_list[task_index], player_level)) {
 			continue;
 		}
 		if (client->IsTaskActive(task_list[task_index])) {
@@ -1332,7 +1338,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 	buf.WriteUInt32(mob->GetID());    // TaskGiver
 
 	for (int i = 0; i < task_count; i++) { // max 40
-		if (!ValidateLevel(task_list[i], PlayerLevel)) {
+		if (!ValidateLevel(task_list[i], player_level)) {
 			continue;
 		}
 		if (client->IsTaskActive(task_list[i])) {
@@ -1454,7 +1460,6 @@ ClientTaskState::~ClientTaskState()
 
 int ClientTaskState::GetActiveTaskID(int index)
 {
-
 	// Return the task_id from the client's specified Active Task slot.
 	if ((index < 0) || (index >= MAXACTIVEQUESTS)) {
 		return 0;
@@ -1556,7 +1561,7 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	// Stepped Mode
 	// TODO: This code is probably more complex than it needs to be
 
-	bool CurrentStepComplete = true;
+	bool current_step_complete = true;
 
 	Log(Logs::General, Logs::Tasks, "[UPDATE] Current Step is %i, Last Step is %i", task_info.current_step,
 		p_task_information->last_step);
@@ -1579,13 +1584,13 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 			if (p_task_information->activity_information[Activity].step_number == (int) task_info.current_step) {
 				if ((task_info.activity[Activity].activity_state != ActivityCompleted) &&
 					(!p_task_information->activity_information[Activity].optional)) {
-					CurrentStepComplete     = false;
+					current_step_complete   = false;
 					all_activities_complete = false;
 					break;
 				}
 			}
 		}
-		if (!CurrentStepComplete) {
+		if (!current_step_complete) {
 			break;
 		}
 		task_info.current_step++;
@@ -1673,22 +1678,25 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 		}
 
 		// Check if there are any active kill activities for this p_task_information
-		auto p_task_information = p_task_manager->p_task_data[current_task->task_id];
-		if (p_task_information == nullptr) {
+		auto p_task_data = p_task_manager->p_task_data[current_task->task_id];
+		if (p_task_data == nullptr) {
 			return false;
 		}
 
-		for (int activity_id = 0; activity_id < p_task_information->activity_count; activity_id++) {
+		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
+			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+
 			// We are not interested in completed or hidden activities
-			if (current_task->activity[activity_id].activity_state != ActivityActive) {
+			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
 			// We are only interested in Kill activities
-			if (p_task_information->activity_information[activity_id].activity_type != activity_type) {
+			if (activity_info->activity_type != activity_type) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!p_task_information->activity_information[activity_id].CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID())) {
 				LogTasks(
 					"[UPDATE] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
 					client->GetName(),
@@ -1700,16 +1708,16 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 				continue;
 			}
 			// Is the activity_information to kill this type of NPC ?
-			switch (p_task_information->activity_information[activity_id].goal_method) {
+			switch (activity_info->goal_method) {
 				case METHODSINGLEID:
-					if (p_task_information->activity_information[activity_id].goal_id != npc_type_id) {
+					if (activity_info->goal_id != npc_type_id) {
 						continue;
 					}
 					break;
 
 				case METHODLIST:
 					if (!p_task_manager->goal_list_manager.IsInList(
-						p_task_information->activity_information[activity_id].goal_id,
+						activity_info->goal_id,
 						npc_type_id
 					)) {
 						continue;
@@ -1722,7 +1730,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 			}
 			// We found an active p_task_information to kill this type of NPC, so increment the done count
 			LogTasksDetail("Calling increment done count ByNPC");
-			IncrementDoneCount(client, p_task_information, current_task->slot, activity_id);
+			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id);
 			is_updating = true;
 		}
 	}
@@ -1746,26 +1754,28 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 			continue;
 		}
 
-		TaskInformation *p_task_information = p_task_manager->p_task_data[current_task->task_id];
-		if (p_task_information == nullptr) {
+		TaskInformation *p_task_data = p_task_manager->p_task_data[current_task->task_id];
+		if (p_task_data == nullptr) {
 			continue;
 		}
 
-		for (int activity_id = 0; activity_id < p_task_information->activity_count; activity_id++) {
+		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
+			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+
 			// We are not interested in completed or hidden activities
-			if (current_task->activity[activity_id].activity_state != ActivityActive) {
+			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (p_task_information->activity_information[activity_id].activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != ActivitySpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!p_task_information->activity_information[activity_id].CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID())) {
 				continue;
 			}
 			// Is the activity_information to speak with this type of NPC ?
-			if (p_task_information->activity_information[activity_id].goal_method == METHODQUEST &&
-				p_task_information->activity_information[activity_id].goal_id == npc_type_id) {
+			if (activity_info->goal_method == METHODQUEST && activity_info->goal_id == npc_type_id) {
 				return current_task->task_id;
 			}
 		}
@@ -1793,27 +1803,30 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 			continue;
 		}
 
-		TaskInformation *p_task_information = p_task_manager->p_task_data[current_task->task_id];
-		if (p_task_information == nullptr) {
+		TaskInformation *p_task_data = p_task_manager->p_task_data[current_task->task_id];
+		if (p_task_data == nullptr) {
 			continue;
 		}
 
-		for (int activity_index = 0; activity_index < p_task_information->activity_count; activity_index++) {
+		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
+			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+
 			// We are not interested in completed or hidden activities
-			if (current_task->activity[activity_index].activity_state != ActivityActive) {
+			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (p_task_information->activity_information[activity_index].activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != ActivitySpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!p_task_information->activity_information[activity_index].CheckZone(zone->GetZoneID())) {
+			if (!activity_info->CheckZone(zone->GetZoneID())) {
 				continue;
 			}
+
 			// Is the activity_information to speak with this type of NPC ?
-			if (p_task_information->activity_information[activity_index].goal_method == METHODQUEST &&
-				p_task_information->activity_information[activity_index].goal_id == npc_type_id) {
-				return activity_index;
+			if (activity_info->goal_method == METHODQUEST && activity_info->goal_id == npc_type_id) {
+				return activity_id;
 			}
 		}
 		return 0;
@@ -1846,42 +1859,46 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 
 		// Check if there are any active loot activities for this task
 
-		TaskInformation *Task = p_task_manager->p_task_data[current_task->task_id];
-
-		if (Task == nullptr) {
+		TaskInformation *p_task_data = p_task_manager->p_task_data[current_task->task_id];
+		if (p_task_data == nullptr) {
 			return;
 		}
 
-		for (int j = 0; j < Task->activity_count; j++) {
+		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
+			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+
 			// We are not interested in completed or hidden activities
-			if (current_task->activity[j].activity_state != ActivityActive) {
+			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
 			// We are only interested in the ActivityType we were called with
-			if (Task->activity_information[j].activity_type != (int) activity_type) {
+			if (activity_info->activity_type != (int) activity_type) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
-			if (!Task->activity_information[j].CheckZone(zone->GetZoneID())) {
-				Log(Logs::General,
+			if (!activity_info->CheckZone(zone->GetZoneID())) {
+				Log(
+					Logs::General,
 					Logs::Tasks,
 					"[UPDATE] Char: %s activity_information type %i for Item %i failed zone check",
 					client->GetName(),
 					activity_type,
-					item_id);
+					item_id
+				);
 				continue;
 			}
 			// Is the activity_information related to this item ?
 			//
-			switch (Task->activity_information[j].goal_method) {
+			switch (activity_info->goal_method) {
 
 				case METHODSINGLEID:
-					if (Task->activity_information[j].goal_id != item_id) { continue; }
+					if (activity_info->goal_id != item_id) { continue; }
 					break;
 
 				case METHODLIST:
 					if (!p_task_manager->goal_list_manager.IsInList(
-						Task->activity_information[j].goal_id,
+						activity_info->goal_id,
 						item_id
 					)) { continue; }
 					break;
@@ -1892,7 +1909,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 			}
 			// We found an active task related to this item, so increment the done count
 			Log(Logs::General, Logs::Tasks, "[UPDATE] Calling increment done count ForItem");
-			IncrementDoneCount(client, Task, current_task->slot, j, count);
+			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id, count);
 		}
 	}
 }
@@ -3367,28 +3384,28 @@ void TaskManager::SendActiveTaskDescription(
 		return;
 	}
 
-	int PacketLength = sizeof(TaskDescriptionHeader_Struct) + p_task_data[task_id]->title.length() + 1
-					   + sizeof(TaskDescriptionData1_Struct) + p_task_data[task_id]->description.length() + 1
-					   + sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
+	int packet_length = sizeof(TaskDescriptionHeader_Struct) + p_task_data[task_id]->title.length() + 1
+						+ sizeof(TaskDescriptionData1_Struct) + p_task_data[task_id]->description.length() + 1
+						+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	// If there is an item make the reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
 	//
 	if (p_task_data[task_id]->reward_id && p_task_data[task_id]->item_link.empty()) {
-		int ItemID = 0;
+		int item_id = 0;
 		// If the reward is a list of items, and the first entry on the list is valid
 		if (p_task_data[task_id]->reward_method == METHODSINGLEID) {
-			ItemID = p_task_data[task_id]->reward_id;
+			item_id = p_task_data[task_id]->reward_id;
 		}
 		else if (p_task_data[task_id]->reward_method == METHODLIST) {
-			ItemID = goal_list_manager.GetFirstEntry(p_task_data[task_id]->reward_id);
-			if (ItemID < 0) {
-				ItemID = 0;
+			item_id = goal_list_manager.GetFirstEntry(p_task_data[task_id]->reward_id);
+			if (item_id < 0) {
+				item_id = 0;
 			}
 		}
 
-		if (ItemID) {
-			const EQ::ItemData *reward_item = database.GetItem(ItemID);
+		if (item_id) {
+			const EQ::ItemData *reward_item = database.GetItem(item_id);
 
 			EQ::SayLinkEngine linker;
 			linker.SetLinkType(EQ::saylink::SayLinkItemData);
@@ -3398,25 +3415,25 @@ void TaskManager::SendActiveTaskDescription(
 		}
 	}
 
-	PacketLength += p_task_data[task_id]->reward.length() + 1 + p_task_data[task_id]->item_link.length() + 1;
+	packet_length += p_task_data[task_id]->reward.length() + 1 + p_task_data[task_id]->item_link.length() + 1;
 
 	char                          *Ptr;
-	TaskDescriptionHeader_Struct  *tdh;
+	TaskDescriptionHeader_Struct  *task_description_header;
 	TaskDescriptionData1_Struct   *tdd1;
 	TaskDescriptionData2_Struct   *tdd2;
 	TaskDescriptionTrailer_Struct *tdt;
 
-	auto outapp = new EQApplicationPacket(OP_TaskDescription, PacketLength);
+	auto outapp = new EQApplicationPacket(OP_TaskDescription, packet_length);
 
-	tdh = (TaskDescriptionHeader_Struct *) outapp->pBuffer;
+	task_description_header = (TaskDescriptionHeader_Struct *) outapp->pBuffer;
 
-	tdh->SequenceNumber = task_info.slot;
-	tdh->TaskID         = task_id;
-	tdh->open_window    = bring_up_task_journal;
-	tdh->task_type      = static_cast<uint32>(p_task_data[task_id]->type);
-	tdh->reward_type    = 0; // TODO: 4 says Radiant Crystals else Ebon Crystals when shared task
+	task_description_header->SequenceNumber = task_info.slot;
+	task_description_header->TaskID         = task_id;
+	task_description_header->open_window    = bring_up_task_journal;
+	task_description_header->task_type      = static_cast<uint32>(p_task_data[task_id]->type);
+	task_description_header->reward_type    = 0; // TODO: 4 says Radiant Crystals else Ebon Crystals when shared task
 
-	Ptr = (char *) tdh + sizeof(TaskDescriptionHeader_Struct);
+	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
 	sprintf(Ptr, "%s", p_task_data[task_id]->title.c_str());
 	Ptr += p_task_data[task_id]->title.length() + 1;
@@ -3530,20 +3547,20 @@ int ClientTaskState::GetTaskActivityDoneCountFromTaskID(int task_id, int activit
 
 	// TODO: shared tasks
 
-	int      ActiveTaskIndex = -1;
-	for (int i               = 0; i < MAXACTIVEQUESTS; i++) {
+	int      active_task_index = -1;
+	for (int i                 = 0; i < MAXACTIVEQUESTS; i++) {
 		if (active_quests[i].task_id == task_id) {
-			ActiveTaskIndex = i;
+			active_task_index = i;
 			break;
 		}
 	}
 
-	if (ActiveTaskIndex == -1) {
+	if (active_task_index == -1) {
 		return 0;
 	}
 
-	if (active_quests[ActiveTaskIndex].activity[activity_id].done_count) {
-		return active_quests[ActiveTaskIndex].activity[activity_id].done_count;
+	if (active_quests[active_task_index].activity[activity_id].done_count) {
+		return active_quests[active_task_index].activity[activity_id].done_count;
 	}
 	else {
 		return 0;
