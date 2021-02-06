@@ -1025,13 +1025,13 @@ public:
 	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
 	void SendTaskComplete(int task_index);
 	inline ClientTaskState *GetTaskState() const { return task_state; }
-	inline void CancelTask(int TaskIndex, TaskType type)
+	inline void CancelTask(int task_index, TaskType task_type)
 	{
 		if (task_state) {
 			task_state->CancelTask(
 				this,
-				TaskIndex,
-				type
+				task_index,
+				task_type
 			);
 		}
 	}
@@ -1040,13 +1040,13 @@ public:
 		return p_task_manager != nullptr && p_task_manager->SaveClientState(this, task_state);
 	}
 	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
-	inline bool IsTaskActive(int TaskID) { return task_state != nullptr && task_state->IsTaskActive(TaskID); }
-	inline bool IsTaskActivityActive(int TaskID, int ActivityID)
+	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
+	inline bool IsTaskActivityActive(int task_id, int activity_id)
 	{
 		return task_state != nullptr &&
 			   task_state->IsTaskActivityActive(
-				   TaskID,
-				   ActivityID
+				   task_id,
+				   activity_id
 			   );
 	}
 	inline ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id)
@@ -1179,14 +1179,14 @@ public:
 	inline bool IsTaskEnabled(int task_id) {
 		return task_state != nullptr && task_state->IsTaskEnabled(task_id);
 	}
-	inline void ProcessTaskProximities(float X, float Y, float Z)
+	inline void ProcessTaskProximities(float x, float y, float z)
 	{
 		if (task_state) {
 			task_state->ProcessTaskProximities(
 				this,
-				X,
-				Y,
-				Z
+				x,
+				y,
+				z
 			);
 		}
 	}

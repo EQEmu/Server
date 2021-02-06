@@ -4043,8 +4043,8 @@ bool TaskGoalListManager::IsInList(int list_id, int entry)
 		return false;
 	}
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i) returning true", list_index,
-		entry);
+	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i) returning true", list_index, entry);
+
 	return true;
 }
 
