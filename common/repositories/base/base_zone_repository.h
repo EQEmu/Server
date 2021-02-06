@@ -125,6 +125,7 @@ public:
 		int         max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
+		int         underworld_teleport_index;
 	};
 
 	static std::string PrimaryKey()
@@ -225,6 +226,7 @@ public:
 			"max_expansion",
 			"content_flags",
 			"content_flags_disabled",
+			"underworld_teleport_index",
 		};
 	}
 
@@ -365,6 +367,7 @@ public:
 		entry.max_expansion             = 0;
 		entry.content_flags             = "";
 		entry.content_flags_disabled    = "";
+		entry.underworld_teleport_index = 0;
 
 		return entry;
 	}
@@ -489,6 +492,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			return entry;
 		}
@@ -609,6 +613,7 @@ public:
 		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.max_expansion));
 		update_values.push_back(columns[88] + " = '" + EscapeString(zone_entry.content_flags) + "'");
 		update_values.push_back(columns[89] + " = '" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[90] + " = " + std::to_string(zone_entry.underworld_teleport_index));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -718,6 +723,7 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 
 		auto results = content_db.QueryDatabase(
 			fmt::format(
@@ -835,6 +841,7 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -958,6 +965,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			all_entries.push_back(entry);
 		}
@@ -1072,6 +1080,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			all_entries.push_back(entry);
 		}
