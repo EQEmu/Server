@@ -150,10 +150,11 @@ public:
 	}
 
 	static BlockedSpells FindOne(
+		Database& db,
 		int blocked_spells_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -185,10 +186,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int blocked_spells_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -201,6 +203,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		BlockedSpells blocked_spells_entry
 	)
 	{
@@ -220,7 +223,7 @@ public:
 		update_values.push_back(columns[10] + " = '" + EscapeString(blocked_spells_entry.message) + "'");
 		update_values.push_back(columns[11] + " = '" + EscapeString(blocked_spells_entry.description) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -234,6 +237,7 @@ public:
 	}
 
 	static BlockedSpells InsertOne(
+		Database& db,
 		BlockedSpells blocked_spells_entry
 	)
 	{
@@ -270,6 +274,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<BlockedSpells> blocked_spells_entries
 	)
 	{
@@ -295,7 +300,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -306,11 +311,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<BlockedSpells> All()
+	static std::vector<BlockedSpells> All(Database& db)
 	{
 		std::vector<BlockedSpells> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -341,11 +346,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<BlockedSpells> GetWhere(std::string where_filter)
+	static std::vector<BlockedSpells> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<BlockedSpells> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -377,9 +382,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -390,9 +395,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

@@ -147,10 +147,11 @@ public:
 	}
 
 	static LootdropEntries FindOne(
+		Database& db,
 		int lootdrop_entries_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -181,10 +182,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int lootdrop_entries_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -197,6 +199,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		LootdropEntries lootdrop_entries_entry
 	)
 	{
@@ -216,7 +219,7 @@ public:
 		update_values.push_back(columns[9] + " = " + std::to_string(lootdrop_entries_entry.npc_min_level));
 		update_values.push_back(columns[10] + " = " + std::to_string(lootdrop_entries_entry.npc_max_level));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -230,6 +233,7 @@ public:
 	}
 
 	static LootdropEntries InsertOne(
+		Database& db,
 		LootdropEntries lootdrop_entries_entry
 	)
 	{
@@ -266,6 +270,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<LootdropEntries> lootdrop_entries_entries
 	)
 	{
@@ -291,7 +296,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -302,11 +307,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<LootdropEntries> All()
+	static std::vector<LootdropEntries> All(Database& db)
 	{
 		std::vector<LootdropEntries> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -336,11 +341,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LootdropEntries> GetWhere(std::string where_filter)
+	static std::vector<LootdropEntries> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<LootdropEntries> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -371,9 +376,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -384,9 +389,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

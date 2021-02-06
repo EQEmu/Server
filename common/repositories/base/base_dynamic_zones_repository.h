@@ -165,10 +165,11 @@ public:
 	}
 
 	static DynamicZones FindOne(
+		Database& db,
 		int dynamic_zones_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -205,10 +206,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int dynamic_zones_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -221,6 +223,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		DynamicZones dynamic_zones_entry
 	)
 	{
@@ -245,7 +248,7 @@ public:
 		update_values.push_back(columns[15] + " = " + std::to_string(dynamic_zones_entry.zone_in_heading));
 		update_values.push_back(columns[16] + " = " + std::to_string(dynamic_zones_entry.has_zone_in));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -259,6 +262,7 @@ public:
 	}
 
 	static DynamicZones InsertOne(
+		Database& db,
 		DynamicZones dynamic_zones_entry
 	)
 	{
@@ -300,6 +304,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<DynamicZones> dynamic_zones_entries
 	)
 	{
@@ -330,7 +335,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -341,11 +346,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<DynamicZones> All()
+	static std::vector<DynamicZones> All(Database& db)
 	{
 		std::vector<DynamicZones> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -381,11 +386,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<DynamicZones> GetWhere(std::string where_filter)
+	static std::vector<DynamicZones> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<DynamicZones> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -422,9 +427,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -435,9 +440,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

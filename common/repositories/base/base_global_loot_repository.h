@@ -165,10 +165,11 @@ public:
 	}
 
 	static GlobalLoot FindOne(
+		Database& db,
 		int global_loot_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -205,10 +206,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int global_loot_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -221,6 +223,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		GlobalLoot global_loot_entry
 	)
 	{
@@ -245,7 +248,7 @@ public:
 		update_values.push_back(columns[15] + " = '" + EscapeString(global_loot_entry.content_flags) + "'");
 		update_values.push_back(columns[16] + " = '" + EscapeString(global_loot_entry.content_flags_disabled) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -259,6 +262,7 @@ public:
 	}
 
 	static GlobalLoot InsertOne(
+		Database& db,
 		GlobalLoot global_loot_entry
 	)
 	{
@@ -300,6 +304,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<GlobalLoot> global_loot_entries
 	)
 	{
@@ -330,7 +335,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -341,11 +346,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<GlobalLoot> All()
+	static std::vector<GlobalLoot> All(Database& db)
 	{
 		std::vector<GlobalLoot> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -381,11 +386,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<GlobalLoot> GetWhere(std::string where_filter)
+	static std::vector<GlobalLoot> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<GlobalLoot> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -422,9 +427,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -435,9 +440,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

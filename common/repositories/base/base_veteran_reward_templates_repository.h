@@ -129,10 +129,11 @@ public:
 	}
 
 	static VeteranRewardTemplates FindOne(
+		Database& db,
 		int veteran_reward_templates_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -157,10 +158,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int veteran_reward_templates_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -173,6 +175,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		VeteranRewardTemplates veteran_reward_templates_entry
 	)
 	{
@@ -186,7 +189,7 @@ public:
 		update_values.push_back(columns[3] + " = " + std::to_string(veteran_reward_templates_entry.charges));
 		update_values.push_back(columns[4] + " = " + std::to_string(veteran_reward_templates_entry.reward_slot));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -200,6 +203,7 @@ public:
 	}
 
 	static VeteranRewardTemplates InsertOne(
+		Database& db,
 		VeteranRewardTemplates veteran_reward_templates_entry
 	)
 	{
@@ -230,6 +234,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<VeteranRewardTemplates> veteran_reward_templates_entries
 	)
 	{
@@ -249,7 +254,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -260,11 +265,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<VeteranRewardTemplates> All()
+	static std::vector<VeteranRewardTemplates> All(Database& db)
 	{
 		std::vector<VeteranRewardTemplates> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -288,11 +293,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<VeteranRewardTemplates> GetWhere(std::string where_filter)
+	static std::vector<VeteranRewardTemplates> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<VeteranRewardTemplates> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -317,9 +322,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -330,9 +335,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

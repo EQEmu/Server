@@ -135,10 +135,11 @@ public:
 	}
 
 	static CharacterExpeditionLockouts FindOne(
+		Database& db,
 		int character_expedition_lockouts_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -165,10 +166,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int character_expedition_lockouts_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -181,6 +183,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		CharacterExpeditionLockouts character_expedition_lockouts_entry
 	)
 	{
@@ -195,7 +198,7 @@ public:
 		update_values.push_back(columns[5] + " = " + std::to_string(character_expedition_lockouts_entry.duration));
 		update_values.push_back(columns[6] + " = '" + EscapeString(character_expedition_lockouts_entry.from_expedition_uuid) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -209,6 +212,7 @@ public:
 	}
 
 	static CharacterExpeditionLockouts InsertOne(
+		Database& db,
 		CharacterExpeditionLockouts character_expedition_lockouts_entry
 	)
 	{
@@ -240,6 +244,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<CharacterExpeditionLockouts> character_expedition_lockouts_entries
 	)
 	{
@@ -260,7 +265,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -271,11 +276,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<CharacterExpeditionLockouts> All()
+	static std::vector<CharacterExpeditionLockouts> All(Database& db)
 	{
 		std::vector<CharacterExpeditionLockouts> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -301,11 +306,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<CharacterExpeditionLockouts> GetWhere(std::string where_filter)
+	static std::vector<CharacterExpeditionLockouts> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<CharacterExpeditionLockouts> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -332,9 +337,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -345,9 +350,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

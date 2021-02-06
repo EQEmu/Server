@@ -123,10 +123,11 @@ public:
 	}
 
 	static FactionList FindOne(
+		Database& db,
 		int faction_list_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -149,10 +150,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int faction_list_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -165,6 +167,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		FactionList faction_list_entry
 	)
 	{
@@ -176,7 +179,7 @@ public:
 		update_values.push_back(columns[1] + " = '" + EscapeString(faction_list_entry.name) + "'");
 		update_values.push_back(columns[2] + " = " + std::to_string(faction_list_entry.base));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -190,6 +193,7 @@ public:
 	}
 
 	static FactionList InsertOne(
+		Database& db,
 		FactionList faction_list_entry
 	)
 	{
@@ -218,6 +222,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<FactionList> faction_list_entries
 	)
 	{
@@ -235,7 +240,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -246,11 +251,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<FactionList> All()
+	static std::vector<FactionList> All(Database& db)
 	{
 		std::vector<FactionList> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -272,11 +277,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<FactionList> GetWhere(std::string where_filter)
+	static std::vector<FactionList> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<FactionList> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -299,9 +304,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -312,9 +317,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
