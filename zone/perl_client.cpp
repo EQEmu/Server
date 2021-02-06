@@ -1484,7 +1484,7 @@ XS(XS_Client_TGB); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TGB) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -1655,7 +1655,7 @@ XS(XS_Client_CheckSpecializeIncrease); /* prototype to pass -Wmissing-prototypes
 XS(XS_Client_CheckSpecializeIncrease) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1842,7 +1842,7 @@ XS(XS_Client_MemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1864,7 +1864,7 @@ XS(XS_Client_UnmemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -1885,7 +1885,7 @@ XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int32  spell_id = (int32) SvIV(ST(1));
@@ -1899,7 +1899,7 @@ XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
@@ -1919,7 +1919,7 @@ XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_FindMemmedSpellBySlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)");	// @categories Account / Character, Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)");	// @categories Account / Character, Spells / Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -1937,7 +1937,7 @@ XS(XS_Client_MemmedCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemmedCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint32  RETVAL;
@@ -1954,7 +1954,7 @@ XS(XS_Client_ScribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ScribeSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1976,7 +1976,7 @@ XS(XS_Client_UnscribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnscribeSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -2017,7 +2017,7 @@ XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TrainDiscBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int32 spell_id = (int32) SvIV(ST(1));
@@ -2031,7 +2031,7 @@ XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDiscSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int   RETVAL;
@@ -2049,7 +2049,7 @@ XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDisc) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -2070,7 +2070,7 @@ XS(XS_Client_UntrainDiscAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDiscAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
@@ -2503,7 +2503,7 @@ XS(XS_Client_BreakInvis); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_BreakInvis) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)");	// @categories Spells / Disciiplines, Script Utility
+		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)");	// @categories Spells / Disciplines, Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2625,7 +2625,7 @@ XS(XS_Client_GetInstrumentMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstrumentMod) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -2781,7 +2781,7 @@ XS(XS_Client_UseDiscipline); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UseDiscipline) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -2799,7 +2799,7 @@ XS(XS_Client_GetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -2817,7 +2817,7 @@ XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		uint32 timer_id = (uint32) SvUV(ST(1));
@@ -3711,7 +3711,7 @@ XS(XS_Client_GetFreeSpellBookSlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFreeSpellBookSlot) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
@@ -3732,7 +3732,7 @@ XS(XS_Client_GetSpellBookSlotBySpellID); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_GetSpellBookSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
@@ -4222,7 +4222,7 @@ XS(XS_Client_HasSpellScribed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSpellScribed) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)");	// @categories Spells / Disciiplines
+		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)");	// @categories Spells / Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
