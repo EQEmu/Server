@@ -113,7 +113,8 @@ bool TaskManager::LoadTasks(int single_task)
 	}
 
 	// load task level data
-	auto      repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
+	auto repo_tasks = TasksRepository::GetWhere(content_db, task_query_filter);
+
 	for (auto &task: repo_tasks) {
 		int task_id = task.id;
 
@@ -304,7 +305,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 	int character_id = client->CharacterID();
 
-	Log(Logs::Detail, Logs::Tasks, "TaskManager::SaveClientState for character ID %d", character_id);
+	LogTasks("[SaveClientState] character_id [{}]", character_id);
 
 	if (client_task_state->active_task_count > 0 ||
 		client_task_state->active_task.task_id != TASKSLOTEMPTY) { // TODO: tasks
@@ -317,10 +318,12 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			int slot = active_task.slot;
 			if (active_task.updated) {
 
-				Log(Logs::General, Logs::Tasks,
-					"[CLIENTSAVE] TaskManager::SaveClientState for character ID %d, Updating TaskIndex "
-					"%i task_id %i",
-					character_id, slot, task_id);
+				LogTasks(
+					"[SaveClientState] character_id [{}] updating task_index [{}] task_id [{}]",
+					character_id,
+					slot,
+					task_id
+				);
 
 				std::string query = StringFormat(
 					"REPLACE INTO character_tasks (charid, taskid, slot, type, acceptedtime) "
@@ -352,10 +355,13 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 					continue;
 				}
 
-				Log(Logs::General, Logs::Tasks,
-					"[CLIENTSAVE] TaskManager::SaveClientSate for character ID %d, Updating activity_information "
-					"%i, %i",
-					character_id, slot, activity_index);
+				LogTasks(
+					"[SaveClientState] Updating activity character_id [{}] updating task_index [{}] task_id [{}] activity_index [{}]",
+					character_id,
+					slot,
+					task_id,
+					activity_index
+				);
 
 				if (updated_activity_count == 0) {
 					query +=
@@ -383,7 +389,6 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 				continue;
 			}
 
-			Log(Logs::General, Logs::Tasks, "[CLIENTSAVE] Executing query %s", query.c_str());
 			auto results = database.QueryDatabase(query);
 
 			if (!results.Success()) {
@@ -412,8 +417,6 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		task_index < client_task_state->completed_tasks.size();
 		task_index++) {
 
-		Log(Logs::General, Logs::Tasks,
-			"[CLIENTSAVE] TaskManager::SaveClientState Saving Completed Task at slot %i", task_index);
 		int task_id = client_task_state->completed_tasks[task_index].task_id;
 
 		if ((task_id <= 0) || (task_id >= MAXTASKS) || (p_task_data[task_id] == nullptr)) {
@@ -634,7 +637,8 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 	if (RuleB(TaskSystem, RecordCompletedTasks)) {
 		CompletedTaskInformation completed_task_information{};
-		for (bool                &i : completed_task_information.activity_done) {
+
+		for (bool &i : completed_task_information.activity_done) {
 			i = false;
 		}
 
@@ -781,12 +785,12 @@ void ClientTaskState::EnableTask(int character_id, int task_count, int *task_lis
 	for (int         i = 0; i < task_count; i++) {
 
 		auto iterator = enabled_tasks.begin();
-		bool addTask  = true;
+		bool add_task = true;
 
 		while (iterator != enabled_tasks.end()) {
 			// If this task is already enabled, stop looking
 			if ((*iterator) == task_list[i]) {
-				addTask = false;
+				add_task = false;
 				break;
 			}
 			// Our list of enabled tasks is sorted, so we can quit if we find a taskid higher than
@@ -797,7 +801,7 @@ void ClientTaskState::EnableTask(int character_id, int task_count, int *task_lis
 			++iterator;
 		}
 
-		if (addTask) {
+		if (add_task) {
 			enabled_tasks.insert(iterator, task_list[i]);
 			// Make a note of the task we enabled, for later SQL generation
 			tasks_enabled.push_back(task_list[i]);
@@ -881,14 +885,13 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 	std::string query = queryStream.str();
 
 	if (tasks_disabled.size()) {
-		Log(Logs::General, Logs::Tasks, "[UPDATE] Executing query %s", query.c_str());
 		database.QueryDatabase(query);
 	}
 	else {
-		Log(Logs::General,
-			Logs::Tasks,
-			"[UPDATE] DisableTask called for characterID: %u .. but, no tasks exist",
-			character_id);
+		LogTasks(
+			"[DisableTask] DisableTask called for characterID: [{}] ... but, no tasks exist",
+			character_id
+		);
 	}
 }
 
@@ -1563,13 +1566,18 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 
 	bool current_step_complete = true;
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] Current Step is %i, Last Step is %i", task_info.current_step,
-		p_task_information->last_step);
+	LogTasks(
+		"[UnlockActivities] Current step [{}] last_step [{}]",
+		task_info.current_step,
+		p_task_information->last_step
+	);
+
 	// If current_step is -1, this is the first call to this method since loading the
 	// client state. Unlock all activities with a step number of 0
 
 	if (task_info.current_step == -1) {
 		for (int i             = 0; i < p_task_information->activity_count; i++) {
+
 			if (p_task_information->activity_information[i].step_number == 0 &&
 				task_info.activity[i].activity_state == ActivityHidden) {
 				task_info.activity[i].activity_state = ActivityActive;
@@ -1579,11 +1587,11 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 		task_info.current_step = 0;
 	}
 
-	for (int Step = task_info.current_step; Step <= p_task_information->last_step; Step++) {
-		for (int Activity = 0; Activity < p_task_information->activity_count; Activity++) {
-			if (p_task_information->activity_information[Activity].step_number == (int) task_info.current_step) {
-				if ((task_info.activity[Activity].activity_state != ActivityCompleted) &&
-					(!p_task_information->activity_information[Activity].optional)) {
+	for (int current_step = task_info.current_step; current_step <= p_task_information->last_step; current_step++) {
+		for (int activity = 0; activity < p_task_information->activity_count; activity++) {
+			if (p_task_information->activity_information[activity].step_number == (int) task_info.current_step) {
+				if ((task_info.activity[activity].activity_state != ActivityCompleted) &&
+					(!p_task_information->activity_information[activity].optional)) {
 					current_step_complete   = false;
 					all_activities_complete = false;
 					break;
@@ -1844,7 +1852,11 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 
 	// If the client has no tasks, there is nothing further to check.
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState::UpdateTasksForItem(%d,%d)", activity_type, item_id);
+	LogTasks(
+		"[UpdateTasksForItem] activity_type [{}] item_id [{}]",
+		activity_type,
+		item_id
+	);
 
 	if (!p_task_manager || (active_task_count == 0 && active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
 		return;
@@ -1878,10 +1890,8 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 			}
 			// Is there a zone restriction on the activity_information ?
 			if (!activity_info->CheckZone(zone->GetZoneID())) {
-				Log(
-					Logs::General,
-					Logs::Tasks,
-					"[UPDATE] Char: %s activity_information type %i for Item %i failed zone check",
+				LogTasks(
+					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
 					client->GetName(),
 					activity_type,
 					item_id
@@ -1908,7 +1918,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 					continue;
 			}
 			// We found an active task related to this item, so increment the done count
-			Log(Logs::General, Logs::Tasks, "[UPDATE] Calling increment done count ForItem");
+			LogTasksDetail("[UpdateTasksForItem] Calling increment done count ForItem");
 			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id, count);
 		}
 	}
@@ -2426,7 +2436,12 @@ bool ClientTaskState::IsTaskActive(int task_id)
 
 void ClientTaskState::FailTask(Client *client, int task_id)
 {
-	Log(Logs::General, Logs::Tasks, "[UPDATE] FailTask %i, ActiveTaskCount is %i", task_id, active_task_count);
+	LogTasks(
+		"[FailTask] Failing task for character [{}] task_id [{}] task_count [{}]",
+		client->GetCleanName(),
+		task_id,
+		active_task_count
+	);
 
 	if (active_task.task_id == task_id) {
 		client->SendTaskFailed(task_id, 0, TaskType::Task);
@@ -2454,8 +2469,8 @@ void ClientTaskState::FailTask(Client *client, int task_id)
 // TODO: Shared tasks
 bool ClientTaskState::IsTaskActivityActive(int task_id, int activity_id)
 {
+	LogTasks("[IsTaskActivityActive] task_id [{}] activity_id [{}]", task_id, activity_id);
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i).", task_id, activity_id);
 	// Quick sanity check
 	if (activity_id < 0) {
 		return false;
@@ -2504,12 +2519,12 @@ bool ClientTaskState::IsTaskActivityActive(int task_id, int activity_id)
 		return false;
 	}
 
-	Log(Logs::General,
-		Logs::Tasks,
-		"[UPDATE] ClientTaskState IsTaskActivityActive(%i, %i). activity_state is %i ",
+	LogTasks(
+		"[IsTaskActivityActive] (Update) task_id [{}] activity_id [{}] activity_state",
 		task_id,
 		activity_id,
-		info->activity[activity_id].activity_state);
+		info->activity[activity_id].activity_state
+	);
 
 	return (info->activity[activity_id].activity_state == ActivityActive);
 }
@@ -2773,12 +2788,12 @@ bool TaskManager::IsTaskRepeatable(int task_id)
 		return false;
 	}
 
-	TaskInformation *p_task_data = p_task_manager->p_task_data[task_id];
-	if (p_task_data == nullptr) {
+	TaskInformation *task_data = p_task_manager->p_task_data[task_id];
+	if (task_data == nullptr) {
 		return false;
 	}
 
-	return p_task_data->repeatable;
+	return task_data->repeatable;
 }
 
 bool ClientTaskState::TaskOutOfTime(TaskType task_type, int index)

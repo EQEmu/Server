@@ -426,7 +426,6 @@ int main(int argc, char** argv) {
 #endif
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		Log(Logs::General, Logs::Tasks, "[INIT] Loading Tasks");
 		p_task_manager = new TaskManager;
 		p_task_manager->LoadTasks();
 	}
