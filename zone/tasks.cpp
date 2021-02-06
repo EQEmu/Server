@@ -46,6 +46,7 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/repositories/task_activities_repository.h"
 #include "../common/repositories/character_activities_repository.h"
 #include "../common/repositories/character_tasks_repository.h"
+#include "../common/repositories/proximities_repository.h"
 
 extern QueryServ *QServ;
 
@@ -3745,8 +3746,8 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 
 	// only Quests can have more than one, so don't need to check others
 	if (task->type == TaskType::Quest) {
-		for (int i = 0; i < MAXACTIVEQUESTS; i++) {
-			if (active_quests[i].task_id == task_id) {
+		for (auto &active_quest : active_quests) {
+			if (active_quest.task_id == task_id) {
 				client->Message(Chat::Red, "You have already been assigned this task.");
 				return;
 			}
@@ -3805,11 +3806,11 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	active_slot->updated       = true;
 	active_slot->current_step  = -1;
 
-	for (int i = 0; i < p_task_manager->p_task_data[task_id]->activity_count; i++) {
-		active_slot->activity[i].activity_id    = i;
-		active_slot->activity[i].done_count     = 0;
-		active_slot->activity[i].activity_state = ActivityHidden;
-		active_slot->activity[i].updated        = true;
+	for (int activity_id = 0; activity_id < p_task_manager->p_task_data[task_id]->activity_count; activity_id++) {
+		active_slot->activity[activity_id].activity_id    = activity_id;
+		active_slot->activity[activity_id].done_count     = 0;
+		active_slot->activity[activity_id].activity_state = ActivityHidden;
+		active_slot->activity[activity_id].updated        = true;
 	}
 
 	UnlockActivities(client->CharacterID(), *active_slot);
@@ -3822,7 +3823,8 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	client->Message(
 		Chat::White,
 		"You have been assigned the task '%s'.",
-		p_task_manager->p_task_data[task_id]->title.c_str());
+		p_task_manager->p_task_data[task_id]->title.c_str()
+	);
 	p_task_manager->SaveClientState(client, this);
 	std::string buf = std::to_string(task_id);
 
@@ -3834,25 +3836,26 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 
 void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, float z)
 {
+	float last_x = client->ProximityX();
+	float last_y = client->ProximityY();
+	float last_z = client->ProximityZ();
 
-	float LastX = client->ProximityX();
-	float LastY = client->ProximityY();
-	float LastZ = client->ProximityZ();
+	if ((last_x == x) && (last_y == y) && (last_z == z)) {
+		return;
+	}
 
-	if ((LastX == x) && (LastY == y) && (LastZ == z)) { return; }
-
-	Log(Logs::General, Logs::Tasks, "[PROXIMITY] Checking proximities for Position %8.3f, %8.3f, %8.3f", x, y, z);
-	int ExploreID = p_task_manager->proximity_manager.CheckProximities(x, y, z);
-
-	if (ExploreID > 0) {
-		Log(Logs::General,
-			Logs::Tasks,
-			"[PROXIMITY] Position %8.3f, %8.3f, %8.3f is within proximity %i",
+	LogTasksDetail("[ProcessTaskProximities] Checking proximities for Position x[{}] y[{}] z[{}]", x, y, z);
+	int explore_id = p_task_manager->proximity_manager.CheckProximities(x, y, z);
+	if (explore_id > 0) {
+		LogTasksDetail(
+			"[ProcessTaskProximities] Position x[{}] y[{}] z[{}] is within proximity explore_id [{}]",
 			x,
 			y,
 			z,
-			ExploreID);
-		UpdateTasksOnExplore(client, ExploreID);
+			explore_id
+		);
+
+		UpdateTasksOnExplore(client, explore_id);
 	}
 }
 
@@ -3866,14 +3869,9 @@ TaskGoalListManager::~TaskGoalListManager() {}
 bool TaskGoalListManager::LoadLists()
 {
 	task_goal_lists.clear();
-
-	const char *ERR_MYSQLERROR = "Error in TaskGoalListManager::LoadLists: %s %s";
-
 	goal_lists_count = 0;
 
-	std::string query   = "SELECT `listid`, COUNT(`entry`) "
-						  "FROM `goallists` GROUP by `listid` "
-						  "ORDER BY `listid`";
+	std::string query   = "SELECT `listid`, COUNT(`entry`) FROM `goallists` GROUP by `listid` ORDER BY `listid`";
 	auto        results = content_db.QueryDatabase(query);
 	if (!results.Success()) {
 		return false;
@@ -3886,12 +3884,12 @@ bool TaskGoalListManager::LoadLists()
 
 	int       list_index = 0;
 	for (auto row        = results.begin(); row != results.end(); ++row) {
-		int listID   = atoi(row[0]);
-		int listSize = atoi(row[1]);
+		int list_id   = atoi(row[0]);
+		int list_size = atoi(row[1]);
 
-		task_goal_lists.push_back({listID, 0, 0});
+		task_goal_lists.push_back({list_id, 0, 0});
 
-		task_goal_lists[list_index].GoalItemEntries.reserve(listSize);
+		task_goal_lists[list_index].GoalItemEntries.reserve(list_size);
 
 		list_index++;
 	}
@@ -3946,51 +3944,56 @@ int TaskGoalListManager::GetListByID(int list_id)
 
 int TaskGoalListManager::GetFirstEntry(int list_id)
 {
-	int ListIndex = GetListByID(list_id);
+	int list_by_id = GetListByID(list_id);
 
-	if ((ListIndex < 0) || (ListIndex >= goal_lists_count)) { return -1; }
+	if ((list_by_id < 0) || (list_by_id >= goal_lists_count)) {
+		return -1;
+	}
 
-	if (task_goal_lists[ListIndex].GoalItemEntries.empty()) { return -1; }
+	if (task_goal_lists[list_by_id].GoalItemEntries.empty()) {
+		return -1;
+	}
 
-	return task_goal_lists[ListIndex].GoalItemEntries[0];
+	return task_goal_lists[list_by_id].GoalItemEntries[0];
 }
 
 std::vector<int> TaskGoalListManager::GetListContents(int list_index)
 {
-	std::vector<int> ListContents;
-	int              ListIndex = GetListByID(list_index);
+	std::vector<int> list_contents;
+	int              list_by_id = GetListByID(list_index);
 
-	if ((ListIndex < 0) || (ListIndex >= goal_lists_count)) { return ListContents; }
+	if ((list_by_id < 0) || (list_by_id >= goal_lists_count)) {
+		return list_contents;
+	}
 
-	ListContents = task_goal_lists[ListIndex].GoalItemEntries;
+	list_contents = task_goal_lists[list_by_id].GoalItemEntries;
 
-	return ListContents;
+	return list_contents;
 }
 
 bool TaskGoalListManager::IsInList(int list_id, int entry)
 {
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i)", list_id, entry);
 
-	int ListIndex = GetListByID(list_id);
+	int list_index = GetListByID(list_id);
 
-	if ((ListIndex < 0) || (ListIndex >= goal_lists_count)) {
+	if ((list_index < 0) || (list_index >= goal_lists_count)) {
 		return false;
 	}
 
-	if ((entry < task_goal_lists[ListIndex].Min) || (entry > task_goal_lists[ListIndex].Max)) {
+	if ((entry < task_goal_lists[list_index].Min) || (entry > task_goal_lists[list_index].Max)) {
 		return false;
 	}
 
-	int  FirstEntry = 0;
-	auto &task      = task_goal_lists[ListIndex];
-
-	auto it = std::find(task.GoalItemEntries.begin(), task.GoalItemEntries.end(), entry);
+	int  first_entry = 0;
+	auto &task       = task_goal_lists[list_index];
+	auto it          = std::find(task.GoalItemEntries.begin(), task.GoalItemEntries.end(), entry);
 
 	if (it == task.GoalItemEntries.end()) {
 		return false;
 	}
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i) returning true", ListIndex,
+	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskGoalListManager::IsInList(%i, %i) returning true", list_index,
 		entry);
 	return true;
 }
@@ -4009,65 +4012,58 @@ TaskProximityManager::~TaskProximityManager()
 
 bool TaskProximityManager::LoadProximities(int zone_id)
 {
-	TaskProximity proximity;
-
-	Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] TaskProximityManager::LoadProximities Called for zone %i", zone_id);
+	TaskProximity proximity{};
 	task_proximities.clear();
 
-	std::string query   = StringFormat(
-		"SELECT `exploreid`, `minx`, `maxx`, "
-		"`miny`, `maxy`, `minz`, `maxz` "
-		"FROM `proximities` WHERE `zoneid` = %i "
-		"ORDER BY `zoneid` ASC", zone_id
+	auto proximities = ProximitiesRepository::GetWhere(
+		content_db,
+		fmt::format("zoneid = {} ORDER BY `zoneid` ASC", zone_id)
 	);
-	auto        results = content_db.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		proximity.explore_id = atoi(row[0]);
-		proximity.min_x      = atof(row[1]);
-		proximity.max_x      = atof(row[2]);
-		proximity.min_y      = atof(row[3]);
-		proximity.max_y      = atof(row[4]);
-		proximity.min_z      = atof(row[5]);
-		proximity.max_z      = atof(row[6]);
+	for (auto &row: proximities) {
+		proximity.explore_id = row.exploreid;
+		proximity.min_x      = row.minx;
+		proximity.max_x      = row.maxx;
+		proximity.min_y      = row.miny;
+		proximity.max_y      = row.maxy;
+		proximity.min_z      = row.minz;
+		proximity.max_z      = row.maxz;
 
 		task_proximities.push_back(proximity);
 	}
 
-	return true;
+	LogTasks("Loaded [{}] Task Proximities", proximities.size());
 
+	return true;
 }
 
 int TaskProximityManager::CheckProximities(float x, float y, float z)
 {
+	for (auto &task_proximity : task_proximities) {
 
-	for (unsigned int i = 0; i < task_proximities.size(); i++) {
+		TaskProximity *p_proximity = &task_proximity;
 
-		TaskProximity *P = &task_proximities[i];
-
-		Log(Logs::General,
+		Log(
+			Logs::General,
 			Logs::Tasks,
 			"[PROXIMITY] Checking %8.3f, %8.3f, %8.3f against %8.3f, %8.3f, %8.3f, %8.3f, %8.3f, %8.3f",
 			x,
 			y,
 			z,
-			P->min_x,
-			P->max_x,
-			P->min_y,
-			P->max_y,
-			P->min_z,
-			P->max_z);
+			p_proximity->min_x,
+			p_proximity->max_x,
+			p_proximity->min_y,
+			p_proximity->max_y,
+			p_proximity->min_z,
+			p_proximity->max_z
+		);
 
-		if (x < P->min_x || x > P->max_x || y < P->min_y || y > P->max_y ||
-			z < P->min_z || z > P->max_z) {
+		if (x < p_proximity->min_x || x > p_proximity->max_x || y < p_proximity->min_y || y > p_proximity->max_y ||
+			z < p_proximity->min_z || z > p_proximity->max_z) {
 			continue;
 		}
 
-		return P->explore_id;
-
+		return p_proximity->explore_id;
 	}
 
 	return 0;
