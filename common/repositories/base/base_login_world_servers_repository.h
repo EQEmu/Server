@@ -144,10 +144,11 @@ public:
 	}
 
 	static LoginWorldServers FindOne(
+		Database& db,
 		int login_world_servers_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -177,10 +178,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int login_world_servers_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -193,6 +195,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		LoginWorldServers login_world_servers_entry
 	)
 	{
@@ -210,7 +213,7 @@ public:
 		update_values.push_back(columns[8] + " = " + std::to_string(login_world_servers_entry.is_server_trusted));
 		update_values.push_back(columns[9] + " = '" + EscapeString(login_world_servers_entry.note) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -224,6 +227,7 @@ public:
 	}
 
 	static LoginWorldServers InsertOne(
+		Database& db,
 		LoginWorldServers login_world_servers_entry
 	)
 	{
@@ -258,6 +262,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<LoginWorldServers> login_world_servers_entries
 	)
 	{
@@ -281,7 +286,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -292,11 +297,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<LoginWorldServers> All()
+	static std::vector<LoginWorldServers> All(Database& db)
 	{
 		std::vector<LoginWorldServers> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -325,11 +330,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LoginWorldServers> GetWhere(std::string where_filter)
+	static std::vector<LoginWorldServers> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<LoginWorldServers> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -359,9 +364,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -372,9 +377,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

@@ -123,10 +123,11 @@ public:
 	}
 
 	static LevelExpMods FindOne(
+		Database& db,
 		int level_exp_mods_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -149,10 +150,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int level_exp_mods_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -165,6 +167,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		LevelExpMods level_exp_mods_entry
 	)
 	{
@@ -176,7 +179,7 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(level_exp_mods_entry.exp_mod));
 		update_values.push_back(columns[2] + " = " + std::to_string(level_exp_mods_entry.aa_exp_mod));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -190,6 +193,7 @@ public:
 	}
 
 	static LevelExpMods InsertOne(
+		Database& db,
 		LevelExpMods level_exp_mods_entry
 	)
 	{
@@ -218,6 +222,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<LevelExpMods> level_exp_mods_entries
 	)
 	{
@@ -235,7 +240,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -246,11 +251,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<LevelExpMods> All()
+	static std::vector<LevelExpMods> All(Database& db)
 	{
 		std::vector<LevelExpMods> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -272,11 +277,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<LevelExpMods> GetWhere(std::string where_filter)
+	static std::vector<LevelExpMods> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<LevelExpMods> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -299,9 +304,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -312,9 +317,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

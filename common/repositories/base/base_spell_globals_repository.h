@@ -126,10 +126,11 @@ public:
 	}
 
 	static SpellGlobals FindOne(
+		Database& db,
 		int spell_globals_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -153,10 +154,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int spell_globals_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -169,6 +171,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		SpellGlobals spell_globals_entry
 	)
 	{
@@ -181,7 +184,7 @@ public:
 		update_values.push_back(columns[2] + " = '" + EscapeString(spell_globals_entry.qglobal) + "'");
 		update_values.push_back(columns[3] + " = '" + EscapeString(spell_globals_entry.value) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -195,6 +198,7 @@ public:
 	}
 
 	static SpellGlobals InsertOne(
+		Database& db,
 		SpellGlobals spell_globals_entry
 	)
 	{
@@ -224,6 +228,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<SpellGlobals> spell_globals_entries
 	)
 	{
@@ -242,7 +247,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -253,11 +258,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<SpellGlobals> All()
+	static std::vector<SpellGlobals> All(Database& db)
 	{
 		std::vector<SpellGlobals> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -280,11 +285,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<SpellGlobals> GetWhere(std::string where_filter)
+	static std::vector<SpellGlobals> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<SpellGlobals> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -308,9 +313,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -321,9 +326,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

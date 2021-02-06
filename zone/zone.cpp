@@ -1979,7 +1979,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	zone->numzonepoints = 0;
 	zone->virtual_zone_point_list.clear();
 
-	auto zone_points = ZonePointsRepository::GetWhere(
+	auto zone_points = ZonePointsRepository::GetWhere(content_db,
 		fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY number",
 			zonename,

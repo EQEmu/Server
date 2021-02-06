@@ -25,7 +25,7 @@ WorldStore::~WorldStore() = default;
 
 void WorldStore::LoadZones()
 {
-	zones = ZoneRepository::All();
+	zones = ZoneRepository::All(content_db);
 }
 
 uint32 WorldStore::GetZoneID(const char *in_zone_name)

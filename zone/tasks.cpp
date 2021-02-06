@@ -3447,7 +3447,7 @@ bool TaskGoalListManager::LoadLists()
 		list_index++;
 	}
 
-	auto goal_lists = GoallistsRepository::GetWhere("TRUE ORDER BY listid, entry ASC");
+	auto goal_lists = GoallistsRepository::GetWhere(content_db, "TRUE ORDER BY listid, entry ASC");
 
 	for (list_index = 0; list_index < NumberOfLists; list_index++) {
 

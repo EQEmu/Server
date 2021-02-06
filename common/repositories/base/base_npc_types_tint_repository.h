@@ -201,10 +201,11 @@ public:
 	}
 
 	static NpcTypesTint FindOne(
+		Database& db,
 		int npc_types_tint_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -253,10 +254,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int npc_types_tint_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -269,6 +271,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		NpcTypesTint npc_types_tint_entry
 	)
 	{
@@ -306,7 +309,7 @@ public:
 		update_values.push_back(columns[27] + " = " + std::to_string(npc_types_tint_entry.grn9x));
 		update_values.push_back(columns[28] + " = " + std::to_string(npc_types_tint_entry.blu9x));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -320,6 +323,7 @@ public:
 	}
 
 	static NpcTypesTint InsertOne(
+		Database& db,
 		NpcTypesTint npc_types_tint_entry
 	)
 	{
@@ -374,6 +378,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<NpcTypesTint> npc_types_tint_entries
 	)
 	{
@@ -417,7 +422,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -428,11 +433,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<NpcTypesTint> All()
+	static std::vector<NpcTypesTint> All(Database& db)
 	{
 		std::vector<NpcTypesTint> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -480,11 +485,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<NpcTypesTint> GetWhere(std::string where_filter)
+	static std::vector<NpcTypesTint> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<NpcTypesTint> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -533,9 +538,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -546,9 +551,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

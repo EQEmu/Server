@@ -198,10 +198,11 @@ public:
 	}
 
 	static NpcScaleGlobalBase FindOne(
+		Database& db,
 		int npc_scale_global_base_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -249,10 +250,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int npc_scale_global_base_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -265,6 +267,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		NpcScaleGlobalBase npc_scale_global_base_entry
 	)
 	{
@@ -301,7 +304,7 @@ public:
 		update_values.push_back(columns[26] + " = " + std::to_string(npc_scale_global_base_entry.heal_scale));
 		update_values.push_back(columns[27] + " = '" + EscapeString(npc_scale_global_base_entry.special_abilities) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -315,6 +318,7 @@ public:
 	}
 
 	static NpcScaleGlobalBase InsertOne(
+		Database& db,
 		NpcScaleGlobalBase npc_scale_global_base_entry
 	)
 	{
@@ -368,6 +372,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<NpcScaleGlobalBase> npc_scale_global_base_entries
 	)
 	{
@@ -410,7 +415,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -421,11 +426,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<NpcScaleGlobalBase> All()
+	static std::vector<NpcScaleGlobalBase> All(Database& db)
 	{
 		std::vector<NpcScaleGlobalBase> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -472,11 +477,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<NpcScaleGlobalBase> GetWhere(std::string where_filter)
+	static std::vector<NpcScaleGlobalBase> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<NpcScaleGlobalBase> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -524,9 +529,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -537,9 +542,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

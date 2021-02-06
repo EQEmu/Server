@@ -313,7 +313,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		 * In 99% of cases we would never get here and this would be fallback
 		 */
 		if (!found_zone) {
-			auto zones = ZoneRepository::GetWhere(
+			auto zones = ZoneRepository::GetWhere(content_db,
 				fmt::format(
 					"expansion <= {} AND short_name = '{}' and version = 0",
 					(content_service.GetCurrentExpansion() + 1),

@@ -156,10 +156,11 @@ public:
 	}
 
 	static Titles FindOne(
+		Database& db,
 		int titles_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -193,10 +194,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int titles_id
 	)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -209,6 +211,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		Titles titles_entry
 	)
 	{
@@ -230,7 +233,7 @@ public:
 		update_values.push_back(columns[12] + " = '" + EscapeString(titles_entry.suffix) + "'");
 		update_values.push_back(columns[13] + " = " + std::to_string(titles_entry.title_set));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -244,6 +247,7 @@ public:
 	}
 
 	static Titles InsertOne(
+		Database& db,
 		Titles titles_entry
 	)
 	{
@@ -282,6 +286,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<Titles> titles_entries
 	)
 	{
@@ -309,7 +314,7 @@ public:
 
 		std::vector<std::string> insert_values;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -320,11 +325,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Titles> All()
+	static std::vector<Titles> All(Database& db)
 	{
 		std::vector<Titles> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -357,11 +362,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Titles> GetWhere(std::string where_filter)
+	static std::vector<Titles> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<Titles> all_entries;
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -395,9 +400,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -408,9 +413,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()
