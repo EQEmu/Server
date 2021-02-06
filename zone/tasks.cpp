@@ -44,6 +44,8 @@ Copyright (C) 2001-2008 EQEMu Development Team (http://eqemulator.net)
 #include "../common/repositories/tasksets_repository.h"
 #include "../common/repositories/tasks_repository.h"
 #include "../common/repositories/task_activities_repository.h"
+#include "../common/repositories/character_activities_repository.h"
+#include "../common/repositories/character_tasks_repository.h"
 
 extern QueryServ *QServ;
 
@@ -496,45 +498,36 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 	LogTasks("[LoadClientState] for character_id [{}]", character_id);
 
-	std::string query = StringFormat(
-		"SELECT `taskid`, `slot`,`type`, `acceptedtime` "
-		"FROM `character_tasks` "
-		"WHERE `charid` = %i ORDER BY acceptedtime",
-		character_id
+	auto character_tasks = CharacterTasksRepository::GetWhere(
+		database,
+		fmt::format("charid = {} ORDER BY acceptedtime", character_id)
 	);
 
-	auto results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int  task_id = atoi(row[0]);
-		int  slot    = atoi(row[1]);
-		auto type    = static_cast<TaskType>(atoi(row[2]));
+	for (auto &character_task: character_tasks) {
+		int  task_id = character_task.taskid;
+		int  slot    = character_task.slot;
+		auto type    = static_cast<TaskType>(character_task.type);
 
 		if ((task_id < 0) || (task_id >= MAXTASKS)) {
-			LogError("[TASKS]Task ID [{}] out of range while loading character tasks from database", task_id);
+			LogTasks("[LoadClientState] Error: task_id [{}] out of range while loading character tasks from database", task_id);
 			continue;
 		}
 
 		auto task_info = client_task_state->GetClientTaskInfo(type, slot);
 
 		if (task_info == nullptr) {
-			LogError("[TASKS] Slot [{}] out of range while loading character tasks from database", slot);
+			LogTasks("[LoadClientState] Error: slot [{}] out of range while loading character tasks from database", slot);
 			continue;
 		}
 
 		if (task_info->task_id != TASKSLOTEMPTY) {
-			LogError("[TASKS] Slot [{}] for Task [{}]s is already occupied", slot, task_id);
+			LogTasks("[LoadClientState] Error: slot [{}] for task [{}] is already occupied", slot, task_id);
 			continue;
 		}
 
-		int accepted_time = atoi(row[3]);
-
 		task_info->task_id       = task_id;
 		task_info->current_step  = -1;
-		task_info->accepted_time = accepted_time;
+		task_info->accepted_time = character_task.acceptedtime;
 		task_info->updated       = false;
 
 		for (auto &i : task_info->activity) {
@@ -545,29 +538,24 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			++client_task_state->active_task_count;
 		}
 
-		LogTasks("[LoadClientState] character_id [{}] task_id [{}] accepted_time [{}]",
-				 character_id,
-				 task_id,
-				 accepted_time);
+		LogTasks(
+			"[LoadClientState] character_id [{}] task_id [{}] accepted_time [{}]",
+			character_id,
+			task_id,
+			character_task.acceptedtime
+		);
 	}
 
 	// Load Activities
 	LogTasks("[LoadClientState] Loading activities for character_id [{}]", character_id);
 
-	query   = StringFormat(
-		"SELECT `taskid`, `activityid`, `donecount`, `completed` "
-		"FROM `character_activities` "
-		"WHERE `charid` = %i "
-		"ORDER BY `taskid` ASC, `activityid` ASC",
-		character_id
+	auto character_activities = CharacterActivitiesRepository::GetWhere(
+		database,
+		fmt::format("charid = {} ORDER BY `taskid` ASC, `activityid` ASC", character_id)
 	);
-	results = database.QueryDatabase(query);
-	if (!results.Success()) {
-		return false;
-	}
 
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		int task_id = atoi(row[0]);
+	for (auto &character_activity: character_activities) {
+		int task_id = character_activity.taskid;
 		if ((task_id < 0) || (task_id >= MAXTASKS)) {
 			LogTasks(
 				"[LoadClientState] Error: task_id [{}] out of range while loading character activities from database character_id [{}]",
@@ -577,7 +565,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			continue;
 		}
 
-		int activity_id = atoi(row[1]);
+		int activity_id = character_activity.activityid;
 		if ((activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
 			LogTasks(
 				"[LoadClientState] Error: activity_id [{}] out of range while loading character activities from database character_id [{}]",
@@ -613,11 +601,9 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			continue;
 		}
 
-		int  done_count = atoi(row[2]);
-		bool completed  = atoi(row[3]);
 		task_info->activity[activity_id].activity_id = activity_id;
-		task_info->activity[activity_id].done_count  = done_count;
-		if (completed) {
+		task_info->activity[activity_id].done_count  = character_activity.donecount;
+		if (character_activity.completed) {
 			task_info->activity[activity_id].activity_state = ActivityCompleted;
 		}
 		else {
@@ -631,33 +617,27 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			character_id,
 			task_id,
 			activity_id,
-			done_count,
-			completed
+			character_activity.donecount,
+			character_activity.completed
 		);
 	}
 
 	if (RuleB(TaskSystem, RecordCompletedTasks)) {
-		query   = StringFormat(
-			"SELECT `taskid`, `activityid`, `completedtime` "
-			"FROM `completed_tasks` "
-			"WHERE `charid` = %i ORDER BY completedtime, taskid, activityid",
-			character_id
-		);
-		results = database.QueryDatabase(query);
-		if (!results.Success()) {
-			return false;
-		}
-
 		CompletedTaskInformation completed_task_information{};
-		for (bool                &i : completed_task_information.activity_done)
+		for (bool                &i : completed_task_information.activity_done) {
 			i = false;
+		}
 
 		int previous_task_id        = -1;
 		int previous_completed_time = -1;
 
-		for (auto row = results.begin(); row != results.end(); ++row) {
+		auto character_completed_tasks = CompletedTasksRepository::GetWhere(
+			database,
+			fmt::format("charid = {}  ORDER BY completedtime, taskid, activityid", character_id)
+		);
 
-			int task_id = atoi(row[0]);
+		for (auto &character_completed_task: character_completed_tasks) {
+			int task_id = character_completed_task.taskid;
 			if ((task_id <= 0) || (task_id >= MAXTASKS)) {
 				LogError("[TASKS]Task ID [{}] out of range while loading completed tasks from database", task_id);
 				continue;
@@ -667,14 +647,14 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			// task as complete. If the Rule to record optional activities is enabled,
 			// subsequent records for this task will flag any optional tasks that were
 			// completed.
-			int activity_id = atoi(row[1]);
+			int activity_id = character_completed_task.activityid;
 			if ((activity_id < -1) || (activity_id >= MAXACTIVITIESPERTASK)) {
 				LogError("[TASKS]activity_information ID [{}] out of range while loading completed tasks from database",
 						 activity_id);
 				continue;
 			}
 
-			int completed_time = atoi(row[2]);
+			int completed_time = character_completed_task.completedtime;
 			if ((previous_task_id != -1) &&
 				((task_id != previous_task_id) || (completed_time != previous_completed_time))) {
 				client_task_state->completed_tasks.push_back(completed_task_information);
@@ -711,13 +691,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		client_task_state->last_completed_task_loaded = client_task_state->completed_tasks.size();
 	}
 
-	query   = StringFormat(
+	std::string query = StringFormat(
 		"SELECT `taskid` FROM character_enabledtasks "
 		"WHERE `charid` = %i AND `taskid` >0 AND `taskid` < %i "
 		"ORDER BY `taskid` ASC",
 		character_id, MAXTASKS
 	);
-	results = database.QueryDatabase(query);
+	auto results = database.QueryDatabase(query);
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			int task_id = atoi(row[0]);
@@ -778,7 +758,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 	}
 
-	LogTasks("[LoadClientState] for Character ID [{}}] DONE!", character_id);
+	LogTasks("[LoadClientState] for Character ID [{}] DONE!", character_id);
 
 	return true;
 }
@@ -3889,7 +3869,7 @@ bool TaskGoalListManager::LoadLists()
 	}
 
 	goal_lists_count = results.RowCount();
-	LogTasks("Loaded GoalLists [{}]", goal_lists_count);
+	LogTasks("Loaded [{}] GoalLists", goal_lists_count);
 
 	task_goal_lists.reserve(goal_lists_count);
 
