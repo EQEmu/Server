@@ -10192,7 +10192,7 @@ void command_task(Client *c, const Seperator *sep) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"--- [{}] <task_id> Reload Task and Activity informnation for a single task",
+				"--- [{}] <task_id> Reload Task and Activity information for a single task",
 				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload task", false, "reload task")
 			).c_str()
 		);
