@@ -223,7 +223,7 @@ void ClientTaskState::DisableTask(int character_id, int task_count, int *task_li
 	}
 	else {
 		LogTasks(
-			"[DisableTask] DisableTask called for characterID: [{}] ... but, no tasks exist",
+			"[DisableTask] DisableTask called for character_id [{}] ... but, no tasks exist",
 			character_id
 		);
 	}
@@ -359,8 +359,8 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 {
 	bool all_activities_complete = true;
 
-	TaskInformation *p_task_information = task_manager->m_task_data[task_info.task_id];
-	if (p_task_information == nullptr) {
+	TaskInformation *p_task_data = task_manager->m_task_data[task_info.task_id];
+	if (p_task_data == nullptr) {
 		return true;
 	}
 
@@ -371,18 +371,18 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 		"character_id [{}] task_id [{}] sequence_mode [{}]",
 		character_id,
 		task_info.task_id,
-		p_task_information->sequence_mode
+		p_task_data->sequence_mode
 	);
 
-	if (p_task_information->sequence_mode == ActivitiesSequential) {
+	if (p_task_data->sequence_mode == ActivitiesSequential) {
 		if (task_info.activity[0].activity_state != ActivityCompleted) {
 			task_info.activity[0].activity_state = ActivityActive;
 		}
 
 		// Enable the next Hidden task.
-		for (int i = 0; i < p_task_information->activity_count; i++) {
+		for (int i = 0; i < p_task_data->activity_count; i++) {
 			if ((task_info.activity[i].activity_state == ActivityActive) &&
-				(!p_task_information->activity_information[i].optional)) {
+				(!p_task_data->activity_information[i].optional)) {
 				all_activities_complete = false;
 				break;
 			}
@@ -422,9 +422,8 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 			completed_task_information.task_id        = task_info.task_id;
 			completed_task_information.completed_time = time(nullptr);
 
-			for (int i = 0; i < p_task_information->activity_count; i++) {
-				completed_task_information.activity_done[i] = (task_info.activity[i].activity_state ==
-															   ActivityCompleted);
+			for (int i = 0; i < p_task_data->activity_count; i++) {
+				completed_task_information.activity_done[i] = (task_info.activity[i].activity_state == ActivityCompleted);
 			}
 
 			m_completed_tasks.push_back(completed_task_information);
@@ -443,16 +442,16 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	LogTasks(
 		"[UnlockActivities] Current step [{}] last_step [{}]",
 		task_info.current_step,
-		p_task_information->last_step
+		p_task_data->last_step
 	);
 
 	// If current_step is -1, this is the first call to this method since loading the
 	// client state. Unlock all activities with a step number of 0
 
 	if (task_info.current_step == -1) {
-		for (int i             = 0; i < p_task_information->activity_count; i++) {
+		for (int i             = 0; i < p_task_data->activity_count; i++) {
 
-			if (p_task_information->activity_information[i].step_number == 0 &&
+			if (p_task_data->activity_information[i].step_number == 0 &&
 				task_info.activity[i].activity_state == ActivityHidden) {
 				task_info.activity[i].activity_state = ActivityActive;
 				// task_info.activity_information[i].updated=true;
@@ -461,11 +460,11 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 		task_info.current_step = 0;
 	}
 
-	for (int current_step = task_info.current_step; current_step <= p_task_information->last_step; current_step++) {
-		for (int activity = 0; activity < p_task_information->activity_count; activity++) {
-			if (p_task_information->activity_information[activity].step_number == (int) task_info.current_step) {
+	for (int current_step = task_info.current_step; current_step <= p_task_data->last_step; current_step++) {
+		for (int activity = 0; activity < p_task_data->activity_count; activity++) {
+			if (p_task_data->activity_information[activity].step_number == (int) task_info.current_step) {
 				if ((task_info.activity[activity].activity_state != ActivityCompleted) &&
-					(!p_task_information->activity_information[activity].optional)) {
+					(!p_task_data->activity_information[activity].optional)) {
 					current_step_complete   = false;
 					all_activities_complete = false;
 					break;
@@ -510,7 +509,7 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 			completed_task_information.task_id        = task_info.task_id;
 			completed_task_information.completed_time = time(nullptr);
 
-			for (int activity_id = 0; activity_id < p_task_information->activity_count; activity_id++) {
+			for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
 				completed_task_information.activity_done[activity_id] =
 					(task_info.activity[activity_id].activity_state == ActivityCompleted);
 			}
@@ -521,8 +520,8 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	}
 
 	// Mark all non-completed tasks in the current step as active
-	for (int activity = 0; activity < p_task_information->activity_count; activity++) {
-		if ((p_task_information->activity_information[activity].step_number == (int) task_info.current_step) &&
+	for (int activity = 0; activity < p_task_data->activity_count; activity++) {
+		if ((p_task_data->activity_information[activity].step_number == (int) task_info.current_step) &&
 			(task_info.activity[activity].activity_state == ActivityHidden)) {
 			task_info.activity[activity].activity_state = ActivityActive;
 			task_info.activity[activity].updated        = true;
@@ -559,7 +558,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 			continue;
 		}
 
-		// Check if there are any active kill activities for this p_task_information
+		// Check if there are any active kill activities for this p_task_data
 		auto p_task_data = task_manager->m_task_data[current_task->task_id];
 		if (p_task_data == nullptr) {
 			return false;
@@ -610,7 +609,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 					// If METHODQUEST, don't updated the activity_information here
 					continue;
 			}
-			// We found an active p_task_information to kill this type of NPC, so increment the done count
+			// We found an active p_task_data to kill this type of NPC, so increment the done count
 			LogTasksDetail("Calling increment done count ByNPC");
 			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id);
 			is_updating = true;
@@ -1162,7 +1161,10 @@ void ClientTaskState::IncrementDoneCount(
 	else {
 		// Send an updated packet for this single activity_information
 		task_manager->SendTaskActivityLong(
-			client, info->task_id, activity_id, task_index,
+			client,
+			info->task_id,
+			activity_id,
+			task_index,
 			task_information->activity_information[activity_id].optional
 		);
 		task_manager->SaveClientState(client, this);
