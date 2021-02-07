@@ -1402,7 +1402,7 @@ bool ClientTaskState::IsTaskActivityActive(int task_id, int activity_id)
 	}
 
 	LogTasks(
-		"[IsTaskActivityActive] (Update) task_id [{}] activity_id [{}] activity_state",
+		"[IsTaskActivityActive] (Update) task_id [{}] activity_id [{}] activity_state [{}]",
 		task_id,
 		activity_id,
 		info->activity[activity_id].activity_state

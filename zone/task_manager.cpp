@@ -162,7 +162,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
 			LogTasks(
-				"Error: Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
+				"[LoadTasks] Error: Task or activity_information ID ([{}], [{}]) out of range while loading activities from database",
 				task_id,
 				activity_id
 			);
@@ -171,7 +171,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		if (m_task_data[task_id] == nullptr) {
 			LogTasks(
-				"Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
+				"[LoadTasks] Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
 				task_id,
 				activity_id
 			);
@@ -193,8 +193,8 @@ bool TaskManager::LoadTasks(int single_task)
 		// ERR_NOTASK errors.
 		// Change to (activityID != (Tasks[taskID]->activity_count + 1)) to index from 1
 		if (activity_id != m_task_data[task_id]->activity_count) {
-			LogError(
-				"[TASKS]Activities for Task [{}] are not sequential starting at 0. Not loading task",
+			LogTasks(
+				"[LoadTasks] Error: Activities for Task [{}] (activity_id [{}]) are not sequential starting at 0. Not loading task ",
 				task_id,
 				activity_id
 			);
