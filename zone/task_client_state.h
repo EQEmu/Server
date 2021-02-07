@@ -14,7 +14,7 @@ public:
 	ClientTaskState();
 	~ClientTaskState();
 	void ShowClientTasks(Client *client);
-	inline int GetActiveTaskCount() { return active_task_count; }
+	inline int GetActiveTaskCount() { return m_active_task_count; }
 	int GetActiveTaskID(int index);
 	bool IsTaskActivityCompleted(TaskType task_type, int index, int activity_id);
 	int GetTaskActivityDoneCount(TaskType task_type, int index, int activity_id);
@@ -55,7 +55,7 @@ public:
 	int CompletedTasksInSet(int task_set_id);
 	bool HasSlotForTask(TaskInformation *task);
 
-	inline bool HasFreeTaskSlot() { return active_task.task_id == TASKSLOTEMPTY; }
+	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
 	friend class TaskManager;
 
@@ -69,20 +69,21 @@ private:
 		int count = 1,
 		bool ignore_quest_update = false
 	);
+
 	inline ClientTaskInformation *GetClientTaskInfo(TaskType task_type, int index)
 	{
 		ClientTaskInformation *info = nullptr;
 		switch (task_type) {
 			case TaskType::Task:
 				if (index == 0) {
-					info = &active_task;
+					info = &m_active_task;
 				}
 				break;
 			case TaskType::Shared:
 				break;
 			case TaskType::Quest:
 				if (index < MAXACTIVEQUESTS) {
-					info = &active_quests[index];
+					info = &m_active_quests[index];
 				}
 				break;
 			default:
@@ -90,20 +91,20 @@ private:
 		}
 		return info;
 	}
-	int                                   active_task_count;
 
 	union { // easier to loop over
 		struct {
-			ClientTaskInformation active_task; // only one
-			ClientTaskInformation active_quests[MAXACTIVEQUESTS];
+			ClientTaskInformation m_active_task; // only one
+			ClientTaskInformation m_active_quests[MAXACTIVEQUESTS];
 		};
-		ClientTaskInformation active_tasks[MAXACTIVEQUESTS + 1];
+		ClientTaskInformation m_active_tasks[MAXACTIVEQUESTS + 1];
 	};
 	// Shared tasks should be limited to 1 as well
-	std::vector<int>                      enabled_tasks;
-	std::vector<CompletedTaskInformation> completed_tasks;
-	int                                   last_completed_task_loaded;
-	bool                                  checked_touch_activities;
+	int                                   m_active_task_count;
+	std::vector<int>                      m_enabled_tasks;
+	std::vector<CompletedTaskInformation> m_completed_tasks;
+	int                                   m_last_completed_task_loaded;
+	bool                                  m_checked_touch_activities;
 };
 
 

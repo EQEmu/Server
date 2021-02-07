@@ -25,7 +25,7 @@ public:
 	void ReloadGoalLists();
 	inline void LoadProximities(int zone_id)
 	{
-		proximity_manager.LoadProximities(zone_id);
+		m_proximity_manager.LoadProximities(zone_id);
 	}
 	bool LoadTaskSets();
 	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
@@ -79,10 +79,10 @@ public:
 
 
 private:
-	TaskGoalListManager  goal_list_manager;
-	TaskProximityManager proximity_manager;
-	TaskInformation      *p_task_data[MAXTASKS]{};
-	std::vector<int>     task_sets[MAXTASKSETS];
+	TaskGoalListManager  m_goal_list_manager;
+	TaskProximityManager m_proximity_manager;
+	TaskInformation      *m_task_data[MAXTASKS]{};
+	std::vector<int>     m_task_sets[MAXTASKSETS];
 	void SendActiveTaskDescription(
 		Client *client,
 		int task_id,

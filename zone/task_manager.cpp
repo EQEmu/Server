@@ -12,14 +12,14 @@
 
 TaskManager::TaskManager()
 {
-	for (auto &task : p_task_data) {
+	for (auto &task : m_task_data) {
 		task = nullptr;
 	}
 }
 
 TaskManager::~TaskManager()
 {
-	for (auto &task : p_task_data) {
+	for (auto &task : m_task_data) {
 		if (task != nullptr) {
 			safe_delete(task);
 		}
@@ -30,7 +30,7 @@ bool TaskManager::LoadTaskSets()
 {
 	// Clear all task sets in memory. Done so we can reload them on the fly if required by just calling
 	// this method again.
-	for (auto &task_set : task_sets) {
+	for (auto &task_set : m_task_sets) {
 		task_set.clear();
 	}
 
@@ -44,7 +44,7 @@ bool TaskManager::LoadTaskSets()
 	);
 
 	for (auto &task_set: rows) {
-		task_sets[task_set.id].push_back(task_set.taskid);
+		m_task_sets[task_set.id].push_back(task_set.taskid);
 		LogTasksDetail("[LoadTaskSets] Adding task_id [{}] to task_set [{}]", task_set.taskid, task_set.id);
 	}
 
@@ -53,7 +53,7 @@ bool TaskManager::LoadTaskSets()
 
 void TaskManager::ReloadGoalLists()
 {
-	if (!goal_list_manager.LoadLists()) {
+	if (!m_goal_list_manager.LoadLists()) {
 		Log(Logs::Detail, Logs::Tasks, "TaskManager::LoadTasks LoadLists failed");
 	}
 }
@@ -63,7 +63,7 @@ bool TaskManager::LoadTasks(int single_task)
 	std::string task_query_filter = fmt::format("id = {}", single_task);
 	std::string query;
 	if (single_task == 0) {
-		if (!goal_list_manager.LoadLists()) {
+		if (!m_goal_list_manager.LoadLists()) {
 			LogTasks("[TaskManager::LoadTasks] LoadLists failed");
 		}
 
@@ -87,25 +87,25 @@ bool TaskManager::LoadTasks(int single_task)
 		}
 
 		// load task data
-		p_task_data[task_id] = new TaskInformation;
-		p_task_data[task_id]->type              = static_cast<TaskType>(task.type);
-		p_task_data[task_id]->duration          = task.duration;
-		p_task_data[task_id]->duration_code     = static_cast<DurationCode>(task.duration_code);
-		p_task_data[task_id]->title             = task.title;
-		p_task_data[task_id]->description       = task.description;
-		p_task_data[task_id]->reward            = task.reward;
-		p_task_data[task_id]->reward_id         = task.rewardid;
-		p_task_data[task_id]->cash_reward       = task.cashreward;
-		p_task_data[task_id]->experience_reward = task.xpreward;
-		p_task_data[task_id]->reward_method     = (TaskMethodType) task.rewardmethod;
-		p_task_data[task_id]->faction_reward    = task.faction_reward;
-		p_task_data[task_id]->min_level         = task.minlevel;
-		p_task_data[task_id]->max_level         = task.maxlevel;
-		p_task_data[task_id]->repeatable        = task.repeatable;
-		p_task_data[task_id]->completion_emote  = task.completion_emote;
-		p_task_data[task_id]->activity_count    = 0;
-		p_task_data[task_id]->sequence_mode     = ActivitiesSequential;
-		p_task_data[task_id]->last_step         = 0;
+		m_task_data[task_id] = new TaskInformation;
+		m_task_data[task_id]->type              = static_cast<TaskType>(task.type);
+		m_task_data[task_id]->duration          = task.duration;
+		m_task_data[task_id]->duration_code     = static_cast<DurationCode>(task.duration_code);
+		m_task_data[task_id]->title             = task.title;
+		m_task_data[task_id]->description       = task.description;
+		m_task_data[task_id]->reward            = task.reward;
+		m_task_data[task_id]->reward_id         = task.rewardid;
+		m_task_data[task_id]->cash_reward       = task.cashreward;
+		m_task_data[task_id]->experience_reward = task.xpreward;
+		m_task_data[task_id]->reward_method     = (TaskMethodType) task.rewardmethod;
+		m_task_data[task_id]->faction_reward    = task.faction_reward;
+		m_task_data[task_id]->min_level         = task.minlevel;
+		m_task_data[task_id]->max_level         = task.maxlevel;
+		m_task_data[task_id]->repeatable        = task.repeatable;
+		m_task_data[task_id]->completion_emote  = task.completion_emote;
+		m_task_data[task_id]->activity_count    = 0;
+		m_task_data[task_id]->sequence_mode     = ActivitiesSequential;
+		m_task_data[task_id]->last_step         = 0;
 
 		LogTasksDetail(
 			"[LoadTasks] (Task) task_id [{}] type [{}] duration [{}] duration_code [{}] title [{}] description [{}] "
@@ -155,8 +155,8 @@ bool TaskManager::LoadTasks(int single_task)
 		int activity_id = task_activity.activityid;
 
 		// create pointer to activity data since declarations get unruly long
-		int                 activity_index   = p_task_data[task_id]->activity_count;
-		ActivityInformation *p_activity_data = &p_task_data[task_id]->activity_information[activity_index];
+		int                 activity_index = m_task_data[task_id]->activity_count;
+		ActivityInformation *activity_data = &m_task_data[task_id]->activity_information[activity_index];
 
 		if ((task_id <= 0) || (task_id >= MAXTASKS) || (activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
 
@@ -169,7 +169,7 @@ bool TaskManager::LoadTasks(int single_task)
 			continue;
 		}
 
-		if (p_task_data[task_id] == nullptr) {
+		if (m_task_data[task_id] == nullptr) {
 			LogTasks(
 				"Error: activity_information for non-existent task ([{}], [{}]) while loading activities from database",
 				task_id,
@@ -178,76 +178,76 @@ bool TaskManager::LoadTasks(int single_task)
 			continue;
 		}
 
-		p_task_data[task_id]->activity_information[p_task_data[task_id]->activity_count].step_number = step;
+		m_task_data[task_id]->activity_information[m_task_data[task_id]->activity_count].step_number = step;
 
 		if (step != 0) {
-			p_task_data[task_id]->sequence_mode = ActivitiesStepped;
+			m_task_data[task_id]->sequence_mode = ActivitiesStepped;
 		}
 
-		if (step > p_task_data[task_id]->last_step) {
-			p_task_data[task_id]->last_step = step;
+		if (step > m_task_data[task_id]->last_step) {
+			m_task_data[task_id]->last_step = step;
 		}
 
 		// Task Activities MUST be numbered sequentially from 0. If not, log an error
 		// and set the task to nullptr. Subsequent activities for this task will raise
 		// ERR_NOTASK errors.
 		// Change to (activityID != (Tasks[taskID]->activity_count + 1)) to index from 1
-		if (activity_id != p_task_data[task_id]->activity_count) {
+		if (activity_id != m_task_data[task_id]->activity_count) {
 			LogError(
 				"[TASKS]Activities for Task [{}] are not sequential starting at 0. Not loading task",
 				task_id,
 				activity_id
 			);
-			p_task_data[task_id] = nullptr;
+			m_task_data[task_id] = nullptr;
 			continue;
 		}
 
 		// set activity data
-		p_activity_data->activity_type        = task_activity.activitytype;
-		p_activity_data->target_name          = task_activity.target_name;
-		p_activity_data->item_list            = task_activity.item_list;
-		p_activity_data->skill_list           = task_activity.skill_list;
-		p_activity_data->skill_id             = std::stoi(task_activity.skill_list); // for older clients
-		p_activity_data->spell_list           = task_activity.spell_list;
-		p_activity_data->spell_id             = std::stoi(task_activity.spell_list); // for older clients
-		p_activity_data->description_override = task_activity.description_override;
-		p_activity_data->goal_id              = task_activity.goalid;
-		p_activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
-		p_activity_data->goal_count           = task_activity.goalcount;
-		p_activity_data->deliver_to_npc       = task_activity.delivertonpc;
+		activity_data->activity_type        = task_activity.activitytype;
+		activity_data->target_name          = task_activity.target_name;
+		activity_data->item_list            = task_activity.item_list;
+		activity_data->skill_list           = task_activity.skill_list;
+		activity_data->skill_id             = std::stoi(task_activity.skill_list); // for older clients
+		activity_data->spell_list           = task_activity.spell_list;
+		activity_data->spell_id             = std::stoi(task_activity.spell_list); // for older clients
+		activity_data->description_override = task_activity.description_override;
+		activity_data->goal_id              = task_activity.goalid;
+		activity_data->goal_method          = (TaskMethodType) task_activity.goalmethod;
+		activity_data->goal_count           = task_activity.goalcount;
+		activity_data->deliver_to_npc       = task_activity.delivertonpc;
 
 		// zones
-		p_activity_data->zones = task_activity.zones;
+		activity_data->zones = task_activity.zones;
 		auto zones = SplitString(
 			task_activity.zones,
 			';'
 		);
 
 		for (auto &&e : zones) {
-			p_activity_data->zone_ids.push_back(std::stoi(e));
+			activity_data->zone_ids.push_back(std::stoi(e));
 		}
 
-		p_activity_data->optional = task_activity.optional;
+		activity_data->optional = task_activity.optional;
 
 		LogTasksDetail(
 			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_id [{}] goal_method [{}] goal_count [{}] zones [{}]"
 			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
 			task_id,
 			activity_id,
-			p_task_data[task_id]->activity_count,
-			p_activity_data->activity_type,
-			p_activity_data->goal_id,
-			p_activity_data->goal_method,
-			p_activity_data->goal_count,
-			p_activity_data->zones.c_str(),
-			p_activity_data->target_name.c_str(),
-			p_activity_data->item_list.c_str(),
-			p_activity_data->skill_list.c_str(),
-			p_activity_data->spell_list.c_str(),
-			p_activity_data->description_override.c_str()
+			m_task_data[task_id]->activity_count,
+			activity_data->activity_type,
+			activity_data->goal_id,
+			activity_data->goal_method,
+			activity_data->goal_count,
+			activity_data->zones.c_str(),
+			activity_data->target_name.c_str(),
+			activity_data->item_list.c_str(),
+			activity_data->skill_list.c_str(),
+			activity_data->spell_list.c_str(),
+			activity_data->description_override.c_str()
 		);
 
-		p_task_data[task_id]->activity_count++;
+		m_task_data[task_id]->activity_count++;
 	}
 
 	LogTasks("Loaded [{}] Task Activities", task_activities.size());
@@ -271,9 +271,9 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 	LogTasks("[SaveClientState] character_id [{}]", character_id);
 
-	if (client_task_state->active_task_count > 0 ||
-		client_task_state->active_task.task_id != TASKSLOTEMPTY) { // TODO: tasks
-		for (auto &active_task : client_task_state->active_tasks) {
+	if (client_task_state->m_active_task_count > 0 ||
+		client_task_state->m_active_task.task_id != TASKSLOTEMPTY) { // TODO: tasks
+		for (auto &active_task : client_task_state->m_active_tasks) {
 			int task_id = active_task.task_id;
 			if (task_id == TASKSLOTEMPTY) {
 				continue;
@@ -295,7 +295,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 					character_id,
 					task_id,
 					slot,
-					static_cast<int>(p_task_data[task_id]->type),
+					static_cast<int>(m_task_data[task_id]->type),
 					active_task.accepted_time
 				);
 
@@ -314,7 +314,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 			int updated_activity_count = 0;
 
-			for (int activity_index = 0; activity_index < p_task_data[task_id]->activity_count; ++activity_index) {
+			for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; ++activity_index) {
 				if (!active_task.activity[activity_index].updated) {
 					continue;
 				}
@@ -362,28 +362,28 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 
 			active_task.updated = false;
 			for (int activity_index                          = 0;
-				activity_index < p_task_data[task_id]->activity_count;
+				activity_index < m_task_data[task_id]->activity_count;
 				++activity_index)
 				active_task.activity[activity_index].updated = false;
 		}
 	}
 
 	if (!RuleB(TaskSystem, RecordCompletedTasks) ||
-		(client_task_state->completed_tasks.size() <= (unsigned int) client_task_state->last_completed_task_loaded)) {
-		client_task_state->last_completed_task_loaded = client_task_state->completed_tasks.size();
+		(client_task_state->m_completed_tasks.size() <= (unsigned int) client_task_state->m_last_completed_task_loaded)) {
+		client_task_state->m_last_completed_task_loaded = client_task_state->m_completed_tasks.size();
 		return true;
 	}
 
 	const char *completed_task_query = "REPLACE INTO completed_tasks (charid, completedtime, taskid, activityid) "
 									   "VALUES (%i, %i, %i, %i)";
 
-	for (unsigned int task_index = client_task_state->last_completed_task_loaded;
-		task_index < client_task_state->completed_tasks.size();
+	for (unsigned int task_index = client_task_state->m_last_completed_task_loaded;
+		task_index < client_task_state->m_completed_tasks.size();
 		task_index++) {
 
-		int task_id = client_task_state->completed_tasks[task_index].task_id;
+		int task_id = client_task_state->m_completed_tasks[task_index].task_id;
 
-		if ((task_id <= 0) || (task_id >= MAXTASKS) || (p_task_data[task_id] == nullptr)) {
+		if ((task_id <= 0) || (task_id >= MAXTASKS) || (m_task_data[task_id] == nullptr)) {
 			continue;
 		}
 
@@ -394,7 +394,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		std::string query = StringFormat(
 			completed_task_query,
 			character_id,
-			client_task_state->completed_tasks[task_index].completed_time,
+			client_task_state->m_completed_tasks[task_index].completed_time,
 			task_id,
 			-1
 		);
@@ -411,16 +411,16 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		// Insert one record for each completed optional task.
-		for (int activity_id = 0; activity_id < p_task_data[task_id]->activity_count; activity_id++) {
-			if (!p_task_data[task_id]->activity_information[activity_id].optional ||
-				!client_task_state->completed_tasks[task_index].activity_done[activity_id]) {
+		for (int activity_id = 0; activity_id < m_task_data[task_id]->activity_count; activity_id++) {
+			if (!m_task_data[task_id]->activity_information[activity_id].optional ||
+				!client_task_state->m_completed_tasks[task_index].activity_done[activity_id]) {
 				continue;
 			}
 
 			query = StringFormat(
 				completed_task_query,
 				character_id,
-				client_task_state->completed_tasks[task_index].completed_time,
+				client_task_state->m_completed_tasks[task_index].completed_time,
 				task_id, activity_id
 			);
 
@@ -431,7 +431,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		}
 	}
 
-	client_task_state->last_completed_task_loaded = client_task_state->completed_tasks.size();
+	client_task_state->m_last_completed_task_loaded = client_task_state->m_completed_tasks.size();
 	return true;
 }
 
@@ -441,12 +441,12 @@ int TaskManager::FirstTaskInSet(int task_set)
 		return 0;
 	}
 
-	if (task_sets[task_set].empty()) {
+	if (m_task_sets[task_set].empty()) {
 		return 0;
 	}
 
-	auto iterator = task_sets[task_set].begin();
-	while (iterator != task_sets[task_set].end()) {
+	auto iterator = m_task_sets[task_set].begin();
+	while (iterator != m_task_sets[task_set].end()) {
 		if ((*iterator) > 0) {
 			return (*iterator);
 		}
@@ -462,11 +462,11 @@ int TaskManager::LastTaskInSet(int task_set)
 		return 0;
 	}
 
-	if (task_sets[task_set].empty()) {
+	if (m_task_sets[task_set].empty()) {
 		return 0;
 	}
 
-	return task_sets[task_set][task_sets[task_set].size() - 1];
+	return m_task_sets[task_set][m_task_sets[task_set].size() - 1];
 }
 
 int TaskManager::NextTaskInSet(int task_set, int task_id)
@@ -475,11 +475,11 @@ int TaskManager::NextTaskInSet(int task_set, int task_id)
 		return 0;
 	}
 
-	if (task_sets[task_set].empty()) {
+	if (m_task_sets[task_set].empty()) {
 		return 0;
 	}
 
-	for (int i : task_sets[task_set]) {
+	for (int i : m_task_sets[task_set]) {
 		if (i > task_id) {
 			return i;
 		}
@@ -490,15 +490,15 @@ int TaskManager::NextTaskInSet(int task_set, int task_id)
 
 bool TaskManager::ValidateLevel(int task_id, int player_level)
 {
-	if (p_task_data[task_id] == nullptr) {
+	if (m_task_data[task_id] == nullptr) {
 		return false;
 	}
 
-	if (p_task_data[task_id]->min_level && (player_level < p_task_data[task_id]->min_level)) {
+	if (m_task_data[task_id]->min_level && (player_level < m_task_data[task_id]->min_level)) {
 		return false;
 	}
 
-	if (p_task_data[task_id]->max_level && (player_level > p_task_data[task_id]->max_level)) {
+	if (m_task_data[task_id]->max_level && (player_level > m_task_data[task_id]->max_level)) {
 		return false;
 	}
 
@@ -508,8 +508,8 @@ bool TaskManager::ValidateLevel(int task_id, int player_level)
 std::string TaskManager::GetTaskName(uint32 task_id)
 {
 	if (task_id > 0 && task_id < MAXTASKS) {
-		if (p_task_data[task_id] != nullptr) {
-			return p_task_data[task_id]->title;
+		if (m_task_data[task_id] != nullptr) {
+			return m_task_data[task_id]->title;
 		}
 	}
 
@@ -519,8 +519,8 @@ std::string TaskManager::GetTaskName(uint32 task_id)
 TaskType TaskManager::GetTaskType(uint32 task_id)
 {
 	if (task_id > 0 && task_id < MAXTASKS) {
-		if (p_task_data[task_id] != nullptr) {
-			return p_task_data[task_id]->type;
+		if (m_task_data[task_id] != nullptr) {
+			return m_task_data[task_id]->type;
 		}
 	}
 	return TaskType::Task;
@@ -535,14 +535,14 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 	LogTasks(
 		"TaskSetSelector called for task_set_id [{}] EnableTaskSize is [{}]",
 		task_set_id,
-		client_task_state->enabled_tasks.size()
+		client_task_state->m_enabled_tasks.size()
 	);
 
 	if (task_set_id <= 0 || task_set_id >= MAXTASKSETS) {
 		return;
 	}
 
-	if (task_sets[task_set_id].empty()) {
+	if (m_task_sets[task_set_id].empty()) {
 		// I think this is suppose to be yellow
 		mob->SayString(
 			client,
@@ -556,22 +556,22 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 	bool all_enabled = false;
 
 	// A task_id of 0 in a TaskSet indicates that all Tasks in the set are enabled for all players.
-	if (task_sets[task_set_id][0] == 0) {
+	if (m_task_sets[task_set_id][0] == 0) {
 		LogTasks("[TaskSetSelector] TaskSets[{}][0] == 0. All Tasks in Set enabled.", task_set_id);
 		all_enabled = true;
 	}
 
-	auto iterator = task_sets[task_set_id].begin();
+	auto iterator = m_task_sets[task_set_id].begin();
 	if (all_enabled) {
 		++iterator;
 	} // skip first when all enabled since it's useless data
 
-	while (iterator != task_sets[task_set_id].end() && task_list_index < MAXCHOOSERENTRIES) {
+	while (iterator != m_task_sets[task_set_id].end() && task_list_index < MAXCHOOSERENTRIES) {
 		auto task = *iterator;
 		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if ((all_enabled || client_task_state->IsTaskEnabled(task)) && ValidateLevel(task, player_level) &&
-			!client_task_state->IsTaskActive(task) && client_task_state->HasSlotForTask(p_task_data[task]) &&
+			!client_task_state->IsTaskActive(task) && client_task_state->HasSlotForTask(m_task_data[task]) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
 			task_list[task_list_index++] = task;
@@ -619,7 +619,7 @@ void TaskManager::TaskQuestSetSelector(
 		// verify level, we're not currently on it, repeatable status, if it's a (shared) task
 		// we aren't currently on another, and if it's enabled if not all_enabled
 		if (ValidateLevel(task, player_level) && !client_task_state->IsTaskActive(task) &&
-			client_task_state->HasSlotForTask(p_task_data[task]) &&
+			client_task_state->HasSlotForTask(m_task_data[task]) &&
 			// this slot checking is a bit silly, but we allow mixing of task types ...
 			(IsTaskRepeatable(task) || !client_task_state->IsTaskCompleted(task))) {
 			task_list[task_list_index++] = task;
@@ -653,7 +653,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 
 	// Check if any of the tasks exist
 	for (int i = 0; i < task_count; i++) {
-		if (p_task_data[task_list[i]] != nullptr) {
+		if (m_task_data[task_list[i]] != nullptr) {
 			break;
 		}
 	}
@@ -701,24 +701,24 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 		if (client->ClientVersion() != EQ::versions::ClientVersion::Titanium) {
 			buf.WriteFloat(1.0f);
 		}
-		buf.WriteUInt32(p_task_data[task_list[task_index]]->duration);
-		buf.WriteUInt32(static_cast<int>(p_task_data[task_list[task_index]]->duration_code));
+		buf.WriteUInt32(m_task_data[task_list[task_index]]->duration);
+		buf.WriteUInt32(static_cast<int>(m_task_data[task_list[task_index]]->duration_code));
 
-		buf.WriteString(p_task_data[task_list[task_index]]->title); // max 64 with null
-		buf.WriteString(p_task_data[task_list[task_index]]->description); // max 4000 with null
+		buf.WriteString(m_task_data[task_list[task_index]]->title); // max 64 with null
+		buf.WriteString(m_task_data[task_list[task_index]]->description); // max 4000 with null
 
 		// Has reward set flag
 		if (client->ClientVersion() != EQ::versions::ClientVersion::Titanium) {
 			buf.WriteUInt8(0);
 		}
 
-		buf.WriteUInt32(p_task_data[task_list[task_index]]->activity_count);
+		buf.WriteUInt32(m_task_data[task_list[task_index]]->activity_count);
 
 		for (int activity_index = 0;
-			activity_index < p_task_data[task_list[task_index]]->activity_count;
+			activity_index < m_task_data[task_list[task_index]]->activity_count;
 			++activity_index) {
 			buf.WriteUInt32(activity_index); // ActivityNumber
-			auto &activity = p_task_data[task_list[task_index]]->activity_information[activity_index];
+			auto &activity = m_task_data[task_list[task_index]]->activity_information[activity_index];
 			buf.WriteUInt32(activity.activity_type);
 			buf.WriteUInt32(0); // solo, group, raid?
 			buf.WriteString(activity.target_name); // max length 64, "target name" so like loot x foo from bar (this is bar)
@@ -745,7 +745,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 
 	// Check if any of the tasks exist
 	for (int i = 0; i < task_count; i++) {
-		if (p_task_data[task_list[i]] != nullptr) {
+		if (m_task_data[task_list[i]] != nullptr) {
 			break;
 		}
 	}
@@ -790,18 +790,18 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 
 		buf.WriteUInt32(task_list[i]);    // task_id
 		buf.WriteFloat(1.0f); // affects color, difficulty?
-		buf.WriteUInt32(p_task_data[task_list[i]]->duration);
-		buf.WriteUInt32(static_cast<int>(p_task_data[task_list[i]]->duration_code));    // 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
+		buf.WriteUInt32(m_task_data[task_list[i]]->duration);
+		buf.WriteUInt32(static_cast<int>(m_task_data[task_list[i]]->duration_code));    // 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
 
-		buf.WriteString(p_task_data[task_list[i]]->title); // max 64 with null
-		buf.WriteString(p_task_data[task_list[i]]->description); // max 4000 with null
+		buf.WriteString(m_task_data[task_list[i]]->title); // max 64 with null
+		buf.WriteString(m_task_data[task_list[i]]->description); // max 4000 with null
 
 		buf.WriteUInt8(0);                // Has reward set flag
-		buf.WriteUInt32(p_task_data[task_list[i]]->activity_count);    // activity_count
+		buf.WriteUInt32(m_task_data[task_list[i]]->activity_count);    // activity_count
 
-		for (int j = 0; j < p_task_data[task_list[i]]->activity_count; ++j) {
+		for (int j = 0; j < m_task_data[task_list[i]]->activity_count; ++j) {
 			buf.WriteUInt32(j);                // ActivityNumber
-			auto &activity = p_task_data[task_list[i]]->activity_information[j];
+			auto &activity = m_task_data[task_list[i]]->activity_information[j];
 			buf.WriteUInt32(activity.activity_type);                // ActivityType
 			buf.WriteUInt32(0);                // solo, group, raid?
 			buf.WriteString(activity.target_name);    // max length 64, "target name" so like loot x foo from bar (this is bar)
@@ -834,7 +834,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 int TaskManager::GetActivityCount(int task_id)
 {
 	if ((task_id > 0) && (task_id < MAXTASKS)) {
-		if (p_task_data[task_id]) { return p_task_data[task_id]->activity_count; }
+		if (m_task_data[task_id]) { return m_task_data[task_id]->activity_count; }
 	}
 
 	return 0;
@@ -855,20 +855,20 @@ void TaskManager::ExplainTask(Client *client, int task_id)
 		return;
 	}
 
-	if (p_task_data[task_id] == nullptr) {
+	if (m_task_data[task_id] == nullptr) {
 		client->Message(Chat::White, "Task does not exist.");
 		return;
 	}
 
 	char explanation[1000], *ptr;
-	client->Message(Chat::White, "Task %4i: title: %s", task_id, p_task_data[task_id]->description.c_str());
-	client->Message(Chat::White, "%3i Activities", p_task_data[task_id]->activity_count);
+	client->Message(Chat::White, "Task %4i: title: %s", task_id, m_task_data[task_id]->description.c_str());
+	client->Message(Chat::White, "%3i Activities", m_task_data[task_id]->activity_count);
 	ptr = explanation;
-	for (int i = 0; i < p_task_data[task_id]->activity_count; i++) {
+	for (int i = 0; i < m_task_data[task_id]->activity_count; i++) {
 
 		sprintf(ptr, "Act: %3i: ", i);
 		ptr = ptr + strlen(ptr);
-		switch (p_task_data[task_id]->activity_information[i].activity_type) {
+		switch (m_task_data[task_id]->activity_information[i].activity_type) {
 			case ActivityDeliver:
 				sprintf(ptr, "Deliver");
 				break;
@@ -883,7 +883,7 @@ bool TaskManager::IsTaskRepeatable(int task_id)
 		return false;
 	}
 
-	TaskInformation *task_data = p_task_manager->p_task_data[task_id];
+	TaskInformation *task_data = task_manager->m_task_data[task_id];
 	if (task_data == nullptr) {
 		return false;
 	}
@@ -898,15 +898,15 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *client_
 	//vector<CompletedTaskInformation>::const_iterator iterator;
 	// The client only display the first 50 Completed Tasks send, so send the 50 most recent
 	int first_task_to_send = 0;
-	int last_task_to_send  = client_task_state->completed_tasks.size();
+	int last_task_to_send  = client_task_state->m_completed_tasks.size();
 
-	if (client_task_state->completed_tasks.size() > 50) {
-		first_task_to_send = client_task_state->completed_tasks.size() - 50;
+	if (client_task_state->m_completed_tasks.size() > 50) {
+		first_task_to_send = client_task_state->m_completed_tasks.size() - 50;
 	}
 
 	LogTasks(
 		"[SendCompletedTasksToClient] completed task count [{}] first tank to send is [{}] last is [{}]",
-		client_task_state->completed_tasks.size(),
+		client_task_state->m_completed_tasks.size(),
 		first_task_to_send,
 		last_task_to_send
 	);
@@ -919,9 +919,9 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *client_
 	}
 	*/
 	for (int i = first_task_to_send; i < last_task_to_send; i++) {
-		int TaskID = client_task_state->completed_tasks[i].task_id;
-		if (p_task_data[TaskID] == nullptr) { continue; }
-		packet_length = packet_length + 8 + p_task_data[TaskID]->title.size() + 1;
+		int TaskID = client_task_state->m_completed_tasks[i].task_id;
+		if (m_task_data[TaskID] == nullptr) { continue; }
+		packet_length = packet_length + 8 + m_task_data[TaskID]->title.size() + 1;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_CompletedTasks, packet_length);
@@ -933,15 +933,15 @@ void TaskManager::SendCompletedTasksToClient(Client *c, ClientTaskState *client_
 	//for(iterator=activity_state->CompletedTasks.begin(); iterator!=activity_state->CompletedTasks.end(); iterator++) {
 	//	int task_id = (*iterator).task_id;
 	for (int i = first_task_to_send; i < last_task_to_send; i++) {
-		int task_id = client_task_state->completed_tasks[i].task_id;
-		if (p_task_data[task_id] == nullptr) { continue; }
+		int task_id = client_task_state->m_completed_tasks[i].task_id;
+		if (m_task_data[task_id] == nullptr) { continue; }
 		*(uint32 *) buf = task_id;
 		buf = buf + 4;
 
-		sprintf(buf, "%s", p_task_data[task_id]->title.c_str());
+		sprintf(buf, "%s", m_task_data[task_id]->title.c_str());
 		buf = buf + strlen(buf) + 1;
 		//*(uint32 *)buf = (*iterator).CompletedTime;
-		*(uint32 *) buf = client_task_state->completed_tasks[i].completed_time;
+		*(uint32 *) buf = client_task_state->m_completed_tasks[i].completed_time;
 		buf = buf + 4;
 	}
 
@@ -958,7 +958,7 @@ void TaskManager::SendTaskActivityShort(Client *client, int task_id, int activit
 	if (client->ClientVersionBit() & EQ::versions::maskRoFAndLater) {
 		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
 		outapp->WriteUInt32(client_task_index);
-		outapp->WriteUInt32(static_cast<uint32>(p_task_data[task_id]->type));
+		outapp->WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
 		outapp->WriteUInt32(task_id);
 		outapp->WriteUInt32(activity_id);
 		outapp->WriteUInt32(0);
@@ -973,7 +973,7 @@ void TaskManager::SendTaskActivityShort(Client *client, int task_id, int activit
 
 	task_activity_short = (TaskActivityShort_Struct *) outapp->pBuffer;
 	task_activity_short->TaskSequenceNumber = client_task_index;
-	task_activity_short->unknown2           = static_cast<uint32>(p_task_data[task_id]->type);
+	task_activity_short->unknown2           = static_cast<uint32>(m_task_data[task_id]->type);
 	task_activity_short->TaskID             = task_id;
 	task_activity_short->ActivityID         = activity_id;
 	task_activity_short->unknown3           = 0x000000;
@@ -1002,16 +1002,16 @@ void TaskManager::SendTaskActivityLong(
 	SerializeBuffer buf(100);
 
 	buf.WriteUInt32(client_task_index);
-	buf.WriteUInt32(static_cast<uint32>(p_task_data[task_id]->type));
+	buf.WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
 	buf.WriteUInt32(task_id);
 	buf.WriteUInt32(activity_id);
 	buf.WriteUInt32(0); // unknown3
 
 	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
 	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((p_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
-		p_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
-		buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].activity_type);
+	if ((m_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
+		m_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
+		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].activity_type);
 	}
 	else {
 		buf.WriteUInt32(ActivityCastOn);
@@ -1020,11 +1020,11 @@ void TaskManager::SendTaskActivityLong(
 	buf.WriteUInt32(optional);
 	buf.WriteUInt32(0);        // solo, group, raid
 
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].target_name); // target name string
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].item_list); // item name list
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].target_name); // target name string
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
 
-	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
-		buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].goal_count);
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
 	}
 	else {
 		// For our internal type GiveCash, where the goal count has the amount of cash that must be given,
@@ -1034,22 +1034,22 @@ void TaskManager::SendTaskActivityLong(
 		buf.WriteUInt32(1);
 	}
 
-	buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].skill_id);
-	buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].spell_id);
+	buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].skill_id);
+	buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].spell_id);
 	buf.WriteUInt32(
-		p_task_data[task_id]->activity_information[activity_id].zone_ids.empty() ? 0
-			: p_task_data[task_id]->activity_information[activity_id].zone_ids.front());
+		m_task_data[task_id]->activity_information[activity_id].zone_ids.empty() ? 0
+			: m_task_data[task_id]->activity_information[activity_id].zone_ids.front());
 	buf.WriteUInt32(0);
 
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].description_override);
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override);
 
-	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
-		buf.WriteUInt32(client->GetTaskActivityDoneCount(p_task_data[task_id]->type, client_task_index, activity_id));
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+		buf.WriteUInt32(client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id));
 	}
 	else {
 		// For internal activity_information types, done_count is either 1 if the activity_information is complete, 0 otherwise.
-		buf.WriteUInt32((client->GetTaskActivityDoneCount(p_task_data[task_id]->type, client_task_index, activity_id) >=
-						 p_task_data[task_id]->activity_information[activity_id].goal_count));
+		buf.WriteUInt32((client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id) >=
+						 m_task_data[task_id]->activity_information[activity_id].goal_count));
 	}
 
 	buf.WriteUInt32(1); // unknown
@@ -1074,16 +1074,16 @@ void TaskManager::SendTaskActivityNew(
 	SerializeBuffer buf(100);
 
 	buf.WriteUInt32(client_task_index);    // TaskSequenceNumber
-	buf.WriteUInt32(static_cast<uint32>(p_task_data[task_id]->type));        // task type
+	buf.WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));        // task type
 	buf.WriteUInt32(task_id);
 	buf.WriteUInt32(activity_id);
 	buf.WriteUInt32(0);        // unknown3
 
 	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
 	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((p_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
-		p_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
-		buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].activity_type);
+	if ((m_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
+		m_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
+		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].activity_type);
 	}
 	else {
 		buf.WriteUInt32(ActivityCastOn);
@@ -1093,46 +1093,46 @@ void TaskManager::SendTaskActivityNew(
 	buf.WriteUInt32(0);        // solo, group, raid
 
 	// One of these unknown fields maybe related to the 'Use On' activity_information types
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].target_name); // target name string
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].target_name); // target name string
 
-	buf.WriteLengthString(p_task_data[task_id]->activity_information[activity_id].item_list); // item name list
+	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
 
 	// Goal Count
-	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
-		buf.WriteUInt32(p_task_data[task_id]->activity_information[activity_id].goal_count);
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
 	}
 	else {
 		buf.WriteUInt32(1);
 	}    // GoalCount
 
 	// skill ID list ; separated
-	buf.WriteLengthString(p_task_data[task_id]->activity_information[activity_id].skill_list);
+	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].skill_list);
 
 	// spelll ID list ; separated -- unsure wtf we're doing here
-	buf.WriteLengthString(p_task_data[task_id]->activity_information[activity_id].spell_list);
+	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].spell_list);
 
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].zones);
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].zones);
 	buf.WriteUInt32(0);        // unknown7
 
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].description_override); // description override
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override); // description override
 
-	if (p_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
 		buf.WriteUInt32(
 			client->GetTaskActivityDoneCount(
-				p_task_data[task_id]->type,
+				m_task_data[task_id]->type,
 				client_task_index,
 				activity_id
 			));    // done_count
 	}
 	else {
 		// For internal activity_information types, done_count is either 1 if the activity_information is complete, 0 otherwise.
-		buf.WriteUInt32((client->GetTaskActivityDoneCount(p_task_data[task_id]->type, client_task_index, activity_id) >=
-						 p_task_data[task_id]->activity_information[activity_id].goal_count));
+		buf.WriteUInt32((client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id) >=
+						 m_task_data[task_id]->activity_information[activity_id].goal_count));
 	}
 
 	buf.WriteUInt8(1);    // unknown9
 
-	buf.WriteString(p_task_data[task_id]->activity_information[activity_id].zones);
+	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].zones);
 
 	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
 
@@ -1149,22 +1149,22 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 	}
 
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS + 1; task_index++) {
-		int task_id = state->active_tasks[task_index].task_id;
-		if ((task_id == 0) || (p_task_data[task_id] == 0)) {
+		int task_id = state->m_active_tasks[task_index].task_id;
+		if ((task_id == 0) || (m_task_data[task_id] == 0)) {
 			continue;
 		}
-		int start_time = state->active_tasks[task_index].accepted_time;
+		int start_time = state->m_active_tasks[task_index].accepted_time;
 
 		SendActiveTaskDescription(
-			client, task_id, state->active_tasks[task_index], start_time, p_task_data[task_id]->duration,
+			client, task_id, state->m_active_tasks[task_index], start_time, m_task_data[task_id]->duration,
 			false
 		);
 		LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}]", task_id, GetActivityCount(task_id));
 
 		int      sequence    = 0;
-		int      fixed_index = p_task_data[task_id]->type == TaskType::Task ? 0 : task_index - 1; // hmmm fuck
+		int      fixed_index = m_task_data[task_id]->type == TaskType::Task ? 0 : task_index - 1; // hmmm fuck
 		for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
-			if (client->GetTaskActivityState(p_task_data[task_id]->type, fixed_index, activity_id) != ActivityHidden) {
+			if (client->GetTaskActivityState(m_task_data[task_id]->type, fixed_index, activity_id) != ActivityHidden) {
 				LogTasks(
 					"[SendActiveTasksToClient] (Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
 					task_id,
@@ -1179,7 +1179,7 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 						task_id,
 						activity_id,
 						fixed_index,
-						p_task_data[task_id]->activity_information[activity_id].optional,
+						m_task_data[task_id]->activity_information[activity_id].optional,
 						task_complete
 					);
 				}
@@ -1189,7 +1189,7 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 						task_id,
 						activity_id,
 						fixed_index,
-						p_task_data[task_id]->activity_information[activity_id].optional,
+						m_task_data[task_id]->activity_information[activity_id].optional,
 						0
 					);
 				}
@@ -1215,7 +1215,7 @@ void TaskManager::SendSingleActiveTaskToClient(
 )
 {
 	int task_id = task_info.task_id;
-	if (task_id == 0 || p_task_data[task_id] == nullptr) {
+	if (task_id == 0 || m_task_data[task_id] == nullptr) {
 		return;
 	}
 
@@ -1225,7 +1225,7 @@ void TaskManager::SendSingleActiveTaskToClient(
 		task_id,
 		task_info,
 		start_time,
-		p_task_data[task_id]->duration,
+		m_task_data[task_id]->duration,
 		bring_up_task_journal
 	);
 	Log(Logs::General,
@@ -1243,13 +1243,13 @@ void TaskManager::SendSingleActiveTaskToClient(
 			if (activity_id == GetActivityCount(task_id) - 1) {
 				SendTaskActivityLong(
 					client, task_id, activity_id, task_info.slot,
-					p_task_data[task_id]->activity_information[activity_id].optional, task_complete
+					m_task_data[task_id]->activity_information[activity_id].optional, task_complete
 				);
 			}
 			else {
 				SendTaskActivityLong(
 					client, task_id, activity_id, task_info.slot,
-					p_task_data[task_id]->activity_information[activity_id].optional, 0
+					m_task_data[task_id]->activity_information[activity_id].optional, 0
 				);
 			}
 		}
@@ -1269,25 +1269,25 @@ void TaskManager::SendActiveTaskDescription(
 	bool bring_up_task_journal
 )
 {
-	if ((task_id < 1) || (task_id >= MAXTASKS) || !p_task_data[task_id]) {
+	if ((task_id < 1) || (task_id >= MAXTASKS) || !m_task_data[task_id]) {
 		return;
 	}
 
-	int packet_length = sizeof(TaskDescriptionHeader_Struct) + p_task_data[task_id]->title.length() + 1
-						+ sizeof(TaskDescriptionData1_Struct) + p_task_data[task_id]->description.length() + 1
+	int packet_length = sizeof(TaskDescriptionHeader_Struct) + m_task_data[task_id]->title.length() + 1
+						+ sizeof(TaskDescriptionData1_Struct) + m_task_data[task_id]->description.length() + 1
 						+ sizeof(TaskDescriptionData2_Struct) + 1 + sizeof(TaskDescriptionTrailer_Struct);
 
 	// If there is an item make the reward text into a link to the item (only the first item if a list
 	// is specified). I have been unable to get multiple item links to work.
 	//
-	if (p_task_data[task_id]->reward_id && p_task_data[task_id]->item_link.empty()) {
+	if (m_task_data[task_id]->reward_id && m_task_data[task_id]->item_link.empty()) {
 		int item_id = 0;
 		// If the reward is a list of items, and the first entry on the list is valid
-		if (p_task_data[task_id]->reward_method == METHODSINGLEID) {
-			item_id = p_task_data[task_id]->reward_id;
+		if (m_task_data[task_id]->reward_method == METHODSINGLEID) {
+			item_id = m_task_data[task_id]->reward_id;
 		}
-		else if (p_task_data[task_id]->reward_method == METHODLIST) {
-			item_id = goal_list_manager.GetFirstEntry(p_task_data[task_id]->reward_id);
+		else if (m_task_data[task_id]->reward_method == METHODLIST) {
+			item_id = m_goal_list_manager.GetFirstEntry(m_task_data[task_id]->reward_id);
 			if (item_id < 0) {
 				item_id = 0;
 			}
@@ -1300,11 +1300,11 @@ void TaskManager::SendActiveTaskDescription(
 			linker.SetLinkType(EQ::saylink::SayLinkItemData);
 			linker.SetItemData(reward_item);
 			linker.SetTaskUse();
-			p_task_data[task_id]->item_link = linker.GenerateLink();
+			m_task_data[task_id]->item_link = linker.GenerateLink();
 		}
 	}
 
-	packet_length += p_task_data[task_id]->reward.length() + 1 + p_task_data[task_id]->item_link.length() + 1;
+	packet_length += m_task_data[task_id]->reward.length() + 1 + m_task_data[task_id]->item_link.length() + 1;
 
 	char                          *Ptr;
 	TaskDescriptionHeader_Struct  *task_description_header;
@@ -1319,25 +1319,25 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->SequenceNumber = task_info.slot;
 	task_description_header->TaskID         = task_id;
 	task_description_header->open_window    = bring_up_task_journal;
-	task_description_header->task_type      = static_cast<uint32>(p_task_data[task_id]->type);
+	task_description_header->task_type      = static_cast<uint32>(m_task_data[task_id]->type);
 	task_description_header->reward_type    = 0; // TODO: 4 says Radiant Crystals else Ebon Crystals when shared task
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
-	sprintf(Ptr, "%s", p_task_data[task_id]->title.c_str());
-	Ptr += p_task_data[task_id]->title.length() + 1;
+	sprintf(Ptr, "%s", m_task_data[task_id]->title.c_str());
+	Ptr += m_task_data[task_id]->title.length() + 1;
 
 	tdd1 = (TaskDescriptionData1_Struct *) Ptr;
 
 	tdd1->Duration = duration;
-	tdd1->dur_code = static_cast<uint32>(p_task_data[task_id]->duration_code);
+	tdd1->dur_code = static_cast<uint32>(m_task_data[task_id]->duration_code);
 
 	tdd1->StartTime = start_time;
 
 	Ptr = (char *) tdd1 + sizeof(TaskDescriptionData1_Struct);
 
-	sprintf(Ptr, "%s", p_task_data[task_id]->description.c_str());
-	Ptr += p_task_data[task_id]->description.length() + 1;
+	sprintf(Ptr, "%s", m_task_data[task_id]->description.c_str());
+	Ptr += m_task_data[task_id]->description.length() + 1;
 
 	tdd2 = (TaskDescriptionData2_Struct *) Ptr;
 
@@ -1346,20 +1346,20 @@ void TaskManager::SendActiveTaskDescription(
 	// "has_reward_selection" is after this bool! Smaller packet when this is 0
 	tdd2->has_rewards = 1;
 
-	tdd2->coin_reward    = p_task_data[task_id]->cash_reward;
-	tdd2->xp_reward      = p_task_data[task_id]->experience_reward ? 1 : 0; // just booled
-	tdd2->faction_reward = p_task_data[task_id]->faction_reward ? 1 : 0; // faction booled
+	tdd2->coin_reward    = m_task_data[task_id]->cash_reward;
+	tdd2->xp_reward      = m_task_data[task_id]->experience_reward ? 1 : 0; // just booled
+	tdd2->faction_reward = m_task_data[task_id]->faction_reward ? 1 : 0; // faction booled
 
 	Ptr = (char *) tdd2 + sizeof(TaskDescriptionData2_Struct);
 
 	// we actually have 2 strings here. One is max length 96 and not parsed for item links
 	// We actually skipped past that string incorrectly before, so TODO: fix item link string
-	sprintf(Ptr, "%s", p_task_data[task_id]->reward.c_str());
-	Ptr += p_task_data[task_id]->reward.length() + 1;
+	sprintf(Ptr, "%s", m_task_data[task_id]->reward.c_str());
+	Ptr += m_task_data[task_id]->reward.length() + 1;
 
 	// second string is parsed for item links
-	sprintf(Ptr, "%s", p_task_data[task_id]->item_link.c_str());
-	Ptr += p_task_data[task_id]->item_link.length() + 1;
+	sprintf(Ptr, "%s", m_task_data[task_id]->item_link.c_str());
+	Ptr += m_task_data[task_id]->item_link.length() + 1;
 
 	tdt = (TaskDescriptionTrailer_Struct *) Ptr;
 	tdt->Points               = 0x00000000; // Points Count TODO: this does have a visible affect on the client ...
@@ -1377,7 +1377,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 	int character_id = client->CharacterID();
 
-	client_task_state->active_task_count = 0;
+	client_task_state->m_active_task_count = 0;
 
 	LogTasks("[LoadClientState] for character_id [{}]", character_id);
 
@@ -1424,7 +1424,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		if (type == TaskType::Quest) {
-			++client_task_state->active_task_count;
+			++client_task_state->m_active_task_count;
 		}
 
 		LogTasks(
@@ -1466,13 +1466,13 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		ClientTaskInformation *task_info = nullptr;
-		if (client_task_state->active_task.task_id == task_id) {
-			task_info = &client_task_state->active_task;
+		if (client_task_state->m_active_task.task_id == task_id) {
+			task_info = &client_task_state->m_active_task;
 		}
 
 		// wasn't task
 		if (task_info == nullptr) {
-			for (auto &active_quest : client_task_state->active_quests) {
+			for (auto &active_quest : client_task_state->m_active_quests) {
 				if (active_quest.task_id == task_id) {
 					task_info = &active_quest;
 				}
@@ -1547,7 +1547,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			int completed_time = character_completed_task.completedtime;
 			if ((previous_task_id != -1) &&
 				((task_id != previous_task_id) || (completed_time != previous_completed_time))) {
-				client_task_state->completed_tasks.push_back(completed_task_information);
+				client_task_state->m_completed_tasks.push_back(completed_task_information);
 				for (bool &activity_done : completed_task_information.activity_done) {
 					activity_done = false;
 				}
@@ -1558,7 +1558,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 			// If activity_id is -1, Mark all the non-optional tasks as completed.
 			if (activity_id < 0) {
-				TaskInformation *task = p_task_data[task_id];
+				TaskInformation *task = m_task_data[task_id];
 				if (task == nullptr) {
 					continue;
 				}
@@ -1575,10 +1575,10 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		if (previous_task_id != -1) {
-			client_task_state->completed_tasks.push_back(completed_task_information);
+			client_task_state->m_completed_tasks.push_back(completed_task_information);
 		}
 
-		client_task_state->last_completed_task_loaded = client_task_state->completed_tasks.size();
+		client_task_state->m_last_completed_task_loaded = client_task_state->m_completed_tasks.size();
 	}
 
 	std::string query = StringFormat(
@@ -1592,7 +1592,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	if (results.Success()) {
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			int task_id = atoi(row[0]);
-			client_task_state->enabled_tasks.push_back(task_id);
+			client_task_state->m_enabled_tasks.push_back(task_id);
 			LogTasksDetail("[LoadClientState] Adding task_id [{}] to enabled tasks", task_id);
 		}
 	}
@@ -1601,11 +1601,11 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	// This should only break if a ServerOP adds or deletes activites for a task that players already
 	// have active, or due to a bug.
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS + 1; task_index++) {
-		int task_id = client_task_state->active_tasks[task_index].task_id;
+		int task_id = client_task_state->m_active_tasks[task_index].task_id;
 		if (task_id == TASKSLOTEMPTY) {
 			continue;
 		}
-		if (!p_task_data[task_id]) {
+		if (!m_task_data[task_id]) {
 			client->Message(
 				Chat::Red,
 				"Active Task Slot %i, references a task (%i), that does not exist. "
@@ -1615,16 +1615,16 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			);
 
 			LogError("[LoadClientState] Character [{}] has task [{}] which does not exist", character_id, task_id);
-			client_task_state->active_tasks[task_index].task_id = TASKSLOTEMPTY;
+			client_task_state->m_active_tasks[task_index].task_id = TASKSLOTEMPTY;
 			continue;
 		}
-		for (int activity_index = 0; activity_index < p_task_data[task_id]->activity_count; activity_index++) {
-			if (client_task_state->active_tasks[task_index].activity[activity_index].activity_id != activity_index) {
+		for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; activity_index++) {
+			if (client_task_state->m_active_tasks[task_index].activity[activity_index].activity_id != activity_index) {
 				client->Message(
 					Chat::Red,
 					"Active Task %i, %s. activity_information count does not match expected value."
 					"Removing from memory. Contact a GM to resolve this.",
-					task_id, p_task_data[task_id]->title.c_str()
+					task_id, m_task_data[task_id]->title.c_str()
 				);
 
 				LogTasks(
@@ -1633,18 +1633,18 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 					activity_index,
 					task_id
 				);
-				client_task_state->active_tasks[task_index].task_id = TASKSLOTEMPTY;
+				client_task_state->m_active_tasks[task_index].task_id = TASKSLOTEMPTY;
 				break;
 			}
 		}
 	}
 
-	if (client_task_state->active_task.task_id != TASKSLOTEMPTY) {
-		client_task_state->UnlockActivities(character_id, client_task_state->active_task);
+	if (client_task_state->m_active_task.task_id != TASKSLOTEMPTY) {
+		client_task_state->UnlockActivities(character_id, client_task_state->m_active_task);
 	}
 
 	// TODO: shared
-	for (auto &active_quest : client_task_state->active_quests) {
+	for (auto &active_quest : client_task_state->m_active_quests) {
 		if (active_quest.task_id != TASKSLOTEMPTY) {
 			client_task_state->UnlockActivities(character_id, active_quest);
 		}

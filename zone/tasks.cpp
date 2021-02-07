@@ -12,18 +12,18 @@ extern QueryServ *QServ;
 
 void Client::LoadClientTaskState()
 {
-	if (RuleB(TaskSystem, EnableTaskSystem) && p_task_manager) {
+	if (RuleB(TaskSystem, EnableTaskSystem) && task_manager) {
 		if (task_state) {
 			safe_delete(task_state);
 		}
 
 		task_state = new ClientTaskState;
-		if (!p_task_manager->LoadClientState(this, task_state)) {
+		if (!task_manager->LoadClientState(this, task_state)) {
 			safe_delete(task_state);
 		}
 		else {
-			p_task_manager->SendActiveTasksToClient(this);
-			p_task_manager->SendCompletedTasksToClient(this, task_state);
+			task_manager->SendActiveTasksToClient(this);
+			task_manager->SendCompletedTasksToClient(this, task_state);
 		}
 	}
 }

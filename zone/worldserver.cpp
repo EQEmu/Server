@@ -3100,16 +3100,16 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 
 		if (rts->Parameter == 0) {
 			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
-			safe_delete(p_task_manager);
-			p_task_manager = new TaskManager;
-			p_task_manager->LoadTasks();
+			safe_delete(task_manager);
+			task_manager = new TaskManager;
+			task_manager->LoadTasks();
 			if (zone)
-				p_task_manager->LoadProximities(zone->GetZoneID());
+				task_manager->LoadProximities(zone->GetZoneID());
 			entity_list.ReloadAllClientsTaskState();
 		}
 		else {
 			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload only task %i", rts->Parameter);
-			p_task_manager->LoadTasks(rts->Parameter);
+			task_manager->LoadTasks(rts->Parameter);
 			entity_list.ReloadAllClientsTaskState(rts->Parameter);
 		}
 
@@ -3118,18 +3118,18 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 	case RELOADTASKPROXIMITIES:
 		if (zone) {
 			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task proximities");
-			p_task_manager->LoadProximities(zone->GetZoneID());
+			task_manager->LoadProximities(zone->GetZoneID());
 		}
 		break;
 
 	case RELOADTASKGOALLISTS:
 		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task goal lists");
-		p_task_manager->ReloadGoalLists();
+		task_manager->ReloadGoalLists();
 		break;
 
 	case RELOADTASKSETS:
 		Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload task sets");
-		p_task_manager->LoadTaskSets();
+		task_manager->LoadTaskSets();
 		break;
 
 	default:

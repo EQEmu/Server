@@ -88,7 +88,7 @@ namespace EQ
 #define XTARGET_HARDCAP 20
 
 extern Zone* zone;
-extern TaskManager *p_task_manager;
+extern TaskManager *task_manager;
 
 class CLIENTPACKET
 {
@@ -1039,7 +1039,7 @@ public:
 	}
 	inline bool SaveTaskState()
 	{
-		return p_task_manager != nullptr && p_task_manager->SaveClientState(this, task_state);
+		return task_manager != nullptr && task_manager->SaveClientState(this, task_state);
 	}
 	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
 	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
@@ -1137,8 +1137,8 @@ public:
 	}
 	inline void TaskSetSelector(Mob *mob, int task_set_id)
 	{
-		if (p_task_manager) {
-			p_task_manager->TaskSetSelector(
+		if (task_manager) {
+			task_manager->TaskSetSelector(
 				this,
 				task_state,
 				mob,
@@ -1148,8 +1148,8 @@ public:
 	}
 	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks)
 	{
-		if (p_task_manager) {
-			p_task_manager->TaskQuestSetSelector(
+		if (task_manager) {
+			task_manager->TaskQuestSetSelector(
 				this,
 				task_state,
 				mob,

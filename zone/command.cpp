@@ -77,7 +77,7 @@
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
-extern TaskManager *p_task_manager;
+extern TaskManager *task_manager;
 extern FastMath g_Math;
 void CatchSignal(int sig_num);
 
