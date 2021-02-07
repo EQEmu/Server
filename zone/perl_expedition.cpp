@@ -142,7 +142,7 @@ XS(XS_Expedition_GetDynamicZoneID) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	XSRETURN_UV(THIS->GetDynamicZoneID());
+	XSRETURN_UV(THIS->GetDynamicZone().GetID());
 }
 
 XS(XS_Expedition_GetID);
@@ -168,7 +168,7 @@ XS(XS_Expedition_GetInstanceID) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	XSRETURN_UV(THIS->GetInstanceID());
+	XSRETURN_UV(THIS->GetDynamicZone().GetInstanceID());
 }
 
 XS(XS_Expedition_GetLeaderName);

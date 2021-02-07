@@ -474,4 +474,13 @@ enum class DynamicZoneType
 	Quest
 };
 
+enum class ExpeditionMemberStatus : uint8_t
+{
+	Unknown = 0,
+	Online,
+	Offline,
+	InDynamicZone,
+	LinkDead
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

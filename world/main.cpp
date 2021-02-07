@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
 	PurgeInstanceTimer.Start(450000);
 
 	LogInfo("Loading active expeditions");
-	expedition_state.LoadActiveExpeditions();
+	expedition_state.CacheAllFromDatabase();
 
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();

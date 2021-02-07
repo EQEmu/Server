@@ -6900,20 +6900,20 @@ void command_dz(Client* c, const Seperator* sep)
 				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
 					"#goto {}", expedition->GetLeaderName()), false, expedition->GetLeaderName());
 				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
-					"#zoneinstance {}", expedition->GetInstanceID()), false, "zone");
+					"#zoneinstance {}", expedition->GetDynamicZone().GetInstanceID()), false, "zone");
 
 				auto seconds = expedition->GetDynamicZone().GetSecondsRemaining();
 
 				c->Message(Chat::White, fmt::format(
 					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] {}: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					expedition->GetID(),
-					expedition->GetDynamicZoneID(),
+					expedition->GetDynamicZone().GetID(),
 					expedition->GetName(),
 					leader_saylink,
 					zone_saylink,
 					ZoneName(expedition->GetDynamicZone().GetZoneID()),
 					expedition->GetDynamicZone().GetZoneID(),
-					expedition->GetInstanceID(),
+					expedition->GetDynamicZone().GetInstanceID(),
 					expedition->GetDynamicZone().GetZoneVersion(),
 					expedition->GetMemberCount(),
 					seconds / 3600,      // hours

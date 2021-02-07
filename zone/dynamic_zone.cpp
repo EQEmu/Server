@@ -64,22 +64,6 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	return nullptr;
 }
 
-std::unordered_map<uint32_t, DynamicZone> DynamicZone::LoadMultipleDzFromDatabase(
-	const std::vector<uint32_t>& dynamic_zone_ids)
-{
-	LogDynamicZonesDetail("Loading dynamic zone data for [{}] instances", dynamic_zone_ids.size());
-
-	std::unordered_map<uint32_t, DynamicZone> dynamic_zones;
-
-	auto entries = DynamicZonesRepository::GetWithInstance(database, dynamic_zone_ids);
-	for (auto& entry : entries)
-	{
-		dynamic_zones.emplace(entry.id, std::move(entry));
-	}
-
-	return dynamic_zones;
-}
-
 void DynamicZone::StartAllClientRemovalTimers()
 {
 	for (const auto& client_iter : entity_list.GetClientList())
