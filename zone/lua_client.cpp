@@ -69,9 +69,24 @@ void Lua_Client::WorldKick() {
 	self->WorldKick();
 }
 
-bool Lua_Client::GetAnon() {
-	Lua_Safe_Call_Bool();
-	return self->GetAnon() != 0;
+int Lua_Client::GetAFK() {
+	Lua_Safe_Call_Int();
+	return self->GetAFK();
+}
+
+void Lua_Client::SetAFK(uint8 afk_flag) {
+	Lua_Safe_Call_Void();
+	self->SetAFK(afk_flag);
+}
+
+int Lua_Client::GetAnon() {
+	Lua_Safe_Call_Int();
+	return self->GetAnon();
+}
+
+void Lua_Client::SetAnon(uint8 anon_flag) {
+	Lua_Safe_Call_Void();
+	self->SetAnon(anon_flag);
 }
 
 void Lua_Client::Duck() {
@@ -2062,7 +2077,10 @@ luabind::scope lua_register_client() {
 		.def("IsLD", (bool(Lua_Client::*)(void))&Lua_Client::IsLD)
 		.def("WorldKick", (void(Lua_Client::*)(void))&Lua_Client::WorldKick)
 		.def("SendToGuildHall", (void(Lua_Client::*)(void))&Lua_Client::SendToGuildHall)
-		.def("GetAnon", (bool(Lua_Client::*)(void))&Lua_Client::GetAnon)
+		.def("GetAFK", (int(Lua_Client::*)(void))&Lua_Client::GetAFK)
+		.def("SetAFK", (void(Lua_Client::*)(uint8))&Lua_Client::SetAFK)
+		.def("GetAnon", (int(Lua_Client::*)(void))&Lua_Client::GetAnon)
+		.def("SetAnon", (void(Lua_Client::*)(uint8))&Lua_Client::SetAnon)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
 		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
 		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
