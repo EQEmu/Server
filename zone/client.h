@@ -1227,7 +1227,7 @@ public:
 		return (task_state ? task_state->EnabledTaskCount(task_set_id) : -1);
 	}
 	inline int IsTaskCompleted(int task_id) { return (task_state ? task_state->IsTaskCompleted(task_id) : -1); }
-	inline void ShowClientTasks() { if (task_state) { task_state->ShowClientTasks(this); }}
+	inline void ShowClientTasks(Client *client) { if (task_state) { task_state->ShowClientTasks(client); }}
 	inline void CancelAllTasks() { if (task_state) { task_state->CancelAllTasks(this); }}
 	inline int GetActiveTaskCount() { return (task_state ? task_state->GetActiveTaskCount() : 0); }
 	inline int GetActiveTaskID(int index) { return (task_state ? task_state->GetActiveTaskID(index) : -1); }

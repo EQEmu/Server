@@ -1052,7 +1052,6 @@ void ClientTaskState::IncrementDoneCount(
 	Log(Logs::General, Logs::Tasks, "[UPDATE] IncrementDoneCount");
 
 	auto info = GetClientTaskInfo(task_information->type, task_index);
-
 	if (info == nullptr) {
 		return;
 	}
@@ -1557,7 +1556,9 @@ void ClientTaskState::ResetTaskActivity(Client *client, int task_id, int activit
 
 void ClientTaskState::ShowClientTasks(Client *client)
 {
-	client->Message(Chat::White, "Task Information:");
+	client->Message(Chat::White, "------------------------------------------------");
+	client->Message(Chat::White, "# Task Information | Client [%s]", client->GetCleanName());
+//	client->Message(Chat::White, "------------------------------------------------");
 	if (active_task.task_id != TASKSLOTEMPTY) {
 		client->Message(
 			Chat::White,
@@ -1586,27 +1587,51 @@ void ClientTaskState::ShowClientTasks(Client *client)
 			continue;
 		}
 
+		client->Message(Chat::White, "------------------------------------------------");
 		client->Message(
-			Chat::White, "Quest: %i %s", active_quest.task_id,
+			Chat::White, "# Quest | task_id [%i] title [%s]",
+			active_quest.task_id,
 			p_task_manager->p_task_data[active_quest.task_id]->title.c_str()
 		);
+		client->Message(Chat::White, "------------------------------------------------");
 
 		client->Message(
 			Chat::White,
-			"  description: [%s]\n",
+			" -- Description [%s]\n",
 			p_task_manager->p_task_data[active_quest.task_id]->description.c_str()
 		);
 
 		for (int activity_id = 0; activity_id < p_task_manager->GetActivityCount(active_quest.task_id); activity_id++) {
+			std::vector<std::string> update_increments = {"1", "5", "50"};
+			std::string              update_saylinks;
+
+			for (auto &increment: update_increments) {
+				auto task_update_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format(
+						"#task update {} {} {}",
+						active_quest.task_id,
+						active_quest.activity[activity_id].activity_id,
+						increment
+					),
+					false,
+					increment
+				);
+
+				update_saylinks += "[" + task_update_saylink + "] ";
+			}
+
 			client->Message(
 				Chat::White,
-				"  activity_information: %2d, done_count: %2d, Status: %d (0=Hidden, 1=Active, 2=Complete)",
+				" --- activity_id [%i] done_count [%i] state [%d] (0=hidden 1=active 2=complete) | Update %s",
 				active_quest.activity[activity_id].activity_id,
 				active_quest.activity[activity_id].done_count,
-				active_quest.activity[activity_id].activity_state
+				active_quest.activity[activity_id].activity_state,
+				update_saylinks.c_str()
 			);
 		}
 	}
+
+	client->Message(Chat::White, "------------------------------------------------");
 }
 
 // TODO: Shared Task

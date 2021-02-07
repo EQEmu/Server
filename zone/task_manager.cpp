@@ -1392,16 +1392,20 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		auto type    = static_cast<TaskType>(character_task.type);
 
 		if ((task_id < 0) || (task_id >= MAXTASKS)) {
-			LogTasks("[LoadClientState] Error: task_id [{}] out of range while loading character tasks from database",
-					 task_id);
+			LogTasks(
+				"[LoadClientState] Error: task_id [{}] out of range while loading character tasks from database",
+				task_id
+			);
 			continue;
 		}
 
+		// client data bucket pointer
 		auto task_info = client_task_state->GetClientTaskInfo(type, slot);
-
 		if (task_info == nullptr) {
-			LogTasks("[LoadClientState] Error: slot [{}] out of range while loading character tasks from database",
-					 slot);
+			LogTasks(
+				"[LoadClientState] Error: slot [{}] out of range while loading character tasks from database",
+				slot
+			);
 			continue;
 		}
 
