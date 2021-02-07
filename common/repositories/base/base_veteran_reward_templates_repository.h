@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.charges));
 		insert_values.push_back(std::to_string(veteran_reward_templates_entry.reward_slot));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

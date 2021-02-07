@@ -915,7 +915,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_entry.flymode));
 		insert_values.push_back(std::to_string(npc_types_entry.always_aggro));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

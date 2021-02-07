@@ -221,7 +221,7 @@ public:
 		insert_values.push_back(std::to_string(buyer_entry.quantity));
 		insert_values.push_back(std::to_string(buyer_entry.price));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(completed_tasks_entry.taskid));
 		insert_values.push_back(std::to_string(completed_tasks_entry.activityid));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

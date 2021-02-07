@@ -221,7 +221,7 @@ public:
 		insert_values.push_back(std::to_string(char_create_combinations_entry.start_zone));
 		insert_values.push_back(std::to_string(char_create_combinations_entry.expansions_req));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

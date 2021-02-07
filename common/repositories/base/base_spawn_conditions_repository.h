@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(spawn_conditions_entry.onchange));
 		insert_values.push_back("'" + EscapeString(spawn_conditions_entry.name) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

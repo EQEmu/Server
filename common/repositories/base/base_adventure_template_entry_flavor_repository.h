@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(adventure_template_entry_flavor_entry.id));
 		insert_values.push_back("'" + EscapeString(adventure_template_entry_flavor_entry.text) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

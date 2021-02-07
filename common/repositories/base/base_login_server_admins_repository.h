@@ -231,7 +231,7 @@ public:
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_date) + "'");
 		insert_values.push_back("'" + EscapeString(login_server_admins_entry.registration_ip_address) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

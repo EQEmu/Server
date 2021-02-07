@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(timers_entry.duration));
 		insert_values.push_back(std::to_string(timers_entry.enable));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

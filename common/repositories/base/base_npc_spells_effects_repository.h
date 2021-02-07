@@ -201,7 +201,7 @@ public:
 		insert_values.push_back("'" + EscapeString(npc_spells_effects_entry.name) + "'");
 		insert_values.push_back(std::to_string(npc_spells_effects_entry.parent_list));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

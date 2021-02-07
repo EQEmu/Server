@@ -215,7 +215,7 @@ public:
 		insert_values.push_back("'" + EscapeString(tributes_entry.descr) + "'");
 		insert_values.push_back(std::to_string(tributes_entry.isguild));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

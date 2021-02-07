@@ -203,7 +203,7 @@ public:
 		insert_values.push_back("'" + EscapeString(spell_buckets_entry.key) + "'");
 		insert_values.push_back("'" + EscapeString(spell_buckets_entry.value) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

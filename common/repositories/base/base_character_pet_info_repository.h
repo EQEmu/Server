@@ -239,7 +239,7 @@ public:
 		insert_values.push_back(std::to_string(character_pet_info_entry.size));
 		insert_values.push_back(std::to_string(character_pet_info_entry.taunting));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

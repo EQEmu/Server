@@ -201,7 +201,7 @@ public:
 		insert_values.push_back(std::to_string(player_titlesets_entry.char_id));
 		insert_values.push_back(std::to_string(player_titlesets_entry.title_set));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

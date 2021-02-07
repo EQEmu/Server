@@ -219,7 +219,7 @@ public:
 		insert_values.push_back("'" + EscapeString(hackers_entry.zone) + "'");
 		insert_values.push_back("'" + EscapeString(hackers_entry.date) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -209,7 +209,7 @@ public:
 		insert_values.push_back("'" + EscapeString(rule_values_entry.rule_value) + "'");
 		insert_values.push_back("'" + EscapeString(rule_values_entry.notes) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

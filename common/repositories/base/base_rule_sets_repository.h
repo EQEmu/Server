@@ -195,7 +195,7 @@ public:
 
 		insert_values.push_back("'" + EscapeString(rule_sets_entry.name) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

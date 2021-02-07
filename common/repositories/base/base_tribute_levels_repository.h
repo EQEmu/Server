@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(tribute_levels_entry.cost));
 		insert_values.push_back(std::to_string(tribute_levels_entry.item_id));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -287,7 +287,7 @@ public:
 		insert_values.push_back(std::to_string(inventory_snapshots_entry.ornamentidfile));
 		insert_values.push_back(std::to_string(inventory_snapshots_entry.ornament_hero_model));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

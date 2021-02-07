@@ -261,7 +261,7 @@ public:
 		insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(starting_items_entry.content_flags_disabled) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

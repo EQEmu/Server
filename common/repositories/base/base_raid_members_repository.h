@@ -239,7 +239,7 @@ public:
 		insert_values.push_back(std::to_string(raid_members_entry.israidleader));
 		insert_values.push_back(std::to_string(raid_members_entry.islooter));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

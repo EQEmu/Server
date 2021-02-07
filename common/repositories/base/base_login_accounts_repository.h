@@ -239,7 +239,7 @@ public:
 		insert_values.push_back("'" + EscapeString(login_accounts_entry.created_at) + "'");
 		insert_values.push_back("'" + EscapeString(login_accounts_entry.updated_at) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

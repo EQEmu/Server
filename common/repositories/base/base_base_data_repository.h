@@ -245,7 +245,7 @@ public:
 		insert_values.push_back(std::to_string(base_data_entry.mana_fac));
 		insert_values.push_back(std::to_string(base_data_entry.end_fac));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

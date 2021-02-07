@@ -267,7 +267,7 @@ public:
 		insert_values.push_back("'" + EscapeString(titles_entry.suffix) + "'");
 		insert_values.push_back(std::to_string(titles_entry.title_set));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

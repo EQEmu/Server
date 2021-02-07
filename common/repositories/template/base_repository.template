@@ -190,7 +190,7 @@ public:
 
 {{INSERT_ONE_ENTRIES}}
 
-		auto results = {{DATABASE_CONNECTION}}.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

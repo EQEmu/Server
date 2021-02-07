@@ -237,7 +237,7 @@ public:
 		insert_values.push_back(std::to_string(adventure_details_entry.time_zoned));
 		insert_values.push_back(std::to_string(adventure_details_entry.time_completed));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

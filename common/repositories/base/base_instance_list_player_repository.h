@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(instance_list_player_entry.id));
 		insert_values.push_back(std::to_string(instance_list_player_entry.charid));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

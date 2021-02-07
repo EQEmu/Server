@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(character_activities_entry.donecount));
 		insert_values.push_back(std::to_string(character_activities_entry.completed));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

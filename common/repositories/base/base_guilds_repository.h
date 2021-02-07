@@ -237,7 +237,7 @@ public:
 		insert_values.push_back("'" + EscapeString(guilds_entry.channel) + "'");
 		insert_values.push_back("'" + EscapeString(guilds_entry.url) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

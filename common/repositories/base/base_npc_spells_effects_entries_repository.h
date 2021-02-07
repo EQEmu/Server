@@ -231,7 +231,7 @@ public:
 		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.se_limit));
 		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.se_max));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

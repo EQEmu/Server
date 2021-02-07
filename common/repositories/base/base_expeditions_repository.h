@@ -237,7 +237,7 @@ public:
 		insert_values.push_back(std::to_string(expeditions_entry.add_replay_on_join));
 		insert_values.push_back(std::to_string(expeditions_entry.is_locked));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -359,7 +359,7 @@ public:
 		insert_values.push_back(std::to_string(npc_types_tint_entry.grn9x));
 		insert_values.push_back(std::to_string(npc_types_tint_entry.blu9x));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -267,7 +267,7 @@ public:
 		insert_values.push_back(std::to_string(spawn_events_entry.argument));
 		insert_values.push_back(std::to_string(spawn_events_entry.strict));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

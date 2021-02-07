@@ -239,7 +239,7 @@ public:
 		insert_values.push_back("'" + EscapeString(group_leaders_entry.mentoree) + "'");
 		insert_values.push_back(std::to_string(group_leaders_entry.mentor_percent));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -221,7 +221,7 @@ public:
 		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero2));
 		insert_values.push_back(std::to_string(faction_base_data_entry.unk_hero3));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

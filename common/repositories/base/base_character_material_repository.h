@@ -225,7 +225,7 @@ public:
 		insert_values.push_back(std::to_string(character_material_entry.use_tint));
 		insert_values.push_back(std::to_string(character_material_entry.color));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

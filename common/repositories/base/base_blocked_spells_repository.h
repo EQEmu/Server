@@ -255,7 +255,7 @@ public:
 		insert_values.push_back("'" + EscapeString(blocked_spells_entry.message) + "'");
 		insert_values.push_back("'" + EscapeString(blocked_spells_entry.description) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

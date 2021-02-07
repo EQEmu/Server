@@ -729,7 +729,7 @@ public:
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
 		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
