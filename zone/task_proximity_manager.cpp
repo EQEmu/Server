@@ -23,7 +23,7 @@ TaskProximityManager::~TaskProximityManager()
 bool TaskProximityManager::LoadProximities(int zone_id)
 {
 	TaskProximity proximity{};
-	task_proximities.clear();
+	m_task_proximities.clear();
 
 	auto proximities = ProximitiesRepository::GetWhere(
 		content_db,
@@ -39,7 +39,7 @@ bool TaskProximityManager::LoadProximities(int zone_id)
 		proximity.min_z      = row.minz;
 		proximity.max_z      = row.maxz;
 
-		task_proximities.push_back(proximity);
+		m_task_proximities.push_back(proximity);
 	}
 
 	LogTasks("Loaded [{}] Task Proximities", proximities.size());
@@ -49,7 +49,7 @@ bool TaskProximityManager::LoadProximities(int zone_id)
 
 int TaskProximityManager::CheckProximities(float x, float y, float z)
 {
-	for (auto &task_proximity : task_proximities) {
+	for (auto &task_proximity : m_task_proximities) {
 
 		TaskProximity *p_proximity = &task_proximity;
 

@@ -29,8 +29,8 @@ public:
 	std::vector<int> GetListContents(int list_index);
 
 private:
-	std::vector<TaskGoalList_Struct> task_goal_lists;
-	int                              goal_lists_count;
+	std::vector<TaskGoalList_Struct> m_task_goal_lists;
+	int                              m_goal_lists_count;
 };
 
 

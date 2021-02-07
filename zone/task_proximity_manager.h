@@ -21,7 +21,7 @@ public:
 	int CheckProximities(float x, float y, float z);
 
 private:
-	std::vector <TaskProximity> task_proximities;
+	std::vector <TaskProximity> m_task_proximities;
 };
 
 #endif //EQEMU_TASK_PROXIMITY_MANAGER_H
