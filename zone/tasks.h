@@ -2,7 +2,6 @@
 #define TASKS_H
 
 #include "../common/types.h"
-
 #include <list>
 #include <vector>
 #include <string>
@@ -10,14 +9,10 @@
 
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
-// The Client has a hard cap of 19 active quests, 29 in SoD+
-#define MAXACTIVEQUESTS 19
-// The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
-#define MAXCHOOSERENTRIES 40
-// The Client has a hard cap of 20 activities per task.
-#define MAXACTIVITIESPERTASK 20
-// This is used to determine if a client's active task slot is empty.
-#define TASKSLOTEMPTY 0
+#define MAXACTIVEQUESTS 19 // The Client has a hard cap of 19 active quests, 29 in SoD+
+#define MAXCHOOSERENTRIES 40 // The Max Chooser (Task Selector entries) is capped at 40 in the Titanium Client.
+#define MAXACTIVITIESPERTASK 20 // The Client has a hard cap of 20 activities per task.
+#define TASKSLOTEMPTY 0 // This is used to determine if a client's active task slot is empty.
 
 // Command Codes for worldserver ServerOP_ReloadTasks
 #define RELOADTASKS 0
@@ -31,8 +26,6 @@ class Mob;
 namespace EQ {
 	class ItemInstance;
 }
-
-
 
 typedef enum {
 	METHODSINGLEID = 0,

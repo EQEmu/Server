@@ -12,6 +12,7 @@
 #include <algorithm>
 
 class Client;
+
 class Mob;
 
 class TaskManager {

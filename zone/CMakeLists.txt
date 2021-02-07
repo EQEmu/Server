@@ -134,10 +134,9 @@ SET(zone_sources
 	spell_effects.cpp
 	spells.cpp
 	task_client_state.cpp
-	task_client_state.cpp
 	task_goal_list_manager.cpp
 	task_manager.cpp
-	task_proximity_manager.cpp  
+	task_proximity_manager.cpp
 	tasks.cpp
 	titles.cpp
 	tradeskills.cpp
