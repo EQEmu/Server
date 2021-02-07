@@ -65,6 +65,8 @@ namespace EQ
 #include "zone.h"
 #include "zonedb.h"
 #include "zone_store.h"
+#include "task_manager.h"
+#include "task_client_state.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
