@@ -61,7 +61,7 @@ XS(XS_Client_SendSound); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendSound) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -74,7 +74,7 @@ XS(XS_Client_Save); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Save) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::Save(THIS, uint8 commit_now)");
+		Perl_croak(aTHX_ "Usage: Client::Save(THIS, uint8 commit_now)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool  RETVAL;
@@ -91,7 +91,7 @@ XS(XS_Client_SaveBackup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SaveBackup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -104,7 +104,7 @@ XS(XS_Client_Connected); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Connected) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Connected(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Connected(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -120,7 +120,7 @@ XS(XS_Client_InZone); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_InZone) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::InZone(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::InZone(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -136,7 +136,7 @@ XS(XS_Client_Kick); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Kick) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -149,7 +149,7 @@ XS(XS_Client_Disconnect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Disconnect) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -162,7 +162,7 @@ XS(XS_Client_IsLD); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsLD) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsLD(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsLD(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -178,7 +178,7 @@ XS(XS_Client_WorldKick); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_WorldKick) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -191,7 +191,7 @@ XS(XS_Client_SendToGuildHall); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendToGuildHall) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)"); // @categories Script Utility, Guild
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -204,7 +204,7 @@ XS(XS_Client_GetAnon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAnon) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAnon(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAnon(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -266,7 +266,7 @@ XS(XS_Client_Duck); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Duck) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -279,7 +279,7 @@ XS(XS_Client_DyeArmorBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DyeArmorBySlot) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])");
+		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		uint8 slot = (uint8) SvUV(ST(1));
@@ -300,7 +300,7 @@ XS(XS_Client_Stand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Stand) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -313,7 +313,7 @@ XS(XS_Client_SetGM); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetGM) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetGM(THIS, bool toggle)");
+		Perl_croak(aTHX_ "Usage: Client::SetGM(THIS, bool toggle)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
@@ -327,7 +327,7 @@ XS(XS_Client_SetPVP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetPVP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetPVP(THIS, bool toggle)");
+		Perl_croak(aTHX_ "Usage: Client::SetPVP(THIS, bool toggle)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
@@ -341,7 +341,7 @@ XS(XS_Client_GetPVP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetPVP(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -357,7 +357,7 @@ XS(XS_Client_GetGM); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGM) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGM(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGM(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -373,7 +373,7 @@ XS(XS_Client_SetBaseClass); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseClass) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseClass(THIS, uint32 class_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseClass(THIS, uint32 class_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
@@ -387,7 +387,7 @@ XS(XS_Client_SetBaseRace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseRace) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseRace(THIS, uint32 race_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseRace(THIS, uint32 race_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
@@ -401,7 +401,7 @@ XS(XS_Client_SetBaseGender); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseGender) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseGender(THIS, uint32 gender_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseGender(THIS, uint32 gender_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
@@ -415,7 +415,7 @@ XS(XS_Client_GetBaseFace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseFace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseFace(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseFace(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -432,7 +432,7 @@ XS(XS_Client_GetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLanguageSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLanguageSkill(THIS, uint16 lanuage_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetLanguageSkill(THIS, uint16 lanuage_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8  RETVAL;
@@ -450,7 +450,7 @@ XS(XS_Client_GetLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLastName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLastName(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLastName(THIS)"); // @categories Account and Character
 	{
 		Client     *THIS;
 		Const_char *RETVAL;
@@ -468,7 +468,7 @@ XS(XS_Client_GetLDoNPointsTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNPointsTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -486,7 +486,7 @@ XS(XS_Client_GetBaseSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTR(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseSTR(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -503,7 +503,7 @@ XS(XS_Client_GetBaseSTA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseSTA(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -520,7 +520,7 @@ XS(XS_Client_GetBaseCHA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseCHA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseCHA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseCHA(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -537,7 +537,7 @@ XS(XS_Client_GetBaseDEX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseDEX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseDEX(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseDEX(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -554,7 +554,7 @@ XS(XS_Client_GetBaseINT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseINT) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseINT(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseINT(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -571,7 +571,7 @@ XS(XS_Client_GetBaseAGI); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseAGI) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseAGI(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseAGI(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -588,7 +588,7 @@ XS(XS_Client_GetBaseWIS); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseWIS) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseWIS(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseWIS(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -605,7 +605,7 @@ XS(XS_Client_GetWeight); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetWeight) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetWeight(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetWeight(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -622,7 +622,7 @@ XS(XS_Client_GetEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEXP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEXP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEXP(THIS)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -639,7 +639,7 @@ XS(XS_Client_GetAAExp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAAExp) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAExp(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAExp(THIS)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -656,7 +656,7 @@ XS(XS_Client_GetAAPercent);
 XS(XS_Client_GetAAPercent) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -673,7 +673,7 @@ XS(XS_Client_GetTotalSecondsPlayed); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_GetTotalSecondsPlayed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTotalSecondsPlayed(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTotalSecondsPlayed(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -690,7 +690,7 @@ XS(XS_Client_UpdateLDoNPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateLDoNPoints) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, int32 points, uint32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, int32 points, uint32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -708,7 +708,7 @@ XS(XS_Client_SetDeity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDeity) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDeity(THIS, uint32 deity_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetDeity(THIS, uint32 deity_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
@@ -722,7 +722,7 @@ XS(XS_Client_AddEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddEXP) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddEXP(THIS, uint32 experience_points)");
+		Perl_croak(aTHX_ "Usage: Client::AddEXP(THIS, uint32 experience_points)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 add_exp = (uint32) SvUV(ST(1));
@@ -750,7 +750,7 @@ XS(XS_Client_SetEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetEXP) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])");
+		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 set_exp  = (uint32) SvUV(ST(1));
@@ -772,7 +772,7 @@ XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint) {
 	dXSARGS;
 	if (items < 1 || items > 6)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)");
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int   to_zone;
@@ -820,7 +820,7 @@ XS(XS_Client_GetBindX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindX) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindX(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindX(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
@@ -844,7 +844,7 @@ XS(XS_Client_GetBindY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindY) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindY(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindY(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
@@ -868,7 +868,7 @@ XS(XS_Client_GetBindZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindZ) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZ(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindZ(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
@@ -892,7 +892,7 @@ XS(XS_Client_GetBindHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindHeading) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindHeading(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindHeading(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
@@ -916,7 +916,7 @@ XS(XS_Client_GetBindZoneID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindZoneID) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZoneID(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindZoneID(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 index = 0;
@@ -941,7 +941,7 @@ XS(XS_Client_MovePC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MovePC) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::MovePC(THIS, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Client::MovePC(THIS, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 zoneID  = (uint32) SvUV(ST(1));
@@ -979,7 +979,7 @@ XS(XS_Client_MovePCInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MovePCInstance) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)"); // @categories Adventures and Expeditions, Script Utility
 	{
 		Client *THIS;
 		uint32 zoneID     = (uint32) SvUV(ST(1));
@@ -1019,7 +1019,7 @@ XS(XS_Client_MoveZone); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZone) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)"); // @categories Script Utility
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
@@ -1053,7 +1053,7 @@ XS(XS_Client_MoveZoneGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)"); // @categories Script Utility, Group
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
@@ -1087,7 +1087,7 @@ XS(XS_Client_MoveZoneRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneRaid) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)"); // @categories Script Utility, Raid
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
@@ -1121,7 +1121,7 @@ XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
@@ -1155,7 +1155,7 @@ XS(XS_Client_MoveZoneInstanceGroup); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_MoveZoneInstanceGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Group
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
@@ -1189,7 +1189,7 @@ XS(XS_Client_MoveZoneInstanceRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneInstanceRaid) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Raid
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
@@ -1223,7 +1223,7 @@ XS(XS_Client_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ChangeLastName) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)");
+		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)"); // @categories Account and Character
 	{
 		Client *THIS;
 		char   *in_lastname = (char *) SvPV_nolen(ST(1));
@@ -1237,7 +1237,7 @@ XS(XS_Client_GetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFactionLevel) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)");
+		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)"); // @categories Faction
 	{
 		Client *THIS;
 		FACTION_VALUE RETVAL;
@@ -1269,7 +1269,7 @@ XS(XS_Client_SetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)"); // @categories Faction
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1287,7 +1287,7 @@ XS(XS_Client_SetFactionLevel2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel2) {
 	dXSARGS;
 	if (items < 7 || items > 8)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)"); // @categories Faction
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1313,7 +1313,7 @@ XS(XS_Client_GetRawItemAC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawItemAC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRawItemAC(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRawItemAC(THIS)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 RETVAL;
@@ -1330,7 +1330,7 @@ XS(XS_Client_AccountID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AccountID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AccountID(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -1347,7 +1347,7 @@ XS(XS_Client_AccountName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AccountName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountName(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AccountName(THIS)"); // @categories Account and Character
 	{
 		Client     *THIS;
 		Const_char *RETVAL;
@@ -1365,7 +1365,7 @@ XS(XS_Client_Admin); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Admin) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Admin(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Admin(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int16 RETVAL;
@@ -1382,7 +1382,7 @@ XS(XS_Client_CharacterID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CharacterID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::CharacterID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::CharacterID(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -1399,7 +1399,7 @@ XS(XS_Client_UpdateAdmin); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateAdmin) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateAdmin(THIS, bool from_db = true)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateAdmin(THIS, bool from_db = true)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool iFromDB;
@@ -1419,7 +1419,7 @@ XS(XS_Client_UpdateWho); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateWho) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateWho(THIS, uint8 remove = 0)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateWho(THIS, uint8 remove = 0)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint8  remove;
@@ -1439,7 +1439,7 @@ XS(XS_Client_GuildRank); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GuildRank) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildRank(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GuildRank(THIS)"); // @categories Account and Character, Guild
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -1456,7 +1456,7 @@ XS(XS_Client_GuildID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GuildID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GuildID(THIS)"); // @categories Account and Character, Guild
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -1473,7 +1473,7 @@ XS(XS_Client_GetFace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFace(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetFace(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -1490,7 +1490,7 @@ XS(XS_Client_TakeMoneyFromPP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TakeMoneyFromPP) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::TakeMoneyFromPP(THIS, uint32 copper, bool update_client = false)");
+		Perl_croak(aTHX_ "Usage: Client::TakeMoneyFromPP(THIS, uint32 copper, bool update_client = false)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -1511,7 +1511,7 @@ XS(XS_Client_AddMoneyToPP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddMoneyToPP) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)");
+		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 copper       = (uint32) SvUV(ST(1));
@@ -1529,7 +1529,7 @@ XS(XS_Client_TGB); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TGB) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -1545,7 +1545,7 @@ XS(XS_Client_GetSkillPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetSkillPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSkillPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetSkillPoints(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -1562,7 +1562,7 @@ XS(XS_Client_SetSkillPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetSkillPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetSkillPoints(THIS, inp)");
+		Perl_croak(aTHX_ "Usage: Client::SetSkillPoints(THIS, inp)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int inp = (int) SvIV(ST(1));
@@ -1576,7 +1576,7 @@ XS(XS_Client_IncreaseSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IncreaseSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseSkill(THIS, int skill_id, int value = 1)");
+		Perl_croak(aTHX_ "Usage: Client::IncreaseSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
@@ -1597,7 +1597,7 @@ XS(XS_Client_IncreaseLanguageSkill); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_IncreaseLanguageSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseLanguageSkill(THIS, int skill_id, int value = 1)");
+		Perl_croak(aTHX_ "Usage: Client::IncreaseLanguageSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
@@ -1618,7 +1618,7 @@ XS(XS_Client_GetRawSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetRawSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetRawSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint32                   RETVAL;
@@ -1636,7 +1636,7 @@ XS(XS_Client_HasSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
@@ -1653,7 +1653,7 @@ XS(XS_Client_CanHaveSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CanHaveSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CanHaveSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::CanHaveSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
@@ -1670,7 +1670,7 @@ XS(XS_Client_SetSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)");
+		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
@@ -1685,7 +1685,7 @@ XS(XS_Client_AddSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)");
+		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
 	{
 		Client                   *THIS;
 		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
@@ -1700,7 +1700,7 @@ XS(XS_Client_CheckSpecializeIncrease); /* prototype to pass -Wmissing-prototypes
 XS(XS_Client_CheckSpecializeIncrease) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1714,7 +1714,7 @@ XS(XS_Client_CheckIncreaseSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CheckIncreaseSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CheckIncreaseSkill(THIS, int skill_id, int chance_modifier = 0)");
+		Perl_croak(aTHX_ "Usage: Client::CheckIncreaseSkill(THIS, int skill_id, int chance_modifier = 0)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
@@ -1738,7 +1738,7 @@ XS(XS_Client_SetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetLanguageSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetLanguageSkill(THIS, int language_id, int value)");
+		Perl_croak(aTHX_ "Usage: Client::SetLanguageSkill(THIS, int language_id, int value)"); // @categories Account and Character, Skills and Recipes, Stats and Attributes
 	{
 		Client *THIS;
 		int    langid = (int) SvIV(ST(1));
@@ -1754,7 +1754,7 @@ XS(XS_Client_MaxSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MaxSkill) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MaxSkill(THIS, uint16 skill_id, uint16 class_id, uint16 level)");
+		Perl_croak(aTHX_ "Usage: Client::MaxSkill(THIS, uint16 skill_id, uint16 class_id, uint16 level)"); // @categories Skills and Recipes
 	{
 		Client                   *THIS;
 		uint16                   RETVAL;
@@ -1784,7 +1784,7 @@ XS(XS_Client_GMKill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GMKill) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -1797,7 +1797,7 @@ XS(XS_Client_IsMedding); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsMedding) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsMedding(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsMedding(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -1813,7 +1813,7 @@ XS(XS_Client_GetDuelTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDuelTarget) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -1830,7 +1830,7 @@ XS(XS_Client_IsDueling); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsDueling) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsDueling(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsDueling(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -1846,7 +1846,7 @@ XS(XS_Client_SetDuelTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDuelTarget) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint16 set_id = (uint16) SvUV(ST(1));
@@ -1860,7 +1860,7 @@ XS(XS_Client_SetDueling); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDueling) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDueling(THIS, duel)");
+		Perl_croak(aTHX_ "Usage: Client::SetDueling(THIS, duel)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		bool duel = (bool) SvTRUE(ST(1));
@@ -1874,7 +1874,7 @@ XS(XS_Client_ResetAA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -1887,7 +1887,7 @@ XS(XS_Client_MemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1909,7 +1909,7 @@ XS(XS_Client_UnmemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -1930,7 +1930,7 @@ XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int32  spell_id = (int32) SvIV(ST(1));
@@ -1944,7 +1944,7 @@ XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
@@ -1964,7 +1964,7 @@ XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_FindMemmedSpellBySlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)");
+		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)"); // @categories Account and Character, Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -1982,7 +1982,7 @@ XS(XS_Client_MemmedCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemmedCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32  RETVAL;
@@ -1999,7 +1999,7 @@ XS(XS_Client_ScribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ScribeSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -2021,7 +2021,7 @@ XS(XS_Client_UnscribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnscribeSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -2062,7 +2062,7 @@ XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TrainDiscBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int32 spell_id = (int32) SvIV(ST(1));
@@ -2076,7 +2076,7 @@ XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDiscSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int   RETVAL;
@@ -2094,7 +2094,7 @@ XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDisc) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
@@ -2115,7 +2115,7 @@ XS(XS_Client_UntrainDiscAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDiscAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
@@ -2136,7 +2136,7 @@ XS(XS_Client_IsStanding)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)"); // @categories Account and Character
 	{
 		Client *		THIS;
 		bool		RETVAL;
@@ -2152,7 +2152,7 @@ XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsSitting) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsSitting(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsSitting(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2169,7 +2169,7 @@ XS(XS_Client_IsCrouching)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)"); // @categories Account and Character
 	{
 		Client *		THIS;
 		bool		RETVAL;
@@ -2185,7 +2185,7 @@ XS(XS_Client_IsBecomeNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsBecomeNPC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsBecomeNPC(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsBecomeNPC(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2201,7 +2201,7 @@ XS(XS_Client_GetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBecomeNPCLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBecomeNPCLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBecomeNPCLevel(THIS)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -2218,7 +2218,7 @@ XS(XS_Client_SetBecomeNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBecomeNPC) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPC(THIS, flag)");
+		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPC(THIS, flag)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool flag = (bool) SvTRUE(ST(1));
@@ -2232,7 +2232,7 @@ XS(XS_Client_SetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBecomeNPCLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPCLevel(THIS, level)");
+		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPCLevel(THIS, level)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 level = (uint8) SvUV(ST(1));
@@ -2246,7 +2246,7 @@ XS(XS_Client_SetFeigned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFeigned) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetFeigned(THIS, in_feigned)");
+		Perl_croak(aTHX_ "Usage: Client::SetFeigned(THIS, in_feigned)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool in_feigned = (bool) SvTRUE(ST(1));
@@ -2260,7 +2260,7 @@ XS(XS_Client_GetFeigned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFeigned) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFeigned(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetFeigned(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2276,7 +2276,7 @@ XS(XS_Client_AutoSplitEnabled); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AutoSplitEnabled) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AutoSplitEnabled(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AutoSplitEnabled(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2292,7 +2292,7 @@ XS(XS_Client_SetHorseId); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetHorseId) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHorseId(THIS, horseid_in)");
+		Perl_croak(aTHX_ "Usage: Client::SetHorseId(THIS, horseid_in)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint16 horseid_in = (uint16) SvUV(ST(1));
@@ -2306,7 +2306,7 @@ XS(XS_Client_GetHorseId); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetHorseId) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHorseId(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetHorseId(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -2323,7 +2323,7 @@ XS(XS_Client_NukeItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_NukeItem) {
 	dXSARGS;
 	if (items != 3 && items != 2)
-		Perl_croak(aTHX_ "Usage: Client::NukeItem(THIS, uint32 item_id, [uint8 slot_to_check])");
+		Perl_croak(aTHX_ "Usage: Client::NukeItem(THIS, uint32 item_id, [uint8 slot_to_check])"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -2349,7 +2349,7 @@ XS(XS_Client_SetTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetTint) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetTint(THIS, int16 slot_id, uint32 color)");
+		Perl_croak(aTHX_ "Usage: Client::SetTint(THIS, int16 slot_id, uint32 color)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
@@ -2364,7 +2364,7 @@ XS(XS_Client_SetMaterial); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetMaterial) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetMaterial(THIS, int16 slot_id, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetMaterial(THIS, int16 slot_id, uint32 item_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
@@ -2379,7 +2379,7 @@ XS(XS_Client_Undye); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Undye) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2392,7 +2392,7 @@ XS(XS_Client_GetItemIDAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemIDAt) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int32 RETVAL;
@@ -2410,7 +2410,7 @@ XS(XS_Client_GetAugmentIDAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAugmentIDAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, int16 slot_id, int16 aug_slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, int16 slot_id, int16 aug_slot)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int32 RETVAL;
@@ -2429,7 +2429,7 @@ XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_DeleteItemInInventory) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
@@ -2457,7 +2457,7 @@ XS(XS_Client_SummonItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SummonItem) {
 	dXSARGS;
 	if (items < 2 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])");
+		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])"); // @categories Inventory and Items, Script Utility
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
@@ -2504,7 +2504,7 @@ XS(XS_Client_SetStats); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetStats) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, uint8 type, uint16 increase_val)");
+		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
@@ -2519,7 +2519,7 @@ XS(XS_Client_IncStats); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IncStats) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, uint8 type, uint16 increase_val)");
+		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
@@ -2534,7 +2534,7 @@ XS(XS_Client_DropItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DropItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::DropItem(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::DropItem(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
@@ -2548,7 +2548,7 @@ XS(XS_Client_BreakInvis); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_BreakInvis) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)"); // @categories Spells and Disciplines, Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2561,7 +2561,7 @@ XS(XS_Client_GetGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGroup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGroup(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		Group  *RETVAL;
@@ -2577,7 +2577,7 @@ XS(XS_Client_LeaveGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_LeaveGroup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2590,7 +2590,7 @@ XS(XS_Client_GetRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRaid) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaid(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRaid(THIS)"); // @categories Account and Character, Raid
 	{
 		Client *THIS;
 		Raid   *RETVAL;
@@ -2606,7 +2606,7 @@ XS(XS_Client_IsGrouped); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsGrouped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsGrouped(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsGrouped(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2622,7 +2622,7 @@ XS(XS_Client_IsRaidGrouped); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsRaidGrouped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsRaidGrouped(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsRaidGrouped(THIS)"); // @categories Account and Character, Group, Raid
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2638,7 +2638,7 @@ XS(XS_Client_Hungry); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Hungry) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Hungry(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Hungry(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2654,7 +2654,7 @@ XS(XS_Client_Thirsty); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Thirsty) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Thirsty(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Thirsty(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -2670,7 +2670,7 @@ XS(XS_Client_GetInstrumentMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstrumentMod) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
@@ -2688,7 +2688,7 @@ XS(XS_Client_DecreaseByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DecreaseByID) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, unit8 amount)");
+		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, unit8 amount)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -2706,7 +2706,7 @@ XS(XS_Client_SlotConvert2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SlotConvert2) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SlotConvert2(THIS, uint8 slot)");
+		Perl_croak(aTHX_ "Usage: Client::SlotConvert2(THIS, uint8 slot)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -2724,7 +2724,7 @@ XS(XS_Client_Escape); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Escape) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)"); // @categories Account and Character, Skills and Recipes
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2737,7 +2737,7 @@ XS(XS_Client_RemoveNoRent); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_RemoveNoRent) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2750,7 +2750,7 @@ XS(XS_Client_GoFish); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GoFish) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2763,7 +2763,7 @@ XS(XS_Client_ForageItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ForageItem) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2776,7 +2776,7 @@ XS(XS_Client_CalcPriceMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CalcPriceMod) {
 	dXSARGS;
 	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CalcPriceMod(THIS, Mob*, [bool reverse = false])");
+		Perl_croak(aTHX_ "Usage: Client::CalcPriceMod(THIS, Mob*, [bool reverse = false])"); // @categories Currency and Points
 	{
 		Client *THIS;
 		float  RETVAL;
@@ -2813,7 +2813,7 @@ XS(XS_Client_ResetTrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetTrade) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2826,7 +2826,7 @@ XS(XS_Client_UseDiscipline); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UseDiscipline) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)");
+		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -2844,7 +2844,7 @@ XS(XS_Client_GetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -2862,7 +2862,7 @@ XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)");
+		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32 timer_id = (uint32) SvUV(ST(1));
@@ -2876,7 +2876,7 @@ XS(XS_Client_GetCharacterFactionLevel); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_GetCharacterFactionLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCharacterFactionLevel(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
 	{
 		Client *THIS;
 		int32  RETVAL;
@@ -2894,7 +2894,7 @@ XS(XS_Client_SetZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character, Zones
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
@@ -2908,7 +2908,7 @@ XS(XS_Client_ClearZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ClearZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ClearZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::ClearZoneFlag(THIS, uint32 zone_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
@@ -2922,7 +2922,7 @@ XS(XS_Client_HasZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -2939,7 +2939,7 @@ XS(XS_Client_SendZoneFlagInfo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendZoneFlagInfo) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendZoneFlagInfo(THIS, Client* to)");
+		Perl_croak(aTHX_ "Usage: Client::SendZoneFlagInfo(THIS, Client* to)"); // @categories Account and Character, Zones
 	{
 		Client *THIS;
 		Client *to;
@@ -2961,7 +2961,7 @@ XS(XS_Client_LoadZoneFlags); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_LoadZoneFlags) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)"); // @categories Zones
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -2974,7 +2974,7 @@ XS(XS_Client_SetAATitle); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAATitle) {
 	dXSARGS;
 	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])");
+		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
@@ -2998,7 +2998,7 @@ XS(XS_Client_GetClientVersion); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetClientVersion) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersion(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetClientVersion(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3015,7 +3015,7 @@ XS(XS_Client_GetClientVersionBit); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetClientVersionBit) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersionBit(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetClientVersionBit(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3032,7 +3032,7 @@ XS(XS_Client_SetTitleSuffix);
 XS(XS_Client_SetTitleSuffix) {
 	dXSARGS;
 	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])");
+		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])"); // @categories Account and Character
 	{
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
@@ -3056,7 +3056,7 @@ XS(XS_Client_SetAAPoints);
 XS(XS_Client_SetAAPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAAPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::SetAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
@@ -3070,7 +3070,7 @@ XS(XS_Client_GetAAPoints);
 XS(XS_Client_GetAAPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAPoints(THIS)"); // @categories Alternative Advancement, Experience and Level
 	dXSTARG;
 	{
 		Client *THIS;
@@ -3087,7 +3087,7 @@ XS(XS_Client_GetSpentAA);
 XS(XS_Client_GetSpentAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSpentAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetSpentAA(THIS)"); // @categories Alternative Advancement
 	dXSTARG;
 	{
 		Client *THIS;
@@ -3104,7 +3104,7 @@ XS(XS_Client_AddAAPoints);
 XS(XS_Client_AddAAPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddAAPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::AddAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
@@ -3118,7 +3118,7 @@ XS(XS_Client_RefundAA);
 XS(XS_Client_RefundAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -3131,7 +3131,7 @@ XS(XS_Client_GetModCharacterFactionLevel); /* prototype to pass -Wmissing-protot
 XS(XS_Client_GetModCharacterFactionLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetModCharacterFactionLevel(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetModCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
 	{
 		Client *THIS;
 		int32 RETVAL;
@@ -3149,7 +3149,7 @@ XS(XS_Client_GetLDoNWins); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNWins) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3166,7 +3166,7 @@ XS(XS_Client_GetLDoNLosses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNLosses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3183,7 +3183,7 @@ XS(XS_Client_GetLDoNWinsTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNWinsTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3201,7 +3201,7 @@ XS(XS_Client_GetLDoNLossesTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNLossesTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3219,7 +3219,7 @@ XS(XS_Client_GetItemAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemAt) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)"); // @categories Inventory and Items
 	{
 		Client              *THIS;
 		EQ::ItemInstance *RETVAL;
@@ -3236,7 +3236,7 @@ XS(XS_Client_GetAugmentAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAugmentAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)"); // @categories Inventory and Items
 	{
 		Client              *THIS;
 		EQ::ItemInstance *RETVAL;
@@ -3260,7 +3260,7 @@ XS(XS_Client_GetStartZone);
 XS(XS_Client_GetStartZone) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetStartZone(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetStartZone(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3301,7 +3301,7 @@ XS(XS_Client_KeyRingAdd);
 XS(XS_Client_KeyRingAdd) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingAdd(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::KeyRingAdd(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
@@ -3315,7 +3315,7 @@ XS(XS_Client_KeyRingCheck);
 XS(XS_Client_KeyRingCheck) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingCheck(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::KeyRingCheck(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		bool   RETVAL;
@@ -3332,7 +3332,7 @@ XS(XS_Client_AddPVPPoints);
 XS(XS_Client_AddPVPPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, uint32 points)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 Points = (uint32) SvUV(ST(1));
@@ -3346,7 +3346,7 @@ XS(XS_Client_AddCrystals);
 XS(XS_Client_AddCrystals) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, uint32 radiant_count, uint32 ebon_count)");
+		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, uint32 radiant_count, uint32 ebon_count)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 Radiant = (uint32) SvUV(ST(1));
@@ -3389,7 +3389,7 @@ XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVPPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3406,7 +3406,7 @@ XS(XS_Client_GetRadiantCrystals); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRadiantCrystals) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3423,7 +3423,7 @@ XS(XS_Client_GetEbonCrystals); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEbonCrystals) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3440,7 +3440,7 @@ XS(XS_Client_ReadBook); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ReadBook) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, char* book_test, uint8 type)");
+		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, char* book_test, uint8 type)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *in_txt = (char *) SvPV_nolen(ST(1));
@@ -3455,7 +3455,7 @@ XS(XS_Client_UpdateGroupAAs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateGroupAAs) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateGroupAAs(THIS, int32 points, uint32 type)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateGroupAAs(THIS, int32 points, uint32 type)"); // @categories Alternative Advancement, Group
 	{
 		Client *THIS;
 		int32  points = (int32) SvIV(ST(1));
@@ -3470,7 +3470,7 @@ XS(XS_Client_GetGroupPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGroupPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroupPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGroupPoints(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3487,7 +3487,7 @@ XS(XS_Client_GetRaidPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRaidPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaidPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRaidPoints(THIS)"); // @categories Account and Character, Raid
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3504,7 +3504,7 @@ XS(XS_Client_LearnRecipe);
 XS(XS_Client_LearnRecipe) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::LearnRecipe(THIS, uint32 recipe_id)");
+		Perl_croak(aTHX_ "Usage: Client::LearnRecipe(THIS, uint32 recipe_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint32 recipe_id = (uint32) SvUV(ST(1));
@@ -3518,7 +3518,7 @@ XS(XS_Client_GetEndurance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEndurance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEndurance(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEndurance(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3535,7 +3535,7 @@ XS(XS_Client_GetMaxEndurance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetMaxEndurance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetMaxEndurance(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetMaxEndurance(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3552,7 +3552,7 @@ XS(XS_Client_GetEnduranceRatio); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEnduranceRatio) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEnduranceRatio(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEnduranceRatio(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -3569,7 +3569,7 @@ XS(XS_Client_SetEndurance);
 XS(XS_Client_SetEndurance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetEndurance(THIS, Endurance)");
+		Perl_croak(aTHX_ "Usage: Client::SetEndurance(THIS, Endurance)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 Endurance = (int32) SvUV(ST(1));
@@ -3583,7 +3583,7 @@ XS(XS_Client_SendOPTranslocateConfirm);
 XS(XS_Client_SendOPTranslocateConfirm) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendOPTranslocateConfirm(THIS, Mob* caster, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::SendOPTranslocateConfirm(THIS, Mob* caster, int32 spell_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		Mob    *caster = nullptr;
@@ -3606,7 +3606,7 @@ XS(XS_Client_NPCSpawn); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_NPCSpawn) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::NPCSpawn(THIS, NPC*, string option, uint32 respawn_time=1200)");
+		Perl_croak(aTHX_ "Usage: Client::NPCSpawn(THIS, NPC*, string option, uint32 respawn_time=1200)"); // @categories Script Utility, Spawns
 	{
 		Client     *THIS;
 		NPC        *target_npc = nullptr;
@@ -3633,7 +3633,7 @@ XS(XS_Client_GetIP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetIP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetIP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetIP(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3650,7 +3650,7 @@ XS(XS_Client_AddLevelBasedExp);
 XS(XS_Client_AddLevelBasedExp) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)");
+		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint8 exp_percentage = (uint8) SvUV(ST(1));
@@ -3672,7 +3672,7 @@ XS(XS_Client_IncrementAA);
 XS(XS_Client_IncrementAA) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IncrementAA(THIS, uint32 aa_skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::IncrementAA(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 aaskillid = SvUV(ST(1));
@@ -3686,7 +3686,7 @@ XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-p
 XS(XS_Client_GrantAlternateAdvancementAbility) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])");
+		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -3709,7 +3709,7 @@ XS(XS_Client_GetAALevel);
 XS(XS_Client_GetAALevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAALevel(THIS, uint32 aa_skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetAALevel(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3727,7 +3727,7 @@ XS(XS_Client_MarkCompassLoc);
 XS(XS_Client_MarkCompassLoc) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, float x, float y, float z)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		float x = SvNV(ST(1));
@@ -3743,7 +3743,7 @@ XS(XS_Client_ClearCompassMark);
 XS(XS_Client_ClearCompassMark) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -3756,7 +3756,7 @@ XS(XS_Client_GetFreeSpellBookSlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFreeSpellBookSlot) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
@@ -3777,7 +3777,7 @@ XS(XS_Client_GetSpellBookSlotBySpellID); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_GetSpellBookSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
@@ -3813,7 +3813,7 @@ XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateTaskActivity) {
 	dXSARGS;
 	if (items < 4)
-		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])"); // @categories Tasks and Activities
 	{
 		bool ignore_quest_update = false;
 
@@ -3836,7 +3836,7 @@ XS(XS_Client_GetTaskActivityDoneCount); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_GetTaskActivityDoneCount) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, int task_id, int activity_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int RETVAL;
@@ -3856,7 +3856,7 @@ XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask) {
 	dXSARGS;
 	if (items != 3 && items != 4)
-		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])");
+		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int  TaskID                    = (int) SvIV(ST(1));
@@ -3877,7 +3877,7 @@ XS(XS_Client_FailTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_FailTask) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FailTask(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::FailTask(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int TaskID = (int) SvIV(ST(1));
@@ -3891,7 +3891,7 @@ XS(XS_Client_IsTaskCompleted); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskCompleted) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskCompleted(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskCompleted(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int RETVAL;
@@ -3908,7 +3908,7 @@ XS(XS_Client_IsTaskActive); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskActive) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActive(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskActive(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -3925,7 +3925,7 @@ XS(XS_Client_IsTaskActivityActive); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskActivityActive) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActivityActive(THIS, int task_id, int activity_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskActivityActive(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -3943,7 +3943,7 @@ XS(XS_Client_GetCorpseCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseCount(THIS)"); // @categories Account and Character, Corpse
 	{
 		Client *THIS;
 		uint32 RETVAL;
@@ -3960,7 +3960,7 @@ XS(XS_Client_GetCorpseID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseID(THIS, uint8 corpse)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseID(THIS, uint8 corpse)"); // @categories Account and Character, Corpse
 	{
 		Client *THIS;
 		uint8  corpse = (uint8) SvIV(ST(1));
@@ -3978,7 +3978,7 @@ XS(XS_Client_GetCorpseItemAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseItemAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseItemAt(THIS, uint32 corpse_id, uint16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseItemAt(THIS, uint32 corpse_id, uint16 slot_id)"); // @categories Inventory and Items, Corpse
 	{
 		Client *THIS;
 		uint32 corpse_id = (uint32) SvIV(ST(1));
@@ -3997,7 +3997,7 @@ XS(XS_Client_AssignToInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignToInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AssignToInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::AssignToInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
@@ -4011,7 +4011,7 @@ XS(XS_Client_RemoveFromInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_RemoveFromInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
@@ -4052,7 +4052,7 @@ XS(XS_Client_GetAggroCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAggroCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAggroCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAggroCount(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		Client *THIS;
 		int RETVAL;
@@ -4070,7 +4070,7 @@ XS(XS_Client_GetCarriedMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCarriedMoney) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		int RETVAL;
@@ -4088,7 +4088,7 @@ XS(XS_Client_GetAllMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAllMoney) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		int RETVAL;
@@ -4106,7 +4106,7 @@ XS(XS_Client_GetItemInInventory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemInInventory) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemInInventory(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemInInventory(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16               slot_id = (int16) SvIV(ST(1));
@@ -4123,7 +4123,7 @@ XS(XS_Client_SetCustomItemData); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetCustomItemData) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::SetCustomItemData(THIS, int16 slot_id, string identifier, string value)");
+		Perl_croak(aTHX_ "Usage: Client::SetCustomItemData(THIS, int16 slot_id, string identifier, string value)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
@@ -4139,7 +4139,7 @@ XS(XS_Client_GetCustomItemData); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCustomItemData) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCustomItemData(THIS, int16 slot_id, string identifier)");
+		Perl_croak(aTHX_ "Usage: Client::GetCustomItemData(THIS, int16 slot_id, string identifier)"); // @categories Inventory and Items, Corpse
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
@@ -4160,7 +4160,7 @@ XS(XS_Client_OpenLFGuildWindow); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_OpenLFGuildWindow) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)"); // @categories Script Utility, Guild
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -4173,7 +4173,7 @@ XS(XS_Client_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_NotifyNewTitlesAvailable) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -4186,7 +4186,7 @@ XS(XS_Client_AddAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_AddAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
@@ -4201,7 +4201,7 @@ XS(XS_Client_SetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_SetAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
@@ -4216,7 +4216,7 @@ XS(XS_Client_GetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_GetAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
@@ -4234,7 +4234,7 @@ XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendWebLink) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, string website_url)");
+		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, string website_url)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *website = nullptr;
@@ -4250,7 +4250,7 @@ XS(XS_Client_GetInstanceID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstanceID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetInstanceID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetInstanceID(THIS)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		int8 RETVAL;
@@ -4267,7 +4267,7 @@ XS(XS_Client_HasSpellScribed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSpellScribed) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
@@ -4284,7 +4284,7 @@ XS(XS_Client_SetAccountFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAccountFlag) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, string flag, string value)");
+		Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, string flag, string value)"); // @categories Account and Character
 	{
 		Client *THIS;
 		//char*     flag = (char *)SvPV_nolen(ST(1));
@@ -4302,7 +4302,7 @@ XS(XS_Client_GetAccountFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAccountFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, string flag)");
+		Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, string flag)"); // @categories Account and Character
 	{
 		Client *THIS;
 		//char*     flag = (char *)SvPV_nolen(ST(1));
@@ -4324,7 +4324,7 @@ XS(XS_Client_GetHunger); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetHunger) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHunger(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetHunger(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 RETVAL;
@@ -4341,7 +4341,7 @@ XS(XS_Client_GetThirst); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetThirst) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetThirst(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetThirst(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 RETVAL;
@@ -4358,7 +4358,7 @@ XS(XS_Client_SetHunger); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetHunger) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, in_hunger)");
+		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, in_hunger)"); // @categories Script Utility, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
@@ -4372,7 +4372,7 @@ XS(XS_Client_SetThirst); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetThirst) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetThirst(THIS, int32 in_thirst)");
+		Perl_croak(aTHX_ "Usage: Client::SetThirst(THIS, int32 in_thirst)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_thirst = (uint32) SvUV(ST(1));
@@ -4386,7 +4386,7 @@ XS(XS_Client_SendTargetCommand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendTargetCommand) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, int32 entity_id)");
+		Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, int32 entity_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		int32 in_entid = (uint32) SvUV(ST(1));
@@ -4400,7 +4400,7 @@ XS(XS_Client_SetConsumption); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetConsumption) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, int32 hunger_amount, int32 thirst_amount)");
+		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, int32 hunger_amount, int32 thirst_amount)"); // @categories Script Utility, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
@@ -4415,7 +4415,7 @@ XS(XS_Client_SilentMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SilentMessage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, string message)");
+		Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, string message)"); // @categories Script Utility
 	{
 		Client *THIS;
 		dXSTARG;
@@ -4438,7 +4438,7 @@ XS(XS_Client_PlayMP3); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_PlayMP3) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, string file_name)");
+		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, string file_name)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *fname = nullptr;
@@ -4454,7 +4454,7 @@ XS(XS_Client_ExpeditionMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ExpeditionMessage) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, int expedition_id, string message)");
+		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, int expedition_id, string message)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		int ExpdID = (int) SvUV(ST(1));
@@ -4472,7 +4472,7 @@ XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendMarqueeMessage) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)");
+		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32      type     = (uint32) SvUV(ST(1));
@@ -4492,7 +4492,7 @@ XS(XS_Client_SendColoredText); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendColoredText) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendColoredText(uint32 color, string message)");
+		Perl_croak(aTHX_ "Usage: Client::SendColoredText(uint32 color, string message)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32      color = (uint32) SvUV(ST(1));
@@ -4524,7 +4524,7 @@ XS(XS_Client_GetTargetRingX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
@@ -4541,7 +4541,7 @@ XS(XS_Client_GetTargetRingY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
@@ -4558,7 +4558,7 @@ XS(XS_Client_GetTargetRingZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
@@ -4595,7 +4595,7 @@ XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_QuestReward) {
 	dXSARGS;
 	if (items < 1 || items > 9)
-		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])");
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])"); // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
 	{
 		Client *THIS;
 		Mob    *mob = nullptr;
@@ -4677,7 +4677,7 @@ XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Popup2) {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
+		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *Title = (char *) SvPV_nolen(ST(1));
@@ -4710,7 +4710,7 @@ XS(XS_Client_SetPrimaryWeaponOrnamentation)
 {
 	dXSARGS;
 	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetPrimaryWeaponOrnamentation(THIS, model_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetPrimaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
 	}
 	{
 		Client *THIS;
@@ -4726,7 +4726,7 @@ XS(XS_Client_SetSecondaryWeaponOrnamentation)
 {
 	dXSARGS;
 	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetSecondaryWeaponOrnamentation(THIS, model_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetSecondaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
 	}
 	{
 		Client *THIS;
@@ -5109,7 +5109,7 @@ XS(XS_Client_GetRaceBitmask);
 XS(XS_Client_GetRaceBitmask) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaceBitmask(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRaceBitmask(THIS)"); // @categories Stats and Attributes
 	{
 		Client* THIS;
 		int client_bitmask = 0;
