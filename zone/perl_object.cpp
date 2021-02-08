@@ -59,7 +59,7 @@ XS(XS_Object_IsGroundSpawn); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_IsGroundSpawn) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::IsGroundSpawn(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::IsGroundSpawn(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		bool   RETVAL;
@@ -76,7 +76,7 @@ XS(XS_Object_Close); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_Close) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::Close(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::Close(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		VALIDATE_THIS_IS_OBJECT;
@@ -90,7 +90,7 @@ XS(XS_Object_Delete); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_Delete) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Object::Delete(THIS, [bool reset_state = false])");
+		Perl_croak(aTHX_ "Usage: Object::Delete(THIS, [bool reset_state = false])");  // @categories Objects
 	{
 		Object *THIS;
 		bool   reset_state;
@@ -109,7 +109,7 @@ XS(XS_Object_StartDecay); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_StartDecay) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::StartDecay(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::StartDecay(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		VALIDATE_THIS_IS_OBJECT;
@@ -123,7 +123,7 @@ XS(XS_Object_DeleteItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_DeleteItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::DeleteItem(THIS, uint8 index)");
+		Perl_croak(aTHX_ "Usage: Object::DeleteItem(THIS, uint8 index)");  // @categories Objects
 	{
 		Object *THIS;
 		uint8  index = (uint8) SvUV(ST(1));
@@ -137,7 +137,7 @@ XS(XS_Object_IsObject); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_IsObject) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::IsObject(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::IsObject(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		bool   RETVAL;
@@ -154,7 +154,7 @@ XS(XS_Object_Save); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_Save) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::Save(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::Save(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		bool   RETVAL;
@@ -171,7 +171,7 @@ XS(XS_Object_SetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetID(THIS, uint16 id)");
+		Perl_croak(aTHX_ "Usage: Object::SetID(THIS, uint16 id)");  // @categories Objects
 	{
 		Object *THIS;
 		uint16 set_id = (uint16) SvUV(ST(1));
@@ -186,7 +186,7 @@ XS(XS_Object_ClearUser); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_ClearUser) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::ClearUser(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::ClearUser(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		VALIDATE_THIS_IS_OBJECT;
@@ -200,7 +200,7 @@ XS(XS_Object_GetDBID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetDBID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetDBID(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetDBID(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 RETVAL;
@@ -217,7 +217,7 @@ XS(XS_Object_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetID(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint16 RETVAL;
@@ -234,7 +234,7 @@ XS(XS_Object_GetX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetX(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetX(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -251,7 +251,7 @@ XS(XS_Object_GetY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetY(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetY(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -268,7 +268,7 @@ XS(XS_Object_GetZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetZ(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetZ(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -285,7 +285,7 @@ XS(XS_Object_GetHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetHeading) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetHeading(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetHeading(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -302,7 +302,7 @@ XS(XS_Object_VarSave); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_VarSave) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::VarSave(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::VarSave(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 RETVAL;
@@ -320,7 +320,7 @@ XS(XS_Object_GetType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetType) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetType(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetType(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 RETVAL;
@@ -338,7 +338,7 @@ XS(XS_Object_SetType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetType(THIS, uint32 type)");
+		Perl_croak(aTHX_ "Usage: Object::SetType(THIS, uint32 type)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 type = (uint32) SvUV(ST(1));
@@ -353,7 +353,7 @@ XS(XS_Object_GetIcon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetIcon) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetIcon(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetIcon(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 RETVAL;
@@ -371,7 +371,7 @@ XS(XS_Object_SetIcon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetIcon) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetIcon(THIS, uint32 icon)");
+		Perl_croak(aTHX_ "Usage: Object::SetIcon(THIS, uint32 icon)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 icon = (uint32) SvUV(ST(1));
@@ -386,7 +386,7 @@ XS(XS_Object_GetItemID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetItemID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetItemID(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetItemID(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 RETVAL;
@@ -404,7 +404,7 @@ XS(XS_Object_SetItemID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetItemID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetItemID(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Object::SetItemID(THIS, uint32 item_id)");  // @categories Objects
 	{
 		Object *THIS;
 		uint32 itemid = (uint32) SvUV(ST(1));
@@ -418,7 +418,7 @@ XS(XS_Object_SetLocation); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetLocation) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Object::SetLocation(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Object::SetLocation(THIS, float x, float y, float z)");  // @categories Objects
 	{
 		Object *THIS;
 		float  x = (float) SvNV(ST(1));
@@ -434,7 +434,7 @@ XS(XS_Object_SetX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetX) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetX(THIS, float x)");
+		Perl_croak(aTHX_ "Usage: Object::SetX(THIS, float x)");  // @categories Objects
 	{
 		Object *THIS;
 		float  pos = (float) SvNV(ST(1));
@@ -448,7 +448,7 @@ XS(XS_Object_SetY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetY) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetY(THIS, float y)");
+		Perl_croak(aTHX_ "Usage: Object::SetY(THIS, float y)");  // @categories Objects
 	{
 		Object *THIS;
 		float  pos = (float) SvNV(ST(1));
@@ -462,7 +462,7 @@ XS(XS_Object_SetZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetZ) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetZ(THIS, float z)");
+		Perl_croak(aTHX_ "Usage: Object::SetZ(THIS, float z)");  // @categories Objects
 	{
 		Object *THIS;
 		float  pos = (float) SvNV(ST(1));
@@ -476,7 +476,7 @@ XS(XS_Object_SetHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetHeading) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetHeading(THIS, float heading)");
+		Perl_croak(aTHX_ "Usage: Object::SetHeading(THIS, float heading)");  // @categories Objects
 	{
 		Object *THIS;
 		float  heading = (float) SvNV(ST(1));
@@ -490,7 +490,7 @@ XS(XS_Object_SetModelName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetModelName) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Object::SetModelName(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Object::SetModelName(THIS, string name)");  // @categories Objects
 	{
 		Object *THIS;
 		char   *name = nullptr;
@@ -505,7 +505,7 @@ XS(XS_Object_GetModelName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetModelName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetModelName(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetModelName(THIS)");  // @categories Objects
 	{
 		Object     *THIS;
 		Const_char *RETVAL;
@@ -523,7 +523,7 @@ XS(XS_Object_Repop); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_Repop) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::Repop(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::Repop(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		dXSTARG;
@@ -536,7 +536,7 @@ XS(XS_Object_Depop); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_Depop) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::Depop(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::Depop(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		dXSTARG;
@@ -550,7 +550,7 @@ XS(XS_Object_GetEntityVariable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetEntityVariable) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::GetEntityVariable(THIS, string key)");
+		Perl_croak(aTHX_ "Usage: Object::GetEntityVariable(THIS, string key)");  // @categories Objects
 	{
 		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
@@ -569,7 +569,7 @@ XS(XS_Object_EntityVariableExists); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_EntityVariableExists) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::EntityVariableExists(THIS, string key)");
+		Perl_croak(aTHX_ "Usage: Object::EntityVariableExists(THIS, string key)");  // @categories Objects
 	{
 		Object     *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
@@ -586,7 +586,7 @@ XS(XS_Object_SetEntityVariable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetEntityVariable) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Object::SetEntityVariable(THIS, string key, string var)");
+		Perl_croak(aTHX_ "Usage: Object::SetEntityVariable(THIS, string key, string var)");  // @categories Objects
 	{
 		Object     *THIS;
 		Const_char *id  = SvPV_nolen(ST(1));
@@ -601,7 +601,7 @@ XS(XS_Object_GetSolidType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetSolidType) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetSolidType(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetSolidType(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		uint16 RETVAL;
@@ -619,7 +619,7 @@ XS(XS_Object_SetSolidType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetSolidType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetSolidType(THIS, uint16 type)");
+		Perl_croak(aTHX_ "Usage: Object::SetSolidType(THIS, uint16 type)");  // @categories Objects
 	{
 		Object *THIS;
 		uint16 type = (uint16) SvUV(ST(1));
@@ -633,7 +633,7 @@ XS(XS_Object_GetSize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_GetSize) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");
+		Perl_croak(aTHX_ "Usage: Object::GetSize(THIS)");  // @categories Objects
 	{
 		Object *THIS;
 		float  RETVAL;
@@ -651,7 +651,7 @@ XS(XS_Object_SetSize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetSize) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, float size)");
+		Perl_croak(aTHX_ "Usage: Object::SetSize(THIS, float size)");  // @categories Objects
 	{
 		Object *THIS;
 		float  size = (float) SvNV(ST(1));
@@ -665,7 +665,7 @@ XS(XS_Object_SetTiltX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetTiltX) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, float tilt_x)");
+		Perl_croak(aTHX_ "Usage: Object::SetTiltX(THIS, float tilt_x)");  // @categories Objects
 	{
 		Object *THIS;
 		float  pos = (float) SvNV(ST(1));
@@ -679,7 +679,7 @@ XS(XS_Object_SetTiltY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Object_SetTiltY) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, float tilt_y)");
+		Perl_croak(aTHX_ "Usage: Object::SetTiltY(THIS, float tilt_y)");  // @categories Objects
 	{
 		Object *THIS;
 		float  pos = (float) SvNV(ST(1));
