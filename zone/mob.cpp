@@ -464,6 +464,8 @@ Mob::Mob(
 #endif
 
 	mob_close_scan_timer.Trigger();
+
+	SetCanOpenDoors(true);
 }
 
 Mob::~Mob()
@@ -509,8 +511,6 @@ Mob::~Mob()
 	entity_list.RemoveAuraFromMobs(this);
 
 	close_mobs.clear();
-
-	SetCanOpenDoors(true);
 
 #ifdef BOTS
 	LeaveHealRotationTargetPool();
