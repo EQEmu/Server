@@ -60,7 +60,7 @@ XS(XS_Raid_IsRaidMember); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsRaidMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, string name)"); // @categories Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
@@ -77,7 +77,7 @@ XS(XS_Raid_CastGroupSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_CastGroupSpell) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, Mob* caster, uint16 spell_id, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, Mob* caster, uint16 spell_id, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		Mob    *caster;
@@ -101,7 +101,7 @@ XS(XS_Raid_GroupCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GroupCount) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		uint8  RETVAL;
@@ -119,7 +119,7 @@ XS(XS_Raid_RaidCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_RaidCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::RaidCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::RaidCount(THIS)"); // @categories Raid
 	{
 		Raid  *THIS;
 		uint8 RETVAL;
@@ -136,7 +136,7 @@ XS(XS_Raid_GetGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, string name)"); // @categories Group, Raid
 	{
 		Raid       *THIS;
 		uint32     RETVAL;
@@ -154,7 +154,7 @@ XS(XS_Raid_SplitExp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitExp) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, uint32 experience, [Mob* other = nullptr])");
+		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, uint32 experience, [Mob* other = nullptr])"); // @categories Experience and Level, Raid
 	{
 		Raid   *THIS;
 		uint32 exp = (uint32) SvUV(ST(1));
@@ -177,7 +177,7 @@ XS(XS_Raid_GetTotalRaidDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetTotalRaidDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, [Mob* other = nullptr])");
+		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, [Mob* other = nullptr])"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
@@ -203,7 +203,7 @@ XS(XS_Raid_SplitMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitMoney) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
+		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)"); // @categories Currency and Points, Raid
 	{
 		Raid   *THIS;
 		uint32 gid      = (uint32) SvUV(ST(1));
@@ -221,7 +221,7 @@ XS(XS_Raid_BalanceHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_BalanceHP) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, int32 penalty, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, int32 penalty, uint32 group_id)"); // @categories Raid
 	{
 		Raid   *THIS;
 		int32  penalty = (int32) SvUV(ST(1));
@@ -236,7 +236,7 @@ XS(XS_Raid_IsLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, string name)"); // @categories Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
@@ -253,7 +253,7 @@ XS(XS_Raid_IsGroupLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsGroupLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, string name)"); // @categories Group, Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
@@ -270,7 +270,7 @@ XS(XS_Raid_GetHighestLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetHighestLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetHighestLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetHighestLevel(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
@@ -287,7 +287,7 @@ XS(XS_Raid_GetLowestLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetLowestLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetLowestLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetLowestLevel(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
@@ -304,7 +304,7 @@ XS(XS_Raid_GetClientByIndex); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetClientByIndex) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)");
+		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Client *RETVAL;
@@ -321,7 +321,7 @@ XS(XS_Raid_TeleportGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportGroup) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		Mob    *sender;
@@ -349,7 +349,7 @@ XS(XS_Raid_TeleportRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportRaid) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Mob    *sender;
@@ -376,7 +376,7 @@ XS(XS_Raid_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetID(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
@@ -393,7 +393,7 @@ XS(XS_Raid_GetMember);
 XS(XS_Raid_GetMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, int raid_index)");
+		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, int raid_index)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Client *RETVAL = nullptr;
