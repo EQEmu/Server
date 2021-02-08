@@ -221,7 +221,7 @@ XS(XS_Client_SetAnon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAnon) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)");
+		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 anon_flag = (uint8) SvUV(ST(1));
@@ -235,7 +235,7 @@ XS(XS_Client_GetAFK); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAFK) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAFK(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAFK(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
@@ -252,7 +252,7 @@ XS(XS_Client_SetAFK); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAFK) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)");
+		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 afk_flag = (uint8) SvUV(ST(1));
