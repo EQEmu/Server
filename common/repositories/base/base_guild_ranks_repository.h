@@ -251,7 +251,7 @@ public:
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_motd));
 		insert_values.push_back(std::to_string(guild_ranks_entry.can_warpeace));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(faction_values_entry.current_value));
 		insert_values.push_back(std::to_string(faction_values_entry.temp));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -261,7 +261,7 @@ public:
 		insert_values.push_back("'" + EscapeString(bugs_entry.date) + "'");
 		insert_values.push_back(std::to_string(bugs_entry.status));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

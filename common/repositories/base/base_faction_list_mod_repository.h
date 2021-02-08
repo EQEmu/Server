@@ -207,7 +207,7 @@ public:
 		insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
 		insert_values.push_back("'" + EscapeString(faction_list_mod_entry.mod_name) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

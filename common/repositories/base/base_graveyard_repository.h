@@ -219,7 +219,7 @@ public:
 		insert_values.push_back(std::to_string(graveyard_entry.z));
 		insert_values.push_back(std::to_string(graveyard_entry.heading));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -353,7 +353,7 @@ public:
 		insert_values.push_back(std::to_string(npc_scale_global_base_entry.heal_scale));
 		insert_values.push_back("'" + EscapeString(npc_scale_global_base_entry.special_abilities) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

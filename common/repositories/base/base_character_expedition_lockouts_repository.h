@@ -225,7 +225,7 @@ public:
 		insert_values.push_back(std::to_string(character_expedition_lockouts_entry.duration));
 		insert_values.push_back("'" + EscapeString(character_expedition_lockouts_entry.from_expedition_uuid) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

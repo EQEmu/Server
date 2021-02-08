@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(account_ip_entry.count));
 		insert_values.push_back("'" + EscapeString(account_ip_entry.lastused) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

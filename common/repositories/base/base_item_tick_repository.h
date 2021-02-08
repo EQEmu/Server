@@ -219,7 +219,7 @@ public:
 		insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
 		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

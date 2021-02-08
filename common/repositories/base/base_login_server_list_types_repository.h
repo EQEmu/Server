@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(login_server_list_types_entry.id));
 		insert_values.push_back("'" + EscapeString(login_server_list_types_entry.description) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

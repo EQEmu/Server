@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(respawn_times_entry.duration));
 		insert_values.push_back(std::to_string(respawn_times_entry.instance_id));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

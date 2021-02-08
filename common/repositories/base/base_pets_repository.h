@@ -233,7 +233,7 @@ public:
 		insert_values.push_back(std::to_string(pets_entry.monsterflag));
 		insert_values.push_back(std::to_string(pets_entry.equipmentset));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

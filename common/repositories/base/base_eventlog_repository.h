@@ -243,7 +243,7 @@ public:
 		insert_values.push_back("'" + EscapeString(eventlog_entry.description) + "'");
 		insert_values.push_back(std::to_string(eventlog_entry.event_nid));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

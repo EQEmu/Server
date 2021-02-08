@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(gm_ips_entry.account_id));
 		insert_values.push_back("'" + EscapeString(gm_ips_entry.ip_address) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

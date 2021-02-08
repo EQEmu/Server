@@ -203,7 +203,7 @@ public:
 		insert_values.push_back("'" + EscapeString(faction_list_entry.name) + "'");
 		insert_values.push_back(std::to_string(faction_list_entry.base));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

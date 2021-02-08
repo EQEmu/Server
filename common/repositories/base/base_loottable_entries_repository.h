@@ -221,7 +221,7 @@ public:
 		insert_values.push_back(std::to_string(loottable_entries_entry.mindrop));
 		insert_values.push_back(std::to_string(loottable_entries_entry.probability));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

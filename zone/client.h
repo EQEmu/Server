@@ -65,6 +65,8 @@ namespace EQ
 #include "zone.h"
 #include "zonedb.h"
 #include "zone_store.h"
+#include "task_manager.h"
+#include "task_client_state.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -86,7 +88,7 @@ namespace EQ
 #define XTARGET_HARDCAP 20
 
 extern Zone* zone;
-extern TaskManager *taskmanager;
+extern TaskManager *task_manager;
 
 class CLIENTPACKET
 {
@@ -1006,7 +1008,7 @@ public:
 	uint32 GetSpellIDByBookSlot(int book_slot);
 	int GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
-	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
+	inline bool HasSpellScribed(int spellid) { return FindSpellBookSlotBySpellID(spellid) != -1; }
 	uint16 GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);
@@ -1021,48 +1023,241 @@ public:
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
-	void SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, TaskType type, int TaskIncomplete=1);
-	void SendTaskFailed(int TaskID, int TaskIndex, TaskType type);
-	void SendTaskComplete(int TaskIndex);
-	inline ClientTaskState *GetTaskState() const { return taskstate; }
-
-	inline void CancelTask(int TaskIndex, TaskType type) { if(taskstate) taskstate->CancelTask(this, TaskIndex, type); }
-	inline bool SaveTaskState() { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
-	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
-	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
-	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
-	inline ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(type, index, ActivityID) : ActivityHidden); }
-	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count, bool ignore_quest_update = false) { if (taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count, ignore_quest_update); }
-	inline void RemoveTaskByTaskID(uint32 task_id) { if (taskstate) taskstate->RemoveTaskByTaskID(this, task_id); }
-	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
-	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
-	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }
-	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
-	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
-	inline bool UpdateTasksOnDeliver(std::list<EQ::ItemInstance*>& Items, int Cash, int NPCTypeID) { if (taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
-	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
-	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks) { if(taskmanager) taskmanager->TaskQuestSetSelector(this, taskstate, mob, count, tasks); }
-	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
-	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
-	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
-	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
-	inline void AssignTask(int TaskID, int NPCID, bool enforce_level_requirement = false) { if (taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID, enforce_level_requirement); }
-	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
-	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
-	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }
-	inline int TaskTimeLeft(int TaskID) { return (taskstate ? taskstate->TaskTimeLeft(TaskID) : 0); }
-	inline int EnabledTaskCount(int TaskSetID) { return (taskstate ? taskstate->EnabledTaskCount(TaskSetID) : -1); }
-	inline int IsTaskCompleted(int TaskID) { return (taskstate ? taskstate->IsTaskCompleted(TaskID) : -1); }
-	inline void ShowClientTasks() { if(taskstate) taskstate->ShowClientTasks(this); }
-	inline void CancelAllTasks() { if(taskstate) taskstate->CancelAllTasks(this); }
-	inline int GetActiveTaskCount() { return (taskstate ? taskstate->GetActiveTaskCount() : 0); }
-	inline int GetActiveTaskID(int index) { return (taskstate ? taskstate->GetActiveTaskID(index) : -1); }
-	inline int GetTaskStartTime(TaskType type, int index) { return (taskstate ? taskstate->GetTaskStartTime(type, index) : -1); }
-	inline bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(type, index, ActivityID) : false); }
-	inline int GetTaskActivityDoneCount(TaskType type, int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(type, ClientTaskIndex, ActivityID) :0); }
-	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
-	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
-	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
+	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
+	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
+	void SendTaskComplete(int task_index);
+	inline ClientTaskState *GetTaskState() const { return task_state; }
+	inline void CancelTask(int task_index, TaskType task_type)
+	{
+		if (task_state) {
+			task_state->CancelTask(
+				this,
+				task_index,
+				task_type
+			);
+		}
+	}
+	inline bool SaveTaskState()
+	{
+		return task_manager != nullptr && task_manager->SaveClientState(this, task_state);
+	}
+	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
+	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
+	inline bool IsTaskActivityActive(int task_id, int activity_id)
+	{
+		return task_state != nullptr &&
+			   task_state->IsTaskActivityActive(
+				   task_id,
+				   activity_id
+			   );
+	}
+	inline ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityState(task_type, index, activity_id) : ActivityHidden);
+	}
+	inline void UpdateTaskActivity(
+		int task_id,
+		int activity_id,
+		int count,
+		bool ignore_quest_update = false
+	)
+	{
+		if (task_state) {
+			task_state->UpdateTaskActivity(this, task_id, activity_id, count, ignore_quest_update);
+		}
+	}
+	inline void RemoveTaskByTaskID(uint32 task_id) {
+		if (task_state) {
+			task_state->RemoveTaskByTaskID(this, task_id);
+		}
+	}
+	inline void ResetTaskActivity(int task_id, int activity_id)
+	{
+		if (task_state) {
+			task_state->ResetTaskActivity(
+				this,
+				task_id,
+				activity_id
+			);
+		}
+	}
+	inline void UpdateTasksOnKill(int npc_type_id)
+	{
+		if (task_state) {
+			task_state->UpdateTasksOnKill(
+				this,
+				npc_type_id
+			);
+		}
+	}
+	inline void UpdateTasksForItem(
+		ActivityType activity_type,
+		int item_id,
+		int count = 1
+	)
+	{
+		if (task_state) {
+			task_state->UpdateTasksForItem(this, activity_type, item_id, count);
+		}
+	}
+	inline void UpdateTasksOnExplore(int explore_id)
+	{
+		if (task_state) {
+			task_state->UpdateTasksOnExplore(
+				this,
+				explore_id
+			);
+		}
+	}
+	inline bool UpdateTasksOnSpeakWith(int npc_type_id)
+	{
+		if (task_state) {
+			return task_state->UpdateTasksOnSpeakWith(
+				this,
+				npc_type_id
+			);
+		}
+		else { return false; }
+	}
+	inline bool UpdateTasksOnDeliver(
+		std::list<EQ::ItemInstance *> &items,
+		int cash,
+		int npc_type_id
+	)
+	{
+		if (task_state) {
+			return task_state->UpdateTasksOnDeliver(
+				this,
+				items,
+				cash,
+				npc_type_id
+			);
+		}
+		else { return false; }
+	}
+	inline void TaskSetSelector(Mob *mob, int task_set_id)
+	{
+		if (task_manager) {
+			task_manager->TaskSetSelector(
+				this,
+				task_state,
+				mob,
+				task_set_id
+			);
+		}
+	}
+	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks)
+	{
+		if (task_manager) {
+			task_manager->TaskQuestSetSelector(
+				this,
+				task_state,
+				mob,
+				count,
+				tasks
+			);
+		}
+	}
+	inline void EnableTask(int task_count, int *task_list)
+	{
+		if (task_state) {
+			task_state->EnableTask(
+				CharacterID(),
+				task_count,
+				task_list
+			);
+		}
+	}
+	inline void DisableTask(int task_count, int *task_list)
+	{
+		if (task_state) {
+			task_state->DisableTask(
+				CharacterID(),
+				task_count,
+				task_list
+			);
+		}
+	}
+	inline bool IsTaskEnabled(int task_id) {
+		return task_state != nullptr && task_state->IsTaskEnabled(task_id);
+	}
+	inline void ProcessTaskProximities(float x, float y, float z)
+	{
+		if (task_state) {
+			task_state->ProcessTaskProximities(
+				this,
+				x,
+				y,
+				z
+			);
+		}
+	}
+	inline void AssignTask(
+		int task_id,
+		int npc_id,
+		bool enforce_level_requirement = false
+	) {
+		if (task_state) {
+			task_state->AcceptNewTask(this, task_id, npc_id, enforce_level_requirement);
+		}
+	}
+	inline int ActiveSpeakTask(int npc_type_id)
+	{
+		if (task_state) {
+			return task_state->ActiveSpeakTask(npc_type_id);
+		}
+		else {
+			return 0;
+		}
+	}
+	inline int ActiveSpeakActivity(int npc_type_id, int task_id)
+	{
+		if (task_state) {
+			return task_state->ActiveSpeakActivity(
+				npc_type_id,
+				task_id
+			);
+		}
+		else { return 0; }
+	}
+	inline void FailTask(int task_id) { if (task_state) { task_state->FailTask(this, task_id); }}
+	inline int TaskTimeLeft(int task_id) { return (task_state ? task_state->TaskTimeLeft(task_id) : 0); }
+	inline int EnabledTaskCount(int task_set_id)
+	{
+		return (task_state ? task_state->EnabledTaskCount(task_set_id) : -1);
+	}
+	inline int IsTaskCompleted(int task_id) { return (task_state ? task_state->IsTaskCompleted(task_id) : -1); }
+	inline void ShowClientTasks(Client *client) { if (task_state) { task_state->ShowClientTasks(client); }}
+	inline void CancelAllTasks() { if (task_state) { task_state->CancelAllTasks(this); }}
+	inline int GetActiveTaskCount() { return (task_state ? task_state->GetActiveTaskCount() : 0); }
+	inline int GetActiveTaskID(int index) { return (task_state ? task_state->GetActiveTaskID(index) : -1); }
+	inline int GetTaskStartTime(TaskType task_type, int index)
+	{
+		return (task_state ? task_state->GetTaskStartTime(
+			task_type,
+			index
+		) : -1);
+	}
+	inline bool IsTaskActivityCompleted(TaskType task_type, int index, int activity_id)
+	{
+		return task_state != nullptr && task_state->IsTaskActivityCompleted(task_type, index, activity_id);
+	}
+	inline int GetTaskActivityDoneCount(TaskType task_type, int client_task_index, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityDoneCount(task_type, client_task_index, activity_id) : 0);
+	}
+	inline int GetTaskActivityDoneCountFromTaskID(int task_id, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityDoneCountFromTaskID(task_id, activity_id) : 0);
+	}
+	inline int ActiveTasksInSet(int task_set_id)
+	{
+		return (task_state ? task_state->ActiveTasksInSet(task_set_id) : 0);
+	}
+	inline int CompletedTasksInSet(int task_set_id)
+	{
+		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
+	}
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1645,7 +1840,7 @@ private:
 
 	std::set<uint32> zone_flags;
 
-	ClientTaskState *taskstate;
+	ClientTaskState *task_state;
 	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff

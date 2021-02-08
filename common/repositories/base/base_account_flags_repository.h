@@ -203,7 +203,7 @@ public:
 		insert_values.push_back("'" + EscapeString(account_flags_entry.p_flag) + "'");
 		insert_values.push_back("'" + EscapeString(account_flags_entry.p_value) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

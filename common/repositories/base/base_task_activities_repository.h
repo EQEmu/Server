@@ -275,7 +275,7 @@ public:
 		insert_values.push_back("'" + EscapeString(task_activities_entry.zones) + "'");
 		insert_values.push_back(std::to_string(task_activities_entry.optional));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

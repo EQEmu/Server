@@ -158,8 +158,8 @@ bool Client::Process() {
 			CalcItemScale();
 		}
 
-		if (TaskPeriodic_Timer.Check() && taskstate)
-			taskstate->TaskPeriodicChecks(this);
+		if (TaskPeriodic_Timer.Check() && task_state)
+			task_state->TaskPeriodicChecks(this);
 
 		if (dynamiczone_removal_timer.Check() && zone && zone->GetInstanceID() != 0)
 		{

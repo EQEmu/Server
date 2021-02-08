@@ -297,7 +297,7 @@ public:
 		insert_values.push_back("'" + EscapeString(account_entry.ban_reason) + "'");
 		insert_values.push_back("'" + EscapeString(account_entry.suspend_reason) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -258,7 +258,7 @@ Client::Client(EQStreamInterface* ieqs)
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
 	tribute_timer.Disable();
-	taskstate = nullptr;
+	task_state         = nullptr;
 	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
@@ -452,7 +452,7 @@ Client::~Client() {
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown
 
-	safe_delete(taskstate);
+	safe_delete(task_state);
 	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);

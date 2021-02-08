@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(guild_relations_entry.guild2));
 		insert_values.push_back(std::to_string(guild_relations_entry.relation));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

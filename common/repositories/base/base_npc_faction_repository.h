@@ -207,7 +207,7 @@ public:
 		insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
 		insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

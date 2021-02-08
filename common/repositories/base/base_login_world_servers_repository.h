@@ -243,7 +243,7 @@ public:
 		insert_values.push_back(std::to_string(login_world_servers_entry.is_server_trusted));
 		insert_values.push_back("'" + EscapeString(login_world_servers_entry.note) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

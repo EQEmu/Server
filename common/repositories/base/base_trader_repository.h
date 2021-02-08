@@ -221,7 +221,7 @@ public:
 		insert_values.push_back(std::to_string(trader_entry.item_cost));
 		insert_values.push_back(std::to_string(trader_entry.slot_id));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

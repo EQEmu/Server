@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.slot));
 		insert_values.push_back(std::to_string(pets_equipmentset_entries_entry.item_id));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

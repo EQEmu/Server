@@ -2223,27 +2223,27 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 void QuestManager::taskselector(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
 		initiator->TaskQuestSetSelector(owner, taskcount, tasks);
 }
 void QuestManager::enabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->EnableTask(taskcount, tasks);
 }
 
 void QuestManager::disabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->DisableTask(taskcount, tasks);
 }
 
 bool QuestManager::istaskenabled(int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		return initiator->IsTaskEnabled(taskid);
 
 	return false;
@@ -2252,7 +2252,7 @@ bool QuestManager::istaskenabled(int taskid) {
 void QuestManager::tasksetselector(int tasksetid) {
 	QuestManagerCurrentQuestVars();
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
 		initiator->TaskSetSelector(owner, tasksetid);
 }
 
@@ -2341,8 +2341,8 @@ int QuestManager::enabledtaskcount(int taskset) {
 int QuestManager::firsttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->FirstTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->FirstTaskInSet(taskset);
 
 	return -1;
 }
@@ -2350,8 +2350,8 @@ int QuestManager::firsttaskinset(int taskset) {
 int QuestManager::lasttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->LastTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->LastTaskInSet(taskset);
 
 	return -1;
 }
@@ -2359,8 +2359,8 @@ int QuestManager::lasttaskinset(int taskset) {
 int QuestManager::nexttaskinset(int taskset, int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->NextTaskInSet(taskset, taskid);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->NextTaskInSet(taskset, taskid);
 
 	return -1;
 }
@@ -2412,8 +2412,8 @@ int QuestManager::completedtasksinset(int taskset) {
 bool QuestManager::istaskappropriate(int task) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
-		return taskmanager->AppropriateLevel(task, initiator->GetLevel());
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
+		return task_manager->ValidateLevel(task, initiator->GetLevel());
 
 	return false;
 }
@@ -2422,7 +2422,7 @@ std::string QuestManager::gettaskname(uint32 task_id) {
 	QuestManagerCurrentQuestVars();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		return taskmanager->GetTaskName(task_id);
+		return task_manager->GetTaskName(task_id);
 	}
 
 	return std::string();

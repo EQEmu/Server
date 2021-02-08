@@ -465,7 +465,7 @@ public:
 		insert_values.push_back(std::to_string(character_corpses_entry.wc_8));
 		insert_values.push_back(std::to_string(character_corpses_entry.wc_9));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

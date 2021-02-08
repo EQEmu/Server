@@ -233,7 +233,7 @@ public:
 		insert_values.push_back(std::to_string(proximities_entry.minz));
 		insert_values.push_back(std::to_string(proximities_entry.maxz));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

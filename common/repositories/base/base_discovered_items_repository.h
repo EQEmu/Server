@@ -209,7 +209,7 @@ public:
 		insert_values.push_back(std::to_string(discovered_items_entry.discovered_date));
 		insert_values.push_back(std::to_string(discovered_items_entry.account_status));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

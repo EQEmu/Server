@@ -269,7 +269,7 @@ public:
 		insert_values.push_back(std::to_string(aa_ability_entry.enabled));
 		insert_values.push_back(std::to_string(aa_ability_entry.reset_on_death));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

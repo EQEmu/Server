@@ -375,7 +375,7 @@ public:
 		insert_values.push_back("'" + EscapeString(bug_reports_entry.last_reviewer) + "'");
 		insert_values.push_back("'" + EscapeString(bug_reports_entry.reviewer_notes) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

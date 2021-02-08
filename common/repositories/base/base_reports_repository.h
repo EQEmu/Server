@@ -207,7 +207,7 @@ public:
 		insert_values.push_back("'" + EscapeString(reports_entry.reported) + "'");
 		insert_values.push_back("'" + EscapeString(reports_entry.reported_text) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

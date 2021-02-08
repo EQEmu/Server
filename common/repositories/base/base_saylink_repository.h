@@ -195,7 +195,7 @@ public:
 
 		insert_values.push_back("'" + EscapeString(saylink_entry.phrase) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

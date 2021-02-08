@@ -22,26 +22,18 @@
 #define PLATFORM_ZONE 1
 
 #include "../common/global_define.h"
-#include "../common/features.h"
-#include "../common/queue.h"
 #include "../common/timer.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/mutex.h"
-#include "../common/version.h"
-#include "../common/packet_dump_file.h"
 #include "../common/opcodemgr.h"
 #include "../common/guilds.h"
 #include "../common/eq_stream_ident.h"
 #include "../common/patches/patches.h"
 #include "../common/rulesys.h"
 #include "../common/profanity_manager.h"
-#include "../common/misc_functions.h"
 #include "../common/string_util.h"
-#include "../common/platform.h"
 #include "../common/crash.h"
-#include "../common/ipc_mutex.h"
 #include "../common/memory_mapped_file.h"
-#include "../common/eqemu_exception.h"
 #include "../common/spdat.h"
 #include "../common/eqemu_logsys.h"
 
@@ -57,32 +49,21 @@
 #endif
 #include "zonedb.h"
 #include "zone_store.h"
-#include "zone_config.h"
 #include "titles.h"
 #include "guild_mgr.h"
-#include "tasks.h"
+#include "task_manager.h"
 #include "quest_parser_collection.h"
 #include "embparser.h"
 #include "lua_parser.h"
 #include "questmgr.h"
 #include "npc_scale_manager.h"
 
-#include "../common/event/event_loop.h"
-#include "../common/event/timer.h"
 #include "../common/net/eqstream.h"
-#include "../common/net/servertalk_server.h"
 #include "../common/content/world_content_service.h"
-#include "../common/repositories/content_flags_repository.h"
 
-#include <iostream>
-#include <string>
-#include <fstream>
 #include <stdlib.h>
-#include <stdio.h>
 #include <signal.h>
 #include <time.h>
-#include <ctime>
-#include <thread>
 #include <chrono>
 
 #ifdef _CRTDBG_MAP_ALLOC
@@ -115,8 +96,8 @@ char errorname[32];
 extern Zone* zone;
 npcDecayTimes_Struct npcCorpseDecayTimes[100];
 TitleManager title_manager;
-QueryServ *QServ = 0;
-TaskManager *taskmanager = 0;
+QueryServ *QServ          = 0;
+TaskManager *task_manager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
 EQEmuLogSys LogSys;
@@ -426,9 +407,8 @@ int main(int argc, char** argv) {
 #endif
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		Log(Logs::General, Logs::Tasks, "[INIT] Loading Tasks");
-		taskmanager = new TaskManager;
-		taskmanager->LoadTasks();
+		task_manager = new TaskManager;
+		task_manager->LoadTasks();
 	}
 
 	parse = new QuestParserCollection();
@@ -607,7 +587,7 @@ int main(int argc, char** argv) {
 	if (zone != 0)
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
-	safe_delete(taskmanager);
+	safe_delete(task_manager);
 	command_deinit();
 #ifdef BOTS
 	bot_command_deinit();

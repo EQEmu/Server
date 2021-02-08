@@ -197,7 +197,7 @@ public:
 		insert_values.push_back(std::to_string(ldon_trap_entries_entry.id));
 		insert_values.push_back(std::to_string(ldon_trap_entries_entry.trap_id));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

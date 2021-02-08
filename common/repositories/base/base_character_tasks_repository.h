@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(character_tasks_entry.type));
 		insert_values.push_back(std::to_string(character_tasks_entry.acceptedtime));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

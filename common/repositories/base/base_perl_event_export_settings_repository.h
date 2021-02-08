@@ -227,7 +227,7 @@ public:
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_item));
 		insert_values.push_back(std::to_string(perl_event_export_settings_entry.export_event));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

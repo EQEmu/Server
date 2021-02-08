@@ -251,7 +251,7 @@ public:
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_min_level));
 		insert_values.push_back(std::to_string(lootdrop_entries_entry.npc_max_level));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

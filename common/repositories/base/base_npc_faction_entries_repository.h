@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(npc_faction_entries_entry.npc_value));
 		insert_values.push_back(std::to_string(npc_faction_entries_entry.temp));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

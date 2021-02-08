@@ -209,7 +209,7 @@ public:
 		insert_values.push_back("'" + EscapeString(spell_globals_entry.qglobal) + "'");
 		insert_values.push_back("'" + EscapeString(spell_globals_entry.value) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

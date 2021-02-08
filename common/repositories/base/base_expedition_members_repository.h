@@ -207,7 +207,7 @@ public:
 		insert_values.push_back(std::to_string(expedition_members_entry.character_id));
 		insert_values.push_back(std::to_string(expedition_members_entry.is_current_member));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

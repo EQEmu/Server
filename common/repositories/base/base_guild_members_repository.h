@@ -239,7 +239,7 @@ public:
 		insert_values.push_back("'" + EscapeString(guild_members_entry.public_note) + "'");
 		insert_values.push_back(std::to_string(guild_members_entry.alt));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

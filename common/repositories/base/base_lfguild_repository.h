@@ -239,7 +239,7 @@ public:
 		insert_values.push_back(std::to_string(lfguild_entry.timezone));
 		insert_values.push_back(std::to_string(lfguild_entry.timeposted));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -213,7 +213,7 @@ public:
 		insert_values.push_back(std::to_string(npc_emotes_entry.type));
 		insert_values.push_back("'" + EscapeString(npc_emotes_entry.text) + "'");
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

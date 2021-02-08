@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(friends_entry.type));
 		insert_values.push_back("'" + EscapeString(friends_entry.name) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

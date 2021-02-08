@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_file));
 		insert_values.push_back(std::to_string(logsys_categories_entry.log_to_gmsay));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

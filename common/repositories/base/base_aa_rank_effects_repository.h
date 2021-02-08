@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

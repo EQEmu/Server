@@ -287,7 +287,7 @@ public:
 		insert_values.push_back(std::to_string(character_currency_entry.ebon_crystals));
 		insert_values.push_back(std::to_string(character_currency_entry.career_ebon_crystals));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

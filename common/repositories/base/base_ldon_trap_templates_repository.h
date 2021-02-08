@@ -215,7 +215,7 @@ public:
 		insert_values.push_back(std::to_string(ldon_trap_templates_entry.skill));
 		insert_values.push_back(std::to_string(ldon_trap_templates_entry.locked));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

@@ -285,7 +285,7 @@ public:
 		insert_values.push_back(std::to_string(dynamic_zones_entry.zone_in_heading));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.has_zone_in));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

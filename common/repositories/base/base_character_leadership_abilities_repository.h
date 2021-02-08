@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(character_leadership_abilities_entry.slot));
 		insert_values.push_back(std::to_string(character_leadership_abilities_entry.rank));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

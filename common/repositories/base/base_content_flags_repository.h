@@ -207,7 +207,7 @@ public:
 		insert_values.push_back(std::to_string(content_flags_entry.enabled));
 		insert_values.push_back("'" + EscapeString(content_flags_entry.notes) + "'");
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

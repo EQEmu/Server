@@ -231,7 +231,7 @@ public:
 		insert_values.push_back("'" + EscapeString(mail_entry.to) + "'");
 		insert_values.push_back(std::to_string(mail_entry.status));
 
-		auto results = database.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),

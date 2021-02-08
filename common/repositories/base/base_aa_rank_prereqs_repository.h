@@ -203,7 +203,7 @@ public:
 		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.aa_id));
 		insert_values.push_back(std::to_string(aa_rank_prereqs_entry.points));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
