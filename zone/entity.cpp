@@ -3604,13 +3604,13 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 
 void EntityList::OpenDoorsNear(Mob *who)
 {
+	if (!who->CanOpenDoors()) {
+		return;
+	}
+
 	for (auto &it : door_list) {
 		Doors *door = it.second;
 		if (!door || door->IsDoorOpen()) {
-			continue;
-		}
-
-		if (who->GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 			continue;
 		}
 

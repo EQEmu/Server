@@ -639,11 +639,10 @@ protected:
 
 
 private:
-	uint32	loottable_id;
-	bool	skip_global_loot;
-	bool	skip_auto_scale;
-	bool	p_depop;
-
+	uint32 loottable_id;
+	bool   skip_global_loot;
+	bool   skip_auto_scale;
+	bool   p_depop;
 };
 
 #endif

@@ -409,6 +409,11 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	AISpellVar.idle_no_sp_recast_min           = static_cast<uint32>(RuleI(Spells, AI_IdleNoSpellMinRecast));
 	AISpellVar.idle_no_sp_recast_max           = static_cast<uint32>(RuleI(Spells, AI_IdleNoSpellMaxRecast));
 	AISpellVar.idle_beneficial_chance          = static_cast<uint8> (RuleI(Spells, AI_IdleBeneficialChance));
+
+	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+		m_can_open_doors = false;
+	}
+
 }
 
 float NPC::GetRoamboxMaxX() const

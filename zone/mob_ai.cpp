@@ -442,7 +442,11 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_movement_timer       = std::unique_ptr<Timer>(new Timer(AImovement_duration));
 	AI_target_check_timer   = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
 	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AI_scan_door_open_timer = std::unique_ptr<Timer>(new Timer(AI_scan_door_open_interval));
+	AI_scan_door_open_timer = std::make_unique<Timer>(AI_scan_door_open_interval);
+
+	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+		SetCanOpenDoors(false);
+	}
 
 	if(!RuleB(Aggro, NPCAggroMaxDistanceEnabled)) {
 		hate_list_cleanup_timer.Disable();
@@ -978,23 +982,25 @@ void Mob::AI_Process() {
 		engaged = false;
 	}
 
-	if (moving) {
+	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-
 			auto      &door_list = entity_list.GetDoorsList();
 			for (auto itr : door_list) {
 				Doors *door = itr.second;
 
-				if (door->GetKeyItem())
+				if (door->GetKeyItem()) {
 					continue;
+				}
 
-				if (door->GetLockpick())
+				if (door->GetLockpick()) {
 					continue;
+				}
 
-				if (door->IsDoorOpen())
+				if (door->IsDoorOpen()) {
 					continue;
+				}
 
-				float distance                = DistanceSquared(this->m_Position, door->GetPosition());
+				float distance                = DistanceSquared(m_Position, door->GetPosition());
 				float distance_scan_door_open = 20;
 
 				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
@@ -1004,10 +1010,6 @@ void Mob::AI_Process() {
 					 * above or below
 					 */
 					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10) {
-						continue;
-					}
-
-					if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
 						continue;
 					}
 
