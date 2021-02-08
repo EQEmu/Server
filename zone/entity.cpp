@@ -3604,18 +3604,21 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 
 void EntityList::OpenDoorsNear(Mob *who)
 {
+	if (!who->CanOpenDoors()) {
+		return;
+	}
 
-	for (auto it = door_list.begin();it != door_list.end(); ++it) {
-		Doors *cdoor = it->second;
-		if (!cdoor || cdoor->IsDoorOpen())
+	for (auto &it : door_list) {
+		Doors *door = it.second;
+		if (!door || door->IsDoorOpen()) {
 			continue;
+		}
 
-		auto diff = who->GetPosition() - cdoor->GetPosition();
-
-		float curdist = diff.x * diff.x + diff.y * diff.y;
-
-		if (diff.z * diff.z < 10 && curdist <= 100)
-			cdoor->Open(who);
+		auto  diff     = who->GetPosition() - door->GetPosition();
+		float distance = diff.x * diff.x + diff.y * diff.y;
+		if (diff.z * diff.z < 10 && distance <= 100) {
+			door->Open(who);
+		}
 	}
 }
 

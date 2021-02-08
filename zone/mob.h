@@ -1194,6 +1194,9 @@ public:
 	int32 GetHPRegen() const;
 	int32 GetManaRegen() const;
 
+	bool CanOpenDoors() const;
+	void SetCanOpenDoors(bool can_open);
+
 
 #ifdef BOTS
 	// Bots HealRotation methods
@@ -1587,11 +1590,14 @@ protected:
 	AuraMgr aura_mgr;
 	AuraMgr trap_mgr;
 
+	bool m_can_open_doors;
+
 	MobMovementManager *mMovementManager;
 
 private:
 	void _StopSong(); //this is not what you think it is
 	Mob* target;
+
 
 #ifdef BOTS
 	std::shared_ptr<HealRotation> m_target_of_heal_rotation;

@@ -531,6 +531,7 @@ RULE_INT(NPC, NPCGateDistanceBind, 75, "Distance from bind before NPC will attem
 RULE_BOOL(NPC, NPCHealOnGate, true, "Will the NPC Heal on Gate")
 RULE_BOOL(NPC, UseMeditateBasedManaRegen, false, "Based NPC ooc regen on Meditate skill")
 RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the NPC will heal on gate if enabled")
+RULE_BOOL(NPC, AnimalsOpenDoors, true, "Determines or not whether animals open doors or not when they approach them")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)

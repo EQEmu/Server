@@ -442,7 +442,11 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 	AI_movement_timer       = std::unique_ptr<Timer>(new Timer(AImovement_duration));
 	AI_target_check_timer   = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
 	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AI_scan_door_open_timer = std::unique_ptr<Timer>(new Timer(AI_scan_door_open_interval));
+	AI_scan_door_open_timer = std::make_unique<Timer>(AI_scan_door_open_interval);
+
+	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+		SetCanOpenDoors(false);
+	}
 
 	if(!RuleB(Aggro, NPCAggroMaxDistanceEnabled)) {
 		hate_list_cleanup_timer.Disable();
@@ -450,7 +454,7 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 
 	if (CastToNPC()->WillAggroNPCs())
 		AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
-	
+
 	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
 
 
@@ -884,49 +888,49 @@ void Mob::ProcessForcedMovement()
 	if (AI_movement_timer->Check()) {
 		bool bPassed = true;
 		glm::vec3 normal;
-	
+
 		// no zone map = fucked
 		if (zone->HasMap()) {
 			// in front
 			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(0.0f);
 			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
 			m_CollisionBox[0].z = m_Position.z;
-	
+
 			// 45 right front
 			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(64.0f);
 			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(64.0f);
 			m_CollisionBox[1].z = m_Position.z;
-	
+
 			// to right
 			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
 			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
 			m_CollisionBox[2].z = m_Position.z;
-	
+
 			// 45 right back
 			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(192.0f);
 			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(192.0f);
 			m_CollisionBox[3].z = m_Position.z;
-	
+
 			// behind
 			m_CollisionBox[4].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
 			m_CollisionBox[4].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
 			m_CollisionBox[4].z = m_Position.z;
-	
+
 			// 45 left back
 			m_CollisionBox[5].x = m_Position.x + 3.0f * g_Math.FastSin(320.0f);
 			m_CollisionBox[5].y = m_Position.y + 3.0f * g_Math.FastCos(320.0f);
 			m_CollisionBox[5].z = m_Position.z;
-	
+
 			// to left
 			m_CollisionBox[6].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
 			m_CollisionBox[6].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
 			m_CollisionBox[6].z = m_Position.z;
-	
+
 			// 45 left front
 			m_CollisionBox[7].x = m_Position.x + 3.0f * g_Math.FastSin(448.0f);
 			m_CollisionBox[7].y = m_Position.y + 3.0f * g_Math.FastCos(448.0f);
 			m_CollisionBox[7].z = m_Position.z;
-	
+
 			// collision happened, need to move along the wall
 			float distance = 0.0f, shortest = std::numeric_limits<float>::infinity();
 			glm::vec3 tmp_nrm;
@@ -940,7 +944,7 @@ void Mob::ProcessForcedMovement()
 				}
 			}
 		}
-	
+
 		if (bPassed) {
 			ForcedMovement = 0;
 			Teleport(m_Position + m_Delta);
@@ -978,23 +982,25 @@ void Mob::AI_Process() {
 		engaged = false;
 	}
 
-	if (moving) {
+	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-
 			auto      &door_list = entity_list.GetDoorsList();
 			for (auto itr : door_list) {
 				Doors *door = itr.second;
 
-				if (door->GetKeyItem())
+				if (door->GetKeyItem()) {
 					continue;
+				}
 
-				if (door->GetLockpick())
+				if (door->GetLockpick()) {
 					continue;
+				}
 
-				if (door->IsDoorOpen())
+				if (door->IsDoorOpen()) {
 					continue;
+				}
 
-				float distance                = DistanceSquared(this->m_Position, door->GetPosition());
+				float distance                = DistanceSquared(m_Position, door->GetPosition());
 				float distance_scan_door_open = 20;
 
 				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
@@ -1003,8 +1009,9 @@ void Mob::AI_Process() {
 					 * Make sure we're opening a door within height relevance and not platforms
 					 * above or below
 					 */
-					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10)
+					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10) {
 						continue;
+					}
 
 					door->ForceOpen(this);
 				}
@@ -1743,7 +1750,7 @@ void NPC::AI_DoMovement() {
 					if (cur_wp_pause > 0 && m_CurrentWayPoint.w >= 0.0) {
 						RotateTo(m_CurrentWayPoint.w);
 					}
-							
+
 					//kick off event_waypoint arrive
 					char temp[16];
 					sprintf(temp, "%d", cur_wp);
@@ -1757,7 +1764,7 @@ void NPC::AI_DoMovement() {
 					if (cur_wp == EQ::WaypointStatus::QuestControlNoGrid) {
 						AI_SetupNextWaypoint();
 					}
-		
+
 					// wipe feign memory since we reached our first waypoint
 					if (cur_wp == 1)
 						ClearFeignMemory();
@@ -1775,7 +1782,7 @@ void NPC::AI_DoMovement() {
 						m_CurrentWayPoint.y,
 						m_CurrentWayPoint.z
 					);
-		
+
 				}
 			}
 		}        // endif (gridno > 0)
@@ -1784,15 +1791,15 @@ void NPC::AI_DoMovement() {
 			if (pause_timer_complete == true) { // time to pause has ended
 				SetGrid(0 - GetGrid()); // revert to AI control
 				LogPathing("Quest pathing is finished. Resuming on grid [{}]", GetGrid());
-		
+
 				SetAppearance(eaStanding, false);
-		
+
 				CalculateNewWaypoint();
 			}
 		}
 
 	}
-	else if (IsGuarding()) {	
+	else if (IsGuarding()) {
 		bool at_gp = IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 15.0f);
 
 		if (at_gp) {
@@ -1857,17 +1864,17 @@ void NPC::AI_SetupNextWaypoint() {
 			roamer = false;
 			cur_wp = 0;
 		}
-		
+
 		SetAppearance(eaStanding, false);
-		
+
 		entity_list.OpenDoorsNear(this);
-		
+
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart
 			char temp[16];
 			sprintf(temp, "%d", cur_wp);
 			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
-		
+
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
 			if (GetGrid() > 0) {
@@ -1937,7 +1944,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 		time_until_can_move += minLastFightingDelayMoving;
 	else
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
-	
+
 	StopNavigation();
 	ClearRampage();
 

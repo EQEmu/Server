@@ -225,6 +225,10 @@ inline std::string GetMobAttributeByString(Mob *mob, const std::string &attribut
 		return std::to_string(mob->GetMaxBuffSlots());
 	}
 
+	if (attribute == "can_open_doors") {
+		return std::to_string(mob->CanOpenDoors());
+	}
+
 	if (attribute == "curbuffslots") {
 		return std::to_string(mob->GetCurrentBuffSlots());
 	}
@@ -770,6 +774,7 @@ void Mob::DisplayInfo(Mob *mob)
 				"spells_id",
 				"curbuffslots",
 				"maxbuffslots",
+				"can_open_doors",
 			};
 
 			window_text += WriteDisplayInfoSection(mob, "NPC Attributes", npc_attributes, 1, true);
