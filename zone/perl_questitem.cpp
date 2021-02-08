@@ -51,7 +51,7 @@ XS(XS_QuestItem_GetName);
 XS(XS_QuestItem_GetName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetName(THIS)");
+		Perl_croak(aTHX_ "Usage: QuestItem::GetName(THIS)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		Const_char          *RETVAL;
@@ -69,7 +69,7 @@ XS(XS_QuestItem_SetScale);
 XS(XS_QuestItem_SetScale) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::SetScale(THIS, float scale_multiplier)");
+		Perl_croak(aTHX_ "Usage: QuestItem::SetScale(THIS, float scale_multiplier)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		float Mult;
@@ -87,7 +87,7 @@ XS(XS_QuestItem_ItemSay);
 XS(XS_QuestItem_ItemSay) {
 	dXSARGS;
 	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: QuestItem::ItemSay(THIS, string text [int language_id])");
+		Perl_croak(aTHX_ "Usage: QuestItem::ItemSay(THIS, string text [int language_id])"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		Const_char          *text;
@@ -106,7 +106,7 @@ XS(XS_QuestItem_IsType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_IsType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::IsType(THIS, type)");
+		Perl_croak(aTHX_ "Usage: QuestItem::IsType(THIS, type)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		bool   RETVAL;
@@ -123,7 +123,7 @@ XS(XS_QuestItem_IsAttuned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_IsAttuned) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::IsAttuned(THIS)");
+		Perl_croak(aTHX_ "Usage: QuestItem::IsAttuned(THIS)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		bool RETVAL;
@@ -139,7 +139,7 @@ XS(XS_QuestItem_GetCharges); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_GetCharges) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetCharges(THIS)");
+		Perl_croak(aTHX_ "Usage: QuestItem::GetCharges(THIS)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		int16 RETVAL;
@@ -156,7 +156,7 @@ XS(XS_QuestItem_GetAugment); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_GetAugment) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: QuestItem::GetAugment(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
@@ -173,7 +173,7 @@ XS(XS_QuestItem_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_QuestItem_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: QuestItem::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: QuestItem::GetID(THIS)"); // @categories Inventory and Items
 	{
 		EQ::ItemInstance *THIS;
 		uint32 RETVAL;
