@@ -217,6 +217,51 @@ XS(XS_Client_GetAnon) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_SetAnon); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAnon) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)");
+	{
+		Client *THIS;
+		uint8 anon_flag = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetAnon(anon_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetAFK); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetAFK) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetAFK(THIS)");
+	{
+		Client *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetAFK();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetAFK); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAFK) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)");
+	{
+		Client *THIS;
+		uint8 afk_flag = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetAFK(afk_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Duck); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Duck) {
 	dXSARGS;
@@ -5283,6 +5328,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetAAPoints"), XS_Client_GetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "GetAccountAge"), XS_Client_GetAccountAge, file, "$");
 	newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "GetAFK"), XS_Client_GetAFK, file, "$");
 	newXSproto(strcpy(buf, "GetAggroCount"), XS_Client_GetAggroCount, file, "$");
 	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
 	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
@@ -5450,6 +5496,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
 	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "SetAFK"), XS_Client_SetAFK, file, "$$");
+	newXSproto(strcpy(buf, "SetAnon"), XS_Client_SetAnon, file, "$$");
 	newXSproto(strcpy(buf, "SetAlternateCurrencyValue"), XS_Client_SetAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "SetBaseClass"), XS_Client_SetBaseClass, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseGender"), XS_Client_SetBaseGender, file, "$$");

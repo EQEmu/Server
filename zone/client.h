@@ -371,6 +371,9 @@ public:
 	void Kick(const std::string &reason);
 	void WorldKick();
 	inline uint8 GetAnon() const { return m_pp.anon; }
+	inline uint8 GetAFK() const { return AFK; }
+	void SetAnon(uint8 anon_flag);
+	void SetAFK(uint8 afk_flag);
 	inline PlayerProfile_Struct& GetPP() { return m_pp; }
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
