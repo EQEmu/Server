@@ -10,17 +10,17 @@
 
 struct ExpeditionMember
 {
-	uint32_t char_id = 0;
+	uint32_t id = 0;
 	std::string name;
 	ExpeditionMemberStatus status = ExpeditionMemberStatus::Online;
 
 	ExpeditionMember() = default;
 	ExpeditionMember(uint32_t id, const std::string& name_)
-		: char_id(id), name(name_) {}
+		: id(id), name(name_) {}
 	ExpeditionMember(uint32_t id, const std::string& name_, ExpeditionMemberStatus status_)
-		: char_id(id), name(name_), status(status_) {}
+		: id(id), name(name_), status(status_) {}
 
-	bool IsValid() const { return char_id != 0 && !name.empty(); }
+	bool IsValid() const { return id != 0 && !name.empty(); }
 };
 
 class ExpeditionBase
@@ -33,7 +33,7 @@ public:
 	ExpeditionBase& operator=(ExpeditionBase&&) = default;
 
 	uint32_t GetID() const { return m_id; }
-	uint32_t GetLeaderID() const { return m_leader.char_id; }
+	uint32_t GetLeaderID() const { return m_leader.id; }
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }

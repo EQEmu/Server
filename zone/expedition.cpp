@@ -264,7 +264,7 @@ void Expedition::SaveMembers(ExpeditionRequest& request)
 	std::vector<uint32_t> member_ids;
 	for (const auto& member : m_members)
 	{
-		member_ids.emplace_back(member.char_id);
+		member_ids.emplace_back(member.id);
 	}
 
 	ExpeditionDatabase::InsertMembers(m_id, m_members);
@@ -484,11 +484,11 @@ bool Expedition::RemoveMember(const std::string& remove_char_name)
 		return false;
 	}
 
-	ExpeditionDatabase::DeleteMember(m_id, member.char_id);
-	m_dynamiczone.RemoveCharacter(member.char_id);
+	ExpeditionDatabase::DeleteMember(m_id, member.id);
+	m_dynamiczone.RemoveCharacter(member.id);
 
-	ProcessMemberRemoved(member.name, member.char_id);
-	SendWorldMemberChanged(member.name, member.char_id, true);
+	ProcessMemberRemoved(member.name, member.id);
+	SendWorldMemberChanged(member.name, member.id, true);
 
 	return true;
 }
@@ -507,14 +507,14 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	}
 
 	// make remove and add atomic to avoid racing with separate world messages
-	ExpeditionDatabase::DeleteMember(m_id, member.char_id);
+	ExpeditionDatabase::DeleteMember(m_id, member.id);
 	ExpeditionDatabase::InsertMember(m_id, add_client->CharacterID());
-	m_dynamiczone.RemoveCharacter(member.char_id);
+	m_dynamiczone.RemoveCharacter(member.id);
 	m_dynamiczone.AddCharacter(add_client->CharacterID());
 
-	ProcessMemberRemoved(member.name, member.char_id);
+	ProcessMemberRemoved(member.name, member.id);
 	ProcessMemberAdded(add_client->GetName(), add_client->CharacterID());
-	SendWorldMemberSwapped(member.name, member.char_id, add_client->GetName(), add_client->CharacterID());
+	SendWorldMemberSwapped(member.name, member.id, add_client->GetName(), add_client->CharacterID());
 }
 
 void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
@@ -546,7 +546,7 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 		status = ExpeditionMemberStatus::Online;
 	}
 
-	if (update_member_id == m_leader.char_id)
+	if (update_member_id == m_leader.id)
 	{
 		m_leader.status = status;
 	}
@@ -561,12 +561,12 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 
 	for (auto& member : m_members)
 	{
-		if (member.char_id == update_member_id)
+		if (member.id == update_member_id)
 		{
 			member.status = status;
 		}
 
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			member_client->QueuePacket(outapp_member_status.get());
@@ -732,7 +732,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 
 	// a null leader_client is handled by SendLeaderMessage fallbacks
 	// note current leader receives invite reply messages (if leader changed)
-	Client* leader_client = entity_list.GetClientByCharID(m_leader.char_id);
+	Client* leader_client = entity_list.GetClientByCharID(m_leader.id);
 
 	if (!accepted)
 	{
@@ -756,7 +756,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 	if (was_swap_invite)
 	{
 		auto swap_member = GetMemberData(swap_remove_name);
-		if (!swap_member.IsValid() || !ExpeditionDatabase::HasMember(m_id, swap_member.char_id))
+		if (!swap_member.IsValid() || !ExpeditionDatabase::HasMember(m_id, swap_member.id))
 		{
 			has_conflicts = true;
 		}
@@ -808,7 +808,7 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 		return false;
 	}
 
-	if (m_leader.char_id != requester->CharacterID())
+	if (m_leader.id != requester->CharacterID())
 	{
 		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, m_leader.name.c_str());
 		return false;
@@ -1054,12 +1054,12 @@ void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 	auto outapp_leader = CreateLeaderNamePacket();
 	for (const auto& member : m_members)
 	{
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			member_client->QueuePacket(outapp_leader.get());
 
-			if (member.char_id == new_leader_id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+			if (member.id == new_leader_id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
 			{
 				member_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 			}
@@ -1096,7 +1096,7 @@ void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader
 void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added_char_id)
 {
 	// adds the member to this expedition and notifies both leader and new member
-	Client* leader_client = entity_list.GetClientByCharID(m_leader.char_id);
+	Client* leader_client = entity_list.GetClientByCharID(m_leader.id);
 	if (leader_client)
 	{
 		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
@@ -1129,7 +1129,7 @@ void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint
 	{
 		bool is_removed = (it->name == removed_char_name);
 
-		Client* member_client = entity_list.GetClientByCharID(it->char_id);
+		Client* member_client = entity_list.GetClientByCharID(it->id);
 		if (member_client)
 		{
 			// all members receive the removed player name packet
@@ -1175,7 +1175,7 @@ void Expedition::ProcessLockoutDuration(
 
 	for (const auto& member : m_members)
 	{
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			member_client->AddExpeditionLockoutDuration(m_expedition_name,
@@ -1228,7 +1228,7 @@ void Expedition::ProcessLockoutUpdate(
 
 	for (const auto& member : m_members)
 	{
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			if (!remove)
@@ -1283,7 +1283,7 @@ void Expedition::SendNewMemberAddedToZoneMembers(const std::string& added_name)
 	{
 		if (member.name != added_name) // new member already updated
 		{
-			Client* member_client = entity_list.GetClientByCharID(member.char_id);
+			Client* member_client = entity_list.GetClientByCharID(member.id);
 			if (member_client)
 			{
 				member_client->QueuePacket(outapp_members.get());
@@ -1301,7 +1301,7 @@ void Expedition::SendUpdatesToZoneMembers(bool clear, bool message_on_clear)
 
 		for (const auto& member : m_members)
 		{
-			Client* member_client = entity_list.GetClientByCharID(member.char_id);
+			Client* member_client = entity_list.GetClientByCharID(member.id);
 			if (member_client)
 			{
 				member_client->SetExpeditionID(clear ? 0 : GetID());
@@ -1922,7 +1922,7 @@ void Expedition::SendCompassUpdateToZoneMembers()
 {
 	for (const auto& member : m_members)
 	{
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			member_client->SendDzCompassUpdate();
@@ -2036,7 +2036,7 @@ void Expedition::SendMembersExpireWarning(uint32_t minutes_remaining)
 	auto outapp = CreateExpireWarningPacket(minutes_remaining);
 	for (const auto& member : m_members)
 	{
-		Client* member_client = entity_list.GetClientByCharID(member.char_id);
+		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
 			member_client->QueuePacket(outapp.get());

@@ -23,7 +23,7 @@ void ExpeditionBase::LoadRepositoryResult(ExpeditionsRepository::ExpeditionWithL
 	m_max_players        = entry.max_players;
 	m_add_replay_on_join = entry.add_replay_on_join;
 	m_is_locked          = entry.is_locked;
-	m_leader.char_id     = entry.leader_id;
+	m_leader.id          = entry.leader_id;
 	m_leader.name        = std::move(entry.leader_name);
 }
 
@@ -36,7 +36,7 @@ void ExpeditionBase::AddMemberFromRepositoryResult(
 
 void ExpeditionBase::AddInternalMember(const ExpeditionMember& member)
 {
-	if (!HasMember(member.char_id))
+	if (!HasMember(member.id))
 	{
 		m_members.emplace_back(member);
 	}
@@ -45,7 +45,7 @@ void ExpeditionBase::AddInternalMember(const ExpeditionMember& member)
 void ExpeditionBase::RemoveInternalMember(uint32_t character_id)
 {
 	m_members.erase(std::remove_if(m_members.begin(), m_members.end(),
-		[&](const ExpeditionMember& member) { return member.char_id == character_id; }
+		[&](const ExpeditionMember& member) { return member.id == character_id; }
 	), m_members.end());
 }
 
@@ -53,7 +53,7 @@ void ExpeditionBase::RemoveInternalMember(uint32_t character_id)
 bool ExpeditionBase::HasMember(uint32_t character_id)
 {
 	return std::any_of(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
-		return member.char_id == character_id;
+		return member.id == character_id;
 	});
 }
 
@@ -67,7 +67,7 @@ bool ExpeditionBase::HasMember(const std::string& character_name)
 ExpeditionMember ExpeditionBase::GetMemberData(uint32_t character_id)
 {
 	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
-		return member.char_id == character_id;
+		return member.id == character_id;
 	});
 
 	ExpeditionMember member_data;

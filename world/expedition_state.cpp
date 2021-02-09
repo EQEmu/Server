@@ -121,7 +121,7 @@ void ExpeditionState::MemberChange(
 	if (expedition)
 	{
 		if (remove) {
-			expedition->RemoveMember(member.char_id);
+			expedition->RemoveMember(member.id);
 		} else {
 			expedition->AddInternalMember(member);
 		}

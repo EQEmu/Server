@@ -182,7 +182,7 @@ void ExpeditionDatabase::DeleteMembersLockout(
 	std::string query_character_ids;
 	for (const auto& member : members)
 	{
-		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.char_id);
+		fmt::format_to(std::back_inserter(query_character_ids), "{},", member.id);
 	}
 
 	if (!query_character_ids.empty())
@@ -324,7 +324,7 @@ void ExpeditionDatabase::InsertMembersLockout(
 	{
 		fmt::format_to(std::back_inserter(insert_values),
 			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
-			member.char_id,
+			member.id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
@@ -440,7 +440,7 @@ void ExpeditionDatabase::InsertMembers(
 	{
 		fmt::format_to(std::back_inserter(insert_values),
 			"({}, {}),",
-			expedition_id, member.char_id
+			expedition_id, member.id
 		);
 	}
 
@@ -516,7 +516,7 @@ void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>&
 	{
 		fmt::format_to(std::back_inserter(insert_values),
 			"({}, FROM_UNIXTIME({}), {}, '{}', '{}', '{}'),",
-			member.char_id,
+			member.id,
 			lockout.GetExpireTime(),
 			lockout.GetDuration(),
 			lockout.GetExpeditionUUID(),
