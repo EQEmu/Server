@@ -502,6 +502,7 @@ RULE_BOOL(Combat, ClassicNPCBackstab, false, "True disables NPC facestab - NPC g
 RULE_BOOL(Combat, UseNPCDamageClassLevelMods, true, "Uses GetClassLevelDamageMod calc in npc_scale_manager")
 RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to last until characrer zones, at a lower proc rate")
 RULE_BOOL(Combat, EnableSneakPull, false, "Enable implementation of Sneak Pull")
+RULE_INT(Combat, SneakPullAssistRange, 400, "Modified range of assist for sneak pull")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
