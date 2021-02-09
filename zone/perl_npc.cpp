@@ -1711,6 +1711,20 @@ XS(XS_NPC_RecalculateSkills) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_ScaleNPC); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_ScaleNPC) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::ScaleNPC(THIS, uint8 npc_level)");
+	{
+		NPC *THIS;
+		uint8 npc_level = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		THIS->ScaleNPC(npc_level);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1827,6 +1841,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "GetCombatState"), XS_NPC_GetCombatState, file, "$");
 	newXSproto(strcpy(buf, "SetSimpleRoamBox"), XS_NPC_SetSimpleRoamBox, file, "$$;$$");
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
+	newXSproto(strcpy(buf, "ScaleNPC"), XS_NPC_ScaleNPC, file, "$$");
 	XSRETURN_YES;
 }
 

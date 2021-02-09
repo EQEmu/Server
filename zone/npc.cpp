@@ -3329,3 +3329,11 @@ void NPC::RecalculateSkills()
 		}
 	}
 }
+
+void NPC::ScaleNPC(uint8 npc_level) {
+	if (GetLevel() != npc_level) {
+		SetLevel(npc_level);
+	}
+	npc_scale_manager->ResetNPCScaling(this);
+	npc_scale_manager->ScaleNPC(this);
+}
