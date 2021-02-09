@@ -5999,9 +5999,9 @@ std::string Mob::GetBucketExpires(std::string bucket_name) {
 
 std::string Mob::GetBucketKey() {
 	if (IsClient()) {
-		return std::to_string(CastToClient()->CharacterID());
+		return fmt::format("character-{}", CastToClient()->CharacterID());
 	} else if (IsNPC()) {
-		return std::to_string(GetNPCTypeID());
+		return fmt::format("npc-{}", GetNPCTypeID());
 	}
 	return std::string();
 }
