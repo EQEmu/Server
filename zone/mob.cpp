@@ -20,6 +20,7 @@
 #include "../common/string_util.h"
 #include "../common/misc_functions.h"
 
+#include "data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
@@ -5971,4 +5972,52 @@ bool Mob::CanOpenDoors() const
 void Mob::SetCanOpenDoors(bool can_open)
 {
 	m_can_open_doors = can_open;
+}
+
+void Mob::DeleteBucket(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	DataBucket::DeleteData(full_bucket_name);
+}
+
+std::string Mob::GetBucket(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_value = DataBucket::GetData(full_bucket_name);
+	if (!bucket_value.empty()) {
+		return bucket_value;
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketExpires(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_expiration = DataBucket::GetDataExpires(full_bucket_name);
+	if (!bucket_expiration.empty()) {
+		return bucket_expiration;
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketKey() {
+	if (IsClient()) {
+		return fmt::format("character-{}", CastToClient()->CharacterID());
+	} else if (IsNPC()) {
+		return fmt::format("npc-{}", GetNPCTypeID());
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketRemaining(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
+	if (!bucket_remaining.empty() && atoi(bucket_remaining.c_str()) > 0) {
+		return bucket_remaining;
+	} else if (atoi(bucket_remaining.c_str()) == 0) {
+		return "0";
+	}
+	return std::string();
+}
+
+void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
 }

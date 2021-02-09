@@ -6071,6 +6071,115 @@ XS(XS_Mob_GetRaceName) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_DeleteBucket);
+XS(XS_Mob_DeleteBucket) {
+	dXSARGS;	
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::DeleteBucket(THIS, std::string bucket_name)");
+	{
+		Mob* THIS;
+		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
+		VALIDATE_THIS_IS_MOB;
+		THIS->DeleteBucket(bucket_name);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_GetBucket);
+XS(XS_Mob_GetBucket) {
+	dXSARGS;	
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetBucket(THIS, std::string bucket_name)");
+	{
+		Mob* THIS;
+		dXSTARG;
+		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
+		std::string bucket_value;
+		VALIDATE_THIS_IS_MOB;
+		bucket_value = THIS->GetBucket(bucket_name);
+		sv_setpv(TARG, bucket_value.c_str());
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetBucketExpires);
+XS(XS_Mob_GetBucketExpires) {
+	dXSARGS;	
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketExpires(THIS, std::string bucket_name)");
+	{
+		Mob* THIS;
+		dXSTARG;
+		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
+		std::string bucket_expiration;
+		VALIDATE_THIS_IS_MOB;
+		bucket_expiration = THIS->GetBucketExpires(bucket_name);
+		sv_setpv(TARG, bucket_expiration.c_str());
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetBucketKey);
+XS(XS_Mob_GetBucketKey) {
+	dXSARGS;	
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketKey(THIS)");
+	{
+		Mob* THIS;
+		dXSTARG;
+		std::string bucket_key;
+		VALIDATE_THIS_IS_MOB;
+		bucket_key = THIS->GetBucketKey();
+		sv_setpv(TARG, bucket_key.c_str());
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetBucketRemaining);
+XS(XS_Mob_GetBucketRemaining) {
+	dXSARGS;	
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketRemaining(THIS, std::string bucket_name)");
+	{
+		Mob* THIS;
+		dXSTARG;
+		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
+		std::string bucket_remaining;
+		VALIDATE_THIS_IS_MOB;
+		bucket_remaining = THIS->GetBucketRemaining(bucket_name);
+		sv_setpv(TARG, bucket_remaining.c_str());
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_SetBucket);
+XS(XS_Mob_SetBucket) {
+	dXSARGS;	
+	if (items < 3 || items > 4)
+		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, std::string bucket_name, std::string bucket_value, [std::string expiration])");
+	{
+		Mob* THIS;
+		std::string key = (std::string) SvPV_nolen(ST(1));
+		std::string value = (std::string) SvPV_nolen(ST(2));
+		std::string expiration;
+		VALIDATE_THIS_IS_MOB;
+		if (items == 4)
+			expiration = (std::string) SvPV_nolen(ST(3));
+
+		THIS->SetBucket(key, value, expiration);
+	}
+	XSRETURN_EMPTY;
+}
+
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6410,6 +6519,12 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "IsAmnesiad"), XS_Mob_IsAmnesiad, file, "$");
 	newXSproto(strcpy(buf, "GetMeleeMitigation"), XS_Mob_GetMeleeMitigation, file, "$");
 	newXSproto(strcpy(buf, "TryMoveAlong"), XS_Mob_TryMoveAlong, file, "$$$;$");
+	newXSproto(strcpy(buf, "DeleteBucket"), XS_Mob_DeleteBucket, file, "$$");
+	newXSproto(strcpy(buf, "GetBucket"), XS_Mob_GetBucket, file, "$$");
+	newXSproto(strcpy(buf, "GetBucketExpires"), XS_Mob_GetBucketExpires, file, "$$");
+	newXSproto(strcpy(buf, "GetBucketKey"), XS_Mob_GetBucketKey, file, "$");
+	newXSproto(strcpy(buf, "GetBucketRemaining"), XS_Mob_GetBucketRemaining, file, "$$");
+	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
 	XSRETURN_YES;
 }
 
