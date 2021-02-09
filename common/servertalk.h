@@ -148,7 +148,7 @@
 #define ServerOP_ExpeditionMemberChange       0x0404
 #define ServerOP_ExpeditionMemberSwap         0x0405
 #define ServerOP_ExpeditionMemberStatus       0x0406
-#define ServerOP_ExpeditionGetOnlineMembers   0x0407
+#define ServerOP_ExpeditionGetMemberStatuses  0x0407
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
 #define ServerOP_ExpeditionCharacterLockout   0x040d
@@ -159,7 +159,6 @@
 #define ServerOP_ExpeditionMembersRemoved     0x0412
 #define ServerOP_ExpeditionLockoutDuration    0x0414
 #define ServerOP_ExpeditionExpireWarning      0x0416
-#define ServerOP_ExpeditionChooseNewLeader    0x0417
 
 #define ServerOP_DzAddRemoveCharacter         0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
@@ -2035,19 +2034,15 @@ struct ServerExpeditionMemberStatus_Struct {
 	uint32 character_id;
 };
 
-struct ServerExpeditionCharacterEntry_Struct {
-	uint32 expedition_id;
+struct ServerExpeditionMemberStatusEntry_Struct {
 	uint32 character_id;
-	uint32 character_zone_id;
-	uint16 character_instance_id;
-	uint8  character_online; // 0: offline 1: online
+	uint8  online_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 };
 
-struct ServerExpeditionCharacters_Struct {
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
+struct ServerExpeditionMemberStatuses_Struct {
+	uint32 expedition_id;
 	uint32 count;
-	ServerExpeditionCharacterEntry_Struct entries[0];
+	ServerExpeditionMemberStatusEntry_Struct entries[0];
 };
 
 struct ServerExpeditionLockout_Struct {

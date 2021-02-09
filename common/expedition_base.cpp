@@ -1,5 +1,6 @@
 #include "expedition_base.h"
 #include "repositories/expeditions_repository.h"
+#include "rulesys.h"
 
 ExpeditionBase::ExpeditionBase(uint32_t id, const std::string& uuid,
 	const std::string& expedition_name, const DynamicZoneMember& leader,
@@ -90,4 +91,28 @@ DynamicZoneMember ExpeditionBase::GetMemberData(const std::string& character_nam
 		member_data = *it;
 	}
 	return member_data;
+}
+
+bool ExpeditionBase::SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	if (status == DynamicZoneMemberStatus::InDynamicZone && !RuleB(Expedition, EnableInDynamicZoneStatus))
+	{
+		status = DynamicZoneMemberStatus::Online;
+	}
+
+	if (character_id == m_leader.id)
+	{
+		m_leader.status = status;
+	}
+
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) { return member.id == character_id; });
+
+	if (it != m_members.end() && it->status != status)
+	{
+		it->status = status;
+		return true;
+	}
+
+	return false;
 }

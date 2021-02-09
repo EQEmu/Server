@@ -32,16 +32,18 @@ public:
 	Expedition();
 
 	void RemoveMember(uint32_t character_id);
+	void CacheMemberStatuses();
 	void CheckExpireWarning();
 	void CheckLeader();
 	void ChooseNewLeader();
 	DynamicZone& GetDynamicZone() { return m_dynamic_zone; }
 	bool Process();
-
+	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetDynamicZone(DynamicZone&& dz);
 	bool SetNewLeader(const DynamicZoneMember& member);
+	void UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
 private:
 	void SendZonesLeaderChanged();

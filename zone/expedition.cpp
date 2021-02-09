@@ -167,8 +167,6 @@ void Expedition::CacheExpeditions(
 	auto expedition_members = ExpeditionMembersRepository::GetWithNames(database, expedition_ids);
 	auto expedition_lockouts = ExpeditionLockoutsRepository::GetWithTimestamp(database, expedition_ids);
 
-	std::vector<std::pair<uint32_t, uint32_t>> expedition_character_ids; // for online status request
-
 	for (auto& entry : expedition_entries)
 	{
 		auto expedition = std::make_unique<Expedition>();
@@ -189,7 +187,6 @@ void Expedition::CacheExpeditions(
 			if (member.expedition_id == expedition->GetID())
 			{
 				expedition->AddMemberFromRepositoryResult(std::move(member));
-				expedition_character_ids.emplace_back(expedition->GetID(), member.character_id);
 			}
 		}
 
@@ -210,12 +207,11 @@ void Expedition::CacheExpeditions(
 			}
 		}
 
+		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
+
 		auto inserted = zone->expedition_cache.emplace(entry.id, std::move(expedition));
 		inserted.first->second->SendUpdatesToZoneMembers();
 	}
-
-	// ask world for online members from all cached expeditions at once
-	Expedition::SendWorldGetOnlineMembers(expedition_character_ids);
 }
 
 void Expedition::CacheFromDatabase(uint32_t expedition_id)
@@ -521,19 +517,12 @@ void Expedition::SetMemberStatus(Client* client, DynamicZoneMemberStatus status)
 {
 	if (client)
 	{
-		UpdateMemberStatus(client->CharacterID(), status);
+		SendMemberStatusToZoneMembers(client->CharacterID(), status);
 		SendWorldMemberStatus(client->CharacterID(), status);
-
-		// world could detect this itself but it'd have to process member status updates
-		// a member coming online will trigger a leader change if all members were offline
-		if (m_leader.status == DynamicZoneMemberStatus::Offline)
-		{
-			SendWorldExpeditionUpdate(ServerOP_ExpeditionChooseNewLeader);
-		}
 	}
 }
 
-void Expedition::UpdateMemberStatus(uint32_t update_member_id, DynamicZoneMemberStatus status)
+void Expedition::SendMemberStatusToZoneMembers(uint32_t update_member_id, DynamicZoneMemberStatus status)
 {
 	auto member_data = GetMemberData(update_member_id);
 	if (!member_data.IsValid())
@@ -541,35 +530,19 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, DynamicZoneMember
 		return;
 	}
 
-	if (status == DynamicZoneMemberStatus::InDynamicZone && !RuleB(Expedition, EnableInDynamicZoneStatus))
-	{
-		status = DynamicZoneMemberStatus::Online;
-	}
-
-	if (update_member_id == m_leader.id)
-	{
-		m_leader.status = status;
-	}
-
 	// if zone already had this member status cached avoid packet update to clients
-	if (member_data.status == status)
+	bool changed = SetInternalMemberStatus(update_member_id, status);
+	if (changed)
 	{
-		return;
-	}
-
-	auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, status);
-
-	for (auto& member : m_members)
-	{
-		if (member.id == update_member_id)
+		member_data = GetMemberData(update_member_id); // rules may override status
+		auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, member_data.status);
+		for (auto& member : m_members)
 		{
-			member.status = status;
-		}
-
-		Client* member_client = entity_list.GetClientByCharID(member.id);
-		if (member_client)
-		{
-			member_client->QueuePacket(outapp_member_status.get());
+			Client* member_client = entity_list.GetClientByCharID(member.id);
+			if (member_client)
+			{
+				member_client->QueuePacket(outapp_member_status.get());
+			}
 		}
 	}
 }
@@ -1095,6 +1068,8 @@ void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader
 
 void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added_char_id)
 {
+	AddInternalMember({ added_char_id, char_name, DynamicZoneMemberStatus::Online });
+
 	// adds the member to this expedition and notifies both leader and new member
 	Client* leader_client = entity_list.GetClientByCharID(m_leader.id);
 	if (leader_client)
@@ -1102,18 +1077,16 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
 	}
 
-	AddInternalMember({ added_char_id, char_name, DynamicZoneMemberStatus::Online });
-
 	Client* member_client = entity_list.GetClientByCharID(added_char_id);
 	if (member_client)
 	{
 		member_client->SetExpeditionID(GetID());
 		member_client->SendDzCompassUpdate();
-		SendClientExpeditionInfo(member_client);
+		member_client->QueuePacket(CreateInfoPacket().get());
 		member_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
 	}
 
-	SendNewMemberAddedToZoneMembers(char_name);
+	SendMemberListToZoneMembers();
 }
 
 void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id)
@@ -1271,23 +1244,16 @@ void Expedition::AddLockoutClients(
 	}
 }
 
-void Expedition::SendNewMemberAddedToZoneMembers(const std::string& added_name)
+void Expedition::SendMemberListToZoneMembers()
 {
-	// live only sends MemberListName when members are added from a swap, otherwise
-	// it sends expedition info (unnecessary) and the full member list
-	// we send a full member list update for both cases since MemberListName adds as
-	// "unknown" status (either due to unknown packet fields or future client change)
 	auto outapp_members = CreateMemberListPacket(false);
 
 	for (const auto& member : m_members)
 	{
-		if (member.name != added_name) // new member already updated
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
 		{
-			Client* member_client = entity_list.GetClientByCharID(member.id);
-			if (member_client)
-			{
-				member_client->QueuePacket(outapp_members.get());
-			}
+			member_client->QueuePacket(outapp_members.get());
 		}
 	}
 }
@@ -1562,29 +1528,6 @@ void Expedition::SendWorldSettingChanged(uint16_t server_opcode, bool setting_va
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldGetOnlineMembers(
-	const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids)
-{
-	// request online status of characters
-	uint32_t count = static_cast<uint32_t>(expedition_character_ids.size());
-	uint32_t entries_size = sizeof(ServerExpeditionCharacterEntry_Struct) * count;
-	uint32_t pack_size = sizeof(ServerExpeditionCharacters_Struct) + entries_size;
-	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionGetOnlineMembers, pack_size);
-	auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
-	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
-	buf->count = count;
-	for (uint32_t i = 0; i < buf->count; ++i)
-	{
-		buf->entries[i].expedition_id = expedition_character_ids[i].first;
-		buf->entries[i].character_id = expedition_character_ids[i].second;
-		buf->entries[i].character_zone_id = 0;
-		buf->entries[i].character_instance_id = 0;
-		buf->entries[i].character_online = false;
-	}
-	worldserver.SendPacket(pack.get());
-}
-
 void Expedition::SendWorldCharacterLockout(
 	uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove)
 {
@@ -1794,7 +1737,8 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 			if (expedition)
 			{
-				expedition->UpdateMemberStatus(buf->character_id, static_cast<DynamicZoneMemberStatus>(buf->status));
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
+				expedition->SendMemberStatusToZoneMembers(buf->character_id, status);
 			}
 		}
 		break;
@@ -1825,24 +1769,19 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	case ServerOP_ExpeditionGetOnlineMembers:
+	case ServerOP_ExpeditionGetMemberStatuses:
 	{
-		// reply from world for online member statuses request (for multiple expeditions)
-		auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-		for (uint32_t i = 0; i < buf->count; ++i)
+		// reply from world for online member statuses request
+		auto buf = reinterpret_cast<ServerExpeditionMemberStatuses_Struct*>(pack->pBuffer);
+		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
+		if (expedition)
 		{
-			auto member = reinterpret_cast<ServerExpeditionCharacterEntry_Struct*>(&buf->entries[i]);
-			auto expedition = Expedition::FindCachedExpeditionByID(member->expedition_id);
-			if (expedition)
+			for (uint32_t i = 0; i < buf->count; ++i)
 			{
-				auto is_online = member->character_online;
-				auto status = is_online ? DynamicZoneMemberStatus::Online : DynamicZoneMemberStatus::Offline;
-				if (is_online && expedition->GetDynamicZone().IsInstanceID(member->character_instance_id))
-				{
-					status = DynamicZoneMemberStatus::InDynamicZone;
-				}
-				expedition->UpdateMemberStatus(member->character_id, status);
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->entries[i].online_status);
+				expedition->SetInternalMemberStatus(buf->entries[i].character_id, status);
 			}
+			expedition->SendMemberListToZoneMembers();
 		}
 		break;
 	}

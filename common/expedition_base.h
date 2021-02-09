@@ -33,6 +33,7 @@ public:
 	bool HasMember(uint32_t character_id);
 	bool IsEmpty() const { return m_members.empty(); }
 	void RemoveInternalMember(uint32_t character_id);
+	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
 	void LoadRepositoryResult(ExpeditionsRepository::ExpeditionWithLeader&& entry);
 	void AddMemberFromRepositoryResult(ExpeditionMembersRepository::MemberWithName&& entry);

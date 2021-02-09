@@ -62,10 +62,8 @@ void Expedition::ChooseNewLeader()
 		return;
 	}
 
-	// we don't track expedition member status in world so may choose a linkdead member
-	// this is fine since it will trigger another change when that member goes offline
 	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
-		if (member.id != m_leader.id) {
+		if (member.id != m_leader.id && member.IsOnline()) {
 			auto member_cle = client_list.FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
 		}
@@ -170,4 +168,63 @@ bool Expedition::Process()
 	CheckLeader();
 
 	return false;
+}
+
+void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	SetInternalMemberStatus(character_id, status);
+
+	// any member status update will trigger a leader fix if leader was offline
+	if (m_leader.status == DynamicZoneMemberStatus::Offline)
+	{
+		ChooseNewLeader();
+	}
+}
+
+void Expedition::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
+{
+	const auto& members = GetMembers();
+
+	uint32_t members_count = static_cast<uint32_t>(members.size());
+	uint32_t entries_size = sizeof(ServerExpeditionMemberStatusEntry_Struct) * members_count;
+	uint32_t pack_size = sizeof(ServerExpeditionMemberStatuses_Struct) + entries_size;
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionGetMemberStatuses, pack_size);
+	auto buf = reinterpret_cast<ServerExpeditionMemberStatuses_Struct*>(pack->pBuffer);
+	buf->expedition_id = GetID();
+	buf->count = members_count;
+
+	for (int i = 0; i < members.size(); ++i)
+	{
+		buf->entries[i].character_id = members[i].id;
+		buf->entries[i].online_status = static_cast<uint8_t>(members[i].status);
+	}
+
+	zoneserver_list.SendPacket(zone_id, instance_id, pack.get());
+}
+
+void Expedition::CacheMemberStatuses()
+{
+	// called when a new expedition is cached to fill member statuses
+	std::string zone_name{};
+	std::vector<ClientListEntry*> all_clients;
+	all_clients.reserve(client_list.GetClientCount());
+	client_list.GetClients(zone_name.c_str(), all_clients);
+
+	for (const auto& member : m_members)
+	{
+		auto it = std::find_if(all_clients.begin(), all_clients.end(),
+			[&](const ClientListEntry* cle) { return (cle && cle->CharID() == member.id); });
+
+		auto status = DynamicZoneMemberStatus::Offline;
+		if (it != all_clients.end())
+		{
+			status = DynamicZoneMemberStatus::Online;
+			if (GetDynamicZone().IsSameDz((*it)->zone(), (*it)->instance()))
+			{
+				status = DynamicZoneMemberStatus::InDynamicZone;
+			}
+		}
+
+		SetInternalMemberStatus(member.id, status);
+	}
 }

@@ -110,6 +110,8 @@ void ExpeditionState::CacheExpeditions(
 			}
 		}
 
+		expedition->CacheMemberStatuses();
+
 		m_expeditions.emplace_back(std::move(expedition));
 	}
 }
