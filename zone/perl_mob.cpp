@@ -6164,7 +6164,7 @@ XS(XS_Mob_SetBucket);
 XS(XS_Mob_SetBucket) {
 	dXSARGS;	
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetBucketTHIS, std::string bucket_name, std::string bucket_value, [std::string expiration])");
+		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, std::string bucket_name, std::string bucket_value, [std::string expiration])");
 	{
 		Mob* THIS;
 		std::string key = (std::string) SvPV_nolen(ST(1));
