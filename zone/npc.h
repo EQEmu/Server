@@ -494,6 +494,8 @@ public:
 
 	inline bool IsSkipAutoScale() const { return skip_auto_scale; }
 
+	void ScaleNPC(uint8 npc_level);
+
 	void RecalculateSkills();
 
 	static LootDropEntries_Struct NewLootDropEntry();

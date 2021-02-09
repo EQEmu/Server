@@ -164,6 +164,16 @@ void NpcScaleManager::ScaleNPC(NPC *npc)
 	}
 }
 
+void NpcScaleManager::ResetNPCScaling(NPC *npc) {
+	for (const auto &scaling_stat : scaling_stats) {
+		std::string stat_name = fmt::format("modify_stat_{}", scaling_stat);
+		std::string reset_value = "0";
+		if (npc->EntityVariableExists(stat_name.c_str())) {
+			npc->ModifyNPCStat(scaling_stat.c_str(), reset_value.c_str());
+		}
+	}
+}
+
 bool NpcScaleManager::LoadScaleData()
 {
 	auto results = content_db.QueryDatabase(
