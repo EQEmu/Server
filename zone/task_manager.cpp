@@ -154,10 +154,6 @@ bool TaskManager::LoadTasks(int single_task)
 		int step        = task_activity.step;
 		int activity_id = task_activity.activityid;
 
-		// create pointer to activity data since declarations get unruly long
-		int                 activity_index = m_task_data[task_id]->activity_count;
-		ActivityInformation *activity_data = &m_task_data[task_id]->activity_information[activity_index];
-
 		if ((task_id <= 0) || (task_id >= MAXTASKS) || (activity_id < 0) || (activity_id >= MAXACTIVITIESPERTASK)) {
 
 			// This shouldn't happen, as the SELECT is bounded by MAXTASKS
@@ -177,6 +173,10 @@ bool TaskManager::LoadTasks(int single_task)
 			);
 			continue;
 		}
+
+		// create pointer to activity data since declarations get unruly long
+		int                 activity_index = m_task_data[task_id]->activity_count;
+		ActivityInformation *activity_data = &m_task_data[task_id]->activity_information[activity_index];
 
 		m_task_data[task_id]->activity_information[m_task_data[task_id]->activity_count].step_number = step;
 
