@@ -94,10 +94,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -273,6 +269,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(ground_spawns_entry.id));
 		insert_values.push_back(std::to_string(ground_spawns_entry.zoneid));
 		insert_values.push_back(std::to_string(ground_spawns_entry.version));
 		insert_values.push_back(std::to_string(ground_spawns_entry.max_x));
@@ -319,6 +316,7 @@ public:
 		for (auto &ground_spawns_entry: ground_spawns_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(ground_spawns_entry.id));
 			insert_values.push_back(std::to_string(ground_spawns_entry.zoneid));
 			insert_values.push_back(std::to_string(ground_spawns_entry.version));
 			insert_values.push_back(std::to_string(ground_spawns_entry.max_x));

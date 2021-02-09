@@ -76,10 +76,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -228,6 +224,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(adventure_details_entry.id));
 		insert_values.push_back(std::to_string(adventure_details_entry.adventure_id));
 		insert_values.push_back(std::to_string(adventure_details_entry.instance_id));
 		insert_values.push_back(std::to_string(adventure_details_entry.count));
@@ -265,6 +262,7 @@ public:
 		for (auto &adventure_details_entry: adventure_details_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(adventure_details_entry.id));
 			insert_values.push_back(std::to_string(adventure_details_entry.adventure_id));
 			insert_values.push_back(std::to_string(adventure_details_entry.instance_id));
 			insert_values.push_back(std::to_string(adventure_details_entry.count));

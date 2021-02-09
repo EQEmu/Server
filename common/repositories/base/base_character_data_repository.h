@@ -262,10 +262,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -693,6 +689,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_data_entry.id));
 		insert_values.push_back(std::to_string(character_data_entry.account_id));
 		insert_values.push_back("'" + EscapeString(character_data_entry.name) + "'");
 		insert_values.push_back("'" + EscapeString(character_data_entry.last_name) + "'");
@@ -823,6 +820,7 @@ public:
 		for (auto &character_data_entry: character_data_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_data_entry.id));
 			insert_values.push_back(std::to_string(character_data_entry.account_id));
 			insert_values.push_back("'" + EscapeString(character_data_entry.name) + "'");
 			insert_values.push_back("'" + EscapeString(character_data_entry.last_name) + "'");

@@ -70,10 +70,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -213,6 +209,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(lootdrop_entry.id));
 		insert_values.push_back("'" + EscapeString(lootdrop_entry.name) + "'");
 		insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 		insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));
@@ -247,6 +244,7 @@ public:
 		for (auto &lootdrop_entry: lootdrop_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(lootdrop_entry.id));
 			insert_values.push_back("'" + EscapeString(lootdrop_entry.name) + "'");
 			insert_values.push_back(std::to_string(lootdrop_entry.min_expansion));
 			insert_values.push_back(std::to_string(lootdrop_entry.max_expansion));

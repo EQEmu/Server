@@ -66,10 +66,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -203,6 +199,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(expedition_members_entry.id));
 		insert_values.push_back(std::to_string(expedition_members_entry.expedition_id));
 		insert_values.push_back(std::to_string(expedition_members_entry.character_id));
 		insert_values.push_back(std::to_string(expedition_members_entry.is_current_member));
@@ -235,6 +232,7 @@ public:
 		for (auto &expedition_members_entry: expedition_members_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(expedition_members_entry.id));
 			insert_values.push_back(std::to_string(expedition_members_entry.expedition_id));
 			insert_values.push_back(std::to_string(expedition_members_entry.character_id));
 			insert_values.push_back(std::to_string(expedition_members_entry.is_current_member));

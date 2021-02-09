@@ -64,10 +64,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -198,6 +194,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_skills_entry.id));
 		insert_values.push_back(std::to_string(character_skills_entry.skill_id));
 		insert_values.push_back(std::to_string(character_skills_entry.value));
 
@@ -229,6 +226,7 @@ public:
 		for (auto &character_skills_entry: character_skills_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_skills_entry.id));
 			insert_values.push_back(std::to_string(character_skills_entry.skill_id));
 			insert_values.push_back(std::to_string(character_skills_entry.value));
 

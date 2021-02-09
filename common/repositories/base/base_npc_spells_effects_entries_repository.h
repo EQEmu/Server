@@ -74,10 +74,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -223,6 +219,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.id));
 		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.npc_spells_effects_id));
 		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.spell_effect_id));
 		insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.minlevel));
@@ -259,6 +256,7 @@ public:
 		for (auto &npc_spells_effects_entries_entry: npc_spells_effects_entries_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.id));
 			insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.npc_spells_effects_id));
 			insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.spell_effect_id));
 			insert_values.push_back(std::to_string(npc_spells_effects_entries_entry.minlevel));

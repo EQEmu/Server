@@ -106,10 +106,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -303,6 +299,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(zone_points_entry.id));
 		insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
 		insert_values.push_back(std::to_string(zone_points_entry.version));
 		insert_values.push_back(std::to_string(zone_points_entry.number));
@@ -355,6 +352,7 @@ public:
 		for (auto &zone_points_entry: zone_points_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(zone_points_entry.id));
 			insert_values.push_back("'" + EscapeString(zone_points_entry.zone) + "'");
 			insert_values.push_back(std::to_string(zone_points_entry.version));
 			insert_values.push_back(std::to_string(zone_points_entry.number));

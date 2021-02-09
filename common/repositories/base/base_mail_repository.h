@@ -74,10 +74,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -223,6 +219,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(mail_entry.msgid));
 		insert_values.push_back(std::to_string(mail_entry.charid));
 		insert_values.push_back(std::to_string(mail_entry.timestamp));
 		insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");
@@ -259,6 +256,7 @@ public:
 		for (auto &mail_entry: mail_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(mail_entry.msgid));
 			insert_values.push_back(std::to_string(mail_entry.charid));
 			insert_values.push_back(std::to_string(mail_entry.timestamp));
 			insert_values.push_back("'" + EscapeString(mail_entry.from) + "'");

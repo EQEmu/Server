@@ -92,10 +92,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -268,6 +264,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(global_loot_entry.id));
 		insert_values.push_back("'" + EscapeString(global_loot_entry.description) + "'");
 		insert_values.push_back(std::to_string(global_loot_entry.loottable_id));
 		insert_values.push_back(std::to_string(global_loot_entry.enabled));
@@ -313,6 +310,7 @@ public:
 		for (auto &global_loot_entry: global_loot_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(global_loot_entry.id));
 			insert_values.push_back("'" + EscapeString(global_loot_entry.description) + "'");
 			insert_values.push_back(std::to_string(global_loot_entry.loottable_id));
 			insert_values.push_back(std::to_string(global_loot_entry.enabled));

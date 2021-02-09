@@ -66,10 +66,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -203,6 +199,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(npc_faction_entry.id));
 		insert_values.push_back("'" + EscapeString(npc_faction_entry.name) + "'");
 		insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
 		insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));
@@ -235,6 +232,7 @@ public:
 		for (auto &npc_faction_entry: npc_faction_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(npc_faction_entry.id));
 			insert_values.push_back("'" + EscapeString(npc_faction_entry.name) + "'");
 			insert_values.push_back(std::to_string(npc_faction_entry.primaryfaction));
 			insert_values.push_back(std::to_string(npc_faction_entry.ignore_primary_assist));

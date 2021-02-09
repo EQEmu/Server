@@ -70,10 +70,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -213,6 +209,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(expedition_lockouts_entry.id));
 		insert_values.push_back(std::to_string(expedition_lockouts_entry.expedition_id));
 		insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.event_name) + "'");
 		insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.expire_time) + "'");
@@ -247,6 +244,7 @@ public:
 		for (auto &expedition_lockouts_entry: expedition_lockouts_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(expedition_lockouts_entry.id));
 			insert_values.push_back(std::to_string(expedition_lockouts_entry.expedition_id));
 			insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.event_name) + "'");
 			insert_values.push_back("'" + EscapeString(expedition_lockouts_entry.expire_time) + "'");

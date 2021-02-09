@@ -240,10 +240,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -639,6 +635,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+		insert_values.push_back(std::to_string(zone_entry.id));
 		insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
@@ -758,6 +755,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+			insert_values.push_back(std::to_string(zone_entry.id));
 			insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");

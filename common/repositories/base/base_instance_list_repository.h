@@ -72,10 +72,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -218,6 +214,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(instance_list_entry.id));
 		insert_values.push_back(std::to_string(instance_list_entry.zone));
 		insert_values.push_back(std::to_string(instance_list_entry.version));
 		insert_values.push_back(std::to_string(instance_list_entry.is_global));
@@ -253,6 +250,7 @@ public:
 		for (auto &instance_list_entry: instance_list_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(instance_list_entry.id));
 			insert_values.push_back(std::to_string(instance_list_entry.zone));
 			insert_values.push_back(std::to_string(instance_list_entry.version));
 			insert_values.push_back(std::to_string(instance_list_entry.is_global));

@@ -72,10 +72,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -218,6 +214,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(character_material_entry.id));
 		insert_values.push_back(std::to_string(character_material_entry.slot));
 		insert_values.push_back(std::to_string(character_material_entry.blue));
 		insert_values.push_back(std::to_string(character_material_entry.green));
@@ -253,6 +250,7 @@ public:
 		for (auto &character_material_entry: character_material_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(character_material_entry.id));
 			insert_values.push_back(std::to_string(character_material_entry.slot));
 			insert_values.push_back(std::to_string(character_material_entry.blue));
 			insert_values.push_back(std::to_string(character_material_entry.green));

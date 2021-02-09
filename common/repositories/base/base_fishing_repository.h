@@ -80,10 +80,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -238,6 +234,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(fishing_entry.id));
 		insert_values.push_back(std::to_string(fishing_entry.zoneid));
 		insert_values.push_back(std::to_string(fishing_entry.Itemid));
 		insert_values.push_back(std::to_string(fishing_entry.skill_level));
@@ -277,6 +274,7 @@ public:
 		for (auto &fishing_entry: fishing_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(fishing_entry.id));
 			insert_values.push_back(std::to_string(fishing_entry.zoneid));
 			insert_values.push_back(std::to_string(fishing_entry.Itemid));
 			insert_values.push_back(std::to_string(fishing_entry.skill_level));

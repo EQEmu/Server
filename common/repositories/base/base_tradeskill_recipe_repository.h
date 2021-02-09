@@ -88,10 +88,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -258,6 +254,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
 		insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.name) + "'");
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
 		insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));
@@ -301,6 +298,7 @@ public:
 		for (auto &tradeskill_recipe_entry: tradeskill_recipe_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(tradeskill_recipe_entry.id));
 			insert_values.push_back("'" + EscapeString(tradeskill_recipe_entry.name) + "'");
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.tradeskill));
 			insert_values.push_back(std::to_string(tradeskill_recipe_entry.skillneeded));

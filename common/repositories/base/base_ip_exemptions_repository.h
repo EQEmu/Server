@@ -64,10 +64,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -198,6 +194,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
 		insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
 		insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
 
@@ -229,6 +226,7 @@ public:
 		for (auto &ip_exemptions_entry: ip_exemptions_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_id));
 			insert_values.push_back("'" + EscapeString(ip_exemptions_entry.exemption_ip) + "'");
 			insert_values.push_back(std::to_string(ip_exemptions_entry.exemption_amount));
 

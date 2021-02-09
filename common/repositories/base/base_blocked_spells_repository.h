@@ -82,10 +82,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -243,6 +239,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(blocked_spells_entry.id));
 		insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
 		insert_values.push_back(std::to_string(blocked_spells_entry.type));
 		insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));
@@ -283,6 +280,7 @@ public:
 		for (auto &blocked_spells_entry: blocked_spells_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(blocked_spells_entry.id));
 			insert_values.push_back(std::to_string(blocked_spells_entry.spellid));
 			insert_values.push_back(std::to_string(blocked_spells_entry.type));
 			insert_values.push_back(std::to_string(blocked_spells_entry.zoneid));

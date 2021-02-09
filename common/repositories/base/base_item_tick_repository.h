@@ -70,10 +70,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -216,6 +212,7 @@ public:
 		insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
 		insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 		insert_values.push_back(std::to_string(item_tick_entry.it_level));
+		insert_values.push_back(std::to_string(item_tick_entry.it_id));
 		insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
 		insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 
@@ -250,6 +247,7 @@ public:
 			insert_values.push_back(std::to_string(item_tick_entry.it_itemid));
 			insert_values.push_back(std::to_string(item_tick_entry.it_chance));
 			insert_values.push_back(std::to_string(item_tick_entry.it_level));
+			insert_values.push_back(std::to_string(item_tick_entry.it_id));
 			insert_values.push_back("'" + EscapeString(item_tick_entry.it_qglobal) + "'");
 			insert_values.push_back(std::to_string(item_tick_entry.it_bagslot));
 

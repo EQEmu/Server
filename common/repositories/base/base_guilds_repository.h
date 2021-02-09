@@ -76,10 +76,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -228,6 +224,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(guilds_entry.id));
 		insert_values.push_back("'" + EscapeString(guilds_entry.name) + "'");
 		insert_values.push_back(std::to_string(guilds_entry.leader));
 		insert_values.push_back(std::to_string(guilds_entry.minstatus));
@@ -265,6 +262,7 @@ public:
 		for (auto &guilds_entry: guilds_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(guilds_entry.id));
 			insert_values.push_back("'" + EscapeString(guilds_entry.name) + "'");
 			insert_values.push_back(std::to_string(guilds_entry.leader));
 			insert_values.push_back(std::to_string(guilds_entry.minstatus));

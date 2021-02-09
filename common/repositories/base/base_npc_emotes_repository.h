@@ -68,10 +68,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -208,6 +204,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(npc_emotes_entry.id));
 		insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 		insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 		insert_values.push_back(std::to_string(npc_emotes_entry.type));
@@ -241,6 +238,7 @@ public:
 		for (auto &npc_emotes_entry: npc_emotes_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(npc_emotes_entry.id));
 			insert_values.push_back(std::to_string(npc_emotes_entry.emoteid));
 			insert_values.push_back(std::to_string(npc_emotes_entry.event_));
 			insert_values.push_back(std::to_string(npc_emotes_entry.type));

@@ -70,6 +70,7 @@ public:
 		int         max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
+		int         is_instance_door;
 	};
 
 	static std::string PrimaryKey()
@@ -115,6 +116,7 @@ public:
 			"max_expansion",
 			"content_flags",
 			"content_flags_disabled",
+			"is_instance_door",
 		};
 	}
 
@@ -128,10 +130,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -200,6 +198,7 @@ public:
 		entry.max_expansion          = 0;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
+		entry.is_instance_door       = 0;
 
 		return entry;
 	}
@@ -270,6 +269,7 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.is_instance_door       = atoi(row[35]);
 
 			return entry;
 		}
@@ -337,6 +337,7 @@ public:
 		update_values.push_back(columns[32] + " = " + std::to_string(doors_entry.max_expansion));
 		update_values.push_back(columns[33] + " = '" + EscapeString(doors_entry.content_flags) + "'");
 		update_values.push_back(columns[34] + " = '" + EscapeString(doors_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[35] + " = " + std::to_string(doors_entry.is_instance_door));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -358,6 +359,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(doors_entry.id));
 		insert_values.push_back(std::to_string(doors_entry.doorid));
 		insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
 		insert_values.push_back(std::to_string(doors_entry.version));
@@ -392,6 +394,7 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(doors_entry.is_instance_door));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -421,6 +424,7 @@ public:
 		for (auto &doors_entry: doors_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(doors_entry.id));
 			insert_values.push_back(std::to_string(doors_entry.doorid));
 			insert_values.push_back("'" + EscapeString(doors_entry.zone) + "'");
 			insert_values.push_back(std::to_string(doors_entry.version));
@@ -455,6 +459,7 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(doors_entry.is_instance_door));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -523,6 +528,7 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.is_instance_door       = atoi(row[35]);
 
 			all_entries.push_back(entry);
 		}
@@ -582,6 +588,7 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
+			entry.is_instance_door       = atoi(row[35]);
 
 			all_entries.push_back(entry);
 		}

@@ -66,10 +66,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -203,6 +199,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(faction_list_mod_entry.id));
 		insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
 		insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
 		insert_values.push_back("'" + EscapeString(faction_list_mod_entry.mod_name) + "'");
@@ -235,6 +232,7 @@ public:
 		for (auto &faction_list_mod_entry: faction_list_mod_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(faction_list_mod_entry.id));
 			insert_values.push_back(std::to_string(faction_list_mod_entry.faction_id));
 			insert_values.push_back(std::to_string(faction_list_mod_entry.mod));
 			insert_values.push_back("'" + EscapeString(faction_list_mod_entry.mod_name) + "'");

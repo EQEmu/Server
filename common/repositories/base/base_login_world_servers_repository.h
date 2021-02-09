@@ -78,10 +78,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -233,6 +229,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(login_world_servers_entry.id));
 		insert_values.push_back("'" + EscapeString(login_world_servers_entry.long_name) + "'");
 		insert_values.push_back("'" + EscapeString(login_world_servers_entry.short_name) + "'");
 		insert_values.push_back("'" + EscapeString(login_world_servers_entry.tag_description) + "'");
@@ -271,6 +268,7 @@ public:
 		for (auto &login_world_servers_entry: login_world_servers_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(login_world_servers_entry.id));
 			insert_values.push_back("'" + EscapeString(login_world_servers_entry.long_name) + "'");
 			insert_values.push_back("'" + EscapeString(login_world_servers_entry.short_name) + "'");
 			insert_values.push_back("'" + EscapeString(login_world_servers_entry.tag_description) + "'");

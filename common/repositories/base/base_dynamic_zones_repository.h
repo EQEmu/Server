@@ -92,10 +92,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -268,6 +264,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(dynamic_zones_entry.id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.instance_id));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.type));
 		insert_values.push_back(std::to_string(dynamic_zones_entry.compass_zone_id));
@@ -313,6 +310,7 @@ public:
 		for (auto &dynamic_zones_entry: dynamic_zones_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(dynamic_zones_entry.id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.instance_id));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.type));
 			insert_values.push_back(std::to_string(dynamic_zones_entry.compass_zone_id));

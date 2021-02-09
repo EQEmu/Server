@@ -84,10 +84,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -248,6 +244,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(spawngroup_entry.id));
 		insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
 		insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 		insert_values.push_back(std::to_string(spawngroup_entry.dist));
@@ -289,6 +286,7 @@ public:
 		for (auto &spawngroup_entry: spawngroup_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(spawngroup_entry.id));
 			insert_values.push_back("'" + EscapeString(spawngroup_entry.name) + "'");
 			insert_values.push_back(std::to_string(spawngroup_entry.spawn_limit));
 			insert_values.push_back(std::to_string(spawngroup_entry.dist));

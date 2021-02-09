@@ -66,10 +66,6 @@ public:
 		std::vector<std::string> insert_columns;
 
 		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
 			insert_columns.push_back(column);
 		}
 
@@ -203,6 +199,7 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
+		insert_values.push_back(std::to_string(data_buckets_entry.id));
 		insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
 		insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
 		insert_values.push_back(std::to_string(data_buckets_entry.expires));
@@ -235,6 +232,7 @@ public:
 		for (auto &data_buckets_entry: data_buckets_entries) {
 			std::vector<std::string> insert_values;
 
+			insert_values.push_back(std::to_string(data_buckets_entry.id));
 			insert_values.push_back("'" + EscapeString(data_buckets_entry.key) + "'");
 			insert_values.push_back("'" + EscapeString(data_buckets_entry.value) + "'");
 			insert_values.push_back(std::to_string(data_buckets_entry.expires));
