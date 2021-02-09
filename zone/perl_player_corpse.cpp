@@ -59,7 +59,7 @@ XS(XS_Corpse_GetCharID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetCharID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetCharID(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetCharID(THIS)"); // @categories Account and Character, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -76,7 +76,7 @@ XS(XS_Corpse_GetDecayTime); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetDecayTime) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetDecayTime(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetDecayTime(THIS)"); // @categories Script Utility, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -93,7 +93,7 @@ XS(XS_Corpse_Lock); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_Lock) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::Lock(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::Lock(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -106,7 +106,7 @@ XS(XS_Corpse_UnLock); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_UnLock) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::UnLock(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::UnLock(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -119,7 +119,7 @@ XS(XS_Corpse_IsLocked); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_IsLocked) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::IsLocked(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::IsLocked(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		bool RETVAL;
@@ -135,7 +135,7 @@ XS(XS_Corpse_ResetLooter); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_ResetLooter) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::ResetLooter(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::ResetLooter(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -148,7 +148,7 @@ XS(XS_Corpse_GetDBID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetDBID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetDBID(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetDBID(THIS)"); // @categories Script Utility, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -165,7 +165,7 @@ XS(XS_Corpse_GetOwnerName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetOwnerName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetOwnerName(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetOwnerName(THIS)"); // @categories Account and Character, Corpse
 	{
 		Corpse *THIS;
 		char   *RETVAL;
@@ -183,7 +183,7 @@ XS(XS_Corpse_SetDecayTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_SetDecayTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::SetDecayTimer(THIS, uint32 decay_time)");
+		Perl_croak(aTHX_ "Usage: Corpse::SetDecayTimer(THIS, uint32 decay_time)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		uint32 decaytime = (uint32) SvUV(ST(1));
@@ -197,7 +197,7 @@ XS(XS_Corpse_IsEmpty); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_IsEmpty) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::IsEmpty(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::IsEmpty(THIS)"); // @categories Inventory and Items, Corpse
 	{
 		Corpse *THIS;
 		bool RETVAL;
@@ -213,7 +213,7 @@ XS(XS_Corpse_AddItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_AddItem) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Corpse::AddItem(THIS, uint32 item_id, uint16 charges, [unt16 slot = 0])");
+		Perl_croak(aTHX_ "Usage: Corpse::AddItem(THIS, uint32 item_id, uint16 charges, [unt16 slot = 0])"); // @categories Inventory and Items, Corpse
 	{
 		Corpse *THIS;
 		uint32 itemnum = (uint32) SvUV(ST(1));
@@ -235,7 +235,7 @@ XS(XS_Corpse_GetWornItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetWornItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::GetWornItem(THIS, equipSlot)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetWornItem(THIS, equipSlot)"); // @categories Inventory and Items, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -253,7 +253,7 @@ XS(XS_Corpse_RemoveItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_RemoveItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::RemoveItem(THIS, uint16 loot_slot)");
+		Perl_croak(aTHX_ "Usage: Corpse::RemoveItem(THIS, uint16 loot_slot)"); // @categories Inventory and Items, Corpse
 	{
 		Corpse *THIS;
 		uint16 lootslot = (uint16) SvUV(ST(1));
@@ -267,7 +267,7 @@ XS(XS_Corpse_SetCash); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_SetCash) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Corpse::SetCash(THIS, uint16 copper, uint16 silver, uint16 gold, uint16 platinum)");
+		Perl_croak(aTHX_ "Usage: Corpse::SetCash(THIS, uint16 copper, uint16 silver, uint16 gold, uint16 platinum)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		uint16 in_copper   = (uint16) SvUV(ST(1));
@@ -284,7 +284,7 @@ XS(XS_Corpse_RemoveCash); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_RemoveCash) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::RemoveCash(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::RemoveCash(THIS)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -297,7 +297,7 @@ XS(XS_Corpse_CountItems); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_CountItems) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::CountItems(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::CountItems(THIS)"); // @categories Inventory and Items, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -314,7 +314,7 @@ XS(XS_Corpse_Delete); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_Delete) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::Delete(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::Delete(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -327,7 +327,7 @@ XS(XS_Corpse_GetCopper); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetCopper) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetCopper(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetCopper(THIS)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -344,7 +344,7 @@ XS(XS_Corpse_GetSilver); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetSilver) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetSilver(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetSilver(THIS)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -361,7 +361,7 @@ XS(XS_Corpse_GetGold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetGold) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetGold(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetGold(THIS)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -378,7 +378,7 @@ XS(XS_Corpse_GetPlatinum); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_GetPlatinum) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetPlatinum(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetPlatinum(THIS)"); // @categories Currency and Points, Corpse
 	{
 		Corpse *THIS;
 		uint32 RETVAL;
@@ -395,7 +395,7 @@ XS(XS_Corpse_Summon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_Summon) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::Summon(THIS, Client* client, bool is_spell)");
+		Perl_croak(aTHX_ "Usage: Corpse::Summon(THIS, Client* client, bool is_spell)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		Client *client;
@@ -418,7 +418,7 @@ XS(XS_Corpse_CastRezz); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_CastRezz) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::CastRezz(THIS, uint16 spell_id, [Mob* caster = nullptr])");
+		Perl_croak(aTHX_ "Usage: Corpse::CastRezz(THIS, uint16 spell_id, [Mob* caster = nullptr])"); // @categories Spells and Disciplines, Corpse
 	{
 		Corpse *THIS;
 		uint16 spellid = (uint16) SvUV(ST(1));
@@ -441,7 +441,7 @@ XS(XS_Corpse_CompleteRezz); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_CompleteRezz) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::CompleteRezz(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::CompleteRezz(THIS)"); // @categories Spells and Disciplines, Corpse
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
@@ -454,7 +454,7 @@ XS(XS_Corpse_CanMobLoot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_CanMobLoot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::CanMobLoot(THIS, int character_id)");
+		Perl_croak(aTHX_ "Usage: Corpse::CanMobLoot(THIS, int character_id)"); // @categories Script Utility, Corpse
 	{
 		Corpse *THIS;
 		bool RETVAL;
@@ -471,7 +471,7 @@ XS(XS_Corpse_AllowMobLoot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_AllowMobLoot) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Corpse::AllowMobLoot(THIS, Mob* them, uint8 slot)");
+		Perl_croak(aTHX_ "Usage: Corpse::AllowMobLoot(THIS, Mob* them, uint8 slot)"); // @categories Account and Character, Corpse
 	{
 		Corpse *THIS;
 		Mob    *them;
@@ -494,7 +494,7 @@ XS(XS_Corpse_AddLooter); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_AddLooter) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Corpse::AddLooter(THIS, Mob* who)");
+		Perl_croak(aTHX_ "Usage: Corpse::AddLooter(THIS, Mob* who)"); // @categories Account and Character, Corpse
 	{
 		Corpse *THIS;
 		Mob    *who;
@@ -516,7 +516,7 @@ XS(XS_Corpse_IsRezzed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Corpse_IsRezzed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::IsRezzed(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::IsRezzed(THIS)"); // @categories Corpse
 	{
 		Corpse *THIS;
 		bool RETVAL;
