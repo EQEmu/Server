@@ -22,7 +22,7 @@
 #define EXPEDITION_REQUEST_H
 
 #include "expedition.h"
-#include "expedition_lockout_timer.h"
+#include "../common/expedition_lockout_timer.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -30,16 +30,13 @@
 
 class Client;
 class Group;
-class MySQLRequestResult;
 class Raid;
-class ServerPacket;
 
 class ExpeditionRequest
 {
 public:
-	ExpeditionRequest(
-		std::string expedition_name, uint32_t min_players, uint32_t max_players,
-		bool disable_messages = false);
+	ExpeditionRequest(std::string expedition_name, uint32_t min_players,
+		uint32_t max_players, bool disable_messages = false);
 
 	bool Validate(Client* requester);
 
@@ -60,7 +57,7 @@ private:
 	bool CheckMembersForConflicts(const std::vector<std::string>& member_names);
 	std::string GetGroupLeaderName(uint32_t group_id);
 	bool IsPlayerCountValidated();
-	bool LoadLeaderLockouts();
+	bool SaveLeaderLockouts(const std::vector<ExpeditionLockoutTimer>& leader_lockouts);
 	void SendLeaderMemberInExpedition(const std::string& member_name, bool is_solo);
 	void SendLeaderMemberReplayLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout, bool is_solo);
 	void SendLeaderMemberEventLockout(const std::string& member_name, const ExpeditionLockoutTimer& lockout);
@@ -71,7 +68,6 @@ private:
 	uint32_t m_leader_id            = 0;
 	uint32_t m_min_players          = 0;
 	uint32_t m_max_players          = 0;
-	bool     m_check_event_lockouts = true;
 	bool     m_disable_messages     = false;
 	std::string m_expedition_name;
 	std::string m_leader_name;

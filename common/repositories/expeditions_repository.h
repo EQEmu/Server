@@ -65,6 +65,61 @@ public:
 
 	// Custom extended repository methods here
 
+	struct CharacterExpedition
+	{
+		uint32_t    id;
+		std::string name;
+		uint32_t    expedition_id;
+	};
+
+	static std::vector<CharacterExpedition> GetCharactersWithExpedition(
+		Database& db, const std::vector<std::string>& character_names)
+	{
+		if (character_names.empty())
+		{
+			return {};
+		}
+
+		std::vector<CharacterExpedition> entries;
+
+		auto joined_character_names = fmt::format("'{}'", fmt::join(character_names, "','"));
+
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			SELECT
+				character_data.id,
+				character_data.name,
+				MAX(expeditions.id)
+			FROM character_data
+				LEFT JOIN expedition_members
+					ON character_data.id = expedition_members.character_id
+					AND expedition_members.is_current_member = TRUE
+				LEFT JOIN expeditions
+					ON expedition_members.expedition_id = expeditions.id
+			WHERE character_data.name IN ({})
+			GROUP BY character_data.id
+			ORDER BY FIELD(character_data.name, {})
+		),
+			joined_character_names,
+			joined_character_names
+		));
+
+		if (results.Success())
+		{
+			entries.reserve(results.RowCount());
+
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				CharacterExpedition entry{};
+				entry.id            = std::strtoul(row[0], nullptr, 10);
+				entry.name          = row[1];
+				entry.expedition_id = row[2] ? std::strtoul(row[2], nullptr, 10) : 0;
+
+				entries.emplace_back(std::move(entry));
+			}
+		}
+
+		return entries;
+	}
 };
 
 #endif //EQEMU_EXPEDITIONS_REPOSITORY_H

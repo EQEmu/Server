@@ -20,13 +20,13 @@
 
 #include "expedition.h"
 #include "expedition_database.h"
-#include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "client.h"
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/expedition_lockout_timer.h"
 #include "../common/util/uuid.h"
 
 extern WorldServer worldserver;

@@ -42,7 +42,6 @@ extern volatile bool RunLoops;
 #include "data_bucket.h"
 #include "expedition.h"
 #include "expedition_database.h"
-#include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "position.h"
 #include "worldserver.h"
@@ -61,6 +60,7 @@ extern volatile bool RunLoops;
 #include "queryserv.h"
 #include "mob_movement_manager.h"
 #include "../common/content/world_content_service.h"
+#include "../common/expedition_lockout_timer.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;

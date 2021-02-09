@@ -33,7 +33,6 @@ SET(zone_sources
 	exp.cpp
 	expedition.cpp
 	expedition_database.cpp
-	expedition_lockout_timer.cpp
 	expedition_request.cpp
 	fastmath.cpp
 	fearpath.cpp
@@ -186,7 +185,6 @@ SET(zone_headers
 	event_codes.h
 	expedition.h
 	expedition_database.h
-	expedition_lockout_timer.h
 	expedition_request.h
 	fastmath.h
 	forage.h
