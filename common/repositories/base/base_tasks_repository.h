@@ -1,12 +1,29 @@
 /**
- * DO NOT MODIFY THIS FILE
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
  *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ *
+ */
+
+/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to the repository extending the base.
- * Any modifications to base repositories are to be made by the generator only
- * 
- * @generator ./utils/scripts/generators/repository-generator.pl
- * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
+ * Any repository modifications are meant to be made to
+ * the repository extending the base. Any modifications to base repositories are to
+ * be made by the generator only
  */
 
 #ifndef EQEMU_BASE_TASKS_REPOSITORY_H
@@ -29,27 +46,11 @@ public:
 		int         cashreward;
 		int         xpreward;
 		int         rewardmethod;
-		int         reward_points;
-		int         reward_type;
 		int         minlevel;
 		int         maxlevel;
 		int         repeatable;
 		int         faction_reward;
 		std::string completion_emote;
-		int         replay_group;
-		int         min_players;
-		int         max_players;
-		int         task_lock_step;
-		int         instance_zone_id;
-		int         zone_version;
-		int         zone_in_zone_id;
-		float       zone_in_x;
-		float       zone_in_y;
-		int         zone_in_object_id;
-		float       dest_x;
-		float       dest_y;
-		float       dest_z;
-		float       dest_h;
 	};
 
 	static std::string PrimaryKey()
@@ -71,33 +72,32 @@ public:
 			"cashreward",
 			"xpreward",
 			"rewardmethod",
-			"reward_points",
-			"reward_type",
 			"minlevel",
 			"maxlevel",
 			"repeatable",
 			"faction_reward",
 			"completion_emote",
-			"replay_group",
-			"min_players",
-			"max_players",
-			"task_lock_step",
-			"instance_zone_id",
-			"zone_version",
-			"zone_in_zone_id",
-			"zone_in_x",
-			"zone_in_y",
-			"zone_in_object_id",
-			"dest_x",
-			"dest_y",
-			"dest_z",
-			"dest_h",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string InsertColumnsRaw()
+	{
+		std::vector<std::string> insert_columns;
+
+		for (auto &column : Columns()) {
+			if (column == PrimaryKey()) {
+				continue;
+			}
+
+			insert_columns.push_back(column);
+		}
+
+		return std::string(implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -119,7 +119,7 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			ColumnsRaw()
+			InsertColumnsRaw()
 		);
 	}
 
@@ -127,38 +127,22 @@ public:
 	{
 		Tasks entry{};
 
-		entry.id                = 0;
-		entry.type              = 0;
-		entry.duration          = 0;
-		entry.duration_code     = 0;
-		entry.title             = "";
-		entry.description       = "";
-		entry.reward            = "";
-		entry.rewardid          = 0;
-		entry.cashreward        = 0;
-		entry.xpreward          = 0;
-		entry.rewardmethod      = 2;
-		entry.reward_points     = 0;
-		entry.reward_type       = 0;
-		entry.minlevel          = 0;
-		entry.maxlevel          = 0;
-		entry.repeatable        = 1;
-		entry.faction_reward    = 0;
-		entry.completion_emote  = "";
-		entry.replay_group      = 0;
-		entry.min_players       = 0;
-		entry.max_players       = 0;
-		entry.task_lock_step    = 0;
-		entry.instance_zone_id  = 0;
-		entry.zone_version      = 0;
-		entry.zone_in_zone_id   = 0;
-		entry.zone_in_x         = 0;
-		entry.zone_in_y         = 0;
-		entry.zone_in_object_id = 0;
-		entry.dest_x            = 0;
-		entry.dest_y            = 0;
-		entry.dest_z            = 0;
-		entry.dest_h            = 0;
+		entry.id               = 0;
+		entry.type             = 0;
+		entry.duration         = 0;
+		entry.duration_code    = 0;
+		entry.title            = "";
+		entry.description      = "";
+		entry.reward           = "";
+		entry.rewardid         = 0;
+		entry.cashreward       = 0;
+		entry.xpreward         = 0;
+		entry.rewardmethod     = 2;
+		entry.minlevel         = 0;
+		entry.maxlevel         = 0;
+		entry.repeatable       = 1;
+		entry.faction_reward   = 0;
+		entry.completion_emote = "";
 
 		return entry;
 	}
@@ -194,38 +178,22 @@ public:
 		if (results.RowCount() == 1) {
 			Tasks entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.type              = atoi(row[1]);
-			entry.duration          = atoi(row[2]);
-			entry.duration_code     = atoi(row[3]);
-			entry.title             = row[4] ? row[4] : "";
-			entry.description       = row[5] ? row[5] : "";
-			entry.reward            = row[6] ? row[6] : "";
-			entry.rewardid          = atoi(row[7]);
-			entry.cashreward        = atoi(row[8]);
-			entry.xpreward          = atoi(row[9]);
-			entry.rewardmethod      = atoi(row[10]);
-			entry.reward_points     = atoi(row[11]);
-			entry.reward_type       = atoi(row[12]);
-			entry.minlevel          = atoi(row[13]);
-			entry.maxlevel          = atoi(row[14]);
-			entry.repeatable        = atoi(row[15]);
-			entry.faction_reward    = atoi(row[16]);
-			entry.completion_emote  = row[17] ? row[17] : "";
-			entry.replay_group      = atoi(row[18]);
-			entry.min_players       = atoi(row[19]);
-			entry.max_players       = atoi(row[20]);
-			entry.task_lock_step    = atoi(row[21]);
-			entry.instance_zone_id  = atoi(row[22]);
-			entry.zone_version      = atoi(row[23]);
-			entry.zone_in_zone_id   = atoi(row[24]);
-			entry.zone_in_x         = static_cast<float>(atof(row[25]));
-			entry.zone_in_y         = static_cast<float>(atof(row[26]));
-			entry.zone_in_object_id = atoi(row[27]);
-			entry.dest_x            = static_cast<float>(atof(row[28]));
-			entry.dest_y            = static_cast<float>(atof(row[29]));
-			entry.dest_z            = static_cast<float>(atof(row[30]));
-			entry.dest_h            = static_cast<float>(atof(row[31]));
+			entry.id               = atoi(row[0]);
+			entry.type             = atoi(row[1]);
+			entry.duration         = atoi(row[2]);
+			entry.duration_code    = atoi(row[3]);
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
+			entry.rewardid         = atoi(row[7]);
+			entry.cashreward       = atoi(row[8]);
+			entry.xpreward         = atoi(row[9]);
+			entry.rewardmethod     = atoi(row[10]);
+			entry.minlevel         = atoi(row[11]);
+			entry.maxlevel         = atoi(row[12]);
+			entry.repeatable       = atoi(row[13]);
+			entry.faction_reward   = atoi(row[14]);
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			return entry;
 		}
@@ -270,27 +238,11 @@ public:
 		update_values.push_back(columns[8] + " = " + std::to_string(tasks_entry.cashreward));
 		update_values.push_back(columns[9] + " = " + std::to_string(tasks_entry.xpreward));
 		update_values.push_back(columns[10] + " = " + std::to_string(tasks_entry.rewardmethod));
-		update_values.push_back(columns[11] + " = " + std::to_string(tasks_entry.reward_points));
-		update_values.push_back(columns[12] + " = " + std::to_string(tasks_entry.reward_type));
-		update_values.push_back(columns[13] + " = " + std::to_string(tasks_entry.minlevel));
-		update_values.push_back(columns[14] + " = " + std::to_string(tasks_entry.maxlevel));
-		update_values.push_back(columns[15] + " = " + std::to_string(tasks_entry.repeatable));
-		update_values.push_back(columns[16] + " = " + std::to_string(tasks_entry.faction_reward));
-		update_values.push_back(columns[17] + " = '" + EscapeString(tasks_entry.completion_emote) + "'");
-		update_values.push_back(columns[18] + " = " + std::to_string(tasks_entry.replay_group));
-		update_values.push_back(columns[19] + " = " + std::to_string(tasks_entry.min_players));
-		update_values.push_back(columns[20] + " = " + std::to_string(tasks_entry.max_players));
-		update_values.push_back(columns[21] + " = " + std::to_string(tasks_entry.task_lock_step));
-		update_values.push_back(columns[22] + " = " + std::to_string(tasks_entry.instance_zone_id));
-		update_values.push_back(columns[23] + " = " + std::to_string(tasks_entry.zone_version));
-		update_values.push_back(columns[24] + " = " + std::to_string(tasks_entry.zone_in_zone_id));
-		update_values.push_back(columns[25] + " = " + std::to_string(tasks_entry.zone_in_x));
-		update_values.push_back(columns[26] + " = " + std::to_string(tasks_entry.zone_in_y));
-		update_values.push_back(columns[27] + " = " + std::to_string(tasks_entry.zone_in_object_id));
-		update_values.push_back(columns[28] + " = " + std::to_string(tasks_entry.dest_x));
-		update_values.push_back(columns[29] + " = " + std::to_string(tasks_entry.dest_y));
-		update_values.push_back(columns[30] + " = " + std::to_string(tasks_entry.dest_z));
-		update_values.push_back(columns[31] + " = " + std::to_string(tasks_entry.dest_h));
+		update_values.push_back(columns[11] + " = " + std::to_string(tasks_entry.minlevel));
+		update_values.push_back(columns[12] + " = " + std::to_string(tasks_entry.maxlevel));
+		update_values.push_back(columns[13] + " = " + std::to_string(tasks_entry.repeatable));
+		update_values.push_back(columns[14] + " = " + std::to_string(tasks_entry.faction_reward));
+		update_values.push_back(columns[15] + " = '" + EscapeString(tasks_entry.completion_emote) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -323,27 +275,11 @@ public:
 		insert_values.push_back(std::to_string(tasks_entry.cashreward));
 		insert_values.push_back(std::to_string(tasks_entry.xpreward));
 		insert_values.push_back(std::to_string(tasks_entry.rewardmethod));
-		insert_values.push_back(std::to_string(tasks_entry.reward_points));
-		insert_values.push_back(std::to_string(tasks_entry.reward_type));
 		insert_values.push_back(std::to_string(tasks_entry.minlevel));
 		insert_values.push_back(std::to_string(tasks_entry.maxlevel));
 		insert_values.push_back(std::to_string(tasks_entry.repeatable));
 		insert_values.push_back(std::to_string(tasks_entry.faction_reward));
 		insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
-		insert_values.push_back(std::to_string(tasks_entry.replay_group));
-		insert_values.push_back(std::to_string(tasks_entry.min_players));
-		insert_values.push_back(std::to_string(tasks_entry.max_players));
-		insert_values.push_back(std::to_string(tasks_entry.task_lock_step));
-		insert_values.push_back(std::to_string(tasks_entry.instance_zone_id));
-		insert_values.push_back(std::to_string(tasks_entry.zone_version));
-		insert_values.push_back(std::to_string(tasks_entry.zone_in_zone_id));
-		insert_values.push_back(std::to_string(tasks_entry.zone_in_x));
-		insert_values.push_back(std::to_string(tasks_entry.zone_in_y));
-		insert_values.push_back(std::to_string(tasks_entry.zone_in_object_id));
-		insert_values.push_back(std::to_string(tasks_entry.dest_x));
-		insert_values.push_back(std::to_string(tasks_entry.dest_y));
-		insert_values.push_back(std::to_string(tasks_entry.dest_z));
-		insert_values.push_back(std::to_string(tasks_entry.dest_h));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -384,27 +320,11 @@ public:
 			insert_values.push_back(std::to_string(tasks_entry.cashreward));
 			insert_values.push_back(std::to_string(tasks_entry.xpreward));
 			insert_values.push_back(std::to_string(tasks_entry.rewardmethod));
-			insert_values.push_back(std::to_string(tasks_entry.reward_points));
-			insert_values.push_back(std::to_string(tasks_entry.reward_type));
 			insert_values.push_back(std::to_string(tasks_entry.minlevel));
 			insert_values.push_back(std::to_string(tasks_entry.maxlevel));
 			insert_values.push_back(std::to_string(tasks_entry.repeatable));
 			insert_values.push_back(std::to_string(tasks_entry.faction_reward));
 			insert_values.push_back("'" + EscapeString(tasks_entry.completion_emote) + "'");
-			insert_values.push_back(std::to_string(tasks_entry.replay_group));
-			insert_values.push_back(std::to_string(tasks_entry.min_players));
-			insert_values.push_back(std::to_string(tasks_entry.max_players));
-			insert_values.push_back(std::to_string(tasks_entry.task_lock_step));
-			insert_values.push_back(std::to_string(tasks_entry.instance_zone_id));
-			insert_values.push_back(std::to_string(tasks_entry.zone_version));
-			insert_values.push_back(std::to_string(tasks_entry.zone_in_zone_id));
-			insert_values.push_back(std::to_string(tasks_entry.zone_in_x));
-			insert_values.push_back(std::to_string(tasks_entry.zone_in_y));
-			insert_values.push_back(std::to_string(tasks_entry.zone_in_object_id));
-			insert_values.push_back(std::to_string(tasks_entry.dest_x));
-			insert_values.push_back(std::to_string(tasks_entry.dest_y));
-			insert_values.push_back(std::to_string(tasks_entry.dest_z));
-			insert_values.push_back(std::to_string(tasks_entry.dest_h));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -438,38 +358,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tasks entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.type              = atoi(row[1]);
-			entry.duration          = atoi(row[2]);
-			entry.duration_code     = atoi(row[3]);
-			entry.title             = row[4] ? row[4] : "";
-			entry.description       = row[5] ? row[5] : "";
-			entry.reward            = row[6] ? row[6] : "";
-			entry.rewardid          = atoi(row[7]);
-			entry.cashreward        = atoi(row[8]);
-			entry.xpreward          = atoi(row[9]);
-			entry.rewardmethod      = atoi(row[10]);
-			entry.reward_points     = atoi(row[11]);
-			entry.reward_type       = atoi(row[12]);
-			entry.minlevel          = atoi(row[13]);
-			entry.maxlevel          = atoi(row[14]);
-			entry.repeatable        = atoi(row[15]);
-			entry.faction_reward    = atoi(row[16]);
-			entry.completion_emote  = row[17] ? row[17] : "";
-			entry.replay_group      = atoi(row[18]);
-			entry.min_players       = atoi(row[19]);
-			entry.max_players       = atoi(row[20]);
-			entry.task_lock_step    = atoi(row[21]);
-			entry.instance_zone_id  = atoi(row[22]);
-			entry.zone_version      = atoi(row[23]);
-			entry.zone_in_zone_id   = atoi(row[24]);
-			entry.zone_in_x         = static_cast<float>(atof(row[25]));
-			entry.zone_in_y         = static_cast<float>(atof(row[26]));
-			entry.zone_in_object_id = atoi(row[27]);
-			entry.dest_x            = static_cast<float>(atof(row[28]));
-			entry.dest_y            = static_cast<float>(atof(row[29]));
-			entry.dest_z            = static_cast<float>(atof(row[30]));
-			entry.dest_h            = static_cast<float>(atof(row[31]));
+			entry.id               = atoi(row[0]);
+			entry.type             = atoi(row[1]);
+			entry.duration         = atoi(row[2]);
+			entry.duration_code    = atoi(row[3]);
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
+			entry.rewardid         = atoi(row[7]);
+			entry.cashreward       = atoi(row[8]);
+			entry.xpreward         = atoi(row[9]);
+			entry.rewardmethod     = atoi(row[10]);
+			entry.minlevel         = atoi(row[11]);
+			entry.maxlevel         = atoi(row[12]);
+			entry.repeatable       = atoi(row[13]);
+			entry.faction_reward   = atoi(row[14]);
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -494,38 +398,22 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			Tasks entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.type              = atoi(row[1]);
-			entry.duration          = atoi(row[2]);
-			entry.duration_code     = atoi(row[3]);
-			entry.title             = row[4] ? row[4] : "";
-			entry.description       = row[5] ? row[5] : "";
-			entry.reward            = row[6] ? row[6] : "";
-			entry.rewardid          = atoi(row[7]);
-			entry.cashreward        = atoi(row[8]);
-			entry.xpreward          = atoi(row[9]);
-			entry.rewardmethod      = atoi(row[10]);
-			entry.reward_points     = atoi(row[11]);
-			entry.reward_type       = atoi(row[12]);
-			entry.minlevel          = atoi(row[13]);
-			entry.maxlevel          = atoi(row[14]);
-			entry.repeatable        = atoi(row[15]);
-			entry.faction_reward    = atoi(row[16]);
-			entry.completion_emote  = row[17] ? row[17] : "";
-			entry.replay_group      = atoi(row[18]);
-			entry.min_players       = atoi(row[19]);
-			entry.max_players       = atoi(row[20]);
-			entry.task_lock_step    = atoi(row[21]);
-			entry.instance_zone_id  = atoi(row[22]);
-			entry.zone_version      = atoi(row[23]);
-			entry.zone_in_zone_id   = atoi(row[24]);
-			entry.zone_in_x         = static_cast<float>(atof(row[25]));
-			entry.zone_in_y         = static_cast<float>(atof(row[26]));
-			entry.zone_in_object_id = atoi(row[27]);
-			entry.dest_x            = static_cast<float>(atof(row[28]));
-			entry.dest_y            = static_cast<float>(atof(row[29]));
-			entry.dest_z            = static_cast<float>(atof(row[30]));
-			entry.dest_h            = static_cast<float>(atof(row[31]));
+			entry.id               = atoi(row[0]);
+			entry.type             = atoi(row[1]);
+			entry.duration         = atoi(row[2]);
+			entry.duration_code    = atoi(row[3]);
+			entry.title            = row[4] ? row[4] : "";
+			entry.description      = row[5] ? row[5] : "";
+			entry.reward           = row[6] ? row[6] : "";
+			entry.rewardid         = atoi(row[7]);
+			entry.cashreward       = atoi(row[8]);
+			entry.xpreward         = atoi(row[9]);
+			entry.rewardmethod     = atoi(row[10]);
+			entry.minlevel         = atoi(row[11]);
+			entry.maxlevel         = atoi(row[12]);
+			entry.repeatable       = atoi(row[13]);
+			entry.faction_reward   = atoi(row[14]);
+			entry.completion_emote = row[15] ? row[15] : "";
 
 			all_entries.push_back(entry);
 		}
