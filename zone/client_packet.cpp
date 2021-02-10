@@ -9037,14 +9037,21 @@ void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 	bool* p = (bool*)app->pBuffer;
 	if (*p == true)
 	{
-		auto pack =
-			new ServerPacket(ServerOP_AdventureRequestCreate,
-				sizeof(ServerAdventureRequestCreate_Struct) + (64 * adv_requested_member_count));
-		ServerAdventureRequestCreate_Struct *sac = (ServerAdventureRequestCreate_Struct*)pack->pBuffer;
+		auto pack = new ServerPacket(
+			ServerOP_AdventureRequestCreate,
+			sizeof(ServerAdventureRequestCreate_Struct) +
+			(64 * adv_requested_member_count));
+
+		ServerAdventureRequestCreate_Struct *sac = (ServerAdventureRequestCreate_Struct *) pack->pBuffer;
+
 		strcpy(sac->leader, GetName());
-		sac->id = adv_requested_id;
-		sac->theme = adv_requested_theme;
-		sac->member_count = adv_requested_member_count;
+		sac->id            = adv_requested_id;
+		sac->theme         = adv_requested_theme;
+		sac->member_count  = adv_requested_member_count;
+		sac->average_level = adv_requested_avg_lvl;
+
+		LogAdventure("[Client::Handle_OP_LDoNButton] Adventure average level [{}]", sac->average_level);
+
 		memcpy((pack->pBuffer + sizeof(ServerAdventureRequestCreate_Struct)), adv_requested_data, (64 * adv_requested_member_count));
 		worldserver.SendPacket(pack);
 		delete pack;

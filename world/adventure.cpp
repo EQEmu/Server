@@ -26,6 +26,7 @@ Adventure::Adventure(AdventureTemplate *t)
 	count = 0;
 	assassination_count = 0;
 	instance_id = 0;
+
 }
 
 Adventure::Adventure(AdventureTemplate *t, int count, int assassination_count, AdventureStatus status, uint16 instance_id, uint32 time_left)
@@ -423,5 +424,15 @@ void Adventure::MoveCorpsesToGraveyard()
 		zoneserver_list.SendPacket(spc->zone_id, 0, pack);
 		delete pack;
 	}
+}
+
+int Adventure::GetAverageLevel() const
+{
+	return average_level;
+}
+
+void Adventure::SetAverageLevel(int average_level)
+{
+	Adventure::average_level = average_level;
 }
 

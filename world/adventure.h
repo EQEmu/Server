@@ -87,6 +87,8 @@ public:
 	int GetCount() const { return count; }
 	int GetAssassinationCount() const { return assassination_count; }
 	uint32 GetRemainingTime() const { if(current_timer) { return (current_timer->GetRemainingTime() / 1000); } else { return 0; } }
+	int GetAverageLevel() const;
+	void SetAverageLevel(int average_level);
 protected:
 	int id;
 	int count;
@@ -96,6 +98,8 @@ protected:
 	std::list<std::string> players;
 	Timer *current_timer;
 	int instance_id;
+	int average_level;
+
 };
 
 #endif

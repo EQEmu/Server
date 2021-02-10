@@ -337,6 +337,10 @@ void AdventureManager::CalculateAdventureRequestReply(const char *data)
 		sra->theme = sar->template_id;
 		sra->id = (*ea_iter)->id;
 		sra->member_count = sar->member_count;
+		sra->average_level = avg_level;
+
+		LogAdventure("[AdventureManager::CalculateAdventureRequestReply] Adventure average level [{}]", avg_level);
+
 		memcpy((pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)), (data + sizeof(ServerAdventureRequest_Struct)), (sar->member_count * 64));
 		zoneserver_list.SendPacket(leader->zone(), leader->instance(), pack);
 		delete pack;
@@ -441,6 +445,8 @@ void AdventureManager::TryAdventureCreate(const char *data)
 			delete pack;
 		}
 	}
+
+	adv->SetAverageLevel(src->average_level);
 
 	adventure_list.push_back(adv);
 }
@@ -936,6 +942,10 @@ void AdventureManager::GetZoneData(uint16 instance_id)
 		zd->dest_y = temp->dest_y;
 		zd->dest_z = temp->dest_z;
 		zd->dest_h = temp->dest_h;
+		zd->average_level = current->GetAverageLevel();
+
+		LogAdventure("[AdventureManager::GetZoneData] Adventure average level [{}]", zd->average_level);
+
 		zoneserver_list.SendPacket(0, instance_id, pack);
 		delete pack;
 	}

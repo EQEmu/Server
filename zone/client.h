@@ -1270,7 +1270,7 @@ public:
 	void SendAdventureError(const char *error);
 	void SendAdventureDetails();
 	void SendAdventureCount(uint32 count, uint32 total);
-	void NewAdventure(int id, int theme, const char *text, int member_count, const char *members);
+	void NewAdventure(int id, int theme, const char *text, int member_count, const char *members, uint32 avg_level);
 	bool IsOnAdventure();
 	void LeaveAdventure();
 	void AdventureFinish(bool win, int theme, int points);
@@ -1613,6 +1613,7 @@ protected:
 	int adv_requested_theme;
 	int adv_requested_id;
 	char *adv_requested_data;
+	uint32 adv_requested_avg_lvl;
 	int adv_requested_member_count;
 	char *adv_data;
 

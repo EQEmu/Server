@@ -1688,7 +1688,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client *c = entity_list.GetClientByName(ars->leader);
 		if (c)
 		{
-			c->NewAdventure(ars->id, ars->theme, ars->text, ars->member_count, (const char*)(pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)));
+			LogInfo("[ServerOP_AdventureRequestAccept] Adventure average level [{}]", ars->average_level);
+
+			c->NewAdventure(
+				ars->id,
+				ars->theme,
+				ars->text,
+				ars->member_count,
+				(const char *) (pack->pBuffer + sizeof(ServerAdventureRequestAccept_Struct)),
+				ars->average_level
+			);
 			c->ClearPendingAdventureRequest();
 		}
 		break;
@@ -1811,6 +1820,8 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->adv_data = new char[pack->size];
 			memcpy(zone->adv_data, pack->pBuffer, pack->size);
 			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+
+			LogAdventure("[ServerOP_AdventureZoneData] Adventure average level [{}]", ds->average_level);
 		}
 		break;
 	}

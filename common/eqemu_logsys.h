@@ -121,6 +121,7 @@ namespace Logs {
 		Expeditions,
 		DynamicZones,
 		Group,
+		Adventure,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -201,6 +202,7 @@ namespace Logs {
 		"Expeditions",
 		"DynamicZones",
 		"Group",
+		"Adventure",
 	};
 }
 
