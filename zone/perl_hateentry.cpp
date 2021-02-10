@@ -52,7 +52,7 @@ XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		Mob             *RETVAL;
@@ -68,7 +68,7 @@ XS(XS_HateEntry_GetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetHate) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
@@ -85,7 +85,7 @@ XS(XS_HateEntry_GetDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetDamage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
