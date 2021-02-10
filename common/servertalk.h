@@ -1162,6 +1162,7 @@ struct ServerAdventureRequestAccept_Struct
 	uint32 theme;
 	uint32 id;
 	uint32 member_count;
+	uint32 average_level;
 };
 
 struct ServerAdventureRequestCreate_Struct
@@ -1170,6 +1171,7 @@ struct ServerAdventureRequestCreate_Struct
 	uint32 theme;
 	uint32 id;
 	uint32 member_count;
+	uint32 average_level;
 };
 
 struct ServerSendAdventureData_Struct
@@ -1241,6 +1243,7 @@ struct ServerZoneAdventureDataReply_Struct
 	int dest_y;
 	int dest_z;
 	int dest_h;
+	int average_level;
 };
 
 struct ServerAdventureFinish_Struct
