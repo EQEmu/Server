@@ -37,6 +37,7 @@ public:
 	void RemoveMember(uint32_t character_id);
 	void RemoveAllMembers() { m_member_ids.clear(); }
 	void CheckExpireWarning();
+	void CheckLeader();
 	void ChooseNewLeader();
 	uint32_t GetID() const { return m_expedition_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_dz_instance_id); }
@@ -62,8 +63,10 @@ private:
 	uint32_t m_dz_instance_id = 0;
 	uint32_t m_dz_zone_id     = 0;
 	uint32_t m_leader_id      = 0;
-	bool     m_pending_delete = false;
-	Timer    m_warning_cooldown_timer;
+	bool m_pending_delete = false;
+	bool m_choose_leader_needed = false;
+	Timer m_choose_leader_cooldown_timer;
+	Timer m_warning_cooldown_timer;
 	std::vector<uint32_t> m_member_ids;
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;
