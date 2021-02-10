@@ -1016,7 +1016,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				if (group->GetID() != 0)
 					entity_list.AddGroup(group, groupid);
 				else
-					group = nullptr;
+					safe_delete(group);
 			}
 
 			if (group)
