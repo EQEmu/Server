@@ -356,6 +356,7 @@ int MakeAnyLenString(char** ret, const char* format, ...) {
 		*ret = new char[buf_len];
 		va_copy(tmpargptr, argptr);
 		chars = vsnprintf(*ret, buf_len, format, tmpargptr);
+		va_end(tmpargptr);
 	}
 	va_end(argptr);
 	return chars;
@@ -384,6 +385,7 @@ uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const cha
 		}
 		va_copy(tmpargptr, argptr);
 		chars = vsnprintf(&(*ret)[*strlen], (*bufsize - *strlen), format, tmpargptr);
+		va_end(tmpargptr);
 	}
 	va_end(argptr);
 	*strlen += chars;
