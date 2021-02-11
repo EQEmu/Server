@@ -38,7 +38,7 @@ locations other than lua/
 find_path(LUAJIT_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
-  PATH_SUFFIXES include/luajit include/luajit-2.0 include/luajit-2.1
+  PATH_SUFFIXES include/luajit include/luajit-2.0 include/luajit-2.1 include
   PATHS
   ~/Library/Frameworks
   /Library/Frameworks
