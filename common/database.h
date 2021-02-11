@@ -128,6 +128,7 @@ public:
 	bool SaveCharacterCreate(uint32 character_id, uint32 account_id, PlayerProfile_Struct *pp);
 	bool SetHackerFlag(const char *accountname, const char *charactername, const char *hacked);
 	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const char *hacked, const char *zone);
+	bool SetMQDetectionFlag(const char *accountname, const char *charactername, const std::string &hacked, const char *zone);
 	bool UpdateName(const char *oldname, const char *newname);
 	bool CopyCharacter(
 		std::string source_character_name,
