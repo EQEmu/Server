@@ -41,7 +41,7 @@ public:
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetDynamicZone(DynamicZone&& dz);
-	bool SetNewLeader(const ExpeditionMember& member);
+	bool SetNewLeader(const DynamicZoneMember& member);
 
 private:
 	void SendZonesLeaderChanged();

@@ -221,7 +221,7 @@ bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>&
 			return true;
 		}
 
-		m_members.emplace_back(character.id, character.name, ExpeditionMemberStatus::Online);
+		m_members.emplace_back(character.id, character.name, DynamicZoneMemberStatus::Online);
 		character_ids.emplace_back(character.id);
 	}
 

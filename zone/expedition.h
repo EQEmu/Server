@@ -52,7 +52,7 @@ class Expedition : public ExpeditionBase
 public:
 	Expedition() = default;
 	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
+		const DynamicZoneMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
 
@@ -85,7 +85,7 @@ public:
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
 	void RemoveAllMembers(bool enable_removal_timers = true);
 	bool RemoveMember(const std::string& remove_char_name);
-	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
+	void SetMemberStatus(Client* client, DynamicZoneMemberStatus status);
 	void SwapMember(Client* add_client, const std::string& remove_char_name);
 
 	bool IsLocked() const { return m_is_locked; }
@@ -160,21 +160,21 @@ private:
 	void SendWorldLockoutUpdate(
 		const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
-	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
+	void SendWorldMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
 		const std::string& add_char_name, uint32_t add_char_id);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
 	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
-	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
+	void UpdateMemberStatus(uint32_t update_character_id, DynamicZoneMemberStatus status);
 
 	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
 	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateMemberListNamePacket(const std::string& name, bool remove_name);
-	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, ExpeditionMemberStatus status);
+	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, DynamicZoneMemberStatus status);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };

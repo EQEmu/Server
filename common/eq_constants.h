@@ -474,7 +474,7 @@ enum class DynamicZoneType
 	Quest
 };
 
-enum class ExpeditionMemberStatus : uint8_t
+enum class DynamicZoneMemberStatus : uint8_t
 {
 	Unknown = 0,
 	Online,

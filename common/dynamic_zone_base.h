@@ -13,6 +13,21 @@
 class Database;
 class ServerPacket;
 
+struct DynamicZoneMember
+{
+	uint32_t id = 0;
+	std::string name;
+	DynamicZoneMemberStatus status = DynamicZoneMemberStatus::Online;
+
+	DynamicZoneMember() = default;
+	DynamicZoneMember(uint32_t id, std::string name_)
+		: id(id), name{std::move(name_)} {}
+	DynamicZoneMember(uint32_t id, std::string name_, DynamicZoneMemberStatus status_)
+		: id(id), name{std::move(name_)}, status(status_) {}
+
+	bool IsValid() const { return id != 0 && !name.empty(); }
+};
+
 struct DynamicZoneLocation
 {
 	uint32_t zone_id = 0;

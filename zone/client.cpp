@@ -3401,7 +3401,7 @@ void Client::LinkDead()
 	Expedition* expedition = GetExpedition();
 	if (expedition)
 	{
-		expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
+		expedition->SetMemberStatus(this, DynamicZoneMemberStatus::LinkDead);
 	}
 
 //	save_timer.Start(2500);
@@ -9542,11 +9542,11 @@ void Client::UpdateExpeditionInfoAndLockouts()
 		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
 		{
 			expedition->SyncCharacterLockouts(CharacterID(), m_expedition_lockouts);
-			expedition->SetMemberStatus(this, ExpeditionMemberStatus::InDynamicZone);
+			expedition->SetMemberStatus(this, DynamicZoneMemberStatus::InDynamicZone);
 		}
 		else
 		{
-			expedition->SetMemberStatus(this, ExpeditionMemberStatus::Online);
+			expedition->SetMemberStatus(this, DynamicZoneMemberStatus::Online);
 		}
 	}
 

@@ -174,7 +174,7 @@ void ExpeditionDatabase::DeleteCharacterLockout(
 }
 
 void ExpeditionDatabase::DeleteMembersLockout(
-	const std::vector<ExpeditionMember>& members,
+	const std::vector<DynamicZoneMember>& members,
 	const std::string& expedition_name, const std::string& event_name)
 {
 	LogExpeditionsDetail("Deleting members lockout: [{}]:[{}]", expedition_name, event_name);
@@ -312,7 +312,7 @@ void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
 }
 
 void ExpeditionDatabase::InsertMembersLockout(
-	const std::vector<ExpeditionMember>& members, const ExpeditionLockoutTimer& lockout)
+	const std::vector<DynamicZoneMember>& members, const ExpeditionLockoutTimer& lockout)
 {
 	LogExpeditionsDetail(
 		"Inserting members lockout [{}]:[{}] with expire time [{}]",
@@ -431,7 +431,7 @@ void ExpeditionDatabase::InsertMember(uint32_t expedition_id, uint32_t character
 }
 
 void ExpeditionDatabase::InsertMembers(
-	uint32_t expedition_id, const std::vector<ExpeditionMember>& members)
+	uint32_t expedition_id, const std::vector<DynamicZoneMember>& members)
 {
 	LogExpeditionsDetail("Inserting characters into expedition [{}]", expedition_id);
 
@@ -504,7 +504,7 @@ void ExpeditionDatabase::UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool 
 	database.QueryDatabase(query);
 }
 
-void ExpeditionDatabase::AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+void ExpeditionDatabase::AddLockoutDuration(const std::vector<DynamicZoneMember>& members,
 	const ExpeditionLockoutTimer& lockout, int seconds)
 {
 	LogExpeditionsDetail(

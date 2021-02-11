@@ -30,7 +30,7 @@
 extern class ExpeditionState expedition_state;
 
 class Expedition;
-struct ExpeditionMember;
+struct DynamicZoneMember;
 
 class ExpeditionState
 {
@@ -40,7 +40,7 @@ public:
 	void CacheAllFromDatabase();
 	Expedition* GetExpedition(uint32_t expedition_id);
 	Expedition* GetExpeditionByDynamicZoneID(uint32_t dz_id);
-	void MemberChange(uint32_t expedition_id, const ExpeditionMember& member, bool remove);
+	void MemberChange(uint32_t expedition_id, const DynamicZoneMember& member, bool remove);
 	void Process();
 	void RemoveAllMembers(uint32_t expedition_id);
 

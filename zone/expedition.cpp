@@ -50,7 +50,7 @@ const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
 	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players
+	const DynamicZoneMember& leader, uint32_t min_players, uint32_t max_players
 ) : ExpeditionBase(id, uuid, expedition_name, leader, min_players, max_players)
 {
 	SetDynamicZone(std::move(dz));
@@ -109,7 +109,7 @@ Expedition* Expedition::TryCreate(
 			expedition_uuid,
 			std::move(dynamiczone),
 			request.GetExpeditionName(),
-			ExpeditionMember{ request.GetLeaderID(), request.GetLeaderName() },
+			DynamicZoneMember{ request.GetLeaderID(), request.GetLeaderName() },
 			request.GetMinPlayers(),
 			request.GetMaxPlayers()
 		);
@@ -517,7 +517,7 @@ void Expedition::SwapMember(Client* add_client, const std::string& remove_char_n
 	SendWorldMemberSwapped(member.name, member.id, add_client->GetName(), add_client->CharacterID());
 }
 
-void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
+void Expedition::SetMemberStatus(Client* client, DynamicZoneMemberStatus status)
 {
 	if (client)
 	{
@@ -526,14 +526,14 @@ void Expedition::SetMemberStatus(Client* client, ExpeditionMemberStatus status)
 
 		// world could detect this itself but it'd have to process member status updates
 		// a member coming online will trigger a leader change if all members were offline
-		if (m_leader.status == ExpeditionMemberStatus::Offline)
+		if (m_leader.status == DynamicZoneMemberStatus::Offline)
 		{
 			SendWorldExpeditionUpdate(ServerOP_ExpeditionChooseNewLeader);
 		}
 	}
 }
 
-void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberStatus status)
+void Expedition::UpdateMemberStatus(uint32_t update_member_id, DynamicZoneMemberStatus status)
 {
 	auto member_data = GetMemberData(update_member_id);
 	if (!member_data.IsValid())
@@ -541,9 +541,9 @@ void Expedition::UpdateMemberStatus(uint32_t update_member_id, ExpeditionMemberS
 		return;
 	}
 
-	if (status == ExpeditionMemberStatus::InDynamicZone && !RuleB(Expedition, EnableInDynamicZoneStatus))
+	if (status == DynamicZoneMemberStatus::InDynamicZone && !RuleB(Expedition, EnableInDynamicZoneStatus))
 	{
-		status = ExpeditionMemberStatus::Online;
+		status = DynamicZoneMemberStatus::Online;
 	}
 
 	if (update_member_id == m_leader.id)
@@ -877,7 +877,7 @@ void Expedition::DzAddPlayer(
 		if (member_data.IsValid())
 		{
 			// live prioritizes offline message before already a member message
-			if (member_data.status == ExpeditionMemberStatus::Offline)
+			if (member_data.status == DynamicZoneMemberStatus::Offline)
 			{
 				requester->MessageString(Chat::Red, DZADD_NOT_ONLINE, add_char_name.c_str());
 			}
@@ -1102,7 +1102,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
 	}
 
-	AddInternalMember({ added_char_id, char_name, ExpeditionMemberStatus::Online });
+	AddInternalMember({ added_char_id, char_name, DynamicZoneMemberStatus::Online });
 
 	Client* member_client = entity_list.GetClientByCharID(added_char_id);
 	if (member_client)
@@ -1192,7 +1192,7 @@ void Expedition::ProcessLockoutDuration(
 void Expedition::AddLockoutDurationClients(
 	const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id)
 {
-	std::vector<ExpeditionMember> lockout_clients;
+	std::vector<DynamicZoneMember> lockout_clients;
 	for (const auto& client_iter : entity_list.GetClientList())
 	{
 		Client* client = client_iter.second;
@@ -1254,7 +1254,7 @@ void Expedition::ProcessLockoutUpdate(
 void Expedition::AddLockoutClients(
 	const ExpeditionLockoutTimer& lockout, uint32_t exclude_expedition_id)
 {
-	std::vector<ExpeditionMember> lockout_clients;
+	std::vector<DynamicZoneMember> lockout_clients;
 	for (const auto& client_iter : entity_list.GetClientList())
 	{
 		Client* client = client_iter.second;
@@ -1411,7 +1411,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListNamePacket(
 }
 
 std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
-	const std::string& name, ExpeditionMemberStatus status)
+	const std::string& name, DynamicZoneMemberStatus status)
 {
 	// member list status uses member list struct with a single entry
 	uint32_t outsize = sizeof(ExpeditionMemberList_Struct) + sizeof(ExpeditionMemberEntry_Struct);
@@ -1521,7 +1521,7 @@ void Expedition::SendWorldMemberChanged(const std::string& char_name, uint32_t c
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status)
+void Expedition::SendWorldMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionMemberStatus_Struct);
 	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionMemberStatus, pack_size);
@@ -1794,7 +1794,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
 			if (expedition)
 			{
-				expedition->UpdateMemberStatus(buf->character_id, static_cast<ExpeditionMemberStatus>(buf->status));
+				expedition->UpdateMemberStatus(buf->character_id, static_cast<DynamicZoneMemberStatus>(buf->status));
 			}
 		}
 		break;
@@ -1836,10 +1836,10 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			if (expedition)
 			{
 				auto is_online = member->character_online;
-				auto status = is_online ? ExpeditionMemberStatus::Online : ExpeditionMemberStatus::Offline;
+				auto status = is_online ? DynamicZoneMemberStatus::Online : DynamicZoneMemberStatus::Offline;
 				if (is_online && expedition->GetDynamicZone().IsInstanceID(member->character_instance_id))
 				{
-					status = ExpeditionMemberStatus::InDynamicZone;
+					status = DynamicZoneMemberStatus::InDynamicZone;
 				}
 				expedition->UpdateMemberStatus(member->character_id, status);
 			}

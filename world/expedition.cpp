@@ -64,7 +64,7 @@ void Expedition::ChooseNewLeader()
 
 	// we don't track expedition member status in world so may choose a linkdead member
 	// this is fine since it will trigger another change when that member goes offline
-	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
 		if (member.id != m_leader.id) {
 			auto member_cle = client_list.FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
@@ -76,7 +76,7 @@ void Expedition::ChooseNewLeader()
 	{
 		// no online members found, fallback to choosing any member
 		it = std::find_if(m_members.begin(), m_members.end(),
-			[&](const ExpeditionMember& member) { return (member.id != m_leader.id); });
+			[&](const DynamicZoneMember& member) { return (member.id != m_leader.id); });
 	}
 
 	if (it != m_members.end() && SetNewLeader(*it))
@@ -85,7 +85,7 @@ void Expedition::ChooseNewLeader()
 	}
 }
 
-bool Expedition::SetNewLeader(const ExpeditionMember& member)
+bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 {
 	if (!HasMember(member.id))
 	{
