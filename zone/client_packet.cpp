@@ -3383,11 +3383,10 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 
 	if (!banker || distance > USE_NPC_RANGE2)
 	{
-		char *hacked_string = nullptr;
-		MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(money) but %s is non-existant or too far away (%u units).",
-			banker ? banker->GetName() : "UNKNOWN NPC", distance);
+		auto hacked_string = fmt::format(
+		    "Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
+		    banker ? banker->GetName() : "UNKNOWN NPC", distance);
 		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-		safe_delete_array(hacked_string);
 		return;
 	}
 
@@ -5018,10 +5017,8 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
-		char *hacked_string = nullptr;
-		MakeAnyLenString(&hacked_string, "OP_Control Boat was sent against %s which is of race %u", boat->GetName(), boat->GetRace());
+		auto hacked_string = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
 		database.SetMQDetectionFlag(this->AccountName(), this->GetName(), hacked_string, zone->GetShortName());
-		safe_delete_array(hacked_string);
 		return;
 	}
 
@@ -5341,10 +5338,8 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 	if (pmob->GetID() != GetID()) {
 		// Client sent a disarm request with an originator ID not matching their own ID.
-		char *hack_str = NULL;
-		MakeAnyLenString(&hack_str, "Player %s (%d) sent OP_Disarm with source ID of: %d", GetCleanName(), GetID(), pmob->GetID());
+		auto hack_str = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
 		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-		safe_delete_array(hack_str);
 		return;
 	}
 	// No disarm on corpses
@@ -10031,17 +10026,15 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	{
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
-			char *detect = nullptr;
 			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
 			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
-			MakeAnyLenString(&detect, "Player issued a move item from %u(item id %u) to %u(item id %u) while casting %u.",
+			auto detect = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
 			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
-			safe_delete_array(detect);
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
@@ -12983,12 +12976,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	if (!TakeMoneyFromPP(mpo->price))
 	{
-		char *hacker_str = nullptr;
-		MakeAnyLenString(&hacker_str, "Vendor Cheat: attempted to buy %i of %i: %s that cost %d cp but only has %d pp %d gp %d sp %d cp\n",
+		auto hacker_str = fmt::format("Vendor Cheat: attempted to buy {} of {}: {} that cost {} cp but only has {} pp {} gp {} sp {} cp",
 			mpo->quantity, item->ID, item->Name,
 			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 		database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-		safe_delete_array(hacker_str);
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -13470,10 +13461,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			{
 				if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 				{
-					char *hack_str = nullptr;
-					MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Invis: %i", sa->parameter);
+					auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Invis: {}", sa->parameter);
 					database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-					safe_delete_array(hack_str);
 				}
 			}
 			return;
@@ -13572,10 +13561,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if (!HasSkill(EQ::skills::SkillSneak))
 			{
-				char *hack_str = nullptr;
-				MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Sneak: %i", sa->parameter);
+				auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak: {}", sa->parameter);
 				database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-				safe_delete_array(hack_str);
 			}
 			return;
 		}
@@ -13584,10 +13571,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Size)
 	{
-		char *hack_str = nullptr;
-		MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Size: %i", sa->parameter);
+		auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Size: {}", sa->parameter);
 		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-		safe_delete_array(hack_str);
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
@@ -13927,11 +13912,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			else if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
-				char *hacker_str = nullptr;
-				MakeAnyLenString(&hacker_str, "%s attempting to target something untargetable, %s bodytype: %i\n",
+				auto hacker_str = fmt::format("{} attempting to target something untargetable, {} bodytype: {}",
 					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-				safe_delete_array(hacker_str);
 				SetTarget((Mob*)nullptr);
 				return;
 			}
@@ -13951,13 +13934,15 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				{
 					if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
-						char *hacker_str = nullptr;
-						MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
-							" from (%.2f, %.2f, %.2f) to %s (%.2f, %.2f, %.2f)", GetName(),
-							(zone->newzone_data.maxclip*zone->newzone_data.maxclip),
-							GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
+						auto hacker_str = fmt::format(
+						    "{} attempting to target something beyond the clip plane of {:.2f} "
+						    "units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, "
+						    "{:.2f})",
+						    GetName(),
+						    (zone->newzone_data.maxclip * zone->newzone_data.maxclip), GetX(),
+						    GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
+						    GetTarget()->GetY(), GetTarget()->GetZ());
 						database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-						safe_delete_array(hacker_str);
 						SetTarget(nullptr);
 						return;
 					}
@@ -13965,13 +13950,13 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
-				char *hacker_str = nullptr;
-				MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
-					" from (%.2f, %.2f, %.2f) to %s (%.2f, %.2f, %.2f)", GetName(),
-					(zone->newzone_data.maxclip*zone->newzone_data.maxclip),
-					GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
+				auto hacker_str =
+				    fmt::format("{} attempting to target something beyond the clip plane of {:.2f} "
+						"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
+						GetName(), (zone->newzone_data.maxclip * zone->newzone_data.maxclip),
+						GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
+						GetTarget()->GetY(), GetTarget()->GetZ());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-				safe_delete_array(hacker_str);
 				SetTarget(nullptr);
 				return;
 			}
