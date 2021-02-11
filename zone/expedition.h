@@ -142,7 +142,6 @@ private:
 	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
 	void ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
-	void SaveMembers(ExpeditionRequest& request);
 	void SendClientExpeditionInvite(
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,

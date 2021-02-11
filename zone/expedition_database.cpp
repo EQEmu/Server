@@ -213,67 +213,6 @@ void ExpeditionDatabase::DeleteLockout(uint32_t expedition_id, const std::string
 	database.QueryDatabase(query);
 }
 
-uint32_t ExpeditionDatabase::GetExpeditionIDFromCharacterID(uint32_t character_id)
-{
-	LogExpeditionsDetail("Getting expedition id for character [{}]", character_id);
-
-	uint32_t expedition_id = 0;
-	auto query = fmt::format(SQL(
-		SELECT expedition_id FROM expedition_members
-		WHERE character_id = {} AND is_current_member = TRUE;
-	), character_id);
-
-	auto results = database.QueryDatabase(query);
-	if (results.Success() && results.RowCount() > 0)
-	{
-		auto row = results.begin();
-		expedition_id = strtoul(row[0], nullptr, 10);
-	}
-	return expedition_id;
-}
-
-uint32_t ExpeditionDatabase::GetMemberCount(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Getting expedition [{}] member count from db", expedition_id);
-
-	uint32_t member_count = 0;
-	if (expedition_id != 0)
-	{
-		auto query = fmt::format(SQL(
-			SELECT COUNT(*)
-			FROM expedition_members
-			WHERE expedition_id = {} AND is_current_member = TRUE;
-		), expedition_id);
-
-		auto results = database.QueryDatabase(query);
-		if (results.Success() && results.RowCount() > 0)
-		{
-			auto row = results.begin();
-			member_count = strtoul(row[0], nullptr, 10);
-		}
-	}
-	return member_count;
-}
-
-bool ExpeditionDatabase::HasMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Checking db expedition [{}] for character [{}]", expedition_id, character_id);
-
-	if (expedition_id == 0 || character_id == 0)
-	{
-		return false;
-	}
-
-	auto query = fmt::format(SQL(
-		SELECT id
-		FROM expedition_members
-		WHERE expedition_id = {} AND character_id = {} AND is_current_member = TRUE;
-	), expedition_id, character_id);
-
-	auto results = database.QueryDatabase(query);
-	return (results.Success() && results.RowCount() > 0);
-}
-
 void ExpeditionDatabase::InsertCharacterLockouts(uint32_t character_id,
 	const std::vector<ExpeditionLockoutTimer>& lockouts)
 {
@@ -415,50 +354,6 @@ void ExpeditionDatabase::InsertLockouts(
 	}
 }
 
-void ExpeditionDatabase::InsertMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Inserting character [{}] into expedition [{}]", character_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		INSERT INTO expedition_members
-			(expedition_id, character_id)
-		VALUES
-			({}, {})
-		ON DUPLICATE KEY UPDATE is_current_member = TRUE;
-	), expedition_id, character_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::InsertMembers(
-	uint32_t expedition_id, const std::vector<DynamicZoneMember>& members)
-{
-	LogExpeditionsDetail("Inserting characters into expedition [{}]", expedition_id);
-
-	std::string insert_values;
-	for (const auto& member : members)
-	{
-		fmt::format_to(std::back_inserter(insert_values),
-			"({}, {}),",
-			expedition_id, member.id
-		);
-	}
-
-	if (!insert_values.empty())
-	{
-		insert_values.pop_back(); // trailing comma
-
-		auto query = fmt::format(SQL(
-			INSERT INTO expedition_members
-				(expedition_id, character_id)
-			VALUES {}
-			ON DUPLICATE KEY UPDATE is_current_member = TRUE;
-		), insert_values);
-
-		database.QueryDatabase(query);
-	}
-}
-
 void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 {
 	LogExpeditionsDetail("Updating lock state [{}] for expedition [{}]", is_locked, expedition_id);
@@ -466,29 +361,6 @@ void ExpeditionDatabase::UpdateLockState(uint32_t expedition_id, bool is_locked)
 	auto query = fmt::format(SQL(
 		UPDATE expeditions SET is_locked = {} WHERE id = {};
 	), is_locked, expedition_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteMember(uint32_t expedition_id, uint32_t character_id)
-{
-	LogExpeditionsDetail("Removing member [{}] from expedition [{}]", character_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE
-		WHERE expedition_id = {} AND character_id = {};
-	), expedition_id, character_id);
-
-	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteAllMembers(uint32_t expedition_id)
-{
-	LogExpeditionsDetail("Removing all members of expedition [{}]", expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expedition_members SET is_current_member = FALSE WHERE expedition_id = {};
-	), expedition_id);
 
 	database.QueryDatabase(query);
 }
