@@ -478,9 +478,8 @@ public:
 	void	CameraEffect(uint32 duration, uint32 intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType);
 	void	ForceGroupUpdate(uint32 gid);
-	void	SendGroupLeave(uint32 gid, const char *name, bool checkleader);
+	void	SendGroupLeave(uint32 gid, const char *name);
 	void	SendGroupJoin(uint32 gid, const char *name);
-	void	SendGroupLeader(uint32 gid, const char *lname, const char *oldlname);
 
 	void	SaveAllClientsTaskState();
 	void	ReloadAllClientsTaskState(int task_id=0);
