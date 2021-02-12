@@ -8605,6 +8605,8 @@ void Bot::ProcessBotGroupInvite(Client* c, std::string botName) {
 					g->SaveGroupLeaderAA();
 					database.SetGroupID(c->GetName(), g->GetID(), c->CharacterID());
 					database.SetGroupID(invitedBot->GetCleanName(), g->GetID(), invitedBot->GetBotID());
+				} else {
+					delete g;
 				}
 			} else {
 				AddBotToGroup(invitedBot, c->GetGroup());
