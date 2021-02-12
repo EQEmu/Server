@@ -247,7 +247,6 @@ SET(zone_headers
 	quest_interface.h
 	questmgr.h
 	quest_parser_collection.h
-	raid.h
 	raids.h
 	raycast_mesh.h
 	skills.h
