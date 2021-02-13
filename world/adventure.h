@@ -99,7 +99,6 @@ protected:
 	Timer *current_timer;
 	int instance_id;
 	int average_level;
-
 };
 
 #endif

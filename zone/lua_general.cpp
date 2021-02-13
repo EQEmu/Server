@@ -2300,6 +2300,62 @@ void lua_remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string e
 	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name);
 }
 
+int lua_get_adventure_assassination_count() {
+	return quest_manager.GetAdventureAssassinationCount();
+}
+
+int lua_get_adventure_assassination_x() {
+	return quest_manager.GetAdventureAssassinationX();
+}
+
+int lua_get_adventure_assassination_y() {
+	return quest_manager.GetAdventureAssassinationY();
+}
+
+int lua_get_adventure_assassination_z() {
+	return quest_manager.GetAdventureAssassinationZ();
+}
+
+int lua_get_adventure_assassination_h() {
+	return quest_manager.GetAdventureAssassinationH();
+}
+
+int lua_get_adventure_average_level() {
+	return quest_manager.GetAdventureAverageLevel();
+}
+
+int lua_get_adventure_count() {
+	return quest_manager.GetAdventureCount();
+}
+
+int lua_get_adventure_data_id() {
+	return quest_manager.GetAdventureDataID();
+}
+
+int lua_get_adventure_destination_x() {
+	return quest_manager.GetAdventureDestinationX();
+}
+
+int lua_get_adventure_destination_y() {
+	return quest_manager.GetAdventureDestinationY();
+}
+
+int lua_get_adventure_destination_z() {
+	return quest_manager.GetAdventureDestinationZ();
+}
+
+int lua_get_adventure_destination_h() {
+	return quest_manager.GetAdventureDestinationH();
+}
+
+int lua_get_adventure_total() {
+	return quest_manager.GetAdventureTotal();
+}
+
+int lua_get_adventure_type() {
+	return quest_manager.GetAdventureType();
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2914,7 +2970,22 @@ luabind::scope lua_register_general() {
 		luabind::def("add_expedition_lockout_by_char_id", (void(*)(uint32, std::string, std::string, uint32, std::string))&lua_add_expedition_lockout_by_char_id),
 		luabind::def("remove_expedition_lockout_by_char_id", &lua_remove_expedition_lockout_by_char_id),
 		luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32))&lua_remove_all_expedition_lockouts_by_char_id),
-		luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32, std::string))&lua_remove_all_expedition_lockouts_by_char_id)
+		luabind::def("remove_all_expedition_lockouts_by_char_id", (void(*)(uint32, std::string))&lua_remove_all_expedition_lockouts_by_char_id),
+
+		luabind::def("get_adventure_assassination_count", &lua_get_adventure_assassination_count),
+		luabind::def("get_adventure_assassination_x", &lua_get_adventure_assassination_x),
+		luabind::def("get_adventure_assassination_y", &lua_get_adventure_assassination_y),
+		luabind::def("get_adventure_assassination_z", &lua_get_adventure_assassination_z),
+		luabind::def("get_adventure_assassination_h", &lua_get_adventure_assassination_h),
+		luabind::def("get_adventure_average_level", &lua_get_adventure_average_level),
+		luabind::def("get_adventure_count", &lua_get_adventure_count),
+		luabind::def("get_adventure_data_id", &lua_get_adventure_data_id),
+		luabind::def("get_adventure_destination_x", &lua_get_adventure_destination_x),
+		luabind::def("get_adventure_destination_y", &lua_get_adventure_destination_y),
+		luabind::def("get_adventure_destination_z", &lua_get_adventure_destination_z),
+		luabind::def("get_adventure_destination_h", &lua_get_adventure_destination_h),
+		luabind::def("get_adventure_total", &lua_get_adventure_total),
+		luabind::def("get_adventure_type", &lua_get_adventure_type)
 	];
 }
 

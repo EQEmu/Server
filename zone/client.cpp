@@ -325,7 +325,7 @@ Client::Client(EQStreamInterface* ieqs)
 	adv_requested_theme = 0;
 	adv_requested_id = 0;
 	adv_requested_member_count = 0;
-	adv_requested_avg_lvl = 0;
+	adv_requested_average_lvl = 0;
 
 	for(int i = 0; i < XTARGET_HARDCAP; ++i)
 	{
@@ -5993,17 +5993,14 @@ void Client::NewAdventure(int id, int theme, const char *text, int member_count,
 	strn0cpy((char*)outapp->pBuffer, text, text_size);
 	FastQueuePacket(&outapp);
 
-	adv_requested_id    = id;
+	adv_requested_id = id;
 	adv_requested_theme = theme;
 
 	safe_delete_array(adv_requested_data);
 
 	adv_requested_member_count = member_count;
-	adv_requested_avg_lvl      = avg_level;
-	adv_requested_data         = new char[64 * member_count];
-
-	LogAdventure("[Client::NewAdventure] Adventure average level [{}]", adv_requested_avg_lvl);
-
+	adv_requested_average_lvl = avg_level;
+	adv_requested_data = new char[64 * member_count];
 	memcpy(adv_requested_data, members, (64 * member_count));
 }
 
@@ -6013,6 +6010,7 @@ void Client::ClearPendingAdventureData()
 	adv_requested_theme = 0;
 	safe_delete_array(adv_requested_data);
 	adv_requested_member_count = 0;
+	adv_requested_average_lvl = 0;
 }
 
 bool Client::IsOnAdventure()

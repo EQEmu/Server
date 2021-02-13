@@ -435,4 +435,3 @@ void Adventure::SetAverageLevel(int average_level)
 {
 	Adventure::average_level = average_level;
 }
-

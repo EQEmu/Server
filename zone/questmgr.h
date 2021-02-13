@@ -370,6 +370,21 @@ public:
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
 
+	int GetAdventureAssassinationCount();
+	int GetAdventureAssassinationX();
+	int GetAdventureAssassinationY();
+	int GetAdventureAssassinationZ();
+	int GetAdventureAssassinationH();
+	int GetAdventureAverageLevel();
+	int GetAdventureCount();
+	int GetAdventureDataID();
+	int GetAdventureDestinationX();
+	int GetAdventureDestinationY();
+	int GetAdventureDestinationZ();
+	int GetAdventureDestinationH();
+	int GetAdventureTotal();
+	int GetAdventureType();
+
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;

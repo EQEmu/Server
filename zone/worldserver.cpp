@@ -1688,8 +1688,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Client *c = entity_list.GetClientByName(ars->leader);
 		if (c)
 		{
-			LogAdventure("[ServerOP_AdventureRequestAccept] Adventure average level [{}]", ars->average_level);
-
 			c->NewAdventure(
 				ars->id,
 				ars->theme,
@@ -1820,8 +1818,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			zone->adv_data = new char[pack->size];
 			memcpy(zone->adv_data, pack->pBuffer, pack->size);
 			ServerZoneAdventureDataReply_Struct* ds = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
-
-			LogAdventure("[ServerOP_AdventureZoneData] Adventure average level [{}]", ds->average_level);
 		}
 		break;
 	}

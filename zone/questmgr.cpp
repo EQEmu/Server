@@ -4234,3 +4234,115 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 	}
 	return nullptr;
 }
+
+int QuestManager::GetAdventureAssassinationCount() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->assa_count;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureAssassinationX() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->assa_x;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureAssassinationY() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->assa_y;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureAssassinationZ() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->assa_z;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureAssassinationH() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->assa_h;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureAverageLevel() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->average_level;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureCount() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->count;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureDataID() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->data_id;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureDestinationX() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->dest_x;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureDestinationY() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->dest_y;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureDestinationZ() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->dest_z;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureDestinationH() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->dest_h;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureTotal() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->total;
+	}
+	return 0;
+}
+
+int QuestManager::GetAdventureType() {
+	if (zone->adv_data) {
+		ServerZoneAdventureDataReply_Struct *adventure_data = (ServerZoneAdventureDataReply_Struct*)zone->adv_data;
+		return adventure_data->type;
+	}
+	return 0;
+}

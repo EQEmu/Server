@@ -6404,6 +6404,188 @@ XS(XS__createitem) {
 	XSRETURN(1);
 }
 
+XS(XS__get_adventure_assassination_count);
+XS(XS__get_adventure_assassination_count) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_assassination_count()");
+	}
+	dXSTARG;
+	int assassination_count = quest_manager.GetAdventureAssassinationCount();
+	XSprePUSH;
+	PUSHi((IV)assassination_count);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_assassination_x);
+XS(XS__get_adventure_assassination_x) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_assassination_x()");
+	}
+	dXSTARG;
+	int assassination_x = quest_manager.GetAdventureAssassinationX();
+	XSprePUSH;
+	PUSHi((IV)assassination_x);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_assassination_y);
+XS(XS__get_adventure_assassination_y) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_assassination_y()");
+	}
+	dXSTARG;
+	int assassination_y = quest_manager.GetAdventureAssassinationY();
+	XSprePUSH;
+	PUSHi((IV)assassination_y);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_assassination_z);
+XS(XS__get_adventure_assassination_z) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_assassination_z()");
+	}
+	dXSTARG;
+	int assassination_z = quest_manager.GetAdventureAssassinationZ();
+	XSprePUSH;
+	PUSHi((IV)assassination_z);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_assassination_h);
+XS(XS__get_adventure_assassination_h) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_assassination_h()");
+	}
+	dXSTARG;
+	int assassination_h = quest_manager.GetAdventureAssassinationH();
+	XSprePUSH;
+	PUSHi((IV)assassination_h);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_average_level);
+XS(XS__get_adventure_average_level) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_average_level()");
+	}
+	dXSTARG;
+	int average_level = quest_manager.GetAdventureAverageLevel();
+	XSprePUSH;
+	PUSHi((IV)average_level);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_count);
+XS(XS__get_adventure_count) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_count()");
+	}
+	dXSTARG;
+	int count = quest_manager.GetAdventureCount();
+	XSprePUSH;
+	PUSHi((IV)count);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_data_id);
+XS(XS__get_adventure_data_id) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_data_id()");
+	}
+	dXSTARG;
+	int data_id = quest_manager.GetAdventureDataID();
+	XSprePUSH;
+	PUSHi((IV)data_id);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_destination_x);
+XS(XS__get_adventure_destination_x) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_destination_x()");
+	}
+	dXSTARG;
+	int destination_x = quest_manager.GetAdventureDestinationX();
+	XSprePUSH;
+	PUSHi((IV)destination_x);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_destination_y);
+XS(XS__get_adventure_destination_y) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_destination_y()");
+	}
+	dXSTARG;
+	int destination_y = quest_manager.GetAdventureDestinationY();
+	XSprePUSH;
+	PUSHi((IV)destination_y);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_destination_z);
+XS(XS__get_adventure_destination_z) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_destination_z()");
+	}
+	dXSTARG;
+	int destination_z = quest_manager.GetAdventureDestinationZ();
+	XSprePUSH;
+	PUSHi((IV)destination_z);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_destination_h);
+XS(XS__get_adventure_destination_h) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_destination_h()");
+	}
+	dXSTARG;
+	int destination_h = quest_manager.GetAdventureDestinationH();
+	XSprePUSH;
+	PUSHi((IV)destination_h);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_total);
+XS(XS__get_adventure_total) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_total()");
+	}
+	dXSTARG;
+	int total = quest_manager.GetAdventureTotal();
+	XSprePUSH;
+	PUSHi((IV)total);
+	XSRETURN(1);
+}
+
+XS(XS__get_adventure_type);
+XS(XS__get_adventure_type) {
+	dXSARGS;
+	if (items >= 1) {
+		Perl_croak(aTHX_ "Usage: quest::get_adventure_type()");
+	}
+	dXSTARG;
+	int type = quest_manager.GetAdventureType();
+	XSprePUSH;
+	PUSHi((IV)type);
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6608,6 +6790,20 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "follow"), XS__follow, file);
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
+	newXS(strcpy(buf, "get_adventure_assassination_count"), XS__get_adventure_assassination_count, file);
+	newXS(strcpy(buf, "get_adventure_assassination_x"), XS__get_adventure_assassination_x, file);
+	newXS(strcpy(buf, "get_adventure_assassination_y"), XS__get_adventure_assassination_y, file);
+	newXS(strcpy(buf, "get_adventure_assassination_z"), XS__get_adventure_assassination_z, file);
+	newXS(strcpy(buf, "get_adventure_assassination_h"), XS__get_adventure_assassination_h, file);
+	newXS(strcpy(buf, "get_adventure_average_level"), XS__get_adventure_average_level, file);
+	newXS(strcpy(buf, "get_adventure_count"), XS__get_adventure_count, file);
+	newXS(strcpy(buf, "get_adventure_data_id"), XS__get_adventure_data_id, file);
+	newXS(strcpy(buf, "get_adventure_destination_x"), XS__get_adventure_destination_x, file);
+	newXS(strcpy(buf, "get_adventure_destination_y"), XS__get_adventure_destination_y, file);
+	newXS(strcpy(buf, "get_adventure_destination_z"), XS__get_adventure_destination_z, file);
+	newXS(strcpy(buf, "get_adventure_destination_h"), XS__get_adventure_destination_h, file);
+	newXS(strcpy(buf, "get_adventure_total"), XS__get_adventure_total, file);
+	newXS(strcpy(buf, "get_adventure_type"), XS__get_adventure_type, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);

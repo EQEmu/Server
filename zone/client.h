@@ -1613,7 +1613,7 @@ protected:
 	int adv_requested_theme;
 	int adv_requested_id;
 	char *adv_requested_data;
-	uint32 adv_requested_avg_lvl;
+	uint32 adv_requested_average_lvl;
 	int adv_requested_member_count;
 	char *adv_data;
 
