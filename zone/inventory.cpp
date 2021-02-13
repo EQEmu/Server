@@ -1355,6 +1355,7 @@ bool MakeItemLink(char* &ret_link, const ItemData *item, uint32 aug0, uint32 aug
 #endif
 
 int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
+#if 0
 	//pre-Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=70&postdays=0&postorder=asc
 	//Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145
 	if (!inst)	//have to have an item to make the hash
@@ -1440,6 +1441,8 @@ int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
 
 	safe_delete_array(hash_str);
 	return hash;
+#endif
+	return 0;
 }
 
 // This appears to still be in use... The core of this should be incorporated into class EQ::SayLinkEngine
@@ -1626,11 +1629,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{
-			char *hacked_string = nullptr;
-			MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(items) but %s is non-existant or too far away (%u units).",
-				banker ? banker->GetName() : "UNKNOWN NPC", distance);
+			auto hacked_string = fmt::format("Player tried to make use of a banker(items) but {} is "
+							 "non-existant or too far away ({} units).",
+							 banker ? banker->GetName() : "UNKNOWN NPC", distance);
 			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-			safe_delete_array(hacked_string);
 			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}
