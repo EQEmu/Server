@@ -1090,8 +1090,13 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	int book_slot = initiator->GetNextAvailableSpellBookSlot();
 	std::vector<int> spell_ids = initiator->GetScribeableSpells(min_level, max_level);
 	int spell_count = spell_ids.size();
+	bool spell_learned = false;
+	int spells_learned = 0;
 	if (spell_count > 0) {
 		for (auto spell_id : spell_ids) {
+			if (initiator->HasSpellScribed(spell_id))
+				continue;
+
 			if (book_slot == -1) {			
 				initiator->Message(
 					Chat::Red,
@@ -1101,9 +1106,16 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			}
 			initiator->ScribeSpell(spell_id, book_slot);
 			book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
+			spells_learned++;
+			spell_learned = true;
 		}
 	}
-	return spell_count;
+
+	if (spell_learned) {
+		std::string spell_message = (spells_learned == 1 ? " a new spell" : fmt::format("{} new spells", spells_learned));
+		initiator->Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
+	}
+	return spells_learned;
 }
 
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
@@ -1112,23 +1124,31 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	std::vector<int> spell_ids = initiator->GetLearnableDisciplines(min_level, max_level);
 	int discipline_count = spell_ids.size();
 	bool discipline_learned = false;
+	int disciplines_learned = 0;
 	if (discipline_count > 0) {
 		for (auto spell_id : spell_ids) {
+			if (initiator->HasDisciplineLearned(spell_id))
+				continue;
+
 			for (uint32 index = 0; index < MAX_PP_DISCIPLINES; index++) {
 				if (initiator->GetPP().disciplines.values[index] == 0) {
 					initiator->GetPP().disciplines.values[index] = spell_id;
 					database.SaveCharacterDisc(character_id, index, spell_id);
-					initiator->Message(Chat::White, "You have learned a new discipline!");
 					discipline_learned = true;
+					disciplines_learned++;
+					break;
 				}
 			}
 		}
 	}
 
-	if (discipline_learned)
+	if (discipline_learned) {
+		std::string discipline_message = (disciplines_learned == 1 ? " a new discipline" : fmt::format("{} new disciplines", disciplines_learned));
 		initiator->SendDisciplineUpdate();
+		initiator->Message(Chat::White, fmt::format("You have learned {}!", discipline_message).c_str());
+	}
 
-	return discipline_count;
+	return disciplines_learned;
 }
 
 void QuestManager::unscribespells() {
