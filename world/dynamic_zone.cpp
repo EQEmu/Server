@@ -14,6 +14,11 @@ Database& DynamicZone::GetDatabase()
 	return database;
 }
 
+bool DynamicZone::SendServerPacket(ServerPacket* packet)
+{
+	return zoneserver_list.SendPacket(packet);
+}
+
 DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 {
 	auto expedition = expedition_state.GetExpeditionByDynamicZoneID(dz_id);
@@ -23,6 +28,12 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	}
 	// todo: other system caches
 	return nullptr;
+}
+
+void DynamicZone::RegisterOnMemberAddRemove(
+	std::function<void(const DynamicZoneMember&, bool)> on_addremove)
+{
+	m_on_addremove = std::move(on_addremove);
 }
 
 DynamicZoneStatus DynamicZone::Process()
@@ -110,15 +121,41 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_DzAddRemoveCharacter:
-	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzAddRemoveMember:
 	{
-		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-		ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(buf->instance_id);
-		if (instance_zs)
+		auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
 		{
-			instance_zs->SendPacket(pack);
+			auto status = static_cast<DynamicZoneMemberStatus>(buf->character_status);
+			dz->ProcessMemberAddRemove({ buf->character_id, buf->character_name, status }, buf->removed);
 		}
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_DzSwapMembers:
+	{
+		auto buf = reinterpret_cast<ServerDzMemberSwap_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			// we add first in world so new member can be chosen if leader is removed
+			auto status = static_cast<DynamicZoneMemberStatus>(buf->add_character_status);
+			dz->ProcessMemberAddRemove({ buf->add_character_id, buf->add_character_name, status }, false);
+			dz->ProcessMemberAddRemove({ buf->remove_character_id, buf->remove_character_name }, true);
+		}
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_DzRemoveAllMembers:
+	{
+		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->ProcessRemoveAllMembers();
+		}
+		zoneserver_list.SendPacket(pack);
 		break;
 	}
 	case ServerOP_DzSetSecondsRemaining:
@@ -134,28 +171,12 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 	};
 }
 
-void DynamicZone::SendInstanceAddRemoveCharacter(uint32_t character_id, bool remove)
+void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
 {
-	ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(GetInstanceID());
-	if (instance_zs)
-	{
-		auto pack = CreateServerAddRemoveCharacterPacket(character_id, remove);
-		instance_zs->SendPacket(pack.get());
-	}
-}
+	DynamicZoneBase::ProcessMemberAddRemove(member, removed);
 
-void DynamicZone::SendInstanceRemoveAllCharacters()
-{
-	ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(GetInstanceID());
-	if (instance_zs)
+	if (m_on_addremove)
 	{
-		auto pack = CreateServerRemoveAllCharactersPacket();
-		instance_zs->SendPacket(pack.get());
+		m_on_addremove(member, removed);
 	}
-}
-
-void DynamicZone::SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location)
-{
-	auto pack = CreateServerDzLocationPacket(server_opcode, location);
-	zoneserver_list.SendPacket(pack.get());
 }

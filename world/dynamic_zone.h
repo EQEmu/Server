@@ -2,6 +2,7 @@
 #define WORLD_DYNAMIC_ZONE_H
 
 #include "../common/dynamic_zone_base.h"
+#include <functional>
 
 class Database;
 class ServerPacket;
@@ -25,17 +26,18 @@ public:
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
 	DynamicZoneStatus Process();
+	void RegisterOnMemberAddRemove(std::function<void(const DynamicZoneMember&, bool)> on_addremove);
 
 protected:
 	Database& GetDatabase() override;
-	void SendInstanceAddRemoveCharacter(uint32_t character_id, bool remove) override;
-	void SendInstanceRemoveAllCharacters() override;
-	void SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location) override;
+	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
+	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
 	void SendZonesDurationUpdate();
 
 	bool m_is_pending_early_shutdown = false;
+	std::function<void(const DynamicZoneMember&, bool)> m_on_addremove;
 };
 
 #endif

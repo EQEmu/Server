@@ -31,7 +31,6 @@ class Expedition : public ExpeditionBase
 public:
 	Expedition();
 
-	void RemoveMember(uint32_t character_id);
 	void CacheMemberStatuses();
 	void CheckExpireWarning();
 	void CheckLeader();
@@ -49,6 +48,7 @@ public:
 	void UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
 private:
+	void OnMemberAddRemove(const DynamicZoneMember& member, bool removed);
 	void SendZonesLeaderChanged();
 
 	bool m_choose_leader_needed = false;

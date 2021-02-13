@@ -3011,10 +3011,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionLockout:
 	case ServerOP_ExpeditionLockoutDuration:
 	case ServerOP_ExpeditionLockState:
-	case ServerOP_ExpeditionMemberChange:
-	case ServerOP_ExpeditionMemberSwap:
 	case ServerOP_ExpeditionMemberStatus:
-	case ServerOP_ExpeditionMembersRemoved:
 	case ServerOP_ExpeditionReplayOnJoin:
 	case ServerOP_ExpeditionGetMemberStatuses:
 	case ServerOP_ExpeditionDzAddPlayer:
@@ -3025,8 +3022,9 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Expedition::HandleWorldMessage(pack);
 		break;
 	}
-	case ServerOP_DzAddRemoveCharacter:
-	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzAddRemoveMember:
+	case ServerOP_DzSwapMembers:
+	case ServerOP_DzRemoveAllMembers:
 	case ServerOP_DzDurationUpdate:
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:

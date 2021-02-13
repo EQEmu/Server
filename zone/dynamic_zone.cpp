@@ -43,6 +43,11 @@ Database& DynamicZone::GetDatabase()
 	return database;
 }
 
+bool DynamicZone::SendServerPacket(ServerPacket* packet)
+{
+	return worldserver.SendPacket(packet);
+}
+
 uint16_t DynamicZone::GetCurrentInstanceID()
 {
 	return zone ? static_cast<uint16_t>(zone->GetInstanceID()) : 0;
@@ -64,6 +69,11 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	return nullptr;
 }
 
+void DynamicZone::RegisterOnClientAddRemove(std::function<void(Client*, bool, bool)> on_client_addremove)
+{
+	m_on_client_addremove = std::move(on_client_addremove);
+}
+
 void DynamicZone::StartAllClientRemovalTimers()
 {
 	for (const auto& client_iter : entity_list.GetClientList())
@@ -72,38 +82,6 @@ void DynamicZone::StartAllClientRemovalTimers()
 		{
 			client_iter.second->SetDzRemovalTimer(true);
 		}
-	}
-}
-
-void DynamicZone::SendInstanceRemoveAllCharacters()
-{
-	// just remove all clients in bulk instead of only characters assigned to the instance
-	if (IsCurrentZoneDzInstance())
-	{
-		DynamicZone::StartAllClientRemovalTimers();
-	}
-	else if (GetInstanceID() != 0)
-	{
-		auto pack = CreateServerRemoveAllCharactersPacket();
-		worldserver.SendPacket(pack.get());
-	}
-}
-
-void DynamicZone::SendInstanceAddRemoveCharacter(uint32_t character_id, bool removed)
-{
-	// if removing, sets removal timer on client inside the instance
-	if (IsCurrentZoneDzInstance())
-	{
-		Client* client = entity_list.GetClientByCharID(character_id);
-		if (client)
-		{
-			client->SetDzRemovalTimer(removed);
-		}
-	}
-	else if (GetInstanceID() != 0)
-	{
-		auto pack = CreateServerAddRemoveCharacterPacket(character_id, removed);
-		worldserver.SendPacket(pack.get());
 	}
 }
 
@@ -129,8 +107,8 @@ void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 	m_duration = std::chrono::seconds(new_duration);
 	m_expire_time = m_start_time + m_duration;
 
-	LogDynamicZones("Updated zone [{}]:[{}] seconds remaining: [{}]",
-		m_zone_id, m_instance_id, GetSecondsRemaining());
+	LogDynamicZones("Updated dz [{}] zone [{}]:[{}] seconds remaining: [{}]",
+		m_id, m_zone_id, m_instance_id, GetSecondsRemaining());
 
 	if (zone && IsCurrentZoneDzInstance())
 	{
@@ -138,31 +116,80 @@ void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 	}
 }
 
-void DynamicZone::SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location)
-{
-	auto pack = CreateServerDzLocationPacket(server_opcode, location);
-	worldserver.SendPacket(pack.get());
-}
-
 void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
-	case ServerOP_DzAddRemoveCharacter:
+	case ServerOP_DzAddRemoveMember:
 	{
-		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-		Client* client = entity_list.GetClientByCharID(buf->character_id);
-		if (client)
+		auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 		{
-			client->SetDzRemovalTimer(buf->remove); // instance kick timer
+			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+			if (dz)
+			{
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->character_status);
+				dz->ProcessMemberAddRemove({ buf->character_id, buf->character_name, status }, buf->removed);
+			}
+		}
+
+		if (zone && zone->IsZone(buf->dz_zone_id, buf->dz_instance_id))
+		{
+			// cache independent redundancy to kick removed members from dz's instance
+			Client* client = entity_list.GetClientByCharID(buf->character_id);
+			if (client)
+			{
+				client->SetDzRemovalTimer(buf->removed);
+			}
 		}
 		break;
 	}
-	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzSwapMembers:
 	{
-		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-		if (buf->remove)
+		auto buf = reinterpret_cast<ServerDzMemberSwap_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
 		{
+			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+			if (dz)
+			{
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->add_character_status);
+				dz->ProcessMemberAddRemove({ buf->remove_character_id, buf->remove_character_name }, true);
+				dz->ProcessMemberAddRemove({ buf->add_character_id, buf->add_character_name, status }, false);
+			}
+		}
+
+		if (zone && zone->IsZone(buf->dz_zone_id, buf->dz_instance_id))
+		{
+			// cache independent redundancy to kick removed members from dz's instance
+			Client* removed_client = entity_list.GetClientByCharID(buf->remove_character_id);
+			if (removed_client)
+			{
+				removed_client->SetDzRemovalTimer(true);
+			}
+
+			Client* added_client = entity_list.GetClientByCharID(buf->add_character_id);
+			if (added_client)
+			{
+				added_client->SetDzRemovalTimer(false);
+			}
+		}
+		break;
+	}
+	case ServerOP_DzRemoveAllMembers:
+	{
+		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+			if (dz)
+			{
+				dz->ProcessRemoveAllMembers();
+			}
+		}
+
+		if (zone && zone->IsZone(buf->dz_zone_id, buf->dz_instance_id))
+		{
+			// cache independent redundancy to kick removed members from dz's instance
 			DynamicZone::StartAllClientRemovalTimers();
 		}
 		break;
@@ -330,6 +357,20 @@ void DynamicZone::SendMemberListToZoneMembers()
 	}
 }
 
+void DynamicZone::SendMemberListNameToZoneMembers(const std::string& char_name, bool remove)
+{
+	auto outapp_member_name = CreateMemberListNamePacket(char_name, remove);
+
+	for (const auto& member : m_members)
+	{
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
+		{
+			member_client->QueuePacket(outapp_member_name.get());
+		}
+	}
+}
+
 void DynamicZone::SendMemberStatusToZoneMembers(uint32_t update_member_id, DynamicZoneMemberStatus status)
 {
 	if (!HasMember(update_member_id))
@@ -352,4 +393,103 @@ void DynamicZone::SendMemberStatusToZoneMembers(uint32_t update_member_id, Dynam
 			}
 		}
 	}
+}
+
+void DynamicZone::SendUpdatesToZoneMembers(bool removing_all, bool silent)
+{
+	// performs a full update on all members (usually for dz creation or removing all)
+	if (!HasMembers())
+	{
+		return;
+	}
+
+	std::unique_ptr<EQApplicationPacket> outapp_info = nullptr;
+	std::unique_ptr<EQApplicationPacket> outapp_members = nullptr;
+
+	// only expeditions use the dz window. on live the window is filled by non
+	// expeditions when first created but never kept updated. that behavior could
+	// be replicated in the future by flagging this as a creation update
+	if (m_type == DynamicZoneType::Expedition)
+	{
+		// clearing info also clears member list, no need to send both when removing
+		outapp_info = CreateInfoPacket(removing_all);
+		outapp_members = removing_all ? nullptr : CreateMemberListPacket();
+	}
+
+	for (const auto& member : GetMembers())
+	{
+		Client* client = entity_list.GetClientByCharID(member.id);
+		if (client)
+		{
+			if (removing_all) {
+				client->RemoveDynamicZoneID(GetID());
+			} else {
+				client->AddDynamicZoneID(GetID());
+			}
+
+			client->SendDzCompassUpdate();
+
+			if (outapp_info)
+			{
+				client->QueuePacket(outapp_info.get());
+			}
+
+			if (outapp_members)
+			{
+				client->QueuePacket(outapp_members.get());
+			}
+
+			// callback to the dz system so it can perform any messages or set client data
+			if (m_on_client_addremove)
+			{
+				m_on_client_addremove(client, removing_all, silent);
+			}
+		}
+	}
+}
+
+void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
+{
+	DynamicZoneBase::ProcessMemberAddRemove(member, removed);
+
+	// the affected client always gets a full compass update. for expeditions
+	// client also gets window info update and all members get a member list update
+	Client* client = entity_list.GetClientByCharID(member.id);
+	if (client)
+	{
+		if (!removed) {
+			client->AddDynamicZoneID(GetID());
+		} else {
+			client->RemoveDynamicZoneID(GetID());
+		}
+
+		client->SendDzCompassUpdate();
+
+		if (m_type == DynamicZoneType::Expedition)
+		{
+			// sending clear info also clears member list for removed members
+			client->QueuePacket(CreateInfoPacket(removed).get());
+		}
+
+		if (m_on_client_addremove)
+		{
+			m_on_client_addremove(client, removed, false);
+		}
+	}
+
+	if (m_type == DynamicZoneType::Expedition)
+	{
+		// send full list when adding (MemberListName adds with "unknown" status)
+		if (!removed) {
+			SendMemberListToZoneMembers();
+		} else {
+			SendMemberListNameToZoneMembers(member.name, true);
+		}
+	}
+}
+
+void DynamicZone::ProcessRemoveAllMembers(bool silent)
+{
+	SendUpdatesToZoneMembers(true, silent);
+	DynamicZoneBase::ProcessRemoveAllMembers(silent);
 }

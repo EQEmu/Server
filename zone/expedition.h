@@ -85,15 +85,10 @@ public:
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
 	const std::string& GetName() const { return m_dynamiczone.GetName(); }
 
-	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
-	void RemoveAllMembers(bool enable_removal_timers = true);
-	bool RemoveMember(const std::string& remove_char_name);
-	void SetMemberStatus(Client* client, DynamicZoneMemberStatus status);
-	void SwapMember(Client* add_client, const std::string& remove_char_name);
-
 	bool IsLocked() const { return m_is_locked; }
 	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
 		bool update_db = false, uint32_t msg_color = Chat::Yellow);
+	void SetMemberStatus(Client* client, DynamicZoneMemberStatus status);
 
 	void AddLockout(const std::string& event_name, uint32_t seconds);
 	void AddLockoutDuration(const std::string& event_name, int seconds, bool members_only = true);
@@ -136,21 +131,19 @@ private:
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
 	void AddLockoutDurationClients(const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id = 0);
 	bool ConfirmLeaderCommand(Client* requester);
+	void OnClientAddRemove(Client* client, bool removed, bool silent);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLeaderChanged(uint32_t new_leader_id);
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader,
 		const std::string& new_leader_name, bool is_success, bool is_online);
-	void ProcessMemberAdded(const std::string& added_char_name, uint32_t added_char_id);
-	void ProcessMemberRemoved(const std::string& removed_char_name, uint32_t removed_char_id);
 	void SaveLockouts(ExpeditionRequest& request);
 	void SendClientExpeditionInvite(
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
 	void SendMembersExpireWarning(uint32_t minutes);
-	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name,
 		const std::string& add_name, bool pending = false);
@@ -158,10 +151,7 @@ private:
 		const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void SendWorldLockoutUpdate(
 		const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
-	void SendWorldMemberChanged(const std::string& char_name, uint32_t char_id, bool remove);
 	void SendWorldMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
-	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
-		const std::string& add_char_name, uint32_t add_char_id);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
 	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,

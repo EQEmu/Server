@@ -42,28 +42,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_ExpeditionMemberChange:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, { buf->char_id, buf->char_name }, buf->removed);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberSwap:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberSwap_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, { buf->add_char_id, buf->add_char_name }, false);
-		expedition_state.MemberChange(buf->expedition_id, { buf->remove_char_id, buf->remove_char_name }, true);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMembersRemoved:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.RemoveAllMembers(buf->expedition_id);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
 	case ServerOP_ExpeditionMemberStatus:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);

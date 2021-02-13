@@ -115,29 +115,6 @@ void ExpeditionState::CacheExpeditions(
 	}
 }
 
-void ExpeditionState::MemberChange(
-	uint32_t expedition_id, const DynamicZoneMember& member, bool remove)
-{
-	auto expedition = GetExpedition(expedition_id);
-	if (expedition)
-	{
-		if (remove) {
-			expedition->RemoveMember(member.id);
-		} else {
-			expedition->GetDynamicZone().AddInternalMember(member);
-		}
-	}
-}
-
-void ExpeditionState::RemoveAllMembers(uint32_t expedition_id)
-{
-	auto expedition = GetExpedition(expedition_id);
-	if (expedition)
-	{
-		expedition->GetDynamicZone().ClearInternalMembers();
-	}
-}
-
 void ExpeditionState::Process()
 {
 	if (!m_process_throttle_timer.Check())

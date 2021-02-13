@@ -38,13 +38,13 @@ Expedition::Expedition() :
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
 	m_dynamic_zone = std::move(dz);
+	m_dynamic_zone.RegisterOnMemberAddRemove(
+		[this](const DynamicZoneMember& member, bool removed) { OnMemberAddRemove(member, removed); });
 }
 
-void Expedition::RemoveMember(uint32_t character_id)
+void Expedition::OnMemberAddRemove(const DynamicZoneMember& member, bool removed)
 {
-	GetDynamicZone().RemoveInternalMember(character_id);
-
-	if (character_id == GetLeaderID())
+	if (removed && member.id == GetLeaderID())
 	{
 		ChooseNewLeader();
 	}

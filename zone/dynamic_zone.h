@@ -47,9 +47,13 @@ public:
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
 	bool IsCurrentZoneDzInstance() const;
+	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
 	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
 	void SendMemberListToZoneMembers();
+	void SendMemberListNameToZoneMembers(const std::string& char_name, bool remove);
 	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
+	void SendRemoveAllMembersToZoneMembers(bool silent) { ProcessRemoveAllMembers(silent); }
+	void SendUpdatesToZoneMembers(bool removing_all = false, bool silent = true);
 
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
@@ -62,14 +66,16 @@ protected:
 	uint16_t GetCurrentZoneID() override;
 	Database& GetDatabase() override;
 	void ProcessCompassChange(const DynamicZoneLocation& location) override;
-	void SendInstanceAddRemoveCharacter(uint32_t character_id, bool remove) override;
-	void SendInstanceRemoveAllCharacters() override;
-	void SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location) override;
+	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
+	void ProcessRemoveAllMembers(bool silent = false) override;
+	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
 	static void StartAllClientRemovalTimers();
 	void SendCompassUpdateToZoneMembers();
 	void SetUpdatedDuration(uint32_t seconds);
+
+	std::function<void(Client*, bool, bool)> m_on_client_addremove;
 };
 
 #endif

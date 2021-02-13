@@ -7201,7 +7201,7 @@ void command_dz(Client* c, const Seperator* sep)
 			{
 				c->Message(Chat::White, fmt::format("Destroying expedition [{}] ({})",
 					expedition_id, expedition->GetName()).c_str());
-				expedition->RemoveAllMembers();
+				expedition->GetDynamicZone().RemoveAllMembers();
 			}
 			else
 			{
