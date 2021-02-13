@@ -198,8 +198,6 @@ char* strn0cpy(char* dest, const char* source, uint32 size);
 const char *ConvertArray(int input, char *returnchar);
 const char *ConvertArrayF(float input, char *returnchar);
 const char *MakeLowerString(const char *source);
-int MakeAnyLenString(char** ret, const char* format, ...);
-uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...);
 uint32 hextoi(const char* num);
 uint64 hextoi64(const char* num);
 void MakeLowerString(const char *source, char *target);
