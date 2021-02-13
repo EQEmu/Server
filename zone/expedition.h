@@ -52,7 +52,7 @@ class Expedition : public ExpeditionBase
 public:
 	Expedition() = default;
 	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-		const DynamicZoneMember& leader, uint32_t min_players, uint32_t max_players);
+		const DynamicZoneMember& leader);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
 

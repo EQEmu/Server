@@ -61,6 +61,8 @@ public:
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
+	uint32_t GetMaxPlayers() const { return m_max_players; }
+	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetSecondsRemaining() const;
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); }
 	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
@@ -86,6 +88,8 @@ public:
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
 	void SetLeaderName(const std::string& leader_name) { m_leader_name = leader_name; }
+	void SetMaxPlayers(uint32_t max_players) { m_max_players = max_players; }
+	void SetMinPlayers(uint32_t min_players) { m_min_players = min_players; }
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
@@ -113,6 +117,8 @@ protected:
 	uint32_t m_zone_id = 0;
 	uint32_t m_instance_id = 0;
 	uint32_t m_zone_version = 0;
+	uint32_t m_min_players = 0;
+	uint32_t m_max_players = 0;
 	bool m_never_expires = false;
 	bool m_has_zonein = false;
 	std::string m_name;

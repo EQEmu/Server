@@ -50,8 +50,8 @@ const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
 	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-	const DynamicZoneMember& leader, uint32_t min_players, uint32_t max_players
-) : ExpeditionBase(id, uuid, expedition_name, leader, min_players, max_players)
+	const DynamicZoneMember& leader
+) : ExpeditionBase(id, uuid, expedition_name, leader)
 {
 	SetDynamicZone(std::move(dz));
 }
@@ -79,6 +79,9 @@ Expedition* Expedition::TryCreate(
 		LogExpeditionsModerate("[{}] request by [{}] denied", request.GetExpeditionName(), requester->GetName());
 		return nullptr;
 	}
+
+	dynamiczone.SetMinPlayers(request.GetMinPlayers());
+	dynamiczone.SetMaxPlayers(request.GetMaxPlayers());
 
 	auto dynamic_zone_id = dynamiczone.Create();
 	if (dynamic_zone_id == 0)
@@ -109,9 +112,7 @@ Expedition* Expedition::TryCreate(
 			expedition_uuid,
 			std::move(dynamiczone),
 			request.GetExpeditionName(),
-			DynamicZoneMember{ request.GetLeaderID(), request.GetLeaderName() },
-			request.GetMinPlayers(),
-			request.GetMaxPlayers()
+			DynamicZoneMember{ request.GetLeaderID(), request.GetLeaderName() }
 		);
 
 		LogExpeditions(
@@ -120,8 +121,8 @@ Expedition* Expedition::TryCreate(
 			expedition->GetName(),
 			expedition->GetDynamicZone().GetInstanceID(),
 			expedition->GetLeaderName(),
-			expedition->GetMinPlayers(),
-			expedition->GetMaxPlayers()
+			expedition->GetDynamicZone().GetMinPlayers(),
+			expedition->GetDynamicZone().GetMaxPlayers()
 		);
 
 		expedition->SaveMembers(request);
@@ -206,6 +207,10 @@ void Expedition::CacheExpeditions(
 				expedition->m_lockouts.emplace(std::move(event_name), std::move(lockout));
 			}
 		}
+
+		// stored on expedition in db but on dz in memory cache
+		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
+		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
 
 		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
 
@@ -673,9 +678,10 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 		{
 			has_conflict = true;
 		}
-		else if (member_count >= m_max_players)
+		else if (member_count >= GetDynamicZone().GetMaxPlayers())
 		{
-			SendLeaderMessage(leader_client, Chat::Red, DZADD_EXCEED_MAX, { fmt::format_int(m_max_players).str() });
+			SendLeaderMessage(leader_client, Chat::Red, DZADD_EXCEED_MAX, {
+				fmt::format_int(GetDynamicZone().GetMaxPlayers()).str() });
 			has_conflict = true;
 		}
 	}
@@ -1323,7 +1329,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 		info->assigned = true;
 		strn0cpy(info->dz_name, m_expedition_name.c_str(), sizeof(info->dz_name));
 		strn0cpy(info->leader_name, m_leader.name.c_str(), sizeof(info->leader_name));
-		info->max_players = m_max_players;
+		info->max_players = GetDynamicZone().GetMaxPlayers();
 	}
 	return outapp;
 }

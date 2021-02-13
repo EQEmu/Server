@@ -3,15 +3,12 @@
 #include "rulesys.h"
 
 ExpeditionBase::ExpeditionBase(uint32_t id, const std::string& uuid,
-	const std::string& expedition_name, const DynamicZoneMember& leader,
-	uint32_t min_players, uint32_t max_players
+	const std::string& expedition_name, const DynamicZoneMember& leader
 ) :
 	m_id(id),
 	m_uuid(uuid),
 	m_expedition_name(expedition_name),
-	m_leader(leader),
-	m_min_players(min_players),
-	m_max_players(max_players)
+	m_leader(leader)
 {
 }
 
@@ -20,8 +17,6 @@ void ExpeditionBase::LoadRepositoryResult(ExpeditionsRepository::ExpeditionWithL
 	m_id                 = entry.id;
 	m_uuid               = std::move(entry.uuid);
 	m_expedition_name    = std::move(entry.expedition_name);
-	m_min_players        = entry.min_players;
-	m_max_players        = entry.max_players;
 	m_add_replay_on_join = entry.add_replay_on_join;
 	m_is_locked          = entry.is_locked;
 	m_leader.id          = entry.leader_id;
