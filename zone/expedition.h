@@ -149,8 +149,6 @@ private:
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
-	void SendMemberListToZoneMembers();
-	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
 	void SendMembersExpireWarning(uint32_t minutes);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
@@ -170,11 +168,7 @@ private:
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
 
 	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
-	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
-	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
-	std::unique_ptr<EQApplicationPacket> CreateMemberListNamePacket(const std::string& name, bool remove_name);
-	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, DynamicZoneMemberStatus status);
 
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;

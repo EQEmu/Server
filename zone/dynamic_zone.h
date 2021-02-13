@@ -48,9 +48,14 @@ public:
 
 	bool IsCurrentZoneDzInstance() const;
 	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
-	void SetUpdatedDuration(uint32_t seconds);
+	void SendMemberListToZoneMembers();
+	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
 
+	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
+	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
+	std::unique_ptr<EQApplicationPacket> CreateMemberListNamePacket(const std::string& name, bool remove_name);
+	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, DynamicZoneMemberStatus status);
 
 protected:
 	uint16_t GetCurrentInstanceID() override;
@@ -64,6 +69,7 @@ protected:
 private:
 	static void StartAllClientRemovalTimers();
 	void SendCompassUpdateToZoneMembers();
+	void SetUpdatedDuration(uint32_t seconds);
 };
 
 #endif

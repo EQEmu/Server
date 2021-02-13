@@ -206,6 +206,70 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 	}
 }
 
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateInfoPacket(bool clear)
+{
+	constexpr uint32_t outsize = sizeof(DynamicZoneInfo_Struct);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionInfo, outsize);
+	if (!clear)
+	{
+		auto info = reinterpret_cast<DynamicZoneInfo_Struct*>(outapp->pBuffer);
+		info->assigned = true;
+		strn0cpy(info->dz_name, m_name.c_str(), sizeof(info->dz_name));
+		strn0cpy(info->leader_name, m_leader.name.c_str(), sizeof(info->leader_name));
+		info->max_players = m_max_players;
+	}
+	return outapp;
+}
+
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateMemberListPacket(bool clear)
+{
+	uint32_t member_count = clear ? 0 : static_cast<uint32_t>(m_members.size());
+	uint32_t member_entries_size = sizeof(DynamicZoneMemberEntry_Struct) * member_count;
+	uint32_t outsize = sizeof(DynamicZoneMemberList_Struct) + member_entries_size;
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberList, outsize);
+	auto buf = reinterpret_cast<DynamicZoneMemberList_Struct*>(outapp->pBuffer);
+
+	buf->member_count = member_count;
+
+	if (!clear)
+	{
+		for (auto i = 0; i < m_members.size(); ++i)
+		{
+			strn0cpy(buf->members[i].name, m_members[i].name.c_str(), sizeof(buf->members[i].name));
+			buf->members[i].online_status = static_cast<uint8_t>(m_members[i].status);
+		}
+	}
+
+	return outapp;
+}
+
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateMemberListNamePacket(
+	const std::string& name, bool remove_name)
+{
+	constexpr uint32_t outsize = sizeof(DynamicZoneMemberListName_Struct);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberListName, outsize);
+	auto buf = reinterpret_cast<DynamicZoneMemberListName_Struct*>(outapp->pBuffer);
+	buf->add_name = !remove_name;
+	strn0cpy(buf->name, name.c_str(), sizeof(buf->name));
+	return outapp;
+}
+
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateMemberListStatusPacket(
+	const std::string& name, DynamicZoneMemberStatus status)
+{
+	// member list status uses member list struct with a single entry
+	constexpr uint32_t outsize = sizeof(DynamicZoneMemberList_Struct) + sizeof(DynamicZoneMemberEntry_Struct);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberListStatus, outsize);
+	auto buf = reinterpret_cast<DynamicZoneMemberList_Struct*>(outapp->pBuffer);
+	buf->member_count = 1;
+
+	auto entry = static_cast<DynamicZoneMemberEntry_Struct*>(buf->members);
+	strn0cpy(entry->name, name.c_str(), sizeof(entry->name));
+	entry->online_status = static_cast<uint8_t>(status);
+
+	return outapp;
+}
+
 std::unique_ptr<EQApplicationPacket> DynamicZone::CreateLeaderNamePacket()
 {
 	constexpr uint32_t outsize = sizeof(DynamicZoneLeaderName_Struct);
@@ -247,6 +311,44 @@ void DynamicZone::SendLeaderNameToZoneMembers(std::function<void(Client*)> on_le
 			if (member.id == m_leader.id && on_leader_update)
 			{
 				on_leader_update(member_client);
+			}
+		}
+	}
+}
+
+void DynamicZone::SendMemberListToZoneMembers()
+{
+	auto outapp_members = CreateMemberListPacket(false);
+
+	for (const auto& member : m_members)
+	{
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
+		{
+			member_client->QueuePacket(outapp_members.get());
+		}
+	}
+}
+
+void DynamicZone::SendMemberStatusToZoneMembers(uint32_t update_member_id, DynamicZoneMemberStatus status)
+{
+	if (!HasMember(update_member_id))
+	{
+		return;
+	}
+
+	// if zone already had this member status cached avoid packet update to clients
+	bool changed = SetInternalMemberStatus(update_member_id, status);
+	if (changed)
+	{
+		auto member_data = GetMemberData(update_member_id); // rules may override status
+		auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, member_data.status);
+		for (const auto& member : m_members)
+		{
+			Client* member_client = entity_list.GetClientByCharID(member.id);
+			if (member_client)
+			{
+				member_client->QueuePacket(outapp_member_status.get());
 			}
 		}
 	}
