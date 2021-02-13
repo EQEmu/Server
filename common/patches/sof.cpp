@@ -533,8 +533,8 @@ namespace SoF
 
 	ENCODE(OP_DzExpeditionInfo)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionInfo_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionInfo_Struct, structs::ExpeditionInfo_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneInfo_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneInfo_Struct, structs::DynamicZoneInfo_Struct);
 
 		OUT(client_id);
 		OUT(assigned);
@@ -585,8 +585,8 @@ namespace SoF
 
 	ENCODE(OP_DzSetLeaderName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionSetLeaderName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionSetLeaderName_Struct, structs::ExpeditionSetLeaderName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneLeaderName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneLeaderName_Struct, structs::DynamicZoneLeaderName_Struct);
 
 		OUT(client_id);
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
@@ -596,7 +596,7 @@ namespace SoF
 
 	ENCODE(OP_DzMemberList)
 	{
-		SETUP_VAR_ENCODE(ExpeditionMemberList_Struct);
+		SETUP_VAR_ENCODE(DynamicZoneMemberList_Struct);
 
 		SerializeBuffer buf;
 		buf.WriteUInt32(emu->client_id);
@@ -616,8 +616,8 @@ namespace SoF
 
 	ENCODE(OP_DzMemberListName)
 	{
-		ENCODE_LENGTH_EXACT(ExpeditionMemberListName_Struct);
-		SETUP_DIRECT_ENCODE(ExpeditionMemberListName_Struct, structs::ExpeditionMemberListName_Struct);
+		ENCODE_LENGTH_EXACT(DynamicZoneMemberListName_Struct);
+		SETUP_DIRECT_ENCODE(DynamicZoneMemberListName_Struct, structs::DynamicZoneMemberListName_Struct);
 
 		OUT(client_id);
 		OUT(add_name);
@@ -628,7 +628,7 @@ namespace SoF
 
 	ENCODE(OP_DzMemberListStatus)
 	{
-		auto emu = reinterpret_cast<ExpeditionMemberList_Struct*>((*p)->pBuffer);
+		auto emu = reinterpret_cast<DynamicZoneMemberList_Struct*>((*p)->pBuffer);
 		if (emu->member_count == 1)
 		{
 			ENCODE_FORWARD(OP_DzMemberList);

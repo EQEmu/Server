@@ -1349,9 +1349,9 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateExpireWarningPacket(uint3
 
 std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 {
-	uint32_t outsize = sizeof(ExpeditionInfo_Struct);
+	uint32_t outsize = sizeof(DynamicZoneInfo_Struct);
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionInfo, outsize);
-	auto info = reinterpret_cast<ExpeditionInfo_Struct*>(outapp->pBuffer);
+	auto info = reinterpret_cast<DynamicZoneInfo_Struct*>(outapp->pBuffer);
 	if (!clear)
 	{
 		info->assigned = true;
@@ -1380,10 +1380,10 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInvitePacket(
 std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListPacket(bool clear)
 {
 	uint32_t member_count = clear ? 0 : static_cast<uint32_t>(m_members.size());
-	uint32_t member_entries_size = sizeof(ExpeditionMemberEntry_Struct) * member_count;
-	uint32_t outsize = sizeof(ExpeditionMemberList_Struct) + member_entries_size;
+	uint32_t member_entries_size = sizeof(DynamicZoneMemberEntry_Struct) * member_count;
+	uint32_t outsize = sizeof(DynamicZoneMemberList_Struct) + member_entries_size;
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberList, outsize);
-	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
+	auto buf = reinterpret_cast<DynamicZoneMemberList_Struct*>(outapp->pBuffer);
 
 	buf->member_count = member_count;
 
@@ -1402,9 +1402,9 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListPacket(bool cle
 std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListNamePacket(
 	const std::string& name, bool remove_name)
 {
-	uint32_t outsize = sizeof(ExpeditionMemberListName_Struct);
+	uint32_t outsize = sizeof(DynamicZoneMemberListName_Struct);
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberListName, outsize);
-	auto buf = reinterpret_cast<ExpeditionMemberListName_Struct*>(outapp->pBuffer);
+	auto buf = reinterpret_cast<DynamicZoneMemberListName_Struct*>(outapp->pBuffer);
 	buf->add_name = !remove_name;
 	strn0cpy(buf->name, name.c_str(), sizeof(buf->name));
 	return outapp;
@@ -1414,12 +1414,12 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 	const std::string& name, DynamicZoneMemberStatus status)
 {
 	// member list status uses member list struct with a single entry
-	uint32_t outsize = sizeof(ExpeditionMemberList_Struct) + sizeof(ExpeditionMemberEntry_Struct);
+	uint32_t outsize = sizeof(DynamicZoneMemberList_Struct) + sizeof(DynamicZoneMemberEntry_Struct);
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzMemberListStatus, outsize);
-	auto buf = reinterpret_cast<ExpeditionMemberList_Struct*>(outapp->pBuffer);
+	auto buf = reinterpret_cast<DynamicZoneMemberList_Struct*>(outapp->pBuffer);
 	buf->member_count = 1;
 
-	auto entry = reinterpret_cast<ExpeditionMemberEntry_Struct*>(buf->members);
+	auto entry = static_cast<DynamicZoneMemberEntry_Struct*>(buf->members);
 	strn0cpy(entry->name, name.c_str(), sizeof(entry->name));
 	entry->expedition_status = static_cast<uint8_t>(status);
 
@@ -1428,9 +1428,9 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 
 std::unique_ptr<EQApplicationPacket> Expedition::CreateLeaderNamePacket()
 {
-	uint32_t outsize = sizeof(ExpeditionSetLeaderName_Struct);
+	uint32_t outsize = sizeof(DynamicZoneLeaderName_Struct);
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzSetLeaderName, outsize);
-	auto buf = reinterpret_cast<ExpeditionSetLeaderName_Struct*>(outapp->pBuffer);
+	auto buf = reinterpret_cast<DynamicZoneLeaderName_Struct*>(outapp->pBuffer);
 	strn0cpy(buf->leader_name, m_leader.name.c_str(), sizeof(buf->leader_name));
 	return outapp;
 }

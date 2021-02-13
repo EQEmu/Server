@@ -4841,7 +4841,7 @@ struct ExpeditionInviteResponse_Struct
 /*079*/ uint8  unknown079;     // padding garbage?
 };
 
-struct ExpeditionInfo_Struct
+struct DynamicZoneInfo_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
@@ -4851,20 +4851,20 @@ struct ExpeditionInfo_Struct
 /*144*/ char   leader_name[64];
 };
 
-struct ExpeditionMemberEntry_Struct
+struct DynamicZoneMemberEntry_Struct
 {
 /*000*/ char name[1];            // variable length, null terminated, max 0x40 (64)
 /*000*/ uint8 expedition_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
 };
 
-struct ExpeditionMemberList_Struct
+struct DynamicZoneMemberList_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 member_count; // number of players in window
-/*008*/ ExpeditionMemberEntry_Struct members[0]; // variable length
+/*008*/ DynamicZoneMemberEntry_Struct members[0]; // variable length
 };
 
-struct ExpeditionMemberListName_Struct
+struct DynamicZoneMemberListName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
@@ -4887,7 +4887,7 @@ struct ExpeditionLockoutTimers_Struct
 /*008*/ ExpeditionLockoutTimerEntry_Struct timers[0];
 };
 
-struct ExpeditionSetLeaderName_Struct
+struct DynamicZoneLeaderName_Struct
 {
 /*000*/ uint32 client_id;
 /*004*/ uint32 unknown004;
