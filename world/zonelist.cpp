@@ -333,7 +333,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 			}
 
 			fmt::format_to(out,
-				"#{:-3i} :: {} :: {}:{:-5} :: {:2} :: {}:{} :: {} :: ({})",
+				"#{:<3} :: {} :: {}:{:<5} :: {:2} :: {}:{} :: {} :: ({})",
 				zone_server_data->GetID(),
 				is_static_string,
 				addr.c_str(),
