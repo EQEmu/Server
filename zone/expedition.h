@@ -150,7 +150,6 @@ private:
 	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
 	void SendMembersExpireWarning(uint32_t minutes);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
-	void SendCompassUpdateToZoneMembers();
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name,
 		const std::string& add_name, bool pending = false);

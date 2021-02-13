@@ -23,7 +23,6 @@
 
 #include "../common/dynamic_zone_base.h"
 #include <cstdint>
-#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -47,7 +46,6 @@ public:
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
 	bool IsCurrentZoneDzInstance() const;
-	void RegisterOnCompassChange(const std::function<void()>& on_change) { m_on_compass_change = on_change; }
 	void SetUpdatedDuration(uint32_t seconds);
 
 protected:
@@ -61,8 +59,7 @@ protected:
 
 private:
 	static void StartAllClientRemovalTimers();
-
-	std::function<void()> m_on_compass_change;
+	void SendCompassUpdateToZoneMembers();
 };
 
 #endif

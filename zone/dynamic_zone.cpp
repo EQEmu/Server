@@ -209,8 +209,17 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 void DynamicZone::ProcessCompassChange(const DynamicZoneLocation& location)
 {
 	DynamicZoneBase::ProcessCompassChange(location);
-	if (m_on_compass_change)
+	SendCompassUpdateToZoneMembers();
+}
+
+void DynamicZone::SendCompassUpdateToZoneMembers()
+{
+	for (const auto& member : m_members)
 	{
-		m_on_compass_change();
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
+		{
+			member_client->SendDzCompassUpdate();
+		}
 	}
 }
