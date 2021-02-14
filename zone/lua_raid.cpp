@@ -4,7 +4,6 @@
 #include <luabind/luabind.hpp>
 #include <luabind/object.hpp>
 
-#include "raid.h"
 #include "masterentity.h"
 #include "lua_raid.h"
 #include "lua_entity.h"
