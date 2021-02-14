@@ -1111,7 +1111,7 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	}
 
 	if (spells_learned > 0) {
-		std::string spell_message = (spells_learned == 1 ? " a new spell" : fmt::format("{} new spells", spells_learned));
+		std::string spell_message = (spells_learned == 1 ? "a new spell" : fmt::format("{} new spells", spells_learned));
 		initiator->Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
 	}
 	return spells_learned;
@@ -1140,7 +1140,7 @@ uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	}
 
 	if (disciplines_learned > 0) {
-		std::string discipline_message = (disciplines_learned == 1 ? " a new discipline" : fmt::format("{} new disciplines", disciplines_learned));
+		std::string discipline_message = (disciplines_learned == 1 ? "a new discipline" : fmt::format("{} new disciplines", disciplines_learned));
 		initiator->SendDisciplineUpdate();
 		initiator->Message(Chat::White, fmt::format("You have learned {}!", discipline_message).c_str());
 	}
