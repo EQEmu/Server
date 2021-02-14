@@ -569,6 +569,7 @@ public:
 			}
 			mob_movement_manager->SendCommandToClients(mob, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeCloseMedium);
 		}
+
 		return true;
 	}
 
@@ -604,7 +605,7 @@ public:
 		mob->WipeHateList();
 		mob->Heal();
 
-		return true;
+		return false;
 	}
 
 	virtual bool Started() const
