@@ -3239,6 +3239,19 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 		}
 
 		float assist_range = (mob->GetAssistRange() * mob->GetAssistRange());
+
+		// Implement optional sneak-pull
+		if (RuleB(Combat, EnableSneakPull) && attacker->sneaking) {
+			assist_range = RuleI(Combat, SneakPullAssistRange);
+			if (attacker->IsClient()) {
+				float clientx = attacker->GetX();
+				float clienty = attacker->GetY();
+				if (attacker->CastToClient()->BehindMob(mob, clientx, clienty)) {
+					assist_range = 0;
+				}
+			}
+		}
+
 		if (distance > assist_range) {
 			continue;
 		}
