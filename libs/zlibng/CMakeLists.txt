@@ -128,7 +128,7 @@ mark_as_advanced(FORCE
 if(ZLIB_COMPAT)
     add_definitions(-DZLIB_COMPAT)
     set(WITH_GZFILEOP ON)
-    set(SUFFIX "")
+    set(SUFFIX "-ng")
 else()
     set(SUFFIX "-ng")
 endif()
