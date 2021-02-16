@@ -165,7 +165,7 @@ static inline void static_emit_ptr(deflate_state *const s, const int lc, const u
     quick_send_bits(s, code1, len1, code2, len2);
 }
 
-const ct_data static_ltree[L_CODES+2];
+extern const ct_data static_ltree[L_CODES+2];
 
 static inline void static_emit_lit(deflate_state *const s, const int lit) {
     quick_send_bits(s, static_ltree[lit].Code, static_ltree[lit].Len, 0, 0);
