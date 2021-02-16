@@ -51,8 +51,8 @@ include(CheckCSourceRuns)
 include(CMakeDependentOption)
 include(FeatureSummary)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}cmake/detect-arch.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}cmake/detect-sanitizer.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/detect-arch.cmake)
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/detect-sanitizer.cmake)
 
 if(CMAKE_TOOLCHAIN_FILE)
     message(STATUS "Using CMake toolchain: ${CMAKE_TOOLCHAIN_FILE}")
