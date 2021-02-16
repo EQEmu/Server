@@ -48,9 +48,8 @@ constexpr char LOCK_BEGIN[]                  = "The trial has begun. You cannot 
 const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
-Expedition::Expedition(
-	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name
-) : ExpeditionBase(id, uuid, expedition_name)
+Expedition::Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz) :
+	ExpeditionBase(id, uuid)
 {
 	SetDynamicZone(std::move(dz));
 }
@@ -105,8 +104,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, b
 		auto expedition = std::make_unique<Expedition>(
 			expedition_id,
 			expedition_uuid,
-			std::move(dynamiczone),
-			request.GetExpeditionName()
+			std::move(dynamiczone)
 		);
 
 		LogExpeditions(
@@ -165,7 +163,7 @@ void Expedition::CacheExpeditions(
 	for (auto& entry : expedition_entries)
 	{
 		auto expedition = std::make_unique<Expedition>();
-		expedition->LoadRepositoryResult(std::move(entry));
+		expedition->LoadRepositoryResult(entry);
 
 		auto dz_entry_iter = std::find_if(dynamic_zones.begin(), dynamic_zones.end(),
 			[&](const DynamicZonesRepository::DynamicZoneInstance& dz_entry) {
@@ -203,11 +201,10 @@ void Expedition::CacheExpeditions(
 		}
 
 		// stored on expedition in db but on dz in memory cache
+		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
 		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
-
-		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
 
 		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
 
@@ -357,7 +354,7 @@ void Expedition::AddReplayLockout(uint32_t seconds)
 
 void Expedition::AddLockout(const std::string& event_name, uint32_t seconds)
 {
-	auto lockout = ExpeditionLockoutTimer::CreateLockout(m_expedition_name, event_name, seconds, m_uuid);
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(GetName(), event_name, seconds, m_uuid);
 	AddLockout(lockout);
 }
 
@@ -378,7 +375,7 @@ void Expedition::AddLockoutDuration(const std::string& event_name, int seconds, 
 	// lockout timers use unsigned durations to define intent but we may need
 	// to insert a new lockout while still supporting timer reductions
 	auto lockout = ExpeditionLockoutTimer::CreateLockout(
-		m_expedition_name, event_name, std::max(0, seconds), m_uuid);
+		GetName(), event_name, std::max(0, seconds), m_uuid);
 
 	if (!members_only)
 	{
@@ -418,16 +415,16 @@ void Expedition::UpdateLockoutDuration(
 		seconds = static_cast<uint32_t>(seconds * RuleR(Expedition, LockoutDurationMultiplier));
 
 		uint64_t expire_time = it->second.GetStartTime() + seconds;
-		AddLockout({ m_uuid, m_expedition_name, event_name, expire_time, seconds }, members_only);
+		AddLockout({ m_uuid, GetName(), event_name, expire_time, seconds }, members_only);
 	}
 }
 
 void Expedition::RemoveLockout(const std::string& event_name)
 {
 	ExpeditionDatabase::DeleteLockout(m_id, event_name);
-	ExpeditionDatabase::DeleteMembersLockout(GetDynamicZone().GetMembers(), m_expedition_name, event_name);
+	ExpeditionDatabase::DeleteMembersLockout(GetDynamicZone().GetMembers(), GetName(), event_name);
 
-	ExpeditionLockoutTimer lockout{m_uuid, m_expedition_name, event_name, 0, 0};
+	ExpeditionLockoutTimer lockout{m_uuid, GetName(), event_name, 0, 0};
 	ProcessLockoutUpdate(lockout, true);
 	SendWorldLockoutUpdate(lockout, true);
 }
@@ -545,7 +542,7 @@ void Expedition::SendClientExpeditionInvite(
 	client->SetPendingExpeditionInvite({ m_id, inviter_name, swap_remove_name });
 
 	client->MessageString(Chat::System, EXPEDITION_ASKED_TO_JOIN,
-		GetLeaderName().c_str(), m_expedition_name.c_str());
+		GetLeaderName().c_str(), GetName().c_str());
 
 	// live (as of March 11 2020 patch) sends warnings for lockouts added
 	// during current expedition that client would receive on entering dz
@@ -555,11 +552,11 @@ void Expedition::SendClientExpeditionInvite(
 		// live doesn't issue a warning for the dz's replay timer
 		const ExpeditionLockoutTimer& lockout = lockout_iter.second;
 		if (!lockout.IsReplayTimer() && !lockout.IsExpired() && lockout.IsFromExpedition(m_uuid) &&
-		    !client->HasExpeditionLockout(m_expedition_name, lockout.GetEventName()))
+		    !client->HasExpeditionLockout(GetName(), lockout.GetEventName()))
 		{
 			if (!warned)
 			{
-				client->Message(Chat::System, DZADD_INVITE_WARNING, m_expedition_name.c_str());
+				client->Message(Chat::System, DZADD_INVITE_WARNING, GetName().c_str());
 				warned = true;
 			}
 
@@ -608,7 +605,7 @@ bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, 
 	}
 
 	// check any extra event lockouts for this expedition that the client has and expedition doesn't
-	auto client_lockouts = add_client->GetExpeditionLockouts(m_expedition_name);
+	auto client_lockouts = add_client->GetExpeditionLockouts(GetName());
 	for (const auto& client_lockout : client_lockouts)
 	{
 		if (client_lockout.IsReplayTimer())
@@ -732,7 +729,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 			auto replay_lockout = m_lockouts.find(DZ_REPLAY_TIMER_NAME);
 			if (replay_lockout != m_lockouts.end() &&
 			    replay_lockout->second.IsFromExpedition(m_uuid) &&
-			    !add_client->HasExpeditionLockout(m_expedition_name, DZ_REPLAY_TIMER_NAME))
+			    !add_client->HasExpeditionLockout(GetName(), DZ_REPLAY_TIMER_NAME))
 			{
 				ExpeditionLockoutTimer replay_timer = replay_lockout->second; // copy
 				replay_timer.Reset();
@@ -907,7 +904,7 @@ void Expedition::DzRemovePlayer(Client* requester, std::string char_name)
 	}
 	else
 	{
-		requester->MessageString(Chat::Yellow, EXPEDITION_REMOVED, FormatName(char_name).c_str(), m_expedition_name.c_str());
+		requester->MessageString(Chat::Yellow, EXPEDITION_REMOVED, FormatName(char_name).c_str(), GetName().c_str());
 	}
 }
 
@@ -965,7 +962,7 @@ void Expedition::DzKickPlayers(Client* requester)
 	}
 
 	RemoveAllMembers();
-	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, "Everyone", m_expedition_name.c_str());
+	requester->MessageString(Chat::Red, EXPEDITION_REMOVED, "Everyone", GetName().c_str());
 }
 
 void Expedition::SetLocked(
@@ -1046,7 +1043,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 	Client* leader_client = entity_list.GetClientByCharID(GetLeaderID());
 	if (leader_client)
 	{
-		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
+		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), GetName().c_str());
 	}
 
 	Client* member_client = entity_list.GetClientByCharID(added_char_id);
@@ -1055,7 +1052,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 		member_client->SetExpeditionID(GetID());
 		member_client->SendDzCompassUpdate();
 		member_client->QueuePacket(CreateInfoPacket().get());
-		member_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
+		member_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), GetName().c_str());
 	}
 
 	SendMemberListToZoneMembers();
@@ -1087,7 +1084,7 @@ void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint
 				member_client->SendDzCompassUpdate();
 				member_client->QueuePacket(CreateInfoPacket(true).get());
 				member_client->MessageString(Chat::Yellow, EXPEDITION_REMOVED,
-					member.name.c_str(), m_expedition_name.c_str());
+					member.name.c_str(), GetName().c_str());
 			}
 		}
 	}
@@ -1119,7 +1116,7 @@ void Expedition::ProcessLockoutDuration(
 		Client* member_client = entity_list.GetClientByCharID(member.id);
 		if (member_client)
 		{
-			member_client->AddExpeditionLockoutDuration(m_expedition_name,
+			member_client->AddExpeditionLockoutDuration(GetName(),
 				lockout.GetEventName(), seconds, m_uuid);
 		}
 	}
@@ -1140,7 +1137,7 @@ void Expedition::AddLockoutDurationClients(
 		if (client && (exclude_id == 0 || client->GetExpeditionID() != exclude_id))
 		{
 			lockout_clients.emplace_back(client->CharacterID(), client->GetName());
-			client->AddExpeditionLockoutDuration(m_expedition_name,
+			client->AddExpeditionLockoutDuration(GetName(),
 				lockout.GetEventName(), seconds, m_uuid);
 		}
 	}
@@ -1178,7 +1175,7 @@ void Expedition::ProcessLockoutUpdate(
 			}
 			else
 			{
-				member_client->RemoveExpeditionLockout(m_expedition_name, lockout.GetEventName());
+				member_client->RemoveExpeditionLockout(GetName(), lockout.GetEventName());
 			}
 		}
 	}
@@ -1246,7 +1243,7 @@ void Expedition::SendUpdatesToZoneMembers(bool clear, bool message_on_clear)
 				if (clear && message_on_clear)
 				{
 					member_client->MessageString(Chat::Yellow, EXPEDITION_REMOVED,
-						member_client->GetName(), m_expedition_name.c_str());
+						member_client->GetName(), GetName().c_str());
 				}
 			}
 		}
@@ -1289,7 +1286,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 	if (!clear)
 	{
 		info->assigned = true;
-		strn0cpy(info->dz_name, m_expedition_name.c_str(), sizeof(info->dz_name));
+		strn0cpy(info->dz_name, GetName().c_str(), sizeof(info->dz_name));
 		strn0cpy(info->leader_name, GetDynamicZone().GetLeaderName().c_str(), sizeof(info->leader_name));
 		info->max_players = GetDynamicZone().GetMaxPlayers();
 	}
@@ -1303,7 +1300,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInvitePacket(
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionInvite, outsize);
 	auto outbuf = reinterpret_cast<ExpeditionInvite_Struct*>(outapp->pBuffer);
 	strn0cpy(outbuf->inviter_name, inviter_name.c_str(), sizeof(outbuf->inviter_name));
-	strn0cpy(outbuf->expedition_name, m_expedition_name.c_str(), sizeof(outbuf->expedition_name));
+	strn0cpy(outbuf->expedition_name, GetName().c_str(), sizeof(outbuf->expedition_name));
 	strn0cpy(outbuf->swap_name, swap_remove_name.c_str(), sizeof(outbuf->swap_name));
 	outbuf->swapping = !swap_remove_name.empty();
 	outbuf->dz_zone_id = m_dynamiczone.GetZoneID();

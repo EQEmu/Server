@@ -51,7 +51,7 @@ class Expedition : public ExpeditionBase
 {
 public:
 	Expedition() = default;
-	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name);
+	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);
 
@@ -83,6 +83,7 @@ public:
 	uint32_t GetLeaderID() { return GetDynamicZone().GetLeaderID(); }
 	const std::string& GetLeaderName() { return GetDynamicZone().GetLeaderName(); }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
+	const std::string& GetName() const { return m_dynamiczone.GetName(); }
 
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
 	void RemoveAllMembers(bool enable_removal_timers = true);

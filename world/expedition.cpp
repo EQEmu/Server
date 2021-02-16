@@ -38,8 +38,6 @@ Expedition::Expedition() :
 
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
-	dz.SetName(GetName());
-
 	m_dynamic_zone = std::move(dz);
 }
 

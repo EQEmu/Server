@@ -89,7 +89,7 @@ void ExpeditionState::CacheExpeditions(
 	for (auto& entry : expedition_entries)
 	{
 		auto expedition = std::make_unique<Expedition>();
-		expedition->LoadRepositoryResult(std::move(entry));
+		expedition->LoadRepositoryResult(entry);
 
 		auto dz_entry_iter = std::find_if(dynamic_zones.begin(), dynamic_zones.end(),
 			[&](const DynamicZonesRepository::DynamicZoneInstance& dz_entry) {
@@ -110,6 +110,7 @@ void ExpeditionState::CacheExpeditions(
 		}
 
 		// stored on expedition in db but on dz in memory cache
+		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
 		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });

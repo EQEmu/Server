@@ -16,20 +16,18 @@ public:
 	ExpeditionBase& operator=(ExpeditionBase&&) = default;
 
 	uint32_t GetID() const { return m_id; }
-	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetUUID() const { return m_uuid; }
 
-	void LoadRepositoryResult(ExpeditionsRepository::ExpeditionWithLeader&& entry);
+	void LoadRepositoryResult(const ExpeditionsRepository::ExpeditionWithLeader& entry);
 
 protected:
 	ExpeditionBase() = default;
-	ExpeditionBase(uint32_t id, const std::string& uuid, const std::string& expedition_name);
+	ExpeditionBase(uint32_t id, const std::string& uuid);
 
 	uint32_t m_id = 0;
 	bool m_is_locked = false;
 	bool m_add_replay_on_join = true;
 	std::string m_uuid;
-	std::string m_expedition_name;
 };
 
 #endif
