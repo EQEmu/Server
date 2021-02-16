@@ -64,6 +64,7 @@ public:
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
+	uint32_t GetLeaderID() const { return m_leader.id; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
 	uint32_t GetMinPlayers() const { return m_min_players; }

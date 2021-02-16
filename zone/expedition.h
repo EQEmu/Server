@@ -51,8 +51,7 @@ class Expedition : public ExpeditionBase
 {
 public:
 	Expedition() = default;
-	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-		const DynamicZoneMember& leader);
+	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);
 
@@ -80,6 +79,9 @@ public:
 	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
 	DynamicZone& GetDynamicZone() { return m_dynamiczone; }
+	const DynamicZoneMember& GetLeader() { return GetDynamicZone().GetLeader(); }
+	uint32_t GetLeaderID() { return GetDynamicZone().GetLeaderID(); }
+	const std::string& GetLeaderName() { return GetDynamicZone().GetLeaderName(); }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
 
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
@@ -172,7 +174,6 @@ private:
 	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateMemberListNamePacket(const std::string& name, bool remove_name);
 	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, DynamicZoneMemberStatus status);
-	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;

@@ -112,6 +112,7 @@ void ExpeditionState::CacheExpeditions(
 		// stored on expedition in db but on dz in memory cache
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
+		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
 
 		expedition->CacheMemberStatuses();
 

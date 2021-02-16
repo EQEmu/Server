@@ -49,9 +49,8 @@ const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
-	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
-	const DynamicZoneMember& leader
-) : ExpeditionBase(id, uuid, expedition_name, leader)
+	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name
+) : ExpeditionBase(id, uuid, expedition_name)
 {
 	SetDynamicZone(std::move(dz));
 }
@@ -107,8 +106,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, b
 			expedition_id,
 			expedition_uuid,
 			std::move(dynamiczone),
-			request.GetExpeditionName(),
-			DynamicZoneMember{ request.GetLeaderID(), request.GetLeaderName() }
+			request.GetExpeditionName()
 		);
 
 		LogExpeditions(
@@ -207,9 +205,9 @@ void Expedition::CacheExpeditions(
 		// stored on expedition in db but on dz in memory cache
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
+		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
 
 		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
-		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
 
 		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
 
@@ -547,7 +545,7 @@ void Expedition::SendClientExpeditionInvite(
 	client->SetPendingExpeditionInvite({ m_id, inviter_name, swap_remove_name });
 
 	client->MessageString(Chat::System, EXPEDITION_ASKED_TO_JOIN,
-		m_leader.name.c_str(), m_expedition_name.c_str());
+		GetLeaderName().c_str(), m_expedition_name.c_str());
 
 	// live (as of March 11 2020 patch) sends warnings for lockouts added
 	// during current expedition that client would receive on entering dz
@@ -583,7 +581,7 @@ void Expedition::SendClientExpeditionInvite(
 void Expedition::SendLeaderMessage(
 	Client* leader_client, uint16_t chat_type, uint32_t string_id, const std::initializer_list<std::string>& args)
 {
-	Client::SendCrossZoneMessageString(leader_client, m_leader.name, chat_type, string_id, args);
+	Client::SendCrossZoneMessageString(leader_client, GetLeaderName(), chat_type, string_id, args);
 }
 
 bool Expedition::ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping)
@@ -690,7 +688,7 @@ void Expedition::DzInviteResponse(Client* add_client, bool accepted, const std::
 
 	// a null leader_client is handled by SendLeaderMessage fallbacks
 	// note current leader receives invite reply messages (if leader changed)
-	Client* leader_client = entity_list.GetClientByCharID(m_leader.id);
+	Client* leader_client = entity_list.GetClientByCharID(GetLeaderID());
 
 	if (!accepted)
 	{
@@ -760,15 +758,15 @@ bool Expedition::ConfirmLeaderCommand(Client* requester)
 		return false;
 	}
 
-	if (!m_leader.IsValid())
+	if (!GetLeader().IsValid())
 	{
 		requester->MessageString(Chat::Red, UNABLE_RETRIEVE_LEADER); // unconfirmed message
 		return false;
 	}
 
-	if (m_leader.id != requester->CharacterID())
+	if (GetLeaderID() != requester->CharacterID())
 	{
-		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, m_leader.name.c_str());
+		requester->MessageString(Chat::System, EXPEDITION_NOT_LEADER, GetLeaderName().c_str());
 		return false;
 	}
 
@@ -942,7 +940,7 @@ void Expedition::DzPlayerList(Client* requester)
 {
 	if (requester)
 	{
-		requester->MessageString(Chat::Yellow, EXPEDITION_LEADER, m_leader.name.c_str());
+		requester->MessageString(Chat::Yellow, EXPEDITION_LEADER, GetLeaderName().c_str());
 
 		std::string member_names;
 		for (const auto& member : GetDynamicZone().GetMembers())
@@ -1003,26 +1001,15 @@ void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 		return;
 	}
 
-	LogExpeditionsModerate("Replaced [{}] leader [{}] with [{}]", m_id, m_leader.name, new_leader.name);
+	LogExpeditionsModerate("Replaced [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
 
-	m_leader = new_leader;
-	m_dynamiczone.SetLeader(m_leader);
-
-	// update each client's expedition window in this zone
-	auto outapp_leader = CreateLeaderNamePacket();
-	for (const auto& member : GetDynamicZone().GetMembers())
-	{
-		Client* member_client = entity_list.GetClientByCharID(member.id);
-		if (member_client)
-		{
-			member_client->QueuePacket(outapp_leader.get());
-
-			if (member.id == new_leader_id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+	GetDynamicZone().SetLeader(new_leader);
+	GetDynamicZone().SendLeaderNameToZoneMembers([](Client* leader_client) {
+			if (leader_client && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
 			{
-				member_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
+				leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 			}
-		}
-	}
+		});
 }
 
 void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader_client,
@@ -1056,7 +1043,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 	GetDynamicZone().AddInternalMember({ added_char_id, char_name, DynamicZoneMemberStatus::Online });
 
 	// adds the member to this expedition and notifies both leader and new member
-	Client* leader_client = entity_list.GetClientByCharID(m_leader.id);
+	Client* leader_client = entity_list.GetClientByCharID(GetLeaderID());
 	if (leader_client)
 	{
 		leader_client->MessageString(Chat::Yellow, EXPEDITION_MEMBER_ADDED, char_name.c_str(), m_expedition_name.c_str());
@@ -1303,7 +1290,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 	{
 		info->assigned = true;
 		strn0cpy(info->dz_name, m_expedition_name.c_str(), sizeof(info->dz_name));
-		strn0cpy(info->leader_name, m_leader.name.c_str(), sizeof(info->leader_name));
+		strn0cpy(info->leader_name, GetDynamicZone().GetLeaderName().c_str(), sizeof(info->leader_name));
 		info->max_players = GetDynamicZone().GetMaxPlayers();
 	}
 	return outapp;
@@ -1371,15 +1358,6 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 	strn0cpy(entry->name, name.c_str(), sizeof(entry->name));
 	entry->online_status = static_cast<uint8_t>(status);
 
-	return outapp;
-}
-
-std::unique_ptr<EQApplicationPacket> Expedition::CreateLeaderNamePacket()
-{
-	uint32_t outsize = sizeof(DynamicZoneLeaderName_Struct);
-	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzSetLeaderName, outsize);
-	auto buf = reinterpret_cast<DynamicZoneLeaderName_Struct*>(outapp->pBuffer);
-	strn0cpy(buf->leader_name, m_leader.name.c_str(), sizeof(buf->leader_name));
 	return outapp;
 }
 

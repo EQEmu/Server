@@ -206,6 +206,15 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 	}
 }
 
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateLeaderNamePacket()
+{
+	constexpr uint32_t outsize = sizeof(DynamicZoneLeaderName_Struct);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzSetLeaderName, outsize);
+	auto buf = reinterpret_cast<DynamicZoneLeaderName_Struct*>(outapp->pBuffer);
+	strn0cpy(buf->leader_name, m_leader.name.c_str(), sizeof(buf->leader_name));
+	return outapp;
+}
+
 void DynamicZone::ProcessCompassChange(const DynamicZoneLocation& location)
 {
 	DynamicZoneBase::ProcessCompassChange(location);
@@ -220,6 +229,25 @@ void DynamicZone::SendCompassUpdateToZoneMembers()
 		if (member_client)
 		{
 			member_client->SendDzCompassUpdate();
+		}
+	}
+}
+
+void DynamicZone::SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update)
+{
+	auto outapp_leader = CreateLeaderNamePacket();
+
+	for (const auto& member : m_members)
+	{
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
+		{
+			member_client->QueuePacket(outapp_leader.get());
+
+			if (member.id == m_leader.id && on_leader_update)
+			{
+				on_leader_update(member_client);
+			}
 		}
 	}
 }

@@ -39,7 +39,6 @@ Expedition::Expedition() :
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
 	dz.SetName(GetName());
-	dz.SetLeader(GetLeader());
 
 	m_dynamic_zone = std::move(dz);
 }
@@ -48,7 +47,7 @@ void Expedition::RemoveMember(uint32_t character_id)
 {
 	GetDynamicZone().RemoveInternalMember(character_id);
 
-	if (character_id == m_leader.id)
+	if (character_id == GetLeaderID())
 	{
 		ChooseNewLeader();
 	}
@@ -64,7 +63,7 @@ void Expedition::ChooseNewLeader()
 	}
 
 	auto it = std::find_if(members.begin(), members.end(), [&](const DynamicZoneMember& member) {
-		if (member.id != m_leader.id && member.IsOnline()) {
+		if (member.id != GetLeaderID() && member.IsOnline()) {
 			auto member_cle = client_list.FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
 		}
@@ -75,7 +74,7 @@ void Expedition::ChooseNewLeader()
 	{
 		// no online members found, fallback to choosing any member
 		it = std::find_if(members.begin(), members.end(),
-			[&](const DynamicZoneMember& member) { return (member.id != m_leader.id); });
+			[&](const DynamicZoneMember& member) { return member.id != GetLeaderID(); });
 	}
 
 	if (it != members.end() && SetNewLeader(*it))
@@ -86,15 +85,15 @@ void Expedition::ChooseNewLeader()
 
 bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 {
-	if (!GetDynamicZone().HasMember(member.id))
+	auto new_leader = GetDynamicZone().GetMemberData(member.id);
+	if (!new_leader.IsValid())
 	{
 		return false;
 	}
 
-	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, m_leader.name, member.name);
-	ExpeditionDatabase::UpdateLeaderID(m_id, member.id);
-	m_leader = member;
-	m_dynamic_zone.SetLeader(m_leader);
+	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
+	ExpeditionDatabase::UpdateLeaderID(m_id, new_leader.id);
+	m_dynamic_zone.SetLeader(new_leader);
 	SendZonesLeaderChanged();
 	return true;
 }
@@ -124,7 +123,7 @@ void Expedition::SendZonesLeaderChanged()
 	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	buf->leader_id = m_leader.id;
+	buf->leader_id = GetLeaderID();
 	zoneserver_list.SendPacket(pack.get());
 }
 
@@ -175,14 +174,8 @@ void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStat
 {
 	GetDynamicZone().SetInternalMemberStatus(character_id, status);
 
-	// temporary until move to using dz leader object completely
-	if (character_id == m_leader.id)
-	{
-		m_leader.status = GetDynamicZone().GetLeader().status;
-	}
-
 	// any member status update will trigger a leader fix if leader was offline
-	if (m_leader.status == DynamicZoneMemberStatus::Offline && GetDynamicZone().GetMemberCount() > 1)
+	if (GetLeader().status == DynamicZoneMemberStatus::Offline && GetDynamicZone().GetMemberCount() > 1)
 	{
 		ChooseNewLeader();
 	}

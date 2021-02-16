@@ -28,6 +28,7 @@
 #include <vector>
 
 class Database;
+class EQApplicationPacket;
 class ServerPacket;
 
 extern const char* const CREATE_NOT_ALL_ADDED;
@@ -46,7 +47,10 @@ public:
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
 	bool IsCurrentZoneDzInstance() const;
+	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
 	void SetUpdatedDuration(uint32_t seconds);
+
+	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
 protected:
 	uint16_t GetCurrentInstanceID() override;

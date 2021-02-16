@@ -37,6 +37,9 @@ public:
 	void CheckLeader();
 	void ChooseNewLeader();
 	DynamicZone& GetDynamicZone() { return m_dynamic_zone; }
+	const DynamicZoneMember& GetLeader() { return GetDynamicZone().GetLeader(); }
+	uint32_t GetLeaderID() { return GetDynamicZone().GetLeaderID(); }
+	const std::string& GetLeaderName() { return GetDynamicZone().GetLeaderName(); }
 	bool Process();
 	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesExpeditionDeleted();
