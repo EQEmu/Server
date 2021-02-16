@@ -10091,6 +10091,8 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 		bool scribeable = false;
 		if (!IsValidSpell(spell_id))
 			continue;
+		if (IsDiscipline(spell_id))
+			continue;
 		if (spells[spell_id].classes[WARRIOR] == 0)
 			continue;
 		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
