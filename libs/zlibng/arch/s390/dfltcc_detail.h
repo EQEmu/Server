@@ -46,18 +46,17 @@ typedef enum {
 #define DFLTCC_FACILITY 151
 
 static inline dfltcc_cc dfltcc(int fn, void *param,
-                               unsigned char **op1, size_t *len1, const unsigned char **op2, size_t *len2, void *hist)
-{
+                               unsigned char **op1, size_t *len1, z_const unsigned char **op2, size_t *len2, void *hist) {
     unsigned char *t2 = op1 ? *op1 : NULL;
     size_t t3 = len1 ? *len1 : 0;
-    const unsigned char *t4 = op2 ? *op2 : NULL;
+    z_const unsigned char *t4 = op2 ? *op2 : NULL;
     size_t t5 = len2 ? *len2 : 0;
-    register int r0 __asm__("r0") = fn;
-    register void *r1 __asm__("r1") = param;
-    register unsigned char *r2 __asm__("r2") = t2;
-    register size_t r3 __asm__("r3") = t3;
-    register const unsigned char *r4 __asm__("r4") = t4;
-    register size_t r5 __asm__("r5") = t5;
+    Z_REGISTER int r0 __asm__("r0") = fn;
+    Z_REGISTER void *r1 __asm__("r1") = param;
+    Z_REGISTER unsigned char *r2 __asm__("r2") = t2;
+    Z_REGISTER size_t r3 __asm__("r3") = t3;
+    Z_REGISTER z_const unsigned char *r4 __asm__("r4") = t4;
+    Z_REGISTER size_t r5 __asm__("r5") = t5;
     int cc;
 
     __asm__ volatile(
@@ -108,13 +107,11 @@ struct dfltcc_qaf_param {
 
 static_assert(sizeof(struct dfltcc_qaf_param) == 32, sizeof_struct_dfltcc_qaf_param_is_32);
 
-static inline int is_bit_set(const char *bits, int n)
-{
+static inline int is_bit_set(const char *bits, int n) {
     return bits[n / 8] & (1 << (7 - (n % 8)));
 }
 
-static inline void clear_bit(char *bits, int n)
-{
+static inline void clear_bit(char *bits, int n) {
     bits[n / 8] &= ~(1 << (7 - (n % 8)));
 }
 
@@ -175,8 +172,7 @@ struct dfltcc_param_v0 {
 
 static_assert(sizeof(struct dfltcc_param_v0) == 1536, sizeof_struct_dfltcc_param_v0_is_1536);
 
-static inline const char *oesc_msg(char *buf, int oesc)
-{
+static inline z_const char *oesc_msg(char *buf, int oesc) {
     if (oesc == 0x00)
         return NULL; /* Successful completion */
     else {
@@ -198,4 +194,6 @@ struct dfltcc_state {
     char msg[64];                      /* Buffer for strm->msg */
 };
 
-#define GET_DFLTCC_STATE(state) ((struct dfltcc_state *)((state) + 1))
+#define ALIGN_UP(p, size) (__typeof__(p))(((uintptr_t)(p) + ((size) - 1)) & ~((size) - 1))
+
+#define GET_DFLTCC_STATE(state) ((struct dfltcc_state *)((char *)(state) + ALIGN_UP(sizeof(*state), 8)))
