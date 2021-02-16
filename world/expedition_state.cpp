@@ -114,6 +114,7 @@ void ExpeditionState::CacheExpeditions(
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
 		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
+		expedition->GetDynamicZone().SetUUID(std::move(entry.uuid));
 
 		expedition->CacheMemberStatuses();
 

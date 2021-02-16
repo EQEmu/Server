@@ -75,6 +75,7 @@ public:
 	DynamicZoneType GetType() const { return m_type; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::string& GetName() const { return m_name; }
+	const std::string& GetUUID() const { return m_uuid; }
 	const DynamicZoneMember& GetLeader() const { return m_leader; }
 	const std::vector<DynamicZoneMember>& GetMembers() const { return m_members; }
 	const DynamicZoneLocation& GetCompassLocation() const { return m_compass; }
@@ -112,6 +113,7 @@ public:
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void SetUUID(std::string uuid) { m_uuid = std::move(uuid); }
 	void SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
 	void SetZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
 
@@ -141,6 +143,7 @@ protected:
 	bool m_never_expires = false;
 	bool m_has_zonein = false;
 	std::string m_name;
+	std::string m_uuid;
 	DynamicZoneMember m_leader;
 	DynamicZoneType m_type{ DynamicZoneType::None };
 	DynamicZoneLocation m_compass;

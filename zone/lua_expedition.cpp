@@ -133,7 +133,7 @@ int Lua_Expedition::GetSecondsRemaining() {
 
 std::string Lua_Expedition::GetUUID() {
 	Lua_Safe_Call_String();
-	return self->GetUUID();
+	return self->GetDynamicZone().GetUUID();
 }
 
 int Lua_Expedition::GetZoneID() {

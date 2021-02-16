@@ -51,7 +51,7 @@ class Expedition : public ExpeditionBase
 {
 public:
 	Expedition() = default;
-	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz);
+	Expedition(uint32_t id, DynamicZone&& dz);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);
 

@@ -5,6 +5,7 @@
 #include "repositories/instance_list_player_repository.h"
 #include "rulesys.h"
 #include "servertalk.h"
+#include "util/uuid.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
 {
@@ -23,6 +24,7 @@ uint32_t DynamicZoneBase::Create()
 		CreateInstance();
 	}
 
+	m_uuid = EQ::Util::UUID::Generate().ToString();
 	m_id = SaveToDatabase();
 
 	return m_id;

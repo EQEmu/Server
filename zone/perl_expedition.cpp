@@ -308,7 +308,7 @@ XS(XS_Expedition_GetUUID) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	XSRETURN_PV(THIS->GetUUID().c_str());
+	XSRETURN_PV(THIS->GetDynamicZone().GetUUID().c_str());
 }
 
 XS(XS_Expedition_GetZoneID);
