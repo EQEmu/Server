@@ -45,7 +45,10 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				if (e.event_type == ServerEvents::EVENT_TYPE_RULE_CHANGE) {
 					LogScheduler("Deactivating event [{}] resetting rules to normal", e.description);
 					RuleManager::Instance()->LoadRules(m_database, RuleManager::Instance()->GetActiveRuleset(), true);
-					RemoveActiveEvent(e);
+
+					// force active events clear and reapply all active events because we reset the entire state
+					// ideally if we could revert only the state of which was originally set we would only remove one active event
+					m_active_events.clear();
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_CONTENT_FLAG_CHANGE) {
@@ -54,7 +57,10 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 						LogScheduler("Deactivating event [{}] resetting content flags", e.description);
 						content_service->ReloadContentFlags(*m_database);
 					}
-					RemoveActiveEvent(e);
+
+					// force active events clear and reapply all active events because we reset the entire state
+					// ideally if we could revert only the state of which was originally set we would only remove one active event
+					m_active_events.clear();
 				}
 			}
 		}
