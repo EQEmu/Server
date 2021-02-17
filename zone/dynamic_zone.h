@@ -27,6 +27,7 @@
 #include <unordered_map>
 #include <vector>
 
+class Client;
 class Database;
 class EQApplicationPacket;
 class ServerPacket;
@@ -49,6 +50,7 @@ public:
 	void DoAsyncZoneMemberUpdates();
 	bool IsCurrentZoneDzInstance() const;
 	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
+	void SendClientWindowUpdate(Client* client);
 	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
 	void SendMemberListToZoneMembers();
 	void SendMemberListNameToZoneMembers(const std::string& char_name, bool remove);

@@ -106,7 +106,6 @@ public:
 	void SetLootEventByNPCTypeID(uint32_t npc_type_id, const std::string& event_name);
 	void SetLootEventBySpawnID(uint32_t spawn_id, const std::string& event_name);
 
-	void SendClientExpeditionInfo(Client* client);
 	void SendWorldMakeLeaderRequest(uint32_t requester_id, const std::string& new_leader_name);
 	void SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name);
 

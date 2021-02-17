@@ -3378,11 +3378,7 @@ void Client::LinkDead()
 		raid->MemberZoned(this);
 	}
 
-	Expedition* expedition = GetExpedition();
-	if (expedition)
-	{
-		expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::LinkDead);
-	}
+	SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
@@ -9525,28 +9521,25 @@ void Client::SendCrossZoneMessageString(
 	}
 }
 
-void Client::UpdateExpeditionInfoAndLockouts()
+void Client::SendDynamicZoneUpdates()
 {
-	// this is processed by client after entering a zone
+	// bit inefficient since each do lookups but it avoids duplicating code here
 	SendDzCompassUpdate();
+	SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Online);
 
 	m_expedition_lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
 
+	// expeditions are the only dz type that keep the window updated
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
-		expedition->SendClientExpeditionInfo(this);
+		expedition->GetDynamicZone().SendClientWindowUpdate(this);
 
 		// live synchronizes lockouts obtained during the active expedition to
 		// members once they zone into the expedition's dynamic zone instance
 		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
 		{
 			expedition->SyncCharacterLockouts(CharacterID(), m_expedition_lockouts);
-			expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::InDynamicZone);
-		}
-		else
-		{
-			expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::Online);
 		}
 	}
 
@@ -9926,6 +9919,21 @@ std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_ver
 	}
 
 	return client_dzs;
+}
+
+void Client::SetDynamicZoneMemberStatus(DynamicZoneMemberStatus status)
+{
+	// sets status on all associated dzs client may have. if client is online
+	// inside a dz, only that dz has the "In Dynamic Zone" status set
+	for (auto& dz : GetDynamicZones())
+	{
+		// the rule to disable this status is handled internally by the dz
+		if (status == DynamicZoneMemberStatus::Online && dz->IsCurrentZoneDzInstance())
+		{
+			status = DynamicZoneMemberStatus::InDynamicZone;
+		}
+		dz->SetMemberStatus(CharacterID(), status);
+	}
 }
 
 void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid)

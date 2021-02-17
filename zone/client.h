@@ -1358,7 +1358,6 @@ public:
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
 	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
-	void UpdateExpeditionInfoAndLockouts();
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
@@ -1370,6 +1369,8 @@ public:
 	std::unique_ptr<EQApplicationPacket> CreateCompassPacket(const std::vector<DynamicZoneCompassEntry_Struct>& entries);
 	void AddDynamicZoneID(uint32_t dz_id);
 	void RemoveDynamicZoneID(uint32_t dz_id);
+	void SendDynamicZoneUpdates();
+	void SetDynamicZoneMemberStatus(DynamicZoneMemberStatus status);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1

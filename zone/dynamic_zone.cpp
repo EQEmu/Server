@@ -415,6 +415,15 @@ void DynamicZone::SendMemberListStatusToZoneMembers(const DynamicZoneMember& upd
 	}
 }
 
+void DynamicZone::SendClientWindowUpdate(Client* client)
+{
+	if (client)
+	{
+		client->QueuePacket(CreateInfoPacket().get());
+		client->QueuePacket(CreateMemberListPacket().get());
+	}
+}
+
 void DynamicZone::SendUpdatesToZoneMembers(bool removing_all, bool silent)
 {
 	// performs a full update on all members (usually for dz creation or removing all)

@@ -1055,15 +1055,6 @@ void Expedition::AddLockoutClients(
 	}
 }
 
-void Expedition::SendClientExpeditionInfo(Client* client)
-{
-	if (client)
-	{
-		client->QueuePacket(GetDynamicZone().CreateInfoPacket().get());
-		client->QueuePacket(GetDynamicZone().CreateMemberListPacket().get());
-	}
-}
-
 void Expedition::SendWorldPendingInvite(const ExpeditionInvite& invite, const std::string& add_name)
 {
 	LogExpeditions(

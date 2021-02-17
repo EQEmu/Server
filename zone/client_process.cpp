@@ -181,11 +181,7 @@ bool Client::Process() {
 				myraid->MemberZoned(this);
 			}
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::Offline);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
 			return false; //delete client
 		}
@@ -562,11 +558,7 @@ bool Client::Process() {
 			AI_Start(CLIENT_LD_TIMEOUT);
 			SendAppearancePacket(AT_Linkdead, 1);
 
-			Expedition* expedition = GetExpedition();
-			if (expedition)
-			{
-				expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::LinkDead);
-			}
+			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 		}
 	}
 
@@ -698,10 +690,9 @@ void Client::OnDisconnect(bool hard_disconnect) {
 		}
 	}
 
-	Expedition* expedition = GetExpedition();
-	if (expedition && !bZoning)
+	if (!bZoning)
 	{
-		expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::Offline);
+		SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();
