@@ -230,6 +230,22 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzGetMemberStatuses:
+	{
+		// reply from world for online member statuses request for async zone member updates
+		auto buf = reinterpret_cast<ServerDzMemberStatuses_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			for (uint32_t i = 0; i < buf->count; ++i)
+			{
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->entries[i].online_status);
+				dz->SetInternalMemberStatus(buf->entries[i].character_id, status);
+			}
+			dz->SendUpdatesToZoneMembers(false, true);
+		}
+		break;
+	}
 	}
 }
 
@@ -492,4 +508,16 @@ void DynamicZone::ProcessRemoveAllMembers(bool silent)
 {
 	SendUpdatesToZoneMembers(true, silent);
 	DynamicZoneBase::ProcessRemoveAllMembers(silent);
+}
+
+void DynamicZone::DoAsyncZoneMemberUpdates()
+{
+	// gets member statuses from world and performs zone member updates on reply
+	constexpr uint32_t pack_size = sizeof(ServerDzID_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzGetMemberStatuses, pack_size);
+	auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
+	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
+	worldserver.SendPacket(pack.get());
 }

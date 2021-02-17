@@ -54,11 +54,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_ExpeditionGetMemberStatuses:
-	{
-		ExpeditionMessage::GetMemberStatuses(pack);
-		break;
-	}
 	case ServerOP_ExpeditionDzAddPlayer:
 	{
 		ExpeditionMessage::AddPlayer(pack);
@@ -139,16 +134,6 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	if (requester_cle && requester_cle->Server() && requester_cle->Server() != new_leader_zs)
 	{
 		requester_cle->Server()->SendPacket(pack);
-	}
-}
-
-void ExpeditionMessage::GetMemberStatuses(ServerPacket* pack)
-{
-	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-	if (expedition)
-	{
-		expedition->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
 	}
 }
 

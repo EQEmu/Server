@@ -110,8 +110,8 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, b
 
 		auto inserted = zone->expedition_cache.emplace(expedition_id, std::move(expedition));
 
-		inserted.first->second->GetDynamicZone().SendUpdatesToZoneMembers();
 		inserted.first->second->SendWorldExpeditionUpdate(ServerOP_ExpeditionCreate); // cache in other zones
+		inserted.first->second->GetDynamicZone().DoAsyncZoneMemberUpdates(); // updates members on reply
 		inserted.first->second->SendLeaderMessage(request.GetLeaderClient(),
 			Chat::System, EXPEDITION_AVAILABLE, { request.GetExpeditionName() });
 
@@ -188,10 +188,8 @@ void Expedition::CacheExpeditions(
 			}
 		}
 
-		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
-
 		auto inserted = zone->expedition_cache.emplace(entry.id, std::move(expedition));
-		inserted.first->second->GetDynamicZone().SendUpdatesToZoneMembers();
+		inserted.first->second->GetDynamicZone().DoAsyncZoneMemberUpdates();
 	}
 }
 
@@ -1395,22 +1393,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			{
 				expedition->SetReplayLockoutOnMemberJoin(buf->enabled);
 			}
-		}
-		break;
-	}
-	case ServerOP_ExpeditionGetMemberStatuses:
-	{
-		// reply from world for online member statuses request
-		auto buf = reinterpret_cast<ServerExpeditionMemberStatuses_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition)
-		{
-			for (uint32_t i = 0; i < buf->count; ++i)
-			{
-				auto status = static_cast<DynamicZoneMemberStatus>(buf->entries[i].online_status);
-				expedition->GetDynamicZone().SetInternalMemberStatus(buf->entries[i].character_id, status);
-			}
-			expedition->GetDynamicZone().SendMemberListToZoneMembers();
 		}
 		break;
 	}

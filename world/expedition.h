@@ -31,7 +31,6 @@ class Expedition : public ExpeditionBase
 public:
 	Expedition();
 
-	void CacheMemberStatuses();
 	void CheckExpireWarning();
 	void CheckLeader();
 	void ChooseNewLeader();
@@ -40,7 +39,6 @@ public:
 	uint32_t GetLeaderID() { return GetDynamicZone().GetLeaderID(); }
 	const std::string& GetLeaderName() { return GetDynamicZone().GetLeaderName(); }
 	bool Process();
-	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetDynamicZone(DynamicZone&& dz);

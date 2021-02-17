@@ -147,7 +147,6 @@
 #define ServerOP_ExpeditionLeaderChanged      0x0402
 #define ServerOP_ExpeditionLockout            0x0403
 #define ServerOP_ExpeditionMemberStatus       0x0406
-#define ServerOP_ExpeditionGetMemberStatuses  0x0407
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
 #define ServerOP_ExpeditionCharacterLockout   0x040d
@@ -167,6 +166,7 @@
 #define ServerOP_DzSetSafeReturn              0x0455
 #define ServerOP_DzSetZoneIn                  0x0456
 #define ServerOP_DzSwapMembers                0x0457
+#define ServerOP_DzGetMemberStatuses          0x0458
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2041,15 +2041,15 @@ struct ServerExpeditionMemberStatus_Struct {
 	uint32 character_id;
 };
 
-struct ServerExpeditionMemberStatusEntry_Struct {
+struct ServerDzMemberStatusEntry_Struct {
 	uint32 character_id;
 	uint8  online_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 };
 
-struct ServerExpeditionMemberStatuses_Struct {
-	uint32 expedition_id;
+struct ServerDzMemberStatuses_Struct {
+	uint32 dz_id;
 	uint32 count;
-	ServerExpeditionMemberStatusEntry_Struct entries[0];
+	ServerDzMemberStatusEntry_Struct entries[0];
 };
 
 struct ServerExpeditionLockout_Struct {

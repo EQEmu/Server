@@ -109,7 +109,7 @@ void ExpeditionState::CacheExpeditions(
 			}
 		}
 
-		expedition->CacheMemberStatuses();
+		expedition->GetDynamicZone().CacheMemberStatuses();
 
 		m_expeditions.emplace_back(std::move(expedition));
 	}

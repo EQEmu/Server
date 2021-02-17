@@ -3013,7 +3013,6 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_ExpeditionLockState:
 	case ServerOP_ExpeditionMemberStatus:
 	case ServerOP_ExpeditionReplayOnJoin:
-	case ServerOP_ExpeditionGetMemberStatuses:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
 	case ServerOP_ExpeditionCharacterLockout:
@@ -3026,6 +3025,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_DzSwapMembers:
 	case ServerOP_DzRemoveAllMembers:
 	case ServerOP_DzDurationUpdate:
+	case ServerOP_DzGetMemberStatuses:
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:

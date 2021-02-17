@@ -1,4 +1,6 @@
 #include "dynamic_zone.h"
+#include "cliententry.h"
+#include "clientlist.h"
 #include "expedition.h"
 #include "expedition_state.h"
 #include "worlddb.h"
@@ -7,6 +9,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/repositories/instance_list_repository.h"
 
+extern ClientList client_list;
 extern ZSList zoneserver_list;
 
 Database& DynamicZone::GetDatabase()
@@ -168,6 +171,16 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzGetMemberStatuses:
+	{
+		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
+		}
+		break;
+	}
 	};
 }
 
@@ -178,5 +191,51 @@ void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool r
 	if (m_on_addremove)
 	{
 		m_on_addremove(member, removed);
+	}
+}
+
+void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
+{
+	uint32_t members_count = static_cast<uint32_t>(m_members.size());
+	uint32_t entries_size = sizeof(ServerDzMemberStatusEntry_Struct) * members_count;
+	uint32_t pack_size = sizeof(ServerDzMemberStatuses_Struct) + entries_size;
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzGetMemberStatuses, pack_size);
+	auto buf = reinterpret_cast<ServerDzMemberStatuses_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->count = members_count;
+
+	for (int i = 0; i < m_members.size(); ++i)
+	{
+		buf->entries[i].character_id = m_members[i].id;
+		buf->entries[i].online_status = static_cast<uint8_t>(m_members[i].status);
+	}
+
+	zoneserver_list.SendPacket(zone_id, instance_id, pack.get());
+}
+
+void DynamicZone::CacheMemberStatuses()
+{
+	// called when a new dz is cached to fill member statuses
+	std::string zone_name{};
+	std::vector<ClientListEntry*> all_clients;
+	all_clients.reserve(client_list.GetClientCount());
+	client_list.GetClients(zone_name.c_str(), all_clients);
+
+	for (const auto& member : m_members)
+	{
+		auto it = std::find_if(all_clients.begin(), all_clients.end(),
+			[&](const ClientListEntry* cle) { return (cle && cle->CharID() == member.id); });
+
+		auto status = DynamicZoneMemberStatus::Offline;
+		if (it != all_clients.end())
+		{
+			status = DynamicZoneMemberStatus::Online;
+			if (IsSameDz((*it)->zone(), (*it)->instance()))
+			{
+				status = DynamicZoneMemberStatus::InDynamicZone;
+			}
+		}
+
+		SetInternalMemberStatus(member.id, status);
 	}
 }

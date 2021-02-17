@@ -25,6 +25,7 @@ public:
 
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
+	void CacheMemberStatuses();
 	DynamicZoneStatus Process();
 	void RegisterOnMemberAddRemove(std::function<void(const DynamicZoneMember&, bool)> on_addremove);
 
@@ -34,6 +35,7 @@ protected:
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
+	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesDurationUpdate();
 
 	bool m_is_pending_early_shutdown = false;

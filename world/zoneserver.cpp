@@ -1388,7 +1388,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 
 	case ServerOP_ExpeditionCreate:
-	case ServerOP_ExpeditionGetMemberStatuses:
 	case ServerOP_ExpeditionMemberStatus:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
@@ -1402,6 +1401,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_DzAddRemoveMember:
 	case ServerOP_DzSwapMembers:
 	case ServerOP_DzRemoveAllMembers:
+	case ServerOP_DzGetMemberStatuses:
 	case ServerOP_DzSetSecondsRemaining:
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
