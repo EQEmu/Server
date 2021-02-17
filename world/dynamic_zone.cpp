@@ -39,6 +39,12 @@ void DynamicZone::RegisterOnMemberAddRemove(
 	m_on_addremove = std::move(on_addremove);
 }
 
+void DynamicZone::RegisterOnStatusChanged(
+	std::function<void(const DynamicZoneMember&)> on_status_changed)
+{
+	m_on_status_changed = std::move(on_status_changed);
+}
+
 DynamicZoneStatus DynamicZone::Process()
 {
 	DynamicZoneStatus status = DynamicZoneStatus::Normal;
@@ -181,6 +187,18 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzUpdateMemberStatus:
+	{
+		auto buf = reinterpret_cast<ServerDzMemberStatus_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
+			dz->ProcessMemberStatusChange(buf->character_id, status);
+		}
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
 	};
 }
 
@@ -192,6 +210,17 @@ void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool r
 	{
 		m_on_addremove(member, removed);
 	}
+}
+
+bool DynamicZone::ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	bool changed = DynamicZoneBase::SetInternalMemberStatus(character_id, status);
+	if (changed && m_on_status_changed)
+	{
+		auto member = GetMemberData(character_id);
+		m_on_status_changed(member);
+	}
+	return changed;
 }
 
 void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)

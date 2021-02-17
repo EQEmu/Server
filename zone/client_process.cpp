@@ -184,7 +184,7 @@ bool Client::Process() {
 			Expedition* expedition = GetExpedition();
 			if (expedition)
 			{
-				expedition->SetMemberStatus(this, DynamicZoneMemberStatus::Offline);
+				expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::Offline);
 			}
 
 			return false; //delete client
@@ -565,7 +565,7 @@ bool Client::Process() {
 			Expedition* expedition = GetExpedition();
 			if (expedition)
 			{
-				expedition->SetMemberStatus(this, DynamicZoneMemberStatus::LinkDead);
+				expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::LinkDead);
 			}
 		}
 	}
@@ -701,7 +701,7 @@ void Client::OnDisconnect(bool hard_disconnect) {
 	Expedition* expedition = GetExpedition();
 	if (expedition && !bZoning)
 	{
-		expedition->SetMemberStatus(this, DynamicZoneMemberStatus::Offline);
+		expedition->GetDynamicZone().SetMemberStatus(CharacterID(), DynamicZoneMemberStatus::Offline);
 	}
 
 	RemoveAllAuras();

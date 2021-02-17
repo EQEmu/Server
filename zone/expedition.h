@@ -88,7 +88,6 @@ public:
 	bool IsLocked() const { return m_is_locked; }
 	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
 		bool update_db = false, uint32_t msg_color = Chat::Yellow);
-	void SetMemberStatus(Client* client, DynamicZoneMemberStatus status);
 
 	void AddLockout(const std::string& event_name, uint32_t seconds);
 	void AddLockoutDuration(const std::string& event_name, int seconds, bool members_only = true);
@@ -151,7 +150,6 @@ private:
 		const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void SendWorldLockoutUpdate(
 		const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
-	void SendWorldMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
 	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,

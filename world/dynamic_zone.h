@@ -28,10 +28,12 @@ public:
 	void CacheMemberStatuses();
 	DynamicZoneStatus Process();
 	void RegisterOnMemberAddRemove(std::function<void(const DynamicZoneMember&, bool)> on_addremove);
+	void RegisterOnStatusChanged(std::function<void(const DynamicZoneMember&)> on_status_changed);
 
 protected:
 	Database& GetDatabase() override;
 	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
+	bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status) override;
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
@@ -40,6 +42,7 @@ private:
 
 	bool m_is_pending_early_shutdown = false;
 	std::function<void(const DynamicZoneMember&, bool)> m_on_addremove;
+	std::function<void(const DynamicZoneMember&)> m_on_status_changed;
 };
 
 #endif

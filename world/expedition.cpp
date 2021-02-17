@@ -40,6 +40,8 @@ void Expedition::SetDynamicZone(DynamicZone&& dz)
 	m_dynamic_zone = std::move(dz);
 	m_dynamic_zone.RegisterOnMemberAddRemove(
 		[this](const DynamicZoneMember& member, bool removed) { OnMemberAddRemove(member, removed); });
+	m_dynamic_zone.RegisterOnStatusChanged(
+		[this](const DynamicZoneMember& member) { OnMemberStatusChanged(member); });
 }
 
 void Expedition::OnMemberAddRemove(const DynamicZoneMember& member, bool removed)
@@ -166,10 +168,8 @@ bool Expedition::Process()
 	return false;
 }
 
-void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+void Expedition::OnMemberStatusChanged(const DynamicZoneMember& member)
 {
-	GetDynamicZone().SetInternalMemberStatus(character_id, status);
-
 	// any member status update will trigger a leader fix if leader was offline
 	if (GetLeader().status == DynamicZoneMemberStatus::Offline && GetDynamicZone().GetMemberCount() > 1)
 	{

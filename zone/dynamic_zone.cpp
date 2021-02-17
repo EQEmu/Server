@@ -246,6 +246,20 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzUpdateMemberStatus:
+	{
+		auto buf = reinterpret_cast<ServerDzMemberStatus_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+			if (dz)
+			{
+				auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
+				dz->ProcessMemberStatusChange(buf->character_id, status);
+			}
+		}
+		break;
+	}
 	}
 }
 
@@ -387,26 +401,16 @@ void DynamicZone::SendMemberListNameToZoneMembers(const std::string& char_name, 
 	}
 }
 
-void DynamicZone::SendMemberStatusToZoneMembers(uint32_t update_member_id, DynamicZoneMemberStatus status)
+void DynamicZone::SendMemberListStatusToZoneMembers(const DynamicZoneMember& update_member)
 {
-	if (!HasMember(update_member_id))
-	{
-		return;
-	}
+	auto outapp_member_status = CreateMemberListStatusPacket(update_member.name, update_member.status);
 
-	// if zone already had this member status cached avoid packet update to clients
-	bool changed = SetInternalMemberStatus(update_member_id, status);
-	if (changed)
+	for (const auto& member : m_members)
 	{
-		auto member_data = GetMemberData(update_member_id); // rules may override status
-		auto outapp_member_status = CreateMemberListStatusPacket(member_data.name, member_data.status);
-		for (const auto& member : m_members)
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
 		{
-			Client* member_client = entity_list.GetClientByCharID(member.id);
-			if (member_client)
-			{
-				member_client->QueuePacket(outapp_member_status.get());
-			}
+			member_client->QueuePacket(outapp_member_status.get());
 		}
 	}
 }
@@ -520,4 +524,20 @@ void DynamicZone::DoAsyncZoneMemberUpdates()
 	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
 	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
 	worldserver.SendPacket(pack.get());
+}
+
+bool DynamicZone::ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status)
+{
+	bool changed = DynamicZoneBase::ProcessMemberStatusChange(member_id, status);
+
+	if (changed && m_type == DynamicZoneType::Expedition)
+	{
+		auto member = GetMemberData(member_id);
+		if (member.IsValid())
+		{
+			SendMemberListStatusToZoneMembers(member);
+		}
+	}
+
+	return changed;
 }

@@ -410,15 +410,6 @@ void Expedition::RemoveLockout(const std::string& event_name)
 	SendWorldLockoutUpdate(lockout, true);
 }
 
-void Expedition::SetMemberStatus(Client* client, DynamicZoneMemberStatus status)
-{
-	if (client)
-	{
-		GetDynamicZone().SendMemberStatusToZoneMembers(client->CharacterID(), status);
-		SendWorldMemberStatus(client->CharacterID(), status);
-	}
-}
-
 void Expedition::SendClientExpeditionInvite(
 	Client* client, const std::string& inviter_name, const std::string& swap_remove_name)
 {
@@ -1178,19 +1169,6 @@ void Expedition::SendWorldMakeLeaderRequest(uint32_t requester_id, const std::st
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
-{
-	uint32_t pack_size = sizeof(ServerExpeditionMemberStatus_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionMemberStatus, pack_size);
-	auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
-	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
-	buf->status = static_cast<uint8_t>(status);
-	buf->character_id = character_id;
-	worldserver.SendPacket(pack.get());
-}
-
 void Expedition::SendWorldSettingChanged(uint16_t server_opcode, bool setting_value)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionSetting_Struct);
@@ -1352,20 +1330,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 				{
 					expedition->ProcessLockoutDuration(lockout, buf->seconds_adjust, buf->members_only);
 				}
-			}
-		}
-		break;
-	}
-	case ServerOP_ExpeditionMemberStatus:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);
-		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
-		{
-			auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-			if (expedition)
-			{
-				auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
-				expedition->GetDynamicZone().SendMemberStatusToZoneMembers(buf->character_id, status);
 			}
 		}
 		break;

@@ -103,9 +103,9 @@ public:
 	void SaveMembers(const std::vector<DynamicZoneMember>& members);
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
-	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 	void SetLeader(const DynamicZoneMember& leader, bool update_db = false);
 	void SetMaxPlayers(uint32_t max_players) { m_max_players = max_players; }
+	void SetMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 	void SetMinPlayers(uint32_t min_players) { m_min_players = min_players; }
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
@@ -121,6 +121,7 @@ protected:
 	virtual Database& GetDatabase() = 0;
 	virtual void ProcessCompassChange(const DynamicZoneLocation& location) { m_compass = location; }
 	virtual void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed);
+	virtual bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status);
 	virtual void ProcessRemoveAllMembers(bool silent = false) { m_members.clear(); }
 	virtual bool SendServerPacket(ServerPacket* packet) = 0;
 
@@ -129,9 +130,11 @@ protected:
 	void LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry);
 	void RemoveInternalMember(uint32_t character_id);
 	uint32_t SaveToDatabase();
+	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
 	std::unique_ptr<ServerPacket> CreateServerDzLocationPacket(uint16_t server_opcode, const DynamicZoneLocation& location);
 	std::unique_ptr<ServerPacket> CreateServerMemberAddRemovePacket(const DynamicZoneMember& member, bool removed);
+	std::unique_ptr<ServerPacket> CreateServerMemberStatusPacket(uint32_t character_id, DynamicZoneMemberStatus status);
 	std::unique_ptr<ServerPacket> CreateServerMemberSwapPacket(const DynamicZoneMember& remove_member, const DynamicZoneMember& add_member);
 	std::unique_ptr<ServerPacket> CreateServerRemoveAllMembersPacket();
 

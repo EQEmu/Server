@@ -52,7 +52,7 @@ public:
 	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
 	void SendMemberListToZoneMembers();
 	void SendMemberListNameToZoneMembers(const std::string& char_name, bool remove);
-	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
+	void SendMemberListStatusToZoneMembers(const DynamicZoneMember& member);
 	void SendRemoveAllMembersToZoneMembers(bool silent) { ProcessRemoveAllMembers(silent); }
 
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
@@ -67,6 +67,7 @@ protected:
 	Database& GetDatabase() override;
 	void ProcessCompassChange(const DynamicZoneLocation& location) override;
 	void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed) override;
+	bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status) override;
 	void ProcessRemoveAllMembers(bool silent = false) override;
 	bool SendServerPacket(ServerPacket* packet) override;
 

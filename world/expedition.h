@@ -43,10 +43,10 @@ public:
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetDynamicZone(DynamicZone&& dz);
 	bool SetNewLeader(const DynamicZoneMember& member);
-	void UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
 private:
 	void OnMemberAddRemove(const DynamicZoneMember& member, bool removed);
+	void OnMemberStatusChanged(const DynamicZoneMember& member);
 	void SendZonesLeaderChanged();
 
 	bool m_choose_leader_needed = false;

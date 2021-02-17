@@ -398,6 +398,21 @@ std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzLocationPacket(
 	return pack;
 }
 
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerMemberStatusPacket(
+	uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	constexpr uint32_t pack_size = sizeof(ServerDzMemberStatus_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzUpdateMemberStatus, pack_size);
+	auto buf = reinterpret_cast<ServerDzMemberStatus_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->status = static_cast<uint8_t>(status);
+	buf->character_id = character_id;
+
+	return pack;
+}
+
 uint32_t DynamicZoneBase::GetDatabaseMemberCount()
 {
 	return DynamicZoneMembersRepository::GetCountWhere(GetDatabase(),
@@ -500,6 +515,16 @@ bool DynamicZoneBase::SetInternalMemberStatus(uint32_t character_id, DynamicZone
 	return false;
 }
 
+void DynamicZoneBase::SetMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	auto update_member = GetMemberData(character_id);
+	if (update_member.IsValid())
+	{
+		ProcessMemberStatusChange(character_id, status);
+		SendServerPacket(CreateServerMemberStatusPacket(character_id, status).get());
+	}
+}
+
 void DynamicZoneBase::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
 {
 	if (!removed)
@@ -510,6 +535,11 @@ void DynamicZoneBase::ProcessMemberAddRemove(const DynamicZoneMember& member, bo
 	{
 		RemoveInternalMember(member.id);
 	}
+}
+
+bool DynamicZoneBase::ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	return SetInternalMemberStatus(character_id, status);
 }
 
 std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)

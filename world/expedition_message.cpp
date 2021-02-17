@@ -42,18 +42,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_ExpeditionMemberStatus:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);
-		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-		if (expedition)
-		{
-			auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
-			expedition->UpdateMemberStatus(buf->character_id, status);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
 	case ServerOP_ExpeditionDzAddPlayer:
 	{
 		ExpeditionMessage::AddPlayer(pack);
