@@ -63,7 +63,7 @@ XS(XS_Mob_IsClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsClient) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsClient(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsClient(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -79,7 +79,7 @@ XS(XS_Mob_IsNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsNPC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsNPC(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsNPC(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -95,7 +95,7 @@ XS(XS_Mob_IsBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsBot) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsBot(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsBot(THIS)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		bool RETVAL;
@@ -111,7 +111,7 @@ XS(XS_Mob_IsMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsMob) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsMob(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsMob(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -127,7 +127,7 @@ XS(XS_Mob_IsCorpse); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsCorpse) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsCorpse(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsCorpse(THIS)"); // @categories Script Utility, Corpse
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -143,7 +143,7 @@ XS(XS_Mob_IsPlayerCorpse); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsPlayerCorpse) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsPlayerCorpse(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsPlayerCorpse(THIS)"); // @categories Corpse
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -159,7 +159,7 @@ XS(XS_Mob_IsNPCCorpse); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsNPCCorpse) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsNPCCorpse(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsNPCCorpse(THIS)"); // @categories Corpse
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -175,7 +175,7 @@ XS(XS_Mob_IsObject); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsObject) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsObject(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsObject(THIS)"); // @categories Objects
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -191,7 +191,7 @@ XS(XS_Mob_IsDoor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsDoor) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsDoor(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsDoor(THIS)"); // @categories Script Utility, Doors
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -207,7 +207,7 @@ XS(XS_Mob_IsTrap); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsTrap) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsTrap(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsTrap(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -223,7 +223,7 @@ XS(XS_Mob_IsBeacon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsBeacon) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsBeacon(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsBeacon(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -239,7 +239,7 @@ XS(XS_Mob_CastToClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToClient) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CastToClient(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CastToClient(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Mob    *THIS;
 		Client *RETVAL;
@@ -255,7 +255,7 @@ XS(XS_Mob_CastToNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToNPC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CastToNPC(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CastToNPC(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		NPC *RETVAL;
@@ -271,7 +271,7 @@ XS(XS_Mob_CastToMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToMob) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CastToMob(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CastToMob(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -287,7 +287,7 @@ XS(XS_Mob_CastToCorpse); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToCorpse) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CastToCorpse(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CastToCorpse(THIS)"); // @categories Script Utility, Corpse
 	{
 		Mob    *THIS;
 		Corpse *RETVAL;
@@ -303,7 +303,7 @@ XS(XS_Mob_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetID(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -320,7 +320,7 @@ XS(XS_Mob_GetName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetName(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetName(THIS)"); // @categories Script Utility
 	{
 		Mob        *THIS;
 		Const_char *RETVAL;
@@ -338,7 +338,7 @@ XS(XS_Mob_Depop); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Depop) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::Depop(THIS, StartSpawnTimer = true)");
+		Perl_croak(aTHX_ "Usage: Mob::Depop(THIS, StartSpawnTimer = true)"); // @categories Spawns
 	{
 		Mob *THIS;
 		bool StartSpawnTimer;
@@ -358,7 +358,7 @@ XS(XS_Mob_RogueAssassinate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_RogueAssassinate) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RogueAssassinate(THIS, other)");
+		Perl_croak(aTHX_ "Usage: Mob::RogueAssassinate(THIS, other)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *other;
@@ -380,7 +380,7 @@ XS(XS_Mob_BehindMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BehindMob) {
 	dXSARGS;
 	if (items < 1 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::BehindMob(THIS, Mob* other = 0, [float x = 0.0f], [float y= 0.0f])");
+		Perl_croak(aTHX_ "Usage: Mob::BehindMob(THIS, Mob* other = 0, [float x = 0.0f], [float y= 0.0f])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -423,7 +423,7 @@ XS(XS_Mob_SetLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetLevel) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetLevel(THIS, uint8 in_level, [bool command = false])");
+		Perl_croak(aTHX_ "Usage: Mob::SetLevel(THIS, uint8 in_level, [bool command = false])"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 in_level = (uint8) SvUV(ST(1));
@@ -444,7 +444,7 @@ XS(XS_Mob_GetSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSkill(THIS, int skill_id)"); // @categories Skills and Recipes, Script Utility
 	{
 		Mob *THIS;
 		uint32                   RETVAL;
@@ -462,7 +462,7 @@ XS(XS_Mob_SendWearChange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendWearChange) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SendWearChange(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::SendWearChange(THIS, uint8 material_slot)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 material_slot = (uint8) SvUV(ST(1));
@@ -476,7 +476,7 @@ XS(XS_Mob_GetEquipment); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEquipment) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipment(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipment(THIS, uint8 material_slot)"); // @categories Inventory and Items
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -494,7 +494,7 @@ XS(XS_Mob_GetEquipmentMaterial); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEquipmentMaterial) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentMaterial(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentMaterial(THIS, uint8 material_slot)"); // @categories Inventory and Items
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -512,7 +512,7 @@ XS(XS_Mob_GetEquipmentColor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEquipmentColor) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentColor(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEquipmentColor(THIS, uint8 material_slot)"); // @categories Inventory and Items
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -530,7 +530,7 @@ XS(XS_Mob_GetArmorTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetArmorTint) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetArmorTint(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetArmorTint(THIS, uint8 material_slot)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -548,7 +548,7 @@ XS(XS_Mob_IsMoving); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsMoving) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsMoving(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsMoving(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -564,7 +564,7 @@ XS(XS_Mob_GoToBind); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GoToBind) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GoToBind(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GoToBind(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -577,7 +577,7 @@ XS(XS_Mob_Gate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Gate) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Gate(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Gate(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -590,7 +590,7 @@ XS(XS_Mob_Attack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Attack) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::Attack(THIS, Mob* other, [int hand = 13 [prim|sec]], [bool from_riposte = false])");
+		Perl_croak(aTHX_ "Usage: Mob::Attack(THIS, Mob* other, [int hand = 13 [prim|sec]], [bool from_riposte = false])"); // @categories Script Utility, Hate and Aggro
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -629,7 +629,7 @@ XS(XS_Mob_Damage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Damage) {
 	dXSARGS;
 	if (items < 5 || items > 8)
-		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])");
+		Perl_croak(aTHX_ "Usage: Mob::Damage(THIS, Mob* from, int32 damage, uint16 spell_id, int attack_skill, [bool avoidable = true], [int8 buffslot = -1], [bool buff_tic = false])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *from;
@@ -675,7 +675,7 @@ XS(XS_Mob_RangedAttack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_RangedAttack) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RangedAttack(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::RangedAttack(THIS, Mob* other)"); // @categories Skills and Recipes, Script Utility
 	{
 		Mob *THIS;
 		Mob *other;
@@ -697,7 +697,7 @@ XS(XS_Mob_ThrowingAttack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ThrowingAttack) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::ThrowingAttack(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::ThrowingAttack(THIS, Mob* other)"); // @categories Skills and Recipes, Script Utility
 	{
 		Mob *THIS;
 		Mob *other;
@@ -719,7 +719,7 @@ XS(XS_Mob_Heal); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Heal) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Heal(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Heal(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -733,7 +733,7 @@ XS(XS_Mob_HealDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HealDamage) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, int32 amount, [Mob* caster = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::HealDamage(THIS, int32 amount, [Mob* caster = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 heal_amt = (int32) SvIV(ST(1));
@@ -758,7 +758,7 @@ XS(XS_Mob_SetMaxHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetMaxHP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SetMaxHP(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::SetMaxHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -771,7 +771,7 @@ XS(XS_Mob_GetLevelCon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetLevelCon) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetLevelCon(THIS, uint8 other_level)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLevelCon(THIS, uint8 other_level)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -789,7 +789,7 @@ XS(XS_Mob_SetHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int32 hp)");
+		Perl_croak(aTHX_ "Usage: Mob::SetHP(THIS, int32 hp)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 hp = (int32) SvIV(ST(1));
@@ -803,7 +803,7 @@ XS(XS_Mob_DoAnim); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoAnim) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::DoAnim(THIS, int animation_number, [int type = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::DoAnim(THIS, int animation_number, [int type = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int animnum = (int) SvIV(ST(1));
@@ -824,7 +824,7 @@ XS(XS_Mob_ChangeSize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ChangeSize) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::ChangeSize(THIS, float in_size, [bool no_restriction = false])");
+		Perl_croak(aTHX_ "Usage: Mob::ChangeSize(THIS, float in_size, [bool no_restriction = false])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float in_size = (float) SvNV(ST(1));
@@ -845,7 +845,7 @@ XS(XS_Mob_RandomizeFeatures); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_RandomizeFeatures) {
 		dXSARGS;
 		if (items < 2 || items > 3)
-			Perl_croak(aTHX_ "Usage: Mob::RandomizeFeatures(THIS, bool send_illusion, set_variables)");
+			Perl_croak(aTHX_ "Usage: Mob::RandomizeFeatures(THIS, bool send_illusion, set_variables)"); // @categories Script Utility
 		{
 			Mob *THIS;
 			bool send_illusion = (bool) SvNV(ST(1));
@@ -860,7 +860,7 @@ XS(XS_Mob_GMMove); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GMMove) {
 	dXSARGS;
 	if (items < 4 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::GMMove(THIS, float x, float y, float z, [float heading = 0.01])");
+		Perl_croak(aTHX_ "Usage: Mob::GMMove(THIS, float x, float y, float z, [float heading = 0.01])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float x = (float) SvNV(ST(1));
@@ -883,7 +883,7 @@ XS(XS_Mob_HasProcs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HasProcs) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasProcs(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasProcs(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -899,7 +899,7 @@ XS(XS_Mob_IsInvisible); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsInvisible) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::IsInvisible(THIS, [Mob* other = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::IsInvisible(THIS, [Mob* other = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -928,7 +928,7 @@ XS(XS_Mob_SetInvisible); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetInvisible) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvisible(THIS, uint8 state)");
+		Perl_croak(aTHX_ "Usage: Mob::SetInvisible(THIS, uint8 state)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 state = (uint8) SvUV(ST(1));
@@ -942,7 +942,7 @@ XS(XS_Mob_FindBuff); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindBuff) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::FindBuff(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::FindBuff(THIS, uint16 spell_id)"); // @categories Spells and Disciplines, Script Utility
 	{
 		Mob *THIS;
 		bool   RETVAL;
@@ -959,7 +959,7 @@ XS(XS_Mob_FindBuffBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindBuffBySlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::FindBuffBySlot(THIS, int slot)");
+		Perl_croak(aTHX_ "Usage: Mob::FindBuffBySlot(THIS, int slot)"); // @categories Spells and Disciplines, Script Utility
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -977,7 +977,7 @@ XS(XS_Mob_BuffCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BuffCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::BuffCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffCount(THIS)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		uint32  RETVAL;
@@ -994,7 +994,7 @@ XS(XS_Mob_FindType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindType) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::FindType(THIS, uint8 type, [bool offensive = false], [uint16 threshold = 100])");
+		Perl_croak(aTHX_ "Usage: Mob::FindType(THIS, uint8 type, [bool offensive = false], [uint16 threshold = 100])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool   RETVAL;
@@ -1025,7 +1025,7 @@ XS(XS_Mob_GetBuffSlotFromType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBuffSlotFromType) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBuffSlotFromType(THIS, uint16 type)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBuffSlotFromType(THIS, uint16 type)"); // @categories Spells and Disciplines, Script Utility
 	{
 		Mob *THIS;
 		int8   RETVAL;
@@ -1043,7 +1043,7 @@ XS(XS_Mob_MakePet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_MakePet) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, uint16 spell_id, string pet_type, [string name = nullptr])");
+		Perl_croak(aTHX_ "Usage: Mob::MakePet(THIS, uint16 spell_id, string pet_type, [string name = nullptr])"); // @categories Pet
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1065,7 +1065,7 @@ XS(XS_Mob_MakeTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_MakeTempPet) {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, uint16 spell_id, [string name = nullptr], [uint32 duration = 0], [Mob* target = nullptr], [bool sticktarg = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::MakeTempPet(THIS, uint16 spell_id, [string name = nullptr], [uint32 duration = 0], [Mob* target = nullptr], [bool sticktarg = 0])"); // @categories Pet
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -1107,7 +1107,7 @@ XS(XS_Mob_TypesTempPet); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_TypesTempPet) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, uint32 type_id, [string name = nullptr], [uint32 duration = 0], [bool follow = 0], [Mob* target = nullptr], [bool stick_targ = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::TypesTempPet(THIS, uint32 type_id, [string name = nullptr], [uint32 duration = 0], [bool follow = 0], [Mob* target = nullptr], [bool stick_targ = 0])"); // @categories Pet
 	{
 		Mob *THIS;
 		uint32 typesid = (uint32) SvUV(ST(1));
@@ -1157,7 +1157,7 @@ XS(XS_Mob_GetBaseRace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBaseRace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBaseRace(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBaseRace(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -1174,7 +1174,7 @@ XS(XS_Mob_GetBaseGender); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBaseGender) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBaseGender(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBaseGender(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1191,7 +1191,7 @@ XS(XS_Mob_GetDeity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDeity) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDeity(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDeity(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1208,7 +1208,7 @@ XS(XS_Mob_GetRace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetRace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetRace(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetRace(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -1225,7 +1225,7 @@ XS(XS_Mob_GetGender); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetGender) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetGender(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetGender(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1242,7 +1242,7 @@ XS(XS_Mob_GetTexture); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetTexture) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetTexture(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetTexture(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1259,7 +1259,7 @@ XS(XS_Mob_GetHelmTexture); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHelmTexture) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHelmTexture(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHelmTexture(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1276,7 +1276,7 @@ XS(XS_Mob_GetHairColor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHairColor) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHairColor(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHairColor(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1293,7 +1293,7 @@ XS(XS_Mob_GetBeardColor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBeardColor) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBeardColor(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBeardColor(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1310,7 +1310,7 @@ XS(XS_Mob_GetEyeColor1); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEyeColor1) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetEyeColor1(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEyeColor1(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1327,7 +1327,7 @@ XS(XS_Mob_GetEyeColor2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEyeColor2) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetEyeColor2(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEyeColor2(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1344,7 +1344,7 @@ XS(XS_Mob_GetHairStyle); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHairStyle) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHairStyle(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHairStyle(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1361,7 +1361,7 @@ XS(XS_Mob_GetLuclinFace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetLuclinFace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetLuclinFace(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLuclinFace(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1378,7 +1378,7 @@ XS(XS_Mob_GetBeard); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBeard) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBeard(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBeard(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1395,7 +1395,7 @@ XS(XS_Mob_GetDrakkinHeritage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDrakkinHeritage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinHeritage(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinHeritage(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1412,7 +1412,7 @@ XS(XS_Mob_GetDrakkinTattoo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDrakkinTattoo) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinTattoo(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinTattoo(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1429,7 +1429,7 @@ XS(XS_Mob_GetDrakkinDetails); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDrakkinDetails) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinDetails(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDrakkinDetails(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1446,7 +1446,7 @@ XS(XS_Mob_GetClass); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetClass) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetClass(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetClass(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1463,7 +1463,7 @@ XS(XS_Mob_GetLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLevel(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -1480,7 +1480,7 @@ XS(XS_Mob_GetCleanName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetCleanName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetCleanName(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetCleanName(THIS)"); // @categories Script Utility
 	{
 		Mob        *THIS;
 		Const_char *RETVAL;
@@ -1498,7 +1498,7 @@ XS(XS_Mob_GetTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetTarget) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetTarget(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetTarget(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -1514,7 +1514,7 @@ XS(XS_Mob_SetTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetTarget) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTarget(THIS, mob)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTarget(THIS, mob)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *mob;
@@ -1536,7 +1536,7 @@ XS(XS_Mob_GetHPRatio); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHPRatio) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHPRatio(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHPRatio(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -1553,7 +1553,7 @@ XS(XS_Mob_IsWarriorClass); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsWarriorClass) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsWarriorClass(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsWarriorClass(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -1569,7 +1569,7 @@ XS(XS_Mob_GetHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHP(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1586,7 +1586,7 @@ XS(XS_Mob_GetMaxHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxHP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxHP(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxHP(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1603,7 +1603,7 @@ XS(XS_Mob_GetItemHPBonuses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetItemHPBonuses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetItemHPBonuses(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetItemHPBonuses(THIS)"); // @categories Inventory and Items, Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1620,7 +1620,7 @@ XS(XS_Mob_GetSpellHPBonuses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpellHPBonuses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpellHPBonuses(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpellHPBonuses(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1637,7 +1637,7 @@ XS(XS_Mob_GetSpellIDFromSlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpellIDFromSlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpellIDFromSlot(THIS, slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpellIDFromSlot(THIS, slot)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int   RETVAL;
@@ -1659,7 +1659,7 @@ XS(XS_Mob_GetWalkspeed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWalkspeed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWalkspeed(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWalkspeed(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -1676,7 +1676,7 @@ XS(XS_Mob_GetRunspeed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetRunspeed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetRunspeed(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetRunspeed(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -1693,7 +1693,7 @@ XS(XS_Mob_GetCasterLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetCasterLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetCasterLevel(THIS, spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetCasterLevel(THIS, spell_id)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int    RETVAL;
@@ -1711,7 +1711,7 @@ XS(XS_Mob_GetMaxMana); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxMana) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxMana(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxMana(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1728,7 +1728,7 @@ XS(XS_Mob_GetMana); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMana) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMana(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMana(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1745,7 +1745,7 @@ XS(XS_Mob_SetMana); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetMana) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetMana(THIS, amount)");
+		Perl_croak(aTHX_ "Usage: Mob::SetMana(THIS, amount)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 amount = (int32) SvIV(ST(1));
@@ -1759,7 +1759,7 @@ XS(XS_Mob_GetManaRatio); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetManaRatio) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetManaRatio(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetManaRatio(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -1776,7 +1776,7 @@ XS(XS_Mob_GetAC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAC(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAC(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -1810,7 +1810,7 @@ XS(XS_Mob_GetATK); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetATK) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetATK(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetATK(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -1827,7 +1827,7 @@ XS(XS_Mob_GetSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSTR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetSTR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSTR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1844,7 +1844,7 @@ XS(XS_Mob_GetSTA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSTA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetSTA(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSTA(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1861,7 +1861,7 @@ XS(XS_Mob_GetDEX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDEX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDEX(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDEX(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1878,7 +1878,7 @@ XS(XS_Mob_GetAGI); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAGI) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAGI(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAGI(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1895,7 +1895,7 @@ XS(XS_Mob_GetINT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetINT) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetINT(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetINT(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1912,7 +1912,7 @@ XS(XS_Mob_GetWIS); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWIS) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWIS(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWIS(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1929,7 +1929,7 @@ XS(XS_Mob_GetCHA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetCHA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetCHA(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetCHA(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1946,7 +1946,7 @@ XS(XS_Mob_GetMR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1963,7 +1963,7 @@ XS(XS_Mob_GetFR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetFR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetFR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetFR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1980,7 +1980,7 @@ XS(XS_Mob_GetDR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetDR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -1997,7 +1997,7 @@ XS(XS_Mob_GetPR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetPR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetPR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetPR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2014,7 +2014,7 @@ XS(XS_Mob_GetCR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetCR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetCR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetCR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2031,7 +2031,7 @@ XS(XS_Mob_GetCorruption); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetCorruption) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetCorruption(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetCorruption(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2048,7 +2048,7 @@ XS(XS_Mob_GetPhR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetPhR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetPhR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetPhR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2065,7 +2065,7 @@ XS(XS_Mob_GetMaxSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxSTR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTR(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTR(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2082,7 +2082,7 @@ XS(XS_Mob_GetMaxSTA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxSTA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTA(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxSTA(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2099,7 +2099,7 @@ XS(XS_Mob_GetMaxDEX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxDEX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxDEX(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxDEX(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2116,7 +2116,7 @@ XS(XS_Mob_GetMaxAGI); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxAGI) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxAGI(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxAGI(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2133,7 +2133,7 @@ XS(XS_Mob_GetMaxINT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxINT) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxINT(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxINT(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2150,7 +2150,7 @@ XS(XS_Mob_GetMaxWIS); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxWIS) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxWIS(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxWIS(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2167,7 +2167,7 @@ XS(XS_Mob_GetMaxCHA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetMaxCHA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMaxCHA(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMaxCHA(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -2184,7 +2184,7 @@ XS(XS_Mob_GetActSpellRange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellRange) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellRange(THIS, uint16 spell_id, float range)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellRange(THIS, uint16 spell_id, float range)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		float  RETVAL;
@@ -2203,7 +2203,7 @@ XS(XS_Mob_GetActSpellDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellDamage) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, uint16 spell_id, int32 value)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDamage(THIS, uint16 spell_id, int32 value)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -2222,7 +2222,7 @@ XS(XS_Mob_GetActSpellHealing); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellHealing) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, uint16 spell_id, int32 value)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellHealing(THIS, uint16 spell_id, int32 value)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -2241,7 +2241,7 @@ XS(XS_Mob_GetActSpellCost); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellCost) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCost(THIS, uint16 spell_id, int32 cost)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCost(THIS, uint16 spell_id, int32 cost)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -2260,7 +2260,7 @@ XS(XS_Mob_GetActSpellDuration); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellDuration) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDuration(THIS, uint16 spell_id, int32 duration)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellDuration(THIS, uint16 spell_id, int32 duration)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -2279,7 +2279,7 @@ XS(XS_Mob_GetActSpellCasttime); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetActSpellCasttime) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCasttime(THIS, uint16 spell_id, uint32 cast_time)");
+		Perl_croak(aTHX_ "Usage: Mob::GetActSpellCasttime(THIS, uint16 spell_id, uint32 cast_time)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -2298,7 +2298,7 @@ XS(XS_Mob_ResistSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ResistSpell) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::ResistSpell(THIS, uint8 resist_type, uint16 spell_id, [Mob* caster = nullptr])");
+		Perl_croak(aTHX_ "Usage: Mob::ResistSpell(THIS, uint8 resist_type, uint16 spell_id, [Mob* caster = nullptr])"); // @categories Spells and Disciplines, Script Utility
 	{
 		Mob *THIS;
 		double RETVAL;
@@ -2326,7 +2326,7 @@ XS(XS_Mob_GetSpecializeSkillValue); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpecializeSkillValue) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecializeSkillValue(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecializeSkillValue(THIS, uint16 spell_id)"); // @categories Skills and Recipes, Spells and Disciplines
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -2344,7 +2344,7 @@ XS(XS_Mob_GetNPCTypeID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetNPCTypeID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetNPCTypeID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetNPCTypeID(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -2361,7 +2361,7 @@ XS(XS_Mob_IsTargeted); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsTargeted) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsTargeted(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsTargeted(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -2377,7 +2377,7 @@ XS(XS_Mob_GetX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetX(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetX(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2394,7 +2394,7 @@ XS(XS_Mob_GetY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetY(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetY(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2411,7 +2411,7 @@ XS(XS_Mob_GetZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetZ(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetZ(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2428,7 +2428,7 @@ XS(XS_Mob_GetHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHeading) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHeading(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHeading(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2446,7 +2446,7 @@ XS(XS_Mob_GetWaypointX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointX(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointX(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2463,7 +2463,7 @@ XS(XS_Mob_GetWaypointY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointY(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointY(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2480,7 +2480,7 @@ XS(XS_Mob_GetWaypointZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointZ(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointZ(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2497,7 +2497,7 @@ XS(XS_Mob_GetWaypointH); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointH) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointH(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointH(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2514,7 +2514,7 @@ XS(XS_Mob_GetWaypointPause); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointPause) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointPause(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointPause(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -2531,7 +2531,7 @@ XS(XS_Mob_GetWaypointID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetWaypointID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetWaypointID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetWaypointID(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -2548,7 +2548,7 @@ XS(XS_Mob_SetCurrentWP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetCurrentWP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetCurrentWP(THIS, waypoint)");
+		Perl_croak(aTHX_ "Usage: Mob::SetCurrentWP(THIS, waypoint)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint16 waypoint = (uint16) SvUV(ST(1));
@@ -2562,7 +2562,7 @@ XS(XS_Mob_GetSize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSize) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetSize(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSize(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -2579,7 +2579,7 @@ XS(XS_Mob_SetFollowID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFollowID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFollowID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: Mob::SetFollowID(THIS, id)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 id = (uint32) SvUV(ST(1));
@@ -2593,7 +2593,7 @@ XS(XS_Mob_GetFollowID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetFollowID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetFollowID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetFollowID(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -2610,7 +2610,7 @@ XS(XS_Mob_Message); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Message) {
 	dXSARGS;
 	if (items < 3)
-		Perl_croak(aTHX_ "Usage: Mob::Message(THIS, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: Mob::Message(THIS, uint32 emote_color_type, string message)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 type = (uint32) SvUV(ST(1));
@@ -2625,7 +2625,7 @@ XS(XS_Mob_Message_StringID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Message_StringID) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::Message_StringID(THIS, uint32 emote_color_type, uint32 string_id, [uint32 distance = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::Message_StringID(THIS, uint32 emote_color_type, uint32 string_id, [uint32 distance = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 type      = (uint32) SvUV(ST(1));
@@ -2647,7 +2647,7 @@ XS(XS_Mob_Say); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Say) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Say(THIS, string message)");
+		Perl_croak(aTHX_ "Usage: Mob::Say(THIS, string message)"); // @categories Script Utility
 	{
 		Mob  *THIS;
 		char *format = (char *) SvPV_nolen(ST(1));
@@ -2661,7 +2661,7 @@ XS(XS_Mob_Shout); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Shout) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Shout(THIS, string message)");
+		Perl_croak(aTHX_ "Usage: Mob::Shout(THIS, string message)"); // @categories Script Utility
 	{
 		Mob  *THIS;
 		char *format = (char *) SvPV_nolen(ST(1));
@@ -2675,7 +2675,7 @@ XS(XS_Mob_Emote); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Emote) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: Mob::Emote(THIS, string message)");
+		Perl_croak(aTHX_ "Usage: Mob::Emote(THIS, string message)"); // @categories Script Utility
 	{
 		Mob  *THIS;
 		char *format = (char *) SvPV_nolen(ST(1));
@@ -2689,7 +2689,7 @@ XS(XS_Mob_InterruptSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_InterruptSpell) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::InterruptSpell(THIS, [uint16 spell_id = 0xFFFF])");
+		Perl_croak(aTHX_ "Usage: Mob::InterruptSpell(THIS, [uint16 spell_id = 0xFFFF])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint16 spellid;
@@ -2709,7 +2709,7 @@ XS(XS_Mob_CastSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastSpell) {
 	dXSARGS;
 	if (items < 3 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, uint16 spell_id, uint16 target_id, [int slot = 22], [int32 cast_time = -1], [int32 mana_cost = -1], [int16 resist_adjust = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::CastSpell(THIS, uint16 spell_id, uint16 target_id, [int slot = 22], [int32 cast_time = -1], [int32 mana_cost = -1], [int16 resist_adjust = 0])"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		uint16             spell_id  = (uint16) SvUV(ST(1));
@@ -2757,7 +2757,7 @@ XS(XS_Mob_SpellFinished); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SpellFinished) {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(uint16 spell_id, [Mob* spell_target = this], [uint16 mana_cost = 0], [uint16 resist_diff = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::SpellFinished(uint16 spell_id, [Mob* spell_target = this], [uint16 mana_cost = 0], [uint16 resist_diff = 0])"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -2796,7 +2796,7 @@ XS(XS_Mob_IsImmuneToSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsImmuneToSpell) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::IsImmuneToSpell(THIS, uint16 spell_id, [Mob* caster = nullptr])");
+		Perl_croak(aTHX_ "Usage: Mob::IsImmuneToSpell(THIS, uint16 spell_id, [Mob* caster = nullptr])"); // @categories Spells and Disciplines, Script Utility
 	{
 		Mob *THIS;
 		bool   RETVAL;
@@ -2822,7 +2822,7 @@ XS(XS_Mob_BuffFadeBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BuffFadeBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySpellID(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySpellID(THIS, uint16 spell_id)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
@@ -2836,7 +2836,7 @@ XS(XS_Mob_BuffFadeByEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BuffFadeByEffect) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeByEffect(THIS, int effect_id, int skip_slot = -1)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeByEffect(THIS, int effect_id, int skip_slot = -1)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int effectid = (int) SvIV(ST(1));
@@ -2857,7 +2857,7 @@ XS(XS_Mob_BuffFadeAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BuffFadeAll) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeAll(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeAll(THIS)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -2870,7 +2870,7 @@ XS(XS_Mob_BuffFadeBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_BuffFadeBySlot) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySlot(THIS, int slot, bool recalc_bonuses = true)");
+		Perl_croak(aTHX_ "Usage: Mob::BuffFadeBySlot(THIS, int slot, bool recalc_bonuses = true)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int  slot = (int) SvIV(ST(1));
@@ -2891,7 +2891,7 @@ XS(XS_Mob_CanBuffStack); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanBuffStack) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::CanBuffStack(THIS, uint16 spell_id, uint8 caster_level, [bool fail_if_overwritten = false])");
+		Perl_croak(aTHX_ "Usage: Mob::CanBuffStack(THIS, uint16 spell_id, uint8 caster_level, [bool fail_if_overwritten = false])"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
 		int    RETVAL;
@@ -2917,7 +2917,7 @@ XS(XS_Mob_IsCasting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsCasting) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsCasting(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsCasting(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -2933,7 +2933,7 @@ XS(XS_Mob_CastingSpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastingSpellID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CastingSpellID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CastingSpellID(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -2950,7 +2950,7 @@ XS(XS_Mob_SetAppearance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetAppearance) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetAppearance(THIS, int appearance [0|1|2|3|4], [ignore_self = true])");
+		Perl_croak(aTHX_ "Usage: Mob::SetAppearance(THIS, int appearance [0|1|2|3|4], [ignore_self = true])"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		EmuAppearance app = (EmuAppearance) SvUV(ST(1));
@@ -2971,7 +2971,7 @@ XS(XS_Mob_GetAppearance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAppearance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAppearance(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAppearance(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		EmuAppearance RETVAL;
@@ -2988,7 +2988,7 @@ XS(XS_Mob_GetRunAnimSpeed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetRunAnimSpeed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetRunAnimSpeed(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetRunAnimSpeed(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -3005,7 +3005,7 @@ XS(XS_Mob_SetRunAnimSpeed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetRunAnimSpeed) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRunAnimSpeed(THIS, int8 speed)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRunAnimSpeed(THIS, int8 speed)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int8 in = (int8) SvIV(ST(1));
@@ -3019,7 +3019,7 @@ XS(XS_Mob_SetPetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetPetID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetPetID(THIS, uint16 new_pet_id)");
+		Perl_croak(aTHX_ "Usage: Mob::SetPetID(THIS, uint16 new_pet_id)"); // @categories Pet
 	{
 		Mob *THIS;
 		uint16 NewPetID = (uint16) SvUV(ST(1));
@@ -3033,7 +3033,7 @@ XS(XS_Mob_GetPetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetPetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetPetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetPetID(THIS)"); // @categories Script Utility, Pet
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -3050,7 +3050,7 @@ XS(XS_Mob_SetOwnerID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetOwnerID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, uint16 new_owner_id)");
+		Perl_croak(aTHX_ "Usage: Mob::SetOwnerID(THIS, uint16 new_owner_id)"); // @categories Pet
 	{
 		Mob *THIS;
 		uint16 NewOwnerID = (uint16) SvUV(ST(1));
@@ -3064,7 +3064,7 @@ XS(XS_Mob_GetOwnerID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetOwnerID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetOwnerID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetOwnerID(THIS)"); // @categories Script Utility, Pet
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -3081,7 +3081,7 @@ XS(XS_Mob_GetPetType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetPetType) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetPetType(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetPetType(THIS)"); // @categories Script Utility, Pet
 	{
 		Mob *THIS;
 		uint16 RETVAL;
@@ -3098,7 +3098,7 @@ XS(XS_Mob_GetBodyType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetBodyType) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBodyType(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBodyType(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -3129,7 +3129,7 @@ XS(XS_Mob_Spin); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Spin) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Spin(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Spin(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -3142,7 +3142,7 @@ XS(XS_Mob_Kill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Kill) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Kill(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Kill(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -3155,7 +3155,7 @@ XS(XS_Mob_SetInvul); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetInvul) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetInvul(THIS, bool set_invulnerable)");
+		Perl_croak(aTHX_ "Usage: Mob::SetInvul(THIS, bool set_invulnerable)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool invul = (bool) SvTRUE(ST(1));
@@ -3169,7 +3169,7 @@ XS(XS_Mob_GetInvul); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetInvul) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetInvul(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetInvul(THIS)"); // @categories Script Utility, Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3185,7 +3185,7 @@ XS(XS_Mob_SetExtraHaste); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetExtraHaste) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetExtraHaste(THIS, int haste)");
+		Perl_croak(aTHX_ "Usage: Mob::SetExtraHaste(THIS, int haste)"); // @categories Script Utility, Stats and Attributes
 	{
 		Mob *THIS;
 		int Haste = (int) SvIV(ST(1));
@@ -3199,7 +3199,7 @@ XS(XS_Mob_GetHaste); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHaste) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHaste(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHaste(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int RETVAL;
@@ -3216,7 +3216,7 @@ XS(XS_Mob_GetHandToHandDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHandToHandDamage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDamage(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDamage(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int RETVAL;
@@ -3233,7 +3233,7 @@ XS(XS_Mob_CanThisClassDoubleAttack); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Mob_CanThisClassDoubleAttack) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDoubleAttack(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDoubleAttack(THIS)"); // @categories Skills and Recipes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3249,7 +3249,7 @@ XS(XS_Mob_CanThisClassDualWield); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanThisClassDualWield) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDualWield(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDualWield(THIS)"); // @categories Skills and Recipes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3265,7 +3265,7 @@ XS(XS_Mob_CanThisClassRiposte); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanThisClassRiposte) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CanThisClassRiposte(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CanThisClassRiposte(THIS)"); // @categories Skills and Recipes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3281,7 +3281,7 @@ XS(XS_Mob_CanThisClassDodge); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanThisClassDodge) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDodge(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CanThisClassDodge(THIS)"); // @categories Skills and Recipes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3297,7 +3297,7 @@ XS(XS_Mob_CanThisClassParry); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanThisClassParry) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::CanThisClassParry(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::CanThisClassParry(THIS)"); // @categories Skills and Recipes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3313,7 +3313,7 @@ XS(XS_Mob_GetHandToHandDelay); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHandToHandDelay) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDelay(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHandToHandDelay(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int RETVAL;
@@ -3330,7 +3330,7 @@ XS(XS_Mob_GetClassLevelFactor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetClassLevelFactor) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetClassLevelFactor(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetClassLevelFactor(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -3347,7 +3347,7 @@ XS(XS_Mob_Mesmerize); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Mesmerize) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Mesmerize(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Mesmerize(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -3360,7 +3360,7 @@ XS(XS_Mob_IsMezzed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsMezzed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsMezzed(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsMezzed(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3376,7 +3376,7 @@ XS(XS_Mob_IsStunned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsStunned) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsStunned(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsStunned(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3393,7 +3393,7 @@ XS(XS_Mob_StartEnrage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_StartEnrage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::StartEnrage(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::StartEnrage(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -3406,7 +3406,7 @@ XS(XS_Mob_IsEnraged); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsEnraged) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsEnraged(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsEnraged(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3422,7 +3422,7 @@ XS(XS_Mob_GetReverseFactionCon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetReverseFactionCon) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetReverseFactionCon(THIS, iOther)");
+		Perl_croak(aTHX_ "Usage: Mob::GetReverseFactionCon(THIS, iOther)"); // @categories Faction
 	{
 		Mob *THIS;
 		FACTION_VALUE RETVAL;
@@ -3448,7 +3448,7 @@ XS(XS_Mob_IsAIControlled); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsAIControlled) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsAIControlled(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsAIControlled(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3464,7 +3464,7 @@ XS(XS_Mob_GetAggroRange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAggroRange) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAggroRange(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAggroRange(THIS)"); // @categories Stats and Attributes, Hate and Aggro
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -3481,7 +3481,7 @@ XS(XS_Mob_GetAssistRange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAssistRange) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAssistRange(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAssistRange(THIS)"); // @categories Stats and Attributes, Hate and Aggro
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -3498,7 +3498,7 @@ XS(XS_Mob_SetPetOrder); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetPetOrder) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetPetOrder(THIS, i)");
+		Perl_croak(aTHX_ "Usage: Mob::SetPetOrder(THIS, i)"); // @categories Pet
 	{
 		Mob *THIS;
 		Mob::eStandingPetOrder i = (Mob::eStandingPetOrder) SvIV(ST(1));
@@ -3512,7 +3512,7 @@ XS(XS_Mob_GetPetOrder); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetPetOrder) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetPetOrder(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetPetOrder(THIS)"); // @categories Script Utility, Pet
 	{
 		Mob *THIS;
 		Mob::eStandingPetOrder RETVAL;
@@ -3529,7 +3529,7 @@ XS(XS_Mob_IsRoamer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsRoamer) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsRoamer(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsRoamer(THIS)"); // @categories Script Utility, Spawns
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3545,7 +3545,7 @@ XS(XS_Mob_IsRooted); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsRooted) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsRooted(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsRooted(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3561,7 +3561,7 @@ XS(XS_Mob_AddToHateList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_AddToHateList) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])");
+		Perl_croak(aTHX_ "Usage: Mob::AddToHateList(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0], [bool yell_for_help = true], [bool frenzy = false], [bool buff_tic = false])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
@@ -3618,7 +3618,7 @@ XS(XS_Mob_SetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHate) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::SetHate(THIS, Mob* other, [int32 hate = 0], [int32 damage = 0])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
@@ -3654,7 +3654,7 @@ XS(XS_Mob_HalveAggro);
 XS(XS_Mob_HalveAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::HalveAggro(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::HalveAggro(THIS, Mob* other)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
@@ -3676,7 +3676,7 @@ XS(XS_Mob_DoubleAggro);
 XS(XS_Mob_DoubleAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::DoubleAggro(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::DoubleAggro(THIS, Mob* other)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *other;
@@ -3698,7 +3698,7 @@ XS(XS_Mob_GetHateAmount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHateAmount) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateAmount(THIS, Mob* mob, [bool is_damage = false])");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateAmount(THIS, Mob* mob, [bool is_damage = false])"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -3731,7 +3731,7 @@ XS(XS_Mob_GetDamageAmount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetDamageAmount) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetDamageAmount(THIS, Mob* target_mob)");
+		Perl_croak(aTHX_ "Usage: Mob::GetDamageAmount(THIS, Mob* target_mob)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -3757,7 +3757,7 @@ XS(XS_Mob_GetHateTop); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHateTop) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateTop(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateTop(THIS)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -3773,7 +3773,7 @@ XS(XS_Mob_GetHateDamageTop); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHateDamageTop) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateDamageTop(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateDamageTop(THIS, Mob* other)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -3798,7 +3798,7 @@ XS(XS_Mob_GetHateRandom); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetHateRandom) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateRandom(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateRandom(THIS)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -3814,7 +3814,7 @@ XS(XS_Mob_IsEngaged); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsEngaged) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsEngaged(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsEngaged(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3830,7 +3830,7 @@ XS(XS_Mob_HateSummon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HateSummon) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HateSummon(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HateSummon(THIS)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3846,7 +3846,7 @@ XS(XS_Mob_FaceTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FaceTarget) {
 	dXSARGS;
 	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::FaceTarget(THIS, [Mob* target = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::FaceTarget(THIS, [Mob* target = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *MobToFace;
@@ -3872,7 +3872,7 @@ XS(XS_Mob_SetHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetHeading) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetHeading(THIS, float heading)");
+		Perl_croak(aTHX_ "Usage: Mob::SetHeading(THIS, float heading)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float iHeading = (float) SvNV(ST(1));
@@ -3886,7 +3886,7 @@ XS(XS_Mob_WipeHateList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_WipeHateList) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::WipeHateList(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::WipeHateList(THIS)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -3899,7 +3899,7 @@ XS(XS_Mob_CheckAggro); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CheckAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckAggro(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckAggro(THIS, Mob* other)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -3924,7 +3924,7 @@ XS(XS_Mob_CalculateHeadingToTarget); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Mob_CalculateHeadingToTarget) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::CalculateHeadingToTarget(THIS, float x, float y)");
+		Perl_croak(aTHX_ "Usage: Mob::CalculateHeadingToTarget(THIS, float x, float y)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int8  RETVAL;
@@ -3977,7 +3977,7 @@ XS(XS_Mob_NavigateTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_NavigateTo) {
 	dXSARGS;
 	if (items < 4 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::NavigateTo(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Mob::NavigateTo(THIS, float x, float y, float z)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float x     = (float) SvNV(ST(1));
@@ -4007,7 +4007,7 @@ XS(XS_Mob_CalculateDistance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CalculateDistance) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::CalculateDistance(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Mob::CalculateDistance(THIS, float x, float y, float z)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -4027,7 +4027,7 @@ XS(XS_Mob_SendTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendTo) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SendTo(THIS, float new_x, float new_y, float new_z)");
+		Perl_croak(aTHX_ "Usage: Mob::SendTo(THIS, float new_x, float new_y, float new_z)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float new_x = (float) SvNV(ST(1));
@@ -4043,7 +4043,7 @@ XS(XS_Mob_SendToFixZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendToFixZ) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SendToFixZ(THIS, float new_x, float new_y, float new_z)");
+		Perl_croak(aTHX_ "Usage: Mob::SendToFixZ(THIS, float new_x, float new_y, float new_z)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float new_x = (float) SvNV(ST(1));
@@ -4059,7 +4059,7 @@ XS(XS_Mob_NPCSpecialAttacks); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_NPCSpecialAttacks) {
 	dXSARGS;
 	if (items < 3 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::NPCSpecialAttacks(THIS, string abilities_string, int perm_tag, [bool reset = true], [bool remove = true])");
+		Perl_croak(aTHX_ "Usage: Mob::NPCSpecialAttacks(THIS, string abilities_string, int perm_tag, [bool reset = true], [bool remove = true])"); // @categories Stats and Attributes
 	{
 		Mob  *THIS;
 		char *parse = (char *) SvPV_nolen(ST(1));
@@ -4076,7 +4076,7 @@ XS(XS_Mob_DontHealMeBefore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DontHealMeBefore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DontHealMeBefore(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DontHealMeBefore(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4093,7 +4093,7 @@ XS(XS_Mob_DontBuffMeBefore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DontBuffMeBefore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DontBuffMeBefore(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DontBuffMeBefore(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4110,7 +4110,7 @@ XS(XS_Mob_DontDotMeBefore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DontDotMeBefore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DontDotMeBefore(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DontDotMeBefore(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4127,7 +4127,7 @@ XS(XS_Mob_DontRootMeBefore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DontRootMeBefore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DontRootMeBefore(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DontRootMeBefore(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4144,7 +4144,7 @@ XS(XS_Mob_DontSnareMeBefore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DontSnareMeBefore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DontSnareMeBefore(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DontSnareMeBefore(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4161,7 +4161,7 @@ XS(XS_Mob_GetResist); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetResist) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetResist(THIS, type)");
+		Perl_croak(aTHX_ "Usage: Mob::GetResist(THIS, type)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int16 RETVAL;
@@ -4179,7 +4179,7 @@ XS(XS_Mob_GetShieldTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetShieldTarget) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetShieldTarget(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetShieldTarget(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *RETVAL;
@@ -4195,7 +4195,7 @@ XS(XS_Mob_SetShieldTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetShieldTarget) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetShieldTarget(THIS, mob)");
+		Perl_croak(aTHX_ "Usage: Mob::SetShieldTarget(THIS, mob)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *mob;
@@ -4217,7 +4217,7 @@ XS(XS_Mob_Charmed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Charmed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::Charmed(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::Charmed(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -4233,7 +4233,7 @@ XS(XS_Mob_GetLevelHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetLevelHP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetLevelHP(THIS, uint8 level)");
+		Perl_croak(aTHX_ "Usage: Mob::GetLevelHP(THIS, uint8 level)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4251,7 +4251,7 @@ XS(XS_Mob_GetZoneID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetZoneID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetZoneID(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetZoneID(THIS)"); // @categories Zones
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4268,7 +4268,7 @@ XS(XS_Mob_CheckAggroAmount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CheckAggroAmount) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckAggroAmount(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckAggroAmount(THIS, uint16 spell_id)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4286,7 +4286,7 @@ XS(XS_Mob_CheckHealAggroAmount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CheckHealAggroAmount) {
 	dXSARGS;
 	if (items != 2 && items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::CheckHealAggroAmount(THIS, uint16 spell_id, uint32 possible_heal_amt)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckHealAggroAmount(THIS, uint16 spell_id, uint32 possible_heal_amt)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4309,7 +4309,7 @@ XS(XS_Mob_GetAA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAA) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, uint32 rank_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAA(THIS, uint32 rank_id)"); // @categories Alternative Advancement
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4327,7 +4327,7 @@ XS(XS_Mob_GetAAByAAID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAAByAAID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetAAByAAID(THIS, uint32 aa_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAAByAAID(THIS, uint32 aa_id)"); // @categories Alternative Advancement
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -4345,7 +4345,7 @@ XS(XS_Mob_SetAA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetAA) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetAA(THIS, int aa_id, int points, [int charges = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::SetAA(THIS, int aa_id, int points, [int charges = 0])"); // @categories Alternative Advancement, Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -4364,7 +4364,7 @@ XS(XS_Mob_DivineAura); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DivineAura) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::DivineAura(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::DivineAura(THIS)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -4380,7 +4380,7 @@ XS(XS_Mob_AddFeignMemory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_AddFeignMemory) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::AddFeignMemory(THIS, Client* attacker)");
+		Perl_croak(aTHX_ "Usage: Mob::AddFeignMemory(THIS, Client* attacker)"); // @categories Script Utility
 	{
 		Mob    *THIS;
 		Client *attacker;
@@ -4402,7 +4402,7 @@ XS(XS_Mob_RemoveFromFeignMemory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_RemoveFromFeignMemory) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RemoveFromFeignMemory(THIS, Client* attacker)");
+		Perl_croak(aTHX_ "Usage: Mob::RemoveFromFeignMemory(THIS, Client* attacker)"); // @categories Script Utility, Hate and Aggro
 	{
 		Mob    *THIS;
 		Client *attacker;
@@ -4424,7 +4424,7 @@ XS(XS_Mob_ClearFeignMemory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ClearFeignMemory) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::ClearFeignMemory(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::ClearFeignMemory(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -4437,7 +4437,7 @@ XS(XS_Mob_SetOOCRegen); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetOOCRegen) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int32 new_ooc_regen)");
+		Perl_croak(aTHX_ "Usage: Mob::SetOOCRegen(THIS, int32 new_ooc_regen)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 newoocregen = (int32) SvIV(ST(1));
@@ -4451,7 +4451,7 @@ XS(XS_Mob_GetEntityVariable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetEntityVariable) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetEntityVariable(THIS, string id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetEntityVariable(THIS, string id)"); // @categories Script Utility
 	{
 		Mob        *THIS;
 		Const_char *id = SvPV_nolen(ST(1));
@@ -4487,7 +4487,7 @@ XS(XS_Mob_SetEntityVariable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetEntityVariable) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetEntityVariable(THIS, string id, string var)");
+		Perl_croak(aTHX_ "Usage: Mob::SetEntityVariable(THIS, string id, string var)"); // @categories Script Utility
 	{
 		Mob        *THIS;
 		Const_char *id  = SvPV_nolen(ST(1));
@@ -4503,7 +4503,7 @@ XS(XS_Mob_GetHateList) {
 	dXSARGS;
 	int num_entries = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetHateList(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHateList(THIS)"); // @categories Hate and Aggro
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -4526,7 +4526,7 @@ XS(XS_Mob_SignalClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SignalClient) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SignalClient(THIS, Client* client, uint32 data)");
+		Perl_croak(aTHX_ "Usage: Mob::SignalClient(THIS, Client* client, uint32 data)"); // @categories Script Utility
 	{
 		Mob    *THIS;
 		Client *client = nullptr;
@@ -4549,7 +4549,7 @@ XS(XS_Mob_CombatRange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CombatRange) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CombatRange(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: Mob::CombatRange(THIS, Mob* target)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *target = nullptr;
@@ -4574,7 +4574,7 @@ XS(XS_Mob_DoSpecialAttackDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoSpecialAttackDamage) {
 	dXSARGS;
 	if (items < 4 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::DoSpecialAttackDamage(THIS, Mob* target, int skill, int32 max_damage, [int32 min_damage = 1], [int32 hate_override = -11])");
+		Perl_croak(aTHX_ "Usage: Mob::DoSpecialAttackDamage(THIS, Mob* target, int skill, int32 max_damage, [int32 min_damage = 1], [int32 hate_override = -11])"); // @categories Script Utility, Skills and Attributes
 	{
 		Mob *THIS;
 		Mob *target;
@@ -4608,7 +4608,7 @@ XS(XS_Mob_CheckLoS); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CheckLoS) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CheckLoS(THIS, Mob*)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckLoS(THIS, Mob*)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *mob;
@@ -4633,7 +4633,7 @@ XS(XS_Mob_CheckLoSToLoc); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CheckLoSToLoc) {
 	dXSARGS;
 	if (items != 4 && items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::CheckLoSToLoc(THIS, float x, float y, float z, float mob_size)");
+		Perl_croak(aTHX_ "Usage: Mob::CheckLoSToLoc(THIS, float x, float y, float z, float mob_size)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float loc_x = (float) SvNV(ST(1));
@@ -4659,7 +4659,7 @@ XS(XS_Mob_FindGroundZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_FindGroundZ) {
 	dXSARGS;
 	if (items != 3 && items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::FindGroundZ(THIS, float x, float y, float z_offset)");
+		Perl_croak(aTHX_ "Usage: Mob::FindGroundZ(THIS, float x, float y, float z_offset)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float new_x = (float) SvNV(ST(1));
@@ -4685,7 +4685,7 @@ XS(XS_Mob_ProjectileAnim); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ProjectileAnim) {
 	dXSARGS;
 	if (items < 3 || items > 9)
-		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, Mob* mob, int item_id, [bool is_arrow = false], [float speed = 0], [float angle = 0], [float tilt = 0], [float arc = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::ProjectileAnim(THIS, Mob* mob, int item_id, [bool is_arrow = false], [float speed = 0], [float angle = 0], [float tilt = 0], [float arc = 0])"); // @categories Script Utility
 
 	{
 		Mob *THIS;
@@ -4734,7 +4734,7 @@ XS(XS_Mob_HasNPCSpecialAtk); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_HasNPCSpecialAtk) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::HasNPCSpecialAtk(THIS, string ability_string)");
+		Perl_croak(aTHX_ "Usage: Mob::HasNPCSpecialAtk(THIS, string ability_string)"); // @categories Stats and Attributes
 	{
 		Mob  *THIS;
 		char *parse = (char *) SvPV_nolen(ST(1));
@@ -4751,7 +4751,7 @@ XS(XS_Mob_SendAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendAppearanceEffect) {
 	dXSARGS;
 	if (items < 2 || items > 7)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null])");
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 parm1 = (int32) SvIV(ST(1));
@@ -4784,7 +4784,7 @@ XS(XS_Mob_SetFlyMode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlyMode) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, uint8 flymode[0|1|2|3|4|5])");
+		Perl_croak(aTHX_ "Usage: Mob::SetFlyMode(THIS, uint8 flymode[0|1|2|3|4|5])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		GravityBehavior flymode = (GravityBehavior) SvIV(ST(1));
@@ -4798,7 +4798,7 @@ XS(XS_Mob_SetTexture); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetTexture) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTexture(THIS, int32 texture)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTexture(THIS, int32 texture)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 texture = (int32) SvIV(ST(1));
@@ -4812,7 +4812,7 @@ XS(XS_Mob_SetRace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetRace) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRace(THIS, int32 race)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRace(THIS, int32 race)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 race = (int32) SvIV(ST(1));
@@ -4826,7 +4826,7 @@ XS(XS_Mob_SetGender); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetGender) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetGender(THIS, int32 gender)");
+		Perl_croak(aTHX_ "Usage: Mob::SetGender(THIS, int32 gender)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 gender = (int32) SvIV(ST(1));
@@ -4840,7 +4840,7 @@ XS(XS_Mob_SendIllusion); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendIllusion) {
 	dXSARGS;
 	if (items < 2 || items > 14)
-		Perl_croak(aTHX_ "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture  face = 0xFF], [uint8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color =FF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])");
+		Perl_croak(aTHX_ "Usage: Mob::SendIllusion(THIS, uint16 race, [uint8 gender = 0xFF], [uint8 texture  face = 0xFF], [uint8 hairstyle = 0xFF], [uint8 hair_color = 0xFF], [uint8 beard = 0xFF], [uint8 beard_color =FF], [uint32 drakkin_tattoo = 0xFFFFFFFF], [uint32 drakkin_details = 0xFFFFFFFF], [float size = -1])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint16 race             = (uint16) SvIV(ST(1));
@@ -4880,7 +4880,7 @@ XS(XS_Mob_CameraEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CameraEffect) {
 	dXSARGS;
 	if (items < 2 || items > 5)
-		Perl_croak(aTHX_ "Usage: Mob::CameraEffect(THIS, uint32 duration, [uint32 intensity = 0], [Client* single_client = nullptr], [bool is_world_wide = false])");
+		Perl_croak(aTHX_ "Usage: Mob::CameraEffect(THIS, uint32 duration, [uint32 intensity = 0], [Client* single_client = nullptr], [bool is_world_wide = false])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint32 duration  = (uint32) SvUV(ST(1));
@@ -4914,7 +4914,7 @@ XS(XS_Mob_SpellEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SpellEffect) {
 	dXSARGS;
 	if (items < 2 || items > 8)
-		Perl_croak(aTHX_ "Usage: Mob::SpellEffect(THIS, uint32 effect, [uint32 duration = 5000], [uint32 finish_delay = 0], [bool zone_wide = false], [uint32 unk20 = 3000], [bool perm_effect = false], [Client* single_client])");
+		Perl_croak(aTHX_ "Usage: Mob::SpellEffect(THIS, uint32 effect, [uint32 duration = 5000], [uint32 finish_delay = 0], [bool zone_wide = false], [uint32 unk20 = 3000], [bool perm_effect = false], [Client* single_client])"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		uint32 effect       = (uint32) SvUV(ST(1));
@@ -4951,7 +4951,7 @@ XS(XS_Mob_TempName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_TempName) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Mob::TempName(THIS, string name)"); // @categories Script Utility
 	{
 		Mob  *THIS;
 		char *name = nullptr;
@@ -4967,7 +4967,7 @@ XS(XS_Mob_GetItemStat); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetItemStat) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetItemStat(THIS, uint32 item_id, string stat)");
+		Perl_croak(aTHX_ "Usage: Mob::GetItemStat(THIS, uint32 item_id, string stat)"); // @categories Inventory and Items, Stats and Attributes
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -5070,7 +5070,7 @@ XS(XS_Mob_SetSlotTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetSlotTint) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::SetSlotTint(THIS, uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSlotTint(THIS, uint8 material_slot, uint8 red_tint, uint8 green_tint, uint8 blue_tint)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 material_slot = (uint8) SvIV(ST(1));
@@ -5087,7 +5087,7 @@ XS(XS_Mob_WearChange); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_WearChange) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, uint8 material_slot, uint16 texture, [uint32 color = 0, uint32 hero_forge_model = 0])");
+		Perl_croak(aTHX_ "Usage: Mob::WearChange(THIS, uint8 material_slot, uint16 texture, [uint32 color = 0, uint32 hero_forge_model = 0])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8  material_slot    = (uint8) SvIV(ST(1));
@@ -5111,7 +5111,7 @@ XS(XS_Mob_DoKnockback); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoKnockback) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::DoKnockback(THIS, Mob* caster, uint32 push_back_amount, uint32 push_up_amount)");
+		Perl_croak(aTHX_ "Usage: Mob::DoKnockback(THIS, Mob* caster, uint32 push_back_amount, uint32 push_up_amount)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		Mob *caster;
@@ -5135,7 +5135,7 @@ XS(XS_Mob_RemoveNimbusEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_RemoveNimbusEffect) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::RemoveNimbusEffect(THIS, int32 effect_id)");
+		Perl_croak(aTHX_ "Usage: Mob::RemoveNimbusEffect(THIS, int32 effect_id)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 effectid = (int32) SvIV(ST(1));
@@ -5149,7 +5149,7 @@ XS(XS_Mob_SetRunning);
 XS(XS_Mob_SetRunning) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetRunning(THIS, bool value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetRunning(THIS, bool value)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool value = (bool) SvTRUE(ST(1));
@@ -5163,7 +5163,7 @@ XS(XS_Mob_IsRunning); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsRunning) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsRunning(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsRunning(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5180,7 +5180,7 @@ XS(XS_Mob_SetBodyType); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetBodyType) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetBodyType(THIS, int32 type, [bool overwrite_orig = false])");
+		Perl_croak(aTHX_ "Usage: Mob::SetBodyType(THIS, int32 type, [bool overwrite_orig = false])"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 type           = (int32) SvIV(ST(1));
@@ -5199,7 +5199,7 @@ XS(XS_Mob_SetDeltas); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetDeltas) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Mob::SetDeltas(THIS, float delta_x, float delta_y, float delta_z, float delta_h)");
+		Perl_croak(aTHX_ "Usage: Mob::SetDeltas(THIS, float delta_x, float delta_y, float delta_z, float delta_h)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		auto delta = glm::vec4((float) SvNV(ST(1)), (float) SvNV(ST(2)), (float) SvNV(ST(3)), (float) SvNV(ST(4)));
@@ -5213,7 +5213,7 @@ XS(XS_Mob_SetLD);
 XS(XS_Mob_SetLD) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetLD(THIS, bool value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetLD(THIS, bool value)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool value = (bool) SvTRUE(ST(1));
@@ -5227,7 +5227,7 @@ XS(XS_Mob_SetTargetable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetTargetable) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetTargetable(THIS, bool targetable)");
+		Perl_croak(aTHX_ "Usage: Mob::SetTargetable(THIS, bool targetable)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool on = (bool) SvTRUE(ST(1));
@@ -5241,7 +5241,7 @@ XS(XS_Mob_ModSkillDmgTaken); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ModSkillDmgTaken) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, int skill, int16 value)");
+		Perl_croak(aTHX_ "Usage: Mob::ModSkillDmgTaken(THIS, int skill, int16 value)"); // @categories Skills and Recipes, Script Utility
 	{
 		Mob *THIS;
 		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
@@ -5256,7 +5256,7 @@ XS(XS_Mob_GetModSkillDmgTaken); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetModSkillDmgTaken) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetModSkillDmgTaken(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetModSkillDmgTaken(THIS, int skill_id)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int16                    RETVAL;
@@ -5274,7 +5274,7 @@ XS(XS_Mob_GetSkillDmgTaken); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSkillDmgTaken) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSkillDmgTaken(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSkillDmgTaken(THIS, int skill_id)"); // @categories Skills and Recipes, Script Utility
 	{
 		Mob *THIS;
 		int32                    RETVAL;
@@ -5292,7 +5292,7 @@ XS(XS_Mob_SetAllowBeneficial);
 XS(XS_Mob_SetAllowBeneficial) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetAllowBeneficial(THIS, bool value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetAllowBeneficial(THIS, bool value)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool value = (bool) SvTRUE(ST(1));
@@ -5306,7 +5306,7 @@ XS(XS_Mob_GetAllowBeneficial); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetAllowBeneficial) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetAllowBeneficial(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetAllowBeneficial(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5322,7 +5322,7 @@ XS(XS_Mob_IsBeneficialAllowed);
 XS(XS_Mob_IsBeneficialAllowed) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::IsBeneficialAllowed(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: Mob::IsBeneficialAllowed(THIS, Mob* target)"); // @categories Stats and Attributes
 	{
 		dXSTARG;
 		Mob *THIS;
@@ -5348,7 +5348,7 @@ XS(XS_Mob_ModVulnerability); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ModVulnerability) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::ModVulnerability(THIS, uint8 resist, int16 value)");
+		Perl_croak(aTHX_ "Usage: Mob::ModVulnerability(THIS, uint8 resist, int16 value)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 resist = (uint8) SvIV(ST(1));
@@ -5363,7 +5363,7 @@ XS(XS_Mob_GetModVulnerability); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetModVulnerability) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetModVulnerability(THIS, uint8 resist)");
+		Perl_croak(aTHX_ "Usage: Mob::GetModVulnerability(THIS, uint8 resist)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -5381,7 +5381,7 @@ XS(XS_Mob_DoMeleeSkillAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoMeleeSkillAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoMeleeSkillAttackDmg(THIS, Mob* target, uint16 weapon_damage, int skill, int16 chance_mod, int16 focus, uint8 can_riposte)");
+		Perl_croak(aTHX_ "Usage: Mob::DoMeleeSkillAttackDmg(THIS, Mob* target, uint16 weapon_damage, int skill, int16 chance_mod, int16 focus, uint8 can_riposte)"); // @categories Script Utility, Skills and Attributes
 	{
 		Mob *THIS;
 		Mob *target;
@@ -5408,7 +5408,7 @@ XS(XS_Mob_DoArcheryAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoArcheryAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoArcheryAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)"); // @categories Script Utility, Skills and Attributes
 	{
 		Mob                 *THIS;
 		Mob                 *target;
@@ -5435,7 +5435,7 @@ XS(XS_Mob_DoThrowingAttackDmg); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_DoThrowingAttackDmg) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)");
+		Perl_croak(aTHX_ "Usage: Mob::DoThrowingAttackDmg(THIS, Mob* target, [range_weapon_item_instance = nullptr], [ammo_item_instance = nullptr], uint16 weapon_damage, int16 chance_mod, int16 focus)"); // @categories Script Utility, Skills and Attributes
 	{
 		Mob                 *THIS;
 		Mob                 *target;
@@ -5462,7 +5462,7 @@ XS(XS_Mob_SetDisableMelee);
 XS(XS_Mob_SetDisableMelee) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetDisableMelee(THIS, bool value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetDisableMelee(THIS, bool value)"); // @categories Script Utility, Stats and Attributes
 	{
 		Mob *THIS;
 		bool value = (bool) SvTRUE(ST(1));
@@ -5476,7 +5476,7 @@ XS(XS_Mob_IsMeleeDisabled); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_IsMeleeDisabled) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsMeleeDisabled(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsMeleeDisabled(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5492,7 +5492,7 @@ XS(XS_Mob_SetFlurryChance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlurryChance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetFlurryChance(THIS, uint8 value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetFlurryChance(THIS, uint8 value)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 value = (uint8) SvIV(ST(1));
@@ -5506,7 +5506,7 @@ XS(XS_Mob_GetFlurryChance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetFlurryChance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetFlurryChance(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetFlurryChance(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -5523,7 +5523,7 @@ XS(XS_Mob_GetSpellStat); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpellStat) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpellStat(THIS, uint32 spell_id, string stat, uint8 slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpellStat(THIS, uint32 spell_id, string stat, uint8 slot)"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		int32  RETVAL;
@@ -5546,7 +5546,7 @@ XS(XS_Mob_GetSpecialAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpecialAbility) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbility(THIS, int special_ability)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbility(THIS, int special_ability)"); // @categories Stats and Attributes
 	{
 		int RETVAL;
 		Mob *THIS;
@@ -5564,7 +5564,7 @@ XS(XS_Mob_GetSpecialAbilityParam); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_GetSpecialAbilityParam) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbilityParam(THIS, int special_ability, int param)");
+		Perl_croak(aTHX_ "Usage: Mob::GetSpecialAbilityParam(THIS, int special_ability, int param)"); // @categories Stats and Attributes
 	{
 		int RETVAL;
 		Mob *THIS;
@@ -5583,7 +5583,7 @@ XS(XS_Mob_SetSpecialAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetSpecialAbility) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbility(THIS, int ability, int value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbility(THIS, int ability, int value)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int ability = SvIV(ST(1));
@@ -5598,7 +5598,7 @@ XS(XS_Mob_SetSpecialAbilityParam); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetSpecialAbilityParam) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbilityParam(THIS, int ability, int param, int value)");
+		Perl_croak(aTHX_ "Usage: Mob::SetSpecialAbilityParam(THIS, int ability, int param, int value)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int ability = SvIV(ST(1));
@@ -5614,7 +5614,7 @@ XS(XS_Mob_ClearSpecialAbilities); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ClearSpecialAbilities) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::ClearSpecialAbilities(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::ClearSpecialAbilities(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -5627,7 +5627,7 @@ XS(XS_Mob_ProcessSpecialAbilities); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ProcessSpecialAbilities) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::ProcessSpecialAbilities(THIS, string str)");
+		Perl_croak(aTHX_ "Usage: Mob::ProcessSpecialAbilities(THIS, string str)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		const char *str = (const char *) SvPV_nolen(ST(1));
@@ -5641,7 +5641,7 @@ XS(XS_Mob_CanClassEquipItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CanClassEquipItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::CanClassEquipItem(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Mob::CanClassEquipItem(THIS, uint32 item_id)"); // @categories Inventory and Items, Script Utility
 	{
 		Mob *THIS;
 		bool   RETVAL;
@@ -5658,7 +5658,7 @@ XS(XS_Mob_IsFeared);
 XS(XS_Mob_IsFeared) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsFeared(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsFeared(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5674,7 +5674,7 @@ XS(XS_Mob_IsBlind);
 XS(XS_Mob_IsBlind) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsBlind(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsBlind(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5690,7 +5690,7 @@ XS(XS_Mob_SeeInvisible);
 XS(XS_Mob_SeeInvisible) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SeeInvisible(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::SeeInvisible(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -5707,7 +5707,7 @@ XS(XS_Mob_SeeInvisibleUndead);
 XS(XS_Mob_SeeInvisibleUndead) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SeeInvisibleUndead(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::SeeInvisibleUndead(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5723,7 +5723,7 @@ XS(XS_Mob_SeeHide);
 XS(XS_Mob_SeeHide) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SeeHide(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::SeeHide(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5739,7 +5739,7 @@ XS(XS_Mob_SeeImprovedHide);
 XS(XS_Mob_SeeImprovedHide) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::SeeImprovedHide(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::SeeImprovedHide(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5755,7 +5755,7 @@ XS(XS_Mob_GetNimbusEffect1);
 XS(XS_Mob_GetNimbusEffect1) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect1(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect1(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -5772,7 +5772,7 @@ XS(XS_Mob_GetNimbusEffect2);
 XS(XS_Mob_GetNimbusEffect2) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect2(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect2(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -5789,7 +5789,7 @@ XS(XS_Mob_GetNimbusEffect3);
 XS(XS_Mob_GetNimbusEffect3) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect3(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetNimbusEffect3(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		uint8 RETVAL;
@@ -5806,7 +5806,7 @@ XS(XS_Mob_IsTargetable);
 XS(XS_Mob_IsTargetable) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsTargetable(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsTargetable(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5822,7 +5822,7 @@ XS(XS_Mob_HasShieldEquiped);
 XS(XS_Mob_HasShieldEquiped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasShieldEquiped(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasShieldEquiped(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5838,7 +5838,7 @@ XS(XS_Mob_HasTwoHandBluntEquiped);
 XS(XS_Mob_HasTwoHandBluntEquiped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasTwoHandBluntEquiped(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasTwoHandBluntEquiped(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5854,7 +5854,7 @@ XS(XS_Mob_HasTwoHanderEquipped);
 XS(XS_Mob_HasTwoHanderEquipped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasTwoHanderEquipped(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasTwoHanderEquipped(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5870,7 +5870,7 @@ XS(XS_Mob_GetHerosForgeModel);
 XS(XS_Mob_GetHerosForgeModel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetHerosForgeModel(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::GetHerosForgeModel(THIS, uint8 material_slot)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -5888,7 +5888,7 @@ XS(XS_Mob_IsEliteMaterialItem);
 XS(XS_Mob_IsEliteMaterialItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::IsEliteMaterialItem(THIS, uint8 material_slot)");
+		Perl_croak(aTHX_ "Usage: Mob::IsEliteMaterialItem(THIS, uint8 material_slot)"); // @categories Script Utility, Stats and Attributes
 	{
 		Mob *THIS;
 		uint32 RETVAL;
@@ -5906,7 +5906,7 @@ XS(XS_Mob_GetBaseSize);
 XS(XS_Mob_GetBaseSize) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBaseSize(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBaseSize(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		float RETVAL;
@@ -5923,7 +5923,7 @@ XS(XS_Mob_HasOwner);
 XS(XS_Mob_HasOwner) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasOwner(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasOwner(THIS)"); // @categories Pet
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5939,7 +5939,7 @@ XS(XS_Mob_IsPet);
 XS(XS_Mob_IsPet) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsPet(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsPet(THIS)"); // @categories Pet
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5955,7 +5955,7 @@ XS(XS_Mob_HasPet);
 XS(XS_Mob_HasPet) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::HasPet(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::HasPet(THIS)"); // @categories Pet
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5971,7 +5971,7 @@ XS(XS_Mob_IsSilenced);
 XS(XS_Mob_IsSilenced) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsSilenced(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsSilenced(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -5987,7 +5987,7 @@ XS(XS_Mob_IsAmnesiad);
 XS(XS_Mob_IsAmnesiad) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::IsAmnesiad(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::IsAmnesiad(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		bool RETVAL;
@@ -6003,7 +6003,7 @@ XS(XS_Mob_GetMeleeMitigation);
 XS(XS_Mob_GetMeleeMitigation) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetMeleeMitigation(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetMeleeMitigation(THIS)"); // @categories Stats and Attributes
 	{
 		Mob *THIS;
 		int32 RETVAL;
@@ -6020,7 +6020,7 @@ XS(XS_Mob_TryMoveAlong);
 XS(XS_Mob_TryMoveAlong) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::TryMoveAlong(THIS, float distance, float angle, bool send)");
+		Perl_croak(aTHX_ "Usage: Mob::TryMoveAlong(THIS, float distance, float angle, bool send)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		float distance = (float) SvNV(ST(1));
@@ -6075,7 +6075,7 @@ XS(XS_Mob_DeleteBucket);
 XS(XS_Mob_DeleteBucket) {
 	dXSARGS;	
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::DeleteBucket(THIS, std::string bucket_name)");
+		Perl_croak(aTHX_ "Usage: Mob::DeleteBucket(THIS, std::string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		std::string bucket_name = (std::string) SvPV_nolen(ST(1));
@@ -6089,7 +6089,7 @@ XS(XS_Mob_GetBucket);
 XS(XS_Mob_GetBucket) {
 	dXSARGS;	
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucket(THIS, std::string bucket_name)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBucket(THIS, std::string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6108,7 +6108,7 @@ XS(XS_Mob_GetBucketExpires);
 XS(XS_Mob_GetBucketExpires) {
 	dXSARGS;	
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucketExpires(THIS, std::string bucket_name)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketExpires(THIS, std::string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6127,7 +6127,7 @@ XS(XS_Mob_GetBucketKey);
 XS(XS_Mob_GetBucketKey) {
 	dXSARGS;	
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucketKey(THIS)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketKey(THIS)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6145,7 +6145,7 @@ XS(XS_Mob_GetBucketRemaining);
 XS(XS_Mob_GetBucketRemaining) {
 	dXSARGS;	
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::GetBucketRemaining(THIS, std::string bucket_name)");
+		Perl_croak(aTHX_ "Usage: Mob::GetBucketRemaining(THIS, std::string bucket_name)"); // @categories Script Utility
 	{
 		Mob* THIS;
 		dXSTARG;
@@ -6164,7 +6164,7 @@ XS(XS_Mob_SetBucket);
 XS(XS_Mob_SetBucket) {
 	dXSARGS;	
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, std::string bucket_name, std::string bucket_value, [std::string expiration])");
+		Perl_croak(aTHX_ "Usage: Mob::SetBucket(THIS, std::string bucket_name, std::string bucket_value, [std::string expiration])"); // @categories Script Utility
 	{
 		Mob* THIS;
 		std::string key = (std::string) SvPV_nolen(ST(1));
