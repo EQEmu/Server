@@ -22,6 +22,7 @@
 #include "../database.h"
 #include "../rulesys.h"
 #include "../eqemu_logsys.h"
+#include "../repositories/content_flags_repository.h"
 
 
 WorldContentService::WorldContentService()
@@ -98,4 +99,22 @@ bool WorldContentService::IsContentFlagEnabled(const std::string& content_flag)
 	}
 
 	return false;
+}
+
+void WorldContentService::ReloadContentFlags(Database &db)
+{
+	std::vector<std::string> set_content_flags;
+	auto                     content_flags = ContentFlagsRepository::GetWhere(db, "enabled = 1");
+
+	set_content_flags.reserve(content_flags.size());
+	for (auto &flags: content_flags) {
+		set_content_flags.push_back(flags.flag_name);
+	}
+
+	LogInfo(
+		"Enabled content flags [{}]",
+		implode(", ", set_content_flags)
+	);
+
+	SetContentFlags(set_content_flags);
 }

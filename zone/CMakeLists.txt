@@ -152,6 +152,7 @@ SET(zone_sources
 	zone.cpp
 	zone_config.cpp
 	zonedb.cpp
+	zone_event_scheduler.cpp
 	zone_reload.cpp
 	zone_store.cpp
 	zoning.cpp)
@@ -265,6 +266,7 @@ SET(zone_headers
 	worldserver.h
 	xtargetautohaters.h
 	zone.h
+	zone_event_scheduler.h
 	zone_config.h
 	zonedb.h
 	zonedump.h

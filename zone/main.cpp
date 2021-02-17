@@ -78,6 +78,7 @@
 #include <pthread.h>
 #include "../common/unix.h"
 #include "zone_store.h"
+#include "zone_event_scheduler.h"
 
 #endif
 
@@ -100,8 +101,9 @@ QueryServ *QServ          = 0;
 TaskManager *task_manager = 0;
 NpcScaleManager *npc_scale_manager;
 QuestParserCollection *parse = 0;
-EQEmuLogSys LogSys;
-WorldContentService content_service;
+EQEmuLogSys          LogSys;
+ZoneEventScheduler event_scheduler;
+WorldContentService  content_service;
 const SPDat_Spell_Struct* spells;
 int32 SPDAT_RECORDS = -1;
 const ZoneConfig *Config;
@@ -387,6 +389,8 @@ int main(int argc, char** argv) {
 
 	ZoneStore::LoadContentFlags();
 
+	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+
 #ifdef BOTS
 	LogInfo("Loading bot commands");
 	int botretval = bot_command_init();
@@ -430,6 +434,7 @@ int main(int argc, char** argv) {
 	parse->ReloadQuests();
 
 	worldserver.Connect();
+	worldserver.SetScheduler(&event_scheduler);
 
 	Timer InterserverTimer(INTERSERVER_TIMER); // does MySQL pings and auto-reconnect
 #ifdef EQPROFILE
@@ -541,11 +546,11 @@ int main(int argc, char** argv) {
 				entity_list.CorpseProcess();
 				entity_list.TrapProcess();
 				entity_list.RaidProcess();
-
 				entity_list.Process();
 				entity_list.MobProcess();
 				entity_list.BeaconProcess();
 				entity_list.EncounterProcess();
+				event_scheduler.Process(zone, &content_service);
 
 				if (zone) {
 					if (!zone->Process()) {

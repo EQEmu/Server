@@ -23,6 +23,7 @@
 
 #include <string>
 #include <vector>
+#include "../database.h"
 
 namespace Expansion {
 	static const int EXPANSION_ALL        = -1;
@@ -165,6 +166,7 @@ public:
 	const std::vector<std::string> &GetContentFlags() const;
 	bool IsContentFlagEnabled(const std::string& content_flag);
 	void SetContentFlags(std::vector<std::string> content_flags);
+	void ReloadContentFlags(Database &db);
 	void SetExpansionContext();
 };
 

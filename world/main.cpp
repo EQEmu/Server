@@ -97,6 +97,7 @@ union semun {
 #include "../common/content/world_content_service.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
 #include "world_store.h"
+#include "world_event_scheduler.h"
 
 WorldStore world_store;
 ClientList client_list;
@@ -107,6 +108,7 @@ UCSConnection UCSLink;
 QueryServConnection QSLink;
 LauncherList launcher_list;
 AdventureManager adventure_manager;
+WorldEventScheduler event_scheduler;
 EQ::Random emu_random;
 volatile bool RunLoops = true;
 uint32 numclients = 0;
@@ -442,6 +444,8 @@ int main(int argc, char** argv) {
 	content_db.LoadCharacterCreateAllocations();
 	content_db.LoadCharacterCreateCombos();
 
+	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		LogInfo("Console (TCP) listener started");
@@ -602,6 +606,8 @@ int main(int argc, char** argv) {
 				client_list.Add(client);
 			}
 		}
+
+		event_scheduler.Process(&zoneserver_list);
 
 		client_list.Process();
 

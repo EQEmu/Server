@@ -25,6 +25,7 @@ SET(world_sources
 	web_interface.cpp
 	web_interface_eqw.cpp
 	wguild_mgr.cpp
+	world_event_scheduler.cpp
 	world_config.cpp
 	world_console_connection.cpp
 	world_server_command_handler.cpp
@@ -65,6 +66,7 @@ SET(world_headers
 	world_tcp_connection.h
 	world_server_command_handler.h
 	worlddb.h
+	world_event_scheduler.h
 	world_store.h
 	zonelist.h
 	zoneserver.h
