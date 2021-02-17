@@ -65,9 +65,6 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 			}
 		}
 
-		// clear list
-		// m_active_events.clear();
-
 		// check for active
 		for (auto &e: m_events) {
 
