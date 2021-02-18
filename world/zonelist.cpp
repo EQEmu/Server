@@ -42,8 +42,8 @@ ZSList::ZSList()
 	CurGroupID = 1;
 	memset(pLockedZones, 0, sizeof(pLockedZones));
 
-	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
-	m_keepalive.reset(new EQ::Timer(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1)));
+	m_tick = std::make_unique<EQ::Timer>(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1));
 }
 
 ZSList::~ZSList() {
