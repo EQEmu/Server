@@ -928,8 +928,8 @@ bool SharedDatabase::LoadItems(const std::string &prefix) {
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("items");
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
-		items_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
-		items_hash = std::unique_ptr<EQ::FixedMemoryHashSet<EQ::ItemData>>(new EQ::FixedMemoryHashSet<EQ::ItemData>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size()));
+		items_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
+		items_hash = std::make_unique<EQ::FixedMemoryHashSet<EQ::ItemData>>(reinterpret_cast<uint8*>(items_mmf->Get()), items_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading Items: {}", ex.what());
@@ -1353,8 +1353,8 @@ bool SharedDatabase::LoadNPCFactionLists(const std::string &prefix) {
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("faction");
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
-		faction_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
-		faction_hash = std::unique_ptr<EQ::FixedMemoryHashSet<NPCFactionList>>(new EQ::FixedMemoryHashSet<NPCFactionList>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size()));
+		faction_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
+		faction_hash = std::make_unique<EQ::FixedMemoryHashSet<NPCFactionList>>(reinterpret_cast<uint8*>(faction_mmf->Get()), faction_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading npc factions: {}", ex.what());
@@ -1555,7 +1555,7 @@ bool SharedDatabase::LoadSkillCaps(const std::string &prefix) {
 		mutex.Lock();
 		std::string file_name = Config->SharedMemDir + prefix + std::string("skill_caps");
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
-		skill_caps_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
+		skill_caps_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		LogError("Error loading skill caps: {}", ex.what());
@@ -1712,7 +1712,7 @@ bool SharedDatabase::LoadSpells(const std::string &prefix, int32 *records, const
 		mutex.Lock();
 
 		std::string file_name = Config->SharedMemDir + prefix + std::string("spells");
-		spells_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
+		spells_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		LogInfo("[Shared Memory] Attempting to load file [{}]", file_name);
 		*records = *reinterpret_cast<uint32*>(spells_mmf->Get());
 		*sp = reinterpret_cast<const SPDat_Spell_Struct*>((char*)spells_mmf->Get() + 4);
@@ -1920,7 +1920,7 @@ bool SharedDatabase::LoadBaseData(const std::string &prefix) {
 		mutex.Lock();
 
 		std::string file_name = Config->SharedMemDir + prefix + std::string("base_data");
-		base_data_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name));
+		base_data_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name);
 		mutex.Unlock();
 	} catch(std::exception& ex) {
 		LogError("Error Loading Base Data: {}", ex.what());
@@ -2223,15 +2223,15 @@ bool SharedDatabase::LoadLoot(const std::string &prefix) {
 		EQ::IPCMutex mutex("loot");
 		mutex.Lock();
 		std::string file_name_lt = Config->SharedMemDir + prefix + std::string("loot_table");
-		loot_table_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name_lt));
-		loot_table_hash = std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(new EQ::FixedMemoryVariableHashSet<LootTable_Struct>(
+		loot_table_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_lt);
+		loot_table_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootTable_Struct>>(
 			reinterpret_cast<uint8*>(loot_table_mmf->Get()),
-			loot_table_mmf->Size()));
+			loot_table_mmf->Size());
 		std::string file_name_ld = Config->SharedMemDir + prefix + std::string("loot_drop");
-		loot_drop_mmf = std::unique_ptr<EQ::MemoryMappedFile>(new EQ::MemoryMappedFile(file_name_ld));
-		loot_drop_hash = std::unique_ptr<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(new EQ::FixedMemoryVariableHashSet<LootDrop_Struct>(
+		loot_drop_mmf = std::make_unique<EQ::MemoryMappedFile>(file_name_ld);
+		loot_drop_hash = std::make_unique<EQ::FixedMemoryVariableHashSet<LootDrop_Struct>>(
 			reinterpret_cast<uint8*>(loot_drop_mmf->Get()),
-			loot_drop_mmf->Size()));
+			loot_drop_mmf->Size());
 		mutex.Unlock();
 	} catch(std::exception &ex) {
 		LogError("Error loading loot: {}", ex.what());
