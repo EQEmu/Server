@@ -342,7 +342,7 @@ bool LoginServer::Connect()
 	}
 
 	if (IsLegacy) {
-		legacy_client.reset(new EQ::Net::ServertalkLegacyClient(LoginServerAddress, LoginServerPort, false));
+		legacy_client = std::make_unique<EQ::Net::ServertalkLegacyClient>(LoginServerAddress, LoginServerPort, false);
 		legacy_client->OnConnect(
 			[this](EQ::Net::ServertalkLegacyClient *client) {
 				if (client) {
@@ -356,12 +356,12 @@ bool LoginServer::Connect()
 					SendStatus();
 					zoneserver_list.SendLSZones();
 
-					statusupdate_timer.reset(
-						new EQ::Timer(
+					statusupdate_timer = std::make_unique<EQ::Timer>(
+
 							LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
 								SendStatus();
 							}
-						)
+
 					);
 				}
 				else {
@@ -448,7 +448,7 @@ bool LoginServer::Connect()
 		);
 	}
 	else {
-		client.reset(new EQ::Net::ServertalkClient(LoginServerAddress, LoginServerPort, false, "World", ""));
+		client = std::make_unique<EQ::Net::ServertalkClient>(LoginServerAddress, LoginServerPort, false, "World", "");
 		client->OnConnect(
 			[this](EQ::Net::ServertalkClient *client) {
 				if (client) {
@@ -461,12 +461,12 @@ bool LoginServer::Connect()
 					SendStatus();
 					zoneserver_list.SendLSZones();
 
-					statusupdate_timer.reset(
-						new EQ::Timer(
+					statusupdate_timer = std::make_unique<EQ::Timer>(
+
 							LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
 								SendStatus();
 							}
-						));
+						);
 				}
 				else {
 					LogInfo(
@@ -552,7 +552,7 @@ bool LoginServer::Connect()
 		);
 	}
 
-	m_keepalive.reset(new EQ::Timer(5000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1)));
+	m_keepalive = std::make_unique<EQ::Timer>(5000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
 
 	return true;
 }
