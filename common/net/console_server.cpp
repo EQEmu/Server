@@ -4,7 +4,7 @@
 
 EQ::Net::ConsoleServer::ConsoleServer(const std::string &addr, int port)
 {
-	m_server.reset(new EQ::Net::TCPServer());
+	m_server = std::make_unique<EQ::Net::TCPServer>();
 	m_server->Listen(addr, port, false, [this](std::shared_ptr<EQ::Net::TCPConnection> connection) {
 		ConsoleServerConnection *c = new ConsoleServerConnection(this, connection);
 		m_connections.insert(std::make_pair(c->GetUUID(), std::unique_ptr<ConsoleServerConnection>(c)));
