@@ -679,7 +679,7 @@ struct MobMovementManager::Implementation {
 
 MobMovementManager::MobMovementManager()
 {
-	_impl.reset(new Implementation());
+	_impl = std::make_unique<Implementation>();
 }
 
 MobMovementManager::~MobMovementManager()
