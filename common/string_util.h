@@ -178,6 +178,7 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 }
 
 std::vector<std::string> SplitString(const std::string &s, char delim);
+std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);
 bool StringIsNumber(const std::string &s);

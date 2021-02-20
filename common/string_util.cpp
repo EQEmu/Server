@@ -125,6 +125,19 @@ std::vector<std::string> SplitString(const std::string &str, char delim) {
 	return ret;
 }
 
+std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator)
+{
+	// this shouldn't go out of bounds, even without obvious bounds checks
+	auto pos = haystack.find(needle);
+	while (pos != std::string::npos) {
+		auto c = haystack[pos + needle.length()];
+		if ((c == '\0' || c == deliminator) && (pos == 0 || haystack[pos - 1] == deliminator))
+			return pos;
+		pos = haystack.find(needle, pos + needle.length());
+	}
+	return std::string::npos;
+}
+
 std::string implode(std::string glue, std::vector<std::string> src)
 {
 	if (src.empty()) {
