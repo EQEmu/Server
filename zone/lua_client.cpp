@@ -1864,6 +1864,7 @@ Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
 
 	// luabind will catch thrown cast_failed exceptions for invalid/missing args
 	luabind::object instance_info = expedition_table["instance"];
+	luabind::object expedition_info = expedition_table["expedition"];
 	luabind::object zone = instance_info["zone"];
 
 	uint32_t zone_id = 0;
@@ -1880,6 +1881,9 @@ Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
 	uint32_t zone_duration = luabind::object_cast<uint32_t>(instance_info["duration"]);
 
 	DynamicZone dz{ zone_id, zone_version, zone_duration, DynamicZoneType::Expedition };
+	dz.SetName(luabind::object_cast<std::string>(expedition_info["name"]));
+	dz.SetMinPlayers(luabind::object_cast<uint32_t>(expedition_info["min_players"]));
+	dz.SetMaxPlayers(luabind::object_cast<uint32_t>(expedition_info["max_players"]));
 
 	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
 	if (luabind::type(expedition_table["compass"]) == LUA_TTABLE)
@@ -1900,21 +1904,13 @@ Lua_Expedition Lua_Client::CreateExpedition(luabind::object expedition_table) {
 		dz.SetZoneInLocation(zonein_loc);
 	}
 
-	luabind::object expedition_info = expedition_table["expedition"];
-
-	std::string expedition_name = luabind::object_cast<std::string>(expedition_info["name"]);
-	uint32_t min_players        = luabind::object_cast<uint32_t>(expedition_info["min_players"]);
-	uint32_t max_players        = luabind::object_cast<uint32_t>(expedition_info["max_players"]);
-	bool disable_messages       = false;
-
+	bool disable_messages = false;
 	if (luabind::type(expedition_info["disable_messages"]) == LUA_TBOOLEAN)
 	{
 		disable_messages = luabind::object_cast<bool>(expedition_info["disable_messages"]);
 	}
 
-	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
-
-	return self->CreateExpedition(dz, request);
+	return self->CreateExpedition(dz, disable_messages);
 }
 
 Lua_Expedition Lua_Client::CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players) {

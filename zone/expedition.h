@@ -54,7 +54,7 @@ public:
 	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
 		const DynamicZoneMember& leader);
 
-	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
+	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);
 
 	static void CacheFromDatabase(uint32_t expedition_id);
 	static bool CacheAllFromDatabase();

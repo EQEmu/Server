@@ -58,19 +58,17 @@ Expedition::Expedition(
 
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
-	dz.SetName(GetName());
-	dz.SetLeader(GetLeader());
-
 	m_dynamiczone = std::move(dz);
 }
 
-Expedition* Expedition::TryCreate(
-	Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request)
+Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages)
 {
 	if (!requester || !zone)
 	{
 		return nullptr;
 	}
+
+	ExpeditionRequest request{ dynamiczone, disable_messages };
 
 	// request parses leader, members list, and lockouts while validating
 	if (!request.Validate(requester))
@@ -79,8 +77,7 @@ Expedition* Expedition::TryCreate(
 		return nullptr;
 	}
 
-	dynamiczone.SetMinPlayers(request.GetMinPlayers());
-	dynamiczone.SetMaxPlayers(request.GetMaxPlayers());
+	dynamiczone.SetLeader({ request.GetLeaderID(), request.GetLeaderName(), DynamicZoneMemberStatus::Online });
 
 	auto dynamic_zone_id = dynamiczone.Create();
 	if (dynamic_zone_id == 0)
@@ -210,6 +207,9 @@ void Expedition::CacheExpeditions(
 		// stored on expedition in db but on dz in memory cache
 		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
 		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
+
+		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
+		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
 
 		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
 

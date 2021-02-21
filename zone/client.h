@@ -1338,9 +1338,9 @@ public:
 		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
 	void AddNewExpeditionLockout(const std::string& expedition_name,
 		const std::string& event_name, uint32_t duration, std::string uuid = {});
-	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
-	Expedition* CreateExpedition(
-		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
+	Expedition* CreateExpedition(DynamicZone& dz, bool disable_messages = false);
+	Expedition* CreateExpedition(const std::string& zone_name,
+		uint32 version, uint32 duration, const std::string& expedition_name,
 		uint32 min_players, uint32 max_players, bool disable_messages = false);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }

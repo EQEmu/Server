@@ -9556,18 +9556,21 @@ void Client::UpdateExpeditionInfoAndLockouts()
 	RequestPendingExpeditionInvite();
 }
 
-Expedition* Client::CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request)
+Expedition* Client::CreateExpedition(DynamicZone& dz, bool disable_messages)
 {
-	return Expedition::TryCreate(this, dz_instance, request);
+	return Expedition::TryCreate(this, dz, disable_messages);
 }
 
 Expedition* Client::CreateExpedition(
 	const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
 	uint32 min_players, uint32 max_players, bool disable_messages)
 {
-	DynamicZone dz_instance{ ZoneID(zone_name), version, duration, DynamicZoneType::Expedition };
-	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
-	return Expedition::TryCreate(this, dz_instance, request);
+	DynamicZone dz{ ZoneID(zone_name), version, duration, DynamicZoneType::Expedition };
+	dz.SetName(expedition_name);
+	dz.SetMinPlayers(min_players);
+	dz.SetMaxPlayers(max_players);
+
+	return Expedition::TryCreate(this, dz, disable_messages);
 }
 
 Expedition* Client::GetExpedition() const
