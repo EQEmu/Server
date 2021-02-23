@@ -60,7 +60,7 @@ XS(XS_EntityList_GetMobID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetMobID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetMobID(THIS, id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
@@ -94,7 +94,7 @@ XS(XS_EntityList_GetMobByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetMobByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetMobByID(THIS, id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
@@ -111,7 +111,7 @@ XS(XS_EntityList_GetMobByNpcTypeID); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_GetMobByNpcTypeID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobByNpcTypeID(THIS, get_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetMobByNpcTypeID(THIS, get_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *RETVAL;
@@ -128,7 +128,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID); /* prototype pass -Wmissing-prototype
 XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::ValidMobByNpcTypeID(THIS, get_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::ValidMobByNpcTypeID(THIS, get_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -145,7 +145,7 @@ XS(XS_EntityList_GetNPCByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetNPCByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByID(THIS, id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		NPC        *RETVAL;
@@ -162,7 +162,7 @@ XS(XS_EntityList_GetNPCByNPCTypeID); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_GetNPCByNPCTypeID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByNPCTypeID(THIS, npc_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetNPCByNPCTypeID(THIS, npc_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		NPC        *RETVAL;
@@ -179,7 +179,7 @@ XS(XS_EntityList_GetNPCBySpawnID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetNPCBySpawnID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCBySpawnID(THIS, spawn_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetNPCBySpawnID(THIS, spawn_id)"); // @categories Script Utility, Spawns
 	{
 		EntityList *THIS;
 		NPC 	   *RETVAL;
@@ -196,7 +196,7 @@ XS(XS_EntityList_GetClientByName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetClientByName) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByName(THIS, name)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByName(THIS, name)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
@@ -213,7 +213,7 @@ XS(XS_EntityList_GetClientByAccID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetClientByAccID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, uint32 account_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByAccID(THIS, uint32 account_id)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
@@ -230,7 +230,7 @@ XS(XS_EntityList_GetClientByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetClientByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, uint16 client_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByID(THIS, uint16 client_id)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
@@ -247,7 +247,7 @@ XS(XS_EntityList_GetClientByCharID); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_GetClientByCharID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, uint32 character_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByCharID(THIS, uint32 character_id)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
@@ -264,7 +264,7 @@ XS(XS_EntityList_GetClientByWID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetClientByWID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, uint32 wid)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientByWID(THIS, uint32 wid)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL;
@@ -281,7 +281,7 @@ XS(XS_EntityList_GetObjectByDBID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetObjectByDBID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByDBID(THIS, uint32 database_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByDBID(THIS, uint32 database_id)"); // @categories Script Utility, Objects
 	{
 		EntityList *THIS;
 		Object     *RETVAL;
@@ -298,7 +298,7 @@ XS(XS_EntityList_GetObjectByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetObjectByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByID(THIS, uint32 entity_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetObjectByID(THIS, uint32 entity_id)"); // @categories Script Utility, Objects
 	{
 		EntityList *THIS;
 		Object     *RETVAL;
@@ -315,7 +315,7 @@ XS(XS_EntityList_GetDoorsByDBID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetDoorsByDBID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, uint32 database_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDBID(THIS, uint32 database_id)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
@@ -332,7 +332,7 @@ XS(XS_EntityList_GetDoorsByDoorID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetDoorsByDoorID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, uint32 door_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByDoorID(THIS, uint32 door_id)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
@@ -349,7 +349,7 @@ XS(XS_EntityList_GetDoorsByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetDoorsByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, uint32 entity_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsByID(THIS, uint32 entity_id)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
@@ -366,7 +366,7 @@ XS(XS_EntityList_FindDoor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_FindDoor) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, uint32 door_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::FindDoor(THIS, uint32 door_id)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		Doors      *RETVAL;
@@ -383,7 +383,7 @@ XS(XS_EntityList_GetGroupByMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetGroupByMob) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByMob(THIS, Mob* mob)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByMob(THIS, Mob* mob)"); // @categories Account and Character, Script Utility, Group
 	{
 		EntityList *THIS;
 		Group      *RETVAL;
@@ -408,7 +408,7 @@ XS(XS_EntityList_GetGroupByClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetGroupByClient) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByClient(THIS, Client* client)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByClient(THIS, Client* client)"); // @categories Account and Character, Script Utility, Group
 	{
 		EntityList *THIS;
 		Group      *RETVAL;
@@ -433,7 +433,7 @@ XS(XS_EntityList_GetGroupByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetGroupByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByID(THIS, id)"); // @categories Account and Character, Script Utility, Group
 	{
 		EntityList *THIS;
 		Group      *RETVAL;
@@ -450,7 +450,7 @@ XS(XS_EntityList_GetGroupByLeaderName); /* prototype to pass -Wmissing-prototype
 XS(XS_EntityList_GetGroupByLeaderName) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByLeaderName(THIS, leader)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetGroupByLeaderName(THIS, leader)"); // @categories Account and Character, Script Utility, Group
 	{
 		EntityList *THIS;
 		Group      *RETVAL;
@@ -467,7 +467,7 @@ XS(XS_EntityList_GetRaidByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetRaidByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByID(THIS, id)"); // @categories Script Utility, Raid
 	{
 		EntityList *THIS;
 		Raid       *RETVAL;
@@ -484,7 +484,7 @@ XS(XS_EntityList_GetRaidByClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetRaidByClient) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByClient(THIS, client)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRaidByClient(THIS, client)"); // @categories Account and Character, Script Utility, Raid
 	{
 		EntityList *THIS;
 		Raid       *RETVAL;
@@ -509,7 +509,7 @@ XS(XS_EntityList_GetCorpseByOwner); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetCorpseByOwner) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByOwner(THIS, client)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByOwner(THIS, client)"); // @categories Script Utility, Corpse
 	{
 		EntityList *THIS;
 		Corpse     *RETVAL;
@@ -534,7 +534,7 @@ XS(XS_EntityList_GetCorpseByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetCorpseByID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByID(THIS, id)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByID(THIS, id)"); // @categories Script Utility, Corpse
 	{
 		EntityList *THIS;
 		Corpse     *RETVAL;
@@ -551,7 +551,7 @@ XS(XS_EntityList_GetCorpseByName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetCorpseByName) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByName(THIS, name)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseByName(THIS, name)"); // @categories Script Utility, Corpse
 	{
 		EntityList *THIS;
 		Corpse     *RETVAL;
@@ -568,7 +568,7 @@ XS(XS_EntityList_ClearClientPetitionQueue); /* prototype to pass -Wmissing-proto
 XS(XS_EntityList_ClearClientPetitionQueue) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearClientPetitionQueue(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::ClearClientPetitionQueue(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -581,7 +581,7 @@ XS(XS_EntityList_CanAddHateForMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_CanAddHateForMob) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: EntityList::CanAddHateForMob(THIS, Mob* target)"); // @categories Script Utility, Hate and Aggro
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -606,7 +606,7 @@ XS(XS_EntityList_Clear); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_Clear) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::Clear(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::Clear(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -619,7 +619,7 @@ XS(XS_EntityList_RemoveMob); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveMob) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveMob(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveMob(THIS, delete_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -636,7 +636,7 @@ XS(XS_EntityList_RemoveClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveClient) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveClient(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveClient(THIS, delete_id)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -653,7 +653,7 @@ XS(XS_EntityList_RemoveNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveNPC) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveNPC(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveNPC(THIS, delete_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -670,7 +670,7 @@ XS(XS_EntityList_RemoveGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveGroup(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveGroup(THIS, delete_id)"); // @categories Script Utility, Group
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -687,7 +687,7 @@ XS(XS_EntityList_RemoveCorpse); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveCorpse) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveCorpse(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveCorpse(THIS, delete_id)"); // @categories Corpse
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -704,7 +704,7 @@ XS(XS_EntityList_RemoveDoor); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveDoor) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveDoor(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveDoor(THIS, delete_id)"); // @categories Doors
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -721,7 +721,7 @@ XS(XS_EntityList_RemoveTrap); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveTrap) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveTrap(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveTrap(THIS, delete_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -738,7 +738,7 @@ XS(XS_EntityList_RemoveObject); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveObject) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveObject(THIS, delete_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveObject(THIS, delete_id)"); // @categories Script Utility, Objects
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -755,7 +755,7 @@ XS(XS_EntityList_RemoveAllMobs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllMobs) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllMobs(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllMobs(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -768,7 +768,7 @@ XS(XS_EntityList_RemoveAllClients); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllClients) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllClients(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllClients(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -781,7 +781,7 @@ XS(XS_EntityList_RemoveAllNPCs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllNPCs) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllNPCs(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllNPCs(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -794,7 +794,7 @@ XS(XS_EntityList_RemoveAllGroups); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllGroups) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllGroups(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllGroups(THIS)"); // @categories Group
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -807,7 +807,7 @@ XS(XS_EntityList_RemoveAllCorpses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllCorpses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllCorpses(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllCorpses(THIS)"); // @categories Corpse
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -820,7 +820,7 @@ XS(XS_EntityList_RemoveAllDoors); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllDoors) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllDoors(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllDoors(THIS)"); // @categories Doors
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -833,7 +833,7 @@ XS(XS_EntityList_RemoveAllTraps); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllTraps) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllTraps(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllTraps(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -846,7 +846,7 @@ XS(XS_EntityList_RemoveAllObjects); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveAllObjects) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllObjects(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveAllObjects(THIS)"); // @categories Objects
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -859,7 +859,7 @@ XS(XS_EntityList_Message); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_Message) {
 	dXSARGS;
 	if (items < 4)
-		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::Message(THIS, uint32 guild_id, uint32 emote_color_type, string message)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		uint32     to_guilddbid = (uint32) SvUV(ST(1));
@@ -875,7 +875,7 @@ XS(XS_EntityList_MessageStatus); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MessageStatus) {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageStatus(THIS, uint32 guild_id, uint32 emote_color_type, string message)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		uint32     to_guilddbid = (uint32) SvUV(ST(1));
@@ -918,7 +918,7 @@ XS(XS_EntityList_RemoveFromTargets); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_RemoveFromTargets) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromTargets(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromTargets(THIS, Mob* target)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *mob;
@@ -940,7 +940,7 @@ XS(XS_EntityList_ReplaceWithTarget); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_ReplaceWithTarget) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::ReplaceWithTarget(THIS, Mob* old_mob, Mob* new_target)");
+		Perl_croak(aTHX_ "Usage: EntityList::ReplaceWithTarget(THIS, Mob* old_mob, Mob* new_target)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *pOldMob;
@@ -971,7 +971,7 @@ XS(XS_EntityList_OpenDoorsNear); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_OpenDoorsNear) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, NPC* opener)");
+		Perl_croak(aTHX_ "Usage: EntityList::OpenDoorsNear(THIS, NPC* opener)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		Mob        *opener;
@@ -993,7 +993,7 @@ XS(XS_EntityList_MakeNameUnique); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MakeNameUnique) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::MakeNameUnique(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: EntityList::MakeNameUnique(THIS, string name)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		char       *RETVAL;
@@ -1030,7 +1030,7 @@ XS(XS_EntityList_SignalMobsByNPCID); /* prototype to pass -Wmissing-prototypes *
 XS(XS_EntityList_SignalMobsByNPCID) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, uint32 npc_type_id, int signal_id)");
+		Perl_croak(aTHX_ "Usage: EntityList::SignalMobsByNPCID(THIS, uint32 npc_type_id, int signal_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		uint32     npc_type  = (uint32) SvUV(ST(1));
@@ -1045,7 +1045,7 @@ XS(XS_EntityList_RemoveEntity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_RemoveEntity) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, uint16 id)");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveEntity(THIS, uint16 id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		uint16     id = (uint16) SvUV(ST(1));
@@ -1059,7 +1059,7 @@ XS(XS_EntityList_DeleteNPCCorpses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_DeleteNPCCorpses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::DeleteNPCCorpses(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::DeleteNPCCorpses(THIS)"); // @categories Corpse
 	{
 		EntityList *THIS;
 		int32      RETVAL;
@@ -1076,7 +1076,7 @@ XS(XS_EntityList_DeletePlayerCorpses); /* prototype to pass -Wmissing-prototypes
 XS(XS_EntityList_DeletePlayerCorpses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::DeletePlayerCorpses(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::DeletePlayerCorpses(THIS)"); // @categories Account and Character, Corpse
 	{
 		EntityList *THIS;
 		int32      RETVAL;
@@ -1093,7 +1093,7 @@ XS(XS_EntityList_HalveAggro); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_HalveAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::HalveAggro(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: EntityList::HalveAggro(THIS, Mob* target)"); // @categories Script Utility, Hate and Aggro
 	{
 		EntityList *THIS;
 		Mob        *who;
@@ -1115,7 +1115,7 @@ XS(XS_EntityList_DoubleAggro); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_DoubleAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::DoubleAggro(THIS, *Mob target)");
+		Perl_croak(aTHX_ "Usage: EntityList::DoubleAggro(THIS, *Mob target)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *who;
@@ -1137,7 +1137,7 @@ XS(XS_EntityList_ClearFeignAggro); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_ClearFeignAggro) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::ClearFeignAggro(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: EntityList::ClearFeignAggro(THIS, Mob* target)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		Mob        *targ;
@@ -1159,7 +1159,7 @@ XS(XS_EntityList_Fighting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_Fighting) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: EntityList::Fighting(THIS, Mob* target)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
@@ -1184,7 +1184,7 @@ XS(XS_EntityList_RemoveFromHateLists); /* prototype to pass -Wmissing-prototypes
 XS(XS_EntityList_RemoveFromHateLists) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromHateLists(THIS, Mob* mob, [bool set_to_one = false])");
+		Perl_croak(aTHX_ "Usage: EntityList::RemoveFromHateLists(THIS, Mob* mob, [bool set_to_one = false])"); // @categories Script Utility, Hate and Aggro
 	{
 		EntityList *THIS;
 		Mob        *mob;
@@ -1213,7 +1213,7 @@ XS(XS_EntityList_MessageGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_MessageGroup) {
 	dXSARGS;
 	if (items < 5)
-		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)");
+		Perl_croak(aTHX_ "Usage: EntityList::MessageGroup(THIS, Mob* sender, bool skip_close, uint32 emote_color_type, string message)"); // @categories Script Utility, Group
 	{
 		EntityList *THIS;
 		Mob        *sender;
@@ -1238,7 +1238,7 @@ XS(XS_EntityList_GetRandomClient); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetRandomClient) {
 	dXSARGS;
 	if ((items < 5) || (items > 6))
-		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])");
+		Perl_croak(aTHX_ "Usage: EntityList::GetRandomClient(THIS, float x, float y, float z, float distance, [Client* exclude_client = nullptr])"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		Client     *RETVAL, *c = nullptr;
@@ -1265,7 +1265,7 @@ XS(XS_EntityList_GetMobList) {
 	dXSARGS;
 	int num_mobs = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetMobList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetMobList(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1290,7 +1290,7 @@ XS(XS_EntityList_GetClientList) {
 	dXSARGS;
 	int num_clients = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetClientList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetClientList(THIS)"); // @categories Account and Character, Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1315,7 +1315,7 @@ XS(XS_EntityList_GetNPCList) {
 	dXSARGS;
 	int num_npcs = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetNPCList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetNPCList(THIS)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1340,7 +1340,7 @@ XS(XS_EntityList_GetCorpseList) {
 	dXSARGS;
 	int num_corpses = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetCorpseList(THIS)"); // @categories Script Utility, Corpse
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1365,7 +1365,7 @@ XS(XS_EntityList_GetObjectList) {
 	dXSARGS;
 	int num_objects = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetObjectList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetObjectList(THIS)"); // @categories Script Utility, Objects
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1390,7 +1390,7 @@ XS(XS_EntityList_GetDoorsList) {
 	dXSARGS;
 	int num_objects = 0;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsList(THIS)");
+		Perl_croak(aTHX_ "Usage: EntityList::GetDoorsList(THIS)"); // @categories Script Utility, Doors
 	{
 		EntityList *THIS;
 		VALIDATE_THIS_IS_ENTITY;
@@ -1414,7 +1414,7 @@ XS(XS_EntityList_SignalAllClients); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_SignalAllClients) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::SignalAllClients(THIS, uint32 data)");
+		Perl_croak(aTHX_ "Usage: EntityList::SignalAllClients(THIS, uint32 data)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		uint32     data = (uint32) SvUV(ST(1));
