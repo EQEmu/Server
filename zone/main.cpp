@@ -260,12 +260,6 @@ int main(int argc, char** argv) {
 	guild_mgr.SetDatabase(&database);
 	GuildBanks = nullptr;
 
-	/**
-	 * NPC Scale Manager
-	 */
-	npc_scale_manager = new NpcScaleManager;
-	npc_scale_manager->LoadScaleData();
-
 #ifdef _EQDEBUG
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 #endif
@@ -405,6 +399,12 @@ int main(int argc, char** argv) {
 	if (!database.botdb.LoadBotSpellCastingChances())
 		LogError("Bot spell casting chances loading failed");
 #endif
+
+	/**
+	 * NPC Scale Manager
+	 */
+	npc_scale_manager = new NpcScaleManager;
+	npc_scale_manager->LoadScaleData();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
 		task_manager = new TaskManager;
@@ -588,6 +588,7 @@ int main(int argc, char** argv) {
 		Zone::Shutdown(true);
 	//Fix for Linux world server problem.
 	safe_delete(task_manager);
+	safe_delete(npc_scale_manager);
 	command_deinit();
 #ifdef BOTS
 	bot_command_deinit();
