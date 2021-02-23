@@ -2489,7 +2489,7 @@ create table npc_spells_entries (
 	);
 */
 
-bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID);
+bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
@@ -2761,14 +2761,14 @@ bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSp
 	return false;
 }
 
-bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
+bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID) {
 	auto it = std::find_if(spell_list->entries.begin(), spell_list->entries.end(),
 			       [iSpellID](const DBnpcspells_entries_Struct &a) { return a.spellid == iSpellID; });
 	return it != spell_list->entries.end();
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
+void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType,
 							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
 {
 
@@ -2795,7 +2795,7 @@ void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
-void NPC::RemoveSpellFromNPCList(int16 spell_id)
+void NPC::RemoveSpellFromNPCList(uint16 spell_id)
 {
 	auto iter = AIspells.begin();
 	while(iter != AIspells.end())

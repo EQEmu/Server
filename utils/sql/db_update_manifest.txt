@@ -413,6 +413,8 @@
 9157|2020_09_02_pet_taunting.sql|SHOW COLUMNS from `character_pet_info` LIKE 'taunting'|empty|
 9158|2020_12_09_underworld.sql|SHOW COLUMNS from `zone` LIKE 'underworld_teleport_index'|empty|
 9159|2020_12_22_expedition_system.sql|SELECT * FROM db_version WHERE version >= 9159|empty|
+9160|2021_02_14_npc_exp_mod.sql|SHOW COLUMNS from `npc_types` LIKE 'exp_mod'|empty|
+9161|2021_02_15_npc_spell_entries_unsigned.sql|SELECT * FROM db_version WHERE version >= 9161|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
