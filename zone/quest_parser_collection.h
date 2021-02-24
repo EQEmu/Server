@@ -65,6 +65,7 @@ public:
 	void AddVar(std::string name, std::string val);
 	void Init();
 	void ReloadQuests(bool reset_timers = true);
+	void RemoveEncounter(const std::string name);
 
 	bool HasQuestSub(uint32 npcid, QuestEventID evt);
 	bool PlayerHasQuestSub(QuestEventID evt);

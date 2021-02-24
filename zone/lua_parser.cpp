@@ -988,6 +988,16 @@ void LuaParser::ReloadQuests() {
 	}
 }
 
+/*
+ * This function is intended only to clean up lua_encounters when the Encounter object is
+ * about to be destroyed. It won't clean up memory else where, since the caller of this
+ * function is responsible for that
+ */
+void LuaParser::RemoveEncounter(const std::string &name)
+{
+	lua_encounters.erase(name);
+}
+
 void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	auto iter = loaded_.find(package_name);
 	if(iter != loaded_.end()) {

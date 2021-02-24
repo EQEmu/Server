@@ -89,6 +89,14 @@ void QuestParserCollection::ReloadQuests(bool reset_timers) {
 	}
 }
 
+void QuestParserCollection::RemoveEncounter(const std::string name) {
+	auto iter = _load_precedence.begin();
+	while(iter != _load_precedence.end()) {
+		(*iter)->RemoveEncounter(name);
+		++iter;
+	}
+}
+
 bool QuestParserCollection::HasQuestSub(uint32 npcid, QuestEventID evt) {
 	return HasQuestSubLocal(npcid, evt) || HasQuestSubGlobal(evt);
 }
