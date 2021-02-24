@@ -1,0 +1,1 @@
+ALTER TABLE `npc_spell_entries` MODIFY `spellid` UNSIGNED SMALLINT(5) NOT NULL DEFAULT 0;
