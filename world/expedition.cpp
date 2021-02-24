@@ -112,7 +112,7 @@ bool Expedition::SetNewLeader(uint32_t character_id)
 void Expedition::SendZonesExpeditionDeleted()
 {
 	uint32_t pack_size = sizeof(ServerExpeditionID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDeleted, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionDeleted, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	zoneserver_list.SendPacket(pack.get());
@@ -121,7 +121,7 @@ void Expedition::SendZonesExpeditionDeleted()
 void Expedition::SendZonesDurationUpdate()
 {
 	uint32_t packsize = sizeof(ServerExpeditionUpdateDuration_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzDuration, packsize));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionDzDuration, packsize);
 	auto packbuf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
 	packbuf->expedition_id = GetID();
 	packbuf->new_duration_seconds = static_cast<uint32_t>(m_duration.count());
@@ -131,7 +131,7 @@ void Expedition::SendZonesDurationUpdate()
 void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpireWarning, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionExpireWarning, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->minutes_remaining = minutes_remaining;
@@ -141,7 +141,7 @@ void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 void Expedition::SendZonesLeaderChanged()
 {
 	uint32_t pack_size = sizeof(ServerExpeditionLeaderID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLeaderChanged, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->leader_id = m_leader_id;

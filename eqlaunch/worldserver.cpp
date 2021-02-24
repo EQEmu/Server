@@ -29,7 +29,7 @@ WorldServer::WorldServer(std::map<std::string, ZoneLaunch *> &zones, const char 
 	m_config(config),
 	m_zones(zones)
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey));
+	m_connection = std::make_unique<EQ::Net::ServertalkClient>(config->WorldIP, config->WorldTCPPort, false, "Launcher", config->SharedKey);
 	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
 		OnConnected();
 	});

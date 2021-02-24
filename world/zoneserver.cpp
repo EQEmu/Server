@@ -70,12 +70,12 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn
 
 	tcpc->OnMessage(std::bind(&ZoneServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 
-	boot_timer_obj.reset(new EQ::Timer(100, true, [this](EQ::Timer *obj) {
+	boot_timer_obj = std::make_unique<EQ::Timer>(100, true, [this](EQ::Timer *obj) {
 		if (zone_boot_timer.Check()) {
 			LSBootUpdate(GetZoneID(), true);
 			zone_boot_timer.Disable();
 		}
-	}));
+	});
 
 	this->console = console;
 }

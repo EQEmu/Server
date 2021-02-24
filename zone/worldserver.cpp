@@ -80,14 +80,14 @@ WorldServer::~WorldServer() {
 
 void WorldServer::Connect()
 {
-	m_connection.reset(new EQ::Net::ServertalkClient(Config->WorldIP, Config->WorldTCPPort, false, "Zone", Config->SharedKey));
+	m_connection = std::make_unique<EQ::Net::ServertalkClient>(Config->WorldIP, Config->WorldTCPPort, false, "Zone", Config->SharedKey);
 	m_connection->OnConnect([this](EQ::Net::ServertalkClient *client) {
 		OnConnected();
 	});
 
 	m_connection->OnMessage(std::bind(&WorldServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 
-	m_keepalive.reset(new EQ::Timer(2500, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1)));
+	m_keepalive = std::make_unique<EQ::Timer>(2500, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1));
 }
 
 bool WorldServer::SendPacket(ServerPacket *pack)

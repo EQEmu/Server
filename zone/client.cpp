@@ -756,7 +756,7 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 		return(false);
 	}
 
-	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
+	auto c = std::make_unique<CLIENTPACKET>();
 
 	c->ack_req = bAckreq;
 	c->app = pApp->Copy();
@@ -773,7 +773,7 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
+	auto c = std::make_unique<CLIENTPACKET>();
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
@@ -3221,7 +3221,7 @@ void Client::MessageString(const CZClientMessageString_Struct* msg)
 		else
 		{
 			uint32_t outsize = sizeof(FormattedMessage_Struct) + msg->args_size;
-			auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_FormattedMessage, outsize));
+			auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, outsize);
 			auto outbuf = reinterpret_cast<FormattedMessage_Struct*>(outapp->pBuffer);
 			outbuf->string_id = msg->string_id;
 			outbuf->type = msg->chat_type;
@@ -9511,7 +9511,7 @@ void Client::SendCrossZoneMessage(
 	else if (!character_name.empty() && !message.empty())
 	{
 		uint32_t pack_size = sizeof(CZMessagePlayer_Struct);
-		auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_CZMessagePlayer, pack_size));
+		auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessagePlayer, pack_size);
 		auto buf = reinterpret_cast<CZMessagePlayer_Struct*>(pack->pBuffer);
 		buf->type = chat_type;
 		strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
@@ -9544,7 +9544,7 @@ void Client::SendCrossZoneMessageString(
 
 	uint32_t args_size = static_cast<uint32_t>(argument_buffer.size());
 	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_CZClientMessageString, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
 	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 	buf->string_id = string_id;
 	buf->chat_type = chat_type;
@@ -9791,7 +9791,7 @@ void Client::SendExpeditionLockoutTimers()
 	uint32_t lockout_count = static_cast<uint32_t>(lockout_entries.size());
 	uint32_t lockout_entries_size = sizeof(ExpeditionLockoutTimerEntry_Struct) * lockout_count;
 	uint32_t outsize = sizeof(ExpeditionLockoutTimers_Struct) + lockout_entries_size;
-	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzExpeditionLockoutTimers, outsize));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionLockoutTimers, outsize);
 	auto outbuf = reinterpret_cast<ExpeditionLockoutTimers_Struct*>(outapp->pBuffer);
 	outbuf->count = lockout_count;
 	if (!lockout_entries.empty())
@@ -9804,7 +9804,7 @@ void Client::SendExpeditionLockoutTimers()
 void Client::RequestPendingExpeditionInvite()
 {
 	uint32_t packsize = sizeof(ServerExpeditionCharacterID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRequestInvite, packsize));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionRequestInvite, packsize);
 	auto packbuf = reinterpret_cast<ServerExpeditionCharacterID_Struct*>(pack->pBuffer);
 	packbuf->character_id = CharacterID();
 	worldserver.SendPacket(pack.get());
@@ -9894,7 +9894,7 @@ void Client::SendDzCompassUpdate()
 	uint32 count = static_cast<uint32_t>(compass_entries.size());
 	uint32 entries_size = sizeof(DynamicZoneCompassEntry_Struct) * count;
 	uint32 outsize = sizeof(DynamicZoneCompass_Struct) + entries_size;
-	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzCompass, outsize));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzCompass, outsize);
 	auto outbuf = reinterpret_cast<DynamicZoneCompass_Struct*>(outapp->pBuffer);
 	outbuf->count = count;
 	memcpy(outbuf->entries, compass_entries.data(), entries_size);
@@ -9972,7 +9972,7 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 		uint32 count = static_cast<uint32_t>(client_dzs.size());
 		uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
 		uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
-		auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzChooseZone, outsize));
+		auto outapp = std::make_unique<EQApplicationPacket>(OP_DzChooseZone, outsize);
 		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
 		outbuf->count = count;
 		for (int i = 0; i < client_dzs.size(); ++i)

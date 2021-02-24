@@ -380,7 +380,7 @@ void DynamicZone::RemoveAllCharacters(bool enable_removal_timers)
 		else if (GetInstanceID() != 0)
 		{
 			uint32_t packsize = sizeof(ServerDzCharacter_Struct);
-			auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_DzRemoveAllCharacters, packsize));
+			auto pack = std::make_unique<ServerPacket>(ServerOP_DzRemoveAllCharacters, packsize);
 			auto packbuf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
 			packbuf->zone_id = GetZoneID();
 			packbuf->instance_id = GetInstanceID();
@@ -429,7 +429,7 @@ void DynamicZone::SendInstanceCharacterChange(uint32_t character_id, bool remove
 	else if (GetInstanceID() != 0)
 	{
 		uint32_t packsize = sizeof(ServerDzCharacter_Struct);
-		auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_DzCharacterChange, packsize));
+		auto pack = std::make_unique<ServerPacket>(ServerOP_DzCharacterChange, packsize);
 		auto packbuf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
 		packbuf->zone_id = GetZoneID();
 		packbuf->instance_id = GetInstanceID();
