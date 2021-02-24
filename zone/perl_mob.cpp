@@ -6179,6 +6179,21 @@ XS(XS_Mob_SetBucket) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_IsHorse);
+XS(XS_Mob_IsHorse) {	
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::IsHorse(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		bool RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->IsHorse();
+		ST(0) = boolSV(RETVAL);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -6209,6 +6224,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "IsDoor"), XS_Mob_IsDoor, file, "$");
 	newXSproto(strcpy(buf, "IsTrap"), XS_Mob_IsTrap, file, "$");
 	newXSproto(strcpy(buf, "IsBeacon"), XS_Mob_IsBeacon, file, "$");
+	newXSproto(strcpy(buf, "IsHorse"), XS_Mob_IsHorse, file, "$");
 	newXSproto(strcpy(buf, "CastToClient"), XS_Mob_CastToClient, file, "$");
 	newXSproto(strcpy(buf, "CastToNPC"), XS_Mob_CastToNPC, file, "$");
 	newXSproto(strcpy(buf, "CastToMob"), XS_Mob_CastToMob, file, "$");

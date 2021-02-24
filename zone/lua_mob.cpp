@@ -2309,6 +2309,12 @@ void Lua_Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::
 	self->SetBucket(bucket_name, bucket_value, expiration);
 }
 
+bool Lua_Mob::IsHorse()
+{
+	Lua_Safe_Call_Bool();
+	return self->IsHorse();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2706,7 +2712,8 @@ luabind::scope lua_register_mob() {
 		.def("GetBucketKey", (std::string(Lua_Mob::*)(void))&Lua_Mob::GetBucketKey)
 		.def("GetBucketRemaining", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketRemaining)
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
-		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket);
+		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
+		.def("IsHorse", &Lua_Mob::IsHorse);
 }
 
 luabind::scope lua_register_special_abilities() {
