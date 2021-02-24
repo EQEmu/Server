@@ -36,7 +36,7 @@ Horse::Horse(Client *_owner, uint16 spell_id, const glm::vec4& position)
 	strn0cpy(name, _owner->GetCleanName(), 55);
 	strcat(name,"`s_Mount00");
 
-	IsHorse = true;
+	is_horse = true;
 
 	owner = _owner;
 }

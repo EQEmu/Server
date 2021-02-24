@@ -901,6 +901,7 @@ public:
 	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
+	inline bool IsHorse() { return is_horse; }
 
 	inline const bodyType GetBodyType() const { return bodytype; }
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
@@ -1591,8 +1592,8 @@ protected:
 
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 	Timer aa_timers[aaTimerMax];
-
-	bool IsHorse;
+	
+	bool is_horse;
 
 	AuraMgr aura_mgr;
 	AuraMgr trap_mgr;

@@ -2999,7 +2999,7 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (own && own->IsClient())
 				continue;
 
-			if (pnpc->IsHorse)
+			if (pnpc->IsHorse())
 				continue;
 
 			if (pnpc->IsFindable())
