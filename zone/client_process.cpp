@@ -1262,11 +1262,10 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = nullptr;
-				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(coin move) but %s is non-existant or too far away (%u units).",
-					banker ? banker->GetName() : "UNKNOWN NPC", distance);
+				auto hacked_string = fmt::format("Player tried to make use of a banker(coin move) but "
+								 "{} is non-existant or too far away ({} units).",
+								 banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-				safe_delete_array(hacked_string);
 				return;
 			}
 
@@ -1294,11 +1293,11 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = nullptr;
-				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(shared coin move) but %s is non-existant or too far away (%u units).",
-					banker ? banker->GetName() : "UNKNOWN NPC", distance);
+				auto hacked_string =
+				    fmt::format("Player tried to make use of a banker(shared coin move) but {} is "
+						"non-existant or too far away ({} units).",
+						banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-				safe_delete_array(hacked_string);
 				return;
 			}
 			if(mc->cointype1 == COINTYPE_PP)	// there's only platinum here
@@ -1350,11 +1349,10 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = nullptr;
-				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(coin move) but %s is non-existant or too far away (%u units).",
-					banker ? banker->GetName() : "UNKNOWN NPC", distance);
+				auto hacked_string = fmt::format("Player tried to make use of a banker(coin move) but "
+								 "{} is non-existant or too far away ({} units).",
+								 banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-				safe_delete_array(hacked_string);
 				return;
 			}
 			switch(mc->cointype2)
@@ -1394,11 +1392,11 @@ void Client::OPMoveCoin(const EQApplicationPacket* app)
 			NPC *banker = entity_list.GetClosestBanker(this, distance);
 			if(!banker || distance > USE_NPC_RANGE2)
 			{
-				char *hacked_string = nullptr;
-				MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(shared coin move) but %s is non-existant or too far away (%u units).",
-					banker ? banker->GetName() : "UNKNOWN NPC", distance);
+				auto hacked_string =
+				    fmt::format("Player tried to make use of a banker(shared coin move) but {} is "
+						"non-existant or too far away ({} units).",
+						banker ? banker->GetName() : "UNKNOWN NPC", distance);
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-				safe_delete_array(hacked_string);
 				return;
 			}
 			if(mc->cointype2 == COINTYPE_PP)	// there's only platinum here

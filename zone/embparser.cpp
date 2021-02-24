@@ -1270,12 +1270,11 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
 
 		for (int slot = EQ::invslot::EQUIPMENT_BEGIN; slot <= EQ::invslot::GENERAL_END; slot++) {
-			char *hi_decl = nullptr;
 			int  itemid   = mob->CastToClient()->GetItemIDAt(slot);
 			if (itemid != -1 && itemid != 0) {
-				MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, slot);
-				perl->eval(hi_decl);
-				safe_delete_array(hi_decl);
+				// this is really ugly with fmtlib, I think I did it right
+				auto hi_decl = fmt::format("push (@{{${0}{{{1}}}}},{2});", hashname, itemid, slot);
+				perl->eval(hi_decl.c_str());
 			}
 		}
 	}
@@ -1283,12 +1282,11 @@ void PerlembParser::ExportItemVariables(std::string &package_name, Mob *mob)
 	if (mob && mob->IsClient()) {
 		std::string hashname = package_name + std::string("::oncursor");
 		perl->eval(std::string("%").append(hashname).append(" = ();").c_str());
-		char *hi_decl = nullptr;
 		int  itemid   = mob->CastToClient()->GetItemIDAt(EQ::invslot::slotCursor);
 		if (itemid != -1 && itemid != 0) {
-			MakeAnyLenString(&hi_decl, "push (@{$%s{%d}},%d);", hashname.c_str(), itemid, EQ::invslot::slotCursor);
-			perl->eval(hi_decl);
-			safe_delete_array(hi_decl);
+			// this is really ugly with fmtlib, I think I did it right
+			auto hi_decl = fmt::format("push (@{{${0}{{{1}}}}},{2});", hashname, itemid, EQ::invslot::slotCursor);
+			perl->eval(hi_decl.c_str());
 		}
 	}
 }

@@ -355,56 +355,6 @@ void MakeLowerString(const char *source, char *target) {
 	*target = 0;
 }
 
-int MakeAnyLenString(char** ret, const char* format, ...) {
-	int buf_len = 128;
-	int chars = -1;
-	va_list argptr, tmpargptr;
-	va_start(argptr, format);
-	while (chars == -1 || chars >= buf_len) {
-		safe_delete_array(*ret);
-		if (chars == -1)
-			buf_len *= 2;
-		else
-			buf_len = chars + 1;
-		*ret = new char[buf_len];
-		va_copy(tmpargptr, argptr);
-		chars = vsnprintf(*ret, buf_len, format, tmpargptr);
-		va_end(tmpargptr);
-	}
-	va_end(argptr);
-	return chars;
-}
-
-uint32 AppendAnyLenString(char** ret, uint32* bufsize, uint32* strlen, const char* format, ...) {
-	if (*bufsize == 0)
-		*bufsize = 256;
-	if (*ret == 0)
-		*strlen = 0;
-	int chars = -1;
-	char* oldret = 0;
-	va_list argptr, tmpargptr;
-	va_start(argptr, format);
-	while (chars == -1 || chars >= (int32)(*bufsize - *strlen)) {
-		if (chars == -1)
-			*bufsize += 256;
-		else
-			*bufsize += chars + 25;
-		oldret = *ret;
-		*ret = new char[*bufsize];
-		if (oldret) {
-			if (*strlen)
-				memcpy(*ret, oldret, *strlen);
-			safe_delete_array(oldret);
-		}
-		va_copy(tmpargptr, argptr);
-		chars = vsnprintf(&(*ret)[*strlen], (*bufsize - *strlen), format, tmpargptr);
-		va_end(tmpargptr);
-	}
-	va_end(argptr);
-	*strlen += chars;
-	return *strlen;
-}
-
 uint32 hextoi(const char* num) {
 	if (num == nullptr)
 		return 0;
