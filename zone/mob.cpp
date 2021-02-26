@@ -313,7 +313,7 @@ Mob::Mob(
 	isgrouped     = false;
 	israidgrouped = false;
 
-	IsHorse = false;
+	is_horse = false;
 
 	entity_id_being_looted = 0;
 	_appearance            = eaStanding;
