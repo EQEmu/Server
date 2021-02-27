@@ -255,7 +255,7 @@ Mob::Mob(
 	INT               = in_int;
 	WIS               = in_wis;
 	CHA               = in_cha;
-	MR                = CR = FR = DR = PR = Corrup = 0;
+	MR                = CR = FR = DR = PR = Corrup = PhR = 0;
 	ExtraHaste        = 0;
 	bEnraged          = false;
 	shield_target     = nullptr;
