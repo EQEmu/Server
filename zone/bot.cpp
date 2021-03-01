@@ -1591,7 +1591,7 @@ uint16 Bot::GetPrimarySkillValue() {
 }
 
 uint16 Bot::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(content_db.GetSkillCap(class_, skillid, level));
 }
 
 uint32 Bot::GetTotalATK() {
@@ -9082,7 +9082,7 @@ void Bot::CalcBotStats(bool showtext) {
 		SetLevel(GetBotOwner()->GetLevel());
 
 	for (int sindex = 0; sindex <= EQ::skills::HIGHEST_SKILL; ++sindex) {
-		skills[sindex] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)sindex, GetLevel());
+		skills[sindex] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)sindex, GetLevel());
 	}
 
 	taunt_timer.Start(1000);
