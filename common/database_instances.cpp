@@ -507,7 +507,7 @@ void Database::FlagInstanceByGroupLeader(uint32 zone, int16 version, uint32 char
 
 	char ln[128];
 	memset(ln, 0, 128);
-	strcpy(ln, GetGroupLeadershipInfo(gid, ln));
+	GetGroupLeadershipInfo(gid, ln);
 	uint32 l_charid = GetCharacterID((const char*)ln);
 	uint16 l_id = GetInstanceID(zone, l_charid, version);
 
