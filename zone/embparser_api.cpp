@@ -6404,6 +6404,23 @@ XS(XS__createitem) {
 	XSRETURN(1);
 }
 
+XS(XS__converttime);
+XS(XS__converttime) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::converttime(int duration)");
+	}
+
+	dXSTARG;
+	std::string time_string;
+	int duration = (int) SvIV(ST(0));
+	time_string = quest_manager.converttime(duration);
+	sv_setpv(TARG, time_string.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);	
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6495,6 +6512,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
 	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
 	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
+	newXS(strcpy(buf, "converttime"), XS__converttime, file);
 	newXS(strcpy(buf, "countitem"), XS__countitem, file);
 	newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);

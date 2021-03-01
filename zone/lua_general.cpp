@@ -2300,6 +2300,10 @@ void lua_remove_all_expedition_lockouts_by_char_id(uint32 char_id, std::string e
 	Expedition::RemoveLockoutsByCharacterID(char_id, expedition_name);
 }
 
+std::string lua_convert_time(int duration) {
+	return quest_manager.converttime(duration);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2836,6 +2840,7 @@ luabind::scope lua_register_general() {
 		luabind::def("debug", (void(*)(std::string))&lua_debug),
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
 		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
+		luabind::def("convert_time", &lua_convert_time),
 
 		/**
 		 * Expansions
