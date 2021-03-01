@@ -1006,8 +1006,6 @@ void Group::DisbandGroup(bool joinraid) {
 		database.ClearGroup(GetID());
 	}
 
-	entity_list.RemoveGroup(GetID());
-
 	if(Leader && (Leader->IsLFP()))
 	{
 		Leader->UpdateLFP();
@@ -1015,6 +1013,7 @@ void Group::DisbandGroup(bool joinraid) {
 
 	SetLeader(nullptr);
 	safe_delete(outapp);
+	entity_list.RemoveGroup(GetID());
 }
 
 void Group::GetMemberList(std::list<Mob*>& member_list, bool clear_list)
