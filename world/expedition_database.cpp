@@ -59,7 +59,6 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 
 		if (!expedition_ids.empty())
 		{
-			ExpeditionDatabase::MoveMembersToSafeReturn(expedition_ids);
 			ExpeditionDatabase::DeleteExpeditions(expedition_ids);
 			DynamicZoneMembersRepository::RemoveAllMembers(database, dynamic_zone_ids);
 		}
@@ -90,30 +89,4 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 		query = fmt::format("DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query);
 		database.QueryDatabase(query);
 	}
-}
-
-void ExpeditionDatabase::MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids)
-{
-	LogExpeditionsDetail("Moving members from [{}] expedition(s) to safereturn", expedition_ids.size());
-
-	// only offline members still in expired dz zones should be updated here
-	std::string query = fmt::format(SQL(
-		UPDATE character_data
-			INNER JOIN dynamic_zone_members ON character_data.id = dynamic_zone_members.character_id
-			INNER JOIN expeditions ON dynamic_zone_members.dynamic_zone_id = expeditions.dynamic_zone_id
-			INNER JOIN dynamic_zones ON expeditions.dynamic_zone_id = dynamic_zones.id
-			INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
-				AND character_data.zone_instance = instance_list.id
-				AND character_data.zone_id = instance_list.zone
-		SET
-			zone_id       = IF(safe_return_zone_id > 0, safe_return_zone_id, zone_id),
-			zone_instance = IF(safe_return_zone_id > 0, 0, zone_instance),
-			x             = IF(safe_return_zone_id > 0, safe_return_x, x),
-			y             = IF(safe_return_zone_id > 0, safe_return_y, y),
-			z             = IF(safe_return_zone_id > 0, safe_return_z, z),
-			heading       = IF(safe_return_zone_id > 0, safe_return_heading, heading)
-		WHERE expeditions.id IN ({});
-	), fmt::join(expedition_ids, ","));
-
-	database.QueryDatabase(query);
 }

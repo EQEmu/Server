@@ -63,6 +63,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
 
@@ -1756,6 +1757,29 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	}
 
 	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
+
+	auto dz = zone->GetDynamicZone();
+	if (dz && dz->GetSafeReturnLocation().zone_id != 0)
+	{
+		auto safereturn = dz->GetSafeReturnLocation();
+
+		auto safereturn_entry = CharacterInstanceSafereturnsRepository::NewEntity();
+		safereturn_entry.character_id     = CharacterID();
+		safereturn_entry.instance_zone_id = zone->GetZoneID();
+		safereturn_entry.instance_id      = zone->GetInstanceID();
+		safereturn_entry.safe_zone_id     = safereturn.zone_id;
+		safereturn_entry.safe_x           = safereturn.x;
+		safereturn_entry.safe_y           = safereturn.y;
+		safereturn_entry.safe_z           = safereturn.z;
+		safereturn_entry.safe_heading     = safereturn.heading;
+
+		CharacterInstanceSafereturnsRepository::InsertOneOrUpdate(database, safereturn_entry);
+	}
+	else
+	{
+		CharacterInstanceSafereturnsRepository::DeleteWhere(database,
+			fmt::format("character_id = {}", character_id));
+	}
 
 	/**
 	 * DevTools Load Settings

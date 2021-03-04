@@ -29,7 +29,6 @@ class Expedition;
 namespace ExpeditionDatabase
 {
 	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
-	void MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids);
 	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();
 };
