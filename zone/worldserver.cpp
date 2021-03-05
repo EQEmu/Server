@@ -473,20 +473,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_Motd: {
-		ServerMotd_Struct* smotd = (ServerMotd_Struct*)pack->pBuffer;
-		EQApplicationPacket *outapp;
-		outapp = new EQApplicationPacket(OP_MOTD);
-		char tmp[500] = { 0 };
-		sprintf(tmp, "%s", smotd->motd);
+		if (pack->size != sizeof(ServerMotd_Struct))
+			break;
 
-		outapp->size = strlen(tmp) + 1;
-		outapp->pBuffer = new uchar[outapp->size];
-		memset(outapp->pBuffer, 0, outapp->size);
-		strcpy((char*)outapp->pBuffer, tmp);
+		ServerMotd_Struct *smotd = (ServerMotd_Struct *)pack->pBuffer;
+		SerializeBuffer buf(100);
+		buf.WriteString(smotd->motd);
 
-		entity_list.QueueClients(0, outapp);
-		safe_delete(outapp);
+		auto outapp = std::make_unique<EQApplicationPacket>(OP_MOTD, buf);
 
+		entity_list.QueueClients(0, outapp.get());
 		break;
 	}
 	case ServerOP_ShutdownAll: {
