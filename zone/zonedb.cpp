@@ -639,53 +639,6 @@ void ZoneDatabase::SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name)
 	door_isopen_array[door_id] = value;
 }
 
-void ZoneDatabase::GetEventLogs(const char* name,char* target,uint32 account_id,uint8 eventid,char* detail,char* timestamp, CharacterEventLog_Struct* cel)
-{
-	char modifications[200];
-	if(strlen(name) != 0)
-		sprintf(modifications,"charname=\'%s\'",name);
-	else if(account_id != 0)
-		sprintf(modifications,"accountid=%i",account_id);
-
-	if(strlen(target) != 0)
-		sprintf(modifications,"%s AND target LIKE \'%%%s%%\'",modifications,target);
-
-	if(strlen(detail) != 0)
-		sprintf(modifications,"%s AND description LIKE \'%%%s%%\'",modifications,detail);
-
-	if(strlen(timestamp) != 0)
-		sprintf(modifications,"%s AND time LIKE \'%%%s%%\'",modifications,timestamp);
-
-	if(eventid == 0)
-		eventid =1;
-	sprintf(modifications,"%s AND event_nid=%i",modifications,eventid);
-
-    std::string query = StringFormat("SELECT id, accountname, accountid, status, charname, target, "
-                                    "time, descriptiontype, description FROM eventlog WHERE %s", modifications);
-    auto results = QueryDatabase(query);
-    if (!results.Success())
-        return;
-
-	int index = 0;
-    for (auto row = results.begin(); row != results.end(); ++row, ++index) {
-        if(index == 255)
-            break;
-
-        cel->eld[index].id = atoi(row[0]);
-        strn0cpy(cel->eld[index].accountname,row[1],64);
-        cel->eld[index].account_id = atoi(row[2]);
-        cel->eld[index].status = atoi(row[3]);
-        strn0cpy(cel->eld[index].charactername,row[4],64);
-        strn0cpy(cel->eld[index].targetname,row[5],64);
-        sprintf(cel->eld[index].timestamp,"%s",row[6]);
-        strn0cpy(cel->eld[index].descriptiontype,row[7],64);
-        strn0cpy(cel->eld[index].details,row[8],128);
-        cel->eventid = eventid;
-        cel->count = index + 1;
-    }
-
-}
-
 // Load child objects for a world container (i.e., forge, bag dropped to ground, etc)
 void ZoneDatabase::LoadWorldContainer(uint32 parentid, EQ::ItemInstance* container)
 {
