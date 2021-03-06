@@ -309,7 +309,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	//give NPCs skill values...
 	int r;
 	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, moblevel);
+		skills[r] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, moblevel);
 	}
 	// some overrides -- really we need to be able to set skills for mobs in the DB
 	// There are some known low level SHM/BST pets that do not follow this, which supports
@@ -3322,7 +3322,7 @@ void NPC::RecalculateSkills()
 {
   	int r;
 	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, level);
+		skills[r] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, level);
 	}
 
 	// some overrides -- really we need to be able to set skills for mobs in the DB

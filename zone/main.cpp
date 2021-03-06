@@ -318,7 +318,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	LogInfo("Loading skill caps");
-	if (!database.LoadSkillCaps(std::string(hotfix_name))) {
+	if (!content_db.LoadSkillCaps(std::string(hotfix_name))) {
 		LogError("Loading skill caps failed!");
 		return 1;
 	}

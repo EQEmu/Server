@@ -2505,7 +2505,7 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == EQ::skills::Skill1HPiercing)
 		skill_id = EQ::skills::Skill2HPiercing;
 
-	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
+	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
@@ -2513,7 +2513,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 lev
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
-	return(database.GetSkillCap(class_, skillid, level));
+	return(content_db.GetSkillCap(class_, skillid, level));
 }
 
 uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
@@ -2521,7 +2521,7 @@ uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
-	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+	return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill)

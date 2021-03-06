@@ -1338,7 +1338,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 
 		LogInfo("Loading skill caps");
-		if (!database.LoadSkillCaps(hotfix_name)) {
+		if (!content_db.LoadSkillCaps(hotfix_name)) {
 			LogInfo("Error: Could not load skill cap data. But ignoring");
 		}
 
