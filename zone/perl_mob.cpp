@@ -6195,6 +6195,46 @@ XS(XS_Mob_IsHorse) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetHateListByDistance); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHateListByDistance) {
+	dXSARGS;
+	int num_entries = 0;
+	if (items < 1 || items > 2)
+		Perl_croak(aTHX_ "Usage: Mob::GetHateListByDistance(THIS, int distance)"); // @categories Hate and Aggro
+	{
+		Mob *THIS;
+		int distance = 0;
+		VALIDATE_THIS_IS_MOB;
+		if (items == 2)
+			distance = (int) SvIV(ST(1));
+
+		auto list = THIS->GetHateListByDistance(distance);
+		for (auto hate_entry : list) {
+			ST(0) = sv_newmortal();
+			sv_setref_pv(ST(0), "HateEntry", (void *) hate_entry);
+			XPUSHs(ST(0));
+			num_entries++;
+		}
+	}
+	XSRETURN(num_entries);
+}
+
+XS(XS_Mob_GetHateClosest); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHateClosest) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetHateClosest(THIS)"); // @categories Hate and Aggro
+	{
+		Mob *THIS;
+		Mob *closest_mob;
+		VALIDATE_THIS_IS_MOB;
+		closest_mob = THIS->GetHateClosest();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Mob", (void *) closest_mob);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6541,6 +6581,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetBucketKey"), XS_Mob_GetBucketKey, file, "$");
 	newXSproto(strcpy(buf, "GetBucketRemaining"), XS_Mob_GetBucketRemaining, file, "$$");
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
+	newXSproto(strcpy(buf, "GetHateClosest"), XS_Mob_GetHateClosest, file, "$");
+	newXSproto(strcpy(buf, "GetHateListByDistance"), XS_Mob_GetHateListByDistance, file, "$;$");
 	XSRETURN_YES;
 }
 

@@ -198,9 +198,12 @@ public:
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
 	Lua_HateList GetHateList();
+	Lua_HateList GetHateListByDistance();
+	Lua_HateList GetHateListByDistance(int distance);
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
+	Lua_Mob GetHateClosest();
 	void AddToHateList(Lua_Mob other);
 	void AddToHateList(Lua_Mob other, int hate);
 	void AddToHateList(Lua_Mob other, int hate, int damage);

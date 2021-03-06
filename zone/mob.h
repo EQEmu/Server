@@ -642,6 +642,7 @@ public:
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
+	Mob* GetHateClosest() { return hate_list.GetClosestEntOnHateList(this); }
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }
 	bool HasPrimaryAggro() { return PrimaryAggro; }
 	bool HasAssistAggro() { return AssistAggro; }
@@ -656,6 +657,7 @@ public:
 	bool IsOnFeignMemory(Client *attacker) const;
 	void PrintHateListToClient(Client *who) { hate_list.PrintHateListToClient(who); }
 	std::list<struct_HateList*>& GetHateList() { return hate_list.GetHateList(); }
+	std::list<struct_HateList*> GetHateListByDistance(int distance = 0) { return hate_list.GetHateListByDistance(distance); }
 	bool CheckLosFN(Mob* other);
 	bool CheckLosFN(float posX, float posY, float posZ, float mobSize);
 	static bool CheckLosFN(glm::vec3 posWatcher, float sizeWatcher, glm::vec3 posTarget, float sizeTarget);

@@ -2315,6 +2315,33 @@ bool Lua_Mob::IsHorse()
 	return self->IsHorse();
 }
 
+Lua_Mob Lua_Mob::GetHateClosest() {
+	Lua_Safe_Call_Class(Lua_Mob);
+	return Lua_Mob(self->GetHateClosest());
+}
+
+Lua_HateList Lua_Mob::GetHateListByDistance() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+	auto list = self->GetHateListByDistance();
+	for (auto hate_entry : list) {
+		Lua_HateEntry entry(hate_entry);
+		ret.entries.push_back(entry);
+	}
+	return ret;
+}
+
+Lua_HateList Lua_Mob::GetHateListByDistance(int distance) {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+	auto list = self->GetHateListByDistance(distance);
+	for (auto hate_entry : list) {
+		Lua_HateEntry entry(hate_entry);
+		ret.entries.push_back(entry);
+	}
+	return ret;
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2481,9 +2508,12 @@ luabind::scope lua_register_mob() {
 		.def("GetPet", &Lua_Mob::GetPet)
 		.def("GetOwner", &Lua_Mob::GetOwner)
 		.def("GetHateList", &Lua_Mob::GetHateList)
+		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListByDistance)
+		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(int))&Lua_Mob::GetHateListByDistance)
 		.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
 		.def("GetHateDamageTop", (Lua_Mob(Lua_Mob::*)(Lua_Mob))&Lua_Mob::GetHateDamageTop)
 		.def("GetHateRandom", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateRandom)
+		.def("GetHateClosest", &Lua_Mob::GetHateClosest)
 		.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob))&Lua_Mob::AddToHateList)
 		.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int))&Lua_Mob::AddToHateList)
 		.def("AddToHateList", (void(Lua_Mob::*)(Lua_Mob,int,int))&Lua_Mob::AddToHateList)

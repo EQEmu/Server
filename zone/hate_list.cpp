@@ -785,3 +785,15 @@ void HateList::RemoveStaleEntries(int time_ms, float dist)
 	}
 }
 
+std::list<struct_HateList*> HateList::GetHateListByDistance(int distance)
+{
+	std::list<struct_HateList*> hate_list;
+	int squared_distance = (distance * distance);
+	for (auto hate_iterator : list) {
+		auto hate_entry = hate_iterator->entity_on_hatelist;
+		if (distance == 0 || (distance > 0 && DistanceSquaredNoZ(hate_owner->GetPosition(), hate_entry->GetPosition()) <= squared_distance)) {
+			hate_list.push_back(hate_iterator);
+		}
+	}
+	return hate_list;
+}
