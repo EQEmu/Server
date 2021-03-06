@@ -602,6 +602,8 @@ void EntityList::EncounterProcess()
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
 		if (!it->second->Process()) {
+			// if Process is returning false here, we probably just got called from ReloadQuests .. oh well
+			parse->RemoveEncounter(it->second->GetEncounterName());
 			safe_delete(it->second);
 			free_ids.push(it->first);
 			it = encounter_list.erase(it);
@@ -2565,6 +2567,7 @@ void EntityList::RemoveAllEncounters()
 {
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
+		parse->RemoveEncounter(it->second->GetEncounterName());
 		safe_delete(it->second);
 		free_ids.push(it->first);
 		it = encounter_list.erase(it);

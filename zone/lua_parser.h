@@ -71,6 +71,7 @@ public:
 	virtual std::string GetVar(std::string name);
 	virtual void Init();
 	virtual void ReloadQuests();
+	virtual void RemoveEncounter(const std::string &name);
     virtual uint32 GetIdentifier() { return 0xb0712acc; }
 
 	virtual int DispatchEventNPC(QuestEventID evt, NPC* npc, Mob *init, std::string data, uint32 extra_data,
