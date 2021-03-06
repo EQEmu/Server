@@ -2,7 +2,7 @@
 #include "../event/event_loop.h"
 
 void on_close_tcp_server_handle(uv_handle_t* handle) {
-	delete handle;
+	delete (uv_tcp_t *)handle;
 }
 
 EQ::Net::TCPServer::TCPServer()
