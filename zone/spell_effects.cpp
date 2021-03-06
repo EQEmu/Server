@@ -3541,7 +3541,12 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod,
 							    caster, buff.ticsremaining);
 			// Handle client cast DOTs here.
-			if (caster && effect_value < 0) {
+			if (effect_value < 0) {
+				if (!caster) {
+					effect_value = -effect_value;
+					Damage(this, effect_value, buff.spellid, spell.skill, false, i, true);
+					break;
+				}
 
 				if (IsDetrimentalSpell(buff.spellid)) {
 					if (caster->IsClient()) {
