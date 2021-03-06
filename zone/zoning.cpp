@@ -590,7 +590,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			return;
 		}
 
-		if(GetPetID() != 0) {
+		if(zm != SummonPC && GetPetID() != 0) {
 			//if they have a pet and they are staying in zone, move with them
 			Mob *p = GetPet();
 			if(p != nullptr){
