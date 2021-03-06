@@ -209,6 +209,7 @@ RULE_REAL(Pets, AttackCommandRange, 150, "Range at which a pet will respond to a
 RULE_BOOL(Pets, UnTargetableSwarmPet, false, "Setting whether swarm pets should be targetable")
 RULE_REAL(Pets, PetPowerLevelCap, 10, "Maximum number of levels a player pet can go up with pet power")
 RULE_BOOL(Pets, CanTakeNoDrop, false, "Setting whether anyone can give no-drop items to pets")
+RULE_BOOL(Pets, IsLoSRequired, false, "Setting whether or not pets require los to attack")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(GM)

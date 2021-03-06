@@ -10240,6 +10240,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
+		if (RuleB(Pets, IsLoSRequired) && !CheckLosFN(target) && !mypet->CheckLosFN(target)) {
+			MessageString(Chat::Red, CANT_SEE_TARGET);
+			break;
+		}
+
 		// default range is 200, takes Z into account
 		// really they do something weird where they're added to the aggro list then remove them
 		// and will attack if they come in range -- too lazy, lets remove exploits for now
@@ -10284,10 +10289,24 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 
 		if (!GetTarget())
 			break;
-		if (GetTarget()->IsMezzed()) {
-			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+		//if (GetTarget()->IsMezzed()) { //Commented out by Gangsta, Prevents pets from being sent on mobs that are currently Messmerized
+		//	MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+		//	break;
+		
+
+		//if (!CheckLosFN(target))  // Checks for LoS of target from the owner, if the owner is outside LoS the pet returns. -Gangsta
+		//	auto pet_owner = GetOwner();	
+
+		//	if (!pet_owner->CheckLosFN(pet_owner->GetTarget())) 
+		//		pet_owner->MessageString(Chat::Red,CANT_SEE_TARGET);
+		//		break;
+
+		if (RuleB(Pets, IsLoSRequired) && !CheckLosFN(target) && !mypet->CheckLosFN(target)) {
+			MessageString(Chat::Red,CANT_SEE_TARGET);
 			break;
 		}
+		
+		
 
 		if (!mypet->IsAttackAllowed(GetTarget())) {
 			mypet->SayString(this, NOT_LEGAL_TARGET);
