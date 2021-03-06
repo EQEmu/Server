@@ -1215,6 +1215,12 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
+	//Shadowknights can no longer HT themselves -Gangsta
+	if (rank->id == 7800 && target_id == GetID()) {
+		MessageString(Chat::SpellFailure, ABILITY_FAILED);
+		return;
+	}
+
 	//calculate cooldown
 	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
 	if(cooldown < 0) {
@@ -1250,9 +1256,9 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 			return;
 		}
 		ExpendAlternateAdvancementCharge(ability->id);
-	} else {
+	} 	else {
 		if(!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
-			return;
+			return;	
 		}
 	}
 
