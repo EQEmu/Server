@@ -45,24 +45,6 @@ namespace EQ
 	class InventoryProfile;
 }
 
-struct EventLogDetails_Struct {
-	uint32	id;
-	char	accountname[64];
-	uint32	account_id;
-	int16	status;
-	char	charactername[64];
-	char	targetname[64];
-	char	timestamp[64];
-	char	descriptiontype[64];
-	char	details[128];
-};
-
-struct CharacterEventLog_Struct {
-	uint32	count;
-	uint8	eventid;
-	EventLogDetails_Struct eld[255];
-};
-
 struct npcDecayTimes_Struct {
 	uint16 minlvl;
 	uint16 maxlvl;

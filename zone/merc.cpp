@@ -4791,7 +4791,12 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				tmpsize = c->GetMercInfo().MercSize;
 			}
 
-			sprintf(npc_type->lastname, "%s's Mercenary", c->GetName());
+			std::string tmp_lastname = c->GetName();
+			tmp_lastname += "'s Mercenary";
+
+			// not sure what to do if too long
+			if (tmp_lastname.length() < sizeof(npc_type->lastname))
+				strn0cpy(npc_type->lastname, tmp_lastname.c_str(), sizeof(npc_type->lastname));
 			npc_type->gender = tmpgender;
 			npc_type->size = tmpsize;
 			npc_type->loottable_id = 0; // Loottable has to be 0, otherwise we'll be leavin' some corpses!
