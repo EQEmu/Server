@@ -2262,7 +2262,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			if(client)
 			{
 				SetPetOwnerClient(true);
-				sprintf(ns->spawn.lastName, "%s's Pet", client->GetName());
+				//sprintf(ns->spawn.lastName, "%s's Pet", client->GetName()); //Commented out by Gangsta, this removes pet names.
 			}
 		}
 	}
