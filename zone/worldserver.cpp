@@ -3176,8 +3176,8 @@ void WorldServer::UpdateLFP(uint32 LeaderID, GroupLFPMemberEntry *LFPMembers) {
 
 void WorldServer::StopLFP(uint32 LeaderID) {
 
-	GroupLFPMemberEntry LFPMembers;
-	UpdateLFP(LeaderID, LFPOff, 0, 0, 0, 0, "", &LFPMembers);
+	GroupLFPMemberEntry LFPMembers[MAX_GROUP_MEMBERS];
+	UpdateLFP(LeaderID, LFPOff, 0, 0, 0, 0, "", LFPMembers);
 }
 
 void WorldServer::HandleLFGMatches(ServerPacket *pack) {
