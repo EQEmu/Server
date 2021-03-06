@@ -22,6 +22,7 @@
 
 #include <map>
 #include <list>
+#include <memory>
 
 class SpawnEntry {
 public:
@@ -55,7 +56,7 @@ public:
 
 	~SpawnGroup();
 	uint32 GetNPCType(uint16 condition_value_filter=1);
-	void AddSpawnEntry(SpawnEntry *newEntry);
+	void AddSpawnEntry(std::unique_ptr<SpawnEntry> &newEntry);
 	uint32 id;
 	bool wp_spawns;			// if true, spawn NPCs at a random waypoint location (if spawnpoint has a grid) instead of the spawnpoint's loc
 	float  roamdist;
@@ -66,7 +67,7 @@ public:
 	uint32 despawn_timer;
 private:
 	char name_[120];
-	std::list<SpawnEntry *> list_;
+	std::list<std::unique_ptr<SpawnEntry>> list_;
 	uint8 group_spawn_limit; //max # of this entry which can be spawned by this group
 };
 
@@ -75,14 +76,13 @@ public:
 	SpawnGroupList() {}
 	~SpawnGroupList();
 
-	void AddSpawnGroup(SpawnGroup *new_group);
+	void AddSpawnGroup(std::unique_ptr<SpawnGroup> &new_group);
 	SpawnGroup *GetSpawnGroup(uint32 id);
 	bool RemoveSpawnGroup(uint32 in_id);
 	void ClearSpawnGroups();
 	void ReloadSpawnGroups();
 private:
-	//LinkedList<SpawnGroup*> list_;
-	std::map<uint32, SpawnGroup *> m_spawn_groups;
+	std::map<uint32, std::unique_ptr<SpawnGroup>> m_spawn_groups;
 };
 
 #endif
