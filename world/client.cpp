@@ -1307,23 +1307,23 @@ void Client::Clearance(int8 response)
 	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
 
-	const char *zs_addr = nullptr;
+	std::string zs_addr;
 	if(cle && cle->IsLocalClient()) {
 		const char *local_addr = zs->GetCLocalAddress();
 
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			zs_addr = zs->GetIP().c_str();
+			zs_addr = zs->GetIP();
 
-			if (!zs_addr[0]) {
-				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+			if (zs_addr.empty()) {
+				zs_addr = WorldConfig::get()->LocalAddress;
 			}
 
-			if(strcmp(zs_addr, "127.0.0.1") == 0)
+			if(zs_addr == "127.0.0.1")
 			{
 				LogInfo("Local zone address was [{}], setting local address to: [{}]", zs_addr, WorldConfig::get()->LocalAddress.c_str());
-				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+				zs_addr = WorldConfig::get()->LocalAddress;
 			} else {
 				LogInfo("Local zone address [{}]", zs_addr);
 			}
@@ -1334,11 +1334,11 @@ void Client::Clearance(int8 response)
 		if(addr[0]) {
 			zs_addr = addr;
 		} else {
-			zs_addr = WorldConfig::get()->WorldAddress.c_str();
+			zs_addr = WorldConfig::get()->WorldAddress;
 		}
 	}
 
-	strcpy(zsi->ip, zs_addr);
+	strcpy(zsi->ip, zs_addr.c_str());
 	zsi->port =zs->GetCPort();
 	LogInfo("Sending client to zone [{}] ([{}]:[{}]) at [{}]:[{}]", zonename, zone_id, instance_id, zsi->ip, zsi->port);
 	QueuePacket(outapp);
