@@ -87,13 +87,13 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			break;
 		case EQ::item::ItemType2HBlunt: // 2H Blunt
 			skillinuse = EQ::skills::Skill2HBlunt;
-			type = anim2HSlashing; //anim2HWeapon
+			type = anim2HWeapon; //anim2HWeapon added anim2HWeapon instead of anim2HSlashing -Gangsta
 			break;
 		case EQ::item::ItemType2HPiercing: // 2H Piercing
-			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+			//if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
 				skillinuse = EQ::skills::Skill1HPiercing;
-			else
-				skillinuse = EQ::skills::Skill2HPiercing;
+			//else
+			//	skillinuse = EQ::skills::Skill2HPiercing; -Gangsta commented out so we no longer use 2hPiercing, not classic. 1/2 (client.cpp)
 			type = anim2HWeapon;
 			break;
 		case EQ::item::ItemTypeMartial:
@@ -121,7 +121,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = anim1HWeapon;
 			break;
 		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HSlashing; //anim2HWeapon
+			type = anim2HWeapon; //anim2HWeapon added anim2HWeapon instead of anim2HSlashing -Gangsta
 			break;
 		case EQ::skills::Skill2HPiercing: // 2H Piercing
 			type = anim2HWeapon;
@@ -1773,7 +1773,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		{
 			LogCombat("killer mob is client [{}]", killerMob->GetName());
 			int pvpleveldifference = 0;
-			
+			//if (RuleI(World, PVPSettings) == 4) 
+				//pvpleveldifference = 5; //Sullon Zek 
 			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0)
 				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
 
@@ -2108,7 +2109,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 		other->AddToHateList(this, hate);
 
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
-			my_hit.damage_done = std::max(my_hit.damage_done * RuleI(World, PVPPetDamageMitigation) / 100, 1);
+			my_hit.damage_done = std::max(my_hit.damage_done * RuleI(World, PVPPetDamageMitigation) / 100, 0); //set to 0 so that pets dont always hit for 1 -Gangsta
 		}
 
 		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
