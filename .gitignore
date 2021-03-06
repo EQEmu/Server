@@ -54,3 +54,6 @@ bin/
 /Win32
 /x64
 /client_files/**/CMakeFiles/
+common.zip
+submodules.zip
+world.zip
