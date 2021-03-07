@@ -2271,7 +2271,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 			if(client)
 			{
 				SetPetOwnerClient(true);
-				std::string tmp_lastname = swarmOwner->GetName();
+				std::string tmp_lastname = client->GetName();
 				tmp_lastname += "'s Pet";
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
