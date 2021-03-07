@@ -1804,7 +1804,7 @@ void command_list(Client *c, const Seperator *sep)
 	else {
 		c->Message(Chat::White, "Usage of #list");
 		c->Message(Chat::White, "- #list [npcs|players|corpses|doors|objects] [search]");
-		c->Message(Chat::White, "- Example: #list npc (Blank for all)");
+		c->Message(Chat::White, "- Example: #list npcs (Blank for all)");
 	}
 }
 
