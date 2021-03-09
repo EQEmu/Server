@@ -2389,7 +2389,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
-	DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+	if (slot != CastingSlot::Discipline) {
+		DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
+	}
 
 	// Set and send the nimbus effect if this spell has one
 	int NimbusEffect = GetNimbusEffect(spell_id);
