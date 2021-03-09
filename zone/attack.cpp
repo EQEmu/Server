@@ -1727,6 +1727,17 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 				}
 			}
 		}
+
+		// check for a pvp kill
+		if (killerMob->IsClient()) {
+			Client* victim = this;
+			std::vector<EQ::Any> args;
+			args.push_back(victim);
+
+			parse->EventPlayer(EVENT_PVP_SLAY, killerMob->CastToClient(), victim->GetName(), victim->CharacterID(), &args);
+
+			mod_client_death_pvp(killerMob);
+		}
 	}
 
 	entity_list.RemoveFromTargets(this, true);
