@@ -2389,7 +2389,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		}
 	}
 
-	if (slot != CastingSlot::Discipline) {
+	if (!spells[spell_id].cast_not_standing) {
 		DoAnim(spells[spell_id].CastingAnim, 0, true, IsClient() ? FilterPCSpells : FilterNPCSpells);
 	}
 
