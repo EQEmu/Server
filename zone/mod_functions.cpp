@@ -96,6 +96,7 @@ int32 Client::mod_tribute_item_value(int32 pts, const EQ::ItemInstance* item) { 
 //Death reporting
 void Client::mod_client_death_npc(Mob* killerMob) { return; }
 void Client::mod_client_death_duel(Mob* killerMob) { return; }
+void Client::mod_client_death_pvp(Mob* killerMob) { return; }
 void Client::mod_client_death_env() { return; }
 
 //Calculated xp before consider modifier, called whenever a client gets XP for killing a mob.

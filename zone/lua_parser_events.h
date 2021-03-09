@@ -47,6 +47,8 @@ void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std:
 		std::vector<EQ::Any> *extra_pointers);
 void handle_player_environmental_damage(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 	std::vector<EQ::Any> *extra_pointers);
+void handle_pvp_slay(QuestInterface* parse, lua_State* L, Client* npc, std::string data, uint32 extra_data,
+		std::vector<EQ::Any> *extra_pointers);
 void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
 void handle_player_timer(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

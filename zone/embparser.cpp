@@ -42,6 +42,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_COMBAT",
 	"EVENT_AGGRO",
 	"EVENT_SLAY",
+	"EVENT_PVP_SLAY",
 	"EVENT_NPC_SLAY",
 	"EVENT_WAYPOINT_ARRIVE",
 	"EVENT_WAYPOINT_DEPART",

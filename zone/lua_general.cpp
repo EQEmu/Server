@@ -2930,6 +2930,7 @@ luabind::scope lua_register_events() {
 			luabind::value("spawn", static_cast<int>(EVENT_SPAWN)),
 			luabind::value("combat", static_cast<int>(EVENT_COMBAT)),
 			luabind::value("slay", static_cast<int>(EVENT_SLAY)),
+			luabind::value("pvp_slay", static_cast<int>(EVENT_PVP_SLAY)),
 			luabind::value("waypoint_arrive", static_cast<int>(EVENT_WAYPOINT_ARRIVE)),
 			luabind::value("waypoint_depart", static_cast<int>(EVENT_WAYPOINT_DEPART)),
 			luabind::value("timer", static_cast<int>(EVENT_TIMER)),
