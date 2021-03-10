@@ -1991,7 +1991,7 @@ void Mob::InstillDoubt(Mob *who) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillIntimidation, who, 10);
 	}
 
-	//I think this formula needs work
+		//I think this formula needs work
 	int value = 0;
 
 	//user's bonus
@@ -2000,7 +2000,7 @@ void Mob::InstillDoubt(Mob *who) {
 	//target's counters
 	value -= target->GetLevel()*4 + who->GetWIS()/4;
 
-	if (zone->random.Roll(value)) {
+	if (zone->random.Roll(value) >= 25) {
 		//temporary hack...
 		//cast fear on them... should prolly be a different spell
 		//and should be un-resistable.
