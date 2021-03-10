@@ -198,6 +198,10 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
+	if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) / 10)) { //exp given should not exceed 10%, check #2 after class / race mods -Gangsta
+		in_add_exp = (GetEXPForLevel(GetLevel() + 1) / 10);
+	}
+
 	return in_add_exp;
 }
 
@@ -464,6 +468,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 			}
 		}
 
+
 		// Calculate any changes to leadership experience.
 		CalculateLeadershipExp(add_exp, conlevel);
 	}	//end !resexp
@@ -478,7 +483,12 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 		add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
+	if (add_exp > (GetEXPForLevel(GetLevel() +1 ) / 10)) { //exp given should not exceed 10% -Gangsta
+		add_exp = (GetEXPForLevel(GetLevel() + 1 ) /10);
+	}
+
 	add_exp = GetEXP() + add_exp;
+
 }
 
 void Client::AddEXP(uint32 in_add_exp, uint8 conlevel, bool resexp) {
@@ -1045,7 +1055,9 @@ void Group::SplitExp(uint32 exp, Mob* other) {
 			if (diff >= (maxdiff)) { /*Instead of person who killed the mob, the person who has the highest level in the group*/
 				uint32 tmp = (cmember->GetLevel()+3) * (cmember->GetLevel()+3) * 75 * 35 / 10;
 				uint32 tmp2 = groupexp / membercount;
+
 				cmember->AddEXP( tmp < tmp2 ? tmp : tmp2, conlevel );
+				
 			}
 		}
 	}
