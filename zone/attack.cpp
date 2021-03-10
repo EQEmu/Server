@@ -2298,10 +2298,14 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (killer_mob && GetClass() != LDON_TREASURE)
 		hate_list.AddEntToHateList(killer_mob, damage);
 
-	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
+	Mob* give_exp = nullptr;
 
-	if (give_exp == nullptr)
-		give_exp = killer;
+	if (!hate_list.IsNPCOnHateList()) {
+		give_exp = hate_list.GetDamageTopOnHateList(this);
+
+		if (give_exp == nullptr)
+			give_exp = killer;
+	}
 
 	if (give_exp && give_exp->HasOwner()) {
 

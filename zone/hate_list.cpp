@@ -86,6 +86,20 @@ bool HateList::IsEntOnHateList(Mob *mob)
 	return false;
 }
 
+bool HateList::IsNPCOnHateList()
+{
+	auto iterator = list.begin();
+	while (iterator != list.end())
+	{
+		if ((*iterator)->entity_on_hatelist->IsNPC() && !(*iterator)->entity_on_hatelist->IsPet()) {
+			return true;
+		}
+		++iterator;
+	}
+
+	return false;
+}
+
 struct_HateList *HateList::Find(Mob *in_entity)
 {
 	auto iterator = list.begin();
