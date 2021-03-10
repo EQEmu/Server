@@ -50,6 +50,7 @@ public:
 	Mob *GetEscapingEntOnHateList(Mob *center, float range = 0.0f, bool first = false);
 
 	bool IsEntOnHateList(Mob *mob);
+	bool HateList::IsNPCOnHateList();
 	bool IsHateListEmpty();
 	bool RemoveEntFromHateList(Mob *ent);
 
