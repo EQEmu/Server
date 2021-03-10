@@ -1623,8 +1623,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (!spell)
 		spell = SPELL_UNKNOWN;
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	char buffer[64] = { 0 };
+	snprintf(buffer, 63, "%d %d %d %d %s", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), killerMob ? killerMob->GetName() : "");
 	if (parse->EventPlayer(EVENT_DEATH, this, buffer, 0) != 0) {
 		if (GetHP() < 0) {
 			SetHP(0);
@@ -1800,16 +1800,20 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			exploss = 0;
 		}
 	}
-
+	char caster_name[64] = { 0 };
 	if (spell != SPELL_UNKNOWN)
 	{
 		uint32 buff_count = GetMaxTotalSlots();
 		for (uint16 buffIt = 0; buffIt < buff_count; buffIt++)
 		{
-			if (buffs[buffIt].spellid == spell && buffs[buffIt].client)
+			if (buffs[buffIt].spellid == spell)
 			{
-				exploss = 0;	// no exp loss for pvp dot
-				break;
+				strcpy(caster_name, buffs[buffIt].caster_name);
+				if (buffs[buffIt].client) 
+				{
+					exploss = 0;	// no exp loss for pvp dot
+					break;
+				}
 			}
 		}
 	}
@@ -1946,7 +1950,10 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", this->GetZoneID(), this->GetInstanceID(), killer_name, spell, damage);
 		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
 	}
-
+	if (killerMob && strlen(caster_name) > 0 && strcmp(killerMob->GetName(), caster_name) == -1)
+	{
+		snprintf(buffer, 63, "%d %d %d %d %s", 0, damage, spell, static_cast<int>(attack_skill), caster_name);
+	}
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);
 	return true;
 }
@@ -2623,8 +2630,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	char buffer[64] = { 0 };
+	snprintf(buffer, 63, "%d %d %d %d %s", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), killer_mob ? killer_mob->GetName() : "");
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer, 0);
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
