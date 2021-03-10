@@ -49,6 +49,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_combat",
 	"event_aggro",
 	"event_slay",
+	"event_pvp_slay",
 	"event_npc_slay",
 	"event_waypoint_arrive",
 	"event_waypoint_depart",
@@ -179,6 +180,7 @@ LuaParser::LuaParser() {
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
+	PlayerArgumentDispatch[EVENT_PVP_SLAY] = handle_pvp_slay;
 	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_TIMER] = handle_player_timer;

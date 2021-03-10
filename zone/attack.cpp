@@ -1727,6 +1727,17 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 				}
 			}
 		}
+
+		// check for a pvp kill
+		if (killerMob->IsClient()) {
+			Client* victim = this;
+			std::vector<EQ::Any> args;
+			args.push_back(victim);
+
+			parse->EventPlayer(EVENT_PVP_SLAY, killerMob->CastToClient(), victim->GetName(), victim->CharacterID(), &args);
+
+			mod_client_death_pvp(killerMob);
+		}
 	}
 
 	entity_list.RemoveFromTargets(this, true);
@@ -2306,10 +2317,16 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (killer_mob && GetClass() != LDON_TREASURE)
 		hate_list.AddEntToHateList(killer_mob, damage);
 
-	Mob *give_exp = hate_list.GetDamageTopOnHateList(this);
+	Mob* give_exp = nullptr;
+	bool npc_assisted = hate_list.IsNPCOnHateList();
 
-	if (give_exp == nullptr)
-		give_exp = killer;
+	// only give xp if an npc did not assist this kill
+	if (!npc_assisted) {
+		give_exp = hate_list.GetDamageTopOnHateList(this);
+
+		if (give_exp == nullptr)
+			give_exp = killer;
+	}
 
 	if (give_exp && give_exp->HasOwner()) {
 
@@ -2501,7 +2518,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	if (!HasOwner() && !IsMerc() && !GetSwarmInfo() && (!is_merchant || allow_merchant_corpse) &&
 		((killer && (killer->IsClient() || (killer->HasOwner() && killer->GetUltimateOwner()->IsClient()) ||
 		(killer->IsNPC() && killer->CastToNPC()->GetSwarmInfo() && killer->CastToNPC()->GetSwarmInfo()->GetOwner() && killer->CastToNPC()->GetSwarmInfo()->GetOwner()->IsClient())))
-		|| (killer_mob && IsLdonTreasure)))
+		|| (killer_mob && IsLdonTreasure)) && !npc_assisted)
 	{
 		if (killer != 0) {
 			if (killer->GetOwner() != 0 && killer->GetOwner()->IsClient())
