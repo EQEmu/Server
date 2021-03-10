@@ -3695,7 +3695,8 @@ void ZoneDatabase::LoadBuffs(Client *client)
 			buffs[slot_id].client = true;
 		} else {
 			buffs[slot_id].casterid = 0;
-			strcpy(buffs[slot_id].caster_name, "");
+		//	strcpy(buffs[slot_id].caster_name, "");
+			strcpy(buffs[slot_id].caster_name, row[3]);
 			buffs[slot_id].client = false;
 		}
 
