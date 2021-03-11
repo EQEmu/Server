@@ -21,6 +21,7 @@
 #include "../common/rulesys.h"
 #include "../common/string_util.h"
 
+#include "expedition.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
@@ -312,7 +313,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		 * In 99% of cases we would never get here and this would be fallback
 		 */
 		if (!found_zone) {
-			auto zones = ZoneRepository::GetWhere(
+			auto zones = ZoneRepository::GetWhere(content_db,
 				fmt::format(
 					"expansion <= {} AND short_name = '{}' and version = 0",
 					(content_service.GetCurrentExpansion() + 1),
@@ -403,6 +404,16 @@ void Client::DoZoneSuccess(ZoneChange_Struct *zc, uint16 zone_id, uint32 instanc
 
 	if(this->GetPet())
 		entity_list.RemoveFromHateLists(this->GetPet());
+
+	if (GetPendingExpeditionInviteID() != 0)
+	{
+		// live re-invites if client zoned with a pending invite, save pending invite info in world
+		auto expedition = Expedition::FindCachedExpeditionByID(GetPendingExpeditionInviteID());
+		if (expedition)
+		{
+			expedition->SendWorldPendingInvite(m_pending_expedition_invite, GetName());
+		}
+	}
 
 	LogInfo("Zoning [{}] to: [{}] ([{}]) - ([{}]) x [{}] y [{}] z [{}]", m_pp.name, ZoneName(zone_id), zone_id, instance_id, dest_x, dest_y, dest_z);
 
@@ -579,7 +590,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			return;
 		}
 
-		if(GetPetID() != 0) {
+		if(zm != SummonPC && GetPetID() != 0) {
 			//if they have a pet and they are staying in zone, move with them
 			Mob *p = GetPet();
 			if(p != nullptr){

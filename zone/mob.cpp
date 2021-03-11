@@ -20,6 +20,7 @@
 #include "../common/string_util.h"
 #include "../common/misc_functions.h"
 
+#include "data_bucket.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "worldserver.h"
@@ -254,7 +255,7 @@ Mob::Mob(
 	INT               = in_int;
 	WIS               = in_wis;
 	CHA               = in_cha;
-	MR                = CR = FR = DR = PR = Corrup = 0;
+	MR                = CR = FR = DR = PR = Corrup = PhR = 0;
 	ExtraHaste        = 0;
 	bEnraged          = false;
 	shield_target     = nullptr;
@@ -312,7 +313,7 @@ Mob::Mob(
 	isgrouped     = false;
 	israidgrouped = false;
 
-	IsHorse = false;
+	is_horse = false;
 
 	entity_id_being_looted = 0;
 	_appearance            = eaStanding;
@@ -464,6 +465,8 @@ Mob::Mob(
 #endif
 
 	mob_close_scan_timer.Trigger();
+
+	SetCanOpenDoors(true);
 }
 
 Mob::~Mob()
@@ -1197,10 +1200,6 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	else
 		ns->spawn.flymode = flymode;
 
-	if(IsBoat()) {
-		ns->spawn.flymode = GravityBehavior::Floating;
-	}
-
 	ns->spawn.lastName[0] = '\0';
 
 	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
@@ -1738,6 +1737,7 @@ void Mob::GMMove(float x, float y, float z, float heading, bool SendUpdate) {
 	m_Position.x = x;
 	m_Position.y = y;
 	m_Position.z = z;
+	SetHeading(heading);
 	mMovementManager->SendCommandToClients(this, 0.0, 0.0, 0.0, 0.0, 0, ClientRangeAny);
 
 	if (IsNPC()) {
@@ -2824,6 +2824,11 @@ bool Mob::HateSummon() {
 }
 
 void Mob::FaceTarget(Mob* mob_to_face /*= 0*/) {
+
+	if (IsBoat()) {
+		return;
+	}
+
 	Mob* faced_mob = mob_to_face;
 	if(!faced_mob) {
 		if(!GetTarget()) {
@@ -3135,6 +3140,12 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
 	}
+
+	if (on->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
+		return;
+
+	if (on->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
+		return;
 
 	if (IsNoCast())
 		return;
@@ -4887,7 +4898,8 @@ bool Mob::IsBoat() const {
 		race == RACE_SHIP_404 ||
 		race == RACE_MERCHANT_SHIP_550 ||
 		race == RACE_PIRATE_SHIP_551 ||
-		race == RACE_GHOST_SHIP_552
+		race == RACE_GHOST_SHIP_552 ||
+		race == RACE_BOAT_533
 	);
 }
 
@@ -5951,3 +5963,61 @@ float Mob::HealRotationExtendedHealFrequency()
 	return m_target_of_heal_rotation->ExtendedHealFrequency(this);
 }
 #endif
+
+bool Mob::CanOpenDoors() const
+{
+	return m_can_open_doors;
+}
+
+void Mob::SetCanOpenDoors(bool can_open)
+{
+	m_can_open_doors = can_open;
+}
+
+void Mob::DeleteBucket(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	DataBucket::DeleteData(full_bucket_name);
+}
+
+std::string Mob::GetBucket(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_value = DataBucket::GetData(full_bucket_name);
+	if (!bucket_value.empty()) {
+		return bucket_value;
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketExpires(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_expiration = DataBucket::GetDataExpires(full_bucket_name);
+	if (!bucket_expiration.empty()) {
+		return bucket_expiration;
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketKey() {
+	if (IsClient()) {
+		return fmt::format("character-{}", CastToClient()->CharacterID());
+	} else if (IsNPC()) {
+		return fmt::format("npc-{}", GetNPCTypeID());
+	}
+	return std::string();
+}
+
+std::string Mob::GetBucketRemaining(std::string bucket_name) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	std::string bucket_remaining = DataBucket::GetDataRemaining(full_bucket_name);
+	if (!bucket_remaining.empty() && atoi(bucket_remaining.c_str()) > 0) {
+		return bucket_remaining;
+	} else if (atoi(bucket_remaining.c_str()) == 0) {
+		return "0";
+	}
+	return std::string();
+}
+
+void Mob::SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration) {
+	std::string full_bucket_name = fmt::format("{}-{}", GetBucketKey(), bucket_name);
+	DataBucket::SetData(full_bucket_name, bucket_value, expiration);
+}

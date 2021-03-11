@@ -118,6 +118,8 @@ namespace Logs {
 		Merchants,
 		ZonePoints,
 		Loot,
+		Expeditions,
+		DynamicZones,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -194,7 +196,9 @@ namespace Logs {
 		"HotReload",
 		"Merchants",
 		"ZonePoints",
-		"Loot"
+		"Loot",
+		"Expeditions",
+		"DynamicZones",
 	};
 }
 

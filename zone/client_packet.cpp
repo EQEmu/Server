@@ -49,6 +49,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/zone_numbers.h"
 #include "data_bucket.h"
 #include "event_codes.h"
+#include "expedition.h"
+#include "expedition_database.h"
 #include "guild_mgr.h"
 #include "merc.h"
 #include "petitions.h"
@@ -191,6 +193,15 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_DuelResponse2] = &Client::Handle_OP_DuelResponse2;
 	ConnectedOpcodes[OP_DumpName] = &Client::Handle_OP_DumpName;
 	ConnectedOpcodes[OP_Dye] = &Client::Handle_OP_Dye;
+	ConnectedOpcodes[OP_DzAddPlayer] = &Client::Handle_OP_DzAddPlayer;
+	ConnectedOpcodes[OP_DzChooseZoneReply] = &Client::Handle_OP_DzChooseZoneReply;
+	ConnectedOpcodes[OP_DzExpeditionInviteResponse] = &Client::Handle_OP_DzExpeditionInviteResponse;
+	ConnectedOpcodes[OP_DzListTimers] = &Client::Handle_OP_DzListTimers;
+	ConnectedOpcodes[OP_DzMakeLeader] = &Client::Handle_OP_DzMakeLeader;
+	ConnectedOpcodes[OP_DzPlayerList] = &Client::Handle_OP_DzPlayerList;
+	ConnectedOpcodes[OP_DzRemovePlayer] = &Client::Handle_OP_DzRemovePlayer;
+	ConnectedOpcodes[OP_DzSwapPlayer] = &Client::Handle_OP_DzSwapPlayer;
+	ConnectedOpcodes[OP_DzQuit] = &Client::Handle_OP_DzQuit;
 	ConnectedOpcodes[OP_Emote] = &Client::Handle_OP_Emote;
 	ConnectedOpcodes[OP_EndLootRequest] = &Client::Handle_OP_EndLootRequest;
 	ConnectedOpcodes[OP_EnvDamage] = &Client::Handle_OP_EnvDamage;
@@ -266,6 +277,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ItemViewUnknown] = &Client::Handle_OP_Ignore;
 	ConnectedOpcodes[OP_Jump] = &Client::Handle_OP_Jump;
 	ConnectedOpcodes[OP_KeyRing] = &Client::Handle_OP_KeyRing;
+	ConnectedOpcodes[OP_KickPlayers] = &Client::Handle_OP_KickPlayers;
 	ConnectedOpcodes[OP_LDoNButton] = &Client::Handle_OP_LDoNButton;
 	ConnectedOpcodes[OP_LDoNDisarmTraps] = &Client::Handle_OP_LDoNDisarmTraps;
 	ConnectedOpcodes[OP_LDoNInspect] = &Client::Handle_OP_LDoNInspect;
@@ -549,8 +561,9 @@ void Client::CompleteConnect()
 				entity_list.AddRaid(raid, raidid);
 				raid->LoadLeadership(); // Recreating raid in new zone, get leadership from DB
 			}
-			else
-				raid = nullptr;
+			else {
+				safe_delete(raid);
+			}
 		}
 		if (raid) {
 			SetRaidGrouped(true);
@@ -885,6 +898,8 @@ void Client::CompleteConnect()
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
+	UpdateExpeditionInfoAndLockouts();
+
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
 	strcpy((char*)pack->pBuffer, GetName());
@@ -920,7 +935,7 @@ void Client::CompleteConnect()
 
 	entity_list.ScanCloseMobs(close_mobs, this, true);
 
-	if (GetGM()) {
+	if (GetGM() && IsDevToolsEnabled()) {
 		ShowDevToolsMenu();
 	}
 
@@ -1517,7 +1532,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 			int mentor_percent;
 			GroupLeadershipAA_Struct GLAA;
 			memset(ln, 0, 64);
-			strcpy(ln, database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA));
+			database.GetGroupLeadershipInfo(group->GetID(), ln, MainTankName, AssistName, PullerName, NPCMarkerName, mentoree_name, &mentor_percent, &GLAA);
 			Client *c = entity_list.GetClientByName(ln);
 			if (c)
 				group->SetLeader(c);
@@ -1701,13 +1716,15 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	m_expedition_id = ExpeditionDatabase::GetExpeditionIDFromCharacterID(CharacterID());
+
 	/**
 	 * DevTools Load Settings
 	 */
 	if (Admin() >= EQ::DevTools::GM_ACCOUNT_STATUS_LEVEL) {
-		std::string dev_tools_window_key = StringFormat("%i-dev-tools-window-disabled", AccountID());
+		std::string dev_tools_window_key = StringFormat("%i-dev-tools-disabled", AccountID());
 		if (DataBucket::GetData(dev_tools_window_key) == "true") {
-			dev_tools_window_enabled = false;
+			dev_tools_enabled = false;
 		}
 	}
 
@@ -1805,8 +1822,8 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 	}
 	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
-	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->AcceptNewTask(this, ant->task_id, ant->task_master_id);
+	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id);
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
@@ -2025,12 +2042,10 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	else if (aps->Type == NorrathsKeepersMerchant)
 	{
 		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	else if (aps->Type == DarkReignMerchant)
 	{
 		SetEbonCrystals(GetEbonCrystals() - (int32)item->LDoNPrice);
-		SendCrystalCounts();
 	}
 	int16 charges = 1;
 	if (item->MaxCharges != 0)
@@ -3368,11 +3383,10 @@ void Client::Handle_OP_BankerChange(const EQApplicationPacket *app)
 
 	if (!banker || distance > USE_NPC_RANGE2)
 	{
-		char *hacked_string = nullptr;
-		MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(money) but %s is non-existant or too far away (%u units).",
-			banker ? banker->GetName() : "UNKNOWN NPC", distance);
+		auto hacked_string = fmt::format(
+		    "Player tried to make use of a banker(money) but {} is non-existant or too far away ({} units).",
+		    banker ? banker->GetName() : "UNKNOWN NPC", distance);
 		database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-		safe_delete_array(hacked_string);
 		return;
 	}
 
@@ -3990,8 +4004,8 @@ void Client::Handle_OP_CancelTask(const EQApplicationPacket *app)
 	}
 	CancelTask_Struct *cts = (CancelTask_Struct*)app->pBuffer;
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
+	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->CancelTask(this, cts->SequenceNumber, static_cast<TaskType>(cts->type));
 }
 
 void Client::Handle_OP_CancelTrade(const EQApplicationPacket *app)
@@ -5003,10 +5017,8 @@ void Client::Handle_OP_ControlBoat(const EQApplicationPacket *app)
 
 	if (!boat->IsNPC() || !boat->IsControllableBoat())
 	{
-		char *hacked_string = nullptr;
-		MakeAnyLenString(&hacked_string, "OP_Control Boat was sent against %s which is of race %u", boat->GetName(), boat->GetRace());
+		auto hacked_string = fmt::format("OP_Control Boat was sent against {} which is of race {}", boat->GetName(), boat->GetRace());
 		database.SetMQDetectionFlag(this->AccountName(), this->GetName(), hacked_string, zone->GetShortName());
-		safe_delete_array(hacked_string);
 		return;
 	}
 
@@ -5326,10 +5338,8 @@ void Client::Handle_OP_Disarm(const EQApplicationPacket *app) {
 		return;
 	if (pmob->GetID() != GetID()) {
 		// Client sent a disarm request with an originator ID not matching their own ID.
-		char *hack_str = NULL;
-		MakeAnyLenString(&hack_str, "Player %s (%d) sent OP_Disarm with source ID of: %d", GetCleanName(), GetID(), pmob->GetID());
+		auto hack_str = fmt::format("Player {} ({}) sent OP_Disarm with source ID of: {}", GetCleanName(), GetID(), pmob->GetID());
 		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-		safe_delete_array(hack_str);
 		return;
 	}
 	// No disarm on corpses
@@ -5604,6 +5614,116 @@ void Client::Handle_OP_Dye(const EQApplicationPacket *app)
 		DyeArmor(dye);
 	}
 	return;
+}
+
+void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzAddPlayer(this, dzcmd->name);
+	}
+	else
+	{
+		// the only /dz command that sends an error message if no active expedition
+		Message(Chat::System, DZ_YOU_NOT_ASSIGNED);
+	}
+}
+
+void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
+{
+	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
+	LogDynamicZones(
+		"Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
+		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2
+	);
+
+	if (!dzmsg->dz_instance_id || !database.VerifyInstanceAlive(dzmsg->dz_instance_id, CharacterID()))
+	{
+		// live just no-ops this without a message
+		LogDynamicZones(
+			"Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
+			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id
+		);
+		return;
+	}
+
+	auto client_dzs = GetDynamicZones();
+	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZoneInfo dz_info) {
+		return dz_info.dynamic_zone.IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id);
+	});
+
+	if (it != client_dzs.end())
+	{
+		DynamicZoneLocation loc = it->dynamic_zone.GetZoneInLocation();
+		ZoneMode zone_mode = it->dynamic_zone.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
+	}
+}
+
+void Client::Handle_OP_DzExpeditionInviteResponse(const EQApplicationPacket *app)
+{
+	auto expedition = Expedition::FindCachedExpeditionByID(m_pending_expedition_invite.expedition_id);
+	std::string swap_remove_name = m_pending_expedition_invite.swap_remove_name;
+	m_pending_expedition_invite = { 0 }; // clear before re-validating
+
+	if (expedition)
+	{
+		auto dzmsg = reinterpret_cast<ExpeditionInviteResponse_Struct*>(app->pBuffer);
+		expedition->DzInviteResponse(this, dzmsg->accepted, swap_remove_name);
+	}
+}
+
+void Client::Handle_OP_DzListTimers(const EQApplicationPacket *app)
+{
+	DzListTimers();
+}
+
+void Client::Handle_OP_DzMakeLeader(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzMakeLeader(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzPlayerList(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzPlayerList(this);
+	}
+}
+
+void Client::Handle_OP_DzRemovePlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommand_Struct*>(app->pBuffer);
+		expedition->DzRemovePlayer(this, dzcmd->name);
+	}
+}
+
+void Client::Handle_OP_DzSwapPlayer(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition)
+	{
+		auto dzcmd = reinterpret_cast<ExpeditionCommandSwap_Struct*>(app->pBuffer);
+		expedition->DzSwapPlayer(this, dzcmd->rem_player_name, dzcmd->add_player_name);
+	}
+}
+
+void Client::Handle_OP_DzQuit(const EQApplicationPacket *app)
+{
+	auto expedition = GetExpedition();
+	if (expedition) {
+		expedition->DzQuit(this);
+	}
 }
 
 void Client::Handle_OP_Emote(const EQApplicationPacket *app)
@@ -8876,6 +8996,23 @@ void Client::Handle_OP_KeyRing(const EQApplicationPacket *app)
 	KeyRingList();
 }
 
+void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
+{
+	auto buf = reinterpret_cast<KickPlayers_Struct*>(app->pBuffer);
+	if (buf->kick_expedition)
+	{
+		auto expedition = GetExpedition();
+		if (expedition)
+		{
+			expedition->DzKickPlayers(this);
+		}
+	}
+	else if (buf->kick_task)
+	{
+		// todo: shared tasks
+	}
+}
+
 void Client::Handle_OP_LDoNButton(const EQApplicationPacket *app)
 {
 	if (app->size < sizeof(bool))
@@ -9889,17 +10026,15 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 	{
 		if (mi->from_slot != mi->to_slot && (mi->from_slot <= EQ::invslot::GENERAL_END || mi->from_slot > 39) && IsValidSlot(mi->from_slot) && IsValidSlot(mi->to_slot))
 		{
-			char *detect = nullptr;
 			const EQ::ItemInstance *itm_from = GetInv().GetItem(mi->from_slot);
 			const EQ::ItemInstance *itm_to = GetInv().GetItem(mi->to_slot);
-			MakeAnyLenString(&detect, "Player issued a move item from %u(item id %u) to %u(item id %u) while casting %u.",
+			auto detect = fmt::format("Player issued a move item from {}(item id {}) to {}(item id {}) while casting {}.",
 				mi->from_slot,
 				itm_from ? itm_from->GetID() : 0,
 				mi->to_slot,
 				itm_to ? itm_to->GetID() : 0,
 				casting_spell_id);
 			database.SetMQDetectionFlag(AccountName(), GetName(), detect, zone->GetShortName());
-			safe_delete_array(detect);
 			Kick("Inventory desync"); // Kick client to prevent client and server from getting out-of-sync inventory slots
 			return;
 		}
@@ -10912,8 +11047,8 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case EQ::popupresponse::MOB_INFO_DISMISS:
-			this->SetDisplayMobInfoWindow(false);
-			this->Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
+			SetDisplayMobInfoWindow(false);
+			Message(Chat::Yellow, "[DevTools] Window snoozed in this zone...");
 			break;
 		default:
 			break;
@@ -12841,12 +12976,10 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	if (!TakeMoneyFromPP(mpo->price))
 	{
-		char *hacker_str = nullptr;
-		MakeAnyLenString(&hacker_str, "Vendor Cheat: attempted to buy %i of %i: %s that cost %d cp but only has %d pp %d gp %d sp %d cp\n",
+		auto hacker_str = fmt::format("Vendor Cheat: attempted to buy {} of {}: {} that cost {} cp but only has {} pp {} gp {} sp {} cp",
 			mpo->quantity, item->ID, item->Name,
 			mpo->price, m_pp.platinum, m_pp.gold, m_pp.silver, m_pp.copper);
 		database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-		safe_delete_array(hacker_str);
 		safe_delete(outapp);
 		safe_delete(inst);
 		return;
@@ -13328,10 +13461,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			{
 				if (ClientVersion() < EQ::versions::ClientVersion::SoF)
 				{
-					char *hack_str = nullptr;
-					MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Invis: %i", sa->parameter);
+					auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Invis: {}", sa->parameter);
 					database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-					safe_delete_array(hack_str);
 				}
 			}
 			return;
@@ -13430,10 +13561,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 		{
 			if (!HasSkill(EQ::skills::SkillSneak))
 			{
-				char *hack_str = nullptr;
-				MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Sneak: %i", sa->parameter);
+				auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Sneak: {}", sa->parameter);
 				database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-				safe_delete_array(hack_str);
 			}
 			return;
 		}
@@ -13442,10 +13571,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	else if (sa->type == AT_Size)
 	{
-		char *hack_str = nullptr;
-		MakeAnyLenString(&hack_str, "Player sent OP_SpawnAppearance with AT_Size: %i", sa->parameter);
+		auto hack_str = fmt::format("Player sent OP_SpawnAppearance with AT_Size: {}", sa->parameter);
 		database.SetMQDetectionFlag(this->account_name, this->name, hack_str, zone->GetShortName());
-		safe_delete_array(hack_str);
 	}
 	else if (sa->type == AT_Light)	// client emitting light (lightstone, shiny shield)
 	{
@@ -13785,11 +13912,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			else if (GetTarget()->GetBodyType() == BT_NoTarget2 || GetTarget()->GetBodyType() == BT_Special
 				|| GetTarget()->GetBodyType() == BT_NoTarget)
 			{
-				char *hacker_str = nullptr;
-				MakeAnyLenString(&hacker_str, "%s attempting to target something untargetable, %s bodytype: %i\n",
+				auto hacker_str = fmt::format("{} attempting to target something untargetable, {} bodytype: {}",
 					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-				safe_delete_array(hacker_str);
 				SetTarget((Mob*)nullptr);
 				return;
 			}
@@ -13809,13 +13934,15 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				{
 					if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 					{
-						char *hacker_str = nullptr;
-						MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
-							" from (%.2f, %.2f, %.2f) to %s (%.2f, %.2f, %.2f)", GetName(),
-							(zone->newzone_data.maxclip*zone->newzone_data.maxclip),
-							GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
+						auto hacker_str = fmt::format(
+						    "{} attempting to target something beyond the clip plane of {:.2f} "
+						    "units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, "
+						    "{:.2f})",
+						    GetName(),
+						    (zone->newzone_data.maxclip * zone->newzone_data.maxclip), GetX(),
+						    GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
+						    GetTarget()->GetY(), GetTarget()->GetZ());
 						database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-						safe_delete_array(hacker_str);
 						SetTarget(nullptr);
 						return;
 					}
@@ -13823,13 +13950,13 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 			}
 			else if (DistanceSquared(m_Position, GetTarget()->GetPosition()) > (zone->newzone_data.maxclip*zone->newzone_data.maxclip))
 			{
-				char *hacker_str = nullptr;
-				MakeAnyLenString(&hacker_str, "%s attempting to target something beyond the clip plane of %.2f units,"
-					" from (%.2f, %.2f, %.2f) to %s (%.2f, %.2f, %.2f)", GetName(),
-					(zone->newzone_data.maxclip*zone->newzone_data.maxclip),
-					GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(), GetTarget()->GetY(), GetTarget()->GetZ());
+				auto hacker_str =
+				    fmt::format("{} attempting to target something beyond the clip plane of {:.2f} "
+						"units, from ({:.2f}, {:.2f}, {:.2f}) to {} ({:.2f}, {:.2f}, {:.2f})",
+						GetName(), (zone->newzone_data.maxclip * zone->newzone_data.maxclip),
+						GetX(), GetY(), GetZ(), GetTarget()->GetName(), GetTarget()->GetX(),
+						GetTarget()->GetY(), GetTarget()->GetZ());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
-				safe_delete_array(hacker_str);
 				SetTarget(nullptr);
 				return;
 			}
@@ -13855,8 +13982,8 @@ void Client::Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app)
 	}
 	TaskHistoryRequest_Struct *ths = (TaskHistoryRequest_Struct*)app->pBuffer;
 
-	if (RuleB(TaskSystem, EnableTaskSystem) && taskstate)
-		taskstate->SendTaskHistory(this, ths->TaskIndex);
+	if (RuleB(TaskSystem, EnableTaskSystem) && task_state)
+		task_state->SendTaskHistory(this, ths->TaskIndex);
 }
 
 void Client::Handle_OP_Taunt(const EQApplicationPacket *app)

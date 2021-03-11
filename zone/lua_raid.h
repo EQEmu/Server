@@ -48,6 +48,8 @@ public:
 	int GetID();
 	Lua_Client GetMember(int index);
 	int GetGroupNumber(int index);
+	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name);
+	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name, int max_check_count);
 };
 
 #endif

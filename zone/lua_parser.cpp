@@ -19,6 +19,7 @@
 #include "lua_parser.h"
 #include "lua_bit.h"
 #include "lua_entity.h"
+#include "lua_expedition.h"
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
@@ -987,6 +988,16 @@ void LuaParser::ReloadQuests() {
 	}
 }
 
+/*
+ * This function is intended only to clean up lua_encounters when the Encounter object is
+ * about to be destroyed. It won't clean up memory else where, since the caller of this
+ * function is responsible for that
+ */
+void LuaParser::RemoveEncounter(const std::string &name)
+{
+	lua_encounters.erase(name);
+}
+
 void LuaParser::LoadScript(std::string filename, std::string package_name) {
 	auto iter = loaded_.find(package_name);
 	if(iter != loaded_.end()) {
@@ -1108,7 +1119,9 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_ruler(),
 			lua_register_ruleb(),
 			lua_register_journal_speakmode(),
-			lua_register_journal_mode()
+			lua_register_journal_mode(),
+			lua_register_expedition(),
+			lua_register_expedition_lock_messages()
 		];
 
 	} catch(std::exception &ex) {

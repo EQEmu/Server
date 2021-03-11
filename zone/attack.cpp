@@ -2667,6 +2667,12 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (IsFamiliar() || GetSpecialAbility(IMMUNE_AGGRO))
 		return;
 
+	if (GetSpecialAbility(IMMUNE_AGGRO_NPC) && other->IsNPC())
+		return;
+
+	if (GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient())
+		return;
+
 	if (spell_id != SPELL_UNKNOWN && NoDetrimentalSpellAggro(spell_id))
 		return;
 
@@ -2758,8 +2764,11 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		else {
 			// cb:2007-08-17
 			// owner must get on list, but he's not actually gained any hate yet
-			if (!owner->GetSpecialAbility(IMMUNE_AGGRO))
-			{
+			if (
+				!owner->GetSpecialAbility(IMMUNE_AGGRO) &&
+				!(this->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && owner->IsClient()) && 
+				!(this->GetSpecialAbility(IMMUNE_AGGRO_NPC) && owner->IsNPC())
+			) {
 				if (owner->IsClient() && !CheckAggro(owner))
 					owner->CastToClient()->AddAutoXTarget(this);
 				hate_list.AddEntToHateList(owner, 0, 0, false, !iBuffTic);
@@ -2768,12 +2777,24 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	}
 
 	if (mypet && !mypet->IsHeld() && !mypet->IsPetStop()) { // I have a pet, add other to it
-		if (!mypet->IsFamiliar() && !mypet->GetSpecialAbility(IMMUNE_AGGRO))
+		if (
+			!mypet->IsFamiliar() && 
+			!mypet->GetSpecialAbility(IMMUNE_AGGRO) &&
+			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && this->IsClient()) && 
+			!(mypet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && this->IsNPC())
+		) {
 			mypet->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+		}
 	}
 	else if (myowner) { // I am a pet, add other to owner if it's NPC/LD
-		if (myowner->IsAIControlled() && !myowner->GetSpecialAbility(IMMUNE_AGGRO))
+		if (
+			myowner->IsAIControlled() && 
+			!myowner->GetSpecialAbility(IMMUNE_AGGRO) &&
+			!(this->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && myowner->IsClient()) && 
+			!(this->GetSpecialAbility(IMMUNE_AGGRO_NPC) && myowner->IsNPC())
+		) {
 			myowner->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+		}
 	}
 
 	if (other->GetTempPetCount())
@@ -3467,8 +3488,19 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// pets that have GHold will never automatically add NPCs
 		// pets that have Hold and no Focus will add NPCs if they're engaged
 		// pets that have Hold and Focus will not add NPCs
-		if (pet && !pet->IsFamiliar() && !pet->GetSpecialAbility(IMMUNE_AGGRO) && !pet->IsEngaged() && attacker && attacker != this && !attacker->IsCorpse() && !pet->IsGHeld() && !attacker->IsTrap())
-		{
+		if (
+			pet && 
+			!pet->IsFamiliar() && 
+			!pet->GetSpecialAbility(IMMUNE_AGGRO) && 
+			!pet->IsEngaged() && 
+			attacker && 
+			!(pet->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && attacker->IsClient()) && 
+			!(pet->GetSpecialAbility(IMMUNE_AGGRO_NPC) && attacker->IsNPC()) && 
+			attacker != this && 
+			!attacker->IsCorpse() && 
+			!pet->IsGHeld() && 
+			!attacker->IsTrap()
+		) {
 			if (!pet->IsHeld()) {
 				LogAggro("Sending pet [{}] into battle due to attack", pet->GetName());
 				if (IsClient()) {

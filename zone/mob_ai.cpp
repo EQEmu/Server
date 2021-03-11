@@ -435,23 +435,27 @@ void Mob::AI_Start(uint32 iMoveDelay) {
 		time_until_can_move = 0;
 
 	pAIControlled  = true;
-	AI_think_timer = std::unique_ptr<Timer>(new Timer(AIthink_duration));
+	AI_think_timer = std::make_unique<Timer>(AIthink_duration);
 	AI_think_timer->Trigger();
 
-	AI_walking_timer        = std::unique_ptr<Timer>(new Timer(0));
-	AI_movement_timer       = std::unique_ptr<Timer>(new Timer(AImovement_duration));
-	AI_target_check_timer   = std::unique_ptr<Timer>(new Timer(AItarget_check_duration));
-	AI_feign_remember_timer = std::unique_ptr<Timer>(new Timer(AIfeignremember_delay));
-	AI_scan_door_open_timer = std::unique_ptr<Timer>(new Timer(AI_scan_door_open_interval));
+	AI_walking_timer        = std::make_unique<Timer>(0);
+	AI_movement_timer       = std::make_unique<Timer>(AImovement_duration);
+	AI_target_check_timer   = std::make_unique<Timer>(AItarget_check_duration);
+	AI_feign_remember_timer = std::make_unique<Timer>(AIfeignremember_delay);
+	AI_scan_door_open_timer = std::make_unique<Timer>(AI_scan_door_open_interval);
+
+	if (GetBodyType() == BT_Animal && !RuleB(NPC, AnimalsOpenDoors)) {
+		SetCanOpenDoors(false);
+	}
 
 	if(!RuleB(Aggro, NPCAggroMaxDistanceEnabled)) {
 		hate_list_cleanup_timer.Disable();
 	}
 
 	if (CastToNPC()->WillAggroNPCs())
-		AI_scan_area_timer = std::unique_ptr<Timer>(new Timer(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax))));
-	
-	AI_check_signal_timer = std::unique_ptr<Timer>(new Timer(AI_check_signal_timer_delay));
+		AI_scan_area_timer = std::make_unique<Timer>(RandomTimer(RuleI(NPC, NPCToNPCAggroTimerMin), RuleI(NPC, NPCToNPCAggroTimerMax)));
+
+	AI_check_signal_timer = std::make_unique<Timer>(AI_check_signal_timer_delay);
 
 
 	if (GetAggroRange() == 0)
@@ -484,10 +488,10 @@ void NPC::AI_Start(uint32 iMoveDelay) {
 		return;
 
 	if (AIspells.empty()) {
-		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(1000));
+		AIautocastspell_timer = std::make_unique<Timer>(1000);
 		AIautocastspell_timer->Disable();
 	} else {
-		AIautocastspell_timer = std::unique_ptr<Timer>(new Timer(500));
+		AIautocastspell_timer = std::make_unique<Timer>(500);
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 	}
 
@@ -884,49 +888,49 @@ void Mob::ProcessForcedMovement()
 	if (AI_movement_timer->Check()) {
 		bool bPassed = true;
 		glm::vec3 normal;
-	
+
 		// no zone map = fucked
 		if (zone->HasMap()) {
 			// in front
 			m_CollisionBox[0].x = m_Position.x + 3.0f * g_Math.FastSin(0.0f);
 			m_CollisionBox[0].y = m_Position.y + 3.0f * g_Math.FastCos(0.0f);
 			m_CollisionBox[0].z = m_Position.z;
-	
+
 			// 45 right front
 			m_CollisionBox[1].x = m_Position.x + 3.0f * g_Math.FastSin(64.0f);
 			m_CollisionBox[1].y = m_Position.y + 3.0f * g_Math.FastCos(64.0f);
 			m_CollisionBox[1].z = m_Position.z;
-	
+
 			// to right
 			m_CollisionBox[2].x = m_Position.x + 3.0f * g_Math.FastSin(128.0f);
 			m_CollisionBox[2].y = m_Position.y + 3.0f * g_Math.FastCos(128.0f);
 			m_CollisionBox[2].z = m_Position.z;
-	
+
 			// 45 right back
 			m_CollisionBox[3].x = m_Position.x + 3.0f * g_Math.FastSin(192.0f);
 			m_CollisionBox[3].y = m_Position.y + 3.0f * g_Math.FastCos(192.0f);
 			m_CollisionBox[3].z = m_Position.z;
-	
+
 			// behind
 			m_CollisionBox[4].x = m_Position.x + 3.0f * g_Math.FastSin(256.0f);
 			m_CollisionBox[4].y = m_Position.y + 3.0f * g_Math.FastCos(256.0f);
 			m_CollisionBox[4].z = m_Position.z;
-	
+
 			// 45 left back
 			m_CollisionBox[5].x = m_Position.x + 3.0f * g_Math.FastSin(320.0f);
 			m_CollisionBox[5].y = m_Position.y + 3.0f * g_Math.FastCos(320.0f);
 			m_CollisionBox[5].z = m_Position.z;
-	
+
 			// to left
 			m_CollisionBox[6].x = m_Position.x + 3.0f * g_Math.FastSin(384.0f);
 			m_CollisionBox[6].y = m_Position.y + 3.0f * g_Math.FastCos(384.0f);
 			m_CollisionBox[6].z = m_Position.z;
-	
+
 			// 45 left front
 			m_CollisionBox[7].x = m_Position.x + 3.0f * g_Math.FastSin(448.0f);
 			m_CollisionBox[7].y = m_Position.y + 3.0f * g_Math.FastCos(448.0f);
 			m_CollisionBox[7].z = m_Position.z;
-	
+
 			// collision happened, need to move along the wall
 			float distance = 0.0f, shortest = std::numeric_limits<float>::infinity();
 			glm::vec3 tmp_nrm;
@@ -940,7 +944,7 @@ void Mob::ProcessForcedMovement()
 				}
 			}
 		}
-	
+
 		if (bPassed) {
 			ForcedMovement = 0;
 			Teleport(m_Position + m_Delta);
@@ -978,23 +982,25 @@ void Mob::AI_Process() {
 		engaged = false;
 	}
 
-	if (moving) {
+	if (moving && CanOpenDoors()) {
 		if (AI_scan_door_open_timer->Check()) {
-
 			auto      &door_list = entity_list.GetDoorsList();
 			for (auto itr : door_list) {
 				Doors *door = itr.second;
 
-				if (door->GetKeyItem())
+				if (door->GetKeyItem()) {
 					continue;
+				}
 
-				if (door->GetLockpick())
+				if (door->GetLockpick()) {
 					continue;
+				}
 
-				if (door->IsDoorOpen())
+				if (door->IsDoorOpen()) {
 					continue;
+				}
 
-				float distance                = DistanceSquared(this->m_Position, door->GetPosition());
+				float distance                = DistanceSquared(m_Position, door->GetPosition());
 				float distance_scan_door_open = 20;
 
 				if (distance <= (distance_scan_door_open * distance_scan_door_open)) {
@@ -1003,8 +1009,9 @@ void Mob::AI_Process() {
 					 * Make sure we're opening a door within height relevance and not platforms
 					 * above or below
 					 */
-					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10)
+					if (std::abs(this->m_Position.z - door->GetPosition().z) > 10) {
 						continue;
+					}
 
 					door->ForceOpen(this);
 				}
@@ -1637,7 +1644,7 @@ void NPC::AI_DoMovement() {
 					roambox_destination_y,
 					m_Position.z + 15
 				);
-				if (!zone->watermap->InLiquid(position)) {
+				if (zone->HasWaterMap() && !zone->watermap->InLiquid(position)) {
 					roambox_destination_x = m_SpawnPoint.x;
 					roambox_destination_y = m_SpawnPoint.y;
 					roambox_destination_z = m_SpawnPoint.z;
@@ -1723,7 +1730,9 @@ void NPC::AI_DoMovement() {
 							// reached our randomly selected destination; force a pause
 							if (cur_wp_pause == 0)
 							{
-								if (Waypoints.size() > 0 && Waypoints[0].pause)
+								if (Waypoints.size() >= cur_wp && Waypoints[cur_wp].pause)
+									cur_wp_pause = Waypoints[cur_wp].pause;
+								else if (Waypoints.size() > 0 && Waypoints[0].pause)
 									cur_wp_pause = Waypoints[0].pause;
 								else
 									cur_wp_pause = 38;
@@ -1741,7 +1750,7 @@ void NPC::AI_DoMovement() {
 					if (cur_wp_pause > 0 && m_CurrentWayPoint.w >= 0.0) {
 						RotateTo(m_CurrentWayPoint.w);
 					}
-							
+
 					//kick off event_waypoint arrive
 					char temp[16];
 					sprintf(temp, "%d", cur_wp);
@@ -1755,7 +1764,7 @@ void NPC::AI_DoMovement() {
 					if (cur_wp == EQ::WaypointStatus::QuestControlNoGrid) {
 						AI_SetupNextWaypoint();
 					}
-		
+
 					// wipe feign memory since we reached our first waypoint
 					if (cur_wp == 1)
 						ClearFeignMemory();
@@ -1773,7 +1782,7 @@ void NPC::AI_DoMovement() {
 						m_CurrentWayPoint.y,
 						m_CurrentWayPoint.z
 					);
-		
+
 				}
 			}
 		}        // endif (gridno > 0)
@@ -1782,15 +1791,15 @@ void NPC::AI_DoMovement() {
 			if (pause_timer_complete == true) { // time to pause has ended
 				SetGrid(0 - GetGrid()); // revert to AI control
 				LogPathing("Quest pathing is finished. Resuming on grid [{}]", GetGrid());
-		
+
 				SetAppearance(eaStanding, false);
-		
+
 				CalculateNewWaypoint();
 			}
 		}
 
 	}
-	else if (IsGuarding()) {	
+	else if (IsGuarding()) {
 		bool at_gp = IsPositionEqualWithinCertainZ(m_Position, m_GuardPoint, 15.0f);
 
 		if (at_gp) {
@@ -1855,17 +1864,17 @@ void NPC::AI_SetupNextWaypoint() {
 			roamer = false;
 			cur_wp = 0;
 		}
-		
+
 		SetAppearance(eaStanding, false);
-		
+
 		entity_list.OpenDoorsNear(this);
-		
+
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart
 			char temp[16];
 			sprintf(temp, "%d", cur_wp);
 			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
-		
+
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
 			if (GetGrid() > 0) {
@@ -1935,7 +1944,7 @@ void Mob::AI_Event_NoLongerEngaged() {
 		time_until_can_move += minLastFightingDelayMoving;
 	else
 		time_until_can_move += zone->random.Int(minLastFightingDelayMoving, maxLastFightingDelayMoving);
-	
+
 	StopNavigation();
 	ClearRampage();
 
@@ -2480,7 +2489,7 @@ create table npc_spells_entries (
 	);
 */
 
-bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID);
+bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
 bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
@@ -2752,14 +2761,14 @@ bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSp
 	return false;
 }
 
-bool IsSpellInList(DBnpcspells_Struct* spell_list, int16 iSpellID) {
+bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID) {
 	auto it = std::find_if(spell_list->entries.begin(), spell_list->entries.end(),
 			       [iSpellID](const DBnpcspells_entries_Struct &a) { return a.spellid == iSpellID; });
 	return it != spell_list->entries.end();
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
+void NPC::AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType,
 							int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp)
 {
 
@@ -2786,7 +2795,7 @@ void NPC::AddSpellToNPCList(int16 iPriority, int16 iSpellID, uint32 iType,
 		AIautocastspell_timer->Start(RandomTimer(0, 300), false);
 }
 
-void NPC::RemoveSpellFromNPCList(int16 spell_id)
+void NPC::RemoveSpellFromNPCList(uint16 spell_id)
 {
 	auto iter = AIspells.begin();
 	while(iter != AIspells.end())

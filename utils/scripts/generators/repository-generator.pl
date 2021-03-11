@@ -266,16 +266,14 @@ foreach my $table_to_generate (@tables) {
             );
         }
 
-        # insert one
-        if ($extra ne "auto_increment") {
-            my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
-            if ($data_type =~ /int|float|double|decimal/) {
-                $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
-            }
-
-            $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
-            $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
+        # insert
+        my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
+        if ($data_type =~ /int|float|double|decimal/) {
+            $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
         }
+
+        $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
+        $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
 
         # find one / all (select)
         if ($data_type =~ /int/) {

@@ -44,24 +44,28 @@ typedef const char Const_char;
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_NPC \
+	do { \
+		if (sv_derived_from(ST(0), "NPC")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(NPC*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type NPC"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_NPC_SignalNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SignalNPC) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SignalNPC(THIS, int signal_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SignalNPC(THIS, int signal_id)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int _signal_id = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SignalNPC(_signal_id);
 	}
 	XSRETURN_EMPTY;
@@ -71,21 +75,13 @@ XS(XS_NPC_CheckNPCFactionAlly); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_CheckNPCFactionAlly) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::CheckNPCFactionAlly(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: NPC::CheckNPCFactionAlly(THIS, int32 faction_id)"); // @categories Faction
 	{
 		NPC           *THIS;
 		FACTION_VALUE RETVAL;
 		dXSTARG;
 		int32         other_faction = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->CheckNPCFactionAlly(other_faction);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -97,7 +93,7 @@ XS(XS_NPC_AddItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddItem) {
 	dXSARGS;
 	if (items < 2 || items > 10)
-		Perl_croak(aTHX_ "Usage: NPC::AddItem(THIS, uint32 item_id, [uint16 charges = 0], [bool equip_item = true], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint32 aug6 = 0])");
+		Perl_croak(aTHX_ "Usage: NPC::AddItem(THIS, uint32 item_id, [uint16 charges = 0], [bool equip_item = true], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint32 aug6 = 0])"); // @categories Inventory and Items
 	{
 		NPC    *THIS;
 		uint32 itemid    = (uint32) SvUV(ST(1));
@@ -109,15 +105,7 @@ XS(XS_NPC_AddItem) {
 		uint32 aug4      = 0;
 		uint32 aug5      = 0;
 		uint32 aug6      = 0;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (items > 2)
 			charges   = (uint16) SvUV(ST(2));
 		if (items > 3)
@@ -144,18 +132,10 @@ XS(XS_NPC_AddLootTable); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddLootTable) {
 	dXSARGS;
 	if (items < 1)
-		Perl_croak(aTHX_ "Usage: NPC::AddLootTable(THIS, [uint32 loottable_id])");
+		Perl_croak(aTHX_ "Usage: NPC::AddLootTable(THIS, [uint32 loottable_id])"); // @categories Inventory and Items
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		uint32 loottable_id = 0;
 
 		if (items > 1) {
@@ -172,21 +152,13 @@ XS(XS_NPC_RemoveItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveItem) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveItem(THIS, uint32 item_id, [uint16 quantity = 0], [uint16 slot_id = 0])");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveItem(THIS, uint32 item_id, [uint16 quantity = 0], [uint16 slot_id = 0])"); // @categories Inventory and Items
 	{
 		NPC    *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
 		uint16 quantity;
 		uint16 slot;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (items < 3)
 			quantity = 0;
 		else {
@@ -208,18 +180,10 @@ XS(XS_NPC_ClearItemList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ClearItemList) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::ClearItemList(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::ClearItemList(THIS)"); // @categories Inventory and Items
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->ClearItemList();
 	}
 	XSRETURN_EMPTY;
@@ -229,22 +193,14 @@ XS(XS_NPC_AddCash); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddCash) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: NPC::AddCash(THIS, uint16 copper, uint16 silver, uint16 gold, uint16 platinum)");
+		Perl_croak(aTHX_ "Usage: NPC::AddCash(THIS, uint16 copper, uint16 silver, uint16 gold, uint16 platinum)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint16 in_copper   = (uint16) SvUV(ST(1));
 		uint16 in_silver   = (uint16) SvUV(ST(2));
 		uint16 in_gold     = (uint16) SvUV(ST(3));
 		uint16 in_platinum = (uint16) SvUV(ST(4));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AddCash(in_copper, in_silver, in_gold, in_platinum);
 	}
 	XSRETURN_EMPTY;
@@ -254,18 +210,10 @@ XS(XS_NPC_RemoveCash); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveCash) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveCash(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveCash(THIS)"); // @categories Currency and Points
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveCash();
 	}
 	XSRETURN_EMPTY;
@@ -275,20 +223,12 @@ XS(XS_NPC_CountLoot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_CountLoot) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::CountLoot(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::CountLoot(THIS)"); // @categories Inventory and Items
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->CountLoot();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -300,20 +240,12 @@ XS(XS_NPC_GetLoottableID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetLoottableID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetLoottableID(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetLoottableID(THIS)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetLoottableID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -325,20 +257,12 @@ XS(XS_NPC_GetCopper); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetCopper) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetCopper(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetCopper(THIS)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetCopper();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -350,20 +274,12 @@ XS(XS_NPC_GetSilver); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSilver) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSilver(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSilver(THIS)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSilver();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -375,20 +291,12 @@ XS(XS_NPC_GetGold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetGold) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetGold(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetGold(THIS)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetGold();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -400,20 +308,12 @@ XS(XS_NPC_GetPlatinum); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetPlatinum) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetPlatinum(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetPlatinum(THIS)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetPlatinum();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -425,19 +325,11 @@ XS(XS_NPC_SetCopper); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetCopper) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetCopper(THIS, uint32 copper_amount)");
+		Perl_croak(aTHX_ "Usage: NPC::SetCopper(THIS, uint32 copper_amount)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 amt = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetCopper(amt);
 	}
 	XSRETURN_EMPTY;
@@ -447,19 +339,11 @@ XS(XS_NPC_SetSilver); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSilver) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSilver(THIS, uint32 silver_amount)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSilver(THIS, uint32 silver_amount)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 amt = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSilver(amt);
 	}
 	XSRETURN_EMPTY;
@@ -469,19 +353,11 @@ XS(XS_NPC_SetGold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetGold) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetGold(THIS, uint32 gold_amount)");
+		Perl_croak(aTHX_ "Usage: NPC::SetGold(THIS, uint32 gold_amount)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 amt = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetGold(amt);
 	}
 	XSRETURN_EMPTY;
@@ -491,19 +367,11 @@ XS(XS_NPC_SetPlatinum); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetPlatinum) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetPlatinum(THIS, uint32 platinum_amount)");
+		Perl_croak(aTHX_ "Usage: NPC::SetPlatinum(THIS, uint32 platinum_amount)"); // @categories Currency and Points
 	{
 		NPC    *THIS;
 		uint32 amt = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetPlatinum(amt);
 	}
 	XSRETURN_EMPTY;
@@ -513,19 +381,11 @@ XS(XS_NPC_SetGrid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetGrid) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetGrid(THIS, int32 grid_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetGrid(THIS, int32 grid_id)"); // @categories Script Utility
 	{
 		NPC   *THIS;
 		int32 grid_ = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetGrid(grid_);
 	}
 	XSRETURN_EMPTY;
@@ -535,19 +395,11 @@ XS(XS_NPC_SetSaveWaypoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSaveWaypoint) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSaveWaypoint(THIS, uint16 waypoint)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSaveWaypoint(THIS, uint16 waypoint)"); // @categories Script Utility
 	{
 		NPC    *THIS;
 		uint16 waypoint = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSaveWaypoint(waypoint);
 	}
 	XSRETURN_EMPTY;
@@ -557,19 +409,11 @@ XS(XS_NPC_SetSp2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSp2) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSp2(THIS, uint32 set_spawn_group_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSp2(THIS, uint32 set_spawn_group_id)"); // @categories Spawns
 	{
 		NPC    *THIS;
 		uint32 sg2 = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSpawnGroupId(sg2);
 	}
 	XSRETURN_EMPTY;
@@ -579,20 +423,12 @@ XS(XS_NPC_GetWaypointMax); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetWaypointMax) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetWaypointMax(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetWaypointMax(THIS)"); // @categories Script Utility
 	{
 		NPC    *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetWaypointMax();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -604,20 +440,12 @@ XS(XS_NPC_GetGrid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetGrid) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetGrid(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetGrid(THIS)"); // @categories Script Utility, Spawns
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetGrid();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -629,20 +457,12 @@ XS(XS_NPC_GetSp2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSp2) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSp2(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSp2(THIS)"); // @categories Spawns
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnGroupId();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -654,20 +474,12 @@ XS(XS_NPC_GetNPCFactionID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetNPCFactionID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetNPCFactionID(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetNPCFactionID(THIS)"); // @categories Faction, Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetNPCFactionID();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -679,20 +491,12 @@ XS(XS_NPC_GetPrimaryFaction); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetPrimaryFaction) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetPrimaryFaction(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetPrimaryFaction(THIS)"); // @categories Faction, Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetPrimaryFaction();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -704,21 +508,13 @@ XS(XS_NPC_GetNPCHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetNPCHate) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::GetNPCHate(THIS, Mob* entity)");
+		Perl_croak(aTHX_ "Usage: NPC::GetNPCHate(THIS, Mob* entity)"); // @categories Hate and Aggro
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
 		Mob   *in_ent;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			in_ent = INT2PTR(Mob *, tmp);
@@ -738,20 +534,12 @@ XS(XS_NPC_IsOnHatelist); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_IsOnHatelist) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::IsOnHatelist(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: NPC::IsOnHatelist(THIS, Mob* target)"); // @categories Hate and Aggro
 	{
 		NPC  *THIS;
 		bool RETVAL;
 		Mob  *p;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			p = INT2PTR(Mob *, tmp);
@@ -771,19 +559,11 @@ XS(XS_NPC_RemoveFromHateList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveFromHateList) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveFromHateList(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveFromHateList(THIS, Mob* target)"); // @categories Hate and Aggro
 	{
 		NPC *THIS;
 		Mob *ent;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			ent = INT2PTR(Mob *, tmp);
@@ -803,19 +583,11 @@ XS(XS_NPC_SetNPCFactionID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetNPCFactionID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetNPCFactionID(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetNPCFactionID(THIS, int32 faction_id)"); // @categories Faction
 	{
 		NPC   *THIS;
 		int32 in = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetNPCFactionID(in);
 	}
 	XSRETURN_EMPTY;
@@ -825,20 +597,12 @@ XS(XS_NPC_GetMaxDMG); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetMaxDMG) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetMaxDMG(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetMaxDMG(THIS)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetMaxDMG();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -855,15 +619,7 @@ XS(XS_NPC_GetMinDMG) {
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetMinDMG();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -876,19 +632,11 @@ XS(XS_NPC_IsAnimal); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_IsAnimal) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::IsAnimal(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::IsAnimal(THIS)"); // @categories Stats and Attributes
 	{
 		NPC  *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->IsAnimal();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -900,20 +648,12 @@ XS(XS_NPC_GetPetSpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetPetSpellID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetPetSpellID(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetPetSpellID(THIS)"); // @categories Stats and Attributes, Pet
 	{
 		NPC    *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetPetSpellID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -925,19 +665,11 @@ XS(XS_NPC_SetPetSpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetPetSpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetPetSpellID(THIS, uint16 amount)");
+		Perl_croak(aTHX_ "Usage: NPC::SetPetSpellID(THIS, uint16 amount)"); // @categories Pet
 	{
 		NPC    *THIS;
 		uint16 amt = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetPetSpellID(amt);
 	}
 	XSRETURN_EMPTY;
@@ -947,21 +679,13 @@ XS(XS_NPC_GetMaxDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetMaxDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::GetMaxDamage(THIS, uint8 target_level)");
+		Perl_croak(aTHX_ "Usage: NPC::GetMaxDamage(THIS, uint8 target_level)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		uint8  tlevel = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetMaxDamage(tlevel);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -973,19 +697,11 @@ XS(XS_NPC_SetTaunting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetTaunting) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetTaunting(THIS, bool toggle)");
+		Perl_croak(aTHX_ "Usage: NPC::SetTaunting(THIS, bool toggle)"); // @categories Script Utility
 	{
 		NPC  *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetTaunting(toggle);
 	}
 	XSRETURN_EMPTY;
@@ -999,15 +715,7 @@ XS(XS_NPC_IsTaunting) {
 	{
 		NPC  *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->IsTaunting();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -1019,19 +727,11 @@ XS(XS_NPC_PickPocket); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_PickPocket) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::PickPocket(THIS, Client* thief)");
+		Perl_croak(aTHX_ "Usage: NPC::PickPocket(THIS, Client* thief)"); // @categories Skills and Recipes
 	{
 		NPC    *THIS;
 		Client *thief;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			thief = INT2PTR(Client *, tmp);
@@ -1049,19 +749,11 @@ XS(XS_NPC_StartSwarmTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_StartSwarmTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::StartSwarmTimer(THIS, uint32 duration)");
+		Perl_croak(aTHX_ "Usage: NPC::StartSwarmTimer(THIS, uint32 duration)"); // @categories Script Utility, Pet
 	{
 		NPC    *THIS;
 		uint32 duration = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->StartSwarmTimer(duration);
 	}
 	XSRETURN_EMPTY;
@@ -1071,19 +763,11 @@ XS(XS_NPC_DoClassAttacks); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_DoClassAttacks) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::DoClassAttacks(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: NPC::DoClassAttacks(THIS, Mob* target)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		Mob *target;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			target = INT2PTR(Mob *, tmp);
@@ -1106,15 +790,7 @@ XS(XS_NPC_GetMaxWp) {
 		NPC *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetMaxWp();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1126,19 +802,11 @@ XS(XS_NPC_DisplayWaypointInfo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_DisplayWaypointInfo) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::DisplayWaypointInfo(THIS, Client* target)");
+		Perl_croak(aTHX_ "Usage: NPC::DisplayWaypointInfo(THIS, Client* target)"); // @categories Script Utility
 	{
 		NPC    *THIS;
 		Client *to;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			to = INT2PTR(Client *, tmp);
@@ -1156,18 +824,10 @@ XS(XS_NPC_CalculateNewWaypoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_CalculateNewWaypoint) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::CalculateNewWaypoint(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::CalculateNewWaypoint(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->CalculateNewWaypoint();
 	}
 	XSRETURN_EMPTY;
@@ -1177,19 +837,11 @@ XS(XS_NPC_AssignWaypoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AssignWaypoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::AssignWaypoints(THIS, uint32 grid_id)");
+		Perl_croak(aTHX_ "Usage: NPC::AssignWaypoints(THIS, uint32 grid_id)"); // @categories Script Utility
 	{
 		NPC    *THIS;
 		uint32 grid = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AssignWaypoints(grid);
 	}
 	XSRETURN_EMPTY;
@@ -1199,18 +851,10 @@ XS(XS_NPC_SetWaypointPause); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetWaypointPause) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::SetWaypointPause(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::SetWaypointPause(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetWaypointPause();
 	}
 	XSRETURN_EMPTY;
@@ -1220,19 +864,11 @@ XS(XS_NPC_UpdateWaypoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_UpdateWaypoint) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::UpdateWaypoint(THIS, int wp_index)");
+		Perl_croak(aTHX_ "Usage: NPC::UpdateWaypoint(THIS, int wp_index)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int wp_index = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->UpdateWaypoint(wp_index);
 	}
 	XSRETURN_EMPTY;
@@ -1242,18 +878,10 @@ XS(XS_NPC_StopWandering); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_StopWandering) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::StopWandering(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::StopWandering(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->StopWandering();
 	}
 	XSRETURN_EMPTY;
@@ -1263,18 +891,10 @@ XS(XS_NPC_ResumeWandering); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ResumeWandering) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::ResumeWandering(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::ResumeWandering(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->ResumeWandering();
 	}
 	XSRETURN_EMPTY;
@@ -1284,19 +904,11 @@ XS(XS_NPC_PauseWandering); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_PauseWandering) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::PauseWandering(THIS, int pause_time)");
+		Perl_croak(aTHX_ "Usage: NPC::PauseWandering(THIS, int pause_time)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int pausetime = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->PauseWandering(pausetime);
 	}
 	XSRETURN_EMPTY;
@@ -1306,33 +918,19 @@ XS(XS_NPC_MoveTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_MoveTo) {
 	dXSARGS;
 	if (items != 4 && items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: NPC::MoveTo(THIS, float x, float y, float z, [float heading], [bool save_guard_location = false])");
+		Perl_croak(aTHX_ "Usage: NPC::MoveTo(THIS, float x, float y, float z, [float heading], [bool save_guard_location = false])"); // @categories Script Utility
 	{
 		NPC   *THIS;
 		float mtx = (float) SvNV(ST(1));
 		float mty = (float) SvNV(ST(2));
 		float mtz = (float) SvNV(ST(3));
-		float mth;
-		bool  saveguard;
-
+		float mth = 0;
+		bool  saveguard = false;
+		VALIDATE_THIS_IS_NPC;
 		if (items > 4)
 			mth = (float) SvNV(ST(4));
-		else
-			mth = 0;
-
 		if (items > 5)
 			saveguard = (bool) SvTRUE(ST(5));
-		else
-			saveguard = false;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
 		auto position = glm::vec4(mtx, mty, mtz, mth);
 		THIS->MoveTo(position, saveguard);
 	}
@@ -1343,18 +941,10 @@ XS(XS_NPC_NextGuardPosition); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_NextGuardPosition) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::NextGuardPosition(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::NextGuardPosition(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->NextGuardPosition();
 	}
 	XSRETURN_EMPTY;
@@ -1364,22 +954,14 @@ XS(XS_NPC_SaveGuardSpot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SaveGuardSpot) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: NPC::SaveGuardSpot(THIS, x, y, z, heading)");
+		Perl_croak(aTHX_ "Usage: NPC::SaveGuardSpot(THIS, x, y, z, heading)"); // @categories Script Utility
 	{
 		NPC  *THIS;
 		float x = (float)SvNV(ST(1));
 		float y = (float)SvNV(ST(2));
 		float z = (float)SvNV(ST(3));
 		float heading = (float)SvNV(ST(4));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SaveGuardSpot(glm::vec4(x, y, z, heading));
 	}
 	XSRETURN_EMPTY;
@@ -1389,19 +971,11 @@ XS(XS_NPC_IsGuarding); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_IsGuarding) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::IsGuarding(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::IsGuarding(THIS)"); // @categories Script Utility
 	{
 		NPC  *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->IsGuarding();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -1413,7 +987,7 @@ XS(XS_NPC_AI_SetRoambox); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AI_SetRoambox) {
 	dXSARGS;
 	if (items < 6 || items > 8)
-		Perl_croak(aTHX_ "Usage: NPC::AI_SetRoambox(THIS, float distance, float max_x, float min_x, float max_y, float min_y, [uint32 max_delay = 2500], [uint32 min_delay = 2500])");
+		Perl_croak(aTHX_ "Usage: NPC::AI_SetRoambox(THIS, float distance, float max_x, float min_x, float max_y, float min_y, [uint32 max_delay = 2500], [uint32 min_delay = 2500])"); // @categories Script Utility
 	{
 		NPC    *THIS;
 		float  iDist = (float) SvNV(ST(1));
@@ -1423,15 +997,7 @@ XS(XS_NPC_AI_SetRoambox) {
 		float  iMinY = (float) SvNV(ST(5));
 		uint32 iDelay;
 		uint32 iMinDelay;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (items < 7) {
 			iMinDelay = 2500;
 			iDelay    = 2500;
@@ -1452,20 +1018,12 @@ XS(XS_NPC_GetNPCSpellsID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetNPCSpellsID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetNPCSpellsID(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetNPCSpellsID(THIS)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetNPCSpellsID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1477,20 +1035,12 @@ XS(XS_NPC_GetSpawnPointID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnPointID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointID(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointID(THIS)"); // @categories Spawns
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnPointID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1502,21 +1052,12 @@ XS(XS_NPC_GetSpawnPointX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnPointX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointX(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointX(THIS)"); // @categories Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnPoint().x;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1528,21 +1069,12 @@ XS(XS_NPC_GetSpawnPointY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnPointY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointY(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointY(THIS)"); // @categories Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnPoint().y;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1554,21 +1086,12 @@ XS(XS_NPC_GetSpawnPointZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnPointZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointZ(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointZ(THIS)"); // @categories Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnPoint().z;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1580,21 +1103,12 @@ XS(XS_NPC_GetSpawnPointH); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnPointH) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointH(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnPointH(THIS)"); // @categories Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnPoint().w;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1606,21 +1120,12 @@ XS(XS_NPC_GetGuardPointX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetGuardPointX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointX(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointX(THIS)"); // @categories Script Utility, Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetGuardPoint().x;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1632,21 +1137,12 @@ XS(XS_NPC_GetGuardPointY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetGuardPointY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointY(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointY(THIS)"); // @categories Script Utility, Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetGuardPoint().y;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1658,21 +1154,12 @@ XS(XS_NPC_GetGuardPointZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetGuardPointZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointZ(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetGuardPointZ(THIS)"); // @categories Script Utility, Spawns
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetGuardPoint().z;
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -1684,19 +1171,11 @@ XS(XS_NPC_SetPrimSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetPrimSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetPrimSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetPrimSkill(THIS, int skill_id)"); // @categories Stats and Attributes
 	{
 		NPC *THIS;
 		int skill_id = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetPrimSkill(skill_id);
 	}
 	XSRETURN_EMPTY;
@@ -1706,19 +1185,11 @@ XS(XS_NPC_SetSecSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSecSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSecSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSecSkill(THIS, int skill_id)"); // @categories Stats and Attributes
 	{
 		NPC *THIS;
 		int skill_id = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSecSkill(skill_id);
 	}
 	XSRETURN_EMPTY;
@@ -1728,20 +1199,12 @@ XS(XS_NPC_GetPrimSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetPrimSkill) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetPrimSkill(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetPrimSkill(THIS)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetPrimSkill();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1753,20 +1216,12 @@ XS(XS_NPC_GetSecSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSecSkill) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSecSkill(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSecSkill(THIS)"); // @categories Stats and Attributes
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSecSkill();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1778,20 +1233,12 @@ XS(XS_NPC_GetSwarmOwner); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSwarmOwner) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSwarmOwner(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSwarmOwner(THIS)"); // @categories Pet
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSwarmOwner();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1803,20 +1250,12 @@ XS(XS_NPC_GetSwarmTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSwarmTarget) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSwarmTarget(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSwarmTarget(THIS)"); // @categories Pet
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSwarmTarget();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1828,19 +1267,11 @@ XS(XS_NPC_SetSwarmTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSwarmTarget) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSwarmTarget(THIS, int target_id)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSwarmTarget(THIS, int target_id)"); // @categories Pet
 	{
 		NPC *THIS;
 		int target_id = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSwarmTarget(target_id);
 	}
 	XSRETURN_EMPTY;
@@ -1850,20 +1281,12 @@ XS(XS_NPC_ModifyNPCStat); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ModifyNPCStat) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: NPC::ModifyNPCStat(THIS, string key, string value)");
+		Perl_croak(aTHX_ "Usage: NPC::ModifyNPCStat(THIS, string key, string value)"); // @categories Stats and Attributes
 	{
 		NPC        *THIS;
 		Const_char *identifier = (Const_char *) SvPV_nolen(ST(1));
 		Const_char *newValue   = (Const_char *) SvPV_nolen(ST(2));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->ModifyNPCStat(identifier, newValue);
 	}
 	XSRETURN_EMPTY;
@@ -1873,7 +1296,7 @@ XS(XS_NPC_AddSpellToNPCList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_AddSpellToNPCList) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: NPC::AddAISpell(THIS, int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust)");
+		Perl_croak(aTHX_ "Usage: NPC::AddAISpell(THIS, int priority, int spell_id, int type, int mana_cost, int recast_delay, int resist_adjust)"); // @categories Spells and Disciplines, Script Utility
 	{
 		NPC *THIS;
 		int priority      = (int) SvIV(ST(1));
@@ -1882,15 +1305,7 @@ XS(XS_NPC_AddSpellToNPCList) {
 		int mana_cost     = (int) SvIV(ST(4));
 		int recast_delay  = (int) SvIV(ST(5));
 		int resist_adjust = (int) SvIV(ST(6));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AddSpellToNPCList(priority, spell_id, type, mana_cost, recast_delay, resist_adjust, 0, 0);
 	}
 	XSRETURN_EMPTY;
@@ -1900,19 +1315,11 @@ XS(XS_NPC_RemoveSpellFromNPCList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RemoveSpellFromNPCList) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpell(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveAISpell(THIS, int spell_id)"); // @categories Spells and Disciplines
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveSpellFromNPCList(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -1922,19 +1329,11 @@ XS(XS_NPC_SetSpellFocusDMG); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSpellFocusDMG) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSpellFocusDMG(THIS, int new_spell_focus_dmg)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSpellFocusDMG(THIS, int new_spell_focus_dmg)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 NewSpellFocusDMG = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSpellFocusDMG(NewSpellFocusDMG);
 	}
 	XSRETURN_EMPTY;
@@ -1944,20 +1343,12 @@ XS(XS_NPC_GetSpellFocusDMG); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpellFocusDMG) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusDMG(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusDMG(THIS)"); // @categories Spells and Disciplines
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpellFocusDMG();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1969,19 +1360,11 @@ XS(XS_NPC_SetSpellFocusHeal); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSpellFocusHeal) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSpellFocusHeal(THIS, int32 new_spell_focus_heal)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSpellFocusHeal(THIS, int32 new_spell_focus_heal)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 NewSpellFocusHeal = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSpellFocusHeal(NewSpellFocusHeal);
 	}
 	XSRETURN_EMPTY;
@@ -1991,20 +1374,12 @@ XS(XS_NPC_GetSpellFocusHeal); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpellFocusHeal) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusHeal(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpellFocusHeal(THIS)"); // @categories Spells and Disciplines
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpellFocusHeal();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2016,20 +1391,12 @@ XS(XS_NPC_GetSlowMitigation); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSlowMitigation) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSlowMitigation(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSlowMitigation(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSlowMitigation();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -2041,20 +1408,12 @@ XS(XS_NPC_GetAttackSpeed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAttackSpeed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetAttackSpeed(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetAttackSpeed(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetAttackSpeed();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -2066,20 +1425,12 @@ XS(XS_NPC_GetAttackDelay); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAttackDelay) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetAttackDelay(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetAttackDelay(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetAttackDelay();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -2091,20 +1442,12 @@ XS(XS_NPC_GetAccuracyRating); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAccuracyRating) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetAccuracyRating(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetAccuracyRating(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetAccuracyRating();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2116,20 +1459,12 @@ XS(XS_NPC_GetAvoidanceRating); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAvoidanceRating) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetAvoidanceyRating(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetAvoidanceyRating(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetAvoidanceRating();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2141,20 +1476,12 @@ XS(XS_NPC_GetSpawnKillCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetSpawnKillCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetSpawnKillCount(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetSpawnKillCount(THIS)"); // @categories Spawns
 	{
 		NPC    *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetSpawnKillCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2166,20 +1493,12 @@ XS(XS_NPC_GetScore); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetScore) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetScore(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetScore(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetScore();
 		XSprePUSH;
 		PUSHi((UV) RETVAL);
@@ -2191,18 +1510,11 @@ XS(XS_NPC_MerchantOpenShop);
 XS(XS_NPC_MerchantOpenShop) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::MerchantOpenShop(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::MerchantOpenShop(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		dXSTARG;
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->MerchantOpenShop();
 	}
 	XSRETURN_EMPTY;
@@ -2212,18 +1524,11 @@ XS(XS_NPC_MerchantCloseShop);
 XS(XS_NPC_MerchantCloseShop) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::MerchantCloseShop(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::MerchantCloseShop(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		dXSTARG;
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->MerchantCloseShop();
 	}
 	XSRETURN_EMPTY;
@@ -2233,21 +1538,13 @@ XS(XS_NPC_AddMeleeProc);
 XS(XS_NPC_AddMeleeProc) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: NPC::AddMeleeProc(THIS, int spell_id, int chance)");
+		Perl_croak(aTHX_ "Usage: NPC::AddMeleeProc(THIS, int spell_id, int chance)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		int chance   = (int) SvIV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AddProcToWeapon(spell_id, true, chance);
 	}
 	XSRETURN_EMPTY;
@@ -2257,21 +1554,13 @@ XS(XS_NPC_AddRangedProc);
 XS(XS_NPC_AddRangedProc) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: NPC::AddRangedProc(THIS, int spell_id, int chance)");
+		Perl_croak(aTHX_ "Usage: NPC::AddRangedProc(THIS, int spell_id, int chance)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		int chance   = (int) SvIV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AddRangedProc(spell_id, chance);
 	}
 	XSRETURN_EMPTY;
@@ -2281,21 +1570,13 @@ XS(XS_NPC_AddDefensiveProc);
 XS(XS_NPC_AddDefensiveProc) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: NPC::AddDefensiveProc(THIS, int spell_id, int chance)");
+		Perl_croak(aTHX_ "Usage: NPC::AddDefensiveProc(THIS, int spell_id, int chance)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		int chance   = (int) SvIV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->AddDefensiveProc(spell_id, chance);
 	}
 	XSRETURN_EMPTY;
@@ -2305,20 +1586,12 @@ XS(XS_NPC_RemoveMeleeProc);
 XS(XS_NPC_RemoveMeleeProc) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveMeleeProc(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveMeleeProc(THIS, int spell_id)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveProcFromWeapon(spell_id, false);
 	}
 	XSRETURN_EMPTY;
@@ -2328,20 +1601,12 @@ XS(XS_NPC_RemoveRangedProc);
 XS(XS_NPC_RemoveRangedProc) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveRangedProc(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveRangedProc(THIS, int spell_id)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveRangedProc(spell_id, false);
 	}
 	XSRETURN_EMPTY;
@@ -2351,20 +1616,12 @@ XS(XS_NPC_RemoveDefensiveProc);
 XS(XS_NPC_RemoveDefensiveProc) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: NPC::RemoveDefensiveProc(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: NPC::RemoveDefensiveProc(THIS, int spell_id)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		int spell_id = (int) SvIV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RemoveDefensiveProc(spell_id, false);
 	}
 	XSRETURN_EMPTY;
@@ -2374,19 +1631,11 @@ XS(XS_NPC_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ChangeLastName) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: NPC::ChangeLastName(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: NPC::ChangeLastName(THIS, string name)"); // @categories Script Utility
 	{
 		NPC  *THIS;
 		char *name = nullptr;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		if (items > 1) { name = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->ChangeLastName(name);
@@ -2398,18 +1647,10 @@ XS(XS_NPC_ClearLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_ClearLastName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::ClearLastName(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::ClearLastName(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->ClearLastName();
 	}
 	XSRETURN_EMPTY;
@@ -2419,19 +1660,11 @@ XS(XS_NPC_GetCombatState); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetCombatState) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetCombatState(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetCombatState(THIS)"); // @categories Script Utility
 	{
 		NPC  *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		RETVAL = THIS->GetCombatEvent();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2443,7 +1676,7 @@ XS(XS_NPC_SetSimpleRoamBox); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_SetSimpleRoamBox) {
 	dXSARGS;
 	if (items < 2)
-		Perl_croak(aTHX_ "Usage: NPC::SetSimpleRoamBox(THIS, box_size, move_distance, move_delay)");
+		Perl_croak(aTHX_ "Usage: NPC::SetSimpleRoamBox(THIS, box_size, move_distance, move_delay)"); // @categories Script Utility
 	{
 		NPC *THIS;
 
@@ -2458,18 +1691,7 @@ XS(XS_NPC_SetSimpleRoamBox) {
 		if (items >= 4) {
 			move_delay = (int) SvIV(ST(3));
 		}
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		}
-		else {
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		}
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->SetSimpleRoamBox(box_size, move_distance, move_delay);
 	}
 	XSRETURN_EMPTY;
@@ -2480,19 +1702,25 @@ XS(XS_NPC_RecalculateSkills); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_RecalculateSkills) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::RecalculateSkills(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::RecalculateSkills(THIS)"); // @categories Skills and Recipes
 	{
 		NPC    *THIS;
-
-		if (sv_derived_from(ST(0), "NPC")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(NPC *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type NPC");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_NPC;
 		THIS->RecalculateSkills();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_NPC_ScaleNPC); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_ScaleNPC) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::ScaleNPC(THIS, uint8 npc_level)");
+	{
+		NPC *THIS;
+		uint8 npc_level = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		THIS->ScaleNPC(npc_level);
 	}
 	XSRETURN_EMPTY;
 }
@@ -2613,6 +1841,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "GetCombatState"), XS_NPC_GetCombatState, file, "$");
 	newXSproto(strcpy(buf, "SetSimpleRoamBox"), XS_NPC_SetSimpleRoamBox, file, "$$;$$");
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
+	newXSproto(strcpy(buf, "ScaleNPC"), XS_NPC_ScaleNPC, file, "$$");
 	XSRETURN_YES;
 }
 

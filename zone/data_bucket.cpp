@@ -102,6 +102,29 @@ std::string DataBucket::GetDataExpires(std::string bucket_key) {
 	return std::string(row[0]);
 }
 
+std::string DataBucket::GetDataRemaining(std::string bucket_key) {
+	if (DataBucket::GetDataExpires(bucket_key).empty()) {
+		return "0";
+	}
+	std::string query = fmt::format(
+		"SELECT (`expires` - UNIX_TIMESTAMP()) AS `remaining` from `data_buckets` WHERE `key` = '{}' AND (`expires` > {} OR `expires` = 0) LIMIT 1",
+		bucket_key.c_str(),
+		(long long) std::time(nullptr)
+	);
+
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return std::string();
+	}
+
+	if (results.RowCount() != 1)
+		return std::string();
+
+	auto row = results.begin();
+
+	return std::string(row[0]);
+}
+
 /**
  * Checks for bucket existence by bucket_name key
  * @param bucket_key

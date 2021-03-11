@@ -45,7 +45,7 @@ LauncherLink::LauncherLink(int id, std::shared_ptr<EQ::Net::ServertalkServerConn
 	m_bootTimer.Disable();
 
 	tcpc->OnMessage(std::bind(&LauncherLink::ProcessMessage, this, std::placeholders::_1, std::placeholders::_2));
-	m_process_timer.reset(new EQ::Timer(100, true, std::bind(&LauncherLink::Process, this, std::placeholders::_1)));
+	m_process_timer = std::make_unique<EQ::Timer>(100, true, std::bind(&LauncherLink::Process, this, std::placeholders::_1));
 }
 
 LauncherLink::~LauncherLink() {

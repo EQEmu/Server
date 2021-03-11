@@ -36,6 +36,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "ucs.h"
 #include "queryserv.h"
 #include "world_store.h"
+#include "expedition_message.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -69,12 +70,12 @@ ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> conn
 
 	tcpc->OnMessage(std::bind(&ZoneServer::HandleMessage, this, std::placeholders::_1, std::placeholders::_2));
 
-	boot_timer_obj.reset(new EQ::Timer(100, true, [this](EQ::Timer *obj) {
+	boot_timer_obj = std::make_unique<EQ::Timer>(100, true, [this](EQ::Timer *obj) {
 		if (zone_boot_timer.Check()) {
 			LSBootUpdate(GetZoneID(), true);
 			zone_boot_timer.Disable();
 		}
-	}));
+	});
 
 	this->console = console;
 }
@@ -1337,7 +1338,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 
 		LogInfo("Loading skill caps");
-		if (!database.LoadSkillCaps(hotfix_name)) {
+		if (!content_db.LoadSkillCaps(hotfix_name)) {
 			LogInfo("Error: Could not load skill cap data. But ignoring");
 		}
 
@@ -1353,6 +1354,52 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			break;
 
 		cle->ProcessTellQueue();
+		break;
+	}
+	case ServerOP_CZClientMessageString:
+	{
+		auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
+		client_list.SendPacket(buf->character_name, pack);
+		break;
+	}
+	case ServerOP_ExpeditionLockout:
+	case ServerOP_ExpeditionLockoutDuration:
+	case ServerOP_ExpeditionLockState:
+	case ServerOP_ExpeditionMemberStatus:
+	case ServerOP_ExpeditionReplayOnJoin:
+	case ServerOP_ExpeditionDzCompass:
+	case ServerOP_ExpeditionDzSafeReturn:
+	case ServerOP_ExpeditionDzZoneIn:
+	case ServerOP_ExpeditionExpireWarning:
+	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ExpeditionChooseNewLeader:
+	case ServerOP_ExpeditionCreate:
+	case ServerOP_ExpeditionGetOnlineMembers:
+	case ServerOP_ExpeditionMemberChange:
+	case ServerOP_ExpeditionMemberSwap:
+	case ServerOP_ExpeditionMembersRemoved:
+	case ServerOP_ExpeditionDzAddPlayer:
+	case ServerOP_ExpeditionDzMakeLeader:
+	case ServerOP_ExpeditionCharacterLockout:
+	case ServerOP_ExpeditionSaveInvite:
+	case ServerOP_ExpeditionRequestInvite:
+	case ServerOP_ExpeditionSecondsRemaining:
+	{
+		ExpeditionMessage::HandleZoneMessage(pack);
+		break;
+	}
+	case ServerOP_DzCharacterChange:
+	case ServerOP_DzRemoveAllCharacters:
+	{
+		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
+		ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(buf->instance_id);
+		if (instance_zs)
+		{
+			instance_zs->SendPacket(pack);
+		}
 		break;
 	}
 	default:

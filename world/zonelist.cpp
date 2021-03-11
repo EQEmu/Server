@@ -42,8 +42,8 @@ ZSList::ZSList()
 	CurGroupID = 1;
 	memset(pLockedZones, 0, sizeof(pLockedZones));
 
-	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1)));
-	m_keepalive.reset(new EQ::Timer(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1)));
+	m_tick = std::make_unique<EQ::Timer>(5000, true, std::bind(&ZSList::OnTick, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(2500, true, std::bind(&ZSList::OnKeepAlive, this, std::placeholders::_1));
 }
 
 ZSList::~ZSList() {
@@ -280,20 +280,19 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 		strcpy(locked, "No");
 	}
 
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
+	fmt::memory_buffer out;
 
 	if (connection->IsConsole()) {
-		AppendAnyLenString(&output, &outsize, &outlen, "World Locked: %s\r\n", locked);
+		fmt::format_to(out, "World Locked: {}\r\n", locked);
 	}
 	else {
-		AppendAnyLenString(&output, &outsize, &outlen, "World Locked: %s^", locked);
+		fmt::format_to(out, "World Locked: {}^", locked);
 	}
 	if (connection->IsConsole()) {
-		AppendAnyLenString(&output, &outsize, &outlen, "Zoneservers online:\r\n");
+		fmt::format_to(out, "Zoneservers online:\r\n");
 	}
 	else {
-		AppendAnyLenString(&output, &outsize, &outlen, "Zoneservers online:^");
+		fmt::format_to(out, "Zoneservers online:^");
 	}
 
 	int v = 0, w = 0, x = 0, y = 0, z = 0;
@@ -333,8 +332,8 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				zone_data_string[0] = 0;
 			}
 
-			AppendAnyLenString(&output, &outsize, &outlen,
-				"#%-3i :: %s :: %15s:%-5i :: %2i :: %s:%i :: %s :: (%u)",
+			fmt::format_to(out,
+				"#{:<3} :: {} :: {}:{:<5} :: {:2} :: {}:{} :: {} :: ({})",
 				zone_server_data->GetID(),
 				is_static_string,
 				addr.c_str(),
@@ -346,17 +345,16 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				zone_server_data->GetZoneOSProcessID()
 				);
 
-			if (outlen >= 3584) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
+			if (out.size() >= 3584) {
+				auto output = fmt::to_string(out);
+				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				out.clear();
 			}
 			else {
 				if (connection->IsConsole())
-					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+					fmt::format_to(out, "\r\n");
 				else
-					AppendAnyLenString(&output, &outsize, &outlen, "^");
+					fmt::format_to(out, "^");
 			}
 			x++;
 		}
@@ -365,19 +363,18 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				strcpy(zone_data_string, zone_server_data->GetZoneName());
 			else
 				zone_data_string[0] = 0;
-			AppendAnyLenString(&output, &outsize, &outlen, "  #%i %s  %s", zone_server_data->GetID(), is_static_string, zone_data_string);
-			if (outlen >= 3584) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
+			fmt::format_to(out, "  #{} {}  {}", zone_server_data->GetID(), is_static_string, zone_data_string);
+			if (out.size() >= 3584) {
+				auto output = fmt::to_string(out);
+				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				out.clear();
 			}
 			else {
 				if (connection->IsConsole()) {
-					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+					fmt::format_to(out, "\r\n");
 				}
 				else {
-					AppendAnyLenString(&output, &outsize, &outlen, "^");
+					fmt::format_to(out, "^");
 				}
 			}
 			x++;
@@ -387,19 +384,16 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 	}
 
 	if (connection->IsConsole()) {
-		AppendAnyLenString(&output, &outsize, &outlen, "%i servers listed. %i servers online.\r\n", x, y);
+		fmt::format_to(out, "{} servers listed. {} servers online.\r\n", x, y);
 	}
 	else {
-		AppendAnyLenString(&output, &outsize, &outlen, "%i servers listed. %i servers online.^", x, y);
+		fmt::format_to(out, "{} servers listed. {} servers online.^", x, y);
 	}
 
-	AppendAnyLenString(&output, &outsize, &outlen, "%i zones are static zones, %i zones are booted zones, %i zones available.", z, w, v);
+	fmt::format_to(out, "{} zones are static zones, {} zones are booted zones, {} zones available.", z, w, v);
 
-	if (output) {
-		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-	}
-
-	safe_delete(output);
+	auto output = fmt::to_string(out);
+	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
 }
 
 void ZSList::SendChannelMessage(const char* from, const char* to, uint8 chan_num, uint8 language, const char* message, ...) {

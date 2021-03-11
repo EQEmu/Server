@@ -1,0 +1,41 @@
+/**
+ * EQEmulator: Everquest Server Emulator
+ * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY except by those people which sell it, which
+ * are required to give you total support for your newly bought product;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+ * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+#ifndef WORLD_EXPEDITION_DATABASE_H
+#define WORLD_EXPEDITION_DATABASE_H
+
+#include <cstdint>
+#include <vector>
+
+class Expedition;
+
+namespace ExpeditionDatabase
+{
+	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
+	std::vector<Expedition> LoadExpeditions(uint32_t select_expedition_id = 0);
+	Expedition LoadExpedition(uint32_t expedition_id);
+	void MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids);
+	void PurgeExpiredExpeditions();
+	void PurgeExpiredCharacterLockouts();
+	void UpdateDzDuration(uint16_t instance_id, uint32_t new_duration);
+	void UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id);
+};
+
+#endif

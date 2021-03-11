@@ -11,10 +11,9 @@
 #ifndef INFLATE_H_
 #define INFLATE_H_
 
-/* define NO_GZIP when compiling if you want to disable gzip header and
-   trailer decoding by inflate().  NO_GZIP would be used to avoid linking in
-   the crc code when it is not needed.  For shared libraries, gzip decoding
-   should be left enabled. */
+/* define NO_GZIP when compiling if you want to disable gzip header and trailer decoding by inflate().
+   NO_GZIP would be used to avoid linking in the crc code when it is not needed.
+   For shared libraries, gzip decoding should be left enabled. */
 #ifndef NO_GZIP
 #  define GUNZIP
 #endif
@@ -89,7 +88,8 @@ struct inflate_state {
     int wrap;                   /* bit 0 true for zlib, bit 1 true for gzip,
                                    bit 2 true to validate check value */
     int havedict;               /* true if dictionary provided */
-    int flags;                  /* gzip header method and flags (0 if zlib) */
+    int flags;                  /* gzip header method and flags, 0 if zlib, or
+                                   -1 if raw or no header yet */
     unsigned dmax;              /* zlib header max distance (INFLATE_STRICT) */
     unsigned long check;        /* protected copy of check value */
     unsigned long total;        /* protected copy of output count */
@@ -125,8 +125,10 @@ struct inflate_state {
     int sane;                   /* if false, allow invalid distance too far */
     int back;                   /* bits back of last unprocessed length/lit */
     unsigned was;               /* initial length of match */
+    uint32_t chunksize;         /* size of memory copying chunk */
 };
 
-int ZLIB_INTERNAL inflate_ensure_window(struct inflate_state *state);
+int Z_INTERNAL inflate_ensure_window(struct inflate_state *state);
+void Z_INTERNAL fixedtables(struct inflate_state *state);
 
 #endif /* INFLATE_H_ */

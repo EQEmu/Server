@@ -146,7 +146,7 @@ WebInterfaceList::~WebInterfaceList()
 
 void WebInterfaceList::AddConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)
 {
-	m_interfaces.insert(std::make_pair(connection->GetUUID(), std::unique_ptr<WebInterface>(new WebInterface(connection))));
+	m_interfaces.insert(std::make_pair(connection->GetUUID(), std::make_unique<WebInterface>(connection)));
 }
 
 void WebInterfaceList::RemoveConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection)

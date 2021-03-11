@@ -195,7 +195,11 @@ enum {
 	COUNTER_AVOID_DAMAGE = 44,
 	PROX_AGGRO = 45,
 	IMMUNE_RANGED_ATTACKS = 46,
-	MAX_SPECIAL_ATTACK = 47
+	IMMUNE_DAMAGE_CLIENT = 47,
+	IMMUNE_DAMAGE_NPC = 48,
+	IMMUNE_AGGRO_CLIENT = 49,
+	IMMUNE_AGGRO_NPC = 50,
+	MAX_SPECIAL_ATTACK = 51
 };
 
 typedef enum {	//fear states
@@ -784,6 +788,13 @@ struct DamageHitInfo {
 	int tohit;
 	int hand;
 	EQ::skills::SkillType skill;
+};
+
+struct ExpeditionInvite
+{
+	uint32_t    expedition_id;
+	std::string inviter_name;
+	std::string swap_remove_name;
 };
 
 #endif

@@ -37,6 +37,7 @@
 #include "../common/string_util.h"
 #include "../common/eqemu_logsys.h"
 
+#include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
 #include "npc.h"
@@ -274,7 +275,9 @@ bool Zone::LoadZoneObjects()
 		position.y = data.y;
 		position.z = data.z;
 
-		data.z = zone->zonemap->FindBestZ(position, nullptr);
+		if (zone->HasMap()) {
+			data.z = zone->zonemap->FindBestZ(position, nullptr);
+		}
 
 		EQ::ItemInstance *inst = nullptr;
 		// FatherNitwit: this dosent seem to work...
@@ -961,7 +964,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	lootvar = 0;
 
 	if(RuleB(TaskSystem, EnableTaskSystem)) {
-		taskmanager->LoadProximities(zoneid);
+		task_manager->LoadProximities(zoneid);
 	}
 
 	short_name = strcpy(new char[strlen(in_short_name)+1], in_short_name);
@@ -1182,6 +1185,9 @@ bool Zone::Init(bool iStaticZone) {
 
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
+
+	LogInfo("Loading active Expeditions");
+	Expedition::CacheAllFromDatabase();
 
 	LogInfo("Loading timezone data");
 	zone->zone_time.setEQTimeZone(content_db.GetZoneTZ(zoneid, GetInstanceVersion()));
@@ -1487,7 +1493,17 @@ bool Zone::Process() {
 		{
 			if(Instance_Timer->Check())
 			{
-				entity_list.GateAllClients();
+				// if this is a dynamic zone instance notify system associated with it
+				auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+				if (expedition)
+				{
+					expedition->RemoveAllMembers(false); // entity list will teleport clients out immediately
+				}
+
+				// instance shutting down, move corpses to graveyard or non-instanced zone at same coords
+				entity_list.MovePlayerCorpsesToGraveyard(true);
+
+				entity_list.GateAllClientsToSafeReturn();
 				database.DeleteInstance(GetInstanceID());
 				Instance_Shutdown_Timer = new Timer(20000); //20 seconds
 			}
@@ -1497,20 +1513,29 @@ bool Zone::Process() {
 				if(Instance_Warning_timer == nullptr)
 				{
 					uint32 rem_time = Instance_Timer->GetRemainingTime();
+					uint32_t minutes_warning = 0;
 					if(rem_time < 60000 && rem_time > 55000)
 					{
-						entity_list.ExpeditionWarning(1);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 1;
 					}
 					else if(rem_time < 300000 && rem_time > 295000)
 					{
-						entity_list.ExpeditionWarning(5);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 5;
 					}
 					else if(rem_time < 900000 && rem_time > 895000)
 					{
-						entity_list.ExpeditionWarning(15);
-						Instance_Warning_timer = new Timer(10000);
+						minutes_warning = 15;
+					}
+
+					if (minutes_warning > 0)
+					{
+						// expedition expire warnings are handled by world
+						auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+						if (!expedition)
+						{
+							entity_list.ExpeditionWarning(minutes_warning);
+							Instance_Warning_timer = new Timer(10000);
+						}
 					}
 				}
 				else if(Instance_Warning_timer->Check())
@@ -1954,7 +1979,7 @@ bool ZoneDatabase::LoadStaticZonePoints(LinkedList<ZonePoint *> *zone_point_list
 	zone->numzonepoints = 0;
 	zone->virtual_zone_point_list.clear();
 
-	auto zone_points = ZonePointsRepository::GetWhere(
+	auto zone_points = ZonePointsRepository::GetWhere(content_db,
 		fmt::format(
 			"zone = '{}' AND (version = {} OR version = -1) {} ORDER BY number",
 			zonename,
@@ -2699,3 +2724,25 @@ void Zone::SetInstanceTimeRemaining(uint32 instance_time_remaining)
 	Zone::instance_time_remaining = instance_time_remaining;
 }
 
+bool Zone::IsZone(uint32 zone_id, uint16 instance_id) const
+{
+	return (zoneid == zone_id && instanceid == instance_id);
+}
+
+DynamicZone Zone::GetDynamicZone()
+{
+	if (GetInstanceID() == 0)
+	{
+		return {}; // invalid
+	}
+
+	auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
+	if (expedition)
+	{
+		return expedition->GetDynamicZone();
+	}
+
+	// todo: tasks, missions, and quests with an associated dz for this instance id
+
+	return {}; // invalid
+}

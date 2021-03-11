@@ -37,28 +37,34 @@
 #endif
 
 #include "client.h"
+#include "expedition.h"
 #include "titles.h"
 
 #ifdef THIS        /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_CLIENT \
+	do { \
+		if (sv_derived_from(ST(0), "Client")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Client*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Client"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
+
 XS(XS_Client_SendSound); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendSound) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SendSound(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendSound();
 	}
 	XSRETURN_EMPTY;
@@ -68,20 +74,12 @@ XS(XS_Client_Save); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Save) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::Save(THIS, uint8 commit_now)");
+		Perl_croak(aTHX_ "Usage: Client::Save(THIS, uint8 commit_now)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool  RETVAL;
 		uint8 iCommitNow = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Save(iCommitNow);
 		ST(0)            = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -93,18 +91,10 @@ XS(XS_Client_SaveBackup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SaveBackup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SaveBackup(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SaveBackup();
 	}
 	XSRETURN_EMPTY;
@@ -114,19 +104,11 @@ XS(XS_Client_Connected); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Connected) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Connected(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Connected(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Connected();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -138,19 +120,11 @@ XS(XS_Client_InZone); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_InZone) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::InZone(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::InZone(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->InZone();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -162,18 +136,10 @@ XS(XS_Client_Kick); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Kick) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Kick(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Kick("Perl Quest");
 	}
 	XSRETURN_EMPTY;
@@ -183,18 +149,10 @@ XS(XS_Client_Disconnect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Disconnect) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Disconnect(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Disconnect();
 	}
 	XSRETURN_EMPTY;
@@ -204,19 +162,11 @@ XS(XS_Client_IsLD); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsLD) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsLD(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsLD(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsLD();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -228,18 +178,10 @@ XS(XS_Client_WorldKick); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_WorldKick) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::WorldKick(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->WorldKick();
 	}
 	XSRETURN_EMPTY;
@@ -249,18 +191,10 @@ XS(XS_Client_SendToGuildHall); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendToGuildHall) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::SendToGuildHall(THIS)"); // @categories Script Utility, Guild
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendToGuildHall();
 	}
 	XSRETURN_EMPTY;
@@ -270,20 +204,12 @@ XS(XS_Client_GetAnon); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAnon) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAnon(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAnon(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAnon();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -291,22 +217,59 @@ XS(XS_Client_GetAnon) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_SetAnon); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAnon) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAnon(THIS, uint8 anon_flag)"); // @categories Account and Character, Stats and Attributes
+	{
+		Client *THIS;
+		uint8 anon_flag = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetAnon(anon_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_GetAFK); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetAFK) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetAFK(THIS)"); // @categories Account and Character, Stats and Attributes
+	{
+		Client *THIS;
+		uint8 RETVAL;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = THIS->GetAFK();
+		XSprePUSH;
+		PUSHu((UV) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetAFK); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetAFK) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetAFK(THIS, uint8 afk_flag)"); // @categories Account and Character, Stats and Attributes
+	{
+		Client *THIS;
+		uint8 afk_flag = (uint8) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetAFK(afk_flag);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_Duck); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Duck) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Duck(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Duck();
 	}
 	XSRETURN_EMPTY;
@@ -316,7 +279,7 @@ XS(XS_Client_DyeArmorBySlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DyeArmorBySlot) {
 	dXSARGS;
 	if (items != 5 && items != 6)
-		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])");
+		Perl_croak(aTHX_ "Usage: Client::DyeArmorBySlot(THIS, uint8 slot, uint8 red, uint8 green, uint8 blue, [uint8 use_tint = 0x00])"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		uint8 slot = (uint8) SvUV(ST(1));
@@ -327,14 +290,7 @@ XS(XS_Client_DyeArmorBySlot) {
 		if (items == 6) {
 			use_tint = (uint8) SvUV(ST(5));
 		}
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->DyeArmorBySlot(slot, red, green, blue, use_tint);
 	}
 	XSRETURN_EMPTY;
@@ -344,18 +300,10 @@ XS(XS_Client_Stand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Stand) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Stand(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Stand();
 	}
 	XSRETURN_EMPTY;
@@ -365,19 +313,11 @@ XS(XS_Client_SetGM); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetGM) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetGM(THIS, bool toggle)");
+		Perl_croak(aTHX_ "Usage: Client::SetGM(THIS, bool toggle)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetGM(toggle);
 	}
 	XSRETURN_EMPTY;
@@ -387,19 +327,11 @@ XS(XS_Client_SetPVP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetPVP) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetPVP(THIS, bool toggle)");
+		Perl_croak(aTHX_ "Usage: Client::SetPVP(THIS, bool toggle)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool toggle = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetPVP(toggle);
 	}
 	XSRETURN_EMPTY;
@@ -409,19 +341,11 @@ XS(XS_Client_GetPVP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetPVP(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetPVP();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -433,19 +357,11 @@ XS(XS_Client_GetGM); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGM) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGM(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGM(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGM();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -457,19 +373,11 @@ XS(XS_Client_SetBaseClass); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseClass) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseClass(THIS, uint32 class_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseClass(THIS, uint32 class_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseClass(i);
 	}
 	XSRETURN_EMPTY;
@@ -479,19 +387,11 @@ XS(XS_Client_SetBaseRace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseRace) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseRace(THIS, uint32 race_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseRace(THIS, uint32 race_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseRace(i);
 	}
 	XSRETURN_EMPTY;
@@ -501,19 +401,11 @@ XS(XS_Client_SetBaseGender); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBaseGender) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBaseGender(THIS, uint32 gender_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetBaseGender(THIS, uint32 gender_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBaseGender(i);
 	}
 	XSRETURN_EMPTY;
@@ -523,20 +415,12 @@ XS(XS_Client_GetBaseFace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseFace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseFace(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseFace(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseFace();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -548,21 +432,13 @@ XS(XS_Client_GetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLanguageSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLanguageSkill(THIS, uint16 lanuage_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetLanguageSkill(THIS, uint16 lanuage_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8  RETVAL;
 		dXSTARG;
 		uint16 n = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLanguageSkill(n);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -574,20 +450,12 @@ XS(XS_Client_GetLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLastName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLastName(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLastName(THIS)"); // @categories Account and Character
 	{
 		Client     *THIS;
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLastName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -600,21 +468,13 @@ XS(XS_Client_GetLDoNPointsTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNPointsTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNPointsTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNPointsTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -626,20 +486,12 @@ XS(XS_Client_GetBaseSTR); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTR) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTR(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseSTR(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseSTR();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -651,20 +503,12 @@ XS(XS_Client_GetBaseSTA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseSTA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseSTA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseSTA(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseSTA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -676,20 +520,12 @@ XS(XS_Client_GetBaseCHA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseCHA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseCHA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseCHA(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseCHA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -701,20 +537,12 @@ XS(XS_Client_GetBaseDEX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseDEX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseDEX(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseDEX(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseDEX();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -726,20 +554,12 @@ XS(XS_Client_GetBaseINT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseINT) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseINT(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseINT(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseINT();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -751,20 +571,12 @@ XS(XS_Client_GetBaseAGI); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseAGI) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseAGI(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseAGI(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseAGI();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -776,20 +588,12 @@ XS(XS_Client_GetBaseWIS); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBaseWIS) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBaseWIS(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBaseWIS(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBaseWIS();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -801,20 +605,12 @@ XS(XS_Client_GetWeight); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetWeight) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetWeight(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetWeight(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetWeight();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -826,20 +622,12 @@ XS(XS_Client_GetEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEXP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEXP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEXP(THIS)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEXP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -851,20 +639,12 @@ XS(XS_Client_GetAAExp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAAExp) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAExp(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAExp(THIS)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAXP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -876,20 +656,12 @@ XS(XS_Client_GetAAPercent);
 XS(XS_Client_GetAAPercent) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAPercent(THIS)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAPercent();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -901,20 +673,12 @@ XS(XS_Client_GetTotalSecondsPlayed); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_GetTotalSecondsPlayed) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTotalSecondsPlayed(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTotalSecondsPlayed(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTotalSecondsPlayed();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -926,21 +690,13 @@ XS(XS_Client_UpdateLDoNPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateLDoNPoints) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, int32 points, uint32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, int32 points, uint32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool   RETVAL;
 		int32  points = (int32) SvIV(ST(1));
 		uint32 theme  = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->UpdateLDoNPoints(points, theme);
 		ST(0)         = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -952,19 +708,11 @@ XS(XS_Client_SetDeity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDeity) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDeity(THIS, uint32 deity_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetDeity(THIS, uint32 deity_id)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 i = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDeity(i);
 	}
 	XSRETURN_EMPTY;
@@ -974,21 +722,13 @@ XS(XS_Client_AddEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddEXP) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddEXP(THIS, uint32 experience_points)");
+		Perl_croak(aTHX_ "Usage: Client::AddEXP(THIS, uint32 experience_points)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 add_exp = (uint32) SvUV(ST(1));
 		uint8  conlevel;
 		bool   resexp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			conlevel = 0xFF;
 		else {
@@ -1010,21 +750,13 @@ XS(XS_Client_SetEXP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetEXP) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])");
+		Perl_croak(aTHX_ "Usage: Client::SetEXP(THIS, uint32 experience_points, uint32 aa_experience_points, [bool resexp=false])"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint32 set_exp  = (uint32) SvUV(ST(1));
 		uint32 set_aaxp = (uint32) SvUV(ST(2));
 		bool   resexp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			resexp = false;
 		else {
@@ -1040,7 +772,7 @@ XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint) {
 	dXSARGS;
 	if (items < 1 || items > 6)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)");
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int   to_zone;
@@ -1048,15 +780,7 @@ XS(XS_Client_SetBindPoint) {
 		float new_x;
 		float new_y;
 		float new_z;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			to_zone = -1;
 		else {
@@ -1096,21 +820,13 @@ XS(XS_Client_GetBindX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindX) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindX(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindX(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1128,21 +844,13 @@ XS(XS_Client_GetBindY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindY) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindY(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindY(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1160,21 +868,13 @@ XS(XS_Client_GetBindZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindZ) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZ(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindZ(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1192,21 +892,13 @@ XS(XS_Client_GetBindHeading); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindHeading) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindHeading(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindHeading(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int   index = 0;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1224,21 +916,13 @@ XS(XS_Client_GetBindZoneID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBindZoneID) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetBindZoneID(int index = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetBindZoneID(int index = 0)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 index = 0;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 1)
 			index = 0;
 		else if (items == 2) {
@@ -1257,7 +941,7 @@ XS(XS_Client_MovePC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MovePC) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::MovePC(THIS, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Client::MovePC(THIS, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 zoneID  = (uint32) SvUV(ST(1));
@@ -1265,15 +949,7 @@ XS(XS_Client_MovePC) {
 		float  y       = (float) SvNV(ST(3));
 		float  z       = (float) SvNV(ST(4));
 		float  heading = (float) SvNV(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MovePC(zoneID, x, y, z, heading);
 		} else {
@@ -1303,7 +979,7 @@ XS(XS_Client_MovePCInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MovePCInstance) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Client::MovePCInstance(THIS, uint32 zone_id, uint32 instance_id, float x, float y, float z, float heading)"); // @categories Adventures and Expeditions, Script Utility
 	{
 		Client *THIS;
 		uint32 zoneID     = (uint32) SvUV(ST(1));
@@ -1312,15 +988,7 @@ XS(XS_Client_MovePCInstance) {
 		float  y          = (float) SvNV(ST(4));
 		float  z          = (float) SvNV(ST(5));
 		float  heading    = (float) SvNV(ST(6));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MovePC(zoneID, instanceID, x, y, z, heading);
 		} else {
@@ -1351,19 +1019,11 @@ XS(XS_Client_MoveZone); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZone) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZone(THIS, string zone_short_name)"); // @categories Script Utility
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZone(zone_short_name);
 		} else {
@@ -1393,19 +1053,11 @@ XS(XS_Client_MoveZoneGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneGroup(THIS, string zone_short_name)"); // @categories Script Utility, Group
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneGroup(zone_short_name);
 		} else {
@@ -1435,19 +1087,11 @@ XS(XS_Client_MoveZoneRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneRaid) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneRaid(THIS, string zone_short_name)"); // @categories Script Utility, Raid
 	{
 		Client *THIS;
 		const char *zone_short_name  = (const char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneRaid(zone_short_name);
 		} else {
@@ -1477,19 +1121,11 @@ XS(XS_Client_MoveZoneInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstance(instance_id);
 		} else {
@@ -1519,19 +1155,11 @@ XS(XS_Client_MoveZoneInstanceGroup); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_MoveZoneInstanceGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceGroup(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Group
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstanceGroup(instance_id);
 		} else {
@@ -1561,19 +1189,11 @@ XS(XS_Client_MoveZoneInstanceRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MoveZoneInstanceRaid) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::MoveZoneInstanceRaid(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions, Script Utility, Raid
 	{
 		Client *THIS;
 		uint16 instance_id  = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->IsClient()) {
 			THIS->MoveZoneInstanceRaid(instance_id);
 		} else {
@@ -1603,19 +1223,11 @@ XS(XS_Client_ChangeLastName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ChangeLastName) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)");
+		Perl_croak(aTHX_ "Usage: Client::ChangeLastName(THIS, string last_name)"); // @categories Account and Character
 	{
 		Client *THIS;
 		char   *in_lastname = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ChangeLastName(in_lastname);
 	}
 	XSRETURN_EMPTY;
@@ -1625,7 +1237,7 @@ XS(XS_Client_GetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFactionLevel) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)");
+		Perl_croak(aTHX_ "Usage: Client::GetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint32 player_race_id, uint32 player_class_id, uint32 player_deity_id, uint32 player_faction_id, Mob*)"); // @categories Faction
 	{
 		Client *THIS;
 		FACTION_VALUE RETVAL;
@@ -1637,15 +1249,7 @@ XS(XS_Client_GetFactionLevel) {
 		uint32        p_deity  = (uint32) SvUV(ST(5));
 		int32         pFaction = (int32) SvIV(ST(6));
 		Mob *tnpc;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(7), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(7)));
 			tnpc = INT2PTR(Mob *, tmp);
@@ -1665,7 +1269,7 @@ XS(XS_Client_SetFactionLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel(THIS, uint32 character_id, uint32 npc_id, uint8 character_class, uint8 character_race, uint8 character_deity)"); // @categories Faction
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1673,15 +1277,7 @@ XS(XS_Client_SetFactionLevel) {
 		uint8  char_class = (uint8) SvUV(ST(3));
 		uint8  char_race  = (uint8) SvUV(ST(4));
 		uint8  char_deity = (uint8) SvUV(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetFactionLevel(char_id, npc_id, char_class, char_race, char_deity);
 	}
 	XSRETURN_EMPTY;
@@ -1691,7 +1287,7 @@ XS(XS_Client_SetFactionLevel2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFactionLevel2) {
 	dXSARGS;
 	if (items < 7 || items > 8)
-		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)");
+		Perl_croak(aTHX_ "Usage: Client::SetFactionLevel2(THIS, uint32 character_id, int32 faction_id, uint8 character_class, uint8 character_race, uint8 character_deity, int32 value, uint8 temp)"); // @categories Faction
 	{
 		Client *THIS;
 		uint32 char_id    = (uint32) SvUV(ST(1));
@@ -1701,15 +1297,7 @@ XS(XS_Client_SetFactionLevel2) {
 		uint8  char_deity = (uint8) SvUV(ST(5));
 		int32  value      = (int32) SvIV(ST(6));
 		uint8  temp;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 7)
 			temp = 0;
 		else {
@@ -1725,20 +1313,12 @@ XS(XS_Client_GetRawItemAC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawItemAC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRawItemAC(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRawItemAC(THIS)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRawItemAC();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1750,20 +1330,12 @@ XS(XS_Client_AccountID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AccountID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AccountID(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AccountID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1775,20 +1347,12 @@ XS(XS_Client_AccountName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AccountName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AccountName(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AccountName(THIS)"); // @categories Account and Character
 	{
 		Client     *THIS;
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AccountName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -1801,20 +1365,12 @@ XS(XS_Client_Admin); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Admin) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Admin(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Admin(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		int16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Admin();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -1826,20 +1382,12 @@ XS(XS_Client_CharacterID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CharacterID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::CharacterID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::CharacterID(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CharacterID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1851,19 +1399,11 @@ XS(XS_Client_UpdateAdmin); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateAdmin) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateAdmin(THIS, bool from_db = true)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateAdmin(THIS, bool from_db = true)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool iFromDB;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			iFromDB = true;
 		else {
@@ -1879,19 +1419,11 @@ XS(XS_Client_UpdateWho); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateWho) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UpdateWho(THIS, uint8 remove = 0)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateWho(THIS, uint8 remove = 0)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint8  remove;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			remove = 0;
 		else {
@@ -1907,20 +1439,12 @@ XS(XS_Client_GuildRank); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GuildRank) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildRank(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GuildRank(THIS)"); // @categories Account and Character, Guild
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GuildRank();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1932,20 +1456,12 @@ XS(XS_Client_GuildID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GuildID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GuildID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GuildID(THIS)"); // @categories Account and Character, Guild
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GuildID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1957,20 +1473,12 @@ XS(XS_Client_GetFace); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFace) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFace(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetFace(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetFace();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -1982,21 +1490,13 @@ XS(XS_Client_TakeMoneyFromPP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TakeMoneyFromPP) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::TakeMoneyFromPP(THIS, uint32 copper, bool update_client = false)");
+		Perl_croak(aTHX_ "Usage: Client::TakeMoneyFromPP(THIS, uint32 copper, bool update_client = false)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool   RETVAL;
 		bool   updateclient = false;
 		uint32 copper       = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			updateclient = (bool) SvTRUE(ST(2));
 
@@ -2011,7 +1511,7 @@ XS(XS_Client_AddMoneyToPP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddMoneyToPP) {
 	dXSARGS;
 	if (items != 6)
-		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)");
+		Perl_croak(aTHX_ "Usage: Client::AddMoneyToPP(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, bool update_client)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 copper       = (uint32) SvUV(ST(1));
@@ -2019,15 +1519,7 @@ XS(XS_Client_AddMoneyToPP) {
 		uint32 gold         = (uint32) SvUV(ST(3));
 		uint32 platinum     = (uint32) SvUV(ST(4));
 		bool   updateclient = (bool) SvTRUE(ST(5));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddMoneyToPP(copper, silver, gold, platinum, updateclient);
 	}
 	XSRETURN_EMPTY;
@@ -2037,19 +1529,11 @@ XS(XS_Client_TGB); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TGB) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::TGB(THIS)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->TGB();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2061,20 +1545,12 @@ XS(XS_Client_GetSkillPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetSkillPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSkillPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetSkillPoints(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSkillPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2086,19 +1562,11 @@ XS(XS_Client_SetSkillPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetSkillPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetSkillPoints(THIS, inp)");
+		Perl_croak(aTHX_ "Usage: Client::SetSkillPoints(THIS, inp)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int inp = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSkillPoints(inp);
 	}
 	XSRETURN_EMPTY;
@@ -2108,20 +1576,12 @@ XS(XS_Client_IncreaseSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IncreaseSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseSkill(THIS, int skill_id, int value = 1)");
+		Perl_croak(aTHX_ "Usage: Client::IncreaseSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
 		int value;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			value = 1;
 		else {
@@ -2137,20 +1597,12 @@ XS(XS_Client_IncreaseLanguageSkill); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_IncreaseLanguageSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::IncreaseLanguageSkill(THIS, int skill_id, int value = 1)");
+		Perl_croak(aTHX_ "Usage: Client::IncreaseLanguageSkill(THIS, int skill_id, int value = 1)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		int skill_id = (int) SvIV(ST(1));
 		int value;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			value = 1;
 		else {
@@ -2166,21 +1618,13 @@ XS(XS_Client_GetRawSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRawSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetRawSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetRawSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint32                   RETVAL;
 		dXSTARG;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRawSkill(skill_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2192,20 +1636,12 @@ XS(XS_Client_HasSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasSkill(skill_id);
 		ST(0)                             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2217,20 +1653,12 @@ XS(XS_Client_CanHaveSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CanHaveSkill) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CanHaveSkill(THIS, int skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::CanHaveSkill(THIS, int skill_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
 		EQ::skills::SkillType skill_id = (EQ::skills::SkillType) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CanHaveSkill(skill_id);
 		ST(0)                             = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2242,20 +1670,12 @@ XS(XS_Client_SetSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)");
+		Perl_croak(aTHX_ "Usage: Client::SetSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		EQ::skills::SkillType skill_num = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value     = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSkill(skill_num, value);
 	}
 	XSRETURN_EMPTY;
@@ -2265,20 +1685,12 @@ XS(XS_Client_AddSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AddSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)");
+		Perl_croak(aTHX_ "Usage: Client::AddSkill(THIS, int skill_id, uint16 value)"); // @categories Skills and Recipes
 	{
 		Client                   *THIS;
 		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		uint16                   value   = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddSkill(skillid, value);
 	}
 	XSRETURN_EMPTY;
@@ -2288,19 +1700,11 @@ XS(XS_Client_CheckSpecializeIncrease); /* prototype to pass -Wmissing-prototypes
 XS(XS_Client_CheckSpecializeIncrease) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::CheckSpecializeIncrease(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->CheckSpecializeIncrease(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2310,21 +1714,13 @@ XS(XS_Client_CheckIncreaseSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CheckIncreaseSkill) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CheckIncreaseSkill(THIS, int skill_id, int chance_modifier = 0)");
+		Perl_croak(aTHX_ "Usage: Client::CheckIncreaseSkill(THIS, int skill_id, int chance_modifier = 0)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		bool                     RETVAL;
 		EQ::skills::SkillType skillid = (EQ::skills::SkillType) SvUV(ST(1));
 		int                      chancemodi;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			chancemodi = 0;
 		else {
@@ -2342,20 +1738,12 @@ XS(XS_Client_SetLanguageSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetLanguageSkill) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetLanguageSkill(THIS, int language_id, int value)");
+		Perl_croak(aTHX_ "Usage: Client::SetLanguageSkill(THIS, int language_id, int value)"); // @categories Account and Character, Skills and Recipes, Stats and Attributes
 	{
 		Client *THIS;
 		int    langid = (int) SvIV(ST(1));
 		int    value  = (int) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetLanguageSkill(langid, value);
 	}
 	XSRETURN_EMPTY;
@@ -2366,7 +1754,7 @@ XS(XS_Client_MaxSkill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MaxSkill) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MaxSkill(THIS, uint16 skill_id, uint16 class_id, uint16 level)");
+		Perl_croak(aTHX_ "Usage: Client::MaxSkill(THIS, uint16 skill_id, uint16 class_id, uint16 level)"); // @categories Skills and Recipes
 	{
 		Client                   *THIS;
 		uint16                   RETVAL;
@@ -2374,15 +1762,7 @@ XS(XS_Client_MaxSkill) {
 		uint16                   class_  = 0;
 		uint16                   level   = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			class_ = (uint16) SvUV(ST(2));
 		else
@@ -2404,18 +1784,10 @@ XS(XS_Client_GMKill); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GMKill) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GMKill(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GMKill();
 	}
 	XSRETURN_EMPTY;
@@ -2425,19 +1797,11 @@ XS(XS_Client_IsMedding); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsMedding) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsMedding(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsMedding(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsMedding();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2449,20 +1813,12 @@ XS(XS_Client_GetDuelTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDuelTarget) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetDuelTarget(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDuelTarget();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2474,19 +1830,11 @@ XS(XS_Client_IsDueling); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsDueling) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsDueling(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsDueling(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsDueling();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2498,19 +1846,11 @@ XS(XS_Client_SetDuelTarget); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDuelTarget) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetDuelTarget(THIS, set_id)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint16 set_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDuelTarget(set_id);
 	}
 	XSRETURN_EMPTY;
@@ -2520,19 +1860,11 @@ XS(XS_Client_SetDueling); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetDueling) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetDueling(THIS, duel)");
+		Perl_croak(aTHX_ "Usage: Client::SetDueling(THIS, duel)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		bool duel = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetDueling(duel);
 	}
 	XSRETURN_EMPTY;
@@ -2542,18 +1874,10 @@ XS(XS_Client_ResetAA); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ResetAA(THIS)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetAA();
 	}
 	XSRETURN_EMPTY;
@@ -2563,21 +1887,13 @@ XS(XS_Client_MemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::MemSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
 		int    slot     = (int) SvIV(ST(2));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			update_client = true;
 		else {
@@ -2593,20 +1909,12 @@ XS(XS_Client_UnmemSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2622,19 +1930,11 @@ XS(XS_Client_UnmemSpellBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int32  spell_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UnmemSpellBySpellID(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2644,19 +1944,11 @@ XS(XS_Client_UnmemSpellAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnmemSpellAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnmemSpellAll(THIS, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2672,21 +1964,13 @@ XS(XS_Client_FindMemmedSpellBySlot); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_FindMemmedSpellBySlot) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)");
+		Perl_croak(aTHX_ "Usage: Client::FindMemmedSpellBySlot(THIS, int slot)"); // @categories Account and Character, Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
 		int slot = SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->FindMemmedSpellBySlot(slot);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2698,20 +1982,12 @@ XS(XS_Client_MemmedCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_MemmedCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::MemmedCount(THIS)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32  RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->MemmedCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -2723,21 +1999,13 @@ XS(XS_Client_ScribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ScribeSpell) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::ScribeSpell(THIS, uint16 spell_id, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 spell_id = (uint16) SvUV(ST(1));
 		int    slot     = (int) SvIV(ST(2));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 4)
 			update_client = true;
 		else {
@@ -2753,20 +2021,12 @@ XS(XS_Client_UnscribeSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UnscribeSpell) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UnscribeSpell(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2786,15 +2046,7 @@ XS(XS_Client_UnscribeSpellAll) {
 	{
 		Client *THIS;
 		bool update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2810,19 +2062,11 @@ XS(XS_Client_TrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_TrainDiscBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::TrainDiscBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int32 spell_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->TrainDiscBySpellID(spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -2832,21 +2076,13 @@ XS(XS_Client_GetDiscSlotBySpellID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDiscSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetDiscSlotBySpellID(THIS, int32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int   RETVAL;
 		int32 spell_id = (int32) SvIV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDiscSlotBySpellID(spell_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -2858,20 +2094,12 @@ XS(XS_Client_UntrainDisc); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDisc) {
 	dXSARGS;
 	if (items < 2 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UntrainDisc(THIS, int slot, [bool update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    slot = (int) SvIV(ST(1));
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			update_client = true;
 		else {
@@ -2887,19 +2115,11 @@ XS(XS_Client_UntrainDiscAll); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UntrainDiscAll) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])");
+		Perl_croak(aTHX_ "Usage: Client::UntrainDiscAll(THIS, [update_client = true])"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   update_client;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			update_client = true;
 		else {
@@ -2916,20 +2136,11 @@ XS(XS_Client_IsStanding)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsStanding(THIS)"); // @categories Account and Character
 	{
 		Client *		THIS;
 		bool		RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsStanding();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2941,19 +2152,11 @@ XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsSitting) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsSitting(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsSitting(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsSitting();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2966,20 +2169,11 @@ XS(XS_Client_IsCrouching)
 {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsCrouching(THIS)"); // @categories Account and Character
 	{
 		Client *		THIS;
 		bool		RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client *,tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if(THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsCrouching();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -2991,19 +2185,11 @@ XS(XS_Client_IsBecomeNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsBecomeNPC) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsBecomeNPC(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsBecomeNPC(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsBecomeNPC();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3015,20 +2201,12 @@ XS(XS_Client_GetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetBecomeNPCLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetBecomeNPCLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetBecomeNPCLevel(THIS)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetBecomeNPCLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3040,19 +2218,11 @@ XS(XS_Client_SetBecomeNPC); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBecomeNPC) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPC(THIS, flag)");
+		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPC(THIS, flag)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool flag = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBecomeNPC(flag);
 	}
 	XSRETURN_EMPTY;
@@ -3062,19 +2232,11 @@ XS(XS_Client_SetBecomeNPCLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBecomeNPCLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPCLevel(THIS, level)");
+		Perl_croak(aTHX_ "Usage: Client::SetBecomeNPCLevel(THIS, level)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 level = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetBecomeNPCLevel(level);
 	}
 	XSRETURN_EMPTY;
@@ -3084,19 +2246,11 @@ XS(XS_Client_SetFeigned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetFeigned) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetFeigned(THIS, in_feigned)");
+		Perl_croak(aTHX_ "Usage: Client::SetFeigned(THIS, in_feigned)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool in_feigned = (bool) SvTRUE(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetFeigned(in_feigned);
 	}
 	XSRETURN_EMPTY;
@@ -3106,19 +2260,11 @@ XS(XS_Client_GetFeigned); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFeigned) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetFeigned(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetFeigned(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetFeigned();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3130,19 +2276,11 @@ XS(XS_Client_AutoSplitEnabled); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AutoSplitEnabled) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::AutoSplitEnabled(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::AutoSplitEnabled(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->AutoSplitEnabled();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3154,19 +2292,11 @@ XS(XS_Client_SetHorseId); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetHorseId) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHorseId(THIS, horseid_in)");
+		Perl_croak(aTHX_ "Usage: Client::SetHorseId(THIS, horseid_in)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint16 horseid_in = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetHorseId(horseid_in);
 	}
 	XSRETURN_EMPTY;
@@ -3176,20 +2306,12 @@ XS(XS_Client_GetHorseId); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetHorseId) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHorseId(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetHorseId(THIS)"); // @categories Account and Character, Script Utility
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetHorseId();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3201,22 +2323,14 @@ XS(XS_Client_NukeItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_NukeItem) {
 	dXSARGS;
 	if (items != 3 && items != 2)
-		Perl_croak(aTHX_ "Usage: Client::NukeItem(THIS, uint32 item_id, [uint8 slot_to_check])");
+		Perl_croak(aTHX_ "Usage: Client::NukeItem(THIS, uint32 item_id, [uint8 slot_to_check])"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		uint32 itemnum = (uint32) SvUV(ST(1));
 		uint8  where_to_check;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3) {
 			where_to_check = 0xFF;
 		}
@@ -3235,20 +2349,12 @@ XS(XS_Client_SetTint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetTint) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetTint(THIS, int16 slot_id, uint32 color)");
+		Perl_croak(aTHX_ "Usage: Client::SetTint(THIS, int16 slot_id, uint32 color)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
 		uint32 color   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetTint(slot_id, color);
 	}
 	XSRETURN_EMPTY;
@@ -3258,20 +2364,12 @@ XS(XS_Client_SetMaterial); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetMaterial) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetMaterial(THIS, int16 slot_id, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetMaterial(THIS, int16 slot_id, uint32 item_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
 		uint32 item_id = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetMaterial(slot_id, item_id);
 	}
 	XSRETURN_EMPTY;
@@ -3281,18 +2379,10 @@ XS(XS_Client_Undye); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Undye) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Undye(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Undye();
 	}
 	XSRETURN_EMPTY;
@@ -3302,21 +2392,13 @@ XS(XS_Client_GetItemIDAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemIDAt) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemIDAt(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
 		int16 slot_id = (int16) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetItemIDAt(slot_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -3328,22 +2410,14 @@ XS(XS_Client_GetAugmentIDAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAugmentIDAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, int16 slot_id, int16 aug_slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetAugmentIDAt(THIS, int16 slot_id, int16 aug_slot)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
 		int16 slot_id = (int16) SvIV(ST(1));
 		int16 augslot = (uint8) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAugmentIDAt(slot_id, augslot);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -3355,21 +2429,13 @@ XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_DeleteItemInInventory) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
 		int8   quantity;
 		bool   client_update;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			quantity = 0;
 		else {
@@ -3391,7 +2457,7 @@ XS(XS_Client_SummonItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SummonItem) {
 	dXSARGS;
 	if (items < 2 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])");
+		Perl_croak(aTHX_ "Usage: Client::SummonItem(THIS, uint32 item_id, [int16 charges = -1], [bool attune = false], [uint32 aug1 = 0], [uint32 aug2 = 0], [uint32 aug3 = 0], [uint32 aug4 = 0], [uint32 aug5 = 0], [uint16 slot_id = cursor])"); // @categories Inventory and Items, Script Utility
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
@@ -3403,15 +2469,7 @@ XS(XS_Client_SummonItem) {
 		uint32 aug4    = 0;
 		uint32 aug5    = 0;
 		uint16 slot_id = EQ::invslot::slotCursor;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2) {
 			charges = (int16) SvIV(ST(2));
 		}
@@ -3446,20 +2504,12 @@ XS(XS_Client_SetStats); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetStats) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, uint8 type, uint16 increase_val)");
+		Perl_croak(aTHX_ "Usage: Client::SetStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
 		int16 increase_val = (int16) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetStats(type, increase_val);
 	}
 	XSRETURN_EMPTY;
@@ -3469,20 +2519,12 @@ XS(XS_Client_IncStats); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IncStats) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, uint8 type, uint16 increase_val)");
+		Perl_croak(aTHX_ "Usage: Client::IncStats(THIS, uint8 type, uint16 increase_val)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint8 type         = (uint8) SvUV(ST(1));
 		int16 increase_val = (int16) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->IncStats(type, increase_val);
 	}
 	XSRETURN_EMPTY;
@@ -3492,19 +2534,11 @@ XS(XS_Client_DropItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DropItem) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::DropItem(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::DropItem(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->DropItem(slot_id);
 	}
 	XSRETURN_EMPTY;
@@ -3514,18 +2548,10 @@ XS(XS_Client_BreakInvis); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_BreakInvis) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::BreakInvis(THIS)"); // @categories Spells and Disciplines, Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->BreakInvis();
 	}
 	XSRETURN_EMPTY;
@@ -3535,19 +2561,11 @@ XS(XS_Client_GetGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGroup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGroup(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		Group  *RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGroup();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Group", (void *) RETVAL);
@@ -3559,18 +2577,10 @@ XS(XS_Client_LeaveGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_LeaveGroup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::LeaveGroup(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LeaveGroup();
 	}
 	XSRETURN_EMPTY;
@@ -3580,19 +2590,11 @@ XS(XS_Client_GetRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRaid) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaid(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRaid(THIS)"); // @categories Account and Character, Raid
 	{
 		Client *THIS;
 		Raid   *RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRaid();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Raid", (void *) RETVAL);
@@ -3604,19 +2606,11 @@ XS(XS_Client_IsGrouped); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsGrouped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsGrouped(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsGrouped(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsGrouped();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3628,19 +2622,11 @@ XS(XS_Client_IsRaidGrouped); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsRaidGrouped) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::IsRaidGrouped(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::IsRaidGrouped(THIS)"); // @categories Account and Character, Group, Raid
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsRaidGrouped();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3652,19 +2638,11 @@ XS(XS_Client_Hungry); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Hungry) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Hungry(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Hungry(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Hungry();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3676,19 +2654,11 @@ XS(XS_Client_Thirsty); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Thirsty) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Thirsty(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Thirsty(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->Thirsty();
 		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3700,21 +2670,13 @@ XS(XS_Client_GetInstrumentMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstrumentMod) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetInstrumentMod(THIS, uint16 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint16 RETVAL;
 		dXSTARG;
 		uint16 spell_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInstrumentMod(spell_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3726,21 +2688,13 @@ XS(XS_Client_DecreaseByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DecreaseByID) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, unit8 amount)");
+		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, unit8 amount)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool   RETVAL;
 		uint32 type = (uint32) SvUV(ST(1));
 		uint8  amt  = (uint8) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->DecreaseByID(type, amt);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3752,21 +2706,13 @@ XS(XS_Client_SlotConvert2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SlotConvert2) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SlotConvert2(THIS, uint8 slot)");
+		Perl_croak(aTHX_ "Usage: Client::SlotConvert2(THIS, uint8 slot)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
 		uint8 slot = (uint8) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->SlotConvert2(slot);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3778,18 +2724,10 @@ XS(XS_Client_Escape); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Escape) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Escape(THIS)"); // @categories Account and Character, Skills and Recipes
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->Escape();
 	}
 	XSRETURN_EMPTY;
@@ -3799,18 +2737,10 @@ XS(XS_Client_RemoveNoRent); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_RemoveNoRent) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::RemoveNoRent(THIS)"); // @categories Inventory and Items
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RemoveNoRent();
 	}
 	XSRETURN_EMPTY;
@@ -3820,18 +2750,10 @@ XS(XS_Client_GoFish); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GoFish) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GoFish(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GoFish();
 	}
 	XSRETURN_EMPTY;
@@ -3841,18 +2763,10 @@ XS(XS_Client_ForageItem); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ForageItem) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ForageItem(THIS)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ForageItem();
 	}
 	XSRETURN_EMPTY;
@@ -3862,22 +2776,14 @@ XS(XS_Client_CalcPriceMod); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_CalcPriceMod) {
 	dXSARGS;
 	if (items < 1 || items > 3)
-		Perl_croak(aTHX_ "Usage: Client::CalcPriceMod(THIS, Mob*, [bool reverse = false])");
+		Perl_croak(aTHX_ "Usage: Client::CalcPriceMod(THIS, Mob*, [bool reverse = false])"); // @categories Currency and Points
 	{
 		Client *THIS;
 		float  RETVAL;
 		dXSTARG;
 		Mob    *other;
 		bool   reverse;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items < 2)
 			other = 0;
 		else {
@@ -3907,18 +2813,10 @@ XS(XS_Client_ResetTrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetTrade) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ResetTrade(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetTrade();
 	}
 	XSRETURN_EMPTY;
@@ -3928,21 +2826,13 @@ XS(XS_Client_UseDiscipline); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UseDiscipline) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)");
+		Perl_croak(aTHX_ "Usage: Client::UseDiscipline(THIS, int32 spell_id, int32 target)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool   RETVAL;
 		uint32 spell_id = (uint32) SvUV(ST(1));
 		uint32 target   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->UseDiscipline(spell_id, target);
 		ST(0)           = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -3954,21 +2844,13 @@ XS(XS_Client_GetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		uint32 timer_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetDisciplineTimer(timer_id);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -3980,19 +2862,11 @@ XS(XS_Client_ResetDisciplineTimer); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ResetDisciplineTimer) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)");
+		Perl_croak(aTHX_ "Usage: Client::ResetDisciplineTimer(THIS, uint32 timer_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		uint32 timer_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ResetDisciplineTimer(timer_id);
 	}
 	XSRETURN_EMPTY;
@@ -4002,21 +2876,13 @@ XS(XS_Client_GetCharacterFactionLevel); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_GetCharacterFactionLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCharacterFactionLevel(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
 	{
 		Client *THIS;
 		int32  RETVAL;
 		dXSTARG;
 		int32  faction_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCharacterFactionLevel(faction_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -4028,19 +2894,11 @@ XS(XS_Client_SetZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character, Zones
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetZoneFlag(zone_id);
 	}
 	XSRETURN_EMPTY;
@@ -4050,19 +2908,11 @@ XS(XS_Client_ClearZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ClearZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::ClearZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::ClearZoneFlag(THIS, uint32 zone_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ClearZoneFlag(zone_id);
 	}
 	XSRETURN_EMPTY;
@@ -4072,20 +2922,12 @@ XS(XS_Client_HasZoneFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasZoneFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasZoneFlag(THIS, uint32 zone_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasZoneFlag(THIS, uint32 zone_id)"); // @categories Account and Character
 	{
 		Client *THIS;
 		bool   RETVAL;
 		uint32 zone_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasZoneFlag(zone_id);
 		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -4097,19 +2939,11 @@ XS(XS_Client_SendZoneFlagInfo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendZoneFlagInfo) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendZoneFlagInfo(THIS, Client* to)");
+		Perl_croak(aTHX_ "Usage: Client::SendZoneFlagInfo(THIS, Client* to)"); // @categories Account and Character, Zones
 	{
 		Client *THIS;
 		Client *to;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "Client")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			to = INT2PTR(Client *, tmp);
@@ -4127,18 +2961,10 @@ XS(XS_Client_LoadZoneFlags); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_LoadZoneFlags) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::LoadZoneFlags(THIS)"); // @categories Zones
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LoadZoneFlags();
 	}
 	XSRETURN_EMPTY;
@@ -4148,20 +2974,12 @@ XS(XS_Client_SetAATitle); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAATitle) {
 	dXSARGS;
 	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])");
+		Perl_croak(aTHX_ "Usage: Client::SetAATitle(THIS, string text, [bool save = false])"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
 		bool SaveTitle = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (strlen(txt) > 31)
 			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
@@ -4180,20 +2998,12 @@ XS(XS_Client_GetClientVersion); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetClientVersion) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersion(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetClientVersion(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = static_cast<unsigned int>(THIS->ClientVersion());
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4205,20 +3015,12 @@ XS(XS_Client_GetClientVersionBit); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetClientVersionBit) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetClientVersionBit(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetClientVersionBit(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->ClientVersionBit();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4230,20 +3032,12 @@ XS(XS_Client_SetTitleSuffix);
 XS(XS_Client_SetTitleSuffix) {
 	dXSARGS;
 	if ((items < 2) || (items > 3))
-		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])");
+		Perl_croak(aTHX_ "Usage: Client::SetTitleSuffix(THIS, string text, [bool save = false])"); // @categories Account and Character
 	{
 		Client *THIS;
 		char   *txt = (char *) SvPV_nolen(ST(1));
 		bool SaveSuffix = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (strlen(txt) > 31)
 			Perl_croak(aTHX_ "Title must be 31 characters or less");
 
@@ -4262,19 +3056,11 @@ XS(XS_Client_SetAAPoints);
 XS(XS_Client_SetAAPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetAAPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::SetAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAAPoints(points);
 	}
 	XSRETURN_EMPTY;
@@ -4284,20 +3070,12 @@ XS(XS_Client_GetAAPoints);
 XS(XS_Client_GetAAPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAAPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAAPoints(THIS)"); // @categories Alternative Advancement, Experience and Level
 	dXSTARG;
 	{
 		Client *THIS;
 		uint32 RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAAPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4309,20 +3087,12 @@ XS(XS_Client_GetSpentAA);
 XS(XS_Client_GetSpentAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetSpentAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetSpentAA(THIS)"); // @categories Alternative Advancement
 	dXSTARG;
 	{
 		Client *THIS;
 		uint32 RETVAL;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSpentAA();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4334,19 +3104,11 @@ XS(XS_Client_AddAAPoints);
 XS(XS_Client_AddAAPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddAAPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::AddAAPoints(THIS, uint32 points)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 points = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddAAPoints(points);
 	}
 	XSRETURN_EMPTY;
@@ -4356,18 +3118,10 @@ XS(XS_Client_RefundAA);
 XS(XS_Client_RefundAA) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::RefundAA(THIS)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RefundAA();
 	}
 	XSRETURN_EMPTY;
@@ -4377,21 +3131,13 @@ XS(XS_Client_GetModCharacterFactionLevel); /* prototype to pass -Wmissing-protot
 XS(XS_Client_GetModCharacterFactionLevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetModCharacterFactionLevel(THIS, int32 faction_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetModCharacterFactionLevel(THIS, int32 faction_id)"); // @categories Faction
 	{
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
 		int32 faction_id = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetModCharacterFactionLevel(faction_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -4403,20 +3149,12 @@ XS(XS_Client_GetLDoNWins); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNWins) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNWins(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNWins();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4428,20 +3166,12 @@ XS(XS_Client_GetLDoNLosses); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNLosses) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNLosses(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNLosses();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4453,21 +3183,13 @@ XS(XS_Client_GetLDoNWinsTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNWinsTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNWinsTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNWinsTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4479,21 +3201,13 @@ XS(XS_Client_GetLDoNLossesTheme); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetLDoNLossesTheme) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, int32 theme)");
+		Perl_croak(aTHX_ "Usage: Client::GetLDoNLossesTheme(THIS, int32 theme)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		int32  theme_out = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetLDoNLossesTheme(theme_out);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4505,20 +3219,12 @@ XS(XS_Client_GetItemAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemAt) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemAt(THIS, uint32 slot)"); // @categories Inventory and Items
 	{
 		Client              *THIS;
 		EQ::ItemInstance *RETVAL;
 		uint32 slot = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInv().GetItem(slot);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
@@ -4530,21 +3236,13 @@ XS(XS_Client_GetAugmentAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAugmentAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)");
+		Perl_croak(aTHX_ "Usage: Client::GetAugmentAt(THIS, uint32 slot, uint32 aug_slot)"); // @categories Inventory and Items
 	{
 		Client              *THIS;
 		EQ::ItemInstance *RETVAL;
 		uint32 slot     = (int32) SvIV(ST(1));
 		uint32 aug_slot = (int32) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		EQ::ItemInstance *inst = THIS->GetInv().GetItem(slot);
 		if (inst) {
 			RETVAL = inst->GetAugment(aug_slot);
@@ -4562,20 +3260,12 @@ XS(XS_Client_GetStartZone);
 XS(XS_Client_GetStartZone) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetStartZone(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetStartZone(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetStartZone();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4595,15 +3285,7 @@ XS(XS_Client_SetStartZone) {
 		float  x      = 0;
 		float  y      = 0;
 		float  z      = 0;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items == 5) {
 			x = SvNV(ST(2));
 			y = SvNV(ST(3));
@@ -4619,19 +3301,11 @@ XS(XS_Client_KeyRingAdd);
 XS(XS_Client_KeyRingAdd) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingAdd(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::KeyRingAdd(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		uint32 item_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->KeyRingAdd(item_id);;
 	}
 	XSRETURN_EMPTY;
@@ -4641,20 +3315,12 @@ XS(XS_Client_KeyRingCheck);
 XS(XS_Client_KeyRingCheck) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::KeyRingCheck(THIS, uint32 item_id)");
+		Perl_croak(aTHX_ "Usage: Client::KeyRingCheck(THIS, uint32 item_id)"); // @categories Account and Character, Inventory and Items
 	{
 		Client *THIS;
 		bool   RETVAL;
 		uint32 item_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->KeyRingCheck(item_id);;
 		ST(0)          = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -4666,19 +3332,11 @@ XS(XS_Client_AddPVPPoints);
 XS(XS_Client_AddPVPPoints) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, uint32 points)");
+		Perl_croak(aTHX_ "Usage: Client::AddPVPPoints(THIS, uint32 points)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 Points = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddPVPPoints(Points);
 	}
 	XSRETURN_EMPTY;
@@ -4688,21 +3346,41 @@ XS(XS_Client_AddCrystals);
 XS(XS_Client_AddCrystals) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, uint32 radiant_count, uint32 ebon_count)");
+		Perl_croak(aTHX_ "Usage: Client::AddCrystals(THIS, uint32 radiant_count, uint32 ebon_count)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 Radiant = (uint32) SvUV(ST(1));
 		uint32 Ebon    = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddCrystals(Radiant, Ebon);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetEbonCrystals);
+XS(XS_Client_SetEbonCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetEbonCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetEbonCrystals(value);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SetRadiantCrystals);
+XS(XS_Client_SetRadiantCrystals) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetRadiantCrystals(THIS, uint32 value)");
+	{
+		Client *THIS;
+		uint32 value = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetRadiantCrystals(value);
 	}
 	XSRETURN_EMPTY;
 }
@@ -4711,20 +3389,12 @@ XS(XS_Client_GetPVPPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetPVPPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetPVPPoints(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetPVPPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4736,20 +3406,12 @@ XS(XS_Client_GetRadiantCrystals); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRadiantCrystals) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRadiantCrystals(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRadiantCrystals();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4761,20 +3423,12 @@ XS(XS_Client_GetEbonCrystals); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEbonCrystals) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEbonCrystals(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEbonCrystals();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4786,20 +3440,12 @@ XS(XS_Client_ReadBook); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ReadBook) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, char* book_test, uint8 type)");
+		Perl_croak(aTHX_ "Usage: Client::ReadBook(THIS, char* book_test, uint8 type)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *in_txt = (char *) SvPV_nolen(ST(1));
 		uint8 type = (uint8) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->QuestReadBook(in_txt, type);
 	}
 	XSRETURN_EMPTY;
@@ -4809,20 +3455,12 @@ XS(XS_Client_UpdateGroupAAs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateGroupAAs) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateGroupAAs(THIS, int32 points, uint32 type)");
+		Perl_croak(aTHX_ "Usage: Client::UpdateGroupAAs(THIS, int32 points, uint32 type)"); // @categories Alternative Advancement, Group
 	{
 		Client *THIS;
 		int32  points = (int32) SvIV(ST(1));
 		uint32 type   = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UpdateGroupAAs(points, type);
 	}
 	XSRETURN(1);
@@ -4832,20 +3470,12 @@ XS(XS_Client_GetGroupPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetGroupPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetGroupPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetGroupPoints(THIS)"); // @categories Account and Character, Group
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetGroupPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4857,20 +3487,12 @@ XS(XS_Client_GetRaidPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetRaidPoints) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetRaidPoints(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetRaidPoints(THIS)"); // @categories Account and Character, Raid
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetRaidPoints();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4882,19 +3504,11 @@ XS(XS_Client_LearnRecipe);
 XS(XS_Client_LearnRecipe) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::LearnRecipe(THIS, uint32 recipe_id)");
+		Perl_croak(aTHX_ "Usage: Client::LearnRecipe(THIS, uint32 recipe_id)"); // @categories Skills and Recipes
 	{
 		Client *THIS;
 		uint32 recipe_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->LearnRecipe(recipe_id);;
 	}
 	XSRETURN_EMPTY;
@@ -4904,20 +3518,12 @@ XS(XS_Client_GetEndurance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEndurance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEndurance(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEndurance(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEndurance();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4929,20 +3535,12 @@ XS(XS_Client_GetMaxEndurance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetMaxEndurance) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetMaxEndurance(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetMaxEndurance(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetMaxEndurance();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4954,20 +3552,12 @@ XS(XS_Client_GetEnduranceRatio); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetEnduranceRatio) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetEnduranceRatio(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetEnduranceRatio(THIS)"); // @categories Stats and Attributes
 	{
 		Client *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetEndurancePercent();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -4979,19 +3569,11 @@ XS(XS_Client_SetEndurance);
 XS(XS_Client_SetEndurance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetEndurance(THIS, Endurance)");
+		Perl_croak(aTHX_ "Usage: Client::SetEndurance(THIS, Endurance)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 Endurance = (int32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetEndurance(Endurance);
 	}
 	XSRETURN_EMPTY;
@@ -5001,20 +3583,12 @@ XS(XS_Client_SendOPTranslocateConfirm);
 XS(XS_Client_SendOPTranslocateConfirm) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendOPTranslocateConfirm(THIS, Mob* caster, int32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::SendOPTranslocateConfirm(THIS, Mob* caster, int32 spell_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		Mob    *caster = nullptr;
 		int32 spell_id = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			caster = INT2PTR(Mob *, tmp);
@@ -5032,21 +3606,13 @@ XS(XS_Client_NPCSpawn); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_NPCSpawn) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::NPCSpawn(THIS, NPC*, string option, uint32 respawn_time=1200)");
+		Perl_croak(aTHX_ "Usage: Client::NPCSpawn(THIS, NPC*, string option, uint32 respawn_time=1200)"); // @categories Script Utility, Spawns
 	{
 		Client     *THIS;
 		NPC        *target_npc = nullptr;
 		Const_char *option     = (Const_char *) SvPV_nolen(ST(2));
 		uint32 respawntime = 1200;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (sv_derived_from(ST(1), "NPC")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			target_npc = INT2PTR(NPC *, tmp);
@@ -5067,20 +3633,12 @@ XS(XS_Client_GetIP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetIP) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetIP(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetIP(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetIP();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5092,21 +3650,13 @@ XS(XS_Client_AddLevelBasedExp);
 XS(XS_Client_AddLevelBasedExp) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)");
+		Perl_croak(aTHX_ "Usage: Client::AddLevelBasedExp(THIS, uint8 exp_percentage, uint8 max_level = 0, bool ignore_mods = false)"); // @categories Experience and Level
 	{
 		Client *THIS;
 		uint8 exp_percentage = (uint8) SvUV(ST(1));
 		uint8 max_level      = 0;
 		bool ignore_mods	 = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 2)
 			max_level = (uint8) SvUV(ST(2));
 
@@ -5122,19 +3672,11 @@ XS(XS_Client_IncrementAA);
 XS(XS_Client_IncrementAA) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IncrementAA(THIS, uint32 aa_skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::IncrementAA(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		uint32 aaskillid = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->IncrementAlternateAdvancementRank(aaskillid);
 	}
 	XSRETURN_EMPTY;
@@ -5144,22 +3686,14 @@ XS(XS_Client_GrantAlternateAdvancementAbility); /* prototype to pass -Wmissing-p
 XS(XS_Client_GrantAlternateAdvancementAbility) {
 	dXSARGS;
 	if (items < 3 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])");
+		Perl_croak(aTHX_ "Usage: Client::GrantAlternateAdvancementAbility(THIS, int aa_id, int points, [bool ignore_cost = false])"); // @categories Alternative Advancement
 	{
 		Client *THIS;
 		bool RETVAL;
 		int  aa_id       = (int) SvIV(ST(1));
 		int  points      = (int) SvIV(ST(2));
 		bool ignore_cost = false;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 3) {
 			ignore_cost = (bool) SvTRUE(ST(3));
 		}
@@ -5175,21 +3709,13 @@ XS(XS_Client_GetAALevel);
 XS(XS_Client_GetAALevel) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAALevel(THIS, uint32 aa_skill_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetAALevel(THIS, uint32 aa_skill_id)"); // @categories Alternative Advancement, Experience and Level
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		uint32 aaskillid = SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAA(aaskillid);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5201,21 +3727,13 @@ XS(XS_Client_MarkCompassLoc);
 XS(XS_Client_MarkCompassLoc) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, float x, float y, float z)");
+		Perl_croak(aTHX_ "Usage: Client::MarkCompassLoc(THIS, float x, float y, float z)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		float x = SvNV(ST(1));
 		float y = SvNV(ST(2));
 		float z = SvNV(ST(3));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->MarkSingleCompassLoc(x, y, z);
 	}
 	XSRETURN_EMPTY;
@@ -5225,18 +3743,10 @@ XS(XS_Client_ClearCompassMark);
 XS(XS_Client_ClearCompassMark) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::ClearCompassMark(THIS)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->MarkSingleCompassLoc(0, 0, 0, 0);
 	}
 	XSRETURN_EMPTY;
@@ -5246,21 +3756,13 @@ XS(XS_Client_GetFreeSpellBookSlot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetFreeSpellBookSlot) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)");
+		Perl_croak(aTHX_ "Usage: Client::GetFreeSpellBookSlot(THIS, uint32 start_slot = 0)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
 		uint32 start_slot = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1)
 			start_slot = SvUV(ST(1));
 
@@ -5275,21 +3777,13 @@ XS(XS_Client_GetSpellBookSlotBySpellID); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_GetSpellBookSlotBySpellID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetSpellBookSlotBySpellID(THIS, uint32 spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		int    RETVAL;
 		uint32 spell_id = SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->FindSpellBookSlotBySpellID(spell_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5307,16 +3801,7 @@ XS(XS_Client_GetSpellIDByBookSlot) {
 		int    RETVAL;
 		int	   slot_id = SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetSpellIDByBookSlot(slot_id);
 		XSprePUSH;
 		PUSHi((IV)RETVAL);
@@ -5328,7 +3813,7 @@ XS(XS_Client_UpdateTaskActivity); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateTaskActivity) {
 	dXSARGS;
 	if (items < 4)
-		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])");
+		Perl_croak(aTHX_ "Usage: Client::UpdateTaskActivity(THIS, int task_id, int activity_id, int count, [bool ignore_quest_update = false])"); // @categories Tasks and Activities
 	{
 		bool ignore_quest_update = false;
 
@@ -5341,15 +3826,7 @@ XS(XS_Client_UpdateTaskActivity) {
 		if (items == 5) {
 			ignore_quest_update = (bool) SvTRUE(ST(4));
 		}
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->UpdateTaskActivity(TaskID, ActivityID, Count, ignore_quest_update);
 	}
 	XSRETURN_EMPTY;
@@ -5359,22 +3836,14 @@ XS(XS_Client_GetTaskActivityDoneCount); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_GetTaskActivityDoneCount) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, int task_id, int activity_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetTaskActivityDoneCount(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int RETVAL;
 		int TaskID     = (int) SvIV(ST(1));
 		int ActivityID = (int) SvIV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 
 		RETVAL = THIS->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID);
 		XSprePUSH;
@@ -5387,7 +3856,7 @@ XS(XS_Client_AssignTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignTask) {
 	dXSARGS;
 	if (items != 3 && items != 4)
-		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])");
+		Perl_croak(aTHX_ "Usage: Client::AssignTask(THIS, int task_id, int npc_id, [bool enforce_level_requirement = false])"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int  TaskID                    = (int) SvIV(ST(1));
@@ -5398,14 +3867,7 @@ XS(XS_Client_AssignTask) {
 				enforce_level_requirement = true;
 			}
 		}
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS   = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AssignTask(TaskID, NPCID, enforce_level_requirement);
 	}
 	XSRETURN_EMPTY;
@@ -5415,19 +3877,11 @@ XS(XS_Client_FailTask); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_FailTask) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::FailTask(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::FailTask(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->FailTask(TaskID);
 	}
 	XSRETURN_EMPTY;
@@ -5437,20 +3891,12 @@ XS(XS_Client_IsTaskCompleted); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskCompleted) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskCompleted(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskCompleted(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		int RETVAL;
 		int TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskCompleted(TaskID);
 		ST(0)      = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5462,20 +3908,12 @@ XS(XS_Client_IsTaskActive); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskActive) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActive(THIS, int task_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskActive(THIS, int task_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		bool RETVAL;
 		int  TaskID = (int) SvIV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActive(TaskID);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5487,21 +3925,13 @@ XS(XS_Client_IsTaskActivityActive); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsTaskActivityActive) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::IsTaskActivityActive(THIS, int task_id, int activity_id)");
+		Perl_croak(aTHX_ "Usage: Client::IsTaskActivityActive(THIS, int task_id, int activity_id)"); // @categories Tasks and Activities
 	{
 		Client *THIS;
 		bool RETVAL;
 		int  TaskID     = (int) SvIV(ST(1));
 		int  ActivityID = (int) SvIV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->IsTaskActivityActive(TaskID, ActivityID);
 		ST(0)           = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -5513,20 +3943,12 @@ XS(XS_Client_GetCorpseCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseCount(THIS)"); // @categories Account and Character, Corpse
 	{
 		Client *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseCount();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5538,21 +3960,13 @@ XS(XS_Client_GetCorpseID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseID(THIS, uint8 corpse)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseID(THIS, uint8 corpse)"); // @categories Account and Character, Corpse
 	{
 		Client *THIS;
 		uint8  corpse = (uint8) SvIV(ST(1));
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseID(corpse);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5564,22 +3978,14 @@ XS(XS_Client_GetCorpseItemAt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCorpseItemAt) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCorpseItemAt(THIS, uint32 corpse_id, uint16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetCorpseItemAt(THIS, uint32 corpse_id, uint16 slot_id)"); // @categories Inventory and Items, Corpse
 	{
 		Client *THIS;
 		uint32 corpse_id = (uint32) SvIV(ST(1));
 		uint16 slotid    = (uint16) SvIV(ST(2));
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCorpseItemAt(corpse_id, slotid);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5591,19 +3997,11 @@ XS(XS_Client_AssignToInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_AssignToInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::AssignToInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::AssignToInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AssignToInstance(instance_id);
 	}
 	XSRETURN_EMPTY;
@@ -5613,19 +4011,11 @@ XS(XS_Client_RemoveFromInstance); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_RemoveFromInstance) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, uint16 instance_id)");
+		Perl_croak(aTHX_ "Usage: Client::RemoveFromInstance(THIS, uint16 instance_id)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		uint16 instance_id = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->RemoveFromInstance(instance_id);
 	}
 	XSRETURN_EMPTY;
@@ -5638,15 +4028,7 @@ XS(XS_Client_Freeze) {
 		Perl_croak(aTHX_ "Usage: Client:Freeze(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendAppearancePacket(AT_Anim, ANIM_FREEZE);
 	}
 	XSRETURN_EMPTY;
@@ -5659,15 +4041,7 @@ XS(XS_Client_UnFreeze) {
 		Perl_croak(aTHX_ "Usage: Client:UnFreeze(THIS)");
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendAppearancePacket(AT_Anim, ANIM_STAND);
 	}
 	XSRETURN_EMPTY;
@@ -5678,20 +4052,12 @@ XS(XS_Client_GetAggroCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAggroCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAggroCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAggroCount(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAggroCount();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5704,20 +4070,12 @@ XS(XS_Client_GetCarriedMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCarriedMoney) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetCarriedMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetCarriedMoney();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5730,20 +4088,12 @@ XS(XS_Client_GetAllMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAllMoney) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetAllMoney(THIS)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAllMoney();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5756,20 +4106,12 @@ XS(XS_Client_GetItemInInventory); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetItemInInventory) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetItemInInventory(THIS, int16 slot_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetItemInInventory(THIS, int16 slot_id)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16               slot_id = (int16) SvIV(ST(1));
 		EQ::ItemInstance *RETVAL = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInv().GetItem(slot_id);
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "QuestItem", (void *) RETVAL);
@@ -5781,21 +4123,13 @@ XS(XS_Client_SetCustomItemData); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetCustomItemData) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Client::SetCustomItemData(THIS, int16 slot_id, string identifier, string value)");
+		Perl_croak(aTHX_ "Usage: Client::SetCustomItemData(THIS, int16 slot_id, string identifier, string value)"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
 		Const_char *identifier = SvPV_nolen(ST(2));
 		Const_char *value      = SvPV_nolen(ST(3));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->GetInv().SetCustomItemData(THIS->CharacterID(), slot_id, std::string(identifier), std::string(value));
 	}
 	XSRETURN_EMPTY;
@@ -5805,22 +4139,14 @@ XS(XS_Client_GetCustomItemData); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetCustomItemData) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::GetCustomItemData(THIS, int16 slot_id, string identifier)");
+		Perl_croak(aTHX_ "Usage: Client::GetCustomItemData(THIS, int16 slot_id, string identifier)"); // @categories Inventory and Items, Corpse
 	{
 		Client *THIS;
 		int16 slot_id = (int16) SvIV(ST(1));
 		Const_char *identifier = SvPV_nolen(ST(2));
 		Const_char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		std::string ret_val = THIS->GetInv().GetCustomItemData(slot_id, std::string(identifier));
 		RETVAL = ret_val.c_str();
 		sv_setpv(TARG, RETVAL);
@@ -5834,18 +4160,10 @@ XS(XS_Client_OpenLFGuildWindow); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_OpenLFGuildWindow) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::OpenLFGuildWindow(THIS)"); // @categories Script Utility, Guild
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->OpenLFGuildWindow();
 	}
 	XSRETURN_EMPTY;
@@ -5855,18 +4173,10 @@ XS(XS_Client_NotifyNewTitlesAvailable); /* prototype to pass -Wmissing-prototype
 XS(XS_Client_NotifyNewTitlesAvailable) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::NotifyNewTitlesAvailable(THIS)"); // @categories Account and Character
 	{
 		Client *THIS;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->NotifyNewTitlesAvailable();
 	}
 	XSRETURN_EMPTY;
@@ -5876,20 +4186,12 @@ XS(XS_Client_AddAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_AddAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+		Perl_croak(aTHX_ "Usage: Client::AddAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  amount      = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->AddAlternateCurrencyValue(currency_id, amount);
 	}
 	XSRETURN_EMPTY;
@@ -5899,20 +4201,12 @@ XS(XS_Client_SetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_SetAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)");
+		Perl_croak(aTHX_ "Usage: Client::SetAlternateCurrencyValue(THIS, uint32 currency_id, int32 amount)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  amount      = (int32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAlternateCurrencyValue(currency_id, amount);
 	}
 	XSRETURN_EMPTY;
@@ -5922,21 +4216,13 @@ XS(XS_Client_GetAlternateCurrencyValue); /* prototype to pass -Wmissing-prototyp
 XS(XS_Client_GetAlternateCurrencyValue) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)");
+		Perl_croak(aTHX_ "Usage: Client::GetAlternateCurrencyValue(THIS, uint32 currency_id)"); // @categories Currency and Points
 	{
 		Client *THIS;
 		uint32 currency_id = (uint32) SvUV(ST(1));
 		int32  RETVAL 	   = 0;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAlternateCurrencyValue(currency_id);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -5948,19 +4234,11 @@ XS(XS_Client_SendWebLink); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendWebLink) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, string website_url)");
+		Perl_croak(aTHX_ "Usage: Client::SendWebLink(THIS, string website_url)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *website = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1) { website = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->SendWebLink(website);
@@ -5972,20 +4250,12 @@ XS(XS_Client_GetInstanceID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetInstanceID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetInstanceID(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetInstanceID(THIS)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		int8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetInstanceID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -5997,20 +4267,12 @@ XS(XS_Client_HasSpellScribed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_HasSpellScribed) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)");
+		Perl_croak(aTHX_ "Usage: Client::HasSpellScribed(THIS, int spell_id)"); // @categories Spells and Disciplines
 	{
 		Client *THIS;
 		bool RETVAL;
 		int  spell_id = (int) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->HasSpellScribed(spell_id);
 		ST(0)         = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -6022,7 +4284,7 @@ XS(XS_Client_SetAccountFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetAccountFlag) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, string flag, string value)");
+		Perl_croak(aTHX_ "Usage: Client::SetAccountFlag(THIS, string flag, string value)"); // @categories Account and Character
 	{
 		Client *THIS;
 		//char*     flag = (char *)SvPV_nolen(ST(1));
@@ -6030,15 +4292,7 @@ XS(XS_Client_SetAccountFlag) {
 
 		std::string flag((char *) SvPV_nolen(ST(1)));
 		std::string value((char *) SvTRUE(ST(2)));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAccountFlag(flag, value);
 	}
 	XSRETURN_EMPTY;
@@ -6048,7 +4302,7 @@ XS(XS_Client_GetAccountFlag); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetAccountFlag) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, string flag)");
+		Perl_croak(aTHX_ "Usage: Client::GetAccountFlag(THIS, string flag)"); // @categories Account and Character
 	{
 		Client *THIS;
 		//char*     flag = (char *)SvPV_nolen(ST(1));
@@ -6056,15 +4310,7 @@ XS(XS_Client_GetAccountFlag) {
 
 		std::string flag((char *) SvPV_nolen(ST(1)));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		std::string value = THIS->GetAccountFlag(flag);
 
 		sv_setpv(TARG, value.c_str());
@@ -6078,20 +4324,12 @@ XS(XS_Client_GetHunger); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetHunger) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetHunger(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetHunger(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetHunger();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6103,20 +4341,12 @@ XS(XS_Client_GetThirst); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetThirst) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetThirst(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetThirst(THIS)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetThirst();
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6128,19 +4358,11 @@ XS(XS_Client_SetHunger); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetHunger) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, in_hunger)");
+		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, in_hunger)"); // @categories Script Utility, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetHunger(in_hunger);
 	}
 	XSRETURN_EMPTY;
@@ -6150,19 +4372,11 @@ XS(XS_Client_SetThirst); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetThirst) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SetThirst(THIS, int32 in_thirst)");
+		Perl_croak(aTHX_ "Usage: Client::SetThirst(THIS, int32 in_thirst)"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_thirst = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetThirst(in_thirst);
 	}
 	XSRETURN_EMPTY;
@@ -6172,19 +4386,11 @@ XS(XS_Client_SendTargetCommand); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendTargetCommand) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, int32 entity_id)");
+		Perl_croak(aTHX_ "Usage: Client::SendTargetCommand(THIS, int32 entity_id)"); // @categories Script Utility
 	{
 		Client *THIS;
 		int32 in_entid = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendTargetCommand(in_entid);
 	}
 	XSRETURN_EMPTY;
@@ -6194,20 +4400,12 @@ XS(XS_Client_SetConsumption); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetConsumption) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, int32 hunger_amount, int32 thirst_amount)");
+		Perl_croak(aTHX_ "Usage: Client::SetHunger(THIS, int32 hunger_amount, int32 thirst_amount)"); // @categories Script Utility, Stats and Attributes
 	{
 		Client *THIS;
 		int32 in_hunger = (uint32) SvUV(ST(1));
 		int32 in_thirst = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetConsumption(in_hunger, in_thirst);
 	}
 	XSRETURN_EMPTY;
@@ -6217,18 +4415,11 @@ XS(XS_Client_SilentMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SilentMessage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, string message)");
+		Perl_croak(aTHX_ "Usage: Client::SilentMessage(THIS, string message)"); // @categories Script Utility
 	{
 		Client *THIS;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
+		VALIDATE_THIS_IS_CLIENT;
 		if (THIS->GetTarget() != NULL) {
 			if (THIS->GetTarget()->IsNPC()) {
 				if (DistanceSquaredNoZ(THIS->GetPosition(), THIS->GetTarget()->GetPosition()) <= 200) {
@@ -6247,19 +4438,11 @@ XS(XS_Client_PlayMP3); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_PlayMP3) {
 	dXSARGS;
 	if (items < 1 || items > 2)
-		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, string file_name)");
+		Perl_croak(aTHX_ "Usage: Client::PlayMP3(THIS, string file_name)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *fname = nullptr;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Mob");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1) { fname = (char *) SvPV_nolen(ST(1)); }
 
 		THIS->PlayMP3(fname);
@@ -6271,21 +4454,13 @@ XS(XS_Client_ExpeditionMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_ExpeditionMessage) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, int expedition_id, string message)");
+		Perl_croak(aTHX_ "Usage: Client::ExpeditionMessage(THIS, int expedition_id, string message)"); // @categories Adventures and Expeditions
 	{
 		Client *THIS;
 		int ExpdID = (int) SvUV(ST(1));
 		const char *Message = (const char *) SvPV_nolen(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->ExpeditionSay(Message, ExpdID);
 	}
 	XSRETURN_EMPTY;
@@ -6297,7 +4472,7 @@ XS(XS_Client_SendMarqueeMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendMarqueeMessage) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)");
+		Perl_croak(aTHX_ "Usage: Client::SendMarqueeMessage(THIS, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, string msg)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32      type     = (uint32) SvUV(ST(1));
@@ -6307,15 +4482,7 @@ XS(XS_Client_SendMarqueeMessage) {
 		uint32      duration = (uint32) SvUV(ST(5));
 		std::string msg      = (std::string) SvPV_nolen(ST(6));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, msg);
 	}
 	XSRETURN_EMPTY;
@@ -6325,21 +4492,13 @@ XS(XS_Client_SendColoredText); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SendColoredText) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::SendColoredText(uint32 color, string message)");
+		Perl_croak(aTHX_ "Usage: Client::SendColoredText(uint32 color, string message)"); // @categories Script Utility
 	{
 		Client *THIS;
 		uint32      color = (uint32) SvUV(ST(1));
 		std::string msg   = (std::string) SvPV_nolen(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendColoredText(color, msg);
 	}
 	XSRETURN_EMPTY;
@@ -6355,15 +4514,7 @@ XS(XS_Client_SendSpellAnim) {
 		uint16 targetid = (uint16) SvUV(ST(1));
 		uint16 spell_id = (uint16) SvUV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SendSpellAnim(targetid, spell_id);
 	}
 	XSRETURN_EMPTY;
@@ -6373,20 +4524,12 @@ XS(XS_Client_GetTargetRingX); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingX) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingX(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingX();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6398,20 +4541,12 @@ XS(XS_Client_GetTargetRingY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingY) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingY(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingY();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6423,20 +4558,12 @@ XS(XS_Client_GetTargetRingZ); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_GetTargetRingZ) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::GetTargetRingZ(THIS)"); // @categories Script Utility
 	{
 		Client *THIS;
 		float RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetTargetRingZ();
 		XSprePUSH;
 		PUSHn((double) RETVAL);
@@ -6456,15 +4583,7 @@ XS(XS_Client_CalcEXP) {
 		if (items == 2)
 			conlevel = (uint16) SvUV(ST(1));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == NULL)
-			Perl_croak(aTHX_ "THIS is NULL, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->CalcEXP(conlevel);
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -6476,7 +4595,7 @@ XS(XS_Client_QuestReward); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_QuestReward) {
 	dXSARGS;
 	if (items < 1 || items > 9)
-		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])");
+		Perl_croak(aTHX_ "Usage: Client::QuestReward(THIS, int32 mob, int32 copper, int32 silver, int32 gold, int32 platinum, int32 item_id, int32 exp, [bool faction = false])"); // @categories Currency and Points, Experience and Level, Inventory and Items, Faction
 	{
 		Client *THIS;
 		Mob    *mob = nullptr;
@@ -6529,16 +4648,7 @@ XS(XS_Client_GetMoney) {
 		uint8  type    = (uint8) SvUV(ST(1));
 		uint8  subtype = (uint8) SvUV(ST(2));
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetMoney(type, subtype);
 		XSprePUSH;
 		PUSHn((uint32) RETVAL);
@@ -6555,16 +4665,7 @@ XS(XS_Client_GetAccountAge) {
 		Client *THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetAccountAge();
 		XSprePUSH;
 		PUSHn((int) RETVAL);
@@ -6576,7 +4677,7 @@ XS(XS_Client_Popup2); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_Popup2) {
 	dXSARGS;
 	if (items < 3 || items > 10)
-		Perl_croak(aTHX_ "Usage: Client::SendFullPopup(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)");
+		Perl_croak(aTHX_ "Usage: Client::Popup2(THIS, string title, string text, uint32 popup_id, uint32 negative_id, uint32 buttons, uint32 duration, string button_name_0, string button_name_1, uint32 sound_controls)"); // @categories Script Utility
 	{
 		Client *THIS;
 		char   *Title = (char *) SvPV_nolen(ST(1));
@@ -6588,15 +4689,7 @@ XS(XS_Client_Popup2) {
 		char *ButtonName0 = 0;
 		char *ButtonName1 = 0;
 		uint32 SoundControls = 0;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		if (items > 3) { PopupID = (uint32) SvUV(ST(3)); }
 		if (items > 4) { NegativeID = (uint32) SvUV(ST(4)); }
 		if (items > 5) { Buttons = (uint32) SvUV(ST(5)); }
@@ -6617,23 +4710,12 @@ XS(XS_Client_SetPrimaryWeaponOrnamentation)
 {
 	dXSARGS;
 	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetPrimaryWeaponOrnamentation(THIS, model_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetPrimaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
 	}
 	{
 		Client *THIS;
 		uint32 model_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		}
-		else {
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetPrimaryWeaponOrnamentation(model_id);
 	}
 	XSRETURN_EMPTY;
@@ -6644,23 +4726,12 @@ XS(XS_Client_SetSecondaryWeaponOrnamentation)
 {
 	dXSARGS;
 	if (items != 2) {
-		Perl_croak(aTHX_ "Usage: Client::SetSecondaryWeaponOrnamentation(THIS, model_id)");
+		Perl_croak(aTHX_ "Usage: Client::SetSecondaryWeaponOrnamentation(THIS, model_id)"); // @categories Account and Character, Inventory and Items
 	}
 	{
 		Client *THIS;
 		uint32 model_id = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Client *, tmp);
-		}
-		else {
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		}
-		if (THIS == nullptr) {
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-		}
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetSecondaryWeaponOrnamentation(model_id);
 	}
 	XSRETURN_EMPTY;
@@ -6674,16 +4745,7 @@ XS(XS_Client_SetClientMaxLevel) {
 	{
 		Client* THIS;
 		int in_level = (int)SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetClientMaxLevel(in_level);
 	}
 	XSRETURN_EMPTY;
@@ -6698,16 +4760,7 @@ XS(XS_Client_GetClientMaxLevel) {
 		Client* THIS;
 		int RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Client")) {
-			IV tmp = SvIV((SV*)SvRV(ST(0)));
-			THIS = INT2PTR(Client*, tmp);
-		}
-		else
-			Perl_croak(aTHX_ "THIS is not of type Client");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_CLIENT;
 		RETVAL = THIS->GetClientMaxLevel();
 		XSprePUSH;
 		PUSHu((UV)RETVAL);
@@ -6715,6 +4768,499 @@ XS(XS_Client_GetClientMaxLevel) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_CreateExpedition);
+XS(XS_Client_CreateExpedition) {
+	dXSARGS;
+	if (items != 7 && items != 8) {
+		Perl_croak(aTHX_ "Usage: Client::CreateExpedition(THIS, string zone_name, uint32 zone_version, uint32 duration, string expedition_name, uint32 min_players, uint32 max_players, [bool disable_messages = false])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string zone_name(SvPV_nolen(ST(1)));
+	uint32 zone_version = (uint32)SvUV(ST(2));
+	uint32 duration = (uint32)SvUV(ST(3));
+	std::string expedition_name(SvPV_nolen(ST(4)));
+	uint32 min_players = (uint32)SvUV(ST(5));
+	uint32 max_players = (uint32)SvUV(ST(6));
+	bool disable_messages = (items > 7) ? (bool)SvTRUE(ST(7)) : false;
+
+	Expedition* RETVAL = THIS->CreateExpedition(zone_name, zone_version, duration,
+		expedition_name, min_players, max_players, disable_messages);
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpedition);
+XS(XS_Client_GetExpedition) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpedition(THIS)");
+	}
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	Expedition* RETVAL = THIS->GetExpedition();
+
+	ST(0) = sv_newmortal();
+	sv_setref_pv(ST(0), "Expedition", (void*)RETVAL);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetExpeditionLockouts);
+XS(XS_Client_GetExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::GetExpeditionLockouts(THIS, [string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	HV* hash = newHV();
+	SV* hash_ref = nullptr; // for expedition event hash if filtering on expedition
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	auto lockouts = THIS->GetExpeditionLockouts();
+
+	for (const auto& lockout : lockouts)
+	{
+		uint32_t name_len = static_cast<uint32_t>(lockout.GetExpeditionName().size());
+		uint32_t event_len = static_cast<uint32_t>(lockout.GetEventName().size());
+
+		SV** entry = hv_fetch(hash, lockout.GetExpeditionName().c_str(), name_len, false);
+		if (!entry)
+		{
+			SV* event_hash_ref = newRV_noinc((SV*)newHV()); // takes ownership of hash
+			if (!expedition_name.empty() && lockout.GetExpeditionName() == expedition_name)
+			{
+				hash_ref = event_hash_ref; // save ref to event hash for return
+			}
+			entry = hv_store(hash, lockout.GetExpeditionName().c_str(), name_len, event_hash_ref, 0);
+		}
+
+		if (entry && SvROK(*entry) && SvTYPE(SvRV(*entry)) == SVt_PVHV)
+		{
+			HV* event_hash = (HV*)SvRV(*entry);
+			hv_store(event_hash, lockout.GetEventName().c_str(), event_len,
+				newSVuv(lockout.GetSecondsRemaining()), 0);
+		}
+	}
+
+	SV* rv = &PL_sv_undef;
+
+	if (!expedition_name.empty())
+	{
+		rv = hash_ref ? sv_2mortal(hash_ref) : &PL_sv_undef; // ref that owns event hash for expedition
+	}
+	else
+	{
+		rv = sv_2mortal(newRV_noinc((SV*)hash)); // owns expedition hash
+	}
+
+	ST(0) = rv;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLockoutExpeditionUUID);
+XS(XS_Client_GetLockoutExpeditionUUID) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::GetLockoutExpeditionUUID(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name = SvPV_nolen(ST(1));
+	std::string event_name = SvPV_nolen(ST(2));
+
+	auto lockout = THIS->GetExpeditionLockout(expedition_name, event_name);
+	if (lockout)
+	{
+		XSRETURN_PV(lockout->GetExpeditionUUID().c_str());
+	}
+
+	XSRETURN_UNDEF;
+}
+
+XS(XS_Client_AddExpeditionLockout);
+XS(XS_Client_AddExpeditionLockout) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockout(THIS, string expedition_name, string event_name, uint32 seconds, [string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	uint32 seconds = (uint32)SvUV(ST(3));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddNewExpeditionLockout(expedition_name, event_name, seconds, uuid);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_AddExpeditionLockoutDuration);
+XS(XS_Client_AddExpeditionLockoutDuration) {
+	dXSARGS;
+	if (items != 4 && items != 5) {
+		Perl_croak(aTHX_ "Usage: Client::AddExpeditionLockoutDuration(THIS, string expedition_name, string event_name, int seconds, [string uuid])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+	int seconds = static_cast<int>(SvUV(ST(3)));
+	std::string uuid;
+
+	if (items == 5)
+	{
+		uuid = SvPV_nolen(ST(4));
+	}
+
+	THIS->AddExpeditionLockoutDuration(expedition_name, event_name, seconds, uuid, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveAllExpeditionLockouts);
+XS(XS_Client_RemoveAllExpeditionLockouts) {
+	dXSARGS;
+	if (items != 1 && items != 2) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveAllExpeditionLockouts(THIS, [string expedition_name])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name;
+	if (items == 2)
+	{
+		expedition_name = SvPV_nolen(ST(1));
+	}
+
+	THIS->RemoveAllExpeditionLockouts(expedition_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveExpeditionLockout);
+XS(XS_Client_RemoveExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::RemoveExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	THIS->RemoveExpeditionLockout(expedition_name, event_name, true);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasExpeditionLockout);
+XS(XS_Client_HasExpeditionLockout) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::HasExpeditionLockout(THIS, string expedition_name, string event_name)");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	std::string expedition_name(SvPV_nolen(ST(1)));
+	std::string event_name(SvPV_nolen(ST(2)));
+
+	bool result = THIS->HasExpeditionLockout(expedition_name, event_name);
+	ST(0) = boolSV(result);
+
+	XSRETURN(1);
+}
+
+XS(XS_Client_MovePCDynamicZone);
+XS(XS_Client_MovePCDynamicZone) {
+	dXSARGS;
+	if (items != 2 && items != 3 && items != 4) {
+		Perl_croak(aTHX_ "Usage: Client::MovePCDynamicZone(THIS, uint32 zone_id | string zone_name, [int zone_version = -1], [bool message_if_invalid = true])");
+	}
+
+	Client* THIS = nullptr;
+	VALIDATE_THIS_IS_CLIENT;
+
+	if (SvTYPE(ST(1)) == SVt_PV)
+	{
+		std::string zone_name(SvPV_nolen(ST(1)));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 4)
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version, (bool)SvTRUE(ST(3)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_name, zone_version);
+		}
+	}
+	else if (SvTYPE(ST(1)) == SVt_IV)
+	{
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		int zone_version = (items >= 3) ? static_cast<int>(SvIV(ST(2))) : -1;
+		if (items == 3)
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version, (bool)SvTRUE(ST(2)));
+		}
+		else
+		{
+			THIS->MovePCDynamicZone(zone_id, zone_version);
+		}
+	}
+	else
+	{
+		Perl_croak(aTHX_ "Client::MovePCDynamicZone expected an integer or string");
+	}
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_Fling); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_Fling) {
+	dXSARGS;
+	if (items < 5 || items > 7)
+		Perl_croak(aTHX_ "Usage: Client::Fling(THIS, value, target_x, target_y, target_z, ignore_los, clipping)");
+	{
+		Client*		THIS;
+		float value = (float) SvNV(ST(1));
+		float target_x = (float) SvNV(ST(2));
+		float target_y = (float) SvNV(ST(3));
+		float target_z = (float) SvNV(ST(4));
+		bool ignore_los = false;
+		bool clipping = false;
+		VALIDATE_THIS_IS_CLIENT;
+		if (items > 5)
+			ignore_los = (bool) SvTRUE(ST(5));
+			
+		if (items > 6)
+			clipping = (bool) SvTRUE(ST(6));
+
+		THIS->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_HasDisciplineLearned); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_HasDisciplineLearned) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::HasDisciplineLearned(THIS, uint16 spell_id)");
+	{
+		Client *THIS;
+		bool has_learned;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		has_learned = THIS->HasDisciplineLearned(spell_id);
+		ST(0) = boolSV(has_learned);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetClassBitmask);
+XS(XS_Client_GetClassBitmask) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetClassBitmask(THIS)");
+	{
+		Client* THIS;
+		int client_bitmask = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		client_bitmask = GetPlayerClassBit(THIS->GetClass());
+		XSprePUSH;
+		PUSHu((UV) client_bitmask);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetRaceBitmask);
+XS(XS_Client_GetRaceBitmask) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetRaceBitmask(THIS)"); // @categories Stats and Attributes
+	{
+		Client* THIS;
+		int client_bitmask = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		client_bitmask = GetPlayerRaceBit(THIS->GetBaseRace());
+		XSprePUSH;
+		PUSHu((UV) client_bitmask);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLearnableDisciplines);
+XS(XS_Client_GetLearnableDisciplines) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnableDisciplines(THIS, [uint8 min_level, uint8 max_level])");
+
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learnable_disciplines = THIS->GetLearnableDisciplines(min_level, max_level);
+	auto learnable_size = learnable_disciplines.size();
+	if (learnable_size > 0) {
+		EXTEND(sp, learnable_size);
+		for (int index = 0; index < learnable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learnable_disciplines[index]));
+		}
+		XSRETURN(learnable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetLearnedDisciplines);
+XS(XS_Client_GetLearnedDisciplines) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetLearnedDisciplines(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto learned_disciplines = THIS->GetLearnedDisciplines();
+	auto learned_size = learned_disciplines.size();
+	if (learned_size > 0) {
+		EXTEND(sp, learned_size);
+		for (int index = 0; index < learned_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(learned_disciplines[index]));
+		}
+		XSRETURN(learned_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetMemmedSpells);
+XS(XS_Client_GetMemmedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetMemmedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto memmed_spells = THIS->GetMemmedSpells();
+	auto memmed_size = memmed_spells.size();
+	if (memmed_size > 0) {
+		EXTEND(sp, memmed_size);
+		for (int index = 0; index < memmed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(memmed_spells[index]));
+		}
+		XSRETURN(memmed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribeableSpells);
+XS(XS_Client_GetScribeableSpells) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::GetScribeableSpells(THIS, [uint8 min_level, uint8 max_level])");
+	
+	uint8 min_level = 1;
+	uint8 max_level = 0;
+	if (items > 1)
+		min_level = (uint8)SvUV(ST(1));
+	if (items > 2)
+		max_level = (uint8)SvUV(ST(2));
+
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribeable_spells = THIS->GetScribeableSpells(min_level, max_level);
+	auto scribeable_size = scribeable_spells.size();
+	if (scribeable_size > 0) {
+		EXTEND(sp, scribeable_size);
+		for (int index = 0; index < scribeable_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribeable_spells[index]));
+		}
+		XSRETURN(scribeable_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetScribedSpells);
+XS(XS_Client_GetScribedSpells) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetScribedSpells(THIS)");
+	
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+	auto scribed_spells = THIS->GetScribedSpells();
+	auto scribed_size = scribed_spells.size();
+	if (scribed_size > 0) {
+		EXTEND(sp, scribed_size);
+		for (int index = 0; index < scribed_size; ++index) {
+			ST(index) = sv_2mortal(newSVuv(scribed_spells[index]));
+		}
+		XSRETURN(scribed_size);
+	}
+	SV* return_value = &PL_sv_undef;
+	ST(0) = return_value;
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetInventory);
+XS(XS_Client_GetInventory) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetInventory(THIS)");
+	{
+		Client* THIS;
+		EQ::InventoryProfile* RETVAL;
+		VALIDATE_THIS_IS_CLIENT;
+		RETVAL = &THIS->GetInv();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Inventory", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
 
 #ifdef __cplusplus
 extern "C"
@@ -6742,6 +5288,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddAlternateCurrencyValue"), XS_Client_AddAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "AddCrystals"), XS_Client_AddCrystals, file, "$$");
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
+	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
+	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
 	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
@@ -6760,6 +5308,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "CheckSpecializeIncrease"), XS_Client_CheckSpecializeIncrease, file, "$$");
 	newXSproto(strcpy(buf, "ClearCompassMark"), XS_Client_ClearCompassMark, file, "$");
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
+	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
@@ -6770,6 +5319,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Escape"), XS_Client_Escape, file, "$");
 	newXSproto(strcpy(buf, "ExpeditionMessage"), XS_Client_ExpeditionMessage, file, "$$$");
 	newXSproto(strcpy(buf, "FailTask"), XS_Client_FailTask, file, "$$");
+	newXSproto(strcpy(buf, "Fling"), XS_Client_Fling, file, "$$$$$;$$");
 	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
 	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
 	newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
@@ -6778,6 +5328,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetAAPoints"), XS_Client_GetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "GetAccountAge"), XS_Client_GetAccountAge, file, "$");
 	newXSproto(strcpy(buf, "GetAccountFlag"), XS_Client_GetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "GetAFK"), XS_Client_GetAFK, file, "$");
 	newXSproto(strcpy(buf, "GetAggroCount"), XS_Client_GetAggroCount, file, "$");
 	newXSproto(strcpy(buf, "GetAllMoney"), XS_Client_GetAllMoney, file, "$");
 	newXSproto(strcpy(buf, "GetAlternateCurrencyValue"), XS_Client_GetAlternateCurrencyValue, file, "$$");
@@ -6800,6 +5351,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetBindZoneID"), XS_Client_GetBindZoneID, file, "$$");
 	newXSproto(strcpy(buf, "GetCarriedMoney"), XS_Client_GetCarriedMoney, file, "$");
 	newXSproto(strcpy(buf, "GetCharacterFactionLevel"), XS_Client_GetCharacterFactionLevel, file, "$$");
+	newXSproto(strcpy(buf, "GetClassBitmask"), XS_Client_GetClassBitmask, file, "$");
 	newXSproto(strcpy(buf, "GetClientMaxLevel"), XS_Client_GetClientMaxLevel, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersion"), XS_Client_GetClientVersion, file, "$");
 	newXSproto(strcpy(buf, "GetClientVersionBit"), XS_Client_GetClientVersionBit, file, "$");
@@ -6814,6 +5366,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetEndurance"), XS_Client_GetEndurance, file, "$");
 	newXSproto(strcpy(buf, "GetEnduranceRatio"), XS_Client_GetEnduranceRatio, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
+	newXSproto(strcpy(buf, "GetExpedition"), XS_Client_GetExpedition, file, "$");
+	newXSproto(strcpy(buf, "GetExpeditionLockouts"), XS_Client_GetExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "GetFace"), XS_Client_GetFace, file, "$");
 	newXSproto(strcpy(buf, "GetFactionLevel"), XS_Client_GetFactionLevel, file, "$$$$$$$$");
 	newXSproto(strcpy(buf, "GetFeigned"), XS_Client_GetFeigned, file, "$");
@@ -6825,6 +5379,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetHunger"), XS_Client_GetHunger, file, "$$");
 	newXSproto(strcpy(buf, "GetInstanceID"), XS_Client_GetInstanceID, file, "$$");
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
+	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
 	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
@@ -6836,24 +5391,31 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetLDoNPointsTheme"), XS_Client_GetLDoNPointsTheme, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWins"), XS_Client_GetLDoNWins, file, "$");
 	newXSproto(strcpy(buf, "GetLDoNWinsTheme"), XS_Client_GetLDoNWinsTheme, file, "$$");
+	newXSproto(strcpy(buf, "GetLearnableDisciplines"), XS_Client_GetLearnableDisciplines, file, "$;$$");
+	newXSproto(strcpy(buf, "GetLearnedDisciplines"), XS_Client_GetLearnedDisciplines, file, "$");
+	newXSproto(strcpy(buf, "GetLockoutExpeditionUUID"), XS_Client_GetLockoutExpeditionUUID, file, "$$$");
 	newXSproto(strcpy(buf, "GetMaxEndurance"), XS_Client_GetMaxEndurance, file, "$");
+	newXSproto(strcpy(buf, "GetMemmedSpells"), XS_Client_GetMemmedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetModCharacterFactionLevel"), XS_Client_GetModCharacterFactionLevel, file, "$$");
 	newXSproto(strcpy(buf, "GetMoney"), XS_Client_GetMoney, file, "$$$");
 	newXSproto(strcpy(buf, "GetPVP"), XS_Client_GetPVP, file, "$");
 	newXSproto(strcpy(buf, "GetPVPPoints"), XS_Client_GetPVPPoints, file, "$");
+	newXSproto(strcpy(buf, "GetRaceBitmask"), XS_Client_GetRaceBitmask, file, "$");
 	newXSproto(strcpy(buf, "GetRadiantCrystals"), XS_Client_GetRadiantCrystals, file, "$");
 	newXSproto(strcpy(buf, "GetRaid"), XS_Client_GetRaid, file, "$");
 	newXSproto(strcpy(buf, "GetRaidPoints"), XS_Client_GetRaidPoints, file, "$");
 	newXSproto(strcpy(buf, "GetRawItemAC"), XS_Client_GetRawItemAC, file, "$");
 	newXSproto(strcpy(buf, "GetRawSkill"), XS_Client_GetRawSkill, file, "$$");
+	newXSproto(strcpy(buf, "GetScribeableSpells"), XS_Client_GetScribeableSpells, file, "$;$$");
+	newXSproto(strcpy(buf, "GetScribedSpells"), XS_Client_GetScribedSpells, file, "$");
 	newXSproto(strcpy(buf, "GetSkillPoints"), XS_Client_GetSkillPoints, file, "$");
 	newXSproto(strcpy(buf, "GetSpellBookSlotBySpellID"), XS_Client_GetSpellBookSlotBySpellID, file, "$$");
 	newXSproto(strcpy(buf, "GetSpellIDByBookSlot"), XS_Client_GetSpellIDByBookSlot, file, "$$");
 	newXSproto(strcpy(buf, "GetSpentAA"), XS_Client_GetSpentAA, file, "$$");
 	newXSproto(strcpy(buf, "GetStartZone"), XS_Client_GetStartZone, file, "$");
-	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$$");
-	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$$");
+	newXSproto(strcpy(buf, "GetTargetRingX"), XS_Client_GetTargetRingX, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingY"), XS_Client_GetTargetRingY, file, "$");
+	newXSproto(strcpy(buf, "GetTargetRingZ"), XS_Client_GetTargetRingZ, file, "$");
 	newXSproto(strcpy(buf, "GetTaskActivityDoneCount"), XS_Client_GetTaskActivityDoneCount, file, "$$$");
 	newXSproto(strcpy(buf, "GetThirst"), XS_Client_GetThirst, file, "$$");
 	newXSproto(strcpy(buf, "GetTotalSecondsPlayed"), XS_Client_GetTotalSecondsPlayed, file, "$");
@@ -6863,6 +5425,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GrantAlternateAdvancementAbility"), XS_Client_GrantAlternateAdvancementAbility, file, "$$$;$");
 	newXSproto(strcpy(buf, "GuildID"), XS_Client_GuildID, file, "$");
 	newXSproto(strcpy(buf, "GuildRank"), XS_Client_GuildRank, file, "$");
+	newXSproto(strcpy(buf, "HasDisciplineLearned"), XS_Client_HasDisciplineLearned, file, "$$");
+	newXSproto(strcpy(buf, "HasExpeditionLockout"), XS_Client_HasExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "HasSkill"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasSpellScribed"), XS_Client_HasSkill, file, "$$");
 	newXSproto(strcpy(buf, "HasZoneFlag"), XS_Client_HasZoneFlag, file, "$$");
@@ -6894,6 +5458,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "MaxSkill"), XS_Client_MaxSkill, file, "$$;$$");
 	newXSproto(strcpy(buf, "MemSpell"), XS_Client_MemSpell, file, "$$$;$");
 	newXSproto(strcpy(buf, "MovePC"), XS_Client_MovePC, file, "$$$$$$");
+	newXSproto(strcpy(buf, "MovePCDynamicZone"), XS_Client_MovePCDynamicZone, file, "$$;$$");
 	newXSproto(strcpy(buf, "MovePCInstance"), XS_Client_MovePCInstance, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "MoveZone"), XS_Client_MoveZone, file, "$$");
 	newXSproto(strcpy(buf, "MoveZoneGroup"), XS_Client_MoveZoneGroup, file, "$$");
@@ -6910,6 +5475,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "QuestReward"), XS_Client_QuestReward, file, "$$;$$$$$$$");
 	newXSproto(strcpy(buf, "ReadBook"), XS_Client_ReadBook, file, "$$$");
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
+	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
@@ -6929,6 +5496,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
 	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
+	newXSproto(strcpy(buf, "SetAFK"), XS_Client_SetAFK, file, "$$");
+	newXSproto(strcpy(buf, "SetAnon"), XS_Client_SetAnon, file, "$$");
 	newXSproto(strcpy(buf, "SetAlternateCurrencyValue"), XS_Client_SetAlternateCurrencyValue, file, "$$$");
 	newXSproto(strcpy(buf, "SetBaseClass"), XS_Client_SetBaseClass, file, "$$");
 	newXSproto(strcpy(buf, "SetBaseGender"), XS_Client_SetBaseGender, file, "$$");
@@ -6942,6 +5511,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetDeity"), XS_Client_SetDeity, file, "$$");
 	newXSproto(strcpy(buf, "SetDueling"), XS_Client_SetDueling, file, "$$");
 	newXSproto(strcpy(buf, "SetDuelTarget"), XS_Client_SetDuelTarget, file, "$$");
+	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
 	newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
@@ -6954,6 +5524,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetPVP"), XS_Client_SetPVP, file, "$$");
+	newXSproto(strcpy(buf, "SetRadiantCrystals"), XS_Client_SetRadiantCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetSecondaryWeaponOrnamentation"), XS_Client_SetSecondaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetSkill"), XS_Client_SetSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetSkillPoints"), XS_Client_SetSkillPoints, file, "$$");

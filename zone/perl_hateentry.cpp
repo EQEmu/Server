@@ -35,23 +35,28 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_HATE \
+	do { \
+		if (sv_derived_from(ST(0), "HateEntry")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(struct_HateList*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type HateEntry"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
+
 XS(XS_HateEntry_GetEnt); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetEnt) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetData(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		Mob             *RETVAL;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->entity_on_hatelist;
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -63,20 +68,12 @@ XS(XS_HateEntry_GetHate); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetHate) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetHate(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->stored_hate_amount;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);
@@ -88,20 +85,12 @@ XS(XS_HateEntry_GetDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_HateEntry_GetDamage) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)");
+		Perl_croak(aTHX_ "Usage: HateEntry::GetDamage(THIS)"); // @categories Script Utility, Hate and Aggro
 	{
 		struct_HateList *THIS;
 		int32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "HateEntry")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(struct_HateList *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type tHateEntry");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_HATE;
 		RETVAL = THIS->hatelist_damage;
 		XSprePUSH;
 		PUSHi((IV) RETVAL);

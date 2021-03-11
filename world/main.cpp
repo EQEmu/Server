@@ -88,6 +88,8 @@ union semun {
 #include "queryserv.h"
 #include "web_interface.h"
 #include "console.h"
+#include "expedition_database.h"
+#include "expedition_state.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -423,11 +425,18 @@ int main(int argc, char** argv) {
 
 	adventure_manager.LoadLeaderboardInfo();
 
+	LogInfo("Purging expired expeditions");
+	ExpeditionDatabase::PurgeExpiredExpeditions();
+	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
+
 	LogInfo("Purging expired instances");
 	database.PurgeExpiredInstances();
 
 	Timer PurgeInstanceTimer(450000);
 	PurgeInstanceTimer.Start(450000);
+
+	LogInfo("Loading active expeditions");
+	expedition_state.LoadActiveExpeditions();
 
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();
@@ -436,13 +445,13 @@ int main(int argc, char** argv) {
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		LogInfo("Console (TCP) listener started");
-		console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->TelnetTCPPort));
+		console = std::make_unique<EQ::Net::ConsoleServer>(Config->TelnetIP, Config->TelnetTCPPort);
 		RegisterConsoleFunctions(console);
 	}
 
 	zoneserver_list.Init();
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
-	server_connection.reset(new EQ::Net::ServertalkServer());
+	server_connection = std::make_unique<EQ::Net::ServertalkServer>();
 
 	EQ::Net::ServertalkServerOptions server_opts;
 	server_opts.port = Config->WorldTCPPort;
@@ -599,6 +608,7 @@ int main(int argc, char** argv) {
 		if (PurgeInstanceTimer.Check()) {
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
+			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 		}
 
 		if (EQTimeTimer.Check()) {
@@ -614,6 +624,7 @@ int main(int argc, char** argv) {
 		launcher_list.Process();
 		LFPGroupList.Process();
 		adventure_manager.Process();
+		expedition_state.Process();
 
 		if (InterserverTimer.Check()) {
 			InterserverTimer.Start();

@@ -21,12 +21,18 @@
 class Client;
 class EQApplicationPacket;
 class EQStream;
+class DynamicZone;
+class Expedition;
+class ExpeditionLockoutTimer;
+class ExpeditionRequest;
 class Group;
 class NPC;
 class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
+struct DynamicZoneInfo;
+struct DynamicZoneLocation;
 enum WaterRegionType : int;
 
 namespace EQ
@@ -59,6 +65,8 @@ namespace EQ
 #include "zone.h"
 #include "zonedb.h"
 #include "zone_store.h"
+#include "task_manager.h"
+#include "task_client_state.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -80,7 +88,7 @@ namespace EQ
 #define XTARGET_HARDCAP 20
 
 extern Zone* zone;
-extern TaskManager *taskmanager;
+extern TaskManager *task_manager;
 
 class CLIENTPACKET
 {
@@ -232,8 +240,8 @@ public:
 	void SetDisplayMobInfoWindow(bool display_mob_info_window);
 	bool GetDisplayMobInfoWindow() const;
 
-	bool IsDevToolsWindowEnabled() const;
-	void SetDevToolsWindowEnabled(bool dev_tools_window_enabled);
+	bool IsDevToolsEnabled() const;
+	void SetDevToolsEnabled(bool in_dev_tools_enabled);
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
@@ -283,6 +291,7 @@ public:
 	uint8 SlotConvert(uint8 slot,bool bracer=false);
 	void MessageString(uint32 type, uint32 string_id, uint32 distance = 0);
 	void MessageString(uint32 type, uint32 string_id, const char* message,const char* message2=0,const char* message3=0,const char* message4=0,const char* message5=0,const char* message6=0,const char* message7=0,const char* message8=0,const char* message9=0, uint32 distance = 0);
+	void MessageString(const CZClientMessageString_Struct* msg);
 	bool FilteredMessageCheck(Mob *sender, eqFilterType filter);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter, uint32 string_id);
 	void FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter,
@@ -362,6 +371,9 @@ public:
 	void Kick(const std::string &reason);
 	void WorldKick();
 	inline uint8 GetAnon() const { return m_pp.anon; }
+	inline uint8 GetAFK() const { return AFK; }
+	void SetAnon(uint8 anon_flag);
+	void SetAFK(uint8 afk_flag);
 	inline PlayerProfile_Struct& GetPP() { return m_pp; }
 	inline ExtendedProfile_Struct& GetEPP() { return m_epp; }
 	inline EQ::InventoryProfile& GetInv() { return m_inv; }
@@ -594,9 +606,9 @@ public:
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
 	void AddPVPPoints(uint32 Points);
 	uint32 GetRadiantCrystals() { return m_pp.currentRadCrystals; }
-	void SetRadiantCrystals(uint32 Crystals) { m_pp.currentRadCrystals = Crystals; }
+	void SetRadiantCrystals(uint32 value);
 	uint32 GetEbonCrystals() { return m_pp.currentEbonCrystals; }
-	void SetEbonCrystals(uint32 Crystals) { m_pp.currentEbonCrystals = Crystals; }
+	void SetEbonCrystals(uint32 value);
 	void AddCrystals(uint32 Radiant, uint32 Ebon);
 	void SendCrystalCounts();
 
@@ -777,6 +789,11 @@ public:
 	void UnmemSpellAll(bool update_client = true);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	std::vector<int> GetLearnableDisciplines(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetLearnedDisciplines();
+	std::vector<int> GetMemmedSpells();
+	std::vector<int> GetScribeableSpells(uint8 min_level = 1, uint8 max_level = 0);
+	std::vector<int> GetScribedSpells();
 	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
 	void UnscribeSpell(int slot, bool update_client = true);
 	void UnscribeSpellAll(bool update_client = true);
@@ -786,6 +803,8 @@ public:
 	bool SpellBucketCheck(uint16 spell_id, uint32 char_id);
 	uint32 GetCharMaxLevelFromQGlobal();
 	uint32 GetCharMaxLevelFromBucket();
+
+	void Fling(float value, float target_x, float target_y, float target_z, bool ignore_los = false, bool clipping = false);
 
 	inline bool IsStanding() const {return (playeraction == 0);}
 	inline bool IsSitting() const {return (playeraction == 1);}
@@ -966,6 +985,7 @@ public:
 	void SendDisciplineUpdate();
 	void SendDisciplineTimer(uint32 timer_id, uint32 duration);
 	bool UseDiscipline(uint32 spell_id, uint32 target);
+	bool HasDisciplineLearned(uint16 spell_id);
 
 	void SetLinkedSpellReuseTimer(uint32 timer_id, uint32 duration);
 	bool IsLinkedSpellReuseTimerReady(uint32 timer_id);
@@ -991,7 +1011,7 @@ public:
 	uint32 GetSpellIDByBookSlot(int book_slot);
 	int GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
-	inline bool HasSpellScribed(int spellid) { return (FindSpellBookSlotBySpellID(spellid) != -1 ? true : false); }
+	inline bool HasSpellScribed(int spellid) { return FindSpellBookSlotBySpellID(spellid) != -1; }
 	uint16 GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);
@@ -1006,48 +1026,241 @@ public:
 	// Task System Methods
 	void LoadClientTaskState();
 	void RemoveClientTaskState();
-	void SendTaskActivityComplete(int TaskID, int ActivityID, int TaskIndex, TaskType type, int TaskIncomplete=1);
-	void SendTaskFailed(int TaskID, int TaskIndex, TaskType type);
-	void SendTaskComplete(int TaskIndex);
-	inline ClientTaskState *GetTaskState() const { return taskstate; }
-
-	inline void CancelTask(int TaskIndex, TaskType type) { if(taskstate) taskstate->CancelTask(this, TaskIndex, type); }
-	inline bool SaveTaskState() { return (taskmanager ? taskmanager->SaveClientState(this, taskstate) : false); }
-	inline bool IsTaskStateLoaded() { return taskstate != nullptr; }
-	inline bool IsTaskActive(int TaskID) { return (taskstate ? taskstate->IsTaskActive(TaskID) : false); }
-	inline bool IsTaskActivityActive(int TaskID, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityActive(TaskID, ActivityID) : false); }
-	inline ActivityState GetTaskActivityState(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityState(type, index, ActivityID) : ActivityHidden); }
-	inline void UpdateTaskActivity(int TaskID, int ActivityID, int Count, bool ignore_quest_update = false) { if (taskstate) taskstate->UpdateTaskActivity(this, TaskID, ActivityID, Count, ignore_quest_update); }
-	inline void RemoveTaskByTaskID(uint32 task_id) { if (taskstate) taskstate->RemoveTaskByTaskID(this, task_id); }
-	inline void ResetTaskActivity(int TaskID, int ActivityID) { if(taskstate) taskstate->ResetTaskActivity(this, TaskID, ActivityID); }
-	inline void UpdateTasksOnKill(int NPCTypeID) { if(taskstate) taskstate->UpdateTasksOnKill(this, NPCTypeID); }
-	inline void UpdateTasksForItem(ActivityType Type, int ItemID, int Count=1) { if(taskstate) taskstate->UpdateTasksForItem(this, Type, ItemID, Count); }
-	inline void UpdateTasksOnExplore(int ExploreID) { if(taskstate) taskstate->UpdateTasksOnExplore(this, ExploreID); }
-	inline bool UpdateTasksOnSpeakWith(int NPCTypeID) { if(taskstate) return taskstate->UpdateTasksOnSpeakWith(this, NPCTypeID); else return false; }
-	inline bool UpdateTasksOnDeliver(std::list<EQ::ItemInstance*>& Items, int Cash, int NPCTypeID) { if (taskstate) return taskstate->UpdateTasksOnDeliver(this, Items, Cash, NPCTypeID); else return false; }
-	inline void TaskSetSelector(Mob *mob, int TaskSetID) { if(taskmanager) taskmanager->TaskSetSelector(this, taskstate, mob, TaskSetID); }
-	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks) { if(taskmanager) taskmanager->TaskQuestSetSelector(this, taskstate, mob, count, tasks); }
-	inline void EnableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->EnableTask(CharacterID(), TaskCount, TaskList); }
-	inline void DisableTask(int TaskCount, int *TaskList) { if(taskstate) taskstate->DisableTask(CharacterID(), TaskCount, TaskList); }
-	inline bool IsTaskEnabled(int TaskID) { return (taskstate ? taskstate->IsTaskEnabled(TaskID) : false); }
-	inline void ProcessTaskProximities(float X, float Y, float Z) { if(taskstate) taskstate->ProcessTaskProximities(this, X, Y, Z); }
-	inline void AssignTask(int TaskID, int NPCID, bool enforce_level_requirement = false) { if (taskstate) taskstate->AcceptNewTask(this, TaskID, NPCID, enforce_level_requirement); }
-	inline int ActiveSpeakTask(int NPCID) { if(taskstate) return taskstate->ActiveSpeakTask(NPCID); else return 0; }
-	inline int ActiveSpeakActivity(int NPCID, int TaskID) { if(taskstate) return taskstate->ActiveSpeakActivity(NPCID, TaskID); else return 0; }
-	inline void FailTask(int TaskID) { if(taskstate) taskstate->FailTask(this, TaskID); }
-	inline int TaskTimeLeft(int TaskID) { return (taskstate ? taskstate->TaskTimeLeft(TaskID) : 0); }
-	inline int EnabledTaskCount(int TaskSetID) { return (taskstate ? taskstate->EnabledTaskCount(TaskSetID) : -1); }
-	inline int IsTaskCompleted(int TaskID) { return (taskstate ? taskstate->IsTaskCompleted(TaskID) : -1); }
-	inline void ShowClientTasks() { if(taskstate) taskstate->ShowClientTasks(this); }
-	inline void CancelAllTasks() { if(taskstate) taskstate->CancelAllTasks(this); }
-	inline int GetActiveTaskCount() { return (taskstate ? taskstate->GetActiveTaskCount() : 0); }
-	inline int GetActiveTaskID(int index) { return (taskstate ? taskstate->GetActiveTaskID(index) : -1); }
-	inline int GetTaskStartTime(TaskType type, int index) { return (taskstate ? taskstate->GetTaskStartTime(type, index) : -1); }
-	inline bool IsTaskActivityCompleted(TaskType type, int index, int ActivityID) { return (taskstate ? taskstate->IsTaskActivityCompleted(type, index, ActivityID) : false); }
-	inline int GetTaskActivityDoneCount(TaskType type, int ClientTaskIndex, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCount(type, ClientTaskIndex, ActivityID) :0); }
-	inline int GetTaskActivityDoneCountFromTaskID(int TaskID, int ActivityID) { return (taskstate ? taskstate->GetTaskActivityDoneCountFromTaskID(TaskID, ActivityID) :0); }
-	inline int ActiveTasksInSet(int TaskSet) { return (taskstate ? taskstate->ActiveTasksInSet(TaskSet) :0); }
-	inline int CompletedTasksInSet(int TaskSet) { return (taskstate ? taskstate->CompletedTasksInSet(TaskSet) :0); }
+	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
+	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
+	void SendTaskComplete(int task_index);
+	inline ClientTaskState *GetTaskState() const { return task_state; }
+	inline void CancelTask(int task_index, TaskType task_type)
+	{
+		if (task_state) {
+			task_state->CancelTask(
+				this,
+				task_index,
+				task_type
+			);
+		}
+	}
+	inline bool SaveTaskState()
+	{
+		return task_manager != nullptr && task_manager->SaveClientState(this, task_state);
+	}
+	inline bool IsTaskStateLoaded() { return task_state != nullptr; }
+	inline bool IsTaskActive(int task_id) { return task_state != nullptr && task_state->IsTaskActive(task_id); }
+	inline bool IsTaskActivityActive(int task_id, int activity_id)
+	{
+		return task_state != nullptr &&
+			   task_state->IsTaskActivityActive(
+				   task_id,
+				   activity_id
+			   );
+	}
+	inline ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityState(task_type, index, activity_id) : ActivityHidden);
+	}
+	inline void UpdateTaskActivity(
+		int task_id,
+		int activity_id,
+		int count,
+		bool ignore_quest_update = false
+	)
+	{
+		if (task_state) {
+			task_state->UpdateTaskActivity(this, task_id, activity_id, count, ignore_quest_update);
+		}
+	}
+	inline void RemoveTaskByTaskID(uint32 task_id) {
+		if (task_state) {
+			task_state->RemoveTaskByTaskID(this, task_id);
+		}
+	}
+	inline void ResetTaskActivity(int task_id, int activity_id)
+	{
+		if (task_state) {
+			task_state->ResetTaskActivity(
+				this,
+				task_id,
+				activity_id
+			);
+		}
+	}
+	inline void UpdateTasksOnKill(int npc_type_id)
+	{
+		if (task_state) {
+			task_state->UpdateTasksOnKill(
+				this,
+				npc_type_id
+			);
+		}
+	}
+	inline void UpdateTasksForItem(
+		ActivityType activity_type,
+		int item_id,
+		int count = 1
+	)
+	{
+		if (task_state) {
+			task_state->UpdateTasksForItem(this, activity_type, item_id, count);
+		}
+	}
+	inline void UpdateTasksOnExplore(int explore_id)
+	{
+		if (task_state) {
+			task_state->UpdateTasksOnExplore(
+				this,
+				explore_id
+			);
+		}
+	}
+	inline bool UpdateTasksOnSpeakWith(int npc_type_id)
+	{
+		if (task_state) {
+			return task_state->UpdateTasksOnSpeakWith(
+				this,
+				npc_type_id
+			);
+		}
+		else { return false; }
+	}
+	inline bool UpdateTasksOnDeliver(
+		std::list<EQ::ItemInstance *> &items,
+		int cash,
+		int npc_type_id
+	)
+	{
+		if (task_state) {
+			return task_state->UpdateTasksOnDeliver(
+				this,
+				items,
+				cash,
+				npc_type_id
+			);
+		}
+		else { return false; }
+	}
+	inline void TaskSetSelector(Mob *mob, int task_set_id)
+	{
+		if (task_manager) {
+			task_manager->TaskSetSelector(
+				this,
+				task_state,
+				mob,
+				task_set_id
+			);
+		}
+	}
+	inline void TaskQuestSetSelector(Mob *mob, int count, int *tasks)
+	{
+		if (task_manager) {
+			task_manager->TaskQuestSetSelector(
+				this,
+				task_state,
+				mob,
+				count,
+				tasks
+			);
+		}
+	}
+	inline void EnableTask(int task_count, int *task_list)
+	{
+		if (task_state) {
+			task_state->EnableTask(
+				CharacterID(),
+				task_count,
+				task_list
+			);
+		}
+	}
+	inline void DisableTask(int task_count, int *task_list)
+	{
+		if (task_state) {
+			task_state->DisableTask(
+				CharacterID(),
+				task_count,
+				task_list
+			);
+		}
+	}
+	inline bool IsTaskEnabled(int task_id) {
+		return task_state != nullptr && task_state->IsTaskEnabled(task_id);
+	}
+	inline void ProcessTaskProximities(float x, float y, float z)
+	{
+		if (task_state) {
+			task_state->ProcessTaskProximities(
+				this,
+				x,
+				y,
+				z
+			);
+		}
+	}
+	inline void AssignTask(
+		int task_id,
+		int npc_id,
+		bool enforce_level_requirement = false
+	) {
+		if (task_state) {
+			task_state->AcceptNewTask(this, task_id, npc_id, enforce_level_requirement);
+		}
+	}
+	inline int ActiveSpeakTask(int npc_type_id)
+	{
+		if (task_state) {
+			return task_state->ActiveSpeakTask(npc_type_id);
+		}
+		else {
+			return 0;
+		}
+	}
+	inline int ActiveSpeakActivity(int npc_type_id, int task_id)
+	{
+		if (task_state) {
+			return task_state->ActiveSpeakActivity(
+				npc_type_id,
+				task_id
+			);
+		}
+		else { return 0; }
+	}
+	inline void FailTask(int task_id) { if (task_state) { task_state->FailTask(this, task_id); }}
+	inline int TaskTimeLeft(int task_id) { return (task_state ? task_state->TaskTimeLeft(task_id) : 0); }
+	inline int EnabledTaskCount(int task_set_id)
+	{
+		return (task_state ? task_state->EnabledTaskCount(task_set_id) : -1);
+	}
+	inline int IsTaskCompleted(int task_id) { return (task_state ? task_state->IsTaskCompleted(task_id) : -1); }
+	inline void ShowClientTasks(Client *client) { if (task_state) { task_state->ShowClientTasks(client); }}
+	inline void CancelAllTasks() { if (task_state) { task_state->CancelAllTasks(this); }}
+	inline int GetActiveTaskCount() { return (task_state ? task_state->GetActiveTaskCount() : 0); }
+	inline int GetActiveTaskID(int index) { return (task_state ? task_state->GetActiveTaskID(index) : -1); }
+	inline int GetTaskStartTime(TaskType task_type, int index)
+	{
+		return (task_state ? task_state->GetTaskStartTime(
+			task_type,
+			index
+		) : -1);
+	}
+	inline bool IsTaskActivityCompleted(TaskType task_type, int index, int activity_id)
+	{
+		return task_state != nullptr && task_state->IsTaskActivityCompleted(task_type, index, activity_id);
+	}
+	inline int GetTaskActivityDoneCount(TaskType task_type, int client_task_index, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityDoneCount(task_type, client_task_index, activity_id) : 0);
+	}
+	inline int GetTaskActivityDoneCountFromTaskID(int task_id, int activity_id)
+	{
+		return (task_state ? task_state->GetTaskActivityDoneCountFromTaskID(task_id, activity_id) : 0);
+	}
+	inline int ActiveTasksInSet(int task_set_id)
+	{
+		return (task_state ? task_state->ActiveTasksInSet(task_set_id) : 0);
+	}
+	inline int CompletedTasksInSet(int task_set_id)
+	{
+		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
+	}
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1103,6 +1316,47 @@ public:
 	int LDoNChest_SkillCheck(NPC *target, int skill);
 
 	void MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count=1);
+
+	// cross zone client messaging helpers (null client argument will fallback to messaging by name)
+	static void SendCrossZoneMessage(
+		Client* client, const std::string& client_name, uint16_t chat_type, const std::string& message);
+	static void SendCrossZoneMessageString(
+		Client* client, const std::string& client_name, uint16_t chat_type,
+		uint32_t string_id, const std::initializer_list<std::string>& arguments = {});
+
+	void AddExpeditionLockout(const ExpeditionLockoutTimer& lockout, bool update_db = false);
+	void AddExpeditionLockoutDuration(const std::string& expedition_name,
+		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
+	void AddNewExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, uint32_t duration, std::string uuid = {});
+	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
+	Expedition* CreateExpedition(
+		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
+		uint32 min_players, uint32 max_players, bool disable_messages = false);
+	Expedition* GetExpedition() const;
+	uint32 GetExpeditionID() const { return m_expedition_id; }
+	const ExpeditionLockoutTimer* GetExpeditionLockout(
+		const std::string& expedition_name, const std::string& event_name, bool include_expired = false) const;
+	const std::vector<ExpeditionLockoutTimer>& GetExpeditionLockouts() const { return m_expedition_lockouts; };
+	std::vector<ExpeditionLockoutTimer> GetExpeditionLockouts(const std::string& expedition_name, bool include_expired = false);
+	uint32 GetPendingExpeditionInviteID() const { return m_pending_expedition_invite.expedition_id; }
+	bool HasExpeditionLockout(const std::string& expedition_name, const std::string& event_name, bool include_expired = false);
+	bool IsInExpedition() const { return m_expedition_id != 0; }
+	void RemoveAllExpeditionLockouts(const std::string& expedition_name, bool update_db = false);
+	void RemoveExpeditionLockout(const std::string& expedition_name,
+		const std::string& event_name, bool update_db = false);
+	void RequestPendingExpeditionInvite();
+	void SendExpeditionLockoutTimers();
+	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
+	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
+	void UpdateExpeditionInfoAndLockouts();
+	void DzListTimers();
+	void SetDzRemovalTimer(bool enable_timer);
+	void SendDzCompassUpdate();
+	void GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone);
+	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
+	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
+	std::vector<DynamicZoneInfo> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
@@ -1477,7 +1731,7 @@ private:
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
 	bool display_mob_info_window;
-	bool dev_tools_window_enabled;
+	bool dev_tools_enabled;
 
 	int32 max_end;
 	int32 current_endurance;
@@ -1557,6 +1811,7 @@ private:
 	Timer hp_other_update_throttle_timer; /* This is to keep clients from DOSing the server with macros that change client targets constantly */
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
+	Timer dynamiczone_removal_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -1588,7 +1843,7 @@ private:
 
 	std::set<uint32> zone_flags;
 
-	ClientTaskState *taskstate;
+	ClientTaskState *task_state;
 	int TotalSecondsPlayed;
 
 	//Anti Spam Stuff
@@ -1657,6 +1912,12 @@ private:
 	bool InterrogateInventory_error(int16 head, int16 index, const EQ::ItemInstance* inst, const EQ::ItemInstance* parent, int depth);
 
 	int client_max_level;
+
+	uint32 m_expedition_id = 0;
+	ExpeditionInvite m_pending_expedition_invite { 0 };
+	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
+	glm::vec3 m_quest_compass;
+	bool m_has_quest_compass = false;
 
 #ifdef BOTS
 

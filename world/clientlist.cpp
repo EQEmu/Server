@@ -46,7 +46,7 @@ ClientList::ClientList()
 {
 	NextCLEID = 1;
 
-	m_tick.reset(new EQ::Timer(5000, true, std::bind(&ClientList::OnTick, this, std::placeholders::_1)));
+	m_tick = std::make_unique<EQ::Timer>(5000, true, std::bind(&ClientList::OnTick, this, std::placeholders::_1));
 }
 
 ClientList::~ClientList() {
@@ -269,8 +269,6 @@ ClientListEntry* ClientList::FindCLEByLSID(uint32 iLSID) {
 
 void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnection* connection, const char* iName) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
 	int x = 0, y = 0;
 	int namestrlen = iName == 0 ? 0 : strlen(iName);
 	bool addnewline = false;
@@ -279,6 +277,7 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 		strcpy(newline, "\r\n");
 	else
 		strcpy(newline, "^");
+	fmt::memory_buffer out;
 
 	iterator.Reset();
 	while(iterator.MoreElements()) {
@@ -287,31 +286,30 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 			struct in_addr in;
 			in.s_addr = cle->GetIP();
 			if (addnewline) {
-				AppendAnyLenString(&output, &outsize, &outlen, newline);
+				fmt::format_to(out, newline);
 			}
-			AppendAnyLenString(&output, &outsize, &outlen, "ID: %i  Acc# %i  AccName: %s  IP: %s", cle->GetID(), cle->AccountID(), cle->AccountName(), inet_ntoa(in));
-			AppendAnyLenString(&output, &outsize, &outlen, "%s  Stale: %i  Online: %i  Admin: %i", newline, cle->GetStaleCounter(), cle->Online(), cle->Admin());
+			fmt::format_to(out, "ID: {}  Acc# {}  AccName: {}  IP: {}", cle->GetID(), cle->AccountID(), cle->AccountName(), inet_ntoa(in));
+			fmt::format_to(out, "{}  Stale: {}  Online: {}  Admin: {}", newline, cle->GetStaleCounter(), cle->Online(), cle->Admin());
 			if (cle->LSID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  LSID: %i  LSName: %s  WorldAdmin: %i", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
+				fmt::format_to(out, "{}  LSID: {}  LSName: {}  WorldAdmin: {}", newline, cle->LSID(), cle->LSName(), cle->WorldAdmin());
 			if (cle->CharID())
-				AppendAnyLenString(&output, &outsize, &outlen, "%s  CharID: %i  CharName: %s  Zone: %s (%i)", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
-			if (outlen >= 3072) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
+				fmt:format_to(out, "{}  CharID: {}  CharName: {}  Zone: {} ({})", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
+			if (out.size() >= 3072) {
+				auto output = fmt::to_string(out);
+				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
 				addnewline = false;
-			}
-			else
+				out.clear();
+			} else {
 				addnewline = true;
+			}
 			y++;
 		}
 		iterator.Advance();
 		x++;
 	}
-	AppendAnyLenString(&output, &outsize, &outlen, "%s%i CLEs in memory. %i CLEs listed. numplayers = %i.", newline, x, y, numplayers);
-	connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-	safe_delete(output);
+	fmt::format_to(out, "{}{} CLEs in memory. {} CLEs listed. numplayers = {}.", newline, x, y, numplayers);
+	auto output = fmt::to_string(out);
+	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
 }
 
 
@@ -489,15 +487,8 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			whom->wrace = FROGLOK; // This is what EQEmu uses for the Froglok Race number.
 	}
 
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
 	uint32 totalusers=0;
 	uint32 totallength=0;
-	AppendAnyLenString(&output, &outsize, &outlen, "Players on server:");
-	if (connection->IsConsole())
-		AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
-	else
-		AppendAnyLenString(&output, &outsize, &outlen, "\n");
 	countclients.Reset();
 	while(countclients.MoreElements()){
 		countcle = countclients.GetData();
@@ -722,7 +713,6 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	//zoneserver_list.SendPacket(pack2); // NO NO NO WHY WOULD YOU SEND IT TO EVERY ZONE SERVER?!?
 	SendPacket(to,pack2);
 	safe_delete(pack2);
-	safe_delete_array(output);
 	}
 	catch(...){
 		LogInfo("Unknown error in world's SendWhoAll (probably mem error), ignoring");
@@ -956,13 +946,12 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	if (whom)
 		whomlen = strlen(whom->whom);
 
-	char* output = 0;
-	uint32 outsize = 0, outlen = 0;
-	AppendAnyLenString(&output, &outsize, &outlen, "Players on server:");
+	fmt::memory_buffer out;
+	fmt::format_to(out, "Players on server:");
 	if (connection->IsConsole())
-		AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+		fmt::format_to(out, "\r\n");
 	else
-		AppendAnyLenString(&output, &outsize, &outlen, "\n");
+		fmt::format_to(out, "\n");
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		cle = iterator.GetData();
@@ -1058,18 +1047,17 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			else
 				sprintf(line, "  %s[%i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
 
-			AppendAnyLenString(&output, &outsize, &outlen, line);
-			if (outlen >= 3584) {
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-				safe_delete(output);
-				outsize = 0;
-				outlen = 0;
+			fmt::format_to(out, line);
+			if (out.size() >= 3584) {
+				auto output = fmt::to_string(out);
+				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				out.clear();
 			}
 			else {
 				if (connection->IsConsole())
-					AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+					fmt::format_to(out, "\r\n");
 				else
-					AppendAnyLenString(&output, &outsize, &outlen, "\n");
+					fmt::format_to(out, "\n");
 			}
 			x++;
 			if (x >= 20 && admin < 80)
@@ -1079,20 +1067,19 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 	}
 
 	if (x >= 20 && admin < 80)
-		AppendAnyLenString(&output, &outsize, &outlen, "too many results...20 players shown");
+		fmt::format_to(out, "too many results...20 players shown");
 	else
-		AppendAnyLenString(&output, &outsize, &outlen, "%i players online", x);
+		fmt::format_to(out, "{} players online", x);
 	if (admin >= 150 && (whom == 0 || whom->gmlookup != 0xFFFF)) {
 		if (connection->IsConsole())
-			AppendAnyLenString(&output, &outsize, &outlen, "\r\n");
+			fmt::format_to(out, "\r\n");
 		else
-			AppendAnyLenString(&output, &outsize, &outlen, "\n");
+			fmt::format_to(out, "\n");
 
 		//console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
 	}
-	if (output)
-		connection->SendEmoteMessageRaw(to, 0, 0, 10, output);
-	safe_delete(output);
+	auto output = fmt::to_string(out);
+	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
 }
 
 void ClientList::Add(Client* client) {

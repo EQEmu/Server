@@ -44,6 +44,8 @@ public:
 	void TeleportGroup(Lua_Mob sender, uint32 zone_id, uint32 instance_id, float x, float y, float z, float h);
 	int GetID();
 	Lua_Mob GetMember(int index);
+	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name);
+	bool DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, std::string event_name, int max_check_count);
 };
 
 #endif

@@ -223,10 +223,10 @@ bool DBcore::Open(
 )
 {
 	LockMutex lock(&MDatabase);
-	safe_delete(pHost);
-	safe_delete(pUser);
-	safe_delete(pPassword);
-	safe_delete(pDatabase);
+	safe_delete_array(pHost);
+	safe_delete_array(pUser);
+	safe_delete_array(pPassword);
+	safe_delete_array(pDatabase);
 	pHost     = strcpy(new char[strlen(iHost) + 1], iHost);
 	pUser     = strcpy(new char[strlen(iUser) + 1], iUser);
 	pPassword = strcpy(new char[strlen(iPassword) + 1], iPassword);

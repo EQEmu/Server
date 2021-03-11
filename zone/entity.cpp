@@ -32,6 +32,8 @@
 #include "../common/features.h"
 #include "../common/guilds.h"
 
+#include "entity.h"
+#include "dynamiczone.h"
 #include "guild_mgr.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
@@ -600,6 +602,8 @@ void EntityList::EncounterProcess()
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
 		if (!it->second->Process()) {
+			// if Process is returning false here, we probably just got called from ReloadQuests .. oh well
+			parse->RemoveEncounter(it->second->GetEncounterName());
 			safe_delete(it->second);
 			free_ids.push(it->first);
 			it = encounter_list.erase(it);
@@ -2510,7 +2514,7 @@ void EntityList::DespawnAllDoors()
 	auto outapp = new EQApplicationPacket(OP_RemoveAllDoors, 0);
 	for (auto it = client_list.begin(); it != client_list.end(); ++it) {
 		if (it->second) {
-			it->second->QueuePacket(outapp);
+			it->second->QueuePacket(outapp, true, Client::CLIENT_CONNECTED);
 		}
 	}
 	safe_delete(outapp);
@@ -2523,7 +2527,7 @@ void EntityList::RespawnAllDoors()
 		if (it->second) {
 			auto outapp = new EQApplicationPacket();
 			MakeDoorSpawnPacket(outapp, it->second);
-			it->second->FastQueuePacket(&outapp);
+			it->second->FastQueuePacket(&outapp, true, Client::CLIENT_CONNECTED);
 		}
 		++it;
 	}
@@ -2563,6 +2567,7 @@ void EntityList::RemoveAllEncounters()
 {
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
+		parse->RemoveEncounter(it->second->GetEncounterName());
 		safe_delete(it->second);
 		free_ids.push(it->first);
 		it = encounter_list.erase(it);
@@ -2692,6 +2697,36 @@ void EntityList::RemoveAuraFromMobs(Mob *aura)
 }
 
 /**
+ * The purpose of this system is so that we cache relevant entities that are "close"
+ *
+ * In general; it becomes incredibly expensive to run zone-wide checks against every single mob in the zone when in reality
+ * we only care about entities closest to us
+ *
+ * A very simple example of where this is relevant is Aggro, the below example is skewed because the overall implementation
+ * of Aggro was also tweaked in conjunction with close lists. We also scan more aggressively when entities are moving (1-6 seconds)
+ * versus 60 seconds when idle. We also have entities that are moving add themselves to those closest to them so that their close
+ * lists remain always up to date
+ *
+ * Before: Aggro checks for NPC to Client aggro | (40 clients in zone) x (525 npcs) x 2 (times a second) = 2,520,000 checks a minute
+ * After: Aggro checks for NPC to Client aggro | (40 clients in zone) x (20-30 npcs) x 2 (times a second) = 144,000 checks a minute (This is actually far less today)
+ *
+ * Places in the code where this logic makes a huge impact
+ *
+ * Aggro checks (zone wide -> close)
+ * Aura processing (zone wide -> close)
+ * AE Taunt (zone wide -> close)
+ * AOE Spells (zone wide -> close)
+ * Bard Pulse AOE (zone wide -> close)
+ * Mass Group Buff (zone wide -> close)
+ * AE Attack (zone wide -> close)
+ * Packet QueueCloseClients (zone wide -> close)
+ * Check Close Beneficial Spells (Buffs; should I heal other npcs) (zone wide -> close)
+ * AI Yell for Help (NPC Assist other NPCs) (zone wide -> close)
+ *
+ * All of the above makes a tremendous impact on the bottom line of cpu cycle performance because we run an order of magnitude
+ * less checks by focusing our hot path logic down to a very small subset of relevant entities instead of looping an entire
+ * entity list (zone wide)
+ *
  * @param close_mobs
  * @param scanning_mob
  */
@@ -2967,7 +3002,7 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (own && own->IsClient())
 				continue;
 
-			if (pnpc->IsHorse)
+			if (pnpc->IsHorse())
 				continue;
 
 			if (pnpc->IsFindable())
@@ -3572,18 +3607,21 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 
 void EntityList::OpenDoorsNear(Mob *who)
 {
+	if (!who->CanOpenDoors()) {
+		return;
+	}
 
-	for (auto it = door_list.begin();it != door_list.end(); ++it) {
-		Doors *cdoor = it->second;
-		if (!cdoor || cdoor->IsDoorOpen())
+	for (auto &it : door_list) {
+		Doors *door = it.second;
+		if (!door || door->IsDoorOpen()) {
 			continue;
+		}
 
-		auto diff = who->GetPosition() - cdoor->GetPosition();
-
-		float curdist = diff.x * diff.x + diff.y * diff.y;
-
-		if (diff.z * diff.z < 10 && curdist <= 100)
-			cdoor->Open(who);
+		auto  diff     = who->GetPosition() - door->GetPosition();
+		float distance = diff.x * diff.x + diff.y * diff.y;
+		if (diff.z * diff.z < 10 && distance <= 100) {
+			door->Open(who);
+		}
 	}
 }
 
@@ -3869,22 +3907,24 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 
 void EntityList::SaveAllClientsTaskState()
 {
-	if (!taskmanager)
+	if (!task_manager) {
 		return;
+	}
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *client = it->second;
-		if (client->IsTaskStateLoaded())
+		if (client->IsTaskStateLoaded()) {
 			client->SaveTaskState();
+		}
 
 		++it;
 	}
 }
 
-void EntityList::ReloadAllClientsTaskState(int TaskID)
+void EntityList::ReloadAllClientsTaskState(int task_id)
 {
-	if (!taskmanager)
+	if (!task_manager)
 		return;
 
 	auto it = client_list.begin();
@@ -3893,11 +3933,11 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 		if (client->IsTaskStateLoaded()) {
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
-			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
+			if ((!task_id) || (task_id && client->IsTaskActive(task_id))) {
 				Log(Logs::General, Logs::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
-				taskmanager->SendActiveTasksToClient(client);
+				task_manager->SendActiveTasksToClient(client);
 			}
 		}
 		++it;
@@ -4104,8 +4144,13 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 		NPC* n = it->second;
 		if (n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				if (!n->GetSpecialAbility(IMMUNE_AGGRO))
+				if (
+					!n->GetSpecialAbility(IMMUNE_AGGRO) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient()) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_NPC) && other->IsNPC())
+				) {
 					n->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+				}
 			}
 		}
 		++it;
@@ -5189,6 +5234,8 @@ void EntityList::ReloadMerchants() {
  * If we have a distance requested that is greater than our scanning distance
  * then we return the full list
  *
+ * See comments @EntityList::ScanCloseMobs for system explanation
+ *
  * @param mob
  * @param distance
  * @return
@@ -5202,3 +5249,65 @@ std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float d
 	return mob_list;
 }
 
+void EntityList::GateAllClientsToSafeReturn()
+{
+	DynamicZone dz;
+	if (zone)
+	{
+		dz = zone->GetDynamicZone();
+
+		LogDynamicZones(
+			"Sending all clients in zone: [{}] instance: [{}] to dz safereturn or bind",
+			zone->GetZoneID(), zone->GetInstanceID()
+		);
+	}
+
+	for (const auto& client_list_iter : client_list)
+	{
+		if (client_list_iter.second)
+		{
+			// falls back to gating clients to bind if dz invalid
+			client_list_iter.second->GoToDzSafeReturnOrBind(dz);
+		}
+	}
+}
+
+int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
+{
+	if (!zone)
+	{
+		return 0;
+	}
+
+	int moved_count = 0;
+
+	for (auto it = corpse_list.begin(); it != corpse_list.end();)
+	{
+		bool moved = false;
+		if (it->second && it->second->IsPlayerCorpse())
+		{
+			if (zone->HasGraveyard())
+			{
+				moved = it->second->MovePlayerCorpseToGraveyard();
+			}
+			else if (force_move_from_instance && zone->GetInstanceID() != 0)
+			{
+				moved = it->second->MovePlayerCorpseToNonInstance();
+			}
+		}
+
+		if (moved)
+		{
+			safe_delete(it->second);
+			free_ids.push(it->first);
+			it = corpse_list.erase(it);
+			++moved_count;
+		}
+		else
+		{
+			++it;
+		}
+	}
+
+	return moved_count;
+}

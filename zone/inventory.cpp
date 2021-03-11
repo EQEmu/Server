@@ -1154,9 +1154,34 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 						}
 					}
 				}
+				if( i == EQ::invslot::slotPrimary && m_inv[EQ::invslot::slotSecondary] ) {
+					uint8 instrument = m_inv[EQ::invslot::slotSecondary]->GetItem()->ItemType;
+					if(
+							instrument == EQ::item::ItemTypeWindInstrument ||
+							instrument == EQ::item::ItemTypeStringedInstrument ||
+							instrument == EQ::item::ItemTypeBrassInstrument ||
+							instrument == EQ::item::ItemTypePercussionInstrument
+							) {
+						LogInventory("Cannot equip a primary item with [{}] already in the secondary.", m_inv[EQ::invslot::slotSecondary]->GetItem()->Name);
+						continue; // Do not auto-equip Primary when instrument is in Secondary
+					}
+				}
 				if (i == EQ::invslot::slotSecondary && m_inv[EQ::invslot::slotPrimary]) { // check to see if primary slot is a two hander
-					if (m_inv[EQ::invslot::slotPrimary]->GetItem()->IsType2HWeapon())
+					uint8 instrument = inst.GetItem()->ItemType;
+					if(
+							instrument == EQ::item::ItemTypeWindInstrument ||
+							instrument == EQ::item::ItemTypeStringedInstrument ||
+							instrument == EQ::item::ItemTypeBrassInstrument ||
+							instrument == EQ::item::ItemTypePercussionInstrument
+							) {
+						LogInventory("Cannot equip a secondary instrument with [{}] already in the primary.", m_inv[EQ::invslot::slotPrimary]->GetItem()->Name);
+						continue; // Do not auto-equip instrument in Secondary when Primary is equipped.
+					}
+
+					uint8 use = m_inv[EQ::invslot::slotPrimary]->GetItem()->ItemType;
+					if(use == EQ::item::ItemType2HSlash || use == EQ::item::ItemType2HBlunt || use == EQ::item::ItemType2HPiercing) {
 						continue;
+					}
 				}
 				if (i == EQ::invslot::slotSecondary && inst.IsWeapon() && !CanThisClassDualWield()) {
 					continue;
@@ -1169,7 +1194,6 @@ bool Client::AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn, bool 
 					if (worn_slot_material != EQ::textures::materialInvalid) {
 						SendWearChange(worn_slot_material);
 					}
-
 					parse->EventItem(EVENT_EQUIP_ITEM, this, &inst, nullptr, "", i);
 					return true;
 				}
@@ -1331,6 +1355,7 @@ bool MakeItemLink(char* &ret_link, const ItemData *item, uint32 aug0, uint32 aug
 #endif
 
 int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
+#if 0
 	//pre-Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=70&postdays=0&postorder=asc
 	//Titanium: http://eqitems.13th-floor.org/phpBB2/viewtopic.php?t=145
 	if (!inst)	//have to have an item to make the hash
@@ -1416,6 +1441,8 @@ int Client::GetItemLinkHash(const EQ::ItemInstance* inst) {
 
 	safe_delete_array(hash_str);
 	return hash;
+#endif
+	return 0;
 }
 
 // This appears to still be in use... The core of this should be incorporated into class EQ::SayLinkEngine
@@ -1602,11 +1629,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 
 		if(!banker || distance > USE_NPC_RANGE2)
 		{
-			char *hacked_string = nullptr;
-			MakeAnyLenString(&hacked_string, "Player tried to make use of a banker(items) but %s is non-existant or too far away (%u units).",
-				banker ? banker->GetName() : "UNKNOWN NPC", distance);
+			auto hacked_string = fmt::format("Player tried to make use of a banker(items) but {} is "
+							 "non-existant or too far away ({} units).",
+							 banker ? banker->GetName() : "UNKNOWN NPC", distance);
 			database.SetMQDetectionFlag(AccountName(), GetName(), hacked_string, zone->GetShortName());
-			safe_delete_array(hacked_string);
 			Kick("Inventory desync");	// Kicking player to avoid item loss do to client and server inventories not being sync'd
 			return false;
 		}

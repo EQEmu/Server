@@ -12,13 +12,14 @@
  * real thing.
  */
 
-/* @(#) $Id$ */
+#define _POSIX_SOURCE 1  /* This file needs POSIX for fileno(). */
+#define _POSIX_C_SOURCE 200112  /* For snprintf(). */
 
 #include "zbuild.h"
 #ifdef ZLIB_COMPAT
-# include "zlib.h"
+#  include "zlib.h"
 #else
-# include "zlib-ng.h"
+#  include "zlib-ng.h"
 #endif
 #include <stdio.h>
 #include <assert.h>
@@ -35,7 +36,7 @@
 #  include <malloc.h>
 #endif
 
-#if defined(WIN32) || defined(__CYGWIN__)
+#if defined(_WIN32) || defined(__CYGWIN__)
 #  include <fcntl.h>
 #  include <io.h>
 #  define SET_BINARY_MODE(file) setmode(fileno(file), O_BINARY)
@@ -48,8 +49,8 @@
 #endif
 
 #if !defined(Z_HAVE_UNISTD_H) && !defined(_LARGEFILE64_SOURCE)
-#ifndef WIN32 /* unlink already in stdio.h for WIN32 */
-  extern int unlink (const char *);
+#ifndef _WIN32 /* unlink already in stdio.h for Win32 */
+extern int unlink (const char *);
 #endif
 #endif
 
@@ -62,23 +63,22 @@
 #define BUFLENW     (BUFLEN * 3) /* write buffer size */
 #define MAX_NAME_LEN 1024
 
-static char *prog;
+static const char *prog = "minigzip_fuzzer";
 
 void error            (const char *msg);
-void gz_compress      (FILE   *in, gzFile out);
+void gz_compress      (FILE *in, gzFile out);
 #ifdef USE_MMAP
-int  gz_compress_mmap (FILE   *in, gzFile out);
+int  gz_compress_mmap (FILE *in, gzFile out);
 #endif
-void gz_uncompress    (gzFile in, FILE   *out);
-void file_compress    (char  *file, char *mode);
-void file_uncompress  (char  *file);
+void gz_uncompress    (gzFile in, FILE *out);
+void file_compress    (char *file, char *mode);
+void file_uncompress  (char *file);
 int  main             (int argc, char *argv[]);
 
 /* ===========================================================================
  * Display error message and exit
  */
-void error(const char *msg)
-{
+void error(const char *msg) {
     fprintf(stderr, "%s: %s\n", prog, msg);
     exit(1);
 }
@@ -87,8 +87,7 @@ void error(const char *msg)
  * Compress input to output then close both files.
  */
 
-void gz_compress(FILE   *in, gzFile out)
-{
+void gz_compress(FILE *in, gzFile out) {
     char buf[BUFLEN];
     int len;
     int err;
@@ -121,12 +120,11 @@ void gz_compress(FILE   *in, gzFile out)
 /* Try compressing the input file at once using mmap. Return Z_OK if
  * if success, Z_ERRNO otherwise.
  */
-int gz_compress_mmap(FILE   *in, gzFile out)
-{
+int gz_compress_mmap(FILE *in, gzFile out) {
     int len;
     int err;
     int ifd = fileno(in);
-    caddr_t buf;    /* mmap'ed buffer for the entire input file */
+    char *buf;      /* mmap'ed buffer for the entire input file */
     off_t buf_len;  /* length of the input file */
     struct stat sb;
 
@@ -136,8 +134,8 @@ int gz_compress_mmap(FILE   *in, gzFile out)
     if (buf_len <= 0) return Z_ERRNO;
 
     /* Now do the actual mmap: */
-    buf = mmap((caddr_t) 0, buf_len, PROT_READ, MAP_SHARED, ifd, (off_t)0);
-    if (buf == (caddr_t)(-1)) return Z_ERRNO;
+    buf = mmap((void *)0, buf_len, PROT_READ, MAP_SHARED, ifd, (off_t)0);
+    if (buf == (char *)(-1)) return Z_ERRNO;
 
     /* Compress the whole file at once: */
     len = PREFIX(gzwrite)(out, (char *)buf, (unsigned)buf_len);
@@ -154,8 +152,7 @@ int gz_compress_mmap(FILE   *in, gzFile out)
 /* ===========================================================================
  * Uncompress input to output then close both files.
  */
-void gz_uncompress(gzFile in, FILE   *out)
-{
+void gz_uncompress(gzFile in, FILE *out) {
     char buf[BUFLENW];
     int len;
     int err;
@@ -179,10 +176,9 @@ void gz_uncompress(gzFile in, FILE   *out)
  * Compress the given file: create a corresponding .gz file and remove the
  * original.
  */
-void file_compress(char  *file, char  *mode)
-{
+void file_compress(char *file, char *mode) {
     char outfile[MAX_NAME_LEN];
-    FILE  *in;
+    FILE *in;
     gzFile out;
 
     if (strlen(file) + strlen(GZ_SUFFIX) >= sizeof(outfile)) {
@@ -211,11 +207,10 @@ void file_compress(char  *file, char  *mode)
 /* ===========================================================================
  * Uncompress the given file and remove the original.
  */
-void file_uncompress(char  *file)
-{
+void file_uncompress(char *file) {
     char buf[MAX_NAME_LEN];
     char *infile, *outfile;
-    FILE  *out;
+    FILE *out;
     gzFile in;
     size_t len = strlen(file);
 
@@ -252,75 +247,75 @@ void file_uncompress(char  *file)
 }
 
 int LLVMFuzzerTestOneInput(const uint8_t *data, size_t dataLen) {
-  char *inFileName = "/tmp/minigzip_fuzzer.out";
-  char *outFileName = "/tmp/minigzip_fuzzer.out.gz";
-  char outmode[20];
-  FILE *in;
-  char buf[BUFLEN];
-  uint32_t offset = 0;
+    char *inFileName = "minigzip_fuzzer.out";
+    char *outFileName = "minigzip_fuzzer.out.gz";
+    char outmode[20];
+    FILE *in;
+    char buf[BUFLEN];
+    uint32_t offset = 0;
 
-  /* Discard inputs larger than 1Mb. */
-  static size_t kMaxSize = 1024 * 1024;
-  if (dataLen < 1 || dataLen > kMaxSize)
-    return 0;
+    /* Discard inputs larger than 1Mb. */
+    static size_t kMaxSize = 1024 * 1024;
+    if (dataLen < 1 || dataLen > kMaxSize)
+        return 0;
 
-  in = fopen(inFileName, "w");
-  if (fwrite(data, 1, (unsigned)dataLen, in) != dataLen)
-    error("failed fwrite");
-  if (fclose(in))
-    error("failed fclose");
+    in = fopen(inFileName, "wb");
+    if (fwrite(data, 1, (unsigned)dataLen, in) != dataLen)
+        error("failed fwrite");
+    if (fclose(in))
+        error("failed fclose");
 
-  memset(outmode, 0, sizeof(outmode));
-  snprintf(outmode, sizeof(outmode), "%s", "wb");
+    memset(outmode, 0, sizeof(outmode));
+    snprintf(outmode, sizeof(outmode), "%s", "wb");
 
-  /* Compression level: [0..9]. */
-  outmode[2] = data[0] % 10;
+    /* Compression level: [0..9]. */
+    outmode[2] = data[0] % 10;
 
-  switch (data[0] % 4) {
-  default:
-  case 0:
-    outmode[3] = 0;
-    break;
-  case 1:
-    /* compress with Z_FILTERED */
-    outmode[3] = 'f';
-    break;
-  case 2:
-    /* compress with Z_HUFFMAN_ONLY */
-    outmode[3] = 'h';
-    break;
-  case 3:
-    /* compress with Z_RLE */
-    outmode[3] = 'R';
-    break;
-  }
-
-  file_compress(inFileName, outmode);
-  file_uncompress(outFileName);
-
-  /* Check that the uncompressed file matches the input data. */
-  in = fopen(inFileName, "rb");
-  if (in == NULL) {
-    perror(inFileName);
-    exit(1);
-  }
-
-  memset(buf, 0, sizeof(buf));
-  for (;;) {
-    int len = (int)fread(buf, 1, sizeof(buf), in);
-    if (ferror(in)) {
-      perror("fread");
-      exit(1);
+    switch (data[0] % 4) {
+    default:
+    case 0:
+        outmode[3] = 0;
+        break;
+    case 1:
+        /* compress with Z_FILTERED */
+        outmode[3] = 'f';
+        break;
+    case 2:
+        /* compress with Z_HUFFMAN_ONLY */
+        outmode[3] = 'h';
+        break;
+    case 3:
+        /* compress with Z_RLE */
+        outmode[3] = 'R';
+        break;
     }
-    if (len == 0)
-      break;
-    assert(0 == memcmp(data + offset, buf, len));
-    offset += len;
-  }
 
-  if (fclose(in))
-    error("failed fclose");
+    file_compress(inFileName, outmode);
+    file_uncompress(outFileName);
 
-  /* This function must return 0. */
-  return 0;
+    /* Check that the uncompressed file matches the input data. */
+    in = fopen(inFileName, "rb");
+    if (in == NULL) {
+        perror(inFileName);
+        exit(1);
+    }
+
+    memset(buf, 0, sizeof(buf));
+    for (;;) {
+        int len = (int)fread(buf, 1, sizeof(buf), in);
+        if (ferror(in)) {
+            perror("fread");
+            exit(1);
+        }
+        if (len == 0)
+            break;
+        assert(0 == memcmp(data + offset, buf, len));
+        offset += len;
+    }
+
+    if (fclose(in))
+        error("failed fclose");
+
+    /* This function must return 0. */
+    return 0;
 }

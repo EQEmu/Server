@@ -23,7 +23,6 @@ class Petition;
 class Spawn2;
 class SpawnGroupList;
 class Trap;
-struct CharacterEventLog_Struct;
 struct Door;
 struct ExtendedProfile_Struct;
 struct NPCType;
@@ -52,7 +51,7 @@ struct wplist {
 
 #pragma pack(1)
 struct DBnpcspells_entries_Struct {
-	int16	spellid;
+	uint16	spellid;
 	uint8	minlevel;
 	uint8	maxlevel;
 	uint32	type;
@@ -376,6 +375,7 @@ public:
 	uint32		GetCharacterCorpseID(uint32 char_id, uint8 corpse);
 	uint32		GetCharacterCorpseItemAt(uint32 corpse_id, uint16 slotid);
 	uint32		GetPlayerCorpseTimeLeft(uint8 corpse, uint8 type);
+	void        SendCharacterCorpseToNonInstance(uint32 corpse_db_id);
 
 	/* Faction   */
 	bool		GetNPCFactionList(uint32 npcfaction_id, int32* faction_id, int32* value, uint8* temp, int32* primary_faction = 0);
@@ -550,7 +550,6 @@ public:
 		* REALLY HAS NO BETTER SECTION
 	*/
 	bool	logevents(const char* accountname,uint32 accountid,uint8 status,const char* charname,const char* target, const char* descriptiontype, const char* description,int event_nid);
-	void	GetEventLogs(const char* name,char* target,uint32 account_id=0,uint8 eventid=0,char* detail=0,char* timestamp=0, CharacterEventLog_Struct* cel=0);
 	uint32	GetKarma(uint32 acct_id);
 	void	UpdateKarma(uint32 acct_id, uint32 amount);
 

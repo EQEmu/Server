@@ -20,7 +20,7 @@ EQ::Net::WebsocketServerConnection::WebsocketServerConnection(WebsocketServer *p
 	std::shared_ptr<TCPConnection> connection,
 	std::shared_ptr<websocket_connection> ws_connection)
 {
-	_impl.reset(new Impl());
+	_impl = std::make_unique<Impl>();
 	_impl->parent = parent;
 	_impl->connection = connection;
 	_impl->id = EQ::Util::UUID::Generate().ToString();

@@ -153,6 +153,8 @@ public:
 	inline int GetMentorPercent() { return mentor_percent; }
 	inline Client *GetMentoree() { return mentoree; }
 
+	bool DoesAnyMemberHaveExpeditionLockout(const std::string& expedition_name, const std::string& event_name, int max_check_count = 0);
+
 	Mob* members[MAX_GROUP_MEMBERS];
 	char	membername[MAX_GROUP_MEMBERS][64];
 	uint8	MemberRoles[MAX_GROUP_MEMBERS];

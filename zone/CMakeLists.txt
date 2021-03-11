@@ -22,6 +22,7 @@ SET(zone_sources
 	corpse.cpp
 	data_bucket.cpp
 	doors.cpp
+	dynamiczone.cpp
 	effects.cpp
 	embparser.cpp
 	embparser_api.cpp
@@ -30,6 +31,10 @@ SET(zone_sources
 	encounter.cpp
 	entity.cpp
 	exp.cpp
+	expedition.cpp
+	expedition_database.cpp
+	expedition_lockout_timer.cpp
+	expedition_request.cpp
 	fastmath.cpp
 	fearpath.cpp
 	forage.cpp
@@ -48,6 +53,7 @@ SET(zone_sources
 	lua_encounter.cpp
 	lua_entity.cpp
 	lua_entity_list.cpp
+	lua_expedition.cpp
 	lua_general.cpp
 	lua_group.cpp
 	lua_hate_list.cpp
@@ -100,8 +106,10 @@ SET(zone_sources
 	perl_client.cpp
 	perl_doors.cpp
 	perl_entity.cpp
+	perl_expedition.cpp
 	perl_groups.cpp
 	perl_hateentry.cpp
+	perl_inventory.cpp
 	perl_mob.cpp
 	perl_npc.cpp
 	perl_object.cpp
@@ -125,6 +133,10 @@ SET(zone_sources
 	special_attacks.cpp
 	spell_effects.cpp
 	spells.cpp
+	task_client_state.cpp
+	task_goal_list_manager.cpp
+	task_manager.cpp
+	task_proximity_manager.cpp
 	tasks.cpp
 	titles.cpp
 	tradeskills.cpp
@@ -143,8 +155,7 @@ SET(zone_sources
 	zonedb.cpp
 	zone_reload.cpp
 	zone_store.cpp
-	zoning.cpp
-)
+	zoning.cpp)
 
 SET(zone_headers
 	aa.h
@@ -165,6 +176,7 @@ SET(zone_headers
 	corpse.h
 	data_bucket.h
 	doors.h
+	dynamiczone.h
 	embparser.h
 	embperl.h
 	embxs.h
@@ -172,6 +184,10 @@ SET(zone_headers
 	entity.h
 	errmsg.h
 	event_codes.h
+	expedition.h
+	expedition_database.h
+	expedition_lockout_timer.h
+	expedition_request.h
 	fastmath.h
 	forage.h
 	global_loot_manager.h
@@ -187,6 +203,7 @@ SET(zone_headers
 	lua_encounter.h
 	lua_entity.h
 	lua_entity_list.h
+	lua_expedition.h
 	lua_general.h
 	lua_group.h
 	lua_hate_list.h
@@ -230,7 +247,6 @@ SET(zone_headers
 	quest_interface.h
 	questmgr.h
 	quest_parser_collection.h
-	raid.h
 	raids.h
 	raycast_mesh.h
 	skills.h
@@ -238,6 +254,10 @@ SET(zone_headers
 	spawn2.h
 	spawngroup.h
 	string_ids.h
+	task_client_state.h
+	task_goal_list_manager.h
+	task_manager.h
+	task_proximity_manager.h
 	tasks.h
 	titles.h
 	trap.h
@@ -251,8 +271,7 @@ SET(zone_headers
 	zonedb.h
 	zonedump.h
 	zone_reload.h
-	zone_store.h
-)
+	zone_store.h)
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers})
 

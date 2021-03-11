@@ -5,6 +5,7 @@
 #include "lua_mob.h"
 
 class Client;
+class Lua_Expedition;
 class Lua_Group;
 class Lua_Raid;
 class Lua_Inventory;
@@ -40,7 +41,10 @@ public:
 	bool IsLD();
 	void WorldKick();
 	void SendToGuildHall();
-	bool GetAnon();
+	int GetAnon();
+	void SetAnon(uint8 anon_flag);
+	int GetAFK();
+	void SetAFK(uint8 afk_flag);
 	void Duck();
 	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue);
 	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint);
@@ -51,7 +55,9 @@ public:
 	bool GetGM();
 	void SetBaseClass(int v);
 	void SetBaseRace(int v);
-	void SetBaseGender(int v);
+	void SetBaseGender(int v);	
+	int GetClassBitmask();
+	int GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
 	const char *GetLastName();
@@ -91,6 +97,9 @@ public:
 	float GetBindHeading(int index);
 	uint32 GetBindZoneID();
 	uint32 GetBindZoneID(int index);
+	float GetTargetRingX();
+	float GetTargetRingY();
+	float GetTargetRingZ();
 	void MovePC(int zone, float x, float y, float z, float heading);
 	void MovePCInstance(int zone, int instance, float x, float y, float z, float heading);
 	void MoveZone(const char *zone_short_name);
@@ -146,6 +155,15 @@ public:
 	void UnmemSpellAll(bool update_client);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	luabind::object GetLearnableDisciplines(lua_State* L);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level, uint8 max_level);
+	luabind::object GetLearnedDisciplines(lua_State* L);
+	luabind::object GetMemmedSpells(lua_State* L);
+	luabind::object GetScribedSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level);
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	void UnscribeSpell(int slot);
@@ -207,6 +225,7 @@ public:
 	uint32 GetDisciplineTimer(uint32 timer_id);
 	void ResetDisciplineTimer(uint32 timer_id);
 	bool UseDiscipline(int spell_id, int target_id);
+	bool HasDisciplineLearned(uint16 spell_id);
 	int GetCharacterFactionLevel(int faction_id);
 	void SetZoneFlag(int zone_id);
 	void ClearZoneFlag(int zone_id);
@@ -235,6 +254,8 @@ public:
 	bool KeyRingCheck(uint32 item);
 	void AddPVPPoints(uint32 points);
 	void AddCrystals(uint32 radiant, uint32 ebon);
+	void SetEbonCrystals(uint32 value);
+	void SetRadiantCrystals(uint32 value);
 	uint32 GetPVPPoints();
 	uint32 GetRadiantCrystals();
 	uint32 GetEbonCrystals();
@@ -330,12 +351,36 @@ public:
 	void EnableAreaRegens(int value);
 	void DisableAreaRegens();
 
-
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
 
 	void SetClientMaxLevel(int value);
 	int GetClientMaxLevel();
+
+	Lua_Expedition  CreateExpedition(luabind::object expedition_info);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players);
+	Lua_Expedition  CreateExpedition(std::string zone_name, uint32 version, uint32 duration, std::string expedition_name, uint32 min_players, uint32 max_players, bool disable_messages);
+	Lua_Expedition  GetExpedition();
+	luabind::object GetExpeditionLockouts(lua_State* L);
+	luabind::object GetExpeditionLockouts(lua_State* L, std::string expedition_name);
+	std::string     GetLockoutExpeditionUUID(std::string expedition_name, std::string event_name);
+	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds);
+	void            AddExpeditionLockout(std::string expedition_name, std::string event_name, uint32 seconds, std::string uuid);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds);
+	void            AddExpeditionLockoutDuration(std::string expedition_name, std::string event_name, int seconds, std::string uuid);
+	void            RemoveAllExpeditionLockouts();
+	void            RemoveAllExpeditionLockouts(std::string expedition_name);
+	void            RemoveExpeditionLockout(std::string expedition_name, std::string event_name);
+	bool            HasExpeditionLockout(std::string expedition_name, std::string event_name);
+	void            MovePCDynamicZone(uint32 zone_id);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version);
+	void            MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid);
+	void            MovePCDynamicZone(std::string zone_name);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version);
+	void            MovePCDynamicZone(std::string zone_name, int zone_version, bool msg_if_invalid);
+	void            Fling(float value, float target_x, float target_y, float target_z);
+	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los);
+	void            Fling(float value, float target_x, float target_y, float target_z, bool ignore_los, bool clipping);
 };
 
 #endif

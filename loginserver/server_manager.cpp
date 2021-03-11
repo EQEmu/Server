@@ -33,7 +33,7 @@ ServerManager::ServerManager()
 {
 	int listen_port = server.config.GetVariableInt("general", "listen_port", 5998);
 
-	server_connection.reset(new EQ::Net::ServertalkServer());
+	server_connection = std::make_unique<EQ::Net::ServertalkServer>();
 	EQ::Net::ServertalkServerOptions opts;
 	opts.port = listen_port;
 	opts.ipv6 = false;
@@ -68,7 +68,7 @@ ServerManager::ServerManager()
 				++iter;
 			}
 
-			world_servers.push_back(std::unique_ptr<WorldServer>(new WorldServer(world_connection)));
+			world_servers.push_back(std::make_unique<WorldServer>(world_connection));
 		}
 	);
 

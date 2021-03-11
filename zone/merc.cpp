@@ -74,7 +74,7 @@ Merc::Merc(const NPCType* d, float x, float y, float z, float heading)
 
 	int r;
 	for (r = 0; r <= EQ::skills::HIGHEST_SKILL; r++) {
-		skills[r] = database.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, GetLevel());
+		skills[r] = content_db.GetSkillCap(GetClass(), (EQ::skills::SkillType)r, GetLevel());
 	}
 
 	size = d->size;
@@ -1180,12 +1180,12 @@ bool Merc::HasSkill(EQ::skills::SkillType skill_id) const {
 }
 
 bool Merc::CanHaveSkill(EQ::skills::SkillType skill_id) const {
-	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
+	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
 uint16 Merc::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 level) const {
-	return(database.GetSkillCap(class_, skillid, level));
+	return(content_db.GetSkillCap(class_, skillid, level));
 }
 
 void Merc::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho) {
@@ -2154,16 +2154,9 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 								}
 
 								if(castedSpell) {
-									char* gmsg = nullptr;
-
 									if(tar && tar != this) { // [tar] was implicitly valid at this point..this change is to catch any bad logic
 										//we don't need spam of bots healing themselves
-										MakeAnyLenString(&gmsg, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
-										if(gmsg)
-										{
-											MercGroupSay(this, gmsg);
-											safe_delete_array(gmsg);
-										}
+										MercGroupSay(this, "Casting %s on %s.", spells[selectedMercSpell.spellid].name, tar->GetCleanName());
 									}
 								}
 
@@ -4798,7 +4791,12 @@ Merc* Merc::LoadMerc(Client *c, MercTemplate* merc_template, uint32 merchant_id,
 				tmpsize = c->GetMercInfo().MercSize;
 			}
 
-			sprintf(npc_type->lastname, "%s's Mercenary", c->GetName());
+			std::string tmp_lastname = c->GetName();
+			tmp_lastname += "'s Mercenary";
+
+			// not sure what to do if too long
+			if (tmp_lastname.length() < sizeof(npc_type->lastname))
+				strn0cpy(npc_type->lastname, tmp_lastname.c_str(), sizeof(npc_type->lastname));
 			npc_type->gender = tmpgender;
 			npc_type->size = tmpsize;
 			npc_type->loottable_id = 0; // Loottable has to be 0, otherwise we'll be leavin' some corpses!
