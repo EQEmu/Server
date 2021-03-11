@@ -2642,7 +2642,7 @@ void command_flymode(Client *c, const Seperator *sep)
 {
 	Mob *t = c;
 
-	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3' || sep->arg[1][0] == '4' || sep->arg[1][0] == '5'))
+	if (!(strlen(sep->arg[1]) == 1 && (sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3' || sep->arg[1][0] == '4' || sep->arg[1][0] == '5')))
 		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
 	else {
 		if (c->GetTarget()) {
