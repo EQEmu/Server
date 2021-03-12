@@ -369,6 +369,7 @@ public:
 	bool DisableRecipe(uint32 recipe_id);
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
+	std::string secondstotime(int duration);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
