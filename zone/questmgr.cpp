@@ -4252,7 +4252,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 	return nullptr;
 }
 
-std::string QuestManager::converttime(int duration) {
+std::string QuestManager::secondstotime(int duration) {
 	int timer_length = duration;
 	int hours = int(timer_length / 3600);
 	timer_length %= 3600;

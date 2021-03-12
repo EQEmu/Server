@@ -6404,17 +6404,17 @@ XS(XS__createitem) {
 	XSRETURN(1);
 }
 
-XS(XS__converttime);
-XS(XS__converttime) {
+XS(XS__secondstotime);
+XS(XS__secondstotime) {
 	dXSARGS;
 	if (items != 1) {
-		Perl_croak(aTHX_ "Usage: quest::converttime(int duration)");
+		Perl_croak(aTHX_ "Usage: quest::secondstotime(int duration)");
 	}
 
 	dXSTARG;
 	std::string time_string;
 	int duration = (int) SvIV(ST(0));
-	time_string = quest_manager.converttime(duration);
+	time_string = quest_manager.secondstotime(duration);
 	sv_setpv(TARG, time_string.c_str());
 	XSprePUSH;
 	PUSHTARG;
@@ -6512,7 +6512,6 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "clearspawntimers"), XS__clearspawntimers, file);
 	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
 	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
-	newXS(strcpy(buf, "converttime"), XS__converttime, file);
 	newXS(strcpy(buf, "countitem"), XS__countitem, file);
 	newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
@@ -6714,6 +6713,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "say"), XS__say, file);
 	newXS(strcpy(buf, "saylink"), XS__saylink, file);
 	newXS(strcpy(buf, "scribespells"), XS__scribespells, file);
+	newXS(strcpy(buf, "secondstotime"), XS__secondstotime, file);
 	newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
 	newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
 	newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);
