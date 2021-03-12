@@ -76,6 +76,7 @@ public:
 	int             GetZoneVersion();
 	bool            HasLockout(std::string event_name);
 	bool            HasReplayLockout();
+	bool            IsLocked();
 	void            RemoveCompass();
 	void            RemoveLockout(std::string event_name);
 	void            SetCompass(uint32_t zone_id, float x, float y, float z);
