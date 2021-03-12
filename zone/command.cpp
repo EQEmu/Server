@@ -2642,9 +2642,7 @@ void command_flymode(Client *c, const Seperator *sep)
 {
 	Mob *t = c;
 
-	if (!(strlen(sep->arg[1]) == 1 && (sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3' || sep->arg[1][0] == '4' || sep->arg[1][0] == '5')))
-		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
-	else {
+	if (strlen(sep->arg[1]) == 1 && sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 5) {
 		if (c->GetTarget()) {
 			t = c->GetTarget();
 		}
@@ -2671,8 +2669,11 @@ void command_flymode(Client *c, const Seperator *sep)
 		else if (sep->arg[1][0] == '5') {
 			c->Message(Chat::White, "Setting %s to Levitating While Running", t->GetName());
 		}
+	} else {
+		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
 	}
 }
+
 
 void command_showskills(Client *c, const Seperator *sep)
 {
