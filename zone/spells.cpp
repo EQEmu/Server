@@ -82,6 +82,7 @@ Copyright (C) 2001-2002 EQEMu Development Team (http://eqemu.org)
 #include "string_ids.h"
 #include "worldserver.h"
 #include "fastmath.h"
+#include "lua_parser.h"
 
 #include <assert.h>
 #include <math.h>
@@ -4475,6 +4476,20 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
 		return(0);
 	}
+
+#ifdef LUA_EQEMU
+	// for pvp override, caster and resistor must both be clients
+	if (this->IsClient() && caster->IsClient()) {
+		float out_index;
+		float lua_ret;
+		bool ignoreDefault = false;
+		lua_ret = LuaParser::Instance()->PVPResistSpell(this->CastToClient(), resist_type, spell_id, caster->CastToClient(), use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, out_index, ignoreDefault);
+
+		if (ignoreDefault && lua_ret) {
+			return lua_ret;
+		}
+	}
+#endif
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
 	int resist_modifier = (use_resist_override) ? resist_override : spells[spell_id].ResistDiff;
