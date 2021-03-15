@@ -46,6 +46,7 @@ void LuaMod::Init()
 	m_has_get_experience_for_kill = parser_->HasFunction("GetExperienceForKill", package_name_);
 	m_has_common_outgoing_hit_success = parser_->HasFunction("CommonOutgoingHitSuccess", package_name_);
 	m_has_client_damage = parser_->HasFunction("ClientDamage", package_name_);
+	m_has_pvp_resist_spell = parser_->HasFunction("PVPResistSpell", package_name_);
 }
 
 void PutDamageHitInfo(lua_State *L, luabind::adl::object &e, DamageHitInfo &hit) {
@@ -687,6 +688,59 @@ void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &sp
 	int n = end - start;
 	if (n > 0) {
 		lua_pop(L, n);
+	}
+}
+
+void LuaMod::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck,
+							bool &CharmTick, bool &IsRoot, int &level_override, float &out_index, bool &ignoreDefault) {
+	try {
+		if (!m_has_pvp_resist_spell) {
+			return;
+		}
+
+		lua_getfield(L, LUA_REGISTRYINDEX, package_name_.c_str());
+		lua_getfield(L, -1, "PVPResistSpell");
+
+		Lua_Mob l_self(self);
+		luabind::adl::object e = luabind::newtable(L);
+
+		e["self"] = l_self;
+		e["resist_type"] = resist_type;
+		e["spell_id"] = spell_id;
+		Lua_Mob l_other(caster);
+		e["caster"] = l_other;
+		e["use_resist_override"] = use_resist_override;
+		e["resist_override"] = resist_override;
+		e["CharismaCheck"] = CharismaCheck;
+		e["CharmTick"] = CharmTick;
+		e["IsRoot"] = IsRoot;
+		e["level_override"] = level_override;
+		e.push(L);
+
+		if (lua_pcall(L, 1, 1, 0)) {
+			std::string error = lua_tostring(L, -1);
+			parser_->AddError(error);
+			lua_pop(L, 1);
+			return;
+		}
+
+		if (lua_type(L, -1) == LUA_TTABLE) {
+			luabind::adl::object ret(luabind::from_stack(L, -1));
+			auto IgnoreDefaultObj = ret["IgnoreDefault"];
+			if (luabind::type(IgnoreDefaultObj) == LUA_TBOOLEAN) {
+				ignoreDefault = ignoreDefault || luabind::object_cast<bool>(IgnoreDefaultObj);
+			}
+
+			auto returnValueObj = ret["ReturnValue"];
+			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
+				// out_index is the effectiveness index of the spell, see Mob::ResistSpell
+				out_index = luabind::object_cast<int32>(returnValueObj);
+			}
+		}
+
+	}
+	catch (std::exception & ex) {
+		parser_->AddError(ex.what());
 	}
 }
 
