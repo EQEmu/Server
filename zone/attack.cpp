@@ -1762,7 +1762,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	}
 
 	if (!RuleB(Character, UseDeathExpLossMult)) {
-		exploss = (int)(GetLevel() * (GetLevel() / 18.0) * 12000);
+		exploss = ((int)(GetLevel() * (GetLevel() / 18.0) * 12000) / 2);
 	}
 
 	if (RuleB(Zone, LevelBasedEXPMods)) {
