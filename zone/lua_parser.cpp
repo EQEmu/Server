@@ -1389,10 +1389,10 @@ void LuaParser::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 
 	}
 }
 
-float LuaParser::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, float &out_index, bool &ignoreDefault) {
+float LuaParser::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, bool &ignoreDefault) {
 	float retval = 0;
 	for (auto &mod : mods_) {
-		mod.PVPResistSpell(self, resist_type, spell_id, caster, use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, out_index, ignoreDefault);
+		mod.PVPResistSpell(self, resist_type, spell_id, caster, use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, retval, ignoreDefault);
 	}
 	return retval;
 }
