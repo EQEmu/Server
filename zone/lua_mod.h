@@ -27,7 +27,7 @@ public:
 	void GetEXPForLevel(Client *self, uint16 level, uint32 &returnValue, bool &ignoreDefault);
 	void GetExperienceForKill(Client *self, Mob *against, uint32 &returnValue, bool &ignoreDefault);
 	void ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id,  int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault);
-	void PVPResistSpell(Client *self, uint8 &resist_type, uint16 &spell_id, Client *caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, float &out_index, bool &ignoreDefault);
+	void PVPResistSpell(Client *self, uint8 &resist_type, uint16 &spell_id, Client *caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, float &returnValue, bool &ignoreDefault);
 private:
 	LuaParser *parser_;
 	lua_State *L;

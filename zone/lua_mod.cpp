@@ -692,7 +692,9 @@ void LuaMod::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &sp
 }
 
 void LuaMod::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck,
-							bool &CharmTick, bool &IsRoot, int &level_override, float &out_index, bool &ignoreDefault) {
+							bool &CharmTick, bool &IsRoot, int &level_override, float &returnValue, bool &ignoreDefault) {
+	float retval = 0;
+	int start = lua_gettop(L);
 	try {
 		if (!m_has_pvp_resist_spell) {
 			return;
@@ -733,14 +735,19 @@ void LuaMod::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, 
 
 			auto returnValueObj = ret["ReturnValue"];
 			if (luabind::type(returnValueObj) == LUA_TNUMBER) {
-				// out_index is the effectiveness index of the spell, see Mob::ResistSpell
-				out_index = luabind::object_cast<int32>(returnValueObj);
+				returnValue = luabind::object_cast<float>(returnValueObj);
 			}
 		}
 
 	}
 	catch (std::exception & ex) {
 		parser_->AddError(ex.what());
+	}
+
+	int end = lua_gettop(L);
+	int n = end - start;
+	if (n > 0) {
+		lua_pop(L, n);
 	}
 }
 

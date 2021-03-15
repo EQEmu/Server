@@ -4480,12 +4480,12 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 #ifdef LUA_EQEMU
 	// for pvp override, caster and resistor must both be clients
 	if (this->IsClient() && caster->IsClient()) {
-		float out_index;
-		float lua_ret;
+		float returnValue;
 		bool ignoreDefault = false;
-		lua_ret = LuaParser::Instance()->PVPResistSpell(this->CastToClient(), resist_type, spell_id, caster->CastToClient(), use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, out_index, ignoreDefault);
+		float lua_ret = LuaParser::Instance()->PVPResistSpell(this->CastToClient(), resist_type, spell_id, caster->CastToClient(), use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, ignoreDefault);
 
-		if (ignoreDefault && lua_ret) {
+		if (ignoreDefault) {
+			LogDebug("Default ignored, lua return value is: [{}]", lua_ret);
 			return lua_ret;
 		}
 	}
