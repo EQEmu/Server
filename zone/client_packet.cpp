@@ -4474,14 +4474,20 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		else {
 			// Calculate angle from boat heading to EQ heading
-			float theta = fmod(((boat->GetHeading() * 360.0) / 512.0),360.0);
-			float thetar = (theta * M_PI) / 180.0;
+			double theta = std::fmod(((boat->GetHeading() * 360.0) / 512.0),360.0);
+			double thetar = (theta * M_PI) / 180.0;
+
+			if (log) LogError("theta[{}] cx[{}] cy[{}]", theta, cx, cy);
 
 			// Boat cx is inverted (positive to left)
 			// Boat cy is normal (positive toward heading)
-			float normalizedx, normalizedy;	
-			normalizedx = cx * cos(thetar) - -cy * sin(thetar);
-			normalizedy = -cx * sin(thetar) + cy * cos(thetar);
+			double cosine = std::cos(thetar);
+			double sine = std::sin(thetar);
+
+			double normalizedx, normalizedy;	
+			normalizedx = cx * cosine - -cy * sine;
+			normalizedy = -cx * sine + cy * cosine;
+
 			cx = boat->GetX() + normalizedx;
 			cy = boat->GetY() + normalizedy;
 			cz += boat->GetZ();
