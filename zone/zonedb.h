@@ -545,6 +545,17 @@ public:
 	uint32 LoadSaylinkID(const char* saylink_text, bool auto_insert = true);
 	uint32 SaveSaylinkID(const char* saylink_text);
 
+	/* PVP Stats */
+	void GetLastPVPDeath(Client* client, PVPStats_Struct* pvps);
+	void GetLastPVPKill(Client* client, PVPStats_Struct* pvps);
+	void GetPVPLeaderBoard(Client* client, PVPLeaderBoard_Struct* pvplb, const char* sort_by);
+	void GetPVPLeaderBoardDetails(PVPLeaderBoardDetailsReply_Struct* pvplbdr, const char* name);
+	void GetPVPKillsLast24Hours(Client* client, PVPStats_Struct* pvps);	
+
+	int GetKillCount24Hours(Client* killer, Client* victim);	
+	
+	bool RegisterPVPKill(Client* victim, Client* killer, uint32 points);
+	
 	/*
 		* Misc stuff.
 		* PLEASE DO NOT ADD TO THIS COLLECTION OF CRAP UNLESS YOUR METHOD

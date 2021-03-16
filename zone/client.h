@@ -1095,7 +1095,14 @@ public:
 	int GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
+	
+	int CalculatePVPPoints(Client* killer, Client* victim);
+
+	void HandlePVPDeath(uint32 points);
+	void HandlePVPKill(uint32 points);
 	void SendPVPStats();
+	void SendPVPLeaderBoard();
+
 	void SendDisciplineTimers();
 	void SendRespawnBinds();
 

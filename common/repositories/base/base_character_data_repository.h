@@ -115,6 +115,9 @@ public:
 		int         pvp_best_kill_streak;
 		int         pvp_worst_death_streak;
 		int         pvp_current_kill_streak;
+		int	    pvp_current_death_streak;
+		int	    pvp_infamy;	
+		int	    pvp_vitality;
 		int         pvp2;
 		int         pvp_type;
 		int         show_helm;
@@ -227,6 +230,9 @@ public:
 			"pvp_best_kill_streak",
 			"pvp_worst_death_streak",
 			"pvp_current_kill_streak",
+			"pvp_current_death_streak",
+			"pvp_infamy",				
+			"pvp_vitality",
 			"pvp2",
 			"pvp_type",
 			"show_helm",
@@ -379,6 +385,9 @@ public:
 		entry.pvp_best_kill_streak    = 0;
 		entry.pvp_worst_death_streak  = 0;
 		entry.pvp_current_kill_streak = 0;
+		entry.pvp_current_death_streak = 0;	
+		entry.pvp_infamy	      = 0;	
+		entry.pvp_vitality	      = 0;
 		entry.pvp2                    = 0;
 		entry.pvp_type                = 0;
 		entry.show_helm               = 0;
@@ -515,28 +524,31 @@ public:
 			entry.pvp_best_kill_streak    = atoi(row[77]);
 			entry.pvp_worst_death_streak  = atoi(row[78]);
 			entry.pvp_current_kill_streak = atoi(row[79]);
-			entry.pvp2                    = atoi(row[80]);
-			entry.pvp_type                = atoi(row[81]);
-			entry.show_helm               = atoi(row[82]);
-			entry.group_auto_consent      = atoi(row[83]);
-			entry.raid_auto_consent       = atoi(row[84]);
-			entry.guild_auto_consent      = atoi(row[85]);
-			entry.leadership_exp_on       = atoi(row[86]);
-			entry.RestTimer               = atoi(row[87]);
-			entry.air_remaining           = atoi(row[88]);
-			entry.autosplit_enabled       = atoi(row[89]);
-			entry.lfp                     = atoi(row[90]);
-			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92] ? row[92] : "";
-			entry.xtargets                = atoi(row[93]);
-			entry.firstlogon              = atoi(row[94]);
-			entry.e_aa_effects            = atoi(row[95]);
-			entry.e_percent_to_aa         = atoi(row[96]);
-			entry.e_expended_aa_spent     = atoi(row[97]);
-			entry.aa_points_spent_old     = atoi(row[98]);
-			entry.aa_points_old           = atoi(row[99]);
-			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.pvp_current_death_streak = atoi(row[80]);
+			entry.pvp_infamy	      = atoi(row[81]);
+			entry.pvp_vitality	      = atoi(row[82]);
+			entry.pvp2                    = atoi(row[83]);
+			entry.pvp_type                = atoi(row[84]);
+			entry.show_helm               = atoi(row[85]);
+			entry.group_auto_consent      = atoi(row[86]);
+			entry.raid_auto_consent       = atoi(row[87]);
+			entry.guild_auto_consent      = atoi(row[88]);
+			entry.leadership_exp_on       = atoi(row[89]);
+			entry.RestTimer               = atoi(row[90]);
+			entry.air_remaining           = atoi(row[91]);
+			entry.autosplit_enabled       = atoi(row[92]);
+			entry.lfp                     = atoi(row[93]);
+			entry.lfg                     = atoi(row[94]);
+			entry.mailkey                 = row[95] ? row[95] : "";
+			entry.xtargets                = atoi(row[96]);
+			entry.firstlogon              = atoi(row[97]);
+			entry.e_aa_effects            = atoi(row[98]);
+			entry.e_percent_to_aa         = atoi(row[99]);
+			entry.e_expended_aa_spent     = atoi(row[100]);
+			entry.aa_points_spent_old     = atoi(row[101]);
+			entry.aa_points_old           = atoi(row[102]);
+			entry.e_last_invsnapshot      = atoi(row[103]);
+			entry.deleted_at              = row[104] ? row[104] : "";
 
 			return entry;
 		}
@@ -647,28 +659,31 @@ public:
 		update_values.push_back(columns[77] + " = " + std::to_string(character_data_entry.pvp_best_kill_streak));
 		update_values.push_back(columns[78] + " = " + std::to_string(character_data_entry.pvp_worst_death_streak));
 		update_values.push_back(columns[79] + " = " + std::to_string(character_data_entry.pvp_current_kill_streak));
-		update_values.push_back(columns[80] + " = " + std::to_string(character_data_entry.pvp2));
-		update_values.push_back(columns[81] + " = " + std::to_string(character_data_entry.pvp_type));
-		update_values.push_back(columns[82] + " = " + std::to_string(character_data_entry.show_helm));
-		update_values.push_back(columns[83] + " = " + std::to_string(character_data_entry.group_auto_consent));
-		update_values.push_back(columns[84] + " = " + std::to_string(character_data_entry.raid_auto_consent));
-		update_values.push_back(columns[85] + " = " + std::to_string(character_data_entry.guild_auto_consent));
-		update_values.push_back(columns[86] + " = " + std::to_string(character_data_entry.leadership_exp_on));
-		update_values.push_back(columns[87] + " = " + std::to_string(character_data_entry.RestTimer));
-		update_values.push_back(columns[88] + " = " + std::to_string(character_data_entry.air_remaining));
-		update_values.push_back(columns[89] + " = " + std::to_string(character_data_entry.autosplit_enabled));
-		update_values.push_back(columns[90] + " = " + std::to_string(character_data_entry.lfp));
-		update_values.push_back(columns[91] + " = " + std::to_string(character_data_entry.lfg));
-		update_values.push_back(columns[92] + " = '" + EscapeString(character_data_entry.mailkey) + "'");
-		update_values.push_back(columns[93] + " = " + std::to_string(character_data_entry.xtargets));
-		update_values.push_back(columns[94] + " = " + std::to_string(character_data_entry.firstlogon));
-		update_values.push_back(columns[95] + " = " + std::to_string(character_data_entry.e_aa_effects));
-		update_values.push_back(columns[96] + " = " + std::to_string(character_data_entry.e_percent_to_aa));
-		update_values.push_back(columns[97] + " = " + std::to_string(character_data_entry.e_expended_aa_spent));
-		update_values.push_back(columns[98] + " = " + std::to_string(character_data_entry.aa_points_spent_old));
-		update_values.push_back(columns[99] + " = " + std::to_string(character_data_entry.aa_points_old));
-		update_values.push_back(columns[100] + " = " + std::to_string(character_data_entry.e_last_invsnapshot));
-		update_values.push_back(columns[101] + " = '" + EscapeString(character_data_entry.deleted_at) + "'");
+		update_values.push_back(columns[80] + " = " + std::to_string(character_data_entry.pvp_current_death_streak));
+		update_values.push_back(columns[81] + " = " + std::to_string(character_data_entry.pvp_infamy));
+		update_values.push_back(columns[82] + " = " + std::to_string(character_data_entry.pvp_vitality));
+		update_values.push_back(columns[83] + " = " + std::to_string(character_data_entry.pvp2));
+		update_values.push_back(columns[84] + " = " + std::to_string(character_data_entry.pvp_type));
+		update_values.push_back(columns[85] + " = " + std::to_string(character_data_entry.show_helm));
+		update_values.push_back(columns[86] + " = " + std::to_string(character_data_entry.group_auto_consent));
+		update_values.push_back(columns[87] + " = " + std::to_string(character_data_entry.raid_auto_consent));
+		update_values.push_back(columns[88] + " = " + std::to_string(character_data_entry.guild_auto_consent));
+		update_values.push_back(columns[89] + " = " + std::to_string(character_data_entry.leadership_exp_on));
+		update_values.push_back(columns[90] + " = " + std::to_string(character_data_entry.RestTimer));
+		update_values.push_back(columns[91] + " = " + std::to_string(character_data_entry.air_remaining));
+		update_values.push_back(columns[92] + " = " + std::to_string(character_data_entry.autosplit_enabled));
+		update_values.push_back(columns[93] + " = " + std::to_string(character_data_entry.lfp));
+		update_values.push_back(columns[94] + " = " + std::to_string(character_data_entry.lfg));
+		update_values.push_back(columns[95] + " = '" + EscapeString(character_data_entry.mailkey) + "'");
+		update_values.push_back(columns[96] + " = " + std::to_string(character_data_entry.xtargets));
+		update_values.push_back(columns[97] + " = " + std::to_string(character_data_entry.firstlogon));
+		update_values.push_back(columns[98] + " = " + std::to_string(character_data_entry.e_aa_effects));
+		update_values.push_back(columns[99] + " = " + std::to_string(character_data_entry.e_percent_to_aa));
+		update_values.push_back(columns[100] + " = " + std::to_string(character_data_entry.e_expended_aa_spent));
+		update_values.push_back(columns[101] + " = " + std::to_string(character_data_entry.aa_points_spent_old));
+		update_values.push_back(columns[102] + " = " + std::to_string(character_data_entry.aa_points_old));
+		update_values.push_back(columns[103] + " = " + std::to_string(character_data_entry.e_last_invsnapshot));
+		update_values.push_back(columns[104] + " = '" + EscapeString(character_data_entry.deleted_at) + "'");
 
 		auto results = database.QueryDatabase(
 			fmt::format(
@@ -768,6 +783,9 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.pvp_best_kill_streak));
 		insert_values.push_back(std::to_string(character_data_entry.pvp_worst_death_streak));
 		insert_values.push_back(std::to_string(character_data_entry.pvp_current_kill_streak));
+		insert_values.push_back(std::to_string(character_data_entry.pvp_current_death_streak));
+		insert_values.push_back(std::to_string(character_data_entry.pvp_infamy));
+		insert_values.push_back(std::to_string(character_data_entry.pvp_vitality));
 		insert_values.push_back(std::to_string(character_data_entry.pvp2));
 		insert_values.push_back(std::to_string(character_data_entry.pvp_type));
 		insert_values.push_back(std::to_string(character_data_entry.show_helm));
@@ -897,6 +915,9 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.pvp_best_kill_streak));
 			insert_values.push_back(std::to_string(character_data_entry.pvp_worst_death_streak));
 			insert_values.push_back(std::to_string(character_data_entry.pvp_current_kill_streak));
+			insert_values.push_back(std::to_string(character_data_entry.pvp_current_death_streak));
+			insert_values.push_back(std::to_string(character_data_entry.pvp_infamy));
+			insert_values.push_back(std::to_string(character_data_entry.pvp_vitality));
 			insert_values.push_back(std::to_string(character_data_entry.pvp2));
 			insert_values.push_back(std::to_string(character_data_entry.pvp_type));
 			insert_values.push_back(std::to_string(character_data_entry.show_helm));
@@ -1032,28 +1053,31 @@ public:
 			entry.pvp_best_kill_streak    = atoi(row[77]);
 			entry.pvp_worst_death_streak  = atoi(row[78]);
 			entry.pvp_current_kill_streak = atoi(row[79]);
-			entry.pvp2                    = atoi(row[80]);
-			entry.pvp_type                = atoi(row[81]);
-			entry.show_helm               = atoi(row[82]);
-			entry.group_auto_consent      = atoi(row[83]);
-			entry.raid_auto_consent       = atoi(row[84]);
-			entry.guild_auto_consent      = atoi(row[85]);
-			entry.leadership_exp_on       = atoi(row[86]);
-			entry.RestTimer               = atoi(row[87]);
-			entry.air_remaining           = atoi(row[88]);
-			entry.autosplit_enabled       = atoi(row[89]);
-			entry.lfp                     = atoi(row[90]);
-			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92] ? row[92] : "";
-			entry.xtargets                = atoi(row[93]);
-			entry.firstlogon              = atoi(row[94]);
-			entry.e_aa_effects            = atoi(row[95]);
-			entry.e_percent_to_aa         = atoi(row[96]);
-			entry.e_expended_aa_spent     = atoi(row[97]);
-			entry.aa_points_spent_old     = atoi(row[98]);
-			entry.aa_points_old           = atoi(row[99]);
-			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.pvp_current_death_streak = atoi(row[80]);
+			entry.pvp_infamy	      = atoi(row[81]);
+			entry.pvp_vitality	      = atoi(row[82]);
+			entry.pvp2                    = atoi(row[83]);
+			entry.pvp_type                = atoi(row[84]);
+			entry.show_helm               = atoi(row[85]);
+			entry.group_auto_consent      = atoi(row[86]);
+			entry.raid_auto_consent       = atoi(row[87]);
+			entry.guild_auto_consent      = atoi(row[88]);
+			entry.leadership_exp_on       = atoi(row[89]);
+			entry.RestTimer               = atoi(row[90]);
+			entry.air_remaining           = atoi(row[91]);
+			entry.autosplit_enabled       = atoi(row[92]);
+			entry.lfp                     = atoi(row[93]);
+			entry.lfg                     = atoi(row[94]);
+			entry.mailkey                 = row[95] ? row[95] : "";
+			entry.xtargets                = atoi(row[96]);
+			entry.firstlogon              = atoi(row[97]);
+			entry.e_aa_effects            = atoi(row[98]);
+			entry.e_percent_to_aa         = atoi(row[99]);
+			entry.e_expended_aa_spent     = atoi(row[100]);
+			entry.aa_points_spent_old     = atoi(row[101]);
+			entry.aa_points_old           = atoi(row[102]);
+			entry.e_last_invsnapshot      = atoi(row[103]);
+			entry.deleted_at              = row[104] ? row[104] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -1158,28 +1182,31 @@ public:
 			entry.pvp_best_kill_streak    = atoi(row[77]);
 			entry.pvp_worst_death_streak  = atoi(row[78]);
 			entry.pvp_current_kill_streak = atoi(row[79]);
-			entry.pvp2                    = atoi(row[80]);
-			entry.pvp_type                = atoi(row[81]);
-			entry.show_helm               = atoi(row[82]);
-			entry.group_auto_consent      = atoi(row[83]);
-			entry.raid_auto_consent       = atoi(row[84]);
-			entry.guild_auto_consent      = atoi(row[85]);
-			entry.leadership_exp_on       = atoi(row[86]);
-			entry.RestTimer               = atoi(row[87]);
-			entry.air_remaining           = atoi(row[88]);
-			entry.autosplit_enabled       = atoi(row[89]);
-			entry.lfp                     = atoi(row[90]);
-			entry.lfg                     = atoi(row[91]);
-			entry.mailkey                 = row[92] ? row[92] : "";
-			entry.xtargets                = atoi(row[93]);
-			entry.firstlogon              = atoi(row[94]);
-			entry.e_aa_effects            = atoi(row[95]);
-			entry.e_percent_to_aa         = atoi(row[96]);
-			entry.e_expended_aa_spent     = atoi(row[97]);
-			entry.aa_points_spent_old     = atoi(row[98]);
-			entry.aa_points_old           = atoi(row[99]);
-			entry.e_last_invsnapshot      = atoi(row[100]);
-			entry.deleted_at              = row[101] ? row[101] : "";
+			entry.pvp_current_death_streak = atoi(row[80]);
+			entry.pvp_infamy	      = atoi(row[81]);
+			entry.pvp_vitality	      = atoi(row[82]);
+			entry.pvp2                    = atoi(row[83]);
+			entry.pvp_type                = atoi(row[84]);
+			entry.show_helm               = atoi(row[85]);
+			entry.group_auto_consent      = atoi(row[86]);
+			entry.raid_auto_consent       = atoi(row[87]);
+			entry.guild_auto_consent      = atoi(row[88]);
+			entry.leadership_exp_on       = atoi(row[89]);
+			entry.RestTimer               = atoi(row[90]);
+			entry.air_remaining           = atoi(row[91]);
+			entry.autosplit_enabled       = atoi(row[92]);
+			entry.lfp                     = atoi(row[93]);
+			entry.lfg                     = atoi(row[94]);
+			entry.mailkey                 = row[95] ? row[95] : "";
+			entry.xtargets                = atoi(row[96]);
+			entry.firstlogon              = atoi(row[97]);
+			entry.e_aa_effects            = atoi(row[98]);
+			entry.e_percent_to_aa         = atoi(row[99]);
+			entry.e_expended_aa_spent     = atoi(row[100]);
+			entry.aa_points_spent_old     = atoi(row[101]);
+			entry.aa_points_old           = atoi(row[102]);
+			entry.e_last_invsnapshot      = atoi(row[103]);
+			entry.deleted_at              = row[104] ? row[104] : "";
 
 			all_entries.push_back(entry);
 		}
