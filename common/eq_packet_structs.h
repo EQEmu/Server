@@ -1072,6 +1072,9 @@ struct PlayerProfile_Struct
 /*8204*/	uint32				PVPBestKillStreak;
 /*8208*/	uint32				PVPWorstDeathStreak;
 /*8212*/	uint32				PVPCurrentKillStreak;
+/*8212*/	uint32				PVPCurrentDeathStreak;
+/*8214*/	uint32				PVPInfamy;
+/*8213*/	uint32				PVPVitality;
 /*8216*/	PVPStatsEntry_Struct	PVPLastKill;
 /*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
 /*8392*/	uint32				PVPNumberOfKillsInLast24Hours;

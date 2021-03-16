@@ -1705,7 +1705,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
-		if (killerMob->IsClient() && (IsDueling() || killerMob->CastToClient()->IsDueling())) {
+		if (killerMob->IsClient() && (IsDueling() || killerMob->CastToClient()->IsDueling())) 
+		{
 			SetDueling(false);
 			SetDuelTarget(0);
 			if (killerMob->IsClient() && killerMob->CastToClient()->IsDueling() && killerMob->CastToClient()->GetDuelTarget() == GetID())
@@ -1734,6 +1735,42 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			std::vector<EQ::Any> args;
 			args.push_back(victim);
 
+			int pvp_points = CalculatePVPPoints(killerMob->CastToClient(), victim);
+
+			if (killerMob->CastToClient()->isgrouped) {
+				Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+
+			  	if (group != 0)
+			  	{
+					uint8 gcount = group->GroupCount();
+
+					if (gcount > 4) {
+						pvp_points = pvp_points * 1.1;
+					}
+					if (gcount == 5) {	
+						pvp_points = pvp_points * 1.15;
+					}
+					if (gcount == 6) {	
+						pvp_points = pvp_points * 1.2;
+					}
+
+					for (int i = 0; i<6; i++)
+					{
+						if (group->members[i] != nullptr)
+						{
+							group->members[i]->CastToClient()->HandlePVPKill(pvp_points);
+							database.RegisterPVPKill(group->members[i]->CastToClient(), victim, pvp_points); 
+						}
+					}
+			  	}
+			} else {
+				killerMob->CastToClient()->HandlePVPKill(pvp_points);
+
+				database.RegisterPVPKill(killerMob->CastToClient(), victim, pvp_points); 
+			}
+
+			this->HandlePVPDeath();
+		
 			parse->EventPlayer(EVENT_PVP_SLAY, killerMob->CastToClient(), victim->GetName(), victim->CharacterID(), &args);
 
 			mod_client_death_pvp(killerMob);
