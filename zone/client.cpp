@@ -505,8 +505,8 @@ void Client::SendZoneInPackets()
 		//SendAppearancePacket(AT_PVP, GetPVP(false), true, false);	 Commented out 1/28/21 Darksinga edits
 	if (IsEvil())  //Evil has a red tag
 		SendAppearancePacket(AT_PVP, IsEvil(), true, false); //rencro via xachary
-	if (IsGood())  //Good has a green tag
-		SendAppearancePacket(AT_GM, IsGood(), true, false); //Darksinga edits
+	if (IsGood())  //Good has a blue tag
+		SendAppearancePacket(AT_PVP, 0, false); //Darksinga edits
 	if (IsNeutral())  //Neutral has a blue tag
 		SendAppearancePacket(AT_PVP, 0, false); //Darksinga edits
 
@@ -3436,7 +3436,7 @@ void Client::LinkDead()
 		expedition->SetMemberStatus(this, ExpeditionMemberStatus::LinkDead);
 	}
 
-//	save_timer.Start(2500);
+	//save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
 	SendAppearancePacket(AT_Linkdead, 1);
 	client_state = CLIENT_LINKDEAD;
@@ -10028,13 +10028,13 @@ bool Client::CanPvP(Client *c) {
 		return true;
 	
 	// if both are in a pvp area, or discord, return true
-	if (GetPVP() && c->GetPVP()) 
-		return true;
+	//if (GetPVP() && c->GetPVP()) --commented out 2/28/21 to troubleshoot an issue... Darksinga
+	//	return true;
 
 	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
 	int rule_level_diff = 0;
 	if (RuleI(World, PVPSettings) == 4)
-		rule_level_diff = 100; //Sullon Zek rules can attack anyone of opposing deity.
+		rule_level_diff = 4; //Sullon Zek rules can attack anyone of opposing deity.
 	if (RuleI(World, PVPLevelDifference) > 0)
 		rule_level_diff = RuleI(World, PVPLevelDifference);
 
