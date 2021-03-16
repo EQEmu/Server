@@ -191,7 +191,8 @@ bool ZoneDatabase::LoadSpawnGroups(const char *zone_name, uint16 version, SpawnG
 				WHERE
 				spawn2.spawngroupID = spawngroup.ID
 				AND
-				spawn2.version = {} and zone = '{}'
+				(spawn2.version = {} OR version = -1)
+				AND zone = '{}'
 				{}
 		),
 		version,
