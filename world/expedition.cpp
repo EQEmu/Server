@@ -25,6 +25,7 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/rulesys.h"
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
@@ -38,7 +39,8 @@ Expedition::Expedition(uint32_t expedition_id, uint32_t dz_id, uint32_t dz_insta
 	m_dz_zone_id(dz_zone_id),
 	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
 	m_duration(duration),
-	m_leader_id(leader_id)
+	m_leader_id(leader_id),
+	m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) }
 {
 	m_expire_time = m_start_time + m_duration;
 	m_warning_cooldown_timer.Enable();
@@ -67,7 +69,7 @@ void Expedition::RemoveMember(uint32_t character_id)
 		[&](uint32_t member_id) { return member_id == character_id; }
 	), m_member_ids.end());
 
-	if (!m_member_ids.empty() && character_id == m_leader_id)
+	if (character_id == m_leader_id)
 	{
 		ChooseNewLeader();
 	}
@@ -75,6 +77,12 @@ void Expedition::RemoveMember(uint32_t character_id)
 
 void Expedition::ChooseNewLeader()
 {
+	if (m_member_ids.empty() || !m_choose_leader_cooldown_timer.Check())
+	{
+		m_choose_leader_needed = true;
+		return;
+	}
+
 	// we don't track expedition member status in world so may choose a linkdead member
 	// this is fine since it will trigger another change when that member goes offline
 	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(), [&](uint32_t member_id) {
@@ -89,9 +97,9 @@ void Expedition::ChooseNewLeader()
 			[&](uint32_t member_id) { return (member_id != m_leader_id); });
 	}
 
-	if (it != m_member_ids.end())
+	if (it != m_member_ids.end() && SetNewLeader(*it))
 	{
-		SetNewLeader(*it);
+		m_choose_leader_needed = false;
 	}
 }
 
@@ -191,5 +199,13 @@ void Expedition::CheckExpireWarning()
 			SendZonesExpireWarning(minutes);
 			m_warning_cooldown_timer.Start(70000); // 1 minute 10 seconds
 		}
+	}
+}
+
+void Expedition::CheckLeader()
+{
+	if (m_choose_leader_needed)
+	{
+		ChooseNewLeader();
 	}
 }
