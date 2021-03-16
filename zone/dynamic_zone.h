@@ -18,8 +18,8 @@
  *
  */
 
-#ifndef DYNAMICZONE_H
-#define DYNAMICZONE_H
+#ifndef DYNAMIC_ZONE_H
+#define DYNAMIC_ZONE_H
 
 #include <chrono>
 #include <cstdint>
@@ -73,6 +73,8 @@ public:
 	uint16_t GetZoneID() const { return static_cast<uint16_t>(m_zone_id); }
 	uint32_t GetZoneIndex() const { return (m_instance_id << 16) | (m_zone_id & 0xffff); }
 	uint32_t GetZoneVersion() const { return m_version; }
+	const std::string& GetLeaderName() const { return m_leader_name; }
+	const std::string& GetName() const { return m_name; }
 	DynamicZoneType GetType() const { return m_type; }
 	DynamicZoneLocation GetCompassLocation() const { return m_compass; }
 	DynamicZoneLocation GetSafeReturnLocation() const { return m_safereturn; }
@@ -91,6 +93,8 @@ public:
 	void     SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids);
 	void     SendInstanceCharacterChange(uint32_t character_id, bool removed);
 	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
+	void     SetLeaderName(const std::string& leader_name) { m_leader_name = leader_name; }
+	void     SetName(const std::string& name) { m_name = name; }
 	void     SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void     SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
 	void     SetUpdatedDuration(uint32_t seconds);
@@ -109,24 +113,15 @@ private:
 	uint32_t m_version       = 0;
 	bool     m_never_expires = false;
 	bool     m_has_zonein    = false;
-	DynamicZoneType m_type   = DynamicZoneType::None;
+	std::string m_name;
+	std::string m_leader_name;
+	DynamicZoneType m_type{ DynamicZoneType::None };
 	DynamicZoneLocation m_compass;
 	DynamicZoneLocation m_safereturn;
 	DynamicZoneLocation m_zonein;
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
-};
-
-struct DynamicZoneInfo
-{
-	std::string description; // from owning system
-	std::string leader_name;
-	DynamicZone dynamic_zone;
-
-	DynamicZoneInfo() = default;
-	DynamicZoneInfo(std::string desc, std::string leader, const DynamicZone& dz)
-		: description(std::move(desc)), leader_name(std::move(leader)), dynamic_zone(dz) {}
 };
 
 #endif

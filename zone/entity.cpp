@@ -33,7 +33,7 @@
 #include "../common/guilds.h"
 
 #include "entity.h"
-#include "dynamiczone.h"
+#include "dynamic_zone.h"
 #include "guild_mgr.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"

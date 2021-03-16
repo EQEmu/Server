@@ -18,7 +18,7 @@
  *
  */
 
-#include "dynamiczone.h"
+#include "dynamic_zone.h"
 #include "client.h"
 #include "worldserver.h"
 #include "zonedb.h"
