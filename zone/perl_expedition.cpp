@@ -383,6 +383,20 @@ XS(XS_Expedition_HasReplayLockout) {
 	XSRETURN(1);
 }
 
+XS(XS_Expedition_IsLocked);
+XS(XS_Expedition_IsLocked) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Expedition::IsLocked(THIS)");
+	}
+
+	Expedition* THIS = nullptr;
+	VALIDATE_THIS_IS_EXPEDITION;
+
+	ST(0) = boolSV(THIS->IsLocked());
+	XSRETURN(1);
+}
+
 XS(XS_Expedition_RemoveCompass);
 XS(XS_Expedition_RemoveCompass) {
 	dXSARGS;
@@ -653,6 +667,7 @@ XS(boot_Expedition) {
 	newXSproto(strcpy(buf, "GetZoneVersion"), XS_Expedition_GetZoneVersion, file, "$");
 	newXSproto(strcpy(buf, "HasLockout"), XS_Expedition_HasLockout, file, "$$");
 	newXSproto(strcpy(buf, "HasReplayLockout"), XS_Expedition_HasReplayLockout, file, "$");
+	newXSproto(strcpy(buf, "IsLocked"), XS_Expedition_IsLocked, file, "$");
 	newXSproto(strcpy(buf, "RemoveCompass"), XS_Expedition_RemoveCompass, file, "$");
 	newXSproto(strcpy(buf, "RemoveLockout"), XS_Expedition_RemoveLockout, file, "$$");
 	newXSproto(strcpy(buf, "SetCompass"), XS_Expedition_SetCompass, file, "$$$$$");
