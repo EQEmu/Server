@@ -11223,10 +11223,12 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 		return;
 	}
 
+	PVPLeaderBoardDetailsRequest_Struct *pvplbdr = (PVPLeaderBoardDetailsRequest_Struct *)app->pBuffer;
+
 	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
 	PVPLeaderBoardDetailsReply_Struct *pvplbdrs = (PVPLeaderBoardDetailsReply_Struct *)outapp->pBuffer;
 
-	// TODO: Record and send this data.
+	database.GetPVPLeaderBoardDetails(pvplbdrs, pvplbdr->Name);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -11248,12 +11250,23 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 		return;
 	}
-	/*PVPLeaderBoardRequest_Struct *pvplbrs = (PVPLeaderBoardRequest_Struct *)app->pBuffer;*/	//unused
+
+	PVPLeaderBoardRequest_Struct *pvplbrs = (PVPLeaderBoardRequest_Struct *)app->pBuffer;
 
 	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardReply, sizeof(PVPLeaderBoard_Struct));
-	/*PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;*/	//unused
+	PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;
+	
+	if(pvplbrs->SortType == PVPSortByKills) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_kills");	
+	}
 
-																					// TODO: Record and send this data.
+	if(pvplbrs->SortType == PVPSortByPoints) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_career_points");	
+	}
+
+	if(pvplbrs->SortType == PVPSortByInfamy) {	
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_infamy");	
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
