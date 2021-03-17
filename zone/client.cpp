@@ -267,7 +267,13 @@ Client::Client(EQStreamInterface* ieqs)
 	mercSlot = 0;
 	InitializeMercInfo();
 	SetMerc(0);
+	
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+	
+	if (RuleI(World, PVPSettings) > 0) {
+		SendPVPStats();
+	}
+
 	dynamiczone_removal_timer.Disable();
 
 	//for good measure:
