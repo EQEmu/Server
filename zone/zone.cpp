@@ -2729,20 +2729,20 @@ bool Zone::IsZone(uint32 zone_id, uint16 instance_id) const
 	return (zoneid == zone_id && instanceid == instance_id);
 }
 
-DynamicZone Zone::GetDynamicZone()
+DynamicZone* Zone::GetDynamicZone()
 {
 	if (GetInstanceID() == 0)
 	{
-		return {}; // invalid
+		return nullptr;
 	}
 
 	auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
 	if (expedition)
 	{
-		return expedition->GetDynamicZone();
+		return &expedition->GetDynamicZone();
 	}
 
 	// todo: tasks, missions, and quests with an associated dz for this instance id
 
-	return {}; // invalid
+	return nullptr;
 }
