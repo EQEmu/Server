@@ -9190,7 +9190,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 		LFGFromLevel = lfg->FromLevel;
 		LFGToLevel = lfg->ToLevel;
 		LFGMatchFilter = lfg->MatchFilter;
-		strcpy(LFGComments, lfg->Comments);
+		strn0cpy(LFGComments, lfg->Comments, sizeof(LFGComments));
 		break;
 	default:
 		Message(0, "Error: unknown LFG value %i", lfg->value);
