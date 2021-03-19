@@ -22,8 +22,8 @@
 #define EXPEDITION_H
 
 #include "dynamic_zone.h"
-#include "expedition_lockout_timer.h"
 #include "../common/eq_constants.h"
+#include "../common/expedition_lockout_timer.h"
 #include <cstdint>
 #include <memory>
 #include <string>

@@ -27,16 +27,16 @@
 const char* const DZ_REPLAY_TIMER_NAME = "Replay Timer"; // see December 14, 2016 patch notes
 
 ExpeditionLockoutTimer::ExpeditionLockoutTimer(
-	const std::string& expedition_uuid, const std::string& expedition_name,
-	const std::string& event_name, uint64_t expire_time, uint32_t duration
+	std::string expedition_uuid, std::string expedition_name,
+	std::string event_name, uint64_t expire_time, uint32_t duration
 ) :
-	m_expedition_uuid(expedition_uuid),
-	m_expedition_name(expedition_name),
-	m_event_name(event_name),
+	m_expedition_uuid{std::move(expedition_uuid)},
+	m_expedition_name{std::move(expedition_name)},
+	m_event_name{std::move(event_name)},
 	m_expire_time(std::chrono::system_clock::from_time_t(expire_time)),
 	m_duration(duration)
 {
-	if (event_name == DZ_REPLAY_TIMER_NAME)
+	if (m_event_name == DZ_REPLAY_TIMER_NAME)
 	{
 		m_is_replay_timer = true;
 	}

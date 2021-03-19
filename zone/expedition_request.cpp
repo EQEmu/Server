@@ -21,27 +21,19 @@
 #include "expedition_request.h"
 #include "client.h"
 #include "expedition.h"
-#include "expedition_database.h"
-#include "expedition_lockout_timer.h"
 #include "groups.h"
 #include "raids.h"
 #include "string_ids.h"
-#include "worldserver.h"
-
-extern WorldServer worldserver;
+#include "../common/expedition_lockout_timer.h"
+#include "../common/repositories/character_expedition_lockouts_repository.h"
+#include "../common/repositories/expeditions_repository.h"
 
 constexpr char SystemName[] = "expedition";
 
-struct ExpeditionRequestConflict
-{
-	std::string character_name;
-	ExpeditionLockoutTimer lockout;
-};
-
-ExpeditionRequest::ExpeditionRequest(
-	std::string expedition_name, uint32_t min_players, uint32_t max_players, bool disable_messages
+ExpeditionRequest::ExpeditionRequest(std::string expedition_name,
+	uint32_t min_players, uint32_t max_players, bool disable_messages
 ) :
-	m_expedition_name(expedition_name),
+	m_expedition_name(std::move(expedition_name)),
 	m_min_players(min_players),
 	m_max_players(max_players),
 	m_disable_messages(disable_messages)
@@ -186,115 +178,95 @@ bool ExpeditionRequest::CanMembersJoin(const std::vector<std::string>& member_na
 	return requirements_met;
 }
 
-bool ExpeditionRequest::LoadLeaderLockouts()
+bool ExpeditionRequest::SaveLeaderLockouts(const std::vector<ExpeditionLockoutTimer>& lockouts)
 {
-	// leader's lockouts are used to check member conflicts and later stored in expedition
-	auto lockouts = ExpeditionDatabase::LoadCharacterLockouts(m_leader_id, m_expedition_name);
+	bool has_replay_lockout = false;
 
-	for (auto& lockout : lockouts)
+	for (const auto& lockout : lockouts)
 	{
 		if (!lockout.IsExpired())
 		{
-			m_lockouts.emplace(lockout.GetEventName(), lockout);
+			m_lockouts[lockout.GetEventName()] = lockout;
 
-			// on live if leader has a replay lockout it never bothers checking for event conflicts
-			if (m_check_event_lockouts && lockout.IsReplayTimer())
+			if (lockout.IsReplayTimer())
 			{
-				m_check_event_lockouts = false;
+				has_replay_lockout = true;
 			}
 		}
 	}
 
-	return true;
+	return has_replay_lockout;
 }
 
 bool ExpeditionRequest::CheckMembersForConflicts(const std::vector<std::string>& member_names)
 {
-	// load data for each member and compare with leader lockouts
-	auto results = ExpeditionDatabase::LoadMembersForCreateRequest(member_names, m_expedition_name);
-	if (!results.Success() || !LoadLeaderLockouts())
+	// order of member_names is preserved by queries for use with max member truncation
+	auto entries = ExpeditionsRepository::GetCharactersWithExpedition(database, member_names);
+	if (entries.empty())
 	{
-		LogExpeditions("Failed to load data to verify members for expedition request");
+		LogExpeditions("Failed to load members for expedition request");
 		return true;
 	}
 
 	bool is_solo = (member_names.size() == 1);
 	bool has_conflicts = false;
 
-	using col = LoadMembersForCreateRequestColumns::eLoadMembersForCreateRequestColumns;
-
-	std::vector<ExpeditionRequestConflict> member_lockout_conflicts;
-
-	uint32_t last_character_id = 0;
-	for (auto row = results.begin(); row != results.end(); ++row)
+	std::vector<uint32_t> character_ids;
+	for (const auto& character : entries)
 	{
-		uint32_t character_id      = std::strtoul(row[col::character_id], nullptr, 10);
-		std::string character_name = row[col::character_name];
-		bool has_expedition        = (row[col::character_expedition_id] != nullptr);
-
-		if (character_id != last_character_id)
+		if (is_solo && character.expedition_id != 0)
 		{
-			// defaults to online status, if offline group members implemented this needs to change
-			m_members.emplace_back(character_id, character_name);
-
-			// process event lockout conflict messages from the previous character
-			for (const auto& member_lockout : member_lockout_conflicts)
-			{
-				SendLeaderMemberEventLockout(member_lockout.character_name, member_lockout.lockout);
-			}
-			member_lockout_conflicts.clear();
-
-			if (has_expedition)
-			{
-				has_conflicts = true;
-				SendLeaderMemberInExpedition(character_name, is_solo);
-
-				// solo requests break out early if requester in an expedition
-				if (is_solo)
-				{
-					return has_conflicts;
-				}
-			}
+			// live doesn't bother checking replay lockout here
+			SendLeaderMemberInExpedition(character.name, is_solo);
+			return true;
 		}
 
-		last_character_id = character_id;
+		m_members.emplace_back(character.id, character.name, ExpeditionMemberStatus::Online);
+		character_ids.emplace_back(character.id);
+	}
 
-		// compare member lockouts with leader lockouts
-		if (row[col::lockout_uuid]) // lockout results may be null
+	auto member_lockouts = CharacterExpeditionLockoutsRepository::GetManyCharacterLockoutTimers(
+		database, character_ids, m_expedition_name, DZ_REPLAY_TIMER_NAME);
+
+	// on live if leader has a replay lockout it never checks for event conflicts
+	bool leader_has_replay_lockout = false;
+	auto lockout_iter = member_lockouts.find(m_leader_id);
+	if (lockout_iter != member_lockouts.end())
+	{
+		leader_has_replay_lockout = SaveLeaderLockouts(lockout_iter->second);
+	}
+
+	for (const auto& character : entries)
+	{
+		if (character.expedition_id != 0)
 		{
-			auto expire_time = strtoull(row[col::lockout_expire_time], nullptr, 10);
-			uint32_t duration = strtoul(row[col::lockout_duration], nullptr, 10);
+			has_conflicts = true;
+			SendLeaderMemberInExpedition(character.name, is_solo);
+		}
 
-			ExpeditionLockoutTimer lockout{
-				row[col::lockout_uuid], m_expedition_name, row[col::lockout_event_name], expire_time, duration
-			};
-
-			if (!lockout.IsExpired())
+		auto lockout_iter = member_lockouts.find(character.id);
+		if (lockout_iter != member_lockouts.end())
+		{
+			for (const auto& lockout : lockout_iter->second)
 			{
-				if (lockout.IsReplayTimer())
+				if (!lockout.IsExpired())
 				{
-					// replay timer conflict messages always show up before event conflicts
-					has_conflicts = true;
-					SendLeaderMemberReplayLockout(character_name, lockout, is_solo);
-				}
-				else if (m_check_event_lockouts && character_id != m_leader_id)
-				{
-					if (m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
+					// replay timers were sorted by query so they show up before event conflicts
+					if (lockout.IsReplayTimer())
 					{
-						// leader doesn't have this lockout. queue instead of messaging
-						// now so message comes after any replay lockout messages
 						has_conflicts = true;
-						member_lockout_conflicts.push_back({character_name, lockout});
+						SendLeaderMemberReplayLockout(character.name, lockout, is_solo);
+					}
+					else if (!leader_has_replay_lockout && character.id != m_leader_id &&
+					         m_lockouts.find(lockout.GetEventName()) == m_lockouts.end())
+					{
+						// leader doesn't have this lockout
+						has_conflicts = true;
+						SendLeaderMemberEventLockout(character.name, lockout);
 					}
 				}
 			}
 		}
-	}
-
-	// event lockout messages for last processed character
-	for (const auto& member_lockout : member_lockout_conflicts)
-	{
-		SendLeaderMemberEventLockout(member_lockout.character_name, member_lockout.lockout);
 	}
 
 	return has_conflicts;
