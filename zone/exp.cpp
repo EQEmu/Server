@@ -149,8 +149,8 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 				in_add_exp = 0;
 				return 0;
 			case CON_GREEN:
-				in_add_exp = in_add_exp * RuleI(Character, GreenModifier) / 100;
-				break;
+				in_add_exp = 0;
+				return 0;
 			case CON_LIGHTBLUE:
 				in_add_exp = in_add_exp * RuleI(Character, LightBlueModifier)/100;
 				break;
@@ -229,9 +229,6 @@ float static GetConLevelModifierPercent(uint8 conlevel)
 {
 	switch (conlevel)
 	{
-	case CON_GREEN:
-		return (float)RuleI(Character, GreenModifier) / 100;
-		break;
 	case CON_LIGHTBLUE:
 		return (float)RuleI(Character, LightBlueModifier) / 100;
 		break;
