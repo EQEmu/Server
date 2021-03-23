@@ -1649,7 +1649,6 @@ void Client::OPGMTrainSkill(const EQApplicationPacket *app)
 			case EQ::skills::SkillBrewing:
 			case EQ::skills::SkillMakePoison:
 			case EQ::skills::SkillTinkering:
-			case EQ::skills::SkillResearch:
 			case EQ::skills::SkillAlchemy:
 			case EQ::skills::SkillBaking:
 			case EQ::skills::SkillTailoring:
