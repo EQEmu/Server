@@ -145,6 +145,7 @@ void ExpeditionState::Process()
 		else
 		{
 			it->CheckExpireWarning();
+			it->CheckLeader();
 		}
 
 		it = is_deleted ? m_expeditions.erase(it) : it + 1;

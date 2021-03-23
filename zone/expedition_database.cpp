@@ -20,9 +20,9 @@
 
 #include "expedition_database.h"
 #include "expedition.h"
-#include "expedition_lockout_timer.h"
 #include "zonedb.h"
 #include "../common/database.h"
+#include "../common/expedition_lockout_timer.h"
 #include "../common/string_util.h"
 #include <fmt/core.h>
 
@@ -216,53 +216,6 @@ ExpeditionDatabase::LoadMultipleExpeditionLockouts(
 	}
 
 	return lockouts;
-}
-
-MySQLRequestResult ExpeditionDatabase::LoadMembersForCreateRequest(
-	const std::vector<std::string>& character_names, const std::string& expedition_name)
-{
-	LogExpeditionsDetail(
-		"Loading data of [{}] characters for [{}] request", character_names.size(), expedition_name
-	);
-
-	std::string in_character_names_query;
-	for (const auto& character_name : character_names)
-	{
-		fmt::format_to(std::back_inserter(in_character_names_query), "'{}',", character_name);
-	}
-
-	MySQLRequestResult results;
-
-	if (!in_character_names_query.empty())
-	{
-		in_character_names_query.pop_back(); // trailing comma
-
-		// for create validation, loads each character's lockouts and possible current expedition
-		auto query = fmt::format(SQL(
-			SELECT
-				character_data.id,
-				character_data.name,
-				member.expedition_id,
-				lockout.from_expedition_uuid,
-				UNIX_TIMESTAMP(lockout.expire_time),
-				lockout.duration,
-				lockout.event_name
-			FROM character_data
-				LEFT JOIN character_expedition_lockouts lockout
-					ON character_data.id = lockout.character_id
-					AND lockout.expire_time > NOW()
-					AND lockout.expedition_name = '{}'
-				LEFT JOIN expedition_members member
-					ON character_data.id = member.character_id
-					AND member.is_current_member = TRUE
-			WHERE character_data.name IN ({})
-			ORDER BY FIELD(character_data.name, {})
-		), EscapeString(expedition_name), in_character_names_query, in_character_names_query);
-
-		results = database.QueryDatabase(query);
-	}
-
-	return results;
 }
 
 void ExpeditionDatabase::DeleteAllCharacterLockouts(uint32_t character_id)

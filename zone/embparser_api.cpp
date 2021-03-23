@@ -899,6 +899,27 @@ XS(XS__getspellname) {
 	XSRETURN(1);
 }
 
+XS(XS__get_spell_level);
+XS(XS__get_spell_level) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::get_spell_level(uint16 spell_id, uint8 class_id)");
+
+	dXSTARG;
+	uint16 spell_id = (int)SvIV(ST(0));
+	uint8 class_id = (int)SvIV(ST(1));
+	uint8 spell_level = IsValidSpell(spell_id) ? GetSpellLevel(spell_id, class_id) : 0;
+	uint8 server_max_level = RuleI(Character, MaxLevel);
+
+	if (spell_level && spell_level > server_max_level) 
+		spell_level = 0;
+	
+	XSprePUSH;
+	PUSHu((UV)spell_level);
+
+	XSRETURN(1);
+}
+
 XS(XS__getskillname);
 XS(XS__getskillname) {
 	dXSARGS;
@@ -6404,6 +6425,23 @@ XS(XS__createitem) {
 	XSRETURN(1);
 }
 
+XS(XS__secondstotime);
+XS(XS__secondstotime) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::secondstotime(int duration)");
+	}
+
+	dXSTARG;
+	std::string time_string;
+	int duration = (int) SvIV(ST(0));
+	time_string = quest_manager.secondstotime(duration);
+	sv_setpv(TARG, time_string.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);	
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6630,6 +6668,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
+	newXS(strcpy(buf, "get_spell_level"), XS__get_spell_level, file);
 	newXS(strcpy(buf, "getskillname"), XS__getskillname, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
@@ -6696,6 +6735,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "say"), XS__say, file);
 	newXS(strcpy(buf, "saylink"), XS__saylink, file);
 	newXS(strcpy(buf, "scribespells"), XS__scribespells, file);
+	newXS(strcpy(buf, "secondstotime"), XS__secondstotime, file);
 	newXS(strcpy(buf, "selfcast"), XS__selfcast, file);
 	newXS(strcpy(buf, "set_proximity"), XS__set_proximity, file);
 	newXS(strcpy(buf, "set_zone_flag"), XS__set_zone_flag, file);

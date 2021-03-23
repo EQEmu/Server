@@ -5634,30 +5634,26 @@ void Client::Handle_OP_DzAddPlayer(const EQApplicationPacket *app)
 void Client::Handle_OP_DzChooseZoneReply(const EQApplicationPacket *app)
 {
 	auto dzmsg = reinterpret_cast<DynamicZoneChooseZoneReply_Struct*>(app->pBuffer);
-	LogDynamicZones(
-		"Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
-		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2
-	);
+
+	LogDynamicZones("Character [{}] chose DynamicZone [{}]:[{}] type: [{}] with system id: [{}]",
+		CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id, dzmsg->dz_type, dzmsg->unknown_id2);
 
 	if (!dzmsg->dz_instance_id || !database.VerifyInstanceAlive(dzmsg->dz_instance_id, CharacterID()))
 	{
 		// live just no-ops this without a message
-		LogDynamicZones(
-			"Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
-			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id
-		);
+		LogDynamicZones("Character [{}] chose invalid DynamicZone [{}]:[{}] or is no longer a member",
+			CharacterID(), dzmsg->dz_zone_id, dzmsg->dz_instance_id);
 		return;
 	}
 
 	auto client_dzs = GetDynamicZones();
-	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZoneInfo dz_info) {
-		return dz_info.dynamic_zone.IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id);
-	});
+	auto it = std::find_if(client_dzs.begin(), client_dzs.end(), [&](const DynamicZone* dz) {
+		return dz->IsSameDz(dzmsg->dz_zone_id, dzmsg->dz_instance_id); });
 
 	if (it != client_dzs.end())
 	{
-		DynamicZoneLocation loc = it->dynamic_zone.GetZoneInLocation();
-		ZoneMode zone_mode = it->dynamic_zone.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		DynamicZoneLocation loc = (*it)->GetZoneInLocation();
+		ZoneMode zone_mode = (*it)->HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
 		MovePC(dzmsg->dz_zone_id, dzmsg->dz_instance_id, loc.x, loc.y, loc.z, loc.heading, 0, zone_mode);
 	}
 }
@@ -9194,7 +9190,7 @@ void Client::Handle_OP_LFGCommand(const EQApplicationPacket *app)
 		LFGFromLevel = lfg->FromLevel;
 		LFGToLevel = lfg->ToLevel;
 		LFGMatchFilter = lfg->MatchFilter;
-		strcpy(LFGComments, lfg->Comments);
+		strn0cpy(LFGComments, lfg->Comments, sizeof(LFGComments));
 		break;
 	default:
 		Message(0, "Error: unknown LFG value %i", lfg->value);

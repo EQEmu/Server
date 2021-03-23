@@ -21,9 +21,9 @@
 #ifndef EXPEDITION_H
 #define EXPEDITION_H
 
-#include "dynamiczone.h"
-#include "expedition_lockout_timer.h"
+#include "dynamic_zone.h"
 #include "../common/eq_constants.h"
+#include "../common/expedition_lockout_timer.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -76,7 +76,7 @@ class Expedition
 {
 public:
 	Expedition() = delete;
-	Expedition(uint32_t id, const std::string& uuid, const DynamicZone& dz, const std::string& expedition_name,
+	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
 		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
@@ -111,7 +111,7 @@ public:
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
-	const DynamicZone& GetDynamicZone() const { return m_dynamiczone; }
+	DynamicZone& GetDynamicZone() { return m_dynamiczone; }
 	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::string& GetUUID() const { return m_uuid; }
@@ -125,6 +125,8 @@ public:
 	bool RemoveMember(const std::string& remove_char_name);
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SwapMember(Client* add_client, const std::string& remove_char_name);
+
+	bool IsLocked() const { return m_is_locked; }
 	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
 		bool update_db = false, uint32_t msg_color = Chat::Yellow);
 
@@ -209,6 +211,7 @@ private:
 		const std::string& add_char_name, uint32_t add_char_id);
 	void SendWorldSetSecondsRemaining(uint32_t seconds_remaining);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
+	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
 	void UpdateDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }

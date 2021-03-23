@@ -161,6 +161,11 @@ bool Lua_Expedition::HasReplayLockout() {
 	return self->HasReplayLockout();
 }
 
+bool Lua_Expedition::IsLocked() {
+	Lua_Safe_Call_Bool();
+	return self->IsLocked();
+}
+
 void Lua_Expedition::RemoveCompass() {
 	Lua_Safe_Call_Void();
 	self->SetDzCompass(0, 0, 0, 0, true);
@@ -270,6 +275,7 @@ luabind::scope lua_register_expedition() {
 		.def("GetZoneVersion", &Lua_Expedition::GetZoneVersion)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
 		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
+		.def("IsLocked", &Lua_Expedition::IsLocked)
 		.def("RemoveCompass", (void(Lua_Expedition::*)(void))&Lua_Expedition::RemoveCompass)
 		.def("RemoveLockout", (void(Lua_Expedition::*)(std::string))&Lua_Expedition::RemoveLockout)
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)

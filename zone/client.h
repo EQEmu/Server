@@ -31,7 +31,6 @@ class Object;
 class Raid;
 class Seperator;
 class ServerPacket;
-struct DynamicZoneInfo;
 struct DynamicZoneLocation;
 enum WaterRegionType : int;
 
@@ -1353,10 +1352,12 @@ public:
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
-	void GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone);
+	void GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone);
 	void MovePCDynamicZone(uint32 zone_id, int zone_version = -1, bool msg_if_invalid = true);
 	void MovePCDynamicZone(const std::string& zone_name, int zone_version = -1, bool msg_if_invalid = true);
-	std::vector<DynamicZoneInfo> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
+	std::vector<DynamicZone*> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
+	std::unique_ptr<EQApplicationPacket> CreateDzSwitchListPacket(const std::vector<DynamicZone*>& dzs);
+	std::unique_ptr<EQApplicationPacket> CreateCompassPacket(const std::vector<DynamicZoneCompassEntry_Struct>& entries);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1

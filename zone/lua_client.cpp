@@ -4,8 +4,7 @@
 #include <luabind/luabind.hpp>
 
 #include "client.h"
-#include "dynamiczone.h"
-#include "expedition_lockout_timer.h"
+#include "dynamic_zone.h"
 #include "expedition_request.h"
 #include "lua_client.h"
 #include "lua_expedition.h"
@@ -16,6 +15,7 @@
 #include "lua_group.h"
 #include "lua_raid.h"
 #include "lua_packet.h"
+#include "../common/expedition_lockout_timer.h"
 
 struct InventoryWhere { };
 

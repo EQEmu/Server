@@ -41,8 +41,6 @@ namespace ExpeditionDatabase
 	std::string LoadExpeditionsSelectQuery();
 	MySQLRequestResult LoadExpedition(uint32_t expedition_id);
 	MySQLRequestResult LoadAllExpeditions();
-	MySQLRequestResult LoadMembersForCreateRequest(
-		const std::vector<std::string>& character_names, const std::string& expedition_name);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id,
 		const std::string& expedition_name);
@@ -91,20 +89,6 @@ namespace LoadExpeditionColumns
 		leader_name,
 		member_id,
 		member_name
-	};
-};
-
-namespace LoadMembersForCreateRequestColumns
-{
-	enum eLoadMembersForCreateRequestColumns
-	{
-		character_id = 0,
-		character_name,
-		character_expedition_id,
-		lockout_uuid,
-		lockout_expire_time,
-		lockout_duration,
-		lockout_event_name
 	};
 };
 

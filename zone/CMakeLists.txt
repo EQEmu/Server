@@ -22,7 +22,7 @@ SET(zone_sources
 	corpse.cpp
 	data_bucket.cpp
 	doors.cpp
-	dynamiczone.cpp
+	dynamic_zone.cpp
 	effects.cpp
 	embparser.cpp
 	embparser_api.cpp
@@ -33,7 +33,6 @@ SET(zone_sources
 	exp.cpp
 	expedition.cpp
 	expedition_database.cpp
-	expedition_lockout_timer.cpp
 	expedition_request.cpp
 	fastmath.cpp
 	fearpath.cpp
@@ -176,7 +175,7 @@ SET(zone_headers
 	corpse.h
 	data_bucket.h
 	doors.h
-	dynamiczone.h
+	dynamic_zone.h
 	embparser.h
 	embperl.h
 	embxs.h
@@ -186,7 +185,6 @@ SET(zone_headers
 	event_codes.h
 	expedition.h
 	expedition_database.h
-	expedition_lockout_timer.h
 	expedition_request.h
 	fastmath.h
 	forage.h
@@ -279,6 +277,6 @@ INSTALL(TARGETS zone RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
 
 ADD_DEFINITIONS(-DZONE)
 
-TARGET_LINK_LIBRARIES(zone ${SERVER_LIBS})
+TARGET_LINK_LIBRARIES(zone ${ZONE_LIBS})
 
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

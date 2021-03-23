@@ -81,7 +81,7 @@ public:
 		entry.character_id         = 0;
 		entry.expedition_name      = "";
 		entry.event_name           = "";
-		entry.expire_time          = current_timestamp();
+		entry.expire_time          = "";
 		entry.duration             = 0;
 		entry.from_expedition_uuid = "";
 

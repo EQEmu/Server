@@ -20,13 +20,13 @@
 
 #include "expedition.h"
 #include "expedition_database.h"
-#include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "client.h"
 #include "string_ids.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/expedition_lockout_timer.h"
 #include "../common/util/uuid.h"
 
 extern WorldServer worldserver;
@@ -50,17 +50,25 @@ const int32_t Expedition::REPLAY_TIMER_ID = -1;
 const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(
-	uint32_t id, const std::string& uuid, const DynamicZone& dynamic_zone, const std::string& expedition_name,
+	uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
 	const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players
 ) :
 	m_id(id),
 	m_uuid(uuid),
-	m_dynamiczone(dynamic_zone),
 	m_expedition_name(expedition_name),
 	m_leader(leader),
 	m_min_players(min_players),
 	m_max_players(max_players)
 {
+	SetDynamicZone(std::move(dz));
+}
+
+void Expedition::SetDynamicZone(DynamicZone&& dz)
+{
+	dz.SetName(GetName());
+	dz.SetLeaderName(GetLeaderName());
+
+	m_dynamiczone = std::move(dz);
 }
 
 Expedition* Expedition::TryCreate(
@@ -105,7 +113,7 @@ Expedition* Expedition::TryCreate(
 		auto expedition = std::make_unique<Expedition>(
 			expedition_id,
 			expedition_uuid,
-			dynamiczone,
+			std::move(dynamiczone),
 			request.GetExpeditionName(),
 			ExpeditionMember{ request.GetLeaderID(), request.GetLeaderName() },
 			request.GetMinPlayers(),
@@ -219,7 +227,7 @@ void Expedition::CacheExpeditions(MySQLRequestResult& results)
 			auto dz_iter = dynamic_zones.find(expedition->GetDynamicZoneID());
 			if (dz_iter != dynamic_zones.end())
 			{
-				expedition->m_dynamiczone = dz_iter->second;
+				expedition->SetDynamicZone(std::move(dz_iter->second));
 			}
 
 			auto lockout_iter = expedition_lockouts.find(expedition->GetID());
@@ -1137,6 +1145,7 @@ void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
 	LogExpeditionsModerate("Replaced [{}] leader [{}] with [{}]", m_id, m_leader.name, new_leader.name);
 
 	m_leader = new_leader;
+	m_dynamiczone.SetLeaderName(m_leader.name);
 
 	// update each client's expedition window in this zone
 	auto outapp_leader = CreateLeaderNamePacket();

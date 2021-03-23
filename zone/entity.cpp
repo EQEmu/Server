@@ -33,7 +33,7 @@
 #include "../common/guilds.h"
 
 #include "entity.h"
-#include "dynamiczone.h"
+#include "dynamic_zone.h"
 #include "guild_mgr.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
@@ -5251,16 +5251,7 @@ std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float d
 
 void EntityList::GateAllClientsToSafeReturn()
 {
-	DynamicZone dz;
-	if (zone)
-	{
-		dz = zone->GetDynamicZone();
-
-		LogDynamicZones(
-			"Sending all clients in zone: [{}] instance: [{}] to dz safereturn or bind",
-			zone->GetZoneID(), zone->GetInstanceID()
-		);
-	}
+	DynamicZone* dz = zone ? zone->GetDynamicZone() : nullptr;
 
 	for (const auto& client_list_iter : client_list)
 	{
