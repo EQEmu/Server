@@ -3163,7 +3163,7 @@ void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 
 	int i = 0, argcount = 0, length = 0;
 	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
+	const char *message_arg[10] = {0};
 
 	if(type==Chat::Emote)
 		type=4;
@@ -3299,7 +3299,7 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 
 	int i = 0, argcount = 0, length = 0;
 	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
+	const char *message_arg[10] = {0};
 
 	if (type == Chat::Emote)
 		type = 4;
