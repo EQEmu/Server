@@ -3807,7 +3807,20 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 		// If this is Damage Shield damage, the correct OP_Damage packets will be sent from Mob::DamageShield, so
 		// we don't send them here.
 		if (!FromDamageShield) {
-
+#ifdef BOTS
+		// If a bot is the attacker, send a damage message ot the Bot Owner
+			if (spell_id != SPELL_UNKNOWN && damage > 0 && attacker && attacker != this && attacker->IsBot() && RuleB(Bots, DisplaySpellDamage)) {
+				attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
+					attacker->CastToBot()->GetBotOwner(), 
+					Chat::DotDamage, 
+					FilterDOT,
+					OTHER_HIT_DOT, 
+					attacker->GetTarget()->GetCleanName(), 
+					itoa(damage),
+					attacker->GetCleanName(),
+					spells[spell_id].name);
+			}
+#endif
 			entity_list.QueueCloseClients(
 				this, /* Sender */
 				outapp, /* packet */
@@ -3819,7 +3832,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				);
 
 			//send the damage to ourself if we are a client
-			if (IsClient()) {
+			if (IsClient() && spell_id != SPELL_UNKNOWN) {  //added !SPELL_UNKNOWN to remove duplicate display for #damage to self
 				//I dont think any filters apply to damage affecting us
 				CastToClient()->QueuePacket(outapp);
 			}
@@ -3849,6 +3862,22 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				spells[spell_id].name /* Message4 */
 			);
 		}
+#ifdef BOTS
+		// If a bot is the attacker, send a damage message ot the Bot Owner
+		else if (spell_id != SPELL_UNKNOWN && attacker->IsBot() && damage > 0 && attacker && attacker !=this && RuleB(Bots, DisplaySpellDamage)) {
+		attacker->CastToBot()->GetBotOwner()->FilteredMessageString(
+			attacker->CastToBot()->GetBotOwner(),
+			Chat::DotDamage,
+			FilterDOT,
+			OTHER_HIT_DOT,
+			attacker->GetTarget()->GetCleanName(),
+			itoa(damage),
+			attacker->GetCleanName(),
+			spells[spell_id].name);
+			}
+		
+#endif
+
 	} //end packet sending
 
 }
