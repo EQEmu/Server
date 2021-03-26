@@ -614,6 +614,7 @@ RULE_REAL(Bots, LeashDistance, 562500.0f, "Distance a bot is allowed to travel f
 RULE_BOOL(Bots, AllowApplyPoisonCommand, true, "Allows the use of the bot command 'applypoison'")
 RULE_BOOL(Bots, AllowApplyPotionCommand, true, "Allows the use of the bot command 'applypotion'")
 RULE_BOOL(Bots, RestrictApplyPotionToRogue, true, "Restricts the bot command 'applypotion' to rogue-usable potions (i.e., poisons)")
+RULE_BOOL(Bots, DisplayHealDamage, false, "Enables the display of bot heal damage to the client")
 RULE_CATEGORY_END()
 #endif
 

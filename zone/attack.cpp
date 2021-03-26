@@ -3853,7 +3853,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 
 }
 
-void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
+void Mob::HealDamage(uint32 amount, Mob* caster, uint16 spell_id)
 {
 	int32 maxhp = GetMaxHP();
 	int32 curhp = GetHP();
@@ -3868,15 +3868,16 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 		if (caster) {
 			if (IsBuffSpell(spell_id)) { // hots
 										 // message to caster
-				if (caster->IsClient() && caster == this) {
-					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
+				if ((caster->IsClient() && caster == this)) {
+					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater) {
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEAL_SELF, itoa(acthealed), spells[spell_id].name);
+					}
 					else
 						FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							YOU_HEALED, GetCleanName(), itoa(acthealed));
 				}
-				else if (caster->IsClient() && caster != this) {
+				else if ((caster->IsClient() && caster != this)) {
 					if (caster->CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEAL_OTHER, GetCleanName(), itoa(acthealed),
@@ -3885,8 +3886,35 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 						caster->FilteredMessageString(caster, Chat::NonMelee, FilterHealOverTime,
 							YOU_HEAL, GetCleanName(), itoa(acthealed));
 				}
+#ifdef BOTS
+				if (caster->IsBot() && this != caster->CastToBot()->GetBotOwner() && RuleB(Bots, DisplayHealDamage)) {
+
+
+					// %1 healed %2 for %3 hit points from %4's %5
+					const char s2[]{ " healed " };
+					const char s4[]{ " for " };
+					const char s6[]{ " hit points from " };
+					const char s8[]{ "'s " };
+
+					caster->CastToBot()->GetBotOwner()->FilteredMessageString(
+						caster->CastToBot()->GetBotOwner(), //send to the Bot Owner's client
+						Chat::NonMelee,
+						FilterHealOverTime,
+						GENERIC_9_STRINGS,					//using generic for testing purposes %1 %2 %3 %4 %5 %6 %7 %8 %9
+						caster->GetCleanName(),				// %1 caster (bot's) name
+						s2,									// %2
+						this->GetCleanName(),				// %3 caster (bot's) target
+						s4,									// %4
+						itoa(acthealed),					// %5 amount healed
+						s6,									// %6
+						caster->GetCleanName(),				// %7 caster (bot's) name
+						s8,									// %8
+						spells[spell_id].name				// %9 spell name
+					);
+				}
+#endif // BOTS
 				// message to target
-				if (IsClient() && caster != this) {
+				if ((IsClient() && caster != this)) {
 					if (CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater)
 						FilteredMessageString(this, Chat::NonMelee, FilterHealOverTime,
 							HOT_HEALED_OTHER, caster->GetCleanName(),
@@ -3899,25 +3927,41 @@ void Mob::HealDamage(uint32 amount, Mob *caster, uint16 spell_id)
 			else { // normal heals
 				FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 					YOU_HEALED, caster->GetCleanName(), itoa(acthealed));
+#ifndef BOTS
 				if (caster != this)
 					caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
 						YOU_HEAL, GetCleanName(), itoa(acthealed));
 			}
-		}
-		else {
-			Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
-		}
-	}
+#endif
+#ifdef	BOTS
+			if (caster->IsBot() && RuleB(Bots, DisplayHealDamage)) {
+				caster->CastToBot()->GetBotOwner()->FilteredMessageString(caster->CastToBot()->GetBotOwner(),
+					Chat::NonMelee, FilterSpellDamage, GENERIC_9_STRINGS,
+					caster->GetCleanName(), " healed ", this->GetCleanName(), " for ", itoa(acthealed), " hit points.", " ", " ", " ");
+			}
+			else if (caster != this) {
+				caster->FilteredMessageString(caster, Chat::NonMelee, FilterSpellDamage,
+					YOU_HEAL, GetCleanName(), itoa(acthealed));
 
-	if (curhp < maxhp) {
-		if ((curhp + amount) > maxhp)
-			curhp = maxhp;
-		else
-			curhp += amount;
-		SetHP(curhp);
+			}
+		}
+#endif // BOTS
 
-		SendHPUpdate();
 	}
+	else {
+		Message(Chat::NonMelee, "You have been healed for %d points of damage.", acthealed);
+	}
+}
+
+if (curhp < maxhp) {
+	if ((curhp + amount) > maxhp)
+		curhp = maxhp;
+	else
+		curhp += amount;
+	SetHP(curhp);
+
+	SendHPUpdate();
+}
 }
 
 //proc chance includes proc bonus
