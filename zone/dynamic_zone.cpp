@@ -20,6 +20,7 @@
 
 #include "dynamic_zone.h"
 #include "client.h"
+#include "expedition.h"
 #include "worldserver.h"
 #include "zonedb.h"
 #include "../common/eqemu_logsys.h"
@@ -37,18 +38,25 @@ DynamicZone::DynamicZone(
 }
 
 DynamicZone::DynamicZone(
-	std::string zone_shortname, uint32_t version, uint32_t duration, DynamicZoneType type
+	std::string zone_name, uint32_t version, uint32_t duration, DynamicZoneType type
 ) :
-	m_version(version),
-	m_duration(duration),
-	m_type(type)
+	DynamicZone(ZoneID(zone_name), version, duration, type)
 {
-	m_zone_id = ZoneID(zone_shortname.c_str());
-
 	if (!m_zone_id)
 	{
-		LogDynamicZones("Failed to get zone id for zone [{}]", zone_shortname);
+		LogDynamicZones("Failed to get zone id for zone [{}]", zone_name);
 	}
+}
+
+DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
+{
+	auto expedition = Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
+	if (expedition)
+	{
+		return &expedition->GetDynamicZone();
+	}
+	// todo: other system caches
+	return nullptr;
 }
 
 std::unordered_map<uint32_t, DynamicZone> DynamicZone::LoadMultipleDzFromDatabase(
@@ -443,10 +451,21 @@ void DynamicZone::SetCompass(const DynamicZoneLocation& location, bool update_db
 {
 	m_compass = location;
 
+	if (m_on_compass_change)
+	{
+		m_on_compass_change();
+	}
+
 	if (update_db)
 	{
 		SaveCompassToDatabase();
+		SendWorldSetLocation(ServerOP_DzSetCompass, location);
 	}
+}
+
+void DynamicZone::SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db)
+{
+	SetCompass({ zone_id, x, y, z, 0.0f }, update_db);
 }
 
 void DynamicZone::SetSafeReturn(const DynamicZoneLocation& location, bool update_db)
@@ -456,7 +475,13 @@ void DynamicZone::SetSafeReturn(const DynamicZoneLocation& location, bool update
 	if (update_db)
 	{
 		SaveSafeReturnToDatabase();
+		SendWorldSetLocation(ServerOP_DzSetSafeReturn, location);
 	}
+}
+
+void DynamicZone::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db)
+{
+	SetSafeReturn({ zone_id, x, y, z, heading }, update_db);
 }
 
 void DynamicZone::SetZoneInLocation(const DynamicZoneLocation& location, bool update_db)
@@ -467,7 +492,13 @@ void DynamicZone::SetZoneInLocation(const DynamicZoneLocation& location, bool up
 	if (update_db)
 	{
 		SaveZoneInLocationToDatabase();
+		SendWorldSetLocation(ServerOP_DzSetZoneIn, location);
 	}
+}
+
+void DynamicZone::SetZoneInLocation(float x, float y, float z, float heading, bool update_db)
+{
+	SetZoneInLocation({ 0, x, y, z, heading }, update_db);
 }
 
 bool DynamicZone::IsCurrentZoneDzInstance() const
@@ -496,6 +527,17 @@ uint32_t DynamicZone::GetSecondsRemaining() const
 	return 0;
 }
 
+void DynamicZone::SetSecondsRemaining(uint32_t seconds_remaining)
+{
+	// async
+	constexpr uint32_t pack_size = sizeof(ServerDzSetDuration_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzSetSecondsRemaining, pack_size);
+	auto buf = reinterpret_cast<ServerDzSetDuration_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->seconds = seconds_remaining;
+	worldserver.SendPacket(pack.get());
+}
+
 void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 {
 	// preserves original start time, just modifies duration and expire time
@@ -509,6 +551,22 @@ void DynamicZone::SetUpdatedDuration(uint32_t new_duration)
 	{
 		zone->SetInstanceTimer(GetSecondsRemaining());
 	}
+}
+
+void DynamicZone::SendWorldSetLocation(uint16_t server_opcode, const DynamicZoneLocation& location)
+{
+	uint32_t pack_size = sizeof(ServerDzLocation_Struct);
+	auto pack = std::make_unique<ServerPacket>(server_opcode, pack_size);
+	auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
+	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
+	buf->zone_id = location.zone_id;
+	buf->x = location.x;
+	buf->y = location.y;
+	buf->z = location.z;
+	buf->heading = location.heading;
+	worldserver.SendPacket(pack.get());
 }
 
 void DynamicZone::HandleWorldMessage(ServerPacket* pack)
@@ -535,6 +593,42 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 				if (client_list_iter.second)
 				{
 					client_list_iter.second->SetDzRemovalTimer(true);
+				}
+			}
+		}
+		break;
+	}
+	case ServerOP_DzDurationUpdate:
+	{
+		auto buf = reinterpret_cast<ServerDzSetDuration_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->SetUpdatedDuration(buf->seconds);
+		}
+		break;
+	}
+	case ServerOP_DzSetCompass:
+	case ServerOP_DzSetSafeReturn:
+	case ServerOP_DzSetZoneIn:
+	{
+		auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
+		{
+			auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+			if (dz)
+			{
+				if (pack->opcode == ServerOP_DzSetCompass)
+				{
+					dz->SetCompass(buf->zone_id, buf->x, buf->y, buf->z, false);
+				}
+				else if (pack->opcode == ServerOP_DzSetSafeReturn)
+				{
+					dz->SetSafeReturn(buf->zone_id, buf->x, buf->y, buf->z, buf->heading, false);
+				}
+				else if (pack->opcode == ServerOP_DzSetZoneIn)
+				{
+					dz->SetZoneInLocation(buf->x, buf->y, buf->z, buf->heading, false);
 				}
 			}
 		}

@@ -69,6 +69,7 @@ void Expedition::SetDynamicZone(DynamicZone&& dz)
 	dz.SetLeaderName(GetLeaderName());
 
 	m_dynamiczone = std::move(dz);
+	m_dynamiczone.RegisterOnCompassChange([this]() { SendCompassUpdateToZoneMembers(); });
 }
 
 Expedition* Expedition::TryCreate(
@@ -1631,24 +1632,6 @@ void Expedition::SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberSt
 	worldserver.SendPacket(pack.get());
 }
 
-void Expedition::SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location)
-{
-	uint32_t pack_size = sizeof(ServerDzLocation_Struct);
-	auto pack = std::make_unique<ServerPacket>(server_opcode, pack_size);
-	auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
-	buf->owner_id = GetID();
-	buf->dz_zone_id = m_dynamiczone.GetZoneID();
-	buf->dz_instance_id = m_dynamiczone.GetInstanceID();
-	buf->sender_zone_id = zone ? zone->GetZoneID() : 0;
-	buf->sender_instance_id = zone ? zone->GetInstanceID() : 0;
-	buf->zone_id = location.zone_id;
-	buf->x = location.x;
-	buf->y = location.y;
-	buf->z = location.z;
-	buf->heading = location.heading;
-	worldserver.SendPacket(pack.get());
-}
-
 void Expedition::SendWorldMemberSwapped(
 	const std::string& remove_char_name, uint32_t remove_char_id, const std::string& add_char_name, uint32_t add_char_id)
 {
@@ -1713,16 +1696,6 @@ void Expedition::SendWorldCharacterLockout(
 	strn0cpy(buf->uuid, lockout.GetExpeditionUUID().c_str(), sizeof(buf->uuid));
 	strn0cpy(buf->expedition_name, lockout.GetExpeditionName().c_str(), sizeof(buf->expedition_name));
 	strn0cpy(buf->event_name, lockout.GetEventName().c_str(), sizeof(buf->event_name));
-	worldserver.SendPacket(pack.get());
-}
-
-void Expedition::SendWorldSetSecondsRemaining(uint32_t seconds_remaining)
-{
-	uint32_t pack_size = sizeof(ServerExpeditionUpdateDuration_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionSecondsRemaining, pack_size);
-	auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->new_duration_seconds = seconds_remaining;
 	worldserver.SendPacket(pack.get());
 }
 
@@ -2007,32 +1980,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	case ServerOP_ExpeditionDzCompass:
-	case ServerOP_ExpeditionDzSafeReturn:
-	case ServerOP_ExpeditionDzZoneIn:
-	{
-		auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
-		if (zone && !zone->IsZone(buf->sender_zone_id, buf->sender_instance_id))
-		{
-			auto expedition = Expedition::FindCachedExpeditionByID(buf->owner_id);
-			if (expedition)
-			{
-				if (pack->opcode == ServerOP_ExpeditionDzCompass)
-				{
-					expedition->SetDzCompass(buf->zone_id, buf->x, buf->y, buf->z, false);
-				}
-				else if (pack->opcode == ServerOP_ExpeditionDzSafeReturn)
-				{
-					expedition->SetDzSafeReturn(buf->zone_id, buf->x, buf->y, buf->z, buf->heading, false);
-				}
-				else if (pack->opcode == ServerOP_ExpeditionDzZoneIn)
-				{
-					expedition->SetDzZoneInLocation(buf->x, buf->y, buf->z, buf->heading, false);
-				}
-			}
-		}
-		break;
-	}
 	case ServerOP_ExpeditionCharacterLockout:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionCharacterLockout_Struct*>(pack->pBuffer);
@@ -2056,16 +2003,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	case ServerOP_ExpeditionDzDuration:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition)
-		{
-			expedition->UpdateDzDuration(buf->new_duration_seconds);
-		}
-		break;
-	}
 	case ServerOP_ExpeditionExpireWarning:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
@@ -2079,11 +2016,8 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	}
 }
 
-void Expedition::SetDzCompass(uint32_t zone_id, float x, float y, float z, bool update_db)
+void Expedition::SendCompassUpdateToZoneMembers()
 {
-	DynamicZoneLocation location{ zone_id, x, y, z, 0.0f };
-	m_dynamiczone.SetCompass(location, update_db);
-
 	for (const auto& member : m_members)
 	{
 		Client* member_client = entity_list.GetClientByCharID(member.char_id);
@@ -2091,52 +2025,6 @@ void Expedition::SetDzCompass(uint32_t zone_id, float x, float y, float z, bool 
 		{
 			member_client->SendDzCompassUpdate();
 		}
-	}
-
-	if (update_db)
-	{
-		SendWorldDzLocationUpdate(ServerOP_ExpeditionDzCompass, location);
-	}
-}
-
-void Expedition::SetDzCompass(const std::string& zone_name, float x, float y, float z, bool update_db)
-{
-	auto zone_id = ZoneID(zone_name.c_str());
-	SetDzCompass(zone_id, x, y, z, update_db);
-}
-
-void Expedition::SetDzSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db)
-{
-	DynamicZoneLocation location{ zone_id, x, y, z, heading };
-
-	m_dynamiczone.SetSafeReturn(location, update_db);
-
-	if (update_db)
-	{
-		SendWorldDzLocationUpdate(ServerOP_ExpeditionDzSafeReturn, location);
-	}
-}
-
-void Expedition::SetDzSafeReturn(const std::string& zone_name, float x, float y, float z, float heading, bool update_db)
-{
-	auto zone_id = ZoneID(zone_name.c_str());
-	SetDzSafeReturn(zone_id, x, y, z, heading, update_db);
-}
-
-void Expedition::SetDzSecondsRemaining(uint32_t seconds_remaining)
-{
-	SendWorldSetSecondsRemaining(seconds_remaining); // async
-}
-
-void Expedition::SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db)
-{
-	DynamicZoneLocation location{ 0, x, y, z, heading };
-
-	m_dynamiczone.SetZoneInLocation(location, update_db);
-
-	if (update_db)
-	{
-		SendWorldDzLocationUpdate(ServerOP_ExpeditionDzZoneIn, location);
 	}
 }
 

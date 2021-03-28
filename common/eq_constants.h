@@ -464,4 +464,14 @@ namespace ZoneBlockedSpellTypes {
 	const uint8 Region   = 2;
 };
 
+enum class DynamicZoneType
+{
+	None = 0,
+	Expedition,
+	Tutorial,
+	Task,
+	Mission, // Shared Task
+	Quest
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/

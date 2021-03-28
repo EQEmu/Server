@@ -35,12 +35,12 @@ class ExpeditionState
 public:
 	void AddExpedition(uint32_t expedition_id);
 	Expedition* GetExpedition(uint32_t expedition_id);
+	Expedition* GetExpeditionByDynamicZoneID(uint32_t dz_id);
 	void LoadActiveExpeditions();
 	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
 	void Process();
 	void RemoveAllMembers(uint32_t expedition_id);
 	void RemoveExpedition(uint32_t expedition_id);
-	void SetSecondsRemaining(uint32_t expedition_id, uint32_t seconds_remaining);
 
 private:
 	std::vector<Expedition> m_expeditions;

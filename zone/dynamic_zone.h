@@ -21,24 +21,16 @@
 #ifndef DYNAMIC_ZONE_H
 #define DYNAMIC_ZONE_H
 
+#include "../common/eq_constants.h"
 #include <chrono>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 class MySQLRequestRow;
 class ServerPacket;
-
-enum class DynamicZoneType : uint8_t
-{
-	None = 0,
-	Expedition,
-	Tutorial,
-	Task,
-	Mission, // Shared Task
-	Quest
-};
 
 struct DynamicZoneLocation
 {
@@ -62,6 +54,7 @@ public:
 	DynamicZone(uint32_t dz_id) : m_id(dz_id) {}
 	DynamicZone(DynamicZoneType type) : m_type(type) {}
 
+	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
 	static std::unordered_map<uint32_t, DynamicZone> LoadMultipleDzFromDatabase(
 		const std::vector<uint32_t>& dynamic_zone_ids);
 	static void HandleWorldMessage(ServerPacket* pack);
@@ -88,15 +81,20 @@ public:
 	bool     IsInstanceID(uint32_t instance_id) const;
 	bool     IsValid() const { return m_instance_id != 0; }
 	bool     IsSameDz(uint32_t zone_id, uint32_t instance_id) const;
+	void     RegisterOnCompassChange(const std::function<void()>& on_change) { m_on_compass_change = on_change; }
 	void     RemoveAllCharacters(bool enable_removal_timers = true);
 	void     RemoveCharacter(uint32_t character_id);
 	void     SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids);
 	void     SendInstanceCharacterChange(uint32_t character_id, bool removed);
 	void     SetCompass(const DynamicZoneLocation& location, bool update_db = false);
+	void     SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
 	void     SetLeaderName(const std::string& leader_name) { m_leader_name = leader_name; }
 	void     SetName(const std::string& name) { m_name = name; }
 	void     SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
+	void     SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void     SetSecondsRemaining(uint32_t seconds_remaining);
 	void     SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
+	void     SetZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
 	void     SetUpdatedDuration(uint32_t seconds);
 
 private:
@@ -105,6 +103,7 @@ private:
 	void SaveCompassToDatabase();
 	void SaveSafeReturnToDatabase();
 	void SaveZoneInLocationToDatabase();
+	void SendWorldSetLocation(uint16_t server_opcode, const DynamicZoneLocation& location);
 	uint32_t SaveToDatabase();
 
 	uint32_t m_id            = 0;
@@ -122,6 +121,7 @@ private:
 	std::chrono::seconds m_duration;
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
+	std::function<void()> m_on_compass_change;
 };
 
 #endif
