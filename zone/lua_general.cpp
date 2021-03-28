@@ -1608,6 +1608,10 @@ int lua_get_zone_id() {
 	return zone->GetZoneID();
 }
 
+int lua_get_zone_id_by_name(const char* zone_name) {
+	return ZoneID(zone_name);
+}
+
 const char *lua_get_zone_long_name() {
 	if(!zone)
 		return "";
@@ -1615,11 +1619,25 @@ const char *lua_get_zone_long_name() {
 	return zone->GetLongName();
 }
 
+const char *lua_get_zone_long_name_by_name(const char* zone_name) {
+	return ZoneLongName(
+		ZoneID(zone_name)
+	);
+}
+
+const char *lua_get_zone_long_name_by_id(uint32 zone_id) {
+	return ZoneLongName(zone_id);
+}
+
 const char *lua_get_zone_short_name() {
 	if(!zone)
 		return "";
 
 	return zone->GetShortName();
+}
+
+const char *lua_get_zone_short_name_by_id(uint32 zone_id) {
+	return ZoneName(zone_id);
 }
 
 int lua_get_zone_instance_id() {
@@ -2806,8 +2824,12 @@ luabind::scope lua_register_general() {
 		luabind::def("zone_group", &lua_zone_group),
 		luabind::def("zone_raid", &lua_zone_raid),
 		luabind::def("get_zone_id", &lua_get_zone_id),
+		luabind::def("get_zone_id_by_name", &lua_get_zone_id_by_name),
 		luabind::def("get_zone_long_name", &lua_get_zone_long_name),
+		luabind::def("get_zone_long_name_by_name", &lua_get_zone_long_name_by_name),
+		luabind::def("get_zone_long_name_by_id", &lua_get_zone_long_name_by_id),
 		luabind::def("get_zone_short_name", &lua_get_zone_short_name),
+		luabind::def("get_zone_short_name_by_id", &lua_get_zone_short_name_by_id),
 		luabind::def("get_zone_instance_id", &lua_get_zone_instance_id),
 		luabind::def("get_zone_instance_version", &lua_get_zone_instance_version),
 		luabind::def("get_zone_weather", &lua_get_zone_weather),

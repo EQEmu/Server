@@ -285,6 +285,8 @@ public:
 	uint16 CreateDoor( const char* model, float x, float y, float z, float heading, uint8 opentype, uint16 size);
     int32 GetZoneID(const char *zone);
     static std::string GetZoneLongName(std::string zone_short_name);
+    static std::string GetZoneLongNameByID(uint32 zone_id);
+	static std::string GetZoneShortName(uint32 zone_id);
 	void CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByGroupID(int group_id, uint32 task_id, bool enforce_level_requirement = false);
 	void CrossZoneAssignTaskByRaidID(int raid_id, uint32 task_id, bool enforce_level_requirement = false);

@@ -3821,6 +3821,36 @@ XS(XS__GetZoneLongName) {
 	XSRETURN(1);
 }
 
+XS(XS__GetZoneLongNameByID);
+XS(XS__GetZoneLongNameByID) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::GetZoneLongNameByID(uint32 zone_id)");
+
+	dXSTARG;
+	uint32 zone_id = (uint32) SvUV(ST(0));
+	std::string zone_long_name = quest_manager.GetZoneLongNameByID(zone_id);
+	sv_setpv(TARG, zone_long_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
+XS(XS__GetZoneShortName);
+XS(XS__GetZoneShortName) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::GetZoneShortName(uint32 zone_id)");
+
+	dXSTARG;
+	uint32 zone_id = (uint32) SvUV(ST(0));
+	std::string zone_short_name = quest_manager.GetZoneShortName(zone_id);
+	sv_setpv(TARG, zone_short_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__GetTimeSeconds);
 XS(XS__GetTimeSeconds) {
 	dXSARGS;
@@ -6490,6 +6520,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "GetTimeSeconds"), XS__GetTimeSeconds, file);
 	newXS(strcpy(buf, "GetZoneID"), XS__GetZoneID, file);
 	newXS(strcpy(buf, "GetZoneLongName"), XS__GetZoneLongName, file);
+	newXS(strcpy(buf, "GetZoneLongNameByID"), XS__GetZoneLongNameByID, file);
+	newXS(strcpy(buf, "GetZoneShortName"), XS__GetZoneShortName, file);
 	newXS(strcpy(buf, "set_rule"), XS__set_rule, file);
 	newXS(strcpy(buf, "get_rule"), XS__get_rule, file);
 	newXS(strcpy(buf, "get_data"), XS__get_data, file);

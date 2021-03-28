@@ -3219,9 +3219,15 @@ int32 QuestManager::GetZoneID(const char *zone) {
 
 std::string QuestManager::GetZoneLongName(std::string zone_short_name)
 {
-	return zone_store.GetZoneLongName(
-		zone_store.GetZoneID(zone_short_name)
-	);
+	return ZoneLongName(ZoneID(zone_short_name));
+}
+
+std::string QuestManager::GetZoneLongNameByID(uint32 zone_id) {
+	return ZoneLongName(zone_id);
+}
+
+std::string QuestManager::GetZoneShortName(uint32 zone_id) {
+	return ZoneName(zone_id);
 }
 
 void QuestManager::CrossZoneAssignTaskByCharID(int character_id, uint32 task_id, bool enforce_level_requirement) {
