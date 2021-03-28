@@ -21,9 +21,9 @@
 #ifndef EXPEDITION_H
 #define EXPEDITION_H
 
-#include "dynamiczone.h"
-#include "expedition_lockout_timer.h"
+#include "dynamic_zone.h"
 #include "../common/eq_constants.h"
+#include "../common/expedition_lockout_timer.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -76,7 +76,7 @@ class Expedition
 {
 public:
 	Expedition() = delete;
-	Expedition(uint32_t id, const std::string& uuid, const DynamicZone& dz, const std::string& expedition_name,
+	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
 		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, ExpeditionRequest& request);
@@ -111,7 +111,7 @@ public:
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
-	const DynamicZone& GetDynamicZone() const { return m_dynamiczone; }
+	DynamicZone& GetDynamicZone() { return m_dynamiczone; }
 	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::string& GetUUID() const { return m_uuid; }
@@ -125,6 +125,8 @@ public:
 	bool RemoveMember(const std::string& remove_char_name);
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
 	void SwapMember(Client* add_client, const std::string& remove_char_name);
+
+	bool IsLocked() const { return m_is_locked; }
 	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
 		bool update_db = false, uint32_t msg_color = Chat::Yellow);
 
@@ -159,13 +161,6 @@ public:
 	void DzQuit(Client* requester);
 	void DzKickPlayers(Client* requester);
 
-	void SetDzCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
-	void SetDzCompass(const std::string& zone_name, float x, float y, float z, bool update_db = false);
-	void SetDzSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
-	void SetDzSafeReturn(const std::string& zone_name, float x, float y, float z, float heading, bool update_db = false);
-	void SetDzSecondsRemaining(uint32_t seconds_remaining);
-	void SetDzZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
-
 	static const int32_t REPLAY_TIMER_ID;
 	static const int32_t EVENT_TIMER_ID;
 
@@ -195,7 +190,7 @@ private:
 	void SendMembersExpireWarning(uint32_t minutes);
 	void SendNewMemberAddedToZoneMembers(const std::string& added_name);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
-	void SendWorldDzLocationUpdate(uint16_t server_opcode, const DynamicZoneLocation& location);
+	void SendCompassUpdateToZoneMembers();
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
 	void SendWorldAddPlayerInvite(const std::string& inviter_name, const std::string& swap_remove_name,
 		const std::string& add_name, bool pending = false);
@@ -207,11 +202,10 @@ private:
 	void SendWorldMemberStatus(uint32_t character_id, ExpeditionMemberStatus status);
 	void SendWorldMemberSwapped(const std::string& remove_char_name, uint32_t remove_char_id,
 		const std::string& add_char_name, uint32_t add_char_id);
-	void SendWorldSetSecondsRemaining(uint32_t seconds_remaining);
 	void SendWorldSettingChanged(uint16_t server_opcode, bool setting_value);
+	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
-	void UpdateDzDuration(uint32_t new_duration) { m_dynamiczone.SetUpdatedDuration(new_duration); }
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
 	ExpeditionMember GetMemberData(uint32_t character_id);

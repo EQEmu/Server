@@ -494,9 +494,6 @@ void Client::ResetAA() {
 	m_pp.raid_leadership_exp = 0;
 
 	database.DeleteCharacterLeadershipAAs(CharacterID());
-	// undefined for these clients
-	if (ClientVersionBit() & EQ::versions::maskTitaniumAndEarlier)
-		Kick("AA Reset on client that doesn't support it");
 }
 
 void Client::SendClearAA()

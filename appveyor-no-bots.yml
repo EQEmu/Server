@@ -16,6 +16,6 @@ build:
   verbosity: minimal
 after_build:
 - cmd: >-
-    7z a build_x64-no-bots.zip C:\projects\eqemu\build\bin\RelWithDebInfo\*.exe C:\projects\eqemu\build\bin\RelWithDebInfo\*.dll C:\projects\eqemu\build\bin\RelWithDebInfo\*.pdb
+    7z a build_x64-no-bots.zip C:\projects\eqemu\build\bin\RelWithDebInfo\*.exe C:\projects\eqemu\build\bin\RelWithDebInfo\*.dll C:\projects\eqemu\build\bin\RelWithDebInfo\*.pdb C:\projects\eqemu\build\libs\zlibng\RelWithDebInfo\*.dll
 
     appveyor PushArtifact build_x64-no-bots.zip

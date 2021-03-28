@@ -77,7 +77,7 @@
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
-extern TaskManager *taskmanager;
+extern TaskManager *task_manager;
 extern FastMath g_Math;
 void CatchSignal(int sig_num);
 
@@ -439,7 +439,7 @@ int command_init(void)
 		command_add("wp", "[add/delete] [grid_num] [pause] [wp_num] [-h] - Add/delete a waypoint to/from a wandering grid", 170, command_wp) ||
 		command_add("wpadd", "[pause] [-h] - Add your current location as a waypoint to your NPC target's AI path", 170, command_wpadd) ||
 		command_add("wpinfo", "- Show waypoint info about your NPC target", 170, command_wpinfo) ||
-		command_add("wwcast", "Casts the provided spell ID to all players currently online. Use caution with this!!", 250, command_wwcast) ||
+		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", 250, command_worldwide) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.",  250, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", 80, command_zclip) ||
 		command_add("zcolor", "[red] [green] [blue] - Change sky color", 80, command_zcolor) ||
@@ -739,15 +739,28 @@ void command_logcommand(Client *c, const char *message)
 /*
  * commands go below here
  */
-void command_wwcast(Client *c, const Seperator *sep)
+void command_worldwide(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] && Seperator::IsNumber(sep->arg[1])) {
-		int spell_id = atoi(sep->arg[1]);
-		quest_manager.WorldWideCastSpell(spell_id, 0, 0);
-		worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast {} world-wide!", GetSpellName(spell_id)).c_str());
+	std::string sub_command;
+	if (sep->arg[1]) {
+		sub_command = sep->arg[1];
 	}
-	else
-		c->Message(Chat::Yellow, "Usage: #wwcast <spellid>");
+
+	if (sub_command == "cast") {
+		if (sep->arg[2][0] && Seperator::IsNumber(sep->arg[2])) {
+			int spell_id = atoi(sep->arg[2]);
+			quest_manager.WorldWideCastSpell(spell_id, 0, 0);
+			worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast [{}] world-wide!", GetSpellName(spell_id)).c_str());
+		}
+		else {
+			c->Message(Chat::Yellow, "Usage: #worldwide cast [spellid]");
+		}
+	}
+
+	if (!sep->arg[1]) {
+		c->Message(Chat::White, "This command is used to perform world-wide tasks");
+		c->Message(Chat::White, "Usage: #worldwide cast [spellid]");
+	}
 }
 void command_endurance(Client *c, const Seperator *sep)
 {
@@ -1791,7 +1804,7 @@ void command_list(Client *c, const Seperator *sep)
 	else {
 		c->Message(Chat::White, "Usage of #list");
 		c->Message(Chat::White, "- #list [npcs|players|corpses|doors|objects] [search]");
-		c->Message(Chat::White, "- Example: #list npc (Blank for all)");
+		c->Message(Chat::White, "- Example: #list npcs (Blank for all)");
 	}
 }
 
@@ -2629,9 +2642,7 @@ void command_flymode(Client *c, const Seperator *sep)
 {
 	Mob *t = c;
 
-	if (strlen(sep->arg[1]) == 1 && !(sep->arg[1][0] == '0' || sep->arg[1][0] == '1' || sep->arg[1][0] == '2' || sep->arg[1][0] == '3' || sep->arg[1][0] == '4' || sep->arg[1][0] == '5'))
-		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
-	else {
+	if (strlen(sep->arg[1]) == 1 && sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 5) {
 		if (c->GetTarget()) {
 			t = c->GetTarget();
 		}
@@ -2658,8 +2669,11 @@ void command_flymode(Client *c, const Seperator *sep)
 		else if (sep->arg[1][0] == '5') {
 			c->Message(Chat::White, "Setting %s to Levitating While Running", t->GetName());
 		}
+	} else {
+		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
 	}
 }
+
 
 void command_showskills(Client *c, const Seperator *sep)
 {
@@ -8785,6 +8799,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npcedit version - Set an NPC's version");
 		c->Message(Chat::White, "#npcedit slow_mitigation - Set an NPC's slow mitigation");
 		c->Message(Chat::White, "#npcedit flymode - Set an NPC's flymode [0 = ground, 1 = flying, 2 = levitate, 3 = water, 4 = floating]");
+		c->Message(Chat::White, "#npcedit raidtarget - Set an NPCs raid_target field");
+		c->Message(Chat::White, "#npcedit respawntime - Set an NPCs respawn timer in seconds");
 
 	}
 
@@ -9381,6 +9397,24 @@ void command_npcedit(Client *c, const Seperator *sep)
 		std::string query = StringFormat("UPDATE npc_types SET slow_mitigation = %i WHERE id = %i",  atoi(sep->argplus[2]), npcTypeID);
 		content_db.QueryDatabase(query);
 		return;
+	}
+
+	if (strcasecmp(sep->arg[1], "raidtarget") == 0) {
+		if (sep->arg[2][0] && sep->IsNumber(sep->arg[2]) && atoi(sep->arg[2]) >= 0) {
+			c->Message(Chat::Yellow, "NPCID %u is %s as a raid target.", npcTypeID, atoi(sep->arg[2]) == 0 ? "no longer designated" : "now designated");
+			std::string query = StringFormat("UPDATE npc_types SET raid_target = %i WHERE id = %i", atoi(sep->arg[2]), npcTypeID);
+			content_db.QueryDatabase(query);
+			return;
+		}
+	}
+
+	if (strcasecmp(sep->arg[1], "respawntime") == 0) {
+		if (sep->arg[2][0] && sep->IsNumber(sep->arg[2]) && atoi(sep->arg[2]) > 0) {
+			c->Message(Chat::Yellow, "NPCID %u (spawngroup %i) respawn time set to %i.", npcTypeID, c->GetTarget()->CastToNPC()->GetSpawnGroupId(), atoi(sep->arg[2]));
+			std::string query = StringFormat("UPDATE spawn2 SET respawntime = %i WHERE spawngroupID = %i AND version = %i", atoi(sep->arg[2]), c->GetTarget()->CastToNPC()->GetSpawnGroupId(), zone->GetInstanceVersion());
+			content_db.QueryDatabase(query);
+			return;
+		}
 	}
 
 	if((sep->arg[1][0] == 0 || strcasecmp(sep->arg[1],"*")==0) || ((c->GetTarget()==0) || (c->GetTarget()->IsClient())))
@@ -10136,76 +10170,135 @@ void command_rules(Client *c, const Seperator *sep) {
 void command_task(Client *c, const Seperator *sep) {
 	//super-command for managing tasks
 	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
-		c->Message(Chat::White, "Syntax: #task [subcommand].");
-		c->Message(Chat::White, "-- Task System Commands --");
-		c->Message(Chat::White, "...show - List active tasks for a client");
-		c->Message(Chat::White, "...update <TaskID> <ActivityID> [Count]");
-		c->Message(Chat::White, "...reloadall - Reload all Task information from the database");
-		c->Message(Chat::White, "...reload task <TaskID> - Reload Task and Activity informnation for a single task");
-		c->Message(Chat::White, "...reload lists - Reload goal/reward list information");
-		c->Message(Chat::White, "...reload prox - Reload proximity information");
-		c->Message(Chat::White, "...reload sets - Reload task set information");
+		c->Message(Chat::White, "Syntax: #task [subcommand]");
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(Chat::White, "# Task System Commands");
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] List active tasks for a client",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task show", false, "show")
+			).c_str()
+		);
+		c->Message(Chat::White, "--- update <task_id> <activity_id> [count] | Updates task");
+		c->Message(Chat::White, "--- assign <task_id> | Assigns task to client");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Reload all Task information from the database",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task reloadall", false, "reloadall")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] <task_id> Reload Task and Activity information for a single task",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload task", false, "reload task")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Reload goal/reward list information",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload lists", false, "reload lists")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Reload proximity information",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload prox", false, "reload prox")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Reload task set information",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload sets", false, "reload sets")
+			).c_str()
+		);
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "show")) {
-		if(c->GetTarget() && c->GetTarget()->IsClient())
-			c->GetTarget()->CastToClient()->ShowClientTasks();
-		else
-			c->ShowClientTasks();
+	Client *client_target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		client_target = c->GetTarget()->CastToClient();
+	}
 
+	if (!strcasecmp(sep->arg[1], "show")) {
+		c->ShowClientTasks(client_target);
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "update")) {
-		if(sep->argnum>=3) {
-			int TaskID = atoi(sep->arg[2]);
-			int ActivityID = atoi(sep->arg[3]);
-			int Count=1;
+	if (!strcasecmp(sep->arg[1], "update")) {
+		if (sep->argnum >= 3) {
+			int task_id     = atoi(sep->arg[2]);
+			int activity_id = atoi(sep->arg[3]);
+			int count       = 1;
 
-			if(sep->argnum>=4) {
-				Count = atoi(sep->arg[4]);
-				if(Count <= 0)
-					Count = 1;
+			if (sep->argnum >= 4) {
+				count = atoi(sep->arg[4]);
+				if (count <= 0) {
+					count = 1;
+				}
 			}
-			c->Message(Chat::Yellow, "Updating Task %i, Activity %i, Count %i",  TaskID, ActivityID, Count);
-			c->UpdateTaskActivity(TaskID, ActivityID, Count);
+			c->Message(
+				Chat::Yellow,
+				"Updating Task [%i] Activity [%i] Count [%i] for client [%s]",
+				task_id,
+				activity_id,
+				count,
+				client_target->GetCleanName()
+			);
+			client_target->UpdateTaskActivity(task_id, activity_id, count);
+			c->ShowClientTasks(client_target);
 		}
 		return;
 	}
-	if(!strcasecmp(sep->arg[1], "reloadall")) {
+
+	if (!strcasecmp(sep->arg[1], "assign")) {
+		int task_id = atoi(sep->arg[2]);
+		if ((task_id > 0) && (task_id < MAXTASKS)) {
+			client_target->AssignTask(task_id, 0, false);
+			c->Message(Chat::Yellow, "Assigned task [%i] to [%s]", task_id, client_target->GetCleanName());
+		}
+		return;
+	}
+
+	if (!strcasecmp(sep->arg[1], "reloadall")) {
 		c->Message(Chat::Yellow, "Sending reloadtasks to world");
 		worldserver.SendReloadTasks(RELOADTASKS);
 		c->Message(Chat::Yellow, "Back again");
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "reload")) {
-		if(sep->arg[2][0] != '\0') {
-			if(!strcasecmp(sep->arg[2], "lists")) {
+	if (!strcasecmp(sep->arg[1], "reload")) {
+		if (sep->arg[2][0] != '\0') {
+			if (!strcasecmp(sep->arg[2], "lists")) {
 				c->Message(Chat::Yellow, "Sending reload lists to world");
 				worldserver.SendReloadTasks(RELOADTASKGOALLISTS);
-				c->Message(Chat::Yellow, "Back again");
+				c->Message(Chat::Yellow, "Reloaded");
 				return;
 			}
-			if(!strcasecmp(sep->arg[2], "prox")) {
+			if (!strcasecmp(sep->arg[2], "prox")) {
 				c->Message(Chat::Yellow, "Sending reload proximities to world");
 				worldserver.SendReloadTasks(RELOADTASKPROXIMITIES);
-				c->Message(Chat::Yellow, "Back again");
+				c->Message(Chat::Yellow, "Reloaded");
 				return;
 			}
-			if(!strcasecmp(sep->arg[2], "sets")) {
+			if (!strcasecmp(sep->arg[2], "sets")) {
 				c->Message(Chat::Yellow, "Sending reload task sets to world");
 				worldserver.SendReloadTasks(RELOADTASKSETS);
-				c->Message(Chat::Yellow, "Back again");
+				c->Message(Chat::Yellow, "Reloaded");
 				return;
 			}
-			if(!strcasecmp(sep->arg[2], "task") && (sep->arg[3][0] != '\0')) {
-				int TaskID = atoi(sep->arg[3]);
-				if((TaskID > 0) && (TaskID < MAXTASKS)) {
-					c->Message(Chat::Yellow, "Sending reload task %i to world", TaskID);
-					worldserver.SendReloadTasks(RELOADTASKS, TaskID);
-					c->Message(Chat::Yellow, "Back again");
+			if (!strcasecmp(sep->arg[2], "task") && (sep->arg[3][0] != '\0')) {
+				int task_id = atoi(sep->arg[3]);
+				if ((task_id > 0) && (task_id < MAXTASKS)) {
+					c->Message(Chat::Yellow, "Sending reload task %i to world", task_id);
+					worldserver.SendReloadTasks(RELOADTASKS, task_id);
+					c->Message(Chat::Yellow, "Reloaded");
 					return;
 				}
 			}
@@ -12460,7 +12553,7 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 			}
 			else
 			{
-				int max_skill_level = database.GetSkillCap(c->GetClass(), (EQ::skills::SkillType)i, c->GetLevel());
+				int max_skill_level = content_db.GetSkillCap(c->GetClass(), (EQ::skills::SkillType)i, c->GetLevel());
 				c->SetSkill((EQ::skills::SkillType)i, max_skill_level);
 			}
 		}

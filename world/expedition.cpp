@@ -25,31 +25,24 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
+#include "../common/rulesys.h"
 
 extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-Expedition::Expedition(uint32_t expedition_id, uint32_t dz_id, uint32_t dz_instance_id,
-	uint32_t dz_zone_id, uint32_t start_time, uint32_t duration, uint32_t leader_id
+Expedition::Expedition(uint32_t expedition_id, const DynamicZone& dz, uint32_t leader_id
 ) :
 	m_expedition_id(expedition_id),
-	m_dz_id(dz_id),
-	m_dz_instance_id(dz_instance_id),
-	m_dz_zone_id(dz_zone_id),
-	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
-	m_duration(duration),
-	m_leader_id(leader_id)
+	m_dynamic_zone(dz),
+	m_leader_id(leader_id),
+	m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) }
 {
-	m_expire_time = m_start_time + m_duration;
 	m_warning_cooldown_timer.Enable();
 }
 
 void Expedition::AddMember(uint32_t character_id)
 {
-	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(),
-		[&](uint32_t member_id) { return member_id == character_id; });
-
-	if (it == m_member_ids.end())
+	if (!HasMember(character_id))
 	{
 		m_member_ids.emplace_back(character_id);
 	}
@@ -67,7 +60,7 @@ void Expedition::RemoveMember(uint32_t character_id)
 		[&](uint32_t member_id) { return member_id == character_id; }
 	), m_member_ids.end());
 
-	if (!m_member_ids.empty() && character_id == m_leader_id)
+	if (character_id == m_leader_id)
 	{
 		ChooseNewLeader();
 	}
@@ -75,6 +68,12 @@ void Expedition::RemoveMember(uint32_t character_id)
 
 void Expedition::ChooseNewLeader()
 {
+	if (m_member_ids.empty() || !m_choose_leader_cooldown_timer.Check())
+	{
+		m_choose_leader_needed = true;
+		return;
+	}
+
 	// we don't track expedition member status in world so may choose a linkdead member
 	// this is fine since it will trigger another change when that member goes offline
 	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(), [&](uint32_t member_id) {
@@ -89,9 +88,9 @@ void Expedition::ChooseNewLeader()
 			[&](uint32_t member_id) { return (member_id != m_leader_id); });
 	}
 
-	if (it != m_member_ids.end())
+	if (it != m_member_ids.end() && SetNewLeader(*it))
 	{
-		SetNewLeader(*it);
+		m_choose_leader_needed = false;
 	}
 }
 
@@ -112,26 +111,16 @@ bool Expedition::SetNewLeader(uint32_t character_id)
 void Expedition::SendZonesExpeditionDeleted()
 {
 	uint32_t pack_size = sizeof(ServerExpeditionID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDeleted, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionDeleted, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	zoneserver_list.SendPacket(pack.get());
-}
-
-void Expedition::SendZonesDurationUpdate()
-{
-	uint32_t packsize = sizeof(ServerExpeditionUpdateDuration_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionDzDuration, packsize));
-	auto packbuf = reinterpret_cast<ServerExpeditionUpdateDuration_Struct*>(pack->pBuffer);
-	packbuf->expedition_id = GetID();
-	packbuf->new_duration_seconds = static_cast<uint32_t>(m_duration.count());
 	zoneserver_list.SendPacket(pack.get());
 }
 
 void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 {
 	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionExpireWarning, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionExpireWarning, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->minutes_remaining = minutes_remaining;
@@ -141,40 +130,11 @@ void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 void Expedition::SendZonesLeaderChanged()
 {
 	uint32_t pack_size = sizeof(ServerExpeditionLeaderID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionLeaderChanged, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	buf->leader_id = m_leader_id;
 	zoneserver_list.SendPacket(pack.get());
-}
-
-void Expedition::UpdateDzSecondsRemaining(uint32_t seconds_remaining)
-{
-	auto now = std::chrono::system_clock::now();
-	auto update_time = std::chrono::seconds(seconds_remaining);
-
-	auto current_remaining = m_expire_time - now;
-	if (current_remaining > update_time) // reduce only
-	{
-		LogExpeditionsDetail(
-			"Updating expedition [{}] dz instance [{}] seconds remaining to [{}]s",
-			GetID(), GetInstanceID(), seconds_remaining
-		);
-
-		// preserve original start time and adjust duration instead
-		m_expire_time = now + update_time;
-		m_duration = std::chrono::duration_cast<std::chrono::seconds>(m_expire_time - m_start_time);
-
-		ExpeditionDatabase::UpdateDzDuration(GetInstanceID(), static_cast<uint32_t>(m_duration.count()));
-
-		// update zone level caches and update the actual dz instance's timer
-		SendZonesDurationUpdate();
-	}
-}
-
-std::chrono::system_clock::duration Expedition::GetRemainingDuration() const
-{
-	return m_expire_time - std::chrono::system_clock::now();
 }
 
 void Expedition::CheckExpireWarning()
@@ -182,7 +142,7 @@ void Expedition::CheckExpireWarning()
 	if (m_warning_cooldown_timer.Check(false))
 	{
 		using namespace std::chrono_literals;
-		auto remaining = GetRemainingDuration();
+		auto remaining = GetDynamicZone().GetRemainingDuration();
 		if ((remaining > 14min && remaining < 15min) ||
 		    (remaining > 4min && remaining < 5min) ||
 		    (remaining > 0min && remaining < 1min))
@@ -191,5 +151,13 @@ void Expedition::CheckExpireWarning()
 			SendZonesExpireWarning(minutes);
 			m_warning_cooldown_timer.Start(70000); // 1 minute 10 seconds
 		}
+	}
+}
+
+void Expedition::CheckLeader()
+{
+	if (m_choose_leader_needed)
+	{
+		ChooseNewLeader();
 	}
 }

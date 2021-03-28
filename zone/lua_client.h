@@ -41,7 +41,10 @@ public:
 	bool IsLD();
 	void WorldKick();
 	void SendToGuildHall();
-	bool GetAnon();
+	int GetAnon();
+	void SetAnon(uint8 anon_flag);
+	int GetAFK();
+	void SetAFK(uint8 afk_flag);
 	void Duck();
 	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue);
 	void DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue, uint8 use_tint);
@@ -152,6 +155,15 @@ public:
 	void UnmemSpellAll(bool update_client);
 	uint16 FindMemmedSpellBySlot(int slot);
 	int MemmedCount();
+	luabind::object GetLearnableDisciplines(lua_State* L);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level);
+	luabind::object GetLearnableDisciplines(lua_State* L, uint8 min_level, uint8 max_level);
+	luabind::object GetLearnedDisciplines(lua_State* L);
+	luabind::object GetMemmedSpells(lua_State* L);
+	luabind::object GetScribedSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level);
+	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level);
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
 	void UnscribeSpell(int slot);
@@ -213,6 +225,7 @@ public:
 	uint32 GetDisciplineTimer(uint32 timer_id);
 	void ResetDisciplineTimer(uint32 timer_id);
 	bool UseDiscipline(int spell_id, int target_id);
+	bool HasDisciplineLearned(uint16 spell_id);
 	int GetCharacterFactionLevel(int faction_id);
 	void SetZoneFlag(int zone_id);
 	void ClearZoneFlag(int zone_id);

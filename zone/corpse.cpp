@@ -1631,7 +1631,7 @@ void Corpse::LoadPlayerCorpseDecayTime(uint32 corpse_db_id){
 
 void Corpse::SendWorldSpawnPlayerCorpseInZone(uint32_t zone_id)
 {
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct)));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_SpawnPlayerCorpse, sizeof(SpawnPlayerCorpse_Struct));
 	SpawnPlayerCorpse_Struct* spc = reinterpret_cast<SpawnPlayerCorpse_Struct*>(pack->pBuffer);
 	spc->player_corpse_id = corpse_db_id;
 	spc->zone_id = zone_id;

@@ -10,10 +10,8 @@
    subject to change. Applications should only use zlib.h.
  */
 
-/* @(#) $Id$ */
-
 #include "zutil.h"
-#include "gzendian.h"
+#include "zendian.h"
 
 /* define NO_GZIP when compiling if you want to disable gzip header and
    trailer creation by deflate().  NO_GZIP would be used to avoid linking in
@@ -22,10 +20,6 @@
 #ifndef NO_GZIP
 #  define GZIP
 #endif
-
-#define NIL 0
-/* Tail of hash chains */
-
 
 /* ===========================================================================
  * Internal compression state.
@@ -52,7 +46,7 @@
 #define MAX_BITS 15
 /* All codes must not exceed MAX_BITS bits */
 
-#define Buf_size 16
+#define BIT_BUF_SIZE 64
 /* size of bit buffer in bi_buf */
 
 #define END_BLOCK 256
@@ -69,6 +63,10 @@
 #define BUSY_STATE   113    /* deflate -> FINISH_STATE */
 #define FINISH_STATE 666    /* stream complete */
 /* Stream status */
+
+#define HASH_BITS    16u           /* log2(HASH_SIZE) */
+#define HASH_SIZE 65536u           /* number of elements in hash table */
+#define HASH_MASK (HASH_SIZE - 1u) /* HASH_SIZE-1 */
 
 
 /* Data structure describing a single value and its code string. */
@@ -97,34 +95,47 @@ typedef struct tree_desc_s {
 } tree_desc;
 
 typedef uint16_t Pos;
-typedef unsigned IPos;
 
 /* A Pos is an index in the character window. We use short instead of int to
- * save space in the various tables. IPos is used only for parameter passing.
+ * save space in the various tables.
  */
 
 typedef struct internal_state {
     PREFIX3(stream)      *strm;            /* pointer back to this zlib stream */
-    int                  status;           /* as the name implies */
     unsigned char        *pending_buf;     /* output still pending */
-    unsigned long        pending_buf_size; /* size of pending_buf */
     unsigned char        *pending_out;     /* next pending byte to output to the stream */
+    uint32_t             pending_buf_size; /* size of pending_buf */
     uint32_t             pending;          /* nb of bytes in the pending buffer */
     int                  wrap;             /* bit 0 true for zlib, bit 1 true for gzip */
-    PREFIX(gz_headerp)   gzhead;           /* gzip header information to write */
     uint32_t             gzindex;          /* where in extra, name, or comment */
-    unsigned char        method;           /* can only be DEFLATED */
+    PREFIX(gz_headerp)   gzhead;           /* gzip header information to write */
+    int                  status;           /* as the name implies */
     int                  last_flush;       /* value of flush param for previous deflate call */
+    int                  reproducible;     /* Whether reproducible compression results are required. */
 
-#ifdef X86_PCLMULQDQ_CRC
-    unsigned crc0[4 * 5];
-#endif
+    int block_open;
+    /* Whether or not a block is currently open for the QUICK deflation scheme.
+     * This is set to 1 if there is an active block, or 0 if the block was just closed.
+     */
 
                 /* used by deflate.c: */
 
     unsigned int  w_size;            /* LZ77 window size (32K by default) */
     unsigned int  w_bits;            /* log2(w_size)  (8..16) */
     unsigned int  w_mask;            /* w_size - 1 */
+    unsigned int  lookahead;         /* number of valid bytes ahead in window */
+
+    unsigned int high_water;
+    /* High water mark offset in window for initialized bytes -- bytes above
+     * this are set to zero in order to avoid memory check warnings when
+     * longest match routines access bytes past the input.  This is then
+     * updated to the new high water mark.
+     */
+
+    unsigned int window_size;
+    /* Actual size of window: 2*wSize, except when the user input buffer
+     * is directly used as sliding window.
+     */
 
     unsigned char *window;
     /* Sliding window. Input bytes are read into the second half of the window,
@@ -136,44 +147,24 @@ typedef struct internal_state {
      * To do: use the user input buffer as sliding window.
      */
 
-    unsigned long window_size;
-    /* Actual size of window: 2*wSize, except when the user input buffer
-     * is directly used as sliding window.
-     */
-
     Pos *prev;
     /* Link to older string with same hash index. To limit the size of this
      * array to 64K, this link is maintained only for the last 32K strings.
      * An index in this array is thus a window index modulo 32K.
      */
 
-    Pos *head; /* Heads of the hash chains or NIL. */
+    Pos *head; /* Heads of the hash chains or 0. */
 
-    unsigned int  ins_h;             /* hash index of string to be inserted */
-    unsigned int  hash_size;         /* number of elements in hash table */
-    unsigned int  hash_bits;         /* log2(hash_size) */
-    unsigned int  hash_mask;         /* hash_size-1 */
-
-    #if !defined(__x86_64__) && !defined(_M_X64) && !defined(__i386) && !defined(_M_IX86)
-    unsigned int  hash_shift;
-    #endif
-    /* Number of bits by which ins_h must be shifted at each input
-     * step. It must be such that after MIN_MATCH steps, the oldest
-     * byte no longer takes part in the hash key, that is:
-     *   hash_shift * MIN_MATCH >= hash_bits
-     */
-
-    long block_start;
+    int block_start;
     /* Window position at the beginning of the current output block. Gets
      * negative when the window is moved backwards.
      */
 
     unsigned int match_length;       /* length of best match */
-    IPos         prev_match;         /* previous match */
+    Pos          prev_match;         /* previous match */
     int          match_available;    /* set if previous match exists */
     unsigned int strstart;           /* start of string to insert */
     unsigned int match_start;        /* start of matching string */
-    unsigned int lookahead;          /* number of valid bytes ahead in window */
 
     unsigned int prev_length;
     /* Length of the best match at previous step. Matches not greater than this
@@ -181,15 +172,13 @@ typedef struct internal_state {
      */
 
     unsigned int max_chain_length;
-    /* To speed up deflation, hash chains are never searched beyond this
-     * length.  A higher limit improves compression ratio but degrades the
-     * speed.
+    /* To speed up deflation, hash chains are never searched beyond this length.
+     * A higher limit improves compression ratio but degrades the speed.
      */
 
     unsigned int max_lazy_match;
-    /* Attempt to find a better match only when the current match is strictly
-     * smaller than this value. This mechanism is used only for compression
-     * levels >= 4.
+    /* Attempt to find a better match only when the current match is strictly smaller
+     * than this value. This mechanism is used only for compression levels >= 4.
      */
 #   define max_insert_length  max_lazy_match
     /* Insert new strings in the hash table only if the match length is not
@@ -204,6 +193,11 @@ typedef struct internal_state {
     /* Use a faster search when the previous match is longer than this */
 
     int nice_match; /* Stop searching when current match exceeds this */
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
+    /* Only used if X86_PCLMULQDQ_CRC is defined */
+    unsigned crc0[4 * 5];
+#endif
 
                 /* used by trees.c: */
     /* Didn't use ct_data typedef below to suppress compiler warning */
@@ -229,8 +223,6 @@ typedef struct internal_state {
     /* Depth of each subtree used as tie breaker for trees of equal frequency
      */
 
-    unsigned char *sym_buf;       /* buffer for distances and literals/lengths */
-
     unsigned int  lit_bufsize;
     /* Size of match buffer for literals/lengths.  There are 4 reasons for
      * limiting lit_bufsize to 64K:
@@ -251,41 +243,31 @@ typedef struct internal_state {
      *   - I can't count above 4
      */
 
-    unsigned int sym_next;      /* running index in sym_buf */
-    unsigned int sym_end;       /* symbol table full when sym_next reaches this */
+    unsigned char *sym_buf;       /* buffer for distances and literals/lengths */
+    unsigned int sym_next;        /* running index in sym_buf */
+    unsigned int sym_end;         /* symbol table full when sym_next reaches this */
 
     unsigned long opt_len;        /* bit length of current block with optimal trees */
     unsigned long static_len;     /* bit length of current block with static trees */
     unsigned int matches;         /* number of string matches in current block */
     unsigned int insert;          /* bytes at end of window left to insert */
 
-#ifdef ZLIB_DEBUG
+    /* compressed_len and bits_sent are only used if ZLIB_DEBUG is defined */
     unsigned long compressed_len; /* total bit length of compressed file mod 2^32 */
     unsigned long bits_sent;      /* bit length of compressed data sent mod 2^32 */
-#endif
 
-    uint16_t bi_buf;
-    /* Output buffer. bits are inserted starting at the bottom (least
-     * significant bits).
-     */
-    int bi_valid;
-    /* Number of valid bits in bi_buf.  All bits above the last valid bit
-     * are always zero.
-     */
+    /* Reserved for future use and alignment purposes */
+    char *reserved_p;
 
-    unsigned long high_water;
-    /* High water mark offset in window for initialized bytes -- bytes above
-     * this are set to zero in order to avoid memory check warnings when
-     * longest match routines access bytes past the input.  This is then
-     * updated to the new high water mark.
-     */
-    int block_open;
-    /* Whether or not a block is currently open for the QUICK deflation scheme.
-     * This is set to 1 if there is an active block, or 0 if the block was just
-     * closed.
-     */
+    uint64_t bi_buf;
+    /* Output buffer. bits are inserted starting at the bottom (least significant bits). */
 
-} deflate_state;
+    int32_t bi_valid;
+    /* Number of valid bits in bi_buf.  All bits above the last valid bit are always zero. */
+
+    /* Reserved for future use and alignment purposes */
+    int32_t reserved[11];
+} ALIGNED_(8) deflate_state;
 
 typedef enum {
     need_more,      /* block not completed, need more input or more output */
@@ -297,18 +279,88 @@ typedef enum {
 /* Output a byte on the stream.
  * IN assertion: there is enough room in pending_buf.
  */
-#define put_byte(s, c) {s->pending_buf[s->pending++] = (unsigned char)(c);}
+#define put_byte(s, c) { \
+    s->pending_buf[s->pending++] = (unsigned char)(c); \
+}
 
 /* ===========================================================================
  * Output a short LSB first on the stream.
- * IN assertion: there is enough room in pendingBuf.
+ * IN assertion: there is enough room in pending_buf.
  */
 static inline void put_short(deflate_state *s, uint16_t w) {
-#if BYTE_ORDER == BIG_ENDIAN
-  w = ZSWAP16(w);
+#if defined(UNALIGNED_OK)
+    *(uint16_t *)(&s->pending_buf[s->pending]) = w;
+    s->pending += 2;
+#else
+    put_byte(s, (w & 0xff));
+    put_byte(s, ((w >> 8) & 0xff));
 #endif
-  memcpy(&(s->pending_buf[s->pending]), &w, sizeof(uint16_t));
-  s->pending += 2;
+}
+
+/* ===========================================================================
+ * Output a short MSB first on the stream.
+ * IN assertion: there is enough room in pending_buf.
+ */
+static inline void put_short_msb(deflate_state *s, uint16_t w) {
+    put_byte(s, ((w >> 8) & 0xff));
+    put_byte(s, (w & 0xff));
+}
+
+/* ===========================================================================
+ * Output a 32-bit unsigned int LSB first on the stream.
+ * IN assertion: there is enough room in pending_buf.
+ */
+static inline void put_uint32(deflate_state *s, uint32_t dw) {
+#if defined(UNALIGNED_OK)
+    *(uint32_t *)(&s->pending_buf[s->pending]) = dw;
+    s->pending += 4;
+#else
+    put_byte(s, (dw & 0xff));
+    put_byte(s, ((dw >> 8) & 0xff));
+    put_byte(s, ((dw >> 16) & 0xff));
+    put_byte(s, ((dw >> 24) & 0xff));
+#endif
+}
+
+/* ===========================================================================
+ * Output a 32-bit unsigned int MSB first on the stream.
+ * IN assertion: there is enough room in pending_buf.
+ */
+static inline void put_uint32_msb(deflate_state *s, uint32_t dw) {
+#if defined(UNALIGNED_OK)
+    *(uint32_t *)(&s->pending_buf[s->pending]) = ZSWAP32(dw);
+    s->pending += 4;
+#else
+    put_byte(s, ((dw >> 24) & 0xff));
+    put_byte(s, ((dw >> 16) & 0xff));
+    put_byte(s, ((dw >> 8) & 0xff));
+    put_byte(s, (dw & 0xff));
+#endif
+}
+
+/* ===========================================================================
+ * Output a 64-bit unsigned int LSB first on the stream.
+ * IN assertion: there is enough room in pending_buf.
+ */
+static inline void put_uint64(deflate_state *s, uint64_t lld) {
+#if defined(UNALIGNED64_OK)
+    *(uint64_t *)(&s->pending_buf[s->pending]) = lld;
+    s->pending += 8;
+#elif defined(UNALIGNED_OK)
+    *(uint32_t *)(&s->pending_buf[s->pending]) = lld & 0xffffffff;
+    s->pending += 4;
+    *(uint32_t *)(&s->pending_buf[s->pending]) = (lld >> 32) & 0xffffffff;
+    s->pending += 4;
+#else
+    put_byte(s, (lld & 0xff));
+    put_byte(s, ((lld >> 8) & 0xff));
+    put_byte(s, ((lld >> 16) & 0xff));
+    put_byte(s, ((lld >> 24) & 0xff));
+    put_byte(s, ((lld >> 32) & 0xff));
+    put_byte(s, ((lld >> 40) & 0xff));
+    put_byte(s, ((lld >> 48) & 0xff));
+    put_byte(s, ((lld >> 56) & 0xff));
+#endif
 }
 
 #define MIN_LOOKAHEAD (MAX_MATCH+MIN_MATCH+1)
@@ -326,120 +378,34 @@ static inline void put_short(deflate_state *s, uint16_t w) {
    memory checker errors from longest match routines */
 
 
-void ZLIB_INTERNAL fill_window_c(deflate_state *s);
+void Z_INTERNAL fill_window(deflate_state *s);
+void Z_INTERNAL slide_hash_c(deflate_state *s);
 
         /* in trees.c */
-void ZLIB_INTERNAL _tr_init(deflate_state *s);
-int ZLIB_INTERNAL _tr_tally(deflate_state *s, unsigned dist, unsigned lc);
-void ZLIB_INTERNAL _tr_flush_block(deflate_state *s, char *buf, unsigned long stored_len, int last);
-void ZLIB_INTERNAL _tr_flush_bits(deflate_state *s);
-void ZLIB_INTERNAL _tr_align(deflate_state *s);
-void ZLIB_INTERNAL _tr_stored_block(deflate_state *s, char *buf, unsigned long stored_len, int last);
-void ZLIB_INTERNAL bi_windup(deflate_state *s);
-unsigned ZLIB_INTERNAL bi_reverse(unsigned code, int len);
-void ZLIB_INTERNAL flush_pending(PREFIX3(streamp) strm);
-
-#define d_code(dist) ((dist) < 256 ? _dist_code[dist] : _dist_code[256+((dist)>>7)])
+void Z_INTERNAL zng_tr_init(deflate_state *s);
+void Z_INTERNAL zng_tr_flush_block(deflate_state *s, char *buf, uint32_t stored_len, int last);
+void Z_INTERNAL zng_tr_flush_bits(deflate_state *s);
+void Z_INTERNAL zng_tr_align(deflate_state *s);
+void Z_INTERNAL zng_tr_stored_block(deflate_state *s, char *buf, uint32_t stored_len, int last);
+unsigned Z_INTERNAL bi_reverse(unsigned code, int len);
+void Z_INTERNAL flush_pending(PREFIX3(streamp) strm);
+#define d_code(dist) ((dist) < 256 ? zng_dist_code[dist] : zng_dist_code[256+((dist)>>7)])
 /* Mapping from a distance to a distance code. dist is the distance - 1 and
- * must not have side effects. _dist_code[256] and _dist_code[257] are never
+ * must not have side effects. zng_dist_code[256] and zng_dist_code[257] are never
  * used.
  */
 
-#ifndef ZLIB_DEBUG
-/* Inline versions of _tr_tally for speed: */
-
-# if defined(GEN_TREES_H)
-    extern unsigned char ZLIB_INTERNAL _length_code[];
-    extern unsigned char ZLIB_INTERNAL _dist_code[];
-# else
-    extern const unsigned char ZLIB_INTERNAL _length_code[];
-    extern const unsigned char ZLIB_INTERNAL _dist_code[];
-# endif
-
-# define _tr_tally_lit(s, c, flush) \
-  { unsigned char cc = (c); \
-    s->sym_buf[s->sym_next++] = 0; \
-    s->sym_buf[s->sym_next++] = 0; \
-    s->sym_buf[s->sym_next++] = cc; \
-    s->dyn_ltree[cc].Freq++; \
-    flush = (s->sym_next == s->sym_end); \
-  }
-# define _tr_tally_dist(s, distance, length, flush) \
-  { unsigned char len = (unsigned char)(length); \
-    uint16_t dist = (uint16_t)(distance); \
-    s->sym_buf[s->sym_next++] = dist; \
-    s->sym_buf[s->sym_next++] = dist >> 8; \
-    s->sym_buf[s->sym_next++] = len; \
-    dist--; \
-    s->dyn_ltree[_length_code[len]+LITERALS+1].Freq++; \
-    s->dyn_dtree[d_code(dist)].Freq++; \
-    flush = (s->sym_next == s->sym_end); \
-  }
-#else
-#   define _tr_tally_lit(s, c, flush) flush = _tr_tally(s, 0, c)
-#   define _tr_tally_dist(s, distance, length, flush) \
-              flush = _tr_tally(s, (unsigned)(distance), (unsigned)(length))
-#endif
-
-/* ===========================================================================
- * Update a hash value with the given input byte
- * IN  assertion: all calls to to UPDATE_HASH are made with consecutive
- *    input characters, so that a running hash key can be computed from the
- *    previous key instead of complete recalculation each time.
- */
-
-#ifdef NOT_TWEAK_COMPILER
-#define TRIGGER_LEVEL 6
-#else
-#define TRIGGER_LEVEL 5
-#endif
-
-#if defined(__x86_64__) || defined(_M_X64) || defined(__i386) || defined(_M_IX86)
-#define UPDATE_HASH(s, h, i) \
-    do {\
-        if (s->level < TRIGGER_LEVEL) \
-            h = (3483 * (s->window[i]) +\
-                 23081* (s->window[i+1]) +\
-                 6954 * (s->window[i+2]) +\
-                 20947* (s->window[i+3])) & s->hash_mask;\
-        else\
-            h = (25881* (s->window[i]) +\
-                 24674* (s->window[i+1]) +\
-                 25811* (s->window[i+2])) & s->hash_mask;\
-    } while (0)
-#else
-#   define UPDATE_HASH(s, h, i) (h = (((h) << s->hash_shift) ^ (s->window[i + (MIN_MATCH-1)])) & s->hash_mask)
-#endif
-
-#ifndef ZLIB_DEBUG
-#  define send_code(s, c, tree) send_bits(s, tree[c].Code, tree[c].Len)
-/* Send a code of the given tree. c and tree must not have side effects */
-
-#else /* ZLIB_DEBUG */
-#  define send_code(s, c, tree) \
-    {  if (z_verbose > 2) { \
-           fprintf(stderr, "\ncd %3d ", (c)); \
-       } \
-       send_bits(s, tree[c].Code, tree[c].Len); \
-     }
-#endif
-
+/* Bit buffer and compress bits calculation debugging */
 #ifdef ZLIB_DEBUG
-void send_bits(deflate_state *s, int value, int length);
+#  define cmpr_bits_add(s, len)     s->compressed_len += (len)
+#  define cmpr_bits_align(s)        s->compressed_len = (s->compressed_len + 7) & ~7L
+#  define sent_bits_add(s, bits)    s->bits_sent += (bits)
+#  define sent_bits_align(s)        s->bits_sent = (s->bits_sent + 7) & ~7L
 #else
-#define send_bits(s, value, length) \
-{ int len = length;\
-  if (s->bi_valid > (int)Buf_size - len) {\
-    int val = (int)value;\
-    s->bi_buf |= (uint16_t)val << s->bi_valid;\
-    put_short(s, s->bi_buf);\
-    s->bi_buf = (uint16_t)val >> (Buf_size - s->bi_valid);\
-    s->bi_valid += len - Buf_size;\
-  } else {\
-    s->bi_buf |= (uint16_t)(value) << s->bi_valid;\
-    s->bi_valid += len;\
-  }\
-}
+#  define cmpr_bits_add(s, len)     (void)(len)
+#  define cmpr_bits_align(s)
+#  define sent_bits_add(s, bits)    (void)(bits)
+#  define sent_bits_align(s)
 #endif
 
 #endif /* DEFLATE_H_ */

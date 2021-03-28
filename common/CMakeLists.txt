@@ -31,6 +31,7 @@ SET(common_sources
 	eq_stream_proxy.cpp
 	eqtime.cpp
 	event_sub.cpp
+	expedition_lockout_timer.cpp
 	extprofile.cpp
 	faction.cpp
 	file_util.cpp
@@ -148,6 +149,7 @@ SET(repositories
 	repositories/base/base_character_currency_repository.h
 	repositories/base/base_character_data_repository.h
 	repositories/base/base_character_disciplines_repository.h
+	repositories/base/base_character_expedition_lockouts_repository.h
 	repositories/base/base_character_inspect_messages_repository.h
 	repositories/base/base_character_item_recast_repository.h
 	repositories/base/base_character_languages_repository.h
@@ -166,11 +168,16 @@ SET(repositories
 	repositories/base/base_char_recipe_list_repository.h
 	repositories/base/base_completed_tasks_repository.h
 	repositories/base/base_content_flags_repository.h
+	repositories/base/base_damageshieldtypes_repository.h
 	repositories/base/base_data_buckets_repository.h
 	repositories/base/base_db_str_repository.h
 	repositories/base/base_discovered_items_repository.h
 	repositories/base/base_doors_repository.h
+	repositories/base/base_dynamic_zones_repository.h
 	repositories/base/base_eventlog_repository.h
+	repositories/base/base_expeditions_repository.h
+	repositories/base/base_expedition_lockouts_repository.h
+	repositories/base/base_expedition_members_repository.h
 	repositories/base/base_faction_base_data_repository.h
 	repositories/base/base_faction_list_repository.h
 	repositories/base/base_faction_list_mod_repository.h
@@ -267,7 +274,6 @@ SET(repositories
 	repositories/base/base_traps_repository.h
 	repositories/base/base_tributes_repository.h
 	repositories/base/base_tribute_levels_repository.h
-	repositories/base/base_variables_repository.h
 	repositories/base/base_veteran_reward_templates_repository.h
 	repositories/base/base_zone_repository.h
 	repositories/base/base_zone_points_repository.h
@@ -306,6 +312,7 @@ SET(repositories
 	repositories/character_currency_repository.h
 	repositories/character_data_repository.h
 	repositories/character_disciplines_repository.h
+	repositories/character_expedition_lockouts_repository.h
 	repositories/character_inspect_messages_repository.h
 	repositories/character_item_recast_repository.h
 	repositories/character_languages_repository.h
@@ -324,11 +331,16 @@ SET(repositories
 	repositories/char_recipe_list_repository.h
 	repositories/completed_tasks_repository.h
 	repositories/content_flags_repository.h
+	repositories/damageshieldtypes_repository.h
 	repositories/data_buckets_repository.h
 	repositories/db_str_repository.h
 	repositories/discovered_items_repository.h
 	repositories/doors_repository.h
+	repositories/dynamic_zones_repository.h
 	repositories/eventlog_repository.h
+	repositories/expeditions_repository.h
+	repositories/expedition_lockouts_repository.h
+	repositories/expedition_members_repository.h
 	repositories/faction_base_data_repository.h
 	repositories/faction_list_repository.h
 	repositories/faction_list_mod_repository.h
@@ -425,7 +437,6 @@ SET(repositories
 	repositories/traps_repository.h
 	repositories/tributes_repository.h
 	repositories/tribute_levels_repository.h
-	repositories/variables_repository.h
 	repositories/veteran_reward_templates_repository.h
 	repositories/zone_repository.h
 	repositories/zone_points_repository.h
@@ -478,6 +489,7 @@ SET(common_headers
 	eqtime.h
 	errmsg.h
 	event_sub.h
+	expedition_lockout_timer.h
 	extprofile.h
 	faction.h
 	file_util.h

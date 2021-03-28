@@ -87,6 +87,17 @@ extern uint32 numclients;
 extern volatile bool RunLoops;
 extern volatile bool UCSServerAvailable_;
 
+// unused ATM, but here for reference, should match RoF2
+enum class NameApprovalResponse : int {
+	NotValid = -1, // string ID 1576
+	Rejected = 0, // string ID 1581
+	Approved = 1,
+	CharacterLimit = 2, // string ID 1591 older clients mention 1 char on server
+	ThreeDeity = 3, // string ID 5502. 3 toons same deity team limit
+	HeadStartPreOoW = 4, // string ID 6862, head start failed due to OoW not being unlocked
+	HeadStartNoOoW = 5, // string ID 6863, head start failed due to not owning OoW
+};
+
 Client::Client(EQStreamInterface* ieqs)
 :	autobootup_timeout(RuleI(World, ZoneAutobootTimeoutMS)),
 	connect(1000),
@@ -497,7 +508,7 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 		return false;
 	}
 
-	snprintf(char_name, 64, "%s", (char*)app->pBuffer);
+	auto length = snprintf(char_name, 64, "%s", (char*)app->pBuffer);
 	uchar race = app->pBuffer[64];
 	uchar clas = app->pBuffer[68];
 
@@ -509,22 +520,39 @@ bool Client::HandleNameApprovalPacket(const EQApplicationPacket *app)
 	outapp->pBuffer = new uchar[1];
 	outapp->size = 1;
 
-	bool valid = false;
-	if(!database.CheckNameFilter(char_name)) {
+	bool valid = true;
+	/* Name must be between 4 and 15 characters long, packet forged if this is true */
+	if (length < 4 || length > 15) {
 		valid = false;
 	}
-	/* Name must begin with an upper-case letter. */
+	/* Name must begin with an upper-case letter, can be sent with some tricking of the client */
 	else if (islower(char_name[0])) {
 		valid = false;
 	}
-	else if (database.ReserveName(GetAccountID(), char_name)) {
-		valid = true;
-	}
-	else {
+	/* Name must not have any spaces, packet forged if this is true */
+	else if (strstr(char_name, " ")) {
 		valid = false;
 	}
+	/* I would like to do this later, since it's likely more expensive, but oh well */
+	else if (!database.CheckNameFilter(char_name)) {
+		valid = false;
+	}
+	else {
+		/* Name must not not contain any uppercase letters, can be sent with some tricking of the client */
+		for (int i = 1; i < length; ++i) {
+			if (isupper(char_name[i])) {
+				valid = false;
+				break;
+			}
+		}
+	}
 
-	outapp->pBuffer[0] = valid? 1 : 0;
+	/* Still not invalid, let's see if it's taken */
+	if (valid) {
+		valid = database.ReserveName(GetAccountID(), char_name);
+	}
+
+	outapp->pBuffer[0] = valid ? 1 : 0;
 	QueuePacket(outapp);
 	safe_delete(outapp);
 
@@ -1279,23 +1307,23 @@ void Client::Clearance(int8 response)
 	outapp = new EQApplicationPacket(OP_ZoneServerInfo, sizeof(ZoneServerInfo_Struct));
 	ZoneServerInfo_Struct* zsi = (ZoneServerInfo_Struct*)outapp->pBuffer;
 
-	const char *zs_addr = nullptr;
+	std::string zs_addr;
 	if(cle && cle->IsLocalClient()) {
 		const char *local_addr = zs->GetCLocalAddress();
 
 		if(local_addr[0]) {
 			zs_addr = local_addr;
 		} else {
-			zs_addr = zs->GetIP().c_str();
+			zs_addr = zs->GetIP();
 
-			if (!zs_addr[0]) {
-				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+			if (zs_addr.empty()) {
+				zs_addr = WorldConfig::get()->LocalAddress;
 			}
 
-			if(strcmp(zs_addr, "127.0.0.1") == 0)
+			if(zs_addr == "127.0.0.1")
 			{
 				LogInfo("Local zone address was [{}], setting local address to: [{}]", zs_addr, WorldConfig::get()->LocalAddress.c_str());
-				zs_addr = WorldConfig::get()->LocalAddress.c_str();
+				zs_addr = WorldConfig::get()->LocalAddress;
 			} else {
 				LogInfo("Local zone address [{}]", zs_addr);
 			}
@@ -1306,11 +1334,11 @@ void Client::Clearance(int8 response)
 		if(addr[0]) {
 			zs_addr = addr;
 		} else {
-			zs_addr = WorldConfig::get()->WorldAddress.c_str();
+			zs_addr = WorldConfig::get()->WorldAddress;
 		}
 	}
 
-	strcpy(zsi->ip, zs_addr);
+	strcpy(zsi->ip, zs_addr.c_str());
 	zsi->port =zs->GetCPort();
 	LogInfo("Sending client to zone [{}] ([{}]:[{}]) at [{}]:[{}]", zonename, zone_id, instance_id, zsi->ip, zsi->port);
 	QueuePacket(outapp);
@@ -1878,7 +1906,7 @@ void Client::SetClassStartingSkills(PlayerProfile_Struct *pp)
 				i == EQ::skills::SkillAlcoholTolerance || i == EQ::skills::SkillBindWound)
 				continue;
 
-			pp->skills[i] = database.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1);
+			pp->skills[i] = content_db.GetSkillCap(pp->class_, (EQ::skills::SkillType)i, 1);
 		}
 	}
 

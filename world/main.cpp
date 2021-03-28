@@ -445,13 +445,13 @@ int main(int argc, char** argv) {
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		LogInfo("Console (TCP) listener started");
-		console.reset(new EQ::Net::ConsoleServer(Config->TelnetIP, Config->TelnetTCPPort));
+		console = std::make_unique<EQ::Net::ConsoleServer>(Config->TelnetIP, Config->TelnetTCPPort);
 		RegisterConsoleFunctions(console);
 	}
 
 	zoneserver_list.Init();
 	std::unique_ptr<EQ::Net::ServertalkServer> server_connection;
-	server_connection.reset(new EQ::Net::ServertalkServer());
+	server_connection = std::make_unique<EQ::Net::ServertalkServer>();
 
 	EQ::Net::ServertalkServerOptions server_opts;
 	server_opts.port = Config->WorldTCPPort;

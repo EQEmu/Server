@@ -383,6 +383,20 @@ XS(XS_Expedition_HasReplayLockout) {
 	XSRETURN(1);
 }
 
+XS(XS_Expedition_IsLocked);
+XS(XS_Expedition_IsLocked) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Expedition::IsLocked(THIS)");
+	}
+
+	Expedition* THIS = nullptr;
+	VALIDATE_THIS_IS_EXPEDITION;
+
+	ST(0) = boolSV(THIS->IsLocked());
+	XSRETURN(1);
+}
+
 XS(XS_Expedition_RemoveCompass);
 XS(XS_Expedition_RemoveCompass) {
 	dXSARGS;
@@ -393,7 +407,7 @@ XS(XS_Expedition_RemoveCompass) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	THIS->SetDzCompass(0, 0, 0, 0, true);
+	THIS->GetDynamicZone().SetCompass(0, 0, 0, 0, true);
 
 	XSRETURN_EMPTY;
 }
@@ -432,12 +446,12 @@ XS(XS_Expedition_SetCompass) {
 	if (SvTYPE(ST(1)) == SVt_PV)
 	{
 		std::string zone_name(SvPV_nolen(ST(1)));
-		THIS->SetDzCompass(zone_name, x, y, z, true);
+		THIS->GetDynamicZone().SetCompass(ZoneID(zone_name), x, y, z, true);
 	}
 	else if (SvTYPE(ST(1)) == SVt_IV)
 	{
 		uint32_t zone_id = static_cast<uint32_t>(SvUV(ST(1)));
-		THIS->SetDzCompass(zone_id, x, y, z, true);
+		THIS->GetDynamicZone().SetCompass(zone_id, x, y, z, true);
 	}
 	else
 	{
@@ -542,12 +556,12 @@ XS(XS_Expedition_SetSafeReturn) {
 	if (SvTYPE(ST(1)) == SVt_PV)
 	{
 		std::string zone_name(SvPV_nolen(ST(1)));
-		THIS->SetDzSafeReturn(zone_name, x, y, z, heading, true);
+		THIS->GetDynamicZone().SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 	}
 	else if (SvTYPE(ST(1)) == SVt_IV)
 	{
 		uint32_t zone_id = static_cast<uint32_t>(SvUV(ST(1)));
-		THIS->SetDzSafeReturn(zone_id, x, y, z, heading, true);
+		THIS->GetDynamicZone().SetSafeReturn(zone_id, x, y, z, heading, true);
 	}
 	else
 	{
@@ -568,7 +582,7 @@ XS(XS_Expedition_SetSecondsRemaining) {
 	VALIDATE_THIS_IS_EXPEDITION;
 
 	uint32_t seconds_remaining = static_cast<uint32_t>(SvUV(ST(1)));
-	THIS->SetDzSecondsRemaining(seconds_remaining);
+	THIS->GetDynamicZone().SetSecondsRemaining(seconds_remaining);
 
 	XSRETURN_EMPTY;
 }
@@ -588,7 +602,7 @@ XS(XS_Expedition_SetZoneInLocation) {
 	float z = static_cast<float>(SvNV(ST(3)));
 	float heading = static_cast<float>(SvNV(ST(4)));
 
-	THIS->SetDzZoneInLocation(x, y, z, heading, true);
+	THIS->GetDynamicZone().SetZoneInLocation(x, y, z, heading, true);
 
 	XSRETURN_EMPTY;
 }
@@ -653,6 +667,7 @@ XS(boot_Expedition) {
 	newXSproto(strcpy(buf, "GetZoneVersion"), XS_Expedition_GetZoneVersion, file, "$");
 	newXSproto(strcpy(buf, "HasLockout"), XS_Expedition_HasLockout, file, "$$");
 	newXSproto(strcpy(buf, "HasReplayLockout"), XS_Expedition_HasReplayLockout, file, "$");
+	newXSproto(strcpy(buf, "IsLocked"), XS_Expedition_IsLocked, file, "$");
 	newXSproto(strcpy(buf, "RemoveCompass"), XS_Expedition_RemoveCompass, file, "$");
 	newXSproto(strcpy(buf, "RemoveLockout"), XS_Expedition_RemoveLockout, file, "$$");
 	newXSproto(strcpy(buf, "SetCompass"), XS_Expedition_SetCompass, file, "$$$$$");

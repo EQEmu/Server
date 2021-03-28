@@ -1,16 +1,14 @@
-ZLIB_NG_1.9.9 {
+ZLIB_NG_2.0.0 {
   global:
     zng_adler32;
     zng_adler32_c;
     zng_adler32_combine;
-    zng_adler32_combine64;
     zng_adler32_z;
     zng_compress;
     zng_compress2;
     zng_compressBound;
     zng_crc32;
     zng_crc32_combine;
-    zng_crc32_combine64;
     zng_crc32_combine_gen;
     zng_crc32_combine_op;
     zng_crc32_z;
@@ -19,6 +17,7 @@ ZLIB_NG_1.9.9 {
     zng_deflateCopy;
     zng_deflateEnd;
     zng_deflateGetDictionary;
+    zng_deflateGetParams;
     zng_deflateInit_;
     zng_deflateInit2_;
     zng_deflateParams;
@@ -28,6 +27,7 @@ ZLIB_NG_1.9.9 {
     zng_deflateResetKeep;
     zng_deflateSetDictionary;
     zng_deflateSetHeader;
+    zng_deflateSetParams;
     zng_deflateTune;
     zng_get_crc_table;
     zng_inflate;
@@ -70,7 +70,7 @@ ZLIB_NG_1.9.9 {
     _*;
 };
 
-ZLIB_NG_GZ_1.9.9 {
+ZLIB_NG_GZ_2.0.0 {
   global:
     zng_gzbuffer;
     zng_gzclearerr;

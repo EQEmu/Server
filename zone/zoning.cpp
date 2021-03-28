@@ -313,7 +313,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		 * In 99% of cases we would never get here and this would be fallback
 		 */
 		if (!found_zone) {
-			auto zones = ZoneRepository::GetWhere(
+			auto zones = ZoneRepository::GetWhere(content_db,
 				fmt::format(
 					"expansion <= {} AND short_name = '{}' and version = 0",
 					(content_service.GetCurrentExpansion() + 1),
@@ -590,7 +590,7 @@ void Client::ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, 
 			return;
 		}
 
-		if(GetPetID() != 0) {
+		if(zm != SummonPC && GetPetID() != 0) {
 			//if they have a pet and they are staying in zone, move with them
 			Mob *p = GetPet();
 			if(p != nullptr){

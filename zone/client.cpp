@@ -42,7 +42,6 @@ extern volatile bool RunLoops;
 #include "data_bucket.h"
 #include "expedition.h"
 #include "expedition_database.h"
-#include "expedition_lockout_timer.h"
 #include "expedition_request.h"
 #include "position.h"
 #include "worldserver.h"
@@ -61,6 +60,7 @@ extern volatile bool RunLoops;
 #include "queryserv.h"
 #include "mob_movement_manager.h"
 #include "../common/content/world_content_service.h"
+#include "../common/expedition_lockout_timer.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
@@ -258,7 +258,7 @@ Client::Client(EQStreamInterface* ieqs)
 	tgb = false;
 	tribute_master_id = 0xFFFFFFFF;
 	tribute_timer.Disable();
-	taskstate = nullptr;
+	task_state         = nullptr;
 	TotalSecondsPlayed = 0;
 	keyring.clear();
 	bind_sight_target = nullptr;
@@ -452,7 +452,7 @@ Client::~Client() {
 	// will need this data right away
 	Save(2); // This fails when database destructor is called first on shutdown
 
-	safe_delete(taskstate);
+	safe_delete(task_state);
 	safe_delete(KarmaUpdateTimer);
 	safe_delete(GlobalChatLimiterTimer);
 	safe_delete(qGlobals);
@@ -756,7 +756,7 @@ bool Client::AddPacket(const EQApplicationPacket *pApp, bool bAckreq) {
 		return(false);
 	}
 
-	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
+	auto c = std::make_unique<CLIENTPACKET>();
 
 	c->ack_req = bAckreq;
 	c->app = pApp->Copy();
@@ -773,7 +773,7 @@ bool Client::AddPacket(EQApplicationPacket** pApp, bool bAckreq) {
 		//drop the packet because it will never get sent.
 		return(false);
 	}
-	auto c = std::unique_ptr<CLIENTPACKET>(new CLIENTPACKET);
+	auto c = std::make_unique<CLIENTPACKET>();
 
 	c->ack_req = bAckreq;
 	c->app = *pApp;
@@ -2433,13 +2433,17 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	char buffer[24] = { 0 };
 	snprintf(buffer, 23, "%d %d", skillid, skillval);
 	parse->EventPlayer(EVENT_USE_SKILL, this, buffer, 0);
-	if(against_who)
-	{
-		if(against_who->GetSpecialAbility(IMMUNE_AGGRO) || against_who->IsClient() ||
-			GetLevelCon(against_who->GetLevel()) == CON_GRAY)
-		{
+	if (against_who) {
+		if (
+			against_who->GetSpecialAbility(IMMUNE_AGGRO) || 
+			against_who->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) || 
+			against_who->IsClient() || 
+			GetLevelCon(against_who->GetLevel()) == CON_GRAY
+		) {
 			//false by default
-			if( !mod_can_increase_skill(skillid, against_who) ) { return(false); }
+			if (!mod_can_increase_skill(skillid, against_who)) {
+				return false;
+			}
 		}
 	}
 
@@ -2501,7 +2505,7 @@ bool Client::CanHaveSkill(EQ::skills::SkillType skill_id) const {
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skill_id == EQ::skills::Skill1HPiercing)
 		skill_id = EQ::skills::Skill2HPiercing;
 
-	return(database.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
+	return(content_db.GetSkillCap(GetClass(), skill_id, RuleI(Character, MaxLevel)) > 0);
 	//if you don't have it by max level, then odds are you never will?
 }
 
@@ -2509,7 +2513,7 @@ uint16 Client::MaxSkill(EQ::skills::SkillType skillid, uint16 class_, uint16 lev
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
-	return(database.GetSkillCap(class_, skillid, level));
+	return(content_db.GetSkillCap(class_, skillid, level));
 }
 
 uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
@@ -2517,7 +2521,7 @@ uint8 Client::SkillTrainLevel(EQ::skills::SkillType skillid, uint16 class_)
 	if (ClientVersion() < EQ::versions::ClientVersion::RoF2 && class_ == BERSERKER && skillid == EQ::skills::Skill1HPiercing)
 		skillid = EQ::skills::Skill2HPiercing;
 
-	return(database.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
+	return(content_db.GetTrainLevel(class_, skillid, RuleI(Character, MaxLevel)));
 }
 
 uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill)
@@ -3217,7 +3221,7 @@ void Client::MessageString(const CZClientMessageString_Struct* msg)
 		else
 		{
 			uint32_t outsize = sizeof(FormattedMessage_Struct) + msg->args_size;
-			auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_FormattedMessage, outsize));
+			auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, outsize);
 			auto outbuf = reinterpret_cast<FormattedMessage_Struct*>(outapp->pBuffer);
 			outbuf->string_id = msg->string_id;
 			outbuf->type = msg->chat_type;
@@ -6157,17 +6161,10 @@ void Client::CheckEmoteHail(Mob *target, const char* message)
 
 void Client::MarkSingleCompassLoc(float in_x, float in_y, float in_z, uint8 count)
 {
-	if (count == 0)
-	{
-		m_has_quest_compass = false;
-	}
-	else
-	{
-		m_has_quest_compass = true;
-		m_quest_compass.x = in_x;
-		m_quest_compass.y = in_y;
-		m_quest_compass.z = in_z;
-	}
+	m_has_quest_compass = (count != 0);
+	m_quest_compass.x = in_x;
+	m_quest_compass.y = in_y;
+	m_quest_compass.z = in_z;
 
 	SendDzCompassUpdate();
 }
@@ -9507,7 +9504,7 @@ void Client::SendCrossZoneMessage(
 	else if (!character_name.empty() && !message.empty())
 	{
 		uint32_t pack_size = sizeof(CZMessagePlayer_Struct);
-		auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_CZMessagePlayer, pack_size));
+		auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessagePlayer, pack_size);
 		auto buf = reinterpret_cast<CZMessagePlayer_Struct*>(pack->pBuffer);
 		buf->type = chat_type;
 		strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
@@ -9540,7 +9537,7 @@ void Client::SendCrossZoneMessageString(
 
 	uint32_t args_size = static_cast<uint32_t>(argument_buffer.size());
 	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_CZClientMessageString, pack_size));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
 	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 	buf->string_id = string_id;
 	buf->chat_type = chat_type;
@@ -9787,7 +9784,7 @@ void Client::SendExpeditionLockoutTimers()
 	uint32_t lockout_count = static_cast<uint32_t>(lockout_entries.size());
 	uint32_t lockout_entries_size = sizeof(ExpeditionLockoutTimerEntry_Struct) * lockout_count;
 	uint32_t outsize = sizeof(ExpeditionLockoutTimers_Struct) + lockout_entries_size;
-	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzExpeditionLockoutTimers, outsize));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionLockoutTimers, outsize);
 	auto outbuf = reinterpret_cast<ExpeditionLockoutTimers_Struct*>(outapp->pBuffer);
 	outbuf->count = lockout_count;
 	if (!lockout_entries.empty())
@@ -9800,7 +9797,7 @@ void Client::SendExpeditionLockoutTimers()
 void Client::RequestPendingExpeditionInvite()
 {
 	uint32_t packsize = sizeof(ServerExpeditionCharacterID_Struct);
-	auto pack = std::unique_ptr<ServerPacket>(new ServerPacket(ServerOP_ExpeditionRequestInvite, packsize));
+	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionRequestInvite, packsize);
 	auto packbuf = reinterpret_cast<ServerExpeditionCharacterID_Struct*>(pack->pBuffer);
 	packbuf->character_id = CharacterID();
 	worldserver.SendPacket(pack.get());
@@ -9858,13 +9855,13 @@ void Client::SendDzCompassUpdate()
 
 	for (const auto& client_dz : GetDynamicZones())
 	{
-		auto compass = client_dz.dynamic_zone.GetCompassLocation();
-		if (zone && zone->GetZoneID() == compass.zone_id && zone->GetInstanceID() == 0)
+		auto compass = client_dz->GetCompassLocation();
+		if (zone && zone->IsZone(compass.zone_id, 0))
 		{
 			DynamicZoneCompassEntry_Struct entry;
-			entry.dz_zone_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetZoneID());
-			entry.dz_instance_id = static_cast<uint16_t>(client_dz.dynamic_zone.GetInstanceID());
-			entry.dz_type = static_cast<uint32_t>(client_dz.dynamic_zone.GetType());
+			entry.dz_zone_id = client_dz->GetZoneID();
+			entry.dz_instance_id = client_dz->GetInstanceID();
+			entry.dz_type = static_cast<uint32_t>(client_dz->GetType());
 			entry.x = compass.x;
 			entry.y = compass.y;
 			entry.z = compass.z;
@@ -9887,37 +9884,42 @@ void Client::SendDzCompassUpdate()
 		compass_entries.emplace_back(entry);
 	}
 
+	QueuePacket(CreateCompassPacket(compass_entries).get());
+}
+
+std::unique_ptr<EQApplicationPacket> Client::CreateCompassPacket(
+	const std::vector<DynamicZoneCompassEntry_Struct>& compass_entries)
+{
 	uint32 count = static_cast<uint32_t>(compass_entries.size());
 	uint32 entries_size = sizeof(DynamicZoneCompassEntry_Struct) * count;
 	uint32 outsize = sizeof(DynamicZoneCompass_Struct) + entries_size;
-	auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzCompass, outsize));
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzCompass, outsize);
 	auto outbuf = reinterpret_cast<DynamicZoneCompass_Struct*>(outapp->pBuffer);
 	outbuf->count = count;
 	memcpy(outbuf->entries, compass_entries.data(), entries_size);
 
-	QueuePacket(outapp.get());
+	return outapp;
 }
 
-void Client::GoToDzSafeReturnOrBind(const DynamicZone& dynamic_zone)
+void Client::GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone)
 {
-	auto safereturn = dynamic_zone.GetSafeReturnLocation();
-	LogDynamicZonesDetail(
-		"Sending character [{}] to safereturn zone [{}] or bind", CharacterID(), safereturn.zone_id
-	);
+	if (dynamic_zone)
+	{
+		auto safereturn = dynamic_zone->GetSafeReturnLocation();
+		if (safereturn.zone_id != 0)
+		{
+			LogDynamicZonesDetail("Sending [{}] to safereturn zone [{}]", CharacterID(), safereturn.zone_id);
+			MovePC(safereturn.zone_id, 0, safereturn.x, safereturn.y, safereturn.z, safereturn.heading);
+			return;
+		}
+	}
 
-	if (!dynamic_zone.IsValid() || safereturn.zone_id == 0)
-	{
-		GoToBind();
-	}
-	else
-	{
-		MovePC(safereturn.zone_id, 0, safereturn.x, safereturn.y, safereturn.z, safereturn.heading);
-	}
+	GoToBind();
 }
 
-std::vector<DynamicZoneInfo> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
+std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
 {
-	std::vector<DynamicZoneInfo> client_dzs;
+	std::vector<DynamicZone*> client_dzs;
 
 	// check client systems for any associated dynamic zones optionally filtered by zone
 	Expedition* expedition = GetExpedition();
@@ -9925,7 +9927,7 @@ std::vector<DynamicZoneInfo> Client::GetDynamicZones(uint32_t zone_id, int zone_
 	   (zone_id == 0 || expedition->GetDynamicZone().GetZoneID() == zone_id) &&
 	   (zone_version < 0 || expedition->GetDynamicZone().GetZoneVersion() == zone_version))
 	{
-		client_dzs.emplace_back(expedition->GetName(), expedition->GetLeaderName(), expedition->GetDynamicZone());
+		client_dzs.emplace_back(&expedition->GetDynamicZone());
 	}
 
 	// todo: tasks, missions (shared tasks), and quests with an associated dz to zone_id
@@ -9951,36 +9953,39 @@ void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_inv
 	}
 	else if (client_dzs.size() == 1)
 	{
-		const DynamicZone& dz = client_dzs[0].dynamic_zone;
-		DynamicZoneLocation zonein = dz.GetZoneInLocation();
-		ZoneMode zone_mode = dz.HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
-		MovePC(zone_id, dz.GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
+		auto dz = client_dzs.front();
+		DynamicZoneLocation zonein = dz->GetZoneInLocation();
+		ZoneMode zone_mode = dz->HasZoneInLocation() ? ZoneMode::ZoneSolicited : ZoneMode::ZoneToSafeCoords;
+		MovePC(zone_id, dz->GetInstanceID(), zonein.x, zonein.y, zonein.z, zonein.heading, 0, zone_mode);
 	}
 	else
 	{
-		LogDynamicZonesDetail(
-			"Sending DzSwitchListWnd to character [{}] associated with [{}] dynamic zone(s)",
-			CharacterID(), client_dzs.size());
+		LogDynamicZonesDetail("Sending DzSwitchListWnd to [{}] for zone [{}] with [{}] dynamic zone(s)",
+			CharacterID(), zone_id, client_dzs.size());
 
-		// more than one dynamic zone to this zone, send out the switchlist window
-		// note that this will most likely crash clients if they've reloaded the ui
-		// this occurs on live as well so it may just be a long lasting client bug
-		uint32 count = static_cast<uint32_t>(client_dzs.size());
-		uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
-		uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
-		auto outapp = std::unique_ptr<EQApplicationPacket>(new EQApplicationPacket(OP_DzChooseZone, outsize));
-		auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
-		outbuf->count = count;
-		for (int i = 0; i < client_dzs.size(); ++i)
-		{
-			outbuf->choices[i].dz_zone_id = client_dzs[i].dynamic_zone.GetZoneID();
-			outbuf->choices[i].dz_instance_id = client_dzs[i].dynamic_zone.GetInstanceID();
-			outbuf->choices[i].dz_type = static_cast<uint32_t>(client_dzs[i].dynamic_zone.GetType());
-			strn0cpy(outbuf->choices[i].description, client_dzs[i].description.c_str(), sizeof(outbuf->choices[i].description));
-			strn0cpy(outbuf->choices[i].leader_name, client_dzs[i].leader_name.c_str(), sizeof(outbuf->choices[i].leader_name));
-		}
-		QueuePacket(outapp.get());
+		// client has more than one dz for this zone, send out the switchlist window
+		QueuePacket(CreateDzSwitchListPacket(client_dzs).get());
 	}
+}
+
+std::unique_ptr<EQApplicationPacket> Client::CreateDzSwitchListPacket(
+	const std::vector<DynamicZone*>& client_dzs)
+{
+	uint32 count = static_cast<uint32_t>(client_dzs.size());
+	uint32 entries_size = sizeof(DynamicZoneChooseZoneEntry_Struct) * count;
+	uint32 outsize = sizeof(DynamicZoneChooseZone_Struct) + entries_size;
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzChooseZone, outsize);
+	auto outbuf = reinterpret_cast<DynamicZoneChooseZone_Struct*>(outapp->pBuffer);
+	outbuf->count = count;
+	for (int i = 0; i < client_dzs.size(); ++i)
+	{
+		outbuf->choices[i].dz_zone_id = client_dzs[i]->GetZoneID();
+		outbuf->choices[i].dz_instance_id = client_dzs[i]->GetInstanceID();
+		outbuf->choices[i].dz_type = static_cast<uint32_t>(client_dzs[i]->GetType());
+		strn0cpy(outbuf->choices[i].description, client_dzs[i]->GetName().c_str(), sizeof(outbuf->choices[i].description));
+		strn0cpy(outbuf->choices[i].leader_name, client_dzs[i]->GetLeaderName().c_str(), sizeof(outbuf->choices[i].leader_name));
+	}
+	return outapp;
 }
 
 void Client::MovePCDynamicZone(const std::string& zone_name, int zone_version, bool msg_if_invalid)
@@ -10009,4 +10014,150 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 		outapp_fling->priority = 6;
 		FastQueuePacket(&outapp_fling);
 	}
+}
+
+std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {
+	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
+	bool SpellGlobalCheckResult = false;
+	bool SpellBucketCheckResult = false;
+	std::vector<int> learnable_disciplines;
+	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+		bool learnable = false;
+		if (!IsValidSpell(spell_id))
+			continue;
+		if (!IsDiscipline(spell_id))
+			continue;
+		if (spells[spell_id].classes[WARRIOR] == 0)
+			continue;
+		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
+			continue;
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
+			continue;
+		if (spells[spell_id].skill == 52)
+			continue;
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+			continue;
+		if (HasDisciplineLearned(spell_id))
+			continue;
+
+		if (SpellGlobalRule) {
+			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
+			if (SpellGlobalCheckResult) {
+				learnable = true;
+			}
+		} else if (SpellBucketRule) {
+			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
+			if (SpellBucketCheckResult) {
+				learnable = true;
+			}
+		} else {
+			learnable = true;
+		}
+
+		if (learnable) {
+			learnable_disciplines.push_back(spell_id);
+		}
+	}		
+	return learnable_disciplines;
+}
+
+std::vector<int> Client::GetLearnedDisciplines() {
+	std::vector<int> learned_disciplines;
+	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
+		if (IsValidSpell(m_pp.disciplines.values[index])) {
+			learned_disciplines.push_back(m_pp.disciplines.values[index]);
+		}
+	}		
+	return learned_disciplines;
+}
+
+std::vector<int> Client::GetMemmedSpells() {
+	std::vector<int> memmed_spells;
+	for (int index = 0; index < EQ::spells::SPELL_GEM_COUNT; index++) {
+		if (IsValidSpell(m_pp.mem_spells[index])) {
+			memmed_spells.push_back(m_pp.mem_spells[index]);
+		}
+	}		
+	return memmed_spells;
+}
+
+std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
+	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
+	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
+	bool SpellGlobalCheckResult = false;
+	bool SpellBucketCheckResult = false;
+	std::vector<int> scribeable_spells;
+	for (int spell_id = 0; spell_id < SPDAT_RECORDS; ++spell_id) {
+		bool scribeable = false;
+		if (!IsValidSpell(spell_id))
+			continue;
+		if (IsDiscipline(spell_id))
+			continue;
+		if (spells[spell_id].classes[WARRIOR] == 0)
+			continue;
+		if (max_level > 0 && spells[spell_id].classes[m_pp.class_ - 1] > max_level)
+			continue;
+		if (min_level > 1 && spells[spell_id].classes[m_pp.class_ - 1] < min_level)
+			continue;
+		if (spells[spell_id].skill == 52)
+			continue;
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+			continue;
+		if (HasSpellScribed(spell_id))
+			continue;
+
+		if (SpellGlobalRule) {
+			SpellGlobalCheckResult = SpellGlobalCheck(spell_id, CharacterID());
+			if (SpellGlobalCheckResult) {
+				scribeable = true;
+			}
+		} else if (SpellBucketRule) {
+			SpellBucketCheckResult = SpellBucketCheck(spell_id, CharacterID());
+			if (SpellBucketCheckResult) {
+				scribeable = true;
+			}
+		} else {
+			scribeable = true;
+		}
+
+		if (scribeable) {
+			scribeable_spells.push_back(spell_id);
+		}
+	}		
+	return scribeable_spells;
+}
+
+std::vector<int> Client::GetScribedSpells() {
+	std::vector<int> scribed_spells;
+	for(int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+		if (IsValidSpell(m_pp.spell_book[index])) {
+			scribed_spells.push_back(m_pp.spell_book[index]);
+		}
+	}		
+	return scribed_spells;
+}
+
+void Client::SetAnon(uint8 anon_flag) {
+	m_pp.anon = anon_flag;
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
+	spawn_appearance->spawn_id = this->GetID();
+	spawn_appearance->type = AT_Anon;
+	spawn_appearance->parameter = anon_flag;
+	entity_list.QueueClients(this, outapp);
+	Save();
+	UpdateWho();
+	safe_delete(outapp);
+}
+
+void Client::SetAFK(uint8 afk_flag) {
+	AFK = afk_flag;
+	auto outapp = new EQApplicationPacket(OP_SpawnAppearance, sizeof(SpawnAppearance_Struct));
+	SpawnAppearance_Struct* spawn_appearance = (SpawnAppearance_Struct*)outapp->pBuffer;
+	spawn_appearance->spawn_id = this->GetID();
+	spawn_appearance->type = AT_AFK;
+	spawn_appearance->parameter = afk_flag;
+	entity_list.QueueClients(this, outapp);
+	safe_delete(outapp);
 }

@@ -43,25 +43,29 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_RAID \
+	do { \
+		if (sv_derived_from(ST(0), "Raid")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Raid*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Raid"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_Raid_IsRaidMember); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsRaidMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsRaidMember(THIS, string name)"); // @categories Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
 		const char *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsRaidMember(name);
 		ST(0)            = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -73,21 +77,13 @@ XS(XS_Raid_CastGroupSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_CastGroupSpell) {
 	dXSARGS;
 	if (items != 4)
-		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, Mob* caster, uint16 spell_id, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::CastGroupSpell(THIS, Mob* caster, uint16 spell_id, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		Mob    *caster;
 		uint16 spellid = (uint16) SvUV(ST(2));
 		uint32 gid     = (uint32) SvUV(ST(3));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			caster = INT2PTR(Mob *, tmp);
@@ -105,21 +101,13 @@ XS(XS_Raid_GroupCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GroupCount) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::GroupCount(THIS, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		uint8  RETVAL;
 		dXSTARG;
 		uint32 gid = (uint32) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GroupCount(gid);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -131,20 +119,12 @@ XS(XS_Raid_RaidCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_RaidCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::RaidCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::RaidCount(THIS)"); // @categories Raid
 	{
 		Raid  *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->RaidCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -156,21 +136,13 @@ XS(XS_Raid_GetGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetGroup) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::GetGroup(THIS, string name)"); // @categories Group, Raid
 	{
 		Raid       *THIS;
 		uint32     RETVAL;
 		dXSTARG;
 		const char *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetGroup(name);
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -182,20 +154,12 @@ XS(XS_Raid_SplitExp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitExp) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, uint32 experience, [Mob* other = nullptr])");
+		Perl_croak(aTHX_ "Usage: Raid::SplitExp(THIS, uint32 experience, [Mob* other = nullptr])"); // @categories Experience and Level, Raid
 	{
 		Raid   *THIS;
 		uint32 exp = (uint32) SvUV(ST(1));
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(2)));
 			other = INT2PTR(Mob *, tmp);
@@ -213,21 +177,13 @@ XS(XS_Raid_GetTotalRaidDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetTotalRaidDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, [Mob* other = nullptr])");
+		Perl_croak(aTHX_ "Usage: Raid::GetTotalRaidDamage(THIS, [Mob* other = nullptr])"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			other = INT2PTR(Mob *, tmp);
@@ -247,7 +203,7 @@ XS(XS_Raid_SplitMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitMoney) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
+		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)"); // @categories Currency and Points, Raid
 	{
 		Raid   *THIS;
 		uint32 gid      = (uint32) SvUV(ST(1));
@@ -255,15 +211,7 @@ XS(XS_Raid_SplitMoney) {
 		uint32 silver   = (uint32) SvUV(ST(3));
 		uint32 gold     = (uint32) SvUV(ST(4));
 		uint32 platinum = (uint32) SvUV(ST(5));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		THIS->SplitMoney(gid, copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
@@ -273,20 +221,12 @@ XS(XS_Raid_BalanceHP); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_BalanceHP) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, int32 penalty, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::BalanceHP(THIS, int32 penalty, uint32 group_id)"); // @categories Raid
 	{
 		Raid   *THIS;
 		int32  penalty = (int32) SvUV(ST(1));
 		uint32 gid     = (uint32) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		THIS->BalanceHP(penalty, gid);
 	}
 	XSRETURN_EMPTY;
@@ -296,20 +236,12 @@ XS(XS_Raid_IsLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsLeader(THIS, string name)"); // @categories Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
 		const char *name = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsLeader(name);
 		ST(0)            = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -321,20 +253,12 @@ XS(XS_Raid_IsGroupLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_IsGroupLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, string name)");
+		Perl_croak(aTHX_ "Usage: Raid::IsGroupLeader(THIS, string name)"); // @categories Group, Raid
 	{
 		Raid       *THIS;
 		bool       RETVAL;
 		const char *who = (char *) SvPV_nolen(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->IsGroupLeader(who);
 		ST(0)           = boolSV(RETVAL);
 		sv_2mortal(ST(0));
@@ -346,20 +270,12 @@ XS(XS_Raid_GetHighestLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetHighestLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetHighestLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetHighestLevel(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetHighestLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -371,20 +287,12 @@ XS(XS_Raid_GetLowestLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetLowestLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetLowestLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetLowestLevel(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetLowestLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -396,20 +304,12 @@ XS(XS_Raid_GetClientByIndex); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetClientByIndex) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)");
+		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Client *RETVAL;
 		uint16 index = (uint16) SvUV(ST(1));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetClientByIndex(index);
 		ST(0)        = sv_newmortal();
 		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
@@ -421,7 +321,7 @@ XS(XS_Raid_TeleportGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportGroup) {
 	dXSARGS;
 	if (items != 8)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading, uint32 group_id)"); // @categories Group, Raid
 	{
 		Raid   *THIS;
 		Mob    *sender;
@@ -431,15 +331,7 @@ XS(XS_Raid_TeleportGroup) {
 		float  z       = (float) SvNV(ST(5));
 		float  heading = (float) SvNV(ST(6));
 		uint32 gid     = (uint32) SvUV(ST(7));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -457,7 +349,7 @@ XS(XS_Raid_TeleportRaid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_TeleportRaid) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Raid::TeleportRaid(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Mob    *sender;
@@ -466,15 +358,7 @@ XS(XS_Raid_TeleportRaid) {
 		float  y       = (float) SvNV(ST(4));
 		float  z       = (float) SvNV(ST(5));
 		float  heading = (float) SvNV(ST(6));
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -492,20 +376,12 @@ XS(XS_Raid_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Raid::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Raid::GetID(THIS)"); // @categories Raid
 	{
 		Raid   *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		RETVAL = THIS->GetID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -517,20 +393,12 @@ XS(XS_Raid_GetMember);
 XS(XS_Raid_GetMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, int raid_index)");
+		Perl_croak(aTHX_ "Usage: Raid::GetMember(THIS, int raid_index)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Client *RETVAL = nullptr;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Raid")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Raid *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Raid");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_RAID;
 		int index = (int) SvUV(ST(1));
 		if (index < 0 || index > 71)
 			RETVAL = nullptr;
@@ -553,14 +421,7 @@ XS(XS_Raid_DoesAnyMemberHaveExpeditionLockout) {
 	}
 
 	Raid* THIS = nullptr;
-	if (sv_derived_from(ST(0), "Raid")) {
-		IV tmp = SvIV((SV *) SvRV(ST(0)));
-		THIS = INT2PTR(Raid *, tmp);
-	} else
-		Perl_croak(aTHX_ "THIS is not of type Raid");
-	if (THIS == nullptr)
-		Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+	VALIDATE_THIS_IS_RAID;
 	std::string expedition_name(SvPV_nolen(ST(1)));
 	std::string event_name(SvPV_nolen(ST(2)));
 	int max_check_count = (items == 4) ? static_cast<int>(SvIV(ST(3))) : 0;

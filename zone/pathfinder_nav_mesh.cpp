@@ -20,7 +20,7 @@ struct PathfinderNavmesh::Implementation
 
 PathfinderNavmesh::PathfinderNavmesh(const std::string &path)
 {
-	m_impl.reset(new Implementation());
+	m_impl = std::make_unique<Implementation>();
 	m_impl->nav_mesh = nullptr;
 	m_impl->query = nullptr;
 	Load(path);

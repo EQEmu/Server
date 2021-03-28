@@ -1088,174 +1088,64 @@ void QuestManager::permagender(int gender_id) {
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
 	int book_slot = initiator->GetNextAvailableSpellBookSlot();
-	int spell_id = 0;
-	int count = 0;
-
-	uint32 char_id = initiator->CharacterID();
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
-
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
-		if (book_slot == -1) {
-			initiator->Message(
-				13,
-				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
-				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-				spell_id
-			);
-
-			break;
-		}
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return count;
-		}
-		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
-			return count;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
+	std::vector<int> spell_ids = initiator->GetScribeableSpells(min_level, max_level);
+	int spell_count = spell_ids.size();
+	int spells_learned = 0;
+	if (spell_count > 0) {
+		for (auto spell_id : spell_ids) {
+			if (book_slot == -1) {			
+				initiator->Message(
+					Chat::Red,
+					"Unable to scribe spell %s (%i) to Spell Book: Spell Book is Full.", spells[spell_id].name, spell_id
+				);
 				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-			if (spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return count;
 			}
-
-			if (!IsDiscipline(spell_id_) && !initiator->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
-				if (SpellGlobalRule) {
-					// bool to see if the character has the required QGlobal to scribe it if one exists in the Spell_Globals table
-					SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id_, char_id);
-					if (SpellGlobalCheckResult) {
-						initiator->ScribeSpell(spell_id_, book_slot);
-						++count;
-					}
-				}
-				else if (SpellBucketRule) {
-					// bool to see if the character has the required bucket to train it if one exists in the spell_buckets table
-					SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id_, char_id);
-					if (SpellBucketCheckResult) {
-						initiator->ScribeSpell(spell_id_, book_slot);
-						++count;
-					}
-				}
-				else {
-					initiator->ScribeSpell(spell_id_, book_slot);
-					++count;
-				}
-			}
-
-			break;
+			
+			if (initiator->HasSpellScribed(spell_id))
+				continue;
+				
+			initiator->ScribeSpell(spell_id, book_slot);
+			book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
+			spells_learned++;
 		}
-
-		book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
 	}
 
-	return count; // how many spells were scribed successfully
+	if (spells_learned > 0) {
+		std::string spell_message = (spells_learned == 1 ? "a new spell" : fmt::format("{} new spells", spells_learned));
+		initiator->Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
+	}
+	return spells_learned;
 }
 
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
-	int spell_id = 0;
-	int count = 0;
+	int character_id = initiator->CharacterID();
+	std::vector<int> spell_ids = initiator->GetLearnableDisciplines(min_level, max_level);
+	int discipline_count = spell_ids.size();
+	int disciplines_learned = 0;
+	if (discipline_count > 0) {
+		for (auto spell_id : spell_ids) {
+			if (initiator->HasDisciplineLearned(spell_id))
+				continue;
 
-	uint32 char_id = initiator->CharacterID();
-	bool SpellGlobalRule = RuleB(Spells, EnableSpellGlobals);
-	bool SpellBucketRule = RuleB(Spells, EnableSpellBuckets);
-	bool SpellGlobalCheckResult = false;
-	bool SpellBucketCheckResult = false;
-
-	bool change = false;
-
-	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			initiator->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return count;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[initiator->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-			if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				initiator->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return count;
-			}
-
-			if (!IsDiscipline(spell_id_))
-				break;
-
-			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; r++) {
-				if (initiator->GetPP().disciplines.values[r] == spell_id_) {
-					initiator->Message(Chat::Red, "You already know this discipline.");
-					break; // continue the 1st loop
-				}
-				else if (initiator->GetPP().disciplines.values[r] == 0) {
-					if (SpellGlobalRule) {
-						// bool to see if the character has the required QGlobal to train it if one exists in the Spell_Globals table
-						SpellGlobalCheckResult = initiator->SpellGlobalCheck(spell_id_, char_id);
-						if (SpellGlobalCheckResult) {
-							initiator->GetPP().disciplines.values[r] = spell_id_;
-							database.SaveCharacterDisc(char_id, r, spell_id_);
-							change = true;
-							initiator->Message(Chat::White, "You have learned a new discipline!");
-							++count; // success counter
-						}
-						break; // continue the 1st loop
-					}
-					else if (SpellBucketRule) {
-						// bool to see if the character has the required bucket to train it if one exists in the spell_buckets table
-						SpellBucketCheckResult = initiator->SpellBucketCheck(spell_id_, char_id);
-						if (SpellBucketCheckResult) {
-							initiator->GetPP().disciplines.values[r] = spell_id_;
-							database.SaveCharacterDisc(char_id, r, spell_id_);
-							change = true;
-							initiator->Message(Chat::White, "You have learned a new discipline!");
-							++count;
-						}
-						break;
-					}
-					else {
-						initiator->GetPP().disciplines.values[r] = spell_id_;
-						database.SaveCharacterDisc(char_id, r, spell_id_);
-						change = true;;
-						initiator->Message(Chat::White, "You have learned a new discipline!");
-						++count; // success counter
-						break; // continue the 1st loop
-					}
+			for (uint32 index = 0; index < MAX_PP_DISCIPLINES; index++) {
+				if (initiator->GetPP().disciplines.values[index] == 0) {
+					initiator->GetPP().disciplines.values[index] = spell_id;
+					database.SaveCharacterDisc(character_id, index, spell_id);
+					disciplines_learned++;
+					break;
 				}
 			}
-
-			break;
 		}
 	}
 
-	if (change)
+	if (disciplines_learned > 0) {
+		std::string discipline_message = (disciplines_learned == 1 ? "a new discipline" : fmt::format("{} new disciplines", disciplines_learned));
 		initiator->SendDisciplineUpdate();
+		initiator->Message(Chat::White, fmt::format("You have learned {}!", discipline_message).c_str());
+	}
 
-	return count; // how many disciplines were learned successfully
+	return disciplines_learned;
 }
 
 void QuestManager::unscribespells() {
@@ -2350,27 +2240,27 @@ bool QuestManager::createBot(const char *name, const char *lastname, uint8 level
 
 void QuestManager::taskselector(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
 		initiator->TaskQuestSetSelector(owner, taskcount, tasks);
 }
 void QuestManager::enabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->EnableTask(taskcount, tasks);
 }
 
 void QuestManager::disabletask(int taskcount, int *tasks) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		initiator->DisableTask(taskcount, tasks);
 }
 
 bool QuestManager::istaskenabled(int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
 		return initiator->IsTaskEnabled(taskid);
 
 	return false;
@@ -2379,7 +2269,7 @@ bool QuestManager::istaskenabled(int taskid) {
 void QuestManager::tasksetselector(int tasksetid) {
 	QuestManagerCurrentQuestVars();
 	Log(Logs::General, Logs::Tasks, "[UPDATE] TaskSetSelector called for task set %i", tasksetid);
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && taskmanager)
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && owner && task_manager)
 		initiator->TaskSetSelector(owner, tasksetid);
 }
 
@@ -2468,8 +2358,8 @@ int QuestManager::enabledtaskcount(int taskset) {
 int QuestManager::firsttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->FirstTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->FirstTaskInSet(taskset);
 
 	return -1;
 }
@@ -2477,8 +2367,8 @@ int QuestManager::firsttaskinset(int taskset) {
 int QuestManager::lasttaskinset(int taskset) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->LastTaskInSet(taskset);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->LastTaskInSet(taskset);
 
 	return -1;
 }
@@ -2486,8 +2376,8 @@ int QuestManager::lasttaskinset(int taskset) {
 int QuestManager::nexttaskinset(int taskset, int taskid) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && taskmanager)
-		return taskmanager->NextTaskInSet(taskset, taskid);
+	if(RuleB(TaskSystem, EnableTaskSystem) && task_manager)
+		return task_manager->NextTaskInSet(taskset, taskid);
 
 	return -1;
 }
@@ -2539,8 +2429,8 @@ int QuestManager::completedtasksinset(int taskset) {
 bool QuestManager::istaskappropriate(int task) {
 	QuestManagerCurrentQuestVars();
 
-	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && taskmanager)
-		return taskmanager->AppropriateLevel(task, initiator->GetLevel());
+	if(RuleB(TaskSystem, EnableTaskSystem) && initiator && task_manager)
+		return task_manager->ValidateLevel(task, initiator->GetLevel());
 
 	return false;
 }
@@ -2549,7 +2439,7 @@ std::string QuestManager::gettaskname(uint32 task_id) {
 	QuestManagerCurrentQuestVars();
 
 	if (RuleB(TaskSystem, EnableTaskSystem)) {
-		return taskmanager->GetTaskName(task_id);
+		return task_manager->GetTaskName(task_id);
 	}
 
 	return std::string();
@@ -2578,6 +2468,24 @@ void QuestManager::ze(int type, const char *str) {
 
 void QuestManager::we(int type, const char *str) {
 	worldserver.SendEmoteMessage(0, 0, type, str);
+}
+
+void QuestManager::message(int color, const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator)
+		return;
+	
+	initiator->Message(color, message);
+}
+
+void QuestManager::whisper(const char *message) {
+	QuestManagerCurrentQuestVars();
+	if (!initiator || !owner)
+		return;
+
+	std::string mob_name = owner->GetCleanName();
+	std::string new_message = fmt::format("{} whispers, '{}'", mob_name, message);
+	initiator->Message(315, new_message.c_str());
 }
 
 int QuestManager::getlevel(uint8 type)
@@ -4238,6 +4146,15 @@ Mob *QuestManager::GetOwner() const {
 	return nullptr;
 }
 
+EQ::InventoryProfile *QuestManager::GetInventory() const {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return &e.initiator->GetInv();
+	}
+
+	return nullptr;
+}
+
 EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -4326,4 +4243,40 @@ void QuestManager::UpdateZoneHeader(std::string type, std::string value) {
 	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 	entity_list.QueueClients(0, outapp);
 	safe_delete(outapp);
+}
+
+EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32 augment_one, uint32 augment_two, uint32 augment_three, uint32 augment_four, uint32 augment_five, uint32 augment_six, bool attuned) const {
+	if (database.GetItem(item_id)) {
+		return database.CreateItem(item_id, charges, augment_one, augment_two, augment_three, augment_four, augment_five, augment_six, attuned);
+	}
+	return nullptr;
+}
+
+std::string QuestManager::secondstotime(int duration) {
+	int timer_length = duration;
+	int hours = int(timer_length / 3600);
+	timer_length %= 3600;
+	int minutes = int(timer_length / 60);
+	timer_length %= 60;
+	int seconds = timer_length;
+	std::string time_string = "Unknown";
+	std::string hour_string = (hours == 1 ? "Hour" : "Hours");
+	std::string minute_string = (minutes == 1 ? "Minute" : "Minutes");
+	std::string second_string = (seconds == 1 ? "Second" : "Seconds");
+	if (hours > 0 && minutes > 0 && seconds > 0) {
+		time_string = fmt::format("{} {}, {} {}, and {} {}", hours, hour_string, minutes, minute_string, seconds, second_string);
+	} else if (hours > 0 && minutes > 0 && seconds == 0) {
+		time_string = fmt::format("{} {} and {} {}", hours, hour_string, minutes, minute_string);
+	} else if (hours > 0 && minutes == 0 && seconds > 0) {
+		time_string = fmt::format("{} {} and {} {}", hours, hour_string, seconds, second_string);
+	} else if (hours > 0 && minutes == 0 && seconds == 0) {
+		time_string = fmt::format("{} {}", hours, hour_string);
+	} else if (hours == 0 && minutes > 0 && seconds > 0) {
+		time_string = fmt::format("{} {} and {} {}", minutes, minute_string, seconds, second_string);
+	} else if (hours == 0 && minutes > 0 && seconds == 0) {
+		time_string = fmt::format("{} {}", minutes, minute_string);
+	} else if (hours == 0 && minutes == 0 && seconds > 0) {
+		time_string = fmt::format("{} {}", seconds, second_string);
+	}
+	return time_string;
 }

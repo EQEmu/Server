@@ -478,12 +478,11 @@ public:
 	void	CameraEffect(uint32 duration, uint32 intensity);
 	Mob*	GetClosestMobByBodyType(Mob* sender, bodyType BodyType);
 	void	ForceGroupUpdate(uint32 gid);
-	void	SendGroupLeave(uint32 gid, const char *name, bool checkleader);
+	void	SendGroupLeave(uint32 gid, const char *name);
 	void	SendGroupJoin(uint32 gid, const char *name);
-	void	SendGroupLeader(uint32 gid, const char *lname, const char *oldlname);
 
 	void	SaveAllClientsTaskState();
-	void	ReloadAllClientsTaskState(int TaskID=0);
+	void	ReloadAllClientsTaskState(int task_id=0);
 	uint16	CreateGroundObject(uint32 itemid, const glm::vec4& position, uint32 decay_time = 300000);
 	uint16	CreateGroundObjectFromModel(const char *model, const glm::vec4& position, uint8 type = 0x00, uint32 decay_time = 0);
 	uint16	CreateDoor(const char *model, const glm::vec4& position, uint8 type = 0, uint16 size = 100);

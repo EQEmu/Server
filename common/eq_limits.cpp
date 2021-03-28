@@ -794,7 +794,7 @@ void EQ::inventory::InitializeDynamicLookups() {
 			continue;
 
 		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<mob> == (int)MobVersion::<mob>
-		inventory_dynamic_nongm_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+		inventory_dynamic_nongm_lookup_entries[iter] = std::make_unique<LookupEntry>(inventory_static_lookup_entries[iter]);
 
 		// clamp affected fields to the lowest standard
 		inventory_dynamic_nongm_lookup_entries[iter]->InventoryTypeSize.Bank = Titanium::invtype::BANK_SIZE; // bank size
@@ -864,7 +864,7 @@ void EQ::inventory::InitializeDynamicLookups() {
 		}
 
 		// direct manipulation of lookup indices is safe so long as (int)ClientVersion::<client> == (int)MobVersion::<client>
-		inventory_dynamic_gm_lookup_entries[iter] = std::unique_ptr<LookupEntry>(new LookupEntry(inventory_static_lookup_entries[iter]));
+		inventory_dynamic_gm_lookup_entries[iter] = std::make_unique<LookupEntry>(inventory_static_lookup_entries[iter]);
 
 		inventory_dynamic_gm_lookup_entries[iter]->PossessionsBitmask = 0; // we'll fix later
 		inventory_dynamic_gm_lookup_entries[iter]->CorpseBitmask = 0; // we'll fix later

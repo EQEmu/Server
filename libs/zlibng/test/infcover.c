@@ -8,13 +8,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#undef NDEBUG
 #include <assert.h>
-#include "zlib.h"
+#include <inttypes.h>
+#include <stdint.h>
 
 /* get definition of internal structure so we can mess with it (see pull()),
    and so we can call inflate_trees() (see cover5()) */
 #define ZLIB_INTERNAL
 #include "zbuild.h"
+#ifdef ZLIB_COMPAT
+#  include "zlib.h"
+#else
+#  include "zlib-ng.h"
+#endif
 #include "inftrees.h"
 #include "inflate.h"
 
@@ -28,7 +35,7 @@
 
    They are used as follows:
 
-   z_stream strm;
+   PREFIX3(stream) strm;
    mem_setup(&strm)         initializes the memory tracking and sets the
                             zalloc, zfree, and opaque members of strm to use
                             memory tracking for all zlib operations on strm
@@ -67,8 +74,7 @@ struct mem_zone {
 };
 
 /* memory allocation routine to pass to zlib */
-static void *mem_alloc(void *mem, unsigned count, unsigned size)
-{
+static void *mem_alloc(void *mem, unsigned count, unsigned size) {
     void *ptr;
     struct mem_item *item;
     struct mem_zone *zone = mem;
@@ -108,8 +114,7 @@ static void *mem_alloc(void *mem, unsigned count, unsigned size)
 }
 
 /* memory free routine to pass to zlib */
-static void mem_free(void *mem, void *ptr)
-{
+static void mem_free(void *mem, void *ptr) {
     struct mem_item *item, *next;
     struct mem_zone *zone = mem;
 
@@ -154,8 +159,7 @@ static void mem_free(void *mem, void *ptr)
 
 /* set up a controlled memory allocation space for monitoring, set the stream
    parameters to the controlled routines, with opaque pointing to the space */
-static void mem_setup(z_stream *strm)
-{
+static void mem_setup(PREFIX3(stream) *strm) {
     struct mem_zone *zone;
 
     zone = malloc(sizeof(struct mem_zone));
@@ -172,32 +176,28 @@ static void mem_setup(z_stream *strm)
 }
 
 /* set a limit on the total memory allocation, or 0 to remove the limit */
-static void mem_limit(z_stream *strm, size_t limit)
-{
+static void mem_limit(PREFIX3(stream) *strm, size_t limit) {
     struct mem_zone *zone = strm->opaque;
 
     zone->limit = limit;
 }
 
 /* show the current total requested allocations in bytes */
-static void mem_used(z_stream *strm, char *prefix)
-{
+static void mem_used(PREFIX3(stream) *strm, char *prefix) {
     struct mem_zone *zone = strm->opaque;
 
-    fprintf(stderr, "%s: %zu allocated\n", prefix, zone->total);
+    fprintf(stderr, "%s: %" PRIu64 " allocated\n", prefix, (uint64_t)zone->total);
 }
 
 /* show the high water allocation in bytes */
-static void mem_high(z_stream *strm, char *prefix)
-{
+static void mem_high(PREFIX3(stream) *strm, char *prefix) {
     struct mem_zone *zone = strm->opaque;
 
-    fprintf(stderr, "%s: %zu high water mark\n", prefix, zone->highwater);
+    fprintf(stderr, "%s: %" PRIu64 " high water mark\n", prefix, (uint64_t)zone->highwater);
 }
 
 /* release the memory allocation zone -- if there are any surprises, notify */
-static void mem_done(z_stream *strm, char *prefix)
-{
+static void mem_done(PREFIX3(stream) *strm, char *prefix) {
     int count = 0;
     struct mem_item *item, *next;
     struct mem_zone *zone = strm->opaque;
@@ -217,8 +217,8 @@ static void mem_done(z_stream *strm, char *prefix)
 
     /* issue alerts about anything unexpected */
     if (count || zone->total)
-        fprintf(stderr, "** %s: %zu bytes in %d blocks not freed\n",
-                prefix, zone->total, count);
+        fprintf(stderr, "** %s: %" PRIu64 " bytes in %d blocks not freed\n",
+                prefix, (uint64_t)zone->total, count);
     if (zone->notlifo)
         fprintf(stderr, "** %s: %d frees not LIFO\n", prefix, zone->notlifo);
     if (zone->rogue)
@@ -241,12 +241,14 @@ static void mem_done(z_stream *strm, char *prefix)
    by a delimiter, where that single digit writes a byte.  The returned data is
    allocated and must eventually be freed.  NULL is returned if out of memory.
    If the length is not needed, then len can be NULL. */
-static unsigned char *h2b(const char *hex, unsigned *len)
-{
+static unsigned char *h2b(const char *hex, unsigned *len) {
     unsigned char *in, *re;
     unsigned next, val;
+    size_t inlen;
 
-    in = malloc((strlen(hex) + 1) >> 1);
+    inlen = (strlen(hex) + 1) >> 1;
+    assert(inlen != 0);     /* tell static analyzer we won't call malloc(0) */
+    in = malloc(inlen);
     if (in == NULL)
         return NULL;
     next = 0;
@@ -267,6 +269,7 @@ static unsigned char *h2b(const char *hex, unsigned *len)
     } while (*hex++);       /* go through the loop with the terminating null */
     if (len != NULL)
         *len = next;
+    assert(next != 0);      /* tell static analyzer we won't call realloc(in, 0) */
     re = realloc(in, next);
     return re == NULL ? in : re;
 }
@@ -280,18 +283,17 @@ static unsigned char *h2b(const char *hex, unsigned *len)
    header information is collected with inflateGetHeader().  If a zlib stream
    is looking for a dictionary, then an empty dictionary is provided.
    inflate() is run until all of the input data is consumed. */
-static void inf(char *hex, char *what, unsigned step, int win, unsigned len, int err)
-{
+static void inf(char *hex, char *what, unsigned step, int win, unsigned len, int err) {
     int ret;
     unsigned have;
     unsigned char *in, *out;
-    z_stream strm, copy;
-    gz_header head;
+    PREFIX3(stream) strm, copy;
+    PREFIX(gz_header) head;
 
     mem_setup(&strm);
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit2(&strm, win);
+    ret = PREFIX(inflateInit2)(&strm, win);
     if (ret != Z_OK) {
         mem_done(&strm, what);
         return;
@@ -304,7 +306,8 @@ static void inf(char *hex, char *what, unsigned step, int win, unsigned len, int
         head.name_max = len;
         head.comment = out;
         head.comm_max = len;
-        ret = inflateGetHeader(&strm, &head);   assert(ret == Z_OK);
+        ret = PREFIX(inflateGetHeader)(&strm, &head);
+                                                assert(ret == Z_OK);
     }
     in = h2b(hex, &have);                       assert(in != NULL);
     if (step == 0 || step > have)
@@ -315,23 +318,26 @@ static void inf(char *hex, char *what, unsigned step, int win, unsigned len, int
     do {
         strm.avail_out = len;
         strm.next_out = out;
-        ret = inflate(&strm, Z_NO_FLUSH);       assert(err == 9 || ret == err);
+        ret = PREFIX(inflate)(&strm, Z_NO_FLUSH);
+                                                assert(err == 9 || ret == err);
         if (ret != Z_OK && ret != Z_BUF_ERROR && ret != Z_NEED_DICT)
             break;
         if (ret == Z_NEED_DICT) {
-            ret = inflateSetDictionary(&strm, in, 1);
+            ret = PREFIX(inflateSetDictionary)(&strm, in, 1);
                                                 assert(ret == Z_DATA_ERROR);
             mem_limit(&strm, 1);
-            ret = inflateSetDictionary(&strm, out, 0);
+            ret = PREFIX(inflateSetDictionary)(&strm, out, 0);
                                                 assert(ret == Z_MEM_ERROR);
             mem_limit(&strm, 0);
             ((struct inflate_state *)strm.state)->mode = DICT;
-            ret = inflateSetDictionary(&strm, out, 0);
+            ret = PREFIX(inflateSetDictionary)(&strm, out, 0);
                                                 assert(ret == Z_OK);
-            ret = inflate(&strm, Z_NO_FLUSH);   assert(ret == Z_BUF_ERROR);
+            ret = PREFIX(inflate)(&strm, Z_NO_FLUSH);
+                                                assert(ret == Z_BUF_ERROR);
         }
-        ret = inflateCopy(&copy, &strm);        assert(ret == Z_OK);
-        ret = inflateEnd(&copy);                assert(ret == Z_OK);
+        ret = PREFIX(inflateCopy)(&copy, &strm);
+                                                assert(ret == Z_OK);
+        ret = PREFIX(inflateEnd)(&copy);        assert(ret == Z_OK);
         err = 9;                        /* don't care next time around */
         have += strm.avail_in;
         strm.avail_in = step > have ? have : step;
@@ -339,27 +345,27 @@ static void inf(char *hex, char *what, unsigned step, int win, unsigned len, int
     } while (strm.avail_in);
     free(in);
     free(out);
-    ret = inflateReset2(&strm, -8);             assert(ret == Z_OK);
-    ret = inflateEnd(&strm);                    assert(ret == Z_OK);
+    ret = PREFIX(inflateReset2)(&strm, -8);     assert(ret == Z_OK);
+    ret = PREFIX(inflateEnd)(&strm);            assert(ret == Z_OK);
     mem_done(&strm, what);
+    (void)err;
 }
 
 /* cover all of the lines in inflate.c up to inflate() */
-static void cover_support(void)
-{
+static void cover_support(void) {
     int ret;
-    z_stream strm;
+    PREFIX3(stream) strm;
 
     mem_setup(&strm);
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit(&strm);                   assert(ret == Z_OK);
+    ret = PREFIX(inflateInit)(&strm);           assert(ret == Z_OK);
     mem_used(&strm, "inflate init");
-    ret = inflatePrime(&strm, 5, 31);           assert(ret == Z_OK);
-    ret = inflatePrime(&strm, -1, 0);           assert(ret == Z_OK);
-    ret = inflateSetDictionary(&strm, NULL, 0);
+    ret = PREFIX(inflatePrime)(&strm, 5, 31);   assert(ret == Z_OK);
+    ret = PREFIX(inflatePrime)(&strm, -1, 0);   assert(ret == Z_OK);
+    ret = PREFIX(inflateSetDictionary)(&strm, NULL, 0);
                                                 assert(ret == Z_STREAM_ERROR);
-    ret = inflateEnd(&strm);                    assert(ret == Z_OK);
+    ret = PREFIX(inflateEnd)(&strm);            assert(ret == Z_OK);
     mem_done(&strm, "prime");
 
     inf("63 0", "force window allocation", 0, -15, 1, Z_OK);
@@ -371,27 +377,27 @@ static void cover_support(void)
     mem_setup(&strm);
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit_(&strm, ZLIB_VERSION + 1, (int)sizeof(z_stream));
+    ret = PREFIX(inflateInit_)(&strm, &PREFIX2(VERSION)[1], (int)sizeof(PREFIX3(stream)));
                                                 assert(ret == Z_VERSION_ERROR);
     mem_done(&strm, "wrong version");
 
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit(&strm);                   assert(ret == Z_OK);
-    ret = inflateEnd(&strm);                    assert(ret == Z_OK);
+    ret = PREFIX(inflateInit)(&strm);           assert(ret == Z_OK);
+    ret = PREFIX(inflateEnd)(&strm);            assert(ret == Z_OK);
     fputs("inflate built-in memory routines\n", stderr);
+    (void)ret;
 }
 
 /* cover all inflate() header and trailer cases and code after inflate() */
-static void cover_wrap(void)
-{
+static void cover_wrap(void) {
     int ret;
-    z_stream strm, copy;
+    PREFIX3(stream) strm, copy;
     unsigned char dict[257];
 
-    ret = inflate(NULL, 0);                     assert(ret == Z_STREAM_ERROR);
-    ret = inflateEnd(NULL);                     assert(ret == Z_STREAM_ERROR);
-    ret = inflateCopy(NULL, NULL);              assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflate)(NULL, 0);             assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflateEnd)(NULL);             assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflateCopy)(NULL, NULL);      assert(ret == Z_STREAM_ERROR);
     fputs("inflate bad parameters\n", stderr);
 
     inf("1f 8b 0 0", "bad gzip method", 0, 31, 0, Z_DATA_ERROR);
@@ -411,39 +417,43 @@ static void cover_wrap(void)
     mem_setup(&strm);
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit2(&strm, -8);
+    ret = PREFIX(inflateInit2)(&strm, -8);
     strm.avail_in = 2;
     strm.next_in = (void *)"\x63";
     strm.avail_out = 1;
     strm.next_out = (void *)&ret;
     mem_limit(&strm, 1);
-    ret = inflate(&strm, Z_NO_FLUSH);           assert(ret == Z_MEM_ERROR);
-    ret = inflate(&strm, Z_NO_FLUSH);           assert(ret == Z_MEM_ERROR);
+    ret = PREFIX(inflate)(&strm, Z_NO_FLUSH);   assert(ret == Z_MEM_ERROR);
+    ret = PREFIX(inflate)(&strm, Z_NO_FLUSH);   assert(ret == Z_MEM_ERROR);
     mem_limit(&strm, 0);
     memset(dict, 0, 257);
-    ret = inflateSetDictionary(&strm, dict, 257);
+    ret = PREFIX(inflateSetDictionary)(&strm, dict, 257);
                                                 assert(ret == Z_OK);
     mem_limit(&strm, (sizeof(struct inflate_state) << 1) + 256);
-    ret = inflatePrime(&strm, 16, 0);           assert(ret == Z_OK);
+    ret = PREFIX(inflatePrime)(&strm, 16, 0);   assert(ret == Z_OK);
     strm.avail_in = 2;
     strm.next_in = (void *)"\x80";
-    ret = inflateSync(&strm);                   assert(ret == Z_DATA_ERROR);
-    ret = inflate(&strm, Z_NO_FLUSH);           assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflateSync)(&strm);           assert(ret == Z_DATA_ERROR);
+    ret = PREFIX(inflate)(&strm, Z_NO_FLUSH);   assert(ret == Z_STREAM_ERROR);
     strm.avail_in = 4;
     strm.next_in = (void *)"\0\0\xff\xff";
-    ret = inflateSync(&strm);                   assert(ret == Z_OK);
-    (void)inflateSyncPoint(&strm);
-    ret = inflateCopy(&copy, &strm);            assert(ret == Z_MEM_ERROR);
+    ret = PREFIX(inflateSync)(&strm);           assert(ret == Z_OK);
+    (void)PREFIX(inflateSyncPoint)(&strm);
+    ret = PREFIX(inflateCopy)(&copy, &strm);    assert(ret == Z_MEM_ERROR);
     mem_limit(&strm, 0);
-    ret = inflateUndermine(&strm, 1);           assert(ret == Z_DATA_ERROR);
-    (void)inflateMark(&strm);
-    ret = inflateEnd(&strm);                    assert(ret == Z_OK);
+    ret = PREFIX(inflateUndermine)(&strm, 1);
+#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
+    assert(ret == Z_OK);
+#else
+    assert(ret == Z_DATA_ERROR);
+#endif
+    (void)PREFIX(inflateMark)(&strm);
+    ret = PREFIX(inflateEnd)(&strm);            assert(ret == Z_OK);
     mem_done(&strm, "miscellaneous, force memory errors");
 }
 
 /* input and output functions for inflateBack() */
-static unsigned pull(void *desc, const unsigned char **buf)
-{
+static unsigned pull(void *desc, z_const unsigned char **buf) {
     static unsigned int next = 0;
     static unsigned char dat[] = {0x63, 0, 2, 0};
     struct inflate_state *state;
@@ -452,63 +462,65 @@ static unsigned pull(void *desc, const unsigned char **buf)
         next = 0;
         return 0;   /* no input (already provided at next_in) */
     }
-    state = (void *)((z_stream *)desc)->state;
+    state = (void *)((PREFIX3(stream) *)desc)->state;
     if (state != NULL)
         state->mode = SYNC;     /* force an otherwise impossible situation */
     return next < sizeof(dat) ? (*buf = dat + next++, 1) : 0;
 }
 
-static int push(void *desc, unsigned char *buf, unsigned len)
-{
+static int push(void *desc, unsigned char *buf, unsigned len) {
     buf += len;
+    (void)buf;
     return desc != NULL;        /* force error if desc not null */
 }
 
 /* cover inflateBack() up to common deflate data cases and after those */
-static void cover_back(void)
-{
+static void cover_back(void) {
     int ret;
-    z_stream strm;
+    PREFIX3(stream) strm;
     unsigned char win[32768];
 
-    ret = inflateBackInit_(NULL, 0, win, 0, 0);
+    ret = PREFIX(inflateBackInit_)(NULL, 0, win, 0, 0);
                                                 assert(ret == Z_VERSION_ERROR);
-    ret = inflateBackInit(NULL, 0, win);        assert(ret == Z_STREAM_ERROR);
-    ret = inflateBack(NULL, NULL, NULL, NULL, NULL);
+    ret = PREFIX(inflateBackInit)(NULL, 0, win);
                                                 assert(ret == Z_STREAM_ERROR);
-    ret = inflateBackEnd(NULL);                 assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflateBack)(NULL, NULL, NULL, NULL, NULL);
+                                                assert(ret == Z_STREAM_ERROR);
+    ret = PREFIX(inflateBackEnd)(NULL);         assert(ret == Z_STREAM_ERROR);
     fputs("inflateBack bad parameters\n", stderr);
 
     mem_setup(&strm);
-    ret = inflateBackInit(&strm, 15, win);      assert(ret == Z_OK);
+    ret = PREFIX(inflateBackInit)(&strm, 15, win);
+                                                assert(ret == Z_OK);
     strm.avail_in = 2;
     strm.next_in = (void *)"\x03";
-    ret = inflateBack(&strm, pull, NULL, push, NULL);
+    ret = PREFIX(inflateBack)(&strm, pull, NULL, push, NULL);
                                                 assert(ret == Z_STREAM_END);
         /* force output error */
     strm.avail_in = 3;
     strm.next_in = (void *)"\x63\x00";
-    ret = inflateBack(&strm, pull, NULL, push, &strm);
+    ret = PREFIX(inflateBack)(&strm, pull, NULL, push, &strm);
                                                 assert(ret == Z_BUF_ERROR);
         /* force mode error by mucking with state */
-    ret = inflateBack(&strm, pull, &strm, push, NULL);
+    ret = PREFIX(inflateBack)(&strm, pull, &strm, push, NULL);
                                                 assert(ret == Z_STREAM_ERROR);
-    ret = inflateBackEnd(&strm);                assert(ret == Z_OK);
+    ret = PREFIX(inflateBackEnd)(&strm);        assert(ret == Z_OK);
     mem_done(&strm, "inflateBack bad state");
 
-    ret = inflateBackInit(&strm, 15, win);      assert(ret == Z_OK);
-    ret = inflateBackEnd(&strm);                assert(ret == Z_OK);
+    ret = PREFIX(inflateBackInit)(&strm, 15, win);
+                                                assert(ret == Z_OK);
+    ret = PREFIX(inflateBackEnd)(&strm);        assert(ret == Z_OK);
     fputs("inflateBack built-in memory routines\n", stderr);
+    (void)ret;
 }
 
 /* do a raw inflate of data in hexadecimal with both inflate and inflateBack */
-static int try(char *hex, char *id, int err)
-{
+static int try(char *hex, char *id, int err) {
     int ret;
     unsigned len, size;
     unsigned char *in, *out, *win;
     char *prefix;
-    z_stream strm;
+    PREFIX3(stream) strm;
 
     /* convert to hex */
     in = h2b(hex, &len);
@@ -529,14 +541,14 @@ static int try(char *hex, char *id, int err)
     mem_setup(&strm);
     strm.avail_in = 0;
     strm.next_in = NULL;
-    ret = inflateInit2(&strm, err < 0 ? 47 : -15);
+    ret = PREFIX(inflateInit2)(&strm, err < 0 ? 47 : -15);
     assert(ret == Z_OK);
     strm.avail_in = len;
     strm.next_in = in;
     do {
         strm.avail_out = size;
         strm.next_out = out;
-        ret = inflate(&strm, Z_TREES);
+        ret = PREFIX(inflate)(&strm, Z_TREES);
         assert(ret != Z_STREAM_ERROR && ret != Z_MEM_ERROR);
         if (ret == Z_DATA_ERROR || ret == Z_NEED_DICT)
             break;
@@ -545,7 +557,7 @@ static int try(char *hex, char *id, int err)
         assert(ret == Z_DATA_ERROR);
         assert(strcmp(id, strm.msg) == 0);
     }
-    inflateEnd(&strm);
+    PREFIX(inflateEnd)(&strm);
     mem_done(&strm, prefix);
 
     /* then with inflateBack */
@@ -553,17 +565,17 @@ static int try(char *hex, char *id, int err)
         strcpy(prefix, id);
         strcat(prefix, "-back");
         mem_setup(&strm);
-        ret = inflateBackInit(&strm, 15, win);
+        ret = PREFIX(inflateBackInit)(&strm, 15, win);
         assert(ret == Z_OK);
         strm.avail_in = len;
         strm.next_in = in;
-        ret = inflateBack(&strm, pull, NULL, push, NULL);
+        ret = PREFIX(inflateBack)(&strm, pull, NULL, push, NULL);
         assert(ret != Z_STREAM_ERROR);
-        if (err) {
+        if (err && ret != Z_BUF_ERROR) {
             assert(ret == Z_DATA_ERROR);
             assert(strcmp(id, strm.msg) == 0);
         }
-        inflateBackEnd(&strm);
+        PREFIX(inflateBackEnd)(&strm);
         mem_done(&strm, prefix);
     }
 
@@ -576,8 +588,7 @@ static int try(char *hex, char *id, int err)
 }
 
 /* cover deflate data cases in both inflate() and inflateBack() */
-static void cover_inflate(void)
-{
+static void cover_inflate(void) {
     try("0 0 0 0 0", "invalid stored block lengths", 1);
     try("3 0", "fixed", 0);
     try("6", "invalid block type", 1);
@@ -592,7 +603,11 @@ static void cover_inflate(void)
     try("4 80 49 92 24 49 92 24 f b4 ff ff c3 84", "invalid distances set", 1);
     try("4 c0 81 8 0 0 0 0 20 7f eb b 0 0", "invalid literal/length code", 1);
     try("2 7e ff ff", "invalid distance code", 1);
+#ifdef INFLATE_ALLOW_INVALID_DISTANCE_TOOFAR_ARRR
+    try("c c0 81 0 0 0 0 0 90 ff 6b 4 0", "invalid distance too far back", 0);
+#else
     try("c c0 81 0 0 0 0 0 90 ff 6b 4 0", "invalid distance too far back", 1);
+#endif
 
     /* also trailer mismatch just in inflate() */
     try("1f 8b 8 0 0 0 0 0 0 0 3 0 0 0 0 1", "incorrect data check", -1);
@@ -612,8 +627,7 @@ static void cover_inflate(void)
 }
 
 /* cover remaining lines in inftrees.c */
-static void cover_trees(void)
-{
+static void cover_trees(void) {
     int ret;
     unsigned bits;
     uint16_t lens[16], work[16];
@@ -626,18 +640,18 @@ static void cover_trees(void)
     lens[15] = 15;
     next = table;
     bits = 15;
-    ret = inflate_table(DISTS, lens, 16, &next, &bits, work);
+    ret = zng_inflate_table(DISTS, lens, 16, &next, &bits, work);
                                                 assert(ret == 1);
     next = table;
     bits = 1;
-    ret = inflate_table(DISTS, lens, 16, &next, &bits, work);
+    ret = zng_inflate_table(DISTS, lens, 16, &next, &bits, work);
                                                 assert(ret == 1);
     fputs("inflate_table not enough errors\n", stderr);
+    (void)ret;
 }
 
 /* cover remaining inffast.c decoding and window copying */
-static void cover_fast(void)
-{
+static void cover_fast(void) {
     inf("e5 e0 81 ad 6d cb b2 2c c9 01 1e 59 63 ae 7d ee fb 4d fd b5 35 41 68"
         " ff 7f 0f 0 0 0", "fast length extra bits", 0, -8, 258, Z_DATA_ERROR);
     inf("25 fd 81 b5 6d 59 b6 6a 49 ea af 35 6 34 eb 8c b9 f6 b9 1e ef 67 49"
@@ -656,9 +670,8 @@ static void cover_fast(void)
         Z_STREAM_END);
 }
 
-int main(void)
-{
-    fprintf(stderr, "%s\n", zlibVersion());
+int main(void) {
+    fprintf(stderr, "%s\n", zVersion());
     cover_support();
     cover_wrap();
     cover_back();

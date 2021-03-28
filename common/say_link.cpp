@@ -101,7 +101,7 @@ const std::string &EQ::SayLinkEngine::GenerateLink()
 		m_Error = true;
 		m_Link  = "<LINKER ERROR>";
 		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
-		LogError(">> LinkType: {}, Lengths: {link: {}({}), body: {}({}), text: {}({})}",
+		LogError(">> LinkType: {}, Lengths: [link: {}({}), body: {}({}), text: {}({})]",
 			m_LinkType,
 			m_Link.length(),
 			EQ::constants::SAY_LINK_MAXIMUM_SIZE,

@@ -161,9 +161,14 @@ bool Lua_Expedition::HasReplayLockout() {
 	return self->HasReplayLockout();
 }
 
+bool Lua_Expedition::IsLocked() {
+	Lua_Safe_Call_Bool();
+	return self->IsLocked();
+}
+
 void Lua_Expedition::RemoveCompass() {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(0, 0, 0, 0, true);
+	self->GetDynamicZone().SetCompass(0, 0, 0, 0, true);
 }
 
 void Lua_Expedition::RemoveLockout(std::string event_name) {
@@ -173,12 +178,12 @@ void Lua_Expedition::RemoveLockout(std::string event_name) {
 
 void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(zone_id, x, y, z, true);
+	self->GetDynamicZone().SetCompass(zone_id, x, y, z, true);
 }
 
 void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(zone_name, x, y, z, true);
+	self->GetDynamicZone().SetCompass(ZoneID(zone_name), x, y, z, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
@@ -213,23 +218,23 @@ void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzSafeReturn(zone_id, x, y, z, heading, true);
+	self->GetDynamicZone().SetSafeReturn(zone_id, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzSafeReturn(zone_name, x, y, z, heading, true);
+	self->GetDynamicZone().SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	Lua_Safe_Call_Void();
-	self->SetDzSecondsRemaining(seconds_remaining);
+	self->GetDynamicZone().SetSecondsRemaining(seconds_remaining);
 }
 
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzZoneInLocation(x, y, z, heading, true);
+	self->GetDynamicZone().SetZoneInLocation(x, y, z, heading, true);
 }
 
 void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration) {
@@ -270,6 +275,7 @@ luabind::scope lua_register_expedition() {
 		.def("GetZoneVersion", &Lua_Expedition::GetZoneVersion)
 		.def("HasLockout", (bool(Lua_Expedition::*)(std::string))&Lua_Expedition::HasLockout)
 		.def("HasReplayLockout", (bool(Lua_Expedition::*)(void))&Lua_Expedition::HasReplayLockout)
+		.def("IsLocked", &Lua_Expedition::IsLocked)
 		.def("RemoveCompass", (void(Lua_Expedition::*)(void))&Lua_Expedition::RemoveCompass)
 		.def("RemoveLockout", (void(Lua_Expedition::*)(std::string))&Lua_Expedition::RemoveLockout)
 		.def("SetCompass", (void(Lua_Expedition::*)(uint32_t, float, float, float))&Lua_Expedition::SetCompass)

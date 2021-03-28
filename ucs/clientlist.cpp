@@ -65,14 +65,10 @@ void Client::SendUptime() {
 	ms -= m * 60000;
 	uint32 s = ms / 1000;
 
-	char *Buffer = nullptr;
-
-	MakeAnyLenString(&Buffer, "UCS has been up for %02id %02ih %02im %02is", d, h, m, s);
-	GeneralChannelMessage(Buffer);
-	safe_delete_array(Buffer);
-	MakeAnyLenString(&Buffer, "Chat Messages Sent: %i, Mail Messages Sent: %i", ChatMessagesSent, MailMessagesSent);
-	GeneralChannelMessage(Buffer);
-	safe_delete_array(Buffer);
+	auto message = fmt::format("UCS has been up for {:02}d {:02}h {:02}m {:02}s", d, h, m, s);
+	GeneralChannelMessage(message);
+	message = fmt::format("Chat Messages Sent: {}, Mail Messages Sent: {}", ChatMessagesSent, MailMessagesSent);
+	GeneralChannelMessage(message);
 }
 
 std::vector<std::string> ParseRecipients(std::string RecipientString) {

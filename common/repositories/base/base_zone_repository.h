@@ -1,29 +1,12 @@
 /**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2020 EQEmulator Development Team (https://github.com/EQEmu/Server)
+ * DO NOT MODIFY THIS FILE
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
- */
-
-/**
  * This repository was automatically generated and is NOT to be modified directly.
- * Any repository modifications are meant to be made to
- * the repository extending the base. Any modifications to base repositories are to
- * be made by the generator only
+ * Any repository modifications are meant to be made to the repository extending the base.
+ * Any modifications to base repositories are to be made by the generator only
+ * 
+ * @generator ./utils/scripts/generators/repository-generator.pl
+ * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
 #ifndef EQEMU_BASE_ZONE_REPOSITORY_H
@@ -125,6 +108,7 @@ public:
 		int         max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
+		int         underworld_teleport_index;
 	};
 
 	static std::string PrimaryKey()
@@ -225,27 +209,13 @@ public:
 			"max_expansion",
 			"content_flags",
 			"content_flags_disabled",
+			"underworld_teleport_index",
 		};
 	}
 
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
-	}
-
-	static std::string InsertColumnsRaw()
-	{
-		std::vector<std::string> insert_columns;
-
-		for (auto &column : Columns()) {
-			if (column == PrimaryKey()) {
-				continue;
-			}
-
-			insert_columns.push_back(column);
-		}
-
-		return std::string(implode(", ", insert_columns));
 	}
 
 	static std::string TableName()
@@ -267,7 +237,7 @@ public:
 		return fmt::format(
 			"INSERT INTO {} ({}) ",
 			TableName(),
-			InsertColumnsRaw()
+			ColumnsRaw()
 		);
 	}
 
@@ -365,6 +335,7 @@ public:
 		entry.max_expansion             = 0;
 		entry.content_flags             = "";
 		entry.content_flags_disabled    = "";
+		entry.underworld_teleport_index = 0;
 
 		return entry;
 	}
@@ -384,10 +355,11 @@ public:
 	}
 
 	static Zone FindOne(
+		Database& db,
 		int zone_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
@@ -489,6 +461,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			return entry;
 		}
@@ -497,10 +470,11 @@ public:
 	}
 
 	static int DeleteOne(
+		Database& db,
 		int zone_id
 	)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
@@ -513,6 +487,7 @@ public:
 	}
 
 	static int UpdateOne(
+		Database& db,
 		Zone zone_entry
 	)
 	{
@@ -609,8 +584,9 @@ public:
 		update_values.push_back(columns[87] + " = " + std::to_string(zone_entry.max_expansion));
 		update_values.push_back(columns[88] + " = '" + EscapeString(zone_entry.content_flags) + "'");
 		update_values.push_back(columns[89] + " = '" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[90] + " = " + std::to_string(zone_entry.underworld_teleport_index));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"UPDATE {} SET {} WHERE {} = {}",
 				TableName(),
@@ -624,12 +600,14 @@ public:
 	}
 
 	static Zone InsertOne(
+		Database& db,
 		Zone zone_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+		insert_values.push_back(std::to_string(zone_entry.id));
 		insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
@@ -718,8 +696,9 @@ public:
 		insert_values.push_back(std::to_string(zone_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES ({})",
 				BaseInsert(),
@@ -738,6 +717,7 @@ public:
 	}
 
 	static int InsertMany(
+		Database& db,
 		std::vector<Zone> zone_entries
 	)
 	{
@@ -747,6 +727,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back("'" + EscapeString(zone_entry.short_name) + "'");
+			insert_values.push_back(std::to_string(zone_entry.id));
 			insert_values.push_back("'" + EscapeString(zone_entry.file_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.long_name) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.map_file_name) + "'");
@@ -835,13 +816,14 @@ public:
 			insert_values.push_back(std::to_string(zone_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
+			insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
 
 		std::vector<std::string> insert_values;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} VALUES {}",
 				BaseInsert(),
@@ -852,11 +834,11 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<Zone> All()
+	static std::vector<Zone> All(Database& db)
 	{
 		std::vector<Zone> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{}",
 				BaseSelect()
@@ -958,6 +940,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			all_entries.push_back(entry);
 		}
@@ -965,11 +948,11 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<Zone> GetWhere(std::string where_filter)
+	static std::vector<Zone> GetWhere(Database& db, std::string where_filter)
 	{
 		std::vector<Zone> all_entries;
 
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE {}",
 				BaseSelect(),
@@ -1072,6 +1055,7 @@ public:
 			entry.max_expansion             = atoi(row[87]);
 			entry.content_flags             = row[88] ? row[88] : "";
 			entry.content_flags_disabled    = row[89] ? row[89] : "";
+			entry.underworld_teleport_index = atoi(row[90]);
 
 			all_entries.push_back(entry);
 		}
@@ -1079,9 +1063,9 @@ public:
 		return all_entries;
 	}
 
-	static int DeleteWhere(std::string where_filter)
+	static int DeleteWhere(Database& db, std::string where_filter)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"DELETE FROM {} WHERE {}",
 				TableName(),
@@ -1092,9 +1076,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static int Truncate()
+	static int Truncate(Database& db)
 	{
-		auto results = content_db.QueryDatabase(
+		auto results = db.QueryDatabase(
 			fmt::format(
 				"TRUNCATE TABLE {}",
 				TableName()

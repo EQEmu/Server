@@ -78,6 +78,7 @@ public:
 	virtual void Init() { }
 	virtual void ReloadQuests() { }
 	virtual uint32 GetIdentifier() = 0;
+	virtual void RemoveEncounter(const std::string &name) { }
 	
 	//TODO: Set maximum quest errors instead of hard coding it
 	virtual void GetErrors(std::list<std::string> &err) {

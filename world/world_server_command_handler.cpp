@@ -355,14 +355,14 @@ namespace WorldserverCommandHandler {
 		instance_list_entry.duration      = 0;
 		instance_list_entry.never_expires = 1;
 
-		auto instance_list_inserted = InstanceListRepository::InsertOne(instance_list_entry);
+		auto instance_list_inserted = InstanceListRepository::InsertOne(database, instance_list_entry);
 
 		LogInfo("Inserted ID is [{}] zone [{}]", instance_list_inserted.id, instance_list_inserted.zone);
 
 		/**
 		 * Find one
 		 */
-		auto found_instance_list = InstanceListRepository::FindOne(instance_list_inserted.id);
+		auto found_instance_list = InstanceListRepository::FindOne(database, instance_list_inserted.id);
 
 		LogInfo("Found ID is [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
 
@@ -371,7 +371,7 @@ namespace WorldserverCommandHandler {
 		 */
 		LogInfo("Updating instance id [{}] zone [{}]", found_instance_list.id, found_instance_list.zone);
 
-		int update_instance_list_count = InstanceListRepository::UpdateOne(found_instance_list);
+		int update_instance_list_count = InstanceListRepository::UpdateOne(database, found_instance_list);
 
 		found_instance_list.zone = 777;
 
@@ -386,7 +386,7 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Delete one
 		 */
-		int deleted = InstanceListRepository::DeleteOne(found_instance_list.id);
+		int deleted = InstanceListRepository::DeleteOne(database, found_instance_list.id);
 
 		LogInfo("Deleting one instance [{}] deleted count [{}]", found_instance_list.id, deleted);
 
@@ -411,18 +411,18 @@ namespace WorldserverCommandHandler {
 		/**
 		 * Fetch all
 		 */
-		int inserted_count = InstanceListRepository::InsertMany(instance_lists);
+		int inserted_count = InstanceListRepository::InsertMany(database, instance_lists);
 
 		LogInfo("Bulk insertion test, inserted [{}]", inserted_count);
 
-		for (auto &entry: InstanceListRepository::GetWhere(fmt::format("zone = {}", 999))) {
+		for (auto &entry: InstanceListRepository::GetWhere(database, fmt::format("zone = {}", 999))) {
 			LogInfo("Iterating through entry id [{}] zone [{}]", entry.id, entry.zone);
 		}
 
 		/**
 		 * Delete where
 		 */
-		int deleted_count = InstanceListRepository::DeleteWhere(fmt::format("zone = {}", 999));
+		int deleted_count = InstanceListRepository::DeleteWhere(database, fmt::format("zone = {}", 999));
 
 		LogInfo("Bulk deletion test, deleted [{}]", deleted_count);
 
@@ -442,7 +442,7 @@ namespace WorldserverCommandHandler {
 			return;
 		}
 
-		auto zones = ZoneRepository::GetWhere("short_name = 'anguish'");
+		auto zones = ZoneRepository::GetWhere(content_db, "short_name = 'anguish'");
 
 		for (auto &zone: zones) {
 			LogInfo(

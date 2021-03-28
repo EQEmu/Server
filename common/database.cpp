@@ -1356,6 +1356,20 @@ bool Database::SetMQDetectionFlag(const char* accountname, const char* character
 	return results.RowsAffected() != 0;
 }
 
+bool Database::SetMQDetectionFlag(const char* accountname, const char* charactername, const std::string &hacked, const char* zone) {
+	//Utilize the "hacker" table, but also give zone information.
+	auto query = fmt::format("INSERT INTO hackers(account, name, hacked, zone) values('{}', '{}', '{}', '{}')",
+				 accountname, charactername, hacked, zone);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+	{
+		return false;
+	}
+
+	return results.RowsAffected() != 0;
+}
+
 uint8 Database::GetRaceSkill(uint8 skillid, uint8 in_race)
 {
 	uint16 race_cap = 0;

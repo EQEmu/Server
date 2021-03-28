@@ -65,6 +65,15 @@ public:
 
 	// Custom extended repository methods here
 
+	static int UpdateDuration(Database& db, int instance_id, uint32_t new_duration)
+	{
+		auto results = db.QueryDatabase(fmt::format(
+			"UPDATE {} SET duration = {} WHERE {} = {};",
+			TableName(), new_duration, PrimaryKey(), instance_id
+		));
+
+		return (results.Success() ? results.RowsAffected() : 0);
+	}
 };
 
 #endif //EQEMU_INSTANCE_LIST_REPOSITORY_H

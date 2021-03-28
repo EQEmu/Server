@@ -42,23 +42,27 @@
 #undef THIS
 #endif
 
+#define VALIDATE_THIS_IS_GROUP \
+	do { \
+		if (sv_derived_from(ST(0), "Group")) { \
+			IV tmp = SvIV((SV*)SvRV(ST(0))); \
+			THIS = INT2PTR(Group*, tmp); \
+		} else { \
+			Perl_croak(aTHX_ "THIS is not of type Group"); \
+		} \
+		if (THIS == nullptr) { \
+			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash."); \
+		} \
+	} while (0);
 
 XS(XS_Group_DisbandGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_DisbandGroup) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::DisbandGroup(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::DisbandGroup(THIS)"); // @categories Script Utility, Group
 	{
 		Group *THIS;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		THIS->DisbandGroup();
 	}
 	XSRETURN_EMPTY;
@@ -68,20 +72,12 @@ XS(XS_Group_IsGroupMember); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_IsGroupMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::IsGroupMember(THIS, client)");
+		Perl_croak(aTHX_ "Usage: Group::IsGroupMember(THIS, client)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group *THIS;
 		bool  RETVAL;
 		Mob   *client;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			client = INT2PTR(Mob *, tmp);
@@ -101,20 +97,12 @@ XS(XS_Group_CastGroupSpell); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_CastGroupSpell) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Group::CastGroupSpell(THIS, Mob* caster, uint16 spell_id)");
+		Perl_croak(aTHX_ "Usage: Group::CastGroupSpell(THIS, Mob* caster, uint16 spell_id)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group  *THIS;
 		Mob    *caster;
 		uint16 spellid = (uint16) SvUV(ST(2));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			caster = INT2PTR(Mob *, tmp);
@@ -132,20 +120,12 @@ XS(XS_Group_SplitExp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_SplitExp) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Group::SplitExp(THIS, uint32 exp, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Group::SplitExp(THIS, uint32 exp, Mob* other)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group  *THIS;
 		uint32 exp = (uint32) SvUV(ST(1));
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(2), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(2)));
 			other = INT2PTR(Mob *, tmp);
@@ -163,21 +143,13 @@ XS(XS_Group_GroupMessage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GroupMessage) {
 	dXSARGS;
 	if ((items != 3) && (items != 4))    // the 3 item version is kept for backwards compatability
-		Perl_croak(aTHX_ "Usage: Group::GroupMessage(THIS, Mob* sender, uint8 language, string message)");
+		Perl_croak(aTHX_ "Usage: Group::GroupMessage(THIS, Mob* sender, uint8 language, string message)"); // @categories Script Utility, Group
 	{
 		Group *THIS;
 		Mob   *sender;
 		uint8 language;
 		char  *message;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -204,21 +176,13 @@ XS(XS_Group_GetTotalGroupDamage); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GetTotalGroupDamage) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::GetTotalGroupDamage(THIS, Mob* other)");
+		Perl_croak(aTHX_ "Usage: Group::GetTotalGroupDamage(THIS, Mob* other)"); // @categories Script Utility, Group
 	{
 		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
 		Mob    *other;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			other = INT2PTR(Mob *, tmp);
@@ -238,22 +202,14 @@ XS(XS_Group_SplitMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_SplitMoney) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Group::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)");
+		Perl_croak(aTHX_ "Usage: Group::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)"); // @categories Currency and Points, Script Utility, Group
 	{
 		Group  *THIS;
 		uint32 copper   = (uint32) SvUV(ST(1));
 		uint32 silver   = (uint32) SvUV(ST(2));
 		uint32 gold     = (uint32) SvUV(ST(3));
 		uint32 platinum = (uint32) SvUV(ST(4));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		THIS->SplitMoney(copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
@@ -263,19 +219,11 @@ XS(XS_Group_SetLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_SetLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SetLeader(THIS, Mob* new_leader)");
+		Perl_croak(aTHX_ "Usage: Group::SetLeader(THIS, Mob* new_leader)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group *THIS;
 		Mob   *newleader;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newleader = INT2PTR(Mob *, tmp);
@@ -293,19 +241,11 @@ XS(XS_Group_GetLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GetLeader) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::GetLeader(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::GetLeader(THIS)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group *THIS;
 		Mob   *RETVAL;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetLeader();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
@@ -317,20 +257,12 @@ XS(XS_Group_GetLeaderName); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GetLeaderName) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::GetLeaderName(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::GetLeaderName(THIS)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group      *THIS;
 		const char *RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetLeaderName();
 		sv_setpv(TARG, RETVAL);
 		XSprePUSH;
@@ -343,19 +275,11 @@ XS(XS_Group_SendHPPacketsTo); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_SendHPPacketsTo) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsTo(THIS, Mob* new_member)");
+		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsTo(THIS, Mob* new_member)"); // @categories Script Utility, Group
 	{
 		Group *THIS;
 		Mob   *newmember;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newmember = INT2PTR(Mob *, tmp);
@@ -373,19 +297,11 @@ XS(XS_Group_SendHPPacketsFrom); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_SendHPPacketsFrom) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsFrom(THIS, Mob* new_member)");
+		Perl_croak(aTHX_ "Usage: Group::SendHPPacketsFrom(THIS, Mob* new_member)"); // @categories Script Utility, Group
 	{
 		Group *THIS;
 		Mob   *newmember;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			newmember = INT2PTR(Mob *, tmp);
@@ -403,20 +319,12 @@ XS(XS_Group_IsLeader); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_IsLeader) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::IsLeader(THIS, Mob* target)");
+		Perl_croak(aTHX_ "Usage: Group::IsLeader(THIS, Mob* target)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group *THIS;
 		bool  RETVAL;
 		Mob   *leadertest;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			leadertest = INT2PTR(Mob *, tmp);
@@ -436,20 +344,12 @@ XS(XS_Group_GroupCount); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GroupCount) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::GroupCount(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::GroupCount(THIS)"); // @categories Script Utility, Group
 	{
 		Group *THIS;
 		uint8 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GroupCount();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -461,20 +361,12 @@ XS(XS_Group_GetHighestLevel); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GetHighestLevel) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::GetHighestLevel(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::GetHighestLevel(THIS)"); // @categories Script Utility, Group
 	{
 		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetHighestLevel();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -486,7 +378,7 @@ XS(XS_Group_TeleportGroup); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_TeleportGroup) {
 	dXSARGS;
 	if (items != 7)
-		Perl_croak(aTHX_ "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)");
+		Perl_croak(aTHX_ "Usage: Group::TeleportGroup(THIS, Mob* sender, uint32 zone_id, float x, float y, float z, float heading)"); // @categories Script Utility, Group
 	{
 		Group  *THIS;
 		Mob    *sender;
@@ -495,15 +387,7 @@ XS(XS_Group_TeleportGroup) {
 		float  y       = (float) SvNV(ST(4));
 		float  z       = (float) SvNV(ST(5));
 		float  heading = (float) SvNV(ST(6));
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
 			sender = INT2PTR(Mob *, tmp);
@@ -521,20 +405,12 @@ XS(XS_Group_GetID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Group_GetID) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Group::GetID(THIS)");
+		Perl_croak(aTHX_ "Usage: Group::GetID(THIS)"); // @categories Script Utility, Group
 	{
 		Group  *THIS;
 		uint32 RETVAL;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		RETVAL = THIS->GetID();
 		XSprePUSH;
 		PUSHu((UV) RETVAL);
@@ -546,21 +422,13 @@ XS(XS_Group_GetMember);
 XS(XS_Group_GetMember) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Group::GetMember(THIS, int group_index)");
+		Perl_croak(aTHX_ "Usage: Group::GetMember(THIS, int group_index)"); // @categories Account and Character, Script Utility, Group
 	{
 		Group  *THIS;
 		Mob    *member;
 		Client *RETVAL = nullptr;
 		dXSTARG;
-
-		if (sv_derived_from(ST(0), "Group")) {
-			IV tmp = SvIV((SV *) SvRV(ST(0)));
-			THIS = INT2PTR(Group *, tmp);
-		} else
-			Perl_croak(aTHX_ "THIS is not of type Group");
-		if (THIS == nullptr)
-			Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+		VALIDATE_THIS_IS_GROUP;
 		int index = (int) SvUV(ST(1));
 		if (index < 0 || index > 5)
 			RETVAL = nullptr;
@@ -584,14 +452,7 @@ XS(XS_Group_DoesAnyMemberHaveExpeditionLockout) {
 	}
 
 	Group* THIS = nullptr;
-	if (sv_derived_from(ST(0), "Group")) {
-		IV tmp = SvIV((SV *) SvRV(ST(0)));
-		THIS = INT2PTR(Group *, tmp);
-	} else
-		Perl_croak(aTHX_ "THIS is not of type Group");
-	if (THIS == nullptr)
-		Perl_croak(aTHX_ "THIS is nullptr, avoiding crash.");
-
+	VALIDATE_THIS_IS_GROUP;
 	std::string expedition_name(SvPV_nolen(ST(1)));
 	std::string event_name(SvPV_nolen(ST(2)));
 	int max_check_count = (items == 4) ? static_cast<int>(SvIV(ST(3))) : 0;

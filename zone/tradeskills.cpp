@@ -1582,7 +1582,7 @@ void Client::LearnRecipe(uint32 recipe_id)
 		return;
 	}
 
-	auto tradeskill_recipe = TradeskillRecipeRepository::FindOne(recipe_id);
+	auto tradeskill_recipe = TradeskillRecipeRepository::FindOne(content_db, recipe_id);
 	if (tradeskill_recipe.id == 0) {
 		LogError("Invalid recipe [{}]", recipe_id);
 		return;

@@ -87,6 +87,7 @@ public:
 	};
 
 	void ScaleNPC(NPC * npc);
+	void ResetNPCScaling(NPC * npc);
 	bool IsAutoScaled(NPC * npc);
 	bool LoadScaleData();
 

@@ -32,7 +32,8 @@
 #include "../common/features.h"
 #include "../common/guilds.h"
 
-#include "dynamiczone.h"
+#include "entity.h"
+#include "dynamic_zone.h"
 #include "guild_mgr.h"
 #include "petitions.h"
 #include "quest_parser_collection.h"
@@ -601,6 +602,8 @@ void EntityList::EncounterProcess()
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
 		if (!it->second->Process()) {
+			// if Process is returning false here, we probably just got called from ReloadQuests .. oh well
+			parse->RemoveEncounter(it->second->GetEncounterName());
 			safe_delete(it->second);
 			free_ids.push(it->first);
 			it = encounter_list.erase(it);
@@ -2564,6 +2567,7 @@ void EntityList::RemoveAllEncounters()
 {
 	auto it = encounter_list.begin();
 	while (it != encounter_list.end()) {
+		parse->RemoveEncounter(it->second->GetEncounterName());
 		safe_delete(it->second);
 		free_ids.push(it->first);
 		it = encounter_list.erase(it);
@@ -2998,7 +3002,7 @@ void EntityList::Depop(bool StartSpawnTimer)
 			if (own && own->IsClient())
 				continue;
 
-			if (pnpc->IsHorse)
+			if (pnpc->IsHorse())
 				continue;
 
 			if (pnpc->IsFindable())
@@ -3603,18 +3607,21 @@ void EntityList::AddHealAggro(Mob *target, Mob *caster, uint16 hate)
 
 void EntityList::OpenDoorsNear(Mob *who)
 {
+	if (!who->CanOpenDoors()) {
+		return;
+	}
 
-	for (auto it = door_list.begin();it != door_list.end(); ++it) {
-		Doors *cdoor = it->second;
-		if (!cdoor || cdoor->IsDoorOpen())
+	for (auto &it : door_list) {
+		Doors *door = it.second;
+		if (!door || door->IsDoorOpen()) {
 			continue;
+		}
 
-		auto diff = who->GetPosition() - cdoor->GetPosition();
-
-		float curdist = diff.x * diff.x + diff.y * diff.y;
-
-		if (diff.z * diff.z < 10 && curdist <= 100)
-			cdoor->Open(who);
+		auto  diff     = who->GetPosition() - door->GetPosition();
+		float distance = diff.x * diff.x + diff.y * diff.y;
+		if (diff.z * diff.z < 10 && distance <= 100) {
+			door->Open(who);
+		}
 	}
 }
 
@@ -3900,22 +3907,24 @@ void EntityList::ProcessProximitySay(const char *Message, Client *c, uint8 langu
 
 void EntityList::SaveAllClientsTaskState()
 {
-	if (!taskmanager)
+	if (!task_manager) {
 		return;
+	}
 
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
 		Client *client = it->second;
-		if (client->IsTaskStateLoaded())
+		if (client->IsTaskStateLoaded()) {
 			client->SaveTaskState();
+		}
 
 		++it;
 	}
 }
 
-void EntityList::ReloadAllClientsTaskState(int TaskID)
+void EntityList::ReloadAllClientsTaskState(int task_id)
 {
-	if (!taskmanager)
+	if (!task_manager)
 		return;
 
 	auto it = client_list.begin();
@@ -3924,11 +3933,11 @@ void EntityList::ReloadAllClientsTaskState(int TaskID)
 		if (client->IsTaskStateLoaded()) {
 			// If we have been passed a TaskID, only reload the client state if they have
 			// that Task active.
-			if ((!TaskID) || (TaskID && client->IsTaskActive(TaskID))) {
+			if ((!task_id) || (task_id && client->IsTaskActive(task_id))) {
 				Log(Logs::General, Logs::Tasks, "[CLIENTLOAD] Reloading Task State For Client %s", client->GetName());
 				client->RemoveClientTaskState();
 				client->LoadClientTaskState();
-				taskmanager->SendActiveTasksToClient(client);
+				task_manager->SendActiveTasksToClient(client);
 			}
 		}
 		++it;
@@ -4135,8 +4144,13 @@ void EntityList::AddTempPetsToHateList(Mob *owner, Mob* other, bool bFrenzy)
 		NPC* n = it->second;
 		if (n->GetSwarmInfo()) {
 			if (n->GetSwarmInfo()->owner_id == owner->GetID()) {
-				if (!n->GetSpecialAbility(IMMUNE_AGGRO))
+				if (
+					!n->GetSpecialAbility(IMMUNE_AGGRO) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_CLIENT) && other->IsClient()) &&
+					!(n->GetSpecialAbility(IMMUNE_AGGRO_NPC) && other->IsNPC())
+				) {
 					n->hate_list.AddEntToHateList(other, 0, 0, bFrenzy);
+				}
 			}
 		}
 		++it;
@@ -4239,7 +4253,7 @@ void EntityList::ForceGroupUpdate(uint32 gid)
 	}
 }
 
-void EntityList::SendGroupLeave(uint32 gid, const char *name, bool checkleader)
+void EntityList::SendGroupLeave(uint32 gid, const char *name)
 {
 	auto it = client_list.begin();
 	while (it != client_list.end()) {
@@ -4255,39 +4269,13 @@ void EntityList::SendGroupLeave(uint32 gid, const char *name, bool checkleader)
 					gj->action = groupActLeave;
 					strcpy(gj->yourname, c->GetName());
 					Mob *Leader = g->GetLeader();
-					if (Leader) {
+					if (Leader)
 						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
-					}
 					c->QueuePacket(outapp);
 					safe_delete(outapp);
-					g->DelMemberOOZ(name, checkleader);
-					if (g->IsLeader(c) && c->IsLFP()) {
+					g->DelMemberOOZ(name);
+					if (g->IsLeader(c) && c->IsLFP())
 						c->UpdateLFP();
-					}
-				}
-			}
-		}
-		++it;
-	}
-}
-
-void EntityList::SendGroupLeader(uint32 gid, const char *lname, const char *oldlname)
-{
-	auto it = client_list.begin();
-	while (it != client_list.end()) {
-		if (it->second){
-			Group *g = nullptr;
-			g = it->second->GetGroup();
-			if (g) {
-				if (g->GetID() == gid) {
-					EQApplicationPacket* outapp = new EQApplicationPacket(OP_GroupUpdate,sizeof(GroupJoin_Struct));
-					GroupJoin_Struct* gj = (GroupJoin_Struct*) outapp->pBuffer;
-					gj->action = groupActMakeLeader;
-					strcpy(gj->membername, lname);
-					strcpy(gj->yourname, oldlname);
-					it->second->QueuePacket(outapp);
-					Log(Logs::Detail, Logs::Group, "SendGroupLeader(): Entity loop leader update packet sent to: %s .", it->second->GetName());
-					safe_delete(outapp);
 				}
 			}
 		}
@@ -4310,9 +4298,9 @@ void EntityList::SendGroupJoin(uint32 gid, const char *name)
 					gj->action = groupActJoin;
 					strcpy(gj->yourname, it->second->GetName());
 					Mob *Leader = g->GetLeader();
-					if (Leader) {
+					if (Leader)
 						Leader->CastToClient()->GetGroupAAs(&gj->leader_aas);
-					}
+
 					it->second->QueuePacket(outapp);
 					safe_delete(outapp);
 				}
@@ -5263,16 +5251,7 @@ std::unordered_map<uint16, Mob *> &EntityList::GetCloseMobList(Mob *mob, float d
 
 void EntityList::GateAllClientsToSafeReturn()
 {
-	DynamicZone dz;
-	if (zone)
-	{
-		dz = zone->GetDynamicZone();
-
-		LogDynamicZones(
-			"Sending all clients in zone: [{}] instance: [{}] to dz safereturn or bind",
-			zone->GetZoneID(), zone->GetInstanceID()
-		);
-	}
+	DynamicZone* dz = zone ? zone->GetDynamicZone() : nullptr;
 
 	for (const auto& client_list_iter : client_list)
 	{
