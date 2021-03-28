@@ -4411,27 +4411,27 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 
 	PlayerPositionUpdateClient_Struct *ppu = (PlayerPositionUpdateClient_Struct *) app->pBuffer;
 
-	/* Boat handling */
-	if (ppu->spawn_id != GetID()) {
-		/* If player is controlling boat */
-		if (ppu->spawn_id && ppu->spawn_id == controlling_boat_id) {
-			Mob *boat = entity_list.GetMob(controlling_boat_id);
-			if (boat == 0) {
-				controlling_boat_id = 0;
-				return;
-			}
+	/* Non PC handling like boats and eye of zomm */
+	if (ppu->spawn_id && ppu->spawn_id != GetID()) {
+		Mob *cmob = entity_list.GetMob(ppu->spawn_id);
 
+		if (!cmob) {
+			return;
+		}
+
+		if (cmob->IsControllableBoat()) {
+			// Controllable boats
 			auto boat_delta = glm::vec4(ppu->delta_x, ppu->delta_y, ppu->delta_z, EQ10toFloat(ppu->delta_heading));
-			boat->SetDelta(boat_delta);
+			cmob->SetDelta(boat_delta);
 
 			auto outapp = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 			PlayerPositionUpdateServer_Struct *ppus = (PlayerPositionUpdateServer_Struct *) outapp->pBuffer;
-			boat->MakeSpawnUpdate(ppus);
-			entity_list.QueueCloseClients(boat, outapp, true, 300, this, false);
+			cmob->MakeSpawnUpdate(ppus);
+			entity_list.QueueCloseClients(cmob, outapp, true, 300, this, false);
 			safe_delete(outapp);
 
 			/* Update the boat's position on the server, without sending an update */
-			boat->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
+			cmob->GMMove(ppu->x_pos, ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading), false);
 			return;
 		}
 		else {
@@ -4439,16 +4439,13 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// so that other clients see it.  I could add a check here for eye of zomm
 			// race, to limit this code, but this should handle any client controlled
 			// mob that gets updates from OP_ClientUpdate
-			if (ppu->spawn_id == controlled_mob_id) {
-				Mob *cmob = entity_list.GetMob(ppu->spawn_id);
-				if (cmob != nullptr) {
-					cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
-					cmob->SetHeading(EQ12toFloat(ppu->heading));
-					mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0,
-							0.0, 0, ClientRangeAny, nullptr, this);
-					cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos,
-							ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
-				}
+			if (!cmob->IsControllableBoat() && ppu->spawn_id == controlled_mob_id) {
+				cmob->SetPosition(ppu->x_pos, ppu->y_pos, ppu->z_pos);
+				cmob->SetHeading(EQ12toFloat(ppu->heading));
+				mMovementManager->SendCommandToClients(cmob, 0.0, 0.0, 0.0,
+						0.0, 0, ClientRangeAny, nullptr, this);
+				cmob->CastToNPC()->SaveGuardSpot(glm::vec4(ppu->x_pos,
+						ppu->y_pos, ppu->z_pos, EQ12toFloat(ppu->heading)));
 			}
 		}
 	return;
@@ -4476,9 +4473,23 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			LogError("Can't find boat for client position offset.");
 		}
 		else {
-			cx += boat->GetX();
-			cy += boat->GetY();
+			// Calculate angle from boat heading to EQ heading
+			double theta = std::fmod(((boat->GetHeading() * 360.0) / 512.0),360.0);
+			double thetar = (theta * M_PI) / 180.0;
+
+			// Boat cx is inverted (positive to left)
+			// Boat cy is normal (positive toward heading)
+			double cosine = std::cos(thetar);
+			double sine = std::sin(thetar);
+
+			double normalizedx, normalizedy;	
+			normalizedx = cx * cosine - -cy * sine;
+			normalizedy = -cx * sine + cy * cosine;
+
+			cx = boat->GetX() + normalizedx;
+			cy = boat->GetY() + normalizedy;
 			cz += boat->GetZ();
+
 			new_heading += boat->GetHeading();
 		}
 	}
