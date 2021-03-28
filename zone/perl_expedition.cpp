@@ -407,7 +407,7 @@ XS(XS_Expedition_RemoveCompass) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	THIS->SetDzCompass(0, 0, 0, 0, true);
+	THIS->GetDynamicZone().SetCompass(0, 0, 0, 0, true);
 
 	XSRETURN_EMPTY;
 }
@@ -446,12 +446,12 @@ XS(XS_Expedition_SetCompass) {
 	if (SvTYPE(ST(1)) == SVt_PV)
 	{
 		std::string zone_name(SvPV_nolen(ST(1)));
-		THIS->SetDzCompass(zone_name, x, y, z, true);
+		THIS->GetDynamicZone().SetCompass(ZoneID(zone_name), x, y, z, true);
 	}
 	else if (SvTYPE(ST(1)) == SVt_IV)
 	{
 		uint32_t zone_id = static_cast<uint32_t>(SvUV(ST(1)));
-		THIS->SetDzCompass(zone_id, x, y, z, true);
+		THIS->GetDynamicZone().SetCompass(zone_id, x, y, z, true);
 	}
 	else
 	{
@@ -556,12 +556,12 @@ XS(XS_Expedition_SetSafeReturn) {
 	if (SvTYPE(ST(1)) == SVt_PV)
 	{
 		std::string zone_name(SvPV_nolen(ST(1)));
-		THIS->SetDzSafeReturn(zone_name, x, y, z, heading, true);
+		THIS->GetDynamicZone().SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 	}
 	else if (SvTYPE(ST(1)) == SVt_IV)
 	{
 		uint32_t zone_id = static_cast<uint32_t>(SvUV(ST(1)));
-		THIS->SetDzSafeReturn(zone_id, x, y, z, heading, true);
+		THIS->GetDynamicZone().SetSafeReturn(zone_id, x, y, z, heading, true);
 	}
 	else
 	{
@@ -582,7 +582,7 @@ XS(XS_Expedition_SetSecondsRemaining) {
 	VALIDATE_THIS_IS_EXPEDITION;
 
 	uint32_t seconds_remaining = static_cast<uint32_t>(SvUV(ST(1)));
-	THIS->SetDzSecondsRemaining(seconds_remaining);
+	THIS->GetDynamicZone().SetSecondsRemaining(seconds_remaining);
 
 	XSRETURN_EMPTY;
 }
@@ -602,7 +602,7 @@ XS(XS_Expedition_SetZoneInLocation) {
 	float z = static_cast<float>(SvNV(ST(3)));
 	float heading = static_cast<float>(SvNV(ST(4)));
 
-	THIS->SetDzZoneInLocation(x, y, z, heading, true);
+	THIS->GetDynamicZone().SetZoneInLocation(x, y, z, heading, true);
 
 	XSRETURN_EMPTY;
 }

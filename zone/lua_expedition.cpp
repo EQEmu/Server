@@ -168,7 +168,7 @@ bool Lua_Expedition::IsLocked() {
 
 void Lua_Expedition::RemoveCompass() {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(0, 0, 0, 0, true);
+	self->GetDynamicZone().SetCompass(0, 0, 0, 0, true);
 }
 
 void Lua_Expedition::RemoveLockout(std::string event_name) {
@@ -178,12 +178,12 @@ void Lua_Expedition::RemoveLockout(std::string event_name) {
 
 void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(zone_id, x, y, z, true);
+	self->GetDynamicZone().SetCompass(zone_id, x, y, z, true);
 }
 
 void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->SetDzCompass(zone_name, x, y, z, true);
+	self->GetDynamicZone().SetCompass(ZoneID(zone_name), x, y, z, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
@@ -218,23 +218,23 @@ void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzSafeReturn(zone_id, x, y, z, heading, true);
+	self->GetDynamicZone().SetSafeReturn(zone_id, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzSafeReturn(zone_name, x, y, z, heading, true);
+	self->GetDynamicZone().SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	Lua_Safe_Call_Void();
-	self->SetDzSecondsRemaining(seconds_remaining);
+	self->GetDynamicZone().SetSecondsRemaining(seconds_remaining);
 }
 
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->SetDzZoneInLocation(x, y, z, heading, true);
+	self->GetDynamicZone().SetZoneInLocation(x, y, z, heading, true);
 }
 
 void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration) {
