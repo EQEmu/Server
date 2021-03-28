@@ -152,7 +152,7 @@ int32 Mob::mod_monk_special_damage(int32 ndamage, SkillType skill_type) { return
 //ndamage - Backstab damage as calculated by default formulas
 int32 Mob::mod_backstab_damage(int32 ndamage) { return(ndamage); }
 
-//Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.  Base is Combat:ArcheryBonusChance
+//Chance for 50+ archery bonus damage if Combat:UseArcheryBonusRoll is true.
 int Mob::mod_archery_bonus_chance(int bonuschance, const ItemInst* RangeWeapon) { return(bonuschance); }
 
 //Archery bonus damage
