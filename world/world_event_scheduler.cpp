@@ -1,5 +1,6 @@
 #include "world_event_scheduler.h"
 #include "../common/servertalk.h"
+#include <ctime>
 
 void WorldEventScheduler::Process(ZSList *zs_list)
 {
