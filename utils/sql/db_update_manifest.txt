@@ -415,6 +415,7 @@
 9159|2020_12_22_expedition_system.sql|SELECT * FROM db_version WHERE version >= 9159|empty|
 9160|2021_02_14_npc_exp_mod.sql|SHOW COLUMNS from `npc_types` LIKE 'exp_mod'|empty|
 9161|2021_02_15_npc_spell_entries_unsigned.sql|SELECT * FROM db_version WHERE version >= 9161|empty|
+9162|2021_02_17_server_scheduled_events|SELECT * FROM db_version WHERE version >= 9162|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
