@@ -37,6 +37,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 					for (auto &short_name: split(e.event_data, ',')) {
 						if (zone->GetShortName() == short_name) {
 							zone->SetIsHotzone(false);
+							break;
 						}
 					}
 					RemoveActiveEvent(e);
@@ -90,6 +91,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 						if (zone->GetShortName() == short_name) {
 							zone->SetIsHotzone(true);
 							LogScheduler("Activating Event [{}] Enabling zone as hotzone", e.description);
+							break;
 						}
 					}
 					m_active_events.push_back(e);

@@ -33,7 +33,7 @@ void ServerEventScheduler::LoadScheduledEvents()
 		// data excluded from output because it can be very large
 
 		LogScheduler(
-			"Loaded Event ({}) [{}] type [{}] start [{}/{}/{} {}:{}:00] end [{}/{}/{} {}:{}:00] cron [{}] created [{}]",
+			"Loaded Event ({}) [{}] type [{}] start [{}/{}/{} {:02}:{:02}:00] end [{}/{}/{} {:02}:{:02}:00] cron [{}] created [{}]",
 			e.id,
 			e.description,
 			e.event_type,

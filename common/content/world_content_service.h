@@ -23,7 +23,8 @@
 
 #include <string>
 #include <vector>
-#include "../database.h"
+
+class Database;
 
 namespace Expansion {
 	static const int EXPANSION_ALL        = -1;
