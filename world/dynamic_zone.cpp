@@ -35,6 +35,30 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	return nullptr;
 }
 
+DynamicZoneStatus DynamicZone::Process(bool force_expire)
+{
+	DynamicZoneStatus status = DynamicZoneStatus::Normal;
+
+	if (force_expire || IsExpired())
+	{
+		status = DynamicZoneStatus::Expired;
+
+		auto dz_zoneserver = zoneserver_list.FindByInstanceID(GetInstanceID());
+		if (!dz_zoneserver || dz_zoneserver->NumPlayers() == 0) // no clients inside dz
+		{
+			status = DynamicZoneStatus::ExpiredEmpty;
+
+			if (force_expire && !m_is_pending_early_shutdown && RuleB(DynamicZone, EmptyShutdownEnabled))
+			{
+				SetSecondsRemaining(RuleI(DynamicZone, EmptyShutdownDelaySeconds));
+				m_is_pending_early_shutdown = true;
+			}
+		}
+	}
+
+	return status;
+}
+
 void DynamicZone::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	auto now = std::chrono::system_clock::now();

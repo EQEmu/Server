@@ -44,7 +44,7 @@ public:
 
 private:
 	std::vector<Expedition> m_expeditions;
-	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(Expedition, WorldExpeditionProcessRateMS))};
+	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(DynamicZone, WorldProcessRate))};
 };
 
 #endif

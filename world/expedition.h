@@ -43,19 +43,17 @@ public:
 	uint32_t GetID() const { return m_expedition_id; }
 	bool HasMember(uint32_t character_id);
 	bool IsEmpty() const { return m_member_ids.empty(); }
-	bool IsPendingDelete() const { return m_pending_delete; }
 	bool IsValid() const { return m_expedition_id != 0; }
+	bool Process();
 	void SendZonesExpeditionDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	bool SetNewLeader(uint32_t new_leader_id);
-	void SetPendingDelete(bool pending) { m_pending_delete = pending; }
 
 private:
 	void SendZonesLeaderChanged();
 
 	uint32_t m_expedition_id  = 0;
 	uint32_t m_leader_id      = 0;
-	bool m_pending_delete = false;
 	bool m_choose_leader_needed = false;
 	Timer m_choose_leader_cooldown_timer;
 	Timer m_warning_cooldown_timer;
