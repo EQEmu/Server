@@ -705,7 +705,8 @@ sub get_windows_wget {
         if (!-d "bin") {
             mkdir("bin");
         }
-        `powershell -Command "(New-Object Net.WebClient).DownloadFile('https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe', 'bin\\wget.exe') "`
+        eval "use LWP::Simple qw(getstore);";
+        getstore("https://raw.githubusercontent.com/Akkadius/eqemu-install-v2/master/windows/wget.exe", "bin\\wget.exe");
     }
 }
 
