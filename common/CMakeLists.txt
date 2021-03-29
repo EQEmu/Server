@@ -16,6 +16,7 @@ SET(common_sources
 	database_instances.cpp
 	dbcore.cpp
 	deity.cpp
+	dynamic_zone_base.cpp
 	emu_constants.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
@@ -466,6 +467,7 @@ SET(common_headers
 	database_schema.h
 	dbcore.h
 	deity.h
+	dynamic_zone_base.h
 	emu_constants.h
 	emu_limits.h
 	emu_opcodes.h

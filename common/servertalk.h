@@ -161,7 +161,7 @@
 #define ServerOP_ExpeditionExpireWarning      0x0416
 #define ServerOP_ExpeditionChooseNewLeader    0x0417
 
-#define ServerOP_DzCharacterChange            0x0450
+#define ServerOP_DzAddRemoveCharacter         0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
 #define ServerOP_DzSetSecondsRemaining        0x0452
 #define ServerOP_DzDurationUpdate             0x0453
