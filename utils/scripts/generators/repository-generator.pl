@@ -237,7 +237,7 @@ foreach my $table_to_generate (@tables) {
         elsif ($column_default eq "''") {
             $default_value = '""';
         }
-        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar/i) {
+        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar|datetime/i) {
             $default_value = '""';
         }
 

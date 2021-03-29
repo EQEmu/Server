@@ -941,7 +941,6 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	spawn2_timer(1000),
 	hot_reload_timer(1000),
 	qglobal_purge_timer(30000),
-	hotzone_timer(120000),
 	m_SafePoint(0.0f,0.0f,0.0f),
 	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
 {
@@ -1581,8 +1580,6 @@ bool Zone::Process() {
 			}
 		}
 	}
-
-	if(hotzone_timer.Check()) { UpdateHotzone(); }
 
 	mMovementManager->Process();
 
@@ -2602,19 +2599,9 @@ uint32 Zone::GetSpawnKillCount(uint32 in_spawnid) {
 	return 0;
 }
 
-void Zone::UpdateHotzone()
+void Zone::SetIsHotzone(bool is_hotzone)
 {
-    std::string query = StringFormat("SELECT hotzone FROM zone WHERE short_name = '%s'", GetShortName());
-    auto results = content_db.QueryDatabase(query);
-    if (!results.Success())
-        return;
-
-    if (results.RowCount() == 0)
-        return;
-
-    auto row = results.begin();
-
-    is_hotzone = atoi(row[0]) == 0 ? false: true;
+	Zone::is_hotzone = is_hotzone;
 }
 
 void Zone::RequestUCSServerStatus() {
