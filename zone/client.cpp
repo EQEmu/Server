@@ -3161,53 +3161,37 @@ void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 	if (GetFilter(FilterDamageShields) == FilterHide && type == Chat::DamageShield)
 		return;
 
-	int i = 0, argcount = 0, length = 0;
-	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
+	if (type == Chat::Emote)
+		type = 4;
 
-	if(type==Chat::Emote)
-		type=4;
-
-	if(!message1)
-	{
+	if (!message1) {
 		MessageString(type, string_id);	// use the simple message instead
 		return;
 	}
 
-	message_arg[i++] = message1;
-	message_arg[i++] = message2;
-	message_arg[i++] = message3;
-	message_arg[i++] = message4;
-	message_arg[i++] = message5;
-	message_arg[i++] = message6;
-	message_arg[i++] = message7;
-	message_arg[i++] = message8;
-	message_arg[i++] = message9;
+	const char *message_arg[] = {
+		message1, message2, message3, message4, message5,
+		message6, message7, message8, message9
+	};
 
-	for(; message_arg[argcount]; ++argcount)
-		length += strlen(message_arg[argcount]) + 1;
-
-	length += 1;
-
-	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
-	for(i = 0; i < argcount; i++)
-	{
-		strcpy(bufptr, message_arg[i]);
-		bufptr += strlen(message_arg[i]) + 1;
+	SerializeBuffer buf(20);
+	buf.WriteInt32(0); // unknown
+	buf.WriteInt32(string_id);
+	buf.WriteInt32(type);
+	for (auto &m : message_arg) {
+		if (m == nullptr)
+			break;
+		buf.WriteString(m);
 	}
 
-	// since we're moving the pointer the 0 offset is correct
-	bufptr[0] = '\0';
+	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
 
-	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, buf);
+
+	if (distance > 0)
+		entity_list.QueueCloseClients(this, outapp.get(), false, distance);
 	else
-		QueuePacket(outapp);
-	safe_delete(outapp);
+		QueuePacket(outapp.get());
 }
 
 void Client::MessageString(const CZClientMessageString_Struct* msg)
@@ -3297,10 +3281,6 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 	if (!FilteredMessageCheck(sender, filter))
 		return;
 
-	int i = 0, argcount = 0, length = 0;
-	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
-
 	if (type == Chat::Emote)
 		type = 4;
 
@@ -3309,36 +3289,26 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 		return;
 	}
 
-	message_arg[i++] = message1;
-	message_arg[i++] = message2;
-	message_arg[i++] = message3;
-	message_arg[i++] = message4;
-	message_arg[i++] = message5;
-	message_arg[i++] = message6;
-	message_arg[i++] = message7;
-	message_arg[i++] = message8;
-	message_arg[i++] = message9;
+	const char *message_arg[] = {
+		message1, message2, message3, message4, message5,
+		message6, message7, message8, message9
+	};
 
-	for (; message_arg[argcount]; ++argcount)
-		length += strlen(message_arg[argcount]) + 1;
-
-	length += 1;
-
-	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
-	for (i = 0; i < argcount; i++) {
-		strcpy(bufptr, message_arg[i]);
-		bufptr += strlen(message_arg[i]) + 1;
+	SerializeBuffer buf(20);
+	buf.WriteInt32(0); // unknown
+	buf.WriteInt32(string_id);
+	buf.WriteInt32(type);
+	for (auto &m : message_arg) {
+		if (m == nullptr)
+			break;
+		buf.WriteString(m);
 	}
 
-	// since we're moving the pointer the 0 offset is correct
-	bufptr[0] = '\0';
+	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
 
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, buf);
+
+	QueuePacket(outapp.get());
 }
 
 void Client::Tell_StringID(uint32 string_id, const char *who, const char *message)
