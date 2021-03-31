@@ -1392,8 +1392,8 @@ void EntityList::SendZonePVPUpdates(Client *to)
 			//c->SendAppearancePacket(AT_PVP, c->GetPVP(), true, false, to);
 		if (c->IsEvil()) //Evil Deity have red tags -Darksinga edits
 			c->SendAppearancePacket(AT_PVP, c->IsEvil(), true, false, to);
-		if (c->IsGood()) //Good Deity have green tags -Darksinga edits
-			c->SendAppearancePacket(AT_GM, c->IsGood(), true, false, to);
+		if (c->IsGood()) //Good Deity have blue tags -Darksinga edits
+			c->SendAppearancePacket(AT_PVP, c->IsGood(), false, false, to);
 		if (c->IsNeutral()) //Neutral people have blue tags -Darksinga edits
 			c->SendAppearancePacket(AT_PVP, c->IsNeutral(), false, false, to);
 		++it;
