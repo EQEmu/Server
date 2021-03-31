@@ -1605,7 +1605,7 @@ void NPC::DoClassAttacks(Mob *target) {
 			break;
 		}
 		case WARRIOR: case WARRIORGM:{
-			if(level >= RuleI(Combat, NPCBashKickLevel)){
+			if(level >= RuleI(Combat, NPCBashKickLevel) && !IsPet()){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					DoAnim(animKick, 0, false);
 					int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
@@ -1627,6 +1627,36 @@ void NPC::DoClassAttacks(Mob *target) {
 					reuse = (BashReuseTime + 3) * 1000;
 					DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
 					did_attack = true;
+				}
+			}
+			else if (level >= RuleI(Combat, NPCBashKickLevel) && IsPet() && !IsCharmed())
+			{
+				if (GetRace() == 75 && GetTexture() == 1) {
+
+				}
+				else {
+					if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
+						DoAnim(animKick, 0, false);
+						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+
+						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
+
+						reuse = (KickReuseTime + 3) * 1000;
+						DoSpecialAttackDamage(target, EQ::skills::SkillKick, dmg, GetMinDamage(), -1, reuse);
+						did_attack = true;
+					}
+					else {
+						DoAnim(animTailRake, 0, false);
+						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+
+						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
+
+						reuse = (BashReuseTime + 3) * 1000;
+						DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
+						did_attack = true;
+					}
 				}
 			}
 			break;
