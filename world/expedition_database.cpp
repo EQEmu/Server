@@ -34,7 +34,7 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 			LEFT JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 			LEFT JOIN
 				(
-					SELECT dynamic_zone_id, COUNT(IF(is_current_member = TRUE, 1, NULL)) member_count
+					SELECT dynamic_zone_id, COUNT(*) member_count
 					FROM dynamic_zone_members
 					GROUP BY dynamic_zone_id
 				) dynamic_zone_members

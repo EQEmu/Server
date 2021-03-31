@@ -92,7 +92,6 @@ public:
 			FROM character_data
 				LEFT JOIN dynamic_zone_members
 					ON character_data.id = dynamic_zone_members.character_id
-					AND dynamic_zone_members.is_current_member = TRUE
 				LEFT JOIN expeditions
 					ON dynamic_zone_members.dynamic_zone_id = expeditions.dynamic_zone_id
 			WHERE character_data.name IN ({})
@@ -138,7 +137,6 @@ public:
 					ON expeditions.dynamic_zone_id = dynamic_zone_members.dynamic_zone_id
 			WHERE
 				dynamic_zone_members.character_id = {}
-				AND dynamic_zone_members.is_current_member = TRUE;
 		),
 			character_id
 		));

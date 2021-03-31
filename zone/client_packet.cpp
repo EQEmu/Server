@@ -1749,7 +1749,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	ApplyWeaponsStance();
 	auto dynamic_zone_member_entries = DynamicZoneMembersRepository::GetWhere(database,
-		fmt::format("character_id = {} AND is_current_member = TRUE", CharacterID()));
+		fmt::format("character_id = {}", CharacterID()));
 
 	for (const auto& entry : dynamic_zone_member_entries)
 	{

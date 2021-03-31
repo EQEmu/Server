@@ -234,7 +234,6 @@ void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
 		DynamicZoneMembersRepository::DynamicZoneMembers member_entry{};
 		member_entry.dynamic_zone_id = m_id;
 		member_entry.character_id = member.id;
-		member_entry.is_current_member = true;
 		insert_members.emplace_back(member_entry);
 
 		InstanceListPlayerRepository::InstanceListPlayer player_entry;
@@ -416,7 +415,7 @@ std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerMemberStatusPacket(
 uint32_t DynamicZoneBase::GetDatabaseMemberCount()
 {
 	return DynamicZoneMembersRepository::GetCountWhere(GetDatabase(),
-		fmt::format("dynamic_zone_id = {} AND is_current_member = TRUE", m_id));
+		fmt::format("dynamic_zone_id = {}", m_id));
 }
 
 bool DynamicZoneBase::HasDatabaseMember(uint32_t character_id)
@@ -427,7 +426,7 @@ bool DynamicZoneBase::HasDatabaseMember(uint32_t character_id)
 	}
 
 	auto entries = DynamicZoneMembersRepository::GetWhere(GetDatabase(), fmt::format(
-		"dynamic_zone_id = {} AND character_id = {} AND is_current_member = TRUE",
+		"dynamic_zone_id = {} AND character_id = {}",
 		m_id, character_id
 	));
 

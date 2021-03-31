@@ -294,7 +294,6 @@ public:
 			FROM dynamic_zones
 				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 				LEFT JOIN dynamic_zone_members ON dynamic_zones.id = dynamic_zone_members.dynamic_zone_id
-					AND dynamic_zone_members.is_current_member = TRUE
 			GROUP BY instance_list.id
 			ORDER BY dynamic_zones.id;
 		));
