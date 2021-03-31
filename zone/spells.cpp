@@ -244,6 +244,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		_StopSong();
 	}
 
+
 	//Added to prevent MQ2 exploitation of equipping normally-unequippable/clickable items with effects and clicking them for benefits.
 	if(item_slot && IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
@@ -4346,6 +4347,19 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			return true;
 		}
 
+		if(this->GetClass() == 41) 
+		{
+			LogSpells("We are immune to Charm spells");
+			caster->MessageString(Chat::Red, CANNOT_CHARM);	// need to verify message type, not in MQ2Cast for easy look up
+			int32 aggro = caster->CheckAggroAmount(spell_id, this);
+			if(aggro > 0) {
+				AddToHateList(caster, aggro);
+			} else {
+				AddToHateList(caster, 1,0,true,false,false,spell_id);
+			}
+			return true;
+		}
+
 		if(this == caster)
 		{
 			LogSpells("You are immune to your own charms");
@@ -5021,7 +5035,15 @@ void Mob::Mesmerize()
 
 	if (casting_spell_id)
 		InterruptSpell();
+	if (HasActiveSong()) {
+		_StopSong();
+		if (IsClient()) {
+			MessageString(Chat::Red, SONG_ENDS_ABRUPTLY);
+			SendSpellBarEnable(casting_spell_id);
+		}
+	}
 
+	
 	StopNavigation();
 }
 
