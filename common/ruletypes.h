@@ -292,6 +292,7 @@ RULE_BOOL(Zone, EnableZoneControllerGlobals, false, "Enables the ability to use 
 RULE_INT(Zone, GlobalLootMultiplier, 1, "Sets Global Loot drop multiplier for database based drops, useful for double, triple loot etc")
 RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a zone and has hit its zone shut down timer, it will hard kill the process to free memory back to the OS")
 RULE_INT(Zone, SecondsBeforeIdle, 60, "Seconds before IDLE_WHEN_EMPTY define kicks in")
+RULE_BOOL(Zone, IsCrossZoneInviteAllowed, true, "Disables inviting players across zones")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

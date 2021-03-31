@@ -6948,6 +6948,10 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	{
 		if (Invitee->IsClient())
 		{
+			if (Invitee->CastToClient()->CanPvP(this)) {
+				Message(Chat::Red, "Cannot invite players of opposing faction.");
+				return;
+			}
 			if (Invitee->CastToClient()->MercOnlyOrNoGroup() && !Invitee->IsRaidGrouped())
 			{
 				if (app->GetOpcode() == OP_GroupInvite2)
@@ -6976,6 +6980,10 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	}
 	else
 	{
+		if (!RuleB(Zone, IsCrossZoneInviteAllowed)) {
+			Message(Chat::Red, "Cannot invite across zones.");
+			return;
+		}
 		auto pack = new ServerPacket(ServerOP_GroupInvite, sizeof(GroupInvite_Struct));
 		memcpy(pack->pBuffer, gis, sizeof(GroupInvite_Struct));
 		worldserver.SendPacket(pack);
