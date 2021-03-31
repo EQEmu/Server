@@ -267,7 +267,10 @@ Client::Client(EQStreamInterface* ieqs)
 	mercSlot = 0;
 	InitializeMercInfo();
 	SetMerc(0);
-	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+
+	if (RuleI(World, PVPSettings) > 0) SendPVPStats();
+
+	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0)  SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
 	//for good measure:
@@ -509,6 +512,8 @@ void Client::SendZoneInPackets()
 		SendAppearancePacket(AT_PVP, 0, false); //Darksinga edits
 	if (IsNeutral())  //Neutral has a blue tag
 		SendAppearancePacket(AT_PVP, 0, false); //Darksinga edits
+
+	SendPVPStats();
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -10145,7 +10150,7 @@ int Client::CalculatePVPPoints(Client* killer, Client* victim)
 
 	return (int)pvp_points;
 }
-void Client::HandlePVPDeath()
+void Client::HandlePVPDeath(void)
 {
 	m_pp.PVPDeaths += 1;
 	m_pp.PVPVitality = 10;	

@@ -1758,19 +1758,20 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 					{
 						if (group->members[i] != nullptr)
 						{
-							group->members[i]->CastToClient()->HandlePVPKill(pvp_points);
 							database.RegisterPVPKill(group->members[i]->CastToClient(), victim, pvp_points); 
+
+							group->members[i]->CastToClient()->HandlePVPKill(pvp_points);
 						}
 					}
 			  	}
 			} else {
-				killerMob->CastToClient()->HandlePVPKill(pvp_points);
-
 				database.RegisterPVPKill(killerMob->CastToClient(), victim, pvp_points); 
+
+				killerMob->CastToClient()->HandlePVPKill(pvp_points);
 			}
 
 			this->HandlePVPDeath();
-		
+
 			parse->EventPlayer(EVENT_PVP_SLAY, killerMob->CastToClient(), victim->GetName(), victim->CharacterID(), &args);
 
 			mod_client_death_pvp(killerMob);

@@ -1098,7 +1098,7 @@ public:
 	
 	int CalculatePVPPoints(Client* killer, Client* victim);
 
-	void HandlePVPDeath(uint32 points);
+	void HandlePVPDeath(void);
 	void HandlePVPKill(uint32 points);
 	void SendPVPStats();
 	void SendPVPLeaderBoard();
@@ -1620,6 +1620,8 @@ private:
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
+
+	Timer vitality_timer; //  For each 5 minutes they are alive, they will gain back two points of vitality
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;

@@ -11256,13 +11256,23 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 		return;
 	}
-	/*PVPLeaderBoardRequest_Struct *pvplbrs = (PVPLeaderBoardRequest_Struct *)app->pBuffer;*/	//unused
+
+	PVPLeaderBoardRequest_Struct* pvplbrs = (PVPLeaderBoardRequest_Struct*)app->pBuffer;
 
 	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardReply, sizeof(PVPLeaderBoard_Struct));
-	/*PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;*/	//unused
+	PVPLeaderBoard_Struct* pvplb = (PVPLeaderBoard_Struct*)outapp->pBuffer;
 
-																					// TODO: Record and send this data.
+	if (pvplbrs->SortType == PVPSortByKills) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_kills");
+	}
 
+	if (pvplbrs->SortType == PVPSortByPoints) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_career_points");
+	}
+
+	if (pvplbrs->SortType == PVPSortByInfamy) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_infamy");
+	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
