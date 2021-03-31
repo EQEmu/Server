@@ -5069,7 +5069,7 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 	- Root break chance values obtained from live parses.
 	*/
 
-	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
+	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0 || attacker->GetID() == GetID())
 		return false;
 
 	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot) {
