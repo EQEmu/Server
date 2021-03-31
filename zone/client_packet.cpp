@@ -4853,7 +4853,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 			}
 		}
 
-		SendColoredText(color, std::string("This creature would take an army to defeat!"));
+
+		//SendColoredText(color, std::string("This creature would take an army to defeat!"));
 	}
 
 	// this could be done better, but this is only called when you con so w/e
@@ -11231,10 +11232,12 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
-	PVPLeaderBoardDetailsReply_Struct *pvplbdrs = (PVPLeaderBoardDetailsReply_Struct *)outapp->pBuffer;
+	PVPLeaderBoardDetailsRequest_Struct* pvplbdr = (PVPLeaderBoardDetailsRequest_Struct*)app->pBuffer;
 
-	// TODO: Record and send this data.
+	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
+	PVPLeaderBoardDetailsReply_Struct* pvplbdrs = (PVPLeaderBoardDetailsReply_Struct*)outapp->pBuffer;
+
+	database.GetPVPLeaderBoardDetails(pvplbdrs, pvplbdr->Name);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
