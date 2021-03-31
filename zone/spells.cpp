@@ -1038,8 +1038,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				// So long recast bard songs need special bard logic, although the effects don't repulse like other songs
 				// This is basically a hack to get that effect
 				// You can hold down the long recast spells, but you only get the effects once
+				// Songs with mana cost also do not repulse
 				// TODO fuck bards.
-				if (spells[spell_id].recast_time == 0) {
+				if (spells[spell_id].recast_time == 0 && spells[spell_id].mana == 0) {
 					bardsong = spell_id;
 					bardsong_slot = slot;
 					//NOTE: theres a lot more target types than this to think about...
