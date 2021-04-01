@@ -203,7 +203,7 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
-		if (IsStunned() && bardsong != 0 || IsMezzed() && bardsong != 0) {
+		if (bardsong != 0 && (IsStunned() || IsMezzed())) {
 			//Checks if a bard song is active then kills it if stunned.
 			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
 		}
