@@ -1039,9 +1039,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				// This is basically a hack to get that effect
 				// You can hold down the long recast spells, but you only get the effects once
 				// Songs with mana cost also do not repulse
-				// AAs that use SE_TemporaryPets also do not repulse
+				// AAs that use SE_TemporaryPets or SE_Familiar also do not repulse
 				// TODO fuck bards.
-				if (spells[spell_id].recast_time == 0 && spells[spell_id].mana == 0 && !IsEffectInSpell(spell_id, SE_TemporaryPets)) {
+				if (spells[spell_id].recast_time == 0 && spells[spell_id].mana == 0 && !IsEffectInSpell(spell_id, SE_TemporaryPets) && !IsEffectInSpell(spell_id, SE_Familiar)) {
 					bardsong = spell_id;
 					bardsong_slot = slot;
 					//NOTE: theres a lot more target types than this to think about...
