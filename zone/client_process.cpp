@@ -203,11 +203,6 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
-		if (bardsong != 0 && (IsStunned() || IsMezzed())) {
-			//Checks if a bard song is active then kills it if stunned.
-			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-		}
-
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...
