@@ -4916,18 +4916,13 @@ void Mob::Stun(int duration)
 	if(stunned && stunned_timer.GetRemainingTime() > uint32(duration))
 		return;
 
-	if(IsValidSpell(casting_spell_id) && !spells[casting_spell_id].uninterruptable) {
+	auto spell_id = bardsong ? bardsong : casting_spell_id;
+
+	if(IsValidSpell(spell_id) && !spells[spell_id].uninterruptable) {
 		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
 
 		if(zone->random.Int(0,99) > persistent_casting)
-			InterruptSpell();
-	}
-
-	//Checks if a bard song is active then kills.
-	if (bardsong != 0) {
-		int persistent_casting = spellbonuses.PersistantCasting + itembonuses.PersistantCasting + aabonuses.PersistantCasting;
-		if(zone->random.Int(0,99) > persistent_casting)
-			InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
+			InterruptSpell(spell_id);
 	}
 
 	if(duration > 0)
@@ -4983,14 +4978,11 @@ void Mob::Mesmerize()
 {
 	mezzed = true;
 
-	if (casting_spell_id)
-		InterruptSpell();
+	auto spell_id = bardsong ? bardsong : casting_spell_id;
 
-	if (bardsong != 0 && (IsStunned() || IsMezzed())) {
-	//Checks if a bard song is active then kills it if stunned.
-		InterruptSpell(SONG_ENDS_ABRUPTLY, 0x121, bardsong);
-	}
-
+	if (spell_id)
+		InterruptSpell(spell_id);
+	
 	StopNavigation();
 }
 
