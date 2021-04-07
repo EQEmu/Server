@@ -2322,6 +2322,10 @@ std::string lua_seconds_to_time(int duration) {
 	return quest_manager.secondstotime(duration);
 }
 
+std::string lua_get_color_tag(std::string color_name) {
+	return quest_manager.getcolortag(color_name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2863,6 +2867,7 @@ luabind::scope lua_register_general() {
 		luabind::def("debug", (void(*)(std::string, int))&lua_debug),
 		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
 		luabind::def("seconds_to_time", &lua_seconds_to_time),
+		luabind::def("get_color_tag", &lua_get_color_tag),
 
 		/**
 		 * Expansions
