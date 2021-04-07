@@ -3298,7 +3298,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 					const NPCFactionList *cf = content_db.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
 					if (cf) {
 						if (cf->assistprimaryfaction == 0) {
-							return; //Same faction and ignore primary assist
+							continue; //Same faction and ignore primary assist
 						}
 					}
 				}
