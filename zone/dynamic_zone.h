@@ -42,8 +42,6 @@ public:
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
 
 	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
-	static std::unordered_map<uint32_t, DynamicZone> LoadMultipleDzFromDatabase(
-		const std::vector<uint32_t>& dynamic_zone_ids);
 	static void HandleWorldMessage(ServerPacket* pack);
 
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;

@@ -21,6 +21,7 @@
 #ifndef WORLD_EXPEDITION_STATE_H
 #define WORLD_EXPEDITION_STATE_H
 
+#include "../common/repositories/expeditions_repository.h"
 #include "../common/rulesys.h"
 #include "../common/timer.h"
 #include <cstdint>
@@ -29,21 +30,22 @@
 extern class ExpeditionState expedition_state;
 
 class Expedition;
+struct ExpeditionMember;
 
 class ExpeditionState
 {
 public:
-	void AddExpedition(uint32_t expedition_id);
+	void CacheExpeditions(std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expedition_entries);
+	void CacheFromDatabase(uint32_t expedition_id);
+	void CacheAllFromDatabase();
 	Expedition* GetExpedition(uint32_t expedition_id);
 	Expedition* GetExpeditionByDynamicZoneID(uint32_t dz_id);
-	void LoadActiveExpeditions();
-	void MemberChange(uint32_t expedition_id, uint32_t character_id, bool remove);
+	void MemberChange(uint32_t expedition_id, const ExpeditionMember& member, bool remove);
 	void Process();
 	void RemoveAllMembers(uint32_t expedition_id);
-	void RemoveExpedition(uint32_t expedition_id);
 
 private:
-	std::vector<Expedition> m_expeditions;
+	std::vector<std::unique_ptr<Expedition>> m_expeditions;
 	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(DynamicZone, WorldProcessRate))};
 };
 

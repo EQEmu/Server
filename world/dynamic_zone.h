@@ -19,10 +19,6 @@ class DynamicZone : public DynamicZoneBase
 public:
 	using DynamicZoneBase::DynamicZoneBase; // inherit base constructors
 
-	DynamicZone() = default;
-	DynamicZone(uint32_t id, uint32_t zone_id, uint32_t instance_id, uint32_t zone_version,
-		uint32_t start_time, uint32_t duration, DynamicZoneType type);
-
 	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
 	static void HandleZoneMessage(ServerPacket* pack);
 

@@ -9,21 +9,6 @@
 
 extern ZSList zoneserver_list;
 
-DynamicZone::DynamicZone(
-	uint32_t id, uint32_t zone_id, uint32_t instance_id, uint32_t zone_version,
-	uint32_t start_time, uint32_t duration, DynamicZoneType type
-)
-{
-	m_id = id;
-	m_instance_id = instance_id;
-	m_zone_id = zone_id;
-	m_zone_version = zone_version;
-	m_start_time = std::chrono::system_clock::from_time_t(start_time);
-	m_duration = std::chrono::seconds(duration);
-	m_type = type;
-	m_expire_time = m_start_time + m_duration;
-}
-
 Database& DynamicZone::GetDatabase()
 {
 	return database;
