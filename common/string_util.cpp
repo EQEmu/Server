@@ -74,18 +74,6 @@ const std::string str_tolower(std::string s)
 	return s;
 }
 
-std::vector<std::string> split(std::string str_to_split, char delimiter)
-{
-	std::stringstream        ss(str_to_split);
-	std::string              item;
-	std::vector<std::string> exploded_values;
-	while (std::getline(ss, item, delimiter)) {
-		exploded_values.push_back(item);
-	}
-
-	return exploded_values;
-}
-
 const std::string str_toupper(std::string s)
 {
 	std::transform(

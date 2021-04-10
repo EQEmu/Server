@@ -39,7 +39,6 @@
 const std::string str_tolower(std::string s);
 const std::string str_toupper(std::string s);
 const std::string ucfirst(std::string s);
-std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
