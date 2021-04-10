@@ -101,15 +101,18 @@ const std::string StringFormat(const char *format, ...)
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &str, char delim) {
+std::vector<std::string> SplitString(const std::string &str, const char delim) {
 	std::vector<std::string> ret;
-	std::stringstream ss(str);
-    std::string item;
-
-    while(std::getline(ss, item, delim)) {
-        ret.push_back(item);
-    }
-
+	std::string::size_type start = 0;
+	auto end = str.find(delim);
+	while (end != std::string::npos) {
+		ret.emplace_back(str, start, end - start);
+		start = end + 1;
+		end = str.find(delim, start);
+	}
+	// this will catch the last word since the string is unlikely to end with a delimiter
+	if (str.length() > start)
+		ret.emplace_back(str, start, str.length() - start);
 	return ret;
 }
 
