@@ -372,6 +372,10 @@ public:
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
 	std::string secondstotime(int duration);
+	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
+	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
+	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier);
+	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

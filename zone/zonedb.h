@@ -331,6 +331,11 @@ public:
 	bool SaveCharacterSkill(uint32 character_id, uint32 skill_id, uint32 value);
 	bool SaveCharacterSpell(uint32 character_id, uint32 spell_id, uint32 slot_id);
 	bool SaveCharacterTribute(uint32 character_id, PlayerProfile_Struct* pp);
+	
+	double GetAAEXPModifier(uint32 character_id, uint32 zone_id) const;
+	double GetEXPModifier(uint32 character_id, uint32 zone_id) const;
+	void SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier);
+	void SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier);
 
 	/* Character Inventory  */
 	bool	NoRentExpired(const char* name);

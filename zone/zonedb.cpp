@@ -4893,3 +4893,85 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 
 	return results.LastInsertedID();
 }
+
+double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const {
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`aa_modifier`
+			FROM
+			`character_exp_modifiers`
+			WHERE
+			`character_id` = {}
+			AND
+			(`zone_id` = {} OR `zone_id` = 0)
+			ORDER BY `zone_id` DESC
+			LIMIT 1
+		),
+		character_id,
+		zone_id
+	);
+	auto results = database.QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atof(row[0]);
+	}
+	return 1.0f;
+}
+
+double ZoneDatabase::GetEXPModifier(uint32 character_id, uint32 zone_id) const {
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`exp_modifier`
+			FROM
+			`character_exp_modifiers`
+			WHERE
+			`character_id` = {}
+			AND
+			(`zone_id` = {} OR `zone_id` = 0)
+			ORDER BY `zone_id` DESC
+			LIMIT 1
+		),
+		character_id,
+		zone_id
+	);
+	auto results = database.QueryDatabase(query);
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		return atof(row[0]);
+	}
+	return 1.0f;
+}
+
+void ZoneDatabase::SetAAEXPModifier(uint32 character_id, uint32 zone_id, double aa_modifier) {
+	float exp_modifier = GetEXPModifier(character_id, zone_id);
+	std::string query = fmt::format(
+		SQL(
+			REPLACE INTO
+			`character_exp_modifiers`
+			VALUES
+			({}, {}, {}, {})
+		),
+		character_id,
+		zone_id,
+		aa_modifier,
+		exp_modifier
+	);
+	database.QueryDatabase(query);
+}
+
+void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double exp_modifier) {
+	float aa_modifier = GetAAEXPModifier(character_id, zone_id);
+	std::string query = fmt::format(
+		SQL(
+			REPLACE INTO
+			`character_exp_modifiers`
+			VALUES
+			({}, {}, {}, {})
+		),
+		character_id,
+		zone_id,
+		aa_modifier,
+		exp_modifier
+	);
+	database.QueryDatabase(query);
+}

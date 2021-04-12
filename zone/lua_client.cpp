@@ -2063,6 +2063,26 @@ void Lua_Client::Fling(float value, float target_x, float target_y, float target
 	self->Fling(value, target_x, target_y, target_z, ignore_los, clipping);
 }
 
+double Lua_Client::GetAAEXPModifier(uint32 zone_id) {
+	Lua_Safe_Call_Real();
+	return self->GetAAEXPModifier(zone_id);
+}
+
+double Lua_Client::GetEXPModifier(uint32 zone_id) {
+	Lua_Safe_Call_Real();
+	return self->GetEXPModifier(zone_id);
+}
+
+void Lua_Client::SetAAEXPModifier(uint32 zone_id, double aa_modifier) {
+	Lua_Safe_Call_Void();
+	self->SetAAEXPModifier(zone_id, aa_modifier);
+}
+
+void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier) {
+	Lua_Safe_Call_Void();
+	self->SetEXPModifier(zone_id, exp_modifier);	
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2411,7 +2431,11 @@ luabind::scope lua_register_client() {
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone)
 		.def("Fling", (void(Lua_Client::*)(float,float,float,float))&Lua_Client::Fling)
 		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool))&Lua_Client::Fling)
-		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool,bool))&Lua_Client::Fling);
+		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool,bool))&Lua_Client::Fling)
+		.def("GetAAEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
+		.def("GetEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
+		.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
+		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier);
 }
 
 luabind::scope lua_register_inventory_where() {

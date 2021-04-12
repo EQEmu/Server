@@ -4286,3 +4286,18 @@ std::string QuestManager::secondstotime(int duration) {
 	}
 	return time_string;
 }
+
+double QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
+	return database.GetAAEXPModifier(character_id, zone_id);
+}
+double QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
+	return database.GetEXPModifier(character_id, zone_id);
+}
+
+void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier) {
+	database.SetAAEXPModifier(character_id, zone_id, aa_modifier);
+}
+
+void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier) {
+	database.SetEXPModifier(character_id, zone_id, aa_modifier);
+}
