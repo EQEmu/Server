@@ -4288,7 +4288,7 @@ std::string QuestManager::secondstotime(int duration) {
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {
-	const std::map<std::string, std::string> colors = {
+	static const std::map<std::string, std::string> colors = {
 		{ "Black", "#000000" },
 		{ "Brown", "#804000" },
 		{ "Burgundy", "#800000" },
@@ -4601,7 +4601,7 @@ std::string QuestManager::gethexcolorcode(std::string color_name) {
 		{ "Yellow Green", "#52D017" }
 	};
 	for (auto color : colors) {
-		if (!strcmp(str_tolower(color.first).c_str(), str_tolower(color_name).c_str())) {
+		if (!strcasecmp(color.first.c_str(), color_name.c_str())) {
 			return color.second;
 		}
 	}
