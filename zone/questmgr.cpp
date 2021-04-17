@@ -1673,10 +1673,17 @@ void QuestManager::ding() {
 
 }
 
-void QuestManager::rebind(int zoneid, const glm::vec3& location) {
+void QuestManager::rebind(int zone_id, const glm::vec3& location) {
 	QuestManagerCurrentQuestVars();
 	if(initiator && initiator->IsClient()) {
-		initiator->SetBindPoint(0, zoneid, 0, location);
+		initiator->SetBindPoint(0, zone_id, 0, location);
+	}
+}
+
+void QuestManager::rebind(int zone_id, const glm::vec4& location) {
+	QuestManagerCurrentQuestVars();
+	if(initiator && initiator->IsClient()) {
+		initiator->SetBindPoint(0, zone_id, 0, location);
 	}
 }
 

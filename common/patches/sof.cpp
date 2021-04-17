@@ -1140,7 +1140,7 @@ namespace SoF
 		eq->level1 = emu->level;
 		//	OUT(unknown00022[2]);
 		for (r = 0; r < 5; r++) {
-			OUT(binds[r].zoneId);
+			OUT(binds[r].zone_id);
 			OUT(binds[r].x);
 			OUT(binds[r].y);
 			OUT(binds[r].z);

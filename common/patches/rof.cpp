@@ -1968,7 +1968,7 @@ namespace RoF
 
 		for (int r = 0; r < 5; r++)
 		{
-			outapp->WriteUInt32(emu->binds[r].zoneId);
+			outapp->WriteUInt32(emu->binds[r].zone_id);
 			outapp->WriteFloat(emu->binds[r].x);
 			outapp->WriteFloat(emu->binds[r].y);
 			outapp->WriteFloat(emu->binds[r].z);

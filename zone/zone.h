@@ -167,7 +167,7 @@ public:
 	inline const uint32 &graveyard_zoneid() { return pgraveyard_zoneid; }
 	inline const uint32 GetInstanceID() const { return instanceid; }
 	inline const uint32 GetZoneID() const { return zoneid; }
-	inline glm::vec3 GetSafePoint() { return m_SafePoint; }
+	inline glm::vec4 GetSafePoint() { return m_SafePoint; }
 	inline glm::vec4 GetGraveyardPoint() { return m_Graveyard; }
 	inline std::vector<int> GetGlobalLootTables(NPC *mob) const { return m_global_loot.GetGlobalLootTables(mob); }
 	inline Timer *GetInstanceTimer() { return Instance_Timer; }
@@ -376,7 +376,7 @@ private:
 	char      *map_name;
 	char      *short_name;
 	char      file_name[16];
-	glm::vec3 m_SafePoint;
+	glm::vec4 m_SafePoint;
 	glm::vec4 m_Graveyard;
 	int       default_ruleset;
 	int       zone_total_blocked_spells;

@@ -131,9 +131,9 @@ bool Client::Process() {
 			CheckManaEndUpdate();
 
 		if (dead && dead_timer.Check()) {
-			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zoneId);
+			database.MoveCharacterToZone(GetName(), m_pp.binds[0].zone_id);
 
-			m_pp.zone_id = m_pp.binds[0].zoneId;
+			m_pp.zone_id = m_pp.binds[0].zone_id;
 			m_pp.zoneInstance = m_pp.binds[0].instance_id;
 			m_pp.x = m_pp.binds[0].x;
 			m_pp.y = m_pp.binds[0].y;
@@ -1996,7 +1996,7 @@ void Client::HandleRespawnFromHover(uint32 Option)
 		BindStruct* b = &m_pp.binds[0];
 		default_to_bind = new RespawnOption;
 		default_to_bind->name = "Bind Location";
-		default_to_bind->zone_id = b->zoneId;
+		default_to_bind->zone_id = b->zone_id;
 		default_to_bind->instance_id = b->instance_id;
 		default_to_bind->x = b->x;
 		default_to_bind->y = b->y;

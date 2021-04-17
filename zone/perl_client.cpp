@@ -771,47 +771,28 @@ XS(XS_Client_SetEXP) {
 XS(XS_Client_SetBindPoint); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_SetBindPoint) {
 	dXSARGS;
-	if (items < 1 || items > 6)
-		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f)"); // @categories Account and Character, Stats and Attributes
+	if (items < 1 || items > 7)
+		Perl_croak(aTHX_ "Usage: Client::SetBindPoint(THIS, [int to_zone = -1, int to_instance = 0, float new_x = 0.0f, float new_y = 0.0f, float new_z = 0.0f, float new_heading = 0.0f])"); // @categories Account and Character, Stats and Attributes
 	{
 		Client *THIS;
-		int   to_zone;
-		int   to_instance;
-		float new_x;
-		float new_y;
-		float new_z;
+		int   to_zone = -1;
+		int   to_instance = 0;
+		float new_x = 0.0f, new_y = 0.0, new_z = 0.0, new_heading = 0.0f;
 		VALIDATE_THIS_IS_CLIENT;
-		if (items < 2)
-			to_zone = -1;
-		else {
+		if (items > 1)
 			to_zone = (int) SvIV(ST(1));
-		}
-
-		if (items < 3)
-			to_instance = 0;
-		else {
+		if (items > 2)
 			to_instance = (int) SvIV(ST(2));
-		}
-
-		if (items < 4)
-			new_x = 0.0f;
-		else {
+		if (items > 3)
 			new_x = (float) SvNV(ST(3));
-		}
-
-		if (items < 5)
-			new_y = 0.0f;
-		else {
+		if (items > 4)
 			new_y = (float) SvNV(ST(4));
-		}
-
-		if (items < 6)
-			new_z = 0.0f;
-		else {
+		if (items > 5)
 			new_z = (float) SvNV(ST(5));
-		}
+		if (items > 6)
+			new_heading = (float) SvNV(ST(6));
 
-		THIS->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
+		THIS->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, new_z, new_heading));
 	}
 	XSRETURN_EMPTY;
 }
@@ -3276,23 +3257,22 @@ XS(XS_Client_GetStartZone) {
 XS(XS_Client_SetStartZone);
 XS(XS_Client_SetStartZone) {
 	dXSARGS;
-	if (items != 2 && items != 5)
-		Perl_croak(aTHX_
-		           "Usage: Client::SetStartZone(THIS, uint32 zone_id, [float x = 0], [float y = 0], [float z = 0])");
+	if (items != 2 && items != 5 && items != 6)
+		Perl_croak(aTHX_ "Usage: Client::SetStartZone(THIS, uint32 zone_id, [float x = 0, float y = 0, float z = 0, [float heading = 0]])");
 	{
 		Client *THIS;
 		uint32 zoneid = (uint32) SvUV(ST(1));
-		float  x      = 0;
-		float  y      = 0;
-		float  z      = 0;
+		float  x = 0.0f, y = 0.0f, z = 0.0f, heading = 0.0f;
 		VALIDATE_THIS_IS_CLIENT;
 		if (items == 5) {
-			x = SvNV(ST(2));
-			y = SvNV(ST(3));
-			z = SvNV(ST(4));
+			x = (float) SvNV(ST(2));
+			y = (float) SvNV(ST(3));
+			z = (float) SvNV(ST(4));
 		}
+		if (items == 6)
+			heading = (float) SvNV(ST(5));
 
-		THIS->SetStartZone(zoneid, x, y, z);
+		THIS->SetStartZone(zoneid, x, y, z, heading);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5504,7 +5484,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetBaseRace"), XS_Client_SetBaseRace, file, "$$");
 	newXSproto(strcpy(buf, "SetBecomeNPC"), XS_Client_SetBecomeNPC, file, "$$");
 	newXSproto(strcpy(buf, "SetBecomeNPCLevel"), XS_Client_SetBecomeNPCLevel, file, "$$");
-	newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$");
+	newXSproto(strcpy(buf, "SetBindPoint"), XS_Client_SetBindPoint, file, "$;$$$$$$");
 	newXSproto(strcpy(buf, "SetConsumption"), XS_Client_SetConsumption, file, "$$$");
 	newXSproto(strcpy(buf, "SetClientMaxLevel"), XS_Client_SetClientMaxLevel, file, "$$");
 	newXSproto(strcpy(buf, "SetCustomItemData"), XS_Client_SetCustomItemData, file, "$$$$");
@@ -5528,7 +5508,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetSecondaryWeaponOrnamentation"), XS_Client_SetSecondaryWeaponOrnamentation, file, "$$");
 	newXSproto(strcpy(buf, "SetSkill"), XS_Client_SetSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetSkillPoints"), XS_Client_SetSkillPoints, file, "$$");
-	newXSproto(strcpy(buf, "SetStartZone"), XS_Client_SetStartZone, file, "$$");
+	newXSproto(strcpy(buf, "SetStartZone"), XS_Client_SetStartZone, file, "$$;$$$$");
 	newXSproto(strcpy(buf, "SetStats"), XS_Client_SetStats, file, "$$$");
 	newXSproto(strcpy(buf, "SetThirst"), XS_Client_SetThirst, file, "$$");
 	newXSproto(strcpy(buf, "SetTint"), XS_Client_SetTint, file, "$$$");
