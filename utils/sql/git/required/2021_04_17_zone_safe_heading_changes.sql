@@ -1,0 +1,1 @@
+ALTER TABLE zone ADD COLUMN safe_heading float NOT NULL AFTER safe_z;
