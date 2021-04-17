@@ -1060,7 +1060,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 			strcpy(flag_name, "(ERROR GETTING NAME)");
 		}
 
-		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, zone_long_name, zone_id, zone_short_name);
+		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, zone_long_name.c_str(), zone_id, zone_short_name);
 	}
 }
 
