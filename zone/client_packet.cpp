@@ -12766,7 +12766,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 			zone_id = atoi(row[0]);
 
 		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
-		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name);
+		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name.c_str());
 	}
 
 }
