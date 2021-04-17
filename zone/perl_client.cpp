@@ -5266,7 +5266,7 @@ XS(XS_Client_GetAAEXPModifier);
 XS(XS_Client_GetAAEXPModifier) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Client::GetAAEXPModifier(THIS, [uint32 zone_id])");
+		Perl_croak(aTHX_ "Usage: Client::GetAAEXPModifier(THIS, uint32 zone_id)");
 	{
 		Client* THIS;
 		double aa_modifier = 1.0f;
