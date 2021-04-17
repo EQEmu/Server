@@ -1041,11 +1041,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for(; cur != end; ++cur) {
 		uint32 zone_id = *cur;
 		const char* zone_short_name = ZoneName(zone_id);
-		char* zone_long_name = nullptr;
-		content_db.GetZoneLongName(zone_short_name, &zone_long_name);
-		if(zone_long_name == nullptr)
-			zone_long_name = empty;
-
+		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
 		float safe_x, safe_y, safe_z, safe_heading;
 		int16 min_status = 0;
 		uint8 min_level = 0;
@@ -1065,8 +1061,6 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		}
 
 		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, zone_long_name, zone_id, zone_short_name);
-		if(zone_long_name != empty)
-			delete[] zone_long_name;
 	}
 }
 
