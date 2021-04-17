@@ -207,7 +207,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 	case EvacToSafeCoords:
 	case ZoneToSafeCoords:
 		LogDebug(
-			"Zoning [{}] to safe coords ([{}], [{}], [{}]) in [{}] ([{}])",
+			"Zoning [{}] to safe coords ([{}], [{}], [{}], [{}]) in [{}] ([{}])",
 			GetName(),
 			safe_x,
 			safe_y,
