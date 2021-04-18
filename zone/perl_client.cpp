@@ -777,7 +777,7 @@ XS(XS_Client_SetBindPoint) {
 		Client *THIS;
 		int   to_zone = -1;
 		int   to_instance = 0;
-		float new_x = 0.0f, new_y = 0.0, new_z = 0.0, new_heading = 0.0f;
+		float new_x = 0.0f, new_y = 0.0f, new_z = 0.0f, new_heading = 0.0f;
 		VALIDATE_THIS_IS_CLIENT;
 		if (items > 1)
 			to_zone = (int) SvIV(ST(1));
