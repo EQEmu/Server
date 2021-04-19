@@ -1355,7 +1355,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateInfoPacket(bool clear)
 	if (!clear)
 	{
 		info->assigned = true;
-		strn0cpy(info->expedition_name, m_expedition_name.c_str(), sizeof(info->expedition_name));
+		strn0cpy(info->dz_name, m_expedition_name.c_str(), sizeof(info->dz_name));
 		strn0cpy(info->leader_name, m_leader.name.c_str(), sizeof(info->leader_name));
 		info->max_players = m_max_players;
 	}
@@ -1392,7 +1392,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListPacket(bool cle
 		for (auto i = 0; i < m_members.size(); ++i)
 		{
 			strn0cpy(buf->members[i].name, m_members[i].name.c_str(), sizeof(buf->members[i].name));
-			buf->members[i].expedition_status = static_cast<uint8_t>(m_members[i].status);
+			buf->members[i].online_status = static_cast<uint8_t>(m_members[i].status);
 		}
 	}
 
@@ -1421,7 +1421,7 @@ std::unique_ptr<EQApplicationPacket> Expedition::CreateMemberListStatusPacket(
 
 	auto entry = static_cast<DynamicZoneMemberEntry_Struct*>(buf->members);
 	strn0cpy(entry->name, name.c_str(), sizeof(entry->name));
-	entry->expedition_status = static_cast<uint8_t>(status);
+	entry->online_status = static_cast<uint8_t>(status);
 
 	return outapp;
 }

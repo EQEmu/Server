@@ -482,7 +482,7 @@ namespace Titanium
 		OUT(client_id);
 		OUT(assigned);
 		OUT(max_players);
-		strn0cpy(eq->expedition_name, emu->expedition_name, sizeof(eq->expedition_name));
+		strn0cpy(eq->dz_name, emu->dz_name, sizeof(eq->dz_name));
 		strn0cpy(eq->leader_name, emu->leader_name, sizeof(eq->leader_name));
 
 		FINISH_ENCODE();
@@ -547,7 +547,7 @@ namespace Titanium
 		for (uint32 i = 0; i < emu->member_count; ++i)
 		{
 			buf.WriteString(emu->members[i].name);
-			buf.WriteUInt8(emu->members[i].expedition_status);
+			buf.WriteUInt8(emu->members[i].online_status);
 		}
 
 		__packet->size = buf.size();

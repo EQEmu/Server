@@ -3328,14 +3328,14 @@ struct DynamicZoneInfo_Struct
 /*000*/ uint32 client_id;
 /*004*/ uint32 assigned; // padded bool
 /*008*/ uint32 max_players;
-/*012*/ char   expedition_name[128];
+/*012*/ char   dz_name[128];
 /*140*/ char   leader_name[64];
 };
 
 struct DynamicZoneMemberEntry_Struct
 {
-/*000*/ char name[1];            // variable length, null terminated, max 0x40 (64)
-/*000*/ uint8 expedition_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
+/*000*/ char name[1];        // variable length, null terminated, max 0x40 (64)
+/*000*/ uint8 online_status; // 0: unknown 1: Online, 2: Offline, 3: In Dynamic Zone, 4: Link Dead
 };
 
 struct DynamicZoneMemberList_Struct
