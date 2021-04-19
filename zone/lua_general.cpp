@@ -2334,8 +2334,8 @@ void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, dou
 	database.SetAAEXPModifier(character_id, zone_id, aa_modifier);
 }
 
-void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double aa_modifier) {
-	database.SetEXPModifier(character_id, zone_id, aa_modifier);
+void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double exp_modifier) {
+	database.SetEXPModifier(character_id, zone_id, exp_modifier);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
