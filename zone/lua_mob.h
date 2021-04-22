@@ -110,6 +110,7 @@ public:
 	int GetClass();
 	int GetLevel();
 	const char *GetCleanName();
+	const char *GetLastName();
 	Lua_Mob GetTarget();
 	void SetTarget(Lua_Mob t);
 	double GetHPRatio();
