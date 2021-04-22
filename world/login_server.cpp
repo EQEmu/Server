@@ -101,7 +101,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	}
 
 	int32 x = Config->MaxClients;
-	if ((int32) numplayers >= x && x != -1 && x != 255 && status < 80) {
+	if ((int32) numplayers >= x && x != -1 && x != 255 && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
 		LogDebug("[ProcessUsertoWorldReqLeg] World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);
