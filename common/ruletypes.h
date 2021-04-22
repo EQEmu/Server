@@ -209,6 +209,7 @@ RULE_CATEGORY(GM)
 RULE_INT(GM, MinStatusToSummonItem, 250, "Minimum required status to summon items")
 RULE_INT(GM, MinStatusToZoneAnywhere, 250, "Minimum required status to zone anywhere")
 RULE_INT(GM, MinStatusToLevelTarget, 100, "Minimum required status to set the level of a player")
+RULE_INT(GM, MinStatusToBypassLockedServer, 100, "Players >= this status can log in to the server even when it is locked")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(World)
