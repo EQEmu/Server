@@ -93,7 +93,7 @@ void ZoneEventScheduler::Process(Zone *zone, WorldContentService *content_servic
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_RULE_CHANGE) {
-					auto params     = split(e.event_data, '=');
+					auto params     = SplitString(e.event_data, '=');
 					auto rule_key   = params[0];
 					auto rule_value = params[1];
 					if (!rule_key.empty() && !rule_value.empty()) {
