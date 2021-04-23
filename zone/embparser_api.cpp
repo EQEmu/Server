@@ -6477,6 +6477,23 @@ XS(XS__secondstotime) {
 	XSRETURN(1);
 }
 
+XS(XS__gethexcolorcode);
+XS(XS__gethexcolorcode) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::gethexcolorcode(std::string color_name)");
+	}
+
+	dXSTARG;
+	std::string hex_color_code;
+	std::string color_name = SvPV_nolen(ST(0));
+	hex_color_code = quest_manager.gethexcolorcode(color_name);
+	sv_setpv(TARG, hex_color_code.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);	
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6685,6 +6702,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
+	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
 	newXS(strcpy(buf, "get_expedition_by_char_id"), XS__get_expedition_by_char_id, file);

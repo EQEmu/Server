@@ -373,6 +373,7 @@ public:
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
 	std::string secondstotime(int duration);
+	std::string gethexcolorcode(std::string color_name);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
