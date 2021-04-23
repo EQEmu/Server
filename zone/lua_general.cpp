@@ -2326,6 +2326,22 @@ std::string lua_get_hex_color_code(std::string color_name) {
 	return quest_manager.gethexcolorcode(color_name);
 }
 
+double lua_get_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
+	return database.GetAAEXPModifier(character_id, zone_id);
+}
+
+double lua_get_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id) {
+	return database.GetEXPModifier(character_id, zone_id);
+}
+
+void lua_set_aa_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double aa_modifier) {
+	database.SetAAEXPModifier(character_id, zone_id, aa_modifier);
+}
+
+void lua_set_exp_modifier_by_char_id(uint32 character_id, uint32 zone_id, double exp_modifier) {
+	database.SetEXPModifier(character_id, zone_id, exp_modifier);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2868,7 +2884,11 @@ luabind::scope lua_register_general() {
 		luabind::def("log_combat", (void(*)(std::string))&lua_log_combat),
 		luabind::def("seconds_to_time", &lua_seconds_to_time),
 		luabind::def("get_hex_color_code", &lua_get_hex_color_code),
-
+		luabind::def("get_aa_exp_modifier_by_char_id", &lua_get_aa_exp_modifier_by_char_id),
+		luabind::def("get_exp_modifier_by_char_id", &lua_get_exp_modifier_by_char_id),
+		luabind::def("set_aa_exp_modifier_by_char_id", &lua_set_aa_exp_modifier_by_char_id),
+		luabind::def("set_exp_modifier_by_char_id", &lua_set_exp_modifier_by_char_id),
+    
 		/**
 		 * Expansions
 		 */

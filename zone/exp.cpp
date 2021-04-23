@@ -327,6 +327,10 @@ void Client::CalculateStandardAAExp(uint32 &add_aaxp, uint8 conlevel, bool resex
 		add_aaxp *= RuleR(Character, FinalExpMultiplier);
 	}
 
+	if (RuleB(Character, EnableCharacterEXPMods)) {
+		add_aaxp *= GetAAEXPModifier(this->GetZoneID());
+	}
+
 	add_aaxp = (uint32)(RuleR(Character, AAExpMultiplier) * add_aaxp * aatotalmod);
 }
 
@@ -484,6 +488,10 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 
 	if (RuleR(Character, FinalExpMultiplier) >= 0) {
 		add_exp *= RuleR(Character, FinalExpMultiplier);
+	}
+
+	if (RuleB(Character, EnableCharacterEXPMods)) {
+		add_exp *= GetEXPModifier(this->GetZoneID());
 	}
 
 	add_exp = GetEXP() + add_exp;

@@ -70,6 +70,10 @@ public:
 	int GetBaseWIS();
 	int GetWeight();
 	uint32 GetEXP();
+	double GetEXPModifier(uint32 zone_id);
+	double GetAAEXPModifier(uint32 zone_id);
+	void SetAAEXPModifier(uint32 zone_id, double aa_modifier);
+	void SetEXPModifier(uint32 zone_id, double exp_modifier);
 	uint32 GetAAExp();
 	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();

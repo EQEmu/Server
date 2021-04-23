@@ -5224,6 +5224,72 @@ XS(XS_Client_GetInventory) {
 	XSRETURN(1);
 }
 
+XS(XS_Client_GetAAEXPModifier);
+XS(XS_Client_GetAAEXPModifier) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetAAEXPModifier(THIS, uint32 zone_id)");
+	{
+		Client* THIS;
+		double aa_modifier = 1.0f;
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;			
+		aa_modifier = THIS->GetAAEXPModifier(zone_id);
+		XSprePUSH;
+		PUSHn((double) aa_modifier);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_GetEXPModifier);
+XS(XS_Client_GetEXPModifier) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetEXPModifier(THIS, uint32 zone_id)");
+	{
+		Client* THIS;
+		double exp_modifier = 1.0f;
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		exp_modifier = THIS->GetEXPModifier(zone_id);
+		XSprePUSH;
+		PUSHn((double) exp_modifier);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetAAEXPModifier);
+XS(XS_Client_SetAAEXPModifier) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SetAAEXPModifier(THIS, uint32 zone_id, float aa_modifier)");
+	{
+		Client* THIS;
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		double aa_modifier = (double) SvNV(ST(2));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetAAEXPModifier(zone_id, aa_modifier);
+	}
+	XSRETURN_EMPTY;	
+}
+
+XS(XS_Client_SetEXPModifier);
+XS(XS_Client_SetEXPModifier) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SetEXPModifier(THIS, uint32 zone_id, float exp_modifier)");
+	{
+		Client* THIS;
+		uint32 zone_id = (uint32)SvUV(ST(1));
+		double exp_modifier = (double) SvNV(ST(2));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetEXPModifier(zone_id, exp_modifier);
+	}
+	XSRETURN_EMPTY;		
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5285,6 +5351,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "ForageItem"), XS_Client_ForageItem, file, "$");
 	newXSproto(strcpy(buf, "Freeze"), XS_Client_Freeze, file, "$");
 	newXSproto(strcpy(buf, "GetAAExp"), XS_Client_GetAAExp, file, "$");
+	newXSproto(strcpy(buf, "GetAAEXPModifier"), XS_Client_GetAAEXPModifier, file, "$$");
 	newXSproto(strcpy(buf, "GetAALevel"), XS_Client_GetAALevel, file, "$$");
 	newXSproto(strcpy(buf, "GetAAPercent"), XS_Client_GetAAPercent, file, "$");
 	newXSproto(strcpy(buf, "GetAAPoints"), XS_Client_GetAAPoints, file, "$$");
@@ -5328,6 +5395,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetEndurance"), XS_Client_GetEndurance, file, "$");
 	newXSproto(strcpy(buf, "GetEnduranceRatio"), XS_Client_GetEnduranceRatio, file, "$");
 	newXSproto(strcpy(buf, "GetEXP"), XS_Client_GetEXP, file, "$");
+	newXSproto(strcpy(buf, "GetEXPModifier"), XS_Client_GetEXPModifier, file, "$$");
 	newXSproto(strcpy(buf, "GetExpedition"), XS_Client_GetExpedition, file, "$");
 	newXSproto(strcpy(buf, "GetExpeditionLockouts"), XS_Client_GetExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "GetFace"), XS_Client_GetFace, file, "$");
@@ -5454,6 +5522,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SendToGuildHall"), XS_Client_SendToGuildHall, file, "$");
 	newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 	newXSproto(strcpy(buf, "SendZoneFlagInfo"), XS_Client_SendZoneFlagInfo, file, "$$");
+	newXSproto(strcpy(buf, "SetAAEXPModifier"), XS_Client_SetAAEXPModifier, file, "$$$");
 	newXSproto(strcpy(buf, "SetAAPoints"), XS_Client_SetAAPoints, file, "$$");
 	newXSproto(strcpy(buf, "SetAATitle"), XS_Client_SetAATitle, file, "$$;$");
 	newXSproto(strcpy(buf, "SetAccountFlag"), XS_Client_SetAccountFlag, file, "$$");
@@ -5475,6 +5544,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetEbonCrystals"), XS_Client_SetEbonCrystals, file, "$$");
 	newXSproto(strcpy(buf, "SetEndurance"), XS_Client_SetEndurance, file, "$$");
 	newXSproto(strcpy(buf, "SetEXP"), XS_Client_SetEXP, file, "$$$;$");
+	newXSproto(strcpy(buf, "SetEXPModifier"), XS_Client_SetEXPModifier, file, "$$$");
 	newXSproto(strcpy(buf, "SetFactionLevel"), XS_Client_SetFactionLevel, file, "$$$$$$");
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
