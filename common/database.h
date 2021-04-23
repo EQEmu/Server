@@ -267,6 +267,9 @@ public:
 	int		CountInvSnapshots();
 	void	ClearInvSnapshots(bool from_now = false);
 
+	/* Bypass Server Lock */
+	bool GetBypassFlagByLSAccountID(uint32 lsaccount_id);
+
 	/* EQEmuLogSys */
 	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 

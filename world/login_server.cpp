@@ -67,16 +67,18 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	UsertoWorldRequestLegacy_Struct *utwr  = (UsertoWorldRequestLegacy_Struct *) p.Data();
 	uint32                          id     = database.GetAccountIDFromLSID("eqemu", utwr->lsaccountid);
 	int16                           status = database.CheckStatus(id);
+	bool					  canBypassServerLock = database.GetBypassFlagByLSAccountID(utwr->lsaccountid);
 
 	LogDebug(
-		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
+		"[ProcessUsertoWorldReqLeg] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}] Bypass Server Lock [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
 		utwr->worldid,
 		utwr->FromID,
 		utwr->ToID,
-		utwr->IPAddr
+		utwr->IPAddr,
+		canBypassServerLock
 	);
 
 	ServerPacket outpack;
@@ -92,7 +94,7 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 	utwrs->response    = UserToWorldStatusSuccess;
 
 	if (Config->Locked) {
-		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
+		if (canBypassServerLock == false && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
 			LogDebug("[ProcessUsertoWorldReqLeg] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
@@ -144,16 +146,18 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	UsertoWorldRequest_Struct *utwr  = (UsertoWorldRequest_Struct *) p.Data();
 	uint32                    id     = database.GetAccountIDFromLSID(utwr->login, utwr->lsaccountid);
 	int16                     status = database.CheckStatus(id);
+	bool					  canBypassServerLock = database.GetBypassFlagByLSAccountID(utwr->lsaccountid);
 
 	LogDebug(
-		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}]",
+		"[ProcessUsertoWorldReq] id [{}] status [{}] account_id [{}] world_id [{}] from_id [{}] to_id [{}] ip [{}] Bypass Server Lock [{}]",
 		id,
 		status,
 		utwr->lsaccountid,
 		utwr->worldid,
 		utwr->FromID,
 		utwr->ToID,
-		utwr->IPAddr
+		utwr->IPAddr,
+		canBypassServerLock
 	);
 
 	ServerPacket outpack;
@@ -170,7 +174,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	utwrs->response = UserToWorldStatusSuccess;
 
 	if (Config->Locked == true) {
-		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
+		if (canBypassServerLock == false && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
 			LogDebug("[ProcessUsertoWorldReq] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
@@ -179,7 +183,7 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 	}
 
 	int32 x = Config->MaxClients;
-	if ((int32) numplayers >= x && x != -1 && x != 255 && status < (RuleI(GM, MinStatusToBypassLockedServer))) {
+	if ((int32)numplayers >= x && x != -1 && x != 255 && status < (RuleI(GM, MinStatusToBypassLockedServer)) && canBypassServerLock == false) {
 		LogDebug("[ProcessUsertoWorldReq] World at capacity account_id [{0}]", utwr->lsaccountid);
 		utwrs->response = UserToWorldStatusWorldAtCapacity;
 		SendPacket(&outpack);

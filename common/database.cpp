@@ -2479,3 +2479,14 @@ bool Database::CopyCharacter(
 	return true;
 }
 
+bool Database::GetBypassFlagByLSAccountID(uint32 lsaccount_id)
+{
+	std::string query = fmt::format("select bypassServerLock from account WHERE lsaccount_id = {}", lsaccount_id);
+	auto results = QueryDatabase(query);
+	auto row = results.begin();
+
+	if (atoi(row[0]))
+		return true;
+
+	return false;
+}
