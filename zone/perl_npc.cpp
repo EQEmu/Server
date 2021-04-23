@@ -1459,7 +1459,7 @@ XS(XS_NPC_GetAvoidanceRating); /* prototype to pass -Wmissing-prototypes */
 XS(XS_NPC_GetAvoidanceRating) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetAvoidanceyRating(THIS)"); // @categories Stats and Attributes
+		Perl_croak(aTHX_ "Usage: NPC::GetAvoidanceRating(THIS)"); // @categories Stats and Attributes
 	{
 		NPC   *THIS;
 		int32 RETVAL;
