@@ -1332,10 +1332,11 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	strcpy(lastname, m_pp.last_name);
 	/* If PP is set to weird coordinates */
 	if ((m_pp.x == -1 && m_pp.y == -1 && m_pp.z == -1) || (m_pp.x == -2 && m_pp.y == -2 && m_pp.z == -2)) {
-		auto safePoint = zone->GetSafePoint();
-		m_pp.x = safePoint.x;
-		m_pp.y = safePoint.y;
-		m_pp.z = safePoint.z;
+		auto zone_safe_point = zone->GetSafePoint();
+		m_pp.x = zone_safe_point.x;
+		m_pp.y = zone_safe_point.y;
+		m_pp.z = zone_safe_point.z;
+		m_pp.heading = zone_safe_point.w;
 	}
 	/* If too far below ground, then fix */
 	// float ground_z = GetGroundZ(m_pp.x, m_pp.y, m_pp.z);
@@ -6594,34 +6595,45 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	}
 
 	GMZoneRequest_Struct* gmzr = (GMZoneRequest_Struct*)app->pBuffer;
-	float tarx = -1, tary = -1, tarz = -1;
+	float target_x = -1, target_y = -1, target_z = -1, target_heading;
 
-	int16 minstatus = 0;
-	uint8 minlevel = 0;
-	char tarzone[32];
-	uint16 zid = gmzr->zone_id;
+	int16 min_status = 0;
+	uint8 min_level = 0;
+	char target_zone[32];
+	uint16 zone_id = gmzr->zone_id;
 	if (gmzr->zone_id == 0)
-		zid = zonesummon_id;
-	const char * zname = ZoneName(zid);
-	if (zname == nullptr)
-		tarzone[0] = 0;
+		zone_id = zonesummon_id;
+
+	const char* zone_short_name = ZoneName(zone_id);
+	if (zone_short_name == nullptr)
+		target_zone[0] = 0;
 	else
-		strcpy(tarzone, zname);
+		strcpy(target_zone, zone_short_name);
 
 	// this both loads the safe points and does a sanity check on zone name
-	if (!content_db.GetSafePoints(tarzone, 0, &tarx, &tary, &tarz, &minstatus, &minlevel)) {
-		tarzone[0] = 0;
+	if (!content_db.GetSafePoints(
+		target_zone,
+		0,
+		&target_x,
+		&target_y,
+		&target_z,
+		&target_heading,
+		&min_status,
+		&min_level
+	)) {
+		target_zone[0] = 0;
 	}
 
 	auto outapp = new EQApplicationPacket(OP_GMZoneRequest, sizeof(GMZoneRequest_Struct));
 	GMZoneRequest_Struct* gmzr2 = (GMZoneRequest_Struct*)outapp->pBuffer;
 	strcpy(gmzr2->charname, this->GetName());
 	gmzr2->zone_id = gmzr->zone_id;
-	gmzr2->x = tarx;
-	gmzr2->y = tary;
-	gmzr2->z = tarz;
+	gmzr2->x = target_x;
+	gmzr2->y = target_y;
+	gmzr2->z = target_z;
+	gmzr2->heading = target_heading;
 	// Next line stolen from ZoneChange as well... - This gives us a nicer message than the normal "zone is down" message...
-	if (tarzone[0] != 0 && admin >= minstatus && GetLevel() >= minlevel)
+	if (target_zone[0] != 0 && admin >= min_status && GetLevel() >= min_level)
 		gmzr2->success = 1;
 	else {
 		std::cout << "GetZoneSafeCoords failed. zoneid = " << gmzr->zone_id << "; czone = " << zone->GetZoneID() << std::endl;
@@ -12663,8 +12675,8 @@ void Client::Handle_OP_SetServerFilter(const EQApplicationPacket *app)
 void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 {
 	// if the character has a start city, don't let them use the command
-	if (m_pp.binds[4].zoneId != 0 && m_pp.binds[4].zoneId != 189) {
-		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zoneId, ZoneName(m_pp.binds[4].zoneId));
+	if (m_pp.binds[4].zone_id != 0 && m_pp.binds[4].zone_id != 189) {
+		Message(Chat::Yellow, "Your home city has already been set.", m_pp.binds[4].zone_id, ZoneName(m_pp.binds[4].zone_id));
 		return;
 	}
 
@@ -12674,13 +12686,22 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		return;
 	}
 
-	float x(0), y(0), z(0);
-	uint32 zoneid = 0;
-	uint32 startCity = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
-
-	std::string query = StringFormat(
-		"SELECT zone_id, bind_id, x, y, z FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i %s",
+	float x = 0.0f, y = 0.0f, z = 0.0f, heading = 0.0f;
+	uint32 zone_id = 0;
+	uint32 start_city = (uint32)strtol((const char*)app->pBuffer, nullptr, 10);
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`zone_id`, `bind_id`, `x`, `y`, `z`, `heading`
+			FROM
+			`start_zones`
+			WHERE
+			player_class = {}
+			AND
+			player_deity = {}
+			AND
+			player_race = {} {}
+		),
 		m_pp.class_,
 		m_pp.deity,
 		m_pp.race,
@@ -12692,31 +12713,46 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		return;
 	}
 
-	bool validCity = false;
+	bool valid_city = false;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[1]) != 0)
-			zoneid = atoi(row[1]);
+			zone_id = atoi(row[1]);
 		else
-			zoneid = atoi(row[0]);
+			zone_id = atoi(row[0]);
 
-		if (zoneid != startCity)
+		if (zone_id != start_city)
 			continue;
 
-		validCity = true;
+		valid_city = true;
 		x = atof(row[2]);
 		y = atof(row[3]);
 		z = atof(row[4]);
+		heading = atof(row[5]);
 	}
 
-	if (validCity) {
+	if (valid_city) {
 		Message(Chat::Yellow, "Your home city has been set");
-		SetStartZone(startCity, x, y, z);
+		SetStartZone(start_city, x, y, z, heading);
 		return;
 	}
 
-	query = StringFormat("SELECT zone_id, bind_id FROM start_zones "
-		"WHERE player_class=%i AND player_deity=%i AND player_race=%i",
-		m_pp.class_, m_pp.deity, m_pp.race);
+	query = fmt::format(
+		SQL(
+			SELECT
+			`zone_id`, `bind_id`
+			FROM
+			`start_zones`
+			WHERE
+			player_class = {}
+			AND
+			player_deity = {}
+			AND
+			player_race = {}
+		),
+		m_pp.class_,
+		m_pp.deity,
+		m_pp.race
+	);
 	results = content_db.QueryDatabase(query);
 	if (!results.Success())
 		return;
@@ -12725,13 +12761,12 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		if (atoi(row[1]) != 0)
-			zoneid = atoi(row[1]);
+			zone_id = atoi(row[1]);
 		else
-			zoneid = atoi(row[0]);
+			zone_id = atoi(row[0]);
 
-		char* name = nullptr;
-		content_db.GetZoneLongName(ZoneName(zoneid), &name);
-		Message(Chat::Yellow, "%d - %s", zoneid, name);
+		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
+		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name.c_str());
 	}
 
 }

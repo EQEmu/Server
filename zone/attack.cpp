@@ -1655,7 +1655,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	d->spawn_id = GetID();
 	d->killer_id = killerMob ? killerMob->GetID() : 0;
 	d->corpseid = GetID();
-	d->bindzoneid = m_pp.binds[0].zoneId;
+	d->bindzoneid = m_pp.binds[0].zone_id;
 	d->spell_id = spell == SPELL_UNKNOWN ? 0xffffffff : spell;
 	d->attack_skill = spell != SPELL_UNKNOWN ? 0xe7 : attack_skill;
 	d->damage = damage;
@@ -1892,7 +1892,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			r->MemberZoned(this);
 
 		dead_timer.Start(5000, true);
-		m_pp.zone_id = m_pp.binds[0].zoneId;
+		m_pp.zone_id = m_pp.binds[0].zone_id;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		database.MoveCharacterToZone(this->CharacterID(), m_pp.zone_id);
 		Save();

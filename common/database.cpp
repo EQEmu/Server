@@ -703,11 +703,11 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i), "
 		"(%u, %u, %u, %f, %f, %f, %f, %i)",
-		character_id, pp->binds[0].zoneId, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
-		character_id, pp->binds[1].zoneId, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
-		character_id, pp->binds[2].zoneId, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
-		character_id, pp->binds[3].zoneId, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
-		character_id, pp->binds[4].zoneId, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
+		character_id, pp->binds[0].zone_id, 0, pp->binds[0].x, pp->binds[0].y, pp->binds[0].z, pp->binds[0].heading, 0,
+		character_id, pp->binds[1].zone_id, 0, pp->binds[1].x, pp->binds[1].y, pp->binds[1].z, pp->binds[1].heading, 1,
+		character_id, pp->binds[2].zone_id, 0, pp->binds[2].x, pp->binds[2].y, pp->binds[2].z, pp->binds[2].heading, 2,
+		character_id, pp->binds[3].zone_id, 0, pp->binds[3].x, pp->binds[3].y, pp->binds[3].z, pp->binds[3].heading, 3,
+		character_id, pp->binds[4].zone_id, 0, pp->binds[4].x, pp->binds[4].y, pp->binds[4].z, pp->binds[4].heading, 4
 	); results = QueryDatabase(query);
 
         /* HoTT Ability */
@@ -971,10 +971,20 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 }
 
 // Get zone starting points from DB
-bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe_x, float* safe_y, float* safe_z, int16* minstatus, uint8* minlevel, char *flag_needed) {
-
-	std::string query = StringFormat("SELECT safe_x, safe_y, safe_z, min_status, min_level, flag_needed FROM zone "
-		" WHERE short_name='%s' AND (version=%i OR version=0) ORDER BY version DESC", short_name, version);
+bool Database::GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x, float* safe_y, float* safe_z, float* safe_heading, int16* min_status, uint8* min_level, char *flag_needed) {
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`safe_x`, `safe_y`, `safe_z`, `safe_heading`, `min_status`, `min_level`, `flag_needed`
+			FROM
+			zone
+			WHERE
+			`short_name` = '{}'
+			AND
+			(`version` = {} OR `version` = 0)
+			ORDER BY `version` DESC
+		), zone_short_name, instance_version
+	);
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
@@ -987,16 +997,24 @@ bool Database::GetSafePoints(const char* short_name, uint32 version, float* safe
 
 	if (safe_x != nullptr)
 		*safe_x = atof(row[0]);
+
 	if (safe_y != nullptr)
 		*safe_y = atof(row[1]);
+
 	if (safe_z != nullptr)
 		*safe_z = atof(row[2]);
-	if (minstatus != nullptr)
-		*minstatus = atoi(row[3]);
-	if (minlevel != nullptr)
-		*minlevel = atoi(row[4]);
+
+	if (safe_heading != nullptr)
+		*safe_heading = atof(row[3]);
+
+	if (min_status != nullptr)
+		*min_status = atoi(row[4]);
+
+	if (min_level != nullptr)
+		*min_level = atoi(row[5]);
+
 	if (flag_needed != nullptr)
-		strcpy(flag_needed, row[5]);
+		strcpy(flag_needed, row[6]);
 
 	return true;
 }

@@ -5199,7 +5199,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 	}
 
 	if (instance_id > 0) {
-		float target_x   = -1, target_y = -1, target_z = -1;
+		float target_x   = -1, target_y = -1, target_z = -1, target_heading = -1;
 		int16 min_status = 0;
 		uint8 min_level  = 0;
 
@@ -5209,6 +5209,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 			&target_x,
 			&target_y,
 			&target_z,
+			&target_heading,
 			&min_status,
 			&min_level
 		)) {
@@ -5218,7 +5219,7 @@ void command_gmzone(Client *c, const Seperator *sep)
 		c->Message(Chat::Yellow, "Zoning to private GM instance (%s) (%u)", zone_short_name, instance_id);
 
 		c->AssignToInstance(instance_id);
-		c->MovePC(zone_id, instance_id, target_x, target_y, target_z, 0, 1);
+		c->MovePC(zone_id, instance_id, target_x, target_y, target_z, target_heading, 1);
 	}
 }
 
