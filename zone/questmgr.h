@@ -151,7 +151,8 @@ public:
 	void targlobal(const char *varname, const char *value, const char *duration, int npcid, int charid, int zoneid);
 	void delglobal(const char *varname);
 	void ding();
-	void rebind(int zoneid, const glm::vec3& location);
+	void rebind(int zone_id, const glm::vec3& location);
+	void rebind(int zone_id, const glm::vec4& location);
 	void start(int wp);
 	void stop();
 	void pause(int duration);
@@ -372,6 +373,7 @@ public:
 	void ClearNPCTypeCache(int npctype_id);
 	void ReloadZoneStaticData();
 	std::string secondstotime(int duration);
+	std::string gethexcolorcode(std::string color_name);  
 	double GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
 	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
 	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier);

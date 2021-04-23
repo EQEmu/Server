@@ -163,7 +163,7 @@ Client::Client(EQStreamInterface* ieqs)
   helm_toggle_timer(250),
   aggro_meter_timer(AGGRO_METER_UPDATE_MS),
   m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
+	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f,-2.0f),
   m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
   m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
   last_region_type(RegionTypeUnsupported),
@@ -441,7 +441,7 @@ Client::~Client() {
 
 	if(IsHoveringForRespawn())
 	{
-		m_pp.zone_id = m_pp.binds[0].zoneId;
+		m_pp.zone_id = m_pp.binds[0].zone_id;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		m_Position.x = m_pp.binds[0].x;
 		m_Position.y = m_pp.binds[0].y;
@@ -658,7 +658,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	/* Save Current Bind Points */
 	for (int i = 0; i < 5; i++)
-		if (m_pp.binds[i].zoneId)
+		if (m_pp.binds[i].zone_id)
 			database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[i], i);
 
 	/* Save Character Buffs */
@@ -3959,7 +3959,7 @@ void Client::Sacrifice(Client *caster)
 			Death_Struct *d = (Death_Struct *)app.pBuffer;
 			d->spawn_id = GetID();
 			d->killer_id = caster ? caster->GetID() : 0;
-			d->bindzoneid = GetPP().binds[0].zoneId;
+			d->bindzoneid = GetPP().binds[0].zone_id;
 			d->spell_id = SPELL_UNKNOWN;
 			d->attack_skill = 0xe7;
 			d->damage = 0;
@@ -4007,7 +4007,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	PendingTranslocateData.spell_id = ts->SpellID = SpellID;
 
 	if((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) {
-		PendingTranslocateData.zone_id = ts->ZoneID = m_pp.binds[0].zoneId;
+		PendingTranslocateData.zone_id = ts->ZoneID = m_pp.binds[0].zone_id;
 		PendingTranslocateData.instance_id = m_pp.binds[0].instance_id;
 		PendingTranslocateData.x = ts->x = m_pp.binds[0].x;
 		PendingTranslocateData.y = ts->y = m_pp.binds[0].y;
@@ -4892,7 +4892,7 @@ void Client::SendRespawnBinds()
 		BindStruct* b = &m_pp.binds[0];
 		RespawnOption opt;
 		opt.name = "Bind Location";
-		opt.zone_id = b->zoneId;
+		opt.zone_id = b->zone_id;
 		opt.instance_id = b->instance_id;
 		opt.x = b->x;
 		opt.y = b->y;
@@ -5289,11 +5289,11 @@ void Client::NotifyNewTitlesAvailable()
 
 }
 
-void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
+void Client::SetStartZone(uint32 zoneid, float x, float y, float z, float heading)
 {
 	// setting city to zero allows the player to use /setstartcity to set the city themselves
 	if(zoneid == 0) {
-		m_pp.binds[4].zoneId = 0;
+		m_pp.binds[4].zone_id = 0;
 		this->Message(Chat::Yellow,"Your starting city has been reset. Use /setstartcity to choose a new one");
 		return;
 	}
@@ -5303,24 +5303,32 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	if(target_zone_name == nullptr)
 		return;
 
-	m_pp.binds[4].zoneId = zoneid;
+	m_pp.binds[4].zone_id = zoneid;
 	if(zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) {
 		m_pp.binds[4].instance_id = zone->GetInstanceID();
 	}
 
 	if (x == 0 && y == 0 && z == 0) {
-		content_db.GetSafePoints(ZoneName(m_pp.binds[4].zoneId), 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+		content_db.GetSafePoints(
+			ZoneName(m_pp.binds[4].zone_id),
+			0,
+			&m_pp.binds[4].x,
+			&m_pp.binds[4].y,
+			&m_pp.binds[4].z,
+			&m_pp.binds[4].heading
+		);
 	}
 	else {
 		m_pp.binds[4].x = x;
 		m_pp.binds[4].y = y;
 		m_pp.binds[4].z = z;
+		m_pp.binds[4].heading = heading;
 	}
 }
 
 uint32 Client::GetStartZone()
 {
-	return m_pp.binds[4].zoneId;
+	return m_pp.binds[4].zone_id;
 }
 
 void Client::ShowSkillsWindow()

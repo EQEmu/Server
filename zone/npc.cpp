@@ -3294,17 +3294,16 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 			 * then jump in if they are our friend
 			 */
 			if (mob->GetLevel() >= 50 || attacker->GetLevelCon(mob->GetLevel()) != CON_GRAY) {
-				bool use_primary_faction = false;
 				if (mob->GetPrimaryFaction() == sender->CastToNPC()->GetPrimaryFaction()) {
 					const NPCFactionList *cf = content_db.GetNPCFactionEntry(mob->CastToNPC()->GetNPCFactionID());
 					if (cf) {
-						if (cf->assistprimaryfaction != 0) {
-							use_primary_faction = true;
+						if (cf->assistprimaryfaction == 0) {
+							continue; //Same faction and ignore primary assist
 						}
 					}
 				}
 
-				if (use_primary_faction || sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE) {
+				if (sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE) {
 					//attacking someone on same faction, or a friend
 					//Father Nitwit: make sure we can see them.
 					if (mob->CheckLosFN(sender)) {

@@ -941,7 +941,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	spawn2_timer(1000),
 	hot_reload_timer(1000),
 	qglobal_purge_timer(30000),
-	m_SafePoint(0.0f,0.0f,0.0f),
+	m_SafePoint(0.0f,0.0f,0.0f,0.0f),
 	m_Graveyard(0.0f,0.0f,0.0f,0.0f)
 {
 	zoneid = in_zoneid;

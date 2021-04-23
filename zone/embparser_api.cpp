@@ -1495,14 +1495,19 @@ XS(XS__ding) {
 XS(XS__rebind);
 XS(XS__rebind) {
 	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::rebind(int zone_id, float x, float y, float z)");
+	if (items < 4 || items > 5)
+		Perl_croak(aTHX_ "Usage: quest::rebind(int zone_id, float x, float y, float z, [float heading])");
 
-	int  zone_id  = (int) SvIV(ST(0));
-	auto location = glm::vec3((float) SvNV(ST(1)), (float) SvNV(ST(2)), (float) SvNV(ST(3)));
-
-	quest_manager.rebind(zone_id, location);
-
+	int zone_id = (int) SvIV(ST(0));
+	float target_x = (float) SvNV(ST(1));
+	float target_y = (float) SvNV(ST(2));
+	float target_z = (float) SvNV(ST(3));
+	if (items > 4) {
+		float target_heading = (float) SvNV(ST(4));
+		quest_manager.rebind(zone_id, glm::vec4(target_x, target_y, target_z, target_heading));
+	} else {
+		quest_manager.rebind(zone_id, glm::vec3(target_x, target_y, target_z));
+	}
 	XSRETURN_EMPTY;
 }
 
@@ -6472,6 +6477,23 @@ XS(XS__secondstotime) {
 	XSRETURN(1);
 }
 
+XS(XS__gethexcolorcode);
+XS(XS__gethexcolorcode) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: quest::gethexcolorcode(std::string color_name)");
+	}
+
+	dXSTARG;
+	std::string hex_color_code;
+	std::string color_name = SvPV_nolen(ST(0));
+	hex_color_code = quest_manager.gethexcolorcode(color_name);
+	sv_setpv(TARG, hex_color_code.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);	
+}
+
 XS(XS__getaaexpmodifierbycharid);
 XS(XS__getaaexpmodifierbycharid) {
 	dXSARGS;
@@ -6739,6 +6761,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getaaexpmodifierbycharid"), XS__getaaexpmodifierbycharid, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
+	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "getexpmodifierbycharid"), XS__getexpmodifierbycharid, file);
 	newXS(strcpy(buf, "get_expedition"), XS__get_expedition, file);
