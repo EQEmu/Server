@@ -29,8 +29,6 @@ class Expedition;
 namespace ExpeditionDatabase
 {
 	void DeleteExpeditions(const std::vector<uint32_t>& expedition_ids);
-	std::vector<Expedition> LoadExpeditions(uint32_t select_expedition_id = 0);
-	Expedition LoadExpedition(uint32_t expedition_id);
 	void MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids);
 	void PurgeExpiredExpeditions();
 	void PurgeExpiredCharacterLockouts();

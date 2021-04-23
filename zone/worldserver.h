@@ -20,6 +20,7 @@
 
 #include "../common/eq_packet_structs.h"
 #include "../common/net/servertalk_client_connection.h"
+#include "zone_event_scheduler.h"
 
 class ServerPacket;
 class EQApplicationPacket;
@@ -76,6 +77,11 @@ private:
 
 	std::unique_ptr<EQ::Net::ServertalkClient> m_connection;
 	std::unique_ptr<EQ::Timer> m_keepalive;
+
+	ZoneEventScheduler *m_zone_scheduler;
+public:
+	ZoneEventScheduler *GetScheduler() const;
+	void SetScheduler(ZoneEventScheduler *scheduler);
 };
 #endif
 

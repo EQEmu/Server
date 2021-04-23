@@ -1470,7 +1470,7 @@ bool ZoneDatabase::LoadCharacterBindPoint(uint32 character_id, PlayerProfile_Str
 		if (index < 0 || index > 4)
 			continue;
 
-		pp->binds[index].zoneId = atoi(row[1]);
+		pp->binds[index].zone_id = atoi(row[1]);
 		pp->binds[index].instance_id = atoi(row[2]);
 		pp->binds[index].x = atoi(row[3]);
 		pp->binds[index].y = atoi(row[4]);
@@ -1493,10 +1493,10 @@ bool ZoneDatabase::SaveCharacterBindPoint(uint32 character_id, const BindStruct 
 	std::string query =
 	    StringFormat("REPLACE INTO `character_bind` (id, zone_id, instance_id, x, y, z, heading, slot) VALUES (%u, "
 			 "%u, %u, %f, %f, %f, %f, %i)",
-			 character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
+			 character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
 
 	LogDebug("ZoneDatabase::SaveCharacterBindPoint for character ID: [{}] zone_id: [{}] instance_id: [{}] position: [{}] [{}] [{}] [{}] bind_num: [{}]",
-		character_id, bind.zoneId, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
+		character_id, bind.zone_id, bind.instance_id, bind.x, bind.y, bind.z, bind.heading, bind_num);
 
 	auto results = QueryDatabase(query);
 	if (!results.RowsAffected())

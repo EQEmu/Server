@@ -9,19 +9,9 @@
 
 extern ZSList zoneserver_list;
 
-DynamicZone::DynamicZone(
-	uint32_t id, uint32_t zone_id, uint32_t instance_id, uint32_t zone_version,
-	uint32_t start_time, uint32_t duration, DynamicZoneType type
-) :
-	m_id(id),
-	m_instance_id(instance_id),
-	m_zone_id(zone_id),
-	m_zone_version(zone_version),
-	m_start_time(std::chrono::system_clock::from_time_t(start_time)),
-	m_duration(duration),
-	m_type(type),
-	m_expire_time(m_start_time + m_duration)
+Database& DynamicZone::GetDatabase()
 {
+	return database;
 }
 
 DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
@@ -99,10 +89,27 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:
 	{
+		auto buf = reinterpret_cast<ServerDzLocation_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			if (pack->opcode == ServerOP_DzSetCompass)
+			{
+				dz->SetCompass(buf->zone_id, buf->x, buf->y, buf->z, false);
+			}
+			else if (pack->opcode == ServerOP_DzSetSafeReturn)
+			{
+				dz->SetSafeReturn(buf->zone_id, buf->x, buf->y, buf->z, buf->heading, false);
+			}
+			else if (pack->opcode == ServerOP_DzSetZoneIn)
+			{
+				dz->SetZoneInLocation(buf->x, buf->y, buf->z, buf->heading, false);
+			}
+		}
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_DzCharacterChange:
+	case ServerOP_DzAddRemoveCharacter:
 	case ServerOP_DzRemoveAllCharacters:
 	{
 		auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
@@ -124,4 +131,30 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 		break;
 	}
 	};
+}
+
+void DynamicZone::SendInstanceAddRemoveCharacter(uint32_t character_id, bool remove)
+{
+	ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(GetInstanceID());
+	if (instance_zs)
+	{
+		auto pack = CreateServerAddRemoveCharacterPacket(character_id, remove);
+		instance_zs->SendPacket(pack.get());
+	}
+}
+
+void DynamicZone::SendInstanceRemoveAllCharacters()
+{
+	ZoneServer* instance_zs = zoneserver_list.FindByInstanceID(GetInstanceID());
+	if (instance_zs)
+	{
+		auto pack = CreateServerRemoveAllCharactersPacket();
+		instance_zs->SendPacket(pack.get());
+	}
+}
+
+void DynamicZone::SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location)
+{
+	auto pack = CreateServerDzLocationPacket(server_opcode, location);
+	zoneserver_list.SendPacket(pack.get());
 }

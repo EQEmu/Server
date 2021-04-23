@@ -39,7 +39,6 @@
 const std::string str_tolower(std::string s);
 const std::string str_toupper(std::string s);
 const std::string ucfirst(std::string s);
-std::vector<std::string> split(std::string str_to_split, char delimiter);
 const std::string StringFormat(const char* format, ...);
 const std::string vStringFormat(const char* format, va_list args);
 std::vector<std::string> wrap(std::vector<std::string> &src, std::string character);
@@ -177,7 +176,7 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &s, char delim);
+std::vector<std::string> SplitString(const std::string &s, const char delim = ',');
 std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);

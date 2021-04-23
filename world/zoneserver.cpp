@@ -1388,7 +1388,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
 	}
-	case ServerOP_DzCharacterChange:
+	case ServerOP_DzAddRemoveCharacter:
 	case ServerOP_DzRemoveAllCharacters:
 	case ServerOP_DzSetSecondsRemaining:
 	case ServerOP_DzSetCompass:

@@ -59,7 +59,7 @@ void Lua_Expedition::AddReplayLockoutDuration(int seconds, bool members_only) {
 
 uint32_t Lua_Expedition::GetDynamicZoneID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZoneID();
+	return self->GetDynamicZone().GetID();
 }
 
 uint32_t Lua_Expedition::GetID() {

@@ -16,6 +16,7 @@ SET(common_sources
 	database_instances.cpp
 	dbcore.cpp
 	deity.cpp
+	dynamic_zone_base.cpp
 	emu_constants.cpp
 	emu_limits.cpp
 	emu_opcodes.cpp
@@ -31,6 +32,7 @@ SET(common_sources
 	eq_stream_proxy.cpp
 	eqtime.cpp
 	event_sub.cpp
+	expedition_base.cpp
 	expedition_lockout_timer.cpp
 	extprofile.cpp
 	faction.cpp
@@ -68,6 +70,7 @@ SET(common_sources
 	rulesys.cpp
 	say_link.cpp
 	serialize_buffer.cpp
+	server_event_scheduler.cpp
 	serverinfo.cpp
 	shareddb.cpp
 	skills.cpp
@@ -251,6 +254,7 @@ SET(repositories
 	repositories/base/base_rule_sets_repository.h
 	repositories/base/base_rule_values_repository.h
 	repositories/base/base_saylink_repository.h
+	repositories/base/base_server_scheduled_events_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn2_repository.h
 	repositories/base/base_spawnentry_repository.h
@@ -414,6 +418,7 @@ SET(repositories
 	repositories/rule_sets_repository.h
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
+	repositories/server_scheduled_events_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
 	repositories/spawnentry_repository.h
@@ -460,12 +465,14 @@ SET(common_headers
 	cli/argh.h
 	cli/eqemu_command_handler.h
 	cli/terminal_color.hpp
+	cron/croncpp.h
 	database/database_dump_service.h
 	data_verification.h
 	database.h
 	database_schema.h
 	dbcore.h
 	deity.h
+	dynamic_zone_base.h
 	emu_constants.h
 	emu_limits.h
 	emu_opcodes.h
@@ -489,6 +496,7 @@ SET(common_headers
 	eqtime.h
 	errmsg.h
 	event_sub.h
+	expedition_base.h
 	expedition_lockout_timer.h
 	extprofile.h
 	faction.h
@@ -541,6 +549,7 @@ SET(common_headers
 	say_link.h
 	seperator.h
 	serialize_buffer.h
+	server_event_scheduler.h
 	serverinfo.h
 	servertalk.h
 	shareddb.h

@@ -65,6 +65,100 @@ public:
 
 	// Custom extended repository methods here
 
+	struct ExpeditionWithLeader
+	{
+		uint32_t    id;
+		std::string uuid;
+		uint32_t    dynamic_zone_id;
+		std::string expedition_name;
+		uint32_t    min_players;
+		uint32_t    max_players;
+		int         add_replay_on_join;
+		int         is_locked;
+		uint32_t    leader_id;
+		std::string leader_name;
+	};
+
+	static std::string SelectExpeditionsJoinLeader()
+	{
+		return std::string(SQL(
+			SELECT
+				expeditions.id,
+				expeditions.uuid,
+				expeditions.dynamic_zone_id,
+				expeditions.expedition_name,
+				expeditions.min_players,
+				expeditions.max_players,
+				expeditions.add_replay_on_join,
+				expeditions.is_locked,
+				expeditions.leader_id,
+				character_data.name leader_name
+			FROM expeditions
+				INNER JOIN character_data ON expeditions.leader_id = character_data.id
+		));
+	}
+
+	static ExpeditionWithLeader FillExpeditionWithLeaderFromRow(MySQLRequestRow& row)
+	{
+		ExpeditionWithLeader entry{};
+
+		int col = 0;
+		entry.id                 = strtoul(row[col++], nullptr, 10);
+		entry.uuid               = row[col++];
+		entry.dynamic_zone_id    = strtoul(row[col++], nullptr, 10);
+		entry.expedition_name    = row[col++];
+		entry.min_players        = strtoul(row[col++], nullptr, 10);
+		entry.max_players        = strtoul(row[col++], nullptr, 10);
+		entry.add_replay_on_join = strtoul(row[col++], nullptr, 10);
+		entry.is_locked          = strtoul(row[col++], nullptr, 10);
+		entry.leader_id          = strtoul(row[col++], nullptr, 10);
+		entry.leader_name        = row[col++];
+
+		return entry;
+	}
+
+	static std::vector<ExpeditionWithLeader> GetAllWithLeaderName(Database& db)
+	{
+		std::vector<ExpeditionWithLeader> all_entries;
+
+		auto results = db.QueryDatabase(fmt::format(
+			"{} ORDER BY expeditions.id;",
+			SelectExpeditionsJoinLeader()
+		));
+
+		if (results.Success())
+		{
+			all_entries.reserve(results.RowCount());
+
+			for (auto row = results.begin(); row != results.end(); ++row)
+			{
+				ExpeditionWithLeader entry = FillExpeditionWithLeaderFromRow(row);
+				all_entries.emplace_back(std::move(entry));
+			}
+		}
+
+		return all_entries;
+	}
+
+	static ExpeditionWithLeader GetWithLeaderName(Database& db, uint32_t expedition_id)
+	{
+		ExpeditionWithLeader entry{};
+
+		auto results = db.QueryDatabase(fmt::format(
+			"{} WHERE expeditions.id = {};",
+			SelectExpeditionsJoinLeader(),
+			expedition_id
+		));
+
+		if (results.Success() && results.RowCount() > 0)
+		{
+			auto row = results.begin();
+			entry = FillExpeditionWithLeaderFromRow(row);
+		}
+
+		return entry;
+	}
+
 	struct CharacterExpedition
 	{
 		uint32_t    id;

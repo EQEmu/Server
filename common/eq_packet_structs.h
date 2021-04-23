@@ -829,7 +829,7 @@ struct LeadershipAA_Struct {
 * Size: 20 Octets
 */
 struct BindStruct {
-	/*000*/ uint32 zoneId;
+	/*000*/ uint32 zone_id;
 	/*004*/ float x;
 	/*008*/ float y;
 	/*012*/ float z;
@@ -1772,7 +1772,7 @@ struct GMZoneRequest_Struct {
 /*0068*/	float	x;
 /*0072*/	float	y;
 /*0076*/	float	z;
-/*0080*/	char	unknown0080[4];
+/*0080*/	float	heading;
 /*0084*/	uint32	success;		// 0 if command failed, 1 if succeeded?
 /*0088*/
 //	/*072*/	int8	success;		// =0 client->server, =1 server->client, -X=specific error
@@ -3247,7 +3247,7 @@ struct TraderClick_Struct{
 };
 
 struct FormattedMessage_Struct{
-	uint32	unknown0;
+	uint32	unknown0; // 1 means from world server
 	uint32	string_id;
 	uint32	type;
 	char	message[0];
@@ -3255,7 +3255,7 @@ struct FormattedMessage_Struct{
 struct SimpleMessage_Struct{
 	uint32	string_id;
 	uint32	color;
-	uint32	unknown8;
+	uint32	unknown8; // 1 means from world server
 };
 
 struct GuildMemberUpdate_Struct {

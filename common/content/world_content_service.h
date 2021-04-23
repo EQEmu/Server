@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+class Database;
+
 namespace Expansion {
 	static const int EXPANSION_ALL        = -1;
 	static const int EXPANSION_FILTER_MAX = 99;
@@ -165,6 +167,7 @@ public:
 	const std::vector<std::string> &GetContentFlags() const;
 	bool IsContentFlagEnabled(const std::string& content_flag);
 	void SetContentFlags(std::vector<std::string> content_flags);
+	void ReloadContentFlags(Database &db);
 	void SetExpansionContext();
 };
 

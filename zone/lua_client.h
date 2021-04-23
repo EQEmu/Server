@@ -60,7 +60,6 @@ public:
 	int GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
-	const char *GetLastName();
 	int GetLDoNPointsTheme(int theme);
 	int GetBaseSTR();
 	int GetBaseSTA();
@@ -87,6 +86,7 @@ public:
 	void SetBindPoint(int to_zone, int to_instance, float new_x);
 	void SetBindPoint(int to_zone, int to_instance, float new_x, float new_y);
 	void SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z);
+	void SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z, float new_heading);
 	float GetBindX();
 	float GetBindX(int index);
 	float GetBindY();
@@ -250,6 +250,7 @@ public:
 	void SetStartZone(int zone_id, float x);
 	void SetStartZone(int zone_id, float x, float y);
 	void SetStartZone(int zone_id, float x, float y, float z);
+	void SetStartZone(int zone_id, float x, float y, float z, float heading);
 	void KeyRingAdd(uint32 item);
 	bool KeyRingCheck(uint32 item);
 	void AddPVPPoints(uint32 points);

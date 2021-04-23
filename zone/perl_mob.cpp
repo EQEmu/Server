@@ -6235,6 +6235,24 @@ XS(XS_Mob_GetHateClosest) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_GetLastName); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetLastName) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetLastName(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		Const_char *last_name;
+		dXSTARG;
+		VALIDATE_THIS_IS_MOB;
+		last_name = THIS->GetLastName();
+		sv_setpv(TARG, last_name);
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6583,6 +6601,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SetBucket"), XS_Mob_SetBucket, file, "$$$;$");
 	newXSproto(strcpy(buf, "GetHateClosest"), XS_Mob_GetHateClosest, file, "$");
 	newXSproto(strcpy(buf, "GetHateListByDistance"), XS_Mob_GetHateListByDistance, file, "$;$");
+	newXSproto(strcpy(buf, "GetLastName"), XS_Mob_GetLastName, file, "$");
 	XSRETURN_YES;
 }
 

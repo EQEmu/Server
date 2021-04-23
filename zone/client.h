@@ -426,7 +426,7 @@ public:
 	inline const float GetBindY(uint32 index = 0) const { return m_pp.binds[index].y; }
 	inline const float GetBindZ(uint32 index = 0) const { return m_pp.binds[index].z; }
 	inline const float GetBindHeading(uint32 index = 0) const { return m_pp.binds[index].heading; }
-	inline uint32 GetBindZoneID(uint32 index = 0) const { return m_pp.binds[index].zoneId; }
+	inline uint32 GetBindZoneID(uint32 index = 0) const { return m_pp.binds[index].zone_id; }
 	inline uint32 GetBindInstanceID(uint32 index = 0) const { return m_pp.binds[index].instance_id; }
 	int32 CalcMaxMana();
 	int32 CalcBaseMana();
@@ -644,7 +644,8 @@ public:
 	void GoToSafeCoords(uint16 zone_id, uint16 instance_id);
 	void Gate(uint8 bindnum = 0);
 	void SetBindPoint(int bind_num = 0, int to_zone = -1, int to_instance = 0, const glm::vec3& location = glm::vec3());
-	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f);
+	void SetBindPoint2(int bind_num = 0, int to_zone = -1, int to_instance = 0, const glm::vec4& location = glm::vec4());
+	void SetStartZone(uint32 zoneid, float x = 0.0f, float y =0.0f, float z = 0.0f, float heading = 0.0f);
 	uint32 GetStartZone(void);
 	void MovePC(const char* zonename, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 	void MovePC(uint32 zoneID, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
@@ -1765,7 +1766,7 @@ private:
 	void ZonePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions, ZoneMode zm);
 	void ProcessMovePC(uint32 zoneID, uint32 instance_id, float x, float y, float z, float heading, uint8 ignorerestrictions = 0, ZoneMode zm = ZoneSolicited);
 
-	glm::vec3 m_ZoneSummonLocation;
+	glm::vec4 m_ZoneSummonLocation;
 	uint16 zonesummon_id;
 	uint8 zonesummon_ignorerestrictions;
 	ZoneMode zone_mode;

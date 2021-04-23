@@ -557,7 +557,7 @@ inline std::string WriteDisplayInfoSection(
 		 *     "total_to_hit" = "Total To Hit"
 		 */
 		if (attribute_name.find('_') != std::string::npos) {
-			std::vector<std::string> split_string = split(attribute_name, '_');
+			auto split_string = SplitString(attribute_name, '_');
 			std::string new_attribute_name;
 			for (std::string &string_value : split_string) {
 				new_attribute_name += ucfirst(string_value) + " ";

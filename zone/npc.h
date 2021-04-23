@@ -178,8 +178,8 @@ public:
 	FACTION_VALUE CheckNPCFactionAlly(int32 other_faction);
 	virtual FACTION_VALUE GetReverseFactionCon(Mob* iOther);
 
-	void	GoToBind(uint8 bindnum = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
-	void	Gate(uint8 bindnum = 0);
+	void	GoToBind(uint8 bind_number = 0)	{ GMMove(m_SpawnPoint.x, m_SpawnPoint.y, m_SpawnPoint.z, m_SpawnPoint.w); }
+	void	Gate(uint8 bind_number = 0);
 
 	void	GetPetState(SpellBuff_Struct *buffs, uint32 *items, char *name);
 	void	SetPetState(SpellBuff_Struct *buffs, uint32 *items);

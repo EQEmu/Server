@@ -22,8 +22,9 @@
 #define EXPEDITION_H
 
 #include "dynamic_zone.h"
-#include "../common/eq_constants.h"
+#include "../common/expedition_base.h"
 #include "../common/expedition_lockout_timer.h"
+#include "../common/repositories/expeditions_repository.h"
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -34,21 +35,10 @@ class Client;
 class EQApplicationPacket;
 struct ExpeditionInvite;
 class ExpeditionRequest;
-class MySQLRequestResult;
 class ServerPacket;
 
 extern const char* const DZ_YOU_NOT_ASSIGNED;
 extern const char* const EXPEDITION_OTHER_BELONGS;
-extern const char* const CREATE_NOT_ALL_ADDED;
-
-enum class ExpeditionMemberStatus : uint8_t
-{
-	Unknown = 0,
-	Online,
-	Offline,
-	InDynamicZone,
-	LinkDead
-};
 
 enum class ExpeditionLockMessage : uint8_t
 {
@@ -57,25 +47,10 @@ enum class ExpeditionLockMessage : uint8_t
 	Begin
 };
 
-struct ExpeditionMember
-{
-	uint32_t char_id = 0;
-	std::string name;
-	ExpeditionMemberStatus status = ExpeditionMemberStatus::Online;
-
-	ExpeditionMember() = default;
-	ExpeditionMember(uint32_t char_id_, const std::string& name_)
-		: char_id(char_id_), name(name_) {}
-	ExpeditionMember(uint32_t char_id_, const std::string& name_, ExpeditionMemberStatus status_)
-		: char_id(char_id_), name(name_), status(status_) {}
-
-	bool IsValid() const { return char_id != 0 && !name.empty(); }
-};
-
-class Expedition
+class Expedition : public ExpeditionBase
 {
 public:
-	Expedition() = delete;
+	Expedition() = default;
 	Expedition(uint32_t id, const std::string& uuid, DynamicZone&& dz, const std::string& expedition_name,
 		const ExpeditionMember& leader, uint32_t min_players, uint32_t max_players);
 
@@ -104,23 +79,10 @@ public:
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
-	uint32_t GetDynamicZoneID() const { return m_dynamiczone.GetID(); }
-	uint32_t GetID() const { return m_id; }
-	uint16_t GetInstanceID() const { return m_dynamiczone.GetInstanceID(); }
-	uint32_t GetLeaderID() const { return m_leader.char_id; }
-	uint32_t GetMinPlayers() const { return m_min_players; }
-	uint32_t GetMaxPlayers() const { return m_max_players; }
-	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
 	DynamicZone& GetDynamicZone() { return m_dynamiczone; }
-	const std::string& GetName() const { return m_expedition_name; }
-	const std::string& GetLeaderName() const { return m_leader.name; }
-	const std::string& GetUUID() const { return m_uuid; }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
-	const std::vector<ExpeditionMember>& GetMembers() const { return m_members; }
 
 	bool AddMember(const std::string& add_char_name, uint32_t add_char_id);
-	bool HasMember(const std::string& character_name);
-	bool HasMember(uint32_t character_id);
 	void RemoveAllMembers(bool enable_removal_timers = true);
 	bool RemoveMember(const std::string& remove_char_name);
 	void SetMemberStatus(Client* client, ExpeditionMemberStatus status);
@@ -165,13 +127,12 @@ public:
 	static const int32_t EVENT_TIMER_ID;
 
 private:
-	static void CacheExpeditions(MySQLRequestResult& results);
+	static void CacheExpeditions(std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expeditions);
 	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
 	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
 	void AddLockoutDurationClients(const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id = 0);
-	void AddInternalMember(const std::string& char_name, uint32_t char_id, ExpeditionMemberStatus status);
 	bool ConfirmLeaderCommand(Client* requester);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLeaderChanged(uint32_t new_leader_id);
@@ -208,8 +169,6 @@ private:
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
 	void UpdateMemberStatus(uint32_t update_character_id, ExpeditionMemberStatus status);
 
-	ExpeditionMember GetMemberData(uint32_t character_id);
-	ExpeditionMember GetMemberData(const std::string& character_name);
 	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
@@ -218,16 +177,7 @@ private:
 	std::unique_ptr<EQApplicationPacket> CreateMemberListStatusPacket(const std::string& name, ExpeditionMemberStatus status);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 
-	uint32_t    m_id                 = 0;
-	uint32_t    m_min_players        = 0;
-	uint32_t    m_max_players        = 0;
-	bool        m_is_locked          = false;
-	bool        m_add_replay_on_join = true;
-	std::string m_uuid;
-	std::string m_expedition_name;
 	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
-	ExpeditionMember m_leader;
-	std::vector<ExpeditionMember> m_members;
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
 	std::unordered_map<uint32_t, std::string> m_npc_loot_events;   // only valid inside dz zone
 	std::unordered_map<uint32_t, std::string> m_spawn_loot_events; // only valid inside dz zone

@@ -55,7 +55,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone_config.h"
 #include "zone_reload.h"
 
-
 extern EntityList entity_list;
 extern Zone* zone;
 extern volatile bool is_zone_loaded;
@@ -2815,6 +2814,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 
+	case ServerOP_UpdateSchedulerEvents: {
+		LogScheduler("Received signal from world to update");
+		if (m_zone_scheduler) {
+			m_zone_scheduler->LoadScheduledEvents();
+		}
+
+		break;
+	}
+
 	case ServerOP_HotReloadQuests:
 	{
 		if (!zone) {
@@ -2906,7 +2914,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		Expedition::HandleWorldMessage(pack);
 		break;
 	}
-	case ServerOP_DzCharacterChange:
+	case ServerOP_DzAddRemoveCharacter:
 	case ServerOP_DzRemoveAllCharacters:
 	case ServerOP_DzDurationUpdate:
 	case ServerOP_DzSetCompass:
@@ -3300,4 +3308,14 @@ void WorldServer::OnKeepAlive(EQ::Timer *t)
 {
 	ServerPacket pack(ServerOP_KeepAlive, 0);
 	SendPacket(&pack);
+}
+
+ZoneEventScheduler *WorldServer::GetScheduler() const
+{
+	return m_zone_scheduler;
+}
+
+void WorldServer::SetScheduler(ZoneEventScheduler *scheduler)
+{
+	WorldServer::m_zone_scheduler = scheduler;
 }

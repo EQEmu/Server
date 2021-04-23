@@ -169,11 +169,6 @@ int Lua_Client::GetLanguageSkill(int skill_id) {
 	return self->GetLanguageSkill(skill_id);
 }
 
-const char *Lua_Client::GetLastName() {
-	Lua_Safe_Call_String();
-	return self->GetLastName();
-}
-
 int Lua_Client::GetLDoNPointsTheme(int theme) {
 	Lua_Safe_Call_Int();
 	return self->GetLDoNPointsTheme(theme);
@@ -302,6 +297,11 @@ void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float n
 void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z) {
 	Lua_Safe_Call_Void();
 	self->SetBindPoint(0, to_zone, to_instance, glm::vec3(new_x, new_y, new_z));
+}
+
+void Lua_Client::SetBindPoint(int to_zone, int to_instance, float new_x, float new_y, float new_z, float new_heading) {
+	Lua_Safe_Call_Void();
+	self->SetBindPoint2(0, to_zone, to_instance, glm::vec4(new_x, new_y, new_z, new_heading));
 }
 
 float Lua_Client::GetBindX() {
@@ -2096,7 +2096,6 @@ luabind::scope lua_register_client() {
 		.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 		.def("GetBaseFace", (int(Lua_Client::*)(void))&Lua_Client::GetBaseFace)
 		.def("GetLanguageSkill", (int(Lua_Client::*)(int))&Lua_Client::GetLanguageSkill)
-		.def("GetLastName", (const char *(Lua_Client::*)(void))&Lua_Client::GetLastName)
 		.def("GetLDoNPointsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNPointsTheme)
 		.def("GetBaseSTR", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTR)
 		.def("GetBaseSTA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTA)
@@ -2122,7 +2121,8 @@ luabind::scope lua_register_client() {
 		.def("SetBindPoint", (void(Lua_Client::*)(int,int))&Lua_Client::SetBindPoint)
 		.def("SetBindPoint", (void(Lua_Client::*)(int,int,float))&Lua_Client::SetBindPoint)
 		.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float))&Lua_Client::SetBindPoint)
-		.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float, float))&Lua_Client::SetBindPoint)
+		.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float,float))&Lua_Client::SetBindPoint)
+		.def("SetBindPoint", (void(Lua_Client::*)(int,int,float,float,float,float))&Lua_Client::SetBindPoint)
 		.def("GetBindX", (float(Lua_Client::*)(void))&Lua_Client::GetBindX)
 		.def("GetBindX", (float(Lua_Client::*)(int))&Lua_Client::GetBindX)
 		.def("GetBindY", (float(Lua_Client::*)(void))&Lua_Client::GetBindY)

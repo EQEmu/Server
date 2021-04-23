@@ -30,37 +30,25 @@
 extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-Expedition::Expedition(uint32_t expedition_id, const DynamicZone& dz, uint32_t leader_id
-) :
-	m_expedition_id(expedition_id),
-	m_dynamic_zone(dz),
-	m_leader_id(leader_id),
+Expedition::Expedition() :
 	m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) }
 {
 	m_warning_cooldown_timer.Enable();
 }
 
-void Expedition::AddMember(uint32_t character_id)
+void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
-	if (!HasMember(character_id))
-	{
-		m_member_ids.emplace_back(character_id);
-	}
-}
+	dz.SetName(GetName());
+	dz.SetLeaderName(GetLeaderName());
 
-bool Expedition::HasMember(uint32_t character_id)
-{
-	return std::any_of(m_member_ids.begin(), m_member_ids.end(),
-		[&](uint32_t member_id) { return member_id == character_id; });
+	m_dynamic_zone = std::move(dz);
 }
 
 void Expedition::RemoveMember(uint32_t character_id)
 {
-	m_member_ids.erase(std::remove_if(m_member_ids.begin(), m_member_ids.end(),
-		[&](uint32_t member_id) { return member_id == character_id; }
-	), m_member_ids.end());
+	RemoveInternalMember(character_id);
 
-	if (character_id == m_leader_id)
+	if (character_id == m_leader.char_id)
 	{
 		ChooseNewLeader();
 	}
@@ -68,7 +56,7 @@ void Expedition::RemoveMember(uint32_t character_id)
 
 void Expedition::ChooseNewLeader()
 {
-	if (m_member_ids.empty() || !m_choose_leader_cooldown_timer.Check())
+	if (m_members.empty() || !m_choose_leader_cooldown_timer.Check())
 	{
 		m_choose_leader_needed = true;
 		return;
@@ -76,34 +64,38 @@ void Expedition::ChooseNewLeader()
 
 	// we don't track expedition member status in world so may choose a linkdead member
 	// this is fine since it will trigger another change when that member goes offline
-	auto it = std::find_if(m_member_ids.begin(), m_member_ids.end(), [&](uint32_t member_id) {
-		auto member_cle = (member_id != m_leader_id) ? client_list.FindCLEByCharacterID(member_id) : nullptr;
-		return (member_id != m_leader_id && member_cle && member_cle->GetOnline() == CLE_Status::InZone);
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
+		if (member.char_id != m_leader.char_id) {
+			auto member_cle = client_list.FindCLEByCharacterID(member.char_id);
+			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
+		}
+		return false;
 	});
 
-	if (it == m_member_ids.end())
+	if (it == m_members.end())
 	{
 		// no online members found, fallback to choosing any member
-		it = std::find_if(m_member_ids.begin(), m_member_ids.end(),
-			[&](uint32_t member_id) { return (member_id != m_leader_id); });
+		it = std::find_if(m_members.begin(), m_members.end(),
+			[&](const ExpeditionMember& member) { return (member.char_id != m_leader.char_id); });
 	}
 
-	if (it != m_member_ids.end() && SetNewLeader(*it))
+	if (it != m_members.end() && SetNewLeader(*it))
 	{
 		m_choose_leader_needed = false;
 	}
 }
 
-bool Expedition::SetNewLeader(uint32_t character_id)
+bool Expedition::SetNewLeader(const ExpeditionMember& member)
 {
-	if (!HasMember(character_id))
+	if (!HasMember(member.char_id))
 	{
 		return false;
 	}
 
-	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_expedition_id, m_leader_id, character_id);
-	ExpeditionDatabase::UpdateLeaderID(m_expedition_id, character_id);
-	m_leader_id = character_id;
+	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, m_leader.name, member.name);
+	ExpeditionDatabase::UpdateLeaderID(m_id, member.char_id);
+	m_leader = member;
+	m_dynamic_zone.SetLeaderName(m_leader.name);
 	SendZonesLeaderChanged();
 	return true;
 }
@@ -133,7 +125,7 @@ void Expedition::SendZonesLeaderChanged()
 	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	buf->leader_id = m_leader_id;
+	buf->leader_id = m_leader.char_id;
 	zoneserver_list.SendPacket(pack.get());
 }
 
@@ -142,7 +134,7 @@ void Expedition::CheckExpireWarning()
 	if (m_warning_cooldown_timer.Check(false))
 	{
 		using namespace std::chrono_literals;
-		auto remaining = GetDynamicZone().GetRemainingDuration();
+		auto remaining = GetDynamicZone().GetDurationRemaining();
 		if ((remaining > 14min && remaining < 15min) ||
 		    (remaining > 4min && remaining < 5min) ||
 		    (remaining > 0min && remaining < 1min))

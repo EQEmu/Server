@@ -911,9 +911,9 @@ XS(XS__get_spell_level) {
 	uint8 spell_level = IsValidSpell(spell_id) ? GetSpellLevel(spell_id, class_id) : 0;
 	uint8 server_max_level = RuleI(Character, MaxLevel);
 
-	if (spell_level && spell_level > server_max_level) 
+	if (spell_level && spell_level > server_max_level)
 		spell_level = 0;
-	
+
 	XSprePUSH;
 	PUSHu((UV)spell_level);
 
@@ -1495,14 +1495,19 @@ XS(XS__ding) {
 XS(XS__rebind);
 XS(XS__rebind) {
 	dXSARGS;
-	if (items != 4)
-		Perl_croak(aTHX_ "Usage: quest::rebind(int zone_id, float x, float y, float z)");
+	if (items < 4 || items > 5)
+		Perl_croak(aTHX_ "Usage: quest::rebind(int zone_id, float x, float y, float z, [float heading])");
 
-	int  zone_id  = (int) SvIV(ST(0));
-	auto location = glm::vec3((float) SvNV(ST(1)), (float) SvNV(ST(2)), (float) SvNV(ST(3)));
-
-	quest_manager.rebind(zone_id, location);
-
+	int zone_id = (int) SvIV(ST(0));
+	float target_x = (float) SvNV(ST(1));
+	float target_y = (float) SvNV(ST(2));
+	float target_z = (float) SvNV(ST(3));
+	if (items > 4) {
+		float target_heading = (float) SvNV(ST(4));
+		quest_manager.rebind(zone_id, glm::vec4(target_x, target_y, target_z, target_heading));
+	} else {
+		quest_manager.rebind(zone_id, glm::vec3(target_x, target_y, target_z));
+	}
 	XSRETURN_EMPTY;
 }
 
@@ -2953,7 +2958,7 @@ XS(XS__ModifyNPCStat);
 XS(XS__ModifyNPCStat) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: quest::ModifyNPCStat(string key, string value)");
+		Perl_croak(aTHX_ "Usage: quest::modifynpcstat(string key, string value)");
 
 	quest_manager.ModifyNPCStat(SvPV_nolen(ST(0)), SvPV_nolen(ST(1)));
 
@@ -6469,7 +6474,7 @@ XS(XS__secondstotime) {
 	sv_setpv(TARG, time_string.c_str());
 	XSprePUSH;
 	PUSHTARG;
-	XSRETURN(1);	
+	XSRETURN(1);
 }
 
 XS(XS__gethexcolorcode);

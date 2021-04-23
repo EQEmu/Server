@@ -163,7 +163,7 @@ Client::Client(EQStreamInterface* ieqs)
   helm_toggle_timer(250),
   aggro_meter_timer(AGGRO_METER_UPDATE_MS),
   m_Proximity(FLT_MAX, FLT_MAX, FLT_MAX), //arbitrary large number
-	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f),
+	m_ZoneSummonLocation(-2.0f,-2.0f,-2.0f,-2.0f),
   m_AutoAttackPosition(0.0f, 0.0f, 0.0f, 0.0f),
   m_AutoAttackTargetLocation(0.0f, 0.0f, 0.0f),
   last_region_type(RegionTypeUnsupported),
@@ -441,7 +441,7 @@ Client::~Client() {
 
 	if(IsHoveringForRespawn())
 	{
-		m_pp.zone_id = m_pp.binds[0].zoneId;
+		m_pp.zone_id = m_pp.binds[0].zone_id;
 		m_pp.zoneInstance = m_pp.binds[0].instance_id;
 		m_Position.x = m_pp.binds[0].x;
 		m_Position.y = m_pp.binds[0].y;
@@ -658,7 +658,7 @@ bool Client::Save(uint8 iCommitNow) {
 
 	/* Save Current Bind Points */
 	for (int i = 0; i < 5; i++)
-		if (m_pp.binds[i].zoneId)
+		if (m_pp.binds[i].zone_id)
 			database.SaveCharacterBindPoint(CharacterID(), m_pp.binds[i], i);
 
 	/* Save Character Buffs */
@@ -3161,53 +3161,37 @@ void Client::MessageString(uint32 type, uint32 string_id, const char* message1,
 	if (GetFilter(FilterDamageShields) == FilterHide && type == Chat::DamageShield)
 		return;
 
-	int i = 0, argcount = 0, length = 0;
-	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
+	if (type == Chat::Emote)
+		type = 4;
 
-	if(type==Chat::Emote)
-		type=4;
-
-	if(!message1)
-	{
+	if (!message1) {
 		MessageString(type, string_id);	// use the simple message instead
 		return;
 	}
 
-	message_arg[i++] = message1;
-	message_arg[i++] = message2;
-	message_arg[i++] = message3;
-	message_arg[i++] = message4;
-	message_arg[i++] = message5;
-	message_arg[i++] = message6;
-	message_arg[i++] = message7;
-	message_arg[i++] = message8;
-	message_arg[i++] = message9;
+	const char *message_arg[] = {
+		message1, message2, message3, message4, message5,
+		message6, message7, message8, message9
+	};
 
-	for(; message_arg[argcount]; ++argcount)
-		length += strlen(message_arg[argcount]) + 1;
-
-	length += 1;
-
-	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
-	for(i = 0; i < argcount; i++)
-	{
-		strcpy(bufptr, message_arg[i]);
-		bufptr += strlen(message_arg[i]) + 1;
+	SerializeBuffer buf(20);
+	buf.WriteInt32(0); // unknown
+	buf.WriteInt32(string_id);
+	buf.WriteInt32(type);
+	for (auto &m : message_arg) {
+		if (m == nullptr)
+			break;
+		buf.WriteString(m);
 	}
 
-	// since we're moving the pointer the 0 offset is correct
-	bufptr[0] = '\0';
+	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
 
-	if(distance>0)
-		entity_list.QueueCloseClients(this,outapp,false,distance);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, buf);
+
+	if (distance > 0)
+		entity_list.QueueCloseClients(this, outapp.get(), false, distance);
 	else
-		QueuePacket(outapp);
-	safe_delete(outapp);
+		QueuePacket(outapp.get());
 }
 
 void Client::MessageString(const CZClientMessageString_Struct* msg)
@@ -3297,10 +3281,6 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 	if (!FilteredMessageCheck(sender, filter))
 		return;
 
-	int i = 0, argcount = 0, length = 0;
-	char *bufptr = nullptr;
-	const char *message_arg[9] = {0};
-
 	if (type == Chat::Emote)
 		type = 4;
 
@@ -3309,36 +3289,26 @@ void Client::FilteredMessageString(Mob *sender, uint32 type, eqFilterType filter
 		return;
 	}
 
-	message_arg[i++] = message1;
-	message_arg[i++] = message2;
-	message_arg[i++] = message3;
-	message_arg[i++] = message4;
-	message_arg[i++] = message5;
-	message_arg[i++] = message6;
-	message_arg[i++] = message7;
-	message_arg[i++] = message8;
-	message_arg[i++] = message9;
+	const char *message_arg[] = {
+		message1, message2, message3, message4, message5,
+		message6, message7, message8, message9
+	};
 
-	for (; message_arg[argcount]; ++argcount)
-		length += strlen(message_arg[argcount]) + 1;
-
-	length += 1;
-
-	auto outapp = new EQApplicationPacket(OP_FormattedMessage, sizeof(FormattedMessage_Struct) + length);
-	FormattedMessage_Struct *fm = (FormattedMessage_Struct *)outapp->pBuffer;
-	fm->string_id = string_id;
-	fm->type = type;
-	bufptr = fm->message;
-	for (i = 0; i < argcount; i++) {
-		strcpy(bufptr, message_arg[i]);
-		bufptr += strlen(message_arg[i]) + 1;
+	SerializeBuffer buf(20);
+	buf.WriteInt32(0); // unknown
+	buf.WriteInt32(string_id);
+	buf.WriteInt32(type);
+	for (auto &m : message_arg) {
+		if (m == nullptr)
+			break;
+		buf.WriteString(m);
 	}
 
-	// since we're moving the pointer the 0 offset is correct
-	bufptr[0] = '\0';
+	buf.WriteInt8(0); // prevent oob in packet translation, maybe clean that up sometime
 
-	QueuePacket(outapp);
-	safe_delete(outapp);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_FormattedMessage, buf);
+
+	QueuePacket(outapp.get());
 }
 
 void Client::Tell_StringID(uint32 string_id, const char *who, const char *message)
@@ -3989,7 +3959,7 @@ void Client::Sacrifice(Client *caster)
 			Death_Struct *d = (Death_Struct *)app.pBuffer;
 			d->spawn_id = GetID();
 			d->killer_id = caster ? caster->GetID() : 0;
-			d->bindzoneid = GetPP().binds[0].zoneId;
+			d->bindzoneid = GetPP().binds[0].zone_id;
 			d->spell_id = SPELL_UNKNOWN;
 			d->attack_skill = 0xe7;
 			d->damage = 0;
@@ -4037,7 +4007,7 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	PendingTranslocateData.spell_id = ts->SpellID = SpellID;
 
 	if((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) {
-		PendingTranslocateData.zone_id = ts->ZoneID = m_pp.binds[0].zoneId;
+		PendingTranslocateData.zone_id = ts->ZoneID = m_pp.binds[0].zone_id;
 		PendingTranslocateData.instance_id = m_pp.binds[0].instance_id;
 		PendingTranslocateData.x = ts->x = m_pp.binds[0].x;
 		PendingTranslocateData.y = ts->y = m_pp.binds[0].y;
@@ -4922,7 +4892,7 @@ void Client::SendRespawnBinds()
 		BindStruct* b = &m_pp.binds[0];
 		RespawnOption opt;
 		opt.name = "Bind Location";
-		opt.zone_id = b->zoneId;
+		opt.zone_id = b->zone_id;
 		opt.instance_id = b->instance_id;
 		opt.x = b->x;
 		opt.y = b->y;
@@ -5319,11 +5289,11 @@ void Client::NotifyNewTitlesAvailable()
 
 }
 
-void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
+void Client::SetStartZone(uint32 zoneid, float x, float y, float z, float heading)
 {
 	// setting city to zero allows the player to use /setstartcity to set the city themselves
 	if(zoneid == 0) {
-		m_pp.binds[4].zoneId = 0;
+		m_pp.binds[4].zone_id = 0;
 		this->Message(Chat::Yellow,"Your starting city has been reset. Use /setstartcity to choose a new one");
 		return;
 	}
@@ -5333,24 +5303,32 @@ void Client::SetStartZone(uint32 zoneid, float x, float y, float z)
 	if(target_zone_name == nullptr)
 		return;
 
-	m_pp.binds[4].zoneId = zoneid;
+	m_pp.binds[4].zone_id = zoneid;
 	if(zone->GetInstanceID() != 0 && zone->IsInstancePersistent()) {
 		m_pp.binds[4].instance_id = zone->GetInstanceID();
 	}
 
 	if (x == 0 && y == 0 && z == 0) {
-		content_db.GetSafePoints(ZoneName(m_pp.binds[4].zoneId), 0, &m_pp.binds[4].x, &m_pp.binds[4].y, &m_pp.binds[4].z);
+		content_db.GetSafePoints(
+			ZoneName(m_pp.binds[4].zone_id),
+			0,
+			&m_pp.binds[4].x,
+			&m_pp.binds[4].y,
+			&m_pp.binds[4].z,
+			&m_pp.binds[4].heading
+		);
 	}
 	else {
 		m_pp.binds[4].x = x;
 		m_pp.binds[4].y = y;
 		m_pp.binds[4].z = z;
+		m_pp.binds[4].heading = heading;
 	}
 }
 
 uint32 Client::GetStartZone()
 {
-	return m_pp.binds[4].zoneId;
+	return m_pp.binds[4].zone_id;
 }
 
 void Client::ShowSkillsWindow()
@@ -9595,7 +9573,7 @@ Expedition* Client::CreateExpedition(
 	const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
 	uint32 min_players, uint32 max_players, bool disable_messages)
 {
-	DynamicZone dz_instance{ zone_name, version, duration, DynamicZoneType::Expedition };
+	DynamicZone dz_instance{ ZoneID(zone_name), version, duration, DynamicZoneType::Expedition };
 	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
 	return Expedition::TryCreate(this, dz_instance, request);
 }

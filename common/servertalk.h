@@ -161,7 +161,7 @@
 #define ServerOP_ExpeditionExpireWarning      0x0416
 #define ServerOP_ExpeditionChooseNewLeader    0x0417
 
-#define ServerOP_DzCharacterChange            0x0450
+#define ServerOP_DzAddRemoveCharacter         0x0450
 #define ServerOP_DzRemoveAllCharacters        0x0451
 #define ServerOP_DzSetSecondsRemaining        0x0452
 #define ServerOP_DzDurationUpdate             0x0453
@@ -222,6 +222,7 @@
 #define ServerOP_UCSServerStatusRequest		0x4009
 #define ServerOP_UCSServerStatusReply		0x4010
 #define ServerOP_HotReloadQuests 0x4011
+#define ServerOP_UpdateSchedulerEvents 0x4012
 
 #define ServerOP_CZCastSpellPlayer 0x4500
 #define ServerOP_CZCastSpellGroup 0x4501
@@ -320,7 +321,7 @@
 #define ServerOP_QSPlayerDropItem 0x5007
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
-enum { QSG_LFGuild = 0 }; 
+enum { QSG_LFGuild = 0 };
 enum {	QSG_LFGuild_PlayerMatches = 0, QSG_LFGuild_UpdatePlayerInfo, QSG_LFGuild_RequestPlayerInfo, QSG_LFGuild_UpdateGuildInfo, QSG_LFGuild_GuildMatches,
 	QSG_LFGuild_RequestGuildInfo };
 
@@ -1933,7 +1934,7 @@ struct WWRemoveTask_Struct {
 	uint32 task_id;
 	uint8 min_status;
 	uint8 max_status;
-	
+
 };
 
 struct WWResetActivity_Struct {

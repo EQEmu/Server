@@ -1569,25 +1569,25 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	}
 
 	/* Set Home Binds  -- yep, all of them */
-	pp.binds[1].zoneId = pp.zone_id;
+	pp.binds[1].zone_id = pp.zone_id;
 	pp.binds[1].x = pp.x;
 	pp.binds[1].y = pp.y;
 	pp.binds[1].z = pp.z;
 	pp.binds[1].heading = pp.heading;
 
-	pp.binds[2].zoneId = pp.zone_id;
+	pp.binds[2].zone_id = pp.zone_id;
 	pp.binds[2].x = pp.x;
 	pp.binds[2].y = pp.y;
 	pp.binds[2].z = pp.z;
 	pp.binds[2].heading = pp.heading;
 
-	pp.binds[3].zoneId = pp.zone_id;
+	pp.binds[3].zone_id = pp.zone_id;
 	pp.binds[3].x = pp.x;
 	pp.binds[3].y = pp.y;
 	pp.binds[3].z = pp.z;
 	pp.binds[3].heading = pp.heading;
 
-	pp.binds[4].zoneId = pp.zone_id;
+	pp.binds[4].zone_id = pp.zone_id;
 	pp.binds[4].x = pp.x;
 	pp.binds[4].y = pp.y;
 	pp.binds[4].z = pp.z;
@@ -1601,7 +1601,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 
 	/*  Will either be the same as home or tutorial if enabled. */
 	if(RuleB(World, StartZoneSameAsBindOnCreation))	{
-		pp.binds[0].zoneId = pp.zone_id;
+		pp.binds[0].zone_id = pp.zone_id;
 		pp.binds[0].x = pp.x;
 		pp.binds[0].y = pp.y;
 		pp.binds[0].z = pp.z;
@@ -1611,9 +1611,9 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 	Log(Logs::Detail, Logs::WorldServer, "Current location: %s (%d)  %0.2f, %0.2f, %0.2f, %0.2f",
 		ZoneName(pp.zone_id), pp.zone_id, pp.x, pp.y, pp.z, pp.heading);
 	Log(Logs::Detail, Logs::WorldServer, "Bind location: %s (%d) %0.2f, %0.2f, %0.2f",
-		ZoneName(pp.binds[0].zoneId), pp.binds[0].zoneId, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
+		ZoneName(pp.binds[0].zone_id), pp.binds[0].zone_id, pp.binds[0].x, pp.binds[0].y, pp.binds[0].z);
 	Log(Logs::Detail, Logs::WorldServer, "Home location: %s (%d) %0.2f, %0.2f, %0.2f",
-		ZoneName(pp.binds[4].zoneId), pp.binds[4].zoneId, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
+		ZoneName(pp.binds[4].zone_id), pp.binds[4].zone_id, pp.binds[4].x, pp.binds[4].y, pp.binds[4].z);
 
 	/* Starting Items inventory */
 	content_db.SetStartingItems(&pp, &inv, pp.race, pp.class_, pp.deity, pp.zone_id, pp.name, GetAdmin());

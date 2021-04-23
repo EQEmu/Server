@@ -146,20 +146,7 @@ ZoneRepository::Zone ZoneStore::GetZone(const char *in_zone_name)
  */
 void ZoneStore::LoadContentFlags()
 {
-	std::vector<std::string> set_content_flags;
-	auto                     content_flags = ContentFlagsRepository::GetWhere(database, "enabled = 1");
-
-	set_content_flags.reserve(content_flags.size());
-	for (auto &flags: content_flags) {
-		set_content_flags.push_back(flags.flag_name);
-	}
-
-	LogInfo(
-		"Enabled content flags [{}]",
-		implode(", ", set_content_flags)
-	);
-
-	content_service.SetContentFlags(set_content_flags);
+	content_service.ReloadContentFlags(database);
 }
 
 /**
