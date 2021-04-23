@@ -2342,6 +2342,11 @@ Lua_HateList Lua_Mob::GetHateListByDistance(int distance) {
 	return ret;
 }
 
+const char *Lua_Mob::GetLastName() {
+	Lua_Safe_Call_String();
+	return self->GetLastName();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2743,7 +2748,8 @@ luabind::scope lua_register_mob() {
 		.def("GetBucketRemaining", (std::string(Lua_Mob::*)(std::string))&Lua_Mob::GetBucketRemaining)
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
-		.def("IsHorse", &Lua_Mob::IsHorse);
+		.def("IsHorse", &Lua_Mob::IsHorse)
+		.def("GetLastName", &Lua_Mob::GetLastName);
 }
 
 luabind::scope lua_register_special_abilities() {

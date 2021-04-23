@@ -60,7 +60,6 @@ public:
 	int GetRaceBitmask();
 	int GetBaseFace();
 	int GetLanguageSkill(int skill_id);
-	const char *GetLastName();
 	int GetLDoNPointsTheme(int theme);
 	int GetBaseSTR();
 	int GetBaseSTA();

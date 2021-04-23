@@ -169,11 +169,6 @@ int Lua_Client::GetLanguageSkill(int skill_id) {
 	return self->GetLanguageSkill(skill_id);
 }
 
-const char *Lua_Client::GetLastName() {
-	Lua_Safe_Call_String();
-	return self->GetLastName();
-}
-
 int Lua_Client::GetLDoNPointsTheme(int theme) {
 	Lua_Safe_Call_Int();
 	return self->GetLDoNPointsTheme(theme);
@@ -2096,7 +2091,6 @@ luabind::scope lua_register_client() {
 		.def("GetRaceBitmask", (int(Lua_Client::*)(void))&Lua_Client::GetRaceBitmask)
 		.def("GetBaseFace", (int(Lua_Client::*)(void))&Lua_Client::GetBaseFace)
 		.def("GetLanguageSkill", (int(Lua_Client::*)(int))&Lua_Client::GetLanguageSkill)
-		.def("GetLastName", (const char *(Lua_Client::*)(void))&Lua_Client::GetLastName)
 		.def("GetLDoNPointsTheme", (int(Lua_Client::*)(int))&Lua_Client::GetLDoNPointsTheme)
 		.def("GetBaseSTR", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTR)
 		.def("GetBaseSTA", (int(Lua_Client::*)(void))&Lua_Client::GetBaseSTA)
