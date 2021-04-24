@@ -265,7 +265,7 @@ public:
 	void FlagInstanceByRaidLeader(uint32 zone, int16 version);
 	const char* varlink(char* perltext, int item_id);
 	std::string saylink(char *saylink_text, bool silent, const char *link_name);
-	const char* getcharnamebyid(uint32 char_id);
+	std::string getcharnamebyid(uint32 char_id);
 	uint32 getcharidbyname(const char* name);
 	std::string getclassname(uint8 class_id, uint8 level = 0);
 	int getcurrencyid(uint32 item_id);
@@ -273,7 +273,7 @@ public:
 	const char* getguildnamebyid(int guild_id);
 	int getguildidbycharid(uint32 char_id);
 	int getgroupidbycharid(uint32 char_id);
-	const char* getnpcnamebyid(uint32 npc_id);
+	std::string getnpcnamebyid(uint32 npc_id);
 	int getraididbycharid(uint32 char_id);
 	void SetRunning(bool val);
 	bool IsRunning();

@@ -901,7 +901,7 @@ bool lua_delete_data(std::string bucket_key) {
 	return DataBucket::DeleteData(bucket_key);
 }
 
-const char *lua_get_char_name_by_id(uint32 char_id) {
+std::string lua_get_char_name_by_id(uint32 char_id) {
 	return database.GetCharNameByID(char_id);
 }
 
@@ -937,7 +937,7 @@ int lua_get_group_id_by_char_id(uint32 char_id) {
 	return database.GetGroupIDByCharID(char_id);
 }
 
-const char *lua_get_npc_name_by_id(uint32 npc_id) {
+std::string lua_get_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getnpcnamebyid(npc_id);
 }
 
