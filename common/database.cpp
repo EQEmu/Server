@@ -972,6 +972,10 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 
 // Get zone starting points from DB
 bool Database::GetSafePoints(const char* zone_short_name, uint32 instance_version, float* safe_x, float* safe_y, float* safe_z, float* safe_heading, int16* min_status, uint8* min_level, char *flag_needed) {
+
+	if (zone_short_name == nullptr)
+		return false;
+
 	std::string query = fmt::format(
 		SQL(
 			SELECT
