@@ -230,9 +230,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 		break;
 	case GateToBindPoint:
 		target_x = m_pp.binds[0].x;
-		target_x = m_pp.binds[0].y;
-		target_x = m_pp.binds[0].z;
-		target_x = m_pp.binds[0].heading;
+		target_y = m_pp.binds[0].y;
+		target_z = m_pp.binds[0].z;
+		target_heading = m_pp.binds[0].heading;
 		break;
 	case ZoneToBindPoint:
 		target_x = m_pp.binds[0].x;
