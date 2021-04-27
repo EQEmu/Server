@@ -48,7 +48,7 @@ void Expedition::RemoveMember(uint32_t character_id)
 {
 	RemoveInternalMember(character_id);
 
-	if (character_id == m_leader.char_id)
+	if (character_id == m_leader.id)
 	{
 		ChooseNewLeader();
 	}
@@ -64,9 +64,9 @@ void Expedition::ChooseNewLeader()
 
 	// we don't track expedition member status in world so may choose a linkdead member
 	// this is fine since it will trigger another change when that member goes offline
-	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
-		if (member.char_id != m_leader.char_id) {
-			auto member_cle = client_list.FindCLEByCharacterID(member.char_id);
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
+		if (member.id != m_leader.id) {
+			auto member_cle = client_list.FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
 		}
 		return false;
@@ -76,7 +76,7 @@ void Expedition::ChooseNewLeader()
 	{
 		// no online members found, fallback to choosing any member
 		it = std::find_if(m_members.begin(), m_members.end(),
-			[&](const ExpeditionMember& member) { return (member.char_id != m_leader.char_id); });
+			[&](const DynamicZoneMember& member) { return (member.id != m_leader.id); });
 	}
 
 	if (it != m_members.end() && SetNewLeader(*it))
@@ -85,15 +85,15 @@ void Expedition::ChooseNewLeader()
 	}
 }
 
-bool Expedition::SetNewLeader(const ExpeditionMember& member)
+bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 {
-	if (!HasMember(member.char_id))
+	if (!HasMember(member.id))
 	{
 		return false;
 	}
 
 	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, m_leader.name, member.name);
-	ExpeditionDatabase::UpdateLeaderID(m_id, member.char_id);
+	ExpeditionDatabase::UpdateLeaderID(m_id, member.id);
 	m_leader = member;
 	m_dynamic_zone.SetLeaderName(m_leader.name);
 	SendZonesLeaderChanged();
@@ -125,7 +125,7 @@ void Expedition::SendZonesLeaderChanged()
 	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
 	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
-	buf->leader_id = m_leader.char_id;
+	buf->leader_id = m_leader.id;
 	zoneserver_list.SendPacket(pack.get());
 }
 

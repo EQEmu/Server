@@ -30,7 +30,7 @@
 
 class Expedition;
 class ExpeditionLockoutTimer;
-struct ExpeditionMember;
+struct DynamicZoneMember;
 class MySQLRequestResult;
 
 namespace ExpeditionDatabase
@@ -48,23 +48,23 @@ namespace ExpeditionDatabase
 	void DeleteCharacterLockout(uint32_t character_id, const std::string& expedition_name,
 		const std::string& event_name);
 	void DeleteLockout(uint32_t expedition_id, const std::string& event_name);
-	void DeleteMembersLockout(const std::vector<ExpeditionMember>& members,
+	void DeleteMembersLockout(const std::vector<DynamicZoneMember>& members,
 		const std::string& expedition_name, const std::string& event_name);
 	uint32_t GetExpeditionIDFromCharacterID(uint32_t character_id);
 	uint32_t GetMemberCount(uint32_t expedition_id);
 	bool HasMember(uint32_t expedition_id, uint32_t character_id);
 	void InsertCharacterLockouts(uint32_t character_id,
 		const std::vector<ExpeditionLockoutTimer>& lockouts);
-	void InsertMembersLockout(const std::vector<ExpeditionMember>& members,
+	void InsertMembersLockout(const std::vector<DynamicZoneMember>& members,
 		const ExpeditionLockoutTimer& lockout);
 	void InsertLockout(uint32_t expedition_id, const ExpeditionLockoutTimer& lockout);
 	void InsertLockouts(uint32_t expedition_id,
 		const std::unordered_map<std::string, ExpeditionLockoutTimer>& lockouts);
 	void InsertMember(uint32_t expedition_id, uint32_t character_id);
-	void InsertMembers(uint32_t expedition_id, const std::vector<ExpeditionMember>& members);
+	void InsertMembers(uint32_t expedition_id, const std::vector<DynamicZoneMember>& members);
 	void UpdateLockState(uint32_t expedition_id, bool is_locked);
 	void UpdateReplayLockoutOnJoin(uint32_t expedition_id, bool add_on_join);
-	void AddLockoutDuration(const std::vector<ExpeditionMember>& members,
+	void AddLockoutDuration(const std::vector<DynamicZoneMember>& members,
 		const ExpeditionLockoutTimer& lockout, int seconds);
 };
 

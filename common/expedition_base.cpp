@@ -2,7 +2,7 @@
 #include "repositories/expeditions_repository.h"
 
 ExpeditionBase::ExpeditionBase(uint32_t id, const std::string& uuid,
-	const std::string& expedition_name, const ExpeditionMember& leader,
+	const std::string& expedition_name, const DynamicZoneMember& leader,
 	uint32_t min_players, uint32_t max_players
 ) :
 	m_id(id),
@@ -23,20 +23,20 @@ void ExpeditionBase::LoadRepositoryResult(ExpeditionsRepository::ExpeditionWithL
 	m_max_players        = entry.max_players;
 	m_add_replay_on_join = entry.add_replay_on_join;
 	m_is_locked          = entry.is_locked;
-	m_leader.char_id     = entry.leader_id;
+	m_leader.id          = entry.leader_id;
 	m_leader.name        = std::move(entry.leader_name);
 }
 
 void ExpeditionBase::AddMemberFromRepositoryResult(
 	ExpeditionMembersRepository::MemberWithName&& entry)
 {
-	auto status = ExpeditionMemberStatus::Unknown;
+	auto status = DynamicZoneMemberStatus::Unknown;
 	AddInternalMember({ entry.character_id, std::move(entry.character_name), status });
 }
 
-void ExpeditionBase::AddInternalMember(const ExpeditionMember& member)
+void ExpeditionBase::AddInternalMember(const DynamicZoneMember& member)
 {
-	if (!HasMember(member.char_id))
+	if (!HasMember(member.id))
 	{
 		m_members.emplace_back(member);
 	}
@@ -45,32 +45,32 @@ void ExpeditionBase::AddInternalMember(const ExpeditionMember& member)
 void ExpeditionBase::RemoveInternalMember(uint32_t character_id)
 {
 	m_members.erase(std::remove_if(m_members.begin(), m_members.end(),
-		[&](const ExpeditionMember& member) { return member.char_id == character_id; }
+		[&](const DynamicZoneMember& member) { return member.id == character_id; }
 	), m_members.end());
 }
 
 
 bool ExpeditionBase::HasMember(uint32_t character_id)
 {
-	return std::any_of(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
-		return member.char_id == character_id;
+	return std::any_of(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
+		return member.id == character_id;
 	});
 }
 
 bool ExpeditionBase::HasMember(const std::string& character_name)
 {
-	return std::any_of(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
+	return std::any_of(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
 		return (strcasecmp(member.name.c_str(), character_name.c_str()) == 0);
 	});
 }
 
-ExpeditionMember ExpeditionBase::GetMemberData(uint32_t character_id)
+DynamicZoneMember ExpeditionBase::GetMemberData(uint32_t character_id)
 {
-	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
-		return member.char_id == character_id;
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
+		return member.id == character_id;
 	});
 
-	ExpeditionMember member_data;
+	DynamicZoneMember member_data;
 	if (it != m_members.end())
 	{
 		member_data = *it;
@@ -78,13 +78,13 @@ ExpeditionMember ExpeditionBase::GetMemberData(uint32_t character_id)
 	return member_data;
 }
 
-ExpeditionMember ExpeditionBase::GetMemberData(const std::string& character_name)
+DynamicZoneMember ExpeditionBase::GetMemberData(const std::string& character_name)
 {
-	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const ExpeditionMember& member) {
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
 		return (strcasecmp(member.name.c_str(), character_name.c_str()) == 0);
 	});
 
-	ExpeditionMember member_data;
+	DynamicZoneMember member_data;
 	if (it != m_members.end())
 	{
 		member_data = *it;

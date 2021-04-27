@@ -115,7 +115,7 @@ luabind::object Lua_Expedition::GetMembers(lua_State* L) {
 		auto self = reinterpret_cast<NativeType*>(d_);
 		for (const auto& member : self->GetMembers())
 		{
-			lua_table[member.name] = member.char_id;
+			lua_table[member.name] = member.id;
 		}
 	}
 	return lua_table;

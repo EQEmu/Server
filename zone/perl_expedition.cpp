@@ -266,7 +266,7 @@ XS(XS_Expedition_GetMembers) {
 	for (const auto& member : members)
 	{
 		hv_store(hash, member.name.c_str(), static_cast<uint32_t>(member.name.size()),
-			newSVuv(member.char_id), 0);
+			newSVuv(member.id), 0);
 	}
 
 	ST(0) = sv_2mortal(newRV_noinc((SV*)hash));
