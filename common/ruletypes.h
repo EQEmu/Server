@@ -368,6 +368,7 @@ RULE_BOOL(Spells, AllowItemTGB, false, "Target group buff (/tgb) doesn't work wi
 RULE_BOOL(Spells, NPCInnateProcOverride, true, "NPC innate procs override the target type to single target")
 RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximum targets for rains")
 RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
+RULE_BOOL(Spells, July242002PetResists, true, "Enable Pets using PCs resist change from July 24 2002")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
