@@ -235,7 +235,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 				if (atoi(row_d[1]) != 0) {
 					player_profile_struct.binds[4].zone_id = (uint32) atoi(row_d[1]);
 					content_db.GetSafePoints(
-						ZoneName(player_profile_struct.binds[4].zone_id),
+						ZoneName(player_profile_struct.binds[4].zone_id, true),
 						0,
 						&player_profile_struct.binds[4].x,
 						&player_profile_struct.binds[4].y,
@@ -252,7 +252,7 @@ void WorldDatabase::GetCharSelectInfo(uint32 account_id, EQApplicationPacket **o
 					float heading = atof(row_d[5]);
 					if (x == 0 && y == 0 && z == 0 && heading == 0) {
 						content_db.GetSafePoints(
-							ZoneName(player_profile_struct.binds[4].zone_id),
+							ZoneName(player_profile_struct.binds[4].zone_id, true),
 							0,
 							&x,
 							&y,
@@ -567,7 +567,7 @@ bool WorldDatabase::GetStartZone(
 		p_player_profile_struct->heading == 0
 	) {
 		content_db.GetSafePoints(
-			ZoneName(p_player_profile_struct->zone_id),
+			ZoneName(p_player_profile_struct->zone_id, true),
 			0,
 			&p_player_profile_struct->x,
 			&p_player_profile_struct->y,
@@ -583,7 +583,7 @@ bool WorldDatabase::GetStartZone(
 		p_player_profile_struct->binds[0].heading == 0
 	) {
 		content_db.GetSafePoints(
-			ZoneName(p_player_profile_struct->binds[0].zone_id),
+			ZoneName(p_player_profile_struct->binds[0].zone_id, true),
 			0,
 			&p_player_profile_struct->binds[0].x,
 			&p_player_profile_struct->binds[0].y,
