@@ -3033,9 +3033,9 @@ XS(XS__getnpcnamebyid) {
 
 	dXSTARG;
 	uint32 npc_id = (int) SvIV(ST(0));
-	const char *npc_name = quest_manager.getnpcnamebyid(npc_id);
+	auto npc_name = quest_manager.getnpcnamebyid(npc_id);
 
-	sv_setpv(TARG, npc_name);
+	sv_setpv(TARG, npc_name.c_str());
 	XSprePUSH;
 	PUSHTARG;
 	XSRETURN(1);
@@ -3423,8 +3423,9 @@ XS(XS__getcharnamebyid) {
 
 	Const_char *RETVAL;
 	uint32     char_id = (int) SvUV(ST(0));
+	auto       name    = quest_manager.getcharnamebyid(char_id);
 
-	RETVAL = quest_manager.getcharnamebyid(char_id);
+	RETVAL = name.c_str();
 
 	sv_setpv(TARG, RETVAL);
 	XSprePUSH;

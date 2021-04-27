@@ -2781,11 +2781,12 @@ std::string QuestManager::getitemname(uint32 item_id) {
 	return item_name;
 }
 
-const char *QuestManager::getnpcnamebyid(uint32 npc_id) {
+std::string QuestManager::getnpcnamebyid(uint32 npc_id) {
+	std::string res;
 	if (npc_id > 0) {
-		return database.GetNPCNameByID(npc_id);
+		res = database.GetNPCNameByID(npc_id);
 	}
-	return "";
+	return res;
 }
 
 uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
@@ -2991,11 +2992,12 @@ std::string QuestManager::saylink(char *saylink_text, bool silent, const char *l
 	return EQ::SayLinkEngine::GenerateQuestSaylink(saylink_text, silent, link_name);
 }
 
-const char* QuestManager::getcharnamebyid(uint32 char_id) {
+std::string QuestManager::getcharnamebyid(uint32 char_id) {
+	std::string res;
 	if (char_id > 0) {
-		return database.GetCharNameByID(char_id);
+		res = database.GetCharNameByID(char_id);
 	}
-	return "";
+	return res;
 }
 
 uint32 QuestManager::getcharidbyname(const char* name) {
