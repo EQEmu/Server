@@ -240,10 +240,11 @@ sub show_install_summary_info
     }
     if ($OS eq "Linux") {
         print "[Install] Linux Utility Scripts:\n";
-        print " - server_start.sh			Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
-        print " - server_start_dev.sh			Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
-        print " - server_stop.sh			Stops EQEmu Server (No warning)\n";
-        print " - server_status.sh			Prints the status of the EQEmu Server processes\n";
+        print " - server_start.sh           	Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+        print " - server_start_with_login.sh	Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+        print " - server_start_dev.sh       	Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
+        print " - server_stop.sh            	Stops EQEmu Server (No warning)\n";
+        print " - server_status.sh          	Prints the status of the EQEmu Server processes\n";
     }
 
     print "[Configure] eqemu_config.json 		Edit to change server settings and name\n";
@@ -417,7 +418,6 @@ sub check_xml_to_json_conversion
 
 sub build_linux_source
 {
-
     $build_options = $_[0];
 
     $cmake_options          = "";
@@ -840,9 +840,9 @@ sub do_install_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config_template.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -895,9 +895,9 @@ sub do_install_config_login_json
 
     my $content;
     open(my $fh, '<', "login_template.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -1206,12 +1206,12 @@ sub print_main_menu
     print "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     print ">>> EQEmu Server Main Menu >>>>>>>>>>>>\n";
     print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-    print " [database]				Enter database management menu \n";
-    print " [assets]				Manage server assets \n";
-    print " [new_server]			New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
-    print " [new_server_with_bots]	New folder EQEmu/PEQ install with bots enabled - Assumes MySQL/Perl installed \n";
-    print " [setup_bots]			Enables bots on server - builds code and database requirements \n";
-    print " [conversions]			Routines used for conversion of scripts/data \n";
+    print " [database]              Enter database management menu \n";
+    print " [assets]                Manage server assets \n";
+    print " [new_server]            New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
+    print " [new_server_with_bots]  New folder EQEmu/PEQ install with bots enabled - Assumes MySQL/Perl installed \n";
+    print " [setup_bots]            Enables bots on server - builds code and database requirements \n";
+    print " [conversions]           Routines used for conversion of scripts/data \n";
     print "\n";
     print " exit \n";
     print "\n";
@@ -1351,12 +1351,12 @@ sub script_exit
 sub check_db_version_table
 {
     if (get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db) {
+        print "[Database] Table 'db_version' does not exist.... Creating...\n\n";
         print get_mysql_result("
 			CREATE TABLE db_version (
 			  version int(11) DEFAULT '0'
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 			INSERT INTO db_version (version) VALUES ('1000');");
-        print "[Database] Table 'db_version' does not exist.... Creating...\n\n";
     }
 }
 
@@ -1505,9 +1505,9 @@ sub read_eqemu_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -2578,7 +2578,6 @@ sub run_database_check
     }
 }
 
-
 sub fetch_missing_db_update
 {
     $db_update   = $_[0];
@@ -2759,7 +2758,6 @@ sub quest_heading_convert
 
     print "Total matches: " . $total_matches . "\n";
 }
-
 
 sub quest_faction_convert
 {
