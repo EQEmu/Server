@@ -62,7 +62,8 @@ if (-e "skip_internet_connection_check.txt") {
 # skip self update
 #############################################
 my $skip_self_update_check = 0;
-if (-e "eqemu_server_skip_update.txt") {
+if (-e "eqemu_server_skip_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_UPDATE'})) {
+    print "[Info] Skipping self check\n";
     $skip_self_update_check = 1;
 }
 
@@ -70,7 +71,8 @@ if (-e "eqemu_server_skip_update.txt") {
 # skip maps update
 #############################################
 my $skip_self_maps_update_check = 0;
-if (-e "eqemu_server_skip_maps_update.txt") {
+if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MAPS_UPDATE'})) {
+    print "[Info] Skipping maps update\n";
     $skip_self_maps_update_check = 1;
 }
 
@@ -265,9 +267,7 @@ sub new_server
         exit;
     }
 
-    if (-e "install_variables.txt" || -e "../install_variables.txt") {
-        get_installation_variables();
-    }
+    get_installation_variables();
 
     while (1) {
 
@@ -307,7 +307,7 @@ sub new_server
 
         if ($mysql_pass == 1) {
 
-            if ((!-e "install_variables.txt" && !-e "../install_variables.txt")) {
+            if ($database_name eq "" && !-e "install_variables.txt" && !-e "../install_variables.txt") {
                 print "[New Server] Success! We have a database connection\n";
 
                 check_for_input("Specify a NEW database name that PEQ will be installed to: ");
@@ -517,9 +517,25 @@ sub do_installer_routines
     fetch_utility_scripts();
 
     #::: Database Routines
+    $root_user = $user;
+    $root_password = $pass;
     print "[Database] Creating Database '" . $db_name . "'\n";
-    print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-    print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
+    {
+        # In the case that the user doesn't have privileges to create databases, support passing in the root password during setup
+        print "[Database] Using 'root' for database management.\n";
+        $root_user = "root";
+        $root_password = $ENV{'MYSQL_ROOT_PASSWORD'};
+    }
+    print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+    print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "CREATE DATABASE $db_name"`;
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
+    {
+        # If we used root, make sure $user has permissions on db
+        print "[Database] Assigning ALL PRIVILEGES to $user on $db_name.\n";
+        print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "GRANT ALL PRIVILEGES ON $db_name.* TO '$user.%'"`;
+        print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "FLUSH PRIVILEGES"`;
+    }
 
     my $world_path = "world";
     if (-e "bin/world") {
@@ -775,6 +791,12 @@ sub do_self_update_check_routine
 
 sub get_installation_variables
 {
+    # Read installation variables from the ENV if set, but override them with install_variables.txt
+    if ($ENV{"MYSQL_HOST"}) { $installation_variables{"mysql_host"} = $ENV{"MYSQL_HOST"}; }
+    if ($ENV{"MYSQL_DATABASE"}) { $installation_variables{"mysql_eqemu_db_name"} = $ENV{"MYSQL_DATABASE"}; }
+    if ($ENV{"MYSQL_USER"}) { $installation_variables{"mysql_eqemu_user"} = $ENV{"MYSQL_USER"} }
+    if ($ENV{"MYSQL_PASSWORD"}) { $installation_variables{"mysql_eqemu_password"} = $ENV{"MYSQL_PASSWORD"} }
+
     #::: Fetch installation variables before building the config
     if ($OS eq "Linux") {
         if (-e "../install_variables.txt") {
@@ -826,9 +848,18 @@ sub do_install_config_json
         $db_name = "peq";
     }
 
+    if ($installation_variables{"mysql_host"}) {
+        $host = $installation_variables{"mysql_host"};
+    }
+    else {
+        $host = "127.0.0.1";
+    }
+
+    $config->{"server"}{"database"}{"host"}         = $host;
     $config->{"server"}{"database"}{"username"}   = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"database"}{"password"}   = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"database"}{"db"}         = $db_name;
+    $config->{"server"}{"qsdatabase"}{"host"}       = $host;
     $config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"qsdatabase"}{"db"}       = $db_name;
@@ -868,7 +899,14 @@ sub do_install_config_login_json
         $db_name = "peq";
     }
 
-    $config->{"database"}{"host"}                         = "127.0.0.1";
+    if ($installation_variables{"mysql_host"}) {
+        $host = $installation_variables{"mysql_host"};
+    }
+    else {
+        $host = "127.0.0.1";
+    }
+
+    $config->{"database"}{"host"}                         = $host;
     $config->{"database"}{"user"}                         = $installation_variables{"mysql_eqemu_user"};
     $config->{"database"}{"password"}                     = $installation_variables{"mysql_eqemu_password"};
     $config->{"database"}{"db"}                           = $db_name;
