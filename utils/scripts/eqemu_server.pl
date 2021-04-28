@@ -108,7 +108,7 @@ if (-e "eqemu_update.pl") {
 print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
 my $skip_checks = 0;
-if ($ARGV[0] && $ARGV[0] eq "new_server") {
+if ($ARGV[0] && ($ARGV[0] eq "new_server" || $ARGV[0] eq "new_server_with_bots")) {
     $skip_checks = 1;
 }
 
@@ -253,6 +253,7 @@ sub show_install_summary_info
 
 sub new_server
 {
+    $build_options = $_[0];
     $file_count = 0;
     opendir(DIR, ".") or die $!;
     while (my $file = readdir(DIR)) {
@@ -323,11 +324,12 @@ sub new_server
             }
             analytics_insertion("new_server::install", $database_name);
 
-            if ($OS eq "Linux") {
-                build_linux_source("login");
-            }
+            # This shouldn't be necessary, as we call do_linux_login_server_setup as the last step in do_installer_routines()
+            # if ($OS eq "Linux") {
+            #     build_linux_source("login");
+            # }
 
-            do_installer_routines();
+            do_installer_routines($build_options);
 
             if ($OS eq "Linux") {
                 print `chmod 755 *.sh`;
@@ -485,6 +487,7 @@ sub build_linux_source
 
 sub do_installer_routines
 {
+    $build_options = $_[0];
     print "[Install] EQEmu Server Installer... LOADING... PLEASE WAIT...\n";
 
     #::: Make some local server directories...
@@ -564,6 +567,11 @@ sub do_installer_routines
     print "[Database] Fetching and Applying Latest Database Updates...\n";
     main_db_management();
 
+    # if bots
+    if ($build_options =~ /bots/i) {
+        bots_db_management();
+    }
+
     remove_duplicate_rule_values();
 
     if ($OS eq "Windows") {
@@ -571,7 +579,7 @@ sub do_installer_routines
         do_windows_login_server_setup();
     }
     if ($OS eq "Linux") {
-        do_linux_login_server_setup();
+        do_linux_login_server_setup($build_options);
     }
 }
 
@@ -1125,6 +1133,10 @@ sub show_menu_prompt
             new_server();
             $dc = 1;
         }
+        elsif ($input eq "new_server_with_bots") {
+            new_server("bots");
+            $dc = 1;
+        }
         elsif ($input eq "setup_bots") {
             setup_bots();
             $dc = 1;
@@ -1192,11 +1204,12 @@ sub print_main_menu
     print "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     print ">>> EQEmu Server Main Menu >>>>>>>>>>>>\n";
     print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-    print " [database]	Enter database management menu \n";
-    print " [assets]	Manage server assets \n";
-    print " [new_server]	New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
-    print " [setup_bots]	Enables bots on server - builds code and database requirements \n";
-    print " [conversions]	Routines used for conversion of scripts/data \n";
+    print " [database]				Enter database management menu \n";
+    print " [assets]				Manage server assets \n";
+    print " [new_server]			New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
+    print " [new_server_with_bots]	New folder EQEmu/PEQ install with bots enabled - Assumes MySQL/Perl installed \n";
+    print " [setup_bots]			Enables bots on server - builds code and database requirements \n";
+    print " [conversions]			Routines used for conversion of scripts/data \n";
     print "\n";
     print " exit \n";
     print "\n";
@@ -1734,8 +1747,7 @@ sub do_windows_login_server_setup
 
 sub do_linux_login_server_setup
 {
-
-    build_linux_source();
+    build_linux_source($_[0]);
 
     for my $file (@files) {
         $destination_file = $file;
