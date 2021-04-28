@@ -418,6 +418,7 @@
 9162|2021_02_17_server_scheduled_events.sql|SELECT * FROM db_version WHERE version >= 9162|empty|
 9163|2021_04_17_zone_safe_heading_changes.sql|SHOW COLUMNS FROM `zone` LIKE 'safe_heading'|empty|
 9164|2021_04_23_character_exp_modifiers.sql|SHOW TABLES LIKE 'character_exp_modifiers'|empty|
+9165|2021_04_28_idle_pathing.sql|SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

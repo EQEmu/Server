@@ -517,13 +517,15 @@ void EntityList::MobProcess()
 			mob_settle_timer->Disable();
 		}
 
+		Spawn2* s2 = mob->CastToNPC()->respawn2;
+
+		// Perform normal mob processing if any of these are true:
+		//	-- zone is not empty
+		//	-- a quest has turned it on for this zone while zone is idle
+		//	-- the entity's spawn2 point is marked as path_while_zone_idle
+		//	-- the zone is newly empty and we're allowing mobs to settle
 		if (zone->process_mobs_while_empty || numclients > 0 ||
-			mob->GetWanderType() == 4 || mob->GetWanderType() == 6 ||
-			mob_settle_timer->Enabled()) {
-			// Normal processing, or assuring that spawns that should
-			// path and depop do that.  Otherwise all of these type mobs
-			// will be up and at starting positions, or waiting at the zoneline
-			// if they chased the PCs  when idle zone wakes up.
+			(s2 && s2->PathWhenZoneIdle()) || mob_settle_timer->Enabled()) {
 			mob_dead = !mob->Process();
 		}
 		else {

@@ -1732,6 +1732,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		uint32 variance;
 		uint32 timeleft = 0;
 		uint32 grid = 0;
+		bool path_when_zone_idle;
 		int condition_id = 0;
 		int condition_min_value = 0;
 		bool enabled = true;
@@ -1841,6 +1842,14 @@ void lua_add_spawn_point(luabind::adl::object table) {
 			}
 		}
 
+		cur = table["path_when_zone_idle"];
+		if(luabind::type(cur) != LUA_TNIL) {
+			try {
+				grid = luabind::object_cast<bool>(cur);
+			} catch(luabind::cast_failed &) {
+			}
+		}
+
 		cur = table["condition_id"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
@@ -1875,8 +1884,10 @@ void lua_add_spawn_point(luabind::adl::object table) {
 
 		lua_remove_spawn_point(spawn2_id);
 
-		auto t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn, variance, timeleft, grid,
-				    condition_id, condition_min_value, enabled, static_cast<EmuAppearance>(animation));
+		auto t = new Spawn2(spawn2_id, spawngroup_id, x, y, z, heading, respawn,
+			variance, timeleft, grid, path_when_zone_idle, condition_id, 
+			condition_min_value, enabled, static_cast<EmuAppearance>(animation));
+
 		zone->spawn2_list.Insert(t);
 	}
 }
