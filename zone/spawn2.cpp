@@ -638,10 +638,10 @@ bool ZoneDatabase::PopulateZoneSpawnList(uint32 zoneid, LinkedList<Spawn2*> &spa
 Spawn2* ZoneDatabase::LoadSpawn2(LinkedList<Spawn2*> &spawn2_list, uint32 spawn2id, uint32 timeleft) {
 
 	std::string query = StringFormat("SELECT id, spawngroupID, x, y, z, heading, "
-                                    "respawntime, variance, pathgrid, "
+									"respawntime, variance, pathgrid, "
 									"path_when_zone_idle, _condition, "
-                                    "cond_value, enabled, animation FROM spawn2 "
-                                    "WHERE id = %i", spawn2id);
+									"cond_value, enabled, animation FROM spawn2 "
+									"WHERE id = %i", spawn2id);
     auto results = QueryDatabase(query);
     if (!results.Success()) {
         return nullptr;

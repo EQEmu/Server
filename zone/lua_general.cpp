@@ -1732,7 +1732,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		uint32 variance;
 		uint32 timeleft = 0;
 		uint32 grid = 0;
-		bool path_when_zone_idle;
+		bool path_when_zone_idle = false;
 		int condition_id = 0;
 		int condition_min_value = 0;
 		bool enabled = true;
@@ -1845,7 +1845,7 @@ void lua_add_spawn_point(luabind::adl::object table) {
 		cur = table["path_when_zone_idle"];
 		if(luabind::type(cur) != LUA_TNIL) {
 			try {
-				grid = luabind::object_cast<bool>(cur);
+				path_when_zone_idle = luabind::object_cast<bool>(cur);
 			} catch(luabind::cast_failed &) {
 			}
 		}
