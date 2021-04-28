@@ -436,7 +436,9 @@ sub build_linux_source
         }
     }
     my $eqemu_server_directory = "/home/eqemu";
-    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source' . $source_folder_post_fix;
+    # source between bots and not is the same, just different build results, so use the same source folder, different build folders
+    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source';
+    my $build_dir              = $eqemu_server_directory . '/' . $last_directory . '_build' . $source_folder_post_fix;
 
     $current_directory = trim($current_directory);
 
@@ -448,22 +450,22 @@ sub build_linux_source
 
     chdir($source_dir);
 
-    print `git clone https://github.com/EQEmu/Server.git`;
+    if (!-d "$source_dir/.git") {
+        print `git clone --recurse-submodules https://github.com/EQEmu/Server.git $source_dir`;
+    }
+    else {
+        print `git pull --recurse-submodules`;
+    }
 
-    mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
-    chdir($source_dir . "/Server");
-
-    print `git submodule init`;
-    print `git submodule update`;
-
-    chdir($source_dir . "/Server/build");
+    mkdir($build_dir) if (!-e $build_dir);
+    chdir($build_dir);
 
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
-        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" $source_dir`;
     }
     else {
-        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" $source_dir`;
     }
     print "Building EQEmu Server code. This will take a while.";
 
@@ -472,17 +474,17 @@ sub build_linux_source
 
     chdir($current_directory);
 
-    print `ln -s -f $source_dir/Server/build/bin/eqlaunch .`;
-    print `ln -s -f $source_dir/Server/build/bin/export_client_files .`;
-    print `ln -s -f $source_dir/Server/build/bin/import_client_files .`;
-    print `ln -s -f $source_dir/Server/build/bin/libcommon.a .`;
-    print `ln -s -f $source_dir/Server/build/bin/libluabind.a .`;
-    print `ln -s -f $source_dir/Server/build/bin/queryserv .`;
-    print `ln -s -f $source_dir/Server/build/bin/shared_memory .`;
-    print `ln -s -f $source_dir/Server/build/bin/ucs .`;
-    print `ln -s -f $source_dir/Server/build/bin/world .`;
-    print `ln -s -f $source_dir/Server/build/bin/zone .`;
-    print `ln -s -f $source_dir/Server/build/bin/loginserver .`;
+    print `ln -s -f $build_dir/bin/eqlaunch .`;
+    print `ln -s -f $build_dir/bin/export_client_files .`;
+    print `ln -s -f $build_dir/bin/import_client_files .`;
+    print `ln -s -f $build_dir/bin/libcommon.a .`;
+    print `ln -s -f $build_dir/bin/libluabind.a .`;
+    print `ln -s -f $build_dir/bin/queryserv .`;
+    print `ln -s -f $build_dir/bin/shared_memory .`;
+    print `ln -s -f $build_dir/bin/ucs .`;
+    print `ln -s -f $build_dir/bin/world .`;
+    print `ln -s -f $build_dir/bin/zone .`;
+    print `ln -s -f $build_dir/bin/loginserver .`;
 }
 
 sub do_installer_routines
