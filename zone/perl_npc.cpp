@@ -1725,6 +1725,22 @@ XS(XS_NPC_ScaleNPC) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_NPC_IsRaidTarget); /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_IsRaidTarget) {	
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: NPC::IsRaidTarget(THIS)"); // @categories Stats and Attributes
+	{
+		NPC  *THIS;
+		bool is_raid_target;
+		VALIDATE_THIS_IS_NPC;
+		is_raid_target = THIS->IsRaidTarget();
+		ST(0) = boolSV(is_raid_target);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1842,6 +1858,7 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "SetSimpleRoamBox"), XS_NPC_SetSimpleRoamBox, file, "$$;$$");
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
 	newXSproto(strcpy(buf, "ScaleNPC"), XS_NPC_ScaleNPC, file, "$$");
+	newXSproto(strcpy(buf, "IsRaidTarget"), XS_NPC_IsRaidTarget, file, "$");
 	XSRETURN_YES;
 }
 
