@@ -35,11 +35,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
-	case ServerOP_ExpeditionChooseNewLeader:
-	{
-		ExpeditionMessage::ChooseNewLeader(pack);
-		break;
-	}
 	case ServerOP_ExpeditionCreate:
 	{
 		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
@@ -69,9 +64,21 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
-	case ServerOP_ExpeditionGetOnlineMembers:
+	case ServerOP_ExpeditionMemberStatus:
 	{
-		ExpeditionMessage::GetOnlineMembers(pack);
+		auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);
+		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
+		if (expedition)
+		{
+			auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
+			expedition->UpdateMemberStatus(buf->character_id, status);
+		}
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ExpeditionGetMemberStatuses:
+	{
+		ExpeditionMessage::GetMemberStatuses(pack);
 		break;
 	}
 	case ServerOP_ExpeditionDzAddPlayer:
@@ -157,31 +164,14 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	}
 }
 
-void ExpeditionMessage::GetOnlineMembers(ServerPacket* pack)
+void ExpeditionMessage::GetMemberStatuses(ServerPacket* pack)
 {
-	auto buf = reinterpret_cast<ServerExpeditionCharacters_Struct*>(pack->pBuffer);
-
-	// not efficient but only requested during caching
-	char zone_name[64] = {0};
-	std::vector<ClientListEntry*> all_clients;
-	all_clients.reserve(client_list.GetClientCount());
-	client_list.GetClients(zone_name, all_clients);
-
-	for (uint32_t i = 0; i < buf->count; ++i)
+	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
+	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
+	if (expedition)
 	{
-		auto it = std::find_if(all_clients.begin(), all_clients.end(), [&](const ClientListEntry* cle) {
-			return (cle && cle->CharID() == buf->entries[i].character_id);
-		});
-
-		if (it != all_clients.end())
-		{
-			buf->entries[i].character_zone_id = (*it)->zone();
-			buf->entries[i].character_instance_id = (*it)->instance();
-			buf->entries[i].character_online = true;
-		}
+		expedition->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
 	}
-
-	zoneserver_list.SendPacket(buf->sender_zone_id, buf->sender_instance_id, pack);
 }
 
 void ExpeditionMessage::SaveInvite(ServerPacket* pack)
@@ -209,15 +199,5 @@ void ExpeditionMessage::RequestInvite(ServerPacket* pack)
 		{
 			cle->Server()->SendPacket(invite_pack.get());
 		}
-	}
-}
-
-void ExpeditionMessage::ChooseNewLeader(ServerPacket* pack)
-{
-	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-	if (expedition)
-	{
-		expedition->ChooseNewLeader();
 	}
 }

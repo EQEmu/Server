@@ -128,7 +128,6 @@ public:
 
 private:
 	static void CacheExpeditions(std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expeditions);
-	static void SendWorldGetOnlineMembers(const std::vector<std::pair<uint32_t, uint32_t>>& expedition_character_ids);
 	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);
@@ -148,8 +147,9 @@ private:
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);
 	void SendLeaderMessage(Client* leader_client, uint16_t chat_type, uint32_t string_id,
 		const std::initializer_list<std::string>& args = {});
+	void SendMemberListToZoneMembers();
+	void SendMemberStatusToZoneMembers(uint32_t update_character_id, DynamicZoneMemberStatus status);
 	void SendMembersExpireWarning(uint32_t minutes);
-	void SendNewMemberAddedToZoneMembers(const std::string& added_name);
 	void SendUpdatesToZoneMembers(bool clear = false, bool message_on_clear = true);
 	void SendCompassUpdateToZoneMembers();
 	void SendWorldExpeditionUpdate(uint16_t server_opcode);
@@ -167,7 +167,6 @@ private:
 	void SetDynamicZone(DynamicZone&& dz);
 	void TryAddClient(Client* add_client, const std::string& inviter_name,
 		const std::string& swap_remove_name, Client* leader_client = nullptr);
-	void UpdateMemberStatus(uint32_t update_character_id, DynamicZoneMemberStatus status);
 
 	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
