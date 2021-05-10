@@ -62,7 +62,8 @@ if (-e "skip_internet_connection_check.txt") {
 # skip self update
 #############################################
 my $skip_self_update_check = 0;
-if (-e "eqemu_server_skip_update.txt") {
+if (-e "eqemu_server_skip_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_UPDATE'})) {
+    print "[Info] Skipping self check\n";
     $skip_self_update_check = 1;
 }
 
@@ -70,7 +71,8 @@ if (-e "eqemu_server_skip_update.txt") {
 # skip maps update
 #############################################
 my $skip_self_maps_update_check = 0;
-if (-e "eqemu_server_skip_maps_update.txt") {
+if (-e "eqemu_server_skip_maps_update.txt" || defined($ENV{'EQEMU_SERVER_SKIP_MAPS_UPDATE'})) {
+    print "[Info] Skipping maps update\n";
     $skip_self_maps_update_check = 1;
 }
 
@@ -106,7 +108,7 @@ if (-e "eqemu_update.pl") {
 print "[Info] For EQEmu Server management utilities - run eqemu_server.pl\n" if $ARGV[0] eq "ran_from_world";
 
 my $skip_checks = 0;
-if ($ARGV[0] && $ARGV[0] eq "new_server") {
+if ($ARGV[0] && ($ARGV[0] eq "new_server" || $ARGV[0] eq "new_server_with_bots")) {
     $skip_checks = 1;
 }
 
@@ -238,10 +240,11 @@ sub show_install_summary_info
     }
     if ($OS eq "Linux") {
         print "[Install] Linux Utility Scripts:\n";
-        print " - server_start.sh			Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
-        print " - server_start_dev.sh			Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
-        print " - server_stop.sh			Stops EQEmu Server (No warning)\n";
-        print " - server_status.sh			Prints the status of the EQEmu Server processes\n";
+        print " - server_start.sh           	Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+        print " - server_start_with_login.sh	Starts EQEmu server (Quiet) with 30 dynamic zones, UCS & Queryserv, dynamic zones\n";
+        print " - server_start_dev.sh       	Starts EQEmu server with 10 dynamic zones, UCS & Queryserv, dynamic zones all verbose\n";
+        print " - server_stop.sh            	Stops EQEmu Server (No warning)\n";
+        print " - server_status.sh          	Prints the status of the EQEmu Server processes\n";
     }
 
     print "[Configure] eqemu_config.json 		Edit to change server settings and name\n";
@@ -251,6 +254,7 @@ sub show_install_summary_info
 
 sub new_server
 {
+    $build_options = $_[0];
     $file_count = 0;
     opendir(DIR, ".") or die $!;
     while (my $file = readdir(DIR)) {
@@ -265,9 +269,7 @@ sub new_server
         exit;
     }
 
-    if (-e "install_variables.txt" || -e "../install_variables.txt") {
-        get_installation_variables();
-    }
+    get_installation_variables();
 
     while (1) {
 
@@ -307,7 +309,7 @@ sub new_server
 
         if ($mysql_pass == 1) {
 
-            if ((!-e "install_variables.txt" && !-e "../install_variables.txt")) {
+            if ($database_name eq "" && !-e "install_variables.txt" && !-e "../install_variables.txt") {
                 print "[New Server] Success! We have a database connection\n";
 
                 check_for_input("Specify a NEW database name that PEQ will be installed to: ");
@@ -323,11 +325,12 @@ sub new_server
             }
             analytics_insertion("new_server::install", $database_name);
 
-            if ($OS eq "Linux") {
-                build_linux_source("login");
-            }
+            # This shouldn't be necessary, as we call do_linux_login_server_setup as the last step in do_installer_routines()
+            # if ($OS eq "Linux") {
+            #     build_linux_source("login");
+            # }
 
-            do_installer_routines();
+            do_installer_routines($build_options);
 
             if ($OS eq "Linux") {
                 print `chmod 755 *.sh`;
@@ -415,7 +418,6 @@ sub check_xml_to_json_conversion
 
 sub build_linux_source
 {
-
     $build_options = $_[0];
 
     $cmake_options          = "";
@@ -434,7 +436,9 @@ sub build_linux_source
         }
     }
     my $eqemu_server_directory = "/home/eqemu";
-    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source' . $source_folder_post_fix;
+    # source between bots and not is the same, just different build results, so use the same source folder, different build folders
+    my $source_dir             = $eqemu_server_directory . '/' . $last_directory . '_source';
+    my $build_dir              = $eqemu_server_directory . '/' . $last_directory . '_build' . $source_folder_post_fix;
 
     $current_directory = trim($current_directory);
 
@@ -446,22 +450,22 @@ sub build_linux_source
 
     chdir($source_dir);
 
-    print `git clone https://github.com/EQEmu/Server.git`;
+    if (!-d "$source_dir/.git") {
+        print `git clone --recurse-submodules https://github.com/EQEmu/Server.git $source_dir`;
+    }
+    else {
+        print `git pull --recurse-submodules`;
+    }
 
-    mkdir($source_dir . "/Server/build") if (!-e $source_dir . "/Server/build");
-    chdir($source_dir . "/Server");
-
-    print `git submodule init`;
-    print `git submodule update`;
-
-    chdir($source_dir . "/Server/build");
+    mkdir($build_dir) if (!-e $build_dir);
+    chdir($build_dir);
 
     print "Generating CMake build files...\n";
     if ($os_flavor eq "fedora_core") {
-        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" ..`;
+        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -DLUA_INCLUDE_DIR=/usr/include/lua-5.1/ -G "Unix Makefiles" $source_dir`;
     }
     else {
-        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" ..`;
+        print `cmake $cmake_options -DEQEMU_BUILD_LOGIN=ON -DEQEMU_BUILD_LUA=ON -G "Unix Makefiles" $source_dir`;
     }
     print "Building EQEmu Server code. This will take a while.";
 
@@ -470,21 +474,22 @@ sub build_linux_source
 
     chdir($current_directory);
 
-    print `ln -s -f $source_dir/Server/build/bin/eqlaunch .`;
-    print `ln -s -f $source_dir/Server/build/bin/export_client_files .`;
-    print `ln -s -f $source_dir/Server/build/bin/import_client_files .`;
-    print `ln -s -f $source_dir/Server/build/bin/libcommon.a .`;
-    print `ln -s -f $source_dir/Server/build/bin/libluabind.a .`;
-    print `ln -s -f $source_dir/Server/build/bin/queryserv .`;
-    print `ln -s -f $source_dir/Server/build/bin/shared_memory .`;
-    print `ln -s -f $source_dir/Server/build/bin/ucs .`;
-    print `ln -s -f $source_dir/Server/build/bin/world .`;
-    print `ln -s -f $source_dir/Server/build/bin/zone .`;
-    print `ln -s -f $source_dir/Server/build/bin/loginserver .`;
+    print `ln -s -f $build_dir/bin/eqlaunch .`;
+    print `ln -s -f $build_dir/bin/export_client_files .`;
+    print `ln -s -f $build_dir/bin/import_client_files .`;
+    print `ln -s -f $build_dir/bin/libcommon.a .`;
+    print `ln -s -f $build_dir/bin/libluabind.a .`;
+    print `ln -s -f $build_dir/bin/queryserv .`;
+    print `ln -s -f $build_dir/bin/shared_memory .`;
+    print `ln -s -f $build_dir/bin/ucs .`;
+    print `ln -s -f $build_dir/bin/world .`;
+    print `ln -s -f $build_dir/bin/zone .`;
+    print `ln -s -f $build_dir/bin/loginserver .`;
 }
 
 sub do_installer_routines
 {
+    $build_options = $_[0];
     print "[Install] EQEmu Server Installer... LOADING... PLEASE WAIT...\n";
 
     #::: Make some local server directories...
@@ -517,9 +522,25 @@ sub do_installer_routines
     fetch_utility_scripts();
 
     #::: Database Routines
+    $root_user = $user;
+    $root_password = $pass;
     print "[Database] Creating Database '" . $db_name . "'\n";
-    print `"$path" --host $host --user $user --password="$pass" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
-    print `"$path" --host $host --user $user --password="$pass" -N -B -e "CREATE DATABASE $db_name"`;
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
+    {
+        # In the case that the user doesn't have privileges to create databases, support passing in the root password during setup
+        print "[Database] Using 'root' for database management.\n";
+        $root_user = "root";
+        $root_password = $ENV{'MYSQL_ROOT_PASSWORD'};
+    }
+    print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "DROP DATABASE IF EXISTS $db_name;"`;
+    print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "CREATE DATABASE $db_name"`;
+    if (defined($ENV{'MYSQL_ROOT_PASSWORD'}))
+    {
+        # If we used root, make sure $user has permissions on db
+        print "[Database] Assigning ALL PRIVILEGES to $user on $db_name.\n";
+        print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "GRANT ALL PRIVILEGES ON $db_name.* TO '$user.%'"`;
+        print `"$path" --host $host --user $root_user --password="$root_password" -N -B -e "FLUSH PRIVILEGES"`;
+    }
 
     my $world_path = "world";
     if (-e "bin/world") {
@@ -548,6 +569,11 @@ sub do_installer_routines
     print "[Database] Fetching and Applying Latest Database Updates...\n";
     main_db_management();
 
+    # if bots
+    if ($build_options =~ /bots/i) {
+        bots_db_management();
+    }
+
     remove_duplicate_rule_values();
 
     if ($OS eq "Windows") {
@@ -555,7 +581,7 @@ sub do_installer_routines
         do_windows_login_server_setup();
     }
     if ($OS eq "Linux") {
-        do_linux_login_server_setup();
+        do_linux_login_server_setup($build_options);
     }
 }
 
@@ -775,6 +801,12 @@ sub do_self_update_check_routine
 
 sub get_installation_variables
 {
+    # Read installation variables from the ENV if set, but override them with install_variables.txt
+    if ($ENV{"MYSQL_HOST"}) { $installation_variables{"mysql_host"} = $ENV{"MYSQL_HOST"}; }
+    if ($ENV{"MYSQL_DATABASE"}) { $installation_variables{"mysql_eqemu_db_name"} = $ENV{"MYSQL_DATABASE"}; }
+    if ($ENV{"MYSQL_USER"}) { $installation_variables{"mysql_eqemu_user"} = $ENV{"MYSQL_USER"} }
+    if ($ENV{"MYSQL_PASSWORD"}) { $installation_variables{"mysql_eqemu_password"} = $ENV{"MYSQL_PASSWORD"} }
+
     #::: Fetch installation variables before building the config
     if ($OS eq "Linux") {
         if (-e "../install_variables.txt") {
@@ -808,9 +840,9 @@ sub do_install_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config_template.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -826,9 +858,18 @@ sub do_install_config_json
         $db_name = "peq";
     }
 
+    if ($installation_variables{"mysql_host"}) {
+        $host = $installation_variables{"mysql_host"};
+    }
+    else {
+        $host = "127.0.0.1";
+    }
+
+    $config->{"server"}{"database"}{"host"}         = $host;
     $config->{"server"}{"database"}{"username"}   = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"database"}{"password"}   = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"database"}{"db"}         = $db_name;
+    $config->{"server"}{"qsdatabase"}{"host"}       = $host;
     $config->{"server"}{"qsdatabase"}{"username"} = $installation_variables{"mysql_eqemu_user"};
     $config->{"server"}{"qsdatabase"}{"password"} = $installation_variables{"mysql_eqemu_password"};
     $config->{"server"}{"qsdatabase"}{"db"}       = $db_name;
@@ -854,9 +895,9 @@ sub do_install_config_login_json
 
     my $content;
     open(my $fh, '<', "login_template.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -868,7 +909,14 @@ sub do_install_config_login_json
         $db_name = "peq";
     }
 
-    $config->{"database"}{"host"}                         = "127.0.0.1";
+    if ($installation_variables{"mysql_host"}) {
+        $host = $installation_variables{"mysql_host"};
+    }
+    else {
+        $host = "127.0.0.1";
+    }
+
+    $config->{"database"}{"host"}                         = $host;
     $config->{"database"}{"user"}                         = $installation_variables{"mysql_eqemu_user"};
     $config->{"database"}{"password"}                     = $installation_variables{"mysql_eqemu_password"};
     $config->{"database"}{"db"}                           = $db_name;
@@ -1087,6 +1135,10 @@ sub show_menu_prompt
             new_server();
             $dc = 1;
         }
+        elsif ($input eq "new_server_with_bots") {
+            new_server("bots");
+            $dc = 1;
+        }
         elsif ($input eq "setup_bots") {
             setup_bots();
             $dc = 1;
@@ -1154,11 +1206,12 @@ sub print_main_menu
     print "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n";
     print ">>> EQEmu Server Main Menu >>>>>>>>>>>>\n";
     print ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n\n";
-    print " [database]	Enter database management menu \n";
-    print " [assets]	Manage server assets \n";
-    print " [new_server]	New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
-    print " [setup_bots]	Enables bots on server - builds code and database requirements \n";
-    print " [conversions]	Routines used for conversion of scripts/data \n";
+    print " [database]              Enter database management menu \n";
+    print " [assets]                Manage server assets \n";
+    print " [new_server]            New folder EQEmu/PEQ install - Assumes MySQL/Perl installed \n";
+    print " [new_server_with_bots]  New folder EQEmu/PEQ install with bots enabled - Assumes MySQL/Perl installed \n";
+    print " [setup_bots]            Enables bots on server - builds code and database requirements \n";
+    print " [conversions]           Routines used for conversion of scripts/data \n";
     print "\n";
     print " exit \n";
     print "\n";
@@ -1298,12 +1351,12 @@ sub script_exit
 sub check_db_version_table
 {
     if (get_mysql_result("SHOW TABLES LIKE 'db_version'") eq "" && $db) {
+        print "[Database] Table 'db_version' does not exist.... Creating...\n\n";
         print get_mysql_result("
 			CREATE TABLE db_version (
 			  version int(11) DEFAULT '0'
 			) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 			INSERT INTO db_version (version) VALUES ('1000');");
-        print "[Database] Table 'db_version' does not exist.... Creating...\n\n";
     }
 }
 
@@ -1452,9 +1505,9 @@ sub read_eqemu_config_json
 
     my $content;
     open(my $fh, '<', "eqemu_config.json") or die "cannot open file $filename"; {
-    local $/;
-    $content = <$fh>;
-}
+        local $/;
+        $content = <$fh>;
+    }
     close($fh);
 
     $config = $json->decode($content);
@@ -1696,8 +1749,7 @@ sub do_windows_login_server_setup
 
 sub do_linux_login_server_setup
 {
-
-    build_linux_source();
+    build_linux_source($_[0]);
 
     for my $file (@files) {
         $destination_file = $file;
@@ -2526,7 +2578,6 @@ sub run_database_check
     }
 }
 
-
 sub fetch_missing_db_update
 {
     $db_update   = $_[0];
@@ -2707,7 +2758,6 @@ sub quest_heading_convert
 
     print "Total matches: " . $total_matches . "\n";
 }
-
 
 sub quest_faction_convert
 {
