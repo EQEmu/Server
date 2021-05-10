@@ -4474,6 +4474,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			LogError("Can't find boat for client position offset.");
 		}
 		else {
+			if (boat->turning) return;
+
 			// Calculate angle from boat heading to EQ heading
 			double theta = std::fmod(((boat->GetHeading() * 360.0) / 512.0),360.0);
 			double thetar = (theta * M_PI) / 180.0;
