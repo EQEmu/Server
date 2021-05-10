@@ -1244,7 +1244,7 @@ void ClientList::RemoveCLEByLSID(uint32 iLSID)
 
 bool ClientList::IsAccountInGame(uint32 iLSID) {
 	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-
+	iterator.Reset();
 	while (iterator.MoreElements()) {
 		if (iterator.GetData()->LSID() == iLSID && iterator.GetData()->Online() == CLE_Status::InZone) {
 			return true;
