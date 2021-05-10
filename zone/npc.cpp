@@ -916,6 +916,10 @@ bool NPC::Process()
 
 	if (assist_timer.Check() && IsEngaged() && !Charmed() && !HasAssistAggro() &&
 	    NPCAssistCap() < RuleI(Combat, NPCAssistCap)) {
+		// Some cases like flash of light used for aggro haven't set target
+		if (!GetTarget()) {
+			SetTarget(hate_list.GetEntWithMostHateOnList(this));
+		}
 		AIYellForHelp(this, GetTarget());
 		if (NPCAssistCap() > 0 && !assist_cap_timer.Enabled())
 			assist_cap_timer.Start(RuleI(Combat, NPCAssistCapTimer));
@@ -3217,6 +3221,11 @@ bool NPC::AICheckCloseBeneficialSpells(
  */
 void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 {
+	LogAIYellForHelp("Mob[{}] Target[{}]",
+		(sender == nullptr ? "NULL MOB" : GetCleanName()),
+		(attacker == nullptr ? "NULL TARGET" : attacker->GetCleanName())
+		);
+
 	if (!sender || !attacker) {
 		return;
 	}
@@ -3225,11 +3234,14 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 	 * If we dont have a faction set, we're gonna be indiff to everybody
 	 */
 	if (sender->GetPrimaryFaction() == 0) {
+		LogAIYellForHelp("No Primary Faction");
 		return;
 	}
 
-	if (sender->HasAssistAggro())
+	if (sender->HasAssistAggro()) {
+		LogAIYellForHelp("I have assist aggro");
 		return;
+	}
 
 	LogAIYellForHelp(
 		"NPC [{}] ID [{}] is starting to scan",
