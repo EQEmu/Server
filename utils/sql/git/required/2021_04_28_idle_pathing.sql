@@ -7,7 +7,7 @@ ALTER TABLE spawn2 ADD COLUMN path_when_zone_idle tinyint(1) NOT NULL DEFAULT 0 
 -- The new flag path_when_zone_idle is the new mechanism, and allows any moving
 -- mob, not just those on grids, to path while the zone is idle.
 UPDATE spawn2 s 
-LEFT JOIN zone z on z.short_name = s.zone 
-LEFT JOIN grid g on g.id = s.pathgrid AND g.zoneid = z.zoneidnumber 
+LEFT JOIN zone z ON z.short_name = s.zone 
+LEFT JOIN grid g ON g.id = s.pathgrid AND g.zoneid = z.zoneidnumber 
 SET path_when_zone_idle = 1 
-WHERE pathgrid != 0 AND g.type in (4, 6)
+WHERE pathgrid != 0 AND g.type IN (4, 6);
