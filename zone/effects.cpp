@@ -784,7 +784,7 @@ void EntityList::AESpell(
 	/**
 	 * Max AOE targets
 	 */
-	int max_targets_allowed = 0; // unlimited
+	int max_targets_allowed = RuleI(Range, AOEMaxTargets); // unlimited
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
 	}
