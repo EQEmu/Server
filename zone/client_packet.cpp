@@ -12990,9 +12990,9 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 
 	int16 freeslotid = INVALID_INDEX;
 	int16 charges = 0;
-	if (item->Stackable || item->MaxCharges > 1)
+	if (item->Stackable)
 		charges = mp->quantity;
-	else
+	else if (item->MaxCharges != -1)
 		charges = item->MaxCharges;
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
