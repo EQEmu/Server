@@ -33,8 +33,9 @@ my $repository_generation_option = $ARGV[2] ? $ARGV[2] : "all";
 #############################################
 # world path
 #############################################
-my $world_path       = $server_path . "/world";
-my $world_path_bin   = $server_path . "/bin/world";
+my $world_binary     = ($^O eq "MSWin32") ? "world.exe" : "world";
+my $world_path       = $server_path . "/" . $world_binary;
+my $world_path_bin   = $server_path . "/bin/" . $world_binary;
 my $found_world_path = "";
 
 if (-e $world_path) {
@@ -81,7 +82,8 @@ my $database_name = $config->{"server"}{"database"}{"db"};
 my $host          = $config->{"server"}{"database"}{"host"};
 my $user          = $config->{"server"}{"database"}{"username"};
 my $pass          = $config->{"server"}{"database"}{"password"};
-my $dsn           = "dbi:mysql:$database_name:$host:3306";
+my $port          = $config->{"server"}{"database"}{"port"};
+my $dsn           = "dbi:mysql:$database_name:$host:$port";
 my $connect       = DBI->connect($dsn, $user, $pass);
 
 my @tables = ();
