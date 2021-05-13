@@ -1610,7 +1610,7 @@ void command_list(Client *c, const Seperator *sep)
 					"#goto %.0f %0.f %.0f",
 					entity->GetX(),
 					entity->GetY(),
-					entity->GetZ());
+					entity->GetZ() + (entity->IsBoat() ? 50 : 0));
 
 				c->Message(
 					0,
