@@ -8432,13 +8432,13 @@ void command_set_adventure_points(Client *c, const Seperator *sep)
 
 	if(!sep->arg[1][0])
 	{
-		c->Message(Chat::White, "Usage: #setadventurepoints [points] [theme]");
+		c->Message(Chat::White, "Usage: #setadventurepoints [theme] [points]");
 		return;
 	}
 
 	if(!sep->IsNumber(1) || !sep->IsNumber(2))
 	{
-		c->Message(Chat::White, "Usage: #setadventurepoints [points] [theme]");
+		c->Message(Chat::White, "Usage: #setadventurepoints [theme] [points]");
 		return;
 	}
 

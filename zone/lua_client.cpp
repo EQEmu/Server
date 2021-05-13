@@ -234,9 +234,9 @@ uint32 Lua_Client::GetTotalSecondsPlayed() {
 	return self->GetTotalSecondsPlayed();
 }
 
-void Lua_Client::UpdateLDoNPoints(int points, uint32 theme) {
+void Lua_Client::UpdateLDoNPoints(uint32 theme_id, int points) {
 	Lua_Safe_Call_Void();
-	self->UpdateLDoNPoints(points, theme);
+	self->UpdateLDoNPoints(theme_id, points);
 }
 
 void Lua_Client::SetDeity(int v) {
@@ -2083,6 +2083,16 @@ void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier) {
 	self->SetEXPModifier(zone_id, exp_modifier);	
 }
 
+void Lua_Client::AddLDoNLoss(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->AddLDoNLoss(theme_id);
+}
+
+void Lua_Client::AddLDoNWin(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->AddLDoNWin(theme_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2129,7 +2139,7 @@ luabind::scope lua_register_client() {
 		.def("GetAAExp", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAExp)
 		.def("GetAAPercent", (uint32(Lua_Client::*)(void))&Lua_Client::GetAAPercent)
 		.def("GetTotalSecondsPlayed", (uint32(Lua_Client::*)(void))&Lua_Client::GetTotalSecondsPlayed)
-		.def("UpdateLDoNPoints", (void(Lua_Client::*)(int,uint32))&Lua_Client::UpdateLDoNPoints)
+		.def("UpdateLDoNPoints", (void(Lua_Client::*)(uint32,int))&Lua_Client::UpdateLDoNPoints)
 		.def("SetDeity", (void(Lua_Client::*)(int))&Lua_Client::SetDeity)
 		.def("AddEXP", (void(Lua_Client::*)(uint32))&Lua_Client::AddEXP)
 		.def("AddEXP", (void(Lua_Client::*)(uint32,int))&Lua_Client::AddEXP)
@@ -2435,7 +2445,9 @@ luabind::scope lua_register_client() {
 		.def("GetAAEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetAAEXPModifier)
 		.def("GetEXPModifier", (double(Lua_Client::*)(uint32))&Lua_Client::GetEXPModifier)
 		.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
-		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier);
+		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
+		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
+		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin);
 }
 
 luabind::scope lua_register_inventory_where() {

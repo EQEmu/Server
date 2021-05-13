@@ -672,15 +672,15 @@ XS(XS_Client_UpdateLDoNPoints); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateLDoNPoints) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, int32 points, uint32 theme)"); // @categories Currency and Points
+		Perl_croak(aTHX_ "Usage: Client::UpdateLDoNPoints(THIS, uint32 theme_id, int points)"); // @categories Currency and Points
 	{
 		Client *THIS;
-		bool   RETVAL;
-		int32  points = (int32) SvIV(ST(1));
-		uint32 theme  = (uint32) SvUV(ST(2));
+		bool RETVAL;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		int points = (int) SvIV(ST(2));
 		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->UpdateLDoNPoints(points, theme);
-		ST(0)         = boolSV(RETVAL);
+		RETVAL = THIS->UpdateLDoNPoints(theme_id, points);
+		ST(0) = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}
 	XSRETURN(1);
@@ -5272,7 +5272,7 @@ XS(XS_Client_SetAAEXPModifier) {
 		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAAEXPModifier(zone_id, aa_modifier);
 	}
-	XSRETURN_EMPTY;	
+	XSRETURN_EMPTY;
 }
 
 XS(XS_Client_SetEXPModifier);
@@ -5287,7 +5287,35 @@ XS(XS_Client_SetEXPModifier) {
 		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetEXPModifier(zone_id, exp_modifier);
 	}
-	XSRETURN_EMPTY;		
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_AddLDoNLoss);
+XS(XS_Client_AddLDoNLoss) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::AddLDoNLoss(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->AddLDoNLoss(theme_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_AddLDoNWin);
+XS(XS_Client_AddLDoNWin) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::AddLDoNWin(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->AddLDoNWin(theme_id);
+	}
+	XSRETURN_EMPTY;
 }
 
 #ifdef __cplusplus
@@ -5318,6 +5346,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "AddEXP"), XS_Client_AddEXP, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddExpeditionLockout"), XS_Client_AddExpeditionLockout, file, "$$$$;$");
 	newXSproto(strcpy(buf, "AddExpeditionLockoutDuration"), XS_Client_AddExpeditionLockoutDuration, file, "$$$$;$");
+	newXSproto(strcpy(buf, "AddLDoNLoss"), XS_Client_AddLDoNLoss, file, "$$");
+	newXSproto(strcpy(buf, "AddLDoNWin"), XS_Client_AddLDoNWin, file, "$$");
 	newXSproto(strcpy(buf, "AddLevelBasedExp"), XS_Client_AddLevelBasedExp, file, "$$;$$");
 	newXSproto(strcpy(buf, "AddMoneyToPP"), XS_Client_AddMoneyToPP, file, "$$$$$$");
 	newXSproto(strcpy(buf, "AddPVPPoints"), XS_Client_AddPVPPoints, file, "$$");
