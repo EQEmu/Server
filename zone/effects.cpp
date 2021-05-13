@@ -791,10 +791,8 @@ void EntityList::AESpell(
 	else if (spells[spell_id].aemaxtargets) {
 		max_targets_allowed = spells[spell_id].aemaxtargets;
 	}
-	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc) {
+	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc && !IsEffectInSpell(spell_id, SE_Lull) && !IsEffectInSpell(spell_id, SE_Mez)) {
 		max_targets_allowed = 4;
-		if (IsEffectInSpell(spell_id, SE_Lull) || IsEffectInSpell(spell_id, SE_Mez))
-			max_targets_allowed = 99;
 	}
 
 	int   target_hit_counter = 0;
