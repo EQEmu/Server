@@ -793,8 +793,8 @@ void EntityList::AESpell(
 	}
 	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc) {
 		max_targets_allowed = 4;
-		if (spells[spell_id].effectid[2] == SE_Lull || spells[spell_id].effectid[0] == SE_Mez) // pacify and mez
-			max_targets_allowed = 99;												  // this is suppose to be unlimited cap
+		if (IsEffectInSpell(spell_id, SE_Lull) || IsEffectInSpell(spell_id, SE_Mez))
+			max_targets_allowed = 99;
 	}
 
 	int   target_hit_counter = 0;
