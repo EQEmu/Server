@@ -19,8 +19,6 @@ public:
 
 	uint32_t GetID() const { return m_id; }
 	uint32_t GetLeaderID() const { return m_leader.id; }
-	uint32_t GetMinPlayers() const { return m_min_players; }
-	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
 	const std::string& GetName() const { return m_expedition_name; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
@@ -41,14 +39,12 @@ public:
 protected:
 	ExpeditionBase() = default;
 	ExpeditionBase(uint32_t id, const std::string& uuid, const std::string& expedition_name,
-		const DynamicZoneMember& leader, uint32_t min_players, uint32_t max_players);
+		const DynamicZoneMember& leader);
 
 	DynamicZoneMember GetMemberData(uint32_t character_id);
 	DynamicZoneMember GetMemberData(const std::string& character_name);
 
 	uint32_t m_id = 0;
-	uint32_t m_min_players = 0;
-	uint32_t m_max_players = 0;
 	bool m_is_locked = false;
 	bool m_add_replay_on_join = true;
 	std::string m_uuid;
