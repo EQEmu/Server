@@ -419,25 +419,13 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
-				const EQ::ItemData* pItem = database.GetItem(item);
-				if (pItem->Stackable) {
-					if (charges > 0) {
-						database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
-						tmp_merlist.push_back(ml);
-					}
-					else {
-						database.DeleteMerchantTemp(npcid, ml.origslot);
-					}
+				bool IsStackable = database.GetItem(item)->Stackable;
+				if ((IsStackable && charges > 0) || (!IsStackable && sold)) {
+					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
+					tmp_merlist.push_back(ml);
 				} else {
-					if (sold) {
-						database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
-						tmp_merlist.push_back(ml);
-					}
-					else {
-						database.DeleteMerchantTemp(npcid, ml.origslot);
-					}
+					database.DeleteMerchantTemp(npcid, ml.origslot);
 				}
-
 			}
 		}
 
