@@ -108,9 +108,9 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data[task_id]->last_step         = 0;
 
 		LogTasksDetail(
-			"[LoadTasks] (Task) task_id [{}] type [{}] duration [{}] duration_code [{}] title [{}] description [{}] "
+			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
 			" reward [{}] rewardid [{}] cashreward [{}] xpreward [{}] rewardmethod [{}] faction_reward [{}] minlevel [{}] "
-			" maxlevel [{}] repeatable [{}] completion_emote [{}] ",
+			" maxlevel [{}] repeatable [{}] completion_emote [{}]",
 			task.id,
 			task.type,
 			task.duration,
@@ -231,7 +231,7 @@ bool TaskManager::LoadTasks(int single_task)
 
 		LogTasksDetail(
 			"[LoadTasks] (Activity) task_id [{}] activity_id [{}] slot [{}] activity_type [{}] goal_id [{}] goal_method [{}] goal_count [{}] zones [{}]"
-			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}]",
+			" target_name [{}] item_list [{}] skill_list [{}] spell_list [{}] description_override [{}] sequence [{}]",
 			task_id,
 			activity_id,
 			m_task_data[task_id]->activity_count,
@@ -244,7 +244,8 @@ bool TaskManager::LoadTasks(int single_task)
 			activity_data->item_list.c_str(),
 			activity_data->skill_list.c_str(),
 			activity_data->spell_list.c_str(),
-			activity_data->description_override.c_str()
+			activity_data->description_override.c_str(),
+			(m_task_data[task_id]->sequence_mode == ActivitiesStepped ? "stepped" : "sequential")
 		);
 
 		m_task_data[task_id]->activity_count++;
@@ -272,7 +273,8 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 	LogTasks("[SaveClientState] character_id [{}]", character_id);
 
 	if (client_task_state->m_active_task_count > 0 ||
-		client_task_state->m_active_task.task_id != TASKSLOTEMPTY) { // TODO: tasks
+		client_task_state->m_active_task.task_id != TASKSLOTEMPTY ||
+		client_task_state->m_active_shared_task.task_id != TASKSLOTEMPTY) {
 		for (auto &active_task : client_task_state->m_active_tasks) {
 			int task_id = active_task.task_id;
 			if (task_id == TASKSLOTEMPTY) {
@@ -361,15 +363,13 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			}
 
 			active_task.updated = false;
-			for (int activity_index                          = 0;
-				activity_index < m_task_data[task_id]->activity_count;
-				++activity_index)
+			for (int activity_index = 0; activity_index < m_task_data[task_id]->activity_count; ++activity_index) {
 				active_task.activity[activity_index].updated = false;
+			}
 		}
 	}
 
-	if (!RuleB(TaskSystem, RecordCompletedTasks) ||
-		(client_task_state->m_completed_tasks.size() <= (unsigned int) client_task_state->m_last_completed_task_loaded)) {
+	if (!RuleB(TaskSystem, RecordCompletedTasks) || (client_task_state->m_completed_tasks.size() <= (unsigned int) client_task_state->m_last_completed_task_loaded)) {
 		client_task_state->m_last_completed_task_loaded = client_task_state->m_completed_tasks.size();
 		return true;
 	}
@@ -1141,6 +1141,81 @@ void TaskManager::SendTaskActivityNew(
 
 }
 
+void TaskManager::SendActiveTaskToClient(
+	ClientTaskInformation *task,
+	Client *client,
+	int task_index,
+	bool task_complete
+)
+{
+	auto state = client->GetTaskState();
+	if (!state) {
+		return;
+	}
+
+	int  start_time    = task->accepted_time;
+	int  task_id       = task->task_id;
+	auto task_type     = m_task_data[task_id]->type;
+	auto task_duration = m_task_data[task_id]->duration;
+
+	SendActiveTaskDescription(
+		client,
+		task_id,
+		*task,
+		start_time,
+		task_duration,
+		false
+	);
+
+	LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}] task_index [{}]", task_id, GetActivityCount(task_id), task_index);
+
+	int      sequence    = 0;
+	int      fixed_index = task_index;
+	for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
+		if (client->GetTaskActivityState(task_type, fixed_index, activity_id) != ActivityHidden) {
+			LogTasks(
+				"[SendActiveTasksToClient] (Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
+				task_id,
+				activity_id,
+				fixed_index,
+				task_complete ? "true" : "false"
+			);
+
+			if (activity_id == GetActivityCount(task_id) - 1) {
+				SendTaskActivityLong(
+					client,
+					task_id,
+					activity_id,
+					fixed_index,
+					m_task_data[task_id]->activity_information[activity_id].optional,
+					task_complete
+				);
+			}
+			else {
+				SendTaskActivityLong(
+					client,
+					task_id,
+					activity_id,
+					fixed_index,
+					m_task_data[task_id]->activity_information[activity_id].optional,
+					0
+				);
+			}
+		}
+		else {
+			LogTasks(
+				"[SendActiveTasksToClient] (Short Update) task_id [{}] activity_id [{}] fixed_index [{}]",
+				task_id,
+				activity_id,
+				fixed_index
+			);
+
+			SendTaskActivityShort(client, task_id, activity_id, fixed_index);
+		}
+		sequence++;
+	}
+}
+
 void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 {
 	auto state = client->GetTaskState();
@@ -1148,64 +1223,27 @@ void TaskManager::SendActiveTasksToClient(Client *client, bool task_complete)
 		return;
 	}
 
-	for (int task_index = 0; task_index < MAXACTIVEQUESTS + 1; task_index++) {
-		int task_id = state->m_active_tasks[task_index].task_id;
-		if ((task_id == 0) || (m_task_data[task_id] == 0)) {
+	// task
+	if (state->m_active_task.task_id != TASKSLOTEMPTY) {
+		SendActiveTaskToClient(&state->m_active_task, client, 0, task_complete);
+	}
+
+	// shared task
+	if (state->m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		SendActiveTaskToClient(&state->m_active_shared_task, client, 0, task_complete);
+	}
+
+	// quests
+	for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++) {
+		int task_id = state->m_active_quests[task_index].task_id;
+		if ((task_id == 0) || (m_task_data[task_id] == nullptr)) {
 			continue;
 		}
-		int start_time = state->m_active_tasks[task_index].accepted_time;
 
-		SendActiveTaskDescription(
-			client, task_id, state->m_active_tasks[task_index], start_time, m_task_data[task_id]->duration,
-			false
-		);
-		LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}]", task_id, GetActivityCount(task_id));
+		LogTasksDetail("--");
+		LogTasksDetail("[SendActiveTasksToClient] Task [{}]", m_task_data[task_id]->title);
 
-		int      sequence    = 0;
-		int      fixed_index = m_task_data[task_id]->type == TaskType::Task ? 0 : task_index - 1; // hmmm fuck
-		for (int activity_id = 0; activity_id < GetActivityCount(task_id); activity_id++) {
-			if (client->GetTaskActivityState(m_task_data[task_id]->type, fixed_index, activity_id) != ActivityHidden) {
-				LogTasks(
-					"[SendActiveTasksToClient] (Long Update) task_id [{}] activity_id [{}] fixed_index [{}] task_complete [{}]",
-					task_id,
-					activity_id,
-					fixed_index,
-					task_complete ? "true" : "false"
-				);
-
-				if (activity_id == GetActivityCount(task_id) - 1) {
-					SendTaskActivityLong(
-						client,
-						task_id,
-						activity_id,
-						fixed_index,
-						m_task_data[task_id]->activity_information[activity_id].optional,
-						task_complete
-					);
-				}
-				else {
-					SendTaskActivityLong(
-						client,
-						task_id,
-						activity_id,
-						fixed_index,
-						m_task_data[task_id]->activity_information[activity_id].optional,
-						0
-					);
-				}
-			}
-			else {
-				LogTasks(
-					"[SendActiveTasksToClient] (Short Update) task_id [{}] activity_id [{}] fixed_index [{}]",
-					task_id,
-					activity_id,
-					fixed_index
-				);
-
-				SendTaskActivityShort(client, task_id, activity_id, fixed_index);
-			}
-			sequence++;
-		}
+		SendActiveTaskToClient(&state->m_active_quests[task_index], client, task_index, task_complete);
 	}
 }
 
@@ -1387,9 +1425,12 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	);
 
 	for (auto &character_task: character_tasks) {
-		int  task_id = character_task.taskid;
-		int  slot    = character_task.slot;
-		auto type    = static_cast<TaskType>(character_task.type);
+		int task_id = character_task.taskid;
+		int slot    = character_task.slot;
+
+		// this used to be loaded from character_tasks
+		// 	this should just load from the tasks table
+		auto type = task_manager->GetTaskType(character_task.taskid);
 
 		if ((task_id < 0) || (task_id >= MAXTASKS)) {
 			LogTasks(
@@ -1400,6 +1441,8 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		// client data bucket pointer
+		// this actually fetches the proper task type instances to be loaded with data
+		// whether it be quest / task / shared task
 		auto task_info = client_task_state->GetClientTaskInfo(type, slot);
 		if (task_info == nullptr) {
 			LogTasks(
@@ -1428,9 +1471,10 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 
 		LogTasks(
-			"[LoadClientState] character_id [{}] task_id [{}] accepted_time [{}]",
+			"[LoadClientState] character_id [{}] task_id [{}] slot [{}] accepted_time [{}]",
 			character_id,
 			task_id,
+			slot,
 			character_task.acceptedtime
 		);
 	}
@@ -1465,12 +1509,18 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			continue;
 		}
 
+		// type: task
 		ClientTaskInformation *task_info = nullptr;
 		if (client_task_state->m_active_task.task_id == task_id) {
 			task_info = &client_task_state->m_active_task;
 		}
 
-		// wasn't task
+		// type: shared task
+		if (client_task_state->m_active_shared_task.task_id == task_id) {
+			task_info = &client_task_state->m_active_shared_task;
+		}
+
+		// type: quest
 		if (task_info == nullptr) {
 			for (auto &active_quest : client_task_state->m_active_quests) {
 				if (active_quest.task_id == task_id) {
@@ -1639,18 +1689,63 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		}
 	}
 
+	LogTasksDetail(
+		"[LoadClientState] m_active_task task_id is [{}] slot [{}]",
+		client_task_state->m_active_task.task_id,
+		client_task_state->m_active_task.slot
+	);
 	if (client_task_state->m_active_task.task_id != TASKSLOTEMPTY) {
 		client_task_state->UnlockActivities(character_id, client_task_state->m_active_task);
+
+		// purely debugging
+		LogTasksDetail(
+			"[LoadClientState] Fetching task info for character_id [{}] task [{}] slot [{}] current_step [{}] accepted_time [{}] updated [{}]",
+			character_id,
+			client_task_state->m_active_task.task_id,
+			client_task_state->m_active_task.slot,
+			client_task_state->m_active_task.current_step,
+			client_task_state->m_active_task.accepted_time,
+			client_task_state->m_active_task.updated
+		);
+
+		TaskInformation *p_task_data = task_manager->m_task_data[client_task_state->m_active_task.task_id];
+		if (p_task_data != nullptr) {
+			for (int i = 0; i < p_task_data->activity_count; i++) {
+				if (client_task_state->m_active_task.activity[i].activity_id >= 0) {
+					LogTasksDetail(
+						"[LoadClientState] -- character_id [{}] task [{}] activity_id [{}] done_count [{}] activity_state [{}] updated [{}] sequence [{}]",
+						character_id,
+						client_task_state->m_active_task.task_id,
+						client_task_state->m_active_task.activity[i].activity_id,
+						client_task_state->m_active_task.activity[i].done_count,
+						client_task_state->m_active_task.activity[i].activity_state,
+						client_task_state->m_active_task.activity[i].updated,
+						p_task_data->sequence_mode
+					);
+				}
+			}
+		}
 	}
 
-	// TODO: shared
+	// shared task
+	LogTasksDetail(
+		"[LoadClientState] m_active_shared_task task_id is [{}] slot [{}]",
+		client_task_state->m_active_shared_task.task_id,
+		client_task_state->m_active_shared_task.slot
+	);
+	if (client_task_state->m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		client_task_state->UnlockActivities(character_id, client_task_state->m_active_shared_task);
+	}
+
+	// quests (max 20 or 40 depending on client)
 	for (auto &active_quest : client_task_state->m_active_quests) {
 		if (active_quest.task_id != TASKSLOTEMPTY) {
 			client_task_state->UnlockActivities(character_id, active_quest);
 		}
 	}
 
-	LogTasks("[LoadClientState] for Character ID [{}] DONE!", character_id);
+	LogTasksDetail("[LoadClientState] for Character ID [{}] DONE!", character_id);
+	LogTasksDetail("---", character_id);
 
 	return true;
 }

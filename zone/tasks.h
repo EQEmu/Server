@@ -14,6 +14,9 @@
 #define MAXACTIVITIESPERTASK 20 // The Client has a hard cap of 20 activities per task.
 #define TASKSLOTEMPTY 0 // This is used to determine if a client's active task slot is empty.
 
+#define TASKSLOTTASK 0
+#define TASKSLOTSHAREDTASK 0
+
 // Command Codes for worldserver ServerOP_ReloadTasks
 #define RELOADTASKS 0
 #define RELOADTASKGOALLISTS 1
@@ -145,5 +148,66 @@ struct CompletedTaskInformation {
 	int  completed_time;
 	bool activity_done[MAXACTIVITIESPERTASK];
 };
+
+namespace Tasks {
+
+	inline int GetActivityStateIdentifier(ActivityState activity_state)
+	{
+		switch (activity_state) {
+			case ActivityHidden:
+				return 0;
+			case ActivityActive:
+				return 1;
+			case ActivityCompleted:
+				return 2;
+			default:
+				return 0;
+		}
+	}
+	inline std::string GetActivityStateDescription(ActivityState activity_state)
+	{
+		switch (activity_state) {
+			case ActivityHidden:
+				return "Hidden";
+			case ActivityActive:
+				return "Active";
+			case ActivityCompleted:
+				return "Completed";
+			default:
+				return "Hidden";
+		}
+	}
+
+	inline int GetTaskTypeIdentifier(TaskType task_type)
+	{
+		switch (task_type) {
+			case TaskType::Task:
+				return 0;
+			case TaskType::Shared:
+				return 1;
+			case TaskType::Quest:
+				return 2;
+			case TaskType::E:
+				return 3;
+			default:
+				return 0;
+		}
+	}
+	inline std::string GetTaskTypeDescription(TaskType task_type)
+	{
+		switch (task_type) {
+			case TaskType::Task:
+				return "Task";
+			case TaskType::Shared:
+				return "Shared";
+			case TaskType::Quest:
+				return "Quest";
+			case TaskType::E:
+				return "E";
+			default:
+				return "Task";
+		}
+	}
+}
 
 #endif

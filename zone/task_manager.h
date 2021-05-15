@@ -92,6 +92,7 @@ private:
 		bool bring_up_task_journal = false
 	);
 
+	void SendActiveTaskToClient(ClientTaskInformation *task, Client *client, int task_index, bool task_complete);
 };
 
 
