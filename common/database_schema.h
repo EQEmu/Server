@@ -331,6 +331,9 @@ namespace DatabaseSchema {
 			"reports",
 			"respawn_times",
 			"saylink",
+			"shared_tasks",
+			"shared_task_members",
+			"shared_task_activity_state",
 			"server_scheduled_events",
 		};
 	}
