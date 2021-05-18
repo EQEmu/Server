@@ -369,6 +369,7 @@ RULE_BOOL(Spells, NPCInnateProcOverride, true, "NPC innate procs override the ta
 RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximum targets for rains")
 RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
 RULE_BOOL(Spells, July242002PetResists, true, "Enable Pets using PCs resist change from July 24 2002")
+RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spells on a player that is already invisible")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
