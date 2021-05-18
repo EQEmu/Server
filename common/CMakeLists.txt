@@ -558,6 +558,7 @@ SET(common_headers
 	spdat.h
     string_util.h
 	struct_strategy.h
+	tasks.h
 	textures.h
 	timer.h
 	types.h

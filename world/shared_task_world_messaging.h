@@ -10,3 +10,4 @@ public:
 
 
 #endif //EQEMU_SHARED_TASK_WORLD_MESSAGING_H
+
