@@ -1429,7 +1429,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		int slot    = character_task.slot;
 
 		// this used to be loaded from character_tasks
-		// 	this should just load from the tasks table
+		// this should just load from the tasks table
 		auto type = task_manager->GetTaskType(character_task.taskid);
 
 		if ((task_id < 0) || (task_id >= MAXTASKS)) {
