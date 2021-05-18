@@ -4011,6 +4011,33 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
+					for (auto pMob : this->hate_list.GetHateList()) {
+						auto tar = pMob->entity_on_hatelist;
+						if (tar->IsCasting()) {
+							tar->InterruptSpell(tar->CastingSpellID());
+						}
+						uint32 buff_count = tar->GetMaxTotalSlots();
+						for (unsigned int j = 0; j < buff_count; j++) {
+							if (tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+								auto spell = spells[tar->GetBuffs()[j].spellid];
+								if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == this->GetID()) {
+									tar->BuffFadeBySpellID(spell.id);
+								}
+							}
+						}
+					}
+					if (this->IsCasting()) {
+						this->InterruptSpell(this->CastingSpellID());
+					}
+					uint32 buff_count = this->GetMaxTotalSlots();
+					for (unsigned int j = 0; j < buff_count; j++) {
+						if (this->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+							auto spell = spells[this->GetBuffs()[j].spellid];
+							if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
+								this->BuffFadeBySpellID(spell.id);
+							}
+						}
+					}
 					entity_list.ReplaceWithTarget(this, tempmob);
 					WipeHateList();
 					if(tempmob)
