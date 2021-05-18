@@ -21,6 +21,7 @@ SET(world_sources
 	login_server_list.cpp
 	main.cpp
 	queryserv.cpp
+	shared_task_world_messaging.cpp
 	ucs.cpp
 	web_interface.cpp
 	web_interface_eqw.cpp
@@ -56,6 +57,7 @@ SET(world_headers
 	login_server.h
 	login_server_list.h
 	queryserv.h
+	shared_task_world_messaging.h
 	sof_char_create_data.h
 	ucs.h
 	web_interface.h
