@@ -4,6 +4,7 @@
 class ServerPacket;
 
 class SharedTaskWorldMessaging {
+public:
 	static void HandleZoneMessage(ServerPacket* pack);
 };
 
