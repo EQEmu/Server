@@ -182,7 +182,7 @@ void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStat
 	}
 
 	// any member status update will trigger a leader fix if leader was offline
-	if (m_leader.status == DynamicZoneMemberStatus::Offline)
+	if (m_leader.status == DynamicZoneMemberStatus::Offline && GetDynamicZone().GetMemberCount() > 1)
 	{
 		ChooseNewLeader();
 	}
