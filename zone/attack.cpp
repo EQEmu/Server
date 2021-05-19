@@ -3014,9 +3014,10 @@ int Mob::GetHandToHandDelay(void)
 			epic = 280;
 		else if (GetRace() == IKSAR)
 			iksar = 1;
-		if (epic > skill)
-			skill = epic;
-		return iksar - skill / 21 + 38;
+		// the delay bonus from the monk epic scales up to a skill of 280
+		if (epic >= skill)
+			epic = skill;
+		return iksar - epic / 21 + 38;
 	}
 
 	int delay = 35;
