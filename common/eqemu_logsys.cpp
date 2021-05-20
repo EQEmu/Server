@@ -235,9 +235,11 @@ void EQEmuLogSys::ProcessGMSay(
 	}
 
 	/**
-	 * Check to see if the process that actually ran this is zone
+	 * Processes that actually support hooks
 	 */
-	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone) {
+	if (EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformZone ||
+		EQEmuLogSys::log_platform == EQEmuExePlatform::ExePlatformWorld
+	) {
 		on_log_gmsay_hook(log_category, message);
 	}
 }

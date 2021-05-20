@@ -72,6 +72,7 @@ SET(common_sources
 	serialize_buffer.cpp
 	server_event_scheduler.cpp
 	serverinfo.cpp
+	shared_tasks.cpp
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
@@ -553,6 +554,7 @@ SET(common_headers
 	server_event_scheduler.h
 	serverinfo.h
 	servertalk.h
+	shared_tasks.h
 	shareddb.h
 	skills.h
 	spdat.h

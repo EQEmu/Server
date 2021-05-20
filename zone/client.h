@@ -1263,6 +1263,13 @@ public:
 		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
 	}
 
+	// shared tasks
+
+	// this is used as a shim to intercept normal localized task functionality
+	// and pipe it into zone -> world and back to world -> zone
+	// world is authoritative
+	bool m_requesting_shared_task;
+
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
 	inline void SetClientVersion(EQ::versions::ClientVersion client_version) { m_ClientVersion = client_version; }

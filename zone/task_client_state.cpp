@@ -9,7 +9,10 @@
 #include "quest_parser_collection.h"
 #include "task_client_state.h"
 #include "zonedb.h"
+#include "../common/shared_tasks.h"
+#include "worldserver.h"
 
+extern WorldServer worldserver;
 extern QueryServ *QServ;
 
 ClientTaskState::ClientTaskState()
@@ -1670,12 +1673,12 @@ void ClientTaskState::ShowClientTaskInfoMessage(ClientTaskInformation *task, Cli
 
 		c->Message(
 			Chat::White,
-			" --- activity_id [%i] done_count [%i] state [%d] (%s) | Update %s",
+			" --- Update %s activity_id [%i] done_count [%i] state [%d] (%s)",
+			update_saylinks.c_str(),
 			task->activity[activity_id].activity_id,
 			task->activity[activity_id].done_count,
 			task->activity[activity_id].activity_state,
-			Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state).c_str(),
-			update_saylinks.c_str()
+			Tasks::GetActivityStateDescription(task->activity[activity_id].activity_state).c_str()
 		);
 	}
 }
@@ -2184,9 +2187,27 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 	}
 
 	auto task = task_manager->m_task_data[task_id];
-
 	if (task == nullptr) {
 		client->Message(Chat::Red, "Invalid task_id %i", task_id);
+		return;
+	}
+
+	// shared task
+	// intercept and pass to world first before processing normally
+	if (!client->m_requesting_shared_task && task->type == TaskType::Shared) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskRequest, sizeof(ServerSharedTaskRequest_Struct));
+		auto *r   = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
+
+		// fill
+		r->requested_character_id = client->CharacterID();
+		r->requested_task_id      = task_id;
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
 		return;
 	}
 
@@ -2250,9 +2271,11 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 		case TaskType::Task:
 			active_slot = &m_active_task;
 			break;
+
 		case TaskType::Shared:
-			active_slot         = &m_active_shared_task;
+			active_slot = &m_active_shared_task;
 			break;
+
 		case TaskType::Quest:
 			for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++) {
 				Log(Logs::General, Logs::Tasks,
@@ -2264,6 +2287,7 @@ void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id
 				}
 			}
 			break;
+
 		default:
 			break;
 	}

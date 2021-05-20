@@ -121,7 +121,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	m_ClientVersion = eqs->ClientVersion();
 	m_ClientVersionBit = EQ::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
-	
+
 	numclients++;
 }
 

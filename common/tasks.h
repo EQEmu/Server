@@ -62,6 +62,10 @@ enum class TaskType {
 	E      = 3         // can have at max 19 or 29 depending on client, not present in live anymore
 };
 
+static const uint8 TASK_TYPE_TASK   = 0;
+static const uint8 TASK_TYPE_SHARED = 1;
+static const uint8 TASK_TYPE_QUEST  = 2;
+
 enum class DurationCode {
 	None   = 0,
 	Short  = 1,
@@ -196,11 +200,5 @@ namespace Tasks {
 		}
 	}
 }
-
-// shared tasks
-
-struct SharedTask {
-
-};
 
 #endif //EQEMU_TASKS_H

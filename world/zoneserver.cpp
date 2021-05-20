@@ -39,6 +39,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "dynamic_zone.h"
 #include "expedition_message.h"
 #include "shared_task_world_messaging.h"
+#include "../common/shared_tasks.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1182,7 +1183,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		adventure_manager.IncrementAssassinationCount(*((uint16*)pack->pBuffer));
 		break;
 	}
-
 	case ServerOP_AdventureZoneData:
 	{
 		adventure_manager.GetZoneData(*((uint16*)pack->pBuffer));
