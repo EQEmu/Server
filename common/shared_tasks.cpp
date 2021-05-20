@@ -25,6 +25,8 @@ std::vector<SharedTaskRequestMember> SharedTask::GetRequestMembers(Database &db,
 
 			request_members.emplace_back(member);
 		}
+
+		return request_members;
 	}
 
 	// group
@@ -37,12 +39,12 @@ std::vector<SharedTaskRequestMember> SharedTask::GetRequestMembers(Database &db,
 	);
 
 	if (!group_characters.empty()) {
-		request_members.reserve(request_members.size() + raid_characters.size());
+		request_members.reserve(request_members.size());
 		for (auto &c: group_characters) {
 			SharedTaskRequestMember member = {};
 			member.character_id   = c.id;
 			member.character_name = c.name;
-			member.is_raided      = true;
+			member.is_grouped     = true;
 			member.level          = c.level;
 
 			request_members.emplace_back(member);

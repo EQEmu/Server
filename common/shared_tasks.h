@@ -27,6 +27,7 @@ struct ServerSharedTaskRequest_Struct {
 	uint32 requested_task_id;
 };
 
+// used in the shared task request process (currently)
 struct SharedTaskRequestMember {
 	uint32      character_id;
 	std::string character_name;

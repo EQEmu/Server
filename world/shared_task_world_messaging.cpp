@@ -52,13 +52,13 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			}
 
 			// confirm shared task request
-			auto p   = std::make_unique<ServerPacket>(ServerOP_SharedTaskAcceptNewTask, sizeof(ServerSharedTaskRequest_Struct));
-			auto buf = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
-			buf->requested_character_id = r->requested_character_id;
-			buf->requested_task_id      = r->requested_task_id;
+			auto p = std::make_unique<ServerPacket>(ServerOP_SharedTaskAcceptNewTask, sizeof(ServerSharedTaskRequest_Struct));
+			auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
+			d->requested_character_id = r->requested_character_id;
+			d->requested_task_id      = r->requested_task_id;
 
 			// get requested character zone server
-			ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(buf->requested_character_id);
+			ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(d->requested_character_id);
 			if (requested_character_cle && requested_character_cle->Server()) {
 				requested_character_cle->Server()->SendPacket(p.get());
 			}
