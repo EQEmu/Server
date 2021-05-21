@@ -18,10 +18,10 @@
 class BaseSharedTaskMembersRepository {
 public:
 	struct SharedTaskMembers {
-		int id;
-		int shared_task_id;
-		int character_id;
-		int is_leader;
+		int64 id;
+		int64 shared_task_id;
+		int64 character_id;
+		int   is_leader;
 	};
 
 	static std::string PrimaryKey()
@@ -110,9 +110,9 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskMembers entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
-			entry.character_id   = atoi(row[2]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
+			entry.character_id   = strtoll(row[2], NULL, 10);
 			entry.is_leader      = atoi(row[3]);
 
 			return entry;
@@ -241,9 +241,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
-			entry.character_id   = atoi(row[2]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
+			entry.character_id   = strtoll(row[2], NULL, 10);
 			entry.is_leader      = atoi(row[3]);
 
 			all_entries.push_back(entry);
@@ -269,9 +269,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
-			entry.character_id   = atoi(row[2]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
+			entry.character_id   = strtoll(row[2], NULL, 10);
 			entry.is_leader      = atoi(row[3]);
 
 			all_entries.push_back(entry);

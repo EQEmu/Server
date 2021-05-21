@@ -18,12 +18,12 @@
 class BaseSharedTasksRepository {
 public:
 	struct SharedTasks {
-		int id;
-		int task_id;
-		int dynamic_zone_id;
-		int accepted_time;
-		int completion_time;
-		int is_locked;
+		int64 id;
+		int   task_id;
+		int64 dynamic_zone_id;
+		int   accepted_time;
+		int   completion_time;
+		int   is_locked;
 	};
 
 	static std::string PrimaryKey()
@@ -116,9 +116,9 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTasks entry{};
 
-			entry.id              = atoi(row[0]);
+			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = atoi(row[2]);
+			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
 			entry.accepted_time   = atoi(row[3]);
 			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);
@@ -255,9 +255,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTasks entry{};
 
-			entry.id              = atoi(row[0]);
+			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = atoi(row[2]);
+			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
 			entry.accepted_time   = atoi(row[3]);
 			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);
@@ -285,9 +285,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTasks entry{};
 
-			entry.id              = atoi(row[0]);
+			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = atoi(row[2]);
+			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
 			entry.accepted_time   = atoi(row[3]);
 			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);

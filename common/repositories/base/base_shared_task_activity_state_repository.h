@@ -18,12 +18,12 @@
 class BaseSharedTaskActivityStateRepository {
 public:
 	struct SharedTaskActivityState {
-		int id;
-		int shared_task_id;
-		int activity_id;
-		int done_count;
-		int updated_time;
-		int completed_time;
+		int64 id;
+		int64 shared_task_id;
+		int   activity_id;
+		int   done_count;
+		int   updated_time;
+		int   completed_time;
 	};
 
 	static std::string PrimaryKey()
@@ -116,8 +116,8 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskActivityState entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
 			entry.updated_time   = atoi(row[4]);
@@ -255,8 +255,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskActivityState entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
 			entry.updated_time   = atoi(row[4]);
@@ -285,8 +285,8 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskActivityState entry{};
 
-			entry.id             = atoi(row[0]);
-			entry.shared_task_id = atoi(row[1]);
+			entry.id             = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[1], NULL, 10);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
 			entry.updated_time   = atoi(row[4]);
