@@ -6,6 +6,7 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
+#include "../common/repositories/shared_tasks_repository.h"
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;
@@ -77,7 +78,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 	// if we didn't pull the requested character from the db, let's pull it by now
 	// most shared tasks are not going to be single character / solo for us to typically get here
 	// maybe we're a GM testing a shared task solo
-	bool list_has_leader = false;
+	bool      list_has_leader = false;
 	for (auto &m: request_members) {
 		if (m.character_id == requestor_character_id) {
 			list_has_leader = true;
@@ -90,8 +91,8 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 			SharedTaskMember member = {};
 			member.character_id   = leader.id;
 			member.character_name = leader.name;
-			member.is_grouped     = false;
 			member.level          = leader.level;
+			member.is_leader      = true;
 
 			request_members.emplace_back(member);
 		}
@@ -102,6 +103,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 
 void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id)
 {
+	// TODO: Move to memory reference later ?
 	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
@@ -144,9 +146,24 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 		requested_character_cle->Server()->SendPacket(p.get());
 	}
 
-	// new shared task
+	// new shared task instance
 	auto new_shared_task = SharedTask{};
 	auto activities      = TaskActivitiesRepository::GetWhere(*m_content_database, fmt::format("taskid = {}", task.id));
+
+	// new shared task db object
+	auto shared_task_entity = SharedTasksRepository::NewEntity();
+	shared_task_entity.task_id       = requested_task_id;
+	shared_task_entity.accepted_time = std::time(nullptr);
+
+	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
+
+	// something failed here, bail out
+	if (created_db_shared_task.id == 0) {
+		// TODO: Handle failure, happy path for now
+	}
+
+	// active record
+	new_shared_task.m_db_shared_task = created_db_shared_task;
 
 	// activity state
 	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state = {};
@@ -167,11 +184,45 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	// add to shared tasks list
 	m_shared_tasks.emplace_back(new_shared_task);
 
+	// set database data in memory to make it easier for any later referencing
+	new_shared_task.SetTaskData(task);
+	new_shared_task.SetTaskActivityData(activities);
+
 	LogTasks(
-		"[AttemptSharedTaskCreation] Task [{}] created successfully | member_count [{}] activity_count [{}] current tasks in state [{}]",
+		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
+		new_shared_task.m_db_shared_task.id,
 		task.id,
 		request_members.size(),
 		shared_task_activity_state.size(),
 		m_shared_tasks.size()
 	);
+}
+
+void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id)
+{
+	// TODO: Move to memory reference later ?
+	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
+	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
+		LogTasksDetail(
+			"[AttemptSharedTaskCreation] Found Shared Task ({}) [{}]",
+			requested_task_id,
+			task.title
+		);
+	}
+
+	// check for active shared tasks
+	for (auto &t: m_shared_tasks) {
+		if (t.GetTaskData().id == requested_task_id) {
+
+			// get members from shared task
+			for (auto &m: t.GetMembers()) {
+
+				// TODO: Happy path removal just for now, add additional handling later
+				if (m.character_id == requested_character_id && m.is_leader) {
+
+
+				}
+			}
+		}
+	}
 }

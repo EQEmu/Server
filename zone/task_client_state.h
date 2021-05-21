@@ -98,6 +98,9 @@ private:
 	union { // easier to loop over
 		struct {
 			ClientTaskInformation m_active_task; // only one
+
+			// acts as a read-only "view" of data that is managed by world and the internal task
+			// system largely behaves like other tasks but shims logic to world where necessary
 			ClientTaskInformation m_active_shared_task; // only one
 			ClientTaskInformation m_active_quests[MAXACTIVEQUESTS];
 		};

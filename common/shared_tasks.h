@@ -3,6 +3,9 @@
 
 #include "database.h"
 #include "types.h"
+#include "repositories/tasks_repository.h"
+#include "repositories/task_activities_repository.h"
+#include "repositories/shared_tasks_repository.h"
 #include <vector>
 #include <string>
 #include <iostream>
@@ -19,9 +22,12 @@
 #define ServerOP_SharedTaskCompleted      0x0308 // world -> zone. We completed! Do stuff zone!
 #define ServerOP_SharedTaskAcceptNewTask  0x0308 // world -> zone. World verified, continue AcceptNewTask
 
+#define ServerOP_SharedTaskAttemptRemove        0x0309 // zone -> world. Player trying to delete task
+
 // used in
 // ServerOP_SharedTaskRequest
 // ServerOP_SharedTaskAcceptNewTask
+// ServerOP_SharedTaskAttemptRemove
 struct ServerSharedTaskRequest_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
@@ -29,11 +35,12 @@ struct ServerSharedTaskRequest_Struct {
 
 // used in the shared task request process (currently)
 struct SharedTaskMember {
-	uint32      character_id;
-	std::string character_name;
-	uint32      level;
-	bool        is_grouped;
-	bool        is_raided;
+	uint32      character_id   = 0;
+	std::string character_name = "";
+	uint32      level          = 0;
+	bool        is_grouped     = false;
+	bool        is_raided      = false;
+	bool        is_leader      = false;
 };
 
 struct SharedTaskActivityStateEntry {
@@ -46,14 +53,27 @@ class SharedTask {
 public:
 	// shared task stuff
 
+
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 
 	void SetSharedTaskActivityState(const std::vector<SharedTaskActivityStateEntry> &activity_state);
 
+	const TasksRepository::Tasks &GetTaskData() const;
+	const std::vector<TaskActivitiesRepository::TaskActivities> &GetTaskActivityData() const;
+	void SetTaskData(const TasksRepository::Tasks &task_data);
+	void SetTaskActivityData(const std::vector<TaskActivitiesRepository::TaskActivities> &task_activity_data);
+
+	// active record of database shared task
+	SharedTasksRepository::SharedTasks m_db_shared_task;
+
 protected:
 	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state;
 	std::vector<SharedTaskMember>             members;
+
+	// reference to task data
+	TasksRepository::Tasks                                m_task_data;
+	std::vector<TaskActivitiesRepository::TaskActivities> m_task_activity_data;
 };
 
 #endif //EQEMU_SHARED_TASKS_H

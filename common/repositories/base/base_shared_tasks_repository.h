@@ -18,12 +18,12 @@
 class BaseSharedTasksRepository {
 public:
 	struct SharedTasks {
-		int         id;
-		int         task_id;
-		int         dynamic_zone_id;
-		std::string accepted_time;
-		std::string completion_time;
-		int         is_locked;
+		int id;
+		int task_id;
+		int dynamic_zone_id;
+		int accepted_time;
+		int completion_time;
+		int is_locked;
 	};
 
 	static std::string PrimaryKey()
@@ -78,8 +78,8 @@ public:
 		entry.id              = 0;
 		entry.task_id         = 0;
 		entry.dynamic_zone_id = 0;
-		entry.accepted_time   = "";
-		entry.completion_time = "";
+		entry.accepted_time   = 0;
+		entry.completion_time = 0;
 		entry.is_locked       = 0;
 
 		return entry;
@@ -119,8 +119,8 @@ public:
 			entry.id              = atoi(row[0]);
 			entry.task_id         = atoi(row[1]);
 			entry.dynamic_zone_id = atoi(row[2]);
-			entry.accepted_time   = row[3] ? row[3] : "";
-			entry.completion_time = row[4] ? row[4] : "";
+			entry.accepted_time   = atoi(row[3]);
+			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);
 
 			return entry;
@@ -157,8 +157,8 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(shared_tasks_entry.task_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(shared_tasks_entry.dynamic_zone_id));
-		update_values.push_back(columns[3] + " = '" + EscapeString(shared_tasks_entry.accepted_time) + "'");
-		update_values.push_back(columns[4] + " = '" + EscapeString(shared_tasks_entry.completion_time) + "'");
+		update_values.push_back(columns[3] + " = " + std::to_string(shared_tasks_entry.accepted_time));
+		update_values.push_back(columns[4] + " = " + std::to_string(shared_tasks_entry.completion_time));
 		update_values.push_back(columns[5] + " = " + std::to_string(shared_tasks_entry.is_locked));
 
 		auto results = db.QueryDatabase(
@@ -184,8 +184,8 @@ public:
 		insert_values.push_back(std::to_string(shared_tasks_entry.id));
 		insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
 		insert_values.push_back(std::to_string(shared_tasks_entry.dynamic_zone_id));
-		insert_values.push_back("'" + EscapeString(shared_tasks_entry.accepted_time) + "'");
-		insert_values.push_back("'" + EscapeString(shared_tasks_entry.completion_time) + "'");
+		insert_values.push_back(std::to_string(shared_tasks_entry.accepted_time));
+		insert_values.push_back(std::to_string(shared_tasks_entry.completion_time));
 		insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
 
 		auto results = db.QueryDatabase(
@@ -219,8 +219,8 @@ public:
 			insert_values.push_back(std::to_string(shared_tasks_entry.id));
 			insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
 			insert_values.push_back(std::to_string(shared_tasks_entry.dynamic_zone_id));
-			insert_values.push_back("'" + EscapeString(shared_tasks_entry.accepted_time) + "'");
-			insert_values.push_back("'" + EscapeString(shared_tasks_entry.completion_time) + "'");
+			insert_values.push_back(std::to_string(shared_tasks_entry.accepted_time));
+			insert_values.push_back(std::to_string(shared_tasks_entry.completion_time));
 			insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
@@ -258,8 +258,8 @@ public:
 			entry.id              = atoi(row[0]);
 			entry.task_id         = atoi(row[1]);
 			entry.dynamic_zone_id = atoi(row[2]);
-			entry.accepted_time   = row[3] ? row[3] : "";
-			entry.completion_time = row[4] ? row[4] : "";
+			entry.accepted_time   = atoi(row[3]);
+			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);
 
 			all_entries.push_back(entry);
@@ -288,8 +288,8 @@ public:
 			entry.id              = atoi(row[0]);
 			entry.task_id         = atoi(row[1]);
 			entry.dynamic_zone_id = atoi(row[2]);
-			entry.accepted_time   = row[3] ? row[3] : "";
-			entry.completion_time = row[4] ? row[4] : "";
+			entry.accepted_time   = atoi(row[3]);
+			entry.completion_time = atoi(row[4]);
 			entry.is_locked       = atoi(row[5]);
 
 			all_entries.push_back(entry);

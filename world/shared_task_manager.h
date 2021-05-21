@@ -16,6 +16,7 @@ public:
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id);
 
+	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id);
 protected:
 	// reference to database
 	Database *m_database;

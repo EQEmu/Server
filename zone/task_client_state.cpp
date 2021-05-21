@@ -2100,6 +2100,22 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, static_cast<int>(task_type))
 	);
 
+	// shared
+	if (task_type == TaskType::Shared) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskRequest_Struct));
+		auto *r   = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
+
+		// fill
+		r->requested_character_id = client->CharacterID();
+		r->requested_task_id      = task_id;
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+	}
+
 	switch (task_type) {
 		case TaskType::Task:
 			m_active_task.task_id = TASKSLOTEMPTY;

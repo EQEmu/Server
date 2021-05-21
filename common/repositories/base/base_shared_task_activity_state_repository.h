@@ -18,12 +18,12 @@
 class BaseSharedTaskActivityStateRepository {
 public:
 	struct SharedTaskActivityState {
-		int         id;
-		int         shared_task_id;
-		int         activity_id;
-		int         done_count;
-		std::string updated_time;
-		std::string completed_time;
+		int id;
+		int shared_task_id;
+		int activity_id;
+		int done_count;
+		int updated_time;
+		int completed_time;
 	};
 
 	static std::string PrimaryKey()
@@ -79,8 +79,8 @@ public:
 		entry.shared_task_id = 0;
 		entry.activity_id    = 0;
 		entry.done_count     = 0;
-		entry.updated_time   = "";
-		entry.completed_time = "";
+		entry.updated_time   = 0;
+		entry.completed_time = 0;
 
 		return entry;
 	}
@@ -120,8 +120,8 @@ public:
 			entry.shared_task_id = atoi(row[1]);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
-			entry.updated_time   = row[4] ? row[4] : "";
-			entry.completed_time = row[5] ? row[5] : "";
+			entry.updated_time   = atoi(row[4]);
+			entry.completed_time = atoi(row[5]);
 
 			return entry;
 		}
@@ -158,8 +158,8 @@ public:
 		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_activity_state_entry.shared_task_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(shared_task_activity_state_entry.activity_id));
 		update_values.push_back(columns[3] + " = " + std::to_string(shared_task_activity_state_entry.done_count));
-		update_values.push_back(columns[4] + " = '" + EscapeString(shared_task_activity_state_entry.updated_time) + "'");
-		update_values.push_back(columns[5] + " = '" + EscapeString(shared_task_activity_state_entry.completed_time) + "'");
+		update_values.push_back(columns[4] + " = " + std::to_string(shared_task_activity_state_entry.updated_time));
+		update_values.push_back(columns[5] + " = " + std::to_string(shared_task_activity_state_entry.completed_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,8 +185,8 @@ public:
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.shared_task_id));
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.activity_id));
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.done_count));
-		insert_values.push_back("'" + EscapeString(shared_task_activity_state_entry.updated_time) + "'");
-		insert_values.push_back("'" + EscapeString(shared_task_activity_state_entry.completed_time) + "'");
+		insert_values.push_back(std::to_string(shared_task_activity_state_entry.updated_time));
+		insert_values.push_back(std::to_string(shared_task_activity_state_entry.completed_time));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -220,8 +220,8 @@ public:
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.shared_task_id));
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.activity_id));
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.done_count));
-			insert_values.push_back("'" + EscapeString(shared_task_activity_state_entry.updated_time) + "'");
-			insert_values.push_back("'" + EscapeString(shared_task_activity_state_entry.completed_time) + "'");
+			insert_values.push_back(std::to_string(shared_task_activity_state_entry.updated_time));
+			insert_values.push_back(std::to_string(shared_task_activity_state_entry.completed_time));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -259,8 +259,8 @@ public:
 			entry.shared_task_id = atoi(row[1]);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
-			entry.updated_time   = row[4] ? row[4] : "";
-			entry.completed_time = row[5] ? row[5] : "";
+			entry.updated_time   = atoi(row[4]);
+			entry.completed_time = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -289,8 +289,8 @@ public:
 			entry.shared_task_id = atoi(row[1]);
 			entry.activity_id    = atoi(row[2]);
 			entry.done_count     = atoi(row[3]);
-			entry.updated_time   = row[4] ? row[4] : "";
-			entry.completed_time = row[5] ? row[5] : "";
+			entry.updated_time   = atoi(row[4]);
+			entry.completed_time = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
