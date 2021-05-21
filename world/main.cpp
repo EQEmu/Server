@@ -498,6 +498,7 @@ int main(int argc, char **argv)
 	LogInfo("Initializing [SharedTaskManager]");
 	shared_task_manager.SetDatabase(&database)
 		->SetContentDatabase(&content_db)
+		->LoadTaskData()
 		->LoadSharedTaskState();
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;

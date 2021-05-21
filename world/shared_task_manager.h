@@ -9,8 +9,15 @@ public:
 	SharedTaskManager *SetDatabase(Database *db);
 	SharedTaskManager *SetContentDatabase(Database *db);
 
+	// loads task data into memory
+	SharedTaskManager * LoadTaskData();
+
 	// loads shared task state into memory
 	void LoadSharedTaskState();
+
+	// helper, references task memory data
+	TasksRepository::Tasks GetSharedTaskDataByTaskId(uint32 task_id);
+	std::vector<TaskActivitiesRepository::TaskActivities> GetSharedTaskActivityDataByTaskId(uint32 task_id);
 
 	// gets group / raid members belonging to requested character
 	// this may change later depending on how shared tasks develop
@@ -24,6 +31,10 @@ protected:
 	// reference to database
 	Database *m_database;
 	Database *m_content_database;
+
+	// reference to task data (all)
+	std::vector<TasksRepository::Tasks> m_task_data;
+	std::vector<TaskActivitiesRepository::TaskActivities> m_task_activity_data;
 
 	// internal shared tasks list
 	std::vector<SharedTask> m_shared_tasks;

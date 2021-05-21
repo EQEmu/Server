@@ -36,7 +36,7 @@ struct ServerSharedTaskRequest_Struct {
 // used in the shared task request process (currently)
 struct SharedTaskMember {
 	uint32      character_id   = 0;
-	std::string character_name = "";
+	std::string character_name; // potentially remove, use only character_id
 	uint32      level          = 0;
 	bool        is_grouped     = false;
 	bool        is_raided      = false;
@@ -71,7 +71,7 @@ protected:
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;
 
-	// reference to task data
+	// reference to task data (only for this shared task)
 	TasksRepository::Tasks                                m_task_data;
 	std::vector<TaskActivitiesRepository::TaskActivities> m_task_activity_data;
 };

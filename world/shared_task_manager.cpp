@@ -105,8 +105,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 
 void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id)
 {
-	// TODO: Move to memory reference later
-	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
+	auto task = GetSharedTaskDataByTaskId(requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
 			"[AttemptSharedTaskCreation] Found Shared Task ({}) [{}]",
@@ -237,8 +236,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id)
 {
-	// TODO: Move to memory reference later
-	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
+	auto task = GetSharedTaskDataByTaskId(requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
 			"[AttemptSharedTaskRemoval] Found Shared Task ({}) [{}]",
@@ -297,7 +295,131 @@ void SharedTaskManager::LoadSharedTaskState()
 {
 	LogTasksDetail("[LoadSharedTaskState] Restoring state from the database");
 
-	// do stuff
+	// [x] preload task data and activity data
+	// [x] load shared tasks themselves
+	// [x] load shared task activities
+	// [x] load shared task members
 
+	// load shared tasks
+	std::vector<SharedTask> shared_tasks = {};
 
+	// eager load all activity state data
+	auto shared_tasks_activity_state_data = SharedTaskActivityStateRepository::All(*m_database);
+
+	// eager load all member state data
+	auto shared_task_members_data = SharedTaskMembersRepository::All(*m_database);
+
+	// load shared tasks not already completed
+	auto st = SharedTasksRepository::GetWhere(*m_database, "completion_time = 0");
+	shared_tasks.reserve(st.size());
+	for (auto &s: st) {
+		SharedTask ns = {};
+
+		// shared task db data
+		ns.m_db_shared_task = s;
+
+		// set database task data for internal referencing
+		auto task_data = GetSharedTaskDataByTaskId(s.task_id);
+		ns.SetTaskData(task_data);
+
+		// set database task data for internal referencing
+		auto activities_data = GetSharedTaskActivityDataByTaskId(s.task_id);
+		ns.SetTaskActivityData(activities_data);
+
+		// load activity state into memory
+		std::vector<SharedTaskActivityStateEntry> shared_task_activity_state = {};
+
+		// loop through shared task activity state data referencing from memory instead of
+		// querying inside this loop each time
+		for (auto &sta: shared_tasks_activity_state_data) {
+
+			// filter by current shared task id
+			if (sta.shared_task_id == s.id) {
+
+				auto e = SharedTaskActivityStateEntry{};
+				e.activity_id = sta.activity_id;
+				e.done_count  = sta.done_count;
+
+				// get max done count from activities data
+				// loop through activities data in memory and grep on task_id, activity_id to pull goalcount
+				for (auto &ad: activities_data) {
+					if (ad.taskid == s.task_id && ad.activityid == sta.activity_id) {
+						LogTasksDetail(
+							"[LoadSharedTaskState] Task activity loop | found activity_id [{}] max_done_count [{}]",
+							sta.activity_id,
+							ad.goalcount
+						);
+
+						e.max_done_count = ad.goalcount;
+					}
+				}
+
+				shared_task_activity_state.emplace_back(e);
+			}
+		}
+
+		ns.SetSharedTaskActivityState(shared_task_activity_state);
+
+		// members
+		std::vector<SharedTaskMember> shared_task_members = {};
+		for (auto                     &m: shared_task_members_data) {
+			if (m.shared_task_id == s.id) {
+				SharedTaskMember member = {};
+				member.character_id = m.character_id;
+				member.is_leader    = (m.is_leader ? 1 : 0);
+
+				shared_task_members.emplace_back(member);
+			}
+		}
+
+		ns.SetMembers(shared_task_members);
+
+		LogTasksDetail(
+			"Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
+			s.id,
+			task_data.id,
+			task_data.title,
+			ns.GetMembers().size(),
+			ns.GetActivityState().size()
+		);
+
+		shared_tasks.emplace_back(ns);
+	}
+
+	m_shared_tasks = shared_tasks;
+
+}
+SharedTaskManager *SharedTaskManager::LoadTaskData()
+{
+	m_task_data          = TasksRepository::All(*m_content_database);
+	m_task_activity_data = TaskActivitiesRepository::All(*m_content_database);
+
+	LogTasks("Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
+
+	return this;
+}
+
+TasksRepository::Tasks SharedTaskManager::GetSharedTaskDataByTaskId(uint32 task_id)
+{
+	for (auto &t: m_task_data) {
+		if (t.id == task_id && t.type == TASK_TYPE_SHARED) {
+			return t;
+		}
+	}
+
+	return TasksRepository::NewEntity();
+}
+
+std::vector<TaskActivitiesRepository::TaskActivities>
+SharedTaskManager::GetSharedTaskActivityDataByTaskId(uint32 task_id)
+{
+	std::vector<TaskActivitiesRepository::TaskActivities> activities = {};
+
+	for (auto &a: m_task_activity_data) {
+		if (a.taskid == task_id) {
+			activities.emplace_back(a);
+		}
+	}
+
+	return activities;
 }
