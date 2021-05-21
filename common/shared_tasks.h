@@ -51,25 +51,25 @@ struct SharedTaskActivityStateEntry {
 
 class SharedTask {
 public:
-	// shared task stuff
-
-
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 
-	void SetSharedTaskActivityState(const std::vector<SharedTaskActivityStateEntry> &activity_state);
-
-	const TasksRepository::Tasks &GetTaskData() const;
+	// getters
 	const std::vector<TaskActivitiesRepository::TaskActivities> &GetTaskActivityData() const;
-	void SetTaskData(const TasksRepository::Tasks &task_data);
+	const TasksRepository::Tasks &GetTaskData() const;
+
+	// setters
+	void SetMembers(const std::vector<SharedTaskMember> &members);
+	void SetSharedTaskActivityState(const std::vector<SharedTaskActivityStateEntry> &activity_state);
 	void SetTaskActivityData(const std::vector<TaskActivitiesRepository::TaskActivities> &task_activity_data);
+	void SetTaskData(const TasksRepository::Tasks &task_data);
 
 	// active record of database shared task
 	SharedTasksRepository::SharedTasks m_db_shared_task;
 
 protected:
-	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state;
-	std::vector<SharedTaskMember>             members;
+	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
+	std::vector<SharedTaskMember>             m_members;
 
 	// reference to task data
 	TasksRepository::Tasks                                m_task_data;

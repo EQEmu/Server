@@ -148,6 +148,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 		requested_character_cle->Server()->SendPacket(p.get());
 	}
 
+	// TODO: Additional validation logic here
+
 	// new shared task instance
 	auto new_shared_task = SharedTask{};
 	auto activities      = TaskActivitiesRepository::GetWhere(*m_content_database, fmt::format("taskid = {}", task.id));
@@ -197,8 +199,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	}
 
 	// activity state (database)
-	std::vector<SharedTaskActivityStateRepository::SharedTaskActivityState> db_activities = {};
-	db_activities.reserve(activities.size());
+	std::vector<SharedTaskActivityStateRepository::SharedTaskActivityState> shared_task_db_activities = {};
+	shared_task_db_activities.reserve(activities.size());
 	for (auto &a: activities) {
 
 		// entry
@@ -207,19 +209,21 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 		e.activity_id    = a.activityid;
 		e.done_count     = 0;
 
-		db_activities.emplace_back(e);
+		shared_task_db_activities.emplace_back(e);
 	}
 
-	SharedTaskActivityStateRepository::InsertMany(*m_database, db_activities);
+	SharedTaskActivityStateRepository::InsertMany(*m_database, shared_task_db_activities);
 
+	// state
 	new_shared_task.SetSharedTaskActivityState(shared_task_activity_state);
-
-	// add to shared tasks list
-	m_shared_tasks.emplace_back(new_shared_task);
 
 	// set database data in memory to make it easier for any later referencing
 	new_shared_task.SetTaskData(task);
 	new_shared_task.SetTaskActivityData(activities);
+	new_shared_task.SetMembers(request_members);
+
+	// add to shared tasks list
+	m_shared_tasks.emplace_back(new_shared_task);
 
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
@@ -237,7 +241,7 @@ void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint3
 	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
-			"[AttemptSharedTaskCreation] Found Shared Task ({}) [{}]",
+			"[AttemptSharedTaskRemoval] Found Shared Task ({}) [{}]",
 			requested_task_id,
 			task.title
 		);
@@ -245,17 +249,55 @@ void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint3
 
 	// check for active shared tasks
 	for (auto &t: m_shared_tasks) {
-		if (t.GetTaskData().id == requested_task_id) {
+		LogTasksDetail(
+			"[AttemptSharedTaskRemoval] Looping tasks | task_id [{}] shared_task_id [{}]",
+			t.GetTaskData().id,
+			t.m_db_shared_task.id
+		);
 
+		if (t.GetTaskData().id == requested_task_id) {
 			// get members from shared task
 			for (auto &m: t.GetMembers()) {
+				LogTasksDetail(
+					"[AttemptSharedTaskRemoval] Looping members | character_id [{}]",
+					m.character_id
+				);
 
 				// TODO: Happy path removal just for now, add additional handling later
 				if (m.character_id == requested_character_id && m.is_leader) {
-
-
+					DeleteSharedTask(t.m_db_shared_task.id);
 				}
 			}
 		}
 	}
+}
+
+void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
+{
+	LogTasksDetail("[DeleteSharedTask] shared_task_id [{}]", shared_task_id);
+
+	// remove internally
+	m_shared_tasks.erase(
+		std::remove_if(
+			m_shared_tasks.begin(),
+			m_shared_tasks.end(),
+			[&](SharedTask const &s) {
+				return s.m_db_shared_task.id == shared_task_id;
+			}
+		),
+		m_shared_tasks.end());
+
+	// database
+	SharedTasksRepository::DeleteWhere(*m_database, fmt::format("id = {}", shared_task_id));
+	SharedTaskMembersRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
+	SharedTaskActivityStateRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
+}
+
+void SharedTaskManager::LoadSharedTaskState()
+{
+	LogTasksDetail("[LoadSharedTaskState] Restoring state from the database");
+
+	// do stuff
+
+
 }

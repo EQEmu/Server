@@ -496,7 +496,9 @@ int main(int argc, char **argv)
 	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
 
 	LogInfo("Initializing [SharedTaskManager]");
-	shared_task_manager.SetDatabase(&database)->SetContentDatabase(&content_db);
+	shared_task_manager.SetDatabase(&database)
+		->SetContentDatabase(&content_db)
+		->LoadSharedTaskState();
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {

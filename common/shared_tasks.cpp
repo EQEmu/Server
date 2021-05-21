@@ -3,17 +3,17 @@
 
 std::vector<SharedTaskActivityStateEntry> SharedTask::GetActivityState() const
 {
-	return shared_task_activity_state;
+	return m_shared_task_activity_state;
 }
 
 std::vector<SharedTaskMember> SharedTask::GetMembers() const
 {
-	return members;
+	return m_members;
 }
 
 void SharedTask::SetSharedTaskActivityState(const std::vector<SharedTaskActivityStateEntry> &activity_state)
 {
-	SharedTask::shared_task_activity_state = activity_state;
+	SharedTask::m_shared_task_activity_state = activity_state;
 }
 
 void SharedTask::SetTaskData(const TasksRepository::Tasks &task_data)
@@ -34,4 +34,9 @@ const TasksRepository::Tasks &SharedTask::GetTaskData() const
 const std::vector<TaskActivitiesRepository::TaskActivities> &SharedTask::GetTaskActivityData() const
 {
 	return m_task_activity_data;
+}
+
+void SharedTask::SetMembers(const std::vector<SharedTaskMember> &members)
+{
+	SharedTask::m_members = members;
 }

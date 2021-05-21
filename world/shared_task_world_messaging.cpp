@@ -28,6 +28,8 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			);
 
 			shared_task_manager.AttemptSharedTaskCreation(r->requested_task_id, r->requested_character_id);
+
+			break;
 		}
 		case ServerOP_SharedTaskAttemptRemove: {
 			auto *r = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
@@ -38,6 +40,8 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			);
 
 			shared_task_manager.AttemptSharedTaskRemoval(r->requested_task_id, r->requested_character_id);
+
+			break;
 		}
 		default:
 			break;
