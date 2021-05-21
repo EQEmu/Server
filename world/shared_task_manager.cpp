@@ -7,6 +7,8 @@
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
 #include "../common/repositories/shared_tasks_repository.h"
+#include "../common/repositories/shared_task_members_repository.h"
+#include "../common/repositories/shared_task_activity_state_repository.h"
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;
@@ -103,7 +105,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 
 void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id)
 {
-	// TODO: Move to memory reference later ?
+	// TODO: Move to memory reference later
 	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
@@ -115,14 +117,14 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 	auto request_members = GetRequestMembers(requested_character_id);
 	if (!request_members.empty()) {
-		for (auto &member: request_members) {
+		for (auto &m: request_members) {
 			LogTasksDetail(
 				"[AttemptSharedTaskCreation] Request Members ({}) [{}] level [{}] grouped [{}] raided [{}]",
-				member.character_id,
-				member.character_name,
-				member.level,
-				(member.is_grouped ? "true" : "false"),
-				(member.is_raided ? "true" : "false")
+				m.character_id,
+				m.character_name,
+				m.level,
+				(m.is_grouped ? "true" : "false"),
+				(m.is_raided ? "true" : "false")
 			);
 		}
 	}
@@ -165,19 +167,50 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	// active record
 	new_shared_task.m_db_shared_task = created_db_shared_task;
 
-	// activity state
+	// persist members
+	std::vector<SharedTaskMembersRepository::SharedTaskMembers> shared_task_db_members = {};
+	shared_task_db_members.reserve(request_members.size());
+	for (auto &m: request_members) {
+		auto e = SharedTaskMembersRepository::NewEntity();
+
+		e.character_id   = m.character_id;
+		e.is_leader      = (m.is_leader ? 1 : 0);
+		e.shared_task_id = new_shared_task.m_db_shared_task.id;
+
+		shared_task_db_members.emplace_back(e);
+	}
+
+	SharedTaskMembersRepository::InsertMany(*m_database, shared_task_db_members);
+
+	// activity state (memory)
 	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state = {};
 	shared_task_activity_state.reserve(activities.size());
-	for (auto &activity: activities) {
+	for (auto &a: activities) {
 
 		// entry
-		auto shared_task_activity_state_entry = SharedTaskActivityStateEntry{};
-		shared_task_activity_state_entry.activity_id    = activity.activityid;
-		shared_task_activity_state_entry.done_count     = 0;
-		shared_task_activity_state_entry.max_done_count = activity.goalcount;
+		auto e = SharedTaskActivityStateEntry{};
+		e.activity_id    = a.activityid;
+		e.done_count     = 0;
+		e.max_done_count = a.goalcount;
 
-		shared_task_activity_state.emplace_back(shared_task_activity_state_entry);
+		shared_task_activity_state.emplace_back(e);
 	}
+
+	// activity state (database)
+	std::vector<SharedTaskActivityStateRepository::SharedTaskActivityState> db_activities = {};
+	db_activities.reserve(activities.size());
+	for (auto &a: activities) {
+
+		// entry
+		auto e = SharedTaskActivityStateRepository::NewEntity();
+		e.shared_task_id = new_shared_task.m_db_shared_task.id;
+		e.activity_id    = a.activityid;
+		e.done_count     = 0;
+
+		db_activities.emplace_back(e);
+	}
+
+	SharedTaskActivityStateRepository::InsertMany(*m_database, db_activities);
 
 	new_shared_task.SetSharedTaskActivityState(shared_task_activity_state);
 
@@ -200,7 +233,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id)
 {
-	// TODO: Move to memory reference later ?
+	// TODO: Move to memory reference later
 	auto task = TasksRepository::FindOne(*m_content_database, requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(

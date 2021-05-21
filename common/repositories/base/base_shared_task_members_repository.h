@@ -18,7 +18,6 @@
 class BaseSharedTaskMembersRepository {
 public:
 	struct SharedTaskMembers {
-		int64 id;
 		int64 shared_task_id;
 		int64 character_id;
 		int   is_leader;
@@ -26,13 +25,12 @@ public:
 
 	static std::string PrimaryKey()
 	{
-		return std::string("id");
+		return std::string("shared_task_id");
 	}
 
 	static std::vector<std::string> Columns()
 	{
 		return {
-			"id",
 			"shared_task_id",
 			"character_id",
 			"is_leader",
@@ -71,7 +69,6 @@ public:
 	{
 		SharedTaskMembers entry{};
 
-		entry.id             = 0;
 		entry.shared_task_id = 0;
 		entry.character_id   = 0;
 		entry.is_leader      = 0;
@@ -85,7 +82,7 @@ public:
 	)
 	{
 		for (auto &shared_task_members : shared_task_memberss) {
-			if (shared_task_members.id == shared_task_members_id) {
+			if (shared_task_members.shared_task_id == shared_task_members_id) {
 				return shared_task_members;
 			}
 		}
@@ -110,10 +107,9 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskMembers entry{};
 
-			entry.id             = strtoll(row[0], NULL, 10);
-			entry.shared_task_id = strtoll(row[1], NULL, 10);
-			entry.character_id   = strtoll(row[2], NULL, 10);
-			entry.is_leader      = atoi(row[3]);
+			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.is_leader      = atoi(row[2]);
 
 			return entry;
 		}
@@ -147,9 +143,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_members_entry.shared_task_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(shared_task_members_entry.character_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(shared_task_members_entry.is_leader));
+		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_members_entry.shared_task_id));
+		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_members_entry.character_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(shared_task_members_entry.is_leader));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -157,7 +153,7 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				shared_task_members_entry.id
+				shared_task_members_entry.shared_task_id
 			)
 		);
 
@@ -171,7 +167,6 @@ public:
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(shared_task_members_entry.id));
 		insert_values.push_back(std::to_string(shared_task_members_entry.shared_task_id));
 		insert_values.push_back(std::to_string(shared_task_members_entry.character_id));
 		insert_values.push_back(std::to_string(shared_task_members_entry.is_leader));
@@ -185,7 +180,7 @@ public:
 		);
 
 		if (results.Success()) {
-			shared_task_members_entry.id = results.LastInsertedID();
+			shared_task_members_entry.shared_task_id = results.LastInsertedID();
 			return shared_task_members_entry;
 		}
 
@@ -204,7 +199,6 @@ public:
 		for (auto &shared_task_members_entry: shared_task_members_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(shared_task_members_entry.id));
 			insert_values.push_back(std::to_string(shared_task_members_entry.shared_task_id));
 			insert_values.push_back(std::to_string(shared_task_members_entry.character_id));
 			insert_values.push_back(std::to_string(shared_task_members_entry.is_leader));
@@ -241,10 +235,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.id             = strtoll(row[0], NULL, 10);
-			entry.shared_task_id = strtoll(row[1], NULL, 10);
-			entry.character_id   = strtoll(row[2], NULL, 10);
-			entry.is_leader      = atoi(row[3]);
+			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.is_leader      = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}
@@ -269,10 +262,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskMembers entry{};
 
-			entry.id             = strtoll(row[0], NULL, 10);
-			entry.shared_task_id = strtoll(row[1], NULL, 10);
-			entry.character_id   = strtoll(row[2], NULL, 10);
-			entry.is_leader      = atoi(row[3]);
+			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.character_id   = strtoll(row[1], NULL, 10);
+			entry.is_leader      = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}
