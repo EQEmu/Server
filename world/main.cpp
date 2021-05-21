@@ -101,6 +101,7 @@ union semun {
 #include "../common/repositories/merchantlist_temp_repository.h"
 #include "world_store.h"
 #include "world_event_scheduler.h"
+#include "shared_task_manager.h"
 
 WorldStore          world_store;
 ClientList          client_list;
@@ -112,6 +113,7 @@ QueryServConnection QSLink;
 LauncherList        launcher_list;
 AdventureManager    adventure_manager;
 WorldEventScheduler event_scheduler;
+SharedTaskManager   shared_task_manager;
 EQ::Random          emu_random;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
@@ -490,7 +492,11 @@ int main(int argc, char **argv)
 	content_db.LoadCharacterCreateAllocations();
 	content_db.LoadCharacterCreateCombos();
 
+	LogInfo("Initializing [EventScheduler]");
 	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
+
+	LogInfo("Initializing [SharedTaskManager]");
+	shared_task_manager.SetDatabase(&database)->SetContentDatabase(&content_db);
 
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
@@ -758,7 +764,7 @@ void CheckForServerScript(bool force_download)
 #else
 		if (system(
 			"wget -N --no-check-certificate --quiet -O eqemu_server.pl https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl"
-		));
+		)) {}
 #endif
 	}
 }

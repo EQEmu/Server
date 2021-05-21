@@ -28,7 +28,7 @@ struct ServerSharedTaskRequest_Struct {
 };
 
 // used in the shared task request process (currently)
-struct SharedTaskRequestMember {
+struct SharedTaskMember {
 	uint32      character_id;
 	std::string character_name;
 	uint32      level;
@@ -36,10 +36,24 @@ struct SharedTaskRequestMember {
 	bool        is_raided;
 };
 
-class SharedTask {
-public:
-	static std::vector<SharedTaskRequestMember> GetRequestMembers(Database &db, uint32 requestor_character_id);
+struct SharedTaskActivityStateEntry {
+	uint32 activity_id;
+	uint32 done_count;
+	uint32 max_done_count; // goalcount
 };
 
+class SharedTask {
+public:
+	// shared task stuff
+
+	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
+	std::vector<SharedTaskMember> GetMembers() const;
+
+	void SetSharedTaskActivityState(const std::vector<SharedTaskActivityStateEntry> &activity_state);
+
+protected:
+	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state;
+	std::vector<SharedTaskMember>             members;
+};
 
 #endif //EQEMU_SHARED_TASKS_H

@@ -9,9 +9,12 @@
 #include "clientlist.h"
 #include "zonelist.h"
 #include "zoneserver.h"
+#include "shared_task_manager.h"
+#include "../common/repositories/task_activities_repository.h"
 
-extern ClientList client_list;
-extern ZSList     zoneserver_list;
+extern ClientList        client_list;
+extern ZSList            zoneserver_list;
+extern SharedTaskManager shared_task_manager;
 
 void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 {
@@ -24,45 +27,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				r->requested_task_id
 			);
 
-			auto task = TasksRepository::FindOne(content_db, r->requested_task_id);
-			if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
-				LogTasksDetail(
-					"[ServerOP_SharedTaskRequest] Found Shared Task ({}) [{}]",
-					r->requested_task_id,
-					task.title
-				);
-			}
-
-			auto request_members = SharedTask::GetRequestMembers(database, r->requested_character_id);
-			if (!request_members.empty()) {
-				for (auto &member: request_members) {
-					LogTasksDetail(
-						"[ServerOP_SharedTaskRequest] Request Members ({}) [{}] level [{}] grouped [{}] raided [{}]",
-						member.character_id,
-						member.character_name,
-						member.level,
-						(member.is_grouped ? "true" : "false"),
-						(member.is_raided ? "true" : "false")
-					);
-				}
-			}
-
-			if (request_members.empty()) {
-				LogTasksDetail("[ServerOP_SharedTaskRequest] No additional request members found... Just leader");
-			}
-
-			// confirm shared task request
-			auto p = std::make_unique<ServerPacket>(ServerOP_SharedTaskAcceptNewTask, sizeof(ServerSharedTaskRequest_Struct));
-			auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
-			d->requested_character_id = r->requested_character_id;
-			d->requested_task_id      = r->requested_task_id;
-
-			// get requested character zone server
-			ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(d->requested_character_id);
-			if (requested_character_cle && requested_character_cle->Server()) {
-				requested_character_cle->Server()->SendPacket(p.get());
-			}
-
+			shared_task_manager.AttemptSharedTaskCreation(r->requested_task_id, r->requested_character_id);
 		}
 		default:
 			break;
