@@ -8,7 +8,6 @@ class SharedTaskManager {
 public:
 	SharedTaskManager *SetDatabase(Database *db);
 	SharedTaskManager *SetContentDatabase(Database *db);
-	Database *GetDatabase() const;
 
 	// gets group / raid members belonging to requested character
 	// this may change later depending on how shared tasks develop

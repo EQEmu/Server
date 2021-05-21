@@ -24,18 +24,13 @@ SharedTaskManager *SharedTaskManager::SetContentDatabase(Database *db)
 	return this;
 }
 
-Database *SharedTaskManager::GetDatabase() const
-{
-	return m_database;
-}
-
 std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 requestor_character_id)
 {
 	std::vector<SharedTaskMember> request_members = {};
 
 	// raid
 	auto raid_characters = CharacterDataRepository::GetWhere(
-		*GetDatabase(),
+		*m_database,
 		fmt::format(
 			"id IN (select charid from raid_members where raidid = (select raidid from raid_members where charid = {}))",
 			requestor_character_id
@@ -59,7 +54,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 
 	// group
 	auto group_characters = CharacterDataRepository::GetWhere(
-		*GetDatabase(),
+		*m_database,
 		fmt::format(
 			"id IN (select charid from group_id where groupid = (select groupid from group_id where charid = {}))",
 			requestor_character_id
@@ -90,7 +85,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 	}
 
 	if (!list_has_leader) {
-		auto leader = CharacterDataRepository::FindOne(*GetDatabase(), requestor_character_id);
+		auto leader = CharacterDataRepository::FindOne(*m_database, requestor_character_id);
 		if (leader.id != 0) {
 			SharedTaskMember member = {};
 			member.character_id   = leader.id;
