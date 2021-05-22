@@ -133,21 +133,6 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 		LogTasksDetail("[AttemptSharedTaskCreation] No additional request members found... Just leader");
 	}
 
-	// confirm shared task request
-	auto p = std::make_unique<ServerPacket>(
-		ServerOP_SharedTaskAcceptNewTask,
-		sizeof(ServerSharedTaskRequest_Struct)
-	);
-	auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
-	d->requested_character_id = requested_character_id;
-	d->requested_task_id      = requested_task_id;
-
-	// get requested character zone server
-	ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(d->requested_character_id);
-	if (requested_character_cle && requested_character_cle->Server()) {
-		requested_character_cle->Server()->SendPacket(p.get());
-	}
-
 	// TODO: Additional validation logic here
 
 	// new shared task instance
@@ -156,7 +141,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 	// new shared task db object
 	auto shared_task_entity = SharedTasksRepository::NewEntity();
-	shared_task_entity.task_id       = requested_task_id;
+	shared_task_entity.task_id       = (int)requested_task_id;
 	shared_task_entity.accepted_time = std::time(nullptr);
 
 	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
@@ -224,6 +209,24 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 	// add to shared tasks list
 	m_shared_tasks.emplace_back(new_shared_task);
+
+	// confirm shared task request: inform clients
+	auto p = std::make_unique<ServerPacket>(
+		ServerOP_SharedTaskAcceptNewTask,
+		sizeof(ServerSharedTaskRequest_Struct)
+	);
+
+	for (auto &m: request_members) {
+		auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
+		d->requested_character_id = m.character_id;
+		d->requested_task_id      = requested_task_id;
+
+		// get requested character zone server
+		ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(m.character_id);
+		if (requested_character_cle && requested_character_cle->Server()) {
+			requested_character_cle->Server()->SendPacket(p.get());
+		}
+	}
 
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
@@ -346,8 +349,9 @@ void SharedTaskManager::LoadSharedTaskState()
 				for (auto &ad: activities_data) {
 					if (ad.taskid == s.task_id && ad.activityid == sta.activity_id) {
 						LogTasksDetail(
-							"[LoadSharedTaskState] Task activity loop | found activity_id [{}] max_done_count [{}]",
+							"[LoadSharedTaskState] Task activity loop | found activity_id [{}] done_count [{}] max_done_count (goalcount) [{}]",
 							sta.activity_id,
+							e.done_count,
 							ad.goalcount
 						);
 
