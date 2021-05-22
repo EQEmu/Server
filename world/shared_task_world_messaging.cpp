@@ -43,6 +43,28 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskUpdate: {
+			auto *r = (ServerSharedTaskActivityUpdate_Struct *) pack->pBuffer;
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskUpdate] Received request from character [{}] task_id [{}] activity_id [{}] donecount [{}] ignore_quest_update [{}]",
+				r->source_character_id,
+				r->task_id,
+				r->activity_id,
+				r->done_count,
+				(r->ignore_quest_update ? "true" : "false")
+			);
+
+			shared_task_manager.SharedTaskActivityUpdate(
+				r->source_character_id,
+				r->task_id,
+				r->activity_id,
+				r->done_count,
+				r->ignore_quest_update
+			);
+
+			break;
+		}
 		default:
 			break;
 	}

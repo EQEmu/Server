@@ -14,16 +14,36 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 // ServerOP_SharedTaskAcceptNewTask
 	switch (pack->opcode) {
 		case ServerOP_SharedTaskAcceptNewTask: {
-			auto buf              = reinterpret_cast<ServerSharedTaskRequest_Struct *>(pack->pBuffer);
-			auto requested_client = entity_list.GetClientByCharID(buf->requested_character_id);
-			if (requested_client) {
-				LogTasks("We're back in zone and I found [{}]", requested_client->GetCleanName());
+			auto p = reinterpret_cast<ServerSharedTaskRequest_Struct *>(pack->pBuffer);
+			auto c = entity_list.GetClientByCharID(p->requested_character_id);
+			if (c) {
+				LogTasks("[ServerOP_SharedTaskAcceptNewTask] We're back in zone and I found [{}]", c->GetCleanName());
 
-				requested_client->m_requesting_shared_task = true;
-				requested_client->GetTaskState()->AcceptNewTask(requested_client, buf->requested_task_id, 0);
-				requested_client->m_requesting_shared_task = false;
+				c->m_requesting_shared_task = true;
+				c->GetTaskState()->AcceptNewTask(c, p->requested_task_id, 0);
+				c->m_requesting_shared_task = false;
 			}
 
+			break;
+		}
+		case ServerOP_SharedTaskUpdate: {
+			auto p = reinterpret_cast<ServerSharedTaskActivityUpdate_Struct *>(pack->pBuffer);
+			auto c = entity_list.GetClientByCharID(p->source_character_id);
+			if (c) {
+				LogTasks("[ServerOP_SharedTaskUpdate] We're back in zone and I found [{}]", c->GetCleanName());
+
+				c->m_shared_task_update = true;
+				c->GetTaskState()->SharedTaskIncrementDoneCount(
+					c,
+					(int)p->task_id,
+					(int)p->activity_id,
+					(int)p->done_count,
+					p->ignore_quest_update
+				);
+				c->m_shared_task_update = false;
+			}
+
+			break;
 		}
 		default:
 			break;

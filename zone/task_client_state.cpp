@@ -1097,10 +1097,49 @@ void ClientTaskState::IncrementDoneCount(
 	bool ignore_quest_update
 )
 {
-	Log(Logs::General, Logs::Tasks, "[UPDATE] IncrementDoneCount");
-
 	auto info = GetClientTaskInfo(task_information->type, task_index);
 	if (info == nullptr) {
+		return;
+	}
+
+	LogTasks(
+		"[IncrementDoneCount] client [{}] task_id [{}] activity_id [{}] count [{}]",
+		client->GetCleanName(),
+		info->task_id,
+		activity_id,
+		count
+	);
+
+	// shared task shim
+	// intercept and pass to world first before processing normally
+	// TODO: Add zone level cache for determining if an update was sent for a particular shared task already instead
+	// TODO: ...of sending it to world each time (many clients optimization)
+	if (!client->m_shared_task_update && task_information->type == TaskType::Shared) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskUpdate, sizeof(ServerSharedTaskActivityUpdate_Struct));
+		auto *r   = (ServerSharedTaskActivityUpdate_Struct *) pack->pBuffer;
+
+		// fill
+		r->source_character_id = client->CharacterID();
+		r->task_id             = info->task_id;
+		r->activity_id         = activity_id;
+		r->done_count          = info->activity[activity_id].done_count + count;
+		r->ignore_quest_update = ignore_quest_update;
+
+		LogTasksDetail(
+			"[IncrementDoneCount] shared_task sending client [{}] task_id [{}] activity_id [{}] count [{}] ignore_quest_update [{}]",
+			r->source_character_id,
+			r->task_id,
+			r->activity_id,
+			r->done_count,
+			(ignore_quest_update ? "true" : "false")
+		);
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
 		return;
 	}
 
@@ -2374,4 +2413,39 @@ void ClientTaskState::ProcessTaskProximities(Client *client, float x, float y, f
 
 		UpdateTasksOnExplore(client, explore_id);
 	}
+}
+
+void ClientTaskState::SharedTaskIncrementDoneCount(
+	Client *client,
+	int task_id,
+	int activity_id,
+	int done_count,
+	bool ignore_quest_update
+)
+{
+	TaskInformation *t = task_manager->m_task_data[task_id];
+
+	auto info = GetClientTaskInfo(t->type, TASKSLOTSHAREDTASK);
+	if (info == nullptr) {
+		return;
+	}
+
+	// absolute value update
+	info->activity[activity_id].done_count = done_count;
+
+	LogTasksDetail(
+		"[SharedTaskIncrementDoneCount] Setting task_id [{}] to absolute done_count value of [{}] via increment [{}]",
+		task_id,
+		info->activity[activity_id].done_count,
+		done_count
+	);
+
+	IncrementDoneCount(
+		client,
+		t,
+		TASKSLOTSHAREDTASK,
+		activity_id,
+		0, // no op
+		ignore_quest_update
+	);
 }

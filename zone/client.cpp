@@ -467,6 +467,7 @@ Client::~Client() {
 
 	// shared task
 	m_requesting_shared_task = false;
+	m_shared_task_update = false;
 }
 
 void Client::SendZoneInPackets()

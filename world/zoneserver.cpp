@@ -1384,6 +1384,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_SharedTaskActivityUpdate:
 	case ServerOP_SharedTaskCompleted:
 	case ServerOP_SharedTaskAttemptRemove:
+	case ServerOP_SharedTaskUpdate:
 	{
 		SharedTaskWorldMessaging::HandleZoneMessage(pack);
 		break;

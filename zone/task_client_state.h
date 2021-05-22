@@ -59,8 +59,18 @@ public:
 
 	friend class TaskManager;
 
+	// wrapper to call internal IncrementDoneCount
+	void SharedTaskIncrementDoneCount(
+		Client *client,
+		int task_id,
+		int activity_id,
+		int done_count,
+		bool ignore_quest_update = false
+	);
+
+
 private:
-	bool UnlockActivities(int character_id, ClientTaskInformation &task_info);
+
 	void IncrementDoneCount(
 		Client *client,
 		TaskInformation *task_information,
@@ -69,6 +79,8 @@ private:
 		int count = 1,
 		bool ignore_quest_update = false
 	);
+
+	bool UnlockActivities(int character_id, ClientTaskInformation &task_info);
 
 	inline ClientTaskInformation *GetClientTaskInfo(TaskType task_type, int index)
 	{

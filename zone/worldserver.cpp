@@ -3036,13 +3036,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_SharedTaskAcceptNewTask:
+	case ServerOP_SharedTaskUpdate:
 	{
 		SharedTaskZoneMessaging::HandleWorldMessage(pack);
 		break;
 	}
 	default: {
-		std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
-		std::cout << " size:" << pack->size << std::endl;
+		LogInfo("[HandleMessage] Unknown ZS Opcode [{}] size [{}]", (int)pack->opcode, pack->size);
+
+//		std::cout << " Unknown ZSopcode:" << (int)pack->opcode;
+//		std::cout << " size:" << pack->size << std::endl;
 		break;
 	}
 	}
@@ -3207,13 +3210,16 @@ void WorldServer::HandleReloadTasks(ServerPacket *pack)
 	case RELOADTASKS:
 		entity_list.SaveAllClientsTaskState();
 
+		// TODO: Reload at the world level for shared tasks
+
 		if (rts->Parameter == 0) {
 			Log(Logs::General, Logs::Tasks, "[GLOBALLOAD] Reload ALL tasks");
 			safe_delete(task_manager);
 			task_manager = new TaskManager;
 			task_manager->LoadTasks();
-			if (zone)
+			if (zone) {
 				task_manager->LoadProximities(zone->GetZoneID());
+			}
 			entity_list.ReloadAllClientsTaskState();
 		}
 		else {

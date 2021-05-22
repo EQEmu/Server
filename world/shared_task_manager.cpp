@@ -80,7 +80,8 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 	// if we didn't pull the requested character from the db, let's pull it by now
 	// most shared tasks are not going to be single character / solo for us to typically get here
 	// maybe we're a GM testing a shared task solo
-	bool      list_has_leader = false;
+	bool list_has_leader = false;
+
 	for (auto &m: request_members) {
 		if (m.character_id == requestor_character_id) {
 			list_has_leader = true;
@@ -422,4 +423,136 @@ SharedTaskManager::GetSharedTaskActivityDataByTaskId(uint32 task_id)
 	}
 
 	return activities;
+}
+
+void SharedTaskManager::SharedTaskActivityUpdate(
+	uint32 source_character_id,
+	uint32 task_id,
+	uint32 activity_id,
+	uint32 done_count,
+	bool ignore_quest_update
+)
+{
+	auto shared_task = FindSharedTaskByTaskIdAndCharacterId(task_id, source_character_id);
+	if (shared_task) {
+		LogTasksDetail(
+			"[SharedTaskActivityUpdate] shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}]",
+			shared_task->m_db_shared_task.id,
+			source_character_id,
+			task_id,
+			activity_id,
+			done_count
+		);
+
+		for (auto &a : shared_task->m_shared_task_activity_state) {
+			if (a.activity_id == activity_id) {
+				if (a.done_count < done_count) {
+					LogTasksDetail(
+						"[SharedTaskActivityUpdate] Propagating update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] old_done_count [{}] new_done_count [{}]",
+						shared_task->m_db_shared_task.id,
+						source_character_id,
+						task_id,
+						activity_id,
+						a.done_count,
+						done_count
+					);
+
+					a.done_count = done_count;
+
+					// sync state as each update comes in (for now)
+					SaveSharedTaskActivityState(
+						shared_task->m_db_shared_task.id,
+						shared_task->m_shared_task_activity_state
+					);
+
+					shared_task->SetSharedTaskActivityState(shared_task->m_shared_task_activity_state);
+
+					LogTasksDetail(
+						"[SharedTaskActivityUpdate] Debug done_count [{}]",
+						a.done_count
+					);
+
+					// TODO: Check for cap / max here
+
+					// loop through members - send update
+					for (auto &m: shared_task->GetMembers()) {
+
+						// confirm task update to client(s)
+						auto p = std::make_unique<ServerPacket>(
+							ServerOP_SharedTaskUpdate,
+							sizeof(ServerSharedTaskActivityUpdate_Struct)
+						);
+
+						auto d = reinterpret_cast<ServerSharedTaskActivityUpdate_Struct *>(p->pBuffer);
+						d->source_character_id = m.character_id;
+						d->task_id             = task_id;
+						d->activity_id         = activity_id;
+						d->done_count          = done_count;
+						d->ignore_quest_update = ignore_quest_update;
+
+						// get requested character zone server
+						ClientListEntry *c = client_list.FindCLEByCharacterID(m.character_id);
+						if (c && c->Server()) {
+							c->Server()->SendPacket(p.get());
+						}
+					}
+
+					break;
+				}
+
+				LogTasksDetail(
+					"[SharedTaskActivityUpdate] Discarding duplicate update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}] ignore_quest_update [{}]",
+					shared_task->m_db_shared_task.id,
+					source_character_id,
+					task_id,
+					activity_id,
+					done_count,
+					(ignore_quest_update ? "true" : "false")
+				);
+			}
+		}
+	}
+}
+
+SharedTask * SharedTaskManager::FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id)
+{
+	for (auto &s: m_shared_tasks) {
+
+		// grep for task
+		if (s.GetTaskData().id == task_id) {
+
+			// find member in shared task
+			for (auto &m: s.GetMembers()) {
+				if (m.character_id == character_id) {
+					return &s;
+				}
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+void SharedTaskManager::SaveSharedTaskActivityState(
+	int64 shared_task_id,
+	std::vector<SharedTaskActivityStateEntry> activity_state
+)
+{
+	// transfer from memory to database
+	std::vector<SharedTaskActivityStateRepository::SharedTaskActivityState> shared_task_db_activities = {};
+	shared_task_db_activities.reserve(activity_state.size());
+
+	for (auto &a: activity_state) {
+
+		// entry
+		auto e = SharedTaskActivityStateRepository::NewEntity();
+		e.shared_task_id = shared_task_id;
+		e.activity_id    = (int)a.activity_id;
+		e.done_count     = (int)a.done_count;
+
+		shared_task_db_activities.emplace_back(e);
+	}
+
+	SharedTaskActivityStateRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
+	SharedTaskActivityStateRepository::InsertMany(*m_database, shared_task_db_activities);
 }

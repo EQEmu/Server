@@ -11,7 +11,7 @@
 #include <iostream>
 
 // shared tasks
-#define ServerOP_SharedTaskRequest        0x0300 // zone -> world. Player trying to get task
+#define ServerOP_SharedTaskRequest        0x0300 // zone -> world. Player trying to get task. Relayed world -> zone on confirmation
 #define ServerOP_SharedTaskGrant          0x0301 // world -> zone. World verified everything is good
 #define ServerOP_SharedTaskReject         0x0302 // world -> zone. Something failed ABORT
 #define ServerOP_SharedTaskAddPlayer      0x0303 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
@@ -23,6 +23,7 @@
 #define ServerOP_SharedTaskAcceptNewTask  0x0308 // world -> zone. World verified, continue AcceptNewTask
 
 #define ServerOP_SharedTaskAttemptRemove        0x0309 // zone -> world. Player trying to delete task
+#define ServerOP_SharedTaskUpdate               0x0310 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
 
 // used in
 // ServerOP_SharedTaskRequest
@@ -49,6 +50,14 @@ struct SharedTaskActivityStateEntry {
 	uint32 max_done_count; // goalcount
 };
 
+struct ServerSharedTaskActivityUpdate_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	uint32 activity_id;
+	uint32 done_count;
+	bool   ignore_quest_update;
+};
+
 class SharedTask {
 public:
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
@@ -67,9 +76,10 @@ public:
 	// active record of database shared task
 	SharedTasksRepository::SharedTasks m_db_shared_task;
 
-protected:
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;
+
+protected:
 
 	// reference to task data (only for this shared task)
 	TasksRepository::Tasks                                m_task_data;

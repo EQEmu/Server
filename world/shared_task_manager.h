@@ -27,6 +27,19 @@ public:
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id);
 	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id);
 
+	void SharedTaskActivityUpdate(
+		uint32 source_character_id,
+		uint32 task_id,
+		uint32 activity_id,
+		uint32 done_count,
+		bool ignore_quest_update
+	);
+
+	SharedTask * FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id);
+
+	void DeleteSharedTask(int64 shared_task_id);
+	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
+
 protected:
 	// reference to database
 	Database *m_database;
@@ -38,7 +51,6 @@ protected:
 
 	// internal shared tasks list
 	std::vector<SharedTask> m_shared_tasks;
-	void DeleteSharedTask(int64 shared_task_id);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H
