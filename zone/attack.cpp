@@ -1523,13 +1523,13 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	other->AddToHateList(this, hate);
 
 	//Guard Assist Code
-	if (this->IsClient() || this->HasOwner() && this->GetOwner()->IsClient()) {
+	if (RuleB(Character, PVPEnableGuardFactionAssist) && this->IsClient() || RuleB(Character, PVPEnableGuardFactionAssist) && this->HasOwner() && this->GetOwner()->IsClient()) {
 		auto& mob_list = entity_list.GetCloseMobList(other);
 		for (auto& e : mob_list) {
 			auto mob = e.second;
 			float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
 			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (mob->GetRace() == 106 || mob->GetRace() == 112 || mob->GetRace() == 71 || mob->GetRace() == 67 || mob->GetRace() == 44 && mob->GetTexture() == 2 || mob->GetRace() == 1 && mob->GetTexture() == 3 || mob->GetRace() == 1 || mob->GetRace() == 44 && mob->GetTexture() == 1 || mob->GetRace() == 81 || mob->GetRace() == 78 || mob->GetRace() == 1 || mob->GetRace() == 90 || mob->GetRace() == 77 || mob->GetRace() == 92 || mob->CastToNPC()->GetNPCFactionID() == 382 || mob->GetRace() == 93 || mob->GetRace() == 94 || mob->CastToNPC()->GetNPCFactionID() == 778) {
+				if (mob->GetRace() == 106 || mob->GetRace() == 112 || mob->GetRace() == 71 || mob->GetRace() == 67 || mob->GetRace() == 44 && mob->GetTexture() == 2 || mob->GetRace() == 1 && mob->GetTexture() == 3 || mob->GetRace() == 44 && mob->GetTexture() == 1 || mob->GetRace() == 81 || mob->GetRace() == 78 || mob->GetRace() == 90 || mob->GetRace() == 77 || mob->GetRace() == 92 || mob->CastToNPC()->GetNPCFactionID() == 382 || mob->GetRace() == 93 || mob->GetRace() == 94 || mob->CastToNPC()->GetNPCFactionID() == 778) {
 					if (this->IsPet()) {
 						if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
 							mob->AddToHateList(this);
@@ -2024,13 +2024,13 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//Guard Assist Code
-	if (other->IsClient() && this->HasOwner() && this->GetOwner()->IsClient()) {
+	if (RuleB(Character, PVPEnableGuardFactionAssist) && other->IsClient() && this->HasOwner() && this->GetOwner()->IsClient()) {
 		auto& mob_list = entity_list.GetCloseMobList(other);
 		for (auto& e : mob_list) {
 			auto mob = e.second;
 			float distance = Distance(other->GetPosition(), mob->GetPosition());
 			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (mob->GetRace() == 106 || mob->GetRace() == 112 || mob->GetRace() == 71 || mob->GetRace() == 67 || mob->GetRace() == 44 && mob->GetTexture() == 2 || mob->GetRace() == 1 && mob->GetTexture() == 3 || mob->GetRace() == 1 || mob->GetRace() == 44 && mob->GetTexture() == 1 || mob->GetRace() == 81 || mob->GetRace() == 78 || mob->GetRace() == 1 || mob->GetRace() == 90 || mob->GetRace() == 77 || mob->GetRace() == 92 || mob->CastToNPC()->GetNPCFactionID() == 382 || mob->GetRace() == 93 || mob->GetRace() == 94 || mob->CastToNPC()->GetNPCFactionID() == 778) {
+				if (mob->GetRace() == 106 || mob->GetRace() == 112 || mob->GetRace() == 71 || mob->GetRace() == 67 || mob->GetRace() == 44 && mob->GetTexture() == 2 || mob->GetRace() == 1 && mob->GetTexture() == 3 || mob->GetRace() == 44 && mob->GetTexture() == 1 || mob->GetRace() == 81 || mob->GetRace() == 78 || mob->GetRace() == 90 || mob->GetRace() == 77 || mob->GetRace() == 92 || mob->CastToNPC()->GetNPCFactionID() == 382 || mob->GetRace() == 93 || mob->GetRace() == 94 || mob->CastToNPC()->GetNPCFactionID() == 778) {
 					if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
 						mob->AddToHateList(this);
 					}
