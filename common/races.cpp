@@ -2233,7 +2233,7 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 	return false;
 }
 
-uint32 IsGuard(uint16 race_id, uint8 texture_value)
+bool IsGuard(uint16 race_id, uint8 texture_value)
 {
 	switch (race_id) {
 		case RT_GUARD:

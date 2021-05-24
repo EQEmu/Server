@@ -860,7 +860,7 @@ uint16 GetRaceIDFromPlayerRaceBit(uint32 player_race_bit);
 
 float GetRaceGenderDefaultHeight(int race, int gender);
 
-uint32 IsGuard(uint16 race_id, uint8 texture_value);
+bool IsGuard(uint16 race_id, uint8 texture_value);
 
 // player race-/gender-based model feature validators
 namespace PlayerAppearance
