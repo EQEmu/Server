@@ -550,7 +550,6 @@ public:
 	inline virtual int32 GetDelayDeath() const { return aabonuses.DelayDeath + spellbonuses.DelayDeath + itembonuses.DelayDeath + 11; }
 
 	int32 GetActSpellCost(uint16 spell_id, int32);
-	int32 GetActSpellCasttime(uint16 spell_id, int32);
 	virtual bool CheckFizzle(uint16 spell_id);
 	virtual bool CheckSpellLevelRestriction(uint16 spell_id);
 	virtual int GetCurrentBuffSlots() const;

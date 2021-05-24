@@ -7101,12 +7101,14 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 }
 
 int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
-	int32 cast_reducer = 0;
-	cast_reducer += GetBotFocusEffect(focusSpellHaste, spell_id);
+	int32 cast_reducer = GetBotFocusEffect(focusSpellHaste, spell_id);
 	uint8 botlevel = GetLevel();
 	uint8 botclass = GetClass();
-	if (botlevel >= 51 && casttime >= 3000 && !BeneficialSpell(spell_id) && (botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD ))
-		cast_reducer += ((GetLevel() - 50) * 3);
+	if (botlevel >= 51 && casttime >= 3000 && !spells[spell_id].goodEffect &&
+	    (botclass == SHADOWKNIGHT || botclass == RANGER || botclass == PALADIN || botclass == BEASTLORD)) {
+		int level_mod = std::min(15, botlevel - 50);
+		cast_reducer += level_mod * 3;
+	}
 
 	if((casttime >= 4000) && BeneficialSpell(spell_id) && IsBuffSpell(spell_id)) {
 		switch (GetAA(aaSpellCastingDeftness)) {
@@ -7176,11 +7178,8 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 		}
 	}
 
-	if (cast_reducer > RuleI(Spells, MaxCastTimeReduction))
-		cast_reducer = RuleI(Spells, MaxCastTimeReduction);
-
-	casttime = (casttime * (100 - cast_reducer) / 100);
-	return casttime;
+	casttime = casttime * (100 - cast_reducer) / 100;
+	return std::max(casttime, casttime / 2);
 }
 
 int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {
