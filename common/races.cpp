@@ -2232,3 +2232,32 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 	}
 	return false;
 }
+
+uint32 IsGuard(uint16 race_id, uint8 texture_value)
+{
+	switch (race_id) {
+		case RT_GUARD:
+			if (texture_value == 1 || texture_value == 2)
+				return true;
+				break;
+		case RT_IKSAR_2:
+			if (texture_value == 1)
+				return true;
+				break;
+		case RT_GUARD_2:
+		case RT_GUARD_3:
+		case RT_GUARD_4:
+		case RT_HUMAN_3:
+		case RT_HALFLING_2:
+		case RT_ERUDITE_2:
+		case RT_BARBARIAN_2:
+		case RT_DARK_ELF_2:
+		case RT_TROLL_2:
+		case OGGOK_CITIZEN:
+		case RT_DWARF_2:
+			return true;
+		default:
+		break;
+	}
+	return false;
+}
