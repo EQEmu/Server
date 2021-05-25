@@ -287,6 +287,7 @@
 #define ServerOP_CZTaskRemoveRaid 0x4561
 #define ServerOP_CZTaskRemoveGuild 0x4562
 #define ServerOP_CZClientMessageString 0x4563
+#define ServerOP_CZLDoNUpdate 0x4564
 
 #define ServerOP_WWAssignTask 0x4750
 #define ServerOP_WWCastSpell 0x4751
@@ -318,6 +319,20 @@
 #define ServerOP_QSPlayerLogMerchantTransactions 0x5005
 #define ServerOP_QSSendQuery 0x5006
 #define ServerOP_QSPlayerDropItem 0x5007
+
+enum {
+	CZLDoNUpdateType_Character = 0,
+	CZLDoNUpdateType_Group,
+	CZLDoNUpdateType_Raid,
+	CZLDoNUpdateType_Guild,
+	CZLDoNUpdateType_Expedition
+};
+
+enum {
+	CZLDoNUpdateSubtype_Win = 0,
+	CZLDoNUpdateSubtype_Loss,
+	CZLDoNUpdateSubtype_Points
+};
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
 enum { QSG_LFGuild = 0 };
@@ -1860,6 +1875,14 @@ struct CZTaskRemoveGuild_Struct {
 	uint16 npc_entity_id;
 	int guild_id;
 	uint32 task_id;
+};
+
+struct CZLDoNUpdate_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition
+	uint8 update_subtype; // 0 - Win, 1 - Loss, 2 - Points
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type
+	uint32 theme_id;
+	int points; // Always 1, except for when Points are used
 };
 
 struct WWAssignTask_Struct {

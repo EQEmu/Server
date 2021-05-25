@@ -1374,8 +1374,7 @@ void Client::SetMaxHP() {
 	Save();
 }
 
-bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
-{
+bool Client::UpdateLDoNPoints(uint32 theme_id, int points) {
 
 /* make sure total stays in sync with individual buckets
 	m_pp.ldon_points_available = m_pp.ldon_points_guk
@@ -1384,113 +1383,97 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 		+m_pp.ldon_points_ruj
 		+m_pp.ldon_points_tak; */
 
-	if(points < 0)
-	{
-		if(m_pp.ldon_points_available < (0-points))
+	if(points < 0) {
+		if(m_pp.ldon_points_available < (0 - points))
 			return false;
 	}
-	switch(theme)
+
+	switch (theme_id)
 	{
-	// handle generic points (theme=0)
-	case 0:
-		{	// no theme, so distribute evenly across all
-			int splitpts=points/5;
-			int gukpts=splitpts+(points%5);
-			int mirpts=splitpts;
-			int mmcpts=splitpts;
-			int rujpts=splitpts;
-			int takpts=splitpts;
-
-			splitpts=0;
-
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_available < (0-points))
-				{
+		case 0: { // No theme, so distribute evenly across all
+			int split_points = (points / 5);
+			int guk_points = (split_points + (points % 5));
+			int mir_points = split_points;
+			int mmc_points = split_points;
+			int ruj_points = split_points;
+			int tak_points = split_points;
+			split_points = 0;
+			if(points < 0) {
+				if(m_pp.ldon_points_available < (0 - points)) {
 					return false;
 				}
-				if(m_pp.ldon_points_guk < (0-gukpts))
-				{
-					mirpts+=gukpts+m_pp.ldon_points_guk;
-					gukpts=0-m_pp.ldon_points_guk;
+
+				if(m_pp.ldon_points_guk < (0 - guk_points)) {
+					mir_points += (guk_points + m_pp.ldon_points_guk);
+					guk_points = (0 - m_pp.ldon_points_guk);
 				}
-				if(m_pp.ldon_points_mir < (0-mirpts))
-				{
-					mmcpts+=mirpts+m_pp.ldon_points_mir;
-					mirpts=0-m_pp.ldon_points_mir;
+
+				if(m_pp.ldon_points_mir < (0 - mir_points)) {
+					mmc_points += (mir_points + m_pp.ldon_points_mir);
+					mir_points = (0 - m_pp.ldon_points_mir);
 				}
-				if(m_pp.ldon_points_mmc < (0-mmcpts))
-				{
-					rujpts+=mmcpts+m_pp.ldon_points_mmc;
-					mmcpts=0-m_pp.ldon_points_mmc;
+				
+				if(m_pp.ldon_points_mmc < (0 - mmc_points)) {
+					ruj_points += (mmc_points + m_pp.ldon_points_mmc);
+					mmc_points = (0 - m_pp.ldon_points_mmc);
 				}
-				if(m_pp.ldon_points_ruj < (0-rujpts))
-				{
-					takpts+=rujpts+m_pp.ldon_points_ruj;
-					rujpts=0-m_pp.ldon_points_ruj;
+
+				if(m_pp.ldon_points_ruj < (0 - ruj_points)) {
+					tak_points += (ruj_points + m_pp.ldon_points_ruj);
+					ruj_points = (0 - m_pp.ldon_points_ruj);
 				}
-				if(m_pp.ldon_points_tak < (0-takpts))
-				{
-					splitpts=takpts+m_pp.ldon_points_tak;
-					takpts=0-m_pp.ldon_points_tak;
+
+				if(m_pp.ldon_points_tak < (0 - tak_points)) {
+					split_points = (tak_points + m_pp.ldon_points_tak);
+					tak_points = (0 - m_pp.ldon_points_tak);
 				}
 			}
-			m_pp.ldon_points_guk += gukpts;
-			m_pp.ldon_points_mir+=mirpts;
-			m_pp.ldon_points_mmc += mmcpts;
-			m_pp.ldon_points_ruj += rujpts;
-			m_pp.ldon_points_tak += takpts;
-			points-=splitpts;
-			// if anything left, recursively loop thru again
-			if (splitpts !=0)
-				UpdateLDoNPoints(splitpts,0);
+			m_pp.ldon_points_guk += guk_points;
+			m_pp.ldon_points_mir += mir_points;
+			m_pp.ldon_points_mmc += mmc_points;
+			m_pp.ldon_points_ruj += ruj_points;
+			m_pp.ldon_points_tak += tak_points;
+			points -= split_points;
+			if (split_points != 0) // if anything left, recursively loop thru again
+				UpdateLDoNPoints(0, split_points);
+
 			break;
 		}
-	case 1:
-		{
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_guk < (0-points))
+		case 1:	{
+			if(points < 0) {
+				if(m_pp.ldon_points_guk < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_guk += points;
 			break;
 		}
-	case 2:
-		{
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_mir < (0-points))
+		case 2: {
+			if(points < 0) {
+				if(m_pp.ldon_points_mir < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_mir += points;
 			break;
 		}
-	case 3:
-		{
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_mmc < (0-points))
+		case 3: {
+			if(points < 0) {
+				if(m_pp.ldon_points_mmc < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_mmc += points;
 			break;
 		}
-	case 4:
-		{
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_ruj < (0-points))
+		case 4: {
+			if(points < 0) {
+				if(m_pp.ldon_points_ruj < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_ruj += points;
 			break;
 		}
-	case 5:
-		{
-			if(points < 0)
-			{
-				if(m_pp.ldon_points_tak < (0-points))
+		case 5: {
+			if(points < 0) {
+				if(m_pp.ldon_points_tak < (0 - points))
 					return false;
 			}
 			m_pp.ldon_points_tak += points;
@@ -1498,7 +1481,6 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 		}
 	}
 	m_pp.ldon_points_available += points;
-
 	auto outapp = new EQApplicationPacket(OP_AdventurePointsUpdate, sizeof(AdventurePoints_Update_Struct));
 	AdventurePoints_Update_Struct* apus = (AdventurePoints_Update_Struct*)outapp->pBuffer;
 	apus->ldon_available_points = m_pp.ldon_points_available;
@@ -1511,8 +1493,6 @@ bool Client::UpdateLDoNPoints(int32 points, uint32 theme)
 	QueuePacket(outapp);
 	safe_delete(outapp);
 	return true;
-
-	return(false);
 }
 
 void Client::SetSkill(EQ::skills::SkillType skillid, uint16 value) {
@@ -5566,51 +5546,61 @@ uint32 Client::GetLDoNLossesTheme(uint32 t)
 	}
 }
 
-void Client::UpdateLDoNWins(uint32 t, int32 n)
+void Client::AddLDoNLoss(uint32 theme_id)
 {
-	switch(t)
+	switch (theme_id)
 	{
-	case 1:
-		m_pp.ldon_wins_guk = n;
-		break;
-	case 2:
-		m_pp.ldon_wins_mir = n;
-		break;
-	case 3:
-		m_pp.ldon_wins_mmc = n;
-		break;
-	case 4:
-		m_pp.ldon_wins_ruj = n;
-		break;
-	case 5:
-		m_pp.ldon_wins_tak = n;
-		break;
-	default:
-		return;
+		case 1:
+			m_pp.ldon_losses_guk += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			break;
+		case 2:
+			m_pp.ldon_losses_mir += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			break;
+		case 3:
+			m_pp.ldon_losses_mmc += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			break;
+		case 4:
+			m_pp.ldon_losses_ruj += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			break;
+		case 5:
+			m_pp.ldon_losses_tak += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			break;
+		default:
+			return;
 	}
 }
 
-void Client::UpdateLDoNLosses(uint32 t, int32 n)
+void Client::AddLDoNWin(uint32 theme_id)
 {
-	switch(t)
+	switch (theme_id)
 	{
-	case 1:
-		m_pp.ldon_losses_guk = n;
-		break;
-	case 2:
-		m_pp.ldon_losses_mir = n;
-		break;
-	case 3:
-		m_pp.ldon_losses_mmc = n;
-		break;
-	case 4:
-		m_pp.ldon_losses_ruj = n;
-		break;
-	case 5:
-		m_pp.ldon_losses_tak = n;
-		break;
-	default:
-		return;
+		case 1:
+			m_pp.ldon_wins_guk += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			break;
+		case 2:
+			m_pp.ldon_wins_mir += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			break;
+		case 3:
+			m_pp.ldon_wins_mmc += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			break;
+		case 4:
+			m_pp.ldon_wins_ruj += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			break;
+		case 5:
+			m_pp.ldon_wins_tak += 1;
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			break;
+		default:
+			return;
 	}
 }
 
@@ -6043,7 +6033,7 @@ void Client::ClearCurrentAdventure()
 
 void Client::AdventureFinish(bool win, int theme, int points)
 {
-	UpdateLDoNPoints(points, theme);
+	UpdateLDoNPoints(theme, points);
 	auto outapp = new EQApplicationPacket(OP_AdventureFinish, sizeof(AdventureFinish_Struct));
 	AdventureFinish_Struct *af = (AdventureFinish_Struct*)outapp->pBuffer;
 	af->win_lose = win ? 1 : 0;

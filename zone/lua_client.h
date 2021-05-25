@@ -77,7 +77,9 @@ public:
 	uint32 GetAAExp();
 	uint32 GetAAPercent();
 	uint32 GetTotalSecondsPlayed();
-	void UpdateLDoNPoints(int points, uint32 theme);
+	void AddLDoNLoss(uint32 theme_id);
+	void AddLDoNWin(uint32 theme_id);
+	void UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetDeity(int v);
 	void AddEXP(uint32 add_exp);
 	void AddEXP(uint32 add_exp, int conlevel);
