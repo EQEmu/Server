@@ -419,8 +419,8 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
-				bool IsStackable = database.GetItem(item)->Stackable;
-				if ((IsStackable && charges > 0) || (!IsStackable && sold)) {
+				bool is_stackable = database.GetItem(item)->Stackable;
+				if ((is_stackable && charges > 0) || (!is_stackable && sold)) {
 					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 					tmp_merlist.push_back(ml);
 				} else {
