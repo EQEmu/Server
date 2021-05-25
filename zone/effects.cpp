@@ -407,29 +407,6 @@ int32 Mob::GetActSpellDuration(uint16 spell_id, int32 duration)
 		return ifocused + 1;
 }
 
-int32 Client::GetActSpellCasttime(uint16 spell_id, int32 casttime)
-{
-	int32 cast_reducer = 0;
-	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
-
-	//this function loops through the effects of spell_id many times
-	//could easily be consolidated.
-
-	if (GetLevel() >= 51 && casttime >= 3000 && !BeneficialSpell(spell_id)
-		&& (GetClass() == SHADOWKNIGHT || GetClass() == RANGER
-			|| GetClass() == PALADIN || GetClass() == BEASTLORD ))
-		cast_reducer += (GetLevel()-50)*3;
-
-	//LIVE AA SpellCastingDeftness, QuickBuff, QuickSummoning, QuickEvacuation, QuickDamage
-
-	if (cast_reducer > RuleI(Spells, MaxCastTimeReduction))
-		cast_reducer = RuleI(Spells, MaxCastTimeReduction);
-
-	casttime = (casttime*(100 - cast_reducer)/100);
-
-	return casttime;
-}
-
 bool Client::TrainDiscipline(uint32 itemid) {
 
 	//get the item info

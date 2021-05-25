@@ -326,7 +326,6 @@ RULE_INT(Spells, CharismaEffectivenessCap, 255, "Determines how much resist modi
 RULE_BOOL(Spells, CharismaCharmDuration, false, "Allow CHA resist mod to extend charm duration")
 RULE_INT(Spells, CharmBreakCheckChance, 25, "Determines chance for a charm break check to occur each buff tick")
 RULE_BOOL(Spells, CharmDisablesSpecialAbilities, false, "When charm is cast on an NPC, strip their special abilities")
-RULE_INT(Spells, MaxCastTimeReduction, 50, "Maximum percent your spell cast time can be reduced by spell haste")
 RULE_INT(Spells, RootBreakFromSpells, 55, "Chance for root to break when cast on")
 RULE_INT(Spells, DeathSaveCharismaMod, 3, "Determines how much charisma effects chance of death save firing")
 RULE_INT(Spells, DivineInterventionHeal, 8000, "Divine intervention heal amount")
