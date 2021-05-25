@@ -4027,7 +4027,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						}
 					}
 					if (IsCasting()) {
-						this->InterruptSpell(this->CastingSpellID());
+						InterruptSpell(CastingSpellID());
 					}
 					uint32 buff_count = this->GetMaxTotalSlots();
 					for (unsigned int j = 0; j < buff_count; j++) {
