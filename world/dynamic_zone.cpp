@@ -25,11 +25,12 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	return nullptr;
 }
 
-DynamicZoneStatus DynamicZone::Process(bool force_expire)
+DynamicZoneStatus DynamicZone::Process()
 {
 	DynamicZoneStatus status = DynamicZoneStatus::Normal;
 
-	if (force_expire || IsExpired())
+	// force expire if no members
+	if (!HasMembers() || IsExpired())
 	{
 		status = DynamicZoneStatus::Expired;
 
@@ -38,7 +39,7 @@ DynamicZoneStatus DynamicZone::Process(bool force_expire)
 		{
 			status = DynamicZoneStatus::ExpiredEmpty;
 
-			if (force_expire && !m_is_pending_early_shutdown && RuleB(DynamicZone, EmptyShutdownEnabled))
+			if (!HasMembers() && !m_is_pending_early_shutdown && RuleB(DynamicZone, EmptyShutdownEnabled))
 			{
 				SetSecondsRemaining(RuleI(DynamicZone, EmptyShutdownDelaySeconds));
 				m_is_pending_early_shutdown = true;

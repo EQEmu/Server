@@ -104,7 +104,7 @@ std::string Lua_Expedition::GetLootEventBySpawnID(uint32_t spawn_id) {
 
 uint32_t Lua_Expedition::GetMemberCount() {
 	Lua_Safe_Call_Int();
-	return self->GetMemberCount();
+	return self->GetDynamicZone().GetMemberCount();
 }
 
 luabind::object Lua_Expedition::GetMembers(lua_State* L) {
@@ -113,7 +113,7 @@ luabind::object Lua_Expedition::GetMembers(lua_State* L) {
 	if (d_)
 	{
 		auto self = reinterpret_cast<NativeType*>(d_);
-		for (const auto& member : self->GetMembers())
+		for (const auto& member : self->GetDynamicZone().GetMembers())
 		{
 			lua_table[member.name] = member.id;
 		}

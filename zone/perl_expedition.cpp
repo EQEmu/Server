@@ -247,7 +247,7 @@ XS(XS_Expedition_GetMemberCount) {
 	Expedition* THIS = nullptr;
 	VALIDATE_THIS_IS_EXPEDITION;
 
-	XSRETURN_UV(THIS->GetMemberCount());
+	XSRETURN_UV(THIS->GetDynamicZone().GetMemberCount());
 }
 
 XS(XS_Expedition_GetMembers);
@@ -262,8 +262,7 @@ XS(XS_Expedition_GetMembers) {
 
 	HV* hash = newHV();
 
-	auto members = THIS->GetMembers();
-	for (const auto& member : members)
+	for (const auto& member : THIS->GetDynamicZone().GetMembers())
 	{
 		hv_store(hash, member.name.c_str(), static_cast<uint32_t>(member.name.size()),
 			newSVuv(member.id), 0);

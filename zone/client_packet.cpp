@@ -1717,7 +1717,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
-	m_expedition_id = ExpeditionDatabase::GetExpeditionIDFromCharacterID(CharacterID());
+	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
 
 	/**
 	 * DevTools Load Settings

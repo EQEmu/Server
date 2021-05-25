@@ -39,14 +39,14 @@ Expedition::Expedition() :
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
 	dz.SetName(GetName());
-	dz.SetLeaderName(GetLeaderName());
+	dz.SetLeader(GetLeader());
 
 	m_dynamic_zone = std::move(dz);
 }
 
 void Expedition::RemoveMember(uint32_t character_id)
 {
-	RemoveInternalMember(character_id);
+	GetDynamicZone().RemoveInternalMember(character_id);
 
 	if (character_id == m_leader.id)
 	{
@@ -56,13 +56,14 @@ void Expedition::RemoveMember(uint32_t character_id)
 
 void Expedition::ChooseNewLeader()
 {
-	if (m_members.empty() || !m_choose_leader_cooldown_timer.Check())
+	const auto& members = GetDynamicZone().GetMembers();
+	if (members.empty() || !m_choose_leader_cooldown_timer.Check())
 	{
 		m_choose_leader_needed = true;
 		return;
 	}
 
-	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
+	auto it = std::find_if(members.begin(), members.end(), [&](const DynamicZoneMember& member) {
 		if (member.id != m_leader.id && member.IsOnline()) {
 			auto member_cle = client_list.FindCLEByCharacterID(member.id);
 			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
@@ -70,14 +71,14 @@ void Expedition::ChooseNewLeader()
 		return false;
 	});
 
-	if (it == m_members.end())
+	if (it == members.end())
 	{
 		// no online members found, fallback to choosing any member
-		it = std::find_if(m_members.begin(), m_members.end(),
+		it = std::find_if(members.begin(), members.end(),
 			[&](const DynamicZoneMember& member) { return (member.id != m_leader.id); });
 	}
 
-	if (it != m_members.end() && SetNewLeader(*it))
+	if (it != members.end() && SetNewLeader(*it))
 	{
 		m_choose_leader_needed = false;
 	}
@@ -85,7 +86,7 @@ void Expedition::ChooseNewLeader()
 
 bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 {
-	if (!HasMember(member.id))
+	if (!GetDynamicZone().HasMember(member.id))
 	{
 		return false;
 	}
@@ -93,7 +94,7 @@ bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, m_leader.name, member.name);
 	ExpeditionDatabase::UpdateLeaderID(m_id, member.id);
 	m_leader = member;
-	m_dynamic_zone.SetLeaderName(m_leader.name);
+	m_dynamic_zone.SetLeader(m_leader);
 	SendZonesLeaderChanged();
 	return true;
 }
@@ -156,7 +157,7 @@ bool Expedition::Process()
 {
 	// returns true if expedition needs to be deleted from world cache and db
 	// expedition is not deleted until its dz has no clients to prevent exploits
-	auto status = m_dynamic_zone.Process(IsEmpty()); // force expire if no members
+	auto status = m_dynamic_zone.Process();
 	if (status == DynamicZoneStatus::ExpiredEmpty)
 	{
 		LogExpeditions("Expedition [{}] expired or empty, notifying zones and deleting", GetID());
@@ -172,7 +173,13 @@ bool Expedition::Process()
 
 void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
 {
-	SetInternalMemberStatus(character_id, status);
+	GetDynamicZone().SetInternalMemberStatus(character_id, status);
+
+	// temporary until move to using dz leader object completely
+	if (character_id == m_leader.id)
+	{
+		m_leader.status = GetDynamicZone().GetLeader().status;
+	}
 
 	// any member status update will trigger a leader fix if leader was offline
 	if (m_leader.status == DynamicZoneMemberStatus::Offline)
@@ -183,7 +190,7 @@ void Expedition::UpdateMemberStatus(uint32_t character_id, DynamicZoneMemberStat
 
 void Expedition::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
 {
-	const auto& members = GetMembers();
+	const auto& members = GetDynamicZone().GetMembers();
 
 	uint32_t members_count = static_cast<uint32_t>(members.size());
 	uint32_t entries_size = sizeof(ServerExpeditionMemberStatusEntry_Struct) * members_count;
@@ -210,7 +217,7 @@ void Expedition::CacheMemberStatuses()
 	all_clients.reserve(client_list.GetClientCount());
 	client_list.GetClients(zone_name.c_str(), all_clients);
 
-	for (const auto& member : m_members)
+	for (const auto& member : GetDynamicZone().GetMembers())
 	{
 		auto it = std::find_if(all_clients.begin(), all_clients.end(),
 			[&](const ClientListEntry* cle) { return (cle && cle->CharID() == member.id); });
@@ -225,6 +232,6 @@ void Expedition::CacheMemberStatuses()
 			}
 		}
 
-		SetInternalMemberStatus(member.id, status);
+		GetDynamicZone().SetInternalMemberStatus(member.id, status);
 	}
 }
