@@ -1529,7 +1529,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 			auto mob = e.second;
 			float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
 			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (mob->CastToNPC()->GetNPCFactionID() == 382 || mob->CastToNPC()->GetNPCFactionID() == 778 || IsGuard(mob->GetRace(),mob->GetTexture())) {
+				if (IsGuard(mob->GetRace(),mob->GetTexture(), mob->GetPrimaryFaction())) {
 					if (this->IsPet()) {
 						if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
 							mob->AddToHateList(this);
@@ -2030,7 +2030,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 			auto mob = e.second;
 			float distance = Distance(other->GetPosition(), mob->GetPosition());
 			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (mob->CastToNPC()->GetNPCFactionID() == 382 || mob->CastToNPC()->GetNPCFactionID() == 778 || IsGuard(mob->GetRace(), mob->GetTexture())) {
+				if (IsGuard(mob->GetRace(), mob->GetTexture(), mob->GetPrimaryFaction())) {
 					if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
 						mob->AddToHateList(this);
 					}

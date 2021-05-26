@@ -2051,7 +2051,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			auto mob = e.second;
 			float distance = Distance(spell_target->CastToClient()->m_Position, mob->GetPosition());
 			if (mob->CheckLosFN(spell_target) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (mob->CastToNPC()->GetNPCFactionID() == 382 || mob->CastToNPC()->GetNPCFactionID() == 778 || IsGuard(mob->GetRace(), mob->GetTexture())) {
+				if (IsGuard(mob->GetRace(), mob->GetTexture(), mob->GetPrimaryFaction())) {
 					if (this->IsPet()) {
 						if (spell_target->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
 							mob->AddToHateList(this);

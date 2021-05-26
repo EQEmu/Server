@@ -2233,7 +2233,7 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 	return false;
 }
 
-bool IsGuard(uint16 race_id, uint8 texture_value)
+bool IsGuard(uint16 race_id, uint8 texture_value, uint32 primaryfaction)
 {
 	switch (race_id) {
 		case RT_GUARD:
@@ -2258,6 +2258,9 @@ bool IsGuard(uint16 race_id, uint8 texture_value)
 			return true;
 		default:
 		break;
+	}
+	if (primaryfaction == 255 || primaryfaction == 265 || primaryfaction == 333) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
+		return true;
 	}
 	return false;
 }
