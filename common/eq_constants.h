@@ -437,6 +437,8 @@ static const uint8 SkillDamageTypes[EQ::skills::HIGHEST_SKILL + 1] = // change t
 #define INVALID_INDEX	-1
 
 static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
+static const uint32 DB_SPELL_CAZIC_TOUCH = 982;
+static const uint32 DB_SPELL_TOUCH_OF_VINITRAS = 2859;
 
 enum ChatChannelNames : uint16
 {
