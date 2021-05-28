@@ -832,8 +832,11 @@ void SpawnConditionManager::Process() {
 				if(EQTime::IsTimeBefore(&tod, &cevent.next)) {
 					//this event has been triggered.
 					//execute the event
-					if(!cevent.strict || (cevent.strict && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
+					uint8 min = cevent.next.minute + RuleI(Zone, SpawnEventMin);
+					if(!cevent.strict || (cevent.strict && tod.minute < min && cevent.next.hour == tod.hour && cevent.next.day == tod.day && cevent.next.month == tod.month && cevent.next.year == tod.year))
 						ExecEvent(cevent, true);
+					else
+						Log(Logs::Detail, Logs::Spawns, "Event {}: Is strict, ExecEvent is skipped.", cevent.id);
 
 					//add the period of the event to the trigger time
 					EQTime::AddMinutes(cevent.period, &cevent.next);
