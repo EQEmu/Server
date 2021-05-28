@@ -2232,35 +2232,3 @@ bool PlayerAppearance::IsValidWoad(uint16 race_id, uint8 gender_id, uint8 woad_v
 	}
 	return false;
 }
-
-bool IsGuard(uint16 race_id, uint8 texture_value, uint32 primaryfaction)
-{
-	switch (race_id) {
-		case RT_GUARD:
-			if (texture_value == 1 || texture_value == 2)
-				return true;
-				break;
-		case RT_IKSAR_2:
-			if (texture_value == 1)
-				return true;
-				break;
-		case RT_GUARD_2:
-		case RT_GUARD_3:
-		case RT_GUARD_4:
-		case RT_HUMAN_3:
-		case RT_HALFLING_2:
-		case RT_ERUDITE_2:
-		case RT_BARBARIAN_2:
-		case RT_DARK_ELF_2:
-		case RT_TROLL_2:
-		case OGGOK_CITIZEN:
-		case RT_DWARF_2:
-			return true;
-		default:
-		break;
-	}
-	if (primaryfaction == 255 || primaryfaction == 265 || primaryfaction == 333) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
-		return true;
-	}
-	return false;
-}

@@ -1523,20 +1523,22 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	other->AddToHateList(this, hate);
 
 	//Guard Assist Code
-	if (RuleB(Character, PVPEnableGuardFactionAssist) && this->IsClient() || RuleB(Character, PVPEnableGuardFactionAssist) && this->HasOwner() && this->GetOwner()->IsClient()) {
-		auto& mob_list = entity_list.GetCloseMobList(other);
-		for (auto& e : mob_list) {
-			auto mob = e.second;
-			float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
-			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (IsGuard(mob->GetRace(),mob->GetTexture(), mob->GetPrimaryFaction())) {
-					if (this->IsPet()) {
-						if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
+	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
+		if (this->IsClient() || (this->HasOwner() && this->GetOwner()->IsClient())) {
+			auto& mob_list = entity_list.GetCloseMobList(other);
+			for (auto& e : mob_list) {
+				auto mob = e.second;
+				if (mob->CastToNPC()->IsGuard()) {
+					float distance = Distance(other->CastToClient()->m_Position, mob->GetPosition());
+					if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
+						if (this->IsPet()) {
+							if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
+								mob->AddToHateList(this);
+							}
+						}
+						else if (other->GetReverseFactionCon(mob) <= this->GetReverseFactionCon(mob)) {
 							mob->AddToHateList(this);
 						}
-					}
-					else if (other->GetReverseFactionCon(mob) <= this->GetReverseFactionCon(mob)) {
-						mob->AddToHateList(this);
 					}
 				}
 			}
@@ -2024,15 +2026,17 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 	}
 
 	//Guard Assist Code
-	if (RuleB(Character, PVPEnableGuardFactionAssist) && other->IsClient() && this->HasOwner() && this->GetOwner()->IsClient()) {
-		auto& mob_list = entity_list.GetCloseMobList(other);
-		for (auto& e : mob_list) {
-			auto mob = e.second;
-			float distance = Distance(other->GetPosition(), mob->GetPosition());
-			if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (IsGuard(mob->GetRace(), mob->GetTexture(), mob->GetPrimaryFaction())) {
-					if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
-						mob->AddToHateList(this);
+	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
+		if (this->IsClient() || (this->HasOwner() && this->GetOwner()->IsClient())) {
+			auto& mob_list = entity_list.GetCloseMobList(other);
+			for (auto& e : mob_list) {
+				auto mob = e.second;
+				if (mob->CastToNPC()->IsGuard()) {
+					float distance = Distance(other->GetPosition(), mob->GetPosition());
+					if (mob->CheckLosFN(other) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
+						if (other->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
+							mob->AddToHateList(this);
+						}
 					}
 				}
 			}

@@ -2045,20 +2045,22 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		return false;
 
 	//Guard Assist Code
-	if (RuleB(Character, PVPEnableGuardFactionAssist) && IsDetrimentalSpell(spell_id) && this->IsClient() && spell_target != this || RuleB(Character, PVPEnableGuardFactionAssist) && IsDetrimentalSpell(spell_id) && spell_target != this && this->HasOwner() && this->GetOwner()->IsClient()) {
-		auto& mob_list = entity_list.GetCloseMobList(spell_target);
-		for (auto& e : mob_list) {
-			auto mob = e.second;
-			float distance = Distance(spell_target->CastToClient()->m_Position, mob->GetPosition());
-			if (mob->CheckLosFN(spell_target) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
-				if (IsGuard(mob->GetRace(), mob->GetTexture(), mob->GetPrimaryFaction())) {
-					if (this->IsPet()) {
-						if (spell_target->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
+	if (RuleB(Character, PVPEnableGuardFactionAssist) && IsDetrimentalSpell(spell_id) && spell_target != this) {
+		if (IsClient() || HasOwner() && GetOwner()->IsClient()) {
+			auto& mob_list = entity_list.GetCloseMobList(spell_target);
+			for (auto& e : mob_list) {
+				auto mob = e.second;
+				if (mob->CastToNPC()->IsGuard()) {
+					float distance = Distance(spell_target->GetPosition(), mob->GetPosition());
+					if (mob->CheckLosFN(spell_target) && distance <= 70 || mob->CheckLosFN(this) && distance <= 70) {
+						if (this->IsPet()) {
+							if (spell_target->GetReverseFactionCon(mob) <= this->GetOwner()->GetReverseFactionCon(mob)) {
+								mob->AddToHateList(this);
+							}
+						}
+						else if (spell_target->GetReverseFactionCon(mob) <= this->GetReverseFactionCon(mob)) {
 							mob->AddToHateList(this);
 						}
-					}
-					else if (spell_target->GetReverseFactionCon(mob) <= this->GetReverseFactionCon(mob)) {
-						mob->AddToHateList(this);
 					}
 				}
 			}

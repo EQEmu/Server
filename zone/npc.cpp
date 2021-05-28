@@ -3368,3 +3368,35 @@ void NPC::ScaleNPC(uint8 npc_level) {
 	npc_scale_manager->ResetNPCScaling(this);
 	npc_scale_manager->ScaleNPC(this);
 }
+
+bool NPC::IsGuard()
+{
+	switch (GetRace()) {
+	case RT_GUARD:
+		if (GetTexture() == 1 || GetTexture() == 2)
+			return true;
+		break;
+	case RT_IKSAR_2:
+		if (GetTexture() == 1)
+			return true;
+		break;
+	case RT_GUARD_2:
+	case RT_GUARD_3:
+	case RT_GUARD_4:
+	case RT_HUMAN_3:
+	case RT_HALFLING_2:
+	case RT_ERUDITE_2:
+	case RT_BARBARIAN_2:
+	case RT_DARK_ELF_2:
+	case RT_TROLL_2:
+	case OGGOK_CITIZEN:
+	case RT_DWARF_2:
+		return true;
+	default:
+		break;
+	}
+	if (GetPrimaryFaction() == 255 || GetPrimaryFaction() == 265 || GetPrimaryFaction() == 333) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
+		return true;
+	}
+	return false;
+}
