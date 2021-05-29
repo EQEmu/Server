@@ -2044,12 +2044,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if(!IsValidSpell(spell_id))
 		return false;
 
-	//Cazic Touch targets the pet owner instead of the pet when said pet is tanking.
+
+	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target->HasOwner()) && spell_id == DB_SPELL_CAZIC_TOUCH || spell_id == DB_SPELL_TOUCH_OF_VINITRAS) {
 		Mob* owner =  spell_target->GetOwner();
 		
-		if (owner)
+		if (owner) {
 			spell_target = owner;
+		}
 	}
 
 	if( spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()){
