@@ -349,7 +349,9 @@ void SharedTaskManager::LoadSharedTaskState()
 				for (auto &ad: activities_data) {
 					if (ad.taskid == s.task_id && ad.activityid == sta.activity_id) {
 						LogTasksDetail(
-							"[LoadSharedTaskState] Task activity loop | found activity_id [{}] done_count [{}] max_done_count (goalcount) [{}]",
+							"[LoadSharedTaskState] shared_task_id [{}] task_id [{}] activity_id [{}] done_count [{}] max_done_count (goalcount) [{}]",
+							s.id,
+							s.task_id,
 							sta.activity_id,
 							e.done_count,
 							ad.goalcount
