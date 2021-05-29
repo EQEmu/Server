@@ -2044,7 +2044,6 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if(!IsValidSpell(spell_id))
 		return false;
 
-
 	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target->HasOwner()) && spell_id == DB_SPELL_CAZIC_TOUCH || spell_id == DB_SPELL_TOUCH_OF_VINITRAS) {
 		Mob* owner =  spell_target->GetOwner();
