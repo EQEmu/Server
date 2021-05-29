@@ -2054,9 +2054,9 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 					float distance = Distance(spell_target->GetPosition(), mob->GetPosition());
 					if ((mob->CheckLosFN(spell_target) || mob->CheckLosFN(this)) && distance <= 70) {
 						auto petorowner = this->GetOwnerOrSelf();
-							if (spell_target->GetReverseFactionCon(mob) <= petorowner->GetReverseFactionCon(mob)) {
-								mob->AddToHateList(this);
-							}
+						if (spell_target->GetReverseFactionCon(mob) <= petorowner->GetReverseFactionCon(mob)) {
+							mob->AddToHateList(this);
+						}
 					}
 				}
 			}
