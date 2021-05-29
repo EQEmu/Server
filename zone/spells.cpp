@@ -2044,32 +2044,12 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if(!IsValidSpell(spell_id))
 		return false;
 
-	//Guard Assist Code
-	if (RuleB(Character, PVPEnableGuardFactionAssist) && IsDetrimentalSpell(spell_id) && spell_target != this) {
-		if (IsClient() || HasOwner() && GetOwner()->IsClient()) {
-			auto& mob_list = entity_list.GetCloseMobList(spell_target);
-			for (auto& e : mob_list) {
-				auto mob = e.second;
-				if (mob->IsNPC() && mob->CastToNPC()->IsGuard()) {
-					float distance = Distance(spell_target->GetPosition(), mob->GetPosition());
-					if ((mob->CheckLosFN(spell_target) || mob->CheckLosFN(this)) && distance <= 70) {
-						auto petorowner = this->GetOwnerOrSelf();
-						if (spell_target->GetReverseFactionCon(mob) <= petorowner->GetReverseFactionCon(mob)) {
-							mob->AddToHateList(this);
-						}
-					}
-				}
-			}
-		}
-	}
-
-	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
+	//Cazic Touch targets the pet owner instead of the pet when said pet is tanking.
 	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target->HasOwner()) && spell_id == DB_SPELL_CAZIC_TOUCH || spell_id == DB_SPELL_TOUCH_OF_VINITRAS) {
 		Mob* owner =  spell_target->GetOwner();
 		
-		if (owner) {
+		if (owner)
 			spell_target = owner;
-		}
 	}
 
 	if( spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()){
