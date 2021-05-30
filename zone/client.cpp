@@ -9890,20 +9890,40 @@ void Client::GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone)
 	GoToBind();
 }
 
+void Client::AddDynamicZoneID(uint32_t dz_id)
+{
+	auto it = std::find_if(m_dynamic_zone_ids.begin(), m_dynamic_zone_ids.end(),
+		[&](uint32_t current_dz_id) { return current_dz_id == dz_id; });
+
+	if (it == m_dynamic_zone_ids.end())
+	{
+		LogDynamicZonesDetail("Adding dz [{}] to client [{}]", dz_id, GetName());
+		m_dynamic_zone_ids.push_back(dz_id);
+	}
+}
+
+void Client::RemoveDynamicZoneID(uint32_t dz_id)
+{
+	LogDynamicZonesDetail("Removing dz [{}] from client [{}]", dz_id, GetName());
+	m_dynamic_zone_ids.erase(std::remove_if(m_dynamic_zone_ids.begin(), m_dynamic_zone_ids.end(),
+		[&](uint32_t current_dz_id) { return current_dz_id == dz_id; }
+	), m_dynamic_zone_ids.end());
+}
+
 std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
 {
 	std::vector<DynamicZone*> client_dzs;
 
-	// check client systems for any associated dynamic zones optionally filtered by zone
-	Expedition* expedition = GetExpedition();
-	if (expedition &&
-	   (zone_id == 0 || expedition->GetDynamicZone().GetZoneID() == zone_id) &&
-	   (zone_version < 0 || expedition->GetDynamicZone().GetZoneVersion() == zone_version))
+	for (uint32_t dz_id : m_dynamic_zone_ids)
 	{
-		client_dzs.emplace_back(&expedition->GetDynamicZone());
+		auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+		if (dz &&
+		   (zone_id == 0 || dz->GetZoneID() == zone_id) &&
+		   (zone_version < 0 || dz->GetZoneVersion() == zone_version))
+		{
+			client_dzs.emplace_back(dz);
+		}
 	}
-
-	// todo: tasks, missions (shared tasks), and quests with an associated dz to zone_id
 
 	return client_dzs;
 }

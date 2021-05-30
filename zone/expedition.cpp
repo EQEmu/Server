@@ -1006,6 +1006,7 @@ void Expedition::ProcessMemberAdded(const std::string& char_name, uint32_t added
 	Client* member_client = entity_list.GetClientByCharID(added_char_id);
 	if (member_client)
 	{
+		member_client->AddDynamicZoneID(GetDynamicZone().GetID());
 		member_client->SetExpeditionID(GetID());
 		member_client->SendDzCompassUpdate();
 		member_client->QueuePacket(GetDynamicZone().CreateInfoPacket().get());
@@ -1037,6 +1038,7 @@ void Expedition::ProcessMemberRemoved(const std::string& removed_char_name, uint
 				// live doesn't clear expedition info on clients removed while inside dz.
 				// it instead let's the dz kick timer do it even if character zones out
 				// before it triggers. for simplicity we'll always clear immediately
+				member_client->RemoveDynamicZoneID(GetDynamicZone().GetID());
 				member_client->SetExpeditionID(0);
 				member_client->SendDzCompassUpdate();
 				member_client->QueuePacket(GetDynamicZone().CreateInfoPacket(true).get());
@@ -1178,6 +1180,11 @@ void Expedition::SendUpdatesToZoneMembers(bool clear, bool message_on_clear)
 			Client* member_client = entity_list.GetClientByCharID(member.id);
 			if (member_client)
 			{
+				if (clear) {
+					member_client->RemoveDynamicZoneID(GetDynamicZone().GetID());
+				} else {
+					member_client->AddDynamicZoneID(GetDynamicZone().GetID());
+				}
 				member_client->SetExpeditionID(clear ? 0 : GetID());
 				member_client->SendDzCompassUpdate();
 				member_client->QueuePacket(outapp_info.get());
