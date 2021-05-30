@@ -19,6 +19,7 @@
  */
 
 #include "expedition.h"
+#include "dynamic_zone.h"
 #include "expedition_message.h"
 #include "expedition_state.h"
 #include "cliententry.h"
@@ -109,7 +110,7 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
 		if (expedition)
 		{
-			buf->is_success = expedition->GetDynamicZone().SetNewLeader({
+			buf->is_success = expedition->GetDynamicZone()->SetNewLeader({
 				new_leader_cle->CharID(), new_leader_cle->name() });
 		}
 

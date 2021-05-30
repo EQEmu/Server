@@ -21,6 +21,8 @@
 #include "expedition_database.h"
 #include "expedition.h"
 #include "worlddb.h"
+#include "../common/repositories/expeditions_repository.h"
+#include "../common/repositories/expedition_lockouts_repository.h"
 #include "../common/repositories/dynamic_zone_members_repository.h"
 
 void ExpeditionDatabase::PurgeExpiredExpeditions()
@@ -59,7 +61,9 @@ void ExpeditionDatabase::PurgeExpiredExpeditions()
 
 		if (!expedition_ids.empty())
 		{
-			ExpeditionDatabase::DeleteExpeditions(expedition_ids);
+			auto joined_expedition_ids = fmt::join(expedition_ids, ",");
+			ExpeditionsRepository::DeleteWhere(database, fmt::format("id IN ({})", joined_expedition_ids));
+			ExpeditionLockoutsRepository::DeleteWhere(database, fmt::format("expedition_id IN ({})", joined_expedition_ids));
 			DynamicZoneMembersRepository::RemoveAllMembers(database, dynamic_zone_ids);
 		}
 	}
@@ -73,20 +77,4 @@ void ExpeditionDatabase::PurgeExpiredCharacterLockouts()
 	);
 
 	database.QueryDatabase(query);
-}
-
-void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expedition_ids)
-{
-	LogExpeditionsDetail("Deleting [{}] expedition(s)", expedition_ids.size());
-
-	std::string expedition_ids_query = fmt::format("{}", fmt::join(expedition_ids, ","));
-
-	if (!expedition_ids_query.empty())
-	{
-		auto query = fmt::format("DELETE FROM expeditions WHERE id IN ({});", expedition_ids_query);
-		database.QueryDatabase(query);
-
-		query = fmt::format("DELETE FROM expedition_lockouts WHERE expedition_id IN ({});", expedition_ids_query);
-		database.QueryDatabase(query);
-	}
 }

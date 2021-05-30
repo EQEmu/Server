@@ -37,11 +37,14 @@ protected:
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
+	friend class DynamicZoneManager;
+
 	void CheckExpireWarning();
 	void CheckLeader();
 	void ChooseNewLeader();
 	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesDurationUpdate();
+	void SendZonesDynamicZoneDeleted();
 	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SendZonesLeaderChanged();
 

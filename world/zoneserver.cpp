@@ -1396,6 +1396,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
 	}
+	case ServerOP_DzCreated:
 	case ServerOP_DzAddRemoveMember:
 	case ServerOP_DzSwapMembers:
 	case ServerOP_DzRemoveAllMembers:

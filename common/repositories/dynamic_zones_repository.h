@@ -172,21 +172,15 @@ public:
 		return entry;
 	}
 
-	static std::vector<DynamicZoneInstance> GetWithInstance(Database& db,
-		const std::vector<uint32_t>& dynamic_zone_ids)
+	static std::vector<DynamicZoneInstance> AllWithInstanceNotExpired(Database& db)
 	{
-		if (dynamic_zone_ids.empty())
-		{
-			return {};
-		}
-
 		std::vector<DynamicZoneInstance> all_entries;
 
-		auto results = db.QueryDatabase(fmt::format(
-			"{} WHERE dynamic_zones.id IN ({}) ORDER BY dynamic_zones.id;",
-			SelectDynamicZoneJoinInstance(),
-			fmt::join(dynamic_zone_ids, ",")
-		));
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			{} WHERE
+				(instance_list.start_time + instance_list.duration) > UNIX_TIMESTAMP()
+				AND instance_list.never_expires = 0
+		), SelectDynamicZoneJoinInstance()));
 
 		if (results.Success())
 		{
@@ -325,6 +319,41 @@ public:
 				all_entries.emplace_back(std::move(entry));
 			}
 		}
+		return all_entries;
+	}
+
+	static std::vector<uint32_t> GetStaleIDs(Database& db)
+	{
+		std::vector<uint32_t> all_entries;
+
+		// dzs with no members, missing instance, or expired instance
+		auto results = db.QueryDatabase(SQL(
+			SELECT
+				dynamic_zones.id
+			FROM dynamic_zones
+				LEFT JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
+				LEFT JOIN
+					(
+						SELECT dynamic_zone_id, COUNT(*) member_count
+						FROM dynamic_zone_members
+						GROUP BY dynamic_zone_id
+					) dynamic_zone_members
+					ON dynamic_zone_members.dynamic_zone_id = dynamic_zones.id
+			WHERE
+				instance_list.id IS NULL
+				OR dynamic_zone_members.member_count IS NULL
+				OR dynamic_zone_members.member_count = 0
+				OR ((instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP()
+					AND instance_list.never_expires = 0);
+		));
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			all_entries.push_back(atoi(row[0]));
+		}
+
 		return all_entries;
 	}
 };

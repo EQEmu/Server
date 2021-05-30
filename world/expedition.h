@@ -21,22 +21,22 @@
 #ifndef WORLD_EXPEDITION_H
 #define WORLD_EXPEDITION_H
 
-#include "dynamic_zone.h"
 #include "../common/expedition_base.h"
 #include <cstdint>
+
+class DynamicZone;
 
 class Expedition : public ExpeditionBase
 {
 public:
-	Expedition() = default;
+	Expedition() = delete;
+	Expedition(DynamicZone* dz);
 
-	DynamicZone& GetDynamicZone() { return m_dynamic_zone; }
-	bool Process();
+	DynamicZone* GetDynamicZone() const { return m_dynamic_zone; }
 	void SendZonesExpeditionDeleted();
-	void SetDynamicZone(DynamicZone&& dz);
 
 private:
-	DynamicZone m_dynamic_zone;
+	DynamicZone* m_dynamic_zone = nullptr;
 };
 
 #endif

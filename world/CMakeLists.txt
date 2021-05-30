@@ -8,6 +8,7 @@ SET(world_sources
 	clientlist.cpp
 	console.cpp
 	dynamic_zone.cpp
+	dynamic_zone_manager.cpp
 	eql_config.cpp
 	eqemu_api_world_data_service.cpp
 	expedition.cpp
@@ -46,6 +47,7 @@ SET(world_headers
 	clientlist.h
 	console.h
 	dynamic_zone.h
+	dynamic_zone_manager.h
 	eql_config.h
 	eqemu_api_world_data_service.h
 	expedition.h

@@ -29,6 +29,12 @@ struct DynamicZoneMember
 	bool IsOnline() const { return status == DynamicZoneMemberStatus::Online ||
 	                               status == DynamicZoneMemberStatus::InDynamicZone; }
 	bool IsValid() const { return id != 0 && !name.empty(); }
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(id, name, status);
+	}
 };
 
 struct DynamicZoneLocation
@@ -42,6 +48,12 @@ struct DynamicZoneLocation
 	DynamicZoneLocation() = default;
 	DynamicZoneLocation(uint32_t zone_id_, float x_, float y_, float z_, float heading_)
 		: zone_id(zone_id_), x(x_), y(y_), z(z_), heading(heading_) {}
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(zone_id, x, y, z, heading);
+	}
 };
 
 class DynamicZoneBase
@@ -85,7 +97,6 @@ public:
 
 	bool AddMember(const DynamicZoneMember& add_member);
 	void AddMemberFromRepositoryResult(DynamicZoneMembersRepository::MemberWithName&& entry);
-	uint32_t Create();
 	uint32_t GetDatabaseMemberCount();
 	DynamicZoneMember GetMemberData(uint32_t character_id);
 	DynamicZoneMember GetMemberData(const std::string& character_name);
@@ -126,12 +137,15 @@ protected:
 	virtual bool SendServerPacket(ServerPacket* packet) = 0;
 
 	void AddInternalMember(const DynamicZoneMember& member);
+	uint32_t Create();
 	uint32_t CreateInstance();
 	void LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry);
+	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
 	void RemoveInternalMember(uint32_t character_id);
 	uint32_t SaveToDatabase();
 	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
+	std::unique_ptr<ServerPacket> CreateServerDzCreatePacket(uint16_t origin_zone_id, uint16_t origin_instance_id);
 	std::unique_ptr<ServerPacket> CreateServerDzLocationPacket(uint16_t server_opcode, const DynamicZoneLocation& location);
 	std::unique_ptr<ServerPacket> CreateServerMemberAddRemovePacket(const DynamicZoneMember& member, bool removed);
 	std::unique_ptr<ServerPacket> CreateServerMemberStatusPacket(uint32_t character_id, DynamicZoneMemberStatus status);
@@ -146,6 +160,7 @@ protected:
 	uint32_t m_max_players = 0;
 	bool m_never_expires = false;
 	bool m_has_zonein = false;
+	bool m_has_member_statuses = false;
 	std::string m_name;
 	std::string m_uuid;
 	DynamicZoneMember m_leader;
@@ -157,6 +172,34 @@ protected:
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 	std::vector<DynamicZoneMember> m_members;
+
+public:
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			m_id,
+			m_zone_id,
+			m_instance_id,
+			m_zone_version,
+			m_min_players,
+			m_max_players,
+			m_never_expires,
+			m_has_zonein,
+			m_has_member_statuses,
+			m_name,
+			m_uuid,
+			m_leader,
+			m_type,
+			m_compass,
+			m_safereturn,
+			m_zonein,
+			m_duration,
+			m_start_time,
+			m_expire_time,
+			m_members
+		);
+	}
 };
 
 #endif

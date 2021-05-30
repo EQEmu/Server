@@ -14,11 +14,6 @@ DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& e
 
 uint32_t DynamicZoneBase::Create()
 {
-	if (m_id != 0)
-	{
-		return m_id;
-	}
-
 	if (GetInstanceID() == 0)
 	{
 		CreateInstance();
@@ -557,4 +552,31 @@ std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 			return "Quest";
 	}
 	return "Unknown";
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzCreatePacket(
+	uint16_t origin_zone_id, uint16_t origin_instance_id)
+{
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, *this);
+
+	LogDynamicZonesDetail("Serialized server dz size [{}]", dyn_pack.Length());
+
+	auto pack_size = sizeof(ServerDzCreateSerialized_Struct) + dyn_pack.Length();
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzCreated, static_cast<uint32_t>(pack_size));
+	auto buf = reinterpret_cast<ServerDzCreateSerialized_Struct*>(pack->pBuffer);
+	buf->origin_zone_id = origin_zone_id;
+	buf->origin_instance_id = origin_instance_id;
+	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+	return pack;
+}
+
+void DynamicZoneBase::LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size)
+{
+	LogDynamicZonesDetail("Deserializing server dz size [{}]", cereal_size);
+	EQ::Util::MemoryStreamReader ss(cereal_data, cereal_size);
+	cereal::BinaryInputArchive archive(ss);
+	archive(*this);
 }

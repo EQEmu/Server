@@ -1,6 +1,7 @@
 #include "dynamic_zone.h"
 #include "cliententry.h"
 #include "clientlist.h"
+#include "dynamic_zone_manager.h"
 #include "expedition.h"
 #include "expedition_state.h"
 #include "worlddb.h"
@@ -24,12 +25,11 @@ bool DynamicZone::SendServerPacket(ServerPacket* packet)
 
 DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 {
-	auto expedition = expedition_state.GetExpeditionByDynamicZoneID(dz_id);
-	if (expedition)
+	auto dz = dynamic_zone_manager.dynamic_zone_cache.find(dz_id);
+	if (dz != dynamic_zone_manager.dynamic_zone_cache.end())
 	{
-		return &expedition->GetDynamicZone();
+		return dz->second.get();
 	}
-	// todo: other system caches
 	return nullptr;
 }
 
@@ -115,6 +115,15 @@ DynamicZoneStatus DynamicZone::Process()
 	return status;
 }
 
+void DynamicZone::SendZonesDynamicZoneDeleted()
+{
+	uint32_t pack_size = sizeof(ServerDzID_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzDeleted, pack_size);
+	auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	zoneserver_list.SendPacket(pack.get());
+}
+
 void DynamicZone::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	auto now = std::chrono::system_clock::now();
@@ -161,6 +170,11 @@ void DynamicZone::HandleZoneMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
+	case ServerOP_DzCreated:
+	{
+		dynamic_zone_manager.CacheNewDynamicZone(pack);
+		break;
+	}
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:
@@ -312,6 +326,11 @@ void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
 
 void DynamicZone::CacheMemberStatuses()
 {
+	if (m_has_member_statuses)
+	{
+		return;
+	}
+
 	// called when a new dz is cached to fill member statuses
 	std::string zone_name{};
 	std::vector<ClientListEntry*> all_clients;
@@ -335,6 +354,8 @@ void DynamicZone::CacheMemberStatuses()
 
 		SetInternalMemberStatus(member.id, status);
 	}
+
+	m_has_member_statuses = true;
 }
 
 void DynamicZone::CheckExpireWarning()

@@ -59,14 +59,111 @@ uint16_t DynamicZone::GetCurrentZoneID()
 	return zone ? static_cast<uint16_t>(zone->GetZoneID()) : 0;
 }
 
+DynamicZone* DynamicZone::CreateNew(DynamicZone& dz_request, const std::vector<DynamicZoneMember>& members)
+{
+	if (!zone || dz_request.GetID() != 0)
+	{
+		return nullptr;
+	}
+
+	// this creates a new dz instance and saves it to both db and cache
+	uint32_t dz_id = dz_request.Create();
+	if (dz_id == 0)
+	{
+		LogDynamicZones("Failed to create dynamic zone for zone [{}]", dz_request.GetZoneID());
+		return nullptr;
+	}
+
+	auto dz = std::make_unique<DynamicZone>(dz_request);
+	if (!members.empty())
+	{
+		dz->SaveMembers(members);
+	}
+
+	LogDynamicZones("Created new dz [{}] for zone [{}]", dz_id, dz_request.GetZoneID());
+
+	// world must be notified before we request async member updates
+	auto pack = dz->CreateServerDzCreatePacket(zone->GetZoneID(), zone->GetInstanceID());
+	worldserver.SendPacket(pack.get());
+
+	auto inserted = zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
+
+	// expeditions invoke their own updates after installing client update callbacks
+	if (inserted.first->second->GetType() != DynamicZoneType::Expedition)
+	{
+		inserted.first->second->DoAsyncZoneMemberUpdates();
+	}
+
+	return inserted.first->second.get();
+}
+
+void DynamicZone::CacheNewDynamicZone(ServerPacket* pack)
+{
+	auto buf = reinterpret_cast<ServerDzCreateSerialized_Struct*>(pack->pBuffer);
+
+	// caching new dz created in world or another zone (has member statuses set by world)
+	auto dz = std::make_unique<DynamicZone>();
+	dz->LoadSerializedDzPacket(buf->cereal_data, buf->cereal_size);
+
+	uint32_t dz_id = dz->GetID();
+	auto inserted = zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
+
+	// expeditions invoke their own updates after installing client update callbacks
+	if (inserted.first->second->GetType() != DynamicZoneType::Expedition)
+	{
+		inserted.first->second->DoAsyncZoneMemberUpdates();
+	}
+
+	LogDynamicZones("Cached new dynamic zone [{}]", dz_id);
+}
+
+void DynamicZone::CacheAllFromDatabase()
+{
+	if (!zone)
+	{
+		return;
+	}
+
+	BenchTimer bench;
+
+	auto dynamic_zones = DynamicZonesRepository::AllWithInstanceNotExpired(database);
+	auto dynamic_zone_members = DynamicZoneMembersRepository::GetAllWithNames(database);
+
+	zone->dynamic_zone_cache.clear();
+	zone->dynamic_zone_cache.reserve(dynamic_zones.size());
+
+	for (auto& entry : dynamic_zones)
+	{
+		uint32_t dz_id = entry.id;
+		auto dz = std::make_unique<DynamicZone>(std::move(entry));
+
+		for (auto& member : dynamic_zone_members)
+		{
+			if (member.dynamic_zone_id == dz_id)
+			{
+				dz->AddMemberFromRepositoryResult(std::move(member));
+			}
+		}
+
+		zone->dynamic_zone_cache.emplace(dz_id, std::move(dz));
+	}
+
+	LogDynamicZones("Caching [{}] dynamic zone(s) took [{}s]", zone->dynamic_zone_cache.size(), bench.elapsed());
+}
+
 DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 {
-	auto expedition = Expedition::FindCachedExpeditionByDynamicZoneID(dz_id);
-	if (expedition)
+	if (!zone)
 	{
-		return &expedition->GetDynamicZone();
+		return nullptr;
 	}
-	// todo: other system caches
+
+	auto dz = zone->dynamic_zone_cache.find(dz_id);
+	if (dz != zone->dynamic_zone_cache.end())
+	{
+		return dz->second.get();
+	}
+
 	return nullptr;
 }
 
@@ -121,6 +218,30 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 {
 	switch (pack->opcode)
 	{
+	case ServerOP_DzCreated:
+	{
+		auto buf = reinterpret_cast<ServerDzCreateSerialized_Struct*>(pack->pBuffer);
+		if (zone && !zone->IsZone(buf->origin_zone_id, buf->origin_instance_id))
+		{
+			DynamicZone::CacheNewDynamicZone(pack);
+		}
+		break;
+	}
+	case ServerOP_DzDeleted:
+	{
+		// sent by world when it deletes an expired or empty dz
+		// any system that held a reference to the dz should have already been notified
+		auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (zone && dz)
+		{
+			dz->SendUpdatesToZoneMembers(true, true); // members silently removed
+
+			LogDynamicZonesDetail("Deleting dynamic zone [{}] from zone cache", buf->dz_id);
+			zone->dynamic_zone_cache.erase(buf->dz_id);
+		}
+		break;
+	}
 	case ServerOP_DzAddRemoveMember:
 	{
 		auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
@@ -243,6 +364,7 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 				auto status = static_cast<DynamicZoneMemberStatus>(buf->entries[i].online_status);
 				dz->SetInternalMemberStatus(buf->entries[i].character_id, status);
 			}
+			dz->m_has_member_statuses = true;
 			dz->SendUpdatesToZoneMembers(false, true);
 		}
 		break;
@@ -574,6 +696,13 @@ void DynamicZone::ProcessRemoveAllMembers(bool silent)
 void DynamicZone::DoAsyncZoneMemberUpdates()
 {
 	// gets member statuses from world and performs zone member updates on reply
+	// if we've already received member statuses we can just update immediately
+	if (m_has_member_statuses)
+	{
+		SendUpdatesToZoneMembers();
+		return;
+	}
+
 	constexpr uint32_t pack_size = sizeof(ServerDzID_Struct);
 	auto pack = std::make_unique<ServerPacket>(ServerOP_DzGetMemberStatuses, pack_size);
 	auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);

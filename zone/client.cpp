@@ -9533,11 +9533,11 @@ void Client::SendDynamicZoneUpdates()
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
-		expedition->GetDynamicZone().SendClientWindowUpdate(this);
+		expedition->GetDynamicZone()->SendClientWindowUpdate(this);
 
 		// live synchronizes lockouts obtained during the active expedition to
 		// members once they zone into the expedition's dynamic zone instance
-		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
+		if (expedition->GetDynamicZone()->IsCurrentZoneDzInstance())
 		{
 			expedition->SyncCharacterLockouts(CharacterID(), m_expedition_lockouts);
 		}

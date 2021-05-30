@@ -42,6 +42,9 @@ public:
 	DynamicZone() = default;
 	DynamicZone(uint32_t zone_id, uint32_t version, uint32_t duration, DynamicZoneType type);
 
+	static void CacheAllFromDatabase();
+	static void CacheNewDynamicZone(ServerPacket* pack);
+	static DynamicZone* CreateNew(DynamicZone& dz_details, const std::vector<DynamicZoneMember>& members);
 	static DynamicZone* FindDynamicZoneByID(uint32_t dz_id);
 	static void HandleWorldMessage(ServerPacket* pack);
 

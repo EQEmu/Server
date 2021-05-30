@@ -1,8 +1,9 @@
 #include "expedition_base.h"
 #include "repositories/expeditions_repository.h"
 
-ExpeditionBase::ExpeditionBase(uint32_t id) :
-	m_id(id)
+ExpeditionBase::ExpeditionBase(uint32_t id, uint32_t dz_id) :
+	m_id(id),
+	m_dynamic_zone_id(dz_id)
 {
 }
 

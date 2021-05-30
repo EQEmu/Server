@@ -85,24 +85,11 @@ public:
 		));
 	}
 
-	static std::vector<MemberWithName> GetWithNames(Database& db,
-		const std::vector<uint32_t>& dynamic_zone_ids)
+	static std::vector<MemberWithName> GetAllWithNames(Database& db)
 	{
-		if (dynamic_zone_ids.empty())
-		{
-			return {};
-		}
-
 		std::vector<MemberWithName> all_entries;
 
-		auto results = db.QueryDatabase(fmt::format(SQL(
-			{}
-			WHERE dynamic_zone_members.dynamic_zone_id IN ({})
-		),
-			SelectMembersWithNames(),
-			fmt::join(dynamic_zone_ids, ",")
-		));
-
+		auto results = db.QueryDatabase(SelectMembersWithNames());
 		if (results.Success())
 		{
 			all_entries.reserve(results.RowCount());

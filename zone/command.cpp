@@ -61,6 +61,7 @@
 
 #include "data_bucket.h"
 #include "command.h"
+#include "dynamic_zone.h"
 #include "expedition.h"
 #include "guild_mgr.h"
 #include "map.h"
@@ -7143,7 +7144,19 @@ void command_dz(Client* c, const Seperator* sep)
 		return;
 	}
 
-	if (strcasecmp(sep->arg[1], "expedition") == 0)
+	if (strcasecmp(sep->arg[1], "cache") == 0)
+	{
+		if (strcasecmp(sep->arg[2], "reload") == 0)
+		{
+			DynamicZone::CacheAllFromDatabase();
+			Expedition::CacheAllFromDatabase();
+			c->Message(Chat::White, fmt::format(
+				"Reloaded [{}] dynamic zone(s) and [{}] expedition(s) from database",
+				zone->dynamic_zone_cache.size(), zone->expedition_cache.size()
+			).c_str());
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "expedition") == 0)
 	{
 		if (strcasecmp(sep->arg[2], "list") == 0)
 		{
@@ -7161,25 +7174,32 @@ void command_dz(Client* c, const Seperator* sep)
 			c->Message(Chat::White, fmt::format("Total Active Expeditions: [{}]", expeditions.size()).c_str());
 			for (const auto& expedition : expeditions)
 			{
+				auto dz = expedition->GetDynamicZone();
+				if (!dz)
+				{
+					LogExpeditions("Expedition [{}] has an invalid dz [{}] in cache", expedition->GetID(), expedition->GetDynamicZoneID());
+					continue;
+				}
+
 				auto leader_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
 					"#goto {}", expedition->GetLeaderName()), false, expedition->GetLeaderName());
 				auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format(
-					"#zoneinstance {}", expedition->GetDynamicZone().GetInstanceID()), false, "zone");
+					"#zoneinstance {}", dz->GetInstanceID()), false, "zone");
 
-				auto seconds = expedition->GetDynamicZone().GetSecondsRemaining();
+				auto seconds = dz->GetSecondsRemaining();
 
 				c->Message(Chat::White, fmt::format(
 					"expedition id: [{}] dz id: [{}] name: [{}] leader: [{}] {}: [{}]:[{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					expedition->GetID(),
-					expedition->GetDynamicZone().GetID(),
+					expedition->GetDynamicZoneID(),
 					expedition->GetName(),
 					leader_saylink,
 					zone_saylink,
-					ZoneName(expedition->GetDynamicZone().GetZoneID()),
-					expedition->GetDynamicZone().GetZoneID(),
-					expedition->GetDynamicZone().GetInstanceID(),
-					expedition->GetDynamicZone().GetZoneVersion(),
-					expedition->GetDynamicZone().GetMemberCount(),
+					ZoneName(dz->GetZoneID()),
+					dz->GetZoneID(),
+					dz->GetInstanceID(),
+					dz->GetZoneVersion(),
+					dz->GetMemberCount(),
 					seconds / 3600,      // hours
 					(seconds / 60) % 60, // minutes
 					seconds % 60         // seconds
@@ -7201,7 +7221,7 @@ void command_dz(Client* c, const Seperator* sep)
 			{
 				c->Message(Chat::White, fmt::format("Destroying expedition [{}] ({})",
 					expedition_id, expedition->GetName()).c_str());
-				expedition->GetDynamicZone().RemoveAllMembers();
+				expedition->GetDynamicZone()->RemoveAllMembers();
 			}
 			else
 			{
@@ -7225,8 +7245,45 @@ void command_dz(Client* c, const Seperator* sep)
 	}
 	else if (strcasecmp(sep->arg[1], "list") == 0)
 	{
+		c->Message(Chat::White, fmt::format("Total Dynamic Zones (cache): [{}]", zone->dynamic_zone_cache.size()).c_str());
+
+		std::vector<DynamicZone*> dynamic_zones;
+		for (const auto& dz : zone->dynamic_zone_cache)
+		{
+			dynamic_zones.emplace_back(dz.second.get());
+		}
+
+		std::sort(dynamic_zones.begin(), dynamic_zones.end(),
+			[](const DynamicZone* lhs, const DynamicZone* rhs) {
+				return lhs->GetID() < rhs->GetID();
+			});
+
+		for (const auto& dz : dynamic_zones)
+		{
+			auto seconds = dz->GetSecondsRemaining();
+			auto zone_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+				fmt::format("#zoneinstance {}", dz->GetInstanceID()), false, "zone");
+
+			std::string aligned_type = fmt::format("[{}]", DynamicZone::GetDynamicZoneTypeName(static_cast<DynamicZoneType>(dz->GetType())));
+			c->Message(Chat::White, fmt::format(
+				"id: [{}] type: {:>10} {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+				dz->GetID(),
+				aligned_type,
+				zone_saylink,
+				dz->GetZoneID(),
+				dz->GetInstanceID(),
+				dz->GetZoneVersion(),
+				dz->GetMemberCount(),
+				seconds / 3600,      // hours
+				(seconds / 60) % 60, // minutes
+				seconds % 60         // seconds
+			).c_str());
+		}
+	}
+	else if (strcasecmp(sep->arg[1], "listdb") == 0)
+	{
 		auto dz_list = DynamicZonesRepository::AllDzInstancePlayerCounts(database);
-		c->Message(Chat::White, fmt::format("Total Dynamic Zones: [{}]", dz_list.size()).c_str());
+		c->Message(Chat::White, fmt::format("Total Dynamic Zones (database): [{}]", dz_list.size()).c_str());
 
 		auto now = std::chrono::system_clock::now();
 
@@ -7243,7 +7300,7 @@ void command_dz(Client* c, const Seperator* sep)
 					fmt::format("#zoneinstance {}", dz.instance), false, "zone");
 
 				c->Message(Chat::White, fmt::format(
-					"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
+					"id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					dz.id,
 					DynamicZone::GetDynamicZoneTypeName(static_cast<DynamicZoneType>(dz.type)),
 					zone_saylink,
@@ -7295,11 +7352,13 @@ void command_dz(Client* c, const Seperator* sep)
 	else
 	{
 		c->Message(Chat::White, "#dz usage:");
+		c->Message(Chat::White, "#dz cache reload - reload the current zone cache from db (also reloads expedition cache dependency)");
 		c->Message(Chat::White, "#dz expedition list - list expeditions in current zone cache");
 		c->Message(Chat::White, "#dz expedition reload - reload expedition zone cache from database");
 		c->Message(Chat::White, "#dz expedition destroy <expedition_id> - destroy expedition globally (must be in cache)");
 		c->Message(Chat::White, "#dz expedition unlock <expedition_id> - unlock expedition");
-		c->Message(Chat::White, "#dz list [all] - list dynamic zone instances from database -- 'all' includes expired");
+		c->Message(Chat::White, "#dz list - list all dynamic zone instances from current zone cache");
+		c->Message(Chat::White, "#dz listdb [all] - list dynamic zone instances from database -- 'all' includes expired");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> - delete all of character's expedition lockouts");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" - delete lockouts by expedition");
 		c->Message(Chat::White, "#dz lockouts remove <char_name> \"<expedition_name>\" \"<event_name>\" - delete lockout by expedition event");

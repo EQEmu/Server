@@ -16,12 +16,13 @@ public:
 	ExpeditionBase& operator=(ExpeditionBase&&) = default;
 
 	uint32_t GetID() const { return m_id; }
+	uint32_t GetDynamicZoneID() const { return m_dynamic_zone_id; }
 
 	void LoadRepositoryResult(const ExpeditionsRepository::Expeditions& entry);
 
 protected:
 	ExpeditionBase() = default;
-	ExpeditionBase(uint32_t id);
+	ExpeditionBase(uint32_t id, uint32_t dz_id);
 
 	uint32_t m_id = 0;
 	uint32_t m_dynamic_zone_id = 0;

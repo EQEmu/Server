@@ -1184,6 +1184,9 @@ bool Zone::Init(bool iStaticZone) {
 	petition_list.ClearPetitions();
 	petition_list.ReadDatabase();
 
+	LogInfo("Loading dynamic zones");
+	DynamicZone::CacheAllFromDatabase();
+
 	LogInfo("Loading active Expeditions");
 	Expedition::CacheAllFromDatabase();
 
@@ -2724,13 +2727,14 @@ DynamicZone* Zone::GetDynamicZone()
 		return nullptr;
 	}
 
-	auto expedition = Expedition::FindCachedExpeditionByZoneInstance(GetZoneID(), GetInstanceID());
-	if (expedition)
+	// todo: cache dynamic zone id on zone later for faster lookup
+	for (const auto& dz_iter : zone->dynamic_zone_cache)
 	{
-		return &expedition->GetDynamicZone();
+		if (dz_iter.second->IsSameDz(GetZoneID(), GetInstanceID()))
+		{
+			return dz_iter.second.get();
+		}
 	}
-
-	// todo: tasks, missions, and quests with an associated dz for this instance id
 
 	return nullptr;
 }

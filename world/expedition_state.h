@@ -22,8 +22,6 @@
 #define WORLD_EXPEDITION_STATE_H
 
 #include "../common/repositories/expeditions_repository.h"
-#include "../common/rulesys.h"
-#include "../common/timer.h"
 #include <cstdint>
 #include <vector>
 
@@ -39,11 +37,10 @@ public:
 	void CacheAllFromDatabase();
 	Expedition* GetExpedition(uint32_t expedition_id);
 	Expedition* GetExpeditionByDynamicZoneID(uint32_t dz_id);
-	void Process();
+	void RemoveExpeditionByID(uint32_t expedition_id);
 
 private:
 	std::vector<std::unique_ptr<Expedition>> m_expeditions;
-	Timer m_process_throttle_timer{static_cast<uint32_t>(RuleI(DynamicZone, WorldProcessRate))};
 };
 
 #endif

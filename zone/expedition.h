@@ -50,8 +50,9 @@ enum class ExpeditionLockMessage : uint8_t
 class Expedition : public ExpeditionBase
 {
 public:
-	Expedition() = default;
-	Expedition(uint32_t id, DynamicZone&& dz);
+	Expedition() = delete;
+	Expedition(DynamicZone* dz) : m_dynamic_zone(dz) { assert(m_dynamic_zone != nullptr); }
+	Expedition(DynamicZone* dz, uint32_t id, uint32_t dz_id);
 
 	static Expedition* TryCreate(Client* requester, DynamicZone& dynamiczone, bool disable_messages);
 
@@ -78,12 +79,13 @@ public:
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
-	DynamicZone& GetDynamicZone() { return m_dynamiczone; }
-	const DynamicZoneMember& GetLeader() { return GetDynamicZone().GetLeader(); }
-	uint32_t GetLeaderID() { return GetDynamicZone().GetLeaderID(); }
-	const std::string& GetLeaderName() { return GetDynamicZone().GetLeaderName(); }
+	DynamicZone* GetDynamicZone() const { return m_dynamic_zone; }
+	const DynamicZoneMember& GetLeader() { return GetDynamicZone()->GetLeader(); }
+	uint32_t GetLeaderID() { return GetDynamicZone()->GetLeaderID(); }
+	const std::string& GetLeaderName() { return GetDynamicZone()->GetLeaderName(); }
 	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
-	const std::string& GetName() const { return m_dynamiczone.GetName(); }
+	const std::string& GetName() { return GetDynamicZone()->GetName(); }
+	void RegisterDynamicZoneCallbacks();
 
 	bool IsLocked() const { return m_is_locked; }
 	void SetLocked(bool lock_expedition, ExpeditionLockMessage lock_msg,
@@ -154,7 +156,7 @@ private:
 
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
 
-	DynamicZone m_dynamiczone { DynamicZoneType::Expedition };
+	DynamicZone* m_dynamic_zone = nullptr; // should never be null, will exist for lifetime of expedition
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
 	std::unordered_map<uint32_t, std::string> m_npc_loot_events;   // only valid inside dz zone
 	std::unordered_map<uint32_t, std::string> m_spawn_loot_events; // only valid inside dz zone

@@ -19,15 +19,16 @@
  */
 
 #include "expedition.h"
+#include "dynamic_zone.h"
 #include "zonelist.h"
 #include "zoneserver.h"
-#include "../common/eqemu_logsys.h"
 
 extern ZSList zoneserver_list;
 
-void Expedition::SetDynamicZone(DynamicZone&& dz)
+Expedition::Expedition(DynamicZone* dz) :
+	m_dynamic_zone(dz)
 {
-	m_dynamic_zone = std::move(dz);
+	assert(m_dynamic_zone != nullptr); // dz must remain valid for lifetime of expedition
 }
 
 void Expedition::SendZonesExpeditionDeleted()
@@ -37,19 +38,4 @@ void Expedition::SendZonesExpeditionDeleted()
 	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
 	buf->expedition_id = GetID();
 	zoneserver_list.SendPacket(pack.get());
-}
-
-bool Expedition::Process()
-{
-	// returns true if expedition needs to be deleted from world cache and db
-	// expedition is not deleted until its dz has no clients to prevent exploits
-	auto status = m_dynamic_zone.Process();
-	if (status == DynamicZoneStatus::ExpiredEmpty)
-	{
-		LogExpeditions("Expedition [{}] expired or empty, notifying zones and deleting", GetID());
-		SendZonesExpeditionDeleted();
-		return true;
-	}
-
-	return false;
 }
