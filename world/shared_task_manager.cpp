@@ -9,6 +9,7 @@
 #include "../common/repositories/shared_tasks_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
+#include "../common/serialize_buffer.h"
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;
@@ -220,18 +221,21 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	// add to shared tasks list
 	m_shared_tasks.emplace_back(new_shared_task);
 
-	// confirm shared task request: inform clients
-	auto p = std::make_unique<ServerPacket>(
-		ServerOP_SharedTaskAcceptNewTask,
-		sizeof(ServerSharedTaskRequest_Struct)
-	);
-
 	for (auto &m: request_members) {
-		auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
-		d->requested_character_id = m.character_id;
-		d->requested_task_id      = requested_task_id;
+		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id);
 
-		// get requested character zone server
+		// send member list packet
+		auto p = std::make_unique<ServerPacket>(
+			ServerOP_SharedTaskMemberlist,
+			sizeof(ServerSharedTaskMemberListPacket_Struct)
+		);
+
+		auto d = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(p->pBuffer);
+
+		d->destination_character_id = m.character_id;
+		d->shared_task_id           = new_shared_task.m_db_shared_task.id;
+
+		// send memberlist
 		ClientListEntry *cle = client_list.FindCLEByCharacterID(m.character_id);
 		if (cle && cle->Server()) {
 			cle->Server()->SendPacket(p.get());
@@ -619,4 +623,22 @@ bool SharedTaskManager::IsSharedTaskLeader(SharedTask *p_shared_task, uint32 cha
 	}
 
 	return false;
+}
+
+void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id)
+{
+	auto p = std::make_unique<ServerPacket>(
+		ServerOP_SharedTaskAcceptNewTask,
+		sizeof(ServerSharedTaskRequest_Struct)
+	);
+
+	auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
+	d->requested_character_id = character_id;
+	d->requested_task_id      = task_id;
+
+	// get requested character zone server
+	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	if (cle && cle->Server()) {
+		cle->Server()->SendPacket(p.get());
+	}
 }

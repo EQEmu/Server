@@ -24,6 +24,7 @@
 
 #define ServerOP_SharedTaskAttemptRemove        0x0309 // zone -> world. Player trying to delete task
 #define ServerOP_SharedTaskUpdate               0x0310 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
+#define ServerOP_SharedTaskMemberlist               0x0311 // world -> zone. Send shared task memberlist
 
 // used in
 // ServerOP_SharedTaskRequest
@@ -49,6 +50,13 @@ struct SharedTaskMember {
 	bool        is_grouped     = false; // this shouldn't be necessary either, potentially remove
 	bool        is_raided      = false; // this shouldn't be necessary either, potentially remove
 	bool        is_leader      = false;
+};
+
+// ServerOP_SharedTaskMemberlist
+// builds the buffer and sends to clients directly
+struct ServerSharedTaskMemberListPacket_Struct {
+	uint32 destination_character_id;
+	uint32 shared_task_id;
 };
 
 struct SharedTaskActivityStateEntry {

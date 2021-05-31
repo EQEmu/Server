@@ -52,6 +52,7 @@ protected:
 	// internal shared tasks list
 	std::vector<SharedTask> m_shared_tasks;
 	bool IsSharedTaskLeader(SharedTask *p_shared_task, uint32 character_id);
+	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

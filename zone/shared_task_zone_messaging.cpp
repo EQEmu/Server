@@ -2,6 +2,8 @@
 #include "../common/shared_tasks.h"
 #include "../common/servertalk.h"
 #include "client.h"
+#include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/shared_task_members_repository.h"
 
 #include <cstdint>
 #include <memory>
@@ -59,6 +61,61 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 					p->remove_from_db
 				);
 				c->m_requested_shared_task_removal = false;
+			}
+
+			break;
+		}
+		case ServerOP_SharedTaskMemberlist: {
+			auto p = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(pack->pBuffer);
+
+			LogTasks(
+				"[ServerOP_SharedTaskMemberlist] We're back in zone and I'm searching for [{}]",
+				p->destination_character_id,
+				sizeof(pack->pBuffer)
+			);
+
+
+			// temp hack until we make this better
+			auto characters = CharacterDataRepository::GetWhere(
+				database,
+				fmt::format(
+					"id IN (select character_id from shared_task_members where shared_task_id = {})",
+					p->shared_task_id
+				)
+			);
+
+			auto members = SharedTaskMembersRepository::GetWhere(
+				database,
+				fmt::format("shared_task_id = {}", p->shared_task_id)
+			);
+
+			SerializeBuffer buf(sizeof(TaskMemberList_Struct) + 15 * members.size());
+			buf.WriteInt32(0); // unknown ids
+			buf.WriteInt32(0);
+			buf.WriteInt32((int32) members.size());
+
+			for (auto &c : characters) {
+				buf.WriteString(c.name);
+				buf.WriteInt32(0); // monster mission
+
+				bool      is_leader = false;
+				for (auto &m: members) {
+					if (m.character_id == c.id && m.is_leader) {
+						is_leader = true;
+					}
+				}
+
+				buf.WriteInt8((int8) (is_leader ? 1 : 0));
+			}
+
+			// find character and route packet
+			auto c = entity_list.GetClientByCharID(p->destination_character_id);
+			if (c) {
+				LogTasks("[ServerOP_SharedTaskMemberlist] We're back in zone and I found [{}]", c->GetCleanName());
+
+				auto outapp = new EQApplicationPacket(OP_SharedTaskMemberList, buf);
+				c->QueuePacket(outapp);
+				safe_delete(outapp);
 			}
 
 			break;
