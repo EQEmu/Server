@@ -3395,7 +3395,7 @@ bool NPC::IsGuard()
 	default:
 		break;
 	}
-	if (GetPrimaryFaction() == FACTION_GEM_CHOPPERS || GetPrimaryFaction() == FACTION_HERETICS || GetPrimaryFaction() == FACTION_KING_AKANON) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
+	if (GetPrimaryFaction() == DB_FACTION_GEM_CHOPPERS || GetPrimaryFaction() == DB_FACTION_HERETICS || GetPrimaryFaction() == DB_FACTION_KING_AKANON) { //these 3 factions of guards use player races instead of their own races so we must define them by faction.
 		return true;
 	}
 	return false;
