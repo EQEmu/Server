@@ -45,6 +45,24 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskAttemptRemove: {
+			auto p = reinterpret_cast<ServerSharedTaskAttemptRemove_Struct *>(pack->pBuffer);
+			auto c = entity_list.GetClientByCharID(p->requested_character_id);
+			if (c) {
+				LogTasks("[ServerOP_SharedTaskAttemptRemove] We're back in zone and I found [{}]", c->GetCleanName());
+
+				c->m_requested_shared_task_removal = true;
+				c->GetTaskState()->CancelTask(
+					c,
+					TASKSLOTSHAREDTASK,
+					static_cast<TaskType>((int) TASK_TYPE_SHARED),
+					p->remove_from_db
+				);
+				c->m_requested_shared_task_removal = false;
+			}
+
+			break;
+		}
 		default:
 			break;
 	}

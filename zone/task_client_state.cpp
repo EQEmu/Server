@@ -2085,21 +2085,45 @@ void ClientTaskState::CancelAllTasks(Client *client)
 	// TODO: shared
 }
 
-void ClientTaskState::CancelTask(Client *client, int sequence_number, TaskType task_type, bool remove_from_db)
+void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db)
 {
+	LogTasks("CancelTask");
+
+	// shared task middleware
+	// intercept and pass to world first before processing normally
+	if (!c->m_requested_shared_task_removal && task_type == TaskType::Shared && m_active_shared_task.task_id != 0) {
+
+		// struct
+		auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskAttemptRemove_Struct));
+		auto *r   = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
+
+		// fill
+		r->requested_character_id = c->CharacterID();
+		r->requested_task_id      = m_active_shared_task.task_id;
+		r->remove_from_db         = remove_from_db;
+
+		// send
+		worldserver.SendPacket(pack);
+		safe_delete(pack);
+
+		return;
+	}
+
+	// packet
 	auto outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
 
-	CancelTask_Struct *cts = (CancelTask_Struct *) outapp->pBuffer;
+	// fill
+	auto *cts = (CancelTask_Struct *) outapp->pBuffer;
 	cts->SequenceNumber = sequence_number;
 	cts->type           = static_cast<uint32>(task_type);
 
-	Log(Logs::General, Logs::Tasks, "[UPDATE] CancelTask");
-
-	client->QueuePacket(outapp);
+	// send
+	c->QueuePacket(outapp);
 	safe_delete(outapp);
 
+	// persistence
 	if (remove_from_db) {
-		RemoveTask(client, sequence_number, task_type);
+		RemoveTask(c, sequence_number, task_type);
 	}
 }
 
@@ -2138,22 +2162,6 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 		database,
 		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, static_cast<int>(task_type))
 	);
-
-	// shared
-	if (task_type == TaskType::Shared) {
-
-		// struct
-		auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskRequest_Struct));
-		auto *r   = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
-
-		// fill
-		r->requested_character_id = client->CharacterID();
-		r->requested_task_id      = task_id;
-
-		// send
-		worldserver.SendPacket(pack);
-		safe_delete(pack);
-	}
 
 	switch (task_type) {
 		case TaskType::Task:
@@ -2234,7 +2242,12 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 	}
 }
 
-void ClientTaskState::AcceptNewTask(Client *client, int task_id, int npc_type_id, bool enforce_level_requirement)
+void ClientTaskState::AcceptNewTask(
+	Client *client,
+	int task_id,
+	int npc_type_id,
+	bool enforce_level_requirement
+)
 {
 	if (!task_manager || task_id < 0 || task_id >= MAXTASKS) {
 		client->Message(Chat::Red, "Task system not functioning, or task_id %i out of range.", task_id);

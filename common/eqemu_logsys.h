@@ -123,6 +123,7 @@ namespace Logs {
 		DynamicZones,
 		Scheduler,
 		Cheat,
+		ClientList,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -204,6 +205,7 @@ namespace Logs {
 		"DynamicZones",
 		"Scheduler",
 		"Cheat"
+		"ClientList",
 	};
 }
 

@@ -25,7 +25,7 @@ public:
 
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id);
-	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id);
+	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
 	void SharedTaskActivityUpdate(
 		uint32 source_character_id,
@@ -37,7 +37,7 @@ public:
 
 	SharedTask * FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id);
 
-	void DeleteSharedTask(int64 shared_task_id);
+	void DeleteSharedTask(int64 shared_task_id, uint32 requested_character_id);
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
 
 protected:
@@ -51,6 +51,7 @@ protected:
 
 	// internal shared tasks list
 	std::vector<SharedTask> m_shared_tasks;
+	bool IsSharedTaskLeader(SharedTask *p_shared_task, uint32 character_id);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

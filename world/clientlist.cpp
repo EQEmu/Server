@@ -332,30 +332,91 @@ void ClientList::CLCheckStale() {
 	}
 }
 
-void ClientList::ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	ClientListEntry* cle;
+void ClientList::ClientUpdate(ZoneServer *zoneserver, ServerClientList_Struct *scl)
+{
+	LinkedListIterator<ClientListEntry *> iterator(clientlist);
+	ClientListEntry                       *cle;
 	iterator.Reset();
-	while(iterator.MoreElements()) {
+	while (iterator.MoreElements()) {
 		if (iterator.GetData()->GetID() == scl->wid) {
 			cle = iterator.GetData();
-			if (scl->remove == 2){
+			if (scl->remove == 2) {
 				cle->LeavingZone(zoneserver, CLE_Status::Offline);
 			}
-			else if (scl->remove == 1)
+			else if (scl->remove == 1) {
 				cle->LeavingZone(zoneserver, CLE_Status::Zoning);
-			else
+			}
+			else {
 				cle->Update(zoneserver, scl);
+			}
 			return;
 		}
 		iterator.Advance();
 	}
-	if (scl->remove == 2)
+	if (scl->remove == 2) {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::Online);
-	else if (scl->remove == 1)
+	}
+	else if (scl->remove == 1) {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::Zoning);
-	else
+	}
+	else {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::InZone);
+	}
+
+	LogClientListDetail(
+		"[ClientUpdate] "
+		" remove [{}]"
+		" wid [{}]"
+		" IP [{}]"
+		" zone [{}]"
+		" instance_id [{}]"
+		" Admin [{}]"
+		" charid [{}]"
+		" name [{}]"
+		" AccountID [{}]"
+		" AccountName [{}]"
+		" LSAccountID [{}]"
+		" lskey [{}]"
+		" race [{}]"
+		" class_ [{}]"
+		" level [{}]"
+		" anon [{}]"
+		" tellsoff [{}]"
+		" guild_id [{}]"
+		" LFG [{}]"
+		" gm [{}]"
+		" ClientVersion [{}]"
+		" LFGFromLevel [{}]"
+		" LFGToLevel [{}]"
+		" LFGMatchFilter [{}]"
+		" LFGComments [{}]",
+		scl->remove,
+		scl->wid,
+		scl->IP,
+		scl->zone,
+		scl->instance_id,
+		scl->Admin,
+		scl->charid,
+		scl->name,
+		scl->AccountID,
+		scl->AccountName,
+		scl->LSAccountID,
+		scl->lskey,
+		scl->race,
+		scl->class_,
+		scl->level,
+		scl->anon,
+		scl->tellsoff,
+		scl->guild_id,
+		scl->LFG,
+		scl->gm,
+		scl->ClientVersion,
+		scl->LFGFromLevel,
+		scl->LFGToLevel,
+		scl->LFGMatchFilter,
+		scl->LFGComments
+	);
+
 	clientlist.Insert(cle);
 	zoneserver->ChangeWID(scl->charid, cle->GetID());
 }

@@ -29,7 +29,7 @@ public:
 	ActivityState GetTaskActivityState(TaskType task_type, int index, int activity_id);
 	void UpdateTaskActivity(Client *client, int task_id, int activity_id, int count, bool ignore_quest_update = false);
 	void ResetTaskActivity(Client *client, int task_id, int activity_id);
-	void CancelTask(Client *client, int sequence_number, TaskType task_type, bool remove_from_db = true);
+	void CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db = true);
 	void CancelAllTasks(Client *client);
 	void RemoveTask(Client *client, int sequence_number, TaskType task_type);
 	void RemoveTaskByTaskID(Client *client, uint32 task_id);

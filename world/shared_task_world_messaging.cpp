@@ -32,14 +32,19 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			break;
 		}
 		case ServerOP_SharedTaskAttemptRemove: {
-			auto *r = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
+			auto *r = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
 			LogTasksDetail(
-				"[ServerOP_SharedTaskAttemptRemove] Received request from character [{}] task_id [{}]",
+				"[ServerOP_SharedTaskAttemptRemove] Received request from character [{}] task_id [{}] remove_from_db [{}]",
 				r->requested_character_id,
-				r->requested_task_id
+				r->requested_task_id,
+				r->remove_from_db
 			);
 
-			shared_task_manager.AttemptSharedTaskRemoval(r->requested_task_id, r->requested_character_id);
+			shared_task_manager.AttemptSharedTaskRemoval(
+				r->requested_task_id,
+				r->requested_character_id,
+				r->remove_from_db
+			);
 
 			break;
 		}

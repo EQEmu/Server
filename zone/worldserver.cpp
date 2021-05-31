@@ -3037,6 +3037,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	}
 	case ServerOP_SharedTaskAcceptNewTask:
 	case ServerOP_SharedTaskUpdate:
+	case ServerOP_SharedTaskAttemptRemove:
 	{
 		SharedTaskZoneMessaging::HandleWorldMessage(pack);
 		break;

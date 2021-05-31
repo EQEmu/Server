@@ -28,10 +28,17 @@
 // used in
 // ServerOP_SharedTaskRequest
 // ServerOP_SharedTaskAcceptNewTask
-// ServerOP_SharedTaskAttemptRemove
 struct ServerSharedTaskRequest_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
+};
+
+// ServerOP_SharedTaskAttemptRemove
+// gets re-used when sent back to clients
+struct ServerSharedTaskAttemptRemove_Struct {
+	uint32 requested_character_id;
+	uint32 requested_task_id;
+	bool   remove_from_db;
 };
 
 // used in the shared task request process (currently)
@@ -39,8 +46,8 @@ struct SharedTaskMember {
 	uint32      character_id   = 0;
 	std::string character_name; // potentially remove, use only character_id
 	uint32      level          = 0;
-	bool        is_grouped     = false;
-	bool        is_raided      = false;
+	bool        is_grouped     = false; // this shouldn't be necessary either, potentially remove
+	bool        is_raided      = false; // this shouldn't be necessary either, potentially remove
 	bool        is_leader      = false;
 };
 

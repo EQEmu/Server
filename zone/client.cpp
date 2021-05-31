@@ -466,8 +466,9 @@ Client::~Client() {
 	UninitializeBuffSlots();
 
 	// shared task
-	m_requesting_shared_task = false;
-	m_shared_task_update = false;
+	m_requesting_shared_task        = false;
+	m_requested_shared_task_removal = false;
+	m_shared_task_update            = false;
 }
 
 void Client::SendZoneInPackets()
@@ -1554,46 +1555,56 @@ void Client::SendSound(){//Makes a sound.
 	safe_delete(outapp);
 
 }
-void Client::UpdateWho(uint8 remove) {
-	if (account_id == 0)
+void Client::UpdateWho(uint8 remove)
+{
+	if (account_id == 0) {
 		return;
-	if (!worldserver.Connected())
+	}
+	if (!worldserver.Connected()) {
 		return;
+	}
+
 	auto pack = new ServerPacket(ServerOP_ClientList, sizeof(ServerClientList_Struct));
-	ServerClientList_Struct* scl = (ServerClientList_Struct*) pack->pBuffer;
-	scl->remove = remove;
-	scl->wid = this->GetWID();
-	scl->IP = this->GetIP();
-	scl->charid = this->CharacterID();
-	strcpy(scl->name, this->GetName());
+	auto *s   = (ServerClientList_Struct *) pack->pBuffer;
+	s->remove = remove;
+	s->wid    = this->GetWID();
+	s->IP     = this->GetIP();
+	s->charid = this->CharacterID();
+	strcpy(s->name, this->GetName());
 
-	scl->gm = GetGM();
-	scl->Admin = this->Admin();
-	scl->AccountID = this->AccountID();
-	strcpy(scl->AccountName, this->AccountName());
-	scl->LSAccountID = this->LSAccountID();
-	strn0cpy(scl->lskey, lskey, sizeof(scl->lskey));
-	scl->zone = zone->GetZoneID();
-	scl->instance_id = zone->GetInstanceID();
-	scl->race = this->GetRace();
-	scl->class_ = GetClass();
-	scl->level = GetLevel();
-	if (m_pp.anon == 0)
-		scl->anon = 0;
-	else if (m_pp.anon == 1)
-		scl->anon = 1;
-	else if (m_pp.anon >= 2)
-		scl->anon = 2;
+	s->gm        = GetGM();
+	s->Admin     = this->Admin();
+	s->AccountID = this->AccountID();
+	strcpy(s->AccountName, this->AccountName());
 
-	scl->ClientVersion = static_cast<unsigned int>(ClientVersion());
-	scl->tellsoff = tellsoff;
-	scl->guild_id = guild_id;
-	scl->LFG = LFG;
-	if(LFG) {
-		scl->LFGFromLevel = LFGFromLevel;
-		scl->LFGToLevel = LFGToLevel;
-		scl->LFGMatchFilter = LFGMatchFilter;
-		memcpy(scl->LFGComments, LFGComments, sizeof(scl->LFGComments));
+	s->LSAccountID = this->LSAccountID();
+	strn0cpy(s->lskey, lskey, sizeof(s->lskey));
+
+	s->zone        = zone->GetZoneID();
+	s->instance_id = zone->GetInstanceID();
+	s->race        = this->GetRace();
+	s->class_      = GetClass();
+	s->level       = GetLevel();
+
+	if (m_pp.anon == 0) {
+		s->anon = 0;
+	}
+	else if (m_pp.anon == 1) {
+		s->anon = 1;
+	}
+	else if (m_pp.anon >= 2) {
+		s->anon = 2;
+	}
+
+	s->ClientVersion = static_cast<unsigned int>(ClientVersion());
+	s->tellsoff      = tellsoff;
+	s->guild_id      = guild_id;
+	s->LFG           = LFG;
+	if (LFG) {
+		s->LFGFromLevel   = LFGFromLevel;
+		s->LFGToLevel     = LFGToLevel;
+		s->LFGMatchFilter = LFGMatchFilter;
+		memcpy(s->LFGComments, LFGComments, sizeof(s->LFGComments));
 	}
 
 	worldserver.SendPacket(pack);

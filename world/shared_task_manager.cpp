@@ -49,6 +49,11 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 			member.is_raided      = true;
 			member.level          = c.level;
 
+			// if the group member is a leader, make sure we tag it as such
+			if (c.id == requestor_character_id) {
+				member.is_leader = true;
+			}
+
 			request_members.emplace_back(member);
 		}
 
@@ -72,6 +77,11 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 			member.character_name = c.name;
 			member.is_grouped     = true;
 			member.level          = c.level;
+
+			// if the group member is a leader, make sure we tag it as such
+			if (c.id == requestor_character_id) {
+				member.is_leader = true;
+			}
 
 			request_members.emplace_back(member);
 		}
@@ -141,7 +151,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 	// new shared task db object
 	auto shared_task_entity = SharedTasksRepository::NewEntity();
-	shared_task_entity.task_id       = (int)requested_task_id;
+	shared_task_entity.task_id       = (int) requested_task_id;
 	shared_task_entity.accepted_time = std::time(nullptr);
 
 	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
@@ -222,9 +232,9 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 		d->requested_task_id      = requested_task_id;
 
 		// get requested character zone server
-		ClientListEntry *requested_character_cle = client_list.FindCLEByCharacterID(m.character_id);
-		if (requested_character_cle && requested_character_cle->Server()) {
-			requested_character_cle->Server()->SendPacket(p.get());
+		ClientListEntry *cle = client_list.FindCLEByCharacterID(m.character_id);
+		if (cle && cle->Server()) {
+			cle->Server()->SendPacket(p.get());
 		}
 	}
 
@@ -238,45 +248,64 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	);
 }
 
-void SharedTaskManager::AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id)
+void SharedTaskManager::AttemptSharedTaskRemoval(
+	uint32 requested_task_id,
+	uint32 requested_character_id,
+	bool remove_from_db // inherited from zone logic - we're just passing through
+)
 {
 	auto task = GetSharedTaskDataByTaskId(requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
 		LogTasksDetail(
-			"[AttemptSharedTaskRemoval] Found Shared Task ({}) [{}]",
+			"[AttemptSharedTaskRemoval] Found Shared Task data ({}) [{}]",
 			requested_task_id,
 			task.title
 		);
 	}
 
-	// check for active shared tasks
-	for (auto &t: m_shared_tasks) {
-		LogTasksDetail(
-			"[AttemptSharedTaskRemoval] Looping tasks | task_id [{}] shared_task_id [{}]",
-			t.GetTaskData().id,
-			t.m_db_shared_task.id
-		);
+	auto t = FindSharedTaskByTaskIdAndCharacterId(requested_task_id, requested_character_id);
+	if (t) {
+		// make sure the one requesting is leader before removing everyone and deleting the shared task
+		// TODO: Handle removal of non-leaders
+		if (IsSharedTaskLeader(t, requested_character_id)) {
+			LogTasksDetail(
+				"[AttemptSharedTaskRemoval] Leader [{}]",
+				requested_character_id
+			);
 
-		if (t.GetTaskData().id == requested_task_id) {
-			// get members from shared task
-			for (auto &m: t.GetMembers()) {
-				LogTasksDetail(
-					"[AttemptSharedTaskRemoval] Looping members | character_id [{}]",
-					m.character_id
+			// inform clients of removal
+			for (auto &m: t->GetMembers()) {
+
+				// confirm shared task request: inform clients
+				auto p = std::make_unique<ServerPacket>(
+					ServerOP_SharedTaskAttemptRemove,
+					sizeof(ServerSharedTaskAttemptRemove_Struct)
 				);
 
-				// TODO: Happy path removal just for now, add additional handling later
-				if (m.character_id == requested_character_id && m.is_leader) {
-					DeleteSharedTask(t.m_db_shared_task.id);
+				auto d = reinterpret_cast<ServerSharedTaskAttemptRemove_Struct *>(p->pBuffer);
+				d->requested_character_id = m.character_id;
+				d->requested_task_id      = requested_task_id;
+				d->remove_from_db         = remove_from_db;
+
+				// get requested character zone server
+				ClientListEntry *cle = client_list.FindCLEByCharacterID(m.character_id);
+				if (cle && cle->Server()) {
+					cle->Server()->SendPacket(p.get());
 				}
 			}
+
+			// persistence
+			DeleteSharedTask(t->m_db_shared_task.id, requested_character_id);
 		}
 	}
 }
 
-void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
+void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_character_id)
 {
-	LogTasksDetail("[DeleteSharedTask] shared_task_id [{}]", shared_task_id);
+	LogTasksDetail(
+		"[DeleteSharedTask] shared_task_id [{}]",
+		shared_task_id
+	);
 
 	// remove internally
 	m_shared_tasks.erase(
@@ -319,11 +348,20 @@ void SharedTaskManager::LoadSharedTaskState()
 	for (auto &s: st) {
 		SharedTask ns = {};
 
+		LogTasksDetail(
+			"[LoadSharedTaskState] Loading shared_task_id [{}] task_id [{}]",
+			s.id,
+			s.task_id
+		);
+
 		// shared task db data
 		ns.m_db_shared_task = s;
 
 		// set database task data for internal referencing
 		auto task_data = GetSharedTaskDataByTaskId(s.task_id);
+
+		LogTasksDetail("[LoadSharedTaskState] [GetSharedTaskDataByTaskId] task_id [{}]", task_data.id);
+
 		ns.SetTaskData(task_data);
 
 		// set database task data for internal referencing
@@ -376,13 +414,20 @@ void SharedTaskManager::LoadSharedTaskState()
 				member.is_leader    = (m.is_leader ? 1 : 0);
 
 				shared_task_members.emplace_back(member);
+
+				LogTasksDetail(
+					"[LoadSharedTaskState] Adding member to shared_task_id [{}] character_id [{}] is_leader [{}]",
+					s.id,
+					member.character_id,
+					member.is_leader
+				);
 			}
 		}
 
 		ns.SetMembers(shared_task_members);
 
-		LogTasksDetail(
-			"Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
+		LogTasks(
+			"[LoadSharedTaskState] Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
 			s.id,
 			task_data.id,
 			task_data.title,
@@ -395,13 +440,17 @@ void SharedTaskManager::LoadSharedTaskState()
 
 	m_shared_tasks = shared_tasks;
 
+	LogTasks(
+		"[LoadSharedTaskState] Loaded [{}] shared tasks",
+		m_shared_tasks.size()
+	);
 }
 SharedTaskManager *SharedTaskManager::LoadTaskData()
 {
 	m_task_data          = TasksRepository::All(*m_content_database);
 	m_task_activity_data = TaskActivitiesRepository::All(*m_content_database);
 
-	LogTasks("Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
+	LogTasks("[LoadTaskData] Loaded tasks [{}] activities [{}]", m_task_data.size(), m_task_activity_data.size());
 
 	return this;
 }
@@ -520,13 +569,11 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 	}
 }
 
-SharedTask * SharedTaskManager::FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id)
+SharedTask *SharedTaskManager::FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id)
 {
 	for (auto &s: m_shared_tasks) {
-
 		// grep for task
 		if (s.GetTaskData().id == task_id) {
-
 			// find member in shared task
 			for (auto &m: s.GetMembers()) {
 				if (m.character_id == character_id) {
@@ -553,12 +600,23 @@ void SharedTaskManager::SaveSharedTaskActivityState(
 		// entry
 		auto e = SharedTaskActivityStateRepository::NewEntity();
 		e.shared_task_id = shared_task_id;
-		e.activity_id    = (int)a.activity_id;
-		e.done_count     = (int)a.done_count;
+		e.activity_id    = (int) a.activity_id;
+		e.done_count     = (int) a.done_count;
 
 		shared_task_db_activities.emplace_back(e);
 	}
 
 	SharedTaskActivityStateRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
 	SharedTaskActivityStateRepository::InsertMany(*m_database, shared_task_db_activities);
+}
+
+bool SharedTaskManager::IsSharedTaskLeader(SharedTask *p_shared_task, uint32 character_id)
+{
+	for (auto &m: p_shared_task->GetMembers()) {
+		if (m.character_id == character_id && m.is_leader) {
+			return true;
+		}
+	}
+
+	return false;
 }
