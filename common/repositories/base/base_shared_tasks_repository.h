@@ -20,7 +20,6 @@ public:
 	struct SharedTasks {
 		int64 id;
 		int   task_id;
-		int64 dynamic_zone_id;
 		int   accepted_time;
 		int   completion_time;
 		int   is_locked;
@@ -36,7 +35,6 @@ public:
 		return {
 			"id",
 			"task_id",
-			"dynamic_zone_id",
 			"accepted_time",
 			"completion_time",
 			"is_locked",
@@ -77,7 +75,6 @@ public:
 
 		entry.id              = 0;
 		entry.task_id         = 0;
-		entry.dynamic_zone_id = 0;
 		entry.accepted_time   = 0;
 		entry.completion_time = 0;
 		entry.is_locked       = 0;
@@ -118,10 +115,9 @@ public:
 
 			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
-			entry.accepted_time   = atoi(row[3]);
-			entry.completion_time = atoi(row[4]);
-			entry.is_locked       = atoi(row[5]);
+			entry.accepted_time   = atoi(row[2]);
+			entry.completion_time = atoi(row[3]);
+			entry.is_locked       = atoi(row[4]);
 
 			return entry;
 		}
@@ -156,10 +152,9 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(shared_tasks_entry.task_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(shared_tasks_entry.dynamic_zone_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(shared_tasks_entry.accepted_time));
-		update_values.push_back(columns[4] + " = " + std::to_string(shared_tasks_entry.completion_time));
-		update_values.push_back(columns[5] + " = " + std::to_string(shared_tasks_entry.is_locked));
+		update_values.push_back(columns[2] + " = " + std::to_string(shared_tasks_entry.accepted_time));
+		update_values.push_back(columns[3] + " = " + std::to_string(shared_tasks_entry.completion_time));
+		update_values.push_back(columns[4] + " = " + std::to_string(shared_tasks_entry.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -183,7 +178,6 @@ public:
 
 		insert_values.push_back(std::to_string(shared_tasks_entry.id));
 		insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
-		insert_values.push_back(std::to_string(shared_tasks_entry.dynamic_zone_id));
 		insert_values.push_back(std::to_string(shared_tasks_entry.accepted_time));
 		insert_values.push_back(std::to_string(shared_tasks_entry.completion_time));
 		insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
@@ -218,7 +212,6 @@ public:
 
 			insert_values.push_back(std::to_string(shared_tasks_entry.id));
 			insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
-			insert_values.push_back(std::to_string(shared_tasks_entry.dynamic_zone_id));
 			insert_values.push_back(std::to_string(shared_tasks_entry.accepted_time));
 			insert_values.push_back(std::to_string(shared_tasks_entry.completion_time));
 			insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
@@ -257,10 +250,9 @@ public:
 
 			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
-			entry.accepted_time   = atoi(row[3]);
-			entry.completion_time = atoi(row[4]);
-			entry.is_locked       = atoi(row[5]);
+			entry.accepted_time   = atoi(row[2]);
+			entry.completion_time = atoi(row[3]);
+			entry.is_locked       = atoi(row[4]);
 
 			all_entries.push_back(entry);
 		}
@@ -287,10 +279,9 @@ public:
 
 			entry.id              = strtoll(row[0], NULL, 10);
 			entry.task_id         = atoi(row[1]);
-			entry.dynamic_zone_id = strtoll(row[2], NULL, 10);
-			entry.accepted_time   = atoi(row[3]);
-			entry.completion_time = atoi(row[4]);
-			entry.is_locked       = atoi(row[5]);
+			entry.accepted_time   = atoi(row[2]);
+			entry.completion_time = atoi(row[3]);
+			entry.is_locked       = atoi(row[4]);
 
 			all_entries.push_back(entry);
 		}

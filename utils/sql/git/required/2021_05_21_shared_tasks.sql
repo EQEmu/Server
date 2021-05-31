@@ -2,7 +2,6 @@ CREATE TABLE `shared_tasks`
 (
     `id`              bigint(20) NOT NULL AUTO_INCREMENT,
     `task_id`         int(11) DEFAULT NULL,
-    `dynamic_zone_id` bigint(20) DEFAULT NULL,
     `accepted_time`   int(11) DEFAULT NULL,
     `completion_time` int(11) DEFAULT NULL,
     `is_locked`       tinyint(1) DEFAULT NULL,
