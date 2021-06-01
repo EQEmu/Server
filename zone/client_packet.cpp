@@ -414,6 +414,11 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ZoneChange] = &Client::Handle_OP_ZoneChange;
 	ConnectedOpcodes[OP_ResetAA] = &Client::Handle_OP_ResetAA;
 	ConnectedOpcodes[OP_UnderWorld] = &Client::Handle_OP_UnderWorld;
+
+	// shared tasks
+	ConnectedOpcodes[OP_SharedTaskRemovePlayer] = &Client::Handle_OP_SharedTaskRemovePlayer;
+	ConnectedOpcodes[OP_SharedTaskAddPlayer]    = &Client::Handle_OP_SharedTaskAddPlayer;
+	ConnectedOpcodes[OP_SharedTaskMakeLeader]   = &Client::Handle_OP_SharedTaskMakeLeader;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -12820,16 +12825,16 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		While active for the duration of 12 seconds baseline. The 'shield target' will take 50 pct less damage and
 		the 'shielder' will be hit with the damage taken by the 'shield target' after all applicable mitigiont is calculated,
 		the damage on the 'shielder' will be reduced by 25 percent, this reduction can be increased to 50 pct if equiping a shield.
-		You receive a 1% increase in mitigation for every 2 AC on the shield. 
+		You receive a 1% increase in mitigation for every 2 AC on the shield.
 		Shielder must stay with in a close distance (15 units) to your 'shield target'. If either move out of range, shield ends, no message given.
 		Both duration and shield range can be modified by AA.
 		Recast is 3 minutes.
 
 		For custom use cases, Mob::ShieldAbility can be used in quests with all parameters being altered. This functional
 		is also used for SPA 201 SE_PetShield, which functions in a simalar manner with pet shielding owner.
-		
+
 		Note: If either the shielder or the shield target die all variables are reset on both.
-	
+
 	*/
 
 	if (app->size != sizeof(Shielding_Struct)) {
@@ -12838,7 +12843,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	if (GetLevel() < 30) { //Client gives message
-		return; 
+		return;
 	}
 
 	if (GetClass() != WARRIOR){
@@ -12854,7 +12859,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-			
+
 	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
 		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
@@ -15196,20 +15201,39 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
+void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket *app)
+{
 	cheat_manager.ProcessMovementHistory(app);
 }
 
-void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
-	UnderWorld* m_UnderWorld = (UnderWorld*)app->pBuffer;
-	if (app->size != sizeof(UnderWorld))
-	{
+void Client::Handle_OP_UnderWorld(const EQApplicationPacket *app)
+{
+	UnderWorld *m_UnderWorld = (UnderWorld *) app->pBuffer;
+	if (app->size != sizeof(UnderWorld)) {
 		LogDebug("Size mismatch in OP_UnderWorld, expected {}, got [{}]", sizeof(UnderWorld), app->size);
 		DumpPacket(app);
 		return;
 	}
-	auto dist = Distance(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld), glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
+	auto dist = Distance(
+		glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld),
+		glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
 	cheat_manager.MovementCheck(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
-	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0)
+	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0) {
 		cheat_manager.SetExemptStatus(Port, true);
+	}
+}
+
+void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
+{
+	LogTasks("[Handle_OP_SharedTaskRemovePlayer]");
+}
+
+void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
+{
+	LogTasks("[Handle_OP_SharedTaskAddPlayer]");
+}
+
+void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
+{
+	LogTasks("[Handle_OP_SharedTaskMakeLeader]");
 }
