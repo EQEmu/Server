@@ -1599,14 +1599,15 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 
 					// we're behind shared task state, update self
 					if (task_info->activity[a.activity_id].done_count < a.done_count) {
-						task_info->activity[a.activity_id].done_count = a.done_count;
-						if (a.completed_time > 0) {
-							task_info->activity[a.activity_id].activity_state = ActivityCompleted;
-						}
-						else {
-							task_info->activity[a.activity_id].activity_state = ActivityHidden;
-						}
 
+						// update done count
+						task_info->activity[a.activity_id].done_count = a.done_count;
+
+						// activity state
+						task_info->activity[a.activity_id].activity_state =
+							(a.completed_time > 0 ? ActivityCompleted : ActivityHidden);
+
+						// set flag to persist later
 						fell_behind_state = true;
 					}
 				}
