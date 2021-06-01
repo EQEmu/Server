@@ -54,6 +54,9 @@ protected:
 	std::vector<SharedTask> m_shared_tasks;
 	bool IsSharedTaskLeader(SharedTask *p_shared_task, uint32 character_id);
 	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id);
+	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
+	void SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id);
+	void RemovePlayerFromSharedTask(SharedTask **s, uint32 character_id);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

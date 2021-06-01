@@ -221,25 +221,10 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	// add to shared tasks list
 	m_shared_tasks.emplace_back(new_shared_task);
 
+	// send accept to members
 	for (auto &m: request_members) {
 		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id);
-
-		// send member list packet
-		auto p = std::make_unique<ServerPacket>(
-			ServerOP_SharedTaskMemberlist,
-			sizeof(ServerSharedTaskMemberListPacket_Struct)
-		);
-
-		auto d = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(p->pBuffer);
-
-		d->destination_character_id = m.character_id;
-		d->shared_task_id           = new_shared_task.m_db_shared_task.id;
-
-		// send memberlist
-		ClientListEntry *cle = client_list.FindCLEByCharacterID(m.character_id);
-		if (cle && cle->Server()) {
-			cle->Server()->SendPacket(p.get());
-		}
+		SendSharedTaskMemberList(m.character_id, new_shared_task.m_db_shared_task.id);
 	}
 
 	LogTasks(
@@ -269,8 +254,8 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 	auto t = FindSharedTaskByTaskIdAndCharacterId(requested_task_id, requested_character_id);
 	if (t) {
+
 		// make sure the one requesting is leader before removing everyone and deleting the shared task
-		// TODO: Handle removal of non-leaders
 		if (IsSharedTaskLeader(t, requested_character_id)) {
 			LogTasksDetail(
 				"[AttemptSharedTaskRemoval] Leader [{}]",
@@ -279,27 +264,39 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 			// inform clients of removal
 			for (auto &m: t->GetMembers()) {
-
-				// confirm shared task request: inform clients
-				auto p = std::make_unique<ServerPacket>(
-					ServerOP_SharedTaskAttemptRemove,
-					sizeof(ServerSharedTaskAttemptRemove_Struct)
+				LogTasksDetail(
+					"[AttemptSharedTaskRemoval] Sending removal to [{}] shared_task_id [{}]",
+					m.character_id,
+					requested_task_id
 				);
 
-				auto d = reinterpret_cast<ServerSharedTaskAttemptRemove_Struct *>(p->pBuffer);
-				d->requested_character_id = m.character_id;
-				d->requested_task_id      = requested_task_id;
-				d->remove_from_db         = remove_from_db;
-
-				// get requested character zone server
-				ClientListEntry *cle = client_list.FindCLEByCharacterID(m.character_id);
-				if (cle && cle->Server()) {
-					cle->Server()->SendPacket(p.get());
-				}
+				SendRemovePlayerFromSharedTaskPacket(
+					m.character_id,
+					requested_task_id,
+					remove_from_db
+				);
 			}
 
 			// persistence
 			DeleteSharedTask(t->m_db_shared_task.id, requested_character_id);
+
+			return;
+		}
+
+		// non-leader
+		// remove self
+		RemovePlayerFromSharedTask(&t, requested_character_id);
+		SendRemovePlayerFromSharedTaskPacket(
+			requested_character_id,
+			requested_task_id,
+			remove_from_db
+		);
+
+		// inform clients of removal of self
+		for (auto &m: t->GetMembers()) {
+			LogTasksDetail("[AttemptSharedTaskRemoval] looping character_id [{}]", m.character_id);
+
+			SendSharedTaskMemberList(m.character_id, t->m_db_shared_task.id);
 		}
 	}
 }
@@ -320,7 +317,8 @@ void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_
 				return s.m_db_shared_task.id == shared_task_id;
 			}
 		),
-		m_shared_tasks.end());
+		m_shared_tasks.end()
+	);
 
 	// database
 	SharedTasksRepository::DeleteWhere(*m_database, fmt::format("id = {}", shared_task_id));
@@ -643,3 +641,72 @@ void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint3
 		cle->Server()->SendPacket(p.get());
 	}
 }
+
+void SharedTaskManager::SendRemovePlayerFromSharedTaskPacket(
+	uint32 character_id,
+	uint32 task_id,
+	bool remove_from_db
+)
+{
+	// confirm shared task request: inform clients
+	auto p = std::make_unique<ServerPacket>(
+		ServerOP_SharedTaskAttemptRemove,
+		sizeof(ServerSharedTaskAttemptRemove_Struct)
+	);
+
+	auto d = reinterpret_cast<ServerSharedTaskAttemptRemove_Struct *>(p->pBuffer);
+	d->requested_character_id = character_id;
+	d->requested_task_id      = task_id;
+	d->remove_from_db         = remove_from_db;
+
+	// get requested character zone server
+	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	if (cle && cle->Server()) {
+		cle->Server()->SendPacket(p.get());
+	}
+}
+
+void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id)
+{
+	// send member list packet
+	// TODO: move this to serialized list sent over the wire
+	auto p = std::make_unique<ServerPacket>(
+		ServerOP_SharedTaskMemberlist,
+		sizeof(ServerSharedTaskMemberListPacket_Struct)
+	);
+
+	auto d = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(p->pBuffer);
+	d->destination_character_id = character_id;
+	d->shared_task_id           = shared_task_id;
+
+	// send memberlist
+	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
+	if (cle && cle->Server()) {
+		cle->Server()->SendPacket(p.get());
+	}
+}
+
+void SharedTaskManager::RemovePlayerFromSharedTask(SharedTask **s, uint32 character_id)
+{
+	SharedTaskMembersRepository::DeleteWhere(
+		*m_database,
+		fmt::format(
+			"shared_task_id = {} and character_id = {}",
+			(*s)->m_db_shared_task.id,
+			character_id
+		)
+	);
+
+	// remove internally
+	(*s)->m_members.erase(
+		std::remove_if(
+			(*s)->m_members.begin(),
+			(*s)->m_members.end(),
+			[&](SharedTaskMember const &m) {
+				return m.character_id == character_id;
+			}
+		),
+		(*s)->m_members.end()
+	);
+}
+
