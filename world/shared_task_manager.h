@@ -27,6 +27,7 @@ public:
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id);
 	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
+	// shared task activity update middleware
 	void SharedTaskActivityUpdate(
 		uint32 source_character_id,
 		uint32 task_id,

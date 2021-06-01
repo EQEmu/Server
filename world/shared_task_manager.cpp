@@ -420,7 +420,7 @@ void SharedTaskManager::LoadSharedTaskState()
 				shared_task_members.emplace_back(member);
 
 				LogTasksDetail(
-					"[LoadSharedTaskState] Adding member to shared_task_id [{}] character_id [{}] is_leader [{}]",
+					"[LoadSharedTaskState] shared_task_id [{}] adding member character_id [{}] is_leader [{}]",
 					s.id,
 					member.character_id,
 					member.is_leader
@@ -449,6 +449,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		m_shared_tasks.size()
 	);
 }
+
 SharedTaskManager *SharedTaskManager::LoadTaskData()
 {
 	m_task_data          = TasksRepository::All(*m_content_database);
