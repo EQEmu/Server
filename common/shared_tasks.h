@@ -63,6 +63,7 @@ struct SharedTaskActivityStateEntry {
 	uint32 activity_id;
 	uint32 done_count;
 	uint32 max_done_count; // goalcount
+	uint32 completed_time;
 };
 
 struct ServerSharedTaskActivityUpdate_Struct {

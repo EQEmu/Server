@@ -9,6 +9,8 @@
 #include "client.h"
 #include "string_ids.h"
 #include "task_manager.h"
+#include "../common/repositories/shared_task_activity_state_repository.h"
+#include "../common/repositories/shared_task_members_repository.h"
 
 TaskManager::TaskManager()
 {
@@ -1559,6 +1561,62 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			character_activity.donecount,
 			character_activity.completed
 		);
+	}
+
+	// shared sync state
+	// this could change to be entirely driven from world via packets later
+	for (auto &character_task: character_tasks) {
+		if (character_task.type == TASK_TYPE_SHARED) {
+			auto st = SharedTaskMembersRepository::GetWhere(
+				database,
+				fmt::format(
+					"character_id = {}",
+					client->CharacterID()
+				)
+			);
+
+			if (!st.empty()) {
+				int64 shared_task_id = st[0].shared_task_id;
+				auto  activities     = SharedTaskActivityStateRepository::GetWhere(
+					database,
+					fmt::format(
+						"shared_task_id = {}",
+						shared_task_id
+					)
+				);
+
+				ClientTaskInformation *task_info = nullptr;
+				task_info = &client_task_state->m_active_shared_task;
+
+				bool      fell_behind_state = false;
+				for (auto &a: activities) {
+
+					LogTasksDetail(
+						"[LoadClientState] shared_task loop local [{}] shared [{}]",
+						task_info->activity[a.activity_id].done_count,
+						a.done_count
+					);
+
+					// we're behind shared task state, update self
+					if (task_info->activity[a.activity_id].done_count < a.done_count) {
+						task_info->activity[a.activity_id].done_count = a.done_count;
+						if (a.completed_time > 0) {
+							task_info->activity[a.activity_id].activity_state = ActivityCompleted;
+						}
+						else {
+							task_info->activity[a.activity_id].activity_state = ActivityHidden;
+						}
+
+						fell_behind_state = true;
+					}
+				}
+
+				// fell behind, force a save of client state
+				if (fell_behind_state) {
+					SaveClientState(client, client_task_state);
+				}
+			}
+		}
 	}
 
 	if (RuleB(TaskSystem, RecordCompletedTasks)) {

@@ -398,6 +398,7 @@ void SharedTaskManager::LoadSharedTaskState()
 						);
 
 						e.max_done_count = ad.goalcount;
+						e.completed_time = sta.completed_time;
 					}
 				}
 
@@ -517,6 +518,11 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 					a.done_count = done_count;
 
+					// if the activity is done, lets mark it as such
+					if (a.done_count == a.max_done_count) {
+						a.completed_time = std::time(nullptr);
+					}
+
 					// sync state as each update comes in (for now)
 					SaveSharedTaskActivityState(
 						shared_task->m_db_shared_task.id,
@@ -605,6 +611,7 @@ void SharedTaskManager::SaveSharedTaskActivityState(
 		e.shared_task_id = shared_task_id;
 		e.activity_id    = (int) a.activity_id;
 		e.done_count     = (int) a.done_count;
+		e.completed_time = (int) a.completed_time;
 
 		shared_task_db_activities.emplace_back(e);
 	}
