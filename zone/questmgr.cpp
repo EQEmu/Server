@@ -1745,6 +1745,18 @@ void QuestManager::addldonwin(uint32 theme_id) {
 		initiator->AddLDoNWin(theme_id);
 }
 
+void QuestManager::removeldonloss(uint32 theme_id) {
+	QuestManagerCurrentQuestVars();
+	if(initiator)
+		initiator->RemoveLDoNLoss(theme_id);
+}
+
+void QuestManager::removeldonwin(uint32 theme_id) {
+	QuestManagerCurrentQuestVars();
+	if(initiator)
+		initiator->RemoveLDoNWin(theme_id);
+}
+
 void QuestManager::setnexthpevent(int at) {
 	QuestManagerCurrentQuestVars();
 	if (owner)

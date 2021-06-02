@@ -329,8 +329,10 @@ enum {
 };
 
 enum {
-	CZLDoNUpdateSubtype_Win = 0,
-	CZLDoNUpdateSubtype_Loss,
+	CZLDoNUpdateSubtype_WinAdd = 0,
+	CZLDoNUpdateSubtype_WinRemove,
+	CZLDoNUpdateSubtype_LossAdd,
+	CZLDoNUpdateSubtype_LossRemove,
 	CZLDoNUpdateSubtype_Points
 };
 

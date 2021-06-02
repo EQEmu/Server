@@ -2093,6 +2093,16 @@ void Lua_Client::AddLDoNWin(uint32 theme_id) {
 	self->AddLDoNWin(theme_id);
 }
 
+void Lua_Client::RemoveLDoNLoss(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->RemoveLDoNLoss(theme_id);
+}
+
+void Lua_Client::RemoveLDoNWin(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->RemoveLDoNWin(theme_id);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2447,7 +2457,9 @@ luabind::scope lua_register_client() {
 		.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
 		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
 		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
-		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin);
+		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin)
+		.def("RemoveLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNLoss)
+		.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin);
 }
 
 luabind::scope lua_register_inventory_where() {

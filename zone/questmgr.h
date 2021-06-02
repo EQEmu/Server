@@ -161,6 +161,8 @@ public:
 	void addldonpoints(uint32 theme_id, int points);
 	void addldonloss(uint32 theme_id);
 	void addldonwin(uint32 theme_id);
+	void removeldonloss(uint32 theme_id);
+	void removeldonwin(uint32 theme_id);
 	void setnexthpevent(int at);
 	void setnextinchpevent(int at);
 	void respawn(int npc_type, int grid);

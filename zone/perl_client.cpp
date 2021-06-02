@@ -5318,6 +5318,34 @@ XS(XS_Client_AddLDoNWin) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_RemoveLDoNLoss);
+XS(XS_Client_RemoveLDoNLoss) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNLoss(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->RemoveLDoNLoss(theme_id);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveLDoNWin);
+XS(XS_Client_RemoveLDoNWin) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNWin(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->RemoveLDoNWin(theme_id);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5536,6 +5564,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
+	newXSproto(strcpy(buf, "RemoveLDoNLoss"), XS_Client_RemoveLDoNLoss, file, "$$");
+	newXSproto(strcpy(buf, "RemoveLDoNwin"), XS_Client_RemoveLDoNWin, file, "$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
