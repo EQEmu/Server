@@ -204,7 +204,7 @@ void Client::ProcessItemCaps()
 	// The Sleeper Tomb Avatar proc counts towards item ATK
 	// The client uses a 100 here, so using a 100 here the client and server will agree
 	// For example, if you set the effect to be 200 it will get 100 item ATK and 100 spell ATK
-	if (IsValidSpell(2434) && FindBuff(2434)) {
+	if (IsValidSpell(SPELL_AVATAR_ST_PROC) && FindBuff(SPELL_AVATAR_ST_PROC)) {
 		itembonuses.ATK += 100;
 		spellbonuses.ATK -= 100;
 	}
