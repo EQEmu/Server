@@ -5581,23 +5581,23 @@ void Client::RemoveLDoNLoss(uint32 theme_id)
 	{
 		case 1:
 			m_pp.ldon_losses_guk -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false, true);
 			break;
 		case 2:
 			m_pp.ldon_losses_mir -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false, true);
 			break;
 		case 3:
 			m_pp.ldon_losses_mmc -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false, true);
 			break;
 		case 4:
 			m_pp.ldon_losses_ruj -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false, true);
 			break;
 		case 5:
 			m_pp.ldon_losses_tak -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, false, true);
 			break;
 		default:
 			return;
@@ -5639,23 +5639,23 @@ void Client::RemoveLDoNWin(uint32 theme_id)
 	{
 		case 1:
 			m_pp.ldon_wins_guk -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true, true);
 			break;
 		case 2:
 			m_pp.ldon_wins_mir -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true, true);
 			break;
 		case 3:
 			m_pp.ldon_wins_mmc -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true, true);
 			break;
 		case 4:
 			m_pp.ldon_wins_ruj -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true, true);
 			break;
 		case 5:
 			m_pp.ldon_wins_tak -= 1;
-			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true);
+			database.UpdateAdventureStatsEntry(CharacterID(), theme_id, true, true);
 			break;
 		default:
 			return;

@@ -174,7 +174,7 @@ public:
 
 	/* Adventure related. */
 
-	void UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win);
+	void UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win, bool remove = false);
 	bool GetAdventureStats(uint32 char_id, AdventureStats_Struct *as);
 
 	/* Account Related */
