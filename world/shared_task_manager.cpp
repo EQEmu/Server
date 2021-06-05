@@ -768,7 +768,7 @@ void SharedTaskManager::PrintSharedTaskState()
 	}
 }
 
-void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name)
+void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string &character_name)
 {
 	auto character = CharacterDataRepository::GetWhere(
 		*m_database,
@@ -788,7 +788,7 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, co
 			// not leader being removed
 			if (character_id == m.character_id) {
 				LogTasksDetail(
-					"[RemovePlayerFromSharedTaskByPlayerName] shared_task_id [{}] character_name",
+					"[RemovePlayerFromSharedTaskByPlayerName] shared_task_id [{}] character_name [{}]",
 					s->GetDbSharedTask().id,
 					character_name
 				);
@@ -814,5 +814,65 @@ void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
 			s->GetDbSharedTask().id
 		);
 	}
+}
+
+void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string &character_name)
+{
+	auto character = CharacterDataRepository::GetWhere(
+		*m_database,
+		fmt::format("`name` = '{}' LIMIT 1", EscapeString(character_name))
+	);
+
+	if (!character.empty()) {
+		int64 character_id     = character[0].id;
+		bool  found_new_leader = false;
+
+		std::vector<SharedTaskMember> members = s->GetMembers();
+		for (auto                     &m: members) {
+			LogTasksDetail(
+				"[MakeLeaderByPlayerName] character_id [{}] m.character_name [{}]",
+				character_id,
+				m.character_id
+			);
+
+			m.is_leader = false;
+
+			// destination character is in shared task, make swap
+			if (character_id == m.character_id) {
+				found_new_leader = true;
+				LogTasksDetail(
+					"[MakeLeaderByPlayerName] shared_task_id [{}] character_name [{}]",
+					s->GetDbSharedTask().id,
+					character_name
+				);
+
+				m.is_leader = true;
+			}
+		}
+
+		if (found_new_leader) {
+			s->SetMembers(members);
+			SaveMembers(s, members);
+			SendSharedTaskMemberListToAllMembers(s);
+		}
+	}
+}
+
+void SharedTaskManager::SaveMembers(SharedTask *s, std::vector<SharedTaskMember> members)
+{
+	std::vector<SharedTaskMembersRepository::SharedTaskMembers> dm = {};
+	dm.reserve(members.size());
+	for (auto &m: members) {
+		auto e = SharedTaskMembersRepository::NewEntity();
+
+		e.character_id   = m.character_id;
+		e.is_leader      = (m.is_leader ? 1 : 0);
+		e.shared_task_id = s->GetDbSharedTask().id;
+
+		dm.emplace_back(e);
+	}
+
+	SharedTaskMembersRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", s->GetDbSharedTask().id));
+	SharedTaskMembersRepository::InsertMany(*m_database, dm);
 }
 

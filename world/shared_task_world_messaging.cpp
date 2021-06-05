@@ -128,6 +128,38 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskMakeLeader: {
+			auto *r = (ServerSharedTaskMakeLeader_Struct *) pack->pBuffer;
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskMakeLeader] Received request from character [{}] task_id [{}] player_name [{}]",
+				r->source_character_id,
+				r->task_id,
+				r->player_name
+			);
+
+			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(r->task_id, r->source_character_id);
+			if (t) {
+				LogTasksDetail(
+					"[ServerOP_SharedTaskMakeLeader] Found shared task character [{}] shared_task_id [{}]",
+					r->source_character_id,
+					t->GetDbSharedTask().id
+				);
+
+				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
+					LogTasksDetail(
+						"[ServerOP_SharedTaskMakeLeader] character_id [{}] shared_task_id [{}] is_leader",
+						r->source_character_id,
+						t->GetDbSharedTask().id
+					);
+
+					std::string character_name = r->player_name;
+					shared_task_manager.MakeLeaderByPlayerName(t, character_name);
+				}
+			}
+
+			break;
+		}
 		default:
 			break;
 	}

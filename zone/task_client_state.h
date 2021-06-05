@@ -69,6 +69,8 @@ public:
 	);
 
 	const ClientTaskInformation &GetActiveSharedTask() const;
+	bool HasActiveSharedTask();
+
 
 private:
 

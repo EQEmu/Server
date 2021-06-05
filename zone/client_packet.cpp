@@ -948,7 +948,8 @@ void Client::CompleteConnect()
 
 	// shared tasks memberlist
 	// TODO: shared_task move this to something else later
-	if (GetTaskState()->GetActiveSharedTask().task_id != 0) {
+	if (GetTaskState()->HasActiveSharedTask()) {
+
 		// struct
 		auto p = new ServerPacket(
 			ServerOP_SharedTaskRequestMemberlist,
@@ -957,7 +958,7 @@ void Client::CompleteConnect()
 
 		auto *r = (ServerSharedTaskRequestMemberlist_Struct *) p->pBuffer;
 
-		// fillc
+		// fill
 		r->source_character_id = CharacterID();
 		r->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
 
@@ -15262,9 +15263,8 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 		r->player_name
 	);
 
-	// handle
 	// TODO: Send error message if not in active task
-	if (GetTaskState()->GetActiveSharedTask().task_id != 0) {
+	if (GetTaskState()->HasActiveSharedTask()) {
 		// struct
 		auto p = new ServerPacket(
 			ServerOP_SharedTaskRemovePlayer,
@@ -15284,8 +15284,6 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 			rp->task_id,
 			rp->player_name
 		);
-
-//		rp->player_name         = r->player_name;
 
 		// send
 		worldserver.SendPacket(p);
@@ -15331,4 +15329,31 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 		r->field2,
 		r->player_name
 	);
+
+	// TODO: Send error message if not in active task
+	if (GetTaskState()->HasActiveSharedTask()) {
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskMakeLeader,
+			sizeof(ServerSharedTaskMakeLeader_Struct)
+		);
+
+		auto *rp = (ServerSharedTaskMakeLeader_Struct *) p->pBuffer;
+
+		// fill
+		rp->source_character_id = CharacterID();
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
+
+		LogTasks(
+			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			rp->source_character_id,
+			rp->task_id,
+			rp->player_name
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
 }

@@ -49,6 +49,7 @@ public:
 	void PrintSharedTaskState();
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name);
 
+	void MakeLeaderByPlayerName(SharedTask *s, const std::string& character_name);
 protected:
 	// reference to database
 	Database *m_database;
@@ -62,6 +63,7 @@ protected:
 	std::vector<SharedTask> m_shared_tasks;
 
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
+	void SaveMembers(SharedTask *s, std::vector<SharedTaskMember> members);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

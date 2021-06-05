@@ -2467,3 +2467,8 @@ const ClientTaskInformation &ClientTaskState::GetActiveSharedTask() const
 {
 	return m_active_shared_task;
 }
+
+bool ClientTaskState::HasActiveSharedTask()
+{
+	return GetActiveSharedTask().task_id != 0;
+}
