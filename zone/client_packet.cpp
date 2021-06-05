@@ -15309,6 +15309,34 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 		r->field2,
 		r->player_name
 	);
+
+	// TODO: Send error message if not in active task
+	if (GetTaskState()->HasActiveSharedTask()) {
+
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskAddPlayer,
+			sizeof(ServerSharedTaskAddPlayer_Struct)
+		);
+
+		auto *rp = (ServerSharedTaskAddPlayer_Struct *) p->pBuffer;
+
+		// fill
+		rp->source_character_id = CharacterID();
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
+
+		LogTasks(
+			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			rp->source_character_id,
+			rp->task_id,
+			rp->player_name
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
 }
 
 void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)

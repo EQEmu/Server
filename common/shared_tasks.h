@@ -90,6 +90,12 @@ struct ServerSharedTaskRemovePlayer_Struct {
 	char   player_name[64];
 };
 
+struct ServerSharedTaskAddPlayer_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	char   player_name[64];
+};
+
 struct ServerSharedTaskMakeLeader_Struct {
 	uint32 source_character_id;
 	uint32 task_id;

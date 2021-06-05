@@ -22,7 +22,8 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 				LogTasks("[ServerOP_SharedTaskAcceptNewTask] We're back in zone and I found [{}]", c->GetCleanName());
 
 				c->m_requesting_shared_task = true;
-				c->GetTaskState()->AcceptNewTask(c, p->requested_task_id, 0);
+				c->GetTaskState()->AcceptNewTask(c, (int) p->requested_task_id, 0);
+				c->LoadClientTaskState();
 				c->m_requesting_shared_task = false;
 			}
 
@@ -37,9 +38,9 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 				c->m_shared_task_update = true;
 				c->GetTaskState()->SharedTaskIncrementDoneCount(
 					c,
-					(int)p->task_id,
-					(int)p->activity_id,
-					(int)p->done_count,
+					(int) p->task_id,
+					(int) p->activity_id,
+					(int) p->done_count,
 					p->ignore_quest_update
 				);
 				c->m_shared_task_update = false;

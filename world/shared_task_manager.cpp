@@ -876,3 +876,41 @@ void SharedTaskManager::SaveMembers(SharedTask *s, std::vector<SharedTaskMember>
 	SharedTaskMembersRepository::InsertMany(*m_database, dm);
 }
 
+void SharedTaskManager::AddPlayerByPlayerName(SharedTask *s, const std::string &character_name)
+{
+	auto character = CharacterDataRepository::GetWhere(
+		*m_database,
+		fmt::format("`name` LIKE '%%{}%%' LIMIT 1", EscapeString(character_name))
+	);
+
+	if (!character.empty()) {
+		int64 character_id = character[0].id;
+
+		// fetch
+		std::vector<SharedTaskMember> members = s->GetMembers();
+
+		// create
+		auto new_member = SharedTaskMember{};
+		new_member.character_id = character_id;
+
+		bool does_member_exist = false;
+		for (auto &m: s->GetMembers()) {
+			if (m.character_id == character_id) {
+				does_member_exist = true;
+			}
+		}
+
+		if (!does_member_exist) {
+			members.push_back(new_member);
+
+			// inform client
+			SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id);
+
+			// add
+			s->SetMembers(members);
+			SaveMembers(s, members);
+			SendSharedTaskMemberListToAllMembers(s);
+		}
+	}
+}
+

@@ -50,6 +50,7 @@ public:
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string& character_name);
+	void AddPlayerByPlayerName(SharedTask *s, const std::string& character_name);
 protected:
 	// reference to database
 	Database *m_database;
