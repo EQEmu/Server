@@ -2952,6 +2952,20 @@ uint8 BotDatabase::GetSpellCastingChance(uint8 spell_type_index, uint8 class_ind
 	return Bot::spell_casting_chances[spell_type_index][class_index][stance_index][conditional_index];
 }
 
+uint16 BotDatabase::GetRaceClassBitmask(uint16 bot_race)
+{
+	std::string query = fmt::format(
+		"SELECT `classes` FROM `bot_create_combinations` WHERE `race` = {}",
+		bot_race
+	);
+	auto results = database.QueryDatabase(query);
+	uint16 classes = 0;
+	if (results.RowCount() == 1) {
+		auto row = results.begin();
+		classes = atoi(row[0]);
+	}
+	return classes;
+}
 
 /* fail::Bot functions   */
 const char* BotDatabase::fail::QueryNameAvailablity() { return "Failed to query name availability"; }
