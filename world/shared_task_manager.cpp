@@ -163,7 +163,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	}
 
 	// active record
-	new_shared_task.m_db_shared_task = created_db_shared_task;
+	new_shared_task.SetDbSharedTask(created_db_shared_task);
 
 	// persist members
 	std::vector<SharedTaskMembersRepository::SharedTaskMembers> shared_task_db_members = {};
@@ -173,7 +173,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 		e.character_id   = m.character_id;
 		e.is_leader      = (m.is_leader ? 1 : 0);
-		e.shared_task_id = new_shared_task.m_db_shared_task.id;
+		e.shared_task_id = new_shared_task.GetDbSharedTask().id;
 
 		shared_task_db_members.emplace_back(e);
 	}
@@ -201,7 +201,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 		// entry
 		auto e = SharedTaskActivityStateRepository::NewEntity();
-		e.shared_task_id = new_shared_task.m_db_shared_task.id;
+		e.shared_task_id = new_shared_task.GetDbSharedTask().id;
 		e.activity_id    = a.activityid;
 		e.done_count     = 0;
 
@@ -224,12 +224,12 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 	// send accept to members
 	for (auto &m: request_members) {
 		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id);
-		SendSharedTaskMemberList(m.character_id, new_shared_task.m_db_shared_task.id);
+		SendSharedTaskMemberList(m.character_id, new_shared_task.GetDbSharedTask().id);
 	}
 
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
-		new_shared_task.m_db_shared_task.id,
+		new_shared_task.GetDbSharedTask().id,
 		task.id,
 		request_members.size(),
 		shared_task_activity_state.size(),
@@ -278,7 +278,7 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 			}
 
 			// persistence
-			DeleteSharedTask(t->m_db_shared_task.id, requested_character_id);
+			DeleteSharedTask(t->GetDbSharedTask().id, requested_character_id);
 
 			PrintSharedTaskState();
 
@@ -287,7 +287,7 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 		// non-leader
 		// remove self
-		RemovePlayerFromSharedTask(&t, requested_character_id);
+		RemovePlayerFromSharedTask(t, requested_character_id);
 		SendRemovePlayerFromSharedTaskPacket(
 			requested_character_id,
 			requested_task_id,
@@ -298,7 +298,7 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 		for (auto &m: t->GetMembers()) {
 			LogTasksDetail("[AttemptSharedTaskRemoval] looping character_id [{}]", m.character_id);
 
-			SendSharedTaskMemberList(m.character_id, t->m_db_shared_task.id);
+			SendSharedTaskMemberList(m.character_id, t->GetDbSharedTask().id);
 		}
 	}
 }
@@ -316,7 +316,7 @@ void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_
 			m_shared_tasks.begin(),
 			m_shared_tasks.end(),
 			[&](SharedTask const &s) {
-				return s.m_db_shared_task.id == shared_task_id;
+				return s.GetDbSharedTask().id == shared_task_id;
 			}
 		),
 		m_shared_tasks.end()
@@ -359,7 +359,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		);
 
 		// shared task db data
-		ns.m_db_shared_task = s;
+		ns.SetDbSharedTask(s);
 
 		// set database task data for internal referencing
 		auto task_data = GetSharedTaskDataByTaskId(s.task_id);
@@ -500,7 +500,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 	if (shared_task) {
 		LogTasksDetail(
 			"[SharedTaskActivityUpdate] shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}]",
-			shared_task->m_db_shared_task.id,
+			shared_task->GetDbSharedTask().id,
 			source_character_id,
 			task_id,
 			activity_id,
@@ -512,7 +512,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				if (a.done_count < done_count) {
 					LogTasksDetail(
 						"[SharedTaskActivityUpdate] Propagating update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] old_done_count [{}] new_done_count [{}]",
-						shared_task->m_db_shared_task.id,
+						shared_task->GetDbSharedTask().id,
 						source_character_id,
 						task_id,
 						activity_id,
@@ -529,7 +529,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 					// sync state as each update comes in (for now)
 					SaveSharedTaskActivityState(
-						shared_task->m_db_shared_task.id,
+						shared_task->GetDbSharedTask().id,
 						shared_task->m_shared_task_activity_state
 					);
 
@@ -570,7 +570,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 				LogTasksDetail(
 					"[SharedTaskActivityUpdate] Discarding duplicate update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] done_count [{}] ignore_quest_update [{}]",
-					shared_task->m_db_shared_task.id,
+					shared_task->GetDbSharedTask().id,
 					source_character_id,
 					task_id,
 					activity_id,
@@ -629,9 +629,9 @@ void SharedTaskManager::SaveSharedTaskActivityState(
 	SharedTaskActivityStateRepository::InsertMany(*m_database, shared_task_db_activities);
 }
 
-bool SharedTaskManager::IsSharedTaskLeader(SharedTask *p_shared_task, uint32 character_id)
+bool SharedTaskManager::IsSharedTaskLeader(SharedTask *s, uint32 character_id)
 {
-	for (auto &m: p_shared_task->GetMembers()) {
+	for (auto &m: s->GetMembers()) {
 		if (m.character_id == character_id && m.is_leader) {
 			return true;
 		}
@@ -702,40 +702,40 @@ void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, int64 shar
 	}
 }
 
-void SharedTaskManager::RemovePlayerFromSharedTask(SharedTask **s, uint32 character_id)
+void SharedTaskManager::RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id)
 {
 	SharedTaskMembersRepository::DeleteWhere(
 		*m_database,
 		fmt::format(
 			"shared_task_id = {} and character_id = {}",
-			(*s)->m_db_shared_task.id,
+			s->GetDbSharedTask().id,
 			character_id
 		)
 	);
 
 	// remove internally
-	(*s)->m_members.erase(
+	s->m_members.erase(
 		std::remove_if(
-			(*s)->m_members.begin(),
-			(*s)->m_members.end(),
+			s->m_members.begin(),
+			s->m_members.end(),
 			[&](SharedTaskMember const &m) {
 				return m.character_id == character_id;
 			}
 		),
-		(*s)->m_members.end()
+		s->m_members.end()
 	);
 }
 
 void SharedTaskManager::PrintSharedTaskState()
 {
 	for (auto &s: m_shared_tasks) {
-		auto task = GetSharedTaskDataByTaskId(s.m_db_shared_task.task_id);
+		auto task = GetSharedTaskDataByTaskId(s.GetDbSharedTask().task_id);
 
 		LogTasksDetail("[PrintSharedTaskState] # Shared Task");
 
 		LogTasksDetail(
 			"[PrintSharedTaskState] shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
-			s.m_db_shared_task.id,
+			s.GetDbSharedTask().id,
 			task.id,
 			task.title,
 			s.GetMembers().size(),
@@ -768,7 +768,7 @@ void SharedTaskManager::PrintSharedTaskState()
 	}
 }
 
-void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask **p_task, std::string character_name)
+void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name)
 {
 	auto character = CharacterDataRepository::GetWhere(
 		*m_database,
@@ -778,33 +778,41 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask **p_ta
 	if (!character.empty()) {
 		int64 character_id = character[0].id;
 
-		for (auto &m: (*p_task)->GetMembers()) {
+		for (auto &m: s->GetMembers()) {
 			LogTasksDetail(
 				"[RemovePlayerFromSharedTaskByPlayerName] character_id [{}] m.character_name [{}]",
 				character_id,
 				m.character_id
 			);
 
+			// not leader being removed
 			if (character_id == m.character_id) {
 				LogTasksDetail(
 					"[RemovePlayerFromSharedTaskByPlayerName] shared_task_id [{}] character_name",
-					(*p_task)->m_db_shared_task.id,
+					s->GetDbSharedTask().id,
 					character_name
 				);
 
-				RemovePlayerFromSharedTask(p_task, m.character_id);
+				RemovePlayerFromSharedTask(s, m.character_id);
 				SendRemovePlayerFromSharedTaskPacket(
 					m.character_id,
-					(*p_task)->m_db_shared_task.task_id,
+					s->GetDbSharedTask().task_id,
 					true
 				);
 			}
 		}
 
-		// update remaining members list
-		for (auto &m: (*p_task)->GetMembers()) {
-			SendSharedTaskMemberList(m.character_id, (*p_task)->m_db_shared_task.id);
-		}
+		SendSharedTaskMemberListToAllMembers(s);
+	}
+}
+
+void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
+{
+	for (auto &m: s->GetMembers()) {
+		SendSharedTaskMemberList(
+			m.character_id,
+			s->GetDbSharedTask().id
+		);
 	}
 }
 

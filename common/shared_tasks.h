@@ -112,12 +112,14 @@ public:
 	void SetTaskData(const TasksRepository::Tasks &task_data);
 
 	// active record of database shared task
-	SharedTasksRepository::SharedTasks m_db_shared_task;
+	const SharedTasksRepository::SharedTasks &GetDbSharedTask() const;
+	void SetDbSharedTask(const SharedTasksRepository::SharedTasks &m_db_shared_task);
 
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;
 
 protected:
+	SharedTasksRepository::SharedTasks m_db_shared_task;
 
 	// reference to task data (only for this shared task)
 	TasksRepository::Tasks                                m_task_data;

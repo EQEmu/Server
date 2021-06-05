@@ -84,12 +84,12 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				LogTasksDetail(
 					"[ServerOP_SharedTaskRequestMemberlist] Found shared task character [{}] shared_task_id [{}]",
 					r->source_character_id,
-					t->m_db_shared_task.id
+					t->GetDbSharedTask().id
 				);
 
 				shared_task_manager.SendSharedTaskMemberList(
 					r->source_character_id,
-					t->m_db_shared_task.id
+					t->GetDbSharedTask().id
 				);
 			}
 
@@ -110,18 +110,19 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				LogTasksDetail(
 					"[ServerOP_SharedTaskRemovePlayer] Found shared task character [{}] shared_task_id [{}]",
 					r->source_character_id,
-					t->m_db_shared_task.id
+					t->GetDbSharedTask().id
 				);
 
 				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
 					LogTasksDetail(
 						"[ServerOP_SharedTaskRemovePlayer] character_id [{}] shared_task_id [{}] is_leader",
 						r->source_character_id,
-						t->m_db_shared_task.id
+						t->GetDbSharedTask().id
 					);
 
+					// TODO: Clean this up a bit more later as other functionality is A-Z'ed
 					std::string character_name = r->player_name;
-					shared_task_manager.RemovePlayerFromSharedTaskByPlayerName(&t, character_name);
+					shared_task_manager.RemovePlayerFromSharedTaskByPlayerName(t, character_name);
 				}
 			}
 
