@@ -2462,3 +2462,8 @@ void ClientTaskState::SharedTaskIncrementDoneCount(
 		ignore_quest_update
 	);
 }
+
+const ClientTaskInformation &ClientTaskState::GetActiveSharedTask() const
+{
+	return m_active_shared_task;
+}

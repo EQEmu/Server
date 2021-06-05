@@ -11,23 +11,28 @@
 #include <iostream>
 
 // shared tasks
-#define ServerOP_SharedTaskRequest        0x0300 // zone -> world. Player trying to get task. Relayed world -> zone on confirmation
-#define ServerOP_SharedTaskGrant          0x0301 // world -> zone. World verified everything is good
-#define ServerOP_SharedTaskReject         0x0302 // world -> zone. Something failed ABORT
-#define ServerOP_SharedTaskAddPlayer      0x0303 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
-#define ServerOP_SharedTaskRemovePlayer   0x0304 // .. /taskremoveplayer ..
-#define ServerOP_SharedTaskZoneCreated    0x0305 // zone -> world. Something didn't go wrong creating the new task! Now World needs to tell other players to join world -> zone response to tell someone to join
-#define ServerOP_SharedTaskZoneFailed     0x0306 // zone -> world. Something went wrong above ABORT
-#define ServerOP_SharedTaskActivityUpdate 0x0307 // zone -> world. Is this valid update? world -> zone update activity
-#define ServerOP_SharedTaskCompleted      0x0308 // world -> zone. We completed! Do stuff zone!
-#define ServerOP_SharedTaskAcceptNewTask  0x0308 // world -> zone. World verified, continue AcceptNewTask
+//#define ServerOP_SharedTaskGrant          0x0301 // world -> zone. World verified everything is good
+//#define ServerOP_SharedTaskReject         0x0302 // world -> zone. Something failed ABORT
+//#define ServerOP_SharedTaskRemovePlayer   0x0304 // .. /taskremoveplayer ..
+//#define ServerOP_SharedTaskZoneCreated    0x0305 // zone -> world. Something didn't go wrong creating the new task! Now World needs to tell other players to join world -> zone response to tell someone to join
+//#define ServerOP_SharedTaskZoneFailed     0x0306 // zone -> world. Something went wrong above ABORT
+//#define ServerOP_SharedTaskActivityUpdate 0x0307 // zone -> world. Is this valid update? world -> zone update activity
+//#define ServerOP_SharedTaskCompleted      0x0308 // world -> zone. We completed! Do stuff zone!
 
-#define ServerOP_SharedTaskAttemptRemove        0x0309 // zone -> world. Player trying to delete task
-#define ServerOP_SharedTaskUpdate               0x0310 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
-#define ServerOP_SharedTaskMemberlist               0x0311 // world -> zone. Send shared task memberlist
+// handled
+#define ServerOP_SharedTaskRequest                  0x0300 // zone -> world. Player trying to get task. Relayed world -> zone on confirmation
+#define ServerOP_SharedTaskAddPlayer                0x0301 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
+#define ServerOP_SharedTaskMakeLeader               0x0302 // zone -> world -> zone
+#define ServerOP_SharedTaskRemovePlayer             0x0303 // zone -> world -> zone
+#define ServerOP_SharedTaskAttemptRemove            0x0304 // zone -> world. Player trying to delete task
+#define ServerOP_SharedTaskUpdate                   0x0305 // zone -> world. Client sending task update to world. Relayed world -> zone on confirmation
+#define ServerOP_SharedTaskMemberlist               0x0306 // world -> zone. Send shared task memberlist
+#define ServerOP_SharedTaskRequestMemberlist        0x0307 // zone -> world. Send shared task memberlist (zone in initial for now, could change)
+#define ServerOP_SharedTaskAcceptNewTask            0x0308 // world -> zone. World verified, continue AcceptNewTask
 
 // used in
 // ServerOP_SharedTaskRequest
+
 // ServerOP_SharedTaskAcceptNewTask
 struct ServerSharedTaskRequest_Struct {
 	uint32 requested_character_id;
@@ -72,6 +77,23 @@ struct ServerSharedTaskActivityUpdate_Struct {
 	uint32 activity_id;
 	uint32 done_count;
 	bool   ignore_quest_update;
+};
+
+struct ServerSharedTaskRequestMemberlist_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+};
+
+struct ServerSharedTaskRemovePlayer_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	char   player_name[64];
+};
+
+struct ServerSharedTaskMakeLeader_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	char   player_name[64];
 };
 
 class SharedTask {

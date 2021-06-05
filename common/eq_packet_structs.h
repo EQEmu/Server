@@ -3714,7 +3714,7 @@ struct SetTitleReply_Struct {
 	uint32	entity_id;
 };
 
-struct TaskMemberList_Struct {
+struct SharedTaskMemberList_Struct {
 /*00*/ uint32 gopher_id;
 /*04*/ uint32 unknown04;
 /*08*/ uint32 member_count;    //1 less than the number of members
@@ -3726,6 +3726,30 @@ struct TaskMemberList_Struct {
 /*	list is of the form:
 	uint8	task_leader	//boolean flag
 */
+};
+
+struct SharedTaskQuit_Struct {
+	int32 field1;
+	int32 field2;
+	int32 field3;
+};
+
+struct SharedTaskAddPlayer_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
+};
+
+struct SharedTaskMakeLeader_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
+};
+
+struct SharedTaskRemovePlayer_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
 };
 
 #if 0

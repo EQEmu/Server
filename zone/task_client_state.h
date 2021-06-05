@@ -68,6 +68,7 @@ public:
 		bool ignore_quest_update = false
 	);
 
+	const ClientTaskInformation &GetActiveSharedTask() const;
 
 private:
 

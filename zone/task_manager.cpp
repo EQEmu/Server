@@ -11,6 +11,10 @@
 #include "task_manager.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
+#include "../common/shared_tasks.h"
+#include "worldserver.h"
+
+extern WorldServer worldserver;
 
 TaskManager::TaskManager()
 {

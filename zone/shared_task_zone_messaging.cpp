@@ -89,7 +89,7 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 				fmt::format("shared_task_id = {}", p->shared_task_id)
 			);
 
-			SerializeBuffer buf(sizeof(TaskMemberList_Struct) + 15 * members.size());
+			SerializeBuffer buf(sizeof(SharedTaskMemberList_Struct) + 15 * members.size());
 			buf.WriteInt32(0); // unknown ids
 			buf.WriteInt32(0);
 			buf.WriteInt32((int32) members.size());

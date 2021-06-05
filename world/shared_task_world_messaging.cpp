@@ -70,6 +70,63 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskRequestMemberlist: {
+			auto *r = (ServerSharedTaskRequestMemberlist_Struct *) pack->pBuffer;
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskRequestMemberlist] Received request from character [{}] task_id [{}]",
+				r->source_character_id,
+				r->task_id
+			);
+
+			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(r->task_id, r->source_character_id);
+			if (t) {
+				LogTasksDetail(
+					"[ServerOP_SharedTaskRequestMemberlist] Found shared task character [{}] shared_task_id [{}]",
+					r->source_character_id,
+					t->m_db_shared_task.id
+				);
+
+				shared_task_manager.SendSharedTaskMemberList(
+					r->source_character_id,
+					t->m_db_shared_task.id
+				);
+			}
+
+			break;
+		}
+		case ServerOP_SharedTaskRemovePlayer: {
+			auto *r = (ServerSharedTaskRemovePlayer_Struct *) pack->pBuffer;
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskRemovePlayer] Received request from character [{}] task_id [{}] player_name [{}]",
+				r->source_character_id,
+				r->task_id,
+				r->player_name
+			);
+
+			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(r->task_id, r->source_character_id);
+			if (t) {
+				LogTasksDetail(
+					"[ServerOP_SharedTaskRemovePlayer] Found shared task character [{}] shared_task_id [{}]",
+					r->source_character_id,
+					t->m_db_shared_task.id
+				);
+
+				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
+					LogTasksDetail(
+						"[ServerOP_SharedTaskRemovePlayer] character_id [{}] shared_task_id [{}] is_leader",
+						r->source_character_id,
+						t->m_db_shared_task.id
+					);
+
+					std::string character_name = r->player_name;
+					shared_task_manager.RemovePlayerFromSharedTaskByPlayerName(&t, character_name);
+				}
+			}
+
+			break;
+		}
 		default:
 			break;
 	}
