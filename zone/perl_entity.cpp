@@ -1310,6 +1310,64 @@ XS(XS_EntityList_GetClientList) {
 	XSRETURN(num_clients);
 }
 
+#ifdef BOTS
+XS(XS_EntityList_GetBotByID);
+XS(XS_EntityList_GetBotByID) {
+	dXSARGS;
+	int bot_count = 0;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: EntityList::GetBotByID(THIS, uint32 bot_id)"); // @categories Script Utility, Bot
+	{
+		EntityList* THIS;
+		Bot* RETVAL;
+		uint32 bot_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_ENTITY;
+		RETVAL = THIS->GetBotByBotID(bot_id);
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Bot", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_EntityList_GetBotByName);
+XS(XS_EntityList_GetBotByName) {
+	dXSARGS;
+	int bot_count = 0;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: EntityList::GetBotByName(THIS, string bot_name)"); // @categories Script Utility, Bot
+	{
+		EntityList* THIS;
+		Bot* RETVAL;
+		std::string bot_name = (std::string) SvPV_nolen(ST(1));
+		VALIDATE_THIS_IS_ENTITY;
+		RETVAL = THIS->GetBotByBotName(bot_name);
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Bot", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_EntityList_GetBotList);
+XS(XS_EntityList_GetBotList) {
+	dXSARGS;
+	int bot_count = 0;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: EntityList::GetBotList(THIS)"); // @categories Script Utility, Bot
+	{
+		EntityList *THIS;
+		VALIDATE_THIS_IS_ENTITY;
+		auto current_bot_list = THIS->GetBotList();
+		for (auto bot_iterator : current_bot_list) {
+			ST(0) = sv_newmortal();
+			sv_setref_pv(ST(0), "Bot", (void *)bot_iterator);
+			XPUSHs(ST(0));
+			bot_count++;
+		}
+	}
+	XSRETURN(bot_count);
+}
+#endif
+
 XS(XS_EntityList_GetNPCList); /* prototype to pass -Wmissing-prototypes */
 XS(XS_EntityList_GetNPCList) {
 	dXSARGS;
@@ -1517,6 +1575,11 @@ XS(boot_EntityList) {
 	newXSproto(strcpy(buf, "GetObjectList"), XS_EntityList_GetObjectList, file, "$");
 	newXSproto(strcpy(buf, "GetDoorsList"), XS_EntityList_GetDoorsList, file, "$");
 	newXSproto(strcpy(buf, "SignalAllClients"), XS_EntityList_SignalAllClients, file, "$$");
+#ifdef BOTS
+	newXSproto(strcpy(buf, "GetBotByID"), XS_EntityList_GetBotByID, file, "$$");
+	newXSproto(strcpy(buf, "GetBotByName"), XS_EntityList_GetBotByName, file, "$$");
+	newXSproto(strcpy(buf, "GetBotList"), XS_EntityList_GetBotList, file, "$");
+#endif
 	XSRETURN_YES;
 }
 

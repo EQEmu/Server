@@ -42,6 +42,10 @@ typedef const char Const_char;
 #include "client.h"
 #include "../common/spdat.h"
 
+#ifdef BOTS
+#include "bot.h"
+#endif
+
 #ifdef THIS /* this macro seems to leak out on some systems */
 #undef THIS
 #endif
@@ -6253,6 +6257,25 @@ XS(XS_Mob_GetLastName) {
 	XSRETURN(1);
 }
 
+#ifdef BOTS
+XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_CastToBot)
+{
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::CastToBot(THIS)");
+	{
+		Mob* THIS;
+		Bot* RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->CastToBot();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Bot", (void*)RETVAL);
+	}
+	XSRETURN(1);
+}
+#endif
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6602,6 +6625,9 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetHateClosest"), XS_Mob_GetHateClosest, file, "$");
 	newXSproto(strcpy(buf, "GetHateListByDistance"), XS_Mob_GetHateListByDistance, file, "$;$");
 	newXSproto(strcpy(buf, "GetLastName"), XS_Mob_GetLastName, file, "$");
+#ifdef BOTS
+	newXSproto(strcpy(buf, "CastToBot"), XS_Mob_CastToBot, file, "$");
+#endif
 	XSRETURN_YES;
 }
 
