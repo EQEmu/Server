@@ -10102,7 +10102,7 @@ std::vector<int> Client::GetScribedSpells() {
 		if (IsValidSpell(m_pp.spell_book[index])) {
 			scribed_spells.push_back(m_pp.spell_book[index]);
 		}
-	}		
+	}
 	return scribed_spells;
 }
 
