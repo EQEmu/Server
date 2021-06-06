@@ -10,6 +10,7 @@
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
 #include "../common/serialize_buffer.h"
+#include <ctime> // todo: find where time.h is being included and change it to <ctime>
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;

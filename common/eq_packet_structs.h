@@ -3718,7 +3718,7 @@ struct SharedTaskMemberList_Struct {
 /*00*/ uint32 gopher_id;
 /*04*/ uint32 unknown04;
 /*08*/ uint32 member_count;    //1 less than the number of members
-/*12*/ char   list_pointer[0];
+///*12*/ char   list_pointer[0];
 	char      member_name[1];    //null terminated string
 	uint32    monster_mission; // class chosen
 	uint8     task_leader;    //boolean flag
