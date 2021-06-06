@@ -107,7 +107,7 @@ public:
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
 	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
-	void SetLeader(const DynamicZoneMember& leader) { m_leader = leader; }
+	void SetLeader(const DynamicZoneMember& leader, bool update_db = false);
 	void SetMaxPlayers(uint32_t max_players) { m_max_players = max_players; }
 	void SetMinPlayers(uint32_t min_players) { m_min_players = min_players; }
 	void SetName(const std::string& name) { m_name = name; }

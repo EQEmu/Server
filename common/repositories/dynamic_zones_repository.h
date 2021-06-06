@@ -68,6 +68,11 @@ public:
 	struct DynamicZoneInstance
 	{
 		uint32_t id;
+		std::string uuid;
+		std::string name;
+		int      leader_id;
+		int      min_players;
+		int      max_players;
 		int      instance_id;
 		int      type;
 		int      compass_zone_id;
@@ -97,6 +102,11 @@ public:
 		return std::string(SQL(
 			SELECT
 				dynamic_zones.id,
+				dynamic_zones.uuid,
+				dynamic_zones.name,
+				dynamic_zones.leader_id,
+				dynamic_zones.min_players,
+				dynamic_zones.max_players,
 				dynamic_zones.instance_id,
 				dynamic_zones.type,
 				dynamic_zones.compass_zone_id,
@@ -130,6 +140,11 @@ public:
 
 		int col = 0;
 		entry.id                  = strtoul(row[col++], nullptr, 10);
+		entry.uuid                = row[col++];
+		entry.name                = row[col++];
+		entry.leader_id           = strtol(row[col++], nullptr, 10);
+		entry.min_players         = strtol(row[col++], nullptr, 10);
+		entry.max_players         = strtol(row[col++], nullptr, 10);
 		entry.instance_id         = strtol(row[col++], nullptr, 10);
 		entry.type                = strtol(row[col++], nullptr, 10);
 		entry.compass_zone_id     = strtol(row[col++], nullptr, 10);
@@ -235,6 +250,18 @@ public:
 					has_zone_in = {}
 				WHERE {} = {};
 			), TableName(), x, y, z, heading, has_zone_in, PrimaryKey(), dz_id);
+
+			db.QueryDatabase(query);
+		}
+	}
+
+	static void UpdateLeaderID(Database& db, uint32_t dz_id, uint32_t leader_id)
+	{
+		if (dz_id != 0)
+		{
+			std::string query = fmt::format(SQL(
+				UPDATE {} SET leader_id = {} WHERE {} = {};
+			), TableName(), leader_id, PrimaryKey(), dz_id);
 
 			db.QueryDatabase(query);
 		}

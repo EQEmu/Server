@@ -422,6 +422,7 @@
 9166|2021_02_12_dynamic_zone_members.sql|SHOW TABLES LIKE 'dynamic_zone_members'|empty|
 9167|2021_06_06_beastlord_pets.sql|SHOW TABLES LIKE 'pets_beastlord_data'|empty|
 9168|2021_08_31_pvp_duration.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'|empty|
+9169|2021_06_06_dynamic_zone_moved_columns.sql|SELECT * FROM db_version WHERE version >= 9167|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

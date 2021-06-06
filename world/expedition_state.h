@@ -35,7 +35,7 @@ struct DynamicZoneMember;
 class ExpeditionState
 {
 public:
-	void CacheExpeditions(std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expedition_entries);
+	void CacheExpeditions(std::vector<ExpeditionsRepository::Expeditions>&& expedition_entries);
 	void CacheFromDatabase(uint32_t expedition_id);
 	void CacheAllFromDatabase();
 	Expedition* GetExpedition(uint32_t expedition_id);

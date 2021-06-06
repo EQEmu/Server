@@ -56,7 +56,7 @@ void ExpeditionState::CacheFromDatabase(uint32_t expedition_id)
 		return;
 	}
 
-	auto expedition = ExpeditionsRepository::GetWithLeaderName(database, expedition_id);
+	auto expedition = ExpeditionsRepository::GetWhere(database, fmt::format("id = {}", expedition_id));
 	CacheExpeditions({ std::move(expedition) });
 }
 
@@ -64,7 +64,7 @@ void ExpeditionState::CacheAllFromDatabase()
 {
 	BenchTimer benchmark;
 
-	auto expeditions = ExpeditionsRepository::GetAllWithLeaderName(database);
+	auto expeditions = ExpeditionsRepository::All(database);
 	m_expeditions.clear();
 	m_expeditions.reserve(expeditions.size());
 
@@ -74,7 +74,7 @@ void ExpeditionState::CacheAllFromDatabase()
 }
 
 void ExpeditionState::CacheExpeditions(
-	std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expedition_entries)
+	std::vector<ExpeditionsRepository::Expeditions>&& expedition_entries)
 {
 	// bulk load expedition dzs and members before caching
 	std::vector<uint32_t> dynamic_zone_ids;
@@ -108,13 +108,6 @@ void ExpeditionState::CacheExpeditions(
 				expedition->GetDynamicZone().AddMemberFromRepositoryResult(std::move(member));
 			}
 		}
-
-		// stored on expedition in db but on dz in memory cache
-		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
-		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
-		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
-		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
-		expedition->GetDynamicZone().SetUUID(std::move(entry.uuid));
 
 		expedition->CacheMemberStatuses();
 

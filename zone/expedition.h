@@ -130,7 +130,7 @@ public:
 	static const int32_t EVENT_TIMER_ID;
 
 private:
-	static void CacheExpeditions(std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expeditions);
+	static void CacheExpeditions(std::vector<ExpeditionsRepository::Expeditions>&& expeditions);
 	static void SendWorldCharacterLockout(uint32_t character_id, const ExpeditionLockoutTimer& lockout, bool remove);
 
 	void AddLockout(const ExpeditionLockoutTimer& lockout, bool members_only = false);

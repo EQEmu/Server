@@ -77,6 +77,11 @@ uint32_t DynamicZoneBase::CreateInstance()
 void DynamicZoneBase::LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry)
 {
 	m_id                 = dz_entry.id;
+	m_uuid               = std::move(dz_entry.uuid);
+	m_name               = std::move(dz_entry.name);
+	m_leader.id          = dz_entry.leader_id;
+	m_min_players        = dz_entry.min_players;
+	m_max_players        = dz_entry.max_players;
 	m_instance_id        = dz_entry.instance_id;
 	m_type               = static_cast<DynamicZoneType>(dz_entry.type);
 	m_compass.zone_id    = dz_entry.compass_zone_id;
@@ -106,6 +111,12 @@ void DynamicZoneBase::AddMemberFromRepositoryResult(
 	DynamicZoneMembersRepository::MemberWithName&& entry)
 {
 	auto status = DynamicZoneMemberStatus::Unknown;
+
+	if (m_leader.id == entry.character_id)
+	{
+		m_leader.name = entry.character_name;
+	}
+
 	AddInternalMember({ entry.character_id, std::move(entry.character_name), status });
 }
 
@@ -116,6 +127,11 @@ uint32_t DynamicZoneBase::SaveToDatabase()
 	if (m_instance_id != 0)
 	{
 		auto insert_dz = DynamicZonesRepository::NewEntity();
+		insert_dz.uuid                = m_uuid;
+		insert_dz.name                = m_name;
+		insert_dz.leader_id           = m_leader.id;
+		insert_dz.min_players         = m_min_players;
+		insert_dz.max_players         = m_max_players;
 		insert_dz.instance_id         = m_instance_id,
 		insert_dz.type                = static_cast<int>(m_type);
 		insert_dz.compass_zone_id     = m_compass.zone_id;
@@ -258,6 +274,16 @@ void DynamicZoneBase::SetZoneInLocation(const DynamicZoneLocation& location, boo
 void DynamicZoneBase::SetZoneInLocation(float x, float y, float z, float heading, bool update_db)
 {
 	SetZoneInLocation({ 0, x, y, z, heading }, update_db);
+}
+
+void DynamicZoneBase::SetLeader(const DynamicZoneMember& new_leader, bool update_db)
+{
+	m_leader = new_leader;
+
+	if (update_db)
+	{
+		DynamicZonesRepository::UpdateLeaderID(GetDatabase(), m_id, new_leader.id);
+	}
 }
 
 uint32_t DynamicZoneBase::GetSecondsRemaining() const

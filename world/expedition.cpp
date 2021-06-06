@@ -19,7 +19,6 @@
  */
 
 #include "expedition.h"
-#include "expedition_database.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -90,8 +89,7 @@ bool Expedition::SetNewLeader(const DynamicZoneMember& member)
 	}
 
 	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
-	ExpeditionDatabase::UpdateLeaderID(m_id, new_leader.id);
-	m_dynamic_zone.SetLeader(new_leader);
+	m_dynamic_zone.SetLeader(new_leader, true);
 	SendZonesLeaderChanged();
 	return true;
 }

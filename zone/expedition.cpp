@@ -87,14 +87,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, b
 	}
 
 	// unique expedition ids are created from database via auto-increment column
-	auto expedition_id = ExpeditionDatabase::InsertExpedition(
-		dynamiczone.GetUUID(),
-		dynamiczone.GetID(),
-		request.GetExpeditionName(),
-		request.GetLeaderID(),
-		request.GetMinPlayers(),
-		request.GetMaxPlayers()
-	);
+	auto expedition_id = ExpeditionDatabase::InsertExpedition(dynamiczone.GetID());
 
 	if (expedition_id)
 	{
@@ -133,7 +126,7 @@ Expedition* Expedition::TryCreate(Client* requester, DynamicZone& dynamiczone, b
 }
 
 void Expedition::CacheExpeditions(
-	std::vector<ExpeditionsRepository::ExpeditionWithLeader>&& expedition_entries)
+	std::vector<ExpeditionsRepository::Expeditions>&& expedition_entries)
 {
 	if (!zone)
 	{
@@ -193,13 +186,6 @@ void Expedition::CacheExpeditions(
 			}
 		}
 
-		// stored on expedition in db but on dz in memory cache
-		expedition->GetDynamicZone().SetName(std::move(entry.expedition_name));
-		expedition->GetDynamicZone().SetMinPlayers(entry.min_players);
-		expedition->GetDynamicZone().SetMaxPlayers(entry.max_players);
-		expedition->GetDynamicZone().SetLeader({ entry.leader_id, std::move(entry.leader_name) });
-		expedition->GetDynamicZone().SetUUID(std::move(entry.uuid));
-
 		expedition->SendWorldExpeditionUpdate(ServerOP_ExpeditionGetMemberStatuses);
 
 		auto inserted = zone->expedition_cache.emplace(entry.id, std::move(expedition));
@@ -213,7 +199,7 @@ void Expedition::CacheFromDatabase(uint32_t expedition_id)
 	{
 		BenchTimer benchmark;
 
-		auto expedition = ExpeditionsRepository::GetWithLeaderName(database, expedition_id);
+		auto expedition = ExpeditionsRepository::GetWhere(database, fmt::format("id = {}", expedition_id));
 		CacheExpeditions({ std::move(expedition) });
 
 		LogExpeditions("Caching new expedition [{}] took [{}s]", expedition_id, benchmark.elapsed());
@@ -229,7 +215,7 @@ bool Expedition::CacheAllFromDatabase()
 
 	BenchTimer benchmark;
 
-	auto expeditions = ExpeditionsRepository::GetAllWithLeaderName(database);
+	auto expeditions = ExpeditionsRepository::All(database);
 	zone->expedition_cache.clear();
 	zone->expedition_cache.reserve(expeditions.size());
 
@@ -369,8 +355,8 @@ void Expedition::AddLockoutDuration(const std::string& event_name, int seconds, 
 {
 	// lockout timers use unsigned durations to define intent but we may need
 	// to insert a new lockout while still supporting timer reductions
-	auto lockout = ExpeditionLockoutTimer::CreateLockout(
-		GetName(), event_name, std::max(0, seconds), GetDynamicZone().GetUUID());
+	auto lockout = ExpeditionLockoutTimer::CreateLockout(GetName(),
+		event_name, std::max(0, seconds), GetDynamicZone().GetUUID());
 
 	if (!members_only)
 	{

@@ -92,17 +92,6 @@ void ExpeditionDatabase::DeleteExpeditions(const std::vector<uint32_t>& expediti
 	}
 }
 
-void ExpeditionDatabase::UpdateLeaderID(uint32_t expedition_id, uint32_t leader_id)
-{
-	LogExpeditionsDetail("Updating leader [{}] for expedition [{}]", leader_id, expedition_id);
-
-	auto query = fmt::format(SQL(
-		UPDATE expeditions SET leader_id = {} WHERE id = {};
-	), leader_id, expedition_id);
-
-	database.QueryDatabase(query);
-}
-
 void ExpeditionDatabase::MoveMembersToSafeReturn(const std::vector<uint32_t>& expedition_ids)
 {
 	LogExpeditionsDetail("Moving members from [{}] expedition(s) to safereturn", expedition_ids.size());
