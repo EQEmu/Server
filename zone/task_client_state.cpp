@@ -11,6 +11,7 @@
 #include "zonedb.h"
 #include "../common/shared_tasks.h"
 #include "worldserver.h"
+#include "dynamic_zone.h"
 
 extern WorldServer worldserver;
 extern QueryServ   *QServ;
@@ -2478,4 +2479,61 @@ const ClientTaskInformation &ClientTaskState::GetActiveSharedTask() const
 bool ClientTaskState::HasActiveSharedTask()
 {
 	return GetActiveSharedTask().task_id != 0;
+}
+
+void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz_request)
+{
+	auto task = task_manager->m_task_data[task_id];
+	if (!task)
+	{
+		return;
+	}
+
+	// dz should be named the version-based zone name (used in choose zone window and dz window on live)
+	auto zone_info = zone_store.GetZone(dz_request.GetZoneID(), dz_request.GetZoneVersion());
+	dz_request.SetName(zone_info.long_name.empty() ? task->title : zone_info.long_name);
+	// todo: dz_request.SetMinPlayers(task->min_players);
+	// todo: dz_request.SetMaxPlayers(task->max_players);
+
+	// a task might create a dz from an objective so override dz duration to time remaining
+	std::chrono::seconds seconds(TaskTimeLeft(task_id));
+	if (task->duration == 0 || seconds.count() < 0)
+	{
+		// todo: maybe add a rule for duration
+		// cap unlimited duration tasks so instance isn't held indefinitely
+		// expected behavior is to re-acquire any unlimited tasks that have an expired dz
+		seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::hours(24));
+	}
+
+	dz_request.SetDuration(static_cast<uint32_t>(seconds.count()));
+
+	if (task->type == TaskType::Task || task->type == TaskType::Quest)
+	{
+		if (task->type == TaskType::Task) {
+			dz_request.SetType(DynamicZoneType::Task);
+		} else {
+			dz_request.SetType(DynamicZoneType::Quest);
+		}
+
+		// todo: tasks need to persist dz ids (db also) so they can be removed on task abandon
+		DynamicZoneMember solo_member{ client->CharacterID(), client->GetCleanName() };
+		DynamicZone::CreateNew(dz_request, { solo_member });
+	}
+	else if (task->type == TaskType::Shared)
+	{
+		dz_request.SetType(DynamicZoneType::Mission);
+
+		// shared task missions are created in world
+		EQ::Net::DynamicPacket dyn_pack = dz_request.GetSerializedDzPacket();
+
+		auto pack_size = sizeof(ServerSharedTaskCreateDynamicZone_Struct) + dyn_pack.Length();
+		auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskCreateDynamicZone, static_cast<uint32_t>(pack_size));
+		auto buf = reinterpret_cast<ServerSharedTaskCreateDynamicZone_Struct*>(pack->pBuffer);
+		buf->source_character_id = client->CharacterID();
+		buf->task_id = task_id;
+		buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+		memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+		worldserver.SendPacket(pack.get());
+	}
 }

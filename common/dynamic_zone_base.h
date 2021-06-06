@@ -2,6 +2,7 @@
 #define COMMON_DYNAMIC_ZONE_BASE_H
 
 #include "eq_constants.h"
+#include "net/packet.h"
 #include "repositories/dynamic_zones_repository.h"
 #include "repositories/dynamic_zone_members_repository.h"
 #include <algorithm>
@@ -100,6 +101,7 @@ public:
 	uint32_t GetDatabaseMemberCount();
 	DynamicZoneMember GetMemberData(uint32_t character_id);
 	DynamicZoneMember GetMemberData(const std::string& character_name);
+	EQ::Net::DynamicPacket GetSerializedDzPacket();
 	bool HasDatabaseMember(uint32_t character_id);
 	bool HasMember(uint32_t character_id);
 	bool HasMember(const std::string& character_name);
@@ -109,11 +111,13 @@ public:
 	bool IsInstanceID(uint32_t instance_id) const { return (m_instance_id != 0 && m_instance_id == instance_id); }
 	bool IsValid() const { return m_instance_id != 0; }
 	bool IsSameDz(uint32_t zone_id, uint32_t instance_id) const { return zone_id == m_zone_id && instance_id == m_instance_id; }
+	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
 	void RemoveAllMembers();
 	bool RemoveMember(const std::string& character_name);
 	void SaveMembers(const std::vector<DynamicZoneMember>& members);
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
+	void SetDuration(uint32_t seconds) { m_duration = std::chrono::seconds(seconds); }
 	void SetLeader(const DynamicZoneMember& leader, bool update_db = false);
 	void SetMaxPlayers(uint32_t max_players) { m_max_players = max_players; }
 	void SetMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
@@ -121,6 +125,7 @@ public:
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void SetType(DynamicZoneType type) { m_type = type; }
 	void SetUUID(std::string uuid) { m_uuid = std::move(uuid); }
 	void SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
 	void SetZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
@@ -140,7 +145,6 @@ protected:
 	uint32_t Create();
 	uint32_t CreateInstance();
 	void LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry);
-	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
 	void RemoveInternalMember(uint32_t character_id);
 	uint32_t SaveToDatabase();
 	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);

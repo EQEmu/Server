@@ -554,13 +554,19 @@ std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 	return "Unknown";
 }
 
-std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzCreatePacket(
-	uint16_t origin_zone_id, uint16_t origin_instance_id)
+EQ::Net::DynamicPacket DynamicZoneBase::GetSerializedDzPacket()
 {
 	EQ::Net::DynamicPacket dyn_pack;
 	dyn_pack.PutSerialize(0, *this);
 
 	LogDynamicZonesDetail("Serialized server dz size [{}]", dyn_pack.Length());
+	return dyn_pack;
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzCreatePacket(
+	uint16_t origin_zone_id, uint16_t origin_instance_id)
+{
+	EQ::Net::DynamicPacket dyn_pack = GetSerializedDzPacket();
 
 	auto pack_size = sizeof(ServerDzCreateSerialized_Struct) + dyn_pack.Length();
 	auto pack = std::make_unique<ServerPacket>(ServerOP_DzCreated, static_cast<uint32_t>(pack_size));

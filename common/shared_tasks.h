@@ -31,6 +31,7 @@
 #define ServerOP_SharedTaskAcceptNewTask            0x0308 // world -> zone. World verified, continue AcceptNewTask
 #define ServerOP_SharedTaskInvitePlayer             0x0309 // world -> zone. Sends task invite to player
 #define ServerOP_SharedTaskInviteAcceptedPlayer     0x0310 // zone -> world. Confirming task invite
+#define ServerOP_SharedTaskCreateDynamicZone        0x0311 // zone -> world
 
 // used in
 // ServerOP_SharedTaskRequest
@@ -112,6 +113,13 @@ struct ServerSharedTaskMakeLeader_Struct {
 struct ServerSharedTaskInviteAccepted_Struct {
 	uint32 source_character_id;
 	uint32 shared_task_id;
+};
+
+struct ServerSharedTaskCreateDynamicZone_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+	uint32 cereal_size;
+	char   cereal_data[0]; // serialized dz with creation parameters
 };
 
 class SharedTask {

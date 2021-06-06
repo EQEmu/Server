@@ -2049,6 +2049,55 @@ void Lua_Client::MovePCDynamicZone(std::string zone_name, int zone_version, bool
 	return self->MovePCDynamicZone(zone_name, zone_version, msg_if_invalid);
 }
 
+void Lua_Client::CreateTaskDynamicZone(int task_id, luabind::object dz_table) {
+	Lua_Safe_Call_Void();
+
+	if (luabind::type(dz_table) != LUA_TTABLE)
+	{
+		return;
+	}
+
+	// luabind will catch thrown cast_failed exceptions for invalid/missing args
+	luabind::object instance_info = dz_table["instance"];
+	luabind::object zone = instance_info["zone"];
+
+	uint32_t zone_id = 0;
+	if (luabind::type(zone) == LUA_TSTRING)
+	{
+		zone_id = ZoneID(luabind::object_cast<std::string>(zone));
+	}
+	else if (luabind::type(zone) == LUA_TNUMBER)
+	{
+		zone_id = luabind::object_cast<uint32_t>(zone);
+	}
+
+	uint32_t zone_version  = luabind::object_cast<uint32_t>(instance_info["version"]);
+
+	// tasks override dz duration so duration is ignored here
+	DynamicZone dz{ zone_id, zone_version, 0, DynamicZoneType::None };
+
+	// the dz_info table supports optional hash entries for 'compass', 'safereturn', and 'zonein' data
+	if (luabind::type(dz_table["compass"]) == LUA_TTABLE)
+	{
+		auto compass_loc = GetDynamicZoneLocationFromTable(dz_table["compass"]);
+		dz.SetCompass(compass_loc);
+	}
+
+	if (luabind::type(dz_table["safereturn"]) == LUA_TTABLE)
+	{
+		auto safereturn_loc = GetDynamicZoneLocationFromTable(dz_table["safereturn"]);
+		dz.SetSafeReturn(safereturn_loc);
+	}
+
+	if (luabind::type(dz_table["zonein"]) == LUA_TTABLE)
+	{
+		auto zonein_loc = GetDynamicZoneLocationFromTable(dz_table["zonein"]);
+		dz.SetZoneInLocation(zonein_loc);
+	}
+
+	self->CreateTaskDynamicZone(task_id, dz);
+}
+
 void Lua_Client::Fling(float value, float target_x, float target_y, float target_z) {
 	Lua_Safe_Call_Void();
 	self->Fling(value, target_x, target_y, target_z);
@@ -2511,6 +2560,7 @@ luabind::scope lua_register_client() {
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string))&Lua_Client::MovePCDynamicZone)
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int))&Lua_Client::MovePCDynamicZone)
 		.def("MovePCDynamicZone", (void(Lua_Client::*)(std::string, int, bool))&Lua_Client::MovePCDynamicZone)
+		.def("CreateTaskDynamicZone", &Lua_Client::CreateTaskDynamicZone)
 		.def("Fling", (void(Lua_Client::*)(float,float,float,float))&Lua_Client::Fling)
 		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool))&Lua_Client::Fling)
 		.def("Fling", (void(Lua_Client::*)(float,float,float,float,bool,bool))&Lua_Client::Fling)

@@ -11,6 +11,8 @@
 #include "zoneserver.h"
 #include "shared_task_manager.h"
 #include "../common/repositories/task_activities_repository.h"
+#include "dynamic_zone.h"
+#include "dynamic_zone_manager.h"
 
 extern ClientList        client_list;
 extern ZSList            zoneserver_list;
@@ -218,11 +220,47 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
 				shared_task_manager.RemoveActiveInvitation(r->shared_task_id, r->source_character_id);
 			}
+			break;
+		}
+		case ServerOP_SharedTaskCreateDynamicZone: {
+			auto buf = reinterpret_cast<ServerSharedTaskCreateDynamicZone_Struct*>(pack->pBuffer);
 
+			LogTasksDetail(
+				"[ServerOP_SharedTaskCreateDynamicZone] Received dynamic zone creation request from character [{}] task_id [{}]",
+				buf->source_character_id,
+				buf->task_id
+			);
+
+			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
+			if (t)
+			{
+				DynamicZone dz;
+				dz.LoadSerializedDzPacket(buf->cereal_data, buf->cereal_size);
+
+				std::vector<DynamicZoneMember> dz_members;
+				for (const auto& member : t->GetMembers())
+				{
+					// offline players shouldn't be added on creation so names should be in cle
+					auto cle = client_list.FindCLEByCharacterID(member.character_id);
+					std::string character_name = cle ? cle->name() : "";
+
+					dz_members.emplace_back(member.character_id, character_name);
+					if (member.is_leader)
+					{
+						dz.SetLeader({ member.character_id, character_name });
+					}
+				}
+
+				auto new_dz = dynamic_zone_manager.CreateNew(dz, dz_members);
+				if (new_dz)
+				{
+					// todo: shared tasks should store the dz id and notify it when adding/removing members
+					LogTasks("Created task dz id: [{}]", new_dz->GetID());
+				}
+			}
 			break;
 		}
 		default:
 			break;
 	}
 }
-

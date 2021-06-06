@@ -1371,6 +1371,7 @@ public:
 	void RemoveDynamicZoneID(uint32_t dz_id);
 	void SendDynamicZoneUpdates();
 	void SetDynamicZoneMemberStatus(DynamicZoneMemberStatus status);
+	void CreateTaskDynamicZone(int task_id, DynamicZone& dz_request);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1

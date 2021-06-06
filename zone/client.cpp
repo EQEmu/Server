@@ -9566,6 +9566,14 @@ Expedition* Client::CreateExpedition(
 	return Expedition::TryCreate(this, dz, disable_messages);
 }
 
+void Client::CreateTaskDynamicZone(int task_id, DynamicZone& dz_request)
+{
+	if (task_state)
+	{
+		task_state->CreateTaskDynamicZone(this, task_id, dz_request);
+	}
+}
+
 Expedition* Client::GetExpedition() const
 {
 	if (zone && m_expedition_id)
