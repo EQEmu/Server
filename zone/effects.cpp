@@ -586,7 +586,7 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 			return false;
 		}
 	}
-	Message(Chat::Red, "You have learned too many spell and can learn no more.");
+	Message(Chat::Red, "You have learned too many spells and can learn no more.");
 	return false;
 }
 
