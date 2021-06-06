@@ -15,6 +15,8 @@
 #include "bot_database.h"
 #endif
 
+#define WOLF 42
+
 class Client;
 class Corpse;
 class Merc;
@@ -243,6 +245,17 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
+namespace BeastlordPetData {	
+	struct PetStruct {
+		uint16 race_id = WOLF;
+		uint8 texture = 0;
+		uint8 helm_texture = 0;
+		uint8 gender = 2;
+		float size_modifier = 1.0f;
+		uint8 face = 0;
+	};
+}
+
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
@@ -458,6 +471,7 @@ public:
 	bool		GetPetEntry(const char *pet_type, PetRecord *into);
 	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
+	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
 	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
 	uint32		GetMaxNPCSpellsID();

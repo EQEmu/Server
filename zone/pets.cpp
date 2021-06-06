@@ -299,39 +299,16 @@ void Mob::MakePoweredPet(uint16 spell_id, const char* pettype, int16 petpower,
 		strcat(npc_type->name, "`s_pet");
 	}
 
-	//handle beastlord pet appearance
-	if(record.petnaming == 2)
-	{
-		switch(GetBaseRace())
-		{
-		case VAHSHIR:
-			npc_type->race = TIGER;
-			npc_type->size *= 0.8f;
-			break;
-		case TROLL:
-			npc_type->race = ALLIGATOR;
-			npc_type->size *= 2.5f;
-			break;
-		case OGRE:
-			npc_type->race = BEAR;
-			npc_type->texture = 3;
-			npc_type->gender = 2;
-			break;
-		case BARBARIAN:
-			npc_type->race = WOLF;
-			npc_type->texture = 2;
-			break;
-		case IKSAR:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
-			npc_type->gender = 1;
-			npc_type->size *= 2.0f;
-			npc_type->luclinface = 0;
-			break;
-		default:
-			npc_type->race = WOLF;
-			npc_type->texture = 0;
-		}
+	// Beastlord Pets
+	if(record.petnaming == 2) {
+		uint16 race_id = GetBaseRace();
+		auto beastlord_pet_data = content_db.GetBeastlordPetData(race_id);
+		npc_type->race = beastlord_pet_data.race_id;
+		npc_type->texture = beastlord_pet_data.texture;
+		npc_type->helmtexture = beastlord_pet_data.helm_texture;
+		npc_type->gender = beastlord_pet_data.gender;
+		npc_type->size *= beastlord_pet_data.size_modifier;
+		npc_type->luclinface = beastlord_pet_data.face;
 	}
 
 	// handle monster summoning pet appearance
@@ -715,4 +692,30 @@ bool Pet::CheckSpellLevelRestriction(uint16 spell_id)
 	if (owner)
 		return owner->CheckSpellLevelRestriction(spell_id);
 	return true;
+}
+
+BeastlordPetData::PetStruct ZoneDatabase::GetBeastlordPetData(uint16 race_id) {	
+	BeastlordPetData::PetStruct beastlord_pet_data;
+	std::string query = fmt::format(
+		SQL(
+			SELECT
+			`pet_race`, `texture`, `helm_texture`, `gender`, `size_modifier`, `face`
+			FROM `pets_beastlord_data`
+			WHERE `player_race` = {}
+		),
+		race_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success() || results.RowCount() != 1) {
+		return beastlord_pet_data;
+	}
+
+	auto row = results.begin();
+	beastlord_pet_data.race_id = atoi(row[0]);
+	beastlord_pet_data.texture = atoi(row[1]);
+	beastlord_pet_data.helm_texture = atoi(row[2]);
+	beastlord_pet_data.gender = atoi(row[3]);
+	beastlord_pet_data.size_modifier = atof(row[4]);
+	beastlord_pet_data.face = atoi(row[5]);
+	return beastlord_pet_data;
 }
