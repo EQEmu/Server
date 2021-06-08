@@ -25,11 +25,6 @@
 
 extern ZSList zoneserver_list;
 
-Expedition::Expedition()
-{
-	m_warning_cooldown_timer.Enable();
-}
-
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
 	m_dynamic_zone = std::move(dz);
@@ -44,33 +39,6 @@ void Expedition::SendZonesExpeditionDeleted()
 	zoneserver_list.SendPacket(pack.get());
 }
 
-void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
-{
-	uint32_t pack_size = sizeof(ServerExpeditionExpireWarning_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionExpireWarning, pack_size);
-	auto buf = reinterpret_cast<ServerExpeditionExpireWarning_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->minutes_remaining = minutes_remaining;
-	zoneserver_list.SendPacket(pack.get());
-}
-
-void Expedition::CheckExpireWarning()
-{
-	if (m_warning_cooldown_timer.Check(false))
-	{
-		using namespace std::chrono_literals;
-		auto remaining = GetDynamicZone().GetDurationRemaining();
-		if ((remaining > 14min && remaining < 15min) ||
-		    (remaining > 4min && remaining < 5min) ||
-		    (remaining > 0min && remaining < 1min))
-		{
-			int minutes = std::chrono::duration_cast<std::chrono::minutes>(remaining).count() + 1;
-			SendZonesExpireWarning(minutes);
-			m_warning_cooldown_timer.Start(70000); // 1 minute 10 seconds
-		}
-	}
-}
-
 bool Expedition::Process()
 {
 	// returns true if expedition needs to be deleted from world cache and db
@@ -82,8 +50,6 @@ bool Expedition::Process()
 		SendZonesExpeditionDeleted();
 		return true;
 	}
-
-	CheckExpireWarning();
 
 	return false;
 }

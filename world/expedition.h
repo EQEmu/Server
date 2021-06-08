@@ -23,23 +23,19 @@
 
 #include "dynamic_zone.h"
 #include "../common/expedition_base.h"
-#include "../common/timer.h"
 #include <cstdint>
 
 class Expedition : public ExpeditionBase
 {
 public:
-	Expedition();
+	Expedition() = default;
 
-	void CheckExpireWarning();
 	DynamicZone& GetDynamicZone() { return m_dynamic_zone; }
 	bool Process();
 	void SendZonesExpeditionDeleted();
-	void SendZonesExpireWarning(uint32_t minutes_remaining);
 	void SetDynamicZone(DynamicZone&& dz);
 
 private:
-	Timer m_warning_cooldown_timer;
 	DynamicZone m_dynamic_zone;
 };
 

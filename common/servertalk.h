@@ -153,7 +153,6 @@
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
 #define ServerOP_ExpeditionLockState          0x0411
 #define ServerOP_ExpeditionLockoutDuration    0x0414
-#define ServerOP_ExpeditionExpireWarning      0x0416
 
 // dz
 #define ServerOP_DzAddRemoveMember            0x0450
@@ -167,6 +166,7 @@
 #define ServerOP_DzGetMemberStatuses          0x0458
 #define ServerOP_DzUpdateMemberStatus         0x0459
 #define ServerOP_DzLeaderChanged              0x045a
+#define ServerOP_DzExpireWarning              0x045b
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2093,8 +2093,8 @@ struct ServerExpeditionCharacterID_Struct {
 	uint32_t character_id;
 };
 
-struct ServerExpeditionExpireWarning_Struct {
-	uint32_t expedition_id;
+struct ServerDzExpireWarning_Struct {
+	uint32_t dz_id;
 	uint32_t minutes_remaining;
 };
 

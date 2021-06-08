@@ -108,6 +108,7 @@ DynamicZoneStatus DynamicZone::Process()
 
 	if (GetType() == DynamicZoneType::Expedition && status != DynamicZoneStatus::ExpiredEmpty)
 	{
+		CheckExpireWarning();
 		CheckLeader();
 	}
 
@@ -280,6 +281,16 @@ bool DynamicZone::ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMe
 	return changed;
 }
 
+void DynamicZone::SendZonesExpireWarning(uint32_t minutes_remaining)
+{
+	uint32_t pack_size = sizeof(ServerDzExpireWarning_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzExpireWarning, pack_size);
+	auto buf = reinterpret_cast<ServerDzExpireWarning_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->minutes_remaining = minutes_remaining;
+	zoneserver_list.SendPacket(pack.get());
+}
+
 void DynamicZone::SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id)
 {
 	uint32_t members_count = static_cast<uint32_t>(m_members.size());
@@ -323,5 +334,22 @@ void DynamicZone::CacheMemberStatuses()
 		}
 
 		SetInternalMemberStatus(member.id, status);
+	}
+}
+
+void DynamicZone::CheckExpireWarning()
+{
+	if (m_warning_cooldown_timer.Check(false))
+	{
+		using namespace std::chrono_literals;
+		auto remaining = GetDurationRemaining();
+		if ((remaining > 14min && remaining < 15min) ||
+		    (remaining > 4min && remaining < 5min) ||
+		    (remaining > 0min && remaining < 1min))
+		{
+			int minutes = std::chrono::duration_cast<std::chrono::minutes>(remaining).count() + 1;
+			SendZonesExpireWarning(minutes);
+			m_warning_cooldown_timer.Start(120000); // 2 minute cooldown after a warning
+		}
 	}
 }

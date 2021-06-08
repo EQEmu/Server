@@ -271,7 +271,26 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzExpireWarning:
+	{
+		auto buf = reinterpret_cast<ServerDzExpireWarning_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->SendMembersExpireWarning(buf->minutes_remaining);
+		}
+		break;
 	}
+	}
+}
+
+std::unique_ptr<EQApplicationPacket> DynamicZone::CreateExpireWarningPacket(uint32_t minutes_remaining)
+{
+	uint32_t outsize = sizeof(ExpeditionExpireWarning);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_DzExpeditionEndsWarning, outsize);
+	auto buf = reinterpret_cast<ExpeditionExpireWarning*>(outapp->pBuffer);
+	buf->minutes_remaining = minutes_remaining;
+	return outapp;
 }
 
 std::unique_ptr<EQApplicationPacket> DynamicZone::CreateInfoPacket(bool clear)
@@ -380,6 +399,24 @@ void DynamicZone::SendLeaderNameToZoneMembers()
 			{
 				member_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 			}
+		}
+	}
+}
+
+void DynamicZone::SendMembersExpireWarning(uint32_t minutes_remaining)
+{
+	// expeditions warn members in all zones not just the dz
+	auto outapp = CreateExpireWarningPacket(minutes_remaining);
+	for (const auto& member : GetMembers())
+	{
+		Client* member_client = entity_list.GetClientByCharID(member.id);
+		if (member_client)
+		{
+			member_client->QueuePacket(outapp.get());
+
+			// live doesn't actually send the chat message with it
+			member_client->MessageString(Chat::Yellow, EXPEDITION_MIN_REMAIN,
+				fmt::format_int(minutes_remaining).c_str());
 		}
 	}
 }

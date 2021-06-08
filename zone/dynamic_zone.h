@@ -57,6 +57,7 @@ public:
 	void SendMemberListStatusToZoneMembers(const DynamicZoneMember& member);
 	void SendRemoveAllMembersToZoneMembers(bool silent) { ProcessRemoveAllMembers(silent); }
 
+	std::unique_ptr<EQApplicationPacket> CreateExpireWarningPacket(uint32_t minutes_remaining);
 	std::unique_ptr<EQApplicationPacket> CreateInfoPacket(bool clear = false);
 	std::unique_ptr<EQApplicationPacket> CreateLeaderNamePacket();
 	std::unique_ptr<EQApplicationPacket> CreateMemberListPacket(bool clear = false);
@@ -77,6 +78,7 @@ private:
 	static void StartAllClientRemovalTimers();
 	void ProcessLeaderChanged(uint32_t new_leader_id);
 	void SendCompassUpdateToZoneMembers();
+	void SendMembersExpireWarning(uint32_t minutes);
 	void SendUpdatesToZoneMembers(bool removing_all = false, bool silent = true);
 	void SetUpdatedDuration(uint32_t seconds);
 
