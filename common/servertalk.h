@@ -144,7 +144,6 @@
 // expedition
 #define ServerOP_ExpeditionCreate             0x0400
 #define ServerOP_ExpeditionDeleted            0x0401
-#define ServerOP_ExpeditionLeaderChanged      0x0402
 #define ServerOP_ExpeditionLockout            0x0403
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
@@ -167,6 +166,7 @@
 #define ServerOP_DzSwapMembers                0x0457
 #define ServerOP_DzGetMemberStatuses          0x0458
 #define ServerOP_DzUpdateMemberStatus         0x0459
+#define ServerOP_DzLeaderChanged              0x045a
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -2028,8 +2028,8 @@ struct ServerExpeditionID_Struct {
 	uint32 sender_instance_id;
 };
 
-struct ServerExpeditionLeaderID_Struct {
-	uint32 expedition_id;
+struct ServerDzLeaderID_Struct {
+	uint32 dz_id;
 	uint32 leader_id;
 };
 

@@ -2,7 +2,8 @@
 #define WORLD_DYNAMIC_ZONE_H
 
 #include "../common/dynamic_zone_base.h"
-#include <functional>
+#include "../common/rulesys.h"
+#include "../common/timer.h"
 
 class Database;
 class ServerPacket;
@@ -27,8 +28,7 @@ public:
 
 	void CacheMemberStatuses();
 	DynamicZoneStatus Process();
-	void RegisterOnMemberAddRemove(std::function<void(const DynamicZoneMember&, bool)> on_addremove);
-	void RegisterOnStatusChanged(std::function<void(const DynamicZoneMember&)> on_status_changed);
+	bool SetNewLeader(const DynamicZoneMember& member);
 
 protected:
 	Database& GetDatabase() override;
@@ -37,12 +37,15 @@ protected:
 	bool SendServerPacket(ServerPacket* packet) override;
 
 private:
+	void CheckLeader();
+	void ChooseNewLeader();
 	void SendZoneMemberStatuses(uint16_t zone_id, uint16_t instance_id);
 	void SendZonesDurationUpdate();
+	void SendZonesLeaderChanged();
 
 	bool m_is_pending_early_shutdown = false;
-	std::function<void(const DynamicZoneMember&, bool)> m_on_addremove;
-	std::function<void(const DynamicZoneMember&)> m_on_status_changed;
+	bool m_choose_leader_needed = false;
+	Timer m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) };
 };
 
 #endif

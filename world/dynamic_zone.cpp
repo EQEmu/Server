@@ -33,16 +33,55 @@ DynamicZone* DynamicZone::FindDynamicZoneByID(uint32_t dz_id)
 	return nullptr;
 }
 
-void DynamicZone::RegisterOnMemberAddRemove(
-	std::function<void(const DynamicZoneMember&, bool)> on_addremove)
+void DynamicZone::ChooseNewLeader()
 {
-	m_on_addremove = std::move(on_addremove);
+	if (m_members.empty() || !m_choose_leader_cooldown_timer.Check())
+	{
+		m_choose_leader_needed = true;
+		return;
+	}
+
+	auto it = std::find_if(m_members.begin(), m_members.end(), [&](const DynamicZoneMember& member) {
+		if (member.id != GetLeaderID() && member.IsOnline()) {
+			auto member_cle = client_list.FindCLEByCharacterID(member.id);
+			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
+		}
+		return false;
+	});
+
+	if (it == m_members.end())
+	{
+		// no online members found, fallback to choosing any member
+		it = std::find_if(m_members.begin(), m_members.end(),
+			[&](const DynamicZoneMember& member) { return member.id != GetLeaderID(); });
+	}
+
+	if (it != m_members.end() && SetNewLeader(*it))
+	{
+		m_choose_leader_needed = false;
+	}
 }
 
-void DynamicZone::RegisterOnStatusChanged(
-	std::function<void(const DynamicZoneMember&)> on_status_changed)
+bool DynamicZone::SetNewLeader(const DynamicZoneMember& member)
 {
-	m_on_status_changed = std::move(on_status_changed);
+	auto new_leader = GetMemberData(member.id);
+	if (!new_leader.IsValid())
+	{
+		return false;
+	}
+
+	LogDynamicZonesDetail("Replacing dz [{}] leader [{}] with [{}]", GetID(), GetLeaderName(), new_leader.name);
+	SetLeader(new_leader, true);
+	SendZonesLeaderChanged();
+	return true;
+}
+
+void DynamicZone::CheckLeader()
+{
+	if (m_choose_leader_needed)
+	{
+		ChooseNewLeader();
+	}
 }
 
 DynamicZoneStatus DynamicZone::Process()
@@ -65,6 +104,11 @@ DynamicZoneStatus DynamicZone::Process()
 				m_is_pending_early_shutdown = true;
 			}
 		}
+	}
+
+	if (GetType() == DynamicZoneType::Expedition && status != DynamicZoneStatus::ExpiredEmpty)
+	{
+		CheckLeader();
 	}
 
 	return status;
@@ -99,6 +143,16 @@ void DynamicZone::SendZonesDurationUpdate()
 	auto packbuf = reinterpret_cast<ServerDzSetDuration_Struct*>(pack->pBuffer);
 	packbuf->dz_id = GetID();
 	packbuf->seconds = static_cast<uint32_t>(m_duration.count());
+	zoneserver_list.SendPacket(pack.get());
+}
+
+void DynamicZone::SendZonesLeaderChanged()
+{
+	uint32_t pack_size = sizeof(ServerDzLeaderID_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzLeaderChanged, pack_size);
+	auto buf = reinterpret_cast<ServerDzLeaderID_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->leader_id = GetLeaderID();
 	zoneserver_list.SendPacket(pack.get());
 }
 
@@ -206,19 +260,22 @@ void DynamicZone::ProcessMemberAddRemove(const DynamicZoneMember& member, bool r
 {
 	DynamicZoneBase::ProcessMemberAddRemove(member, removed);
 
-	if (m_on_addremove)
+	if (GetType() == DynamicZoneType::Expedition && removed && member.id == GetLeaderID())
 	{
-		m_on_addremove(member, removed);
+		ChooseNewLeader();
 	}
 }
 
 bool DynamicZone::ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMemberStatus status)
 {
 	bool changed = DynamicZoneBase::SetInternalMemberStatus(character_id, status);
-	if (changed && m_on_status_changed)
+	if (changed && GetType() == DynamicZoneType::Expedition)
 	{
-		auto member = GetMemberData(character_id);
-		m_on_status_changed(member);
+		// any member status update will trigger a leader fix if leader was offline
+		if (GetLeader().status == DynamicZoneMemberStatus::Offline && GetMemberCount() > 1)
+		{
+			ChooseNewLeader();
+		}
 	}
 	return changed;
 }

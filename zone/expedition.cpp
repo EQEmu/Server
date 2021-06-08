@@ -881,26 +881,6 @@ void Expedition::SetLocked(
 	}
 }
 
-void Expedition::ProcessLeaderChanged(uint32_t new_leader_id)
-{
-	auto new_leader = GetDynamicZone().GetMemberData(new_leader_id);
-	if (!new_leader.IsValid())
-	{
-		LogExpeditions("Processed invalid new leader id [{}] for expedition [{}]", new_leader_id, m_id);
-		return;
-	}
-
-	LogExpeditionsModerate("Replaced [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
-
-	GetDynamicZone().SetLeader(new_leader);
-	GetDynamicZone().SendLeaderNameToZoneMembers([](Client* leader_client) {
-			if (leader_client && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
-			{
-				leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
-			}
-		});
-}
-
 void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader_client,
 	const std::string& new_leader_name, bool is_success, bool is_online)
 {
@@ -1288,16 +1268,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 
 			LogExpeditionsModerate("Deleting expedition [{}] from zone cache", buf->expedition_id);
 			zone->expedition_cache.erase(buf->expedition_id);
-		}
-		break;
-	}
-	case ServerOP_ExpeditionLeaderChanged:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition)
-		{
-			expedition->ProcessLeaderChanged(buf->leader_id);
 		}
 		break;
 	}

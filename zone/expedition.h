@@ -131,7 +131,6 @@ private:
 	bool ConfirmLeaderCommand(Client* requester);
 	void OnClientAddRemove(Client* client, bool removed, bool silent);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
-	void ProcessLeaderChanged(uint32_t new_leader_id);
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
 	void ProcessMakeLeader(Client* old_leader, Client* new_leader,

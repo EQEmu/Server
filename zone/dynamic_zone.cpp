@@ -21,6 +21,7 @@
 #include "dynamic_zone.h"
 #include "client.h"
 #include "expedition.h"
+#include "string_ids.h"
 #include "worldserver.h"
 #include "../common/eqemu_logsys.h"
 
@@ -260,6 +261,16 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
+	case ServerOP_DzLeaderChanged:
+	{
+		auto buf = reinterpret_cast<ServerDzLeaderID_Struct*>(pack->pBuffer);
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz)
+		{
+			dz->ProcessLeaderChanged(buf->leader_id);
+		}
+		break;
+	}
 	}
 }
 
@@ -354,7 +365,7 @@ void DynamicZone::SendCompassUpdateToZoneMembers()
 	}
 }
 
-void DynamicZone::SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update)
+void DynamicZone::SendLeaderNameToZoneMembers()
 {
 	auto outapp_leader = CreateLeaderNamePacket();
 
@@ -365,9 +376,9 @@ void DynamicZone::SendLeaderNameToZoneMembers(std::function<void(Client*)> on_le
 		{
 			member_client->QueuePacket(outapp_leader.get());
 
-			if (member.id == m_leader.id && on_leader_update)
+			if (member.id == m_leader.id && RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
 			{
-				on_leader_update(member_client);
+				member_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 			}
 		}
 	}
@@ -549,4 +560,22 @@ bool DynamicZone::ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMembe
 	}
 
 	return changed;
+}
+
+void DynamicZone::ProcessLeaderChanged(uint32_t new_leader_id)
+{
+	auto new_leader = GetMemberData(new_leader_id);
+	if (!new_leader.IsValid())
+	{
+		LogDynamicZones("Processed invalid new leader id [{}] for dz [{}]", new_leader_id, m_id);
+		return;
+	}
+
+	LogDynamicZones("Replaced [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
+
+	SetLeader(new_leader);
+	if (GetType() == DynamicZoneType::Expedition)
+	{
+		SendLeaderNameToZoneMembers();
+	}
 }

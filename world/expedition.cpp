@@ -19,18 +19,13 @@
  */
 
 #include "expedition.h"
-#include "cliententry.h"
-#include "clientlist.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "../common/eqemu_logsys.h"
-#include "../common/rulesys.h"
 
-extern ClientList client_list;
 extern ZSList zoneserver_list;
 
-Expedition::Expedition() :
-	m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) }
+Expedition::Expedition()
 {
 	m_warning_cooldown_timer.Enable();
 }
@@ -38,62 +33,6 @@ Expedition::Expedition() :
 void Expedition::SetDynamicZone(DynamicZone&& dz)
 {
 	m_dynamic_zone = std::move(dz);
-	m_dynamic_zone.RegisterOnMemberAddRemove(
-		[this](const DynamicZoneMember& member, bool removed) { OnMemberAddRemove(member, removed); });
-	m_dynamic_zone.RegisterOnStatusChanged(
-		[this](const DynamicZoneMember& member) { OnMemberStatusChanged(member); });
-}
-
-void Expedition::OnMemberAddRemove(const DynamicZoneMember& member, bool removed)
-{
-	if (removed && member.id == GetLeaderID())
-	{
-		ChooseNewLeader();
-	}
-}
-
-void Expedition::ChooseNewLeader()
-{
-	const auto& members = GetDynamicZone().GetMembers();
-	if (members.empty() || !m_choose_leader_cooldown_timer.Check())
-	{
-		m_choose_leader_needed = true;
-		return;
-	}
-
-	auto it = std::find_if(members.begin(), members.end(), [&](const DynamicZoneMember& member) {
-		if (member.id != GetLeaderID() && member.IsOnline()) {
-			auto member_cle = client_list.FindCLEByCharacterID(member.id);
-			return (member_cle && member_cle->GetOnline() == CLE_Status::InZone);
-		}
-		return false;
-	});
-
-	if (it == members.end())
-	{
-		// no online members found, fallback to choosing any member
-		it = std::find_if(members.begin(), members.end(),
-			[&](const DynamicZoneMember& member) { return member.id != GetLeaderID(); });
-	}
-
-	if (it != members.end() && SetNewLeader(*it))
-	{
-		m_choose_leader_needed = false;
-	}
-}
-
-bool Expedition::SetNewLeader(const DynamicZoneMember& member)
-{
-	auto new_leader = GetDynamicZone().GetMemberData(member.id);
-	if (!new_leader.IsValid())
-	{
-		return false;
-	}
-
-	LogExpeditionsModerate("Replacing [{}] leader [{}] with [{}]", m_id, GetLeaderName(), new_leader.name);
-	m_dynamic_zone.SetLeader(new_leader, true);
-	SendZonesLeaderChanged();
-	return true;
 }
 
 void Expedition::SendZonesExpeditionDeleted()
@@ -115,16 +54,6 @@ void Expedition::SendZonesExpireWarning(uint32_t minutes_remaining)
 	zoneserver_list.SendPacket(pack.get());
 }
 
-void Expedition::SendZonesLeaderChanged()
-{
-	uint32_t pack_size = sizeof(ServerExpeditionLeaderID_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionLeaderChanged, pack_size);
-	auto buf = reinterpret_cast<ServerExpeditionLeaderID_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
-	buf->leader_id = GetLeaderID();
-	zoneserver_list.SendPacket(pack.get());
-}
-
 void Expedition::CheckExpireWarning()
 {
 	if (m_warning_cooldown_timer.Check(false))
@@ -142,14 +71,6 @@ void Expedition::CheckExpireWarning()
 	}
 }
 
-void Expedition::CheckLeader()
-{
-	if (m_choose_leader_needed)
-	{
-		ChooseNewLeader();
-	}
-}
-
 bool Expedition::Process()
 {
 	// returns true if expedition needs to be deleted from world cache and db
@@ -163,16 +84,6 @@ bool Expedition::Process()
 	}
 
 	CheckExpireWarning();
-	CheckLeader();
 
 	return false;
-}
-
-void Expedition::OnMemberStatusChanged(const DynamicZoneMember& member)
-{
-	// any member status update will trigger a leader fix if leader was offline
-	if (GetLeader().status == DynamicZoneMemberStatus::Offline && GetDynamicZone().GetMemberCount() > 1)
-	{
-		ChooseNewLeader();
-	}
 }

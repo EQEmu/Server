@@ -109,7 +109,8 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
 		if (expedition)
 		{
-			buf->is_success = expedition->SetNewLeader({ new_leader_cle->CharID(), new_leader_cle->name() });
+			buf->is_success = expedition->GetDynamicZone().SetNewLeader({
+				new_leader_cle->CharID(), new_leader_cle->name() });
 		}
 
 		buf->is_online = true;

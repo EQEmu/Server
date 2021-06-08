@@ -51,7 +51,7 @@ public:
 	bool IsCurrentZoneDzInstance() const;
 	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
 	void SendClientWindowUpdate(Client* client);
-	void SendLeaderNameToZoneMembers(std::function<void(Client*)> on_leader_update);
+	void SendLeaderNameToZoneMembers();
 	void SendMemberListToZoneMembers();
 	void SendMemberListNameToZoneMembers(const std::string& char_name, bool remove);
 	void SendMemberListStatusToZoneMembers(const DynamicZoneMember& member);
@@ -75,6 +75,7 @@ protected:
 
 private:
 	static void StartAllClientRemovalTimers();
+	void ProcessLeaderChanged(uint32_t new_leader_id);
 	void SendCompassUpdateToZoneMembers();
 	void SendUpdatesToZoneMembers(bool removing_all = false, bool silent = true);
 	void SetUpdatedDuration(uint32_t seconds);
