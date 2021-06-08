@@ -967,6 +967,23 @@ Lua_HateList Lua_Mob::GetHateList() {
 	return ret;
 }
 
+Lua_HateList Lua_Mob::GetShuffledHateList() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetHateList();
+	auto iter = h_list.begin();
+	while(iter != h_list.end()) {
+		Lua_HateEntry e(*iter);
+		ret.entries.push_back(e);
+		++iter;
+	}
+
+	zone->random.Shuffle(ret.entries.begin(), ret.entries.end());
+
+	return ret;
+}
+
 Lua_Mob Lua_Mob::GetHateTop() {
 	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateTop());
@@ -2513,6 +2530,7 @@ luabind::scope lua_register_mob() {
 		.def("GetPet", &Lua_Mob::GetPet)
 		.def("GetOwner", &Lua_Mob::GetOwner)
 		.def("GetHateList", &Lua_Mob::GetHateList)
+		.def("GetShuffledHateList", &Lua_Mob::GetShuffledHateList)
 		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListByDistance)
 		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(int))&Lua_Mob::GetHateListByDistance)
 		.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
