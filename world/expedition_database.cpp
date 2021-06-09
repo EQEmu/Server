@@ -19,7 +19,6 @@
  */
 
 #include "expedition_database.h"
-#include "expedition.h"
 #include "worlddb.h"
 #include "../common/repositories/expeditions_repository.h"
 #include "../common/repositories/expedition_lockouts_repository.h"

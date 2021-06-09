@@ -1,7 +1,5 @@
 #include "dynamic_zone_manager.h"
 #include "dynamic_zone.h"
-#include "expedition.h"
-#include "expedition_state.h"
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"
@@ -121,7 +119,6 @@ void DynamicZoneManager::Process()
 	}
 
 	std::vector<uint32_t> dynamic_zone_ids;
-	std::vector<uint32_t> expedition_ids;
 
 	for (const auto& dz_iter : dynamic_zone_cache)
 	{
@@ -134,30 +131,8 @@ void DynamicZoneManager::Process()
 		{
 			LogDynamicZones("[{}] expired with [{}] members, notifying zones and deleting", dz->GetID(), dz->GetMemberCount());
 			dynamic_zone_ids.emplace_back(dz->GetID());
-
-			// manually handle expeditions to remove any references before the dz is deleted
-			if (dz->GetType() == DynamicZoneType::Expedition)
-			{
-				auto expedition = expedition_state.GetExpeditionByDynamicZoneID(dz->GetID());
-				if (expedition)
-				{
-					LogExpeditions("Deleting expedition [{}] from zone and world caches", expedition->GetID());
-					expedition_ids.emplace_back(expedition->GetID());
-					expedition->SendZonesExpeditionDeleted();
-					expedition_state.RemoveExpeditionByID(expedition->GetID());
-				}
-			}
-
 			dz->SendZonesDynamicZoneDeleted(); // delete dz from zone caches
 		}
-	}
-
-	if (!expedition_ids.empty())
-	{
-		ExpeditionsRepository::DeleteWhere(database,
-			fmt::format("id IN ({})", fmt::join(expedition_ids, ",")));
-		ExpeditionLockoutsRepository::DeleteWhere(database,
-			fmt::format("expedition_id IN ({})", fmt::join(expedition_ids, ",")));
 	}
 
 	if (!dynamic_zone_ids.empty())
@@ -167,6 +142,23 @@ void DynamicZoneManager::Process()
 			dynamic_zone_cache.erase(dz_id);
 		}
 
+		// need to look up expedition ids until lockouts are moved to dynamic zones
+		std::vector<uint32_t> expedition_ids;
+		auto expeditions = ExpeditionsRepository::GetWhere(database,
+			fmt::format("dynamic_zone_id IN ({})", fmt::join(dynamic_zone_ids, ",")));
+
+		if (!expeditions.empty())
+		{
+			for (const auto& expedition : expeditions)
+			{
+				expedition_ids.emplace_back(expedition.id);
+			}
+			ExpeditionLockoutsRepository::DeleteWhere(database,
+				fmt::format("expedition_id IN ({})", fmt::join(expedition_ids, ",")));
+		}
+
+		ExpeditionsRepository::DeleteWhere(database,
+			fmt::format("dynamic_zone_id IN ({})", fmt::join(dynamic_zone_ids, ",")));
 		DynamicZoneMembersRepository::RemoveAllMembers(database, dynamic_zone_ids);
 		DynamicZonesRepository::DeleteWhere(database,
 			fmt::format("id IN ({})", fmt::join(dynamic_zone_ids, ",")));

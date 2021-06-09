@@ -18,10 +18,8 @@
  *
  */
 
-#include "expedition.h"
 #include "dynamic_zone.h"
 #include "expedition_message.h"
-#include "expedition_state.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -38,8 +36,6 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	{
 	case ServerOP_ExpeditionCreate:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.CacheFromDatabase(buf->expedition_id);
 		zoneserver_list.SendPacket(pack);
 		break;
 	}

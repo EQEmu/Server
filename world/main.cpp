@@ -93,7 +93,6 @@ union semun {
 #include "console.h"
 #include "dynamic_zone_manager.h"
 #include "expedition_database.h"
-#include "expedition_state.h"
 
 #include "../common/net/servertalk_server.h"
 #include "../zone/data_bucket.h"
@@ -491,9 +490,6 @@ int main(int argc, char **argv)
 
 	LogInfo("Loading dynamic zones");
 	dynamic_zone_manager.CacheAllFromDatabase();
-
-	LogInfo("Loading active expeditions");
-	expedition_state.CacheAllFromDatabase();
 
 	LogInfo("Loading char create info");
 	content_db.LoadCharacterCreateAllocations();

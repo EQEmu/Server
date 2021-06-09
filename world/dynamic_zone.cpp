@@ -2,8 +2,6 @@
 #include "cliententry.h"
 #include "clientlist.h"
 #include "dynamic_zone_manager.h"
-#include "expedition.h"
-#include "expedition_state.h"
 #include "worlddb.h"
 #include "zonelist.h"
 #include "zoneserver.h"

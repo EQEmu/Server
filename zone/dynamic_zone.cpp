@@ -237,6 +237,17 @@ void DynamicZone::HandleWorldMessage(ServerPacket* pack)
 		{
 			dz->SendUpdatesToZoneMembers(true, true); // members silently removed
 
+			// manually handle expeditions to remove any references before the dz is deleted
+			if (dz->GetType() == DynamicZoneType::Expedition)
+			{
+				auto expedition = Expedition::FindCachedExpeditionByDynamicZoneID(dz->GetID());
+				if (expedition)
+				{
+					LogExpeditionsModerate("Deleting expedition [{}] from zone cache", expedition->GetID());
+					zone->expedition_cache.erase(expedition->GetID());
+				}
+			}
+
 			LogDynamicZonesDetail("Deleting dynamic zone [{}] from zone cache", buf->dz_id);
 			zone->dynamic_zone_cache.erase(buf->dz_id);
 		}

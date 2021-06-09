@@ -146,7 +146,6 @@
 
 // expedition
 #define ServerOP_ExpeditionCreate             0x0400
-#define ServerOP_ExpeditionDeleted            0x0401
 #define ServerOP_ExpeditionLockout            0x0403
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409

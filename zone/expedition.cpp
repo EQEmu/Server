@@ -1221,20 +1221,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	case ServerOP_ExpeditionDeleted:
-	{
-		// sent by world when it deletes expired or empty expeditions
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (zone && expedition)
-		{
-			expedition->GetDynamicZone()->SendRemoveAllMembersToZoneMembers(true); // members silently removed
-
-			LogExpeditionsModerate("Deleting expedition [{}] from zone cache", buf->expedition_id);
-			zone->expedition_cache.erase(buf->expedition_id);
-		}
-		break;
-	}
 	case ServerOP_ExpeditionLockout:
 	case ServerOP_ExpeditionLockoutDuration:
 	{
