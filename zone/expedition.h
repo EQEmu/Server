@@ -22,7 +22,6 @@
 #define EXPEDITION_H
 
 #include "dynamic_zone.h"
-#include "../common/expedition_base.h"
 #include "../common/expedition_lockout_timer.h"
 #include "../common/repositories/expeditions_repository.h"
 #include <cstdint>
@@ -47,7 +46,7 @@ enum class ExpeditionLockMessage : uint8_t
 	Begin
 };
 
-class Expedition : public ExpeditionBase
+class Expedition
 {
 public:
 	Expedition() = delete;
@@ -79,6 +78,8 @@ public:
 		const std::string& expedition_name = {}, const std::string& event_name = {});
 	static void AddLockoutClients(const ExpeditionLockoutTimer& lockout, uint32_t exclude_id = 0);
 
+	uint32_t GetID() const { return m_id; }
+	uint32_t GetDynamicZoneID() const { return m_dynamic_zone_id; }
 	DynamicZone* GetDynamicZone() const { return m_dynamic_zone; }
 	const DynamicZoneMember& GetLeader() { return GetDynamicZone()->GetLeader(); }
 	uint32_t GetLeaderID() { return GetDynamicZone()->GetLeaderID(); }
@@ -132,6 +133,7 @@ private:
 	void AddLockoutDurationClients(const ExpeditionLockoutTimer& lockout, int seconds, uint32_t exclude_id = 0);
 	bool ConfirmLeaderCommand(Client* requester);
 	void OnClientAddRemove(Client* client, bool removed, bool silent);
+	void LoadRepositoryResult(const ExpeditionsRepository::Expeditions& entry);
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
@@ -154,6 +156,10 @@ private:
 
 	std::unique_ptr<EQApplicationPacket> CreateInvitePacket(const std::string& inviter_name, const std::string& swap_remove_name);
 
+	uint32_t m_id = 0;
+	uint32_t m_dynamic_zone_id = 0;
+	bool m_is_locked = false;
+	bool m_add_replay_on_join = true;
 	DynamicZone* m_dynamic_zone = nullptr; // should never be null, will exist for lifetime of expedition
 	std::unordered_map<std::string, ExpeditionLockoutTimer> m_lockouts;
 	std::unordered_map<uint32_t, std::string> m_npc_loot_events;   // only valid inside dz zone

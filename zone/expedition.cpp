@@ -49,9 +49,18 @@ const int32_t Expedition::EVENT_TIMER_ID  = 1;
 
 Expedition::Expedition(DynamicZone* dz, uint32_t id, uint32_t dz_id) :
 	m_dynamic_zone(dz),
-	ExpeditionBase(id, dz->GetID())
+	m_id(id),
+	m_dynamic_zone_id(dz_id)
 {
 	assert(m_dynamic_zone != nullptr); // dz must remain valid for lifetime of expedition
+}
+
+void Expedition::LoadRepositoryResult(const ExpeditionsRepository::Expeditions& entry)
+{
+	m_id                 = entry.id;
+	m_dynamic_zone_id    = entry.dynamic_zone_id;
+	m_add_replay_on_join = entry.add_replay_on_join;
+	m_is_locked          = entry.is_locked;
 }
 
 void Expedition::RegisterDynamicZoneCallbacks()
