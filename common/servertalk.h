@@ -2112,7 +2112,7 @@ struct ServerDzCommand_Struct {
 };
 
 struct ServerDzCommandMakeLeader_Struct {
-	uint32 expedition_id;
+	uint32 dz_id;
 	uint32 requester_id;
 	uint8  is_online;  // set by world, 0: new leader name offline, 1: online
 	uint8  is_success; // set by world, 0: makeleader failed, 1: success (is online member)

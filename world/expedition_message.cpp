@@ -107,11 +107,10 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	ClientListEntry* new_leader_cle = client_list.FindCharacter(buf->new_leader_name);
 	if (new_leader_cle && new_leader_cle->Server())
 	{
-		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-		if (expedition)
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz && dz->GetLeaderID() == buf->requester_id)
 		{
-			buf->is_success = expedition->GetDynamicZone()->SetNewLeader({
-				new_leader_cle->CharID(), new_leader_cle->name() });
+			buf->is_success = dz->SetNewLeader(new_leader_cle->CharID());
 		}
 
 		buf->is_online = true;

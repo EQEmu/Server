@@ -56,15 +56,15 @@ void DynamicZone::ChooseNewLeader()
 			[&](const DynamicZoneMember& member) { return member.id != GetLeaderID(); });
 	}
 
-	if (it != m_members.end() && SetNewLeader(*it))
+	if (it != m_members.end() && SetNewLeader(it->id))
 	{
 		m_choose_leader_needed = false;
 	}
 }
 
-bool DynamicZone::SetNewLeader(const DynamicZoneMember& member)
+bool DynamicZone::SetNewLeader(uint32_t member_id)
 {
-	auto new_leader = GetMemberData(member.id);
+	auto new_leader = GetMemberData(member_id);
 	if (!new_leader.IsValid())
 	{
 		return false;

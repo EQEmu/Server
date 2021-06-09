@@ -135,8 +135,6 @@ private:
 	bool ProcessAddConflicts(Client* leader_client, Client* add_client, bool swapping);
 	void ProcessLockoutDuration(const ExpeditionLockoutTimer& lockout, int seconds, bool members_only = false);
 	void ProcessLockoutUpdate(const ExpeditionLockoutTimer& lockout, bool remove, bool members_only = false);
-	void ProcessMakeLeader(Client* old_leader, Client* new_leader,
-		const std::string& new_leader_name, bool is_success, bool is_online);
 	void SaveLockouts(ExpeditionRequest& request);
 	void SendClientExpeditionInvite(
 		Client* client, const std::string& inviter_name, const std::string& swap_remove_name);

@@ -28,7 +28,7 @@ public:
 
 	void CacheMemberStatuses();
 	DynamicZoneStatus Process();
-	bool SetNewLeader(const DynamicZoneMember& member);
+	bool SetNewLeader(uint32_t member_id);
 
 protected:
 	Database& GetDatabase() override;

@@ -880,32 +880,6 @@ void Expedition::SetLocked(
 	}
 }
 
-void Expedition::ProcessMakeLeader(Client* old_leader_client, Client* new_leader_client,
-	const std::string& new_leader_name, bool is_success, bool is_online)
-{
-	if (old_leader_client)
-	{
-		// success flag is set by world to indicate new leader set to an online member
-		if (is_success)
-		{
-			old_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_NAME, new_leader_name.c_str());
-		}
-		else if (!is_online)
-		{
-			old_leader_client->MessageString(Chat::Red, DZMAKELEADER_NOT_ONLINE, new_leader_name.c_str());
-		}
-		else
-		{
-			old_leader_client->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, new_leader_name.c_str());
-		}
-	}
-
-	if (is_success && new_leader_client && !RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
-	{
-		new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
-	}
-}
-
 void Expedition::OnClientAddRemove(Client* client, bool removed, bool silent)
 {
 	if (client)
@@ -1124,7 +1098,7 @@ void Expedition::SendWorldMakeLeaderRequest(uint32_t requester_id, const std::st
 	uint32_t pack_size = sizeof(ServerDzCommandMakeLeader_Struct);
 	auto pack = std::make_unique<ServerPacket>(ServerOP_ExpeditionDzMakeLeader, pack_size);
 	auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
-	buf->expedition_id = GetID();
+	buf->dz_id = GetDynamicZone()->GetID();
 	buf->requester_id = requester_id;
 	strn0cpy(buf->new_leader_name, new_leader_name.c_str(), sizeof(buf->new_leader_name));
 	worldserver.SendPacket(pack.get());
@@ -1337,13 +1311,24 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 	case ServerOP_ExpeditionDzMakeLeader:
 	{
 		auto buf = reinterpret_cast<ServerDzCommandMakeLeader_Struct*>(pack->pBuffer);
-		auto expedition = Expedition::FindCachedExpeditionByID(buf->expedition_id);
-		if (expedition)
+		auto old_leader_client = entity_list.GetClientByCharID(buf->requester_id);
+		auto new_leader_client = entity_list.GetClientByName(buf->new_leader_name);
+
+		if (old_leader_client)
 		{
-			auto old_leader_client = entity_list.GetClientByCharID(buf->requester_id);
-			auto new_leader_client = entity_list.GetClientByName(buf->new_leader_name);
-			expedition->ProcessMakeLeader(old_leader_client, new_leader_client,
-				buf->new_leader_name, buf->is_success, buf->is_online);
+			// success flag is set by world to indicate new leader set to an online member
+			if (buf->is_success) {
+				old_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_NAME, buf->new_leader_name);
+			} else if (!buf->is_online) {
+				old_leader_client->MessageString(Chat::Red, DZMAKELEADER_NOT_ONLINE, buf->new_leader_name);
+			} else {
+				old_leader_client->MessageString(Chat::Red, EXPEDITION_NOT_MEMBER, buf->new_leader_name);
+			}
+		}
+
+		if (buf->is_success && !RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+		{
+			new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 		}
 		break;
 	}
