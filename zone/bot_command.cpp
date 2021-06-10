@@ -5139,7 +5139,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 		c->Message(m_usage, "Usage: %s [bot_race]", sep->arg[0]);
 		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
 		for (int race_id = 0; race_id <= 15; ++race_id) {
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			window_text.append(StringFormat(race_substrs[race_id + 1].c_str(), race_values[race_id + 1]));
 			message_separator = ", ";
 		}
@@ -5161,7 +5161,7 @@ void bot_command_view_combos(Client *c, const Seperator *sep)
 	window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
 	for (int class_id = 0; class_id <= 15; ++class_id) {
 		if (classes_bitmask & GetPlayerClassBit(class_id)) {
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			window_text.append(StringFormat(class_substrs[class_id].c_str(), class_id));
 			message_separator = ", ";
 		}
@@ -5211,7 +5211,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5226,7 +5226,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5240,7 +5240,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		window_text.append("<c \"#FFFFFF\">Genders:<c \"#FFFF\">");
 		message_separator = " ";
 		for (int i = 0; i <= 1; ++i) {
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			window_text.append(StringFormat(gender_substrs[i].c_str(), i));
 			message_separator = ", ";
 		}
@@ -8728,7 +8728,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
 		const char* bot_race_name = GetRaceIDName(bot_race);
 		const char* bot_class_name = GetClassIDName(bot_class);
-		const char* view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view").c_str();
+		std::string view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view");
 		bot_owner->Message(
 			m_fail,
 			fmt::format(
