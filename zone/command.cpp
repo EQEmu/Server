@@ -14110,21 +14110,20 @@ void command_network(Client *c, const Seperator *sep)
 void command_viewzoneloot(Client *c, const Seperator *sep)
 {
 	std::map<uint32,ItemList> zone_loot_list;
-	std::list<NPC*> npc_list;
+	auto npc_list = entity_list.GetNPCList();
 	uint32 loot_amount = 0, loot_id = 1, search_item_id = 0;
 	if (sep->argnum == 1 && sep->IsNumber(1)) {
 		search_item_id = atoi(sep->arg[1]);
-	} else {
+	} else if (sep->argnum == 1 && !sep->IsNumber(1)) {
 		c->Message(
 			Chat::Yellow,
 			"Usage: #viewzoneloot [item id]"
 		);
 		return;
 	}
-	entity_list.GetNPCList(npc_list);
 	for (auto npc_entity : npc_list) {
-		auto current_npc_item_list = npc_entity->GetItemList();
-		zone_loot_list.insert({ npc_entity->GetID(), current_npc_item_list });
+		auto current_npc_item_list = npc_entity.second->GetItemList();
+		zone_loot_list.insert({ npc_entity.second->GetID(), current_npc_item_list });
 	}
 	for (auto loot_item : zone_loot_list) {
 		uint32 current_entity_id = loot_item.first;
