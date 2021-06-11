@@ -217,6 +217,7 @@ namespace DatabaseSchema {
 			"npc_types_tint",
 			"object",
 			"pets",
+			"pets_beastlord_data",
 			"pets_equipmentset",
 			"pets_equipmentset_entries",
 			"proximities",

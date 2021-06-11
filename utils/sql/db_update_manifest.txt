@@ -420,6 +420,7 @@
 9164|2021_04_23_character_exp_modifiers.sql|SHOW TABLES LIKE 'character_exp_modifiers'|empty|
 9165|2021_04_28_idle_pathing.sql|SHOW COLUMNS FROM `spawn2` LIKE 'path_when_zone_idle'|empty|
 9166|2021_02_12_dynamic_zone_members.sql|SHOW TABLES LIKE 'dynamic_zone_members'|empty|
+9167|2021_06_06_beastlord_pets.sql|SHOW TABLES LIKE 'pets_beastlord_data'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
