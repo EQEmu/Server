@@ -440,10 +440,9 @@ static const uint32 MAX_SPELL_DB_ID_VAL = 65535;
 
 static const uint32 DB_SPELL_CAZIC_TOUCH = 982;
 static const uint32 DB_SPELL_TOUCH_OF_VINITRAS = 2859;
-
-static const uint32  DB_FACTION_GEM_CHOPPERS = 255;
-static const uint32  DB_FACTION_HERETICS = 265;
-static const uint32  DB_FACTION_KING_AKANON = 333;
+static const uint32 DB_FACTION_GEM_CHOPPERS = 255;
+static const uint32 DB_FACTION_HERETICS = 265;
+static const uint32 DB_FACTION_KING_AKANON = 333;
 
 enum ChatChannelNames : uint16
 {
