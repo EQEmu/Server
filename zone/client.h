@@ -982,6 +982,7 @@ public:
 	void ResetTrade();
 	void DropInst(const EQ::ItemInstance* inst);
 	bool TrainDiscipline(uint32 itemid);
+	bool MemorizeSpellFromItem(uint32 item_id);
 	void TrainDiscBySpellID(int32 spell_id);
 	uint32 GetDisciplineTimer(uint32 timer_id);
 	int GetDiscSlotBySpellID(int32 spellid);
