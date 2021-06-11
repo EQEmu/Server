@@ -3020,13 +3020,16 @@ XS(XS__getitemname) {
 XS(XS__getnpcnamebyid);
 XS(XS__getnpcnamebyid) {
 	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id)");
+	if (items != 1 && items != 2)
+		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id, [bool clean_name = false])");
 
 	dXSTARG;
 	uint32 npc_id = (int) SvIV(ST(0));
-	auto npc_name = quest_manager.getnpcnamebyid(npc_id);
+	bool clean_name = false;
+	if (items == 2)
+		clean_name = (bool) SvTRUE(ST(1));
 
+	auto npc_name = quest_manager.getnpcnamebyid(npc_id, clean_name);
 	sv_setpv(TARG, npc_name.c_str());
 	XSprePUSH;
 	PUSHTARG;

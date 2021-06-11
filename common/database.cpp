@@ -888,7 +888,7 @@ std::string Database::GetCharNameByID(uint32 char_id) {
 	return res;
 }
 
-std::string Database::GetNPCNameByID(uint32 npc_id) {
+std::string Database::GetNPCNameByID(uint32 npc_id, bool clean_name) {
 	std::string query = fmt::format("SELECT `name` FROM `npc_types` WHERE id = {}", npc_id);
 	auto results = QueryDatabase(query);
 	std::string res;
@@ -903,6 +903,9 @@ std::string Database::GetNPCNameByID(uint32 npc_id) {
 
 	auto row = results.begin();
 	res = row[0];
+	if (clean_name) {
+		find_replace(res, "_", " ");
+	}
 	return res;
 }
 
