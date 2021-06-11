@@ -358,8 +358,6 @@ public:
 	static uint32 SpawnedBotCount(uint32 botOwnerCharacterID);
 	static void LevelBotWithClient(Client* client, uint8 level, bool sendlvlapp);
 	//static bool SetBotOwnerCharacterID(uint32 botID, uint32 botOwnerCharacterID, std::string* errorMessage);
-	static std::string ClassIdToString(uint16 classId);
-	static std::string RaceIdToString(uint16 raceId);
 	static bool IsBotAttackAllowed(Mob* attacker, Mob* target, bool& hasRuleDefined);
 	static Bot* GetBotByBotClientOwnerAndBotName(Client* c, std::string botName);
 	static void ProcessBotGroupInvite(Client* c, std::string botName);
