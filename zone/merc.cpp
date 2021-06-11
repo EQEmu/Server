@@ -2756,19 +2756,6 @@ int32 Merc::GetActSpellCost(uint16 spell_id, int32 cost)
 	return cost;
 }
 
-int32 Merc::GetActSpellCasttime(uint16 spell_id, int32 casttime)
-{
-	int32 cast_reducer = 0;
-	cast_reducer += GetFocusEffect(focusSpellHaste, spell_id);
-
-	if (cast_reducer > RuleI(Spells, MaxCastTimeReduction))
-		cast_reducer = RuleI(Spells, MaxCastTimeReduction);
-
-	casttime = (casttime*(100 - cast_reducer)/100);
-
-	return casttime;
-}
-
 int8 Merc::GetChanceToCastBySpellType(uint32 spellType) {
 	int mercStance = (int)GetStance();
 	int8 mercClass = GetClass();

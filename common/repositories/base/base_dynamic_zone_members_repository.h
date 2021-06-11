@@ -4,22 +4,22 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
 
-#ifndef EQEMU_BASE_EXPEDITION_MEMBERS_REPOSITORY_H
-#define EQEMU_BASE_EXPEDITION_MEMBERS_REPOSITORY_H
+#ifndef EQEMU_BASE_DYNAMIC_ZONE_MEMBERS_REPOSITORY_H
+#define EQEMU_BASE_DYNAMIC_ZONE_MEMBERS_REPOSITORY_H
 
 #include "../../database.h"
 #include "../../string_util.h"
 
-class BaseExpeditionMembersRepository {
+class BaseDynamicZoneMembersRepository {
 public:
-	struct ExpeditionMembers {
+	struct DynamicZoneMembers {
 		int id;
-		int expedition_id;
+		int dynamic_zone_id;
 		int character_id;
 		int is_current_member;
 	};
@@ -33,7 +33,7 @@ public:
 	{
 		return {
 			"id",
-			"expedition_id",
+			"dynamic_zone_id",
 			"character_id",
 			"is_current_member",
 		};
@@ -46,7 +46,7 @@ public:
 
 	static std::string TableName()
 	{
-		return std::string("expedition_members");
+		return std::string("dynamic_zone_members");
 	}
 
 	static std::string BaseSelect()
@@ -67,51 +67,51 @@ public:
 		);
 	}
 
-	static ExpeditionMembers NewEntity()
+	static DynamicZoneMembers NewEntity()
 	{
-		ExpeditionMembers entry{};
+		DynamicZoneMembers entry{};
 
 		entry.id                = 0;
-		entry.expedition_id     = 0;
+		entry.dynamic_zone_id   = 0;
 		entry.character_id      = 0;
 		entry.is_current_member = 1;
 
 		return entry;
 	}
 
-	static ExpeditionMembers GetExpeditionMembersEntry(
-		const std::vector<ExpeditionMembers> &expedition_memberss,
-		int expedition_members_id
+	static DynamicZoneMembers GetDynamicZoneMembersEntry(
+		const std::vector<DynamicZoneMembers> &dynamic_zone_memberss,
+		int dynamic_zone_members_id
 	)
 	{
-		for (auto &expedition_members : expedition_memberss) {
-			if (expedition_members.id == expedition_members_id) {
-				return expedition_members;
+		for (auto &dynamic_zone_members : dynamic_zone_memberss) {
+			if (dynamic_zone_members.id == dynamic_zone_members_id) {
+				return dynamic_zone_members;
 			}
 		}
 
 		return NewEntity();
 	}
 
-	static ExpeditionMembers FindOne(
+	static DynamicZoneMembers FindOne(
 		Database& db,
-		int expedition_members_id
+		int dynamic_zone_members_id
 	)
 	{
 		auto results = db.QueryDatabase(
 			fmt::format(
 				"{} WHERE id = {} LIMIT 1",
 				BaseSelect(),
-				expedition_members_id
+				dynamic_zone_members_id
 			)
 		);
 
 		auto row = results.begin();
 		if (results.RowCount() == 1) {
-			ExpeditionMembers entry{};
+			DynamicZoneMembers entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.expedition_id     = atoi(row[1]);
+			entry.dynamic_zone_id   = atoi(row[1]);
 			entry.character_id      = atoi(row[2]);
 			entry.is_current_member = atoi(row[3]);
 
@@ -123,7 +123,7 @@ public:
 
 	static int DeleteOne(
 		Database& db,
-		int expedition_members_id
+		int dynamic_zone_members_id
 	)
 	{
 		auto results = db.QueryDatabase(
@@ -131,7 +131,7 @@ public:
 				"DELETE FROM {} WHERE {} = {}",
 				TableName(),
 				PrimaryKey(),
-				expedition_members_id
+				dynamic_zone_members_id
 			)
 		);
 
@@ -140,16 +140,16 @@ public:
 
 	static int UpdateOne(
 		Database& db,
-		ExpeditionMembers expedition_members_entry
+		DynamicZoneMembers dynamic_zone_members_entry
 	)
 	{
 		std::vector<std::string> update_values;
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = " + std::to_string(expedition_members_entry.expedition_id));
-		update_values.push_back(columns[2] + " = " + std::to_string(expedition_members_entry.character_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(expedition_members_entry.is_current_member));
+		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_members_entry.character_id));
+		update_values.push_back(columns[3] + " = " + std::to_string(dynamic_zone_members_entry.is_current_member));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -157,24 +157,24 @@ public:
 				TableName(),
 				implode(", ", update_values),
 				PrimaryKey(),
-				expedition_members_entry.id
+				dynamic_zone_members_entry.id
 			)
 		);
 
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static ExpeditionMembers InsertOne(
+	static DynamicZoneMembers InsertOne(
 		Database& db,
-		ExpeditionMembers expedition_members_entry
+		DynamicZoneMembers dynamic_zone_members_entry
 	)
 	{
 		std::vector<std::string> insert_values;
 
-		insert_values.push_back(std::to_string(expedition_members_entry.id));
-		insert_values.push_back(std::to_string(expedition_members_entry.expedition_id));
-		insert_values.push_back(std::to_string(expedition_members_entry.character_id));
-		insert_values.push_back(std::to_string(expedition_members_entry.is_current_member));
+		insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
+		insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
+		insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
+		insert_values.push_back(std::to_string(dynamic_zone_members_entry.is_current_member));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -185,29 +185,29 @@ public:
 		);
 
 		if (results.Success()) {
-			expedition_members_entry.id = results.LastInsertedID();
-			return expedition_members_entry;
+			dynamic_zone_members_entry.id = results.LastInsertedID();
+			return dynamic_zone_members_entry;
 		}
 
-		expedition_members_entry = NewEntity();
+		dynamic_zone_members_entry = NewEntity();
 
-		return expedition_members_entry;
+		return dynamic_zone_members_entry;
 	}
 
 	static int InsertMany(
 		Database& db,
-		std::vector<ExpeditionMembers> expedition_members_entries
+		std::vector<DynamicZoneMembers> dynamic_zone_members_entries
 	)
 	{
 		std::vector<std::string> insert_chunks;
 
-		for (auto &expedition_members_entry: expedition_members_entries) {
+		for (auto &dynamic_zone_members_entry: dynamic_zone_members_entries) {
 			std::vector<std::string> insert_values;
 
-			insert_values.push_back(std::to_string(expedition_members_entry.id));
-			insert_values.push_back(std::to_string(expedition_members_entry.expedition_id));
-			insert_values.push_back(std::to_string(expedition_members_entry.character_id));
-			insert_values.push_back(std::to_string(expedition_members_entry.is_current_member));
+			insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
+			insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
+			insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
+			insert_values.push_back(std::to_string(dynamic_zone_members_entry.is_current_member));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -225,9 +225,9 @@ public:
 		return (results.Success() ? results.RowsAffected() : 0);
 	}
 
-	static std::vector<ExpeditionMembers> All(Database& db)
+	static std::vector<DynamicZoneMembers> All(Database& db)
 	{
-		std::vector<ExpeditionMembers> all_entries;
+		std::vector<DynamicZoneMembers> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -239,10 +239,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ExpeditionMembers entry{};
+			DynamicZoneMembers entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.expedition_id     = atoi(row[1]);
+			entry.dynamic_zone_id   = atoi(row[1]);
 			entry.character_id      = atoi(row[2]);
 			entry.is_current_member = atoi(row[3]);
 
@@ -252,9 +252,9 @@ public:
 		return all_entries;
 	}
 
-	static std::vector<ExpeditionMembers> GetWhere(Database& db, std::string where_filter)
+	static std::vector<DynamicZoneMembers> GetWhere(Database& db, std::string where_filter)
 	{
-		std::vector<ExpeditionMembers> all_entries;
+		std::vector<DynamicZoneMembers> all_entries;
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -267,10 +267,10 @@ public:
 		all_entries.reserve(results.RowCount());
 
 		for (auto row = results.begin(); row != results.end(); ++row) {
-			ExpeditionMembers entry{};
+			DynamicZoneMembers entry{};
 
 			entry.id                = atoi(row[0]);
-			entry.expedition_id     = atoi(row[1]);
+			entry.dynamic_zone_id   = atoi(row[1]);
 			entry.character_id      = atoi(row[2]);
 			entry.is_current_member = atoi(row[3]);
 
@@ -307,4 +307,4 @@ public:
 
 };
 
-#endif //EQEMU_BASE_EXPEDITION_MEMBERS_REPOSITORY_H
+#endif //EQEMU_BASE_DYNAMIC_ZONE_MEMBERS_REPOSITORY_H

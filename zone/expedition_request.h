@@ -47,8 +47,8 @@ public:
 	const std::string& GetNotAllAddedMessage() const { return m_not_all_added_msg; }
 	uint32_t GetMinPlayers() const { return m_min_players; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
-	std::vector<DynamicZoneMember> GetMembers() const { return m_members; }
-	std::unordered_map<std::string, ExpeditionLockoutTimer> GetLockouts() const { return m_lockouts; }
+	const std::vector<DynamicZoneMember>& GetMembers() const { return m_members; }
+	const std::unordered_map<std::string, ExpeditionLockoutTimer>& GetLockouts() const { return m_lockouts; }
 
 private:
 	bool CanMembersJoin(const std::vector<std::string>& member_names);

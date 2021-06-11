@@ -186,6 +186,7 @@ public:
 	/* Bot miscellaneous functions   */
 	uint8 GetSpellCastingChance(uint8 spell_type_index, uint8 class_index, uint8 stance_index, uint8 conditional_index);
 
+	uint16 GetRaceClassBitmask(uint16 bot_race);
 
 	class fail {
 	public:

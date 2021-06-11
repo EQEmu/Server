@@ -6916,7 +6916,7 @@ void command_dz(Client* c, const Seperator* sep)
 					expedition->GetDynamicZone().GetZoneID(),
 					expedition->GetDynamicZone().GetInstanceID(),
 					expedition->GetDynamicZone().GetZoneVersion(),
-					expedition->GetMemberCount(),
+					expedition->GetDynamicZone().GetMemberCount(),
 					seconds / 3600,      // hours
 					(seconds / 60) % 60, // minutes
 					seconds % 60         // seconds
@@ -6982,12 +6982,12 @@ void command_dz(Client* c, const Seperator* sep)
 				c->Message(Chat::White, fmt::format(
 					"dz id: [{}] type: [{}] {}: [{}]:[{}]:[{}] members: [{}] remaining: [{:02}:{:02}:{:02}]",
 					dz.id,
-					dz.type,
+					DynamicZone::GetDynamicZoneTypeName(static_cast<DynamicZoneType>(dz.type)),
 					zone_saylink,
 					dz.zone,
 					dz.instance,
 					dz.version,
-					dz.player_count,
+					dz.member_count,
 					seconds / 3600,      // hours
 					(seconds / 60) % 60, // minutes
 					seconds % 60         // seconds
@@ -8432,13 +8432,13 @@ void command_set_adventure_points(Client *c, const Seperator *sep)
 
 	if(!sep->arg[1][0])
 	{
-		c->Message(Chat::White, "Usage: #setadventurepoints [points] [theme]");
+		c->Message(Chat::White, "Usage: #setadventurepoints [theme] [points]");
 		return;
 	}
 
 	if(!sep->IsNumber(1) || !sep->IsNumber(2))
 	{
-		c->Message(Chat::White, "Usage: #setadventurepoints [points] [theme]");
+		c->Message(Chat::White, "Usage: #setadventurepoints [theme] [points]");
 		return;
 	}
 

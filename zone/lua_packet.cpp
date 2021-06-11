@@ -89,12 +89,32 @@ void Lua_Packet::SetRawOpcode(int op) {
 	self->SetOpcode(static_cast<EmuOpcode>(op));
 }
 
+int Lua_Packet::GetWritePosition() {
+	Lua_Safe_Call_Int();
+	return self->GetWritePosition();
+}
+
+void Lua_Packet::SetWritePosition(int offset) {
+	Lua_Safe_Call_Void();
+	self->SetWritePosition(offset);
+}
+
+void Lua_Packet::WriteInt8(int value) {
+	Lua_Safe_Call_Void();
+	self->WriteUInt8(static_cast<uint8_t>(value));
+}
+
 void Lua_Packet::WriteInt8(int offset, int value) {
 	Lua_Safe_Call_Void();
 
 	if(offset + sizeof(int8) <= self->size) {
 		*reinterpret_cast<int8*>(self->pBuffer + offset) = value;
 	}
+}
+
+void Lua_Packet::WriteInt16(int value) {
+	Lua_Safe_Call_Void();
+	self->WriteUInt16(static_cast<uint16_t>(value));
 }
 
 void Lua_Packet::WriteInt16(int offset, int value) {
@@ -105,12 +125,22 @@ void Lua_Packet::WriteInt16(int offset, int value) {
 	}
 }
 
+void Lua_Packet::WriteInt32(int value) {
+	Lua_Safe_Call_Void();
+	self->WriteUInt32(static_cast<uint32_t>(value));
+}
+
 void Lua_Packet::WriteInt32(int offset, int value) {
 	Lua_Safe_Call_Void();
 
 	if(offset + sizeof(int32) <= self->size) {
 		*reinterpret_cast<int32*>(self->pBuffer + offset) = value;
 	}
+}
+
+void Lua_Packet::WriteInt64(int64 value) {
+	Lua_Safe_Call_Void();
+	self->WriteUInt64(static_cast<uint64_t>(value));
 }
 
 void Lua_Packet::WriteInt64(int offset, int64 value) {
@@ -121,12 +151,22 @@ void Lua_Packet::WriteInt64(int offset, int64 value) {
 	}
 }
 
+void Lua_Packet::WriteFloat(float value) {
+	Lua_Safe_Call_Void();
+	self->WriteFloat(value);
+}
+
 void Lua_Packet::WriteFloat(int offset, float value) {
 	Lua_Safe_Call_Void();
 
 	if(offset + sizeof(float) <= self->size) {
 		*reinterpret_cast<float*>(self->pBuffer + offset) = value;
 	}
+}
+
+void Lua_Packet::WriteDouble(double value) {
+	Lua_Safe_Call_Void();
+	self->WriteDouble(value);
 }
 
 void Lua_Packet::WriteDouble(int offset, double value) {
@@ -137,6 +177,11 @@ void Lua_Packet::WriteDouble(int offset, double value) {
 	}
 }
 
+void Lua_Packet::WriteString(std::string value) {
+	Lua_Safe_Call_Void();
+	self->WriteString(value.c_str());
+}
+
 void Lua_Packet::WriteString(int offset, std::string value) {
 	Lua_Safe_Call_Void();
 
@@ -144,6 +189,11 @@ void Lua_Packet::WriteString(int offset, std::string value) {
 		memcpy(self->pBuffer + offset, value.c_str(), value.length());
 		*reinterpret_cast<int8*>(self->pBuffer + offset + value.length()) = 0;
 	}
+}
+
+void Lua_Packet::WriteFixedLengthString(std::string value) {
+	Lua_Safe_Call_Void();
+	self->WriteLengthString(static_cast<uint32_t>(value.size()), value.c_str());
 }
 
 void Lua_Packet::WriteFixedLengthString(int offset, std::string value, int string_length) {
@@ -283,14 +333,24 @@ luabind::scope lua_register_packet() {
 		.def("SetOpcode", &Lua_Packet::SetOpcode)
 		.def("GetRawOpcode", &Lua_Packet::GetRawOpcode)
 		.def("SetRawOpcode", &Lua_Packet::SetRawOpcode)
-		.def("WriteInt8", &Lua_Packet::WriteInt8)
-		.def("WriteInt16", &Lua_Packet::WriteInt16)
-		.def("WriteInt32", &Lua_Packet::WriteInt32)
-		.def("WriteInt64", &Lua_Packet::WriteInt64)
-		.def("WriteFloat", &Lua_Packet::WriteFloat)
-		.def("WriteDouble", &Lua_Packet::WriteDouble)
-		.def("WriteString", &Lua_Packet::WriteString)
-		.def("WriteFixedLengthString", &Lua_Packet::WriteFixedLengthString)
+		.def("GetWritePosition", &Lua_Packet::GetWritePosition)
+		.def("SetWritePosition", &Lua_Packet::SetWritePosition)
+		.def("WriteInt8", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt8)
+		.def("WriteInt8", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt8)
+		.def("WriteInt16", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt16)
+		.def("WriteInt16", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt16)
+		.def("WriteInt32", (void(Lua_Packet::*)(int))&Lua_Packet::WriteInt32)
+		.def("WriteInt32", (void(Lua_Packet::*)(int, int))&Lua_Packet::WriteInt32)
+		.def("WriteInt64", (void(Lua_Packet::*)(int64))&Lua_Packet::WriteInt64)
+		.def("WriteInt64", (void(Lua_Packet::*)(int, int64))&Lua_Packet::WriteInt64)
+		.def("WriteFloat", (void(Lua_Packet::*)(float))&Lua_Packet::WriteFloat)
+		.def("WriteFloat", (void(Lua_Packet::*)(int, float))&Lua_Packet::WriteFloat)
+		.def("WriteDouble", (void(Lua_Packet::*)(double))&Lua_Packet::WriteDouble)
+		.def("WriteDouble", (void(Lua_Packet::*)(int, double))&Lua_Packet::WriteDouble)
+		.def("WriteString", (void(Lua_Packet::*)(std::string))&Lua_Packet::WriteString)
+		.def("WriteString", (void(Lua_Packet::*)(int, std::string))&Lua_Packet::WriteString)
+		.def("WriteFixedLengthString", (void(Lua_Packet::*)(std::string))&Lua_Packet::WriteFixedLengthString)
+		.def("WriteFixedLengthString", (void(Lua_Packet::*)(int, std::string, int))&Lua_Packet::WriteFixedLengthString)
 		.def("ReadInt8", &Lua_Packet::ReadInt8)
 		.def("ReadInt16", &Lua_Packet::ReadInt16)
 		.def("ReadInt32", &Lua_Packet::ReadInt32)

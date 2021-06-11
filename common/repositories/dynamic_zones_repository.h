@@ -249,7 +249,7 @@ public:
 		int      version;
 		uint32_t start_time;
 		int      duration;
-		int      player_count;
+		int      member_count;
 	};
 
 	static std::string SelectDynamicZoneInstancePlayerCount()
@@ -263,10 +263,11 @@ public:
 				instance_list.version,
 				instance_list.start_time,
 				instance_list.duration,
-				COUNT(instance_list_player.id) member_count
+				COUNT(dynamic_zone_members.character_id) member_count
 			FROM dynamic_zones
 				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
-				LEFT JOIN instance_list_player ON instance_list.id = instance_list_player.id
+				LEFT JOIN dynamic_zone_members ON dynamic_zones.id = dynamic_zone_members.dynamic_zone_id
+					AND dynamic_zone_members.is_current_member = TRUE
 			GROUP BY instance_list.id
 			ORDER BY dynamic_zones.id;
 		));
@@ -293,7 +294,7 @@ public:
 				entry.version      = strtol(row[col++], nullptr, 10);
 				entry.start_time   = strtoul(row[col++], nullptr, 10);
 				entry.duration     = strtol(row[col++], nullptr, 10);
-				entry.player_count = strtol(row[col++], nullptr, 10);
+				entry.member_count = strtol(row[col++], nullptr, 10);
 
 				all_entries.emplace_back(std::move(entry));
 			}

@@ -1727,22 +1727,22 @@ void QuestManager::resume() {
 	owner->CastToNPC()->ResumeWandering();
 }
 
-void QuestManager::addldonpoints(int32 points, uint32 theme) {
+void QuestManager::addldonpoints(uint32 theme_id, int points) {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
-		initiator->UpdateLDoNPoints(points, theme);
+		initiator->UpdateLDoNPoints(theme_id, points);
 }
 
-void QuestManager::addldonwin(int32 wins, uint32 theme) {
+void QuestManager::addldonloss(uint32 theme_id) {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
-		initiator->UpdateLDoNWins(theme, wins);
+		initiator->AddLDoNLoss(theme_id);
 }
 
-void QuestManager::addldonloss(int32 losses, uint32 theme) {
+void QuestManager::addldonwin(uint32 theme_id) {
 	QuestManagerCurrentQuestVars();
 	if(initiator)
-		initiator->UpdateLDoNLosses(theme, losses);
+		initiator->AddLDoNWin(theme_id);
 }
 
 void QuestManager::setnexthpevent(int at) {
@@ -4631,4 +4631,16 @@ void QuestManager::SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id,
 
 void QuestManager::SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier) {
 	database.SetEXPModifier(character_id, zone_id, exp_modifier);
+}
+
+void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier, uint32 theme_id, int points) {
+	auto pack = new ServerPacket(ServerOP_CZLDoNUpdate, sizeof(CZLDoNUpdate_Struct));
+	CZLDoNUpdate_Struct* CZLU = (CZLDoNUpdate_Struct*)pack->pBuffer;
+	CZLU->update_type = type;
+	CZLU->update_subtype = subtype;
+	CZLU->update_identifier = identifier;
+	CZLU->theme_id = theme_id;
+	CZLU->points = points;
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }

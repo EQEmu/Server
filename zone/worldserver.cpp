@@ -1932,6 +1932,115 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
+	case ServerOP_CZLDoNUpdate:
+	{
+		CZLDoNUpdate_Struct* CZLU = (CZLDoNUpdate_Struct*) pack->pBuffer;
+		uint8 update_type = CZLU->update_type;
+		uint8 update_subtype = CZLU->update_subtype;
+		int update_identifier = CZLU->update_identifier;
+		uint32 theme_id = CZLU->theme_id;
+		int points = CZLU->points;
+		if (update_type == CZLDoNUpdateType_Character) {
+			auto client = entity_list.GetClientByCharID(update_identifier);
+			if (client) {
+				switch (update_subtype) {
+					case CZLDoNUpdateSubtype_Loss:
+						client->AddLDoNLoss(theme_id);
+						break;
+					case CZLDoNUpdateSubtype_Points:
+						client->UpdateLDoNPoints(theme_id, points);
+						break;
+					case CZLDoNUpdateSubtype_Win:
+						client->AddLDoNWin(theme_id);
+						break;
+					default:
+						break;
+				}
+			}
+			break;
+		} else if (update_type == CZLDoNUpdateType_Group) {
+			auto client_group = entity_list.GetGroupByID(update_identifier);
+			if (client_group) {
+				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+						auto client_group_member = client_group->members[member_index]->CastToClient();
+						switch (update_subtype) {
+							case CZLDoNUpdateSubtype_Loss:
+								client_group_member->AddLDoNLoss(theme_id);
+								break;
+							case CZLDoNUpdateSubtype_Points:
+								client_group_member->UpdateLDoNPoints(theme_id, points);
+								break;
+							case CZLDoNUpdateSubtype_Win:
+								client_group_member->AddLDoNWin(theme_id);
+								break;
+							default:
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZLDoNUpdateType_Raid) {
+			auto client_raid = entity_list.GetRaidByID(update_identifier);
+			if (client_raid) {
+				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+					auto client_raid_member = client_raid->members[member_index].member;
+					if (client_raid_member && client_raid_member->IsClient()) {
+						switch (update_subtype) {
+							case CZLDoNUpdateSubtype_Loss:
+								client_raid_member->AddLDoNLoss(theme_id);
+								break;
+							case CZLDoNUpdateSubtype_Points:
+								client_raid_member->UpdateLDoNPoints(theme_id, points);
+								break;
+							case CZLDoNUpdateSubtype_Win:
+								client_raid_member->AddLDoNWin(theme_id);
+								break;
+							default:
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZLDoNUpdateType_Guild) {
+			for (auto &client : entity_list.GetClientList()) {
+				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
+					switch (update_subtype) {
+						case CZLDoNUpdateSubtype_Loss:
+							client.second->AddLDoNLoss(theme_id);
+							break;
+						case CZLDoNUpdateSubtype_Points:
+							client.second->UpdateLDoNPoints(theme_id, points);
+							break;
+						case CZLDoNUpdateSubtype_Win:
+							client.second->AddLDoNWin(theme_id);
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		} else if (update_type == CZLDoNUpdateType_Expedition) {
+			for (auto &client : entity_list.GetClientList()) {
+				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
+					switch (update_subtype) {
+						case CZLDoNUpdateSubtype_Loss:
+							client.second->AddLDoNLoss(theme_id);
+							break;
+						case CZLDoNUpdateSubtype_Points:
+							client.second->UpdateLDoNPoints(theme_id, points);
+							break;
+						case CZLDoNUpdateSubtype_Win:
+							client.second->AddLDoNWin(theme_id);
+							break;
+						default:
+							break;
+					}
+				}
+			}
+		}
+		break;
+	}
 	case ServerOP_CZMarqueePlayer:
 	{
 		CZMarqueePlayer_Struct* CZMS = (CZMarqueePlayer_Struct*) pack->pBuffer;
