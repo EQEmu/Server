@@ -4011,30 +4011,32 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
-					for (auto mob : hate_list.GetHateList()) {
-						auto tar = mob->entity_on_hatelist;
-						if (tar->IsCasting()) {
-							tar->InterruptSpell(tar->CastingSpellID());
-						}
-						uint32 buff_count = tar->GetMaxTotalSlots();
-						for (unsigned int j = 0; j < buff_count; j++) {
-							if (tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
-								auto spell = spells[tar->GetBuffs()[j].spellid];
-								if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
-									tar->BuffFadeBySpellID(spell.id);
+					if (RuleB(Spells, PreventFactionWarOnCharmBreak)) {
+						for (auto mob : hate_list.GetHateList()) {
+							auto tar = mob->entity_on_hatelist;
+							if (tar->IsCasting()) {
+								tar->InterruptSpell(tar->CastingSpellID());
+							}
+							uint32 buff_count = tar->GetMaxTotalSlots();
+							for (unsigned int j = 0; j < buff_count; j++) {
+								if (tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+									auto spell = spells[tar->GetBuffs()[j].spellid];
+									if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
+										tar->BuffFadeBySpellID(spell.id);
+									}
 								}
 							}
 						}
-					}
-					if (IsCasting()) {
-						InterruptSpell(CastingSpellID());
-					}
-					uint32 buff_count = GetMaxTotalSlots();
-					for (unsigned int j = 0; j < buff_count; j++) {
-						if (GetBuffs()[j].spellid != SPELL_UNKNOWN) {
-							auto spell = spells[this->GetBuffs()[j].spellid];
-							if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
-								BuffFadeBySpellID(spell.id);
+						if (IsCasting()) {
+							InterruptSpell(CastingSpellID());
+						}
+						uint32 buff_count = GetMaxTotalSlots();
+						for (unsigned int j = 0; j < buff_count; j++) {
+							if (GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+								auto spell = spells[this->GetBuffs()[j].spellid];
+								if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
+									BuffFadeBySpellID(spell.id);
+								}
 							}
 						}
 					}
