@@ -449,6 +449,7 @@ int command_init(void)
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", 150, command_zonebootup) ||
 		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", 50, command_zone_instance) ||
 		command_add("zonelock", "[list/lock/unlock] - Set/query lock flag for zoneservers", 100, command_zonelock) ||
+		command_add("viewzoneloot", "[item id] - Allow's you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", 80, command_viewzoneloot) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", 150, command_zoneshutdown) ||
 		command_add("zonespawn", "- Not implemented", 250, command_zonespawn) ||
 		command_add("zonestatus", "- Show connected zoneservers, synonymous with /servers", 150, command_zonestatus) ||
@@ -14106,6 +14107,135 @@ void command_network(Client *c, const Seperator *sep)
 	}
 }
 
+void command_viewzoneloot(Client *c, const Seperator *sep)
+{
+	std::map<uint32,ItemList> zone_loot_list;
+	std::list<NPC*> npc_list;
+	uint32 loot_amount = 0, loot_id = 1, search_item_id = 0;
+	if (sep->argnum == 1 && sep->IsNumber(1)) {
+		search_item_id = atoi(sep->arg[1]);
+	} else {
+		c->Message(
+			Chat::Yellow,
+			"Usage: #viewzoneloot [item id]"
+		);
+		return;
+	}
+	entity_list.GetNPCList(npc_list);
+	for (auto npc_entity : npc_list) {
+		auto current_npc_item_list = npc_entity->GetItemList();
+		zone_loot_list.insert({ npc_entity->GetID(), current_npc_item_list });
+	}
+	for (auto loot_item : zone_loot_list) {
+		uint32 current_entity_id = loot_item.first;
+		auto current_item_list = loot_item.second;
+		auto current_npc = (
+			entity_list.GetNPCByID(current_entity_id) ?
+			entity_list.GetNPCByID(current_entity_id) :
+			nullptr
+		);
+		std::string npc_link;
+		if (current_npc) {
+			std::string npc_name = current_npc->GetCleanName();
+			uint32 instance_id = zone->GetInstanceID();
+			uint32 zone_id = zone->GetZoneID();
+			float npc_x = current_npc->GetX();
+			float npc_y = current_npc->GetY();
+			float npc_z = current_npc->GetZ();
+			std::string command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+				fmt::format(
+					"#zone {} {} {} {}",
+					zone_id,
+					npc_x,
+					npc_y,
+					npc_z
+				),
+				false,
+				"Goto"
+			);
+			if (instance_id != 0) {
+				command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format(
+						"#zoneinstance {} {} {} {}",
+						instance_id,
+						npc_x,
+						npc_y,
+						npc_z
+					),
+					false,
+					"Goto"
+				);
+			}
+			npc_link = fmt::format(
+				" NPC: {} (ID {}) [{}]",
+				npc_name,
+				current_entity_id,
+				command_link
+			);
+		}
+
+		for (auto current_item : current_item_list) {
+			if (search_item_id == 0 || current_item->item_id == search_item_id) {
+				EQ::SayLinkEngine linker;
+				linker.SetLinkType(EQ::saylink::SayLinkLootItem);
+				linker.SetLootData(current_item);
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{}. {} ({}){}",
+						loot_id,
+						linker.GenerateLink(),
+						current_item->item_id,
+						npc_link
+					).c_str()
+				);
+				loot_id++;
+				loot_amount++;
+			}
+		}
+	}
+
+	
+	if (search_item_id != 0) {
+		std::string drop_string = (
+			loot_amount > 0 ?
+			fmt::format(
+				"dropping in {} {}",
+				loot_amount,
+				(loot_amount > 1 ? "places" : "place")
+			) :
+			"not dropping"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) is {}.",
+				database.CreateItemLink(search_item_id),
+				search_item_id,
+				drop_string
+			).c_str()
+		);
+	} else {
+		std::string drop_string = (
+			loot_amount > 0 ?
+			fmt::format(
+				"{} {} {}",
+				(loot_amount > 1 ? "items" : "item"),
+				(loot_amount > 1 ? "are" : "is"),
+				(loot_amount > 1 ? "dropping" : "not dropping")
+			) :
+			"items are dropping"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {}.",
+				loot_amount,
+				drop_string
+			).c_str()
+		);	
+	}
+}
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 #ifdef BOTS
 #include "bot_command.h"

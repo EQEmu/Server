@@ -354,6 +354,7 @@ void command_zone(Client *c, const Seperator *sep);
 void command_zone_instance(Client *c, const Seperator *sep);
 void command_zonebootup(Client *c, const Seperator *sep);
 void command_zonelock(Client *c, const Seperator *sep);
+void command_viewzoneloot(Client *c, const Seperator *sep);
 void command_zoneshutdown(Client *c, const Seperator *sep);
 void command_zonespawn(Client *c, const Seperator *sep);
 void command_zonestatus(Client *c, const Seperator *sep);
