@@ -4011,6 +4011,35 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
+					if (RuleB(Spells, PreventFactionWarOnCharmBreak)) {
+						for (auto mob : hate_list.GetHateList()) {
+							auto tar = mob->entity_on_hatelist;
+							if (tar->IsCasting()) {
+								tar->InterruptSpell(tar->CastingSpellID());
+							}
+							uint32 buff_count = tar->GetMaxTotalSlots();
+							for (unsigned int j = 0; j < buff_count; j++) {
+								if (tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+									auto spell = spells[tar->GetBuffs()[j].spellid];
+									if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
+										tar->BuffFadeBySpellID(spell.id);
+									}
+								}
+							}
+						}
+						if (IsCasting()) {
+							InterruptSpell(CastingSpellID());
+						}
+						uint32 buff_count = GetMaxTotalSlots();
+						for (unsigned int j = 0; j < buff_count; j++) {
+							if (GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+								auto spell = spells[this->GetBuffs()[j].spellid];
+								if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
+									BuffFadeBySpellID(spell.id);
+								}
+							}
+						}
+					}
 					entity_list.ReplaceWithTarget(this, tempmob);
 					WipeHateList();
 					if(tempmob)
@@ -4022,7 +4051,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					auto app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
 					Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
 					ps->owner_id = tempmob->GetID();
-					ps->pet_id = this->GetID();
+					ps->pet_id = GetID();
 					ps->command = 0;
 					entity_list.QueueClients(this, app);
 					safe_delete(app);

@@ -372,6 +372,7 @@ RULE_BOOL(Spells, OldRainTargets, false, "Use old incorrectly implemented maximu
 RULE_BOOL(Spells, NPCSpellPush, false, "Enable spell push on NPCs")
 RULE_BOOL(Spells, July242002PetResists, true, "Enable Pets using PCs resist change from July 24 2002")
 RULE_INT(Spells, AOEMaxTargets, 0, "Max number of targets a Targeted AOE spell can cast on. Set to 0 for no limit.")
+RULE_BOOL(Spells, PreventFactionWarOnCharmBreak, false, "Enable spell interupts and dot removal on charm break to prevent faction wars.")
 RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spells on a player that is already invisible")
 RULE_BOOL(Spells, AllowSpellMemorizeFromItem, false, "Allows players to memorize spells by right-clicking spell scrolls")
 RULE_CATEGORY_END()
