@@ -39,6 +39,9 @@ EXTERN_C XS(boot_Object);
 EXTERN_C XS(boot_Doors);
 EXTERN_C XS(boot_PerlPacket);
 EXTERN_C XS(boot_Expedition);
+#ifdef BOTS
+EXTERN_C XS(boot_Bot);
+#endif
 #endif
 #endif
 
@@ -91,6 +94,11 @@ EXTERN_C void xs_init(pTHX)
 	newXS(strcpy(buf, "Object::boot_Object"), boot_Object, file);
 	newXS(strcpy(buf, "Doors::boot_Doors"), boot_Doors, file);
 	newXS(strcpy(buf, "Expedition::boot_Expedition"), boot_Expedition, file);
+#ifdef BOTS
+	newXS(strcpy(buf, "Bot::boot_Mob"), boot_Mob, file);
+	newXS(strcpy(buf, "Bot::boot_NPC"), boot_NPC, file);
+	newXS(strcpy(buf, "Bot::boot_Bot"), boot_Bot, file);
+#endif
 ;
 #endif
 #endif

@@ -977,6 +977,14 @@ void PerlembParser::MapFunctions()
 		"package Expedition;"
 		"&boot_Expedition;"
 
+#ifdef BOTS
+		"package Bot;"
+		"our @ISA = qw(NPC);" // Bot inherits NPC
+		"&boot_Mob;" // load our Mob XS
+		"&boot_NPC;" // load our NPC XS
+		"&boot_Bot;" // load our Bot XS
+#endif
+
 		#endif
 		"package main;"
 		"}"
