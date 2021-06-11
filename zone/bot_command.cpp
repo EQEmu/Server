@@ -1119,7 +1119,7 @@ private:
 			for (bcst_levels::iterator levels_iter = bot_levels.begin(); levels_iter != bot_levels.end(); ++levels_iter) {
 				if (levels_iter->second < test_iter->second)
 					test_iter = levels_iter;
-				if (strcasecmp(Bot::ClassIdToString(levels_iter->first).c_str(), Bot::ClassIdToString(test_iter->first).c_str()) < 0 && levels_iter->second <= test_iter->second)
+				if (strcasecmp(GetClassIDName(levels_iter->first), GetClassIDName(test_iter->first)) < 0 && levels_iter->second <= test_iter->second)
 					test_iter = levels_iter;
 			}
 
@@ -1131,8 +1131,8 @@ private:
 			else
 				bot_segment = " or %s(%u)";
 
-			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), Bot::ClassIdToString(test_iter->first).c_str(), test_iter->second));
-			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", Bot::ClassIdToString(test_iter->first).c_str(), test_iter->second);
+			required_bots_map[type_index].append(StringFormat(bot_segment.c_str(), GetClassIDName(test_iter->first), test_iter->second));
+			required_bots_map_by_class[type_index][test_iter->first] = StringFormat("%s(%u)", GetClassIDName(test_iter->first), test_iter->second);
 			bot_levels.erase(test_iter);
 		}
 	}
@@ -1428,6 +1428,7 @@ int bot_command_init(void)
 		bot_command_add("suspend", "Suspends a bot's AI processing until released", 0, bot_command_suspend) ||
 		bot_command_add("taunt", "Toggles taunt use by a bot", 0, bot_command_taunt) ||
 		bot_command_add("track", "Orders a capable bot to track enemies", 0, bot_command_track) ||
+		bot_command_add("viewcombos", "Views bot race class combinations", 0, bot_command_view_combos) ||
 		bot_command_add("waterbreathing", "Orders a bot to cast a water breathing spell", 0, bot_command_water_breathing)
 	) {
 		bot_command_deinit();
@@ -5107,6 +5108,68 @@ void bot_subcommand_bot_clone(Client *c, const Seperator *sep)
 	c->Message(m_action, "Bot '%s' was successfully cloned to bot '%s'", my_bot->GetCleanName(), bot_name.c_str());
 }
 
+void bot_command_view_combos(Client *c, const Seperator *sep)
+{	
+	const std::string class_substrs[17] = { "",
+		"%u (WAR)", "%u (CLR)", "%u (PAL)", "%u (RNG)",
+		"%u (SHD)", "%u (DRU)", "%u (MNK)", "%u (BRD)",
+		"%u (ROG)", "%u (SHM)", "%u (NEC)", "%u (WIZ)",
+		"%u (MAG)", "%u (ENC)", "%u (BST)", "%u (BER)"
+	};
+
+	const std::string race_substrs[17] = { "",
+		"%u (HUM)", "%u (BAR)", "%u (ERU)", "%u (ELF)",
+		"%u (HIE)", "%u (DEF)", "%u (HEF)", "%u (DWF)",
+		"%u (TRL)", "%u (OGR)", "%u (HFL)", "%u (GNM)",
+		"%u (IKS)", "%u (VAH)", "%u (FRG)", "%u (DRK)"
+	};
+
+	const uint16 race_values[17] = { 0,
+		HUMAN, BARBARIAN, ERUDITE, WOOD_ELF,
+		HIGH_ELF, DARK_ELF, HALF_ELF, DWARF,
+		TROLL, OGRE, HALFLING, GNOME,
+		IKSAR, VAHSHIR, FROGLOK, DRAKKIN
+	};
+	if (helper_command_alias_fail(c, "bot_command_view_combos", sep->arg[0], "viewcombos"))
+		return;
+	if (helper_is_help_or_usage(sep->arg[1])) {
+		std::string window_title = "Bot Races";
+		std::string window_text;
+		std::string message_separator = " ";
+		c->Message(m_usage, "Usage: %s [bot_race]", sep->arg[0]);
+		window_text.append("<c \"#FFFFFF\">Races:<c \"#FFFF\">");
+		for (int race_id = 0; race_id <= 15; ++race_id) {
+			window_text.append(message_separator);
+			window_text.append(StringFormat(race_substrs[race_id + 1].c_str(), race_values[race_id + 1]));
+			message_separator = ", ";
+		}
+		c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+		return;
+	}
+
+	if (sep->arg[1][0] == '\0' || !sep->IsNumber(1)) {
+		c->Message(m_fail, "Invalid Race!");
+		return;
+	}
+	uint16 bot_race = atoi(sep->arg[1]);
+	auto classes_bitmask = database.botdb.GetRaceClassBitmask(bot_race);
+	auto race_name = GetRaceIDName(bot_race);
+	std::string window_title = "Bot Classes";
+	std::string window_text;
+	std::string message_separator = " ";
+	c->Message(m_usage, "%s can be these classes.", race_name);
+	window_text.append("<c \"#FFFFFF\">Classes:<c \"#FFFF\">");
+	for (int class_id = 0; class_id <= 15; ++class_id) {
+		if (classes_bitmask & GetPlayerClassBit(class_id)) {
+			window_text.append(message_separator);
+			window_text.append(StringFormat(class_substrs[class_id].c_str(), class_id));
+			message_separator = ", ";
+		}
+	}
+	c->SendPopupToClient(window_title.c_str(), window_text.c_str());
+	return;
+}
+
 void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 {
 	const std::string class_substrs[17] = { "",
@@ -5148,10 +5211,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedClasses)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5166,10 +5226,7 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		message_separator = " ";
 		object_count = 1;
 		for (int i = 0; i <= 15; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedRaces)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			if (object_count >= object_max) {
 				window_text.append("<br>");
 				object_count = 0;
@@ -5183,12 +5240,8 @@ void bot_subcommand_bot_create(Client *c, const Seperator *sep)
 		window_text.append("<c \"#FFFFFF\">Genders:<c \"#FFFF\">");
 		message_separator = " ";
 		for (int i = 0; i <= 1; ++i) {
-			if (((1 << i) & RuleI(Bots, AllowedGenders)) == 0)
-				continue;
-
-			window_text.append(const_cast<const std::string&>(message_separator));
+			window_text.append(message_separator);
 			window_text.append(StringFormat(gender_substrs[i].c_str(), i));
-
 			message_separator = ", ";
 		}
 
@@ -5802,9 +5855,9 @@ void bot_subcommand_bot_list(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "[%s] is a level %u %s %s %s who is owned by %s",
 			((c->CharacterID() == bots_iter.Owner_ID) && (!botCheckNotOnline) ? (EQ::SayLinkEngine::GenerateQuestSaylink(botspawn_saylink, false, bots_iter.Name).c_str()) : (bots_iter.Name)),
 			bots_iter.Level,
-			Bot::RaceIdToString(bots_iter.Race).c_str(),
+			GetRaceIDName(bots_iter.Race),
 			((bots_iter.Gender == FEMALE) ? ("Female") : ((bots_iter.Gender == MALE) ? ("Male") : ("Neuter"))),
-			Bot::ClassIdToString(bots_iter.Class).c_str(),
+			GetClassIDName(bots_iter.Class),
 			bots_iter.Owner
 		);
 		if (c->CharacterID() == bots_iter.Owner_ID) { ++bots_owned; }
@@ -5977,7 +6030,7 @@ void bot_subcommand_bot_report(Client *c, const Seperator *sep)
 		if (!bot_iter)
 			continue;
 
-		std::string report_msg = StringFormat("%s %s reports", Bot::ClassIdToString(bot_iter->GetClass()).c_str(), bot_iter->GetCleanName());
+		std::string report_msg = StringFormat("%s %s reports", GetClassIDName(bot_iter->GetClass()), bot_iter->GetCleanName());
 		report_msg.append(StringFormat(": %3.1f%% health", bot_iter->GetHPRatio()));
 		if (!IsNonSpellFighterClass(bot_iter->GetClass()))
 			report_msg.append(StringFormat(": %3.1f%% mana", bot_iter->GetManaRatio()));
@@ -8672,33 +8725,25 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 
-	auto class_bit = GetPlayerClassBit(bot_class);
-	if ((class_bit & RuleI(Bots, AllowedClasses)) == PLAYER_CLASS_UNKNOWN_BIT) {
-		bot_owner->Message(m_fail, "Class '%s' bots are not allowed on this server", GetPlayerClassName(bot_class));
-		return bot_id;
-	}
-
-	auto race_bit = GetPlayerRaceBit(bot_race);
-	if ((race_bit & RuleI(Bots, AllowedRaces)) == PLAYER_RACE_UNKNOWN_BIT) {
-		bot_owner->Message(m_fail, "Race '%s' bots are not allowed on this server", GetPlayerRaceName(bot_class));
-		return bot_id;
-	}
-
 	if (!Bot::IsValidRaceClassCombo(bot_race, bot_class)) {
-		bot_owner->Message(m_fail, "'%s'(%u):'%s'(%u) is an invalid race-class combination",
-			Bot::RaceIdToString(bot_race).c_str(), bot_race, Bot::ClassIdToString(bot_class).c_str(), bot_class);
+		const char* bot_race_name = GetRaceIDName(bot_race);
+		const char* bot_class_name = GetClassIDName(bot_class);
+		std::string view_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(fmt::format("^viewcombos {}", bot_race), false, "view");
+		bot_owner->Message(
+			m_fail,
+			fmt::format(
+				"{} {} is an invalid race-class combination, would you like to {} proper combinations for {}?",
+				bot_race_name,
+				bot_class_name,
+				view_saylink,
+				bot_race_name
+			).c_str()
+		);
 		return bot_id;
 	}
 
-	if (bot_gender > FEMALE || (((1 << bot_gender) & RuleI(Bots, AllowedGenders)) == 0)) {
-		if (RuleI(Bots, AllowedGenders) == 3)
-			bot_owner->Message(m_fail, "gender: %u(M), %u(F)", MALE, FEMALE);
-		else if (RuleI(Bots, AllowedGenders) == 2)
-			bot_owner->Message(m_fail, "gender: %u(F)", FEMALE);
-		else if (RuleI(Bots, AllowedGenders) == 1)
-			bot_owner->Message(m_fail, "gender: %u(M)", MALE);
-		else
-			bot_owner->Message(m_fail, "gender: ERROR - No valid genders exist");
+	if (bot_gender > FEMALE) {
+		bot_owner->Message(m_fail, "gender: %u (M), %u (F)", MALE, FEMALE);
 		return bot_id;
 	}
 
@@ -8710,7 +8755,7 @@ uint32 helper_bot_create(Client *bot_owner, std::string bot_name, uint8 bot_clas
 		return bot_id;
 	}
 	if (bot_count >= max_bot_count) {
-		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots", max_bot_count);
+		bot_owner->Message(m_fail, "You have reached the maximum limit of %i bots.", max_bot_count);
 		return bot_id;
 	}
 

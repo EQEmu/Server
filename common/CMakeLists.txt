@@ -177,10 +177,10 @@ SET(repositories
 	repositories/base/base_discovered_items_repository.h
 	repositories/base/base_doors_repository.h
 	repositories/base/base_dynamic_zones_repository.h
+	repositories/base/base_dynamic_zone_members_repository.h
 	repositories/base/base_eventlog_repository.h
 	repositories/base/base_expeditions_repository.h
 	repositories/base/base_expedition_lockouts_repository.h
-	repositories/base/base_expedition_members_repository.h
 	repositories/base/base_faction_base_data_repository.h
 	repositories/base/base_faction_list_repository.h
 	repositories/base/base_faction_list_mod_repository.h
@@ -341,10 +341,10 @@ SET(repositories
 	repositories/discovered_items_repository.h
 	repositories/doors_repository.h
 	repositories/dynamic_zones_repository.h
+	repositories/dynamic_zone_members_repository.h
 	repositories/eventlog_repository.h
 	repositories/expeditions_repository.h
 	repositories/expedition_lockouts_repository.h
-	repositories/expedition_members_repository.h
 	repositories/faction_base_data_repository.h
 	repositories/faction_list_repository.h
 	repositories/faction_list_mod_repository.h

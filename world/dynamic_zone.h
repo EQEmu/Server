@@ -24,7 +24,7 @@ public:
 
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
-	DynamicZoneStatus Process(bool force_expire);
+	DynamicZoneStatus Process();
 
 protected:
 	Database& GetDatabase() override;

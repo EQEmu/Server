@@ -40,6 +40,10 @@
 #include "lua_encounter.h"
 #include "lua_stat_bonuses.h"
 
+#ifdef BOTS
+#include "lua_bot.h"
+#endif
+
 const char *LuaEvents[_LargestEventID] = {
 	"event_say",
 	"event_trade",
@@ -1090,6 +1094,9 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_special_abilities(),
 			lua_register_npc(),
 			lua_register_client(),
+#ifdef BOTS
+			lua_register_bot(),
+#endif
 			lua_register_inventory(),
 			lua_register_inventory_where(),
 			lua_register_iteminst(),
@@ -1101,6 +1108,9 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_entity_list(),
 			lua_register_mob_list(),
 			lua_register_client_list(),
+#ifdef BOTS
+			lua_register_bot_list(),
+#endif
 			lua_register_npc_list(),
 			lua_register_corpse_list(),
 			lua_register_object_list(),

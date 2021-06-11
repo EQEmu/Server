@@ -3,6 +3,7 @@
 #include "eqemu_logsys.h"
 #include "repositories/instance_list_repository.h"
 #include "repositories/instance_list_player_repository.h"
+#include "rulesys.h"
 #include "servertalk.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
@@ -99,6 +100,13 @@ void DynamicZoneBase::LoadRepositoryResult(DynamicZonesRepository::DynamicZoneIn
 	m_expire_time        = m_start_time + m_duration;
 }
 
+void DynamicZoneBase::AddMemberFromRepositoryResult(
+	DynamicZoneMembersRepository::MemberWithName&& entry)
+{
+	auto status = DynamicZoneMemberStatus::Unknown;
+	AddInternalMember({ entry.character_id, std::move(entry.character_name), status });
+}
+
 uint32_t DynamicZoneBase::SaveToDatabase()
 {
 	LogDynamicZonesDetail("Saving dz instance [{}] to database", m_instance_id);
@@ -131,12 +139,14 @@ uint32_t DynamicZoneBase::SaveToDatabase()
 
 void DynamicZoneBase::AddCharacter(uint32_t character_id)
 {
+	DynamicZoneMembersRepository::AddMember(GetDatabase(), m_id, character_id);
 	GetDatabase().AddClientToInstance(m_instance_id, character_id);
 	SendInstanceAddRemoveCharacter(character_id, false); // stops client kick timer
 }
 
 void DynamicZoneBase::RemoveCharacter(uint32_t character_id)
 {
+	DynamicZoneMembersRepository::RemoveMember(GetDatabase(), m_id, character_id);
 	GetDatabase().RemoveClientFromInstance(m_instance_id, character_id);
 	SendInstanceAddRemoveCharacter(character_id, true); // start client kick timer
 }
@@ -153,24 +163,35 @@ void DynamicZoneBase::RemoveAllCharacters(bool enable_removal_timers)
 		SendInstanceRemoveAllCharacters();
 	}
 
+	DynamicZoneMembersRepository::RemoveAllMembers(GetDatabase(), m_id);
 	GetDatabase().RemoveClientsFromInstance(GetInstanceID());
 }
 
-void DynamicZoneBase::SaveInstanceMembersToDatabase(const std::vector<uint32_t>& character_ids)
+void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
 {
-	LogDynamicZonesDetail("Saving [{}] members for instance [{}]", character_ids.size(), m_instance_id);
+	LogDynamicZonesDetail("Saving [{}] member(s) for dz [{}]", members.size(), m_id);
 
+	m_members = members;
+
+	// the lower level instance_list_players needs to be kept updated as well
+	std::vector<DynamicZoneMembersRepository::DynamicZoneMembers> insert_members;
 	std::vector<InstanceListPlayerRepository::InstanceListPlayer> insert_players;
-
-	for (const auto& character_id : character_ids)
+	for (const auto& member : m_members)
 	{
-		InstanceListPlayerRepository::InstanceListPlayer entry{};
-		entry.id = static_cast<int>(m_instance_id);
-		entry.charid = static_cast<int>(character_id);
-		insert_players.emplace_back(entry);
+		DynamicZoneMembersRepository::DynamicZoneMembers member_entry{};
+		member_entry.dynamic_zone_id = m_id;
+		member_entry.character_id = member.id;
+		member_entry.is_current_member = true;
+		insert_members.emplace_back(member_entry);
+
+		InstanceListPlayerRepository::InstanceListPlayer player_entry;
+		player_entry.id = static_cast<int>(m_instance_id);
+		player_entry.charid = static_cast<int>(member.id);
+		insert_players.emplace_back(player_entry);
 	}
 
-	InstanceListPlayerRepository::InsertMany(GetDatabase(), insert_players);
+	DynamicZoneMembersRepository::InsertOrUpdateMany(GetDatabase(), insert_members);
+	InstanceListPlayerRepository::InsertOrUpdateMany(GetDatabase(), insert_players);
 }
 
 void DynamicZoneBase::SetCompass(const DynamicZoneLocation& location, bool update_db)
@@ -286,4 +307,124 @@ std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzLocationPacket(
 	buf->heading = location.heading;
 
 	return pack;
+}
+
+uint32_t DynamicZoneBase::GetDatabaseMemberCount()
+{
+	return DynamicZoneMembersRepository::GetCountWhere(GetDatabase(),
+		fmt::format("dynamic_zone_id = {} AND is_current_member = TRUE", m_id));
+}
+
+bool DynamicZoneBase::HasDatabaseMember(uint32_t character_id)
+{
+	if (character_id == 0)
+	{
+		return false;
+	}
+
+	auto entries = DynamicZoneMembersRepository::GetWhere(GetDatabase(), fmt::format(
+		"dynamic_zone_id = {} AND character_id = {} AND is_current_member = TRUE",
+		m_id, character_id
+	));
+
+	return entries.size() != 0;
+}
+
+void DynamicZoneBase::AddInternalMember(const DynamicZoneMember& member)
+{
+	if (!HasMember(member.id))
+	{
+		m_members.emplace_back(member);
+	}
+}
+
+void DynamicZoneBase::RemoveInternalMember(uint32_t character_id)
+{
+	m_members.erase(std::remove_if(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) { return member.id == character_id; }
+	), m_members.end());
+}
+
+bool DynamicZoneBase::HasMember(uint32_t character_id)
+{
+	return std::any_of(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) { return member.id == character_id; });
+}
+
+bool DynamicZoneBase::HasMember(const std::string& character_name)
+{
+	return std::any_of(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) {
+			return strcasecmp(member.name.c_str(), character_name.c_str()) == 0;
+		});
+}
+
+DynamicZoneMember DynamicZoneBase::GetMemberData(uint32_t character_id)
+{
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) { return member.id == character_id; });
+
+	DynamicZoneMember member_data;
+	if (it != m_members.end())
+	{
+		member_data = *it;
+	}
+	return member_data;
+}
+
+DynamicZoneMember DynamicZoneBase::GetMemberData(const std::string& character_name)
+{
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) {
+			return strcasecmp(member.name.c_str(), character_name.c_str()) == 0;
+		});
+
+	DynamicZoneMember member_data;
+	if (it != m_members.end())
+	{
+		member_data = *it;
+	}
+	return member_data;
+}
+
+bool DynamicZoneBase::SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	if (status == DynamicZoneMemberStatus::InDynamicZone && !RuleB(DynamicZone, EnableInDynamicZoneStatus))
+	{
+		status = DynamicZoneMemberStatus::Online;
+	}
+
+	if (character_id == m_leader.id)
+	{
+		m_leader.status = status;
+	}
+
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const DynamicZoneMember& member) { return member.id == character_id; });
+
+	if (it != m_members.end() && it->status != status)
+	{
+		it->status = status;
+		return true;
+	}
+
+	return false;
+}
+
+std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
+{
+	switch (dz_type)
+	{
+		case DynamicZoneType::Expedition:
+			return "Expedition";
+		case DynamicZoneType::Tutorial:
+			return "Tutorial";
+		case DynamicZoneType::Task:
+			return "Task";
+		case DynamicZoneType::Mission:
+			return "Mission";
+		case DynamicZoneType::Quest:
+			return "Quest";
+	}
+	return "Unknown";
 }

@@ -158,9 +158,9 @@ public:
 	void pause(int duration);
 	void moveto(const glm::vec4& position, bool saveguardspot);
 	void resume();
-	void addldonpoints(int32 points, uint32 theme);
-	void addldonwin(int32 wins, uint32 theme);
-	void addldonloss(int32 losses, uint32 theme);
+	void addldonpoints(uint32 theme_id, int points);
+	void addldonloss(uint32 theme_id);
+	void addldonwin(uint32 theme_id);
 	void setnexthpevent(int at);
 	void setnextinchpevent(int at);
 	void respawn(int npc_type, int grid);
@@ -308,6 +308,7 @@ public:
 	void CrossZoneFailTaskByGroupID(int group_id, uint32 task_id);
 	void CrossZoneFailTaskByRaidID(int raid_id, uint32 task_id);
 	void CrossZoneFailTaskByGuildID(int guild_id, uint32 task_id);
+	void CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier, uint32 theme_id, int points = 1);
 	void CrossZoneMarqueeByCharID(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
 	void CrossZoneMarqueeByGroupID(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
 	void CrossZoneMarqueeByRaidID(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message);
