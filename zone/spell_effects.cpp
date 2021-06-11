@@ -4011,8 +4011,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
-					for (auto pMob : hate_list.GetHateList()) {
-						auto tar = pMob->entity_on_hatelist;
+					for (auto mob : hate_list.GetHateList()) {
+						auto tar = mob->entity_on_hatelist;
 						if (tar->IsCasting()) {
 							tar->InterruptSpell(tar->CastingSpellID());
 						}
