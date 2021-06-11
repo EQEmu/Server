@@ -4011,7 +4011,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				if (IsAIControlled())
 				{
 					// clear the hate list of the mobs
-					for (auto pMob : this->hate_list.GetHateList()) {
+					for (auto pMob : hate_list.GetHateList()) {
 						auto tar = pMob->entity_on_hatelist;
 						if (tar->IsCasting()) {
 							tar->InterruptSpell(tar->CastingSpellID());
@@ -4029,9 +4029,9 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					if (IsCasting()) {
 						InterruptSpell(CastingSpellID());
 					}
-					uint32 buff_count = this->GetMaxTotalSlots();
+					uint32 buff_count = GetMaxTotalSlots();
 					for (unsigned int j = 0; j < buff_count; j++) {
-						if (this->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+						if (GetBuffs()[j].spellid != SPELL_UNKNOWN) {
 							auto spell = spells[this->GetBuffs()[j].spellid];
 							if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
 								BuffFadeBySpellID(spell.id);
