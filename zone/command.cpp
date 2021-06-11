@@ -433,6 +433,7 @@ int command_init(void)
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
 		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", 20, command_viewpetition) ||
+		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", 80, command_viewzoneloot) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", 200, command_wc) ||
 		command_add("weather", "[0/1/2/3] (Off/Rain/Snow/Manual) - Change the weather", 80, command_weather) ||
 		command_add("who", "[search]", 20, command_who) ||
@@ -449,7 +450,6 @@ int command_init(void)
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", 150, command_zonebootup) ||
 		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", 50, command_zone_instance) ||
 		command_add("zonelock", "[list/lock/unlock] - Set/query lock flag for zoneservers", 100, command_zonelock) ||
-		command_add("viewzoneloot", "[item id] - Allow's you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", 80, command_viewzoneloot) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", 150, command_zoneshutdown) ||
 		command_add("zonespawn", "- Not implemented", 250, command_zonespawn) ||
 		command_add("zonestatus", "- Show connected zoneservers, synonymous with /servers", 150, command_zonestatus) ||
@@ -14128,43 +14128,24 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 	for (auto loot_item : zone_loot_list) {
 		uint32 current_entity_id = loot_item.first;
 		auto current_item_list = loot_item.second;
-		auto current_npc = (
-			entity_list.GetNPCByID(current_entity_id) ?
-			entity_list.GetNPCByID(current_entity_id) :
-			nullptr
-		);
+		auto current_npc = entity_list.GetNPCByID(current_entity_id);
 		std::string npc_link;
 		if (current_npc) {
 			std::string npc_name = current_npc->GetCleanName();
 			uint32 instance_id = zone->GetInstanceID();
 			uint32 zone_id = zone->GetZoneID();
-			float npc_x = current_npc->GetX();
-			float npc_y = current_npc->GetY();
-			float npc_z = current_npc->GetZ();
 			std::string command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
 				fmt::format(
-					"#zone {} {} {} {}",
-					zone_id,
-					npc_x,
-					npc_y,
-					npc_z
+					"#{} {} {} {} {}",
+					(instance_id != 0 ? "zoneinstance" : "zone"),
+					(instance_id != 0 ? instance_id : zone_id),
+					current_npc->GetX(),
+					current_npc->GetY(),
+					current_npc->GetZ()
 				),
 				false,
 				"Goto"
 			);
-			if (instance_id != 0) {
-				command_link = EQ::SayLinkEngine::GenerateQuestSaylink(
-					fmt::format(
-						"#zoneinstance {} {} {} {}",
-						instance_id,
-						npc_x,
-						npc_y,
-						npc_z
-					),
-					false,
-					"Goto"
-				);
-			}
 			npc_link = fmt::format(
 				" NPC: {} (ID {}) [{}]",
 				npc_name,
