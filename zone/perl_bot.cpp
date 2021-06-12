@@ -13,6 +13,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
+#ifdef BOTS
 #include "../common/features.h"
 #ifdef EMBPERL_XS_CLASSES
 #include "../common/global_define.h"
@@ -82,3 +83,4 @@ XS(boot_Bot)
 }
 
 #endif //EMBPERL_XS_CLASSES
+#endif //BOTS

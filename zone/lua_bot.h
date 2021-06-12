@@ -1,3 +1,4 @@
+#ifdef BOTS
 #ifndef EQEMU_LUA_BOT_H
 #define EQEMU_LUA_BOT_H
 #ifdef LUA_EQEMU
@@ -26,5 +27,6 @@ public:
 	}
 };
 
+#endif
 #endif
 #endif
