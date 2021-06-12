@@ -2781,10 +2781,18 @@ std::string QuestManager::getitemname(uint32 item_id) {
 	return item_name;
 }
 
-std::string QuestManager::getnpcnamebyid(uint32 npc_id, bool clean_name) {
+std::string QuestManager::getnpcnamebyid(uint32 npc_id) {
 	std::string res;
 	if (npc_id > 0) {
-		res = database.GetNPCNameByID(npc_id, clean_name);
+		res = database.GetNPCNameByID(npc_id);
+	}
+	return res;
+}
+
+std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
+	std::string res;
+	if (npc_id > 0) {
+		res = database.GetCleanNPCNameByID(npc_id);
 	}
 	return res;
 }

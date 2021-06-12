@@ -193,6 +193,7 @@ bool atobool(const char* iBool);
 bool isAlphaNumeric(const char *text);
 bool strn0cpyt(char* dest, const char* source, uint32 size);
 char *CleanMobName(const char *in, char *out);
+std::string GetCleanMobName(std::string name);
 char *RemoveApostrophes(const char *s);
 char* strn0cpy(char* dest, const char* source, uint32 size);
 const char *ConvertArray(int input, char *returnchar);

@@ -3020,16 +3020,12 @@ XS(XS__getitemname) {
 XS(XS__getnpcnamebyid);
 XS(XS__getnpcnamebyid) {
 	dXSARGS;
-	if (items != 1 && items != 2)
-		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id, [bool clean_name = false])");
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getnpcnamebyid(uint32 npc_id)");
 
 	dXSTARG;
 	uint32 npc_id = (int) SvIV(ST(0));
-	bool clean_name = false;
-	if (items == 2)
-		clean_name = (bool) SvTRUE(ST(1));
-
-	auto npc_name = quest_manager.getnpcnamebyid(npc_id, clean_name);
+	auto npc_name = quest_manager.getnpcnamebyid(npc_id);
 	sv_setpv(TARG, npc_name.c_str());
 	XSprePUSH;
 	PUSHTARG;
@@ -6763,6 +6759,21 @@ XS(XS__crosszoneaddldonwinbyexpeditionid) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__getcleannpcnamebyid);
+XS(XS__getcleannpcnamebyid) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getcleannpcnamebyid(uint32 npc_id)");
+
+	dXSTARG;
+	uint32 npc_id = (int) SvIV(ST(0));
+	auto npc_name = quest_manager.getcleannpcnamebyid(npc_id);
+	sv_setpv(TARG, npc_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6987,6 +6998,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getaaexpmodifierbycharid"), XS__getaaexpmodifierbycharid, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
+	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);
 	newXS(strcpy(buf, "gethexcolorcode"), XS__gethexcolorcode, file);
 	newXS(strcpy(buf, "getcurrencyid"), XS__getcurrencyid, file);
 	newXS(strcpy(buf, "getexpmodifierbycharid"), XS__getexpmodifierbycharid, file);

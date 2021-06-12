@@ -139,7 +139,8 @@ public:
 	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);
 	void	GetCharName(uint32 char_id, char* name);
 	std::string GetCharNameByID(uint32 char_id);
-	std::string GetNPCNameByID(uint32 npc_id, bool clean_name = false);
+	std::string GetNPCNameByID(uint32 npc_id);
+	std::string GetCleanNPCNameByID(uint32 npc_id);
 	void	LoginIP(uint32 AccountID, const char* LoginIP);
 
 	/* Instancing */

@@ -273,7 +273,8 @@ public:
 	const char* getguildnamebyid(int guild_id);
 	int getguildidbycharid(uint32 char_id);
 	int getgroupidbycharid(uint32 char_id);
-	std::string getnpcnamebyid(uint32 npc_id, bool clean_name = false);
+	std::string getnpcnamebyid(uint32 npc_id);
+	std::string getcleannpcnamebyid(uint32 npc_id);
 	int getraididbycharid(uint32 char_id);
 	void SetRunning(bool val);
 	bool IsRunning();
