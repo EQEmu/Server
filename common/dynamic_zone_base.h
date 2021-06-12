@@ -113,7 +113,9 @@ public:
 	bool IsSameDz(uint32_t zone_id, uint32_t instance_id) const { return zone_id == m_zone_id && instance_id == m_instance_id; }
 	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
 	void RemoveAllMembers();
+	bool RemoveMember(uint32_t character_id);
 	bool RemoveMember(const std::string& character_name);
+	bool RemoveMember(const DynamicZoneMember& remove_member);
 	void SaveMembers(const std::vector<DynamicZoneMember>& members);
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);

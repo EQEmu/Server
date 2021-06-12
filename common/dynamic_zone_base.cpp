@@ -166,9 +166,20 @@ bool DynamicZoneBase::AddMember(const DynamicZoneMember& add_member)
 	return true;
 }
 
+bool DynamicZoneBase::RemoveMember(uint32_t character_id)
+{
+	auto remove_member = GetMemberData(character_id);
+	return RemoveMember(remove_member);
+}
+
 bool DynamicZoneBase::RemoveMember(const std::string& character_name)
 {
 	auto remove_member = GetMemberData(character_name);
+	return RemoveMember(remove_member);
+}
+
+bool DynamicZoneBase::RemoveMember(const DynamicZoneMember& remove_member)
+{
 	if (!remove_member.IsValid())
 	{
 		return false;

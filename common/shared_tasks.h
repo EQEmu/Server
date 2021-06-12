@@ -143,6 +143,7 @@ public:
 
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;
+	std::vector<uint32_t>                     dynamic_zone_ids;
 
 protected:
 	SharedTasksRepository::SharedTasks m_db_shared_task;

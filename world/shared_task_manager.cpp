@@ -3,6 +3,7 @@
 #include "../common/repositories/task_activities_repository.h"
 #include "cliententry.h"
 #include "clientlist.h"
+#include "dynamic_zone.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
@@ -270,6 +271,14 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 					requested_task_id,
 					remove_from_db
 				);
+			}
+
+			// todo: delete dynamic zone ids from db in DeleteSharedTask
+			for (const auto& dz_id : t->dynamic_zone_ids) {
+				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+				if (dz) {
+					dz->RemoveAllMembers();
+				}
 			}
 
 			// persistence
@@ -720,6 +729,13 @@ void SharedTaskManager::RemovePlayerFromSharedTask(SharedTask *s, uint32 charact
 		),
 		s->m_members.end()
 	);
+
+	for (const auto& dz_id : s->dynamic_zone_ids) {
+		auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+		if (dz) {
+			dz->RemoveMember(character_id);
+		}
+	}
 }
 
 void SharedTaskManager::PrintSharedTaskState()
@@ -850,6 +866,13 @@ void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string 
 			s->SetMembers(members);
 			SaveMembers(s, members);
 			SendSharedTaskMemberListToAllMembers(s);
+
+			for (const auto& dz_id : s->dynamic_zone_ids) {
+				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+				if (dz) {
+					dz->SetNewLeader(static_cast<uint32_t>(character_id));
+				}
+			}
 		}
 	}
 }
@@ -971,6 +994,16 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		s->SetMembers(members);
 		SaveMembers(s, members);
 		SendSharedTaskMemberListToAllMembers(s);
+
+		for (const auto& dz_id : s->dynamic_zone_ids) {
+			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+			if (dz) {
+				auto cle = client_list.FindCLEByCharacterID(new_member.character_id);
+				std::string character_name = cle ? cle->name() : "";
+				auto status = DynamicZoneMemberStatus::Online;
+				dz->AddMember({ static_cast<uint32_t>(character_id), character_name, status });
+			}
+		}
 	}
 }
 

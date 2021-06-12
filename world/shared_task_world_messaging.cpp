@@ -254,8 +254,9 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				auto new_dz = dynamic_zone_manager.CreateNew(dz, dz_members);
 				if (new_dz)
 				{
-					// todo: shared tasks should store the dz id and notify it when adding/removing members
+					// todo: add dz id to shared tasks db
 					LogTasks("Created task dz id: [{}]", new_dz->GetID());
+					t->dynamic_zone_ids.emplace_back(new_dz->GetID());
 				}
 			}
 			break;
