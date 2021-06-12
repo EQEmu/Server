@@ -29,6 +29,8 @@
 #define ServerOP_SharedTaskMemberlist               0x0306 // world -> zone. Send shared task memberlist
 #define ServerOP_SharedTaskRequestMemberlist        0x0307 // zone -> world. Send shared task memberlist (zone in initial for now, could change)
 #define ServerOP_SharedTaskAcceptNewTask            0x0308 // world -> zone. World verified, continue AcceptNewTask
+#define ServerOP_SharedTaskInvitePlayer             0x0309 // world -> zone. Sends task invite to player
+#define ServerOP_SharedTaskInviteAcceptedPlayer     0x0310 // zone -> world. Confirming task invite
 
 // used in
 // ServerOP_SharedTaskRequest
@@ -37,6 +39,14 @@
 struct ServerSharedTaskRequest_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
+};
+
+// ServerOP_SharedTaskInvitePlayer
+struct ServerSharedTaskInvitePlayer_Struct {
+	uint32 requested_character_id;
+	uint32 invite_shared_task_id;
+	char   task_name[64];
+	char   inviter_name[64];
 };
 
 // ServerOP_SharedTaskAttemptRemove
@@ -100,6 +110,11 @@ struct ServerSharedTaskMakeLeader_Struct {
 	uint32 source_character_id;
 	uint32 task_id;
 	char   player_name[64];
+};
+
+struct ServerSharedTaskInviteAccepted_Struct {
+	uint32 source_character_id;
+	uint32 shared_task_id;
 };
 
 class SharedTask {

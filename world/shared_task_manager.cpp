@@ -886,31 +886,167 @@ void SharedTaskManager::AddPlayerByPlayerName(SharedTask *s, const std::string &
 	if (!character.empty()) {
 		int64 character_id = character[0].id;
 
-		// fetch
-		std::vector<SharedTaskMember> members = s->GetMembers();
+		AddPlayerByCharacterId(s, character_id);
+	}
+}
 
-		// create
-		auto new_member = SharedTaskMember{};
-		new_member.character_id = character_id;
+void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::string &player_name)
+{
+	auto character = CharacterDataRepository::GetWhere(
+		*m_database,
+		fmt::format("`name` LIKE '%%{}%%' LIMIT 1", EscapeString(player_name))
+	);
 
-		bool does_member_exist = false;
-		for (auto &m: s->GetMembers()) {
-			if (m.character_id == character_id) {
-				does_member_exist = true;
-			}
-		}
+	if (!character.empty()) {
+		int64 character_id = character[0].id;
 
-		if (!does_member_exist) {
-			members.push_back(new_member);
+		// send dialogue window
+		SendSharedTaskInvitePacket(s, character_id);
 
-			// inform client
-			SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id);
+		// keep track of active invitations at world
+		QueueActiveInvitation(s->GetDbSharedTask().id, character_id);
+	}
+}
 
-			// add
-			s->SetMembers(members);
-			SaveMembers(s, members);
-			SendSharedTaskMemberListToAllMembers(s);
+void SharedTaskManager::SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id)
+{
+	int64     leader_character_id = 0;
+	for (auto &m: s->GetMembers()) {
+		if (m.is_leader) {
+			leader_character_id = m.character_id;
 		}
 	}
+
+	if (leader_character_id > 0) {
+		auto leader = CharacterDataRepository::FindOne(
+			*m_database,
+			(int) leader_character_id
+		);
+
+		// found leader
+		if (leader.id > 0) {
+
+			// init packet
+			auto p = std::make_unique<ServerPacket>(
+				ServerOP_SharedTaskInvitePlayer,
+				sizeof(ServerSharedTaskInvitePlayer_Struct)
+			);
+
+			// fill
+			auto d = reinterpret_cast<ServerSharedTaskInvitePlayer_Struct *>(p->pBuffer);
+			d->requested_character_id = invited_character_id;
+			d->invite_shared_task_id  = s->GetDbSharedTask().id;
+			strn0cpy(d->inviter_name, leader.name.c_str(), 64);
+			strn0cpy(d->task_name, s->GetTaskData().title.c_str(), 64);
+
+			// get requested character zone server
+			ClientListEntry *cle = client_list.FindCLEByCharacterID(invited_character_id);
+			if (cle && cle->Server()) {
+				cle->Server()->SendPacket(p.get());
+			}
+		}
+	}
+}
+
+void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id)
+{
+	// fetch
+	std::vector<SharedTaskMember> members = s->GetMembers();
+
+	// create
+	auto new_member = SharedTaskMember{};
+	new_member.character_id = character_id;
+
+	bool does_member_exist = false;
+
+	for (auto &m: s->GetMembers()) {
+		if (m.character_id == character_id) {
+			does_member_exist = true;
+		}
+	}
+
+	if (!does_member_exist) {
+		members.push_back(new_member);
+
+		// inform client
+		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id);
+
+		// add
+		s->SetMembers(members);
+		SaveMembers(s, members);
+		SendSharedTaskMemberListToAllMembers(s);
+	}
+}
+
+SharedTask *SharedTaskManager::FindSharedTaskById(int64 shared_task_id)
+{
+	for (auto &s: m_shared_tasks) {
+		if (s.GetDbSharedTask().id == shared_task_id) {
+			return &s;
+		}
+	}
+
+	return nullptr;
+}
+
+void SharedTaskManager::QueueActiveInvitation(int64 shared_task_id, int64 character_id)
+{
+	LogTasksDetail(
+		"[QueueActiveInvitation] shared_task_id [{}] character_id [{}]",
+		shared_task_id,
+		character_id
+	);
+
+	auto active_invitation = SharedTaskActiveInvitation{};
+	active_invitation.shared_task_id = shared_task_id;
+	active_invitation.character_id   = character_id;
+
+	m_active_invitations.emplace_back(active_invitation);
+}
+
+bool SharedTaskManager::IsInvitationActive(uint32 shared_task_id, uint32 character_id)
+{
+	LogTasksDetail(
+		"[IsInvitationActive] shared_task_id [{}] character_id [{}]",
+		shared_task_id,
+		character_id
+	);
+
+	for (auto &i: m_active_invitations) {
+		if (i.character_id == character_id && i.shared_task_id == shared_task_id) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 character_id)
+{
+	LogTasksDetail(
+		"[RemoveActiveInvitation] shared_task_id [{}] character_id [{}] pre_removal_count [{}]",
+		shared_task_id,
+		character_id,
+		m_active_invitations.size()
+	);
+
+	// remove internally
+	m_active_invitations.erase(
+		std::remove_if(
+			m_active_invitations.begin(),
+			m_active_invitations.end(),
+			[&](SharedTaskActiveInvitation const &i) {
+				return i.shared_task_id == shared_task_id && i.character_id == character_id;
+			}
+		),
+		m_active_invitations.end()
+	);
+
+	LogTasksDetail(
+		"[RemoveActiveInvitation] shared_task_id [{}] character_id [{}] post_removal_count [{}]",
+		shared_task_id,
+		character_id,
+		m_active_invitations.size()
+	);
 }
 

@@ -420,6 +420,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SharedTaskRemovePlayer] = &Client::Handle_OP_SharedTaskRemovePlayer;
 	ConnectedOpcodes[OP_SharedTaskAddPlayer]    = &Client::Handle_OP_SharedTaskAddPlayer;
 	ConnectedOpcodes[OP_SharedTaskMakeLeader]   = &Client::Handle_OP_SharedTaskMakeLeader;
+	ConnectedOpcodes[OP_SharedTaskInviteResponse]       = &Client::Handle_OP_SharedTaskInviteResponse;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -15384,4 +15385,53 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
+}
+
+void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SharedTaskInviteResponse_Struct)) {
+		LogPacketClientServer(
+			"Wrong size on SharedTaskInviteResponse | got [{}] expected [{}]",
+			app->size,
+			sizeof(SharedTaskInviteResponse_Struct)
+		);
+		return;
+	}
+
+	auto *r = (SharedTaskInviteResponse_Struct *) app->pBuffer;
+	LogTasks(
+		"[SharedTaskInviteResponse] unknown00 [{}] invite_id [{}] accepted [{}] padding [{}]",
+		r->unknown00,
+		r->invite_id,
+		r->accepted,
+		r->padding
+	);
+
+	if (r->accepted > 0) {
+		LogTasks("[Handle_OP_SharedTaskInviteResponse] Accepted");
+
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskInviteAcceptedPlayer,
+			sizeof(ServerSharedTaskInviteAccepted_Struct)
+		);
+
+		auto *c = (ServerSharedTaskInviteAccepted_Struct *) p->pBuffer;
+
+		// fill
+		c->source_character_id = CharacterID();
+		c->shared_task_id      = r->invite_id;
+
+		LogTasks(
+			"[ServerOP_SharedTaskInviteAcceptedPlayer] source_character_id [{}] shared_task_id [{}]",
+			c->source_character_id,
+			c->shared_task_id
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
+
+
 }

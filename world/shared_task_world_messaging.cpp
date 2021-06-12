@@ -186,8 +186,32 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					);
 
 					std::string character_name = r->player_name;
-					shared_task_manager.AddPlayerByPlayerName(t, character_name);
+//					shared_task_manager.AddPlayerByPlayerName(t, character_name);
+					shared_task_manager.InvitePlayerByPlayerName(t, character_name);
 				}
+			}
+
+			break;
+		}
+		case ServerOP_SharedTaskInviteAcceptedPlayer: {
+			auto *r = (ServerSharedTaskInviteAccepted_Struct *) pack->pBuffer;
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskInviteAcceptedPlayer] Received request from source_character_id [{}] shared_task_id [{}]",
+				r->source_character_id,
+				r->shared_task_id
+			);
+
+			auto t = shared_task_manager.FindSharedTaskById(r->shared_task_id);
+			if (t && shared_task_manager.IsInvitationActive(r->shared_task_id, r->source_character_id)) {
+				LogTasksDetail(
+					"[ServerOP_SharedTaskInviteAcceptedPlayer] Found shared task character [{}] shared_task_id [{}]",
+					r->source_character_id,
+					t->GetDbSharedTask().id
+				);
+
+				shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
+				shared_task_manager.RemoveActiveInvitation(r->shared_task_id, r->source_character_id);
 			}
 
 			break;

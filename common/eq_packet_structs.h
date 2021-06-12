@@ -3752,6 +3752,20 @@ struct SharedTaskRemovePlayer_Struct {
 	char  player_name[64];
 };
 
+struct SharedTaskInvite_Struct {
+	int32_t unknown00;      // probably the unique character id sent in some packets
+	int32_t invite_id;      // invite id sent back in response
+	char    task_name[64];
+	char    inviter_name[64];
+};
+
+struct SharedTaskInviteResponse_Struct {
+	int32_t unknown00;  // 0
+	int32_t invite_id;  // same id sent in the invite, probably for server verification
+	int8_t  accepted;   // 0: declined 1: accepted
+	int8_t  padding[3]; // padding garbage probably
+};
+
 #if 0
 
 // Old struct not used by Task System implementation but left for reference

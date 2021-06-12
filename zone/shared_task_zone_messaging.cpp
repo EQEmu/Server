@@ -121,6 +121,30 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
+
+		case ServerOP_SharedTaskInvitePlayer: {
+			auto p = reinterpret_cast<ServerSharedTaskInvitePlayer_Struct *>(pack->pBuffer);
+			auto c = entity_list.GetClientByCharID(p->requested_character_id);
+			if (c) {
+				LogTasks("[ServerOP_SharedTaskInvitePlayer] We're back in zone and I found [{}]", c->GetCleanName());
+
+				// init packet
+				auto outapp = new EQApplicationPacket(OP_SharedTaskInvite, sizeof(SharedTaskInvite_Struct));
+				auto *i     = (SharedTaskInvite_Struct *) outapp->pBuffer;
+
+				// fill
+				i->unknown00 = 0;
+				i->invite_id = (int) p->invite_shared_task_id;
+				strn0cpy(i->inviter_name, p->inviter_name, 64);
+				strn0cpy(i->task_name, p->task_name, 64);
+
+				// sends
+				c->QueuePacket(outapp);
+				safe_delete(outapp);
+			}
+
+			break;
+		}
 		default:
 			break;
 	}
