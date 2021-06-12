@@ -1882,7 +1882,7 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
 		if (TaskOutOfTime(TaskType::Shared, TASKSLOTSHAREDTASK)) {
 			// Send Red Task Failed Message
-			client->SendTaskFailed(m_active_shared_task.task_id, TASKSLOTSHAREDTASK, TaskType::Task);
+			client->SendTaskFailed(m_active_shared_task.task_id, TASKSLOTSHAREDTASK, TaskType::Shared);
 			// Remove the task from the client
 			client->CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
 			// It is a conscious decision to only fail one task per call to this method,
