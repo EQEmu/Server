@@ -197,7 +197,7 @@ SET(zone_headers
 	hate_list.h
 	heal_rotation.h
 	horse.h
-	lua_bot.cpp
+	lua_bot.h
 	lua_bit.h
 	lua_client.h
 	lua_corpse.h
