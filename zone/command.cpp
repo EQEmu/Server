@@ -212,6 +212,7 @@ int command_init(void)
 		command_add("face", "- Change the face of your target", 80, command_face) ||
 		command_add("faction", "[Find (criteria | all ) | Review (criteria | all) | Reset (id)] - Resets Player's Faction", 80, command_faction) ||
 		command_add("findaliases", "[search criteria]- Searches for available command aliases, by alias or command", 0, command_findaliases) ||
+		command_add("findclass", "[search criteria] - Search for a class", 50, command_findclass) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) ||
 		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
@@ -2689,33 +2690,100 @@ void command_showskills(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
 }
 
-void command_findrace(Client *c, const Seperator *sep)
+void command_findclass(Client *c, const Seperator *sep)
 {
 	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #findrace [race name]");
+		c->Message(Chat::White, "Usage: #findclass [search criteria]");
 	} else if (Seperator::IsNumber(sep->argplus[1])) {
 		int search_id = atoi(sep->argplus[1]);
-		std::string race_name = GetRaceIDName(search_id);
-		if (race_name != std::string("")) {
-			c->Message(Chat::White, "Race %d: %s", search_id, race_name.c_str());
+		std::string class_name = GetClassIDName(search_id);
+		if (class_name.length() > 0) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Class {}: {}",
+					search_id,
+					class_name
+				).c_str()
+			);
 			return;
 		}
 	} else {
-		const char *search_criteria = sep->argplus[1];
+		std::string search_criteria = str_tolower(sep->argplus[1]);
 		int found_count = 0;
-		char race_name[64];
-		char search_string[65];
-		strn0cpy(search_string, search_criteria, sizeof(search_string));
-		strupr(search_string);
-		char *string_location;
-		for (int race_id = RACE_HUMAN_1; race_id <= RT_PEGASUS_3; race_id++) {
-			strn0cpy(race_name, GetRaceIDName(race_id), sizeof(race_name));
-			strupr(race_name);
-			string_location = strstr(race_name, search_string);
-			if (string_location != nullptr) {
-				c->Message(Chat::White, "Race %d: %s", race_id, GetRaceIDName(race_id));
-				found_count++;
+		for (int class_id = WARRIOR; class_id <= MERCERNARY_MASTER; class_id++) {
+			std::string class_name = GetClassIDName(class_id);
+			std::string class_name_lower = str_tolower(class_name);
+			if (search_criteria.length() > 0 && class_name_lower.find(search_criteria) == std::string::npos) {
+				continue;
 			}
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Class {}: {}",
+					class_id,
+					class_name
+				).c_str()
+			);
+			found_count++;
+
+			if (found_count == 20) {
+				break;
+			}
+		}
+
+		if (found_count == 20) {
+			c->Message(Chat::White, "20 Classes found... max reached.");
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} Class(es) found.",
+					found_count
+				).c_str()
+			);
+		}
+	}
+}
+
+void command_findrace(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #findrace [search criteria]");
+	} else if (Seperator::IsNumber(sep->argplus[1])) {
+		int search_id = atoi(sep->argplus[1]);
+		std::string race_name = GetRaceIDName(search_id);
+		if (race_name.length() > 0) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Race {}: {}",
+					search_id,
+					race_name
+				).c_str()
+			);
+			return;
+		}
+	} else {
+		std::string search_criteria = str_tolower(sep->argplus[1]);
+		int found_count = 0;
+		for (int race_id = RACE_HUMAN_1; race_id <= RT_PEGASUS_3; race_id++) {
+			std::string race_name = GetRaceIDName(race_id);
+			std::string race_name_lower = str_tolower(race_name);
+			if (search_criteria.length() > 0 && race_name_lower.find(search_criteria) == std::string::npos) {
+				continue;
+			}
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Race {}: {}",
+					race_id,
+					race_name
+				).c_str()
+			);
+			found_count++;
 
 			if (found_count == 20) {
 				break;
@@ -2724,51 +2792,77 @@ void command_findrace(Client *c, const Seperator *sep)
 		if (found_count == 20) {
 			c->Message(Chat::White, "20 Races found... max reached.");
 		} else {
-			c->Message(Chat::White, "%i Race(s) found.", found_count);
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} Race(s) found.",
+					found_count
+				).c_str()
+			);
 		}
 	}
 }
 
 void command_findspell(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
-		c->Message(Chat::White, "Usage: #FindSpell [spellname]");
-	else if (SPDAT_RECORDS <= 0)
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #findspell [search criteria]");
+	} else if (SPDAT_RECORDS <= 0) {
 		c->Message(Chat::White, "Spells not loaded");
-	else if (Seperator::IsNumber(sep->argplus[1])) {
-		int spellid = atoi(sep->argplus[1]);
-		if (spellid <= 0 || spellid >= SPDAT_RECORDS) {
-			c->Message(Chat::White, "Error: Number out of range");
-		}
-		else {
-			c->Message(Chat::White, "  %i: %s",  spellid, spells[spellid].name);
+	} else if (Seperator::IsNumber(sep->argplus[1])) {
+		int spell_id = atoi(sep->argplus[1]);
+		if (!IsValidSpell(spell_id)) {
+			c->Message(Chat::White, "Error: Invalid Spell");
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{}: {}", 
+					spell_id,
+					spells[spell_id].name
+				).c_str()
+			);
 		}
 	}
 	else {
-		int count=0;
-		//int iSearchLen = strlen(sep->argplus[1])+1;
-		char sName[64];
-		char sCriteria[65];
-		strn0cpy(sCriteria, sep->argplus[1], 64);
-		strupr(sCriteria);
-		for (int i=0; i<SPDAT_RECORDS; i++) {
-			if (spells[i].name[0] != 0) {
-				strcpy(sName, spells[i].name);
-
-				strupr(sName);
-				char* pdest = strstr(sName, sCriteria);
-				if ((pdest != nullptr) && (count <=20)) {
-					c->Message(Chat::White, "  %i: %s",  i, spells[i].name);
-					count++;
+		std::string search_criteria = str_tolower(sep->argplus[1]);
+		int found_count = 0;
+		for (int i = 0; i < SPDAT_RECORDS; i++) {
+			auto current_spell = spells[i];
+			if (current_spell.name[0] != 0) {
+				std::string spell_name = current_spell.name;
+				std::string spell_name_lower = str_tolower(spell_name);
+				if (search_criteria.length() > 0 && spell_name_lower.find(search_criteria) == std::string::npos) {
+					continue;
 				}
-				else if (count > 20)
+				
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{}: {}",
+						i,
+						spell_name
+					).c_str()
+				);
+				found_count++;
+				
+				if (found_count == 20) {
 					break;
+				}
 			}
 		}
-		if (count > 20)
-			c->Message(Chat::White, "20 spells found... max reached.");
-		else
-			c->Message(Chat::White, "%i spells found.",  count);
+
+		if (found_count == 20) {
+			c->Message(Chat::White, "20 Spells found... max reached.");
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} Spell(s) found.",
+					found_count
+				).c_str()
+			);
+		}
 	}
 }
 
