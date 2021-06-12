@@ -6766,7 +6766,7 @@ XS(XS__getcleannpcnamebyid) {
 		Perl_croak(aTHX_ "Usage: quest::getcleannpcnamebyid(uint32 npc_id)");
 
 	dXSTARG;
-	uint32 npc_id = (int) SvIV(ST(0));
+	uint32 npc_id = (uint32) SvUV(ST(0));
 	auto npc_name = quest_manager.getcleannpcnamebyid(npc_id);
 	sv_setpv(TARG, npc_name.c_str());
 	XSprePUSH;
