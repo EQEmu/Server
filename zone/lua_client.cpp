@@ -2093,6 +2093,11 @@ void Lua_Client::AddLDoNWin(uint32 theme_id) {
 	self->AddLDoNWin(theme_id);
 }
 
+void Lua_Client::SetHideMe(bool hide_me_state) {
+	Lua_Safe_Call_Void();
+	self->SetHideMe(hide_me_state);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2447,7 +2452,8 @@ luabind::scope lua_register_client() {
 		.def("SetAAEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetAAEXPModifier)
 		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
 		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
-		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin);
+		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin)
+		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe);
 }
 
 luabind::scope lua_register_inventory_where() {
