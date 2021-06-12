@@ -1263,8 +1263,6 @@ public:
 		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
 	}
 
-	// shared tasks
-
 	// shared task shims / middleware
 	// these variables are used as a shim to intercept normal localized task functionality
 	// and pipe it into zone -> world and back to world -> zone
