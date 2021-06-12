@@ -2263,6 +2263,12 @@ void ClientTaskState::AcceptNewTask(
 	// shared task
 	// intercept and pass to world first before processing normally
 	if (!client->m_requesting_shared_task && task->type == TaskType::Shared) {
+		LogTasksDetail(
+			"[AcceptNewTask] Initiating shared_task request | task_id [{}] character_id [{}] name [{}]",
+			task_id,
+			client->CharacterID(),
+			client->GetCleanName()
+		);
 
 		// struct
 		auto pack = new ServerPacket(ServerOP_SharedTaskRequest, sizeof(ServerSharedTaskRequest_Struct));
