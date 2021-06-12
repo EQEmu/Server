@@ -1,3 +1,4 @@
+#ifdef BOTS
 #ifdef LUA_EQEMU
 
 #include "lua.hpp"
@@ -10,4 +11,5 @@ luabind::scope lua_register_bot() {
 	return luabind::class_<Lua_Bot, Lua_Mob>("Bot").def(luabind::constructor<>());
 }
 
+#endif
 #endif
