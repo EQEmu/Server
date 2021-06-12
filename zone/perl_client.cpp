@@ -5318,6 +5318,20 @@ XS(XS_Client_AddLDoNWin) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetHideMe);
+XS(XS_Client_SetHideMe) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetHideMe(THIS, bool hide_me_state)");
+	{
+		Client* THIS;
+		bool hide_me_state = (bool) SvTRUE(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetHideMe(hide_me_state);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5579,6 +5593,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
 	newXSproto(strcpy(buf, "SetGM"), XS_Client_SetGM, file, "$$");
+	newXSproto(strcpy(buf, "SetHideMe"), XS_Client_SetHideMe, file, "$$");
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");

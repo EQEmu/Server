@@ -357,6 +357,7 @@ public:
 	void DisableAreaEndRegen();
 	void EnableAreaRegens(int value);
 	void DisableAreaRegens();
+	void SetHideMe(bool hide_me_state);
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
