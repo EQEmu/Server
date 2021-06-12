@@ -2789,6 +2789,14 @@ std::string QuestManager::getnpcnamebyid(uint32 npc_id) {
 	return res;
 }
 
+std::string QuestManager::getcleannpcnamebyid(uint32 npc_id) {
+	std::string res;
+	if (npc_id > 0) {
+		res = database.GetCleanNPCNameByID(npc_id);
+	}
+	return res;
+}
+
 uint16 QuestManager::CreateInstance(const char *zone, int16 version, uint32 duration)
 {
 	QuestManagerCurrentQuestVars();

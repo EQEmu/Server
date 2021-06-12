@@ -2455,6 +2455,10 @@ void lua_cross_zone_add_ldon_win_by_expedition_id(uint32 expedition_id, uint32 t
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
 }
 
+std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
+	return quest_manager.getcleannpcnamebyid(npc_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -2796,6 +2800,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_char_id_by_name", (uint32(*)(const char*))&lua_get_char_id_by_name),
 		luabind::def("get_class_name", (std::string(*)(uint8))&lua_get_class_name),
 		luabind::def("get_class_name", (std::string(*)(uint8,uint8))&lua_get_class_name),
+		luabind::def("get_clean_npc_name_by_id", &lua_get_clean_npc_name_by_id),
 		luabind::def("get_currency_id", &lua_get_currency_id),
 		luabind::def("get_currency_item_id", &lua_get_currency_item_id),
 		luabind::def("get_guild_name_by_id", &lua_get_guild_name_by_id),

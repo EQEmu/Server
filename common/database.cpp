@@ -906,6 +906,26 @@ std::string Database::GetNPCNameByID(uint32 npc_id) {
 	return res;
 }
 
+std::string Database::GetCleanNPCNameByID(uint32 npc_id) {
+	std::string query = fmt::format("SELECT `name` FROM `npc_types` WHERE id = {}", npc_id);
+	auto results = QueryDatabase(query);
+	std::string res;
+	std::string mob_name;
+
+	if (!results.Success()) {
+		return res;
+	}
+
+	if (results.RowCount() == 0) {
+		return res;
+	}
+
+	auto row = results.begin();
+	mob_name = row[0];
+	CleanMobName(mob_name.begin(), mob_name.end(), std::back_inserter(res));
+	return res;
+}
+
 bool Database::LoadVariables() {
 	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache.last_update));
 
