@@ -122,6 +122,7 @@ typedef enum {
 
 typedef enum {
 	MQWarp,
+	MQWarpAbsolute,
 	MQWarpShadowStep,
 	MQWarpKnockBack,
 	MQWarpLight,

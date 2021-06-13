@@ -10471,10 +10471,22 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
-			if (RuleB(Zone, MQDetectionSilentReport))
+			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Large warp detected.");
 			char hString[250];
-			sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQWarp(LWD) with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	case MQWarpAbsolute:
+		if (RuleB(Zone, EnableMQWarpDetector)
+			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
+				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			if (!RuleB(Zone, MQDetectionSilentReport))
+				Message(13, "Warp detected.");
+			char hString[250];
+			sprintf(hString, "/MQWarp(FLT) with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
 			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
 		}
 		break;
@@ -10531,7 +10543,7 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 		break;
 	case MQGate:
 		if (RuleB(Zone, EnableMQGateDetector) && ((this->Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
-			if (RuleB(Zone, MQDetectionSilentReport))
+			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Illegal gate request.");
 			char hString[250];
 			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());

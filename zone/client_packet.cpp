@@ -209,7 +209,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_Fishing] = &Client::Handle_OP_Fishing;
-	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
+	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_FloatListThing;
 	ConnectedOpcodes[OP_Forage] = &Client::Handle_OP_Forage;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
@@ -4527,7 +4527,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 						}
 						else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
-								if (speed > (runs * 2) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
@@ -4577,7 +4577,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 						}
 						else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
-								if (speed > (runs * 2) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 									m_TimeSinceLastPositionCheck = cur_time;
 									m_DistanceSinceLastPositionCheck = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
@@ -15318,4 +15318,21 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 		ResetAA();
 	}
 	return;
+}
+
+void Client::Handle_OP_FloatListThing(const EQApplicationPacket* app) {
+	if (IsPortExempted())
+		return;
+	auto m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
+	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
+		switch (m_MovementHistory[index].type) {
+		case EQ::UpdateMovementType::ZoneLine:
+			SetPortExemption(true);
+			break;
+		case EQ::UpdateMovementType::TeleportA:
+			CheatDetected(MQWarpAbsolute, m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z);
+			SetPortExemption(false);
+			break;
+		}
+	}
 }
