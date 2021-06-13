@@ -358,6 +358,13 @@ public:
 	void EnableAreaRegens(int value);
 	void DisableAreaRegens();
 	void SetHideMe(bool hide_me_state);
+	void Popup(const char* title, const char* text);
+	void Popup(const char* title, const char* text, uint32 popup_id);
+	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id);
+	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type);
+	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration);
+	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two);
+	void Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two, uint32 sound_controls);
 
 	void SetPrimaryWeaponOrnamentation(uint32 model_id);
 	void SetSecondaryWeaponOrnamentation(uint32 model_id);
