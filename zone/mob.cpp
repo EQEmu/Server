@@ -1810,7 +1810,7 @@ void Mob::SendIllusionPacket(
 	new_drakkin_tattoo   = (in_drakkin_tattoo == 0xFFFFFFFF) ? GetDrakkinTattoo() : in_drakkin_tattoo;
 	new_drakkin_details  = (in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
 	new_aa_title         = in_aa_title;
-	
+
 	bool  reset_features_to_player_profile = IsClient() && in_race == 0;
 	if (reset_features_to_player_profile) {
 		auto c = CastToClient();
@@ -1861,7 +1861,7 @@ void Mob::SendIllusionPacket(
 	}
 
 	// update internal values for mob from illusion
-	size             = (in_size <= 0.0f) ? GetSize() : in_size;
+	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
 	texture          = new_texture;
 	helmtexture      = new_helmtexture;
 	haircolor        = new_haircolor;
