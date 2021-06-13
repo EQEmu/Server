@@ -4144,7 +4144,63 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					CastToClient()->SetControlledMobId(0);
 					}
 			}
-					
+
+			case SE_MovementSpeed:
+			{
+				if (IsClient())
+				{
+					Client* my_c = CastToClient();
+					uint32 cur_time = Timer::GetCurrentTime();
+					if ((cur_time - my_c->m_TimeSinceLastPositionCheck) > 1000)
+					{
+						float speed = (my_c->m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - my_c->m_TimeSinceLastPositionCheck);
+						float runs = my_c->GetRunspeed();
+						if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+						{
+							if (!my_c->GetGMSpeed() && (runs >= my_c->GetBaseRunspeed() || (speed > (my_c->GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+							{
+								printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
+									my_c->m_DistanceSinceLastPositionCheck, (cur_time - my_c->m_TimeSinceLastPositionCheck), speed);
+								if (my_c->IsShadowStepExempted())
+								{
+									if (my_c->m_DistanceSinceLastPositionCheck > 800)
+									{
+										my_c->CheatDetected(MQWarpShadowStep, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+									}
+								}
+								else if (my_c->IsKnockBackExempted())
+								{
+									//still potential to trigger this if you're knocked back off a
+									//HUGE fall that takes > 2.5 seconds
+									if (speed > 30.0f)
+									{
+										my_c->CheatDetected(MQWarpKnockBack, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+									}
+								}
+								else if (!my_c->IsPortExempted())
+								{
+									if (!my_c->IsMQExemptedArea(zone->GetZoneID(), my_c->GetX(), my_c->GetY(), my_c->GetZ()))
+									{
+										if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+										{
+											my_c->m_TimeSinceLastPositionCheck = cur_time;
+											my_c->m_DistanceSinceLastPositionCheck = 0.0f;
+											my_c->CheatDetected(MQWarp, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+											//my_c->Death(my_c, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
+										}
+										else
+										{
+											my_c->CheatDetected(MQWarpLight, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+										}
+									}
+								}
+							}
+						}
+					}
+					my_c->m_TimeSinceLastPositionCheck = cur_time;
+					my_c->m_DistanceSinceLastPositionCheck = 0.0f;
+				}
+			}	
 		}
 	}
 

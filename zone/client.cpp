@@ -179,6 +179,14 @@ Client::Client(EQStreamInterface* ieqs)
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
 		ClientFilters[client_filter] = FilterShow;
 
+	m_TimeSinceLastPositionCheck = 0;
+	m_DistanceSinceLastPositionCheck = 0.0f;
+	m_ShadowStepExemption = 0;
+	m_KnockBackExemption = 0;
+	m_PortExemption = 0;
+	m_SenseExemption = 0;
+	m_AssistExemption = 0;
+	m_CheatDetectMoved = false;
 	mMovementManager->AddClient(this);
 	character_id = 0;
 	conn_state = NoPacketsReceived;
@@ -10128,4 +10136,426 @@ void Client::SetAFK(uint8 afk_flag) {
 	spawn_appearance->parameter = afk_flag;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
+}
+
+void Client::SetShadowStepExemption(bool v)
+{
+	if (v == true)
+	{
+		uint32 cur_time = Timer::GetCurrentTime();
+		if ((cur_time - m_TimeSinceLastPositionCheck) > 1000)
+		{
+			float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+			int runs = GetRunspeed();
+			if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+			{
+				printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
+					m_DistanceSinceLastPositionCheck, (cur_time - m_TimeSinceLastPositionCheck), speed);
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				{
+					if (IsShadowStepExempted())
+					{
+						if (m_DistanceSinceLastPositionCheck > 800)
+						{
+							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (IsKnockBackExempted())
+					{
+						//still potential to trigger this if you're knocked back off a
+						//HUGE fall that takes > 2.5 seconds
+						if (speed > 30.0f)
+						{
+							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (!IsPortExempted())
+					{
+						if (!IsMQExemptedArea(zone->GetZoneID(), GetX(), GetY(), GetZ()))
+						{
+							if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+							{
+								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+								m_TimeSinceLastPositionCheck = cur_time;
+								m_DistanceSinceLastPositionCheck = 0.0f;
+								//Death(this, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
+							}
+							else
+							{
+								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+							}
+						}
+					}
+				}
+			}
+		}
+		m_TimeSinceLastPositionCheck = cur_time;
+		m_DistanceSinceLastPositionCheck = 0.0f;
+	}
+	m_ShadowStepExemption = v;
+}
+
+void Client::SetKnockBackExemption(bool v)
+{
+	if (v == true)
+	{
+		uint32 cur_time = Timer::GetCurrentTime();
+		if ((cur_time - m_TimeSinceLastPositionCheck) > 1000)
+		{
+			float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+			int runs = GetRunspeed();
+			if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+			{
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				{
+					printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
+						m_DistanceSinceLastPositionCheck, (cur_time - m_TimeSinceLastPositionCheck), speed);
+					if (IsShadowStepExempted())
+					{
+						if (m_DistanceSinceLastPositionCheck > 800)
+						{
+							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (IsKnockBackExempted())
+					{
+						//still potential to trigger this if you're knocked back off a
+						//HUGE fall that takes > 2.5 seconds
+						if (speed > 30.0f)
+						{
+							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (!IsPortExempted())
+					{
+						if (!IsMQExemptedArea(zone->GetZoneID(), GetX(), GetY(), GetZ()))
+						{
+							if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+							{
+								m_TimeSinceLastPositionCheck = cur_time;
+								m_DistanceSinceLastPositionCheck = 0.0f;
+								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+								//Death(this, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
+							}
+							else
+							{
+								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+							}
+						}
+					}
+				}
+			}
+		}
+		m_TimeSinceLastPositionCheck = cur_time;
+		m_DistanceSinceLastPositionCheck = 0.0f;
+	}
+	m_KnockBackExemption = v;
+}
+
+void Client::SetPortExemption(bool v)
+{
+	if (v == true)
+	{
+		uint32 cur_time = Timer::GetCurrentTime();
+		if ((cur_time - m_TimeSinceLastPositionCheck) > 1000)
+		{
+			float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+			int runs = GetRunspeed();
+			if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+			{
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				{
+					printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
+						m_DistanceSinceLastPositionCheck, (cur_time - m_TimeSinceLastPositionCheck), speed);
+					if (IsShadowStepExempted())
+					{
+						if (m_DistanceSinceLastPositionCheck > 800)
+						{
+							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (IsKnockBackExempted())
+					{
+						//still potential to trigger this if you're knocked back off a
+						//HUGE fall that takes > 2.5 seconds
+						if (speed > 30.0f)
+						{
+							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+						}
+					}
+					else if (!IsPortExempted())
+					{
+						if (!IsMQExemptedArea(zone->GetZoneID(), GetX(), GetY(), GetZ()))
+						{
+							if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+							{
+								m_TimeSinceLastPositionCheck = cur_time;
+								m_DistanceSinceLastPositionCheck = 0.0f;
+								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+							}
+							else
+							{
+								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+							}
+						}
+					}
+				}
+			}
+		}
+		m_TimeSinceLastPositionCheck = cur_time;
+		m_DistanceSinceLastPositionCheck = 0.0f;
+	}
+	m_PortExemption = v;
+}
+
+const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const
+{
+	float max_dist = 90000;
+	switch (zoneID)
+	{
+	case 2:
+	{
+		float delta = (x - (-713.6));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-160.2));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-12.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-153.8));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-30.3));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (8.2));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+	case 9:
+	{
+		float delta = (x - (-682.5));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (147.0));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-9.9));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-655.4));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (10.5));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-51.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+	case 62:
+	case 75:
+	case 114:
+	case 209:
+	{
+		//The portals are so common in paineel/felwitheb that checking
+		//distances wouldn't be worth it cause unless you're porting to the
+		//start field you're going to be triggering this and that's a level of
+		//accuracy I'm willing to sacrifice
+		return true;
+		break;
+	}
+
+	case 24:
+	{
+		float delta = (x - (-183.0));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-773.3));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (54.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-8.8));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-394.1));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (41.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-310.3));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1411.6));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-42.8));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		delta = (x - (-183.1));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1409.8));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (37.1));
+		delta *= delta;
+		distance += delta;
+
+		if (distance < max_dist)
+			return true;
+
+		break;
+	}
+
+	case 110:
+	case 34:
+	case 96:
+	case 93:
+	case 68:
+	case 84:
+	{
+		if (GetBoatID() != 0)
+			return true;
+		break;
+	}
+	default:
+		break;
+	}
+	return false;
+}
+
+void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
+{
+	//ToDo: Break warp down for special zones. Some zones have special teleportation pads or bad .map files which can trigger the detector without a legit zone request.
+
+	switch (CheatType)
+	{
+	case MQWarp: //Some zones may still have issues. Database updates will eliminate most if not all problems.
+		if (RuleB(Zone, EnableMQWarpDetector)
+			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
+				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			if (RuleB(Zone, MQDetectionSilentReport))
+				Message(13, "Large warp detected.");
+			char hString[250];
+			sprintf(hString, "/MQWarp with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	case MQWarpShadowStep:
+		if (RuleB(Zone, EnableMQWarpDetector)
+			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
+				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQWarp(SS) with location %.2f, %.2f, %.2f, the target was shadow step exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	case MQWarpKnockBack:
+		if (RuleB(Zone, EnableMQWarpDetector)
+			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
+				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQWarp(KB) with location %.2f, %.2f, %.2f, the target was Knock Back exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+
+	case MQWarpLight:
+		if (RuleB(Zone, EnableMQWarpDetector)
+			&& ((this->Admin() < RuleI(Zone, MQWarpExemptStatus)
+				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		{
+			if (RuleB(Zone, MarkMQWarpLT))
+			{
+				char hString[250];
+				sprintf(hString, "/MQWarp(LT) with location %.2f, %.2f, %.2f, running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", GetX(), GetY(), GetZ());
+				database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+			}
+		}
+		break;
+
+	case MQZone:
+		if (RuleB(Zone, EnableMQZoneDetector) && ((this->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f to %.2f %.2f %.2f", GetX(), GetY(), GetZ(), x, y, z);
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	case MQZoneUnknownDest:
+		if (RuleB(Zone, EnableMQZoneDetector) && ((this->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		}
+		break;
+	case MQGate:
+		if (RuleB(Zone, EnableMQGateDetector) && ((this->Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
+			if (RuleB(Zone, MQDetectionSilentReport))
+				Message(13, "Illegal gate request.");
+			char hString[250];
+			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+			if (zone)
+			{
+				this->SetZone(this->GetZoneID(), zone->GetInstanceID()); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
+			}
+			else
+			{
+				this->SetZone(this->GetZoneID(), 0); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
+
+			}
+		}
+		break;
+	case MQGhost: //Not currently implemented, but the framework is in place - just needs detection scenarios identified
+		if (RuleB(Zone, EnableMQGhostDetector) && ((this->Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
+			database.SetMQDetectionFlag(this->account_name, this->name, "/MQGhost", zone->GetShortName());
+		}
+		break;
+	default:
+		char hString[250];
+		sprintf(hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());
+		database.SetMQDetectionFlag(this->account_name, this->name, hString, zone->GetShortName());
+		break;
+	}
 }

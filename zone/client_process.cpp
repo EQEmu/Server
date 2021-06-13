@@ -203,6 +203,10 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
+		if (!m_CheatDetectMoved) {
+			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
+		}
+
 		if (bardsong_timer.Check() && bardsong != 0) {
 			//NOTE: this is kinda a heavy-handed check to make sure the mob still exists before
 			//doing the next pulse on them...

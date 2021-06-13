@@ -1002,8 +1002,28 @@ public:
 	void EnteringMessages(Client* client);
 	void SendRules(Client* client);
 
+	uint32 m_TimeSinceLastPositionCheck;
+	float m_DistanceSinceLastPositionCheck;
+	bool m_CheatDetectMoved;
+	void SetShadowStepExemption(bool v);
+	void SetKnockBackExemption(bool v);
+	void SetPortExemption(bool v);
+	void SetSenseExemption(bool v) { m_SenseExemption = v; }
+	void SetAssistExemption(bool v) { m_AssistExemption = v; }
+	const bool IsShadowStepExempted() const { return m_ShadowStepExemption; }
+	const bool IsKnockBackExempted() const { return m_KnockBackExemption; }
+	const bool IsPortExempted() const { return m_PortExemption; }
+	const bool IsSenseExempted() const { return m_SenseExemption; }
+	const bool IsAssistExempted() const { return m_AssistExemption; }
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
+	void CheatDetected(CheatTypes CheatType, float x, float y, float z);
+	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
 	bool CanUseReport;
+	bool m_ShadowStepExemption;
+	bool m_KnockBackExemption;
+	bool m_PortExemption;
+	bool m_SenseExemption;
+	bool m_AssistExemption;
 
 	//This is used to later set the buff duration of the spell, in slot to duration.
 	//Doesn't appear to work directly after the client recieves an action packet.

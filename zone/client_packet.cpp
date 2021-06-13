@@ -2919,6 +2919,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
+				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			} else {
 				eid->entity_id = 0;
@@ -4497,8 +4498,108 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
-	if (IsDraggingCorpse())
-		DragCorpses();
+	float dist = 0;
+	float tmp;
+	tmp = m_Position.x - ppu->x_pos;
+	dist += tmp * tmp;
+	tmp = m_Position.y - ppu->y_pos;
+	dist += tmp * tmp;
+	dist = sqrt(dist);
+
+	/* Hack checks */
+	if (dist == 0) {
+		if (m_DistanceSinceLastPositionCheck > 0.0) {
+			uint32 cur_time = Timer::GetCurrentTime();
+			if ((cur_time - m_TimeSinceLastPositionCheck) > 0) {
+				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				int runs = GetRunspeed();
+				if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+					if (!GetGMSpeed()) {
+						if (IsShadowStepExempted()) {
+							if (m_DistanceSinceLastPositionCheck > 800) {
+								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+							}
+						}
+						else if (IsKnockBackExempted()) {
+							if (speed > 30.0f) {
+								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+							}
+						}
+						else if (!IsPortExempted()) {
+							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
+								if (speed > (runs * 2) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+									m_TimeSinceLastPositionCheck = cur_time;
+									m_DistanceSinceLastPositionCheck = 0.0f;
+									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								}
+								else {
+									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								}
+							}
+						}
+					}
+				}
+				SetShadowStepExemption(false);
+				SetKnockBackExemption(false);
+				SetPortExemption(false);
+				m_TimeSinceLastPositionCheck = cur_time;
+				m_DistanceSinceLastPositionCheck = 0.0f;
+				m_CheatDetectMoved = false;
+			}
+		}
+		else {
+			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
+			m_CheatDetectMoved = false;
+		}
+	}
+	else {
+		m_DistanceSinceLastPositionCheck += dist;
+		m_CheatDetectMoved = true;
+		if (m_TimeSinceLastPositionCheck == 0) {
+			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
+		}
+		else {
+			uint32 cur_time = Timer::GetCurrentTime();
+			if ((cur_time - m_TimeSinceLastPositionCheck) > 2500) {
+				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+				int runs = GetRunspeed();
+				if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+					if (!GetGMSpeed()) {
+						if (IsShadowStepExempted()) {
+							if (m_DistanceSinceLastPositionCheck > 800) {
+								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+							}
+						}
+						else if (IsKnockBackExempted()) {
+							if (speed > 30.0f) {
+								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+							}
+						}
+						else if (!IsPortExempted()) {
+							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
+								if (speed > (runs * 2) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
+									m_TimeSinceLastPositionCheck = cur_time;
+									m_DistanceSinceLastPositionCheck = 0.0f;
+									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								}
+								else {
+									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								}
+							}
+						}
+					}
+				}
+				SetShadowStepExemption(false);
+				SetKnockBackExemption(false);
+				SetPortExemption(false);
+				m_TimeSinceLastPositionCheck = cur_time;
+				m_DistanceSinceLastPositionCheck = 0.0f;
+			}
+		}
+
+		if (IsDraggingCorpse())
+			DragCorpses();
+	}
 
 	/* Check to see if PPU should trigger an update to the rewind position. */
 	float rewind_x_diff = 0;
@@ -13949,6 +14050,12 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if (IsAssistExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetAssistExemption(false);
+				return;
+			}
 			else if (GetTarget()->IsClient())
 			{
 				//make sure this client is in our raid/group
@@ -13962,6 +14069,17 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
 				SetTarget((Mob*)nullptr);
+				return;
+			}
+			else if (IsPortExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				return;
+			}
+			else if (IsSenseExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetSenseExemption(false);
 				return;
 			}
 			else if (IsXTarget(GetTarget()))
