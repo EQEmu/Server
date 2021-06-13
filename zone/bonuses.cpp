@@ -3382,10 +3382,10 @@ bool Client::CalcItemScale(uint32 slot_x, uint32 slot_y) {
 		if (Trader)
 			if (i >= EQ::invbag::GENERAL_BAGS_BEGIN && i <= EQ::invbag::GENERAL_BAGS_END) {
 				EQ::ItemInstance* parent_item = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(i));
-				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+				if (parent_item && parent_item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)
 					continue;
 			}
-
+		
 		bool update_slot = false;
 		if(inst->IsScaling())
 		{
@@ -3468,7 +3468,7 @@ bool Client::DoItemEnterZone(uint32 slot_x, uint32 slot_y) {
 		if (Trader)
 			if (i >= EQ::invbag::GENERAL_BAGS_BEGIN && i <= EQ::invbag::GENERAL_BAGS_END) {
 				EQ::ItemInstance* parent_item = m_inv.GetItem(EQ::InventoryProfile::CalcSlotId(i));
-				if (parent_item && parent_item->GetItem()->ID == 17899) // trader satchel
+				if (parent_item && parent_item->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)
 					continue;
 			}
 
