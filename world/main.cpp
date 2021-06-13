@@ -297,11 +297,9 @@ int main(int argc, char** argv) {
 
 	guild_mgr.SetDatabase(&database);
 
-	/**
-	 * Logging
-	 */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	/**
 	 * Parse simple CLI passes

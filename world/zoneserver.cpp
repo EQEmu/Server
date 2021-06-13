@@ -812,7 +812,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_ReloadLogs: {
 		zoneserver_list.SendPacket(pack);
-		database.LoadLogSettings(LogSys.log_settings);
+		LogSys.LoadLogDatabaseSettings();
 		break;
 	}
 	case ServerOP_ReloadRules: {
@@ -1289,11 +1289,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_CZTaskDisablePlayer:
 	case ServerOP_CZTaskDisableGroup:
 	case ServerOP_CZTaskDisableRaid:
-	case ServerOP_CZTaskDisableGuild:	
+	case ServerOP_CZTaskDisableGuild:
 	case ServerOP_CZTaskEnablePlayer:
 	case ServerOP_CZTaskEnableGroup:
 	case ServerOP_CZTaskEnableRaid:
-	case ServerOP_CZTaskEnableGuild:	
+	case ServerOP_CZTaskEnableGuild:
 	case ServerOP_CZTaskFailPlayer:
 	case ServerOP_CZTaskFailGroup:
 	case ServerOP_CZTaskFailRaid:

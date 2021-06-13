@@ -42,15 +42,15 @@ const queryservconfig *Config;
 WorldServer *worldserver = 0;
 EQEmuLogSys LogSys;
 
-void CatchSignal(int sig_num) { 
-	RunLoops = false; 
+void CatchSignal(int sig_num) {
+	RunLoops = false;
 }
 
 int main() {
 	RegisterExecutablePlatform(ExePlatformQueryServ);
 	LogSys.LoadLogSettingsDefaults();
-	set_exception_handler(); 
-	Timer LFGuildExpireTimer(60000);  
+	set_exception_handler();
+	Timer LFGuildExpireTimer(60000);
 
 	LogInfo("Starting EQEmu QueryServ");
 	if (!queryservconfig::LoadConfig()) {
@@ -58,11 +58,11 @@ int main() {
 		return 1;
 	}
 
-	Config = queryservconfig::get(); 
-	WorldShortName = Config->ShortName; 
+	Config = queryservconfig::get();
+	WorldShortName = Config->ShortName;
 
 	LogInfo("Connecting to MySQL");
-	
+
 	/* MySQL Connection */
 	if (!database.Connect(
 		Config->QSDatabaseHost.c_str(),
@@ -74,9 +74,9 @@ int main() {
 		return 1;
 	}
 
-	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	if (signal(SIGINT, CatchSignal) == SIG_ERR)	{
 		LogInfo("Could not set signal handler");
@@ -89,13 +89,13 @@ int main() {
 
 	/* Initial Connection to Worldserver */
 	worldserver = new WorldServer;
-	worldserver->Connect(); 
+	worldserver->Connect();
 
 	/* Load Looking For Guild Manager */
 	lfguildmanager.LoadDatabase();
 
-	while(RunLoops) { 
-		Timer::SetCurrentTime(); 
+	while(RunLoops) {
+		Timer::SetCurrentTime();
 		if(LFGuildExpireTimer.Check())
 			lfguildmanager.ExpireEntries();
 
