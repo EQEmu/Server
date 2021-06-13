@@ -464,11 +464,6 @@ Client::~Client() {
 	safe_delete(eqs);
 
 	UninitializeBuffSlots();
-
-	// shared task
-	m_requesting_shared_task        = false;
-	m_requested_shared_task_removal = false;
-	m_shared_task_update            = false;
 }
 
 void Client::SendZoneInPackets()

@@ -1267,9 +1267,9 @@ public:
 	// these variables are used as a shim to intercept normal localized task functionality
 	// and pipe it into zone -> world and back to world -> zone
 	// world is authoritative
-	bool m_requesting_shared_task;
-	bool m_shared_task_update;
-	bool m_requested_shared_task_removal;
+	bool m_requesting_shared_task        = false;
+	bool m_shared_task_update            = false;
+	bool m_requested_shared_task_removal = false;
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
