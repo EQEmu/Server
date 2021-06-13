@@ -50,7 +50,7 @@ private:
 
 	bool m_is_pending_early_shutdown = false;
 	bool m_choose_leader_needed = false;
-	Timer m_choose_leader_cooldown_timer{ RuleI(Expedition, ChooseLeaderCooldownTime) };
+	Timer m_choose_leader_cooldown_timer{ static_cast<uint32_t>(RuleI(Expedition, ChooseLeaderCooldownTime)) };
 	Timer m_warning_cooldown_timer{ 1 }; // non-zero so it's enabled initially
 };
 

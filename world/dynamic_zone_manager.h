@@ -4,6 +4,7 @@
 #include "../common/timer.h"
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 extern class DynamicZoneManager dynamic_zone_manager;
 
