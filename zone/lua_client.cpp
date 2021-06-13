@@ -2098,6 +2098,11 @@ void Lua_Client::SetHideMe(bool hide_me_state) {
 	self->SetHideMe(hide_me_state);
 }
 
+void Lua_Client::ResetAllDisciplineTimers() {
+	Lua_Safe_Call_Void();
+	self->ResetAllDisciplineTimers();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2453,7 +2458,8 @@ luabind::scope lua_register_client() {
 		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
 		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
 		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin)
-		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe);
+		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
+		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers);
 }
 
 luabind::scope lua_register_inventory_where() {

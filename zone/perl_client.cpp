@@ -5332,6 +5332,19 @@ XS(XS_Client_SetHideMe) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_ResetAllDisciplineTimers);
+XS(XS_Client_ResetAllDisciplineTimers) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::ResetAllDisciplineTimers(THIS)"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ResetAllDisciplineTimers();
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5552,6 +5565,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
+	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");
