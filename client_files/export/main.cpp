@@ -83,8 +83,9 @@ int main(int argc, char **argv)
 		content_db.SetMysql(database.getMySQL());
 	}
 
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	std::string arg_1;
 

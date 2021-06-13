@@ -254,9 +254,10 @@ int main(int argc, char** argv) {
 	}
 
 	/* Register Log System and Settings */
-	LogSys.SetGMSayHandler(&Zone::GMSayHookCallBackProcess);
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->SetGMSayHandler(&Zone::GMSayHookCallBackProcess)
+		->StartFileLogs();
 
 	/* Guilds */
 	guild_mgr.SetDatabase(&database);
