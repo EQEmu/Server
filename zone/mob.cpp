@@ -1859,19 +1859,20 @@ void Mob::SendIllusionPacket(
 	}
 
 	// update internal values for mob
-	size             = (in_size <= 0.0f) ? GetSize() : in_size;
-	texture          = new_texture;
-	helmtexture      = new_helmtexture;
-	haircolor        = new_haircolor;
-	beardcolor       = new_beardcolor;
-	eyecolor1        = new_eyecolor1;
-	eyecolor2        = new_eyecolor2;
-	hairstyle        = new_hairstyle;
-	luclinface       = new_luclinface;
-	beard            = new_beard;
-	drakkin_heritage = new_drakkin_heritage;
-	drakkin_tattoo   = new_drakkin_tattoo;
-	drakkin_details  = new_drakkin_details;
+	// TODO: Move this to its own SetIllusion function later
+	//	size             = (in_size <= 0.0f) ? GetSize() : in_size;
+	//	texture          = new_texture;
+	//	helmtexture      = new_helmtexture;
+	//	haircolor        = new_haircolor;
+	//	beardcolor       = new_beardcolor;
+	//	eyecolor1        = new_eyecolor1;
+	//	eyecolor2        = new_eyecolor2;
+	//	hairstyle        = new_hairstyle;
+	//	luclinface       = new_luclinface;
+	//	beard            = new_beard;
+	//	drakkin_heritage = new_drakkin_heritage;
+	//	drakkin_tattoo   = new_drakkin_tattoo;
+	//	drakkin_details  = new_drakkin_details;
 
 	auto            outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
 	Illusion_Struct *is    = (Illusion_Struct *) outapp->pBuffer;
