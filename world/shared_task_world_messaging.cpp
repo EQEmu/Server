@@ -22,12 +22,17 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 		case ServerOP_SharedTaskRequest: {
 			auto *r = (ServerSharedTaskRequest_Struct *) pack->pBuffer;
 			LogTasksDetail(
-				"[ServerOP_SharedTaskRequest] Received request from character [{}] task_id [{}]",
+				"[ServerOP_SharedTaskRequest] Received request from character [{}] task_id [{}] npc_type_id [{}]",
 				r->requested_character_id,
-				r->requested_task_id
+				r->requested_task_id,
+				r->requested_npc_type_id
 			);
 
-			shared_task_manager.AttemptSharedTaskCreation(r->requested_task_id, r->requested_character_id);
+			shared_task_manager.AttemptSharedTaskCreation(
+				r->requested_task_id,
+				r->requested_character_id,
+				r->requested_npc_type_id
+			);
 
 			break;
 		}

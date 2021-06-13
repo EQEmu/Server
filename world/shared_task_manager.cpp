@@ -115,7 +115,11 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 	return request_members;
 }
 
-void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id)
+void SharedTaskManager::AttemptSharedTaskCreation(
+	uint32 requested_task_id,
+	uint32 requested_character_id,
+	uint32 npc_type_id
+)
 {
 	auto task = GetSharedTaskDataByTaskId(requested_task_id);
 	if (task.id != 0 && task.type == TASK_TYPE_SHARED) {
@@ -223,7 +227,9 @@ void SharedTaskManager::AttemptSharedTaskCreation(uint32 requested_task_id, uint
 
 	// send accept to members
 	for (auto &m: request_members) {
-		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id);
+		// only requester (leader) receives back the npc context to trigger task accept event
+		uint32_t npc_context_id = m.character_id == requested_character_id ? npc_type_id : 0;
+		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id, npc_context_id);
 		SendSharedTaskMemberList(m.character_id, new_shared_task.GetDbSharedTask().id);
 	}
 
@@ -640,7 +646,7 @@ bool SharedTaskManager::IsSharedTaskLeader(SharedTask *s, uint32 character_id)
 	return false;
 }
 
-void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id)
+void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id)
 {
 	auto p = std::make_unique<ServerPacket>(
 		ServerOP_SharedTaskAcceptNewTask,
@@ -650,6 +656,7 @@ void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint3
 	auto d = reinterpret_cast<ServerSharedTaskRequest_Struct *>(p->pBuffer);
 	d->requested_character_id = character_id;
 	d->requested_task_id      = task_id;
+	d->requested_npc_type_id  = npc_context_id;
 
 	// get requested character zone server
 	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
@@ -969,7 +976,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		members.push_back(new_member);
 
 		// inform client
-		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id);
+		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id, 0);
 
 		// add
 		s->SetMembers(members);

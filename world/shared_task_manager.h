@@ -29,7 +29,7 @@ public:
 	std::vector<SharedTaskMember> GetRequestMembers(uint32 requestor_character_id);
 
 	// client attempting to create a shared task
-	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id);
+	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
 	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
 	// shared task activity update middleware
@@ -48,7 +48,7 @@ public:
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
 
 	bool IsSharedTaskLeader(SharedTask *s, uint32 character_id);
-	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id);
+	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
 	void SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);

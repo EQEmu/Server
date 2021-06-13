@@ -22,7 +22,12 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 				LogTasks("[ServerOP_SharedTaskAcceptNewTask] We're back in zone and I found [{}]", c->GetCleanName());
 
 				c->m_requesting_shared_task = true;
-				c->GetTaskState()->AcceptNewTask(c, (int) p->requested_task_id, 0);
+				c->GetTaskState()
+					->AcceptNewTask(
+						c,
+						(int) p->requested_task_id,
+						(int) p->requested_npc_type_id
+					);
 				c->LoadClientTaskState();
 				c->m_requesting_shared_task = false;
 			}

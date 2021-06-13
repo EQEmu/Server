@@ -13,7 +13,7 @@
 #include "worldserver.h"
 
 extern WorldServer worldserver;
-extern QueryServ *QServ;
+extern QueryServ   *QServ;
 
 ClientTaskState::ClientTaskState()
 {
@@ -1544,7 +1544,7 @@ void ClientTaskState::UpdateTaskActivity(
 		active_task_index = TASKSLOTTASK;
 	}
 	if (m_active_shared_task.task_id == task_id) {
-		type = TaskType::Shared;
+		type              = TaskType::Shared;
 		active_task_index = TASKSLOTSHAREDTASK;
 	}
 
@@ -2277,6 +2277,7 @@ void ClientTaskState::AcceptNewTask(
 		// fill
 		r->requested_character_id = client->CharacterID();
 		r->requested_task_id      = task_id;
+		r->requested_npc_type_id  = npc_type_id;
 
 		// send
 		worldserver.SendPacket(pack);
