@@ -651,15 +651,16 @@ EQEmuLogSys *EQEmuLogSys::LoadLogDatabaseSettings()
 	for (int i = Logs::AA; i != Logs::MaxCategoryID; i++) {
 		if (std::find(db_categories.begin(), db_categories.end(), i) == db_categories.end()) {
 			LogInfo(
-				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
+				"Automatically adding new log category [{0}]",
 				Logs::LogCategoryName[i]
 			);
 
 			auto new_category = LogsysCategoriesRepository::NewEntity();
-			new_category.log_category_id = i;
-			new_category.log_to_console  = log_settings[i].log_to_console;
-			new_category.log_to_gmsay    = log_settings[i].log_to_gmsay;
-			new_category.log_to_file     = log_settings[i].log_to_file;
+			new_category.log_category_id          = i;
+			new_category.log_category_description = EscapeString(Logs::LogCategoryName[i]);
+			new_category.log_to_console           = log_settings[i].log_to_console;
+			new_category.log_to_gmsay             = log_settings[i].log_to_gmsay;
+			new_category.log_to_file              = log_settings[i].log_to_file;
 
 			LogsysCategoriesRepository::InsertOne(*m_database, new_category);
 		}
