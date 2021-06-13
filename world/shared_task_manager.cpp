@@ -46,9 +46,6 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 		for (auto &c: raid_characters) {
 			SharedTaskMember member = {};
 			member.character_id   = c.id;
-			member.character_name = c.name;
-			member.is_raided      = true;
-			member.level          = c.level;
 
 			// if the group member is a leader, make sure we tag it as such
 			if (c.id == requestor_character_id) {
@@ -75,9 +72,6 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 		for (auto &c: group_characters) {
 			SharedTaskMember member = {};
 			member.character_id   = c.id;
-			member.character_name = c.name;
-			member.is_grouped     = true;
-			member.level          = c.level;
 
 			// if the group member is a leader, make sure we tag it as such
 			if (c.id == requestor_character_id) {
@@ -100,12 +94,10 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 reques
 	}
 
 	if (!list_has_leader) {
-		auto leader = CharacterDataRepository::FindOne(*m_database, requestor_character_id);
+		auto leader = CharacterDataRepository::FindOne(*m_database, (int) requestor_character_id);
 		if (leader.id != 0) {
 			SharedTaskMember member = {};
 			member.character_id   = leader.id;
-			member.character_name = leader.name;
-			member.level          = leader.level;
 			member.is_leader      = true;
 
 			request_members.emplace_back(member);
@@ -134,12 +126,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	if (!request_members.empty()) {
 		for (auto &m: request_members) {
 			LogTasksDetail(
-				"[AttemptSharedTaskCreation] Request Members ({}) [{}] level [{}] grouped [{}] raided [{}]",
-				m.character_id,
-				m.character_name,
-				m.level,
-				(m.is_grouped ? "true" : "false"),
-				(m.is_raided ? "true" : "false")
+				"[AttemptSharedTaskCreation] Request Members ({})",
+				m.character_id
 			);
 		}
 	}
