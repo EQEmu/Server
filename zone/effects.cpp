@@ -722,7 +722,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 uint32 Client::GetDisciplineTimer(uint32 timer_id) {
 	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
 	uint32 disc_timer = 0;
-	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
+	if (GetPTimers().Enabled(disc_timer_id)) {
 		disc_timer = GetPTimers().GetRemainingTime(disc_timer_id);
 	}
 	return disc_timer;
@@ -730,10 +730,20 @@ uint32 Client::GetDisciplineTimer(uint32 timer_id) {
 
 void Client::ResetDisciplineTimer(uint32 timer_id) {
 	pTimerType disc_timer_id = pTimerDisciplineReuseStart + timer_id;
-	if (GetPTimers().Enabled((uint32)disc_timer_id)) {
-		GetPTimers().Clear(&database, (uint32)disc_timer_id);
+	if (GetPTimers().Enabled(disc_timer_id)) {
+		GetPTimers().Clear(&database, disc_timer_id);
 	}
 	SendDisciplineTimer(timer_id, 0);
+}
+
+void Client::ResetAllDisciplineTimers() {
+	for (pTimerType disc_timer_id = pTimerDisciplineReuseStart; disc_timer_id <= pTimerDisciplineReuseEnd; disc_timer_id++) {
+		uint32 current_timer_id = (disc_timer_id - pTimerDisciplineReuseStart);
+		if (GetPTimers().Enabled(disc_timer_id)) {
+			GetPTimers().Clear(&database, disc_timer_id);
+		}
+		SendDisciplineTimer(current_timer_id, 0);
+	}
 }
 
 bool Client::HasDisciplineLearned(uint16 spell_id) {

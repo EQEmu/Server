@@ -985,6 +985,7 @@ public:
 	bool MemorizeSpellFromItem(uint32 item_id);
 	void TrainDiscBySpellID(int32 spell_id);
 	uint32 GetDisciplineTimer(uint32 timer_id);
+	void ResetAllDisciplineTimers();
 	int GetDiscSlotBySpellID(int32 spellid);
 	void ResetDisciplineTimer(uint32 timer_id);
 	void SendDisciplineUpdate();

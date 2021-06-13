@@ -165,8 +165,7 @@ int main(int argc, char **argv)
 	LoadDatabaseConnection();
 
 	if (argc == 1) {
-		server.db->LoadLogSettings(LogSys.log_settings);
-		LogSys.StartFileLogs();
+		LogSys.LoadLogDatabaseSettings()->StartFileLogs();
 	}
 
 	/**
