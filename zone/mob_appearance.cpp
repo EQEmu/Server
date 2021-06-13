@@ -378,9 +378,7 @@ void Mob::SendArmorAppearance(Client *one_client)
 	 * The other packets work for primary/secondary.
 	 */
 
-	Log(Logs::Detail, Logs::MobAppearance, "Mob::SendArmorAppearance [%s]",
-		this->GetCleanName()
-	);
+	LogMobAppearance("[SendArmorAppearance] [{}]", GetCleanName());
 
 	if (IsPlayerRace(race)) {
 		if (!IsClient()) {
