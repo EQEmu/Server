@@ -4652,3 +4652,15 @@ void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+
+std::string QuestManager::getgendername(uint32 gender_id) {
+	auto gender_name = "Unknown";
+	if (gender_id == MALE) {
+		gender_name = "Male";
+	} else if (gender_id == FEMALE) {
+		gender_name = "Female";
+	} else if (gender_id == NEUTER) {
+		gender_name = "Neuter";
+	}
+	return gender_name;
+}

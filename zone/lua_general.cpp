@@ -2459,6 +2459,10 @@ std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
 
+std::string lua_get_gender_name(uint32 gender_id) {
+	return quest_manager.getgendername(gender_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3024,6 +3028,7 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_add_ldon_loss_by_expedition_id", &lua_cross_zone_add_ldon_loss_by_expedition_id),
 		luabind::def("cross_zone_add_ldon_points_by_expedition_id", &lua_cross_zone_add_ldon_points_by_expedition_id),
 		luabind::def("cross_zone_add_ldon_win_by_expedition_id", &lua_cross_zone_add_ldon_win_by_expedition_id),
+		luabind::def("get_gender_name", &lua_get_gender_name),
 		/**
 		 * Expansions
 		 */
