@@ -2620,65 +2620,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 
 int QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
-	int quantity = 0;
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				quantity += item->IsStackable() ? item->GetCharges() : 1;
-			}
-		}
-	}
-
-	return quantity;
+	return initiator->CountItem(item_id);
 }
 
 void QuestManager::removeitem(uint32 item_id, uint32 quantity) {
 	QuestManagerCurrentQuestVars();
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {		
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity)
-				break;
-
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					initiator->DeleteItemInInventory(slot_id, stack_size, true);
-				} else {
-					int amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						initiator->DeleteItemInInventory(slot_id, amount_left, true);
-					}
-				}
-			}
-		}
-	}
+	initiator->RemoveItem(item_id, quantity);
 }
 
 void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
