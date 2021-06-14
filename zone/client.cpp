@@ -10323,65 +10323,65 @@ void Client::SetPortExemption(bool v)
 
 const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const
 {
-	float max_dist = 90000;
+	float max_dist = 90000.0f;
 	switch (zoneID)
 	{
 	case 2:
 	{
-		float f_delta = (x - (-713.6));
-		f_delta *= f_delta;
-		float f_distance = f_delta;
-		f_delta = (y - (-160.2));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (-12.8));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		float delta = (x - (-713.6f));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-160.2f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-12.8f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
-		f_delta = (x - (-153.8));
-		f_delta *= f_delta;
-		f_distance = f_delta;
-		f_delta = (y - (-30.3));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (8.2));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		delta = (x - (-153.8f));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-30.3f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (8.2f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
 		break;
 	}
 	case 9:
 	{
-		float f_delta = (x - (-682.5));
-		f_delta *= f_delta;
-		float f_distance = f_delta;
-		f_delta = (y - (147.0));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (-9.9));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		float delta = (x - (-682.5f));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (147.0f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-9.9f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
-		f_delta = (x - (-655.4));
-		f_delta *= f_delta;
-		f_distance = f_delta;
-		f_delta = (y - (10.5));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (-51.8));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		delta = (x - (-655.4f));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (10.5f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-51.8f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
 		break;
@@ -10401,56 +10401,56 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 	case 24:
 	{
-		float f_delta = (x - (-183.0));
-		f_delta *= f_delta;
-		float f_distance = f_delta;
-		f_delta = (y - (-773.3));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (54.1));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		float delta = (x - (-183.0f));
+		delta *= delta;
+		float distance = delta;
+		delta = (y - (-773.3f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (54.1f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
-		f_delta = (x - (-8.8));
-		f_delta *= f_delta;
-		f_distance = f_delta;
-		f_delta = (y - (-394.1));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (41.1));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		delta = (x - (-8.8f));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-394.1f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (41.1f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
-		f_delta = (x - (-310.3));
-		f_delta *= f_delta;
-		f_distance = f_delta;
-		f_delta = (y - (-1411.6));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (-42.8));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		delta = (x - (-310.3f));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1411.6f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (-42.8f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
-		f_delta = (x - (-183.1));
-		f_delta *= f_delta;
-		f_distance = f_delta;
-		f_delta = (y - (-1409.8));
-		f_delta *= f_delta;
-		f_distance += f_delta;
-		f_delta = (z - (37.1));
-		f_delta *= f_delta;
-		f_distance += f_delta;
+		delta = (x - (-183.1f));
+		delta *= delta;
+		distance = delta;
+		delta = (y - (-1409.8f));
+		delta *= delta;
+		distance += delta;
+		delta = (z - (37.1f));
+		delta *= delta;
+		distance += delta;
 
-		if (f_distance < max_dist)
+		if (distance < max_dist)
 			return true;
 
 		break;
