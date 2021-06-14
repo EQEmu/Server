@@ -4887,6 +4887,36 @@ void Mob::RemoveNimbusEffect(int effectid)
 	safe_delete(outapp);
 }
 
+void Mob::RemoveAllNimbusEffects()
+{
+	auto current_nimbus_one = nimbus_effect1;
+	auto current_nimbus_two = nimbus_effect2;
+	auto current_nimbus_three = nimbus_effect3;
+	nimbus_effect1 = 0;
+	auto remove_packet_one = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
+	RemoveNimbusEffect_Struct* remove_effect_one = (RemoveNimbusEffect_Struct*)remove_packet_one->pBuffer;
+	remove_effect_one->spawnid = GetID();
+	remove_effect_one->nimbus_effect = current_nimbus_one;
+	entity_list.QueueClients(this, remove_packet_one);
+	safe_delete(remove_packet_one);
+
+	nimbus_effect2 = 0;
+	auto remove_packet_two = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
+	RemoveNimbusEffect_Struct* remove_effect_two = (RemoveNimbusEffect_Struct*)remove_packet_two->pBuffer;
+	remove_effect_two->spawnid = GetID();
+	remove_effect_two->nimbus_effect = current_nimbus_two;
+	entity_list.QueueClients(this, remove_packet_two);
+	safe_delete(remove_packet_two);
+
+	nimbus_effect3 = 0;
+	auto remove_packet_three = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
+	RemoveNimbusEffect_Struct* remove_effect_three = (RemoveNimbusEffect_Struct*)remove_packet_three->pBuffer;
+	remove_effect_three->spawnid = GetID();
+	remove_effect_three->nimbus_effect = current_nimbus_three;
+	entity_list.QueueClients(this, remove_packet_three);
+	safe_delete(remove_packet_three);
+}
+
 bool Mob::IsBoat() const {
 
 	return (

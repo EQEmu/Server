@@ -355,6 +355,7 @@ public:
 	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
+	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
 	void SetBodyType(int new_body, bool overwrite_orig);
