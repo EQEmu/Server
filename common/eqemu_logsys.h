@@ -121,6 +121,7 @@ namespace Logs {
 		Expeditions,
 		DynamicZones,
 		Scheduler,
+		Cheat,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -201,6 +202,7 @@ namespace Logs {
 		"Expeditions",
 		"DynamicZones",
 		"Scheduler",
+		"Cheat"
 	};
 }
 

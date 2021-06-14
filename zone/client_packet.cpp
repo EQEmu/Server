@@ -4508,15 +4508,15 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 
 	/* Hack checks */
 	if (dist == 0) {
-		if (m_DistanceSinceLastPositionCheck > 0.0) {
+		if (m_distance_since_last_position_check > 0.0) {
 			uint32 cur_time = Timer::GetCurrentTime();
-			if ((cur_time - m_TimeSinceLastPositionCheck) > 0) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+			if ((cur_time - m_time_since_last_position_check) > 0) {
+				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				int runs = GetRunspeed();
 				if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 					if (!GetGMSpeed()) {
 						if (IsShadowStepExempted()) {
-							if (m_DistanceSinceLastPositionCheck > 800) {
+							if (m_distance_since_last_position_check > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
 						}
@@ -4528,8 +4528,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 						else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
-									m_TimeSinceLastPositionCheck = cur_time;
-									m_DistanceSinceLastPositionCheck = 0.0f;
+									m_time_since_last_position_check = cur_time;
+									m_distance_since_last_position_check = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 								else {
@@ -4542,31 +4542,31 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				SetShadowStepExemption(false);
 				SetKnockBackExemption(false);
 				SetPortExemption(false);
-				m_TimeSinceLastPositionCheck = cur_time;
-				m_DistanceSinceLastPositionCheck = 0.0f;
-				m_CheatDetectMoved = false;
+				m_time_since_last_position_check = cur_time;
+				m_distance_since_last_position_check = 0.0f;
+				m_cheat_detect_moved = false;
 			}
 		}
 		else {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
-			m_CheatDetectMoved = false;
+			m_time_since_last_position_check = Timer::GetCurrentTime();
+			m_cheat_detect_moved = false;
 		}
 	}
 	else {
-		m_DistanceSinceLastPositionCheck += dist;
-		m_CheatDetectMoved = true;
-		if (m_TimeSinceLastPositionCheck == 0) {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
+		m_distance_since_last_position_check += dist;
+		m_cheat_detect_moved = true;
+		if (m_time_since_last_position_check == 0) {
+			m_time_since_last_position_check = Timer::GetCurrentTime();
 		}
 		else {
 			uint32 cur_time = Timer::GetCurrentTime();
-			if ((cur_time - m_TimeSinceLastPositionCheck) > 2500) {
-				float speed = (m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - m_TimeSinceLastPositionCheck);
+			if ((cur_time - m_time_since_last_position_check) > 2500) {
+				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				int runs = GetRunspeed();
 				if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 					if (!GetGMSpeed()) {
 						if (IsShadowStepExempted()) {
-							if (m_DistanceSinceLastPositionCheck > 800) {
+							if (m_distance_since_last_position_check > 800) {
 								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 							}
 						}
@@ -4578,8 +4578,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 						else if (!IsPortExempted()) {
 							if (!IsMQExemptedArea(zone->GetZoneID(), ppu->x_pos, ppu->y_pos, ppu->z_pos)) {
 								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
-									m_TimeSinceLastPositionCheck = cur_time;
-									m_DistanceSinceLastPositionCheck = 0.0f;
+									m_time_since_last_position_check = cur_time;
+									m_distance_since_last_position_check = 0.0f;
 									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
 								}
 								else {
@@ -4592,8 +4592,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 				SetShadowStepExemption(false);
 				SetKnockBackExemption(false);
 				SetPortExemption(false);
-				m_TimeSinceLastPositionCheck = cur_time;
-				m_DistanceSinceLastPositionCheck = 0.0f;
+				m_time_since_last_position_check = cur_time;
+				m_distance_since_last_position_check = 0.0f;
 			}
 		}
 

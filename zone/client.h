@@ -1003,28 +1003,28 @@ public:
 	void EnteringMessages(Client* client);
 	void SendRules(Client* client);
 
-	uint32 m_TimeSinceLastPositionCheck;
-	float m_DistanceSinceLastPositionCheck;
-	bool m_CheatDetectMoved;
+	uint32 m_time_since_last_position_check;
+	float m_distance_since_last_position_check;
+	bool m_cheat_detect_moved;
 	void SetShadowStepExemption(bool v);
 	void SetKnockBackExemption(bool v);
 	void SetPortExemption(bool v);
-	void SetSenseExemption(bool v) { m_SenseExemption = v; }
-	void SetAssistExemption(bool v) { m_AssistExemption = v; }
-	const bool IsShadowStepExempted() const { return m_ShadowStepExemption; }
-	const bool IsKnockBackExempted() const { return m_KnockBackExemption; }
-	const bool IsPortExempted() const { return m_PortExemption; }
-	const bool IsSenseExempted() const { return m_SenseExemption; }
-	const bool IsAssistExempted() const { return m_AssistExemption; }
+	void SetSenseExemption(bool v) { m_sense_exemption = v; }
+	void SetAssistExemption(bool v) { m_assist_exemption = v; }
+	const bool IsShadowStepExempted() const { return m_shadow_step_exemption; }
+	const bool IsKnockBackExempted() const { return m_knock_back_exemption; }
+	const bool IsPortExempted() const { return m_port_exemption; }
+	const bool IsSenseExempted() const { return m_sense_exemption; }
+	const bool IsAssistExempted() const { return m_assist_exemption; }
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
 	void CheatDetected(CheatTypes CheatType, float x, float y, float z);
 	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
 	bool CanUseReport;
-	bool m_ShadowStepExemption;
-	bool m_KnockBackExemption;
-	bool m_PortExemption;
-	bool m_SenseExemption;
-	bool m_AssistExemption;
+	bool m_shadow_step_exemption;
+	bool m_knock_back_exemption;
+	bool m_port_exemption;
+	bool m_sense_exemption;
+	bool m_assist_exemption;
 
 	//This is used to later set the buff duration of the spell, in slot to duration.
 	//Doesn't appear to work directly after the client recieves an action packet.

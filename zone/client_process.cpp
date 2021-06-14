@@ -203,8 +203,8 @@ bool Client::Process() {
 		if (IsStunned() && stunned_timer.Check())
 			Mob::UnStun();
 
-		if (!m_CheatDetectMoved) {
-			m_TimeSinceLastPositionCheck = Timer::GetCurrentTime();
+		if (!m_cheat_detect_moved) {
+			m_time_since_last_position_check = Timer::GetCurrentTime();
 		}
 
 		if (bardsong_timer.Check() && bardsong != 0) {

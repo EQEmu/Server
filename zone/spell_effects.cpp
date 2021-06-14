@@ -4151,19 +4151,24 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				{
 					Client* my_c = CastToClient();
 					uint32 cur_time = Timer::GetCurrentTime();
-					if ((cur_time - my_c->m_TimeSinceLastPositionCheck) > 1000)
+					if ((cur_time - my_c->m_time_since_last_position_check) > 1000)
 					{
-						float speed = (my_c->m_DistanceSinceLastPositionCheck * 100) / (float)(cur_time - my_c->m_TimeSinceLastPositionCheck);
+						float speed = (my_c->m_distance_since_last_position_check * 100) / (float)(cur_time - my_c->m_time_since_last_position_check);
 						float runs = my_c->GetRunspeed();
 						if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 						{
 							if (!my_c->GetGMSpeed() && (runs >= my_c->GetBaseRunspeed() || (speed > (my_c->GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
 							{
-								printf("%s %i moving too fast! moved: %.2f in %ims, speed %.2f\n", __FILE__, __LINE__,
-									my_c->m_DistanceSinceLastPositionCheck, (cur_time - my_c->m_TimeSinceLastPositionCheck), speed);
+								LogCheat(
+									"[SE_MovementSpeed] Client [{}] moving too fast! Moved [{}] in [{}](s) speed [{}]",
+									GetCleanName(),
+									my_c->m_distance_since_last_position_check,
+									(cur_time - my_c->m_time_since_last_position_check),
+									speed
+								);
 								if (my_c->IsShadowStepExempted())
 								{
-									if (my_c->m_DistanceSinceLastPositionCheck > 800)
+									if (my_c->m_distance_since_last_position_check > 800)
 									{
 										my_c->CheatDetected(MQWarpShadowStep, my_c->GetX(), my_c->GetY(), my_c->GetZ());
 									}
@@ -4183,8 +4188,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 									{
 										if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 										{
-											my_c->m_TimeSinceLastPositionCheck = cur_time;
-											my_c->m_DistanceSinceLastPositionCheck = 0.0f;
+											my_c->m_time_since_last_position_check = cur_time;
+											my_c->m_distance_since_last_position_check = 0.0f;
 											my_c->CheatDetected(MQWarp, my_c->GetX(), my_c->GetY(), my_c->GetZ());
 											//my_c->Death(my_c, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
 										}
@@ -4197,8 +4202,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 							}
 						}
 					}
-					my_c->m_TimeSinceLastPositionCheck = cur_time;
-					my_c->m_DistanceSinceLastPositionCheck = 0.0f;
+					my_c->m_time_since_last_position_check = cur_time;
+					my_c->m_distance_since_last_position_check = 0.0f;
 				}
 			}	
 		}
