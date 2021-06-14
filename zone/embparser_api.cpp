@@ -6774,6 +6774,17 @@ XS(XS__getcleannpcnamebyid) {
 	XSRETURN(1);
 }
 
+XS(XS__rename);
+XS(XS__rename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::rename(string name)");
+
+	std::string name = (std::string) SvPV_nolen(ST(0));
+	quest_manager.rename(name);
+	XSRETURN_EMPTY;
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -7079,6 +7090,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "remove_expedition_lockout_by_char_id"), XS__remove_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
+	newXS(strcpy(buf, "rename"), XS__rename, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
 	newXS(strcpy(buf, "respawn"), XS__respawn, file);
