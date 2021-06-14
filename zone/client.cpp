@@ -180,6 +180,7 @@ Client::Client(EQStreamInterface* ieqs)
 		ClientFilters[client_filter] = FilterShow;
 
 	m_time_since_last_position_check = 0;
+	m_time_since_last_memorization = 0;
 	m_distance_since_last_position_check = 0.0f;
 	m_shadow_step_exemption = 0;
 	m_knock_back_exemption = 0;
@@ -10475,11 +10476,9 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 {
-	//ToDo: Break warp down for special zones. Some zones have special teleportation pads or bad .map files which can trigger the detector without a legit zone request.
-
 	switch (CheatType)
 	{
-	case MQWarp: //Some zones may still have issues. Database updates will eliminate most if not all problems.
+	case MQWarp:
 		if (RuleB(Zone, EnableMQWarpDetector)
 			&& ((Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
@@ -10561,20 +10560,19 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			char hString[250];
 			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			if (zone)
-			{
-				SetZone(GetZoneID(), zone->GetInstanceID()); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
-			}
-			else
-			{
-				SetZone(GetZoneID(), 0); //Prevent the player from zoning, place him back in the zone where he tried to originally /gate.
-
-			}
 		}
 		break;
-	case MQGhost: //Not currently implemented, but the framework is in place - just needs detection scenarios identified
+	case MQGhost:
 		if (RuleB(Zone, EnableMQGhostDetector) && ((Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
 			database.SetMQDetectionFlag(account_name, name, "/MQGhost", zone->GetShortName());
+		}
+		break;
+	case MQFastMem:
+		if (RuleB(Zone, EnableMQFastMemDetector) && ((Admin() < RuleI(Zone, MQFastMemExemptStatus) || (RuleI(Zone, MQFastMemExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQFastMem used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
 		}
 		break;
 	default:

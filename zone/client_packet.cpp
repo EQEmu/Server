@@ -9716,6 +9716,10 @@ return;
 
 void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
+	// no reason you could actually get a 0 or 1
+	if ((m_time_since_last_memorization - Timer::SetCurrentTime()) <= 1) {
+		CheatDetected(MQFastMem, GetX(), GetY(), GetZ());
+	}
 	OPMemorizeSpell(app);
 	return;
 }
@@ -13644,6 +13648,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			BindWound(this, false, true);
 			tmSitting = Timer::GetCurrentTime();
 			BuffFadeBySitModifier();
+			m_time_since_last_memorization = Timer::GetCurrentTime();
 		}
 		else if (sa->parameter == ANIM_CROUCH) {
 			if (!UseBardSpellLogic())

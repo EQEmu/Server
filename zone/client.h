@@ -129,7 +129,8 @@ typedef enum {
 	MQZone,
 	MQZoneUnknownDest,
 	MQGate,
-	MQGhost
+	MQGhost,
+	MQFastMem
 } CheatTypes;
 
 enum {
@@ -1005,6 +1006,7 @@ public:
 	void SendRules(Client* client);
 
 	uint32 m_time_since_last_position_check;
+	uint32 m_time_since_last_memorization;
 	float m_distance_since_last_position_check;
 	bool m_cheat_detect_moved;
 	void SetShadowStepExemption(bool v);
