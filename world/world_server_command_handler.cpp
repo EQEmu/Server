@@ -31,10 +31,6 @@
 #include "../common/repositories/instance_list_repository.h"
 #include "../common/repositories/zone_repository.h"
 
-#define CPPHTTPLIB_OPENSSL_SUPPORT
-
-#include "../common/http/httplib.h"
-
 namespace WorldserverCommandHandler {
 
 	/**
@@ -295,30 +291,6 @@ namespace WorldserverCommandHandler {
 			return;
 		}
 
-		httplib::Client cli("https://raw.githubusercontent.com");
-		cli.set_connection_timeout(0, 15000000); // 15 sec
-		cli.set_read_timeout(15, 0); // 15 seconds
-		cli.set_write_timeout(15, 0); // 15 seconds
-
-		std::string url = "/EQEmu/Server/master/utils/sql/git/optional/2020_07_20_tool_gearup_armor_sets.sql";
-		if (auto    res = cli.Get(url.c_str())) {
-			if (res->status == 200) {
-				for (auto &s: SplitString(res->body, ';')) {
-					if (!trim(s).empty()) {
-						auto results = database.QueryDatabase(s);
-						if (!results.ErrorMessage().empty()) {
-							LogInfo("Error sourcing SQL [{}]", results.ErrorMessage());
-							return;
-						}
-					}
-				}
-			}
-		}
-		else {
-			auto err = res.error();
-			LogError("Error retrieving URL [{}]", url);
-			std::cout << "ERROR " << err << std::endl;
-		}
 	}
 
 	/**
