@@ -2098,6 +2098,46 @@ void Lua_Client::SetHideMe(bool hide_me_state) {
 	self->SetHideMe(hide_me_state);
 }
 
+void Lua_Client::Popup(const char* title, const char* text) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id, negative_id);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id, negative_id, button_type);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id, negative_id, button_type, duration);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id, negative_id, button_type, duration, button_name_one, button_name_two);
+}
+
+void Lua_Client::Popup(const char* title, const char* text, uint32 popup_id, uint32 negative_id, uint32 button_type, uint32 duration, const char* button_name_one, const char* button_name_two, uint32 sound_controls) {
+	Lua_Safe_Call_Void();
+	self->SendFullPopup(title, text, popup_id, negative_id, button_type, duration, button_name_one, button_name_two, sound_controls);
+}
+
+void Lua_Client::ResetAllDisciplineTimers() {
+	Lua_Safe_Call_Void();
+	self->ResetAllDisciplineTimers();
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2453,7 +2493,15 @@ luabind::scope lua_register_client() {
 		.def("SetEXPModifier", (void(Lua_Client::*)(uint32,double))&Lua_Client::SetEXPModifier)
 		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
 		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin)
-		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe);
+		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*,uint32))&Lua_Client::Popup)
+		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers);
 }
 
 luabind::scope lua_register_inventory_where() {

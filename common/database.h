@@ -78,6 +78,7 @@ class PTimerList;
 
 #define SQL(...) #__VA_ARGS__
 
+class LogSettings;
 class Database : public DBcore {
 public:
 	Database();
@@ -268,8 +269,6 @@ public:
 	int		CountInvSnapshots();
 	void	ClearInvSnapshots(bool from_now = false);
 
-	/* EQEmuLogSys */
-	void	LoadLogSettings(EQEmuLogSys::LogSettings* log_settings);
 
 private:
 
