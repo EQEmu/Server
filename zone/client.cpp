@@ -10196,7 +10196,7 @@ void Client::SetShadowStepExemption(bool v)
 		m_time_since_last_position_check = cur_time;
 		m_distance_since_last_position_check = 0.0f;
 	}
-	SetShadowStepExemption(v);
+	m_shadow_step_exemption = v;
 }
 
 void Client::SetKnockBackExemption(bool v)
@@ -10257,7 +10257,7 @@ void Client::SetKnockBackExemption(bool v)
 		m_time_since_last_position_check = cur_time;
 		m_distance_since_last_position_check = 0.0f;
 	}
-	SetKnockBackExemption(v);
+	m_knock_back_exemption = v;
 }
 
 void Client::SetPortExemption(bool v)
@@ -10318,7 +10318,7 @@ void Client::SetPortExemption(bool v)
 		m_time_since_last_position_check = cur_time;
 		m_distance_since_last_position_check = 0.0f;
 	}
-	SetPortExemption(v);
+	m_port_exemption = v;
 }
 
 const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const
