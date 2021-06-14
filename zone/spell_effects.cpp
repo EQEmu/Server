@@ -4154,7 +4154,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					{
 						float speed = (my_c->m_distance_since_last_position_check * 100) / (float)(cur_time - my_c->m_time_since_last_position_check);
 						float runs = my_c->GetRunspeed();
-						if (speed > (runs * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+						if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor))
 						{
 							if (!my_c->GetGMSpeed() && (runs >= my_c->GetBaseRunspeed() || (speed > (my_c->GetBaseRunspeed() * RuleR(Zone, MQWarpDetectionDistanceFactor)))))
 							{
