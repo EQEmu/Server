@@ -1321,7 +1321,7 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 			}
 		}
 
-		if (buf->is_success && !RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
+		if (buf->is_success && new_leader_client && !RuleB(Expedition, AlwaysNotifyNewLeaderOnChange))
 		{
 			new_leader_client->MessageString(Chat::Yellow, DZMAKELEADER_YOU);
 		}
