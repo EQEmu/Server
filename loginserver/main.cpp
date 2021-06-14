@@ -142,6 +142,7 @@ void start_web_server()
 		if (!req.path.empty()) {
 			LogInfo("[API] Request [{}] via [{}:{}]", req.path, req.remote_addr, req.remote_port);
 		}
+		LogInfo("[API] Request [{}] via [{}:{}]", req.path, req.remote_addr, req.remote_port);
 	});
 
 	LoginserverWebserver::RegisterRoutes(api);
