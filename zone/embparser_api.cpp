@@ -805,9 +805,9 @@ XS(XS__changedeity) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::changedeity(int deity_id)");
 
-	int diety_id = (int) SvIV(ST(0));
+	int deity_id = (int) SvIV(ST(0));
 
-	quest_manager.changedeity(diety_id);
+	quest_manager.changedeity(deity_id);
 
 	XSRETURN_EMPTY;
 }
