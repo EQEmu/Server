@@ -5608,7 +5608,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "bonushate") {return spells[spell_id].bonushate; }
 	else if (id == "EndurCost") {return spells[spell_id].EndurCost; }
 	else if (id == "EndurTimerIndex") {return spells[spell_id].EndurTimerIndex; }
-	else if (id == "IsDisciplineBuf") {return spells[spell_id].IsDisciplineBuff; }
+	else if (id == "IsDisciplineBuff") {return spells[spell_id].IsDisciplineBuff; }
 	else if (id == "HateAdded") {return spells[spell_id].HateAdded; }
 	else if (id == "EndurUpkeep") {return spells[spell_id].EndurUpkeep; }
 	else if (id == "numhitstype") {return spells[spell_id].numhitstype; }
