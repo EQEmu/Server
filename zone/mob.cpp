@@ -5586,7 +5586,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "Activated") {return spells[spell_id].Activated;}
 	else if (id == "resisttype") {return spells[spell_id].resisttype;}
 	else if (id == "targettype") {return spells[spell_id].targettype;}
-	else if (id == "basedeiff") {return spells[spell_id].basediff;}
+	else if (id == "basediff") {return spells[spell_id].basediff;}
 	else if (id == "skill") {return spells[spell_id].skill;}
 	else if (id == "zonetype") {return spells[spell_id].zonetype;}
 	else if (id == "EnvironmentType") {return spells[spell_id].EnvironmentType;}
