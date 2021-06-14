@@ -226,7 +226,7 @@ int main(int argc, char **argv)
 	int             web_api_port    = server.config.GetVariableInt("web_api", "port", 6000);
 	bool            web_api_enabled = server.config.GetVariableBool("web_api", "enabled", true);
 	if (web_api_enabled) {
-		api.bind("0.0.0.0", web_api_port);
+		api.listen("0.0.0.0", web_api_port);
 		LogInfo("Webserver API now listening on port [{0}]", web_api_port);
 		LoginserverWebserver::RegisterRoutes(api);
 	}
@@ -252,7 +252,7 @@ int main(int argc, char **argv)
 		EQ::EventLoop::Get().Process();
 
 		if (web_api_enabled) {
-			api.poll();
+			api.listen_after_bind();
 		}
 
 		Sleep(5);
