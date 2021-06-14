@@ -2516,7 +2516,7 @@ void command_grid(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "You need to target an NPC!");
 			return;
 		}
-		
+
 		auto grid_id = target->CastToNPC()->GetGrid();
 		std::string query = fmt::format(
 			"SELECT `x`, `y`, `z`, `heading`, `number` "
@@ -3104,7 +3104,6 @@ void command_race(Client *c, const Seperator *sep)
 void command_gearup(Client *c, const Seperator *sep)
 {
 	std::string tool_table_name = "tool_gearup_armor_sets";
-
 	if (!database.DoesTableExist(tool_table_name)) {
 		c->Message(
 			Chat::Yellow,
@@ -3120,9 +3119,10 @@ void command_gearup(Client *c, const Seperator *sep)
 		cli.set_read_timeout(15, 0); // 15 seconds
 		cli.set_write_timeout(15, 0); // 15 seconds
 
-		int sourced_queries = 0;
-		std::string url = "/EQEmu/Server/master/utils/sql/git/optional/2020_07_20_tool_gearup_armor_sets.sql";
-		if (auto    res = cli.Get(url.c_str())) {
+		int         sourced_queries = 0;
+		std::string url             = "/EQEmu/Server/master/utils/sql/git/optional/2020_07_20_tool_gearup_armor_sets.sql";
+
+		if (auto res = cli.Get(url.c_str())) {
 			if (res->status == 200) {
 				for (auto &s: SplitString(res->body, ';')) {
 					if (!trim(s).empty()) {
@@ -3187,11 +3187,11 @@ void command_gearup(Client *c, const Seperator *sep)
 		)
 	);
 
-	int items_equipped     = 0;
-	int items_already_have = 0;
-
+	int           items_equipped     = 0;
+	int           items_already_have = 0;
 	std::set<int> equipped;
-	for (auto     row = results.begin(); row != results.end(); ++row) {
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		int item_id = atoi(row[0]);
 		int slot_id = atoi(row[1]);
 
@@ -3208,10 +3208,9 @@ void command_gearup(Client *c, const Seperator *sep)
 		}
 
 		if (equipped.find(slot_id) == equipped.end()) {
-			const EQ::ItemData* item = database.GetItem(item_id);
-
-			bool can_wear_item = !c->CheckLoreConflict(item) &&
-								 !(c->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX);
+			const EQ::ItemData *item         = database.GetItem(item_id);
+			bool               has_item      = (c->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX);
+			bool               can_wear_item = !c->CheckLoreConflict(item) && !has_item;
 			if (!can_wear_item) {
 				items_already_have++;
 			}
