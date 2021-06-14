@@ -10129,3 +10129,53 @@ void Client::SetAFK(uint8 afk_flag) {
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 }
+
+void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
+	uint32 account_id = AccountID();
+	std::string account_name = AccountName();
+	uint32 group_id = (GetGroup() ? GetGroup()->GetID() : 0);
+	uint32 raid_id = (GetRaid() ? GetRaid()->GetID() : 0);
+	int32 guild_id = GuildID();
+	uint32 zone_id = ZoneID(zone_short_name);
+	std::string current_instance_type = str_tolower(instance_type);
+	std::string instance_type_name = "public";
+
+	if (current_instance_type.find("public") != std::string::npos) {
+		instance_type_name = "public";
+	} else if (current_instance_type.find("solo") != std::string::npos) {
+		instance_type_name = "solo";
+	} else if (current_instance_type.find("group") != std::string::npos) {
+		instance_type_name = "group";
+	} else if (current_instance_type.find("raid") != std::string::npos) {
+		instance_type_name = "raid";
+	} else if (current_instance_type.find("guild") != std::string::npos) {
+		instance_type_name = "guild";
+	}
+
+	std::string full_bucket_name = fmt::format(
+		"{}_{}_{}",
+		instance_type_name,
+		instance_identifier,
+		zone_short_name
+	);
+	std::string current_bucket_value = DataBucket::GetData(full_bucket_name);
+	uint16 instance_id = 0;
+
+	if (current_bucket_value.length() > 0) {
+		instance_id = atoi(current_bucket_value.c_str());
+	} else {
+		if(!database.GetUnusedInstanceID(instance_id)) {
+			Message(Chat::White, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if(!database.CreateInstance(instance_id, zone_id, instance_version, duration)) {
+			Message(Chat::White, "Server was unable to create a new instance.");
+			return;
+		}
+		DataBucket::SetData(full_bucket_name, itoa(instance_id), itoa(duration));		
+	}
+
+	AssignToInstance(instance_id);
+	MovePC(zone_id, instance_id, x, y, z, heading);
+}

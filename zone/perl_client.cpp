@@ -5345,6 +5345,28 @@ XS(XS_Client_ResetAllDisciplineTimers) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SendToInstance);
+XS(XS_Client_SendToInstance) {
+	dXSARGS;
+	if (items != 10)
+		Perl_croak(aTHX_ "Usage: Client::SendToInstance(THIS, std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration)");
+	{
+		Client* THIS;
+		std::string instance_type = (std::string) SvPV_nolen(ST(1));
+		std::string zone_short_name = (std::string) SvPV_nolen(ST(2));
+		uint32 instance_version = (uint32) SvUV(ST(3));
+		float x = (float) SvNV(ST(4));
+		float y = (float) SvNV(ST(5));
+		float z = (float) SvNV(ST(6));
+		float heading = (float) SvNV(ST(7));
+		std::string instance_identifier = (std::string) SvPV_nolen(ST(8));
+		uint32 duration = (uint32) SvUV(ST(9));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5577,6 +5599,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SendSound"), XS_Client_SendSound, file, "$");
 	newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
 	newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
+	newXSproto(strcpy(buf, "SendToInstance"), XS_Client_SendToInstance, file, "$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendToGuildHall"), XS_Client_SendToGuildHall, file, "$");
 	newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 	newXSproto(strcpy(buf, "SendZoneFlagInfo"), XS_Client_SendZoneFlagInfo, file, "$$");
