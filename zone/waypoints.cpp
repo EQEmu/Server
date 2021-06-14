@@ -1036,6 +1036,24 @@ void ZoneDatabase::ModifyGrid(Client *client, bool remove, uint32 id, uint8 type
 	results = QueryDatabase(query);
 }
 
+bool ZoneDatabase::GridExistsInZone(uint32 zone_id, uint32 grid_id) {
+	bool grid_exists = false;
+	std::string query = fmt::format(
+		"SELECT * FROM `grid` WHERE `id` = {} AND `zoneid` = {}",
+		grid_id,
+		zone_id
+	);
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return grid_exists;
+	}
+
+	if (results.RowCount() == 1) {
+		grid_exists = true;
+	}
+	return grid_exists;
+}
+
 /**************************************
 * AddWP - Adds a new waypoint to a specific grid for a specific zone.
 */
