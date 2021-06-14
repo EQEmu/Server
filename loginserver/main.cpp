@@ -139,7 +139,9 @@ void start_web_server()
 	httplib::Server api;
 
 	api.set_logger([](const auto& req, const auto& res) {
-		LogInfo("[API] Request [{}] via [{}:{}]", req.path, req.remote_addr, req.remote_port);
+		if (!req.path.empty()) {
+			LogInfo("[API] Request [{}] via [{}:{}]", req.path, req.remote_addr, req.remote_port);
+		}
 	});
 
 	LoginserverWebserver::RegisterRoutes(api);
