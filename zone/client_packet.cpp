@@ -4557,9 +4557,6 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 	else {
-		if (IsStunned()) {
-			CheatDetected(MQNoStun, ppu->x_pos, ppu->y_pos, ppu->z_pos);
-		}
 		m_distance_since_last_position_check += dist;
 		m_cheat_detect_moved = true;
 		if (m_time_since_last_position_check == 0) {
