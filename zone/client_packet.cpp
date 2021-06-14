@@ -14059,6 +14059,7 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
 {
+	parse->EventPlayer(EVENT_TEST_BUFF, this, "", 0);
 	return;
 }
 
