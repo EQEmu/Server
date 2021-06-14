@@ -5597,7 +5597,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	//else if (id == "spellanim") {stat = spells[spell_id].spellanim; } - Not implemented
 	else if (id == "uninterruptable") {return spells[spell_id].uninterruptable; }
 	else if (id == "ResistDiff") {return spells[spell_id].ResistDiff; }
-	else if (id == "dot_stacking_exemp") {return spells[spell_id].dot_stacking_exempt; }
+	else if (id == "dot_stacking_exempt") {return spells[spell_id].dot_stacking_exempt; }
 	else if (id == "RecourseLink") {return spells[spell_id].RecourseLink; }
 	else if (id == "no_partial_resist") {return spells[spell_id].no_partial_resist; }
 	else if (id == "short_buff_box") {return spells[spell_id].short_buff_box; }
