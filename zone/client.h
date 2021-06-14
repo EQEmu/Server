@@ -212,6 +212,15 @@ enum eInnateSkill {
 	InnateDisabled = 255
 };
 
+enum MerchantBucketComparison {
+	BucketEqualTo = 0,
+	BucketNotEqualTo,
+	BucketGreaterThanOrEqualTo,
+	BucketLesserThanOrEqualTo,
+	BucketGreaterThan,
+	BucketLesserThan
+};
+
 const uint32 POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
 struct ClientReward

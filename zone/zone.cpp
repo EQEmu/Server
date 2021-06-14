@@ -601,7 +601,10 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 			  level_required,
 			  alt_currency_cost,
 			  classes_required,
-			  probability
+			  probability,
+			  bucket_name,
+			  bucket_value,
+			  bucket_comparison
 			FROM
 			  merchantlist
 			WHERE
@@ -621,14 +624,17 @@ void Zone::LoadNewMerchantData(uint32 merchantid) {
 
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		MerchantList ml;
-		ml.id                = merchantid;
-		ml.item              = atoul(row[0]);
-		ml.slot              = atoul(row[1]);
-		ml.faction_required  = atoul(row[2]);
-		ml.level_required    = atoul(row[3]);
+		ml.id = merchantid;
+		ml.item = atoul(row[0]);
+		ml.slot = atoul(row[1]);
+		ml.faction_required = atoul(row[2]);
+		ml.level_required = atoul(row[3]);
 		ml.alt_currency_cost = atoul(row[4]);
-		ml.classes_required  = atoul(row[5]);
-		ml.probability       = atoul(row[6]);
+		ml.classes_required = atoul(row[5]);
+		ml.probability = atoul(row[6]);
+		ml.bucket_name = row[7];
+		ml.bucket_value = row[8];
+		ml.bucket_comparison = atoul(row[9]);
 		merlist.push_back(ml);
 	}
 
@@ -647,7 +653,10 @@ void Zone::GetMerchantDataForZoneLoad() {
 			  merchantlist.level_required,
 			  merchantlist.alt_currency_cost,
 			  merchantlist.classes_required,
-			  merchantlist.probability
+			  merchantlist.probability,
+			  merchantlist.bucket_name,
+			  merchantlist.bucket_value,
+			  merchantlist.bucket_comparison
 			FROM
 			  merchantlist,
 			  npc_types,
@@ -677,7 +686,7 @@ void Zone::GetMerchantDataForZoneLoad() {
 		LogDebug("No Merchant Data found for [{}]", GetShortName());
 		return;
 	}
-	for (auto row = results.begin(); row != results.end(); ++row) {
+	for (auto row : results) {
 		MerchantList merchant_list_entry{};
 		merchant_list_entry.id = atoul(row[0]);
 		if (npc_id != merchant_list_entry.id) {
@@ -691,31 +700,30 @@ void Zone::GetMerchantDataForZoneLoad() {
 			npc_id = merchant_list_entry.id;
 		}
 
-		auto iter  = merchant_list->second.begin();
 		bool found = false;
-		while (iter != merchant_list->second.end()) {
-			if ((*iter).item == merchant_list_entry.id) {
+		for (auto current_item : merchant_list->second) {
+			if (current_item.item == merchant_list_entry.id) {
 				found = true;
 				break;
 			}
-			++iter;
 		}
 
 		if (found) {
 			continue;
 		}
 
-		merchant_list_entry.slot              = atoul(row[1]);
-		merchant_list_entry.item              = atoul(row[2]);
-		merchant_list_entry.faction_required  = atoul(row[3]);
-		merchant_list_entry.level_required    = atoul(row[4]);
+		merchant_list_entry.slot = atoul(row[1]);
+		merchant_list_entry.item = atoul(row[2]);
+		merchant_list_entry.faction_required = atoul(row[3]);
+		merchant_list_entry.level_required = atoul(row[4]);
 		merchant_list_entry.alt_currency_cost = atoul(row[5]);
-		merchant_list_entry.classes_required  = atoul(row[6]);
-		merchant_list_entry.probability       = atoul(row[7]);
-
+		merchant_list_entry.classes_required = atoul(row[6]);
+		merchant_list_entry.probability = atoul(row[7]);
+		merchant_list_entry.bucket_name = row[8];
+		merchant_list_entry.bucket_value = row[9];
+		merchant_list_entry.bucket_comparison = atoul(row[10]);
 		merchant_list->second.push_back(merchant_list_entry);
 	}
-
 }
 
 void Zone::LoadMercTemplates(){
