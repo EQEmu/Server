@@ -10575,6 +10575,14 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
 		}
 		break;
+	case MQNoStun:
+		if (RuleB(Zone, EnableMQNoStunDetector) && ((Admin() < RuleI(Zone, MQNoStunExemptStatus) || (RuleI(Zone, MQNoStunExemptStatus)) == -1)))
+		{
+			char hString[250];
+			sprintf(hString, "/MQNoStun used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+		}
+		break;
 	default:
 		char hString[250];
 		sprintf(hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());

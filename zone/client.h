@@ -130,7 +130,8 @@ typedef enum {
 	MQZoneUnknownDest,
 	MQGate,
 	MQGhost,
-	MQFastMem
+	MQFastMem,
+	MQNoStun
 } CheatTypes;
 
 enum {
