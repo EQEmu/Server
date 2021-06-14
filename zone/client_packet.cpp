@@ -4498,6 +4498,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
+	if ((Timer::GetCurrentTime() - m_time_since_last_position_check) > 7500) {
+		CheatDetected(MQGhost, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+	}
+
 	float dist = 0;
 	float tmp;
 	tmp = m_Position.x - ppu->x_pos;
