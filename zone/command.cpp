@@ -3187,6 +3187,9 @@ void command_gearup(Client *c, const Seperator *sep)
 		)
 	);
 
+	int items_equipped     = 0;
+	int items_already_have = 0;
+
 	std::set<int> equipped;
 	for (auto     row = results.begin(); row != results.end(); ++row) {
 		int item_id = atoi(row[0]);
@@ -3205,16 +3208,34 @@ void command_gearup(Client *c, const Seperator *sep)
 		}
 
 		if (equipped.find(slot_id) == equipped.end()) {
-			if (c->CastToMob()->CanClassEquipItem(item_id)) {
+			const EQ::ItemData* item = database.GetItem(item_id);
+
+			bool can_wear_item = !c->CheckLoreConflict(item) &&
+								 !(c->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX);
+			if (!can_wear_item) {
+				items_already_have++;
+			}
+
+			if (c->CastToMob()->CanClassEquipItem(item_id) && can_wear_item) {
 				equipped.insert(slot_id);
 				c->SummonItem(
 					item_id,
 					0, 0, 0, 0, 0, 0, 0, 0,
 					slot_id
 				);
+				items_equipped++;
 			}
 		}
 	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Equipped items [{}] already had [{}] items equipped",
+			items_equipped,
+			items_already_have
+		).c_str()
+	);
 
 	if (expansion_arg.empty()) {
 		results = database.QueryDatabase(
