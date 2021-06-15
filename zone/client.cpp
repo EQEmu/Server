@@ -10489,6 +10489,13 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			sprintf(hString, "/MQWarp(LWD) with location from: %.2f, %.2f, %.2f", from.x, from.y, from.z); 
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
 			LogCheat(hString);
+			std::string export_string = fmt::format(
+				"{} {} {}",
+				from.x,
+				from.y,
+				from.z
+			);
+			parse->EventPlayer(EVENT_WARP, this, export_string, 0);
 		}
 		break;
 	case MQWarpAbsolute:
@@ -10502,6 +10509,13 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			sprintf(hString, "/MQWarp(FLT) with location from: %.2f, %.2f, %.2f to: %.2f, %.2f, %.2f", from.x, from.y, from.z, to.x, to.y, to.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
 			LogCheat(hString);
+			std::string export_string = fmt::format(
+				"{} {} {}",
+				from.x,
+				from.y,
+				from.z
+			);
+			parse->EventPlayer(EVENT_WARP, this, export_string, 0);
 		}
 		break;
 	case MQWarpShadowStep:
