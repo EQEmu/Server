@@ -1020,8 +1020,8 @@ public:
 	const bool IsSenseExempted() const { return m_sense_exemption; }
 	const bool IsAssistExempted() const { return m_assist_exemption; }
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
-	void CheatDetected(CheatTypes CheatType, float x, float y, float z);
 	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
+	void CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to = glm::vec3());
 	bool CanUseReport;
 	bool m_shadow_step_exemption;
 	bool m_knock_back_exemption;

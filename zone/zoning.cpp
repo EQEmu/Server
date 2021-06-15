@@ -102,9 +102,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 				Message(Chat::Red, "Invalid unsolicited zone request.");
 				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
 				if (GetBindZoneID() == target_zone_id)
-					CheatDetected(MQGate, zc->x, zc->y, zc->z);
+					CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
 				else
-					CheatDetected(MQZone, zc->x, zc->y, zc->z);
+					CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
 				SendZoneCancel(zc);
 				return;
 			}
@@ -138,9 +138,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 			if(!zone_point || zone_point->target_zone_id != target_zone_id) {
 				LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]", GetName(), target_zone_id);
 				if (GetBindZoneID() == target_zone_id)
-					CheatDetected(MQGate, zc->x, zc->y, zc->z);
+					CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
 				else
-					CheatDetected(MQZone, zc->x, zc->y, zc->z);
+					CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
 				SendZoneCancel(zc);
 				return;
 			}
@@ -289,9 +289,9 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 		//could not find a valid reason for them to be zoning, stop it.
 		if (GetBindZoneID() == target_zone_id)
-			CheatDetected(MQGate, zc->x, zc->y, zc->z);
+			CheatDetected(MQGate, glm::vec3(zc->x, zc->y, zc->z));
 		else
-			CheatDetected(MQZone, zc->x, zc->y, zc->z);
+			CheatDetected(MQZone, glm::vec3(zc->x, zc->y, zc->z));
 		LogError("Zoning [{}]: Invalid unsolicited zone request to zone id [{}]. Not near a zone point", GetName(), target_zone_name);
 		SendZoneCancel(zc);
 		return;

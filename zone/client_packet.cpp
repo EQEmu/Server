@@ -4499,16 +4499,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	}
 
 	if ((Timer::GetCurrentTime() - m_time_since_last_position_check) > 7500) {
-		CheatDetected(MQGhost, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+		CheatDetected(MQGhost, glm::vec3(GetX(), GetY(), GetZ()));
 	}
 
-	float dist = 0;
-	float tmp;
-	tmp = m_Position.x - ppu->x_pos;
-	dist += tmp * tmp;
-	tmp = m_Position.y - ppu->y_pos;
-	dist += tmp * tmp;
-	dist = sqrt(dist);
+	float dist = DistanceNoZ(glm::vec3(m_Position), glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
 
 	/* Hack checks */
 	if (dist == 0) {
@@ -4521,12 +4515,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 					if (!GetGMSpeed()) {
 						if (IsShadowStepExempted()) {
 							if (m_distance_since_last_position_check > 800) {
-								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								CheatDetected(MQWarpShadowStep, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 						else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
-								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								CheatDetected(MQWarpKnockBack, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 						else if (!IsPortExempted()) {
@@ -4534,10 +4528,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 									m_time_since_last_position_check = cur_time;
 									m_distance_since_last_position_check = 0.0f;
-									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+									CheatDetected(MQWarp, glm::vec3(GetX(), GetY(), GetZ()));
 								}
 								else {
-									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+									CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 								}
 							}
 						}
@@ -4571,12 +4565,12 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 					if (!GetGMSpeed()) {
 						if (IsShadowStepExempted()) {
 							if (m_distance_since_last_position_check > 800) {
-								CheatDetected(MQWarpShadowStep, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								CheatDetected(MQWarpShadowStep, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 						else if (IsKnockBackExempted()) {
 							if (speed > 30.0f) {
-								CheatDetected(MQWarpKnockBack, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+								CheatDetected(MQWarpKnockBack, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 						else if (!IsPortExempted()) {
@@ -4584,10 +4578,10 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 								if (speed > (runs * 1.5) / RuleR(Zone, MQWarpDetectionDistanceFactor)) {
 									m_time_since_last_position_check = cur_time;
 									m_distance_since_last_position_check = 0.0f;
-									CheatDetected(MQWarp, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+									CheatDetected(MQWarp, glm::vec3(GetX(), GetY(), GetZ()));
 								}
 								else {
-									CheatDetected(MQWarpLight, ppu->x_pos, ppu->y_pos, ppu->z_pos);
+									CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 								}
 							}
 						}
@@ -9718,7 +9712,7 @@ void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
 	// no reason you could actually get a 0 or 1
 	if ((m_time_since_last_memorization - Timer::SetCurrentTime()) <= 1) {
-		CheatDetected(MQFastMem, GetX(), GetY(), GetZ());
+		CheatDetected(MQFastMem, glm::vec3(GetX(), GetY(), GetZ()));
 	}
 	OPMemorizeSpell(app);
 	return;
@@ -15339,7 +15333,12 @@ void Client::Handle_OP_FloatListThing(const EQApplicationPacket* app) {
 			SetPortExemption(true);
 			break;
 		case EQ::UpdateMovementType::TeleportA:
-			CheatDetected(MQWarpAbsolute, m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z);
+			// for warps this is always index 1 or higher, but lets do a sanity check anyways
+			if (index != 0)
+				CheatDetected(MQWarpAbsolute,
+					glm::vec3(m_MovementHistory[index-1].X, m_MovementHistory[index-1].Y, m_MovementHistory[index-1].Z), // passing the previous index gives us the location for where the person warped from.
+					glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z)
+				); 
 			SetPortExemption(false);
 			break;
 		}

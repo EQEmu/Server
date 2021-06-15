@@ -4169,7 +4169,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 								{
 									if (my_c->m_distance_since_last_position_check > 800)
 									{
-										my_c->CheatDetected(MQWarpShadowStep, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+										my_c->CheatDetected(MQWarpShadowStep, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
 									}
 								}
 								else if (my_c->IsKnockBackExempted())
@@ -4178,7 +4178,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 									//HUGE fall that takes > 2.5 seconds
 									if (speed > 30.0f)
 									{
-										my_c->CheatDetected(MQWarpKnockBack, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+										my_c->CheatDetected(MQWarpKnockBack, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
 									}
 								}
 								else if (!my_c->IsPortExempted())
@@ -4189,12 +4189,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 										{
 											my_c->m_time_since_last_position_check = cur_time;
 											my_c->m_distance_since_last_position_check = 0.0f;
-											my_c->CheatDetected(MQWarp, my_c->GetX(), my_c->GetY(), my_c->GetZ());
-											//my_c->Death(my_c, 10000000, SPELL_UNKNOWN, _1H_BLUNT);
+											my_c->CheatDetected(MQWarp, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
 										}
 										else
 										{
-											my_c->CheatDetected(MQWarpLight, my_c->GetX(), my_c->GetY(), my_c->GetZ());
+											my_c->CheatDetected(MQWarpLight, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
 										}
 									}
 								}

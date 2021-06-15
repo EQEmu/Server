@@ -10163,7 +10163,7 @@ void Client::SetShadowStepExemption(bool v)
 					{
 						if (m_distance_since_last_position_check > 800)
 						{
-							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpShadowStep, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (IsKnockBackExempted())
@@ -10172,7 +10172,7 @@ void Client::SetShadowStepExemption(bool v)
 						//HUGE fall that takes > 2.5 seconds
 						if (speed > 30.0f)
 						{
-							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpKnockBack, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (!IsPortExempted())
@@ -10181,13 +10181,13 @@ void Client::SetShadowStepExemption(bool v)
 						{
 							if (speed > (runs * 2 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
 							{
-								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarp, glm::vec3(GetX(), GetY(), GetZ()));
 								m_time_since_last_position_check = cur_time;
 								m_distance_since_last_position_check = 0.0f;
 							}
 							else
 							{
-								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 					}
@@ -10224,7 +10224,7 @@ void Client::SetKnockBackExemption(bool v)
 					{
 						if (m_distance_since_last_position_check > 800)
 						{
-							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpShadowStep, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (IsKnockBackExempted())
@@ -10233,7 +10233,7 @@ void Client::SetKnockBackExemption(bool v)
 						//HUGE fall that takes > 2.5 seconds
 						if (speed > 30.0f)
 						{
-							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpKnockBack, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (!IsPortExempted())
@@ -10244,11 +10244,11 @@ void Client::SetKnockBackExemption(bool v)
 							{
 								m_time_since_last_position_check = cur_time;
 								m_distance_since_last_position_check = 0.0f;
-								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarp, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 							else
 							{
-								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 					}
@@ -10285,7 +10285,7 @@ void Client::SetPortExemption(bool v)
 					{
 						if (m_distance_since_last_position_check > 800)
 						{
-							CheatDetected(MQWarpShadowStep, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpShadowStep, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (IsKnockBackExempted())
@@ -10294,7 +10294,7 @@ void Client::SetPortExemption(bool v)
 						//HUGE fall that takes > 2.5 seconds
 						if (speed > 30.0f)
 						{
-							CheatDetected(MQWarpKnockBack, GetX(), GetY(), GetZ());
+							CheatDetected(MQWarpKnockBack, glm::vec3(GetX(), GetY(), GetZ()));
 						}
 					}
 					else if (!IsPortExempted())
@@ -10305,11 +10305,11 @@ void Client::SetPortExemption(bool v)
 							{
 								m_time_since_last_position_check = cur_time;
 								m_distance_since_last_position_check = 0.0f;
-								CheatDetected(MQWarp, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarp, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 							else
 							{
-								CheatDetected(MQWarpLight, GetX(), GetY(), GetZ());
+								CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
 					}
@@ -10474,7 +10474,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 	return false;
 }
 
-void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
+void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 {
 	switch (CheatType)
 	{
@@ -10486,8 +10486,9 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Large warp detected.");
 			char hString[250];
-			sprintf(hString, "/MQWarp(LWD) with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQWarp(LWD) with location from: %.2f, %.2f, %.2f", from.x, from.y, from.z); 
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQWarpAbsolute:
@@ -10498,8 +10499,9 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Warp detected.");
 			char hString[250];
-			sprintf(hString, "/MQWarp(FLT) with location %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQWarp(FLT) with location from: %.2f, %.2f, %.2f to: %.2f, %.2f, %.2f", from.x, from.y, from.z, to.x, to.y, to.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQWarpShadowStep:
@@ -10508,8 +10510,9 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
 			char hString[250];
-			sprintf(hString, "/MQWarp(SS) with location %.2f, %.2f, %.2f, the target was shadow step exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQWarp(SS) with location from: %.2f, %.2f, %.2f the target was shadow step exempt but we still found this suspicious.", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQWarpKnockBack:
@@ -10518,8 +10521,9 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
 			char hString[250];
-			sprintf(hString, "/MQWarp(KB) with location %.2f, %.2f, %.2f, the target was Knock Back exempt but we still found this suspicious.", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQWarp(KB) with location from: %.2f, %.2f, %.2f the target was Knock Back exempt but we still found this suspicious.", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 
@@ -10531,8 +10535,9 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			if (RuleB(Zone, MarkMQWarpLT))
 			{
 				char hString[250];
-				sprintf(hString, "/MQWarp(LT) with location %.2f, %.2f, %.2f, running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", GetX(), GetY(), GetZ());
+				sprintf(hString, "/MQWarp(LT) with location from: %.2f, %.2f, %.2f running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", from.x, from.y, from.z);
 				database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+				LogCheat(hString);
 			}
 		}
 		break;
@@ -10541,16 +10546,18 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
 			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f to %.2f %.2f %.2f", GetX(), GetY(), GetZ(), x, y, z);
+			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQZoneUnknownDest:
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
 			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQGate:
@@ -10558,27 +10565,31 @@ void Client::CheatDetected(CheatTypes CheatType, float x, float y, float z)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Illegal gate request.");
 			char hString[250];
-			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	case MQGhost:
 		if (RuleB(Zone, EnableMQGhostDetector) && ((Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
 			database.SetMQDetectionFlag(account_name, name, "/MQGhost", zone->GetShortName());
+			LogCheat("/MQGhost");
 		}
 		break;
 	case MQFastMem:
 		if (RuleB(Zone, EnableMQFastMemDetector) && ((Admin() < RuleI(Zone, MQFastMemExemptStatus) || (RuleI(Zone, MQFastMemExemptStatus)) == -1)))
 		{
 			char hString[250];
-			sprintf(hString, "/MQFastMem used at %.2f, %.2f, %.2f", GetX(), GetY(), GetZ());
+			sprintf(hString, "/MQFastMem used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+			LogCheat(hString);
 		}
 		break;
 	default:
 		char hString[250];
-		sprintf(hString, "Unhandled HackerDetection flag with location %.2f, %.2f, %.2f.", GetX(), GetY(), GetZ());
+		sprintf(hString, "Unhandled HackerDetection flag with location from: %.2f, %.2f, %.2f.", from.x, from.y, from.z);
 		database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
+		LogCheat(hString);
 		break;
 	}
 }
