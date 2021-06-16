@@ -549,10 +549,14 @@ void Mob::SetInvisible(uint8 state)
 	invisible = state;
 	SendAppearancePacket(AT_Invis, invisible);
 	// Invis and hide breaks charms
-
 	auto formerpet = GetPet();
-	if (formerpet && formerpet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden))
-		formerpet->BuffFadeByEffect(SE_Charm);
+	if (formerpet && formerpet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden || invisible_animals || invisible_undead)) {
+		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(formerpet)) {
+			formerpet->BuffFadeByEffect(SE_Charm);
+		}
+
+		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
+	}
 }
 
 //check to see if `this` is invisible to `other`
@@ -5569,7 +5573,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 	if (slot < 16){
 		if (id == "classes") {return spells[spell_id].classes[slot]; }
-		else if (id == "dieties") {return spells[spell_id].deities[slot];}
+		else if (id == "deities") {return spells[spell_id].deities[slot];}
 	}
 
 	if (slot < 12){
@@ -5602,7 +5606,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "Activated") {return spells[spell_id].Activated;}
 	else if (id == "resisttype") {return spells[spell_id].resisttype;}
 	else if (id == "targettype") {return spells[spell_id].targettype;}
-	else if (id == "basedeiff") {return spells[spell_id].basediff;}
+	else if (id == "basediff") {return spells[spell_id].basediff;}
 	else if (id == "skill") {return spells[spell_id].skill;}
 	else if (id == "zonetype") {return spells[spell_id].zonetype;}
 	else if (id == "EnvironmentType") {return spells[spell_id].EnvironmentType;}
@@ -5613,7 +5617,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	//else if (id == "spellanim") {stat = spells[spell_id].spellanim; } - Not implemented
 	else if (id == "uninterruptable") {return spells[spell_id].uninterruptable; }
 	else if (id == "ResistDiff") {return spells[spell_id].ResistDiff; }
-	else if (id == "dot_stacking_exemp") {return spells[spell_id].dot_stacking_exempt; }
+	else if (id == "dot_stacking_exempt") {return spells[spell_id].dot_stacking_exempt; }
 	else if (id == "RecourseLink") {return spells[spell_id].RecourseLink; }
 	else if (id == "no_partial_resist") {return spells[spell_id].no_partial_resist; }
 	else if (id == "short_buff_box") {return spells[spell_id].short_buff_box; }
@@ -5624,7 +5628,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "bonushate") {return spells[spell_id].bonushate; }
 	else if (id == "EndurCost") {return spells[spell_id].EndurCost; }
 	else if (id == "EndurTimerIndex") {return spells[spell_id].EndurTimerIndex; }
-	else if (id == "IsDisciplineBuf") {return spells[spell_id].IsDisciplineBuff; }
+	else if (id == "IsDisciplineBuff") {return spells[spell_id].IsDisciplineBuff; }
 	else if (id == "HateAdded") {return spells[spell_id].HateAdded; }
 	else if (id == "EndurUpkeep") {return spells[spell_id].EndurUpkeep; }
 	else if (id == "numhitstype") {return spells[spell_id].numhitstype; }
