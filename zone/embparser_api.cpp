@@ -6774,6 +6774,19 @@ XS(XS__getcleannpcnamebyid) {
 	XSRETURN(1);
 }
 
+
+XS(XS__getdeityname);
+XS(XS__getdeityname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getdeityname(uint32 deity_id)");
+
+	dXSTARG;
+	uint32 deity_id = (uint32) SvUV(ST(0));
+	auto deity_name = quest_manager.getdeityname(deity_id);
+	sv_setpv(TARG, deity_name.c_str());
+}
+
 XS(XS__getinventoryslotname);
 XS(XS__getinventoryslotname) {
 	dXSARGS;
@@ -7041,6 +7054,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
 	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
+	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
