@@ -3204,7 +3204,7 @@ luabind::scope lua_register_events() {
 			luabind::value("spawn_zone", static_cast<int>(EVENT_SPAWN_ZONE)),
 			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE)),
 			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL)),
-			luabind::value("warp", static_cast<int>(EVENT_WARP))
+			luabind::value("warp", static_cast<int>(EVENT_WARP)),
 			luabind::value("test_buff", static_cast<int>(EVENT_TEST_BUFF))
 		];
 }

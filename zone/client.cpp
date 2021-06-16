@@ -10139,6 +10139,71 @@ void Client::SetAFK(uint8 afk_flag) {
 	safe_delete(outapp);
 }
 
+int Client::CountItem(uint32 item_id)
+{
+	int quantity = 0;
+	EQ::ItemInstance* item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				quantity += (item->IsStackable() ? item->GetCharges() : 1);
+			}
+		}
+	}
+
+	return quantity;
+}
+
+void Client::RemoveItem(uint32 item_id, uint32 quantity)
+{
+	EQ::ItemInstance* item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	int removed_count = 0;
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			if (removed_count == quantity) {
+				break;
+			}
+
+			item = GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
+				if ((removed_count + stack_size) <= quantity) {
+					removed_count += stack_size;
+					DeleteItemInInventory(slot_id, stack_size, true);
+				}
+				else {
+					int amount_left = (quantity - removed_count);
+					if (amount_left > 0 && stack_size >= amount_left) {
+						removed_count += amount_left;
+						DeleteItemInInventory(slot_id, amount_left, true);
+					}
+				}
+			}
+		}
+	}
+}
+
 void Client::SetShadowStepExemption(bool v)
 {
 	if (v == true)
@@ -10312,63 +10377,6 @@ void Client::SetPortExemption(bool v)
 								CheatDetected(MQWarpLight, glm::vec3(GetX(), GetY(), GetZ()));
 							}
 						}
-int Client::CountItem(uint32 item_id)
-{
-	int quantity = 0;
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				quantity += (item->IsStackable() ? item->GetCharges() : 1);
-			}
-		}
-	}
-
-	return quantity;
-}
-
-void Client::RemoveItem(uint32 item_id, uint32 quantity)
-{
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {		
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity) {
-				break;
-			}
-
-			item = GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					DeleteItemInInventory(slot_id, stack_size, true);
-				} else {
-					int amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						DeleteItemInInventory(slot_id, amount_left, true);
 					}
 				}
 			}
@@ -10543,8 +10551,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Large warp detected.");
 			std::string message = fmt::format("/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 			std::string export_string = fmt::format(
 				"{} {} {}",
 				from.x,
@@ -10562,8 +10570,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Warp detected.");
 			std::string message = fmt::format("/MQWarp (Absolute) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z, to.x, to.y, to.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 			std::string export_string = fmt::format(
 				"{} {} {}",
 				from.x,
@@ -10579,8 +10587,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQWarp(ShadowStep) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was shadow step exempt but we still found this suspicious.", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 	case MQWarpKnockBack:
@@ -10589,8 +10597,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was Knock Back exempt but we still found this suspicious.", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 
@@ -10602,8 +10610,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			if (RuleB(Zone, MarkMQWarpLT))
 			{
 				std::string message = fmt::format("/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", from.x, from.y, from.z);
-				database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-				LogCheat(message);
+				database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+				LogCheat(message.c_str());
 			}
 		}
 		break;
@@ -10612,16 +10620,16 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 	case MQZoneUnknownDest:
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 	case MQGate:
@@ -10629,8 +10637,8 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Illegal gate request.");
 			std::string message = fmt::format("/MQGate used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 	case MQGhost:
@@ -10643,14 +10651,14 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		if (RuleB(Zone, EnableMQFastMemDetector) && ((Admin() < RuleI(Zone, MQFastMemExemptStatus) || (RuleI(Zone, MQFastMemExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQFastMem used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-			LogCheat(message);
+			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+			LogCheat(message.c_str());
 		}
 		break;
 	default:
 		std::string message = fmt::format("Unhandled HackerDetection flag with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
-		database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
-		LogCheat(message);
+		database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
+		LogCheat(message.c_str());
 		break;
 	}
 }
