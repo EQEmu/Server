@@ -897,15 +897,15 @@ void QuestManager::sfollow() {
 	owner->SetFollowID(0);
 }
 
-void QuestManager::changedeity(int diety_id) {
+void QuestManager::changedeity(int deity_id) {
 	QuestManagerCurrentQuestVars();
 	//Changes the deity.
 	if(initiator)
 	{
 		if(initiator->IsClient())
 		{
-			initiator->SetDeity(diety_id);
-			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", diety_id);
+			initiator->SetDeity(deity_id);
+			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", deity_id);
 			initiator->Save(1);
 			initiator->Kick("Deity change by QuestManager");
 		}
@@ -1042,6 +1042,31 @@ void QuestManager::snow(int weather) {
 	*((uint32*) &outapp->pBuffer[4]) = (uint32)weather;
 	entity_list.QueueClients(initiator, outapp);
 	safe_delete(outapp);
+}
+
+void QuestManager::rename(std::string name) {
+	QuestManagerCurrentQuestVars();
+	if (initiator && initiator->IsClient()) {
+		std::string current_name = initiator->GetName();
+		if (initiator->ChangeFirstName(name.c_str(), current_name.c_str())) {
+			initiator->Message(
+				Chat::White,
+				fmt::format(
+					"Successfully renamed to {}, kicking to character select.",
+					name
+				).c_str()
+			);
+			initiator->Kick("Name was changed.");
+		} else {
+			initiator->Message(
+				Chat::Red,
+				fmt::format(
+					"Failed to rename {} to {}.",
+					current_name, name
+				).c_str()
+			);
+		}
+	}
 }
 
 void QuestManager::surname(const char *name) {
@@ -2620,65 +2645,12 @@ int QuestManager::collectitems(uint32 item_id, bool remove)
 
 int QuestManager::countitem(uint32 item_id) {
 	QuestManagerCurrentQuestVars();
-	int quantity = 0;
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				quantity += item->IsStackable() ? item->GetCharges() : 1;
-			}
-		}
-	}
-
-	return quantity;
+	return initiator->CountItem(item_id);
 }
 
 void QuestManager::removeitem(uint32 item_id, uint32 quantity) {
 	QuestManagerCurrentQuestVars();
-	EQ::ItemInstance *item = nullptr;
-	static const int16 slots[][2] = {
-		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
-		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
-		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
-		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
-		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
-		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
-		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
-	};
-	int removed_count = 0;
-	const size_t size = sizeof(slots) / sizeof(slots[0]);
-	for (int slot_index = 0; slot_index < size; ++slot_index) {		
-		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
-			if (removed_count == quantity)
-				break;
-
-			item = initiator->GetInv().GetItem(slot_id);
-			if (item && item->GetID() == item_id) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
-				if ((removed_count + stack_size) <= quantity) {
-					removed_count += stack_size;
-					initiator->DeleteItemInInventory(slot_id, stack_size, true);
-				} else {
-					int amount_left = (quantity - removed_count);
-					if (amount_left > 0 && stack_size >= amount_left) {
-						removed_count += amount_left;
-						initiator->DeleteItemInInventory(slot_id, amount_left, true);
-					}
-				}
-			}
-		}
-	}
+	initiator->RemoveItem(item_id, quantity);
 }
 
 void QuestManager::UpdateSpawnTimer(uint32 id, uint32 newTime)
@@ -4629,6 +4601,7 @@ std::string QuestManager::gethexcolorcode(std::string color_name) {
 double QuestManager::GetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
 	return database.GetAAEXPModifier(character_id, zone_id);
 }
+
 double QuestManager::GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const {
 	return database.GetEXPModifier(character_id, zone_id);
 }
@@ -4652,3 +4625,25 @@ void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+
+std::string QuestManager::getgendername(uint32 gender_id) {
+	auto gender_name = "Unknown";
+	if (gender_id == MALE) {
+		gender_name = "Male";
+	} else if (gender_id == FEMALE) {
+		gender_name = "Female";
+	} else if (gender_id == NEUTER) {
+		gender_name = "Neuter";
+	}
+	return gender_name;
+}
+
+std::string QuestManager::getdeityname(uint32 deity_id) {
+	return EQ::deity::DeityName(static_cast<EQ::deity::DeityType>(deity_id));
+}
+
+std::string QuestManager::getinventoryslotname(int16 slot_id) {
+	return EQ::invslot::GetInvPossessionsSlotName(slot_id);
+}
+
+
