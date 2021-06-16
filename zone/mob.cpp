@@ -555,7 +555,7 @@ void Mob::SetInvisible(uint8 state)
 			formerpet->BuffFadeByEffect(SE_Charm);
 		}
 		else {	
-			if(IsInvisible(formerpet))
+			if (IsInvisible(formerpet))
 				formerpet->BuffFadeByEffect(SE_Charm);
 		}
 		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
