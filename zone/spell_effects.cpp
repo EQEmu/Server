@@ -2847,6 +2847,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_StunResist:
 			case SE_MinDamageModifier:
 			case SE_DamageModifier:
+			case SE_DamageModifier2:
 			case SE_HitChance:
 			case SE_MeleeSkillCheck:
 			case SE_HundredHands:
