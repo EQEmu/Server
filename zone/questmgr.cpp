@@ -4624,3 +4624,7 @@ void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
 }
+
+std::string QuestManager::getinventoryslotname(int16 slot_id) {
+	return EQ::invslot::GetInvPossessionsSlotName(slot_id);
+}

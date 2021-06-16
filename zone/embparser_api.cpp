@@ -6774,6 +6774,21 @@ XS(XS__getcleannpcnamebyid) {
 	XSRETURN(1);
 }
 
+XS(XS__getinventoryslotname);
+XS(XS__getinventoryslotname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getinventoryslotname(int16 slot_id)");
+
+	dXSTARG;
+	int16 slot_id = (int16) SvIV(ST(0));
+	auto slot_name = quest_manager.getinventoryslotname(slot_id);
+	sv_setpv(TARG, slot_name.c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 XS(XS__rename);
 XS(XS__rename) {
 	dXSARGS;
@@ -7029,6 +7044,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
+	newXS(strcpy(buf, "getinventoryslotname"), XS__getinventoryslotname, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
