@@ -1005,6 +1005,7 @@ public:
 	void EnteringMessages(Client* client);
 	void SendRules(Client* client);
 
+	// cheat detection related variables and functions
 	uint32 m_time_since_last_position_check;
 	uint32 m_time_since_last_memorization;
 	float m_distance_since_last_position_check;
@@ -1022,12 +1023,13 @@ public:
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
 	const bool IsMQExemptedArea(uint32 zoneID, float x, float y, float z) const;
 	void CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to = glm::vec3());
-	bool CanUseReport;
 	bool m_shadow_step_exemption;
 	bool m_knock_back_exemption;
 	bool m_port_exemption;
 	bool m_sense_exemption;
 	bool m_assist_exemption;
+
+	bool CanUseReport;
 
 	//This is used to later set the buff duration of the spell, in slot to duration.
 	//Doesn't appear to work directly after the client recieves an action packet.

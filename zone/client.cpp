@@ -10327,7 +10327,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 	float max_dist = 90000.0f;
 	switch (zoneID)
 	{
-	case 2:
+	case Zones::QEYNOS2:
 	{
 		float delta = (x - (-713.6f));
 		delta *= delta;
@@ -10357,7 +10357,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 		break;
 	}
-	case 9:
+	case Zones::FREPORTW:
 	{
 		float delta = (x - (-682.5f));
 		delta *= delta;
@@ -10387,10 +10387,10 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 		break;
 	}
-	case 62:
-	case 75:
-	case 114:
-	case 209:
+	case Zones::FELWITHEB:
+	case Zones::PAINEEL:
+	case Zones::SKYSHRINE:
+	case Zones::BOTHUNDER:
 	{
 		//The portals are so common in paineel/felwitheb that checking
 		//distances wouldn't be worth it cause unless you're porting to the
@@ -10400,7 +10400,7 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		break;
 	}
 
-	case 24:
+	case Zones::ERUDNEXT:
 	{
 		float delta = (x - (-183.0f));
 		delta *= delta;
@@ -10457,12 +10457,12 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 		break;
 	}
 
-	case 110:
-	case 34:
-	case 96:
-	case 93:
-	case 68:
-	case 84:
+	case Zones::ICECLAD:
+	case Zones::NRO:
+	case Zones::TIMOROUS:
+	case Zones::OVERTHERE:
+	case Zones::BUTCHER:
+	case Zones::FIRIONA:
 	{
 		if (GetBoatID() != 0)
 			return true;
@@ -10485,10 +10485,9 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		{
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Large warp detected.");
-			char hString[250];
-			sprintf(hString, "/MQWarp(LWD) with location from: %.2f, %.2f, %.2f", from.x, from.y, from.z); 
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 			std::string export_string = fmt::format(
 				"{} {} {}",
 				from.x,
@@ -10505,10 +10504,9 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		{
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Warp detected.");
-			char hString[250];
-			sprintf(hString, "/MQWarp(FLT) with location from: %.2f, %.2f, %.2f to: %.2f, %.2f, %.2f", from.x, from.y, from.z, to.x, to.y, to.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQWarp (Absolute) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z, to.x, to.y, to.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 			std::string export_string = fmt::format(
 				"{} {} {}",
 				from.x,
@@ -10523,10 +10521,9 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			&& ((Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
-			char hString[250];
-			sprintf(hString, "/MQWarp(SS) with location from: %.2f, %.2f, %.2f the target was shadow step exempt but we still found this suspicious.", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQWarp(ShadowStep) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was shadow step exempt but we still found this suspicious.", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 	case MQWarpKnockBack:
@@ -10534,10 +10531,9 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			&& ((Admin() < RuleI(Zone, MQWarpExemptStatus)
 				|| (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
-			char hString[250];
-			sprintf(hString, "/MQWarp(KB) with location from: %.2f, %.2f, %.2f the target was Knock Back exempt but we still found this suspicious.", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was Knock Back exempt but we still found this suspicious.", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 
@@ -10548,10 +10544,9 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		{
 			if (RuleB(Zone, MarkMQWarpLT))
 			{
-				char hString[250];
-				sprintf(hString, "/MQWarp(LT) with location from: %.2f, %.2f, %.2f running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", from.x, from.y, from.z);
-				database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-				LogCheat(hString);
+				std::string message = fmt::format("/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.", from.x, from.y, from.z);
+				database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+				LogCheat(message);
 			}
 		}
 		break;
@@ -10559,29 +10554,26 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	case MQZone:
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
-			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 	case MQZoneUnknownDest:
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
-			char hString[250];
-			sprintf(hString, "/MQZone used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 	case MQGate:
 		if (RuleB(Zone, EnableMQGateDetector) && ((Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
 			if (!RuleB(Zone, MQDetectionSilentReport))
 				Message(13, "Illegal gate request.");
-			char hString[250];
-			sprintf(hString, "/MQGate used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQGate used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 	case MQGhost:
@@ -10593,17 +10585,15 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	case MQFastMem:
 		if (RuleB(Zone, EnableMQFastMemDetector) && ((Admin() < RuleI(Zone, MQFastMemExemptStatus) || (RuleI(Zone, MQFastMemExemptStatus)) == -1)))
 		{
-			char hString[250];
-			sprintf(hString, "/MQFastMem used at %.2f, %.2f, %.2f", from.x, from.y, from.z);
-			database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-			LogCheat(hString);
+			std::string message = fmt::format("/MQFastMem used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+			LogCheat(message);
 		}
 		break;
 	default:
-		char hString[250];
-		sprintf(hString, "Unhandled HackerDetection flag with location from: %.2f, %.2f, %.2f.", from.x, from.y, from.z);
-		database.SetMQDetectionFlag(account_name, name, hString, zone->GetShortName());
-		LogCheat(hString);
+		std::string message = fmt::format("Unhandled HackerDetection flag with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+		database.SetMQDetectionFlag(account_name, name, message, zone->GetShortName());
+		LogCheat(message);
 		break;
 	}
 }
