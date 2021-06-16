@@ -5658,12 +5658,12 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	}
 
 	auto item_classes = itm->Classes;
-	if(item_classes == 65535) {
+	if(item_classes == PLAYER_CLASS_ALL_MASK) {
 		return true;
 	}
 
 	auto class_id = GetClass();
-	if (class_id > 16) {
+	if (class_id > BERSERKER) {
 		return false;
 	}
 
@@ -5685,7 +5685,7 @@ bool Mob::CanRaceEquipItem(uint32 item_id)
 	}
 
 	auto item_races = itm->Races;
-	if(item_races == 65535) {
+	if(item_races == PLAYER_RACE_ALL_MASK) {
 		return true;
 	}
 
