@@ -106,7 +106,7 @@ public:
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
-	void changedeity(int diety_id);
+	void changedeity(int deity_id);
 	void exp(int amt);
 	void level(int newlevel);
 	void traindisc(int discipline_tome_item_id);
@@ -117,6 +117,7 @@ public:
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
+	void rename(std::string name);
 	void surname(const char *name);
 	void permaclass(int class_id);
 	void permarace(int race_id);

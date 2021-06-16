@@ -1822,7 +1822,7 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].CastingAnim=atoi(row[120]);
 		sp[tempid].SpellAffectIndex=atoi(row[123]);
 		sp[tempid].disallow_sit=atoi(row[124]);
-		sp[tempid].diety_agnostic=atoi(row[125]);
+		sp[tempid].deity_agnostic=atoi(row[125]);
 
 		for (y = 0; y < 16; y++)
 			sp[tempid].deities[y]=atoi(row[126+y]);

@@ -759,11 +759,11 @@ struct SPDat_Spell_Struct
 /* 122 */	//uint32 TravelType; // -- TRAVELTYPE
 /* 123 */	uint16 SpellAffectIndex; // -- SPELLAFFECTINDEX
 /* 124 */	int8 disallow_sit; // 124: high-end Yaulp spells (V, VI, VII, VIII [Rk 1, 2, & 3], & Gallenite's Bark of Fury -- CANCELONSIT
-/* 125 */	int8 diety_agnostic;// 125: Words of the Skeptic -- DIETY_AGNOSTIC
+/* 125 */	int8 deity_agnostic;// 125: Words of the Skeptic -- DEITY_AGNOSTIC
 /* 126 */	int8 deities[16];	// Deity check. 201 - 216 per http://www.eqemulator.net/wiki/wikka.php?wakka=DeityList
 										// -1: Restrict to Deity; 1: Restrict to Deity, but only used on non-Live (Test Server "Blessing of ...") spells; 0: Don't restrict
 										// the client actually stores deities in a single int32_t
-										// -- DIETY_BERTOXXULOUS ... DIETY_VEESHAN
+										// -- DEITY_BERTOXXULOUS ... DEITY_VEESHAN
 /* 142 */	//int8 npc_no_cast;			// 142: between 0 & 100 -- NPC_NO_CAST
 /* 143 */	//int ai_pt_bonus;			// 143: always set to 0, client doesn't save this -- AI_PT_BONUS
 /* 144 */	int16 new_icon;	// Spell icon used by the client in uifiles/default/spells??.tga, both for spell gems & buff window. Looks to depreciate icon & memicon -- NEW_ICON

@@ -76,6 +76,9 @@
 #include "npc_scale_manager.h"
 #include "../common/content/world_content_service.h"
 
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "../common/http/httplib.h"
+
 extern QueryServ* QServ;
 extern WorldServer worldserver;
 extern TaskManager *task_manager;
@@ -2513,7 +2516,7 @@ void command_grid(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "You need to target an NPC!");
 			return;
 		}
-		
+
 		auto grid_id = target->CastToNPC()->GetGrid();
 		std::string query = fmt::format(
 			"SELECT `x`, `y`, `z`, `heading`, `number` "
@@ -2887,7 +2890,7 @@ void command_findspell(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{}: {}", 
+					"{}: {}",
 					spell_id,
 					spells[spell_id].name
 				).c_str()
@@ -2905,7 +2908,7 @@ void command_findspell(Client *c, const Seperator *sep)
 				if (search_criteria.length() > 0 && spell_name_lower.find(search_criteria) == std::string::npos) {
 					continue;
 				}
-				
+
 				c->Message(
 					Chat::White,
 					fmt::format(
@@ -2915,7 +2918,7 @@ void command_findspell(Client *c, const Seperator *sep)
 					).c_str()
 				);
 				found_count++;
-				
+
 				if (found_count == 20) {
 					break;
 				}
@@ -3101,16 +3104,60 @@ void command_race(Client *c, const Seperator *sep)
 void command_gearup(Client *c, const Seperator *sep)
 {
 	std::string tool_table_name = "tool_gearup_armor_sets";
-
 	if (!database.DoesTableExist(tool_table_name)) {
 		c->Message(
-			Chat::Red,
+			Chat::Yellow,
 			fmt::format(
-				"Table [{}] does not exist, please source in the optional SQL required for this tool",
+				"Table [{}] does not exist. Downloading from Github and installing...",
 				tool_table_name
 			).c_str()
 		);
-		return;
+
+		// http get request
+		httplib::Client cli("https://raw.githubusercontent.com");
+		cli.set_connection_timeout(0, 15000000); // 15 sec
+		cli.set_read_timeout(15, 0); // 15 seconds
+		cli.set_write_timeout(15, 0); // 15 seconds
+
+		int         sourced_queries = 0;
+		std::string url             = "/EQEmu/Server/master/utils/sql/git/optional/2020_07_20_tool_gearup_armor_sets.sql";
+
+		if (auto res = cli.Get(url.c_str())) {
+			if (res->status == 200) {
+				for (auto &s: SplitString(res->body, ';')) {
+					if (!trim(s).empty()) {
+						auto results = database.QueryDatabase(s);
+						if (!results.ErrorMessage().empty()) {
+							c->Message(
+								Chat::Yellow,
+								fmt::format(
+									"Error sourcing SQL [{}]", results.ErrorMessage()
+								).c_str()
+							);
+							return;
+						}
+						sourced_queries++;
+					}
+				}
+			}
+		}
+		else {
+			c->Message(
+				Chat::Yellow,
+				fmt::format(
+					"Error retrieving URL [{}]",
+					url
+				).c_str()
+			);
+		}
+
+		c->Message(
+			Chat::Yellow,
+			fmt::format(
+				"Table [{}] installed. Sourced [{}] queries",
+				tool_table_name, sourced_queries
+			).c_str()
+		);
 	}
 
 	std::string expansion_arg = sep->arg[1];
@@ -3140,8 +3187,11 @@ void command_gearup(Client *c, const Seperator *sep)
 		)
 	);
 
+	int           items_equipped     = 0;
+	int           items_already_have = 0;
 	std::set<int> equipped;
-	for (auto     row = results.begin(); row != results.end(); ++row) {
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
 		int item_id = atoi(row[0]);
 		int slot_id = atoi(row[1]);
 
@@ -3158,16 +3208,33 @@ void command_gearup(Client *c, const Seperator *sep)
 		}
 
 		if (equipped.find(slot_id) == equipped.end()) {
-			if (c->CastToMob()->CanClassEquipItem(item_id)) {
+			const EQ::ItemData *item         = database.GetItem(item_id);
+			bool               has_item      = (c->GetInv().HasItem(item_id, 1, invWhereWorn) != INVALID_INDEX);
+			bool               can_wear_item = !c->CheckLoreConflict(item) && !has_item;
+			if (!can_wear_item) {
+				items_already_have++;
+			}
+
+			if (c->CastToMob()->CanClassEquipItem(item_id) && can_wear_item) {
 				equipped.insert(slot_id);
 				c->SummonItem(
 					item_id,
 					0, 0, 0, 0, 0, 0, 0, 0,
 					slot_id
 				);
+				items_equipped++;
 			}
 		}
 	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Equipped items [{}] already had [{}] items equipped",
+			items_equipped,
+			items_already_have
+		).c_str()
+	);
 
 	if (expansion_arg.empty()) {
 		results = database.QueryDatabase(
@@ -8198,23 +8265,23 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			if (pdest != nullptr) {
 				linker.SetItemData(item);
 				std::string item_id = std::to_string(item->ID);
-				std::string saylink_commands = 
-					"[" + 
+				std::string saylink_commands =
+					"[" +
 					EQ::SayLinkEngine::GenerateQuestSaylink(
 						"#si " + item_id,
 						false,
 						"X"
-					) + 
+					) +
 					"] ";
 				if (item->Stackable && item->StackSize > 1) {
 					std::string stack_size = std::to_string(item->StackSize);
-					saylink_commands += 
-					"[" + 
+					saylink_commands +=
+					"[" +
 					EQ::SayLinkEngine::GenerateQuestSaylink(
 						"#si " + item_id + " " + stack_size,
 						false,
 						stack_size
-					) + 
+					) +
 					"]";
 				}
 
@@ -14386,7 +14453,7 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 		}
 	}
 
-	
+
 	if (search_item_id != 0) {
 		std::string drop_string = (
 			loot_amount > 0 ?
@@ -14424,7 +14491,7 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 				loot_amount,
 				drop_string
 			).c_str()
-		);	
+		);
 	}
 }
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
