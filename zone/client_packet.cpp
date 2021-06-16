@@ -14059,6 +14059,10 @@ void Client::Handle_OP_Taunt(const EQApplicationPacket *app)
 
 void Client::Handle_OP_TestBuff(const EQApplicationPacket *app)
 {
+	if (!RuleB(Character, EnableTestBuff)) {
+		return;
+	}
+	parse->EventPlayer(EVENT_TEST_BUFF, this, "", 0);
 	return;
 }
 

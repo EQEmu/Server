@@ -165,6 +165,7 @@ RULE_BOOL(Character, ProcessFearedProximity, false, "Processes proximity checks 
 RULE_BOOL(Character, EnableCharacterEXPMods, false, "Enables character zone-based experience modifiers.")
 RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based assisting against the aggresor in pvp.")
 RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable items")
+RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
