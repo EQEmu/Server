@@ -2459,6 +2459,10 @@ std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
 
+void lua_rename(std::string name) {
+	quest_manager.rename(name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3024,6 +3028,7 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_add_ldon_loss_by_expedition_id", &lua_cross_zone_add_ldon_loss_by_expedition_id),
 		luabind::def("cross_zone_add_ldon_points_by_expedition_id", &lua_cross_zone_add_ldon_points_by_expedition_id),
 		luabind::def("cross_zone_add_ldon_win_by_expedition_id", &lua_cross_zone_add_ldon_win_by_expedition_id),
+		luabind::def("rename", &lua_rename),
 		/**
 		 * Expansions
 		 */
@@ -3200,6 +3205,7 @@ luabind::scope lua_register_events() {
 			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE)),
 			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL)),
 			luabind::value("warp", static_cast<int>(EVENT_WARP))
+			luabind::value("test_buff", static_cast<int>(EVENT_TEST_BUFF))
 		];
 }
 

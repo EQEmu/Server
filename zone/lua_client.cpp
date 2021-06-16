@@ -2138,6 +2138,21 @@ void Lua_Client::ResetAllDisciplineTimers() {
 	self->ResetAllDisciplineTimers();
 }
 
+int Lua_Client::CountItem(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->CountItem(item_id);
+}
+
+void Lua_Client::RemoveItem(uint32 item_id) {
+	Lua_Safe_Call_Void();
+	return self->RemoveItem(item_id);
+}
+
+void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
+	Lua_Safe_Call_Void();
+	return self->RemoveItem(item_id, quantity);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2501,7 +2516,10 @@ luabind::scope lua_register_client() {
 		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32))& Lua_Client::Popup)
 		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*))& Lua_Client::Popup)
 		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*,uint32))&Lua_Client::Popup)
-		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers);
+		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
+		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
+		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
+		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem);
 }
 
 luabind::scope lua_register_inventory_where() {

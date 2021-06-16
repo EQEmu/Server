@@ -121,6 +121,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_COMBINE_VALIDATE",
 	"EVENT_BOT_COMMAND",
 	"EVENT_WARP"
+	"EVENT_TEST_BUFF"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
