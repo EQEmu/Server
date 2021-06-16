@@ -9059,6 +9059,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npcedit slow_mitigation - Set an NPC's slow mitigation");
 		c->Message(Chat::White, "#npcedit flymode - Set an NPC's flymode [0 = ground, 1 = flying, 2 = levitate, 3 = water, 4 = floating]");
 		c->Message(Chat::White, "#npcedit raidtarget - Set an NPCs raid_target field");
+		c->Message(Chat::White, "#npcedit rarespawn - Set an NPCs rare flag");
 		c->Message(Chat::White, "#npcedit respawntime - Set an NPCs respawn timer in seconds");
 
 	}
@@ -9662,6 +9663,15 @@ void command_npcedit(Client *c, const Seperator *sep)
 		if (sep->arg[2][0] && sep->IsNumber(sep->arg[2]) && atoi(sep->arg[2]) >= 0) {
 			c->Message(Chat::Yellow, "NPCID %u is %s as a raid target.", npcTypeID, atoi(sep->arg[2]) == 0 ? "no longer designated" : "now designated");
 			std::string query = StringFormat("UPDATE npc_types SET raid_target = %i WHERE id = %i", atoi(sep->arg[2]), npcTypeID);
+			content_db.QueryDatabase(query);
+			return;
+		}
+	}
+
+	if (strcasecmp(sep->arg[1], "rarespawn") == 0) {
+		if (sep->arg[2][0] && sep->IsNumber(sep->arg[2]) && atoi(sep->arg[2]) >= 0) {
+			c->Message(Chat::Yellow, "NPCID %u is %s as a rare spawn.", npcTypeID, atoi(sep->arg[2]) == 0 ? "no longer designated" : "now designated");
+			std::string query = StringFormat("UPDATE npc_types SET rare_spawn = %i WHERE id = %i", atoi(sep->arg[2]), npcTypeID);
 			content_db.QueryDatabase(query);
 			return;
 		}
