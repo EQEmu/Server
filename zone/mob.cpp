@@ -5557,7 +5557,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 
 	if (slot < 16){
 		if (id == "classes") {return spells[spell_id].classes[slot]; }
-		else if (id == "dieties") {return spells[spell_id].deities[slot];}
+		else if (id == "deities") {return spells[spell_id].deities[slot];}
 	}
 
 	if (slot < 12){

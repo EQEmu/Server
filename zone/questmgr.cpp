@@ -897,15 +897,15 @@ void QuestManager::sfollow() {
 	owner->SetFollowID(0);
 }
 
-void QuestManager::changedeity(int diety_id) {
+void QuestManager::changedeity(int deity_id) {
 	QuestManagerCurrentQuestVars();
 	//Changes the deity.
 	if(initiator)
 	{
 		if(initiator->IsClient())
 		{
-			initiator->SetDeity(diety_id);
-			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", diety_id);
+			initiator->SetDeity(deity_id);
+			initiator->Message(Chat::Yellow,"Your Deity has been changed/set to: %i", deity_id);
 			initiator->Save(1);
 			initiator->Kick("Deity change by QuestManager");
 		}
