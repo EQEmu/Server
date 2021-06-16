@@ -10131,8 +10131,6 @@ void Client::SetAFK(uint8 afk_flag) {
 }
 
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
-	uint32 account_id = AccountID();
-	std::string account_name = AccountName();
 	uint32 zone_id = ZoneID(zone_short_name);
 	std::string current_instance_type = str_tolower(instance_type);
 	std::string instance_type_name = "public";
@@ -10150,7 +10148,8 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 	}
 
 	std::string full_bucket_name = fmt::format(
-		"{}_{}_{}",
+		"{}_{}_{}_{}",
+		current_instance_type,
 		instance_type_name,
 		instance_identifier,
 		zone_short_name
@@ -10170,6 +10169,7 @@ void Client::SendToInstance(std::string instance_type, std::string zone_short_na
 			Message(Chat::White, "Server was unable to create a new instance.");
 			return;
 		}
+
 		DataBucket::SetData(full_bucket_name, itoa(instance_id), itoa(duration));		
 	}
 
