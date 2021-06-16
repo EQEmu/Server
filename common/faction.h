@@ -50,8 +50,8 @@ struct NPCFactionList {
 struct FactionMods
 {
 	int32 base;
-	int16	min; 	// The lowest your personal earned faction can go - before race/class/diety adjustments.
-	int16	max; 	// The highest your personal earned faction can go - before race/class/diety adjustments.
+	int16	min; 	// The lowest your personal earned faction can go - before race/class/deity adjustments.
+	int16	max; 	// The highest your personal earned faction can go - before race/class/deity adjustments.
 	int32 class_mod;
 	int32 race_mod;
 	int32 deity_mod;
@@ -61,8 +61,8 @@ struct Faction {
 	int32	id;
 	std::map<std::string, int16> mods;
 	int16	base;
-	int16	min; // The lowest your personal earned faction can go - before race/class/diety adjustments.
-	int16	max; // The highest your personal earned faction can go - before race/class/diety adjustments.
+	int16	min; // The lowest your personal earned faction can go - before race/class/deity adjustments.
+	int16	max; // The highest your personal earned faction can go - before race/class/deity adjustments.
 	char	name[50];
 };
 

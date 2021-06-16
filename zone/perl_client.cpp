@@ -5345,6 +5345,43 @@ XS(XS_Client_ResetAllDisciplineTimers) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_CountItem);
+XS(XS_Client_CountItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::CountItem(THIS, uint32 item_id)");
+	{
+		Client* THIS;
+		int item_count = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		item_count = THIS->CountItem(item_id);
+		XSprePUSH;
+		PUSHu((UV) item_count);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_RemoveItem);
+XS(XS_Client_RemoveItem) {
+	dXSARGS;
+	if (items != 2 && items != 3)
+		Perl_croak(aTHX_ "Usage: Client::RemoveItem(THIS, uint32 item_id, [uint32 quantity = 1])"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		uint32 quantity = 1;
+		VALIDATE_THIS_IS_CLIENT;
+		if (items == 3) {
+			quantity = (uint32) SvUV(ST(2));
+		}
+
+		THIS->RemoveItem(item_id, quantity);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5395,6 +5432,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
+	newXSproto(strcpy(buf, "CountItem"), XS_Client_CountItem, file, "$$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
 	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
@@ -5563,6 +5601,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
+	newXSproto(strcpy(buf, "RemoveItem"), XS_Client_RemoveItem, file, "$$;$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");

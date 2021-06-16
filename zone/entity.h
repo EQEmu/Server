@@ -234,6 +234,7 @@ public:
 	void RemoveAllCorpsesByCharID(uint32 charid);
 	void RemoveCorpseByDBID(uint32 dbid);
 	int RezzAllCorpsesByCharID(uint32 charid);
+	void DespawnGridNodes(int32 grid_id);
 	bool IsMobInZone(Mob *who);
 	void ClearClientPetitionQueue();
 	bool CanAddHateForMob(Mob *p);

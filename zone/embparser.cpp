@@ -119,7 +119,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DEATH_ZONE",
 	"EVENT_USE_SKILL",
 	"EVENT_COMBINE_VALIDATE",
-	"EVENT_BOT_COMMAND"
+	"EVENT_BOT_COMMAND",
+	"EVENT_TEST_BUFF"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
