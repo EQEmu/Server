@@ -2143,6 +2143,21 @@ void Lua_Client::SendToInstance(std::string instance_type, std::string zone_shor
 	self->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
 }
 
+int Lua_Client::CountItem(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->CountItem(item_id);
+}
+
+void Lua_Client::RemoveItem(uint32 item_id) {
+	Lua_Safe_Call_Void();
+	return self->RemoveItem(item_id);
+}
+
+void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
+	Lua_Safe_Call_Void();
+	return self->RemoveItem(item_id, quantity);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2508,6 +2523,9 @@ luabind::scope lua_register_client() {
 		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*,uint32))&Lua_Client::Popup)
 		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
 		.def("SendToInstance", (void(Lua_Client::*)(std::string,std::string,uint32,float,float,float,float,std::string,uint32))&Lua_Client::SendToInstance);
+		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
+		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
+		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem);
 }
 
 luabind::scope lua_register_inventory_where() {

@@ -106,7 +106,7 @@ public:
 	void settarget(const char *type, int target_id);
 	void follow(int entity_id, int distance);
 	void sfollow();
-	void changedeity(int diety_id);
+	void changedeity(int deity_id);
 	void exp(int amt);
 	void level(int newlevel);
 	void traindisc(int discipline_tome_item_id);
@@ -117,6 +117,7 @@ public:
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
+	void rename(std::string name);
 	void surname(const char *name);
 	void permaclass(int class_id);
 	void permarace(int race_id);
@@ -380,6 +381,9 @@ public:
 	double GetEXPModifierByCharID(uint32 character_id, uint32 zone_id) const;
 	void SetAAEXPModifierByCharID(uint32 character_id, uint32 zone_id, double aa_modifier);
 	void SetEXPModifierByCharID(uint32 character_id, uint32 zone_id, double exp_modifier);
+	std::string getgendername(uint32 gender_id);
+	std::string getdeityname(uint32 deity_id);
+	std::string getinventoryslotname(int16 slot_id);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
