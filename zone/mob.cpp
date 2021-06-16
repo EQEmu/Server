@@ -551,12 +551,8 @@ void Mob::SetInvisible(uint8 state)
 	// Invis and hide breaks charms
 	auto formerpet = GetPet();
 	if (formerpet && formerpet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden || invisible_animals || invisible_undead)) {
-		if (RuleB(Pets, LivelikeBreakCharmOnInvis)) {	
+		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || (!RuleB(Pets, LivelikeBreakCharmOnInvis) && IsInvisible(formerpet))) {
 			formerpet->BuffFadeByEffect(SE_Charm);
-		}
-		else {	
-			if (IsInvisible(formerpet))
-				formerpet->BuffFadeByEffect(SE_Charm);
 		}
 		LogRules("Pets:LivelikeBreakCharmOnInvis for [{}] | Invis [{}] - Hidden [{}] - Shroud of Stealth [{}] - IVA [{}] - IVU [{}]", GetCleanName(), invisible, hidden, improved_hidden, invisible_animals, invisible_undead);
 	}
