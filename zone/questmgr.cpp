@@ -4626,6 +4626,18 @@ void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier
 	safe_delete(pack);
 }
 
+std::string QuestManager::getgendername(uint32 gender_id) {
+	auto gender_name = "Unknown";
+	if (gender_id == MALE) {
+		gender_name = "Male";
+	} else if (gender_id == FEMALE) {
+		gender_name = "Female";
+	} else if (gender_id == NEUTER) {
+		gender_name = "Neuter";
+	}
+	return gender_name;
+}
+
 std::string QuestManager::getdeityname(uint32 deity_id) {
 	return EQ::deity::DeityName(static_cast<EQ::deity::DeityType>(deity_id));
 }
@@ -4633,4 +4645,5 @@ std::string QuestManager::getdeityname(uint32 deity_id) {
 std::string QuestManager::getinventoryslotname(int16 slot_id) {
 	return EQ::invslot::GetInvPossessionsSlotName(slot_id);
 }
+
 

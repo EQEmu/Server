@@ -6774,6 +6774,17 @@ XS(XS__getcleannpcnamebyid) {
 	XSRETURN(1);
 }
 
+XS(XS__getgendername);
+XS(XS__getgendername) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getgendername(uint32 gender_id)");
+
+	dXSTARG;
+	uint32 gender_id = (uint32) SvUV(ST(0));
+	auto gender_name = quest_manager.getgendername(gender_id);
+	sv_setpv(TARG, gender_name.c_str());
+}
 
 XS(XS__getdeityname);
 XS(XS__getdeityname) {
@@ -7054,6 +7065,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
 	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
+	newXS(strcpy(buf, "getgendername"), XS__getgendername, file);
 	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
