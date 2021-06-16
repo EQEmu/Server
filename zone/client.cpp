@@ -10394,62 +10394,19 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 	{
 	case Zones::QEYNOS2:
 	{
-		float delta = (x - (-713.6f));
-		delta *= delta;
-		float distance = delta;
-		delta = (y - (-160.2f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (-12.8f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-713.6f, -160.2f, -12.8f)) < max_dist)
 			return true;
-
-		delta = (x - (-153.8f));
-		delta *= delta;
-		distance = delta;
-		delta = (y - (-30.3f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (8.2f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-153.8f, -30.3f, 8.2f)) < max_dist)
 			return true;
 
 		break;
 	}
 	case Zones::FREPORTW:
 	{
-		float delta = (x - (-682.5f));
-		delta *= delta;
-		float distance = delta;
-		delta = (y - (147.0f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (-9.9f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-682.5f, 147.0f, -9.9f)) < max_dist)
 			return true;
-
-		delta = (x - (-655.4f));
-		delta *= delta;
-		distance = delta;
-		delta = (y - (10.5f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (-51.8f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-655.4f, 10.5f, -51.8f)) < max_dist)
 			return true;
-
 		break;
 	}
 	case Zones::FELWITHEB:
@@ -10467,56 +10424,13 @@ const bool Client::IsMQExemptedArea(uint32 zoneID, float x, float y, float z) co
 
 	case Zones::ERUDNEXT:
 	{
-		float delta = (x - (-183.0f));
-		delta *= delta;
-		float distance = delta;
-		delta = (y - (-773.3f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (54.1f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-183.0f, -773.3f, 54.1f)) < max_dist)
 			return true;
-
-		delta = (x - (-8.8f));
-		delta *= delta;
-		distance = delta;
-		delta = (y - (-394.1f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (41.1f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-8.8f, -394.1f, 41.1f)) < max_dist)
 			return true;
-
-		delta = (x - (-310.3f));
-		delta *= delta;
-		distance = delta;
-		delta = (y - (-1411.6f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (-42.8f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x, y, z), glm::vec3(-310.3f, -1411.6f, -42.8f)) < max_dist)
 			return true;
-
-		delta = (x - (-183.1f));
-		delta *= delta;
-		distance = delta;
-		delta = (y - (-1409.8f));
-		delta *= delta;
-		distance += delta;
-		delta = (z - (37.1f));
-		delta *= delta;
-		distance += delta;
-
-		if (distance < max_dist)
+		if (DistanceSquared(glm::vec3(x,y,z),glm::vec3(-183.1f,-1409.8f,37.1f)) < max_dist)
 			return true;
 
 		break;
