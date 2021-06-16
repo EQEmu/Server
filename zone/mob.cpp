@@ -551,7 +551,7 @@ void Mob::SetInvisible(uint8 state)
 	// Invis and hide breaks charms
 	auto formerpet = GetPet();
 	if (formerpet && formerpet->GetPetType() == petCharmed && (invisible || hidden || improved_hidden || invisible_animals || invisible_undead)) {
-		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || (!RuleB(Pets, LivelikeBreakCharmOnInvis) && IsInvisible(formerpet))) {
+		if (RuleB(Pets, LivelikeBreakCharmOnInvis) || IsInvisible(formerpet))
 			formerpet->BuffFadeByEffect(SE_Charm);
 		}
 
