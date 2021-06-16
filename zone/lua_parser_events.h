@@ -97,6 +97,8 @@ void handle_player_null(QuestInterface *parse, lua_State* L, Client* client, std
 		std::vector<EQ::Any> *extra_pointers);
 void handle_player_use_skill(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
+void handle_test_buff(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+		std::vector<EQ::Any>* extra_pointers);
 void handle_player_combine_validate(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 		std::vector<EQ::Any>* extra_pointers);
 void handle_player_bot_command(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,

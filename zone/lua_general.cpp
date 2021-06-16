@@ -2463,6 +2463,18 @@ std::string lua_get_gender_name(uint32 gender_id) {
 	return quest_manager.getgendername(gender_id);
 }
 
+std::string lua_get_deity_name(uint32 deity_id) {
+	return quest_manager.getdeityname(deity_id);
+}
+
+std::string lua_get_inventory_slot_name(int16 slot_id) {
+	return quest_manager.getinventoryslotname(slot_id);
+}
+
+void lua_rename(std::string name) {
+	quest_manager.rename(name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3029,6 +3041,10 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_add_ldon_points_by_expedition_id", &lua_cross_zone_add_ldon_points_by_expedition_id),
 		luabind::def("cross_zone_add_ldon_win_by_expedition_id", &lua_cross_zone_add_ldon_win_by_expedition_id),
 		luabind::def("get_gender_name", &lua_get_gender_name),
+		luabind::def("get_deity_name", &lua_get_deity_name),
+		luabind::def("get_inventory_slot_name", &lua_get_inventory_slot_name),
+		luabind::def("rename", &lua_rename),
+
 		/**
 		 * Expansions
 		 */
@@ -3203,7 +3219,8 @@ luabind::scope lua_register_events() {
 			luabind::value("tick", static_cast<int>(EVENT_TICK)),
 			luabind::value("spawn_zone", static_cast<int>(EVENT_SPAWN_ZONE)),
 			luabind::value("death_zone", static_cast<int>(EVENT_DEATH_ZONE)),
-			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL))
+			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL)),
+			luabind::value("test_buff", static_cast<int>(EVENT_TEST_BUFF))
 		];
 }
 

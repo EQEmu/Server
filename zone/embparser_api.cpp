@@ -805,9 +805,9 @@ XS(XS__changedeity) {
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: quest::changedeity(int deity_id)");
 
-	int diety_id = (int) SvIV(ST(0));
+	int deity_id = (int) SvIV(ST(0));
 
-	quest_manager.changedeity(diety_id);
+	quest_manager.changedeity(deity_id);
 
 	XSRETURN_EMPTY;
 }
@@ -6784,9 +6784,44 @@ XS(XS__getgendername) {
 	uint32 gender_id = (uint32) SvUV(ST(0));
 	auto gender_name = quest_manager.getgendername(gender_id);
 	sv_setpv(TARG, gender_name.c_str());
+}
+
+XS(XS__getdeityname);
+XS(XS__getdeityname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getdeityname(uint32 deity_id)");
+
+	dXSTARG;
+	uint32 deity_id = (uint32) SvUV(ST(0));
+	auto deity_name = quest_manager.getdeityname(deity_id);
+	sv_setpv(TARG, deity_name.c_str());
+}
+
+XS(XS__getinventoryslotname);
+XS(XS__getinventoryslotname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getinventoryslotname(int16 slot_id)");
+
+	dXSTARG;
+	int16 slot_id = (int16) SvIV(ST(0));
+	auto slot_name = quest_manager.getinventoryslotname(slot_id);
+	sv_setpv(TARG, slot_name.c_str());
 	XSprePUSH;
 	PUSHTARG;
 	XSRETURN(1);
+}
+
+XS(XS__rename);
+XS(XS__rename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::rename(string name)");
+
+	std::string name = (std::string) SvPV_nolen(ST(0));
+	quest_manager.rename(name);
+	XSRETURN_EMPTY;
 }
 
 /*
@@ -7031,9 +7066,11 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
 	newXS(strcpy(buf, "getcurrencyitemid"), XS__getcurrencyitemid, file);
 	newXS(strcpy(buf, "getgendername"), XS__getgendername, file);
+	newXS(strcpy(buf, "getdeityname"), XS__getdeityname, file);
 	newXS(strcpy(buf, "getguildnamebyid"), XS__getguildnamebyid, file);
 	newXS(strcpy(buf, "getguildidbycharid"), XS__getguildidbycharid, file);
 	newXS(strcpy(buf, "getgroupidbycharid"), XS__getgroupidbycharid, file);
+	newXS(strcpy(buf, "getinventoryslotname"), XS__getinventoryslotname, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
@@ -7095,6 +7132,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "remove_expedition_lockout_by_char_id"), XS__remove_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "removeitem"), XS__removeitem, file);
 	newXS(strcpy(buf, "removetitle"), XS__removetitle, file);
+	newXS(strcpy(buf, "rename"), XS__rename, file);
 	newXS(strcpy(buf, "repopzone"), XS__repopzone, file);
 	newXS(strcpy(buf, "resettaskactivity"), XS__resettaskactivity, file);
 	newXS(strcpy(buf, "respawn"), XS__respawn, file);

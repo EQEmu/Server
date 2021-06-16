@@ -469,7 +469,7 @@ namespace WorldserverCommandHandler {
 			"destination_character_name",
 			"destination_account_name"
 		};
-		std::vector<std::string> options   = { };
+		std::vector<std::string> options   = {};
 
 		if (cmd[{"-h", "--help"}]) {
 			return;

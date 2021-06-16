@@ -130,7 +130,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_death_zone",
 	"event_use_skill",
 	"event_combine_validate",
-	"event_bot_command"
+	"event_bot_command",
+	"event_test_buff"
 };
 
 extern Zone *zone;
@@ -213,6 +214,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_RESPAWN] = handle_player_respawn;
 	PlayerArgumentDispatch[EVENT_UNHANDLED_OPCODE] = handle_player_packet;
 	PlayerArgumentDispatch[EVENT_USE_SKILL] = handle_player_use_skill;
+	PlayerArgumentDispatch[EVENT_TEST_BUFF] = handle_test_buff;
 	PlayerArgumentDispatch[EVENT_COMBINE_VALIDATE] = handle_player_combine_validate;
 	PlayerArgumentDispatch[EVENT_BOT_COMMAND] = handle_player_bot_command;
 
