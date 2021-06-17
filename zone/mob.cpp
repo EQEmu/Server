@@ -5673,22 +5673,53 @@ bool Mob::CanClassEquipItem(uint32 item_id)
 	const EQ::ItemData* itm = nullptr;
 	itm = database.GetItem(item_id);
 
-	if (!itm)
+	if (!itm) {
 		return false;
+	}
 
-	if(itm->Classes == 65535 )
+	auto item_classes = itm->Classes;
+	if(item_classes == PLAYER_CLASS_ALL_MASK) {
 		return true;
+	}
 
-	if (GetClass() > 16)
+	auto class_id = GetClass();
+	if (class_id > BERSERKER) {
 		return false;
+	}
 
-	int bitmask = 1;
-	bitmask = bitmask << (GetClass() - 1);
-
-	if(!(itm->Classes & bitmask))
+	int class_bitmask = GetPlayerClassBit(class_id);
+	if(!(item_classes & class_bitmask)) {
 		return false;
-	else
+	} else {
 		return true;
+	}
+}
+
+bool Mob::CanRaceEquipItem(uint32 item_id)
+{
+	const EQ::ItemData* itm = nullptr;
+	itm = database.GetItem(item_id);
+
+	if (!itm) {
+		return false;
+	}
+
+	auto item_races = itm->Races;
+	if(item_races == PLAYER_RACE_ALL_MASK) {
+		return true;
+	}
+
+	auto race_id = GetBaseRace();
+	if (!IsPlayerRace(race_id)) {
+		return false;
+	}
+
+	int race_bitmask = GetPlayerRaceBit(race_id);
+	if(!(item_races & race_bitmask)) {
+		return false;
+	} else {
+		return true;
+	}
 }
 
 void Mob::SendAddPlayerState(PlayerState new_state)

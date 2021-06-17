@@ -2364,6 +2364,16 @@ const char *Lua_Mob::GetLastName() {
 	return self->GetLastName();
 }
 
+bool Lua_Mob::CanClassEquipItem(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->CanClassEquipItem(item_id);
+}
+
+bool Lua_Mob::CanRaceEquipItem(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->CanRaceEquipItem(item_id);
+}
+
 void Lua_Mob::RemoveAllNimbusEffects() {
 	Lua_Safe_Call_Void();
 	self->RemoveAllNimbusEffects();
@@ -2773,6 +2783,8 @@ luabind::scope lua_register_mob() {
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
 		.def("IsHorse", &Lua_Mob::IsHorse)
 		.def("GetLastName", &Lua_Mob::GetLastName)
+		.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
+		.def("CanRaceEquipItem", &Lua_Mob::CanRaceEquipItem)
 		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects);
 }
 

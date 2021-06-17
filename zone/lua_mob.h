@@ -431,7 +431,6 @@ public:
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);
-
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
@@ -440,6 +439,8 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	bool IsHorse();
+	bool CanClassEquipItem(uint32 item_id);
+	bool CanRaceEquipItem(uint32 item_id);
 };
 
 #endif
