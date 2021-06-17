@@ -6824,6 +6824,21 @@ XS(XS__rename) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__get_data_remaining);
+XS(XS__get_data_remaining) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::get_data_remaining(string bucket_name)");
+
+	dXSTARG;
+	std::string bucket_name = (std::string) SvPV_nolen(ST(0));
+
+	sv_setpv(TARG, DataBucket::GetDataRemaining(bucket_name).c_str());
+	XSprePUSH;
+	PUSHTARG;
+	XSRETURN(1);
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -6878,6 +6893,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_rule"), XS__get_rule, file);
 	newXS(strcpy(buf, "get_data"), XS__get_data, file);
 	newXS(strcpy(buf, "get_data_expires"), XS__get_data_expires, file);
+	newXS(strcpy(buf, "get_data_remaining"), XS__get_data_remaining, file);
 	newXS(strcpy(buf, "set_data"), XS__set_data, file);
 	newXS(strcpy(buf, "delete_data"), XS__delete_data, file);
 	newXS(strcpy(buf, "IsBeneficialSpell"), XS__IsBeneficialSpell, file);
