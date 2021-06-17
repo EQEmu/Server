@@ -2364,6 +2364,11 @@ const char *Lua_Mob::GetLastName() {
 	return self->GetLastName();
 }
 
+void Lua_Mob::RemoveAllNimbusEffects() {
+	Lua_Safe_Call_Void();
+	self->RemoveAllNimbusEffects();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2767,7 +2772,8 @@ luabind::scope lua_register_mob() {
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
 		.def("IsHorse", &Lua_Mob::IsHorse)
-		.def("GetLastName", &Lua_Mob::GetLastName);
+		.def("GetLastName", &Lua_Mob::GetLastName)
+		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects);
 }
 
 luabind::scope lua_register_special_abilities() {

@@ -4891,6 +4891,22 @@ void Mob::RemoveNimbusEffect(int effectid)
 	safe_delete(outapp);
 }
 
+void Mob::RemoveAllNimbusEffects()
+{
+	uint32 nimbus_effects[3] = { nimbus_effect1, nimbus_effect2, nimbus_effect3 };
+	for (auto &current_nimbus : nimbus_effects) {
+		auto remove_packet = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
+		auto *remove_effect = (RemoveNimbusEffect_Struct*)remove_packet->pBuffer;
+		remove_effect->spawnid = GetID();
+		remove_effect->nimbus_effect = current_nimbus;
+		entity_list.QueueClients(this, remove_packet);
+		safe_delete(remove_packet);
+	}
+	nimbus_effect1 = 0;
+	nimbus_effect2 = 0;
+	nimbus_effect3 = 0;
+}
+
 bool Mob::IsBoat() const {
 
 	return (
