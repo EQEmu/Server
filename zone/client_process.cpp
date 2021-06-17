@@ -968,11 +968,10 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 				handy_chance--;
 			}
 
-			int charges = item->MaxCharges;
-			EQ::ItemInstance* item_instance = database.CreateItem(item, charges);
+			auto item_charges = (item->MaxCharges > 0 ? item->MaxCharges : 1);
+			EQ::ItemInstance* item_instance = database.CreateItem(item, item_charges);
 			if (item_instance) {
 				auto item_price = (item->Price * (RuleR(Merchant, SellCostMod)) * item->SellRate);
-				auto item_charges = (charges > 0 ? item->MaxCharges : 1);
 				if (RuleB(Merchant, UsePriceMod)) {
 					item_price *= Client::CalcPriceMod(merchant, false);
 				}
