@@ -10130,6 +10130,54 @@ void Client::SetAFK(uint8 afk_flag) {
 	safe_delete(outapp);
 }
 
+
+void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
+	uint32 zone_id = ZoneID(zone_short_name);
+	std::string current_instance_type = str_tolower(instance_type);
+	std::string instance_type_name = "public";
+	if (current_instance_type.find("solo") != std::string::npos) {
+		instance_type_name = GetCleanName();
+	} else if (current_instance_type.find("group") != std::string::npos) {
+		uint32 group_id = (GetGroup() ? GetGroup()->GetID() : 0);
+		instance_type_name = itoa(group_id);
+	} else if (current_instance_type.find("raid") != std::string::npos) {
+		uint32 raid_id = (GetRaid() ? GetRaid()->GetID() : 0);
+		instance_type_name = itoa(raid_id);
+	} else if (current_instance_type.find("guild") != std::string::npos) {
+		uint32 guild_id = (GuildID() > 0 ? GuildID() : 0);
+		instance_type_name = itoa(guild_id);
+	}
+
+	std::string full_bucket_name = fmt::format(
+		"{}_{}_{}_{}",
+		current_instance_type,
+		instance_type_name,
+		instance_identifier,
+		zone_short_name
+	);
+	std::string current_bucket_value = DataBucket::GetData(full_bucket_name);
+	uint16 instance_id = 0;
+
+	if (current_bucket_value.length() > 0) {
+		instance_id = atoi(current_bucket_value.c_str());
+	} else {
+		if(!database.GetUnusedInstanceID(instance_id)) {
+			Message(Chat::White, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if(!database.CreateInstance(instance_id, zone_id, instance_version, duration)) {
+			Message(Chat::White, "Server was unable to create a new instance.");
+			return;
+		}
+
+		DataBucket::SetData(full_bucket_name, itoa(instance_id), itoa(duration));		
+	}
+
+	AssignToInstance(instance_id);
+	MovePC(zone_id, instance_id, x, y, z, heading);
+}
+
 int Client::CountItem(uint32 item_id)
 {
 	int quantity = 0;
