@@ -2475,6 +2475,10 @@ void lua_rename(std::string name) {
 	quest_manager.rename(name);
 }
 
+std::string lua_get_data_remaining(std::string bucket_name) {
+	return DataBucket::GetDataRemaining(bucket_name);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3044,6 +3048,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_deity_name", &lua_get_deity_name),
 		luabind::def("get_inventory_slot_name", &lua_get_inventory_slot_name),
 		luabind::def("rename", &lua_rename),
+		luabind::def("get_data_remaining", &lua_get_data_remaining),
 
 		/**
 		 * Expansions

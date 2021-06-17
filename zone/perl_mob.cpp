@@ -6274,6 +6274,19 @@ XS(XS_Mob_CanRaceEquipItem) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_RemoveAllNimbusEffects); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RemoveAllNimbusEffects) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::RemoveAllNimbusEffects(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		VALIDATE_THIS_IS_MOB;
+		THIS->RemoveAllNimbusEffects();
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_AddNimbusEffect);
 XS(XS_Mob_AddNimbusEffect) {
 	dXSARGS;
@@ -6657,6 +6670,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "GetHateListByDistance"), XS_Mob_GetHateListByDistance, file, "$;$");
 	newXSproto(strcpy(buf, "GetLastName"), XS_Mob_GetLastName, file, "$");
 	newXSproto(strcpy(buf, "CanRaceEquipItem"), XS_Mob_CanRaceEquipItem, file, "$$");
+	newXSproto(strcpy(buf, "RemoveAllNimbusEffects"), XS_Mob_RemoveAllNimbusEffects, file, "$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
 #ifdef BOTS
 	newXSproto(strcpy(buf, "CastToBot"), XS_Mob_CastToBot, file, "$");

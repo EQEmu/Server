@@ -2374,6 +2374,11 @@ bool Lua_Mob::CanRaceEquipItem(uint32 item_id) {
 	return self->CanRaceEquipItem(item_id);
 }
 
+void Lua_Mob::RemoveAllNimbusEffects() {
+	Lua_Safe_Call_Void();
+	self->RemoveAllNimbusEffects();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2779,7 +2784,8 @@ luabind::scope lua_register_mob() {
 		.def("IsHorse", &Lua_Mob::IsHorse)
 		.def("GetLastName", &Lua_Mob::GetLastName)
 		.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
-		.def("CanRaceEquipItem", &Lua_Mob::CanRaceEquipItem);
+		.def("CanRaceEquipItem", &Lua_Mob::CanRaceEquipItem)
+		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects);
 }
 
 luabind::scope lua_register_special_abilities() {
