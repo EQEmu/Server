@@ -3199,6 +3199,7 @@ luabind::scope lua_register_events() {
 			luabind::value("fish_failure", static_cast<int>(EVENT_FISH_FAILURE)),
 			luabind::value("click_object", static_cast<int>(EVENT_CLICK_OBJECT)),
 			luabind::value("discover_item", static_cast<int>(EVENT_DISCOVER_ITEM)),
+			luabind::value("serverfirst_level", static_cast<int>(EVENT_SERVERFIRST_LEVEL)),
 			luabind::value("disconnect", static_cast<int>(EVENT_DISCONNECT)),
 			luabind::value("connect", static_cast<int>(EVENT_CONNECT)),
 			luabind::value("item_tick", static_cast<int>(EVENT_ITEM_TICK)),

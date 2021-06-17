@@ -91,6 +91,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_FISH_FAILURE",
 	"EVENT_CLICK_OBJECT",
 	"EVENT_DISCOVER_ITEM",
+	"EVENT_SERVERFIRST_LEVEL",
 	"EVENT_DISCONNECT",
 	"EVENT_CONNECT",
 	"EVENT_ITEM_TICK",
@@ -1552,6 +1553,17 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_DISCOVER_ITEM: {
 			ExportVar(package_name.c_str(), "itemid", extradata);
+			break;
+		}
+
+		case EVENT_SERVERFIRST_LEVEL: {
+		if (mob) {
+			ExportVar(package_name.c_str(), "name", mob->GetName());
+			ExportVar(package_name.c_str(), "race", GetRaceIDName(mob->GetRace()));
+			ExportVar(package_name.c_str(), "class", GetClassIDName(mob->GetClass()));
+			ExportVar(package_name.c_str(), "ulevel", mob->GetLevel());
+			ExportVar(package_name.c_str(), "userid", mob->GetID());
+		}
 			break;
 		}
 

@@ -102,6 +102,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_fish_failure",
 	"event_click_object",
 	"event_discover_item",
+	"event_serverfirst_level",
 	"event_disconnect",
 	"event_connect",
 	"event_item_tick",

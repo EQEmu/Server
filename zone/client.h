@@ -747,6 +747,9 @@ public:
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);
 
+	bool IsLevelFirst(uint32 p_race, uint32 p_class, uint16 level);
+	void LevelFirst(uint32 p_race, uint32 p_class, uint16 level);
+
 	bool TGB() const { return tgb; }
 
 	void OnDisconnect(bool hard_disconnect);
