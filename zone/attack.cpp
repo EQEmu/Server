@@ -87,7 +87,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			break;
 		case EQ::item::ItemType2HBlunt: // 2H Blunt
 			skillinuse = EQ::skills::Skill2HBlunt;
-			type = anim2HSlashing; //anim2HWeapon
+			type = RuleB(Combat, Classic2HBAnimation) ? anim2HWeapon : anim2HSlashing; 
 			break;
 		case EQ::item::ItemType2HPiercing: // 2H Piercing
 			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
