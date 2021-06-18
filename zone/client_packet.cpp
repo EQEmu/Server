@@ -209,7 +209,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_FeignDeath] = &Client::Handle_OP_FeignDeath;
 	ConnectedOpcodes[OP_FindPersonRequest] = &Client::Handle_OP_FindPersonRequest;
 	ConnectedOpcodes[OP_Fishing] = &Client::Handle_OP_Fishing;
-	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_Ignore;
+	ConnectedOpcodes[OP_FloatListThing] = &Client::Handle_OP_MovementHistoryList;
 	ConnectedOpcodes[OP_Forage] = &Client::Handle_OP_Forage;
 	ConnectedOpcodes[OP_FriendsWho] = &Client::Handle_OP_FriendsWho;
 	ConnectedOpcodes[OP_GetGuildMOTD] = &Client::Handle_OP_GetGuildMOTD;
@@ -2919,6 +2919,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
+				SetAssistExemption(true);
 				eid->entity_id = new_target->GetID();
 			} else {
 				eid->entity_id = 0;
@@ -4497,6 +4498,131 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
+	// get distance without counting the z
+	float dist = DistanceNoZ(glm::vec3(m_Position), glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+	// get current time (localized but this shouldn't matter)
+	uint32 cur_time = Timer::GetCurrentTime();
+
+	// the client acts differntly when its moving vs when it isn't moving. we need to make sure we account for these differnces
+	if (dist == 0) {
+		// check to see if the player has even moved since our last check
+		if (m_distance_since_last_position_check > 0.0) {
+			// we don't want to do any 0 tic checks
+			if ((cur_time - m_time_since_last_position_check) > 0) {
+				// gets the runspeed of the player and divides it by the distance factor (default is 9, lower the factor is greater the allowance is)
+				float runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
+				// get the speed using the formula s=d/t. pretty standard math.
+				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
+				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
+				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
+					// checks if the showstep exemption flag has been set to true
+					if (IsShadowStepExempted()) {
+						// checks if the distance is greater than 800 units
+						if (m_distance_since_last_position_check > 800.0f) {
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarpShadowStep, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+					}
+					else if (IsKnockBackExempted()) { // checks to see if knockback flag is set to true
+						// in knockback speed shouldn't be greater than 30 units, we should check to make sure its not
+						if (speed > 30.0f) {
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarpKnockBack, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+					}
+					else if (!IsPortExempted()) { // checks to see if Port flag is set to true
+						// check to see if the estimated speed is greater than server side run speed by a factor greater 50% of its self (if movement speed is 100 then this will only trigger if its beyond 150
+						if (speed > (runs * 1.5)) {
+							// updates the time of last position check to current
+							m_time_since_last_position_check = cur_time;
+							// updates the distance of last position check to 0
+							m_distance_since_last_position_check = 0.0f;
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarp, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+						else { // this is running at exactly the speed that the server says we should, its going to get a lot of false postives, shouldn't be treated as a positive identification of a warp.
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarpLight, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+						// logging things out for debug purposes
+						LogCheatDetail("{} moving with a speed {}. Expected speed: {}", GetName(), speed, runs);
+					}
+				}
+				// setting all the variables to their default state and updating the time to current time
+				SetShadowStepExemption(false);
+				SetKnockBackExemption(false);
+				SetPortExemption(false);
+				m_time_since_last_position_check = cur_time;
+				m_distance_since_last_position_check = 0.0f;
+				m_cheat_detect_moved = false;
+			}
+		}
+		else {
+			// since the distance since last check was 0, we can just update the time and reset variables back to their default state
+			m_time_since_last_position_check = Timer::GetCurrentTime();
+			m_cheat_detect_moved = false;
+		}
+	}
+	else { // our distance was not 0 so we need to check things.
+		// push the new distance onto the distance since the last check
+		m_distance_since_last_position_check += dist;
+		// movement has been detected. we set this to indicate that it has been detected
+		m_cheat_detect_moved = true;
+		// no 0 tick checks
+		if (m_time_since_last_position_check == 0) {
+			// update to current time
+			m_time_since_last_position_check = Timer::GetCurrentTime();
+		}
+		else { // this isn't a 0 tick check so lets run through the checks
+			// make sure the checks are at least 2500 ms apart from each other
+			if ((cur_time - m_time_since_last_position_check) > 2500) {
+				// get the run speed divided by the distance factor (9 is default, lower is more allowance for higheer distances.
+				float runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
+				// calculate speed using s=d/t
+				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
+				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
+				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
+					// checks if the showstep exemption flag has been set to true
+					if (IsShadowStepExempted()) {
+						// checks if the distance is greater than 800 units
+						if (m_distance_since_last_position_check > 800.0f) {
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarpShadowStep, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+					}
+					else if (IsKnockBackExempted()) {// checks to see if knockback flag is set to true
+						// in knockback speed shouldn't be greater than 30 units, we should check to make sure its not
+						if (speed > 30.0f) {
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarpKnockBack, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						}
+					}
+					else if (!IsPortExempted()) {// checks to see if Port flag is set to true
+						// check to see if the estimated speed is greater than server side run speed by a factor greater 50% of its self (if movement speed is 100 then this will only trigger if its beyond 150
+						if (speed > (runs * 1.5)) {
+							// updates the time of last position check to current
+							m_time_since_last_position_check = cur_time;
+							// updates the distance of last position check to 0
+							m_distance_since_last_position_check = 0.0f;
+							// passes the variables to CheatDetected to determin anything that we might of missed here.
+							CheatDetected(MQWarp, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->y_pos));
+						}
+						else {
+							CheatDetected(MQWarpLight, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->y_pos));
+						}
+						LogCheatDetail("{} moving with a speed {}. Expected speed: {} Distance: {}", GetName(), speed, runs, dist);
+					}
+				}
+				// setting all the variables to their default state and updating the time to current time
+				SetShadowStepExemption(false);
+				SetKnockBackExemption(false);
+				SetPortExemption(false);
+				m_time_since_last_position_check = cur_time;
+				m_distance_since_last_position_check = 0.0f;
+			}
+		}
+	}
+	
 	if (IsDraggingCorpse())
 		DragCorpses();
 
@@ -9611,6 +9737,10 @@ return;
 
 void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
+	// no reason you could actually get a 0 or 1
+	if ((m_time_since_last_memorization - Timer::SetCurrentTime()) <= 1) {
+		CheatDetected(MQFastMem, glm::vec3(GetX(), GetY(), GetZ()));
+	}
 	OPMemorizeSpell(app);
 	return;
 }
@@ -13539,6 +13669,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			BindWound(this, false, true);
 			tmSitting = Timer::GetCurrentTime();
 			BuffFadeBySitModifier();
+			m_time_since_last_memorization = Timer::GetCurrentTime();
 		}
 		else if (sa->parameter == ANIM_CROUCH) {
 			if (!UseBardSpellLogic())
@@ -13949,6 +14080,12 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
+			else if (IsAssistExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetAssistExemption(false);
+				return;
+			}
 			else if (GetTarget()->IsClient())
 			{
 				//make sure this client is in our raid/group
@@ -13962,6 +14099,17 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 					GetName(), GetTarget()->GetName(), (int)GetTarget()->GetBodyType());
 				database.SetMQDetectionFlag(AccountName(), GetName(), hacker_str, zone->GetShortName());
 				SetTarget((Mob*)nullptr);
+				return;
+			}
+			else if (IsPortExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				return;
+			}
+			else if (IsSenseExempted())
+			{
+				GetTarget()->IsTargeted(1);
+				SetSenseExemption(false);
 				return;
 			}
 			else if (IsXTarget(GetTarget()))
@@ -15204,4 +15352,36 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 		ResetAA();
 	}
 	return;
+}
+/// <summary>
+/// handles OP_FloatListThing, this is actually called OP_MovementHistoryList
+/// </summary>
+/// <param name="app">Generic Application Packet</param>
+void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
+	// Push the EQ Application packet onto m_MovementHistory
+	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
+	// Iterate through the packet, since the packet is dynamic sized we need to figure out what the size of the array is by getting the packet size and dividing it by the size of what entries are suppose to be
+	// entrie size is 17 bytes long
+	//(there will be a remaining 1 byte left over at the end signifying that is the end of the packet)
+	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
+		// switch case to determain what code we execute based off the entry's type See EQ::UpdateMovementType for more detail on the different types
+		switch (m_MovementHistory[index].type) {
+			// there are some client side built in "zone lines" (IE BoThunder, Felwithb, and erudint)
+		case EQ::UpdateMovementType::ZoneLine:
+			// this sets the port exemption for these client side built in zone lines
+			SetPortExemption(true);
+			// break from the switch case
+			break;
+			// this is sent any time a player moves instantly from point a to point b. most cases its client only side zone lines
+		case EQ::UpdateMovementType::TeleportA:
+			// for warps this is always index 1 or higher, but lets do a sanity check anyways
+			if (index != 0)
+				CheatDetected(MQWarpAbsolute,	// we found a possible hacker, we will pass this to CheatDetected to figure out if there is an exemption in place currently or if this is a hack
+					glm::vec3(m_MovementHistory[index-1].X, m_MovementHistory[index-1].Y, m_MovementHistory[index-1].Z), // passing the previous index gives us the location for where the person warped from.
+					glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z)			// passing the current index gives us the location for where the person warped to.
+				);
+			SetPortExemption(false); // setting the port exemption to false, we shouldn't need it anymore.
+			break; // break from this switch statement.
+		}
+	}
 }

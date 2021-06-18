@@ -122,13 +122,15 @@ typedef enum {
 
 typedef enum {
 	MQWarp,
+	MQWarpAbsolute,
 	MQWarpShadowStep,
 	MQWarpKnockBack,
 	MQWarpLight,
 	MQZone,
 	MQZoneUnknownDest,
 	MQGate,
-	MQGhost
+	MQGhost,
+	MQFastMem
 } CheatTypes;
 
 enum {
@@ -1005,6 +1007,28 @@ public:
 
 	void EnteringMessages(Client* client);
 	void SendRules(Client* client);
+
+	// cheat detection related variables and functions
+	uint32 m_time_since_last_position_check;
+	uint32 m_time_since_last_memorization;
+	float m_distance_since_last_position_check;
+	bool m_cheat_detect_moved;
+	void SetShadowStepExemption(bool v);
+	void SetKnockBackExemption(bool v);
+	void SetPortExemption(bool v);
+	void SetSenseExemption(bool v) { m_sense_exemption = v; }
+	void SetAssistExemption(bool v) { m_assist_exemption = v; }
+	const bool IsShadowStepExempted() const { return m_shadow_step_exemption; }
+	const bool IsKnockBackExempted() const { return m_knock_back_exemption; }
+	const bool IsPortExempted() const { return m_port_exemption; }
+	const bool IsSenseExempted() const { return m_sense_exemption; }
+	const bool IsAssistExempted() const { return m_assist_exemption; }
+	void CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to = glm::vec3());
+	bool m_shadow_step_exemption;
+	bool m_knock_back_exemption;
+	bool m_port_exemption;
+	bool m_sense_exemption;
+	bool m_assist_exemption;
 
 	const bool GetGMSpeed() const { return (gmspeed > 0); }
 	bool CanUseReport;

@@ -4147,6 +4147,54 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					}
 			}
 
+			case SE_MovementSpeed:
+			{
+				// anti-cheat - fundemtnally acts the same as the stuff in client_packet. see notes there
+				if (IsClient()) {
+					Client* my_c = CastToClient();
+					uint32 cur_time = Timer::GetCurrentTime();
+					if ((cur_time - my_c->m_time_since_last_position_check) > 1000)
+					{
+						float speed = (my_c->m_distance_since_last_position_check * 100) / (float)(cur_time - my_c->m_time_since_last_position_check);
+						float runs = my_c->GetRunspeed();
+						if (speed > runs / RuleR(Zone, MQWarpDetectionDistanceFactor))
+						{
+							if (!my_c->GetGMSpeed() && (runs >= my_c->GetBaseRunspeed() || (speed > (my_c->GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+							{
+								if (my_c->IsShadowStepExempted())
+								{
+									if (my_c->m_distance_since_last_position_check > 800)
+									{
+										my_c->CheatDetected(MQWarpShadowStep, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
+									}
+								}
+								else if (my_c->IsKnockBackExempted())
+								{
+									if (speed > 30.0f)
+									{
+										my_c->CheatDetected(MQWarpKnockBack, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
+									}
+								}
+								else if (!my_c->IsPortExempted())
+								{
+									if (speed > (runs * 1.5 * RuleR(Zone, MQWarpDetectionDistanceFactor)))
+									{
+										my_c->m_time_since_last_position_check = cur_time;
+										my_c->m_distance_since_last_position_check = 0.0f;
+										my_c->CheatDetected(MQWarp, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
+									}
+									else
+									{
+										my_c->CheatDetected(MQWarpLight, glm::vec3(my_c->GetX(), my_c->GetY(), my_c->GetZ()));
+									}
+								}
+							}
+						}
+					}
+					my_c->m_time_since_last_position_check = cur_time;
+					my_c->m_distance_since_last_position_check = 0.0f;
+				}
+			}	
 		}
 	}
 
