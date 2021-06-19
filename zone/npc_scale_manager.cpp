@@ -240,7 +240,7 @@ bool NpcScaleManager::LoadScaleData()
 		scale_data.spell_scale       = atoi(row[25]);
 		scale_data.heal_scale        = atoi(row[26]);
 
-		if (row[25]) {
+		if (row[27]) {
 			scale_data.special_abilities = row[27];
 		}
 
