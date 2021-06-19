@@ -131,7 +131,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_use_skill",
 	"event_combine_validate",
 	"event_bot_command",
-	"event_warp"
+	"event_warp",
 	"event_test_buff"
 };
 
