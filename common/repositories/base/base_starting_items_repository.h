@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -20,7 +20,7 @@ public:
 	struct StartingItems {
 		int         id;
 		int         race;
-		int         class;
+		int         class_;
 		int         deityid;
 		int         zoneid;
 		int         itemid;
@@ -43,7 +43,7 @@ public:
 		return {
 			"id",
 			"race",
-			"class",
+			"`class`",
 			"deityid",
 			"zoneid",
 			"itemid",
@@ -91,7 +91,7 @@ public:
 
 		entry.id                     = 0;
 		entry.race                   = 0;
-		entry.class                  = 0;
+		entry.class_                 = 0;
 		entry.deityid                = 0;
 		entry.zoneid                 = 0;
 		entry.itemid                 = 0;
@@ -139,7 +139,7 @@ public:
 
 			entry.id                     = atoi(row[0]);
 			entry.race                   = atoi(row[1]);
-			entry.class                  = atoi(row[2]);
+			entry.class_                 = atoi(row[2]);
 			entry.deityid                = atoi(row[3]);
 			entry.zoneid                 = atoi(row[4]);
 			entry.itemid                 = atoi(row[5]);
@@ -184,7 +184,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[1] + " = " + std::to_string(starting_items_entry.race));
-		update_values.push_back(columns[2] + " = " + std::to_string(starting_items_entry.class));
+		update_values.push_back(columns[2] + " = " + std::to_string(starting_items_entry.class_));
 		update_values.push_back(columns[3] + " = " + std::to_string(starting_items_entry.deityid));
 		update_values.push_back(columns[4] + " = " + std::to_string(starting_items_entry.zoneid));
 		update_values.push_back(columns[5] + " = " + std::to_string(starting_items_entry.itemid));
@@ -218,7 +218,7 @@ public:
 
 		insert_values.push_back(std::to_string(starting_items_entry.id));
 		insert_values.push_back(std::to_string(starting_items_entry.race));
-		insert_values.push_back(std::to_string(starting_items_entry.class));
+		insert_values.push_back(std::to_string(starting_items_entry.class_));
 		insert_values.push_back(std::to_string(starting_items_entry.deityid));
 		insert_values.push_back(std::to_string(starting_items_entry.zoneid));
 		insert_values.push_back(std::to_string(starting_items_entry.itemid));
@@ -260,7 +260,7 @@ public:
 
 			insert_values.push_back(std::to_string(starting_items_entry.id));
 			insert_values.push_back(std::to_string(starting_items_entry.race));
-			insert_values.push_back(std::to_string(starting_items_entry.class));
+			insert_values.push_back(std::to_string(starting_items_entry.class_));
 			insert_values.push_back(std::to_string(starting_items_entry.deityid));
 			insert_values.push_back(std::to_string(starting_items_entry.zoneid));
 			insert_values.push_back(std::to_string(starting_items_entry.itemid));
@@ -306,7 +306,7 @@ public:
 
 			entry.id                     = atoi(row[0]);
 			entry.race                   = atoi(row[1]);
-			entry.class                  = atoi(row[2]);
+			entry.class_                 = atoi(row[2]);
 			entry.deityid                = atoi(row[3]);
 			entry.zoneid                 = atoi(row[4]);
 			entry.itemid                 = atoi(row[5]);
@@ -343,7 +343,7 @@ public:
 
 			entry.id                     = atoi(row[0]);
 			entry.race                   = atoi(row[1]);
-			entry.class                  = atoi(row[2]);
+			entry.class_                 = atoi(row[2]);
 			entry.deityid                = atoi(row[3]);
 			entry.zoneid                 = atoi(row[4]);
 			entry.itemid                 = atoi(row[5]);

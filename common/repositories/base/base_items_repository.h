@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -797,8 +797,8 @@ public:
 		entry.scrolllevel2        = 0;
 		entry.scrolllevel         = 0;
 		entry.UNK157              = 0;
-		entry.serialized          = 0;
-		entry.verified            = 0;
+		entry.serialized          = "";
+		entry.verified            = "";
 		entry.serialization       = "";
 		entry.source              = "";
 		entry.UNK033              = 0;

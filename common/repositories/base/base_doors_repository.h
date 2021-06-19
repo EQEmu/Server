@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -53,7 +53,6 @@ public:
 		int         max_expansion;
 		std::string content_flags;
 		std::string content_flags_disabled;
-		int         is_instance_door;
 	};
 
 	static std::string PrimaryKey()
@@ -99,7 +98,6 @@ public:
 			"max_expansion",
 			"content_flags",
 			"content_flags_disabled",
-			"is_instance_door",
 		};
 	}
 
@@ -170,7 +168,6 @@ public:
 		entry.max_expansion          = 0;
 		entry.content_flags          = "";
 		entry.content_flags_disabled = "";
-		entry.is_instance_door       = 0;
 
 		return entry;
 	}
@@ -241,7 +238,6 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
-			entry.is_instance_door       = atoi(row[35]);
 
 			return entry;
 		}
@@ -309,7 +305,6 @@ public:
 		update_values.push_back(columns[32] + " = " + std::to_string(doors_entry.max_expansion));
 		update_values.push_back(columns[33] + " = '" + EscapeString(doors_entry.content_flags) + "'");
 		update_values.push_back(columns[34] + " = '" + EscapeString(doors_entry.content_flags_disabled) + "'");
-		update_values.push_back(columns[35] + " = " + std::to_string(doors_entry.is_instance_door));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -366,7 +361,6 @@ public:
 		insert_values.push_back(std::to_string(doors_entry.max_expansion));
 		insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
-		insert_values.push_back(std::to_string(doors_entry.is_instance_door));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -431,7 +425,6 @@ public:
 			insert_values.push_back(std::to_string(doors_entry.max_expansion));
 			insert_values.push_back("'" + EscapeString(doors_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(doors_entry.content_flags_disabled) + "'");
-			insert_values.push_back(std::to_string(doors_entry.is_instance_door));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -500,7 +493,6 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
-			entry.is_instance_door       = atoi(row[35]);
 
 			all_entries.push_back(entry);
 		}
@@ -560,7 +552,6 @@ public:
 			entry.max_expansion          = atoi(row[32]);
 			entry.content_flags          = row[33] ? row[33] : "";
 			entry.content_flags_disabled = row[34] ? row[34] : "";
-			entry.is_instance_door       = atoi(row[35]);
 
 			all_entries.push_back(entry);
 		}
