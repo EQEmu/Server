@@ -15358,6 +15358,8 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 /// </summary>
 /// <param name="app">Generic Application Packet</param>
 void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
+	if (IsPortExempted())
+		return;
 	// Push the EQ Application packet onto m_MovementHistory
 	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
 	// Iterate through the packet, since the packet is dynamic sized we need to figure out what the size of the array is by getting the packet size and dividing it by the size of what entries are suppose to be
