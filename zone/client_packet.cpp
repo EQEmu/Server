@@ -4510,7 +4510,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// we don't want to do any 0 tic checks
 			if ((cur_time - m_time_since_last_position_check) > 0) {
 				// gets the runspeed of the player and divides it by the distance factor (default is 9, lower the factor is greater the allowance is)
-				float runs = std::ceilf(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
+				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
 				// get the speed using the formula s=d/t. pretty standard math.
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
@@ -4577,7 +4577,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			// make sure the checks are at least 2500 ms apart from each other
 			if ((cur_time - m_time_since_last_position_check) > 2500) {
 				// get the run speed divided by the distance factor (9 is default, lower is more allowance for higheer distances.
-				float runs = std::ceilf(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
+				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
 				// calculate speed using s=d/t
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
