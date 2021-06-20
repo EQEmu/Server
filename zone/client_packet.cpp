@@ -4498,57 +4498,38 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
-	// get distance without counting the z
-	float dist = DistanceNoZ(glm::vec3(m_Position), glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
-	// get current time (localized but this shouldn't matter)
+	glm::vec3 cli_updated_position = glm::vec3(cx, cy, cz);
+	float dist = DistanceNoZ(m_Position, cli_updated_position);
 	uint32 cur_time = Timer::GetCurrentTime();
 
-	// the client acts differntly when its moving vs when it isn't moving. we need to make sure we account for these differnces
 	if (dist == 0) {
-		// check to see if the player has even moved since our last check
 		if (m_distance_since_last_position_check > 0.0) {
-			// we don't want to do any 0 tic checks
 			if ((cur_time - m_time_since_last_position_check) > 0) {
-				// gets the runspeed of the player and divides it by the distance factor (default is 9, lower the factor is greater the allowance is)
 				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
-				// get the speed using the formula s=d/t. pretty standard math.
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
 				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
-					// checks if the showstep exemption flag has been set to true
 					if (IsShadowStepExempted()) {
-						// checks if the distance is greater than 800 units
 						if (m_distance_since_last_position_check > 800.0f) {
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarpShadowStep, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+							CheatDetected(MQWarpShadowStep, m_Position, cli_updated_position);
 						}
 					}
-					else if (IsKnockBackExempted()) { // checks to see if knockback flag is set to true
-						// in knockback speed shouldn't be greater than 30 units, we should check to make sure its not
+					else if (IsKnockBackExempted()) {
 						if (speed > 30.0f) {
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarpKnockBack, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+							CheatDetected(MQWarpKnockBack, m_Position, cli_updated_position);
 						}
 					}
-					else if (!IsPortExempted()) { // checks to see if Port flag is set to true
-						// check to see if the estimated speed is greater than server side run speed by a factor greater 50% of its self (if movement speed is 100 then this will only trigger if its beyond 150
+					else if (!IsPortExempted()) {
 						if (speed > (runs * 1.5)) {
-							// updates the time of last position check to current
 							m_time_since_last_position_check = cur_time;
-							// updates the distance of last position check to 0
 							m_distance_since_last_position_check = 0.0f;
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarp, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+							CheatDetected(MQWarp, m_Position, cli_updated_position);
 						}
-						else { // this is running at exactly the speed that the server says we should, its going to get a lot of false postives, shouldn't be treated as a positive identification of a warp.
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarpLight, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+						else {
+							CheatDetected(MQWarpLight, m_Position, cli_updated_position);
 						}
-						// logging things out for debug purposes
 						LogCheatDetail("{} moving with a speed {}. Expected speed: {}", GetName(), speed, runs);
 					}
 				}
-				// setting all the variables to their default state and updating the time to current time
 				SetShadowStepExemption(false);
 				SetKnockBackExemption(false);
 				SetPortExemption(false);
@@ -4558,62 +4539,43 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			}
 		}
 		else {
-			// since the distance since last check was 0, we can just update the time and reset variables back to their default state
 			m_time_since_last_position_check = Timer::GetCurrentTime();
 			m_cheat_detect_moved = false;
 		}
 	}
-	else { // our distance was not 0 so we need to check things.
-		// push the new distance onto the distance since the last check
+	else {
 		m_distance_since_last_position_check += dist;
-		// movement has been detected. we set this to indicate that it has been detected
 		m_cheat_detect_moved = true;
-		// no 0 tick checks
 		if (m_time_since_last_position_check == 0) {
-			// update to current time
 			m_time_since_last_position_check = Timer::GetCurrentTime();
 		}
-		else { // this isn't a 0 tick check so lets run through the checks
-			// make sure the checks are at least 2500 ms apart from each other
+		else {
 			if ((cur_time - m_time_since_last_position_check) > 2500) {
-				// get the run speed divided by the distance factor (9 is default, lower is more allowance for higheer distances.
 				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
-				// calculate speed using s=d/t
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-				// check if the speed is higher than the estemated run speed for the player. if the runspeed is 0 we need to void the check because we are ether stunned, rooted, or mezzed. this also voids if the GMSpeed is in place. 
 				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
-					// checks if the showstep exemption flag has been set to true
 					if (IsShadowStepExempted()) {
-						// checks if the distance is greater than 800 units
 						if (m_distance_since_last_position_check > 800.0f) {
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarpShadowStep, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+							CheatDetected(MQWarpShadowStep, m_Position, cli_updated_position);
 						}
 					}
-					else if (IsKnockBackExempted()) {// checks to see if knockback flag is set to true
-						// in knockback speed shouldn't be greater than 30 units, we should check to make sure its not
+					else if (IsKnockBackExempted()) {
 						if (speed > 30.0f) {
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarpKnockBack, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->z_pos));
+							CheatDetected(MQWarpKnockBack, m_Position, cli_updated_position);
 						}
 					}
-					else if (!IsPortExempted()) {// checks to see if Port flag is set to true
-						// check to see if the estimated speed is greater than server side run speed by a factor greater 50% of its self (if movement speed is 100 then this will only trigger if its beyond 150
+					else if (!IsPortExempted()) {
 						if (speed > (runs * 1.5)) {
-							// updates the time of last position check to current
 							m_time_since_last_position_check = cur_time;
-							// updates the distance of last position check to 0
 							m_distance_since_last_position_check = 0.0f;
-							// passes the variables to CheatDetected to determin anything that we might of missed here.
-							CheatDetected(MQWarp, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->y_pos));
+							CheatDetected(MQWarp, m_Position, cli_updated_position);
 						}
 						else {
-							CheatDetected(MQWarpLight, m_Position, glm::vec3(ppu->x_pos, ppu->y_pos, ppu->y_pos));
+							CheatDetected(MQWarpLight, m_Position, cli_updated_position);
 						}
 						LogCheatDetail("{} moving with a speed {}. Expected speed: {} Distance: {}", GetName(), speed, runs, dist);
 					}
 				}
-				// setting all the variables to their default state and updating the time to current time
 				SetShadowStepExemption(false);
 				SetKnockBackExemption(false);
 				SetPortExemption(false);
