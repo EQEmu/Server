@@ -1011,6 +1011,7 @@ public:
 	// cheat detection related variables and functions
 	uint32 m_time_since_last_position_check;
 	uint32 m_time_since_last_memorization;
+	Timer m_time_since_last_warp_detection;
 	float m_distance_since_last_position_check;
 	bool m_cheat_detect_moved;
 	void SetShadowStepExemption(bool v);

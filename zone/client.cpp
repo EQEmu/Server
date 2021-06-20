@@ -182,6 +182,7 @@ Client::Client(EQStreamInterface* ieqs)
 	m_time_since_last_position_check = 0;
 	m_time_since_last_memorization = 0;
 	m_distance_since_last_position_check = 0.0f;
+	m_time_since_last_warp_detection.Start();
 	m_shadow_step_exemption = 0;
 	m_knock_back_exemption = 0;
 	m_port_exemption = 0;
@@ -10426,7 +10427,7 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	switch (CheatType)
 	{
 	case MQWarp:
-		if (RuleB(Zone, EnableMQWarpDetector) && ((Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)))
+		if (m_time_since_last_warp_detection.GetRemainingTime() == 0 && RuleB(Zone, EnableMQWarpDetector) && ((Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
 			std::string message = fmt::format("/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
@@ -10443,6 +10444,7 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 			LogCheat(message.c_str());
 			std::string export_string = fmt::format( "{} {} {}", from.x, from.y, from.z);
 			parse->EventPlayer(EVENT_WARP, this, export_string, 0);
+			m_time_since_last_warp_detection.Start(1000);
 		}
 		break;
 	case MQWarpShadowStep:
