@@ -1478,7 +1478,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					}
 				}
 
-				SendArmorAppearance();
+				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
+					SendWearChange(x);
+				}
 
 				if (caster == this && spell.id != 287 && spell.id != 601 &&
 				    (spellbonuses.IllusionPersistence || aabonuses.IllusionPersistence ||
@@ -3902,7 +3904,9 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					SendAppearancePacket(AT_Size, 6);
 				}
 
-				SendArmorAppearance();
+				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
+					SendWearChange(x);
+				}
 
 				break;
 			}
