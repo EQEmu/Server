@@ -6793,6 +6793,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	int32 cast_reducer = GetBotFocusEffect(focusSpellHaste, spell_id);
+	auto min_cap = casttime / 2;
 	uint8 botlevel = GetLevel();
 	uint8 botclass = GetClass();
 	if (botlevel >= 51 && casttime >= 3000 && !spells[spell_id].goodEffect &&
@@ -6870,7 +6871,7 @@ int32 Bot::GetActSpellCasttime(uint16 spell_id, int32 casttime) {
 	}
 
 	casttime = casttime * (100 - cast_reducer) / 100;
-	return std::max(casttime, casttime / 2);
+	return std::max(casttime, min_cap);
 }
 
 int32 Bot::GetActSpellCost(uint16 spell_id, int32 cost) {

@@ -3124,6 +3124,7 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 {
 	int32 cast_reducer = GetFocusEffect(focusSpellHaste, spell_id);
+	auto min_cap = casttime / 2;
 
 	if (level > 50 && casttime >= 3000 && !spells[spell_id].goodEffect &&
 	    (GetClass() == RANGER || GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == BEASTLORD)) {
@@ -3132,7 +3133,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	}
 
 	casttime = casttime * (100 - cast_reducer) / 100;
-	return std::max(casttime, casttime / 2);
+	return std::max(casttime, min_cap);
 }
 
 void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on, int level_override) {
