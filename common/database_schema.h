@@ -336,6 +336,7 @@ namespace DatabaseSchema {
 			"shared_tasks",
 			"shared_task_members",
 			"shared_task_activity_state",
+			"shared_task_dynamic_zones",
 			"server_scheduled_events",
 		};
 	}

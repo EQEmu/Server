@@ -25,3 +25,9 @@ CREATE TABLE `shared_task_activity_state`
     `completed_time` int(11) DEFAULT NULL,
     PRIMARY KEY (`shared_task_id`, `activity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE `shared_task_dynamic_zones` (
+  `shared_task_id` bigint(20) NOT NULL,
+  `dynamic_zone_id` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`shared_task_id`,`dynamic_zone_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1

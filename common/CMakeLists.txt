@@ -258,6 +258,7 @@ SET(repositories
 	repositories/base/base_server_scheduled_events_repository.h
 	repositories/base/base_shared_tasks_repository.h
 	repositories/base/base_shared_task_activity_state_repository.h
+	repositories/base/base_shared_task_dynamic_zones_repository.h
 	repositories/base/base_shared_task_members_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn2_repository.h
@@ -426,6 +427,7 @@ SET(repositories
 	repositories/server_scheduled_events_repository.h
 	repositories/shared_tasks_repository.h
 	repositories/shared_task_activity_state_repository.h
+	repositories/shared_task_dynamic_zones_repository.h
 	repositories/shared_task_members_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
