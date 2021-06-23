@@ -2515,9 +2515,9 @@ void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, Dynamic
 			dz_request.SetType(DynamicZoneType::Quest);
 		}
 
-		// todo: tasks need to persist dz ids (db also) so they can be removed on task abandon
-		DynamicZoneMember solo_member{ client->CharacterID(), client->GetCleanName() };
-		DynamicZone::CreateNew(dz_request, { solo_member });
+		// todo: can enable non-shared task dz creation when dz ids are persisted for them (db also)
+		//DynamicZoneMember solo_member{ client->CharacterID(), client->GetCleanName() };
+		//DynamicZone::CreateNew(dz_request, { solo_member });
 	}
 	else if (task->type == TaskType::Shared)
 	{
