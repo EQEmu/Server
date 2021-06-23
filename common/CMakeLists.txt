@@ -256,6 +256,9 @@ SET(repositories
 	repositories/base/base_rule_values_repository.h
 	repositories/base/base_saylink_repository.h
 	repositories/base/base_server_scheduled_events_repository.h
+	repositories/base/base_shared_tasks_repository.h
+	repositories/base/base_shared_task_activity_state_repository.h
+	repositories/base/base_shared_task_members_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn2_repository.h
 	repositories/base/base_spawnentry_repository.h
@@ -421,6 +424,9 @@ SET(repositories
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
 	repositories/server_scheduled_events_repository.h
+	repositories/shared_tasks_repository.h
+	repositories/shared_task_activity_state_repository.h
+	repositories/shared_task_members_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
 	repositories/spawnentry_repository.h
