@@ -1815,25 +1815,23 @@ void Mob::SendIllusionPacket(
 	new_drakkin_details  = (in_drakkin_details == 0xFFFFFFFF) ? GetDrakkinDetails() : in_drakkin_details;
 	new_aa_title         = in_aa_title;
 
-	bool  reset_features_to_player_profile = IsClient() && in_race == 0;
-	if (reset_features_to_player_profile) {
-		auto c = CastToClient();
-		race                 = c->GetBaseRace();
-		gender               = c->GetBaseGender();
+	// Reset features to Base from the Player Profile
+	if (IsClient() && in_race == 0) {
+		race                 = CastToClient()->GetBaseRace();
+		gender               = CastToClient()->GetBaseGender();
 		new_texture          = texture          = 0xFF;
 		new_helmtexture      = helmtexture      = 0xFF;
-		new_haircolor        = haircolor        = c->GetBaseHairColor();
-		new_beardcolor       = beardcolor       = c->GetBaseBeardColor();
-		new_eyecolor1        = eyecolor1        = c->GetBaseEyeColor();
-		new_eyecolor2        = eyecolor2        = c->GetBaseEyeColor();
-		new_hairstyle        = hairstyle        = c->GetBaseHairStyle();
-		new_luclinface       = luclinface       = c->GetBaseFace();
-		new_beard            = beard            = c->GetBaseBeard();
+		new_haircolor        = haircolor        = CastToClient()->GetBaseHairColor();
+		new_beardcolor       = beardcolor       = CastToClient()->GetBaseBeardColor();
+		new_eyecolor1        = eyecolor1        = CastToClient()->GetBaseEyeColor();
+		new_eyecolor2        = eyecolor2        = CastToClient()->GetBaseEyeColor();
+		new_hairstyle        = hairstyle        = CastToClient()->GetBaseHairStyle();
+		new_luclinface       = luclinface       = CastToClient()->GetBaseFace();
+		new_beard            = beard            = CastToClient()->GetBaseBeard();
 		new_aa_title         = aa_title         = 0xFF;
-		new_drakkin_heritage = drakkin_heritage = c->GetBaseHeritage();
-		new_drakkin_tattoo   = drakkin_tattoo   = c->GetBaseTattoo();
-		new_drakkin_details  = drakkin_details  = c->GetBaseDetails();
-
+		new_drakkin_heritage = drakkin_heritage = CastToClient()->GetBaseHeritage();
+		new_drakkin_tattoo   = drakkin_tattoo   = CastToClient()->GetBaseTattoo();
+		new_drakkin_details  = drakkin_details  = CastToClient()->GetBaseDetails();
 		switch (race) {
 			case OGRE:
 				size = 9;
@@ -1864,8 +1862,8 @@ void Mob::SendIllusionPacket(
 		}
 	}
 
-	// update internal values for mob from illusion
-	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
+	// update internal values for mob
+	size             = (in_size <= 0.0f) ? GetSize() : in_size;
 	texture          = new_texture;
 	helmtexture      = new_helmtexture;
 	haircolor        = new_haircolor;
@@ -1879,37 +1877,34 @@ void Mob::SendIllusionPacket(
 	drakkin_tattoo   = new_drakkin_tattoo;
 	drakkin_details  = new_drakkin_details;
 
-	// send packet
-	auto outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
-	auto *i     = (Illusion_Struct *) outapp->pBuffer;
-	i->spawnid = GetID();
-	strcpy(i->charname, GetCleanName());
-	i->race             = race;
-	i->gender           = gender;
-	i->texture          = new_texture;
-	i->helmtexture      = new_helmtexture;
-	i->haircolor        = new_haircolor;
-	i->beardcolor       = new_beardcolor;
-	i->beard            = new_beard;
-	i->eyecolor1        = new_eyecolor1;
-	i->eyecolor2        = new_eyecolor2;
-	i->hairstyle        = new_hairstyle;
-	i->face             = new_luclinface;
-	i->drakkin_heritage = new_drakkin_heritage;
-	i->drakkin_tattoo   = new_drakkin_tattoo;
-	i->drakkin_details  = new_drakkin_details;
-	i->size             = size;
+	auto            outapp = new EQApplicationPacket(OP_Illusion, sizeof(Illusion_Struct));
+	Illusion_Struct *is    = (Illusion_Struct *) outapp->pBuffer;
+	is->spawnid = GetID();
+	strcpy(is->charname, GetCleanName());
+	is->race             = race;
+	is->gender           = gender;
+	is->texture          = new_texture;
+	is->helmtexture      = new_helmtexture;
+	is->haircolor        = new_haircolor;
+	is->beardcolor       = new_beardcolor;
+	is->beard            = new_beard;
+	is->eyecolor1        = new_eyecolor1;
+	is->eyecolor2        = new_eyecolor2;
+	is->hairstyle        = new_hairstyle;
+	is->face             = new_luclinface;
+	is->drakkin_heritage = new_drakkin_heritage;
+	is->drakkin_tattoo   = new_drakkin_tattoo;
+	is->drakkin_details  = new_drakkin_details;
+	is->size             = size;
 
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 
-	// Refresh armor and tints after send illusion packet
+	/* Refresh armor and tints after send illusion packet */
 	SendArmorAppearance();
 
-	LogMobAppearance(
-		"[SendIllusionPacket] race [{}] gender [{}] new_texture [{}] new_helmtexture [{}] new_haircolor [{}] new_beardcolor [{}] "
-		"new_eyecolor1 [{}] new_eyecolor2 [{}] new_hairstyle [{}] new_luclinface [{}] new_drakkin_heritage [{}] "
-		"new_drakkin_tattoo [{}] new_drakkin_details [{}] size [{}]",
+	LogSpells(
+		"Illusion: Race [{}] Gender [{}] Texture [{}] HelmTexture [{}] HairColor [{}] BeardColor [{}] EyeColor1 [{}] EyeColor2 [{}] HairStyle [{}] Face [{}] DrakkinHeritage [{}] DrakkinTattoo [{}] DrakkinDetails [{}] Size [{}]",
 		race,
 		gender,
 		new_texture,
