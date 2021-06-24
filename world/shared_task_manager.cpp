@@ -1025,7 +1025,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 			if (dz) {
 				auto cle = client_list.FindCLEByCharacterID(new_member.character_id);
-				std::string character_name = cle ? cle->name() : "";
+				std::string character_name = cle ? cle->name() : ""; // must be in cle to have accepted invite
 				auto status = DynamicZoneMemberStatus::Online;
 				dz->AddMember({ static_cast<uint32_t>(character_id), character_name, status });
 			}
@@ -1107,17 +1107,19 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 
 void SharedTaskManager::CreateDynamicZone(SharedTask* shared_task, DynamicZone& dz_request)
 {
-	std::vector<DynamicZoneMember> dz_members;
-	for (const auto& member : shared_task->GetMembers())
-	{
-		// offline players shouldn't be added on creation so names should be in cle
-		auto cle = client_list.FindCLEByCharacterID(member.character_id);
-		std::string character_name = cle ? cle->name() : "";
+	// get names from db in case of offline members
+	auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
+		"id IN (select character_id from shared_task_members where shared_task_id = {})",
+		shared_task->GetDbSharedTask().id
+	));
 
-		dz_members.emplace_back(member.character_id, character_name);
-		if (member.is_leader)
+	std::vector<DynamicZoneMember> dz_members;
+	for (const auto& member : characters)
+	{
+		dz_members.emplace_back(member.id, member.name);
+		if (IsSharedTaskLeader(shared_task, member.id))
 		{
-			dz_request.SetLeader({ member.character_id, character_name });
+			dz_request.SetLeader({ static_cast<uint32_t>(member.id), member.name });
 		}
 	}
 

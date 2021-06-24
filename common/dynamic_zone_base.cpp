@@ -180,7 +180,7 @@ bool DynamicZoneBase::RemoveMember(const std::string& character_name)
 
 bool DynamicZoneBase::RemoveMember(const DynamicZoneMember& remove_member)
 {
-	if (!remove_member.IsValid())
+	if (remove_member.id == 0)
 	{
 		return false;
 	}
