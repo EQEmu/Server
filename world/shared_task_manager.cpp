@@ -4,14 +4,16 @@
 #include "cliententry.h"
 #include "clientlist.h"
 #include "dynamic_zone.h"
+#include "dynamic_zone_manager.h"
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
 #include "../common/repositories/shared_tasks_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
+#include "../common/repositories/shared_task_dynamic_zones_repository.h"
 #include "../common/serialize_buffer.h"
-#include <ctime> // todo: find where time.h is being included and change it to <ctime>
+#include <ctime>
 
 extern ClientList client_list;
 extern ZSList     zoneserver_list;
@@ -273,7 +275,6 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 				);
 			}
 
-			// todo: delete dynamic zone ids from db in DeleteSharedTask
 			for (const auto& dz_id : t->dynamic_zone_ids) {
 				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 				if (dz) {
@@ -330,6 +331,7 @@ void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_
 	SharedTasksRepository::DeleteWhere(*m_database, fmt::format("id = {}", shared_task_id));
 	SharedTaskMembersRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
 	SharedTaskActivityStateRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
+	SharedTaskDynamicZonesRepository::DeleteWhere(*m_database, fmt::format("shared_task_id = {}", shared_task_id));
 }
 
 void SharedTaskManager::LoadSharedTaskState()
@@ -349,6 +351,8 @@ void SharedTaskManager::LoadSharedTaskState()
 
 	// eager load all member state data
 	auto shared_task_members_data = SharedTaskMembersRepository::All(*m_database);
+
+	auto shared_task_dynamic_zones_data = SharedTaskDynamicZonesRepository::All(*m_database);
 
 	// load shared tasks not already completed
 	auto st = SharedTasksRepository::GetWhere(*m_database, "completion_time = 0");
@@ -434,6 +438,19 @@ void SharedTaskManager::LoadSharedTaskState()
 		}
 
 		ns.SetMembers(shared_task_members);
+
+		// dynamic zones
+		for (const auto& dz_entry : shared_task_dynamic_zones_data) {
+			if (dz_entry.shared_task_id == s.id) {
+				ns.dynamic_zone_ids.emplace_back(static_cast<uint32_t>(dz_entry.dynamic_zone_id));
+
+				LogTasksDetail(
+					"[LoadSharedTaskState] shared_task_id [{}] adding dynamic_zone_id [{}]",
+					s.id,
+					dz_entry.dynamic_zone_id
+				);
+			}
+		}
 
 		LogTasks(
 			"[LoadSharedTaskState] Loaded shared task state | shared_task_id [{}] task_id [{}] task_title [{}] member_count [{}] state_activity_count [{}]",
@@ -777,6 +794,15 @@ void SharedTaskManager::PrintSharedTaskState()
 				m.is_leader
 			);
 		}
+
+		LogTasksDetail("[PrintSharedTaskState] # Dynamic Zones");
+
+		for (auto &dz_id: s.dynamic_zone_ids) {
+			LogTasksDetail(
+				"[PrintSharedTaskState] -- dynamic_zone_id [{}]",
+				dz_id
+			);
+		}
 	}
 }
 
@@ -1079,3 +1105,31 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 	);
 }
 
+void SharedTaskManager::CreateDynamicZone(SharedTask* shared_task, DynamicZone& dz_request)
+{
+	std::vector<DynamicZoneMember> dz_members;
+	for (const auto& member : shared_task->GetMembers())
+	{
+		// offline players shouldn't be added on creation so names should be in cle
+		auto cle = client_list.FindCLEByCharacterID(member.character_id);
+		std::string character_name = cle ? cle->name() : "";
+
+		dz_members.emplace_back(member.character_id, character_name);
+		if (member.is_leader)
+		{
+			dz_request.SetLeader({ member.character_id, character_name });
+		}
+	}
+
+	auto new_dz = dynamic_zone_manager.CreateNew(dz_request, dz_members);
+	if (new_dz)
+	{
+		auto shared_task_dz = SharedTaskDynamicZonesRepository::NewEntity();
+		shared_task_dz.shared_task_id  = shared_task->GetDbSharedTask().id;
+		shared_task_dz.dynamic_zone_id = new_dz->GetID();
+
+		SharedTaskDynamicZonesRepository::InsertOne(*m_database, shared_task_dz);
+
+		shared_task->dynamic_zone_ids.emplace_back(new_dz->GetID());
+	}
+}
