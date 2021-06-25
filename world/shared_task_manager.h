@@ -87,6 +87,10 @@ protected:
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
 	void SaveMembers(SharedTask *s, std::vector<SharedTaskMember> members);
 	void SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id);
+	void SendLeaderMessage(SharedTask* s, int chat_type, const std::string& message);
+	void SendLeaderMessageID(SharedTask* s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
+	void SendMembersMessage(SharedTask* s, int chat_type, const std::string& message);
+	void SendMembersMessageID(SharedTask* s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H

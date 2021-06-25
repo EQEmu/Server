@@ -1135,3 +1135,86 @@ void SharedTaskManager::CreateDynamicZone(SharedTask* shared_task, DynamicZone& 
 		shared_task->dynamic_zone_ids.emplace_back(new_dz->GetID());
 	}
 }
+
+void SharedTaskManager::SendLeaderMessage(SharedTask* shared_task, int chat_type, const std::string& message)
+{
+	if (!shared_task)
+	{
+		return;
+	}
+
+	for (const auto& member : shared_task->GetMembers())
+	{
+		if (member.is_leader)
+		{
+			client_list.SendCharacterMessage(member.character_id, chat_type, message);
+			break;
+		}
+	}
+}
+
+void SharedTaskManager::SendLeaderMessageID(SharedTask* shared_task, int chat_type,
+	int eqstr_id, std::initializer_list<std::string> args)
+{
+	if (!shared_task)
+	{
+		return;
+	}
+
+	for (const auto& member : shared_task->GetMembers())
+	{
+		if (member.is_leader)
+		{
+			client_list.SendCharacterMessageID(member.character_id, chat_type, eqstr_id, args);
+			break;
+		}
+	}
+}
+
+void SharedTaskManager::SendMembersMessage(SharedTask* shared_task, int chat_type, const std::string& message)
+{
+	if (!shared_task)
+	{
+		return;
+	}
+
+	for (const auto& member : shared_task->GetMembers())
+	{
+		client_list.SendCharacterMessage(member.character_id, chat_type, message);
+	}
+}
+
+void SharedTaskManager::SendMembersMessageID(SharedTask* shared_task, int chat_type,
+	int eqstr_id, std::initializer_list<std::string> args)
+{
+	if (!shared_task || shared_task->GetMembers().empty())
+	{
+		return;
+	}
+
+	// serialize here since using client_list methods would re-serialize for every member
+	SerializeBuffer serialized_args;
+	for (const auto& arg : args)
+	{
+		serialized_args.WriteString(arg);
+	}
+
+	uint32_t args_size = static_cast<uint32_t>(serialized_args.size());
+	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
+	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
+	buf->string_id = eqstr_id;
+	buf->chat_type = chat_type;
+	buf->args_size = args_size;
+	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
+
+	for (const auto& member : shared_task->GetMembers())
+	{
+		auto character = client_list.FindCLEByCharacterID(member.character_id);
+		if (character && character->Server())
+		{
+			strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
+			character->Server()->SendPacket(pack.get());
+		}
+	}
+}
