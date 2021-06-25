@@ -2939,6 +2939,44 @@ void command_findspell(Client *c, const Seperator *sep)
 	}
 }
 
+inline bool CastRestrictedSpell(int spellid)
+{
+	switch (spellid) {
+		case SPELL_TOUCH_OF_VINITRAS:
+		case SPELL_DESPERATE_HOPE:
+		case SPELL_CHARM:
+		case SPELL_METAMORPHOSIS65:
+		case SPELL_JT_BUFF:
+		case SPELL_CAN_O_WHOOP_ASS:
+		case SPELL_PHOENIX_CHARM:
+		case SPELL_CAZIC_TOUCH:
+		case SPELL_AVATAR_KNOCKBACK:
+		case SPELL_SHAPECHANGE65:
+		case SPELL_SUNSET_HOME1218:
+		case SPELL_SUNSET_HOME819:
+		case SPELL_SHAPECHANGE75:
+		case SPELL_SHAPECHANGE80:
+		case SPELL_SHAPECHANGE85:
+		case SPELL_SHAPECHANGE90:
+		case SPELL_SHAPECHANGE95:
+		case SPELL_SHAPECHANGE100:
+		case SPELL_SHAPECHANGE25:
+		case SPELL_SHAPECHANGE30:
+		case SPELL_SHAPECHANGE35:
+		case SPELL_SHAPECHANGE40:
+		case SPELL_SHAPECHANGE45:
+		case SPELL_SHAPECHANGE50:
+		case SPELL_NPC_AEGOLISM:
+		case SPELL_SHAPECHANGE55:
+		case SPELL_SHAPECHANGE60:
+		case SPELL_COMMAND_OF_DRUZZIL:
+		case SPELL_SHAPECHANGE70:
+			return true;
+		default:
+			return false;
+	}
+}
+
 void command_castspell(Client *c, const Seperator *sep)
 {
 	if (!sep->IsNumber(1))
@@ -2948,13 +2986,7 @@ void command_castspell(Client *c, const Seperator *sep)
 		/*
 		Spell restrictions.
 		*/
-		if (((spellid == 2859) || (spellid == 841) || (spellid == 300) || (spellid == 2314) ||
-			(spellid == 3716) || (spellid == 911) || (spellid == 3014) || (spellid == 982) ||
-			(spellid == 905) || (spellid == 2079) || (spellid == 1218) || (spellid == 819) ||
-			((spellid >= 780) && (spellid <= 785)) || ((spellid >= 1200) && (spellid <= 1205)) ||
-			((spellid >= 1342) && (spellid <= 1348)) || (spellid == 1923) || (spellid == 1924) ||
-			(spellid == 3355)) &&
-			c->Admin() < commandCastSpecials)
+		if (CastRestrictedSpell(spellid) && c->Admin() < commandCastSpecials)
 			c->Message(Chat::Red, "Unable to cast spell.");
 		else if (spellid >= SPDAT_RECORDS)
 			c->Message(Chat::White, "Error: #CastSpell: Argument out of range");
