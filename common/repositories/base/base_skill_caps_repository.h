@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -19,7 +19,7 @@ class BaseSkillCapsRepository {
 public:
 	struct SkillCaps {
 		int skillID;
-		int class;
+		int class_;
 		int level;
 		int cap;
 		int class_;
@@ -34,7 +34,7 @@ public:
 	{
 		return {
 			"skillID",
-			"class",
+			"`class`",
 			"level",
 			"cap",
 			"class_",
@@ -74,7 +74,7 @@ public:
 		SkillCaps entry{};
 
 		entry.skillID = 0;
-		entry.class   = 0;
+		entry.class_  = 0;
 		entry.level   = 0;
 		entry.cap     = 0;
 		entry.class_  = 0;
@@ -114,7 +114,7 @@ public:
 			SkillCaps entry{};
 
 			entry.skillID = atoi(row[0]);
-			entry.class   = atoi(row[1]);
+			entry.class_  = atoi(row[1]);
 			entry.level   = atoi(row[2]);
 			entry.cap     = atoi(row[3]);
 			entry.class_  = atoi(row[4]);
@@ -152,7 +152,7 @@ public:
 		auto columns = Columns();
 
 		update_values.push_back(columns[0] + " = " + std::to_string(skill_caps_entry.skillID));
-		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_entry.class));
+		update_values.push_back(columns[1] + " = " + std::to_string(skill_caps_entry.class_));
 		update_values.push_back(columns[2] + " = " + std::to_string(skill_caps_entry.level));
 		update_values.push_back(columns[3] + " = " + std::to_string(skill_caps_entry.cap));
 		update_values.push_back(columns[4] + " = " + std::to_string(skill_caps_entry.class_));
@@ -178,7 +178,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(skill_caps_entry.skillID));
-		insert_values.push_back(std::to_string(skill_caps_entry.class));
+		insert_values.push_back(std::to_string(skill_caps_entry.class_));
 		insert_values.push_back(std::to_string(skill_caps_entry.level));
 		insert_values.push_back(std::to_string(skill_caps_entry.cap));
 		insert_values.push_back(std::to_string(skill_caps_entry.class_));
@@ -212,7 +212,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(skill_caps_entry.skillID));
-			insert_values.push_back(std::to_string(skill_caps_entry.class));
+			insert_values.push_back(std::to_string(skill_caps_entry.class_));
 			insert_values.push_back(std::to_string(skill_caps_entry.level));
 			insert_values.push_back(std::to_string(skill_caps_entry.cap));
 			insert_values.push_back(std::to_string(skill_caps_entry.class_));
@@ -250,7 +250,7 @@ public:
 			SkillCaps entry{};
 
 			entry.skillID = atoi(row[0]);
-			entry.class   = atoi(row[1]);
+			entry.class_  = atoi(row[1]);
 			entry.level   = atoi(row[2]);
 			entry.cap     = atoi(row[3]);
 			entry.class_  = atoi(row[4]);
@@ -279,7 +279,7 @@ public:
 			SkillCaps entry{};
 
 			entry.skillID = atoi(row[0]);
-			entry.class   = atoi(row[1]);
+			entry.class_  = atoi(row[1]);
 			entry.level   = atoi(row[2]);
 			entry.cap     = atoi(row[3]);
 			entry.class_  = atoi(row[4]);

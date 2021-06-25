@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -88,7 +88,7 @@ public:
 		entry.short_name                = "";
 		entry.tag_description           = "";
 		entry.login_server_list_type_id = 0;
-		entry.last_login_date           = 0;
+		entry.last_login_date           = "";
 		entry.last_ip_address           = "";
 		entry.login_server_admin_id     = 0;
 		entry.is_server_trusted         = 0;
