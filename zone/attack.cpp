@@ -3444,7 +3444,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 	bool FromDamageShield = (skill_used == EQ::skills::SkillAbjuration);
 	bool ignore_invul = false;
 	if (IsValidSpell(spell_id))
-		ignore_invul = spell_id == 982 || spells[spell_id].cast_not_standing; // cazic touch
+		ignore_invul = spell_id == SPELL_CAZIC_TOUCH || spells[spell_id].cast_not_standing;
 
 	if (!ignore_invul && (GetInvul() || DivineAura())) {
 		LogCombat("Avoiding [{}] damage due to invulnerability", damage);
