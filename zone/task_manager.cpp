@@ -1,6 +1,7 @@
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/repositories/character_activities_repository.h"
+#include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_tasks_repository.h"
 #include "../common/repositories/completed_tasks_repository.h"
 #include "../common/repositories/task_activities_repository.h"
@@ -548,6 +549,8 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 		return;
 	}
 
+	// todo: forward to shared task selector validation if set contains a shared task
+
 	if (client->HasTaskRequestCooldownTimer(true)) {
 		return;
 	}
@@ -624,11 +627,22 @@ void TaskManager::TaskQuestSetSelector(
 		return;
 	}
 
+	// live prevents mixing selection types (also uses diff opcodes for solo vs shared tasks)
+	// to keep shared task validation live-like (and simple), any shared task will
+	// forward this to shared task validation and non-shared tasks will be dropped
+	for (int i = 0; i < count; ++i)
+	{
+		auto task = tasks[i];
+		if (m_task_data[task] && m_task_data[task]->type == TaskType::Shared)
+		{
+			SharedTaskSelector(client, mob, count, tasks);
+			return;
+		}
+	}
+
 	if (client->HasTaskRequestCooldownTimer(true)) {
 		return;
 	}
-
-	// todo: a request timer is set for shared task selections (likely due to extra group/raid validation)
 
 	for (int i = 0; i < count; ++i) {
 		auto task = tasks[i];
@@ -653,6 +667,107 @@ void TaskManager::TaskQuestSetSelector(
 			MAX_ACTIVE_TASKS,
 			client->GetName()
 		);
+	}
+}
+
+void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* tasks)
+{
+	LogTasks("[UPDATE] SharedTaskSelector called for array size [{}]", count);
+
+	if (count <= 0 || client->HasTaskRequestCooldownTimer(true)) {
+		return;
+	}
+
+	// check if requester already has a shared task (no need to query group/raid members if so)
+	if (client->GetTaskState()->m_active_shared_task.task_id != TASKSLOTEMPTY)
+	{
+		client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_HAVE_ONE);
+		return;
+	}
+
+	// get group/raid members for level filtering and to check for existing shared tasks
+	// need to query for character ids since zone group/raid don't store them
+	int party_eqstr_id = SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE;
+	auto characters = CharacterDataRepository::GetWhere(database, fmt::format(
+		"id IN (select charid from group_id where groupid = (select groupid from group_id where charid = {}))",
+		client->CharacterID()
+	));
+
+	if (characters.empty())
+	{
+		party_eqstr_id = SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE;
+		characters = CharacterDataRepository::GetWhere(database, fmt::format(
+			"id IN (select charid from raid_members where raidid = (select raidid from raid_members where charid = {}))",
+			client->CharacterID()
+		));
+	}
+
+	// get lowest and highest level of group/raid members for task filter
+	int lowest_level = client->GetLevel();
+	int highest_level = client->GetLevel();
+	std::vector<uint32_t> character_ids;
+
+	for (const auto& character: characters)
+	{
+		lowest_level = std::min(lowest_level, character.level);
+		highest_level = std::max(highest_level, character.level);
+		character_ids.emplace_back(character.id);
+	}
+
+	// check if any group/raid member already has a shared task (already checked solo character)
+	bool validation_failed = false;
+	if (!character_ids.empty())
+	{
+		auto shared_task_members = SharedTaskMembersRepository::GetWhere(database,
+			fmt::format("character_id IN ({}) LIMIT 1", fmt::join(character_ids, ",")));
+
+		if (!shared_task_members.empty())
+		{
+			validation_failed = true;
+
+			auto it = std::find_if(characters.begin(), characters.end(),
+				[&](const CharacterDataRepository::CharacterData& char_data) {
+					return char_data.id == shared_task_members.front().character_id;
+				});
+
+			if (it != characters.end())
+			{
+				client->MessageString(Chat::Red, party_eqstr_id, it->name.c_str());
+			}
+		}
+	}
+
+	if (!validation_failed)
+	{
+		// run type and level filters on task selections
+		int task_list[MAXCHOOSERENTRIES] = {0};
+		int task_list_index = 0;
+
+		for (int i = 0; i < count && task_list_index < MAXCHOOSERENTRIES; ++i)
+		{
+			// todo: are there non repeatable shared tasks? (would need to check all group/raid members)
+			auto task = tasks[i];
+			if (m_task_data[task] &&
+			    m_task_data[task]->type == TaskType::Shared &&
+			    lowest_level >= m_task_data[task]->min_level &&
+			    (m_task_data[task]->max_level == 0 || highest_level <= m_task_data[task]->max_level))
+			{
+				task_list[task_list_index++] = task;
+			}
+		}
+
+		// check if any tasks are left to offer after filtering
+		if (task_list_index > 0)
+		{
+			// request timer is only set when shared task selection shown (not for failed validations)
+			client->StartTaskRequestCooldownTimer();
+			// todo: shared task specific selector (normal task selector does solo task verifications)
+			SendTaskSelector(client, mob, task_list_index, task_list);
+		}
+		else
+		{
+			client->MessageString(Chat::Red, SharedTaskMessage::YOU_DO_NOT_MEET_REQ_AVAILABLE);
+		}
 	}
 }
 
