@@ -548,6 +548,10 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 		return;
 	}
 
+	if (client->HasTaskRequestCooldownTimer(true)) {
+		return;
+	}
+
 	if (m_task_sets[task_set_id].empty()) {
 		// I think this is suppose to be yellow
 		mob->SayString(
@@ -619,6 +623,12 @@ void TaskManager::TaskQuestSetSelector(
 	if (count <= 0) {
 		return;
 	}
+
+	if (client->HasTaskRequestCooldownTimer(true)) {
+		return;
+	}
+
+	// todo: a request timer is set for shared task selections (likely due to extra group/raid validation)
 
 	for (int i = 0; i < count; ++i) {
 		auto task = tasks[i];

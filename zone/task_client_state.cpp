@@ -2397,6 +2397,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	task_manager->SendSingleActiveTaskToClient(client, *active_slot, false, true);
+	client->StartTaskRequestCooldownTimer();
 	client->Message(
 		Chat::White,
 		"You have been assigned the task '%s'.",

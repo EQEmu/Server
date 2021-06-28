@@ -1030,6 +1030,8 @@ public:
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
 	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
 	void SendTaskComplete(int task_index);
+	bool HasTaskRequestCooldownTimer(bool message_client = false);
+	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
 	inline void CancelTask(int task_index, TaskType task_type)
 	{
@@ -1833,6 +1835,7 @@ private:
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
+	Timer task_request_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
