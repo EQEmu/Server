@@ -770,7 +770,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("ZonePlayerToBind", static_cast<int>(OP_ZonePlayerToBind)),
 			luabind::value("AutoFire", static_cast<int>(OP_AutoFire)),
 			luabind::value("Rewind", static_cast<int>(OP_Rewind)),
-			luabind::value("OpenNewTasksWindow", static_cast<int>(OP_OpenNewTasksWindow)),
+			luabind::value("TaskSelectWindow", static_cast<int>(OP_TaskSelectWindow)),
 			luabind::value("TaskActivityComplete", static_cast<int>(OP_TaskActivityComplete)),
 			luabind::value("AcceptNewTask", static_cast<int>(OP_AcceptNewTask)),
 			luabind::value("CancelTask", static_cast<int>(OP_CancelTask)),

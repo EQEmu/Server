@@ -862,7 +862,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
+	auto outapp = new EQApplicationPacket(OP_TaskSelectWindow, buf);
 
 	client->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -956,7 +956,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 		}
 	}
 
-	auto outapp = new EQApplicationPacket(OP_OpenNewTasksWindow, buf);
+	auto outapp = new EQApplicationPacket(OP_TaskSelectWindow, buf);
 
 	client->QueuePacket(outapp);
 	safe_delete(outapp);
