@@ -495,7 +495,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						LogDebug("Succor/Evacuation Spell In Same Zone");
 #endif
 							if(IsClient())
-								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, EvacToSafeCoords);
+								CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), x, y, z, heading, 0, ZoneToSafeCoords);
 							else
 								GMMove(x, y, z, heading);
 					}
