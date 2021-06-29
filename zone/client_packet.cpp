@@ -422,6 +422,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SharedTaskAddPlayer]      = &Client::Handle_OP_SharedTaskAddPlayer;
 	ConnectedOpcodes[OP_SharedTaskMakeLeader]     = &Client::Handle_OP_SharedTaskMakeLeader;
 	ConnectedOpcodes[OP_SharedTaskInviteResponse] = &Client::Handle_OP_SharedTaskInviteResponse;
+	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -15464,6 +15465,21 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 		worldserver.SendPacket(p);
 		safe_delete(p);
 	}
+}
 
+void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
+{
+	auto buf = reinterpret_cast<SharedTaskAccept_Struct*>(app->pBuffer);
 
+	LogTasksDetail(
+		"[OP_SharedTaskAccept] unknown00 [{}] unknown04 [{}] npc_entity_id [{}] task_id [{}]",
+		buf->unknown00,
+		buf->unknown04,
+		buf->npc_entity_id,
+		buf->task_id
+	);
+
+	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state) {
+		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id);
+	}
 }

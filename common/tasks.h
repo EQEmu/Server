@@ -1,6 +1,8 @@
 #ifndef EQEMU_TASKS_H
 #define EQEMU_TASKS_H
 
+#include "serialize_buffer.h"
+
 #define MAXTASKS 10000
 #define MAXTASKSETS 1000
 #define MAXACTIVEQUESTS 19 // The Client has a hard cap of 19 active quests, 29 in SoD+

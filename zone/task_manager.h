@@ -99,6 +99,7 @@ private:
 	// shared tasks
 	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
 	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
+	void SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list);
 };
 
 

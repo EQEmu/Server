@@ -3766,6 +3766,14 @@ struct SharedTaskInviteResponse_Struct {
 	int8_t  padding[3]; // padding garbage probably
 };
 
+struct SharedTaskAccept_Struct {
+	int32_t  unknown00;
+	int32_t  unknown04;
+	uint32_t npc_entity_id;  // npc task giver entity id (sent in selection window)
+	uint32_t task_id;
+	float    unk_adjustment; // added after titanium (sent in selection window)
+};
+
 #if 0
 
 // Old struct not used by Task System implementation but left for reference
@@ -3858,7 +3866,7 @@ struct TaskHistory_Struct {
 #endif
 
 struct AcceptNewTask_Struct {
-	uint32	unknown00;
+	uint32	task_type; // type sent in selection window
 	uint32	task_id;		//set to 0 for 'decline'
 	uint32	task_master_id;	//entity ID
 };

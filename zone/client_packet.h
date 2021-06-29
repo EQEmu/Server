@@ -321,3 +321,4 @@
 	void Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app);
 	void Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app);
 	void Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAccept(const EQApplicationPacket *app);

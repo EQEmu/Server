@@ -759,10 +759,7 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 		// check if any tasks are left to offer after filtering
 		if (task_list_index > 0)
 		{
-			// request timer is only set when shared task selection shown (not for failed validations)
-			client->StartTaskRequestCooldownTimer();
-			// todo: shared task specific selector (normal task selector does solo task verifications)
-			SendTaskSelector(client, mob, task_list_index, task_list);
+			SendSharedTaskSelector(client, mob, task_list_index, task_list);
 		}
 		else
 		{
@@ -827,6 +824,31 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 	}
 
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskSelectWindow, buf);
+	client->QueuePacket(outapp.get());
+}
+
+void TaskManager::SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list)
+{
+	LogTasks("SendSharedTaskSelector for [{}] Tasks", task_count);
+
+	// request timer is only set when shared task selection shown (not for failed validations)
+	client->StartTaskRequestCooldownTimer();
+
+	SerializeBuffer buf;
+
+	buf.WriteUInt32(task_count); // number of tasks
+	// shared task selection (live doesn't mix types) makes client send shared task specific opcode for accepts
+	buf.WriteUInt32(static_cast<uint32_t>(TaskType::Shared));
+	buf.WriteUInt32(mob->GetID()); // task giver entity id
+
+	for (int i = 0; i < task_count; ++i)
+	{
+		int task_id = task_list[i];
+		buf.WriteUInt32(task_id);
+		m_task_data[task_id]->SerializeSelector(buf, client->ClientVersion());
+	}
+
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_SharedTaskSelectWindow, buf);
 	client->QueuePacket(outapp.get());
 }
 
