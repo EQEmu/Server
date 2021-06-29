@@ -210,7 +210,7 @@ bool TaskManager::LoadTasks(int single_task)
 		}
 
 		// set activity data
-		activity_data->activity_type        = task_activity.activitytype;
+		activity_data->activity_type        = static_cast<TaskActivityType>(task_activity.activitytype);
 		activity_data->target_name          = task_activity.target_name;
 		activity_data->item_list            = task_activity.item_list;
 		activity_data->skill_list           = task_activity.skill_list;
@@ -242,7 +242,7 @@ bool TaskManager::LoadTasks(int single_task)
 			task_id,
 			activity_id,
 			m_task_data[task_id]->activity_count,
-			activity_data->activity_type,
+			static_cast<int32_t>(activity_data->activity_type),
 			activity_data->goal_id,
 			activity_data->goal_method,
 			activity_data->goal_count,
@@ -850,7 +850,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 			++activity_index) {
 			buf.WriteUInt32(activity_index); // ActivityNumber
 			auto &activity = m_task_data[task_list[task_index]]->activity_information[activity_index];
-			buf.WriteUInt32(activity.activity_type);
+			buf.WriteUInt32(static_cast<uint32_t>(activity.activity_type));
 			buf.WriteUInt32(0); // solo, group, raid?
 			buf.WriteString(activity.target_name); // max length 64, "target name" so like loot x foo from bar (this is bar)
 			buf.WriteString(activity.item_list); // max length 64 in these clients
@@ -933,7 +933,7 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 		for (int j = 0; j < m_task_data[task_list[i]]->activity_count; ++j) {
 			buf.WriteUInt32(j);                // ActivityNumber
 			auto &activity = m_task_data[task_list[i]]->activity_information[j];
-			buf.WriteUInt32(activity.activity_type);                // ActivityType
+			buf.WriteUInt32(static_cast<uint32_t>(activity.activity_type));
 			buf.WriteUInt32(0);                // solo, group, raid?
 			buf.WriteString(activity.target_name);    // max length 64, "target name" so like loot x foo from bar (this is bar)
 
@@ -1000,7 +1000,7 @@ void TaskManager::ExplainTask(Client *client, int task_id)
 		sprintf(ptr, "Act: %3i: ", i);
 		ptr = ptr + strlen(ptr);
 		switch (m_task_data[task_id]->activity_information[i].activity_type) {
-			case ActivityDeliver:
+			case TaskActivityType::Deliver:
 				sprintf(ptr, "Deliver");
 				break;
 		}
@@ -1140,12 +1140,12 @@ void TaskManager::SendTaskActivityLong(
 
 	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
 	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((m_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
-		m_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
-		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].activity_type);
+	if ((static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) > 0) &&
+		static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) < 100) {
+		buf.WriteUInt32(static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type));
 	}
 	else {
-		buf.WriteUInt32(ActivityCastOn);
+		buf.WriteUInt32(static_cast<uint32_t>(TaskActivityType::CastOn));
 	} // w/e!
 
 	buf.WriteUInt32(optional);
@@ -1154,7 +1154,7 @@ void TaskManager::SendTaskActivityLong(
 	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].target_name); // target name string
 	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
 
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
 		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
 	}
 	else {
@@ -1174,7 +1174,7 @@ void TaskManager::SendTaskActivityLong(
 
 	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override);
 
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
 		buf.WriteUInt32(client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id));
 	}
 	else {
@@ -1212,12 +1212,12 @@ void TaskManager::SendTaskActivityNew(
 
 	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
 	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((m_task_data[task_id]->activity_information[activity_id].activity_type > 0) &&
-		m_task_data[task_id]->activity_information[activity_id].activity_type < 100) {
-		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].activity_type);
+	if ((static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) > 0) &&
+		static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) < 100) {
+		buf.WriteUInt32(static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type));
 	}
 	else {
-		buf.WriteUInt32(ActivityCastOn);
+		buf.WriteUInt32(static_cast<uint32_t>(TaskActivityType::CastOn));
 	} // w/e!
 
 	buf.WriteUInt8(optional);
@@ -1229,7 +1229,7 @@ void TaskManager::SendTaskActivityNew(
 	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
 
 	// Goal Count
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
 		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
 	}
 	else {
@@ -1247,7 +1247,7 @@ void TaskManager::SendTaskActivityNew(
 
 	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override); // description override
 
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != ActivityGiveCash) {
+	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
 		buf.WriteUInt32(
 			client->GetTaskActivityDoneCount(
 				m_task_data[task_id]->type,

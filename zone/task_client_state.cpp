@@ -100,7 +100,7 @@ void ClientTaskState::SendTaskHistory(Client *client, int task_index)
 	for (int i = 0; i < p_task_data->activity_count; i++) {
 		if (m_completed_tasks[adjusted_task_index].activity_done[i]) {
 			task_history_reply_data_1 = (TaskHistoryReplyData1_Struct *) reply;
-			task_history_reply_data_1->ActivityType = p_task_data->activity_information[i].activity_type;
+			task_history_reply_data_1->ActivityType = static_cast<uint32_t>(p_task_data->activity_information[i].activity_type);
 			reply = (char *) task_history_reply_data_1 + sizeof(TaskHistoryReplyData1_Struct);
 			VARSTRUCT_ENCODE_STRING(reply, p_task_data->activity_information[i].target_name.c_str());
 			VARSTRUCT_ENCODE_STRING(reply, p_task_data->activity_information[i].item_list.c_str());
@@ -577,15 +577,15 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 
 void ClientTaskState::UpdateTasksOnKill(Client *client, int npc_type_id)
 {
-	UpdateTasksByNPC(client, ActivityKill, npc_type_id);
+	UpdateTasksByNPC(client, TaskActivityType::Kill, npc_type_id);
 }
 
 bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
 {
-	return UpdateTasksByNPC(client, ActivitySpeakWith, npc_type_id);
+	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id);
 }
 
-bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int npc_type_id)
+bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id)
 {
 
 	int is_updating = false;
@@ -627,7 +627,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, int activity_type, int np
 					client->GetName(),
 					current_task->task_id,
 					activity_id,
-					activity_type,
+					static_cast<int32_t>(activity_type),
 					npc_type_id
 				);
 				continue;
@@ -693,7 +693,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (activity_info->activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -743,7 +743,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 			if (client_activity->activity_state != ActivityActive) {
 				continue;
 			}
-			if (activity_info->activity_type != ActivitySpeakWith) {
+			if (activity_info->activity_type != TaskActivityType::SpeakWith) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -761,7 +761,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 	return 0;
 }
 
-void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_type, int item_id, int count)
+void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activity_type, int item_id, int count)
 {
 
 	// This method updates the client's task activities of the specified type which relate
@@ -773,7 +773,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 
 	LogTasks(
 		"[UpdateTasksForItem] activity_type [{}] item_id [{}]",
-		activity_type,
+		static_cast<int32_t>(activity_type),
 		item_id
 	);
 
@@ -805,7 +805,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 				continue;
 			}
 			// We are only interested in the ActivityType we were called with
-			if (activity_info->activity_type != (int) activity_type) {
+			if (activity_info->activity_type != activity_type) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -813,7 +813,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, ActivityType activity_t
 				LogTasks(
 					"[UpdateTasksForItem] Error: Character [{}] activity_information type [{}] for Item [{}] failed zone check",
 					client->GetName(),
-					activity_type,
+					static_cast<int32_t>(activity_type),
 					item_id
 				);
 				continue;
@@ -875,7 +875,7 @@ void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 				continue;
 			}
 			// We are only interested in explore activities
-			if (activity_info->activity_type != ActivityExplore) {
+			if (activity_info->activity_type != TaskActivityType::Explore) {
 				continue;
 			}
 			if (!activity_info->CheckZone(zone->GetZoneID())) {
@@ -966,8 +966,8 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 			}
 
 			// We are only interested in Deliver activities
-			if (activity_info->activity_type != ActivityDeliver &&
-				activity_info->activity_type != ActivityGiveCash) {
+			if (activity_info->activity_type != TaskActivityType::Deliver &&
+				activity_info->activity_type != TaskActivityType::GiveCash) {
 				continue;
 			}
 			// Is there a zone restriction on the activity_information ?
@@ -985,7 +985,7 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 			}
 			// Is the activity_information related to these items ?
 			//
-			if ((activity_info->activity_type == ActivityGiveCash) && cash) {
+			if ((activity_info->activity_type == TaskActivityType::GiveCash) && cash) {
 				LogTasks("[UpdateTasksOnDeliver] Increment on GiveCash");
 				IncrementDoneCount(client, p_task_data, i, activity_id, cash);
 				is_updated = true;
@@ -1061,7 +1061,7 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 				continue;
 			}
 			// We are only interested in touch activities
-			if (activity_info->activity_type != ActivityTouch) {
+			if (activity_info->activity_type != TaskActivityType::Touch) {
 				continue;
 			}
 			if (activity_info->goal_method != METHODSINGLEID) {

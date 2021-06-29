@@ -23,9 +23,28 @@ typedef enum {
 	METHODQUEST    = 2
 } TaskMethodType;
 
+enum class TaskActivityType : int32_t // task element/objective
+{
+	Unknown    = -1, // hidden
+	None       = 0,
+	Deliver    = 1,
+	Kill       = 2,
+	Loot       = 3,
+	SpeakWith  = 4,
+	Explore    = 5,
+	TradeSkill = 6,
+	Fish       = 7,
+	Forage     = 8,
+	CastOn     = 9,
+	SkillOn    = 10,
+	Touch      = 11,
+	Collect    = 13,
+	GiveCash   = 100
+};
+
 struct ActivityInformation {
 	int              step_number;
-	int              activity_type;
+	TaskActivityType activity_type;
 	std::string      target_name; // name mob, location -- default empty
 	std::string      item_list; // likely defaults to empty
 	std::string      skill_list; // IDs ; separated -- default -1
@@ -101,22 +120,6 @@ typedef enum {
 	ActivityActive    = 1,
 	ActivityCompleted = 2
 }                  ActivityState;
-
-typedef enum {
-	ActivityDeliver    = 1,
-	ActivityKill       = 2,
-	ActivityLoot       = 3,
-	ActivitySpeakWith  = 4,
-	ActivityExplore    = 5,
-	ActivityTradeSkill = 6,
-	ActivityFish       = 7,
-	ActivityForage     = 8,
-	ActivityCastOn     = 9,
-	ActivitySkillOn    = 10,
-	ActivityTouch      = 11,
-	ActivityCollect    = 13,
-	ActivityGiveCash   = 100
-}                  ActivityType;
 
 struct ClientActivityInformation {
 	int           activity_id;

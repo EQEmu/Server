@@ -33,9 +33,9 @@ public:
 	void CancelAllTasks(Client *client);
 	void RemoveTask(Client *client, int sequence_number, TaskType task_type);
 	void RemoveTaskByTaskID(Client *client, uint32 task_id);
-	bool UpdateTasksByNPC(Client *client, int activity_type, int npc_type_id);
+	bool UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id);
 	void UpdateTasksOnKill(Client *client, int npc_type_id);
-	void UpdateTasksForItem(Client *client, ActivityType activity_type, int item_id, int count = 1);
+	void UpdateTasksForItem(Client *client, TaskActivityType activity_type, int item_id, int count = 1);
 	void UpdateTasksOnExplore(Client *client, int explore_id);
 	bool UpdateTasksOnSpeakWith(Client *client, int npc_type_id);
 	bool UpdateTasksOnDeliver(Client *client, std::list<EQ::ItemInstance *> &items, int cash, int npc_type_id);
