@@ -1253,8 +1253,7 @@ void ClientTaskState::IncrementDoneCount(
 			client,
 			info->task_id,
 			activity_id,
-			task_index,
-			task_information->activity_information[activity_id].optional
+			task_index
 		);
 		task_manager->SaveClientState(client, this);
 	}

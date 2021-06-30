@@ -974,35 +974,15 @@ void TaskManager::SendTaskActivityShort(Client *client, int task_id, int activit
 {
 	// This activity_information Packet is sent for activities that have not yet been unlocked and appear as ???
 	// in the client.
-
-	TaskActivityShort_Struct *task_activity_short;
-	if (client->ClientVersionBit() & EQ::versions::maskRoFAndLater) {
-		auto outapp = new EQApplicationPacket(OP_TaskActivity, 25);
-		outapp->WriteUInt32(client_task_index);
-		outapp->WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
-		outapp->WriteUInt32(task_id);
-		outapp->WriteUInt32(activity_id);
-		outapp->WriteUInt32(0);
-		outapp->WriteUInt32(0xffffffff);
-		outapp->WriteUInt8(0);
-		client->FastQueuePacket(&outapp);
-
-		return;
-	}
-
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, sizeof(TaskActivityShort_Struct));
-
-	task_activity_short = (TaskActivityShort_Struct *) outapp->pBuffer;
-	task_activity_short->TaskSequenceNumber = client_task_index;
-	task_activity_short->unknown2           = static_cast<uint32>(m_task_data[task_id]->type);
-	task_activity_short->TaskID             = task_id;
-	task_activity_short->ActivityID         = activity_id;
-	task_activity_short->unknown3           = 0x000000;
-	task_activity_short->ActivityType       = 0xffffffff;
-	task_activity_short->unknown4           = 0x00000000;
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskActivity, 25);
+	outapp->WriteUInt32(client_task_index);
+	outapp->WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
+	outapp->WriteUInt32(task_id);
+	outapp->WriteUInt32(activity_id);
+	outapp->WriteUInt32(0);
+	outapp->WriteUInt32(0xffffffff);
+	outapp->WriteUInt8(m_task_data[task_id]->activity_information[activity_id].optional ? 1 : 0);
+	client->QueuePacket(outapp.get());
 }
 
 void TaskManager::SendTaskActivityLong(
@@ -1010,85 +990,6 @@ void TaskManager::SendTaskActivityLong(
 	int task_id,
 	int activity_id,
 	int client_task_index,
-	bool optional,
-	bool task_complete
-)
-{
-
-	if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		SendTaskActivityNew(client, task_id, activity_id, client_task_index, optional, task_complete);
-		return;
-	}
-
-	SerializeBuffer buf(100);
-
-	buf.WriteUInt32(client_task_index);
-	buf.WriteUInt32(static_cast<uint32>(m_task_data[task_id]->type));
-	buf.WriteUInt32(task_id);
-	buf.WriteUInt32(activity_id);
-	buf.WriteUInt32(0); // unknown3
-
-	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
-	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) > 0) &&
-		static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) < 100) {
-		buf.WriteUInt32(static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type));
-	}
-	else {
-		buf.WriteUInt32(static_cast<uint32_t>(TaskActivityType::CastOn));
-	} // w/e!
-
-	buf.WriteUInt32(optional);
-	buf.WriteUInt32(0);        // solo, group, raid
-
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].target_name); // target name string
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
-
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
-		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
-	}
-	else {
-		// For our internal type GiveCash, where the goal count has the amount of cash that must be given,
-		// we don't want the donecount and goalcount fields cluttered up with potentially large numbers, so we just
-		// send a goalcount of 1, and a bit further down, a donecount of 1 if the activity_information is complete, 0 otherwise.
-		// The text3 field should decribe the exact activity_information goal, e.g. give 3500gp to Hasten Bootstrutter.
-		buf.WriteUInt32(1);
-	}
-
-	buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].skill_id);
-	buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].spell_id);
-	buf.WriteUInt32(
-		m_task_data[task_id]->activity_information[activity_id].zone_ids.empty() ? 0
-			: m_task_data[task_id]->activity_information[activity_id].zone_ids.front());
-	buf.WriteUInt32(0);
-
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override);
-
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
-		buf.WriteUInt32(client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id));
-	}
-	else {
-		// For internal activity_information types, done_count is either 1 if the activity_information is complete, 0 otherwise.
-		buf.WriteUInt32((client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id) >=
-						 m_task_data[task_id]->activity_information[activity_id].goal_count));
-	}
-
-	buf.WriteUInt32(1); // unknown
-
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
-
-}
-
-// Used only by RoF+ Clients
-void TaskManager::SendTaskActivityNew(
-	Client *client,
-	int task_id,
-	int activity_id,
-	int client_task_index,
-	bool optional,
 	bool task_complete
 )
 {
@@ -1100,66 +1001,13 @@ void TaskManager::SendTaskActivityNew(
 	buf.WriteUInt32(activity_id);
 	buf.WriteUInt32(0);        // unknown3
 
-	// We send our 'internal' types as ActivityCastOn. text3 should be set to the activity_information description, so it makes
-	// no difference to the client. All activity_information updates will be done based on our interal activity_information types.
-	if ((static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) > 0) &&
-		static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type) < 100) {
-		buf.WriteUInt32(static_cast<uint32_t>(m_task_data[task_id]->activity_information[activity_id].activity_type));
-	}
-	else {
-		buf.WriteUInt32(static_cast<uint32_t>(TaskActivityType::CastOn));
-	} // w/e!
+	const auto& activity = m_task_data[task_id]->activity_information[activity_id];
+	int done_count = client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id);
 
-	buf.WriteUInt8(optional);
-	buf.WriteUInt32(0);        // solo, group, raid
+	activity.SerializeObjective(buf, client->ClientVersion(), done_count);
 
-	// One of these unknown fields maybe related to the 'Use On' activity_information types
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].target_name); // target name string
-
-	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].item_list); // item name list
-
-	// Goal Count
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
-		buf.WriteUInt32(m_task_data[task_id]->activity_information[activity_id].goal_count);
-	}
-	else {
-		buf.WriteUInt32(1);
-	}    // GoalCount
-
-	// skill ID list ; separated
-	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].skill_list);
-
-	// spelll ID list ; separated -- unsure wtf we're doing here
-	buf.WriteLengthString(m_task_data[task_id]->activity_information[activity_id].spell_list);
-
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].zones);
-	buf.WriteUInt32(0);        // unknown7
-
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].description_override); // description override
-
-	if (m_task_data[task_id]->activity_information[activity_id].activity_type != TaskActivityType::GiveCash) {
-		buf.WriteUInt32(
-			client->GetTaskActivityDoneCount(
-				m_task_data[task_id]->type,
-				client_task_index,
-				activity_id
-			));    // done_count
-	}
-	else {
-		// For internal activity_information types, done_count is either 1 if the activity_information is complete, 0 otherwise.
-		buf.WriteUInt32((client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id) >=
-						 m_task_data[task_id]->activity_information[activity_id].goal_count));
-	}
-
-	buf.WriteUInt8(1);    // unknown9
-
-	buf.WriteString(m_task_data[task_id]->activity_information[activity_id].zones);
-
-	auto outapp = new EQApplicationPacket(OP_TaskActivity, buf);
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
-
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskActivity, buf);
+	client->QueuePacket(outapp.get());
 }
 
 void TaskManager::SendActiveTaskToClient(
@@ -1208,7 +1056,6 @@ void TaskManager::SendActiveTaskToClient(
 					task_id,
 					activity_id,
 					fixed_index,
-					m_task_data[task_id]->activity_information[activity_id].optional,
 					task_complete
 				);
 			}
@@ -1218,7 +1065,6 @@ void TaskManager::SendActiveTaskToClient(
 					task_id,
 					activity_id,
 					fixed_index,
-					m_task_data[task_id]->activity_information[activity_id].optional,
 					0
 				);
 			}
@@ -1300,16 +1146,10 @@ void TaskManager::SendSingleActiveTaskToClient(
 					 activity_id,
 					 task_complete);
 			if (activity_id == GetActivityCount(task_id) - 1) {
-				SendTaskActivityLong(
-					client, task_id, activity_id, task_info.slot,
-					m_task_data[task_id]->activity_information[activity_id].optional, task_complete
-				);
+				SendTaskActivityLong(client, task_id, activity_id, task_info.slot, task_complete);
 			}
 			else {
-				SendTaskActivityLong(
-					client, task_id, activity_id, task_info.slot,
-					m_task_data[task_id]->activity_information[activity_id].optional, 0
-				);
+				SendTaskActivityLong(client, task_id, activity_id, task_info.slot, 0);
 			}
 		}
 		else {

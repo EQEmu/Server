@@ -57,15 +57,6 @@ public:
 		int task_id,
 		int activity_id,
 		int client_task_index,
-		bool optional,
-		bool task_complete = false
-	);
-	void SendTaskActivityNew(
-		Client *client,
-		int task_id,
-		int activity_id,
-		int client_task_index,
-		bool optional,
 		bool task_complete = false
 	);
 	void SendCompletedTasksToClient(Client *c, ClientTaskState *client_task_state);
