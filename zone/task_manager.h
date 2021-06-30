@@ -31,7 +31,6 @@ public:
 	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
 	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
 	void SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list);
-	void SendTaskSelectorNew(Client *client, Mob *mob, int task_count, int *task_list);
 	bool ValidateLevel(int task_id, int player_level);
 	std::string GetTaskName(uint32 task_id);
 	TaskType GetTaskType(uint32 task_id);

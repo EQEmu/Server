@@ -45,11 +45,11 @@ enum class TaskActivityType : int32_t // task element/objective
 struct ActivityInformation {
 	int              step_number;
 	TaskActivityType activity_type;
-	std::string      target_name; // name mob, location -- default empty
+	std::string      target_name; // name mob, location -- default empty, max length 64
 	std::string      item_list; // likely defaults to empty
 	std::string      skill_list; // IDs ; separated -- default -1
 	std::string      spell_list; // IDs ; separated -- default 0
-	std::string      description_override; // overrides auto generated description -- default empty
+	std::string      description_override; // overrides auto generated description -- default empty, max length 128
 	int              skill_id; // older clients, first id from above
 	int              spell_id; // older clients, first id from above
 	int              goal_id;
@@ -57,7 +57,7 @@ struct ActivityInformation {
 	int              goal_count;
 	int              deliver_to_npc;
 	std::vector<int> zone_ids;
-	std::string      zones; // IDs ; searated, ZoneID is the first in this list for older clients -- default empty string
+	std::string      zones; // IDs ; separated, ZoneID is the first in this list for older clients -- default empty string, max length 64
 	bool             optional;
 
 	inline bool CheckZone(int zone_id)
@@ -66,6 +66,36 @@ struct ActivityInformation {
 			return true;
 		}
 		return std::find(zone_ids.begin(), zone_ids.end(), zone_id) != zone_ids.end();
+	}
+
+	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
+	{
+		out.WriteInt32(static_cast<int32_t>(activity_type));
+		out.WriteInt32(0); // solo/group/raid request type? (no longer in live)
+		out.WriteString(target_name); // target name used in objective type string (max 64)
+
+		if (client_version >= EQ::versions::ClientVersion::RoF)
+		{
+			out.WriteLengthString(item_list);  // used in objective type string (can be empty for none)
+			out.WriteInt32(activity_type == TaskActivityType::GiveCash ? 1 : goal_count);
+			out.WriteLengthString(skill_list); // used in SkillOn objective type string, "-1" for none
+			out.WriteLengthString(spell_list); // used in CastOn objective type string, "0" for none
+			out.WriteString(zones);            // used in objective zone column and task select "begins in" (may have multiple, "0" for "unknown zone", empty for "ALL")
+		}
+		else
+		{
+			out.WriteString(item_list);
+			out.WriteInt32(activity_type == TaskActivityType::GiveCash ? 1 : goal_count);
+			out.WriteInt32(skill_id);
+			out.WriteInt32(spell_id);
+			out.WriteInt32(zone_ids.empty() ? 0 : zone_ids.front());
+		}
+
+		out.WriteString(description_override);
+
+		if (client_version >= EQ::versions::ClientVersion::RoF) {
+			out.WriteString(zones); // serialized again after description (seems unused)
+		}
 	}
 };
 
@@ -113,6 +143,30 @@ struct TaskInformation {
 	short               max_level{};
 	bool                repeatable{};
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
+
+	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
+	{
+		if (client_version != EQ::versions::ClientVersion::Titanium) {
+			out.WriteFloat(1.0f); // adjustment (affects color)
+		}
+
+		out.WriteUInt32(duration);    // task duration (seconds) (0: task_duration_code used, "Unlimited" on live)
+		out.WriteUInt32(static_cast<int>(duration_code)); // 1: Short 2: Medium 3: Long anything else Unlimited (no longer in live)
+		out.WriteString(title);       // max 64 with null
+		out.WriteString(description); // max 4000 with null
+
+		if (client_version != EQ::versions::ClientVersion::Titanium) {
+			out.WriteUInt8(0); // 0: no rewards 1: enables "Reward Preview" button
+		}
+
+		// selector only needs to send the first objective to fill description starting zone
+		out.WriteUInt32(std::min(activity_count, 1)); // number of task objectives
+		if (activity_count > 0)
+		{
+			out.WriteUInt32(0); // objective index
+			activity_information[0].SerializeSelector(out, client_version);
+		}
+	}
 };
 
 typedef enum {

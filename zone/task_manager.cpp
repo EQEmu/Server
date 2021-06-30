@@ -774,104 +774,7 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 // sends task selector to client
 void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list)
 {
-	if (client->ClientVersion() >= EQ::versions::ClientVersion::RoF) {
-		SendTaskSelectorNew(client, mob, task_count, task_list);
-		return;
-	}
-	// Titanium OpCode: 0x5e7c
 	LogTasks("TaskSelector for [{}] Tasks", task_count);
-	int player_level = client->GetLevel();
-
-	// Check if any of the tasks exist
-	for (int i = 0; i < task_count; i++) {
-		if (m_task_data[task_list[i]] != nullptr) {
-			break;
-		}
-	}
-
-	int valid_task_count = 0;
-
-	for (int i = 0; i < task_count; i++) {
-		if (!ValidateLevel(task_list[i], player_level)) {
-			continue;
-		}
-		if (client->IsTaskActive(task_list[i])) {
-			continue;
-		}
-		if (!IsTaskRepeatable(task_list[i]) && client->IsTaskCompleted(task_list[i])) {
-			continue;
-		}
-
-		valid_task_count++;
-	}
-
-	if (valid_task_count == 0) {
-		return;
-	}
-
-	SerializeBuffer buf(50 * valid_task_count);
-
-	buf.WriteUInt32(valid_task_count);
-	buf.WriteUInt32(2); // task type, live doesn't let you send more than one type, but we do?
-	buf.WriteUInt32(mob->GetID());
-
-	for (int task_index = 0; task_index < task_count; task_index++) {
-		if (!ValidateLevel(task_list[task_index], player_level)) {
-			continue;
-		}
-		if (client->IsTaskActive(task_list[task_index])) {
-			continue;
-		}
-		if (!IsTaskRepeatable(task_list[task_index]) && client->IsTaskCompleted(task_list[task_index])) {
-			continue;
-		}
-
-		buf.WriteUInt32(task_list[task_index]);    // task_id
-
-		// affects color, difficulty?
-		if (client->ClientVersion() != EQ::versions::ClientVersion::Titanium) {
-			buf.WriteFloat(1.0f);
-		}
-		buf.WriteUInt32(m_task_data[task_list[task_index]]->duration);
-		buf.WriteUInt32(static_cast<int>(m_task_data[task_list[task_index]]->duration_code));
-
-		buf.WriteString(m_task_data[task_list[task_index]]->title); // max 64 with null
-		buf.WriteString(m_task_data[task_list[task_index]]->description); // max 4000 with null
-
-		// Has reward set flag
-		if (client->ClientVersion() != EQ::versions::ClientVersion::Titanium) {
-			buf.WriteUInt8(0);
-		}
-
-		buf.WriteUInt32(m_task_data[task_list[task_index]]->activity_count);
-
-		for (int activity_index = 0;
-			activity_index < m_task_data[task_list[task_index]]->activity_count;
-			++activity_index) {
-			buf.WriteUInt32(activity_index); // ActivityNumber
-			auto &activity = m_task_data[task_list[task_index]]->activity_information[activity_index];
-			buf.WriteUInt32(static_cast<uint32_t>(activity.activity_type));
-			buf.WriteUInt32(0); // solo, group, raid?
-			buf.WriteString(activity.target_name); // max length 64, "target name" so like loot x foo from bar (this is bar)
-			buf.WriteString(activity.item_list); // max length 64 in these clients
-			buf.WriteUInt32(activity.goal_count);
-			buf.WriteInt32(activity.skill_id);
-			buf.WriteInt32(activity.spell_id);
-			buf.WriteInt32(activity.zone_ids.empty() ? 0 : activity.zone_ids.front());
-			buf.WriteString(activity.description_override);
-		}
-	}
-
-	auto outapp = new EQApplicationPacket(OP_TaskSelectWindow, buf);
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
-void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, int *task_list)
-{
-	LogTasks("SendTaskSelectorNew for [{}] Tasks", task_count);
-
 	int player_level = client->GetLevel();
 
 	// Check if any of the tasks exist
@@ -919,47 +822,12 @@ void TaskManager::SendTaskSelectorNew(Client *client, Mob *mob, int task_count, 
 			continue;
 		}
 
-		buf.WriteUInt32(task_list[i]);    // task_id
-		buf.WriteFloat(1.0f); // affects color, difficulty?
-		buf.WriteUInt32(m_task_data[task_list[i]]->duration);
-		buf.WriteUInt32(static_cast<int>(m_task_data[task_list[i]]->duration_code));    // 1 = Short, 2 = Medium, 3 = Long, anything else Unlimited
-
-		buf.WriteString(m_task_data[task_list[i]]->title); // max 64 with null
-		buf.WriteString(m_task_data[task_list[i]]->description); // max 4000 with null
-
-		buf.WriteUInt8(0);                // Has reward set flag
-		buf.WriteUInt32(m_task_data[task_list[i]]->activity_count);    // activity_count
-
-		for (int j = 0; j < m_task_data[task_list[i]]->activity_count; ++j) {
-			buf.WriteUInt32(j);                // ActivityNumber
-			auto &activity = m_task_data[task_list[i]]->activity_information[j];
-			buf.WriteUInt32(static_cast<uint32_t>(activity.activity_type));
-			buf.WriteUInt32(0);                // solo, group, raid?
-			buf.WriteString(activity.target_name);    // max length 64, "target name" so like loot x foo from bar (this is bar)
-
-			// this string is item names
-			buf.WriteLengthString(activity.item_list);
-
-			buf.WriteUInt32(activity.goal_count);                // GoalCount
-
-			// this string is skill IDs? probably one of the "use on" tasks
-			buf.WriteLengthString(activity.skill_list);
-
-			// this string is spell IDs? probably one of the "use on" tasks
-			buf.WriteLengthString(activity.spell_list);
-
-			//buf.WriteString(itoa(Tasks[TaskList[i]]->activity_information[activity_id].ZoneID));
-			buf.WriteString(activity.zones);        // Zone number in ascii max length 64, can be multiple with separated by ;
-			buf.WriteString(activity.description_override);    // max length 128 -- overrides the automatic descriptions
-			// this doesn't appear to be shown to the client at all and isn't the same as zones ... defaults to '0' though
-			buf.WriteString(activity.zones);        // Zone number in ascii max length 64, probably can be separated by ; too, haven't found it used
-		}
+		buf.WriteUInt32(task_list[i]); // task_id
+		m_task_data[task_list[i]]->SerializeSelector(buf, client->ClientVersion());
 	}
 
-	auto outapp = new EQApplicationPacket(OP_TaskSelectWindow, buf);
-
-	client->QueuePacket(outapp);
-	safe_delete(outapp);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskSelectWindow, buf);
+	client->QueuePacket(outapp.get());
 }
 
 int TaskManager::GetActivityCount(int task_id)
