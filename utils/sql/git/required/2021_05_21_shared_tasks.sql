@@ -30,4 +30,9 @@ CREATE TABLE `shared_task_dynamic_zones` (
   `shared_task_id` bigint(20) NOT NULL,
   `dynamic_zone_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`shared_task_id`,`dynamic_zone_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `tasks`
+  ADD COLUMN `level_spread` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `maxlevel`,
+  ADD COLUMN `min_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `level_spread`,
+  ADD COLUMN `max_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `min_players`;

@@ -94,7 +94,7 @@ bool TaskManager::LoadTasks(int single_task)
 		}
 
 		// load task data
-		m_task_data[task_id] = new TaskInformation;
+		m_task_data[task_id] = new TaskInformation();
 		m_task_data[task_id]->type              = static_cast<TaskType>(task.type);
 		m_task_data[task_id]->duration          = task.duration;
 		m_task_data[task_id]->duration_code     = static_cast<DurationCode>(task.duration_code);
@@ -108,6 +108,9 @@ bool TaskManager::LoadTasks(int single_task)
 		m_task_data[task_id]->faction_reward    = task.faction_reward;
 		m_task_data[task_id]->min_level         = task.minlevel;
 		m_task_data[task_id]->max_level         = task.maxlevel;
+		m_task_data[task_id]->level_spread      = task.level_spread;
+		m_task_data[task_id]->min_players       = task.min_players;
+		m_task_data[task_id]->max_players       = task.max_players;
 		m_task_data[task_id]->repeatable        = task.repeatable;
 		m_task_data[task_id]->completion_emote  = task.completion_emote;
 		m_task_data[task_id]->activity_count    = 0;
@@ -117,7 +120,7 @@ bool TaskManager::LoadTasks(int single_task)
 		LogTasksDetail(
 			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
 			" reward [{}] rewardid [{}] cashreward [{}] xpreward [{}] rewardmethod [{}] faction_reward [{}] minlevel [{}] "
-			" maxlevel [{}] repeatable [{}] completion_emote [{}]",
+			" maxlevel [{}] level_spread [{}] min_players [{}] max_players [{}] repeatable [{}] completion_emote [{}]",
 			task.id,
 			task.type,
 			task.duration,
@@ -132,6 +135,9 @@ bool TaskManager::LoadTasks(int single_task)
 			task.faction_reward,
 			task.minlevel,
 			task.maxlevel,
+			task.level_spread,
+			task.min_players,
+			task.max_players,
 			task.repeatable,
 			task.completion_emote
 		);

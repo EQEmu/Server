@@ -193,6 +193,9 @@ struct TaskInformation {
 	int                 last_step{};
 	short               min_level{};
 	short               max_level{};
+	int                 level_spread;
+	int                 min_players;
+	int                 max_players;
 	bool                repeatable{};
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
 
