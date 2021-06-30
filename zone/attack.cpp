@@ -1524,7 +1524,7 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
-		if (IsClient() || (HasOwner() && GetOwner()->IsClient())) {
+		if (IsClient() && other->IsClient() || (HasOwner() && GetOwner()->IsClient() && other->IsClient() )) {
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
@@ -2023,7 +2023,7 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 	//Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist)) {
-		if (IsClient() || (HasOwner() && GetOwner()->IsClient())) {
+		if (IsClient() && other->IsClient() || (HasOwner() && GetOwner()->IsClient() && other->IsClient())) {
 			auto& mob_list = entity_list.GetCloseMobList(other);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
