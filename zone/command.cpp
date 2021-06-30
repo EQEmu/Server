@@ -12855,7 +12855,7 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 	if(c) {
 		Client* client_target = (c->GetTarget() ? (c->GetTarget()->IsClient() ? c->GetTarget()->CastToClient() : c) : c);
 		auto Skills = EQ::skills::GetSkillTypeMap();
-		for (auto skills_iter& : Skills) {
+		for (auto& skills_iter : Skills) {
 			auto skill_id = skills_iter.first;
 			auto current_skill_value = (
 				(skill_id >= EQ::skills::IsSpecializedSkill() && skill_id <= EQ::skills::IsSpecializedSkill()) ?
