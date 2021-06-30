@@ -12858,7 +12858,7 @@ void command_max_all_skills(Client *c, const Seperator *sep)
 		for (auto& skills_iter : Skills) {
 			auto skill_id = skills_iter.first;
 			auto current_skill_value = (
-				(skill_id >= EQ::skills::IsSpecializedSkill() && skill_id <= EQ::skills::IsSpecializedSkill()) ?
+				(EQ::skills::IsSpecializedSkill(skill_id)) ?
 				50 :
 				content_db.GetSkillCap(client_target->GetClass(), skill_id, client_target->GetLevel())
 			);
