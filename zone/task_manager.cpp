@@ -691,54 +691,32 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 		return;
 	}
 
-	// get group/raid members for level filtering and to check for existing shared tasks
-	// need to query for character ids since zone group/raid don't store them
-	int party_eqstr_id = SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE;
-	auto characters = CharacterDataRepository::GetWhere(database, fmt::format(
-		"id IN (select charid from group_id where groupid = (select groupid from group_id where charid = {}))",
-		client->CharacterID()
-	));
-
-	if (characters.empty())
-	{
-		party_eqstr_id = SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE;
-		characters = CharacterDataRepository::GetWhere(database, fmt::format(
-			"id IN (select charid from raid_members where raidid = (select raidid from raid_members where charid = {}))",
-			client->CharacterID()
-		));
-	}
-
-	// get lowest and highest level of group/raid members for task filter
-	int lowest_level = client->GetLevel();
-	int highest_level = client->GetLevel();
-	std::vector<uint32_t> character_ids;
-
-	for (const auto& character: characters)
-	{
-		lowest_level = std::min(lowest_level, character.level);
-		highest_level = std::max(highest_level, character.level);
-		character_ids.emplace_back(character.id);
-	}
+	// get group/raid member character data from db (need to query for character ids)
+	auto request = SharedTask::GetRequestCharacters(database, client->CharacterID());
 
 	// check if any group/raid member already has a shared task (already checked solo character)
 	bool validation_failed = false;
-	if (!character_ids.empty())
+	if (request.group_type != SharedTaskRequestGroupType::Solo)
 	{
 		auto shared_task_members = SharedTaskMembersRepository::GetWhere(database,
-			fmt::format("character_id IN ({}) LIMIT 1", fmt::join(character_ids, ",")));
+			fmt::format("character_id IN ({}) LIMIT 1", fmt::join(request.character_ids, ",")));
 
 		if (!shared_task_members.empty())
 		{
 			validation_failed = true;
 
-			auto it = std::find_if(characters.begin(), characters.end(),
+			auto it = std::find_if(request.characters.begin(), request.characters.end(),
 				[&](const CharacterDataRepository::CharacterData& char_data) {
 					return char_data.id == shared_task_members.front().character_id;
 				});
 
-			if (it != characters.end())
+			if (it != request.characters.end())
 			{
-				client->MessageString(Chat::Red, party_eqstr_id, it->name.c_str());
+				if (request.group_type == SharedTaskRequestGroupType::Group) {
+					client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE, it->name.c_str());
+				} else {
+					client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE, it->name.c_str());
+				}
 			}
 		}
 	}
@@ -755,8 +733,8 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 			auto task = tasks[i];
 			if (m_task_data[task] &&
 			    m_task_data[task]->type == TaskType::Shared &&
-			    lowest_level >= m_task_data[task]->min_level &&
-			    (m_task_data[task]->max_level == 0 || highest_level <= m_task_data[task]->max_level))
+			    request.lowest_level >= m_task_data[task]->min_level &&
+			    (m_task_data[task]->max_level == 0 || request.highest_level <= m_task_data[task]->max_level))
 			{
 				task_list[task_list_index++] = task;
 			}

@@ -3,6 +3,7 @@
 
 #include "database.h"
 #include "types.h"
+#include "repositories/character_data_repository.h"
 #include "repositories/tasks_repository.h"
 #include "repositories/task_activities_repository.h"
 #include "repositories/shared_tasks_repository.h"
@@ -32,6 +33,12 @@
 #define ServerOP_SharedTaskInvitePlayer             0x0309 // world -> zone. Sends task invite to player
 #define ServerOP_SharedTaskInviteAcceptedPlayer     0x0310 // zone -> world. Confirming task invite
 #define ServerOP_SharedTaskCreateDynamicZone        0x0311 // zone -> world
+
+enum class SharedTaskRequestGroupType {
+	Solo = 0,
+	Group,
+	Raid
+};
 
 // used in
 // ServerOP_SharedTaskRequest
@@ -63,6 +70,15 @@ struct ServerSharedTaskAttemptRemove_Struct {
 struct SharedTaskMember {
 	uint32      character_id = 0;
 	bool        is_leader    = false;
+};
+
+// used in shared task requests to validate group/raid members
+struct SharedTaskRequestCharacters {
+	int  lowest_level;
+	int  highest_level;
+	SharedTaskRequestGroupType group_type;
+	std::vector<uint32_t> character_ids;
+	std::vector<CharacterDataRepository::CharacterData> characters;
 };
 
 // ServerOP_SharedTaskMemberlist
@@ -124,6 +140,9 @@ struct ServerSharedTaskCreateDynamicZone_Struct {
 
 class SharedTask {
 public:
+	// used in both zone and world validation
+	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
+
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 

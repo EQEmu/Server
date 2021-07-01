@@ -2492,10 +2492,11 @@ void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, Dynamic
 	// dz should be named the version-based zone name (used in choose zone window and dz window on live)
 	auto zone_info = zone_store.GetZone(dz_request.GetZoneID(), dz_request.GetZoneVersion());
 	dz_request.SetName(zone_info.long_name.empty() ? task->title : zone_info.long_name);
-	// todo: dz_request.SetMinPlayers(task->min_players);
-	// todo: dz_request.SetMaxPlayers(task->max_players);
+	dz_request.SetMinPlayers(task->min_players);
+	dz_request.SetMaxPlayers(task->max_players);
 
 	// a task might create a dz from an objective so override dz duration to time remaining
+	// live probably creates the dz with the shared task and just adds members for objectives
 	std::chrono::seconds seconds(TaskTimeLeft(task_id));
 	if (task->duration == 0 || seconds.count() < 0)
 	{

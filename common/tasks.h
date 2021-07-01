@@ -314,6 +314,7 @@ namespace Tasks {
 }
 
 namespace SharedTaskMessage {
+	constexpr uint16 AVG_LVL_LOW                                       = 8553; // You can not be assigned this shared task because your party's average level is too low.
 	constexpr uint16 AVG_LVL_HIGH                                      = 8889; // You can not be assigned this shared task because your party's average level is too high.
 	constexpr uint16 LVL_SPREAD_HIGH                                   = 8890; // You can not be assigned this shared task because your party's level spread is too high.
 	constexpr uint16 PARTY_EXCEED_MAX_PLAYER                           = 8891; // You can not be assigned this shared task because your party exceeds the maximum allowed number of players.

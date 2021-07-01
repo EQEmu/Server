@@ -28,7 +28,7 @@ public:
 
 	// gets group / raid members belonging to requested character
 	// this may change later depending on how shared tasks develop
-	std::vector<SharedTaskMember> GetRequestMembers(uint32 requestor_character_id);
+	std::vector<SharedTaskMember> GetRequestMembers(uint32 requestor_character_id, const std::vector<uint32_t>& character_ids);
 
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
@@ -84,6 +84,7 @@ protected:
 	// store a reference of active invitations that have been sent to players
 	std::vector<SharedTaskActiveInvitation> m_active_invitations{};
 
+	bool CanRequestSharedTask(uint32_t task_id, uint32_t character_id, const SharedTaskRequestCharacters& request);
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
 	void SaveMembers(SharedTask *s, std::vector<SharedTaskMember> members);
 	void SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id);

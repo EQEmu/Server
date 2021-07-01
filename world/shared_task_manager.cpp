@@ -32,80 +32,24 @@ SharedTaskManager *SharedTaskManager::SetContentDatabase(Database *db)
 	return this;
 }
 
-std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(uint32 requestor_character_id)
+std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(
+	uint32 requestor_character_id,
+	const std::vector<uint32_t>& character_ids
+)
 {
 	std::vector<SharedTaskMember> request_members = {};
+	request_members.reserve(character_ids.size());
 
-	// raid
-	auto raid_characters = CharacterDataRepository::GetWhere(
-		*m_database,
-		fmt::format(
-			"id IN (select charid from raid_members where raidid = (select raidid from raid_members where charid = {}))",
-			requestor_character_id
-		)
-	);
+	for (auto &id: character_ids) {
+		SharedTaskMember member = {};
+		member.character_id   = id;
 
-	if (!raid_characters.empty()) {
-		request_members.reserve(raid_characters.size());
-		for (auto &c: raid_characters) {
-			SharedTaskMember member = {};
-			member.character_id   = c.id;
-
-			// if the group member is a leader, make sure we tag it as such
-			if (c.id == requestor_character_id) {
-				member.is_leader = true;
-			}
-
-			request_members.emplace_back(member);
+		// if the solo/raid/group member is a leader, make sure we tag it as such
+		if (id == requestor_character_id) {
+			member.is_leader = true;
 		}
 
-		return request_members;
-	}
-
-	// group
-	auto group_characters = CharacterDataRepository::GetWhere(
-		*m_database,
-		fmt::format(
-			"id IN (select charid from group_id where groupid = (select groupid from group_id where charid = {}))",
-			requestor_character_id
-		)
-	);
-
-	if (!group_characters.empty()) {
-		request_members.reserve(request_members.size());
-		for (auto &c: group_characters) {
-			SharedTaskMember member = {};
-			member.character_id   = c.id;
-
-			// if the group member is a leader, make sure we tag it as such
-			if (c.id == requestor_character_id) {
-				member.is_leader = true;
-			}
-
-			request_members.emplace_back(member);
-		}
-	}
-
-	// if we didn't pull the requested character from the db, let's pull it by now
-	// most shared tasks are not going to be single character / solo for us to typically get here
-	// maybe we're a GM testing a shared task solo
-	bool list_has_leader = false;
-
-	for (auto &m: request_members) {
-		if (m.character_id == requestor_character_id) {
-			list_has_leader = true;
-		}
-	}
-
-	if (!list_has_leader) {
-		auto leader = CharacterDataRepository::FindOne(*m_database, (int) requestor_character_id);
-		if (leader.id != 0) {
-			SharedTaskMember member = {};
-			member.character_id   = leader.id;
-			member.is_leader      = true;
-
-			request_members.emplace_back(member);
-		}
+		request_members.emplace_back(member);
 	}
 
 	return request_members;
@@ -126,7 +70,15 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		);
 	}
 
-	auto request_members = GetRequestMembers(requested_character_id);
+	// shared task validation needs character names and levels (not stored in SharedTaskMember)
+	auto request = SharedTask::GetRequestCharacters(*m_database, requested_character_id);
+
+	if (!CanRequestSharedTask(task.id, requested_character_id, request)) {
+		LogTasksDetail("[AttemptSharedTaskCreation] Shared task validation failed");
+		return;
+	}
+
+	auto request_members = GetRequestMembers(requested_character_id, request.character_ids);
 	if (!request_members.empty()) {
 		for (auto &m: request_members) {
 			LogTasksDetail(
@@ -139,8 +91,6 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	if (request_members.empty()) {
 		LogTasksDetail("[AttemptSharedTaskCreation] No additional request members found... Just leader");
 	}
-
-	// TODO: Additional validation logic here
 
 	// new shared task instance
 	auto new_shared_task = SharedTask{};
@@ -1217,4 +1167,92 @@ void SharedTaskManager::SendMembersMessageID(SharedTask* shared_task, int chat_t
 			character->Server()->SendPacket(pack.get());
 		}
 	}
+}
+
+bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t character_id,
+	const SharedTaskRequestCharacters& request)
+{
+	auto task = GetSharedTaskDataByTaskId(task_id);
+	if (task.id == 0) {
+		return false;
+	}
+
+	// this attempts to follow live validation order
+
+	namespace EQStr = SharedTaskMessage;
+
+	// check if any party members are already in a shared task
+	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
+		fmt::format("character_id IN ({})", fmt::join(request.character_ids, ",")));
+
+	if (!shared_task_members.empty())
+	{
+		// messages for every character already in a shared task
+		for (const auto& member : shared_task_members)
+		{
+			auto it = std::find_if(request.characters.begin(), request.characters.end(),
+				[&](const CharacterDataRepository::CharacterData& char_data) {
+					return char_data.id == member.character_id;
+				});
+
+			if (it != request.characters.end())
+			{
+				if (it->id == character_id) {
+					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_HAVE_ONE);
+				} else if (request.group_type == SharedTaskRequestGroupType::Group) {
+					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_GROUP_HAS_ONE, { it->name });
+				} else {
+					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_RAID_HAS_ONE, { it->name });
+				}
+			}
+		}
+
+		return false;
+	}
+
+	// check if any party member's minimum level is too low (pre-2014 this was average level)
+	if (task.minlevel > 0 && request.lowest_level < task.minlevel)
+	{
+		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::AVG_LVL_LOW);
+		return false;
+	}
+
+	// check if any party member's maximum level is too high (pre-2014 this was average level)
+	if (task.maxlevel > 0 && request.highest_level > task.maxlevel)
+	{
+		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::AVG_LVL_HIGH);
+		return false;
+	}
+
+	// allow gm/dev bypass for minimum player count requirements
+	auto requester = client_list.FindCLEByCharacterID(character_id);
+	bool is_gm = (requester && requester->GetGM());
+
+	// check if party member count is below the minimum
+	if (!is_gm && task.min_players > 0 && request.characters.size() < task.min_players)
+	{
+		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::SHARED_TASK_NOT_MEET_MIN_NUM_PLAYER);
+		return false;
+	}
+
+	// check if party member count is above the maximum
+	// todo: live creates the shared task but truncates members if it exceeds max (sorted by leader and raid group numbers)
+	if (task.max_players > 0 && request.characters.size() > task.max_players)
+	{
+		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::PARTY_EXCEED_MAX_PLAYER);
+		return false;
+	}
+
+	// check if party level spread exceeds task's maximum
+	if (task.level_spread > 0 && (request.highest_level - request.lowest_level) > task.level_spread)
+	{
+		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::LVL_SPREAD_HIGH);
+		return false;
+	}
+
+	// todo: check if any party members have a replay timer for the task (limit 1)
+
+	// todo: check if any party members have a request timer for the task (limit 1)
+
+	return true;
 }
