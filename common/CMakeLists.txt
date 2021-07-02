@@ -166,6 +166,7 @@ SET(repositories
 	repositories/base/base_character_potionbelt_repository.h
 	repositories/base/base_character_skills_repository.h
 	repositories/base/base_character_spells_repository.h
+	repositories/base/base_character_task_timers_repository.h
 	repositories/base/base_character_tasks_repository.h
 	repositories/base/base_char_create_combinations_repository.h
 	repositories/base/base_char_create_point_allocations_repository.h
@@ -335,6 +336,7 @@ SET(repositories
 	repositories/character_potionbelt_repository.h
 	repositories/character_skills_repository.h
 	repositories/character_spells_repository.h
+	repositories/character_task_timers_repository.h
 	repositories/character_tasks_repository.h
 	repositories/char_create_combinations_repository.h
 	repositories/char_create_point_allocations_repository.h

@@ -38,3 +38,14 @@ ALTER TABLE `tasks`
   ADD COLUMN `max_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `min_players`,
   ADD COLUMN `replay_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `completion_emote`,
   ADD COLUMN `request_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `replay_timer_seconds`;
+
+CREATE TABLE `character_task_timers` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `character_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `task_id` int(10) unsigned NOT NULL DEFAULT 0,
+  `timer_type` int(11) NOT NULL DEFAULT 0,
+  `expire_time` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `character_id` (`character_id`),
+  KEY `task_id` (`task_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
