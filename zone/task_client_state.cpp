@@ -2363,6 +2363,39 @@ void ClientTaskState::AcceptNewTask(
 		return;
 	}
 
+	// solo task timer lockout validation
+	if (task->type != TaskType::Shared)
+	{
+		auto task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
+			"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+			client->CharacterID(), task_id
+		));
+
+		if (!task_timers.empty())
+		{
+			auto timer_type = static_cast<TaskTimerType>(task_timers.front().timer_type);
+			auto seconds = task_timers.front().expire_time - std::time(nullptr);
+			auto days  = fmt::format_int(seconds / 86400).str();
+			auto hours = fmt::format_int((seconds / 3600) % 24).str();
+			auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+			// these solo task messages are in SharedTaskMessage for convenience
+			namespace EQStr = SharedTaskMessage;
+			if (timer_type == TaskTimerType::Replay)
+			{
+				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REPLAY_TIMER;
+				client->MessageString(Chat::Red, eqstr_id, days.c_str(), hours.c_str(), mins.c_str());
+			}
+			else if (timer_type == TaskTimerType::Request)
+			{
+				int eqstr_id = EQStr::TASK_ASSIGN_WAIT_REQUEST_TIMER;
+				client->Message(Chat::Red, fmt::format(EQStr::GetEQStr(eqstr_id), days, hours, mins).c_str());
+			}
+
+			return;
+		}
+	}
+
 	// We do it this way, because when the Client cancels a task, it retains the sequence number of the remaining
 	// tasks in it's window, until something causes the TaskDescription packets to be sent again. We could just
 	// resend all the active task data to the client when it cancels a task, but that could be construed as a

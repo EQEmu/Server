@@ -1288,9 +1288,54 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 		return false;
 	}
 
-	// todo: check if any party members have a replay timer for the task (limit 1)
+	// check if any party members have a replay or request timer for the task (limit 1, replay checked first)
+	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(*m_database, fmt::format(
+		"character_id IN ({}) AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+		fmt::join(request.character_ids, ","), task_id
+	));
 
-	// todo: check if any party members have a request timer for the task (limit 1)
+	if (!character_task_timers.empty())
+	{
+		auto timer_type = static_cast<TaskTimerType>(character_task_timers.front().timer_type);
+		auto seconds = character_task_timers.front().expire_time - std::time(nullptr);
+		auto days  = fmt::format_int(seconds / 86400).str();
+		auto hours = fmt::format_int((seconds / 3600) % 24).str();
+		auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+		if (character_task_timers.front().character_id == character_id)
+		{
+			if (timer_type == TaskTimerType::Replay)
+			{
+				client_list.SendCharacterMessageID(character_id, Chat::Red,
+					EQStr::YOU_MUST_WAIT_REPLAY_TIMER, { days, hours, mins });
+			}
+			else if (timer_type == TaskTimerType::Request)
+			{
+				client_list.SendCharacterMessage(character_id, Chat::Red, fmt::format(
+					EQStr::GetEQStr(EQStr::YOU_MUST_WAIT_REQUEST_TIMER), days, hours, mins));
+			}
+		}
+		else
+		{
+			auto it = std::find_if(request.characters.begin(), request.characters.end(),
+				[&](const CharacterDataRepository::CharacterData& char_data) {
+					return char_data.id == character_task_timers.front().character_id;
+				});
+
+			if (it != request.characters.end() && timer_type == TaskTimerType::Replay)
+			{
+				client_list.SendCharacterMessageID(character_id, Chat::Red,
+					EQStr::PLAYER_MUST_WAIT_REPLAY_TIMER, { it->name, days, hours, mins });
+			}
+			else if (it != request.characters.end() && timer_type == TaskTimerType::Request)
+			{
+				client_list.SendCharacterMessage(character_id, Chat::Red, fmt::format(
+					EQStr::GetEQStr(EQStr::PLAYER_MUST_WAIT_REQUEST_TIMER), it->name, days, hours, mins));
+			}
+		}
+
+		return false;
+	}
 
 	return true;
 }
