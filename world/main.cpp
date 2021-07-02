@@ -98,6 +98,7 @@ union semun {
 #include "../zone/data_bucket.h"
 #include "world_server_command_handler.h"
 #include "../common/content/world_content_service.h"
+#include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/merchantlist_temp_repository.h"
 #include "world_store.h"
 #include "world_event_scheduler.h"
@@ -482,6 +483,9 @@ int main(int argc, char **argv)
 	ExpeditionDatabase::PurgeExpiredExpeditions();
 	ExpeditionDatabase::PurgeExpiredCharacterLockouts();
 
+	LogInfo("Purging expired character task timers");
+	CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
+
 	LogInfo("Purging expired instances");
 	database.PurgeExpiredInstances();
 
@@ -693,6 +697,7 @@ int main(int argc, char **argv)
 			database.PurgeExpiredInstances();
 			database.PurgeAllDeletedDataBuckets();
 			ExpeditionDatabase::PurgeExpiredCharacterLockouts();
+			CharacterTaskTimersRepository::DeleteWhere(database, "expire_time <= NOW()");
 		}
 
 		if (EQTimeTimer.Check()) {

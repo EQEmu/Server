@@ -1,6 +1,7 @@
 #include "../common/global_define.h"
 #include "../common/misc_functions.h"
 #include "../common/repositories/character_activities_repository.h"
+#include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/character_tasks_repository.h"
 #include "../common/repositories/completed_tasks_repository.h"
 #include "../common/rulesys.h"
@@ -1244,6 +1245,31 @@ void ClientTaskState::IncrementDoneCount(
 			RewardTask(client, task_information);
 			//RemoveTask(c, TaskIndex);
 
+			// add replay timer from start of task (world adds timers for shared tasks)
+			// todo: shared task replay timers need to be added to members in world (message can still be done here)
+			if (task_information->replay_timer_seconds > 0)
+			{
+				int expire_time = info->accepted_time + task_information->replay_timer_seconds;
+				if (task_information->type != TaskType::Shared)
+				{
+					auto timer = CharacterTaskTimersRepository::NewEntity();
+					timer.character_id = client->CharacterID();
+					timer.task_id      = info->task_id;
+					timer.expire_time  = expire_time;
+					timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+
+					CharacterTaskTimersRepository::InsertOne(database, timer);
+				}
+
+				auto seconds = expire_time - std::time(nullptr);
+				client->Message(Chat::Yellow, fmt::format(
+					SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+					task_information->title,
+					fmt::format_int(seconds / 86400).c_str(),       // days
+					fmt::format_int((seconds / 3600) % 24).c_str(), // hours
+					fmt::format_int((seconds / 60) % 60).c_str()    // minutes
+				).c_str());
+			}
 		}
 
 	}
@@ -2394,6 +2420,35 @@ void ClientTaskState::AcceptNewTask(
 
 	if (task->type == TaskType::Quest) {
 		m_active_task_count++;
+	}
+
+	// add request timer (shared task timers are added to members by world)
+	if (task->request_timer_seconds > 0)
+	{
+		auto expire_time = active_slot->accepted_time + task->request_timer_seconds;
+
+		auto seconds = expire_time - std::time(nullptr);
+		if (seconds > 0) // not already expired
+		{
+			if (task->type != TaskType::Shared)
+			{
+				auto timer = CharacterTaskTimersRepository::NewEntity();
+				timer.character_id = client->CharacterID();
+				timer.task_id      = task_id;
+				timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+				timer.expire_time  = expire_time;
+
+				CharacterTaskTimersRepository::InsertOne(database, timer);
+			}
+
+			client->Message(Chat::Yellow, fmt::format(
+				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REQUEST_TIMER),
+				task->title,
+				fmt::format_int(seconds / 86400).c_str(),       // days
+				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
+				fmt::format_int((seconds / 60) % 60).c_str()    // minutes
+			).c_str());
+		}
 	}
 
 	task_manager->SendSingleActiveTaskToClient(client, *active_slot, false, true);

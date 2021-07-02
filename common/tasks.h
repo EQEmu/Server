@@ -44,6 +44,12 @@ enum class TaskActivityType : int32_t // task element/objective
 	GiveCash   = 100
 };
 
+enum class TaskTimerType
+{
+	Replay = 0,
+	Request
+};
+
 struct ActivityInformation {
 	int              step_number;
 	TaskActivityType activity_type;
@@ -359,8 +365,8 @@ namespace SharedTaskMessage {
 	constexpr uint16 YOU_MAY_NOT_REQUEST_EXPANSION                     = 8943; // You may not request this shared task because you do not have the required expansion.
 	constexpr uint16 PLAYER_MAY_NOT_REQUEST_EXPANSION                  = 8944; // You may not request this shared task because %1 does not have the required expansion.
 	constexpr uint16 TWO_MIN_REQ_TASK_TERMINATED                       = 8945; // If your party does not meet the requirements in two minutes, the shared task will be terminated.
-	constexpr uint16 YOU_MUST_WAIT_TIME_LOCKOUT_TYPE                   = 8946; // You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
-	constexpr uint16 PLAYER_MUST_WAIT_TIME_LOCKOUT_TYPE                = 8947; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
+	constexpr uint16 YOU_MUST_WAIT_REPLAY_TIMER                        = 8946; // You may not request this shared task because you must wait %1d:%2h:%3m before you can do another task of this type.
+	constexpr uint16 PLAYER_MUST_WAIT_REPLAY_TIMER                     = 8947; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can do another task of this type.
 	constexpr uint16 PLAYER_NOW_LEADER                                 = 8948; // %1 is now the leader of your shared task, '%2'.
 	constexpr uint16 HAS_ENDED                                         = 8951; // Your shared task, '%1', has ended.
 	constexpr uint16 YOU_ALREADY_LEADER                                = 8952; // You are already the leader of the shared task.
@@ -384,7 +390,7 @@ namespace SharedTaskMessage {
 	constexpr uint16 CANT_ADD_PLAYER_PARTY_FILTER_REQ_FOR_TASK         = 8973; // You can not add this player because your party would no longer meet the filter requirements for this shared task.
 	constexpr uint16 CANT_ADD_PLAYER_ONE_OF_GROUP_RAID_HAS_TASK        = 8977; // You can not add %1 because they or one of their group or raid members is in another shared task.
 	constexpr uint16 CANT_JOIN_GROUP_ACTIVE_TASK                       = 8978; // You can not join that group because you have an active shared task.
-	constexpr uint16 CANT_ADD_PLAYER_CAUSE_LOCKOUT_TIME                = 8979; // You may not add %1 because they must wait %2d:%3h:%4m before they can do another task of this type.
+	constexpr uint16 CANT_ADD_PLAYER_REPLAY_TIMER                      = 8979; // You may not add %1 because they must wait %2d:%3h:%4m before they can do another task of this type.
 	constexpr uint16 CANT_LOOT_BECAUSE_TASK_LOCKED_BELONG              = 8980; // You may not loot that corpse because you are not in the shared task the corpse belongs to.
 	constexpr uint16 CANT_ADD_PLAYER_BECAUSE_GROUP_RAID_BELONG_TASK    = 8981; // The player could not be added to the raid because they or one of their group members is in a different shared task.
 	constexpr uint16 PLAYER_CANT_ADD_GROUP_BECAUSE_DIFF_TASK           = 8982; // %1 can not be added to the group because they are in a different shared task.
@@ -395,6 +401,39 @@ namespace SharedTaskMessage {
 	constexpr uint16 YOU_NO_CURRENT_REPLAY_TIMERS                      = 8989; // You do not currently have any task replay timers.
 	constexpr uint16 SURE_QUIT_TASK                                    = 8995; // Are you sure you want to quit the task '%1'?
 	constexpr uint16 SURE_REMOVE_SELF_FROM_TASK                        = 8996; // Are you sure you want to remove yourself from the shared task '%1'
+	constexpr uint16 TASK_ASSIGN_WAIT_REQUEST_TIMER                    = 14506; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can request another task of this type.
+	constexpr uint16 REQUEST_TIMER_REMAINING                           = 14507; // '%1' request timer:  %2d:%3h:%4m remaining.
+	constexpr uint16 YOU_MUST_WAIT_REQUEST_TIMER                       = 14508; // You may not request this shared task because you must wait %1d:%2h:%3m before you can request another task of this type.
+	constexpr uint16 RECEIVED_REQUEST_TIMER                            = 14509; // You have received a request timer for '%1': %2d:%3h:%4m remaining.
+	constexpr uint16 RECEIVED_REPLAY_TIMER                             = 14510; // You have received a replay timer for '%1': %2d:%3h:%4m remaining.
+	constexpr uint16 PLAYER_MUST_WAIT_REQUEST_TIMER                    = 14511; // You may not request this shared task because %1 must wait %2d:%3h:%4m before they can request another task of this type.
+	constexpr uint16 CANT_ADD_PLAYER_REQUEST_TIMER                     = 14512; // You may not add %1 because they must wait %2d:%3h:%4m before they can request another task of this type.
+
+	// for eqstrs not in current emu clients (some are also used by non-shared tasks)
+	constexpr auto GetEQStr(uint16 eqstr_id)
+	{
+		switch (eqstr_id)
+		{
+		case SharedTaskMessage::TASK_ASSIGN_WAIT_REQUEST_TIMER:
+			return "This task can not be assigned to you because you must wait {}d:{}h:{}m before you can request another task of this type.";
+		case SharedTaskMessage::REQUEST_TIMER_REMAINING:
+			return "'{}' request timer:  {}d:{}h:{}m remaining.";
+		case SharedTaskMessage::YOU_MUST_WAIT_REQUEST_TIMER:
+			return "You may not request this shared task because you must wait {}d:{}h:{}m before you can request another task of this type.";
+		case SharedTaskMessage::RECEIVED_REQUEST_TIMER:
+			return "You have received a request timer for '{}': {}d:{}h:{}m remaining.";
+		case SharedTaskMessage::RECEIVED_REPLAY_TIMER:
+			return "You have received a replay timer for '{}': {}d:{}h:{}m remaining.";
+		case SharedTaskMessage::PLAYER_MUST_WAIT_REQUEST_TIMER:
+			return "You may not request this shared task because {} must wait {}d:{}h:{}m before they can request another task of this type.";
+		case SharedTaskMessage::CANT_ADD_PLAYER_REQUEST_TIMER:
+			return "You may not add {} because they must wait {}d:{}h:{}m before they can request another task of this type.";
+		default:
+			LogTasks("[GetEQStr] Unhandled eqstr id [{}]", eqstr_id);
+			break;
+		}
+		return "Unknown EQStr";
+	}
 }
 
 #endif //EQEMU_TASKS_H

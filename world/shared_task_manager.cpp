@@ -1,5 +1,6 @@
 #include "shared_task_manager.h"
 #include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/task_activities_repository.h"
 #include "cliententry.h"
 #include "clientlist.h"
@@ -111,6 +112,10 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	// active record
 	new_shared_task.SetDbSharedTask(created_db_shared_task);
 
+	// request timer lockouts
+	std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> task_timers;
+	task_timers.reserve(request_members.size());
+
 	// persist members
 	std::vector<SharedTaskMembersRepository::SharedTaskMembers> shared_task_db_members = {};
 	shared_task_db_members.reserve(request_members.size());
@@ -122,9 +127,23 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		e.shared_task_id = new_shared_task.GetDbSharedTask().id;
 
 		shared_task_db_members.emplace_back(e);
+
+		if (task.request_timer_seconds > 0) {
+			auto timer = CharacterTaskTimersRepository::NewEntity();
+			timer.character_id = m.character_id;
+			timer.task_id      = task.id;
+			timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+			timer.expire_time  = shared_task_entity.accepted_time + task.request_timer_seconds;
+
+			task_timers.emplace_back(timer);
+		}
 	}
 
 	SharedTaskMembersRepository::InsertMany(*m_database, shared_task_db_members);
+
+	if (!task_timers.empty()) {
+		CharacterTaskTimersRepository::InsertMany(*m_database, task_timers);
+	}
 
 	// activity state (memory)
 	std::vector<SharedTaskActivityStateEntry> shared_task_activity_state = {};
@@ -477,6 +496,8 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 			activity_id,
 			done_count
 		);
+
+		// todo: add task replay timer to members on shared task completion
 
 		for (auto &a : shared_task->m_shared_task_activity_state) {
 			if (a.activity_id == activity_id) {
@@ -963,6 +984,22 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 
 	if (!does_member_exist) {
 		members.push_back(new_member);
+
+		// add request timer (validation will prevent non-expired duplicates)
+		if (s->GetTaskData().request_timer_seconds > 0)
+		{
+			auto expire_time = s->GetDbSharedTask().accepted_time + s->GetTaskData().request_timer_seconds;
+			if (expire_time > std::time(nullptr)) // not already expired
+			{
+				auto timer = CharacterTaskTimersRepository::NewEntity();
+				timer.character_id = character_id;
+				timer.task_id      = s->GetDbSharedTask().task_id;
+				timer.timer_type   = static_cast<int>(TaskTimerType::Request);
+				timer.expire_time  = expire_time;
+
+				CharacterTaskTimersRepository::InsertOne(*m_database, timer);
+			}
+		}
 
 		// inform client
 		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id, 0, s->GetDbSharedTask().accepted_time);
