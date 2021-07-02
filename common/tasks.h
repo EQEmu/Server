@@ -197,6 +197,8 @@ struct TaskInformation {
 	int                 min_players;
 	int                 max_players;
 	bool                repeatable{};
+	int                 replay_timer_seconds;
+	int                 request_timer_seconds;
 	ActivityInformation activity_information[MAXACTIVITIESPERTASK];
 
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const

@@ -95,32 +95,35 @@ bool TaskManager::LoadTasks(int single_task)
 
 		// load task data
 		m_task_data[task_id] = new TaskInformation();
-		m_task_data[task_id]->type              = static_cast<TaskType>(task.type);
-		m_task_data[task_id]->duration          = task.duration;
-		m_task_data[task_id]->duration_code     = static_cast<DurationCode>(task.duration_code);
-		m_task_data[task_id]->title             = task.title;
-		m_task_data[task_id]->description       = task.description;
-		m_task_data[task_id]->reward            = task.reward;
-		m_task_data[task_id]->reward_id         = task.rewardid;
-		m_task_data[task_id]->cash_reward       = task.cashreward;
-		m_task_data[task_id]->experience_reward = task.xpreward;
-		m_task_data[task_id]->reward_method     = (TaskMethodType) task.rewardmethod;
-		m_task_data[task_id]->faction_reward    = task.faction_reward;
-		m_task_data[task_id]->min_level         = task.minlevel;
-		m_task_data[task_id]->max_level         = task.maxlevel;
-		m_task_data[task_id]->level_spread      = task.level_spread;
-		m_task_data[task_id]->min_players       = task.min_players;
-		m_task_data[task_id]->max_players       = task.max_players;
-		m_task_data[task_id]->repeatable        = task.repeatable;
-		m_task_data[task_id]->completion_emote  = task.completion_emote;
-		m_task_data[task_id]->activity_count    = 0;
-		m_task_data[task_id]->sequence_mode     = ActivitiesSequential;
-		m_task_data[task_id]->last_step         = 0;
+		m_task_data[task_id]->type                  = static_cast<TaskType>(task.type);
+		m_task_data[task_id]->duration              = task.duration;
+		m_task_data[task_id]->duration_code         = static_cast<DurationCode>(task.duration_code);
+		m_task_data[task_id]->title                 = task.title;
+		m_task_data[task_id]->description           = task.description;
+		m_task_data[task_id]->reward                = task.reward;
+		m_task_data[task_id]->reward_id             = task.rewardid;
+		m_task_data[task_id]->cash_reward           = task.cashreward;
+		m_task_data[task_id]->experience_reward     = task.xpreward;
+		m_task_data[task_id]->reward_method         = (TaskMethodType) task.rewardmethod;
+		m_task_data[task_id]->faction_reward        = task.faction_reward;
+		m_task_data[task_id]->min_level             = task.minlevel;
+		m_task_data[task_id]->max_level             = task.maxlevel;
+		m_task_data[task_id]->level_spread          = task.level_spread;
+		m_task_data[task_id]->min_players           = task.min_players;
+		m_task_data[task_id]->max_players           = task.max_players;
+		m_task_data[task_id]->repeatable            = task.repeatable;
+		m_task_data[task_id]->completion_emote      = task.completion_emote;
+		m_task_data[task_id]->replay_timer_seconds  = task.replay_timer_seconds;
+		m_task_data[task_id]->request_timer_seconds = task.request_timer_seconds;
+		m_task_data[task_id]->activity_count        = 0;
+		m_task_data[task_id]->sequence_mode         = ActivitiesSequential;
+		m_task_data[task_id]->last_step             = 0;
 
 		LogTasksDetail(
 			"[LoadTasks] (Task) task_id [{}] type [{}] () duration [{}] duration_code [{}] title [{}] description [{}] "
 			" reward [{}] rewardid [{}] cashreward [{}] xpreward [{}] rewardmethod [{}] faction_reward [{}] minlevel [{}] "
 			" maxlevel [{}] level_spread [{}] min_players [{}] max_players [{}] repeatable [{}] completion_emote [{}]",
+			" replay_timer_seconds [{}] request_timer_seconds [{}]",
 			task.id,
 			task.type,
 			task.duration,
@@ -139,7 +142,9 @@ bool TaskManager::LoadTasks(int single_task)
 			task.min_players,
 			task.max_players,
 			task.repeatable,
-			task.completion_emote
+			task.completion_emote,
+			task.replay_timer_seconds,
+			task.request_timer_seconds
 		);
 	}
 
