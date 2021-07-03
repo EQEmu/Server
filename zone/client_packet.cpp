@@ -1887,7 +1887,7 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
-		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id);
+		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id, std::time(nullptr));
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
@@ -15480,6 +15480,6 @@ void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
 	);
 
 	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state) {
-		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id);
+		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id, std::time(nullptr));
 	}
 }

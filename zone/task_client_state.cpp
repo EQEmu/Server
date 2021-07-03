@@ -2246,6 +2246,7 @@ void ClientTaskState::AcceptNewTask(
 	Client *client,
 	int task_id,
 	int npc_type_id,
+	time_t accept_time,
 	bool enforce_level_requirement
 )
 {
@@ -2378,7 +2379,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	active_slot->task_id       = task_id;
-	active_slot->accepted_time = time(nullptr);
+	active_slot->accepted_time = static_cast<int>(accept_time);
 	active_slot->updated       = true;
 	active_slot->current_step  = -1;
 

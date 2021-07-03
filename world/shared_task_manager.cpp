@@ -99,7 +99,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	// new shared task db object
 	auto shared_task_entity = SharedTasksRepository::NewEntity();
 	shared_task_entity.task_id       = (int) requested_task_id;
-	shared_task_entity.accepted_time = std::time(nullptr);
+	shared_task_entity.accepted_time = static_cast<int>(std::time(nullptr));
 
 	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
 
@@ -171,7 +171,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	for (auto &m: request_members) {
 		// only requester (leader) receives back the npc context to trigger task accept event
 		uint32_t npc_context_id = m.character_id == requested_character_id ? npc_type_id : 0;
-		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id, npc_context_id);
+		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id, npc_context_id, shared_task_entity.accepted_time);
 		SendSharedTaskMemberList(m.character_id, new_shared_task.GetDbSharedTask().id);
 	}
 
@@ -611,7 +611,7 @@ bool SharedTaskManager::IsSharedTaskLeader(SharedTask *s, uint32 character_id)
 	return false;
 }
 
-void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id)
+void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time)
 {
 	auto p = std::make_unique<ServerPacket>(
 		ServerOP_SharedTaskAcceptNewTask,
@@ -622,6 +622,7 @@ void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint3
 	d->requested_character_id = character_id;
 	d->requested_task_id      = task_id;
 	d->requested_npc_type_id  = npc_context_id;
+	d->accept_time            = accept_time;
 
 	// get requested character zone server
 	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
@@ -964,7 +965,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		members.push_back(new_member);
 
 		// inform client
-		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id, 0);
+		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id, 0, s->GetDbSharedTask().accepted_time);
 
 		// add
 		s->SetMembers(members);

@@ -48,6 +48,7 @@ struct ServerSharedTaskRequest_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
 	uint32 requested_npc_type_id; // original task logic passthrough
+	uint32 accept_time;
 };
 
 // ServerOP_SharedTaskInvitePlayer

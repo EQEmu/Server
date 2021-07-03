@@ -50,7 +50,7 @@ public:
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
 
 	bool IsSharedTaskLeader(SharedTask *s, uint32 character_id);
-	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id);
+	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
 	void SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
