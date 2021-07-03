@@ -15432,11 +15432,10 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 
 	auto *r = (SharedTaskInviteResponse_Struct *) app->pBuffer;
 	LogTasks(
-		"[SharedTaskInviteResponse] unknown00 [{}] invite_id [{}] accepted [{}] padding [{}]",
+		"[SharedTaskInviteResponse] unknown00 [{}] invite_id [{}] accepted [{}]",
 		r->unknown00,
 		r->invite_id,
-		r->accepted,
-		r->padding
+		r->accepted
 	);
 
 	// TODO: Inform original client we rejected if we did not accept
