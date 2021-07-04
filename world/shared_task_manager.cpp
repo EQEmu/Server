@@ -207,6 +207,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 void SharedTaskManager::AttemptSharedTaskRemoval(
 	uint32 requested_task_id,
 	uint32 requested_character_id,
+	bool remove_everyone,
 	bool remove_from_db // inherited from zone logic - we're just passing through
 )
 {
@@ -223,7 +224,21 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 	if (t) {
 
 		// make sure the one requesting is leader before removing everyone and deleting the shared task
-		if (IsSharedTaskLeader(t, requested_character_id)) {
+		if (remove_everyone) {
+			// todo: this is ugly and needs cleaned up, need leader name for message though
+			if (!IsSharedTaskLeader(t, requested_character_id)) {
+				for (auto &m: t->GetMembers()) {
+					if (m.is_leader) {
+						auto c = CharacterDataRepository::FindOne(*m_database, m.character_id);
+						if (c.id != 0) {
+							client_list.SendCharacterMessageID(requested_character_id, Chat::Red,
+								SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { c.name });
+						}
+						break;
+					}
+				}
+				return;
+			}
 			LogTasksDetail(
 				"[AttemptSharedTaskRemoval] Leader [{}]",
 				requested_character_id
@@ -243,6 +258,9 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 					remove_from_db
 				);
 			}
+
+			client_list.SendCharacterMessageID(requested_character_id, Chat::Red,
+				SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { "Everyone", task.title });
 
 			for (const auto& dz_id : t->dynamic_zone_ids) {
 				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);

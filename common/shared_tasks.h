@@ -64,6 +64,7 @@ struct ServerSharedTaskInvitePlayer_Struct {
 struct ServerSharedTaskAttemptRemove_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
+	bool   remove_everyone;
 	bool   remove_from_db;
 };
 

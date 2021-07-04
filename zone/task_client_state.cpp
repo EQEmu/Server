@@ -2094,24 +2094,24 @@ void ClientTaskState::CancelAllTasks(Client *client)
 
 	// task
 	// these cancels lock up the client for some reason
-	CancelTask(client, TASKSLOTTASK, TaskType::Task, false);
+	CancelTask(client, TASKSLOTTASK, TaskType::Task, false, false);
 	m_active_task.task_id = TASKSLOTEMPTY;
 
 	// shared task
-	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false);
+	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false, false);
 	m_active_shared_task.task_id = TASKSLOTEMPTY;
 
 	// "quests"
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++)
 		if (m_active_quests[task_index].task_id != TASKSLOTEMPTY) {
-			CancelTask(client, task_index, TaskType::Quest, false);
+			CancelTask(client, task_index, TaskType::Quest, false, false);
 			m_active_quests[task_index].task_id = TASKSLOTEMPTY;
 		}
 
 	// TODO: shared
 }
 
-void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db)
+void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_everyone, bool remove_from_db)
 {
 	LogTasks("CancelTask");
 
@@ -2126,6 +2126,7 @@ void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_t
 		// fill
 		r->requested_character_id = c->CharacterID();
 		r->requested_task_id      = m_active_shared_task.task_id;
+		r->remove_everyone        = remove_everyone;
 		r->remove_from_db         = remove_from_db;
 
 		// send

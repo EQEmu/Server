@@ -1033,13 +1033,14 @@ public:
 	bool HasTaskRequestCooldownTimer(bool message_client = false);
 	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
-	inline void CancelTask(int task_index, TaskType task_type)
+	inline void CancelTask(int task_index, TaskType task_type, bool remove_everyone = false)
 	{
 		if (task_state) {
 			task_state->CancelTask(
 				this,
 				task_index,
-				task_type
+				task_type,
+				remove_everyone
 			);
 		}
 	}
