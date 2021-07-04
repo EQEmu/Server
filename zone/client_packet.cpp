@@ -423,6 +423,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SharedTaskMakeLeader]     = &Client::Handle_OP_SharedTaskMakeLeader;
 	ConnectedOpcodes[OP_SharedTaskInviteResponse] = &Client::Handle_OP_SharedTaskInviteResponse;
 	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
+	ConnectedOpcodes[OP_SharedTaskQuit]           = &Client::Handle_OP_SharedTaskQuit;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -15480,5 +15481,13 @@ void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
 
 	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state) {
 		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id, std::time(nullptr));
+	}
+}
+
+void Client::Handle_OP_SharedTaskQuit(const EQApplicationPacket* app)
+{
+	if (GetTaskState()->HasActiveSharedTask())
+	{
+		CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
 	}
 }
