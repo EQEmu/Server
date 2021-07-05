@@ -935,11 +935,13 @@ void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::strin
 	if (!character.empty()) {
 		int64 character_id = character[0].id;
 
-		// send dialogue window
-		SendSharedTaskInvitePacket(s, character_id);
+		if (CanAddPlayer(s, character_id, character.front().name, false)) {
+			// send dialogue window
+			SendSharedTaskInvitePacket(s, character_id);
 
-		// keep track of active invitations at world
-		QueueActiveInvitation(s->GetDbSharedTask().id, character_id);
+			// keep track of active invitations at world
+			QueueActiveInvitation(s->GetDbSharedTask().id, character_id);
+		}
 	}
 }
 
@@ -1000,7 +1002,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		}
 	}
 
-	if (!does_member_exist) {
+	if (!does_member_exist && CanAddPlayer(s, character_id, {}, true)) {
 		members.push_back(new_member);
 
 		// add request timer (validation will prevent non-expired duplicates)
@@ -1356,4 +1358,143 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 	}
 
 	return true;
+}
+
+bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::string player_name, bool accepted)
+{
+	// this attempts to follow live validation order
+
+	bool allow_invite = true;
+
+	namespace EQStr = SharedTaskMessage;
+
+	// check if task is locked
+	if (s->GetDbSharedTask().is_locked)
+	{
+		SendLeaderMessageID(s, Chat::Red, EQStr::TASK_NOT_ALLOWING_PLAYERS_AT_TIME);
+		allow_invite = false;
+	}
+
+	// check if player is online and in cle (other checks require online)
+	auto cle = client_list.FindCLEByCharacterID(character_id);
+	if (!cle || !cle->Server())
+	{
+		SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_NOT_ONLINE_TO_ADD, { player_name });
+		SendLeaderMessageID(s, Chat::Red, EQStr::COULD_NOT_BE_INVITED, { player_name });
+		return false;
+	}
+
+	player_name = cle->name();
+
+	// check if player is already in a shared task
+	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
+		fmt::format("character_id = {} LIMIT 1", character_id));
+
+	if (!shared_task_members.empty())
+	{
+		auto shared_task_id = shared_task_members.front().shared_task_id;
+		if (shared_task_id == s->GetDbSharedTask().id) {
+			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_ALREADY_MEMBER, { player_name });
+		} else {
+			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_ALREADY_ASSIGNED, { player_name });
+		}
+		allow_invite = false;
+	}
+
+	// check if player has an outstanding invite
+	for (const auto& invite : m_active_invitations)
+	{
+		if (invite.character_id == character_id)
+		{
+			if (invite.shared_task_id == s->GetDbSharedTask().id) {
+				SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_ALREADY_OUTSTANDING_INVITATION_THIS, { player_name });
+			} else {
+				SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_ALREADY_OUTSTANDING_ANOTHER, { player_name });
+			}
+			allow_invite = false;
+			break;
+		}
+	}
+
+	// check if player has a replay or request timer lockout
+	// todo: live allows characters with a request timer to be re-invited if they quit, but only until they zone? (investigate/edge case)
+	auto task_timers = CharacterTaskTimersRepository::GetWhere(*m_database, fmt::format(
+		"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+		character_id, s->GetDbSharedTask().task_id
+	));
+
+	if (!task_timers.empty())
+	{
+		auto timer_type = static_cast<TaskTimerType>(task_timers.front().timer_type);
+		auto seconds = task_timers.front().expire_time - std::time(nullptr);
+		auto days  = fmt::format_int(seconds / 86400).str();
+		auto hours = fmt::format_int((seconds / 3600) % 24).str();
+		auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+		if (timer_type == TaskTimerType::Replay)
+		{
+			SendLeaderMessageID(s, Chat::Red,
+				EQStr::CANT_ADD_PLAYER_REPLAY_TIMER, { player_name, days, hours, mins });
+		}
+		else
+		{
+			SendLeaderMessage(s, Chat::Red, fmt::format(
+				EQStr::GetEQStr(EQStr::CANT_ADD_PLAYER_REQUEST_TIMER), player_name, days, hours, mins));
+		}
+
+		allow_invite = false;
+	}
+
+	// check if task has maximum players
+	if (s->GetMembers().size() >= s->GetTaskData().max_players)
+	{
+		auto max = fmt::format_int(s->GetTaskData().max_players).str();
+		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_PLAYERS, { max });
+		allow_invite = false;
+	}
+
+	// check if task would exceed max level spread
+	auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
+		"id IN (select character_id from shared_task_members where shared_task_id = {})",
+		s->GetDbSharedTask().id));
+
+	int lowest_level = cle->level();
+	int highest_level = cle->level();
+	for (const auto& character : characters)
+	{
+		lowest_level = std::min(lowest_level, character.level);
+		highest_level = std::max(highest_level, character.level);
+	}
+
+	if ((highest_level - lowest_level) > s->GetTaskData().level_spread)
+	{
+		auto max_spread = fmt::format_int(s->GetTaskData().level_spread).str();
+		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, { max_spread });
+		allow_invite = false;
+	}
+
+	// check if player is below minimum level of task (pre-2014 this was average level)
+	if (cle->level() < s->GetTaskData().minlevel)
+	{
+		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_FALL_MIN_AVG_LEVEL);
+		allow_invite = false;
+	}
+
+	// check if player is above maximum level of task (pre-2014 this was average level)
+	if (cle->level() > s->GetTaskData().maxlevel)
+	{
+		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_AVERAGE_LEVEL);
+		allow_invite = false;
+	}
+
+	if (!allow_invite)
+	{
+		if (!accepted) {
+			SendLeaderMessageID(s, Chat::Red, EQStr::COULD_NOT_BE_INVITED, { player_name });
+		} else {
+			SendLeaderMessageID(s, Chat::Red, EQStr::ACCEPTED_OFFER_TO_JOIN_BUT_COULD_NOT, { player_name });
+		}
+	}
+
+	return allow_invite;
 }

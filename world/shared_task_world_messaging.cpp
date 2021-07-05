@@ -218,8 +218,8 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					t->GetDbSharedTask().id
 				);
 
-				shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
 				shared_task_manager.RemoveActiveInvitation(r->shared_task_id, r->source_character_id);
+				shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
 			}
 			break;
 		}
