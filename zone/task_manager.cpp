@@ -1567,62 +1567,7 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		);
 	}
 
-	// shared sync state
-	// this could change to be entirely driven from world via packets later
-	for (auto &character_task: character_tasks) {
-		if (character_task.type == TASK_TYPE_SHARED) {
-			auto st = SharedTaskMembersRepository::GetWhere(
-				database,
-				fmt::format(
-					"character_id = {}",
-					client->CharacterID()
-				)
-			);
-
-			if (!st.empty()) {
-				int64 shared_task_id = st[0].shared_task_id;
-				auto  activities     = SharedTaskActivityStateRepository::GetWhere(
-					database,
-					fmt::format(
-						"shared_task_id = {}",
-						shared_task_id
-					)
-				);
-
-				ClientTaskInformation *task_info = nullptr;
-				task_info = &client_task_state->m_active_shared_task;
-
-				bool      fell_behind_state = false;
-				for (auto &a: activities) {
-
-					LogTasksDetail(
-						"[LoadClientState] shared_task loop local [{}] shared [{}]",
-						task_info->activity[a.activity_id].done_count,
-						a.done_count
-					);
-
-					// we're behind shared task state, update self
-					if (task_info->activity[a.activity_id].done_count < a.done_count) {
-
-						// update done count
-						task_info->activity[a.activity_id].done_count = a.done_count;
-
-						// activity state
-						task_info->activity[a.activity_id].activity_state =
-							(a.completed_time > 0 ? ActivityCompleted : ActivityHidden);
-
-						// set flag to persist later
-						fell_behind_state = true;
-					}
-				}
-
-				// fell behind, force a save of client state
-				if (fell_behind_state) {
-					SaveClientState(client, client_task_state);
-				}
-			}
-		}
-	}
+	SyncClientSharedTaskState(client, client_task_state);
 
 	if (RuleB(TaskSystem, RecordCompletedTasks)) {
 		CompletedTaskInformation completed_task_information{};
@@ -1811,4 +1756,117 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	LogTasksDetail("---", character_id);
 
 	return true;
+}
+
+void TaskManager::SyncClientSharedTaskState(Client *c, ClientTaskState *cts)
+{
+	LogTasksDetail(
+		"[SyncClientSharedTaskState] Syncing client shared task state"
+	);
+
+	SyncClientSharedTaskWithPersistedState(c, cts);
+	SyncClientSharedTaskRemoveLocalIfNotExists(c, cts);
+}
+
+void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts)
+{
+	auto character_tasks = CharacterTasksRepository::GetWhere(
+		database,
+		fmt::format("charid = {} ORDER BY acceptedtime", c->CharacterID())
+	);
+
+	for (auto &character_task: character_tasks) {
+		if (character_task.type == TASK_TYPE_SHARED) {
+			auto st = SharedTaskMembersRepository::GetWhere(
+				database,
+				fmt::format(
+					"character_id = {}",
+					c->CharacterID()
+				)
+			);
+
+			if (!st.empty()) {
+				int64 shared_task_id = st[0].shared_task_id;
+				auto  activities     = SharedTaskActivityStateRepository::GetWhere(
+					database,
+					fmt::format(
+						"shared_task_id = {}",
+						shared_task_id
+					)
+				);
+
+				ClientTaskInformation *shared_task = nullptr;
+				shared_task = &cts->m_active_shared_task;
+
+				// has active shared task
+				if (shared_task) {
+
+					LogTasksDetail(
+						"[SyncClientSharedTaskWithPersistedState] Client [{}] has shared_task, sync with database",
+						c->GetCleanName()
+					);
+
+					bool      fell_behind_state = false;
+					for (auto &a: activities) {
+
+						LogTasksDetail(
+							"[LoadClientState] shared_task loop local [{}] shared [{}]",
+							shared_task->activity[a.activity_id].done_count,
+							a.done_count
+						);
+
+						// we're behind shared task state, update self
+						if (shared_task->activity[a.activity_id].done_count < a.done_count) {
+
+							// update done count
+							shared_task->activity[a.activity_id].done_count = a.done_count;
+
+							// activity state
+							shared_task->activity[a.activity_id].activity_state =
+								(a.completed_time > 0 ? ActivityCompleted : ActivityHidden);
+
+							// set flag to persist later
+							fell_behind_state = true;
+						}
+					}
+
+					// fell behind, force a save of client state
+					if (fell_behind_state) {
+						SaveClientState(c, cts);
+					}
+				}
+			}
+		}
+	}
+}
+
+void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts)
+{
+	ClientTaskInformation *shared_task = nullptr;
+	shared_task = &cts->m_active_shared_task;
+
+	// has active shared task
+	if (shared_task) {
+		auto members = SharedTaskMembersRepository::GetWhere(
+			database,
+			fmt::format(
+				"character_id = {}",
+				c->CharacterID()
+			)
+		);
+
+		// if we don't actually have a membership anywhere, remove ourself locally
+		if (members.empty()) {
+			LogTasksDetail(
+				"[SyncClientSharedTaskRemoveLocalIfNotExists] Client [{}] Shared task doesn't exist in world, removing from local",
+				c->GetCleanName()
+			);
+
+			// remove as active task if doesn't exist
+			cts->m_active_shared_task = {};
+
+			// persist removal from local record
+			SaveClientState(c, cts);
+		}
+	}
 }

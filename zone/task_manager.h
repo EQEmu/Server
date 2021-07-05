@@ -77,6 +77,8 @@ public:
 
 	friend class ClientTaskState;
 
+	// shared tasks
+	void SyncClientSharedTaskState(Client *c, ClientTaskState *cts);
 
 private:
 	TaskGoalListManager  m_goal_list_manager;
@@ -93,6 +95,10 @@ private:
 	);
 
 	void SendActiveTaskToClient(ClientTaskInformation *task, Client *client, int task_index, bool task_complete);
+
+	// shared tasks
+	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
+	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
 };
 
 
