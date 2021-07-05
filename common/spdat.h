@@ -800,18 +800,73 @@ typedef enum {
 #define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
 #define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
-//#define SE_Ff_Override_NotFocusable	460 // 
+//#define SE_Ff_Override_NotFocusable	460 //
 #define SE_ImprovedDamage2				461 // implemented - Increase spell damage by percent (SE_Fc_Damage_%2)
-#define SE_FcDamageAmt2					462 // implemented - Increase spell damage by flat amount (SE_Fc_Damage_Amt2)	
-//#define SE_Shield_Target				463 // 
+#define SE_FcDamageAmt2					462 // implemented - Increase spell damage by flat amount (SE_Fc_Damage_Amt2)
+//#define SE_Shield_Target				463 //
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 //#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
-//#define SE_DS_Mitigation_Amount		467 // 
-//#define SE_DS_Mitigation_Percentage	468 // 
-//#define SE_Chance_Best_in_Spell_Grp   469 //  
-//#define SE_Trigger_Best_in_Spell Grp  470 // 
-//#define SE_Double_Melee_Round			471 // 
+//#define SE_DS_Mitigation_Amount		467 //
+//#define SE_DS_Mitigation_Percentage	468 //
+//#define SE_Chance_Best_in_Spell_Grp   469 //
+//#define SE_Trigger_Best_in_Spell Grp  470 //
+//#define SE_Double_Melee_Round			471 //
+//#define SE_Buy_AA_Rank				472 //
+//#define SE_Double_Backstab_Front		473 //
+//#define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 //
+//#define SE_Trigger_Spell_Non_Item		475 //
+//#define SE_Weapon_Stance				476 //
+//#define SE_Hatelist_To_Top_Index		477 //
+//#define SE_Hatelist_To_Tail_Index		478 //
+//#define SE_Ff_Value_Min				479 //
+//#define SE_Ff_Value_Max				480 //
+//#define SE_Fc_Cast_Spell_On_Land		481 //
+//#define SE_Skill_Base_Damage_Mod		482 //
+//#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 //
+//#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 //
+//#define SE_Ff_CasterClass				485 //
+//#define SE_Ff_Same_Caster				486 //
+//#define SE_Extend_Tradeskill_Cap		487 //
+//#define SE_Defender_Melee_Force_Pct_PC	488 //
+//#define SE_Worn_Endurance_Regen_Cap	489 //
+//#define SE_Ff_ReuseTimeMin			490 //
+//#define SE_Ff_ReuseTimeMax			491 //
+//#define SE_Ff_Endurance_Min			492 //
+//#define SE_Ff_Endurance_Max			493 //
+//#define SE_Pet_Add_Atk				494 //
+//#define SE_Ff_DurationMax				495 //
+//#define SE_Critical_Melee_Damage_Mod_Max	496 //
+//#define SE_Ff_FocusCastProcNoBypass	497 //
+//#define SE_AddExtraAttackPct_1h_Primary	498 //
+//#define SE_AddExtraAttackPct_1h_Secondary	499 //
+//#define SE_Fc_CastTimeMod2			500 //
+//#define SE_Fc_CastTimeAmt				501 //
+//#define SE_Fearstun					502 //
+//#define SE_Melee_Damage_Position_Mod	503 //
+//#define SE_Melee_Damage_Position_Amt	504 //
+//#define SE_Damage_Taken_Position_Mod	505 //
+//#define SE_Damage_Taken_Position_Amt	506 //
+//#define SE_Fc_Amplify_Mod				507 //
+//#define SE_Fc_Amplify_Amt				508 //
+//#define SE_Health_Transfer			509 //
+//#define SE_Fc_ResistIncoming			510 //
+//#define SE_Ff_FocusTimerMin			511 //
+//#define SE_Proc_Timer_Modifier 		512 //
+//#define SE_Mana_Max_Percent			513 //
+//#define SE_Endurance_Max_Percent		514 //
+//#define SE_AC_Avoidance_Max_Percent	515 //
+//#define SE_AC_Mitigation_Max_Percent	516 //
+//#define SE_Attack_Offense_Max_Percent	517 //
+//#define SE_Attack_Accuracy_Max_Percent	518 //
+//#define SE_Luck_Amount				519 //
+//#define SE_Luck_Percent				520 //
+//#define SE_Endurance_Absorb_Pct_Damage	521 //
+//#define SE_Instant_Mana_Pct			522 //
+//#define SE_Instant_Endurance_Pct		523 //
+//#define SE_Duration_HP_Pct			524 //
+//#define SE_Duration_Mana_Pct			525 //
+//#define SE_Duration_Endurance_Pct		526 //
 
 
 // LAST
