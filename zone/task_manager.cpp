@@ -693,7 +693,7 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 	}
 
 	// check if requester already has a shared task (no need to query group/raid members if so)
-	if (client->GetTaskState()->m_active_shared_task.task_id != TASKSLOTEMPTY)
+	if (client->GetTaskState()->HasActiveSharedTask())
 	{
 		client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_HAVE_ONE);
 		return;
