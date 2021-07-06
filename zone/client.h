@@ -1930,6 +1930,8 @@ private:
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
 
+	void Sit();
+
 #ifdef BOTS
 
 public:

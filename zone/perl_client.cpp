@@ -2111,6 +2111,19 @@ XS(XS_Client_IsStanding)
 	XSRETURN(1);
 }
 
+XS(XS_Client_Sit); 
+XS(XS_Client_Sit) {
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Client::Sit(THIS)"); 
+    {
+        Client *THIS;
+        VALIDATE_THIS_IS_CLIENT;
+        THIS->Sit();
+    }
+    XSRETURN_EMPTY;
+}
+
 XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsSitting) {
 	dXSARGS;
@@ -5590,6 +5603,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "IsRaidGrouped"), XS_Client_IsRaidGrouped, file, "$");
 	newXSproto(strcpy(buf, "IsStanding"), XS_Client_IsStanding, file, "$");
 	newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
+	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "IsCrouching"), XS_Client_IsCrouching, file, "$");
 	newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
 	newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
