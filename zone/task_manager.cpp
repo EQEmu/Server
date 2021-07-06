@@ -284,7 +284,7 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		return false;
 	}
 
-	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState %s";
+	const char *ERR_MYSQLERROR = "[TASKS]Error in TaskManager::SaveClientState {}";
 
 	int character_id = client->CharacterID();
 
