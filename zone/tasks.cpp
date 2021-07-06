@@ -119,16 +119,19 @@ void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 	safe_delete(outapp);
 }
 
-bool Client::HasTaskRequestCooldownTimer(bool message_client)
+bool Client::HasTaskRequestCooldownTimer()
 {
 	if (task_request_timer.Check(false))
 	{
 		task_request_timer.Disable();
 	}
 
-	bool has_cooldown = (!GetGM() && task_request_timer.Enabled());
+	return (!GetGM() && task_request_timer.Enabled());
+}
 
-	if (has_cooldown && message_client)
+void Client::SendTaskRequestCooldownTimerMessage()
+{
+	if (HasTaskRequestCooldownTimer())
 	{
 		uint32_t seconds = task_request_timer.GetRemainingTime() / 1000;
 		MessageString(Chat::Yellow, TASK_REQUEST_COOLDOWN_TIMER,
@@ -138,8 +141,6 @@ bool Client::HasTaskRequestCooldownTimer(bool message_client)
 			fmt::format_int(seconds % 60).c_str()  // seconds
 		);
 	}
-
-	return has_cooldown;
 }
 
 void Client::StartTaskRequestCooldownTimer()

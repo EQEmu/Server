@@ -562,7 +562,8 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 
 	// todo: forward to shared task selector validation if set contains a shared task
 
-	if (client->HasTaskRequestCooldownTimer(true)) {
+	if (client->HasTaskRequestCooldownTimer()) {
+		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
 
@@ -651,7 +652,8 @@ void TaskManager::TaskQuestSetSelector(
 		}
 	}
 
-	if (client->HasTaskRequestCooldownTimer(true)) {
+	if (client->HasTaskRequestCooldownTimer()) {
+		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
 
@@ -685,7 +687,8 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 {
 	LogTasks("[UPDATE] SharedTaskSelector called for array size [{}]", count);
 
-	if (count <= 0 || client->HasTaskRequestCooldownTimer(true)) {
+	if (count <= 0 || client->HasTaskRequestCooldownTimer()) {
+		client->SendTaskRequestCooldownTimerMessage();
 		return;
 	}
 

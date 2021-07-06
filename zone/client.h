@@ -1031,7 +1031,8 @@ public:
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
 	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
 	void SendTaskComplete(int task_index);
-	bool HasTaskRequestCooldownTimer(bool message_client = false);
+	bool HasTaskRequestCooldownTimer();
+	void SendTaskRequestCooldownTimerMessage();
 	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
 	inline void CancelTask(int task_index, TaskType task_type, bool remove_everyone = false)
