@@ -5603,7 +5603,6 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "IsRaidGrouped"), XS_Client_IsRaidGrouped, file, "$");
 	newXSproto(strcpy(buf, "IsStanding"), XS_Client_IsStanding, file, "$");
 	newXSproto(strcpy(buf, "IsSitting"), XS_Client_IsSitting, file, "$");
-	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "IsCrouching"), XS_Client_IsCrouching, file, "$");
 	newXSproto(strcpy(buf, "IsTaskActive"), XS_Client_IsTaskActive, file, "$$");
 	newXSproto(strcpy(buf, "IsTaskActivityActive"), XS_Client_IsTaskActivityActive, file, "$$$");
@@ -5701,6 +5700,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetTitleSuffix"), XS_Client_SetTitleSuffix, file, "$$;$");
 	newXSproto(strcpy(buf, "SetZoneFlag"), XS_Client_SetZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
+	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
 	newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
