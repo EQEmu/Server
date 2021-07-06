@@ -1702,9 +1702,14 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 		// if we don't actually have a membership anywhere, remove ourself locally
 		if (members.empty()) {
 			LogTasksDetail(
-				"[SyncClientSharedTaskRemoveLocalIfNotExists] Client [{}] Shared task doesn't exist in world, removing from local",
-				c->GetCleanName()
+				"[SyncClientSharedTaskRemoveLocalIfNotExists] Client [{}] Shared task [{}] doesn't exist in world, removing from local",
+				c->GetCleanName(),
+				cts->m_active_shared_task.task_id
 			);
+
+			std::string delete_where = fmt::format("charid = {} and taskid = {}", c->CharacterID(), cts->m_active_shared_task.task_id);
+			CharacterTasksRepository::DeleteWhere(database, delete_where);
+			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
 
 			// remove as active task if doesn't exist
 			cts->m_active_shared_task = {};
