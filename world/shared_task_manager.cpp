@@ -1446,7 +1446,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	}
 
 	// check if task has maximum players
-	if (s->GetMembers().size() >= s->GetTaskData().max_players)
+	if (s->GetTaskData().max_players > 0 && s->GetMembers().size() >= s->GetTaskData().max_players)
 	{
 		auto max = fmt::format_int(s->GetTaskData().max_players).str();
 		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_PLAYERS, { max });
@@ -1466,7 +1466,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 		highest_level = std::max(highest_level, character.level);
 	}
 
-	if ((highest_level - lowest_level) > s->GetTaskData().level_spread)
+	if (s->GetTaskData().level_spread > 0 && (highest_level - lowest_level) > s->GetTaskData().level_spread)
 	{
 		auto max_spread = fmt::format_int(s->GetTaskData().level_spread).str();
 		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, { max_spread });
@@ -1474,14 +1474,14 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	}
 
 	// check if player is below minimum level of task (pre-2014 this was average level)
-	if (cle->level() < s->GetTaskData().minlevel)
+	if (s->GetTaskData().minlevel > 0 && cle->level() < s->GetTaskData().minlevel)
 	{
 		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_FALL_MIN_AVG_LEVEL);
 		allow_invite = false;
 	}
 
 	// check if player is above maximum level of task (pre-2014 this was average level)
-	if (cle->level() > s->GetTaskData().maxlevel)
+	if (s->GetTaskData().maxlevel > 0 && cle->level() > s->GetTaskData().maxlevel)
 	{
 		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_AVERAGE_LEVEL);
 		allow_invite = false;
