@@ -1454,23 +1454,26 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	}
 
 	// check if task would exceed max level spread
-	auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
-		"id IN (select character_id from shared_task_members where shared_task_id = {})",
-		s->GetDbSharedTask().id));
-
-	int lowest_level = cle->level();
-	int highest_level = cle->level();
-	for (const auto& character : characters)
+	if (s->GetTaskData().level_spread > 0)
 	{
-		lowest_level = std::min(lowest_level, character.level);
-		highest_level = std::max(highest_level, character.level);
-	}
+		auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
+			"id IN (select character_id from shared_task_members where shared_task_id = {})",
+			s->GetDbSharedTask().id));
 
-	if (s->GetTaskData().level_spread > 0 && (highest_level - lowest_level) > s->GetTaskData().level_spread)
-	{
-		auto max_spread = fmt::format_int(s->GetTaskData().level_spread).str();
-		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, { max_spread });
-		allow_invite = false;
+		int lowest_level = cle->level();
+		int highest_level = cle->level();
+		for (const auto& character : characters)
+		{
+			lowest_level = std::min(lowest_level, character.level);
+			highest_level = std::max(highest_level, character.level);
+		}
+
+		if ((highest_level - lowest_level) > s->GetTaskData().level_spread)
+		{
+			auto max_spread = fmt::format_int(s->GetTaskData().level_spread).str();
+			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, { max_spread });
+			allow_invite = false;
+		}
 	}
 
 	// check if player is below minimum level of task (pre-2014 this was average level)
