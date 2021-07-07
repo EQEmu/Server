@@ -34,6 +34,7 @@
 #define ServerOP_SharedTaskInviteAcceptedPlayer     0x0310 // zone -> world. Confirming task invite
 #define ServerOP_SharedTaskCreateDynamicZone        0x0311 // zone -> world
 #define ServerOP_SharedTaskPurgeAllCommand          0x0312 // zone -> world
+#define ServerOP_SharedTaskPlayerList               0x0313 // zone -> world /taskplayerlist command
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -143,6 +144,11 @@ struct ServerSharedTaskCreateDynamicZone_Struct {
 	uint32 task_id;
 	uint32 cereal_size;
 	char   cereal_data[0]; // serialized dz with creation parameters
+};
+
+struct ServerSharedTaskPlayerList_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
 };
 
 class SharedTask {

@@ -425,6 +425,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_SharedTaskInviteResponse] = &Client::Handle_OP_SharedTaskInviteResponse;
 	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
 	ConnectedOpcodes[OP_SharedTaskQuit]           = &Client::Handle_OP_SharedTaskQuit;
+	ConnectedOpcodes[OP_SharedTaskPlayerList]     = &Client::Handle_OP_SharedTaskPlayerList;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -15493,4 +15494,18 @@ void Client::Handle_OP_SharedTaskQuit(const EQApplicationPacket* app)
 void Client::Handle_OP_TaskTimers(const EQApplicationPacket* app)
 {
 	GetTaskState()->ListTaskTimers(this);
+}
+
+void Client::Handle_OP_SharedTaskPlayerList(const EQApplicationPacket* app)
+{
+	if (GetTaskState()->HasActiveSharedTask())
+	{
+		uint32_t size = sizeof(ServerSharedTaskPlayerList_Struct);
+		auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskPlayerList, size);
+		auto buf = reinterpret_cast<ServerSharedTaskPlayerList_Struct*>(pack->pBuffer);
+		buf->source_character_id = CharacterID();
+		buf->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+
+		worldserver.SendPacket(pack.get());
+	}
 }

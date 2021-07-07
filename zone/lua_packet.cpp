@@ -675,7 +675,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("MobRename", static_cast<int>(OP_MobRename)),
 			luabind::value("TaskDescription", static_cast<int>(OP_TaskDescription)),
 			luabind::value("TaskActivity", static_cast<int>(OP_TaskActivity)),
-			luabind::value("TaskMemberList", static_cast<int>(OP_TaskMemberList)),
+			luabind::value("SharedTaskPlayerList", static_cast<int>(OP_SharedTaskPlayerList)),
 			luabind::value("AnnoyingZoneUnknown", static_cast<int>(OP_AnnoyingZoneUnknown)),
 			luabind::value("Some3ByteHPUpdate", static_cast<int>(OP_Some3ByteHPUpdate)),
 			luabind::value("FloatListThing", static_cast<int>(OP_FloatListThing)),

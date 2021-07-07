@@ -10,6 +10,7 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_manager.h"
+#include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/task_activities_repository.h"
 #include "dynamic_zone.h"
 
@@ -260,6 +261,37 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			);
 
 			zoneserver_list.SendPacket(p.get());
+
+			break;
+		}
+		case ServerOP_SharedTaskPlayerList: {
+			auto buf = reinterpret_cast<ServerSharedTaskPlayerList_Struct*>(pack->pBuffer);
+
+			LogTasksDetail(
+				"[ServerOP_SharedTaskPlayerList] Received request from source_character_id [{}] task_id [{}]",
+				buf->source_character_id,
+				buf->task_id
+			);
+
+			auto s = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
+			if (s)
+			{
+				std::vector<std::string> player_names;
+				for (const auto& member : s->GetMembers())
+				{
+					player_names.emplace_back(member.character_name);
+
+					if (member.is_leader)
+					{
+						client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow,
+							SharedTaskMessage::LEADER_PRINT, { member.character_name });
+					}
+				}
+
+				std::string player_list = fmt::format("{}", fmt::join(player_names, ", "));
+				client_list.SendCharacterMessageID(buf->source_character_id, Chat::Yellow,
+					SharedTaskMessage::MEMBERS_PRINT, { player_list });
+			}
 
 			break;
 		}
