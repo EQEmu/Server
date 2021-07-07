@@ -2624,7 +2624,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 
 	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(
 		database, fmt::format(
-			"character_id = {} AND expire_time > NOW() ORDER BY timer_type ASC",
+			"character_id = {} AND expire_time > NOW()",
 			client->CharacterID()
 		)
 	);
