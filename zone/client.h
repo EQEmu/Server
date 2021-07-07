@@ -394,6 +394,7 @@ public:
 
 	void Duck();
 	void Stand();
+	void Sit();
 
 	virtual void SetMaxHP();
 	int32 LevelRegen();
@@ -1929,8 +1930,6 @@ private:
 	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
-
-	void Sit();
 
 #ifdef BOTS
 
