@@ -12852,19 +12852,17 @@ void command_cvs(Client *c, const Seperator *sep)
 
 void command_max_all_skills(Client *c, const Seperator *sep)
 {
-	if(c)
-	{
-		for (int i = 0; i <= EQ::skills::HIGHEST_SKILL; ++i)
-		{
-			if (i >= EQ::skills::SkillSpecializeAbjure && i <= EQ::skills::SkillSpecializeEvocation)
-			{
-				c->SetSkill((EQ::skills::SkillType)i, 50);
-			}
-			else
-			{
-				int max_skill_level = content_db.GetSkillCap(c->GetClass(), (EQ::skills::SkillType)i, c->GetLevel());
-				c->SetSkill((EQ::skills::SkillType)i, max_skill_level);
-			}
+	if(c) {
+		Client* client_target = (c->GetTarget() ? (c->GetTarget()->IsClient() ? c->GetTarget()->CastToClient() : c) : c);
+		auto Skills = EQ::skills::GetSkillTypeMap();
+		for (auto& skills_iter : Skills) {
+			auto skill_id = skills_iter.first;
+			auto current_skill_value = (
+				(EQ::skills::IsSpecializedSkill(skill_id)) ?
+				50 :
+				content_db.GetSkillCap(client_target->GetClass(), skill_id, client_target->GetLevel())
+			);
+			client_target->SetSkill(skill_id, current_skill_value);
 		}
 	}
 }
