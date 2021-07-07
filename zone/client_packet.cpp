@@ -383,6 +383,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TargetCommand] = &Client::Handle_OP_TargetCommand;
 	ConnectedOpcodes[OP_TargetMouse] = &Client::Handle_OP_TargetMouse;
 	ConnectedOpcodes[OP_TaskHistoryRequest] = &Client::Handle_OP_TaskHistoryRequest;
+	ConnectedOpcodes[OP_TaskTimers] = &Client::Handle_OP_TaskTimers;
 	ConnectedOpcodes[OP_Taunt] = &Client::Handle_OP_Taunt;
 	ConnectedOpcodes[OP_TestBuff] = &Client::Handle_OP_TestBuff;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
@@ -15490,4 +15491,9 @@ void Client::Handle_OP_SharedTaskQuit(const EQApplicationPacket* app)
 	{
 		CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
 	}
+}
+
+void Client::Handle_OP_TaskTimers(const EQApplicationPacket* app)
+{
+	GetTaskState()->ListTaskTimers(this);
 }

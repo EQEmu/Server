@@ -282,6 +282,7 @@
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
+	void Handle_OP_TaskTimers(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);

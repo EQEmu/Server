@@ -2628,3 +2628,35 @@ void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, Dynamic
 		worldserver.SendPacket(pack.get());
 	}
 }
+
+void ClientTaskState::ListTaskTimers(Client* client)
+{
+	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
+		"character_id = {} AND expire_time > NOW() ORDER BY timer_type ASC",
+		client->CharacterID()
+	));
+
+	for (const auto& task_timer : character_task_timers)
+	{
+		auto task = task_manager->m_task_data[task_timer.task_id];
+		if (task)
+		{
+			auto timer_type = static_cast<TaskTimerType>(task_timer.timer_type);
+			auto seconds = task_timer.expire_time - std::time(nullptr);
+			auto days  = fmt::format_int(seconds / 86400).str();
+			auto hours = fmt::format_int((seconds / 3600) % 24).str();
+			auto mins  = fmt::format_int((seconds / 60) % 60).str();
+
+			if (timer_type == TaskTimerType::Replay)
+			{
+				client->MessageString(Chat::Yellow, SharedTaskMessage::REPLAY_TIMER_REMAINING,
+					task->title.c_str(), days.c_str(), hours.c_str(), mins.c_str());
+			}
+			else
+			{
+				auto eqstr = SharedTaskMessage::GetEQStr(SharedTaskMessage::REQUEST_TIMER_REMAINING);
+				client->Message(Chat::Yellow, fmt::format(eqstr, task->title, days, hours, mins).c_str());
+			}
+		}
+	}
+}

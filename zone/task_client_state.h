@@ -55,6 +55,7 @@ public:
 	int CompletedTasksInSet(int task_set_id);
 	bool HasSlotForTask(TaskInformation *task);
 	void CreateTaskDynamicZone(Client* client, int task_id, DynamicZone& dz);
+	void ListTaskTimers(Client* client);
 
 	inline bool HasFreeTaskSlot() { return m_active_task.task_id == TASKSLOTEMPTY; }
 
