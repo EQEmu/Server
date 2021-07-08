@@ -130,7 +130,7 @@ foreach my $table_to_generate (@tables) {
     # These tables don't have a typical schema
     my @table_ignore_list = (
         "character_enabledtasks",
-        "grid",                  # Manually created
+        "grid",         # Manually created
         "grid_entries", # Manually created
         # "tradeskill_recipe",     # Manually created
         # "character_recipe_list", # Manually created
@@ -184,14 +184,15 @@ foreach my $table_to_generate (@tables) {
 
     $ex->execute($database_name, $table_to_generate);
 
-    my $longest_column_length    = 0;
-    my $longest_data_type_length = 0;
-    while (my @row               = $ex->fetchrow_array()) {
-        my $column_name          = $row[0];
-        my $data_type            = $row[2];
+    my $longest_column_length     = 0;
+    my $longest_data_type_length  = 0;
+    while (my @row                = $ex->fetchrow_array()) {
+        my $column_name           = $row[0];
+        my $column_name_formatted = format_column_name_for_cpp_var($column_name);
+        my $data_type             = $row[2];
 
-        if ($longest_column_length < length($column_name)) {
-            $longest_column_length = length($column_name);
+        if ($longest_column_length < length($column_name_formatted)) {
+            $longest_column_length = length($column_name_formatted);
         }
 
         my $struct_data_type = translate_mysql_data_type_to_c($data_type);
@@ -215,24 +216,30 @@ foreach my $table_to_generate (@tables) {
     my %table_primary_key    = ();
     $ex->execute($database_name, $table_to_generate);
 
-    while (my @row           = $ex->fetchrow_array()) {
-        my $column_name      = $row[0];
-        my $table_name       = $row[1];
-        my $data_type        = $row[2];
-        my $column_type      = $row[3];
-        my $ordinal_position = $row[4];
-        my $column_key       = $row[5];
-        my $column_default   = ($row[6] ? $row[6] : "");
-        my $extra            = ($row[7] ? $row[7] : "");
+    while (my @row                = $ex->fetchrow_array()) {
+        my $column_name           = $row[0];
+        my $column_name_formatted = format_column_name_for_cpp_var($column_name);
+        my $table_name            = $row[1];
+        my $data_type             = $row[2];
+        my $column_type           = $row[3];
+        my $ordinal_position      = $row[4];
+        my $column_key            = $row[5];
+        my $column_default        = ($row[6] ? $row[6] : "");
+        my $extra                 = ($row[7] ? $row[7] : "");
 
         if (!$table_primary_key{$table_name}) {
-            if (($column_key eq "PRI" && $data_type =~/int/) || ($ordinal_position == 0 && $column_name =~ /id/i)) {
+            if (($column_key eq "PRI" && $data_type =~ /int/) || ($ordinal_position == 0 && $column_name =~ /id/i)) {
                 $table_primary_key{$table_name} = $column_name;
             }
         }
 
+        print $column_default . "\n";
+
         my $default_value = 0;
-        if ($column_default ne "NULL" && $column_default ne "") {
+        if ($column_default eq "current_timestamp()") {
+            $default_value = '""';
+        }
+        elsif ($column_default ne "NULL" && $column_default ne "") {
             $column_default =~ s/'/"/g;
             $default_value = $column_default;
         }
@@ -246,19 +253,19 @@ foreach my $table_to_generate (@tables) {
         my $struct_data_type = translate_mysql_data_type_to_c($data_type);
 
         # struct
-        $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name);
+        $table_struct_columns .= sprintf("\t\t\%-${longest_data_type_length}s %s;\n", $struct_data_type, $column_name_formatted);
 
         # new entity
-        $default_entries .= sprintf("\t\tentry.%-${longest_column_length}s = %s;\n", $column_name, $default_value);
+        $default_entries .= sprintf("\t\tentry.%-${longest_column_length}s = %s;\n", $column_name_formatted, $default_value);
 
         # column names (string)
-        $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", $column_name);
+        $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
 
         # update one
         if ($extra ne "auto_increment") {
-            my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name);
+            my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
-                $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name);
+                $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
@@ -269,26 +276,30 @@ foreach my $table_to_generate (@tables) {
         }
 
         # insert
-        my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name);
+        my $value = sprintf("\"'\" + EscapeString(%s_entry.%s) + \"'\"", $table_name, $column_name_formatted);
         if ($data_type =~ /int|float|double|decimal/) {
-            $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name);
+            $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name_formatted);
         }
 
         $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
         $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
 
         # find one / all (select)
-        if ($data_type =~ /int/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name, $index);
+        if ($data_type =~ /bigint/) {
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], NULL, 10);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], NULL, 10);\n", $column_name_formatted, $index);
+        }
+        elsif ($data_type =~ /int/) {
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
         }
         elsif ($data_type =~ /float|double|decimal/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name, $index);
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = static_cast<float>(atof(row[%s]));\n", $column_name_formatted, $index);
         }
         else {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name, $index, $index);
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = row[%s] ? row[%s] : \"\";\n", $column_name_formatted, $index, $index);
         }
 
         # print $column_name . "\n";
@@ -468,8 +479,7 @@ sub translate_mysql_data_type_to_c {
         $struct_data_type = 'int';
     }
     elsif ($mysql_data_type =~ /bigint/) {
-        $struct_data_type = 'int';
-        # Use regular int for now until we have 64 support
+        $struct_data_type = 'int64';
     }
     elsif ($mysql_data_type =~ /int/) {
         $struct_data_type = 'int';
@@ -479,4 +489,35 @@ sub translate_mysql_data_type_to_c {
     }
 
     return $struct_data_type;
+}
+
+# This is so we can change reserved words on the cpp side to something that will continue be functional in the compilers
+sub get_reserved_cpp_variable_names {
+    return (
+        "class",
+        "int"
+    );
+}
+
+sub format_column_name_for_cpp_var {
+    my $column_name = $_[0];
+
+    for my $word (get_reserved_cpp_variable_names()) {
+        if ($word eq $column_name) {
+            return $column_name . "_";
+        }
+    }
+
+    return $column_name;
+}
+
+sub format_column_name_for_mysql {
+    my $column_name = $_[0];
+    for my $word (get_reserved_cpp_variable_names()) {
+        if ($word eq $column_name) {
+            return "`" . $column_name . "`";
+        }
+    }
+
+    return $column_name;
 }
