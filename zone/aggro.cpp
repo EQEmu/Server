@@ -252,7 +252,7 @@ bool Mob::CheckWillAggro(Mob *mob) {
 	}
 
 	Mob *pet_owner = mob->GetOwner();
-	if (pet_owner && pet_owner->IsClient()) {
+	if (pet_owner && pet_owner->IsClient() && (!RuleB(Aggro, AggroPlayerPets) || pet_owner->CastToClient()->GetGM())) {
 		return false;
 	}
 
