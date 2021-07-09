@@ -14,15 +14,16 @@
 
 #include "../../database.h"
 #include "../../string_util.h"
+#include <ctime>
 
 class BaseSharedTaskActivityStateRepository {
 public:
 	struct SharedTaskActivityState {
-		int64 shared_task_id;
-		int   activity_id;
-		int   done_count;
-		int   updated_time;
-		int   completed_time;
+		int64  shared_task_id;
+		int    activity_id;
+		int    done_count;
+		time_t updated_time;
+		time_t completed_time;
 	};
 
 	static std::string PrimaryKey()
@@ -41,9 +42,25 @@ public:
 		};
 	}
 
+	static std::vector<std::string> SelectColumns()
+	{
+		return {
+			"shared_task_id",
+			"activity_id",
+			"done_count",
+			"UNIX_TIMESTAMP(updated_time)",
+			"UNIX_TIMESTAMP(completed_time)",
+		};
+	}
+
 	static std::string ColumnsRaw()
 	{
 		return std::string(implode(", ", Columns()));
+	}
+
+	static std::string SelectColumnsRaw()
+	{
+		return std::string(implode(", ", SelectColumns()));
 	}
 
 	static std::string TableName()
@@ -55,7 +72,7 @@ public:
 	{
 		return fmt::format(
 			"SELECT {} FROM {}",
-			ColumnsRaw(),
+			SelectColumnsRaw(),
 			TableName()
 		);
 	}
@@ -113,11 +130,11 @@ public:
 		if (results.RowCount() == 1) {
 			SharedTaskActivityState entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
 			entry.activity_id    = atoi(row[1]);
 			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = atoi(row[3]);
-			entry.completed_time = atoi(row[4]);
+			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			return entry;
 		}
@@ -154,8 +171,8 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(shared_task_activity_state_entry.shared_task_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(shared_task_activity_state_entry.activity_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(shared_task_activity_state_entry.done_count));
-		update_values.push_back(columns[3] + " = " + std::to_string(shared_task_activity_state_entry.updated_time));
-		update_values.push_back(columns[4] + " = " + std::to_string(shared_task_activity_state_entry.completed_time));
+		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (shared_task_activity_state_entry.updated_time > 0 ? std::to_string(shared_task_activity_state_entry.updated_time) : "null") + ")");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (shared_task_activity_state_entry.completed_time > 0 ? std::to_string(shared_task_activity_state_entry.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,8 +197,8 @@ public:
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.shared_task_id));
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.activity_id));
 		insert_values.push_back(std::to_string(shared_task_activity_state_entry.done_count));
-		insert_values.push_back(std::to_string(shared_task_activity_state_entry.updated_time));
-		insert_values.push_back(std::to_string(shared_task_activity_state_entry.completed_time));
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_task_activity_state_entry.updated_time > 0 ? std::to_string(shared_task_activity_state_entry.updated_time) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_task_activity_state_entry.completed_time > 0 ? std::to_string(shared_task_activity_state_entry.completed_time) : "null") + ")");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -214,8 +231,8 @@ public:
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.shared_task_id));
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.activity_id));
 			insert_values.push_back(std::to_string(shared_task_activity_state_entry.done_count));
-			insert_values.push_back(std::to_string(shared_task_activity_state_entry.updated_time));
-			insert_values.push_back(std::to_string(shared_task_activity_state_entry.completed_time));
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_task_activity_state_entry.updated_time > 0 ? std::to_string(shared_task_activity_state_entry.updated_time) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_task_activity_state_entry.completed_time > 0 ? std::to_string(shared_task_activity_state_entry.completed_time) : "null") + ")");
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -249,11 +266,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskActivityState entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
 			entry.activity_id    = atoi(row[1]);
 			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = atoi(row[3]);
-			entry.completed_time = atoi(row[4]);
+			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}
@@ -278,11 +295,11 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			SharedTaskActivityState entry{};
 
-			entry.shared_task_id = strtoll(row[0], NULL, 10);
+			entry.shared_task_id = strtoll(row[0], nullptr, 10);
 			entry.activity_id    = atoi(row[1]);
 			entry.done_count     = atoi(row[2]);
-			entry.updated_time   = atoi(row[3]);
-			entry.completed_time = atoi(row[4]);
+			entry.updated_time   = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completed_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
 
 			all_entries.push_back(entry);
 		}

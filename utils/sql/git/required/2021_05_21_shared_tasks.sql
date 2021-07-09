@@ -2,8 +2,8 @@ CREATE TABLE `shared_tasks`
 (
     `id`              bigint(20) NOT NULL AUTO_INCREMENT,
     `task_id`         int(11) DEFAULT NULL,
-    `accepted_time`   int(11) DEFAULT NULL,
-    `completion_time` int(11) DEFAULT NULL,
+    `accepted_time`   datetime DEFAULT NULL,
+    `completion_time` datetime DEFAULT NULL,
     `is_locked`       tinyint(1) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=latin1;
@@ -21,31 +21,33 @@ CREATE TABLE `shared_task_activity_state`
     `shared_task_id` bigint(20) NOT NULL,
     `activity_id`    int(11) NOT NULL,
     `done_count`     int(11) DEFAULT NULL,
-    `updated_time`   int(11) DEFAULT NULL,
-    `completed_time` int(11) DEFAULT NULL,
+    `updated_time`   datetime DEFAULT NULL,
+    `completed_time` datetime DEFAULT NULL,
     PRIMARY KEY (`shared_task_id`, `activity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE `shared_task_dynamic_zones` (
-  `shared_task_id` bigint(20) NOT NULL,
-  `dynamic_zone_id` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`shared_task_id`,`dynamic_zone_id`)
+CREATE TABLE `shared_task_dynamic_zones`
+(
+    `shared_task_id`  bigint(20) NOT NULL,
+    `dynamic_zone_id` int(10) unsigned NOT NULL,
+    PRIMARY KEY (`shared_task_id`, `dynamic_zone_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `tasks`
-  ADD COLUMN `level_spread` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `maxlevel`,
+    ADD COLUMN `level_spread` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `maxlevel`,
   ADD COLUMN `min_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `level_spread`,
   ADD COLUMN `max_players` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `min_players`,
   ADD COLUMN `replay_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `completion_emote`,
   ADD COLUMN `request_timer_seconds` INT UNSIGNED NOT NULL DEFAULT 0 AFTER `replay_timer_seconds`;
 
-CREATE TABLE `character_task_timers` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `character_id` int(10) unsigned NOT NULL DEFAULT 0,
-  `task_id` int(10) unsigned NOT NULL DEFAULT 0,
-  `timer_type` int(11) NOT NULL DEFAULT 0,
-  `expire_time` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `character_id` (`character_id`),
-  KEY `task_id` (`task_id`)
+CREATE TABLE `character_task_timers`
+(
+    `id`           int(10) unsigned NOT NULL AUTO_INCREMENT,
+    `character_id` int(10) unsigned NOT NULL DEFAULT 0,
+    `task_id`      int(10) unsigned NOT NULL DEFAULT 0,
+    `timer_type`   int(11) NOT NULL DEFAULT 0,
+    `expire_time`  datetime NOT NULL DEFAULT current_timestamp(),
+    PRIMARY KEY (`id`),
+    KEY            `character_id` (`character_id`),
+    KEY            `task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
