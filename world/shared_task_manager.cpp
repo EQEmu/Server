@@ -611,6 +611,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				LogTasksDetail("[SharedTaskActivityUpdate] Marking shared task [{}] completed", shared_task->GetDbSharedTask().id);
 				// set record
 				t.completion_time = std::time(nullptr);
+				t.is_locked       = true;
 				// update database
 				SharedTasksRepository::UpdateOne(*m_database, t);
 				// update internally
