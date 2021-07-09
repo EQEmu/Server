@@ -602,7 +602,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 		// mark completed
 		if (is_shared_task_completed) {
-			auto t = SharedTasksRepository::FindOne(*m_database, (int) shared_task->GetDbSharedTask().id);
+			auto t = shared_task->GetDbSharedTask();
 			if (t.id > 0) {
 				LogTasksDetail("[SharedTaskActivityUpdate] Marking shared task [{}] completed", shared_task->GetDbSharedTask().id);
 				// set record
