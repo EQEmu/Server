@@ -864,9 +864,9 @@ typedef enum {
 //#define SE_Endurance_Absorb_Pct_Damage	521 //
 //#define SE_Instant_Mana_Pct			522 //
 //#define SE_Instant_Endurance_Pct		523 //
-//#define SE_Duration_HP_Pct			524 //
-//#define SE_Duration_Mana_Pct			525 //
-//#define SE_Duration_Endurance_Pct		526 //
+#define SE_Duration_HP_Pct				524 //
+#define SE_Duration_Mana_Pct			525 //
+#define SE_Duration_Endurance_Pct		526 //
 
 
 // LAST

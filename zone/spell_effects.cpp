@@ -3777,6 +3777,59 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			break;
 		}
 
+		case SE_Duration_HP_Pct: {
+
+			effect_value = spells[buff.spellid].base[i];
+			int32 amt = abs(GetMaxHP() * effect_value / 100);
+			if (amt > spells[buff.spellid].max[i])
+				amt = spells[buff.spellid].max[i];
+			
+			if (effect_value < 0) { 
+				Damage(this, amt, 0, EQ::skills::SkillEvocation, false);
+			}
+			else { 
+				HealDamage(amt);
+			}
+			break;
+		}
+
+		case SE_Duration_Mana_Pct: {
+
+			effect_value = spells[buff.spellid].base[i];
+			int32 amt = abs(GetMaxHP() * effect_value / 100);
+			if (amt > spells[buff.spellid].max[i])
+				amt = spells[buff.spellid].max[i];
+
+			if (effect_value < 0) {
+				
+				SetMana(GetMana() - amt);
+			}
+			else {
+				SetMana(GetMana() + amt);
+			}
+			break;
+		}
+
+		case SE_Duration_Endurance_Pct: {
+
+			effect_value = spells[buff.spellid].base[i];
+			int32 amt = abs(GetMaxHP() * effect_value / 100);
+			if (amt > spells[buff.spellid].max[i])
+				amt = spells[buff.spellid].max[i];
+
+			if (IsClient())
+			{
+				if (effect_value < 0) {
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() - amt);
+				}
+				else {
+					HealDamage(amt);
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + amt);
+				}
+			}
+			break;
+		}
+
 		default: {
 			// do we need to do anyting here?
 		}

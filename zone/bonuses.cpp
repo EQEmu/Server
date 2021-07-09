@@ -1487,6 +1487,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			break;
 
+
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3250,6 +3252,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->trap_slots < effect_value)
 					new_bonus->trap_slots = effect_value;
 				break;
+
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
