@@ -591,6 +591,28 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				);
 			}
 		}
+
+		// check if completed
+		bool is_shared_task_completed = true;
+		for (auto &a : shared_task->m_shared_task_activity_state) {
+			if (a.done_count != a.max_done_count) {
+				is_shared_task_completed = false;
+			}
+		}
+
+		// mark completed
+		if (is_shared_task_completed) {
+			auto t = SharedTasksRepository::FindOne(*m_database, (int) shared_task->GetDbSharedTask().id);
+			if (t.id > 0) {
+				LogTasksDetail("[SharedTaskActivityUpdate] Marking shared task [{}] completed", shared_task->GetDbSharedTask().id);
+				// set record
+				t.completion_time = std::time(nullptr);
+				// update database
+				SharedTasksRepository::UpdateOne(*m_database, t);
+				// update internally
+				shared_task->SetDbSharedTask(t);
+			}
+		}
 	}
 }
 
