@@ -1419,7 +1419,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	namespace EQStr = SharedTaskMessage;
 
 	// check if task is locked
-	if (s->GetDbSharedTask().is_locked && s->GetDbSharedTask().completion_time)
+	if (s->GetDbSharedTask().is_locked)
 	{
 		SendLeaderMessageID(s, Chat::Red, EQStr::TASK_NOT_ALLOWING_PLAYERS_AT_TIME);
 		allow_invite = false;
