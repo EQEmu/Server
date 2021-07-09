@@ -2726,7 +2726,6 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 					if (!IsBuffSpell(spell_id))
 					{
 						CastToClient()->SetKnockBackExemption(true);
-
 					}
 				}
 			}

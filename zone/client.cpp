@@ -10251,23 +10251,14 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 		}
 	}
 }
-/// <summary>
-/// sets the shadow stepping exemption flag.
-/// </summary>
-/// <param name="v">indicates if the client is shadowstepping or not</param>
-void Client::SetShadowStepExemption(bool v) // fundemtnally acts the same as the stuff in client_packet. see notes there
+void Client::SetShadowStepExemption(bool v)
 {
 	if (v == true)
 	{
-		// get current time and place it into cur_time
 		uint32 cur_time = Timer::GetCurrentTime();
-		// check to make sure the time is greater than 1000 ticks
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
-			// find speed using s=d/t
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			// gets the client's run speed
 			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
-			// makes sure the esimated speed isn't higher than the run speed
 			if (speed > runs) {
 				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
 				{
@@ -10306,23 +10297,14 @@ void Client::SetShadowStepExemption(bool v) // fundemtnally acts the same as the
 	}
 	m_shadow_step_exemption = v;
 }
-/// <summary>
-/// sets the knockback exemption flag.
-/// </summary>
-/// <param name="v">indicates if the client is knockbacked or not</param>
-void Client::SetKnockBackExemption(bool v) // fundemtnally acts the same as the stuff in client_packet. see notes there
+void Client::SetKnockBackExemption(bool v)
 {
 	if (v == true)
 	{
-		// get current time and place it into cur_time
 		uint32 cur_time = Timer::GetCurrentTime();
-		// check to make sure the time is greater than 1000 ticks
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
-			// find speed using s=d/t
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			// gets the client's run speed
 			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
-			// makes sure the esimated speed isn't higher than the run speed
 			if (speed > runs) {
 				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
 				{
@@ -10361,23 +10343,14 @@ void Client::SetKnockBackExemption(bool v) // fundemtnally acts the same as the 
 	}
 	m_knock_back_exemption = v;
 }
-/// <summary>
-/// sets the porting exemption flag.
-/// </summary>
-/// <param name="v">indicates if the client is porting or not</param>
-void Client::SetPortExemption(bool v) // fundemtnally acts the same as the stuff in client_packet. see notes there
+void Client::SetPortExemption(bool v)
 {
 	if (v == true)
 	{
-		// get current time and place it into cur_time
 		uint32 cur_time = Timer::GetCurrentTime();
-		// check to make sure the time is greater than 1000 ticks
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
-			// find speed using s=d/t
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			// gets the client's run speed
 			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
-			// makes sure the esimated speed isn't higher than the run speed
 			if (speed > runs) {
 				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
 				{
@@ -10416,12 +10389,6 @@ void Client::SetPortExemption(bool v) // fundemtnally acts the same as the stuff
 	}
 	m_port_exemption = v;
 }
-/// <summary>
-/// a possible cheat has been detected. this will figure out if we should report it or not.
-/// </summary>
-/// <param name="CheatType">The type of cheat detected</param>
-/// <param name="from">For warping this is passed to help figure out where the person came from. everything else it just says where the cheat happened</param>
-/// <param name="to">for warping this is passed to help figure out the location of where they went to.</param>
 void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 {
 	switch (CheatType)
@@ -10429,7 +10396,7 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	case MQWarp:
 		if (m_time_since_last_warp_detection.GetRemainingTime() == 0 && RuleB(Zone, EnableMQWarpDetector) && ((Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
-			std::string message = fmt::format("/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			std::string message = fmt::format("/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}] Distance [{:.2f}]", from.x, from.y, from.z, to.x, to.y, to.z, Distance(from, to));
 			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
 			LogCheat(message.c_str());
 			std::string export_string = fmt::format("{} {} {}", from.x, from.y, from.z);
@@ -10439,12 +10406,12 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	case MQWarpAbsolute:
 		if (RuleB(Zone, EnableMQWarpDetector) && ((Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1)))
 		{
-			std::string message = fmt::format("/MQWarp (Absolute) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z, to.x, to.y, to.z);
+			std::string message = fmt::format("/MQWarp (Absolute) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}] Distance [{:.2f}]", from.x, from.y, from.z, to.x, to.y, to.z, Distance(from, to));
 			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
 			LogCheat(message.c_str());
 			std::string export_string = fmt::format( "{} {} {}", from.x, from.y, from.z);
 			parse->EventPlayer(EVENT_WARP, this, export_string, 0);
-			m_time_since_last_warp_detection.Start(1000);
+			m_time_since_last_warp_detection.Start(2500);
 		}
 		break;
 	case MQWarpShadowStep:
@@ -10487,7 +10454,7 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 	case MQZoneUnknownDest:
 		if (RuleB(Zone, EnableMQZoneDetector) && ((Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1)))
 		{
-			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]", from.x, from.y, from.z);
+			std::string message = fmt::format("/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}] with Unknown Destination", from.x, from.y, from.z);
 			database.SetMQDetectionFlag(account_name, name, message.c_str(), zone->GetShortName());
 			LogCheat(message.c_str());
 		}
