@@ -348,9 +348,10 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
-	/**
-	 * GM
-	 */
+	// rate limiter
+	m_list_task_timers_rate_limit.Start(1000);
+
+	// gm
 	SetDisplayMobInfoWindow(true);
 	SetDevToolsEnabled(true);
 

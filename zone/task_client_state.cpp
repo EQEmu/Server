@@ -2627,10 +2627,18 @@ void ClientTaskState::CreateTaskDynamicZone(Client* client, int task_id, Dynamic
 
 		worldserver.SendPacket(pack.get());
 	}
+
 }
 
 void ClientTaskState::ListTaskTimers(Client* client)
 {
+	LogTasksDetail("[ListTaskTimers] Client [{}]", client->GetCleanName());
+
+	if (!client->m_list_task_timers_rate_limit.Check()) {
+		client->Message(Chat::White, "Sending messages too fast");
+		return;
+	}
+
 	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
 		"character_id = {} AND expire_time > NOW() ORDER BY timer_type ASC",
 		client->CharacterID()
@@ -2658,5 +2666,10 @@ void ClientTaskState::ListTaskTimers(Client* client)
 				client->Message(Chat::Yellow, fmt::format(eqstr, task->title, days, hours, mins).c_str());
 			}
 		}
+	}
+
+	if (character_task_timers.empty()) {
+		// TODO: Replace with any official eqstr
+		client->Message(Chat::White, "You have no current task timers");
 	}
 }
