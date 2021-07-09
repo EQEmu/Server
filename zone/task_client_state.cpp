@@ -1168,8 +1168,7 @@ void ClientTaskState::IncrementDoneCount(
 	info->activity[activity_id].updated = true;
 	// Have we reached the goal count for this activity_information ?
 	if (info->activity[activity_id].done_count >= task_information->activity_information[activity_id].goal_count) {
-		Log(
-			Logs::General, Logs::Tasks, "[UPDATE] Done (%i) = Goal (%i) for activity_information %i",
+		LogTasks("[IncrementDoneCount] done_count [{}] goal_count [{}] activity_id [{}]",
 			info->activity[activity_id].done_count,
 			task_information->activity_information[activity_id].goal_count,
 			activity_id
@@ -1179,7 +1178,7 @@ void ClientTaskState::IncrementDoneCount(
 		info->activity[activity_id].activity_state = ActivityCompleted;
 		// Unlock subsequent activities for this task
 		bool task_complete = UnlockActivities(client->CharacterID(), *info);
-		Log(Logs::General, Logs::Tasks, "[UPDATE] TaskCompleted is %i", task_complete);
+		LogTasks("[IncrementDoneCount] task_complete is [{}]", task_complete);
 		// and by the 'Task Stage Completed' message
 		client->SendTaskActivityComplete(info->task_id, activity_id, task_index, task_information->type);
 		// Send the updated task/activity_information list to the client
@@ -1235,15 +1234,22 @@ void ClientTaskState::IncrementDoneCount(
 				QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
 			}
 
-			task_manager->SendCompletedTasksToClient(client, this);
 			client->SendTaskActivityComplete(info->task_id, 0, task_index, task_information->type, 0);
 			task_manager->SaveClientState(client, this);
-			//c->SendTaskComplete(TaskIndex);
-			client->CancelTask(task_index, task_information->type);
-			//if(Task->reward_method != METHODQUEST) RewardTask(c, Task);
+
 			// If Experience and/or cash rewards are set, reward them from the task even if reward_method is METHODQUEST
 			RewardTask(client, task_information);
 			//RemoveTask(c, TaskIndex);
+
+			// TODO: shared task intercept completion
+			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
+			if (task_information->type == TaskType::Shared) {
+				return;
+			}
+
+			task_manager->SendCompletedTasksToClient(client, this);
+
+			client->CancelTask(task_index, task_information->type);
 
 			// add replay timer from start of task (world adds timers for shared tasks)
 			// todo: shared task replay timers need to be added to members in world (message can still be done here)
@@ -2639,10 +2645,12 @@ void ClientTaskState::ListTaskTimers(Client* client)
 		return;
 	}
 
-	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(database, fmt::format(
-		"character_id = {} AND expire_time > NOW() ORDER BY timer_type ASC",
-		client->CharacterID()
-	));
+	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(
+		database, fmt::format(
+			"character_id = {} AND expire_time > NOW() ORDER BY timer_type ASC",
+			client->CharacterID()
+		)
+	);
 
 	for (const auto& task_timer : character_task_timers)
 	{
