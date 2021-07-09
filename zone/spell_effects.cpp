@@ -2828,6 +2828,39 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+
+			case SE_Instant_Mana_Pct: {
+				effect_value = spells[spell_id].base[i];
+				int32 amt = abs(GetMaxMana() * effect_value / 10000);
+				if (spells[spell_id].max[i] && amt > spells[spell_id].max[i])
+					amt = spells[spell_id].max[i];
+
+				if (effect_value < 0) {
+					SetMana(GetMana() - amt);
+				}
+				else {
+					SetMana(GetMana() + amt);
+				}
+				break;
+			}
+
+			case SE_Instant_Endurance_Pct: {
+				effect_value = spells[spell_id].base[i];
+				if (IsClient()) {
+					int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 10000);
+					if (spells[spell_id].max[i] && amt > spells[spell_id].max[i])
+						amt = spells[spell_id].max[i];
+
+					if (effect_value < 0) {
+						CastToClient()->SetEndurance(CastToClient()->GetEndurance() - amt);
+					}
+					else {
+						CastToClient()->SetEndurance(CastToClient()->GetEndurance() + amt);
+					}
+				}
+				break;
+			}
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3071,6 +3104,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_SkillProc:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
+			case SE_Duration_HP_Pct:
+			case SE_Duration_Mana_Pct:
+			case SE_Duration_Endurance_Pct:
 			{
 				break;
 			}
@@ -3778,10 +3814,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Duration_HP_Pct: {
-
 			effect_value = spells[buff.spellid].base[i];
 			int32 amt = abs(GetMaxHP() * effect_value / 100);
-			if (amt > spells[buff.spellid].max[i])
+			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
 				amt = spells[buff.spellid].max[i];
 			
 			if (effect_value < 0) { 
@@ -3794,10 +3829,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Duration_Mana_Pct: {
-
 			effect_value = spells[buff.spellid].base[i];
-			int32 amt = abs(GetMaxHP() * effect_value / 100);
-			if (amt > spells[buff.spellid].max[i])
+			int32 amt = abs(GetMaxMana() * effect_value / 100);
+			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
 				amt = spells[buff.spellid].max[i];
 
 			if (effect_value < 0) {
@@ -3811,19 +3845,17 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Duration_Endurance_Pct: {
-
 			effect_value = spells[buff.spellid].base[i];
-			int32 amt = abs(GetMaxHP() * effect_value / 100);
-			if (amt > spells[buff.spellid].max[i])
-				amt = spells[buff.spellid].max[i];
 
-			if (IsClient())
-			{
+			if (IsClient())	{
+				int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 100);
+				if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
+					amt = spells[buff.spellid].max[i];
+
 				if (effect_value < 0) {
 					CastToClient()->SetEndurance(CastToClient()->GetEndurance() - amt);
 				}
 				else {
-					HealDamage(amt);
 					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + amt);
 				}
 			}
