@@ -405,6 +405,11 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 			continue;
 		}
 
+		// we don't record completed shared tasks in the task quest log
+		if (m_task_data[task_id]->type == TaskType::Shared) {
+			break;
+		}
+
 		// First we save a record with an activity_id of -1.
 		// This indicates this task was completed at the given time. We infer that all
 		// none optional activities were completed.
