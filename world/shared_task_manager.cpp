@@ -12,6 +12,9 @@
 #include "../common/repositories/shared_tasks_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
+#include "../common/repositories/completed_shared_tasks_repository.h"
+#include "../common/repositories/completed_shared_task_members_repository.h"
+#include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
 #include "../common/serialize_buffer.h"
 #include <ctime>
@@ -601,6 +604,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 		}
 
 		// mark completed
+		// TODO: Add replay timer logic in completion block below
 		if (is_shared_task_completed) {
 			auto t = shared_task->GetDbSharedTask();
 			if (t.id > 0) {
@@ -611,6 +615,8 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				SharedTasksRepository::UpdateOne(*m_database, t);
 				// update internally
 				shared_task->SetDbSharedTask(t);
+				// record completion
+				RecordSharedTaskCompletion(shared_task);
 			}
 		}
 	}
@@ -1265,8 +1271,27 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 	namespace EQStr = SharedTaskMessage;
 
 	// check if any party members are already in a shared task
-	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
-		fmt::format("character_id IN ({})", fmt::join(request.character_ids, ",")));
+//	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
+//		fmt::format("character_id IN ({})", fmt::join(request.character_ids, ",")));
+
+	std::vector<SharedTaskMembersRepository::SharedTaskMembers> shared_task_members = {};
+
+	for (auto &s: m_shared_tasks) {
+		// loop through members
+		for (auto &m: s.GetMembers()) {
+			// compare members with requested characters
+			for (auto &requested_character_id: request.character_ids) {
+				// found character, add to list
+				if (requested_character_id == m.character_id) {
+					auto req_member = SharedTaskMembersRepository::NewEntity();
+					req_member.shared_task_id = s.GetDbSharedTask().id;
+					req_member.character_id   = m.character_id;
+					req_member.is_leader      = m.is_leader;
+					shared_task_members.emplace_back(req_member);
+				}
+			}
+		}
+	}
 
 	if (!shared_task_members.empty())
 	{
@@ -1394,7 +1419,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	namespace EQStr = SharedTaskMessage;
 
 	// check if task is locked
-	if (s->GetDbSharedTask().is_locked)
+	if (s->GetDbSharedTask().is_locked && s->GetDbSharedTask().completion_time)
 	{
 		SendLeaderMessageID(s, Chat::Red, EQStr::TASK_NOT_ALLOWING_PLAYERS_AT_TIME);
 		allow_invite = false;
@@ -1525,4 +1550,51 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 	}
 
 	return allow_invite;
+}
+
+void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
+{
+	// shared task
+	auto t = s->GetDbSharedTask();
+	auto ct = CompletedSharedTasksRepository::NewEntity();
+	ct.id              = t.id;
+	ct.task_id         = t.task_id;
+	ct.accepted_time   = t.accepted_time;
+	ct.completion_time = t.completion_time;
+	ct.is_locked       = t.is_locked;
+
+	CompletedSharedTasksRepository::InsertOne(*m_database, ct);
+
+	// completed members
+	std::vector<CompletedSharedTaskMembersRepository::CompletedSharedTaskMembers> completed_members = {};
+
+	for (auto &m: s->GetMembers()) {
+		auto cm = CompletedSharedTaskMembersRepository::NewEntity();
+
+		cm.shared_task_id = t.id;
+		cm.character_id   = m.character_id;
+		cm.is_leader      = m.is_leader;
+
+		completed_members.emplace_back(cm);
+	}
+
+	CompletedSharedTaskMembersRepository::InsertMany(*m_database, completed_members);
+
+	// activities
+	std::vector<CompletedSharedTaskActivityStateRepository::CompletedSharedTaskActivityState> completed_states = {};
+
+	for (auto &a: s->GetActivityState()) {
+		auto cs = CompletedSharedTaskActivityStateRepository::NewEntity();
+
+		cs.shared_task_id = t.id;
+		cs.activity_id    = (int) a.activity_id;
+		cs.done_count     = (int) a.done_count;
+		cs.updated_time   = a.updated_time;
+		cs.completed_time = a.completed_time;
+
+		completed_states.emplace_back(cs);
+	}
+
+	CompletedSharedTaskActivityStateRepository::InsertMany(*m_database, completed_states);
+
 }

@@ -93,6 +93,7 @@ protected:
 	void SendLeaderMessageID(SharedTask* s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
 	void SendMembersMessage(SharedTask* s, int chat_type, const std::string& message);
 	void SendMembersMessageID(SharedTask* s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
+	void RecordSharedTaskCompletion(SharedTask *s);
 };
 
 #endif //EQEMU_SHARED_TASK_MANAGER_H
