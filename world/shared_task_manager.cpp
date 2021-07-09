@@ -342,7 +342,7 @@ void SharedTaskManager::LoadSharedTaskState()
 	auto shared_task_dynamic_zones_data = SharedTaskDynamicZonesRepository::All(*m_database);
 
 	// load shared tasks not already completed
-	auto st = SharedTasksRepository::GetWhere(*m_database, "completion_time = 0");
+	auto st = SharedTasksRepository::GetWhere(*m_database, "completion_time IS NULL");
 	shared_tasks.reserve(st.size());
 	for (auto &s: st) {
 		SharedTask ns = {};
@@ -396,6 +396,7 @@ void SharedTaskManager::LoadSharedTaskState()
 
 						e.max_done_count = ad.goalcount;
 						e.completed_time = sta.completed_time;
+						e.updated_time = sta.updated_time;
 					}
 				}
 
@@ -530,7 +531,8 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 						done_count
 					);
 
-					a.done_count = done_count;
+					a.done_count   = done_count;
+					a.updated_time = std::time(nullptr);
 
 					// if the activity is done, lets mark it as such
 					if (a.done_count == a.max_done_count) {
@@ -631,6 +633,7 @@ void SharedTaskManager::SaveSharedTaskActivityState(
 		e.activity_id    = (int) a.activity_id;
 		e.done_count     = (int) a.done_count;
 		e.completed_time = (int) a.completed_time;
+		e.updated_time   = (int) a.updated_time;
 
 		shared_task_db_activities.emplace_back(e);
 	}
