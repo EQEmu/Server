@@ -188,6 +188,11 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing)
 		accuracy += itembonuses.HitChance;
 
+	//518 Increase ATK accuracy by percentage, stackable
+	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
+
+	accuracy += (accuracy * atkhit_bonus) / 10000;
+
 	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
 	accuracy += itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
 		aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
@@ -3333,8 +3338,8 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	}
 
 	if (spellbonuses.EnduranceAbsorbPercentDamage[0]) {
-		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[0] / 10000;
-		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[1] / 10000;
+		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[0] / 10000; //If hit for 1000, at 10% then lower damage by 100;
+		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[1] / 10000; //Reduce endurance by 0.05% per HP loss
 		if (endurance_drain < 1)
 			endurance_drain = 1;
 

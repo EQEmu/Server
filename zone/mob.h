@@ -353,6 +353,7 @@ public:
 	void CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ);
 	void BeamDirectional(uint16 spell_id, int16 resist_adjust);
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
+	void TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id);
 
 	//Buff
 	void BuffProcess();

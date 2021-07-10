@@ -1487,7 +1487,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			break;
 
-
+		case SE_Attack_Accuracy_Max_Percent:
+			newbon->Attack_Accuracy_Max_Percent += base1;
+			break;
 
 		// to do
 		case SE_PetDiscipline:
@@ -3261,6 +3263,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->trap_slots = effect_value;
 				break;
 
+			case SE_Attack_Accuracy_Max_Percent:
+				new_bonus->Attack_Accuracy_Max_Percent += effect_value;
+				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {

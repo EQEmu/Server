@@ -62,6 +62,8 @@
 #define SPELL_SHAPECHANGE60 1924
 #define SPELL_COMMAND_OF_DRUZZIL 3355
 #define SPELL_SHAPECHANGE70 6503
+#define SPELL_MANA_BURN 2751
+#define SPELL_LIFE_BURN 2755
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502
@@ -152,7 +154,7 @@
 #define SPELL_RESURRECTION_SICKNESS 756
 #define SPELL_RESURRECTION_SICKNESS2 5249
 #define SPELL_REVIVAL_SICKNESS 13087
-#define SPELL_MANA_BURN 2751
+
 
 
 #define EFFECT_COUNT 12
@@ -849,16 +851,16 @@ typedef enum {
 //#define SE_Damage_Taken_Position_Amt	506 //
 //#define SE_Fc_Amplify_Mod				507 //
 //#define SE_Fc_Amplify_Amt				508 //
-//#define SE_Health_Transfer			509 //
+#define SE_Health_Transfer				509 //
 //#define SE_Fc_ResistIncoming			510 //
 //#define SE_Ff_FocusTimerMin			511 //
 //#define SE_Proc_Timer_Modifier 		512 //
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
-//#define SE_AC_Avoidance_Max_Percent	515 //
-//#define SE_AC_Mitigation_Max_Percent	516 //
-//#define SE_Attack_Offense_Max_Percent	517 //
-//#define SE_Attack_Accuracy_Max_Percent	518 //
+//#define SE_AC_Avoidance_Max_Percent	515 // 515 is before 172 TotalEffect(515) * static_cast<double>(avoidance_ac) * 0.0001 that value is then rounded with a +/- 0.5
+//#define SE_AC_Mitigation_Max_Percent	516 // 516 is after AGI bonus
+//#define SE_Attack_Offense_Max_Percent	517 // Requires too much rewrite of code.
+#define SE_Attack_Accuracy_Max_Percent	518 //
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
 #define SE_Endurance_Absorb_Pct_Damage	521 //

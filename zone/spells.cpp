@@ -1393,6 +1393,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
+	TryOnSpellFinished(this, target, spell_id);
+
 	TryTwincast(this, target, spell_id);
 
 	TryTriggerOnCast(spell_id, 0);

@@ -3711,6 +3711,32 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	}
 }
 
+//Used for effects that should occur after the completion of the spell
+void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
+{
+	if (!IsValidSpell(spell_id))
+		return;
+
+	/*Apply damage from Lifeburn type effects on caster at end of spell cast. 
+	 This allows for the AE spells to function without repeatedly killing caster
+	 Damage or heal portion can be found as regular single use spell effect
+	*/
+	if (IsEffectInSpell(spell_id, SE_Health_Transfer)){
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+
+			if (spells[spell_id].effectid[i] == SE_Health_Transfer) {
+				int new_hp = GetMaxHP();
+				new_hp -= GetMaxHP()  * spells[spell_id].base[i] / 1000;
+
+				if (new_hp > 0)
+					SetHP(new_hp);
+				else
+					Kill();
+			}
+		}
+	}
+}
+
 int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
 	if (!IsValidSpell(spell_id))
