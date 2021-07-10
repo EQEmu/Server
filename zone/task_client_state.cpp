@@ -1241,6 +1241,9 @@ void ClientTaskState::IncrementDoneCount(
 			RewardTask(client, task_information);
 			//RemoveTask(c, TaskIndex);
 
+			// add replay timer (world adds timers to shared task members but messages here)
+			AddReplayTimer(client, *info, *task_information);
+
 			// TODO: shared task intercept completion
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
 			if (task_information->type == TaskType::Shared) {
@@ -1250,32 +1253,6 @@ void ClientTaskState::IncrementDoneCount(
 			task_manager->SendCompletedTasksToClient(client, this);
 
 			client->CancelTask(task_index, task_information->type);
-
-			// add replay timer from start of task (world adds timers for shared tasks)
-			// todo: shared task replay timers need to be added to members in world (message can still be done here)
-			if (task_information->replay_timer_seconds > 0)
-			{
-				int expire_time = info->accepted_time + task_information->replay_timer_seconds;
-				if (task_information->type != TaskType::Shared)
-				{
-					auto timer = CharacterTaskTimersRepository::NewEntity();
-					timer.character_id = client->CharacterID();
-					timer.task_id      = info->task_id;
-					timer.expire_time  = expire_time;
-					timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
-
-					CharacterTaskTimersRepository::InsertOne(database, timer);
-				}
-
-				auto seconds = expire_time - std::time(nullptr);
-				client->Message(Chat::Yellow, fmt::format(
-					SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
-					task_information->title,
-					fmt::format_int(seconds / 86400).c_str(),       // days
-					fmt::format_int((seconds / 3600) % 24).c_str(), // hours
-					fmt::format_int((seconds / 60) % 60).c_str()    // minutes
-				).c_str());
-			}
 		}
 
 	}
@@ -2679,5 +2656,37 @@ void ClientTaskState::ListTaskTimers(Client* client)
 	if (character_task_timers.empty()) {
 		// TODO: Replace with any official eqstr
 		client->Message(Chat::White, "You have no current task timers");
+	}
+}
+
+void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
+{
+	if (task.replay_timer_seconds > 0 && client)
+	{
+		int expire_time = client_task.accepted_time + task.replay_timer_seconds;
+
+		auto seconds = expire_time - std::time(nullptr);
+		if (seconds > 0) // not already expired
+		{
+			// world adds timers for shared tasks (we still message here for them)
+			if (task.type != TaskType::Shared)
+			{
+				auto timer = CharacterTaskTimersRepository::NewEntity();
+				timer.character_id = client->CharacterID();
+				timer.task_id      = client_task.task_id;
+				timer.expire_time  = expire_time;
+				timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+
+				CharacterTaskTimersRepository::InsertOne(database, timer);
+			}
+
+			client->Message(Chat::Yellow, fmt::format(
+				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+				task.title,
+				fmt::format_int(seconds / 86400).c_str(),       // days
+				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
+				fmt::format_int((seconds / 60) % 60).c_str()    // minutes
+			).c_str());
+		}
 	}
 }

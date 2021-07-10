@@ -519,8 +519,6 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 			done_count
 		);
 
-		// todo: add task replay timer to members on shared task completion
-
 		for (auto &a : shared_task->m_shared_task_activity_state) {
 			if (a.activity_id == activity_id) {
 				if (a.done_count < done_count) {
@@ -604,7 +602,6 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 		}
 
 		// mark completed
-		// TODO: Add replay timer logic in completion block below
 		if (is_shared_task_completed) {
 			auto t = shared_task->GetDbSharedTask();
 			if (t.id > 0) {
@@ -618,6 +615,8 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 				shared_task->SetDbSharedTask(t);
 				// record completion
 				RecordSharedTaskCompletion(shared_task);
+				// replay timer lockouts
+				AddReplayTimers(shared_task);
 			}
 		}
 	}
@@ -1598,4 +1597,32 @@ void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 
 	CompletedSharedTaskActivityStateRepository::InsertMany(*m_database, completed_states);
 
+}
+
+void SharedTaskManager::AddReplayTimers(SharedTask* s)
+{
+	if (s->GetTaskData().replay_timer_seconds > 0)
+	{
+		auto expire_time = s->GetDbSharedTask().accepted_time + s->GetTaskData().replay_timer_seconds;
+		if (expire_time > std::time(nullptr)) // not already expired
+		{
+			// todo: on live past members of the shared task also receive lockouts (hold past members in memory)
+			std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> task_timers;
+
+			for (const auto& m : s->GetMembers())
+			{
+				auto timer = CharacterTaskTimersRepository::NewEntity();
+				timer.character_id = m.character_id;
+				timer.task_id      = s->GetTaskData().id;
+				timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+				timer.expire_time  = expire_time;
+
+				task_timers.emplace_back(timer);
+			}
+
+			if (!task_timers.empty()) {
+				CharacterTaskTimersRepository::InsertMany(*m_database, task_timers);
+			}
+		}
+	}
 }

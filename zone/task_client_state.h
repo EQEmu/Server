@@ -75,6 +75,7 @@ public:
 
 
 private:
+	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
 
 	void IncrementDoneCount(
 		Client *client,
