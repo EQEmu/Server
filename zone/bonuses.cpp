@@ -2692,9 +2692,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ManaAbsorbPercentDamage:
 			{
-				if (new_bonus->ManaAbsorbPercentDamage[0] < effect_value){
-					new_bonus->ManaAbsorbPercentDamage[0] = effect_value;
-					new_bonus->ManaAbsorbPercentDamage[1] = buffslot;
+				if (new_bonus->ManaAbsorbPercentDamage < effect_value){
+					new_bonus->ManaAbsorbPercentDamage = effect_value;
+				}
+				break;
+			}
+
+			case SE_Endurance_Absorb_Pct_Damage:
+			{
+				if (new_bonus->EnduranceAbsorbPercentDamage[0] < effect_value) {
+					new_bonus->EnduranceAbsorbPercentDamage[0] = effect_value;
+					new_bonus->EnduranceAbsorbPercentDamage[1] = base2;
 				}
 				break;
 			}
@@ -4356,8 +4364,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ManaAbsorbPercentDamage:
-					spellbonuses.ManaAbsorbPercentDamage[0] = effect_value;
-					spellbonuses.ManaAbsorbPercentDamage[1] = -1;
+					spellbonuses.ManaAbsorbPercentDamage = effect_value;
+					break;
+
+				case SE_Endurance_Absorb_Pct_Damage:
+					spellbonuses.EnduranceAbsorbPercentDamage[0] = effect_value;
+					spellbonuses.EnduranceAbsorbPercentDamage[1] = effect_value;
 					break;
 
 				case SE_ShieldBlock:

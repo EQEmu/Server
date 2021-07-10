@@ -3323,12 +3323,25 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	if (damage <= 0)
 		return damage;
 
-	if (spellbonuses.ManaAbsorbPercentDamage[0]) {
-		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100;
+	if (spellbonuses.ManaAbsorbPercentDamage) {
+		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
 		if (GetMana() >= mana_reduced) {
 			damage -= mana_reduced;
 			SetMana(GetMana() - mana_reduced);
 			TryTriggerOnValueAmount(false, true);
+		}
+	}
+
+	if (spellbonuses.EnduranceAbsorbPercentDamage[0]) {
+		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[0] / 10000;
+		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[1] / 10000;
+		if (endurance_drain < 1)
+			endurance_drain = 1;
+
+		if (IsClient() && CastToClient()->GetEndurance() >= endurance_drain) {
+			damage -= damage_reduced;
+			CastToClient()->SetEndurance(CastToClient()->GetEndurance() - endurance_drain);
+			TryTriggerOnValueAmount(false, false, true);
 		}
 	}
 

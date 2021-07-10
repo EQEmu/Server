@@ -861,7 +861,7 @@ typedef enum {
 //#define SE_Attack_Accuracy_Max_Percent	518 //
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
-//#define SE_Endurance_Absorb_Pct_Damage	521 //
+#define SE_Endurance_Absorb_Pct_Damage	521 //
 #define SE_Instant_Mana_Pct				522 //
 #define SE_Instant_Endurance_Pct		523 //
 #define SE_Duration_HP_Pct				524 //
