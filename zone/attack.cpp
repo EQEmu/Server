@@ -190,8 +190,8 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 
 	//518 Increase ATK accuracy by percentage, stackable
 	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
-
-	accuracy += (accuracy * atkhit_bonus) / 10000;
+	if (atkhit_bonus)
+		accuracy += round(static_cast<double>(accuracy) * static_cast<double>(atkhit_bonus) * 0.0001);
 
 	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
 	accuracy += itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
@@ -238,6 +238,11 @@ int Mob::compute_defense()
 	if (IsClient())
 		defense += CastToClient()->GetHeroicAGI() / 10;
 
+	//516 SE_AC_Mitigation_Max_Percent
+	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;
+	if (ac_bonus)
+		defense += round(static_cast<double>(defense) * static_cast<double>(ac_bonus) * 0.0001);
+
 	defense += itembonuses.AvoidMeleeChance; // item mod2
 	if (IsNPC())
 		defense += CastToNPC()->GetAvoidanceRating();
@@ -260,7 +265,12 @@ int Mob::GetTotalDefense()
 	auto evasion_bonus = spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
 	if (evasion_bonus >= 10000)
 		return -1;
-	//
+	
+	// 515 SE_AC_Avoidance_Max_Percent
+	auto ac_aviodance_bonus = itembonuses.AC_Avoidance_Max_Percent + aabonuses.AC_Avoidance_Max_Percent + spellbonuses.AC_Avoidance_Max_Percent;
+	if (ac_aviodance_bonus)
+		avoidance += round(static_cast<double>(avoidance) * static_cast<double>(ac_aviodance_bonus) * 0.0001);
+
 	// 172 Evasion aka SE_AvoidMeleeChance
 	evasion_bonus += itembonuses.AvoidMeleeChanceEffect + aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
 

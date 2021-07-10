@@ -3122,6 +3122,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Duration_Mana_Pct:
 			case SE_Duration_Endurance_Pct:
 			case SE_Endurance_Absorb_Pct_Damage:
+			case SE_AC_Mitigation_Max_Percent:
+			case SE_AC_Avoidance_Max_Percent:
+			case SE_Attack_Accuracy_Max_Percent:
+			case SE_Critical_Melee_Damage_Mod_Max:
 			{
 				break;
 			}

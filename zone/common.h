@@ -461,6 +461,7 @@ struct StatBonuses {
 	uint32	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
 	uint32	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
 	int32	CritDmgMod[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
+	int32	CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 2];// Critical melee damage modifier by percent, does not stack.
 	int32	SkillReuseTime[EQ::skills::HIGHEST_SKILL + 1];	// Reduces skill timers
 	int32	SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 2];	// All Skills + -1
 	int32	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon
@@ -525,6 +526,8 @@ struct StatBonuses {
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
 	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
 	int32   Attack_Accuracy_Max_Percent;		// Increase ATK accuracy by percent.
+	int32   AC_Mitigation_Max_Percent;			// Increase AC mitigation by percent
+	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

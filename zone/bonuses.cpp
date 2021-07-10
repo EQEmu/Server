@@ -1102,6 +1102,19 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Critical_Melee_Damage_Mod_Max:
+		{
+			// Bad data or unsupported new skill
+			if (base2 > EQ::skills::HIGHEST_SKILL)
+				break;
+			int skill = base2 == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : base2;
+			if (base1 < 0 && newbon->CritDmgModNoStack[skill] > base1)
+				newbon->CritDmgModNoStack[skill] = base1;
+			else if (base1 > 0 && newbon->CritDmgModNoStack[skill] < base1)
+				newbon->CritDmgModNoStack[skill] = base1;
+			break;
+		}
+
 		case SE_CriticalSpellChance: {
 			newbon->CriticalSpellChance += base1;
 
@@ -1489,6 +1502,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_Attack_Accuracy_Max_Percent:
 			newbon->Attack_Accuracy_Max_Percent += base1;
+			break;
+
+		case SE_AC_Mitigation_Max_Percent:
+			newbon->AC_Mitigation_Max_Percent += base1;
+			break;
+
+		case SE_AC_Avoidance_Max_Percent:
+			newbon->AC_Avoidance_Max_Percent += base1;
 			break;
 
 		// to do
@@ -2489,6 +2510,20 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Critical_Melee_Damage_Mod_Max:
+			{
+				// Bad data or unsupported new skill
+				if (base2 > EQ::skills::HIGHEST_SKILL)
+					break;
+				int skill = base2 == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->CritDmgModNoStack[skill] > effect_value)
+					new_bonus->CritDmgModNoStack[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->CritDmgModNoStack[skill] < effect_value) {
+					new_bonus->CritDmgModNoStack[skill] = effect_value;
+				}
+				break;
+			}
+
 			case SE_ReduceSkillTimer:
 			{
 				if(new_bonus->SkillReuseTime[base2] < effect_value)
@@ -3266,6 +3301,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Attack_Accuracy_Max_Percent:
 				new_bonus->Attack_Accuracy_Max_Percent += effect_value;
 				break;
+
+
+			case SE_AC_Mitigation_Max_Percent:
+				new_bonus->AC_Mitigation_Max_Percent += effect_value;
+				break;
+
+			case SE_AC_Avoidance_Max_Percent:
+				new_bonus->AC_Avoidance_Max_Percent += effect_value;
+				break;
+
+
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
@@ -4274,6 +4320,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 				}
 
+				case SE_Critical_Melee_Damage_Mod_Max:
+				{
+					for (int e = 0; e < EQ::skills::HIGHEST_SKILL + 1; e++)
+					{
+						spellbonuses.CritDmgModNoStack[e] = effect_value;
+						aabonuses.CritDmgModNoStack[e] = effect_value;
+						itembonuses.CritDmgModNoStack[e] = effect_value;
+					}
+					break;
+				}
+
 				case SE_SkillDamageAmount:
 				{
 					for (int e = 0; e < EQ::skills::HIGHEST_SKILL + 1; e++)
@@ -4788,6 +4845,25 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.IllusionPersistence = false;
 					itembonuses.IllusionPersistence = false;
 					aabonuses.IllusionPersistence = false;
+					break;
+
+				case SE_Attack_Accuracy_Max_Percent:
+					spellbonuses.Attack_Accuracy_Max_Percent = effect_value;
+					itembonuses.Attack_Accuracy_Max_Percent = effect_value;
+					aabonuses.Attack_Accuracy_Max_Percent = effect_value;
+					break;
+
+
+				case SE_AC_Mitigation_Max_Percent:
+					spellbonuses.AC_Mitigation_Max_Percent = effect_value;
+					itembonuses.AC_Mitigation_Max_Percent = effect_value;
+					aabonuses.AC_Mitigation_Max_Percent = effect_value;
+					break;
+
+				case SE_AC_Avoidance_Max_Percent:
+					spellbonuses.AC_Avoidance_Max_Percent = effect_value;
+					itembonuses.AC_Avoidance_Max_Percent = effect_value;
+					aabonuses.AC_Avoidance_Max_Percent = effect_value;
 					break;
 
 				case SE_SkillProcSuccess:{

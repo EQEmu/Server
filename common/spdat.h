@@ -838,7 +838,7 @@ typedef enum {
 //#define SE_Ff_Endurance_Max			493 //
 //#define SE_Pet_Add_Atk				494 //
 //#define SE_Ff_DurationMax				495 //
-//#define SE_Critical_Melee_Damage_Mod_Max	496 //
+#define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - 
 //#define SE_Ff_FocusCastProcNoBypass	497 //
 //#define SE_AddExtraAttackPct_1h_Primary	498 //
 //#define SE_AddExtraAttackPct_1h_Secondary	499 //
@@ -851,24 +851,24 @@ typedef enum {
 //#define SE_Damage_Taken_Position_Amt	506 //
 //#define SE_Fc_Amplify_Mod				507 //
 //#define SE_Fc_Amplify_Amt				508 //
-#define SE_Health_Transfer				509 //
+#define SE_Health_Transfer				509 // implemented - 
 //#define SE_Fc_ResistIncoming			510 //
 //#define SE_Ff_FocusTimerMin			511 //
 //#define SE_Proc_Timer_Modifier 		512 //
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
-//#define SE_AC_Avoidance_Max_Percent	515 // 515 is before 172 TotalEffect(515) * static_cast<double>(avoidance_ac) * 0.0001 that value is then rounded with a +/- 0.5
-//#define SE_AC_Mitigation_Max_Percent	516 // 516 is after AGI bonus
+#define SE_AC_Avoidance_Max_Percent		515 // implemented -  515 is before 172
+#define SE_AC_Mitigation_Max_Percent	516 // implemented -  516 is after AGI bonus
 //#define SE_Attack_Offense_Max_Percent	517 // Requires too much rewrite of code.
-#define SE_Attack_Accuracy_Max_Percent	518 //
+#define SE_Attack_Accuracy_Max_Percent	518 // implemented - 
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
-#define SE_Endurance_Absorb_Pct_Damage	521 //
-#define SE_Instant_Mana_Pct				522 //
-#define SE_Instant_Endurance_Pct		523 //
-#define SE_Duration_HP_Pct				524 //
-#define SE_Duration_Mana_Pct			525 //
-#define SE_Duration_Endurance_Pct		526 //
+#define SE_Endurance_Absorb_Pct_Damage	521 // implemented - 
+#define SE_Instant_Mana_Pct				522 // implemented - 
+#define SE_Instant_Endurance_Pct		523 // implemented - 
+#define SE_Duration_HP_Pct				524 // implemented - 
+#define SE_Duration_Mana_Pct			525 // implemented - 
+#define SE_Duration_Endurance_Pct		526 // implemented - 
 
 
 // LAST
