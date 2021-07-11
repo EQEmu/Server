@@ -10586,6 +10586,13 @@ void command_task(Client *c, const Seperator *sep) {
 				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload sets", false, "reload sets")
 			).c_str()
 		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Purges targeted characters task timers",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task purgetimers", false, "purgetimers")
+			).c_str()
+		);
 
 		c->Message(Chat::White, "------------------------------------------------");
 		c->Message(Chat::White, "# Shared Task System Commands");
@@ -10594,7 +10601,7 @@ void command_task(Client *c, const Seperator *sep) {
 			Chat::White,
 			fmt::format(
 				"--- [{}] Purges all active Shared Tasks in memory and database ",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge", false, "purge shared tasks")
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge", false, "sharedpurge")
 			).c_str()
 		);
 
@@ -10608,6 +10615,15 @@ void command_task(Client *c, const Seperator *sep) {
 
 	if (!strcasecmp(sep->arg[1], "show")) {
 		c->ShowClientTasks(client_target);
+		return;
+	}
+
+	if (!strcasecmp(sep->arg[1], "purgetimers")) {
+		c->Message(15, fmt::format("{}'s task timers have been purged", client_target->GetCleanName()).c_str());
+		if (client_target != c) {
+			client_target->Message(15, "[GM] Your task timers have been purged by a GM");
+		}
+		client_target->PurgeTaskTimers();
 		return;
 	}
 

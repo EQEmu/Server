@@ -66,6 +66,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
+#include "client.h"
+#include "../common/repositories/character_task_timers_repository.h"
+
 
 #ifdef BOTS
 #include "bot.h"
@@ -15496,4 +15499,9 @@ void Client::Handle_OP_SharedTaskQuit(const EQApplicationPacket* app)
 void Client::Handle_OP_TaskTimers(const EQApplicationPacket* app)
 {
 	GetTaskState()->ListTaskTimers(this);
+}
+
+void Client::PurgeTaskTimers()
+{
+	CharacterTaskTimersRepository::DeleteWhere(database, fmt::format("character_id = {}", CharacterID()));
 }
