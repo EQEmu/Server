@@ -1382,6 +1382,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_SharedTaskInviteAcceptedPlayer:
 	case ServerOP_SharedTaskMakeLeader:
 	case ServerOP_SharedTaskCreateDynamicZone:
+	case ServerOP_SharedTaskPurgeAllCommand:
 	{
 		SharedTaskWorldMessaging::HandleZoneMessage(pack);
 		break;

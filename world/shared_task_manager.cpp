@@ -1674,3 +1674,12 @@ std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::
 
 	return characters;
 }
+
+void SharedTaskManager::PurgeAllSharedTasks()
+{
+	SharedTasksRepository::Truncate(*m_database);
+	SharedTaskMembersRepository::Truncate(*m_database);
+	SharedTaskActivityStateRepository::Truncate(*m_database);
+
+	LoadSharedTaskState();
+}

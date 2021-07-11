@@ -152,6 +152,18 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskPurgeAllCommand: {
+			LogTasksDetail("[ServerOP_SharedTaskPurgeAllCommand] Syncing clients");
+
+			for (auto &client: entity_list.GetClientList()) {
+				Client *c = client.second;
+				task_manager->SyncClientSharedTaskState(c, c->GetTaskState());
+				c->RemoveClientTaskState();
+				c->LoadClientTaskState();
+			}
+
+			break;
+		}
 		default:
 			break;
 	}

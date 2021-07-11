@@ -69,6 +69,7 @@ public:
 
 	void CreateDynamicZone(SharedTask* s, DynamicZone& dz_request);
 
+	void PurgeAllSharedTasks();
 protected:
 	// reference to database
 	Database *m_database;

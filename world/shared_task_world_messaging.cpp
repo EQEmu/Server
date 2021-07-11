@@ -242,6 +242,19 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			}
 			break;
 		}
+		case ServerOP_SharedTaskPurgeAllCommand: {
+			LogTasksDetail("[ServerOP_SharedTaskPurgeAllCommand] Received request to purge all shared tasks");
+
+			shared_task_manager.PurgeAllSharedTasks();
+			auto p = std::make_unique<ServerPacket>(
+				ServerOP_SharedTaskPurgeAllCommand,
+				0
+			);
+
+			zoneserver_list.SendPacket(p.get());
+
+			break;
+		}
 		default:
 			break;
 	}

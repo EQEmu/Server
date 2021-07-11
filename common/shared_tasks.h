@@ -33,6 +33,7 @@
 #define ServerOP_SharedTaskInvitePlayer             0x0309 // world -> zone. Sends task invite to player
 #define ServerOP_SharedTaskInviteAcceptedPlayer     0x0310 // zone -> world. Confirming task invite
 #define ServerOP_SharedTaskCreateDynamicZone        0x0311 // zone -> world
+#define ServerOP_SharedTaskPurgeAllCommand          0x0312 // zone -> world
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,

@@ -77,6 +77,7 @@
 #include "npc_scale_manager.h"
 #include "../common/content/world_content_service.h"
 #include "../common/http/httplib.h"
+#include "../common/shared_tasks.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -10585,6 +10586,18 @@ void command_task(Client *c, const Seperator *sep) {
 				EQ::SayLinkEngine::GenerateQuestSaylink("#task reload sets", false, "reload sets")
 			).c_str()
 		);
+
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(Chat::White, "# Shared Task System Commands");
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"--- [{}] Purges all active Shared Tasks in memory and database ",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge", false, "purge shared tasks")
+			).c_str()
+		);
+
 		return;
 	}
 
@@ -10621,6 +10634,26 @@ void command_task(Client *c, const Seperator *sep) {
 			client_target->UpdateTaskActivity(task_id, activity_id, count);
 			c->ShowClientTasks(client_target);
 		}
+		return;
+	}
+
+	if (!strcasecmp(sep->arg[1], "sharedpurge")) {
+		if (!strcasecmp(sep->arg[2], "confirm")) {
+			auto pack = new ServerPacket(ServerOP_SharedTaskPurgeAllCommand, 0);
+			worldserver.SendPacket(pack);
+			safe_delete(pack);
+
+			return;
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[WARNING] This will purge all active Shared Tasks [{}]?",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#task sharedpurge confirm", false, "confirm")
+			).c_str()
+		);
+
 		return;
 	}
 
