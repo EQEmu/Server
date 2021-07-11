@@ -978,6 +978,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_FrontalBackstabChance:
 			newbon->FrontalBackstabChance += base1;
 			break;
+		case SE_Double_Backstab_Front:
+			newbon->Double_Backstab_Front += base1;
+			break;
 		case SE_BlockBehind:
 			newbon->BlockBehind += base1;
 			break;
@@ -1534,6 +1537,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->Melee_Damage_Position_Mod[base2] = base1;
 			break;
 		}
+
+		case SE_DS_Mitigation_Amount:
+			newbon->DS_Mitigation_Amount += base1;
+			break;
+
+		case SE_DS_Mitigation_Percentage:
+			newbon->DS_Mitigation_Percentage += base1;
+			break;
 
 
 		// to do
@@ -2833,6 +2844,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->FrontalBackstabChance += effect_value;
 				break;
 
+			case SE_Double_Backstab_Front:
+				new_bonus->Double_Backstab_Front += effect_value;
+				break;
+
 			case SE_ConsumeProjectile:
 				new_bonus->ConsumeProjectile += effect_value;
 				break;
@@ -3362,6 +3377,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->Melee_Damage_Position_Mod[base2] = effect_value;
 				break;
 			}
+
+			case SE_DS_Mitigation_Amount:
+				new_bonus->DS_Mitigation_Amount += effect_value;
+				break;
+
+			case SE_DS_Mitigation_Percentage:
+				new_bonus->DS_Mitigation_Percentage += effect_value;
+				break;
 
 
 		
@@ -4557,6 +4580,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.FrontalBackstabChance = effect_value;
 					break;
 
+				case SE_Double_Backstab_Front:
+					spellbonuses.Double_Backstab_Front = effect_value;
+					aabonuses.Double_Backstab_Front = effect_value;
+					itembonuses.Double_Backstab_Front = effect_value;
+					break;
+
 				case SE_ConsumeProjectile:
 					spellbonuses.ConsumeProjectile = effect_value;
 					aabonuses.ConsumeProjectile = effect_value;
@@ -4916,6 +4945,37 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.AC_Avoidance_Max_Percent = effect_value;
 					itembonuses.AC_Avoidance_Max_Percent = effect_value;
 					aabonuses.AC_Avoidance_Max_Percent = effect_value;
+					break;
+
+				case SE_Melee_Damage_Position_Mod:
+					spellbonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					break;
+
+				case SE_Damage_Taken_Position_Mod:
+					spellbonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					break;
+
+
+				case SE_DS_Mitigation_Amount:
+					spellbonuses.DS_Mitigation_Amount = effect_value;
+					itembonuses.DS_Mitigation_Amount = effect_value;
+					aabonuses.DS_Mitigation_Amount = effect_value;
+					break;
+
+				case SE_DS_Mitigation_Percentage:
+					spellbonuses.DS_Mitigation_Percentage = effect_value;
+					itembonuses.DS_Mitigation_Percentage = effect_value;
+					aabonuses.DS_Mitigation_Percentage = effect_value;
 					break;
 
 				case SE_SkillProcSuccess:{

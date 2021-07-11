@@ -585,6 +585,10 @@ void Mob::TryBackstab(Mob *other, int ReuseTime) {
 		if(IsClient())
 			CastToClient()->CheckIncreaseSkill(EQ::skills::SkillBackstab, other, 10);
 		m_specialattacks = eSpecialAttacks::None;
+
+		int double_bs_front = aabonuses.Double_Backstab_Front + itembonuses.Double_Backstab_Front + spellbonuses.Double_Backstab_Front;
+		if (double_bs_front && other->GetHP() > 0 && zone->random.Roll(double_bs_front))
+			RogueBackstab(other, false, ReuseTime);
 	}
 	else { //We do a single regular attack if we attack from the front without chaotic stab
 		Attack(other, EQ::invslot::slotPrimary);

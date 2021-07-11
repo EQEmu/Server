@@ -2902,6 +2902,10 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 			DS += aabonuses.DamageShield; //Live AA - coat of thistles. (negative value)
 			DS -= itembonuses.DamageShield; //+Damage Shield should only work when you already have a DS spell
+			DS -= attacker->aabonuses.DS_Mitigation_Amount + attacker->itembonuses.DS_Mitigation_Amount + attacker->spellbonuses.DS_Mitigation_Amount; //Negative value to reduce
+			//Do not allow flat amount reductions to reduce past 0.
+			if (DS >= 0)
+				return;
 
 											//Spell data for damage shield mitigation shows a negative value for spells for clients and positive
 											//value for spells that effect pets. Unclear as to why. For now will convert all positive to be consistent.
@@ -2911,7 +2915,11 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 					attacker->aabonuses.DSMitigationOffHand;
 				DS -= DS*mitigation / 100;
 			}
-			DS -= DS * attacker->itembonuses.DSMitigation / 100;
+
+			int mitigation_pct = attacker->aabonuses.DS_Mitigation_Percentage + attacker->itembonuses.DS_Mitigation_Percentage + attacker->spellbonuses.DS_Mitigation_Percentage; //Negative value to reduce
+
+			// Subtract mitigations b/c mitigation_pct is a negative value when reducing total DS
+			DS -= DS * ((attacker->itembonuses.DSMitigation - mitigation_pct) / 100);
 		}
 		attacker->Damage(this, -DS, spellid, EQ::skills::SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
