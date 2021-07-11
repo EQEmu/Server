@@ -4656,6 +4656,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int &damage, Mob *defender, ExtraAt
 	int dmgbonusmod = 0;
 
 	dmgbonusmod += GetMeleeDamageMod_SE(skill);
+	dmgbonusmod += GetMeleeDmgPositionMod(defender);
 	if (opts)
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
@@ -5269,7 +5270,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	if (spec_mod > 0)
 		hit.damage_done = (hit.damage_done * spec_mod) / 100;
 
-	hit.damage_done += (hit.damage_done * defender->GetSkillDmgTaken(hit.skill, opts) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
+	hit.damage_done += (hit.damage_done * (defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this)) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }

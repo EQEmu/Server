@@ -528,6 +528,8 @@ struct StatBonuses {
 	int32   Attack_Accuracy_Max_Percent;		// Increase ATK accuracy by percent.
 	int32   AC_Mitigation_Max_Percent;			// Increase AC mitigation by percent
 	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
+	int32   Damage_Taken_Position_Mod[2];		// base = percent melee damage reduction base2 0=back 1=front. [0]Back[1]Front
+	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

@@ -845,9 +845,9 @@ typedef enum {
 //#define SE_Fc_CastTimeMod2			500 //
 //#define SE_Fc_CastTimeAmt				501 //
 //#define SE_Fearstun					502 //
-//#define SE_Melee_Damage_Position_Mod	503 //
+#define SE_Melee_Damage_Position_Mod	503 //
 //#define SE_Melee_Damage_Position_Amt	504 //
-//#define SE_Damage_Taken_Position_Mod	505 //
+#define SE_Damage_Taken_Position_Mod	505 //
 //#define SE_Damage_Taken_Position_Amt	506 //
 //#define SE_Fc_Amplify_Mod				507 //
 //#define SE_Fc_Amplify_Amt				508 //

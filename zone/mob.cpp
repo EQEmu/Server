@@ -3816,6 +3816,33 @@ int16 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackO
 	return skilldmg_mod;
 }
 
+int16 Mob::GetPositionalDmgTaken(Mob *attacker)
+{
+	if (!attacker)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_mod = 0;
+
+	back_arc += itembonuses.Damage_Taken_Position_Mod[0] + aabonuses.Damage_Taken_Position_Mod[0] + spellbonuses.Damage_Taken_Position_Mod[0];
+	front_arc += itembonuses.Damage_Taken_Position_Mod[1] + aabonuses.Damage_Taken_Position_Mod[1] + spellbonuses.Damage_Taken_Position_Mod[1];
+
+	if (back_arc || front_arc) { //Do they have this bonus?
+		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
+			total_mod = back_arc; //If so, apply the back arc modifier only
+		else
+			total_mod = front_arc;//If not, apply the front arc modifer only
+	}
+
+	total_mod = round(static_cast<double>(total_mod) * 0.1);
+
+	if (total_mod < -100)
+		total_mod = -100;
+
+	return total_mod;
+}
+
 int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
 	int16 heal_rate = 0;
@@ -4719,6 +4746,35 @@ int16 Mob::GetCrippBlowChance()
 		crip_chance = 0;
 
 	return crip_chance;
+}
+
+
+int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
+{
+	if (!defender)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_mod = 0;
+
+	back_arc += itembonuses.Melee_Damage_Position_Mod[0] + aabonuses.Melee_Damage_Position_Mod[0] + spellbonuses.Melee_Damage_Position_Mod[0];
+	front_arc += itembonuses.Melee_Damage_Position_Mod[1] + aabonuses.Melee_Damage_Position_Mod[1] + spellbonuses.Melee_Damage_Position_Mod[1];
+
+	if (back_arc || front_arc) { //Do they have this bonus?
+		if (BehindMob(defender, GetX(), GetY()))//Check if attacker is striking from behind
+			total_mod = back_arc; //If so, apply the back arc modifier only
+		else
+			total_mod = front_arc;//If not, apply the front arc modifer only
+	}
+
+	total_mod = round(static_cast<double>(total_mod) * 0.1);
+
+	if (total_mod < -100)
+		total_mod = -100;
+
+	return total_mod;
+
 }
 
 int16 Mob::GetSkillReuseTime(uint16 skill)

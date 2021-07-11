@@ -1512,6 +1512,30 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->AC_Avoidance_Max_Percent += base1;
 			break;
 
+		case SE_Damage_Taken_Position_Mod:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+			else if (base1 < 0 && newbon->Damage_Taken_Position_Mod[base2] > base1)
+				newbon->Damage_Taken_Position_Mod[base2] = base1;
+			else if (base1 > 0 && newbon->Damage_Taken_Position_Mod[base2] < base1)
+				newbon->Damage_Taken_Position_Mod[base2] = base1;
+			break;
+		}
+
+		case SE_Melee_Damage_Position_Mod:
+		{
+			if (base2 < 0 || base2 > 2)
+				break;
+			else if (base1 < 0 && newbon->Melee_Damage_Position_Mod[base2] > base1)
+				newbon->Melee_Damage_Position_Mod[base2] = base1;
+			else if (base1 > 0 && newbon->Melee_Damage_Position_Mod[base2] < base1)
+				newbon->Melee_Damage_Position_Mod[base2] = base1;
+			break;
+		}
+
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3310,6 +3334,34 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_AC_Avoidance_Max_Percent:
 				new_bonus->AC_Avoidance_Max_Percent += effect_value;
 				break;
+
+			case SE_Damage_Taken_Position_Mod:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+				if (AdditiveWornBonus)
+					new_bonus->Damage_Taken_Position_Mod[base2] += effect_value;
+				else if (effect_value < 0 && new_bonus->Damage_Taken_Position_Mod[base2] > effect_value) 
+					new_bonus->Damage_Taken_Position_Mod[base2] = effect_value;
+				else if (effect_value > 0 && new_bonus->Damage_Taken_Position_Mod[base2] < effect_value)
+					new_bonus->Damage_Taken_Position_Mod[base2] = effect_value;
+				break;
+			}
+
+			case SE_Melee_Damage_Position_Mod:
+			{
+				//Increase damage by percent from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+				if (AdditiveWornBonus)
+					new_bonus->Melee_Damage_Position_Mod[base2] += effect_value;
+				else if (effect_value < 0 && new_bonus->Melee_Damage_Position_Mod[base2] > effect_value)
+					new_bonus->Melee_Damage_Position_Mod[base2] = effect_value;
+				else if (effect_value > 0 && new_bonus->Melee_Damage_Position_Mod[base2] < effect_value)
+					new_bonus->Melee_Damage_Position_Mod[base2] = effect_value;
+				break;
+			}
 
 
 		

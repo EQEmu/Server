@@ -3126,6 +3126,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_AC_Avoidance_Max_Percent:
 			case SE_Attack_Accuracy_Max_Percent:
 			case SE_Critical_Melee_Damage_Mod_Max:
+			case SE_Melee_Damage_Position_Mod:
+			case SE_Damage_Taken_Position_Mod:
 			{
 				break;
 			}
