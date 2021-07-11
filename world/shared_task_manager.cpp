@@ -1274,25 +1274,8 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 //	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
 //		fmt::format("character_id IN ({})", fmt::join(request.character_ids, ",")));
 
-	std::vector<SharedTaskMembersRepository::SharedTaskMembers> shared_task_members = {};
 
-	for (auto &s: m_shared_tasks) {
-		// loop through members
-		for (auto &m: s.GetMembers()) {
-			// compare members with requested characters
-			for (auto &requested_character_id: request.character_ids) {
-				// found character, add to list
-				if (requested_character_id == m.character_id) {
-					auto req_member = SharedTaskMembersRepository::NewEntity();
-					req_member.shared_task_id = s.GetDbSharedTask().id;
-					req_member.character_id   = m.character_id;
-					req_member.is_leader      = m.is_leader;
-					shared_task_members.emplace_back(req_member);
-				}
-			}
-		}
-	}
-
+	auto shared_task_members = FindCharactersInSharedTasks(request.character_ids);
 	if (!shared_task_members.empty())
 	{
 		// messages for every character already in a shared task
@@ -1300,7 +1283,7 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 		{
 			auto it = std::find_if(request.characters.begin(), request.characters.end(),
 				[&](const CharacterDataRepository::CharacterData& char_data) {
-					return char_data.id == member.character_id;
+					return char_data.id == member;
 				});
 
 			if (it != request.characters.end())
@@ -1625,4 +1608,23 @@ void SharedTaskManager::AddReplayTimers(SharedTask* s)
 			}
 		}
 	}
+}
+
+std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::vector<uint32_t>& find_characters)
+{
+	std::vector<uint32_t> characters = {};
+	for (auto &s: m_shared_tasks) {
+		// loop through members
+		for (auto &m: s.GetMembers()) {
+			// compare members with requested characters
+			for (auto &find_character_id: find_characters) {
+				// found character, add to list
+				if (find_character_id == m.character_id) {
+					characters.emplace_back(m.character_id);
+				}
+			}
+		}
+	}
+
+	return characters;
 }
