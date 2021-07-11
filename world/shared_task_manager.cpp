@@ -38,7 +38,7 @@ SharedTaskManager *SharedTaskManager::SetContentDatabase(Database *db)
 
 std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(
 	uint32 requestor_character_id,
-	const std::vector<uint32_t>& character_ids
+	const std::vector<uint32_t> &character_ids
 )
 {
 	std::vector<SharedTaskMember> request_members = {};
@@ -46,7 +46,7 @@ std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(
 
 	for (auto &id: character_ids) {
 		SharedTaskMember member = {};
-		member.character_id   = id;
+		member.character_id = id;
 
 		// if the solo/raid/group member is a leader, make sure we tag it as such
 		if (id == requestor_character_id) {
@@ -193,7 +193,12 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	for (auto &m: request_members) {
 		// only requester (leader) receives back the npc context to trigger task accept event
 		uint32_t npc_context_id = m.character_id == requested_character_id ? npc_type_id : 0;
-		SendAcceptNewSharedTaskPacket(m.character_id, requested_task_id, npc_context_id, shared_task_entity.accepted_time);
+		SendAcceptNewSharedTaskPacket(
+			m.character_id,
+			requested_task_id,
+			npc_context_id,
+			shared_task_entity.accepted_time
+		);
 		SendSharedTaskMemberList(m.character_id, new_shared_task.GetDbSharedTask().id);
 	}
 
@@ -234,8 +239,11 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 					if (m.is_leader) {
 						auto c = CharacterDataRepository::FindOne(*m_database, m.character_id);
 						if (c.id != 0) {
-							client_list.SendCharacterMessageID(requested_character_id, Chat::Red,
-								SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { c.name });
+							client_list.SendCharacterMessageID(
+								requested_character_id,
+								Chat::Red,
+								SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {c.name}
+							);
 						}
 						break;
 					}
@@ -262,10 +270,14 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 				);
 			}
 
-			client_list.SendCharacterMessageID(requested_character_id, Chat::Red,
-				SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { "Everyone", task.title });
+			client_list.SendCharacterMessageID(
+				requested_character_id,
+				Chat::Red,
+				SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED,
+				{"Everyone", task.title}
+			);
 
-			for (const auto& dz_id : t->dynamic_zone_ids) {
+			for (const auto &dz_id : t->dynamic_zone_ids) {
 				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 				if (dz) {
 					dz->RemoveAllMembers();
@@ -399,7 +411,7 @@ void SharedTaskManager::LoadSharedTaskState()
 
 						e.max_done_count = ad.goalcount;
 						e.completed_time = sta.completed_time;
-						e.updated_time = sta.updated_time;
+						e.updated_time   = sta.updated_time;
 					}
 				}
 
@@ -431,7 +443,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		ns.SetMembers(shared_task_members);
 
 		// dynamic zones
-		for (const auto& dz_entry : shared_task_dynamic_zones_data) {
+		for (const auto &dz_entry : shared_task_dynamic_zones_data) {
 			if (dz_entry.shared_task_id == s.id) {
 				ns.dynamic_zone_ids.emplace_back(static_cast<uint32_t>(dz_entry.dynamic_zone_id));
 
@@ -594,7 +606,7 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 		}
 
 		// check if completed
-		bool is_shared_task_completed = true;
+		bool      is_shared_task_completed = true;
 		for (auto &a : shared_task->m_shared_task_activity_state) {
 			if (a.done_count != a.max_done_count) {
 				is_shared_task_completed = false;
@@ -605,7 +617,11 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 		if (is_shared_task_completed) {
 			auto t = shared_task->GetDbSharedTask();
 			if (t.id > 0) {
-				LogTasksDetail("[SharedTaskActivityUpdate] Marking shared task [{}] completed", shared_task->GetDbSharedTask().id);
+				LogTasksDetail(
+					"[SharedTaskActivityUpdate] Marking shared task [{}] completed",
+					shared_task->GetDbSharedTask().id
+				);
+
 				// set record
 				t.completion_time = std::time(nullptr);
 				t.is_locked       = true;
@@ -681,7 +697,12 @@ bool SharedTaskManager::IsSharedTaskLeader(SharedTask *s, uint32 character_id)
 	return false;
 }
 
-void SharedTaskManager::SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time)
+void SharedTaskManager::SendAcceptNewSharedTaskPacket(
+	uint32 character_id,
+	uint32 task_id,
+	uint32_t npc_context_id,
+	int accept_time
+)
 {
 	auto p = std::make_unique<ServerPacket>(
 		ServerOP_SharedTaskAcceptNewTask,
@@ -768,7 +789,7 @@ void SharedTaskManager::RemovePlayerFromSharedTask(SharedTask *s, uint32 charact
 		s->m_members.end()
 	);
 
-	for (const auto& dz_id : s->dynamic_zone_ids) {
+	for (const auto &dz_id : s->dynamic_zone_ids) {
 		auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 		if (dz) {
 			dz->RemoveMember(character_id);
@@ -914,7 +935,7 @@ void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string 
 			SaveMembers(s, members);
 			SendSharedTaskMemberListToAllMembers(s);
 
-			for (const auto& dz_id : s->dynamic_zone_ids) {
+			for (const auto &dz_id : s->dynamic_zone_ids) {
 				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 				if (dz) {
 					dz->SetNewLeader(static_cast<uint32_t>(character_id));
@@ -1037,8 +1058,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		members.push_back(new_member);
 
 		// add request timer (validation will prevent non-expired duplicates)
-		if (s->GetTaskData().request_timer_seconds > 0)
-		{
+		if (s->GetTaskData().request_timer_seconds > 0) {
 			auto expire_time = s->GetDbSharedTask().accepted_time + s->GetTaskData().request_timer_seconds;
 			if (expire_time > std::time(nullptr)) // not already expired
 			{
@@ -1060,13 +1080,13 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		SaveMembers(s, members);
 		SendSharedTaskMemberListToAllMembers(s);
 
-		for (const auto& dz_id : s->dynamic_zone_ids) {
+		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 			if (dz) {
-				auto cle = client_list.FindCLEByCharacterID(new_member.character_id);
+				auto        cle            = client_list.FindCLEByCharacterID(new_member.character_id);
 				std::string character_name = cle ? cle->name() : ""; // must be in cle to have accepted invite
-				auto status = DynamicZoneMemberStatus::Online;
-				dz->AddMember({ static_cast<uint32_t>(character_id), character_name, status });
+				auto        status         = DynamicZoneMemberStatus::Online;
+				dz->AddMember({static_cast<uint32_t>(character_id), character_name, status});
 			}
 		}
 	}
@@ -1144,27 +1164,25 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 	);
 }
 
-void SharedTaskManager::CreateDynamicZone(SharedTask* shared_task, DynamicZone& dz_request)
+void SharedTaskManager::CreateDynamicZone(SharedTask *shared_task, DynamicZone &dz_request)
 {
 	// get names from db in case of offline members
-	auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
-		"id IN (select character_id from shared_task_members where shared_task_id = {})",
-		shared_task->GetDbSharedTask().id
-	));
+	auto characters = CharacterDataRepository::GetWhere(
+		*m_database, fmt::format(
+			"id IN (select character_id from shared_task_members where shared_task_id = {})",
+			shared_task->GetDbSharedTask().id
+		));
 
 	std::vector<DynamicZoneMember> dz_members;
-	for (const auto& member : characters)
-	{
+	for (const auto                &member : characters) {
 		dz_members.emplace_back(member.id, member.name);
-		if (IsSharedTaskLeader(shared_task, member.id))
-		{
-			dz_request.SetLeader({ static_cast<uint32_t>(member.id), member.name });
+		if (IsSharedTaskLeader(shared_task, member.id)) {
+			dz_request.SetLeader({static_cast<uint32_t>(member.id), member.name});
 		}
 	}
 
 	auto new_dz = dynamic_zone_manager.CreateNew(dz_request, dz_members);
-	if (new_dz)
-	{
+	if (new_dz) {
 		auto shared_task_dz = SharedTaskDynamicZonesRepository::NewEntity();
 		shared_task_dz.shared_task_id  = shared_task->GetDbSharedTask().id;
 		shared_task_dz.dynamic_zone_id = new_dz->GetID();
@@ -1175,91 +1193,86 @@ void SharedTaskManager::CreateDynamicZone(SharedTask* shared_task, DynamicZone& 
 	}
 }
 
-void SharedTaskManager::SendLeaderMessage(SharedTask* shared_task, int chat_type, const std::string& message)
+void SharedTaskManager::SendLeaderMessage(SharedTask *shared_task, int chat_type, const std::string &message)
 {
-	if (!shared_task)
-	{
+	if (!shared_task) {
 		return;
 	}
 
-	for (const auto& member : shared_task->GetMembers())
-	{
-		if (member.is_leader)
-		{
+	for (const auto &member : shared_task->GetMembers()) {
+		if (member.is_leader) {
 			client_list.SendCharacterMessage(member.character_id, chat_type, message);
 			break;
 		}
 	}
 }
 
-void SharedTaskManager::SendLeaderMessageID(SharedTask* shared_task, int chat_type,
-	int eqstr_id, std::initializer_list<std::string> args)
+void SharedTaskManager::SendLeaderMessageID(
+	SharedTask *shared_task, int chat_type,
+	int eqstr_id, std::initializer_list<std::string> args
+)
 {
-	if (!shared_task)
-	{
+	if (!shared_task) {
 		return;
 	}
 
-	for (const auto& member : shared_task->GetMembers())
-	{
-		if (member.is_leader)
-		{
+	for (const auto &member : shared_task->GetMembers()) {
+		if (member.is_leader) {
 			client_list.SendCharacterMessageID(member.character_id, chat_type, eqstr_id, args);
 			break;
 		}
 	}
 }
 
-void SharedTaskManager::SendMembersMessage(SharedTask* shared_task, int chat_type, const std::string& message)
+void SharedTaskManager::SendMembersMessage(SharedTask *shared_task, int chat_type, const std::string &message)
 {
-	if (!shared_task)
-	{
+	if (!shared_task) {
 		return;
 	}
 
-	for (const auto& member : shared_task->GetMembers())
-	{
+	for (const auto &member : shared_task->GetMembers()) {
 		client_list.SendCharacterMessage(member.character_id, chat_type, message);
 	}
 }
 
-void SharedTaskManager::SendMembersMessageID(SharedTask* shared_task, int chat_type,
-	int eqstr_id, std::initializer_list<std::string> args)
+void SharedTaskManager::SendMembersMessageID(
+	SharedTask *shared_task, int chat_type,
+	int eqstr_id, std::initializer_list<std::string> args
+)
 {
-	if (!shared_task || shared_task->GetMembers().empty())
-	{
+	if (!shared_task || shared_task->GetMembers().empty()) {
 		return;
 	}
 
 	// serialize here since using client_list methods would re-serialize for every member
 	SerializeBuffer serialized_args;
-	for (const auto& arg : args)
-	{
+	for (const auto &arg : args) {
 		serialized_args.WriteString(arg);
 	}
 
 	uint32_t args_size = static_cast<uint32_t>(serialized_args.size());
 	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
-	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
-	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
+	auto     pack      = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
+	auto     buf       = reinterpret_cast<CZClientMessageString_Struct *>(pack->pBuffer);
 	buf->string_id = eqstr_id;
 	buf->chat_type = chat_type;
 	buf->args_size = args_size;
 	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
 
-	for (const auto& member : shared_task->GetMembers())
-	{
+	for (const auto &member : shared_task->GetMembers()) {
 		auto character = client_list.FindCLEByCharacterID(member.character_id);
-		if (character && character->Server())
-		{
+		if (character && character->Server()) {
 			strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
 			character->Server()->SendPacket(pack.get());
 		}
 	}
 }
 
-bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t character_id,
-	const SharedTaskRequestCharacters& request)
+bool SharedTaskManager::CanRequestSharedTask(
+	uint32_t task_id,
+	uint32_t character_id,
+	const SharedTaskRequestCharacters &request
+)
 {
 	auto task = GetSharedTaskDataByTaskId(task_id);
 	if (task.id == 0) {
@@ -1268,32 +1281,41 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 
 	// this attempts to follow live validation order
 
-	namespace EQStr = SharedTaskMessage;
-
 	// check if any party members are already in a shared task
-//	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
-//		fmt::format("character_id IN ({})", fmt::join(request.character_ids, ",")));
-
-
 	auto shared_task_members = FindCharactersInSharedTasks(request.character_ids);
-	if (!shared_task_members.empty())
-	{
+	if (!shared_task_members.empty()) {
 		// messages for every character already in a shared task
-		for (const auto& member : shared_task_members)
-		{
-			auto it = std::find_if(request.characters.begin(), request.characters.end(),
-				[&](const CharacterDataRepository::CharacterData& char_data) {
+		for (const auto &member : shared_task_members) {
+			auto it = std::find_if(
+				request.characters.begin(), request.characters.end(),
+				[&](const CharacterDataRepository::CharacterData &char_data) {
 					return char_data.id == member;
-				});
+				}
+			);
 
-			if (it != request.characters.end())
-			{
+			if (it != request.characters.end()) {
 				if (it->id == character_id) {
-					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_HAVE_ONE);
-				} else if (request.group_type == SharedTaskRequestGroupType::Group) {
-					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_GROUP_HAS_ONE, { it->name });
-				} else {
-					client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::NO_REQUEST_BECAUSE_RAID_HAS_ONE, { it->name });
+					client_list.SendCharacterMessageID(
+						character_id,
+						Chat::Red,
+						SharedTaskMessage::NO_REQUEST_BECAUSE_HAVE_ONE
+					);
+				}
+				else if (request.group_type == SharedTaskRequestGroupType::Group) {
+					client_list.SendCharacterMessageID(
+						character_id,
+						Chat::Red,
+						SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE,
+						{it->name}
+					);
+				}
+				else {
+					client_list.SendCharacterMessageID(
+						character_id,
+						Chat::Red,
+						SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE,
+						{it->name}
+					);
 				}
 			}
 		}
@@ -1302,88 +1324,104 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 	}
 
 	// check if any party member's minimum level is too low (pre-2014 this was average level)
-	if (task.minlevel > 0 && request.lowest_level < task.minlevel)
-	{
-		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::AVG_LVL_LOW);
+	if (task.minlevel > 0 && request.lowest_level < task.minlevel) {
+		client_list.SendCharacterMessageID(character_id, Chat::Red, SharedTaskMessage::AVG_LVL_LOW);
 		return false;
 	}
 
 	// check if any party member's maximum level is too high (pre-2014 this was average level)
-	if (task.maxlevel > 0 && request.highest_level > task.maxlevel)
-	{
-		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::AVG_LVL_HIGH);
+	if (task.maxlevel > 0 && request.highest_level > task.maxlevel) {
+		client_list.SendCharacterMessageID(character_id, Chat::Red, SharedTaskMessage::AVG_LVL_HIGH);
 		return false;
 	}
 
 	// allow gm/dev bypass for minimum player count requirements
 	auto requester = client_list.FindCLEByCharacterID(character_id);
-	bool is_gm = (requester && requester->GetGM());
+	bool is_gm     = (requester && requester->GetGM());
 
 	// check if party member count is below the minimum
-	if (!is_gm && task.min_players > 0 && request.characters.size() < task.min_players)
-	{
-		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::SHARED_TASK_NOT_MEET_MIN_NUM_PLAYER);
+	if (!is_gm && task.min_players > 0 && request.characters.size() < task.min_players) {
+		client_list.SendCharacterMessageID(
+			character_id,
+			Chat::Red,
+			SharedTaskMessage::SHARED_TASK_NOT_MEET_MIN_NUM_PLAYER
+		);
 		return false;
 	}
 
 	// check if party member count is above the maximum
 	// todo: live creates the shared task but truncates members if it exceeds max (sorted by leader and raid group numbers)
-	if (task.max_players > 0 && request.characters.size() > task.max_players)
-	{
-		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::PARTY_EXCEED_MAX_PLAYER);
+	if (task.max_players > 0 && request.characters.size() > task.max_players) {
+		client_list.SendCharacterMessageID(character_id, Chat::Red, SharedTaskMessage::PARTY_EXCEED_MAX_PLAYER);
 		return false;
 	}
 
 	// check if party level spread exceeds task's maximum
-	if (task.level_spread > 0 && (request.highest_level - request.lowest_level) > task.level_spread)
-	{
-		client_list.SendCharacterMessageID(character_id, Chat::Red, EQStr::LVL_SPREAD_HIGH);
+	if (task.level_spread > 0 && (request.highest_level - request.lowest_level) > task.level_spread) {
+		client_list.SendCharacterMessageID(character_id, Chat::Red, SharedTaskMessage::LVL_SPREAD_HIGH);
 		return false;
 	}
 
 	// check if any party members have a replay or request timer for the task (limit 1, replay checked first)
-	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(*m_database, fmt::format(
-		"character_id IN ({}) AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
-		fmt::join(request.character_ids, ","), task_id
-	));
+	auto character_task_timers = CharacterTaskTimersRepository::GetWhere(
+		*m_database, fmt::format(
+			"character_id IN ({}) AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+			fmt::join(request.character_ids, ","), task_id
+		)
+	);
 
-	if (!character_task_timers.empty())
-	{
+	if (!character_task_timers.empty()) {
 		auto timer_type = static_cast<TaskTimerType>(character_task_timers.front().timer_type);
-		auto seconds = character_task_timers.front().expire_time - std::time(nullptr);
-		auto days  = fmt::format_int(seconds / 86400).str();
-		auto hours = fmt::format_int((seconds / 3600) % 24).str();
-		auto mins  = fmt::format_int((seconds / 60) % 60).str();
+		auto seconds    = character_task_timers.front().expire_time - std::time(nullptr);
+		auto days       = fmt::format_int(seconds / 86400).str();
+		auto hours      = fmt::format_int((seconds / 3600) % 24).str();
+		auto mins       = fmt::format_int((seconds / 60) % 60).str();
 
-		if (character_task_timers.front().character_id == character_id)
-		{
-			if (timer_type == TaskTimerType::Replay)
-			{
-				client_list.SendCharacterMessageID(character_id, Chat::Red,
-					EQStr::YOU_MUST_WAIT_REPLAY_TIMER, { days, hours, mins });
+		if (character_task_timers.front().character_id == character_id) {
+			if (timer_type == TaskTimerType::Replay) {
+				client_list.SendCharacterMessageID(
+					character_id,
+					Chat::Red,
+					SharedTaskMessage::YOU_MUST_WAIT_REPLAY_TIMER, {days, hours, mins}
+				);
 			}
-			else if (timer_type == TaskTimerType::Request)
-			{
-				client_list.SendCharacterMessage(character_id, Chat::Red, fmt::format(
-					EQStr::GetEQStr(EQStr::YOU_MUST_WAIT_REQUEST_TIMER), days, hours, mins));
+			else if (timer_type == TaskTimerType::Request) {
+				client_list.SendCharacterMessage(
+					character_id,
+					Chat::Red, fmt::format(
+						SharedTaskMessage::GetEQStr(SharedTaskMessage::YOU_MUST_WAIT_REQUEST_TIMER), days, hours, mins
+					)
+				);
 			}
 		}
-		else
-		{
-			auto it = std::find_if(request.characters.begin(), request.characters.end(),
-				[&](const CharacterDataRepository::CharacterData& char_data) {
+		else {
+			auto it = std::find_if(
+				request.characters.begin(), request.characters.end(),
+				[&](const CharacterDataRepository::CharacterData &char_data) {
 					return char_data.id == character_task_timers.front().character_id;
-				});
+				}
+			);
 
-			if (it != request.characters.end() && timer_type == TaskTimerType::Replay)
-			{
-				client_list.SendCharacterMessageID(character_id, Chat::Red,
-					EQStr::PLAYER_MUST_WAIT_REPLAY_TIMER, { it->name, days, hours, mins });
+			if (it != request.characters.end() && timer_type == TaskTimerType::Replay) {
+				client_list.SendCharacterMessageID(
+					character_id,
+					Chat::Red,
+					SharedTaskMessage::PLAYER_MUST_WAIT_REPLAY_TIMER,
+					{it->name, days, hours, mins}
+				);
 			}
-			else if (it != request.characters.end() && timer_type == TaskTimerType::Request)
-			{
-				client_list.SendCharacterMessage(character_id, Chat::Red, fmt::format(
-					EQStr::GetEQStr(EQStr::PLAYER_MUST_WAIT_REQUEST_TIMER), it->name, days, hours, mins));
+			else if (it != request.characters.end() && timer_type == TaskTimerType::Request) {
+				client_list.SendCharacterMessage(
+					character_id,
+					Chat::Red,
+					fmt::format(
+						SharedTaskMessage::GetEQStr(SharedTaskMessage::PLAYER_MUST_WAIT_REQUEST_TIMER),
+						it->name,
+						days,
+						hours,
+						mins
+					)
+				);
 			}
 		}
 
@@ -1393,56 +1431,57 @@ bool SharedTaskManager::CanRequestSharedTask(uint32_t task_id, uint32_t characte
 	return true;
 }
 
-bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::string player_name, bool accepted)
+bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::string player_name, bool accepted)
 {
 	// this attempts to follow live validation order
 
 	bool allow_invite = true;
 
-	namespace EQStr = SharedTaskMessage;
-
 	// check if task is locked
-	if (s->GetDbSharedTask().is_locked)
-	{
-		SendLeaderMessageID(s, Chat::Red, EQStr::TASK_NOT_ALLOWING_PLAYERS_AT_TIME);
+	if (s->GetDbSharedTask().is_locked) {
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::TASK_NOT_ALLOWING_PLAYERS_AT_TIME);
 		allow_invite = false;
 	}
 
 	// check if player is online and in cle (other checks require online)
 	auto cle = client_list.FindCLEByCharacterID(character_id);
-	if (!cle || !cle->Server())
-	{
-		SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_NOT_ONLINE_TO_ADD, { player_name });
-		SendLeaderMessageID(s, Chat::Red, EQStr::COULD_NOT_BE_INVITED, { player_name });
+	if (!cle || !cle->Server()) {
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::PLAYER_NOT_ONLINE_TO_ADD, {player_name});
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::COULD_NOT_BE_INVITED, {player_name});
 		return false;
 	}
 
 	player_name = cle->name();
 
 	// check if player is already in a shared task
-	auto shared_task_members = SharedTaskMembersRepository::GetWhere(*m_database,
+	auto shared_task_members = SharedTaskMembersRepository::GetWhere(
+		*m_database,
 		fmt::format("character_id = {} LIMIT 1", character_id));
 
-	if (!shared_task_members.empty())
-	{
+	if (!shared_task_members.empty()) {
 		auto shared_task_id = shared_task_members.front().shared_task_id;
 		if (shared_task_id == s->GetDbSharedTask().id) {
-			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_ALREADY_MEMBER, { player_name });
-		} else {
-			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_ALREADY_ASSIGNED, { player_name });
+			SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_ALREADY_MEMBER, {player_name});
+		}
+		else {
+			SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_ALREADY_ASSIGNED, {player_name});
 		}
 		allow_invite = false;
 	}
 
 	// check if player has an outstanding invite
-	for (const auto& invite : m_active_invitations)
-	{
-		if (invite.character_id == character_id)
-		{
+	for (const auto &invite : m_active_invitations) {
+		if (invite.character_id == character_id) {
 			if (invite.shared_task_id == s->GetDbSharedTask().id) {
-				SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_ALREADY_OUTSTANDING_INVITATION_THIS, { player_name });
-			} else {
-				SendLeaderMessageID(s, Chat::Red, EQStr::PLAYER_ALREADY_OUTSTANDING_ANOTHER, { player_name });
+				SendLeaderMessageID(
+					s,
+					Chat::Red,
+					SharedTaskMessage::PLAYER_ALREADY_OUTSTANDING_INVITATION_THIS,
+					{player_name}
+				);
+			}
+			else {
+				SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::PLAYER_ALREADY_OUTSTANDING_ANOTHER, {player_name});
 			}
 			allow_invite = false;
 			break;
@@ -1451,84 +1490,93 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 
 	// check if player has a replay or request timer lockout
 	// todo: live allows characters with a request timer to be re-invited if they quit, but only until they zone? (investigate/edge case)
-	auto task_timers = CharacterTaskTimersRepository::GetWhere(*m_database, fmt::format(
-		"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
-		character_id, s->GetDbSharedTask().task_id
-	));
+	auto task_timers = CharacterTaskTimersRepository::GetWhere(
+		*m_database, fmt::format(
+			"character_id = {} AND task_id = {} AND expire_time > NOW() ORDER BY timer_type ASC LIMIT 1",
+			character_id, s->GetDbSharedTask().task_id
+		));
 
-	if (!task_timers.empty())
-	{
+	if (!task_timers.empty()) {
 		auto timer_type = static_cast<TaskTimerType>(task_timers.front().timer_type);
-		auto seconds = task_timers.front().expire_time - std::time(nullptr);
-		auto days  = fmt::format_int(seconds / 86400).str();
-		auto hours = fmt::format_int((seconds / 3600) % 24).str();
-		auto mins  = fmt::format_int((seconds / 60) % 60).str();
+		auto seconds    = task_timers.front().expire_time - std::time(nullptr);
+		auto days       = fmt::format_int(seconds / 86400).str();
+		auto hours      = fmt::format_int((seconds / 3600) % 24).str();
+		auto mins       = fmt::format_int((seconds / 60) % 60).str();
 
-		if (timer_type == TaskTimerType::Replay)
-		{
-			SendLeaderMessageID(s, Chat::Red,
-				EQStr::CANT_ADD_PLAYER_REPLAY_TIMER, { player_name, days, hours, mins });
+		if (timer_type == TaskTimerType::Replay) {
+			SendLeaderMessageID(
+				s,
+				Chat::Red,
+				SharedTaskMessage::CANT_ADD_PLAYER_REPLAY_TIMER, {player_name, days, hours, mins}
+			);
 		}
-		else
-		{
-			SendLeaderMessage(s, Chat::Red, fmt::format(
-				EQStr::GetEQStr(EQStr::CANT_ADD_PLAYER_REQUEST_TIMER), player_name, days, hours, mins));
+		else {
+			SendLeaderMessage(
+				s,
+				Chat::Red,
+				fmt::format(
+					SharedTaskMessage::GetEQStr(SharedTaskMessage::CANT_ADD_PLAYER_REQUEST_TIMER),
+					player_name,
+					days,
+					hours,
+					mins
+				)
+			);
 		}
 
 		allow_invite = false;
 	}
 
 	// check if task has maximum players
-	if (s->GetTaskData().max_players > 0 && s->GetMembers().size() >= s->GetTaskData().max_players)
-	{
+	if (s->GetTaskData().max_players > 0 && s->GetMembers().size() >= s->GetTaskData().max_players) {
 		auto max = fmt::format_int(s->GetTaskData().max_players).str();
-		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_PLAYERS, { max });
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_MAX_PLAYERS, {max});
 		allow_invite = false;
 	}
 
 	// check if task would exceed max level spread
-	if (s->GetTaskData().level_spread > 0)
-	{
-		auto characters = CharacterDataRepository::GetWhere(*m_database, fmt::format(
-			"id IN (select character_id from shared_task_members where shared_task_id = {})",
-			s->GetDbSharedTask().id));
+	if (s->GetTaskData().level_spread > 0) {
+		auto characters = CharacterDataRepository::GetWhere(
+			*m_database,
+			fmt::format(
+				"id IN (select character_id from shared_task_members where shared_task_id = {})",
+				s->GetDbSharedTask().id
+			)
+		);
 
-		int lowest_level = cle->level();
+		int lowest_level  = cle->level();
 		int highest_level = cle->level();
-		for (const auto& character : characters)
-		{
-			lowest_level = std::min(lowest_level, character.level);
+
+		for (const auto &character : characters) {
+			lowest_level  = std::min(lowest_level, character.level);
 			highest_level = std::max(highest_level, character.level);
 		}
 
-		if ((highest_level - lowest_level) > s->GetTaskData().level_spread)
-		{
+		if ((highest_level - lowest_level) > s->GetTaskData().level_spread) {
 			auto max_spread = fmt::format_int(s->GetTaskData().level_spread).str();
-			SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, { max_spread });
+			SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_MAX_LEVEL_SPREAD, {max_spread});
 			allow_invite = false;
 		}
 	}
 
 	// check if player is below minimum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().minlevel > 0 && cle->level() < s->GetTaskData().minlevel)
-	{
-		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_FALL_MIN_AVG_LEVEL);
+	if (s->GetTaskData().minlevel > 0 && cle->level() < s->GetTaskData().minlevel) {
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_FALL_MIN_AVG_LEVEL);
 		allow_invite = false;
 	}
 
 	// check if player is above maximum level of task (pre-2014 this was average level)
-	if (s->GetTaskData().maxlevel > 0 && cle->level() > s->GetTaskData().maxlevel)
-	{
-		SendLeaderMessageID(s, Chat::Red, EQStr::CANT_ADD_PLAYER_MAX_AVERAGE_LEVEL);
+	if (s->GetTaskData().maxlevel > 0 && cle->level() > s->GetTaskData().maxlevel) {
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::CANT_ADD_PLAYER_MAX_AVERAGE_LEVEL);
 		allow_invite = false;
 	}
 
-	if (!allow_invite)
-	{
+	if (!allow_invite) {
 		if (!accepted) {
-			SendLeaderMessageID(s, Chat::Red, EQStr::COULD_NOT_BE_INVITED, { player_name });
-		} else {
-			SendLeaderMessageID(s, Chat::Red, EQStr::ACCEPTED_OFFER_TO_JOIN_BUT_COULD_NOT, { player_name });
+			SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::COULD_NOT_BE_INVITED, {player_name});
+		}
+		else {
+			SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::ACCEPTED_OFFER_TO_JOIN_BUT_COULD_NOT, {player_name});
 		}
 	}
 
@@ -1538,7 +1586,7 @@ bool SharedTaskManager::CanAddPlayer(SharedTask* s, uint32_t character_id, std::
 void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 {
 	// shared task
-	auto t = s->GetDbSharedTask();
+	auto t  = s->GetDbSharedTask();
 	auto ct = CompletedSharedTasksRepository::NewEntity();
 	ct.id              = t.id;
 	ct.task_id         = t.task_id;
@@ -1582,18 +1630,16 @@ void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 
 }
 
-void SharedTaskManager::AddReplayTimers(SharedTask* s)
+void SharedTaskManager::AddReplayTimers(SharedTask *s)
 {
-	if (s->GetTaskData().replay_timer_seconds > 0)
-	{
+	if (s->GetTaskData().replay_timer_seconds > 0) {
 		auto expire_time = s->GetDbSharedTask().accepted_time + s->GetTaskData().replay_timer_seconds;
 		if (expire_time > std::time(nullptr)) // not already expired
 		{
 			// todo: on live past members of the shared task also receive lockouts (hold past members in memory)
 			std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> task_timers;
 
-			for (const auto& m : s->GetMembers())
-			{
+			for (const auto &m : s->GetMembers()) {
 				auto timer = CharacterTaskTimersRepository::NewEntity();
 				timer.character_id = m.character_id;
 				timer.task_id      = s->GetTaskData().id;
@@ -1610,10 +1656,10 @@ void SharedTaskManager::AddReplayTimers(SharedTask* s)
 	}
 }
 
-std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::vector<uint32_t>& find_characters)
+std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters)
 {
 	std::vector<uint32_t> characters = {};
-	for (auto &s: m_shared_tasks) {
+	for (auto             &s: m_shared_tasks) {
 		// loop through members
 		for (auto &m: s.GetMembers()) {
 			// compare members with requested characters
