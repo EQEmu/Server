@@ -1,7 +1,5 @@
 #include "shared_task_manager.h"
-#include "../common/repositories/character_data_repository.h"
 #include "../common/repositories/character_task_timers_repository.h"
-#include "../common/repositories/task_activities_repository.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "dynamic_zone.h"
@@ -9,14 +7,12 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
-#include "../common/repositories/shared_tasks_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
 #include "../common/repositories/completed_shared_tasks_repository.h"
 #include "../common/repositories/completed_shared_task_members_repository.h"
 #include "../common/repositories/completed_shared_task_activity_state_repository.h"
 #include "../common/repositories/shared_task_dynamic_zones_repository.h"
-#include "../common/serialize_buffer.h"
 #include <ctime>
 
 extern ClientList client_list;
@@ -76,7 +72,6 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 
 	// shared task validation needs character names and levels (not stored in SharedTaskMember)
 	auto request = SharedTask::GetRequestCharacters(*m_database, requested_character_id);
-
 	if (!CanRequestSharedTask(task.id, requested_character_id, request)) {
 		LogTasksDetail("[AttemptSharedTaskCreation] Shared task validation failed");
 		return;
@@ -1236,8 +1231,10 @@ void SharedTaskManager::SendMembersMessage(SharedTask *shared_task, int chat_typ
 }
 
 void SharedTaskManager::SendMembersMessageID(
-	SharedTask *shared_task, int chat_type,
-	int eqstr_id, std::initializer_list<std::string> args
+	SharedTask *shared_task,
+	int chat_type,
+	int eqstr_id,
+	std::initializer_list<std::string> args
 )
 {
 	if (!shared_task || shared_task->GetMembers().empty()) {
@@ -1456,7 +1453,8 @@ bool SharedTaskManager::CanAddPlayer(SharedTask *s, uint32_t character_id, std::
 	// check if player is already in a shared task
 	auto shared_task_members = SharedTaskMembersRepository::GetWhere(
 		*m_database,
-		fmt::format("character_id = {} LIMIT 1", character_id));
+		fmt::format("character_id = {} LIMIT 1", character_id)
+	);
 
 	if (!shared_task_members.empty()) {
 		auto shared_task_id = shared_task_members.front().shared_task_id;
@@ -1588,6 +1586,7 @@ void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 	// shared task
 	auto t  = s->GetDbSharedTask();
 	auto ct = CompletedSharedTasksRepository::NewEntity();
+
 	ct.id              = t.id;
 	ct.task_id         = t.task_id;
 	ct.accepted_time   = t.accepted_time;
@@ -1659,7 +1658,8 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters)
 {
 	std::vector<uint32_t> characters = {};
-	for (auto             &s: m_shared_tasks) {
+
+	for (auto &s: m_shared_tasks) {
 		// loop through members
 		for (auto &m: s.GetMembers()) {
 			// compare members with requested characters
