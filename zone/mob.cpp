@@ -3797,7 +3797,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 	return value;
 }
 
-int16 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
+int32 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
 {
 	int skilldmg_mod = 0;
 
@@ -3816,7 +3816,7 @@ int16 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackO
 	return skilldmg_mod;
 }
 
-int16 Mob::GetPositionalDmgTaken(Mob *attacker)
+int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 {
 	if (!attacker)
 		return 0;

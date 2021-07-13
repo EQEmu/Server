@@ -2916,10 +2916,11 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 				DS -= DS*mitigation / 100;
 			}
 
-			int mitigation_pct = attacker->aabonuses.DS_Mitigation_Percentage + attacker->itembonuses.DS_Mitigation_Percentage + attacker->spellbonuses.DS_Mitigation_Percentage; //Negative value to reduce
-
-			// Subtract mitigations b/c mitigation_pct is a negative value when reducing total DS
-			DS -= DS * ((attacker->itembonuses.DSMitigation - mitigation_pct) / 100);
+			int ds_mitigation = attacker->itembonuses.DSMitigation;
+			// Subtract mitigations because DS_Mitigation_Percentage is a negative value when reducing total, thus final value will be positive
+			ds_mitigation -= attacker->aabonuses.DS_Mitigation_Percentage + attacker->itembonuses.DS_Mitigation_Percentage + attacker->spellbonuses.DS_Mitigation_Percentage; //Negative value to reduce
+				
+			DS -= DS * ds_mitigation / 100;
 		}
 		attacker->Damage(this, -DS, spellid, EQ::skills::SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
@@ -5278,7 +5279,9 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	if (spec_mod > 0)
 		hit.damage_done = (hit.damage_done * spec_mod) / 100;
 
-	hit.damage_done += (hit.damage_done * (defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this)) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
+	int pct_damage_reduction = defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this);
+
+	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
