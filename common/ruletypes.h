@@ -378,6 +378,7 @@ RULE_BOOL(Spells, CazicTouchTargetsPetOwner, true, "If True, causes Cazic Touch 
 RULE_BOOL(Spells, PreventFactionWarOnCharmBreak, false, "Enable spell interupts and dot removal on charm break to prevent faction wars.")
 RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spells on a player that is already invisible")
 RULE_BOOL(Spells, AllowSpellMemorizeFromItem, false, "Allows players to memorize spells by right-clicking spell scrolls")
+RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to be in group.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

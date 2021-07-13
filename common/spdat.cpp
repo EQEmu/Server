@@ -260,6 +260,17 @@ bool IsDetrimentalSpell(uint16 spell_id)
 	return !IsBeneficialSpell(spell_id);
 }
 
+bool IsInvisSpell(uint16 spell_id)
+{
+	if (IsEffectInSpell(spell_id, SE_Invisibility) ||
+		IsEffectInSpell(spell_id, SE_Invisibility2) ||
+		IsEffectInSpell(spell_id, SE_InvisVsUndead) ||
+		IsEffectInSpell(spell_id, SE_InvisVsUndead2) ||
+		IsEffectInSpell(spell_id, SE_InvisVsAnimals))
+		return true;
+	return false;
+}
+
 bool IsInvulnerabilitySpell(uint16 spell_id)
 {
 	return IsEffectInSpell(spell_id, SE_DivineAura);

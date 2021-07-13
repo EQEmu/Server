@@ -1056,6 +1056,7 @@ bool IsPercentalHealSpell(uint16 spell_id);
 bool IsGroupOnlySpell(uint16 spell_id);
 bool IsBeneficialSpell(uint16 spell_id);
 bool IsDetrimentalSpell(uint16 spell_id);
+bool IsInvisSpell(uint16 spell_id);
 bool IsInvulnerabilitySpell(uint16 spell_id);
 bool IsCHDurationSpell(uint16 spell_id);
 bool IsPoisonCounterSpell(uint16 spell_id);
