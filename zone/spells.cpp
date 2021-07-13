@@ -457,6 +457,26 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
+	if (IsInvisSpell(spell_id) && GetTarget()->IsClient()) {
+		Client* spelltarget = entity_list.GetClientByID(target_id);
+		if ((IsClient() && spelltarget->IsClient() && spelltarget != this) && RuleB(Spells, InvisRequiresGroup)) {
+			if (!spelltarget->IsGrouped()) {
+				InterruptSpell(spell_id);
+				Message(Chat::Red, "You cannot invis someone who is not in your group.");
+				return(false);
+			}
+			else if (spelltarget->IsGrouped()) {
+				Group* targetg = spelltarget->GetGroup();
+				Group* myg = GetGroup();
+				if (targetg != myg) {
+					InterruptSpell(spell_id);
+					Message(Chat::Red, "You cannot invis someone who is not in your group.");
+					return(false);
+				}
+			}
+		}
+	}
+
 	// We don't get actual mana cost here, that's done when we consume the mana
 	if (mana_cost == -1)
 		mana_cost = spell.mana;
