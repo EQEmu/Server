@@ -440,9 +440,9 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
-	if (IsInvisSpell(spell_id) && GetTarget()->IsClient()) {
+	if (IsInvisSpell(spell_id) && IsClient() && GetTarget()->IsClient() && RuleB(Spells, InvisRequiresGroup)) {
 		Client* spelltarget = entity_list.GetClientByID(target_id);
-		if ((IsClient() && spelltarget->IsClient() && spelltarget != this) && RuleB(Spells, InvisRequiresGroup)) {
+		if ((IsClient() && spelltarget->IsClient() && spelltarget != this)) {
 			if (!spelltarget->IsGrouped()) {
 				InterruptSpell(spell_id);
 				Message(Chat::Red, "You cannot invis someone who is not in your group.");
