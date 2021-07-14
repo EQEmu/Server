@@ -274,14 +274,8 @@ int Mob::GetTotalDefense()
 	// 172 Evasion aka SE_AvoidMeleeChance
 	evasion_bonus += itembonuses.AvoidMeleeChanceEffect + aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
 
-	Mob *owner = nullptr;
-	if (IsPet())
-		owner = GetOwner();
-	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
-		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
-
-	if (owner) // 215 Pet Avoidance % aka SE_PetAvoidance
-		evasion_bonus += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+	// 215 Pet Avoidance % aka SE_PetAvoidance
+	evasion_bonus += GetPetAvoidanceBonusFromOwner();
 
 	// Evasion is a percentage bonus according to AA descriptions
 	if (evasion_bonus)
@@ -823,13 +817,7 @@ int Mob::ACSum(bool skip_caps)
 		// According to the guild hall Combat Dummies, a level 50 classic EQ mob it should be ~115
 		// For a 60 PoP mob ~120, 70 OoW ~120
 		ac += GetAC();
-		Mob *owner = nullptr;
-		if (IsPet())
-			owner = GetOwner();
-		else if (CastToNPC()->GetSwarmOwner())
-			owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
-		if (owner)
-			ac += owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+		ac += GetPetACBonusFromOwner();
 		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
 		ac += GetSkill(EQ::skills::SkillDefense) / 5;
 		if (EQ::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
@@ -925,7 +913,7 @@ int Mob::offense(EQ::skills::SkillType skill)
 	if (stat_bonus >= 75)
 		offense += (2 * stat_bonus - 150) / 3;
 
-	offense += GetATK();
+	offense += GetATK() + GetPetATKBonusFromOwner();
 	return offense;
 }
 
@@ -4343,7 +4331,7 @@ void Mob::TryPetCriticalHit(Mob *defender, DamageHitInfo &hit)
 
 	if (critChance > 0) {
 		if (zone->random.Roll(critChance)) {
-			critMod += GetCritDmgMod(hit.skill);
+			critMod += GetCritDmgMod(hit.skill, owner);
 			hit.damage_done += 5;
 			hit.damage_done = (hit.damage_done * critMod) / 100;
 
@@ -5624,6 +5612,48 @@ void Mob::DoOffHandAttackRounds(Mob *target, ExtraAttackOptions *opts)
 		}
 	}
 }
+
+
+int Mob::GetPetAvoidanceBonusFromOwner()
+{
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+	if (owner)
+		return owner->aabonuses.PetAvoidance + owner->spellbonuses.PetAvoidance + owner->itembonuses.PetAvoidance;
+
+	return 0;
+}
+int Mob::GetPetACBonusFromOwner()
+{
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+	if (owner)
+		return owner->aabonuses.PetMeleeMitigation + owner->spellbonuses.PetMeleeMitigation + owner->itembonuses.PetMeleeMitigation;
+
+	return 0;
+}
+int Mob::GetPetATKBonusFromOwner()
+{
+	Mob *owner = nullptr;
+	if (IsPet())
+		owner = GetOwner();
+	else if (IsNPC() && CastToNPC()->GetSwarmOwner())
+		owner = entity_list.GetMobID(CastToNPC()->GetSwarmOwner());
+
+	if (owner)
+		return owner->aabonuses.Pet_Add_Atk + owner->spellbonuses.Pet_Add_Atk + owner->itembonuses.Pet_Add_Atk;
+
+	return 0;
+}
+
 
 bool Mob::GetWasSpawnedInWater() const {
 	return spawned_in_water;

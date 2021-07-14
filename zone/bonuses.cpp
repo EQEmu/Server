@@ -1546,6 +1546,14 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->DS_Mitigation_Percentage += base1;
 			break;
 
+		case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+			newbon->Pet_Crit_Melee_Damage_Pct_Owner += base1;
+			break;
+
+		case SE_Pet_Add_Atk:
+			newbon->Pet_Add_Atk += base1;
+			break;
+
 
 		// to do
 		case SE_PetDiscipline:
@@ -3386,7 +3394,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->DS_Mitigation_Percentage += effect_value;
 				break;
 
+			case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+				new_bonus->Pet_Crit_Melee_Damage_Pct_Owner += effect_value;
+				break;
 
+			case SE_Pet_Add_Atk:
+				new_bonus->Pet_Add_Atk += effect_value;
+				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
@@ -4977,6 +4991,19 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.DS_Mitigation_Percentage = effect_value;
 					aabonuses.DS_Mitigation_Percentage = effect_value;
 					break;
+
+				case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+					spellbonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					itembonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					aabonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					break;
+
+				case SE_Pet_Add_Atk:
+					spellbonuses.Pet_Add_Atk = effect_value;
+					itembonuses.Pet_Add_Atk = effect_value;
+					aabonuses.Pet_Add_Atk = effect_value;
+					break;
+
 
 				case SE_SkillProcSuccess:{
 					for(int e = 0; e < MAX_SKILL_PROCS; e++)

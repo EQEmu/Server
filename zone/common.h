@@ -532,7 +532,9 @@ struct StatBonuses {
 	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
 	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
 	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
-	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce	
+	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
+	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
+	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

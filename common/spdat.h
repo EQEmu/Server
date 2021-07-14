@@ -381,7 +381,7 @@ typedef enum {
 #define SE_PoisonCounter				36	// implemented
 //#define SE_DetectHostile				37	// not used
 //#define SE_DetectMagic				38	// not used
-//#define SE_DetectPoison				39	// not used
+//#define SE_DetectPoison				39	// not used TODO: NEW EFFECT Stacking:: Twincast Blocker
 #define SE_DivineAura					40	// implemented
 #define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
 #define SE_ShadowStep					42	// implemented
@@ -464,7 +464,7 @@ typedef enum {
 #define SE_AttackSpeed3					119	// implemented
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented
-//#define SE_ReduceSkill				122	// not used
+//#define SE_ReduceSkill				122	// not implemented    TODO: Now used on live, decreases skills by percent
 #define SE_Screech						123	// implemented Spell Blocker(If have buff with value +1 will block any effect with -1)
 #define SE_ImprovedDamage				124 // implemented
 #define SE_ImprovedHeal					125 // implemented
@@ -488,7 +488,7 @@ typedef enum {
 #define SE_LimitCastTimeMin				143 // implemented
 #define SE_LimitCastTimeMax				144	// implemented (*not used in any known live spell)
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
-//#define SE_ElectricityResist			146	// *not implemented (Lightning Rod: 23233)
+//#define SE_ElectricityResist			146	// *not implemented TODO: Now used on live, xyz for teleport spells? also in temp pets?
 #define SE_PercentalHeal				147 // implemented
 #define SE_StackingCommand_Block		148 // implemented?
 #define SE_StackingCommand_Overwrite	149 // implemented?
@@ -674,7 +674,7 @@ typedef enum {
 #define SE_ManaAbsorbPercentDamage		329 // implemented
 #define SE_CriticalDamageMob			330	// implemented
 #define SE_Salvage						331 // implemented - chance to recover items that would be destroyed in failed tradeskill combine
-#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp)
+#define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp) TOOD: implement this.
 #define SE_CastOnRuneFadeEffect			333 // implemented
 #define SE_BardAEDot					334	// implemented
 #define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
@@ -739,7 +739,7 @@ typedef enum {
 #define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
 #define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
 #define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
-#define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC.
+#define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
 #define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
@@ -809,15 +809,15 @@ typedef enum {
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 //#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
-#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by percentage
-#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by a flat amount
+#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by a flat amount
+#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
 #define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
 #define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
 //#define SE_Double_Melee_Round			471 //
 //#define SE_Buy_AA_Rank				472 //
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
-//#define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 //
-//#define SE_Trigger_Spell_Non_Item		475 //
+#define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
+#define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
 //#define SE_Weapon_Stance				476 //
 //#define SE_Hatelist_To_Top_Index		477 //
 //#define SE_Hatelist_To_Tail_Index		478 //
@@ -836,7 +836,7 @@ typedef enum {
 //#define SE_Ff_ReuseTimeMax			491 //
 //#define SE_Ff_Endurance_Min			492 //
 //#define SE_Ff_Endurance_Max			493 //
-//#define SE_Pet_Add_Atk				494 //
+#define SE_Pet_Add_Atk					494 //
 //#define SE_Ff_DurationMax				495 //
 #define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
 //#define SE_Ff_FocusCastProcNoBypass	497 //

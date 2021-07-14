@@ -2895,8 +2895,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				break;
 			}
-	
 
+			case SE_Trigger_Spell_Non_Item: {
+				//Only trigger if not from item
+				if (caster && caster->IsClient() && GetCastedSpellInvSlot() > 0)
+					break;
+
+				if (zone->random.Roll(spells[spell_id].base[i]) && IsValidSpell(spells[spell_id].base2[i]))
+						caster->SpellFinished(spells[spell_id].base2[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+				
+				break;
+			}
+											  
+	
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3153,6 +3164,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_DS_Mitigation_Amount:
 			case SE_DS_Mitigation_Percentage:
 			case SE_Double_Backstab_Front:
+			case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+			case SE_Pet_Add_Atk:
 			{
 				break;
 			}

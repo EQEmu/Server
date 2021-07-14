@@ -814,7 +814,7 @@ public:
 	void CastOnCure(uint32 spell_id);
 	void CastOnNumHitFade(uint32 spell_id);
 	void SlowMitigation(Mob* caster);
-	int16 GetCritDmgMod(uint16 skill);
+	int16 GetCritDmgMod(uint16 skill, Mob* owner = nullptr);
 	int16 GetMeleeDamageMod_SE(uint16 skill);
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
 	int16 GetCrippBlowChance();
@@ -909,6 +909,9 @@ public:
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 	inline bool IsHorse() { return is_horse; }
+	int GetPetAvoidanceBonusFromOwner();
+	int GetPetACBonusFromOwner();
+	int GetPetATKBonusFromOwner();
 
 	inline const bodyType GetBodyType() const { return bodytype; }
 	inline const bodyType GetOrigBodyType() const { return orig_bodytype; }
