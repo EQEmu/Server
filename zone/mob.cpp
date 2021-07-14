@@ -3537,56 +3537,81 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 	}
 }
 
+
+
+
 bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
-	if(!target || !IsValidSpell(spell_id))
+	if (!target || !IsValidSpell(spell_id))
 		return false;
 
-	int spell_trig = 0;
-	// Count all the percentage chances to trigger for all effects
-	for(int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			spell_trig += spells[spell_id].base[i];
-	}
-	// If all the % add to 100, then only one of the effects can fire but one has to fire.
-	if (spell_trig == 100)
-	{
-		int trig_chance = 100;
-		for(int i = 0; i < EFFECT_COUNT; i++)
-		{
-			if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			{
-				if(zone->random.Int(0, trig_chance) <= spells[spell_id].base[i])
-				{
-					// If we trigger an effect then its over.
-					if (IsValidSpell(spells[spell_id].base2[i])){
-						SpellFinished(spells[spell_id].base2[i], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
-						return true;
-					}
-				}
-				else
-				{
-					// Increase the chance to fire for the next effect, if all effects fail, the final effect will fire.
-					trig_chance -= spells[spell_id].base[i];
-				}
-			}
+	/*The effects SE_SpellTrigger (SPA 340) and SE_Chance_Best_in_Spell_Grp (SPA 469) work as follows, you typically will have 2-3 different spells each with their own
+	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast. 
+	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance). 
+	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there 
+	is only 1 effect using the trigger effect. In those situations we simply roll a chance for that spell to be cast once.
+	Note: Both SPA 340 and 469 can be in same spell and both cummulative add up to 100 pct chances. SPA469 only difference being the spell cast will
+	be "best in spell group", instead of a defined spell_id.*/
 
-		}
-	}
-	// if the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
-	else
+	int chance_array[EFFECT_COUNT] = {};
+	int total_chance = 0;
+	int effect_slot = effect;
+	bool CastSpell = false;
+	
+	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if(zone->random.Int(0, 100) <= spells[spell_id].base[effect])
-		{
-			if (IsValidSpell(spells[spell_id].base2[effect])){
-				SpellFinished(spells[spell_id].base2[effect], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect]].ResistDiff);
-				return true; //Only trigger once of these per spell effect.
+		if (spells[spell_id].effectid[i] == SE_SpellTrigger || spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)
+			total_chance += spells[spell_id].base[i];
+	}
+
+	if (total_chance == 100)
+	{
+		int current_chance = 0;
+		int cummulative_chance = 0;
+
+		for (int i = 0; i < EFFECT_COUNT; i++){
+			//Find spells with SPA 340 and add the cummulative percent chances to the roll array
+			if ((spells[spell_id].effectid[i] == SE_SpellTrigger) || (spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)){
+
+				cummulative_chance = current_chance + spells[spell_id].base[i];
+				chance_array[i] = cummulative_chance;
+				current_chance = cummulative_chance;
+			}
+		}
+		int random_roll = zone->random.Int(1, 100);
+		//Determine which spell out of the group of the spells (each with own percent chance out of 100) will be cast based on a single roll.
+		for (int i = 0; i < EFFECT_COUNT; i++){
+			if (chance_array[i] != 0 && random_roll <= chance_array[i]) {
+				effect_slot = i;
+				CastSpell = true;
+				break;
 			}
 		}
 	}
+
+	//If the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
+	else if (zone->random.Roll(spells[spell_id].base[effect])) {
+			CastSpell = true; //In this case effect_slot is what was passed into function.
+	}
+
+	if (CastSpell) {
+		if (spells[spell_id].effectid[effect_slot] == SE_SpellTrigger && IsValidSpell(spells[spell_id].base2[effect_slot])) {
+			SpellFinished(spells[spell_id].base2[effect_slot], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect_slot]].ResistDiff);
+			return true;
+		}
+		else if (IsClient() & spells[spell_id].effectid[effect_slot] == SE_Chance_Best_in_Spell_Grp) {
+			uint32 best_spell_id = CastToClient()->GetHighestScribedSpellinSpellGroup(spells[spell_id].base2[effect_slot]);
+			if (IsValidSpell(best_spell_id)) {
+				SpellFinished(best_spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[best_spell_id].ResistDiff);
+			}
+			return true;//Do nothing if you don't have the any spell in spell group scribed.
+		}
+	}
+
 	return false;
 }
+
+
 
 void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
 {

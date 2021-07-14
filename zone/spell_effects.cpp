@@ -197,7 +197,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	if (!IsPowerDistModSpell(spell_id))
 		SetSpellPowerDistanceMod(0);
 
-	bool SE_SpellTrigger_HasCast = false;
+	bool spell_trigger_cast_complete = false; //Used with SE_Spell_Trigger and SE_Chance_Best_in_Spell_Grp, true when spell has been triggered.
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
@@ -2822,9 +2822,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_SpellTrigger: {
 
-				if (!SE_SpellTrigger_HasCast) {
+				if (!spell_trigger_cast_complete) {
 					if (caster && caster->TrySpellTrigger(this, spell_id, i))
-						SE_SpellTrigger_HasCast = true;
+						spell_trigger_cast_complete = true;
 				}
 				break;
 			}
@@ -2871,6 +2871,28 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
 				else
 					HealDamage(amt, caster);
+				break;
+			}
+
+			case SE_Chance_Best_in_Spell_Grp: {
+				if (!spell_trigger_cast_complete) {
+					if (caster && caster->TrySpellTrigger(this, spell_id, i))
+						spell_trigger_cast_complete = true;
+				}
+				break;
+			}
+
+			case SE_Trigger_Best_in_Spell_Grp: {
+
+				if (caster && !caster->IsClient())
+					break;
+
+				if (zone->random.Roll(spells[spell_id].base[i])) {
+					uint32 best_spell_id = caster->CastToClient()->GetHighestScribedSpellinSpellGroup(spells[spell_id].base2[i]);
+
+					if (caster && IsValidSpell(best_spell_id))
+						caster->SpellFinished(best_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[best_spell_id].ResistDiff);
+				}
 				break;
 			}
 	

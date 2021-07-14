@@ -682,7 +682,7 @@ typedef enum {
 #define SE_PercentXPIncrease			337	// implemented
 #define SE_SummonAndResAllCorpses		338	// implemented
 #define SE_TriggerOnCast				339	// implemented
-#define SE_SpellTrigger					340	// implemented - chance to trigger spell
+#define SE_SpellTrigger					340	// implemented - chance to trigger spell [Share rolls with 469] All base2 spells share roll chance, only 1 cast.
 #define SE_ItemAttackCapIncrease		341	// implemented[AA] - increases the maximum amount of attack you can gain from items.
 #define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
 #define SE_InterruptCasting				343	// implemented - % chance to interrupt spells being cast every tic. Cacophony (8272)
@@ -811,8 +811,8 @@ typedef enum {
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
 #define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by percentage
 #define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by a flat amount
-//#define SE_Chance_Best_in_Spell_Grp   469 //
-//#define SE_Trigger_Best_in_Spell Grp  470 //
+#define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
+#define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
 //#define SE_Double_Melee_Round			471 //
 //#define SE_Buy_AA_Rank				472 //
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
