@@ -444,10 +444,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 		Mob* target = GetTarget();
 
-		if (!target || !IsClient())
-			return false;
-
-		if (target->IsClient()) {
+		if (target && target->IsClient()) {
 			Client* spelltarget = entity_list.GetClientByID(target_id);
 			if (spelltarget && spelltarget->GetID() != GetID()) {
 				if (!spelltarget->IsGrouped()) {
