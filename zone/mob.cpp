@@ -4654,10 +4654,10 @@ int16 Mob::GetCritDmgMod(uint16 skill)
 	// All skill dmg mod + Skill specific [SPA 330 and 496]
 	critDmg_mod += itembonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] +
 					itembonuses.CritDmgMod[skill] + spellbonuses.CritDmgMod[skill] + aabonuses.CritDmgMod[skill];
-	Shout("Mod 1 %i", critDmg_mod);
+
 	critDmg_mod += itembonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] +
 				   itembonuses.CritDmgModNoStack[skill] + spellbonuses.CritDmgModNoStack[skill] + aabonuses.CritDmgModNoStack[skill];
-	Shout("Mod 2 %i", critDmg_mod);
+
 	return critDmg_mod;
 }
 

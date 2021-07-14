@@ -809,8 +809,8 @@ typedef enum {
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 //#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
-#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by percentage
-#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by a flat amount
+#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by a flat amount
+#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
 //#define SE_Chance_Best_in_Spell_Grp   469 //
 //#define SE_Trigger_Best_in_Spell Grp  470 //
 //#define SE_Double_Melee_Round			471 //
