@@ -381,7 +381,7 @@ typedef enum {
 #define SE_PoisonCounter				36	// implemented
 //#define SE_DetectHostile				37	// not used
 //#define SE_DetectMagic				38	// not used
-//#define SE_DetectPoison				39	// not used TODO: NEW EFFECT Stacking:: Twincast Blocker
+#define SE_TwinCastBlocker				39	// implemented - If present in spell, then the spell can not be twincast.
 #define SE_DivineAura					40	// implemented
 #define SE_Destroy						41	// implemented - Disintegrate, Banishment of Shadows
 #define SE_ShadowStep					42	// implemented
@@ -844,7 +844,7 @@ typedef enum {
 //#define SE_AddExtraAttackPct_1h_Secondary	499 //
 //#define SE_Fc_CastTimeMod2			500 //
 //#define SE_Fc_CastTimeAmt				501 //
-//#define SE_Fearstun					502 //
+#define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
 #define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
 //#define SE_Melee_Damage_Position_Amt	504 //
 #define SE_Damage_Taken_Position_Mod	505 // implemented - mitigate melee damage by pct if dmg taken from Front or Behind

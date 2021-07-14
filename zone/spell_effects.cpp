@@ -2918,6 +2918,32 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					caster->SetTopRampageList();
 				break;
 			}
+
+			case SE_Fearstun: {
+				//Normal 'stun' restrictions do not apply. base1=duration, base2=PC duration, max =lv restrict
+				if (!caster)
+					break;
+
+				if (IsNPC() && GetSpecialAbility(UNSTUNABLE)) {
+					caster->MessageString(Chat::SpellFailure, IMMUNE_STUN);
+					break;
+				}
+
+				if (IsNPC() && GetSpecialAbility(UNFEARABLE)) {
+					caster->MessageString(Chat::SpellFailure, IMMUNE_FEAR);
+					break;
+				}
+
+				if (GetLevel() <= spells[spell_id].max[i]) {
+					if (IsClient())
+						Stun(spells[spell_id].base2[i]);
+					else
+						Stun(effect_value);
+				}
+				else 
+					caster->MessageString(Chat::SpellFailure, FEAR_TOO_HIGH);
+				break;
+			}
 	
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
@@ -3177,6 +3203,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Double_Backstab_Front:
 			case SE_Pet_Crit_Melee_Damage_Pct_Owner:
 			case SE_Pet_Add_Atk:
+			case SE_TwinCastBlocker:
 			{
 				break;
 			}
