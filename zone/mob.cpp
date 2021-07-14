@@ -3881,6 +3881,61 @@ int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 	return heal_rate;
 }
 
+void Mob::SetBottomRampageList()
+{
+	auto &mob_list = entity_list.GetCloseMobList(this);
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+			continue;
+		}
+
+		if (mob->IsNPC() && mob->CheckAggro(this)) {
+			for (int i = 0; i < mob->RampageArray.size(); i++) {
+				// Find this mob in the rampage list
+				if (this->GetID() == mob->RampageArray[i]) {
+					//Move to bottom of Rampage List
+					auto it = mob->RampageArray.begin() + i;
+					std::rotate(it, it + 1, mob->RampageArray.end());
+				}
+			}
+		}
+	}
+}
+
+void Mob::SetTopRampageList()
+{
+	auto &mob_list = entity_list.GetCloseMobList(this);
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+			continue;
+		}
+
+		if (mob->IsNPC() && mob->CheckAggro(this)) {
+			for (int i = 0; i < mob->RampageArray.size(); i++) {
+				// Find this mob in the rampage list
+				if (this->GetID() == mob->RampageArray[i]) {
+					//Move to Top of Rampage List
+					auto it = mob->RampageArray.begin() + i;
+					std::rotate(it, it + 1, mob->RampageArray.end());
+					std::rotate(mob->RampageArray.rbegin(), mob->RampageArray.rbegin() + 1, mob->RampageArray.rend());
+				}
+			}
+		}
+	}
+}
+
 bool Mob::TryFadeEffect(int slot)
 {
 	if (!buffs[slot].spellid)

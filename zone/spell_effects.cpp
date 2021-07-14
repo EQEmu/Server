@@ -2906,7 +2906,18 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				
 				break;
 			}
-											  
+					
+			case SE_Hatelist_To_Tail_Index: {
+				if (caster && zone->random.Roll(spells[spell_id].base[i]))
+					caster->SetBottomRampageList();
+				break;
+			}
+
+			case SE_Hatelist_To_Top_Index: {
+				if (caster && zone->random.Roll(spells[spell_id].base[i]))
+					caster->SetTopRampageList();
+				break;
+			}
 	
 			case SE_PersistentEffect:
 				MakeAura(spell_id);

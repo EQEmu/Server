@@ -5254,15 +5254,22 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 		if (mod > 0)
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
-			int spell = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
-			if (spell > spec_mod)
-				spec_mod = spell;
+			//SE_PC_Pet_Rampage SPA 464 on pet, damage modifier
+			int spell_mod = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
+			if (spell_mod > spec_mod)
+				spec_mod = spell_mod;
 		}
 	}
 	else if (IsSpecialAttack(eSpecialAttacks::AERampage)) {
 		int mod = GetSpecialAbilityParam(SPECATK_AREA_RAMPAGE, 2);
 		if (mod > 0)
 			spec_mod = mod;
+		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+			//SE_PC_Pet_AE_Rampage SPA 465 on pet, damage modifier
+			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[1] + itembonuses.PC_Pet_AE_Rampage[1] + aabonuses.PC_Pet_AE_Rampage[1];
+			if (spell_mod > spec_mod)
+				spec_mod = spell_mod;
+		}
 	}
 	if (spec_mod > 0)
 		hit.damage_done = (hit.damage_done * spec_mod) / 100;

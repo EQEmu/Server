@@ -1438,6 +1438,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_PC_Pet_AE_Rampage: {
+			newbon->PC_Pet_AE_Rampage[0] += base1; //Chance to rampage
+			if (newbon->PC_Pet_AE_Rampage[1] < base2)
+				newbon->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+			break;
+		}
+
 		case SE_PC_Pet_Flurry_Chance: 
 			newbon->PC_Pet_Flurry += base1; //Chance to Flurry
 			break;
@@ -3290,6 +3297,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_PC_Pet_AE_Rampage: {
+				new_bonus->PC_Pet_AE_Rampage[0] += effect_value; //Chance to rampage
+				if (new_bonus->PC_Pet_AE_Rampage[1] < base2)
+					new_bonus->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+				break;
+			}
+
 			case SE_PC_Pet_Flurry_Chance: 
 				new_bonus->PC_Pet_Flurry += effect_value; //Chance to Flurry
 				break;
@@ -5004,6 +5018,23 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					aabonuses.Pet_Add_Atk = effect_value;
 					break;
 
+				case SE_PC_Pet_Rampage:
+					spellbonuses.PC_Pet_Rampage[0] = effect_value;
+					itembonuses.PC_Pet_Rampage[0] = effect_value;
+					aabonuses.PC_Pet_Rampage[0] = effect_value;
+					spellbonuses.PC_Pet_Rampage[1] = effect_value;
+					itembonuses.PC_Pet_Rampage[1] = effect_value;
+					aabonuses.PC_Pet_Rampage[1] = effect_value;
+					break;
+
+				case SE_PC_Pet_AE_Rampage:
+					spellbonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					spellbonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					break;
 
 				case SE_SkillProcSuccess:{
 					for(int e = 0; e < MAX_SKILL_PROCS; e++)

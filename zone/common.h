@@ -524,6 +524,7 @@ struct StatBonuses {
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
+	uint32  PC_Pet_AE_Rampage[2];				// 0= % chance to AE rampage, 1=damage modifier
 	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
 	int32   Attack_Accuracy_Max_Percent;		// Increase ATK accuracy by percent.
 	int32   AC_Mitigation_Max_Percent;			// Increase AC mitigation by percent

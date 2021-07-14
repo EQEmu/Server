@@ -807,7 +807,7 @@ typedef enum {
 #define SE_FcDamageAmt2					462 // implemented - Increase spell damage by flat amount (SE_Fc_Damage_Amt2)
 //#define SE_Shield_Target				463 //
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
-//#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
+#define SE_PC_Pet_AE_Rampage			465 // implemented - Base1 % chance to do AE rampage for base2 % of damage each melee round
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
 #define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by a flat amount
 #define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
@@ -819,8 +819,8 @@ typedef enum {
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
 //#define SE_Weapon_Stance				476 //
-//#define SE_Hatelist_To_Top_Index		477 //
-//#define SE_Hatelist_To_Tail_Index		478 //
+#define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
+#define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 //#define SE_Ff_Value_Min				479 //
 //#define SE_Ff_Value_Max				480 //
 //#define SE_Fc_Cast_Spell_On_Land		481 //

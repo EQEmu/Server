@@ -969,6 +969,8 @@ public:
 	bool Rampage(ExtraAttackOptions *opts);
 	bool AddRampage(Mob*);
 	void ClearRampage();
+	void SetBottomRampageList();
+	void SetTopRampageList();
 	void AreaRampage(ExtraAttackOptions *opts);
 	inline bool IsSpecialAttack(eSpecialAttacks in) { return m_specialattacks == in; }
 
