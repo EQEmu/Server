@@ -440,23 +440,32 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
-	if (IsInvisSpell(spell_id) && IsClient() && GetTarget()->IsClient() && RuleB(Spells, InvisRequiresGroup)) {
-		Client* spelltarget = entity_list.GetClientByID(target_id);
-		if ((IsClient() && spelltarget->IsClient() && spelltarget != this)) {
-			if (!spelltarget->IsGrouped()) {
-				InterruptSpell(spell_id);
-				Message(Chat::Red, "You cannot invis someone who is not in your group.");
-				return(false);
-			}
-			else if (spelltarget->IsGrouped()) {
-				Group* targetg = spelltarget->GetGroup();
-				Group* myg = GetGroup();
-				if (targetg != myg) {
+	if (IsInvisSpell(spell_id) && RuleB(Spells, InvisRequiresGroup)) {
+
+		Mob* target = GetTarget();
+
+		if (!target || !IsClient())
+			return false;
+
+		if (target->IsClient()) {
+			Client* spelltarget = entity_list.GetClientByID(target_id);
+			if (spelltarget && spelltarget->GetID() != GetID()) {
+				if (!spelltarget->IsGrouped()) {
 					InterruptSpell(spell_id);
 					Message(Chat::Red, "You cannot invis someone who is not in your group.");
 					return(false);
 				}
+				else if (spelltarget->IsGrouped()) {
+					Group* targetg = spelltarget->GetGroup();
+					Group* myg = GetGroup();
+					if (targetg && myg && (targetg->GetID() != myg->GetID())) {
+						InterruptSpell(spell_id);
+							Message(Chat::Red, "You cannot invis someone who is not in your group.");
+							return(false);
+					}
+				}
 			}
+
 		}
 	}
 
@@ -2808,6 +2817,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 				 target->itembonuses.IllusionPersistence) &&
 	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
 		res = 10000; // ~16h override
+	
 
 	res = mod_buff_duration(res, caster, target, spell_id);
 
