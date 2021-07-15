@@ -136,6 +136,7 @@ typedef enum {	//focus types
 	focusBlockNextSpell,
 	focusFcHealPctIncoming,
 	focusFcDamageAmtIncoming,
+	focusFcSpellDamageAmtIncomingPC,
 	focusFcHealAmtIncoming,
 	focusFcBaseEffects,
 	focusIncreaseNumHits,

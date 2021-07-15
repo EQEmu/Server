@@ -825,8 +825,8 @@ typedef enum {
 //#define SE_Ff_Value_Max				480 //
 //#define SE_Fc_Cast_Spell_On_Land		481 //
 //#define SE_Skill_Base_Damage_Mod		482 //
-#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 //
-//#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 //
+#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - modifies incoming spell damage by percent
+#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
 //#define SE_Ff_CasterClass				485 //
 //#define SE_Ff_Same_Caster				486 //
 //#define SE_Extend_Tradeskill_Cap		487 //

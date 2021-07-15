@@ -3061,6 +3061,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_SkillDamageTaken:
 			case SE_FcSpellVulnerability:
 			case SE_Fc_Spell_Damage_Pct_IncomingPC:
+			case SE_Fc_Spell_Damage_Amt_IncomingPC:
 			case SE_FcTwincast:
 			case SE_DelayDeath:
 			case SE_CastOnFadeEffect:
@@ -4814,6 +4815,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				value = base1;
 			break;
 
+		case SE_Fc_Spell_Damage_Amt_IncomingPC:
+			if (type == focusFcSpellDamageAmtIncomingPC)
+				value = base1;
+			break;
+
 		case SE_FcHealAmtIncoming:
 			if (type == focusFcHealAmtIncoming)
 				value = base1;
@@ -5340,6 +5346,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_FcDamageAmtIncoming:
 			if (type == focusFcDamageAmtIncoming)
+				value = focus_spell.base[i];
+			break;
+
+		case SE_Fc_Spell_Damage_Amt_IncomingPC:
+			if (type == focusFcSpellDamageAmtIncomingPC)
 				value = focus_spell.base[i];
 			break;
 
@@ -6328,6 +6339,7 @@ bool Mob::DoHPToManaCovert(uint16 mana_cost)
 int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, uint16 skill )
 {
 	//Used to check focus derived from SE_FcDamageAmtIncoming which adds direct damage to Spells or Skill based attacks.
+	//Used to check focus derived from SE_Fc_Spell_Damage_Amt_IncomingPC which adds direct damage to Spells.
 	int32 dmg = 0;
 	bool limit_exists = false;
 	bool skill_found = false;
@@ -6372,6 +6384,20 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 						dmg += focus;
 						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 					}
+				}
+			}
+		}
+	}
+	if (spellbonuses.FocusEffects[focusFcSpellDamageAmtIncomingPC]) {
+		int buff_count = GetMaxTotalSlots();
+		for (int i = 0; i < buff_count; i++) {
+
+			if ((IsValidSpell(buffs[i].spellid) && (IsEffectInSpell(buffs[i].spellid, SE_FcDamageAmtIncoming)))) {
+
+				int32 focus = caster->CalcFocusEffect(focusFcSpellDamageAmtIncomingPC, buffs[i].spellid, spell_id);
+				if (focus) {
+					dmg += focus;
+					CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 				}
 			}
 		}

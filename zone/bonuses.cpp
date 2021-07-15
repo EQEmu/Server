@@ -3755,6 +3755,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcDamagePctCrit;
 		case SE_FcDamageAmtIncoming:
 			return focusFcDamageAmtIncoming;
+		case SE_Fc_Spell_Damage_Amt_IncomingPC:
+			return focusFcSpellDamageAmtIncomingPC;
 		case SE_FcHealAmtIncoming:
 			return focusFcHealAmtIncoming;
 		case SE_FcHealPctIncoming:
