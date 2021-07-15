@@ -978,6 +978,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_FrontalBackstabChance:
 			newbon->FrontalBackstabChance += base1;
 			break;
+		case SE_Double_Backstab_Front:
+			newbon->Double_Backstab_Front += base1;
+			break;
 		case SE_BlockBehind:
 			newbon->BlockBehind += base1;
 			break;
@@ -1099,6 +1102,19 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 				newbon->CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] += base1;
 			else
 				newbon->CritDmgMod[base2] += base1;
+			break;
+		}
+
+		case SE_Critical_Melee_Damage_Mod_Max:
+		{
+			// Bad data or unsupported new skill
+			if (base2 > EQ::skills::HIGHEST_SKILL)
+				break;
+			int skill = base2 == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : base2;
+			if (base1 < 0 && newbon->CritDmgModNoStack[skill] > base1)
+				newbon->CritDmgModNoStack[skill] = base1;
+			else if (base1 > 0 && newbon->CritDmgModNoStack[skill] < base1)
+				newbon->CritDmgModNoStack[skill] = base1;
 			break;
 		}
 
@@ -1486,6 +1502,50 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					client->SetSkill(EQ::skills::SkillType::SkillForage, 1);
 			}
 			break;
+
+		case SE_Attack_Accuracy_Max_Percent:
+			newbon->Attack_Accuracy_Max_Percent += base1;
+			break;
+
+		case SE_AC_Mitigation_Max_Percent:
+			newbon->AC_Mitigation_Max_Percent += base1;
+			break;
+
+		case SE_AC_Avoidance_Max_Percent:
+			newbon->AC_Avoidance_Max_Percent += base1;
+			break;
+
+		case SE_Damage_Taken_Position_Mod:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+			else if (base1 < 0 && newbon->Damage_Taken_Position_Mod[base2] > base1)
+				newbon->Damage_Taken_Position_Mod[base2] = base1;
+			else if (base1 > 0 && newbon->Damage_Taken_Position_Mod[base2] < base1)
+				newbon->Damage_Taken_Position_Mod[base2] = base1;
+			break;
+		}
+
+		case SE_Melee_Damage_Position_Mod:
+		{
+			if (base2 < 0 || base2 > 2)
+				break;
+			else if (base1 < 0 && newbon->Melee_Damage_Position_Mod[base2] > base1)
+				newbon->Melee_Damage_Position_Mod[base2] = base1;
+			else if (base1 > 0 && newbon->Melee_Damage_Position_Mod[base2] < base1)
+				newbon->Melee_Damage_Position_Mod[base2] = base1;
+			break;
+		}
+
+		case SE_DS_Mitigation_Amount:
+			newbon->DS_Mitigation_Amount += base1;
+			break;
+
+		case SE_DS_Mitigation_Percentage:
+			newbon->DS_Mitigation_Percentage += base1;
+			break;
+
 
 		// to do
 		case SE_PetDiscipline:
@@ -2485,6 +2545,20 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Critical_Melee_Damage_Mod_Max:
+			{
+				// Bad data or unsupported new skill
+				if (base2 > EQ::skills::HIGHEST_SKILL)
+					break;
+				int skill = base2 == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->CritDmgModNoStack[skill] > effect_value)
+					new_bonus->CritDmgModNoStack[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->CritDmgModNoStack[skill] < effect_value) {
+					new_bonus->CritDmgModNoStack[skill] = effect_value;
+				}
+				break;
+			}
+
 			case SE_ReduceSkillTimer:
 			{
 				if(new_bonus->SkillReuseTime[base2] < effect_value)
@@ -2690,9 +2764,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ManaAbsorbPercentDamage:
 			{
-				if (new_bonus->ManaAbsorbPercentDamage[0] < effect_value){
-					new_bonus->ManaAbsorbPercentDamage[0] = effect_value;
-					new_bonus->ManaAbsorbPercentDamage[1] = buffslot;
+				if (new_bonus->ManaAbsorbPercentDamage < effect_value){
+					new_bonus->ManaAbsorbPercentDamage = effect_value;
+				}
+				break;
+			}
+
+			case SE_Endurance_Absorb_Pct_Damage:
+			{
+				if (new_bonus->EnduranceAbsorbPercentDamage[0] < effect_value) {
+					new_bonus->EnduranceAbsorbPercentDamage[0] = effect_value;
+					new_bonus->EnduranceAbsorbPercentDamage[1] = base2;
 				}
 				break;
 			}
@@ -2760,6 +2842,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_FrontalBackstabChance:
 				new_bonus->FrontalBackstabChance += effect_value;
+				break;
+
+			case SE_Double_Backstab_Front:
+				new_bonus->Double_Backstab_Front += effect_value;
 				break;
 
 			case SE_ConsumeProjectile:
@@ -3250,6 +3336,57 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->trap_slots < effect_value)
 					new_bonus->trap_slots = effect_value;
 				break;
+
+			case SE_Attack_Accuracy_Max_Percent:
+				new_bonus->Attack_Accuracy_Max_Percent += effect_value;
+				break;
+
+
+			case SE_AC_Mitigation_Max_Percent:
+				new_bonus->AC_Mitigation_Max_Percent += effect_value;
+				break;
+
+			case SE_AC_Avoidance_Max_Percent:
+				new_bonus->AC_Avoidance_Max_Percent += effect_value;
+				break;
+
+			case SE_Damage_Taken_Position_Mod:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+				if (AdditiveWornBonus)
+					new_bonus->Damage_Taken_Position_Mod[base2] += effect_value;
+				else if (effect_value < 0 && new_bonus->Damage_Taken_Position_Mod[base2] > effect_value) 
+					new_bonus->Damage_Taken_Position_Mod[base2] = effect_value;
+				else if (effect_value > 0 && new_bonus->Damage_Taken_Position_Mod[base2] < effect_value)
+					new_bonus->Damage_Taken_Position_Mod[base2] = effect_value;
+				break;
+			}
+
+			case SE_Melee_Damage_Position_Mod:
+			{
+				//Increase damage by percent from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+				if (AdditiveWornBonus)
+					new_bonus->Melee_Damage_Position_Mod[base2] += effect_value;
+				else if (effect_value < 0 && new_bonus->Melee_Damage_Position_Mod[base2] > effect_value)
+					new_bonus->Melee_Damage_Position_Mod[base2] = effect_value;
+				else if (effect_value > 0 && new_bonus->Melee_Damage_Position_Mod[base2] < effect_value)
+					new_bonus->Melee_Damage_Position_Mod[base2] = effect_value;
+				break;
+			}
+
+			case SE_DS_Mitigation_Amount:
+				new_bonus->DS_Mitigation_Amount += effect_value;
+				break;
+
+			case SE_DS_Mitigation_Percentage:
+				new_bonus->DS_Mitigation_Percentage += effect_value;
+				break;
+
+
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
@@ -4258,6 +4395,17 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 				}
 
+				case SE_Critical_Melee_Damage_Mod_Max:
+				{
+					for (int e = 0; e < EQ::skills::HIGHEST_SKILL + 1; e++)
+					{
+						spellbonuses.CritDmgModNoStack[e] = effect_value;
+						aabonuses.CritDmgModNoStack[e] = effect_value;
+						itembonuses.CritDmgModNoStack[e] = effect_value;
+					}
+					break;
+				}
+
 				case SE_SkillDamageAmount:
 				{
 					for (int e = 0; e < EQ::skills::HIGHEST_SKILL + 1; e++)
@@ -4353,8 +4501,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ManaAbsorbPercentDamage:
-					spellbonuses.ManaAbsorbPercentDamage[0] = effect_value;
-					spellbonuses.ManaAbsorbPercentDamage[1] = -1;
+					spellbonuses.ManaAbsorbPercentDamage = effect_value;
+					break;
+
+				case SE_Endurance_Absorb_Pct_Damage:
+					spellbonuses.EnduranceAbsorbPercentDamage[0] = effect_value;
+					spellbonuses.EnduranceAbsorbPercentDamage[1] = effect_value;
 					break;
 
 				case SE_ShieldBlock:
@@ -4426,6 +4578,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.FrontalBackstabChance = effect_value;
 					aabonuses.FrontalBackstabChance = effect_value;
 					itembonuses.FrontalBackstabChance = effect_value;
+					break;
+
+				case SE_Double_Backstab_Front:
+					spellbonuses.Double_Backstab_Front = effect_value;
+					aabonuses.Double_Backstab_Front = effect_value;
+					itembonuses.Double_Backstab_Front = effect_value;
 					break;
 
 				case SE_ConsumeProjectile:
@@ -4768,6 +4926,56 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.IllusionPersistence = false;
 					itembonuses.IllusionPersistence = false;
 					aabonuses.IllusionPersistence = false;
+					break;
+
+				case SE_Attack_Accuracy_Max_Percent:
+					spellbonuses.Attack_Accuracy_Max_Percent = effect_value;
+					itembonuses.Attack_Accuracy_Max_Percent = effect_value;
+					aabonuses.Attack_Accuracy_Max_Percent = effect_value;
+					break;
+
+
+				case SE_AC_Mitigation_Max_Percent:
+					spellbonuses.AC_Mitigation_Max_Percent = effect_value;
+					itembonuses.AC_Mitigation_Max_Percent = effect_value;
+					aabonuses.AC_Mitigation_Max_Percent = effect_value;
+					break;
+
+				case SE_AC_Avoidance_Max_Percent:
+					spellbonuses.AC_Avoidance_Max_Percent = effect_value;
+					itembonuses.AC_Avoidance_Max_Percent = effect_value;
+					aabonuses.AC_Avoidance_Max_Percent = effect_value;
+					break;
+
+				case SE_Melee_Damage_Position_Mod:
+					spellbonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[0] = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					break;
+
+				case SE_Damage_Taken_Position_Mod:
+					spellbonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[0] = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					break;
+
+
+				case SE_DS_Mitigation_Amount:
+					spellbonuses.DS_Mitigation_Amount = effect_value;
+					itembonuses.DS_Mitigation_Amount = effect_value;
+					aabonuses.DS_Mitigation_Amount = effect_value;
+					break;
+
+				case SE_DS_Mitigation_Percentage:
+					spellbonuses.DS_Mitigation_Percentage = effect_value;
+					itembonuses.DS_Mitigation_Percentage = effect_value;
+					aabonuses.DS_Mitigation_Percentage = effect_value;
 					break;
 
 				case SE_SkillProcSuccess:{

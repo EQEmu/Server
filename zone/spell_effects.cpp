@@ -275,11 +275,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 
 				int32 dmg = effect_value;
-				if (spell_id == 2751 && caster) //Manaburn
+				if (spell_id == SPELL_MANA_BURN && caster) //Manaburn
 				{
 					dmg = caster->GetMana()*-3;
 					caster->SetMana(0);
-				} else if (spell_id == 2755 && caster) //Lifeburn
+				} else if (spell_id == SPELL_LIFE_BURN && caster) //Lifeburn
 				{
 					dmg = caster->GetHP(); // just your current HP
 					caster->SetHP(dmg / 4); // 2003 patch notes say ~ 1/4 HP. Should this be 1/4 your current HP or do 3/4 max HP dmg? Can it kill you?
@@ -302,6 +302,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				break;
 			}
+
 
 			case SE_PercentalHeal:
 			{
@@ -2828,6 +2829,52 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+
+			case SE_Instant_Mana_Pct: {
+				effect_value = spells[spell_id].base[i];
+				int32 amt = abs(GetMaxMana() * effect_value / 10000);
+				if (spells[spell_id].max[i] && amt > spells[spell_id].max[i])
+					amt = spells[spell_id].max[i];
+
+				if (effect_value < 0) {
+					SetMana(GetMana() - amt);
+				}
+				else {
+					SetMana(GetMana() + amt);
+				}
+				break;
+			}
+
+			case SE_Instant_Endurance_Pct: {
+				effect_value = spells[spell_id].base[i];
+				if (IsClient()) {
+					int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 10000);
+					if (spells[spell_id].max[i] && amt > spells[spell_id].max[i])
+						amt = spells[spell_id].max[i];
+
+					if (effect_value < 0) {
+						CastToClient()->SetEndurance(CastToClient()->GetEndurance() - amt);
+					}
+					else {
+						CastToClient()->SetEndurance(CastToClient()->GetEndurance() + amt);
+					}
+				}
+				break;
+			}
+			/*Calc for base1 is found in TryOnSpellFinished() due to needing to account for AOE functionality
+			since effect can potentially kill caster*/
+			case SE_Health_Transfer: {
+				effect_value = spells[spell_id].base2[i];
+				int32 amt = abs(caster->GetMaxHP() * effect_value / 1000);
+
+				if (effect_value < 0)
+					Damage(caster, amt, spell_id, spell.skill, false, buffslot, false);
+				else
+					HealDamage(amt, caster);
+				break;
+			}
+	
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3071,6 +3118,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_SkillProc:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
+			case SE_Duration_HP_Pct:
+			case SE_Duration_Mana_Pct:
+			case SE_Duration_Endurance_Pct:
+			case SE_Endurance_Absorb_Pct_Damage:
+			case SE_AC_Mitigation_Max_Percent:
+			case SE_AC_Avoidance_Max_Percent:
+			case SE_Attack_Accuracy_Max_Percent:
+			case SE_Critical_Melee_Damage_Mod_Max:
+			case SE_Melee_Damage_Position_Mod:
+			case SE_Damage_Taken_Position_Mod:
+			case SE_DS_Mitigation_Amount:
+			case SE_DS_Mitigation_Percentage:
+			case SE_Double_Backstab_Front:
 			{
 				break;
 			}
@@ -3773,6 +3833,55 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 					new_hate = 1;
 
 				CastToNPC()->SetHateAmountOnEnt(caster, new_hate);
+			}
+			break;
+		}
+
+		case SE_Duration_HP_Pct: {
+			effect_value = spells[buff.spellid].base[i];
+			int32 amt = abs(GetMaxHP() * effect_value / 100);
+			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
+				amt = spells[buff.spellid].max[i];
+			
+			if (effect_value < 0) { 
+				Damage(this, amt, 0, EQ::skills::SkillEvocation, false);
+			}
+			else { 
+				HealDamage(amt);
+			}
+			break;
+		}
+
+		case SE_Duration_Mana_Pct: {
+			effect_value = spells[buff.spellid].base[i];
+			int32 amt = abs(GetMaxMana() * effect_value / 100);
+			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
+				amt = spells[buff.spellid].max[i];
+
+			if (effect_value < 0) {
+				
+				SetMana(GetMana() - amt);
+			}
+			else {
+				SetMana(GetMana() + amt);
+			}
+			break;
+		}
+
+		case SE_Duration_Endurance_Pct: {
+			effect_value = spells[buff.spellid].base[i];
+
+			if (IsClient())	{
+				int32 amt = abs(CastToClient()->GetMaxEndurance() * effect_value / 100);
+				if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
+					amt = spells[buff.spellid].max[i];
+
+				if (effect_value < 0) {
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() - amt);
+				}
+				else {
+					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + amt);
+				}
 			}
 			break;
 		}

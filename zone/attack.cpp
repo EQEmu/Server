@@ -188,6 +188,11 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing)
 		accuracy += itembonuses.HitChance;
 
+	//518 Increase ATK accuracy by percentage, stackable
+	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
+	if (atkhit_bonus)
+		accuracy += round(static_cast<double>(accuracy) * static_cast<double>(atkhit_bonus) * 0.0001);
+
 	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
 	accuracy += itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
 		aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
@@ -233,6 +238,11 @@ int Mob::compute_defense()
 	if (IsClient())
 		defense += CastToClient()->GetHeroicAGI() / 10;
 
+	//516 SE_AC_Mitigation_Max_Percent
+	auto ac_bonus = itembonuses.AC_Mitigation_Max_Percent + aabonuses.AC_Mitigation_Max_Percent + spellbonuses.AC_Mitigation_Max_Percent;
+	if (ac_bonus)
+		defense += round(static_cast<double>(defense) * static_cast<double>(ac_bonus) * 0.0001);
+
 	defense += itembonuses.AvoidMeleeChance; // item mod2
 	if (IsNPC())
 		defense += CastToNPC()->GetAvoidanceRating();
@@ -255,7 +265,12 @@ int Mob::GetTotalDefense()
 	auto evasion_bonus = spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
 	if (evasion_bonus >= 10000)
 		return -1;
-	//
+	
+	// 515 SE_AC_Avoidance_Max_Percent
+	auto ac_aviodance_bonus = itembonuses.AC_Avoidance_Max_Percent + aabonuses.AC_Avoidance_Max_Percent + spellbonuses.AC_Avoidance_Max_Percent;
+	if (ac_aviodance_bonus)
+		avoidance += round(static_cast<double>(avoidance) * static_cast<double>(ac_aviodance_bonus) * 0.0001);
+
 	// 172 Evasion aka SE_AvoidMeleeChance
 	evasion_bonus += itembonuses.AvoidMeleeChanceEffect + aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
 
@@ -2887,6 +2902,10 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 			DS += aabonuses.DamageShield; //Live AA - coat of thistles. (negative value)
 			DS -= itembonuses.DamageShield; //+Damage Shield should only work when you already have a DS spell
+			DS -= attacker->aabonuses.DS_Mitigation_Amount + attacker->itembonuses.DS_Mitigation_Amount + attacker->spellbonuses.DS_Mitigation_Amount; //Negative value to reduce
+			//Do not allow flat amount reductions to reduce past 0.
+			if (DS >= 0)
+				return;
 
 											//Spell data for damage shield mitigation shows a negative value for spells for clients and positive
 											//value for spells that effect pets. Unclear as to why. For now will convert all positive to be consistent.
@@ -2896,7 +2915,12 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 					attacker->aabonuses.DSMitigationOffHand;
 				DS -= DS*mitigation / 100;
 			}
-			DS -= DS * attacker->itembonuses.DSMitigation / 100;
+
+			int ds_mitigation = attacker->itembonuses.DSMitigation;
+			// Subtract mitigations because DS_Mitigation_Percentage is a negative value when reducing total, thus final value will be positive
+			ds_mitigation -= attacker->aabonuses.DS_Mitigation_Percentage + attacker->itembonuses.DS_Mitigation_Percentage + attacker->spellbonuses.DS_Mitigation_Percentage; //Negative value to reduce
+				
+			DS -= DS * ds_mitigation / 100;
 		}
 		attacker->Damage(this, -DS, spellid, EQ::skills::SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
@@ -3323,12 +3347,25 @@ int32 Mob::ReduceAllDamage(int32 damage)
 	if (damage <= 0)
 		return damage;
 
-	if (spellbonuses.ManaAbsorbPercentDamage[0]) {
-		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage[0] / 100;
+	if (spellbonuses.ManaAbsorbPercentDamage) {
+		int32 mana_reduced = damage * spellbonuses.ManaAbsorbPercentDamage / 100;
 		if (GetMana() >= mana_reduced) {
 			damage -= mana_reduced;
 			SetMana(GetMana() - mana_reduced);
 			TryTriggerOnValueAmount(false, true);
+		}
+	}
+
+	if (spellbonuses.EnduranceAbsorbPercentDamage[0]) {
+		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[0] / 10000; //If hit for 1000, at 10% then lower damage by 100;
+		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[1] / 10000; //Reduce endurance by 0.05% per HP loss
+		if (endurance_drain < 1)
+			endurance_drain = 1;
+
+		if (IsClient() && CastToClient()->GetEndurance() >= endurance_drain) {
+			damage -= damage_reduced;
+			CastToClient()->SetEndurance(CastToClient()->GetEndurance() - endurance_drain);
+			TryTriggerOnValueAmount(false, false, true);
 		}
 	}
 
@@ -4628,6 +4665,7 @@ void Mob::ApplyMeleeDamageMods(uint16 skill, int &damage, Mob *defender, ExtraAt
 	int dmgbonusmod = 0;
 
 	dmgbonusmod += GetMeleeDamageMod_SE(skill);
+	dmgbonusmod += GetMeleeDmgPositionMod(defender);
 	if (opts)
 		dmgbonusmod += opts->melee_damage_bonus_flat;
 
@@ -5241,7 +5279,9 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	if (spec_mod > 0)
 		hit.damage_done = (hit.damage_done * spec_mod) / 100;
 
-	hit.damage_done += (hit.damage_done * defender->GetSkillDmgTaken(hit.skill, opts) / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
+	int pct_damage_reduction = defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this);
+
+	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
