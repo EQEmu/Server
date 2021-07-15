@@ -3736,6 +3736,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return 0; //This is calculated as an actual bonus
 		case SE_FcSpellVulnerability:
 			return focusSpellVulnerability;
+		case SE_Fc_Spell_Damage_Pct_IncomingPC:
+			return focusFcSpellDamagePctIncomingPC;
 		case SE_BlockNextSpellFocus:
 			//return focusBlockNextSpell;
 			return 0; //This is calculated as an actual bonus
@@ -3775,6 +3777,7 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcHealAmt;
 		case SE_FcHealAmtCrit:
 			return focusFcHealAmtCrit;
+
 	}
 	return 0;
 }

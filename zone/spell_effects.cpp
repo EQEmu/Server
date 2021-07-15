@@ -3060,6 +3060,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_HealRate:
 			case SE_SkillDamageTaken:
 			case SE_FcSpellVulnerability:
+			case SE_Fc_Spell_Damage_Pct_IncomingPC:
 			case SE_FcTwincast:
 			case SE_DelayDeath:
 			case SE_CastOnFadeEffect:
@@ -4769,6 +4770,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			if (type == focusSpellVulnerability)
 				value = base1;
 			break;
+		
+		case SE_Fc_Spell_Damage_Pct_IncomingPC:
+			if (type == focusFcSpellDamagePctIncomingPC)
+				value = base1;
+			break;
 
 		case SE_BlockNextSpellFocus:
 			if (type == focusBlockNextSpell) {
@@ -5284,13 +5290,30 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (type == focusSpellVulnerability) {
 				if (best_focus) {
 					if (focus_spell.base2[i] != 0)
-						value = focus_spell.base2[i];
+						value = focus_spell.base2[i]; //max damage
 					else
-						value = focus_spell.base[i];
+						value = focus_spell.base[i]; //min damage
 				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
+					value = focus_spell.base[i]; //If no max damage set, then default to min damage
 				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]); //else random for value
+				}
+			}
+			break;
+
+		case SE_Fc_Spell_Damage_Pct_IncomingPC:
+			if (type == focusFcSpellDamagePctIncomingPC) {
+				if (best_focus) {
+					if (focus_spell.base2[i] != 0)
+						value = focus_spell.base2[i]; //max damage
+					else
+						value = focus_spell.base[i]; //min damage
+				}
+				else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
+					value = focus_spell.base[i]; //If no max damage set, then default to min damage
+				}
+				else {
+					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]); //else random for value
 				}
 			}
 			break;

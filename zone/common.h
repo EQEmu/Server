@@ -124,6 +124,7 @@ typedef enum {	//focus types
 	focusSpellHateMod,
 	focusTriggerOnCast,
 	focusSpellVulnerability,
+	focusFcSpellDamagePctIncomingPC,
 	focusTwincast,
 	focusSympatheticProc,
 	focusFcDamageAmt,

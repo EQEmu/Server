@@ -638,7 +638,7 @@ typedef enum {
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
 //#define SE_ReduceTimerSpecial			295	// not used
-#define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage
+#define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage [base1= min dmg base2= max dmg]
 #define SE_FcDamageAmtIncoming			297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
 #define SE_ChangeHeight					298	// implemented
 #define SE_WakeTheDead					299	// implemented
@@ -825,7 +825,7 @@ typedef enum {
 //#define SE_Ff_Value_Max				480 //
 //#define SE_Fc_Cast_Spell_On_Land		481 //
 //#define SE_Skill_Base_Damage_Mod		482 //
-//#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 //
+#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 //
 //#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 //
 //#define SE_Ff_CasterClass				485 //
 //#define SE_Ff_Same_Caster				486 //
@@ -856,7 +856,7 @@ typedef enum {
 //#define SE_Ff_FocusTimerMin			511 //
 //#define SE_Proc_Timer_Modifier 		512 //
 //#define SE_Mana_Max_Percent			513 //
-//#define SE_Endurance_Max_Percent		514 //
+//#define SE_Endurance_Max_Percent		514 // 
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
 #define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
 //#define SE_Attack_Offense_Max_Percent	517 // 
