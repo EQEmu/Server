@@ -4693,6 +4693,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				LimitFailure = true;
 			break;
 
+		/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
+		case SE_Ff_Same_Caster:
+		case SE_Ff_CasterClass:
+		*/
+
 			// Handle Focus Effects
 		case SE_ImprovedDamage:
 			if (type == focusImprovedDamage && base1 > value)
@@ -5470,8 +5475,8 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				if (zone->random.Roll(focus_spell.base[i])) {
 					value = focus_spell.base2[i];
 				}
-				break;
-			}
+			break;
+		}
 
 #if EQDEBUG >= 6
 		// this spits up a lot of garbage when calculating spell focuses
@@ -7156,6 +7161,8 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	the CalcFocusEffect function if not 100pct.
 	ApplyFocusProcLimiter() function checks for SE_Proc_Timer_Modifier which allows for limiting how often a spell from effect can be triggered
 	for example, if set to base=1 and base2= 1500, then for everyone 1 successful trigger, you will be unable to trigger again for 1.5 seconds.
+	
+	Live only has this focus in buffs/debuffs that can be placed on a target. TODO: Will consider adding support for it as AA and Item.
 	*/
 	if (!caster)
 		return;
@@ -7177,7 +7184,6 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 
 					//Step 3: Check if SE_Proc_Time_Modifier is present and if so apply it.
 					if (ApplyFocusProcLimiter(buffs[i].spellid, i)) {
-
 						//Step 4: Cast spells
 						if (IsBeneficialSpell(trigger_spell_id)) {
 							SpellFinished(trigger_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
@@ -7209,9 +7215,9 @@ bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
 
 	/*
 	SE_Proc_Timer_Modifier 
-	base1= amount of total procs allowed until lock out timer is triggered
-	base2= lock out timer, which prevents any more procs
-	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks.
+	base1= amount of total procs allowed until lock out timer is triggered, should be set to at least 1 in any spell for the effect to function.
+	base2= lock out timer, which prevents any more procs set in ms 1500 = 1.5 seconds
+	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie. 
 	*/
 
 	if (IsValidSpell(spell_id)) {
