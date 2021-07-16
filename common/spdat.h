@@ -857,7 +857,7 @@ typedef enum {
 //#define SE_Ff_FocusTimerMin			511 //
 #define SE_Proc_Timer_Modifier 			512 //
 //#define SE_Mana_Max_Percent			513 //
-//#define SE_Endurance_Max_Percent		514 // 
+//#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
 #define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
 //#define SE_Attack_Offense_Max_Percent	517 // 

@@ -4797,7 +4797,6 @@ int16 Mob::GetCritDmgMod(uint16 skill, Mob* owner)
 	if (owner) //Checked in TryPetCriticalHit
 		critDmg_mod += owner->aabonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->itembonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->spellbonuses.Pet_Crit_Melee_Damage_Pct_Owner;
 
-	
 	return critDmg_mod;
 }
 

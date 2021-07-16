@@ -1561,7 +1561,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->Pet_Add_Atk += base1;
 			break;
 
-
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -5042,6 +5041,7 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.PC_Pet_AE_Rampage[1] = effect_value;
 					aabonuses.PC_Pet_AE_Rampage[1] = effect_value;
 					break;
+
 
 				case SE_SkillProcSuccess:{
 					for(int e = 0; e < MAX_SKILL_PROCS; e++)

@@ -2949,7 +2949,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
 				break;
 			}
-
+	
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
