@@ -824,12 +824,12 @@ typedef enum {
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 //#define SE_Ff_Value_Min				479 //
 //#define SE_Ff_Value_Max				480 //
-#define SE_Fc_Cast_Spell_On_Land		481 // [FOCUS EFFECT] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
+#define SE_Fc_Cast_Spell_On_Land		481 // Implemented - [FOCUS] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
 //#define SE_Skill_Base_Damage_Mod		482 //
-#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - modifies incoming spell damage by percent
-#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
-#define SE_Ff_CasterClass				485 // [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.
-#define SE_Ff_Same_Caster				486 // [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells 0=Must be different caster 1=Must be same caster
+#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - [FOCUS] modifies incoming spell damage by percent
+#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - [FOCUS] modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
+#define SE_Ff_CasterClass				485 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.
+#define SE_Ff_Same_Caster				486 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells 0=Must be different caster 1=Must be same caster
 //#define SE_Extend_Tradeskill_Cap		487 //
 //#define SE_Defender_Melee_Force_Pct_PC	488 //
 //#define SE_Worn_Endurance_Regen_Cap	489 //
@@ -855,7 +855,7 @@ typedef enum {
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
 //#define SE_Fc_ResistIncoming			510 //
 //#define SE_Ff_FocusTimerMin			511 //
-#define SE_Proc_Timer_Modifier 			512 //
+#define SE_Proc_Timer_Modifier 			512 // implemented - spell trigger limiter used currently with SPA 481, ie. limit to 1 proc every 1.5 seconds (base=1 base2=1500).
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
