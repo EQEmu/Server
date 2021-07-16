@@ -137,6 +137,7 @@ typedef enum {	//focus types
 	focusFcHealPctIncoming,
 	focusFcDamageAmtIncoming,
 	focusFcSpellDamageAmtIncomingPC,
+	focusFcCastSpellOnLand,
 	focusFcHealAmtIncoming,
 	focusFcBaseEffects,
 	focusIncreaseNumHits,
@@ -321,6 +322,8 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;

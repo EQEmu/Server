@@ -3771,6 +3771,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcMute;
 		case SE_FcTimerRefresh:
 			return focusFcTimerRefresh;
+		case SE_Fc_Cast_Spell_On_Land:
+			return focusFcCastSpellOnLand;
 		case SE_FcStunTimeMod:
 			return focusFcStunTimeMod;
 		case SE_FcHealPctCritIncoming:

@@ -1125,6 +1125,9 @@ void Mob::AI_Process() {
 
 		ProjectileAttack();
 
+		if (focus_proc_limit_timer.Check())
+			FocusProcLimitProcess();
+
 		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
 		if (GetSpecialAbility(TETHER)) {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));

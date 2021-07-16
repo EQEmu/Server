@@ -538,6 +538,9 @@ bool Client::Process() {
 		}
 	}
 
+	if (focus_proc_limit_timer.Check() && !dead)
+		FocusProcLimitProcess();
+
 	if (client_state == CLIENT_KICKED) {
 		Save();
 		OnDisconnect(true);
