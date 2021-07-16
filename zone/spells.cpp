@@ -1393,6 +1393,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
+	TryOnSpellFinished(this, target, spell_id);
+
 	TryTwincast(this, target, spell_id);
 
 	TryTriggerOnCast(spell_id, 0);
@@ -2057,7 +2059,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 
   //Guard Assist Code
 	if (RuleB(Character, PVPEnableGuardFactionAssist) && spell_target && IsDetrimentalSpell(spell_id) && spell_target != this) {
-		if (IsClient() || (HasOwner() && GetOwner()->IsClient())) {
+		if (IsClient() && spell_target->IsClient()|| (HasOwner() && GetOwner()->IsClient() && spell_target->IsClient())) {
 			auto& mob_list = entity_list.GetCloseMobList(spell_target);
 			for (auto& e : mob_list) {
 				auto mob = e.second;

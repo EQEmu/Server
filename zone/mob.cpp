@@ -3711,6 +3711,32 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	}
 }
 
+//Used for effects that should occur after the completion of the spell
+void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
+{
+	if (!IsValidSpell(spell_id))
+		return;
+
+	/*Apply damage from Lifeburn type effects on caster at end of spell cast. 
+	 This allows for the AE spells to function without repeatedly killing caster
+	 Damage or heal portion can be found as regular single use spell effect
+	*/
+	if (IsEffectInSpell(spell_id, SE_Health_Transfer)){
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+
+			if (spells[spell_id].effectid[i] == SE_Health_Transfer) {
+				int new_hp = GetMaxHP();
+				new_hp -= GetMaxHP()  * spells[spell_id].base[i] / 1000;
+
+				if (new_hp > 0)
+					SetHP(new_hp);
+				else
+					Kill();
+			}
+		}
+	}
+}
+
 int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
 	if (!IsValidSpell(spell_id))
@@ -3771,7 +3797,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 	return value;
 }
 
-int16 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
+int32 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
 {
 	int skilldmg_mod = 0;
 
@@ -3788,6 +3814,33 @@ int16 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackO
 		skilldmg_mod = -100;
 
 	return skilldmg_mod;
+}
+
+int32 Mob::GetPositionalDmgTaken(Mob *attacker)
+{
+	if (!attacker)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_mod = 0;
+
+	back_arc += itembonuses.Damage_Taken_Position_Mod[0] + aabonuses.Damage_Taken_Position_Mod[0] + spellbonuses.Damage_Taken_Position_Mod[0];
+	front_arc += itembonuses.Damage_Taken_Position_Mod[1] + aabonuses.Damage_Taken_Position_Mod[1] + spellbonuses.Damage_Taken_Position_Mod[1];
+
+	if (back_arc || front_arc) { //Do they have this bonus?
+		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
+			total_mod = back_arc; //If so, apply the back arc modifier only
+		else
+			total_mod = front_arc;//If not, apply the front arc modifer only
+	}
+
+	total_mod = round(static_cast<double>(total_mod) * 0.1);
+
+	if (total_mod < -100)
+		total_mod = -100;
+
+	return total_mod;
 }
 
 int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
@@ -4598,9 +4651,12 @@ int16 Mob::GetCritDmgMod(uint16 skill)
 {
 	int critDmg_mod = 0;
 
-	// All skill dmg mod + Skill specific
+	// All skill dmg mod + Skill specific [SPA 330 and 496]
 	critDmg_mod += itembonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgMod[EQ::skills::HIGHEST_SKILL + 1] +
 					itembonuses.CritDmgMod[skill] + spellbonuses.CritDmgMod[skill] + aabonuses.CritDmgMod[skill];
+
+	critDmg_mod += itembonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] +
+				   itembonuses.CritDmgModNoStack[skill] + spellbonuses.CritDmgModNoStack[skill] + aabonuses.CritDmgModNoStack[skill];
 
 	return critDmg_mod;
 }
@@ -4690,6 +4746,35 @@ int16 Mob::GetCrippBlowChance()
 		crip_chance = 0;
 
 	return crip_chance;
+}
+
+
+int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
+{
+	if (!defender)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_mod = 0;
+
+	back_arc += itembonuses.Melee_Damage_Position_Mod[0] + aabonuses.Melee_Damage_Position_Mod[0] + spellbonuses.Melee_Damage_Position_Mod[0];
+	front_arc += itembonuses.Melee_Damage_Position_Mod[1] + aabonuses.Melee_Damage_Position_Mod[1] + spellbonuses.Melee_Damage_Position_Mod[1];
+
+	if (back_arc || front_arc) { //Do they have this bonus?
+		if (BehindMob(defender, GetX(), GetY()))//Check if attacker is striking from behind
+			total_mod = back_arc; //If so, apply the back arc modifier only
+		else
+			total_mod = front_arc;//If not, apply the front arc modifer only
+	}
+
+	total_mod = round(static_cast<double>(total_mod) * 0.1);
+
+	if (total_mod < -100)
+		total_mod = -100;
+
+	return total_mod;
+
 }
 
 int16 Mob::GetSkillReuseTime(uint16 skill)

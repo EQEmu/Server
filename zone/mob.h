@@ -353,6 +353,7 @@ public:
 	void CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ);
 	void BeamDirectional(uint16 spell_id, int16 resist_adjust);
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
+	void TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id);
 
 	//Buff
 	void BuffProcess();
@@ -802,7 +803,8 @@ public:
 	int32 GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining);
 	int32 GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill = false, uint16 skill=0);
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
-	int16 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
+	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
+	int32 GetPositionalDmgTaken(Mob *attacker);
 	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
 	int16 CalcResistChanceBonus();
 	int16 CalcFearResistChance();
@@ -816,6 +818,7 @@ public:
 	int16 GetMeleeDamageMod_SE(uint16 skill);
 	int16 GetMeleeMinDamageMod_SE(uint16 skill);
 	int16 GetCrippBlowChance();
+	int16 GetMeleeDmgPositionMod(Mob* defender);
 	int16 GetSkillReuseTime(uint16 skill);
 	int GetCriticalChanceBonus(uint16 skill);
 	int16 GetSkillDmgAmt(uint16 skill);

@@ -62,6 +62,8 @@
 #define SPELL_SHAPECHANGE60 1924
 #define SPELL_COMMAND_OF_DRUZZIL 3355
 #define SPELL_SHAPECHANGE70 6503
+#define SPELL_MANA_BURN 2751
+#define SPELL_LIFE_BURN 2755
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502
@@ -152,7 +154,7 @@
 #define SPELL_RESURRECTION_SICKNESS 756
 #define SPELL_RESURRECTION_SICKNESS2 5249
 #define SPELL_REVIVAL_SICKNESS 13087
-#define SPELL_MANA_BURN 2751
+
 
 
 #define EFFECT_COUNT 12
@@ -807,13 +809,13 @@ typedef enum {
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 //#define SE_PC_Pet_AE_Rampage			465 // Would assume as above but need to confirm.
 #define SE_PC_Pet_Flurry_Chance			466 // implemented - Base1 % chance to do flurry from double attack hit.
-//#define SE_DS_Mitigation_Amount		467 //
-//#define SE_DS_Mitigation_Percentage	468 //
+#define SE_DS_Mitigation_Amount			467 // implemented - Modify incoming damage shield damage by a flat amount
+#define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
 //#define SE_Chance_Best_in_Spell_Grp   469 //
 //#define SE_Trigger_Best_in_Spell Grp  470 //
 //#define SE_Double_Melee_Round			471 //
 //#define SE_Buy_AA_Rank				472 //
-//#define SE_Double_Backstab_Front		473 //
+#define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 //#define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 //
 //#define SE_Trigger_Spell_Non_Item		475 //
 //#define SE_Weapon_Stance				476 //
@@ -836,37 +838,37 @@ typedef enum {
 //#define SE_Ff_Endurance_Max			493 //
 //#define SE_Pet_Add_Atk				494 //
 //#define SE_Ff_DurationMax				495 //
-//#define SE_Critical_Melee_Damage_Mod_Max	496 //
+#define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
 //#define SE_Ff_FocusCastProcNoBypass	497 //
 //#define SE_AddExtraAttackPct_1h_Primary	498 //
 //#define SE_AddExtraAttackPct_1h_Secondary	499 //
 //#define SE_Fc_CastTimeMod2			500 //
 //#define SE_Fc_CastTimeAmt				501 //
 //#define SE_Fearstun					502 //
-//#define SE_Melee_Damage_Position_Mod	503 //
+#define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
 //#define SE_Melee_Damage_Position_Amt	504 //
-//#define SE_Damage_Taken_Position_Mod	505 //
+#define SE_Damage_Taken_Position_Mod	505 // implemented - mitigate melee damage by pct if dmg taken from Front or Behind
 //#define SE_Damage_Taken_Position_Amt	506 //
 //#define SE_Fc_Amplify_Mod				507 //
 //#define SE_Fc_Amplify_Amt				508 //
-//#define SE_Health_Transfer			509 //
+#define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
 //#define SE_Fc_ResistIncoming			510 //
 //#define SE_Ff_FocusTimerMin			511 //
 //#define SE_Proc_Timer_Modifier 		512 //
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
-//#define SE_AC_Avoidance_Max_Percent	515 //
-//#define SE_AC_Mitigation_Max_Percent	516 //
-//#define SE_Attack_Offense_Max_Percent	517 //
-//#define SE_Attack_Accuracy_Max_Percent	518 //
+#define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
+#define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
+//#define SE_Attack_Offense_Max_Percent	517 // 
+#define SE_Attack_Accuracy_Max_Percent	518 // implemented - stackable accurary modifer
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
-//#define SE_Endurance_Absorb_Pct_Damage	521 //
-//#define SE_Instant_Mana_Pct			522 //
-//#define SE_Instant_Endurance_Pct		523 //
-//#define SE_Duration_HP_Pct			524 //
-//#define SE_Duration_Mana_Pct			525 //
-//#define SE_Duration_Endurance_Pct		526 //
+#define SE_Endurance_Absorb_Pct_Damage	521 // implemented - Reduces % of Damage using Endurance, drains endurance at a ratio (ie. 0.05 Endurance per Hit Point)
+#define SE_Instant_Mana_Pct				522 // implemented - Increase/Decrease mana by percent of max mana
+#define SE_Instant_Endurance_Pct		523 // implemented - Increase/Decrease mana by percent of max endurance
+#define SE_Duration_HP_Pct				524 // implemented - Decrease Current Hit Points by % of Total Hit Points per Tick, up to a MAX per tick
+#define SE_Duration_Mana_Pct			525 // implemented - Decrease Current Mana by % of Total Mana per Tick, up to a MAX per tick
+#define SE_Duration_Endurance_Pct		526 // implemented - Decrease Current Endurance by % of Total Hit Points per Tick, up to a MAX per tick
 
 
 // LAST
