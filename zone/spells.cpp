@@ -1003,8 +1003,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	if (IsDetrimentalSpell(spell_id) && spells[spell_id].range == 300) { //prevents bolt spells (300 range) from nuking the caster if the target zones or dies before spell finish.
-		target = entity_list.GetMobID(target_id);
-		if (!target) {
+		target = entity_list.GetMob(target_id);
+		if (target == nullptr) {
 			InterruptSpell(spell_id);
 			return;
 		}
