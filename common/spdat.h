@@ -837,7 +837,7 @@ typedef enum {
 //#define SE_Ff_ReuseTimeMax			491 //
 //#define SE_Ff_Endurance_Min			492 //
 //#define SE_Ff_Endurance_Max			493 //
-#define SE_Pet_Add_Atk					494 //
+#define SE_Pet_Add_Atk					494 // implemented - Bonus on pet owner which gives their pet increased attack stat
 //#define SE_Ff_DurationMax				495 //
 #define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
 //#define SE_Ff_FocusCastProcNoBypass	497 //
