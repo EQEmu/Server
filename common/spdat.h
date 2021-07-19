@@ -279,7 +279,7 @@ enum RESISTTYPE
 
 //Target Type IDs
 typedef enum {
-/* 01 */	ST_TargetOptional = 0x01,
+/* 01 */	ST_TargetOptional = 0x01, //only used for targeted projectile spells
 /* 02 */	ST_AEClientV1 = 0x02,
 /* 03 */	ST_GroupTeleport = 0x03,
 /* 04 */	ST_AECaster = 0x04,
