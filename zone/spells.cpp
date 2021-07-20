@@ -1589,8 +1589,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_TargetOptional:
 		{
-			if(!spell_target)
-				spell_target = this;
+			if (!spell_target)
+			{
+				LogSpells("Spell [{}] canceled: invalid target (normal)", spell_id);
+				MessageString(Chat::Red, SPELL_NEED_TAR);
+				return false;	// can't cast these unless we have a target
+			}
 			CastAction = SingleTarget;
 			break;
 		}
