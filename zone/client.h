@@ -394,6 +394,7 @@ public:
 
 	void Duck();
 	void Stand();
+	void Sit();
 
 	virtual void SetMaxHP();
 	int32 LevelRegen();
