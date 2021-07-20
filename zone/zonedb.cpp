@@ -3666,6 +3666,8 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		buffs[slot_id].caston_z = caston_z;
 		buffs[slot_id].ExtraDIChance = ExtraDIChance;
 		buffs[slot_id].RootBreakChance = 0;
+		buffs[slot_id].focusproclimit_time = 0;
+		buffs[slot_id].focusproclimit_procamt = 0;
 		buffs[slot_id].UpdateClient = false;
 		buffs[slot_id].instrument_mod = instrument_mod;
 	}

@@ -406,8 +406,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		spell.targettype == ST_Self ||
 		spell.targettype == ST_AECaster ||
 		spell.targettype == ST_Ring ||
-		spell.targettype == ST_Beam ||
-		spell.targettype == ST_TargetOptional) && target_id == 0)
+		spell.targettype == ST_Beam) && target_id == 0)
 	{
 		LogSpells("Spell [{}] auto-targeted the caster. Group? [{}], target type [{}]", spell_id, IsGroupSpell(spell_id), spell.targettype);
 		target_id = GetID();
@@ -1585,8 +1584,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_TargetOptional:
 		{
-			if(!spell_target)
-				spell_target = this;
+			if (!spell_target)
+			{
+				LogSpells("Spell [{}] canceled: invalid target (normal)", spell_id);
+				MessageString(Chat::Red, SPELL_NEED_TAR);
+				return false;	// can't cast these unless we have a target
+			}
 			CastAction = SingleTarget;
 			break;
 		}
@@ -3350,6 +3353,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].dot_rune = 0;
 	buffs[emptyslot].ExtraDIChance = 0;
 	buffs[emptyslot].RootBreakChance = 0;
+	buffs[emptyslot].focusproclimit_time = 0;
+	buffs[emptyslot].focusproclimit_procamt = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
 	if (level_override > 0) {
@@ -3971,6 +3976,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		safe_delete(action_packet);
 		return false;
 	}
+
+	//Check SE_Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
+	if (spelltar)
+		spelltar->CastSpellOnLand(this, spell_id);
 
 	if (IsValidSpell(spells[spell_id].RecourseLink) && spells[spell_id].RecourseLink != spell_id)
 		SpellFinished(spells[spell_id].RecourseLink, this, CastingSlot::Item, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
@@ -5249,6 +5258,27 @@ int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
 	}
 
 	return -1;	//default
+}
+
+uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
+{
+	//Typical live spells follow 1/5/10 rank value for actual ranks 1/2/3, but this can technically be set as anything.
+
+	int highest_rank = 0; //highest ranked found in spellgroup
+	uint32 highest_spell_id = 0;  //spell_id of the highest ranked spell you have scribed in that spell rank.
+
+	for (int i = 0; i < EQ::spells::SPELLBOOK_SIZE; i++) {
+
+		if (IsValidSpell(m_pp.spell_book[i])) {
+			if (spells[m_pp.spell_book[i]].spellgroup == spell_group) {
+				if (highest_rank < spells[m_pp.spell_book[i]].rank) {
+					highest_rank = spells[m_pp.spell_book[i]].rank;
+					highest_spell_id = m_pp.spell_book[i];
+				}
+			}
+		}
+	}
+	return highest_spell_id;
 }
 
 bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {

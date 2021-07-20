@@ -124,6 +124,7 @@ typedef enum {	//focus types
 	focusSpellHateMod,
 	focusTriggerOnCast,
 	focusSpellVulnerability,
+	focusFcSpellDamagePctIncomingPC,
 	focusTwincast,
 	focusSympatheticProc,
 	focusFcDamageAmt,
@@ -135,6 +136,8 @@ typedef enum {	//focus types
 	focusBlockNextSpell,
 	focusFcHealPctIncoming,
 	focusFcDamageAmtIncoming,
+	focusFcSpellDamageAmtIncomingPC,
+	focusFcCastSpellOnLand,
 	focusFcHealAmtIncoming,
 	focusFcBaseEffects,
 	focusIncreaseNumHits,
@@ -319,6 +322,8 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -524,6 +529,7 @@ struct StatBonuses {
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
+	uint32  PC_Pet_AE_Rampage[2];				// 0= % chance to AE rampage, 1=damage modifier
 	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
 	int32   Attack_Accuracy_Max_Percent;		// Increase ATK accuracy by percent.
 	int32   AC_Mitigation_Max_Percent;			// Increase AC mitigation by percent
@@ -532,7 +538,10 @@ struct StatBonuses {
 	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
 	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
 	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
-	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce	
+	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
+	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
+	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
+
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

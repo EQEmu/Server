@@ -1438,6 +1438,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_PC_Pet_AE_Rampage: {
+			newbon->PC_Pet_AE_Rampage[0] += base1; //Chance to rampage
+			if (newbon->PC_Pet_AE_Rampage[1] < base2)
+				newbon->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+			break;
+		}
+
 		case SE_PC_Pet_Flurry_Chance: 
 			newbon->PC_Pet_Flurry += base1; //Chance to Flurry
 			break;
@@ -1546,6 +1553,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->DS_Mitigation_Percentage += base1;
 			break;
 
+		case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+			newbon->Pet_Crit_Melee_Damage_Pct_Owner += base1;
+			break;
+
+		case SE_Pet_Add_Atk:
+			newbon->Pet_Add_Atk += base1;
+			break;
 
 		// to do
 		case SE_PetDiscipline:
@@ -3282,6 +3296,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_PC_Pet_AE_Rampage: {
+				new_bonus->PC_Pet_AE_Rampage[0] += effect_value; //Chance to rampage
+				if (new_bonus->PC_Pet_AE_Rampage[1] < base2)
+					new_bonus->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+				break;
+			}
+
 			case SE_PC_Pet_Flurry_Chance: 
 				new_bonus->PC_Pet_Flurry += effect_value; //Chance to Flurry
 				break;
@@ -3386,7 +3407,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->DS_Mitigation_Percentage += effect_value;
 				break;
 
+			case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+				new_bonus->Pet_Crit_Melee_Damage_Pct_Owner += effect_value;
+				break;
 
+			case SE_Pet_Add_Atk:
+				new_bonus->Pet_Add_Atk += effect_value;
+				break;
 		
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
@@ -3708,6 +3735,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return 0; //This is calculated as an actual bonus
 		case SE_FcSpellVulnerability:
 			return focusSpellVulnerability;
+		case SE_Fc_Spell_Damage_Pct_IncomingPC:
+			return focusFcSpellDamagePctIncomingPC;
 		case SE_BlockNextSpellFocus:
 			//return focusBlockNextSpell;
 			return 0; //This is calculated as an actual bonus
@@ -3725,6 +3754,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcDamagePctCrit;
 		case SE_FcDamageAmtIncoming:
 			return focusFcDamageAmtIncoming;
+		case SE_Fc_Spell_Damage_Amt_IncomingPC:
+			return focusFcSpellDamageAmtIncomingPC;
 		case SE_FcHealAmtIncoming:
 			return focusFcHealAmtIncoming;
 		case SE_FcHealPctIncoming:
@@ -3739,6 +3770,8 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcMute;
 		case SE_FcTimerRefresh:
 			return focusFcTimerRefresh;
+		case SE_Fc_Cast_Spell_On_Land:
+			return focusFcCastSpellOnLand;
 		case SE_FcStunTimeMod:
 			return focusFcStunTimeMod;
 		case SE_FcHealPctCritIncoming:
@@ -3747,6 +3780,7 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 			return focusFcHealAmt;
 		case SE_FcHealAmtCrit:
 			return focusFcHealAmtCrit;
+
 	}
 	return 0;
 }
@@ -4977,6 +5011,37 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					itembonuses.DS_Mitigation_Percentage = effect_value;
 					aabonuses.DS_Mitigation_Percentage = effect_value;
 					break;
+
+				case SE_Pet_Crit_Melee_Damage_Pct_Owner:
+					spellbonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					itembonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					aabonuses.Pet_Crit_Melee_Damage_Pct_Owner = effect_value;
+					break;
+
+				case SE_Pet_Add_Atk:
+					spellbonuses.Pet_Add_Atk = effect_value;
+					itembonuses.Pet_Add_Atk = effect_value;
+					aabonuses.Pet_Add_Atk = effect_value;
+					break;
+
+				case SE_PC_Pet_Rampage:
+					spellbonuses.PC_Pet_Rampage[0] = effect_value;
+					itembonuses.PC_Pet_Rampage[0] = effect_value;
+					aabonuses.PC_Pet_Rampage[0] = effect_value;
+					spellbonuses.PC_Pet_Rampage[1] = effect_value;
+					itembonuses.PC_Pet_Rampage[1] = effect_value;
+					aabonuses.PC_Pet_Rampage[1] = effect_value;
+					break;
+
+				case SE_PC_Pet_AE_Rampage:
+					spellbonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[0] = effect_value;
+					spellbonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					break;
+
 
 				case SE_SkillProcSuccess:{
 					for(int e = 0; e < MAX_SKILL_PROCS; e++)

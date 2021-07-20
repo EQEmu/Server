@@ -102,6 +102,7 @@ Mob::Mob(
 	ranged_timer(2000),
 	tic_timer(6000),
 	mana_timer(2000),
+	focus_proc_limit_timer(250),
 	spellend_timer(0),
 	rewind_timer(30000),
 	bindwound_timer(10000),
@@ -3537,56 +3538,81 @@ void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
 	}
 }
 
+
+
+
 bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
-	if(!target || !IsValidSpell(spell_id))
+	if (!target || !IsValidSpell(spell_id))
 		return false;
 
-	int spell_trig = 0;
-	// Count all the percentage chances to trigger for all effects
-	for(int i = 0; i < EFFECT_COUNT; i++)
-	{
-		if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			spell_trig += spells[spell_id].base[i];
-	}
-	// If all the % add to 100, then only one of the effects can fire but one has to fire.
-	if (spell_trig == 100)
-	{
-		int trig_chance = 100;
-		for(int i = 0; i < EFFECT_COUNT; i++)
-		{
-			if (spells[spell_id].effectid[i] == SE_SpellTrigger)
-			{
-				if(zone->random.Int(0, trig_chance) <= spells[spell_id].base[i])
-				{
-					// If we trigger an effect then its over.
-					if (IsValidSpell(spells[spell_id].base2[i])){
-						SpellFinished(spells[spell_id].base2[i], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
-						return true;
-					}
-				}
-				else
-				{
-					// Increase the chance to fire for the next effect, if all effects fail, the final effect will fire.
-					trig_chance -= spells[spell_id].base[i];
-				}
-			}
+	/*The effects SE_SpellTrigger (SPA 340) and SE_Chance_Best_in_Spell_Grp (SPA 469) work as follows, you typically will have 2-3 different spells each with their own
+	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast. 
+	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance). 
+	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there 
+	is only 1 effect using the trigger effect. In those situations we simply roll a chance for that spell to be cast once.
+	Note: Both SPA 340 and 469 can be in same spell and both cummulative add up to 100 pct chances. SPA469 only difference being the spell cast will
+	be "best in spell group", instead of a defined spell_id.*/
 
-		}
-	}
-	// if the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
-	else
+	int chance_array[EFFECT_COUNT] = {};
+	int total_chance = 0;
+	int effect_slot = effect;
+	bool CastSpell = false;
+	
+	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if(zone->random.Int(0, 100) <= spells[spell_id].base[effect])
-		{
-			if (IsValidSpell(spells[spell_id].base2[effect])){
-				SpellFinished(spells[spell_id].base2[effect], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect]].ResistDiff);
-				return true; //Only trigger once of these per spell effect.
+		if (spells[spell_id].effectid[i] == SE_SpellTrigger || spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)
+			total_chance += spells[spell_id].base[i];
+	}
+
+	if (total_chance == 100)
+	{
+		int current_chance = 0;
+		int cummulative_chance = 0;
+
+		for (int i = 0; i < EFFECT_COUNT; i++){
+			//Find spells with SPA 340 and add the cummulative percent chances to the roll array
+			if ((spells[spell_id].effectid[i] == SE_SpellTrigger) || (spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)){
+
+				cummulative_chance = current_chance + spells[spell_id].base[i];
+				chance_array[i] = cummulative_chance;
+				current_chance = cummulative_chance;
+			}
+		}
+		int random_roll = zone->random.Int(1, 100);
+		//Determine which spell out of the group of the spells (each with own percent chance out of 100) will be cast based on a single roll.
+		for (int i = 0; i < EFFECT_COUNT; i++){
+			if (chance_array[i] != 0 && random_roll <= chance_array[i]) {
+				effect_slot = i;
+				CastSpell = true;
+				break;
 			}
 		}
 	}
+
+	//If the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
+	else if (zone->random.Roll(spells[spell_id].base[effect])) {
+			CastSpell = true; //In this case effect_slot is what was passed into function.
+	}
+
+	if (CastSpell) {
+		if (spells[spell_id].effectid[effect_slot] == SE_SpellTrigger && IsValidSpell(spells[spell_id].base2[effect_slot])) {
+			SpellFinished(spells[spell_id].base2[effect_slot], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect_slot]].ResistDiff);
+			return true;
+		}
+		else if (IsClient() & spells[spell_id].effectid[effect_slot] == SE_Chance_Best_in_Spell_Grp) {
+			uint32 best_spell_id = CastToClient()->GetHighestScribedSpellinSpellGroup(spells[spell_id].base2[effect_slot]);
+			if (IsValidSpell(best_spell_id)) {
+				SpellFinished(best_spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[best_spell_id].ResistDiff);
+			}
+			return true;//Do nothing if you don't have the any spell in spell group scribed.
+		}
+	}
+
 	return false;
 }
+
+
 
 void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
 {
@@ -3676,6 +3702,9 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	if(!IsValidSpell(spell_id))
 		return;
 
+	if (IsEffectInSpell(spell_id, SE_TwinCastBlocker))
+		return;
+
 	if(IsClient())
 	{
 		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
@@ -3739,34 +3768,46 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 
 int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
+	/*
+	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists. 
+	Can be applied through quest function, spell focus or npc_spells_effects table. This function is run on the target of the spell.
+	*/
+
 	if (!IsValidSpell(spell_id))
 		return 0;
 
 	if (!caster)
 		return 0;
 
-	int32 value = 0;
+	int32 total_mod = 0;
+	int32 innate_mod = 0;
+	int32 fc_spell_vulnerability_mod = 0;
+	int32 fc_spell_damage_pct_incomingPC_mod = 0;
 
-	//Apply innate vulnerabilities
+	//Apply innate vulnerabilities from quest functions and tables
 	if (Vulnerability_Mod[GetSpellResistType(spell_id)] != 0)
-		value = Vulnerability_Mod[GetSpellResistType(spell_id)];
-
+		innate_mod = Vulnerability_Mod[GetSpellResistType(spell_id)];
 
 	else if (Vulnerability_Mod[HIGHEST_RESIST+1] != 0)
-		value = Vulnerability_Mod[HIGHEST_RESIST+1];
+		innate_mod = Vulnerability_Mod[HIGHEST_RESIST+1];
 
-	//Apply spell derived vulnerabilities
-	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
+	//[Apply spell derived vulnerabilities] Step 1: Check this focus effect exists on the mob.
+	if (spellbonuses.FocusEffects[focusSpellVulnerability]){ 
 
 		int32 tmp_focus = 0;
 		int tmp_buffslot = -1;
 
+		/*
+		Find all buffs that may contain SPA 296, then find which slot has the highest possible effect. Since the focus can use
+		a min and max amount value to determine final focus amt. To find the best focus, use only max value if possible. Once the
+		best is found. Run it again to get the final value randoming between min and max.
+		*/
 		int buff_count = GetMaxTotalSlots();
 		for(int i = 0; i < buff_count; i++) {
 
 			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_FcSpellVulnerability))){
 
-				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id, true);
+				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id, true, buffs[tmp_buffslot].casterid);
 
 				if (!focus)
 					continue;
@@ -3780,21 +3821,61 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 					tmp_focus = focus;
 					tmp_buffslot = i;
 				}
-
 			}
 		}
 
-		tmp_focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[tmp_buffslot].spellid, spell_id);
-
-		if (tmp_focus < -99)
-			tmp_focus = -99;
-
-		value += tmp_focus;
+		fc_spell_vulnerability_mod = caster->CalcFocusEffect(focusSpellVulnerability, buffs[tmp_buffslot].spellid, spell_id, false, buffs[tmp_buffslot].casterid);
 
 		if (tmp_buffslot >= 0)
 			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
-	return value;
+
+	if (spellbonuses.FocusEffects[focusFcSpellDamagePctIncomingPC]) {
+
+		int32 tmp_focus = 0;
+		int tmp_buffslot = -1;
+
+		/*
+		Find all buffs that may contain SPA 483, then find which slot has the highest possible effect. Since the focus can use
+		a min and max amount value to determine final focus amt. To find the best focus, use only max value if possible. Once the
+		best is found. Run it again to get the final value randoming between min and max.
+		*/
+		int buff_count = GetMaxTotalSlots();
+		for (int i = 0; i < buff_count; i++) {
+
+			if ((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_Fc_Spell_Damage_Pct_IncomingPC))) {
+
+				int32 focus = caster->CalcFocusEffect(focusFcSpellDamagePctIncomingPC, buffs[i].spellid, spell_id, true, buffs[tmp_buffslot].casterid);
+
+				if (!focus)
+					continue;
+
+				if (tmp_focus && focus > tmp_focus) {
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
+
+				else if (!tmp_focus) {
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
+			}
+		}
+
+		fc_spell_damage_pct_incomingPC_mod = caster->CalcFocusEffect(focusFcSpellDamagePctIncomingPC, buffs[tmp_buffslot].spellid, spell_id, false, buffs[tmp_buffslot].casterid);
+
+		if (tmp_buffslot >= 0)
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
+	}
+
+	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
+
+	//Don't let focus derived mods reduce past 99% mitigation. Quest related can, and for custom functionality if negative will give a healing affect instead of damage.
+	if (total_mod < -99)
+		total_mod = -99;
+
+	total_mod += innate_mod;
+	return total_mod;
 }
 
 int32 Mob::GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts)
@@ -3854,6 +3935,61 @@ int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 		heal_rate = -99;
 
 	return heal_rate;
+}
+
+void Mob::SetBottomRampageList()
+{
+	auto &mob_list = entity_list.GetCloseMobList(this);
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+			continue;
+		}
+
+		if (mob->IsNPC() && mob->CheckAggro(this)) {
+			for (int i = 0; i < mob->RampageArray.size(); i++) {
+				// Find this mob in the rampage list
+				if (this->GetID() == mob->RampageArray[i]) {
+					//Move to bottom of Rampage List
+					auto it = mob->RampageArray.begin() + i;
+					std::rotate(it, it + 1, mob->RampageArray.end());
+				}
+			}
+		}
+	}
+}
+
+void Mob::SetTopRampageList()
+{
+	auto &mob_list = entity_list.GetCloseMobList(this);
+
+	for (auto &e : mob_list) {
+		auto mob = e.second;
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->GetSpecialAbility(SPECATK_RAMPAGE)) {
+			continue;
+		}
+
+		if (mob->IsNPC() && mob->CheckAggro(this)) {
+			for (int i = 0; i < mob->RampageArray.size(); i++) {
+				// Find this mob in the rampage list
+				if (this->GetID() == mob->RampageArray[i]) {
+					//Move to Top of Rampage List
+					auto it = mob->RampageArray.begin() + i;
+					std::rotate(it, it + 1, mob->RampageArray.end());
+					std::rotate(mob->RampageArray.rbegin(), mob->RampageArray.rbegin() + 1, mob->RampageArray.rend());
+				}
+			}
+		}
+	}
 }
 
 bool Mob::TryFadeEffect(int slot)
@@ -4647,7 +4783,7 @@ bool Mob::TrySpellOnDeath()
 	//in death because the heal will not register before the script kills you.
 }
 
-int16 Mob::GetCritDmgMod(uint16 skill)
+int16 Mob::GetCritDmgMod(uint16 skill, Mob* owner)
 {
 	int critDmg_mod = 0;
 
@@ -4657,6 +4793,9 @@ int16 Mob::GetCritDmgMod(uint16 skill)
 
 	critDmg_mod += itembonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 1] +
 				   itembonuses.CritDmgModNoStack[skill] + spellbonuses.CritDmgModNoStack[skill] + aabonuses.CritDmgModNoStack[skill];
+
+	if (owner) //Checked in TryPetCriticalHit
+		critDmg_mod += owner->aabonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->itembonuses.Pet_Crit_Melee_Damage_Pct_Owner + owner->spellbonuses.Pet_Crit_Melee_Damage_Pct_Owner;
 
 	return critDmg_mod;
 }
