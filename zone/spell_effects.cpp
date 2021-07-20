@@ -4744,6 +4744,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				LimitFailure = true;
 			break;
 
+
 		/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 		case SE_Ff_Same_Caster:
 		case SE_Ff_CasterClass:
