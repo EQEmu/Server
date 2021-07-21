@@ -4434,6 +4434,8 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
+	bool not_focusable = spells[spell_id].not_focusable;
+
 	int16 value = 0;
 	int lvlModifier = 100;
 	int spell_level = 0;
@@ -4744,6 +4746,11 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				LimitFailure = true;
 			break;
 
+		case SE_Ff_Override_NotFocusable:
+			if (base1 == 1)
+				not_focusable = false;
+			break;
+
 
 		/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 		case SE_Ff_Same_Caster:
@@ -4996,6 +5003,9 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	if (LimitFailure)
 		return 0;
 
+	if (not_focusable)
+		return 0;
+
 	return (value * lvlModifier / 100);
 }
 
@@ -5011,8 +5021,8 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	if (!IsValidSpell(focus_id) || !IsValidSpell(spell_id))
 		return 0;
 
-	//Check this here also, some focus effects call this directly, bypassing GetFocusEffect function.
-	if (spells[spell_id].not_focusable && !IsEffectInSpell(spell_id, SE_Ff_Override_NotFocusable))
+	//No further checks if spell_id no_focusable, unless spell focus_id contains an override limiter.
+	if (spells[spell_id].not_focusable && !IsEffectInSpell(focus_id, SE_Ff_Override_NotFocusable))
 		return 0;
 
 	const SPDat_Spell_Struct &focus_spell = spells[focus_id];
@@ -5766,9 +5776,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
 		return 0;
 
-	if (spells[spell_id].not_focusable && !IsEffectInSpell(spell_id, SE_Ff_Override_NotFocusable))
-		return 0;
-
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
 	int16 realTotal3 = 0;
@@ -6039,9 +6046,6 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 }
 
 int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
-
-	if (spells[spell_id].not_focusable && !IsEffectInSpell(spell_id, SE_Ff_Override_NotFocusable))
-		return 0;
 
 	int16 realTotal = 0;
 	int16 realTotal2 = 0;
