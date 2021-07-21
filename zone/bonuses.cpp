@@ -1065,19 +1065,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			break;
 
-		case SE_TriggerOnCast:
-
-			for (int i = 0; i < MAX_SPELL_TRIGGER; i++) {
-				if (newbon->SpellTriggers[i] == rank.id)
-					break;
-
-				if (!newbon->SpellTriggers[i]) {
-					// Save the 'rank.id' of each triggerable effect to an array
-					newbon->SpellTriggers[i] = rank.id;
-					break;
-				}
-			}
-			break;
 
 		case SE_CriticalHitChance: {
 			// Bad data or unsupported new skill
@@ -2538,19 +2525,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_TriggerOnCast:
-			{
-				for(int e = 0; e < MAX_SPELL_TRIGGER; e++)
-				{
-					if(!new_bonus->SpellTriggers[e])
-					{
-						new_bonus->SpellTriggers[e] = spell_id;
-						break;
-					}
-				}
-				break;
-			}
-
 			case SE_SpellCritChance:
 				new_bonus->CriticalSpellChance += effect_value;
 				break;
@@ -3820,8 +3794,7 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_ReduceReuseTimer:
 			return focusReduceRecastTime;
 		case SE_TriggerOnCast:
-			//return focusTriggerOnCast;
-			return 0; //This is calculated as an actual bonus
+			return focusTriggerOnCast;
 		case SE_FcSpellVulnerability:
 			return focusSpellVulnerability;
 		case SE_Fc_Spell_Damage_Pct_IncomingPC:
@@ -4434,17 +4407,6 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 						aabonuses.SkillDmgTaken[e] = effect_value;
 						itembonuses.SkillDmgTaken[e] = effect_value;
 
-					}
-					break;
-				}
-
-				case SE_TriggerOnCast:
-				{
-					for(int e = 0; e < MAX_SPELL_TRIGGER; e++)
-					{
-						spellbonuses.SpellTriggers[e] = effect_value;
-						aabonuses.SpellTriggers[e] = effect_value;
-						itembonuses.SpellTriggers[e] = effect_value;
 					}
 					break;
 				}

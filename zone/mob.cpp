@@ -3488,59 +3488,6 @@ void Mob::SetNimbusEffect(uint32 nimbus_effect)
 	}
 }
 
-void Mob::TryTriggerOnCast(uint32 spell_id, bool aa_trigger)
-{
-	if(!IsValidSpell(spell_id))
-			return;
-
-	if (aabonuses.SpellTriggers[0] || spellbonuses.SpellTriggers[0] || itembonuses.SpellTriggers[0]){
-
-		for(int i = 0; i < MAX_SPELL_TRIGGER; i++){
-
-			if(aabonuses.SpellTriggers[i] && IsClient())
-				TriggerOnCast(aabonuses.SpellTriggers[i], spell_id,1);
-
-			if(spellbonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-
-			if(itembonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-		}
-	}
-}
-
-void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
-{
-	if (!IsValidSpell(focus_spell) || !IsValidSpell(spell_id))
-		return;
-
-	uint32 trigger_spell_id = 0;
-
-	if (aa_trigger && IsClient()) {
-		// focus_spell = aaid
-		auto rank = zone->GetAlternateAdvancementRank(focus_spell);
-		if (rank)
-			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget())
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-	}
-
-	else {
-		trigger_spell_id = CalcFocusEffect(focusTriggerOnCast, focus_spell, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget()) {
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
-		}
-	}
-}
-
-
-
-
 bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
 	if (!target || !IsValidSpell(spell_id))
