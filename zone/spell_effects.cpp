@@ -4903,7 +4903,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				value = base1;
 			break;
 
-		case focusFcAmplifyAmt:
+		case SE_Fc_Amplify_Amt:
 			if (type == focusFcAmplifyAmt)
 				value = base1;
 			break;
@@ -5529,7 +5529,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				value = focus_spell.base[i];
 			break;
 
-		case focusFcAmplifyAmt:
+		case SE_Fc_Amplify_Amt:
 			if (type == focusFcAmplifyAmt)
 				value = focus_spell.base[i];
 			break;
