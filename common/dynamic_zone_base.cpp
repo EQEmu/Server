@@ -5,6 +5,7 @@
 #include "repositories/instance_list_player_repository.h"
 #include "rulesys.h"
 #include "servertalk.h"
+#include "util/uuid.h"
 
 DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& entry)
 {
@@ -13,16 +14,12 @@ DynamicZoneBase::DynamicZoneBase(DynamicZonesRepository::DynamicZoneInstance&& e
 
 uint32_t DynamicZoneBase::Create()
 {
-	if (m_id != 0)
-	{
-		return m_id;
-	}
-
 	if (GetInstanceID() == 0)
 	{
 		CreateInstance();
 	}
 
+	m_uuid = EQ::Util::UUID::Generate().ToString();
 	m_id = SaveToDatabase();
 
 	return m_id;
@@ -75,6 +72,11 @@ uint32_t DynamicZoneBase::CreateInstance()
 void DynamicZoneBase::LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry)
 {
 	m_id                 = dz_entry.id;
+	m_uuid               = std::move(dz_entry.uuid);
+	m_name               = std::move(dz_entry.name);
+	m_leader.id          = dz_entry.leader_id;
+	m_min_players        = dz_entry.min_players;
+	m_max_players        = dz_entry.max_players;
 	m_instance_id        = dz_entry.instance_id;
 	m_type               = static_cast<DynamicZoneType>(dz_entry.type);
 	m_compass.zone_id    = dz_entry.compass_zone_id;
@@ -104,6 +106,12 @@ void DynamicZoneBase::AddMemberFromRepositoryResult(
 	DynamicZoneMembersRepository::MemberWithName&& entry)
 {
 	auto status = DynamicZoneMemberStatus::Unknown;
+
+	if (m_leader.id == entry.character_id)
+	{
+		m_leader.name = entry.character_name;
+	}
+
 	AddInternalMember({ entry.character_id, std::move(entry.character_name), status });
 }
 
@@ -114,6 +122,11 @@ uint32_t DynamicZoneBase::SaveToDatabase()
 	if (m_instance_id != 0)
 	{
 		auto insert_dz = DynamicZonesRepository::NewEntity();
+		insert_dz.uuid                = m_uuid;
+		insert_dz.name                = m_name;
+		insert_dz.leader_id           = m_leader.id;
+		insert_dz.min_players         = m_min_players;
+		insert_dz.max_players         = m_max_players;
 		insert_dz.instance_id         = m_instance_id,
 		insert_dz.type                = static_cast<int>(m_type);
 		insert_dz.compass_zone_id     = m_compass.zone_id;
@@ -137,34 +150,80 @@ uint32_t DynamicZoneBase::SaveToDatabase()
 	return 0;
 }
 
-void DynamicZoneBase::AddCharacter(uint32_t character_id)
+bool DynamicZoneBase::AddMember(const DynamicZoneMember& add_member)
 {
-	DynamicZoneMembersRepository::AddMember(GetDatabase(), m_id, character_id);
-	GetDatabase().AddClientToInstance(m_instance_id, character_id);
-	SendInstanceAddRemoveCharacter(character_id, false); // stops client kick timer
-}
-
-void DynamicZoneBase::RemoveCharacter(uint32_t character_id)
-{
-	DynamicZoneMembersRepository::RemoveMember(GetDatabase(), m_id, character_id);
-	GetDatabase().RemoveClientFromInstance(m_instance_id, character_id);
-	SendInstanceAddRemoveCharacter(character_id, true); // start client kick timer
-}
-
-void DynamicZoneBase::RemoveAllCharacters(bool enable_removal_timers)
-{
-	if (GetInstanceID() == 0)
+	if (HasMember(add_member.id))
 	{
-		return;
+		return false;
 	}
 
-	if (enable_removal_timers)
+	DynamicZoneMembersRepository::AddMember(GetDatabase(), m_id, add_member.id);
+	GetDatabase().AddClientToInstance(m_instance_id, add_member.id);
+
+	ProcessMemberAddRemove(add_member, false);
+	SendServerPacket(CreateServerMemberAddRemovePacket(add_member, false).get());
+
+	return true;
+}
+
+bool DynamicZoneBase::RemoveMember(uint32_t character_id)
+{
+	auto remove_member = GetMemberData(character_id);
+	return RemoveMember(remove_member);
+}
+
+bool DynamicZoneBase::RemoveMember(const std::string& character_name)
+{
+	auto remove_member = GetMemberData(character_name);
+	return RemoveMember(remove_member);
+}
+
+bool DynamicZoneBase::RemoveMember(const DynamicZoneMember& remove_member)
+{
+	if (remove_member.id == 0)
 	{
-		SendInstanceRemoveAllCharacters();
+		return false;
 	}
 
+	DynamicZoneMembersRepository::RemoveMember(GetDatabase(), m_id, remove_member.id);
+	GetDatabase().RemoveClientFromInstance(m_instance_id, remove_member.id);
+
+	ProcessMemberAddRemove(remove_member, true);
+	SendServerPacket(CreateServerMemberAddRemovePacket(remove_member, true).get());
+
+	return true;
+}
+
+bool DynamicZoneBase::SwapMember(
+	const DynamicZoneMember& add_member, const std::string& remove_char_name)
+{
+	auto remove_member = GetMemberData(remove_char_name);
+	if (!add_member.IsValid() || !remove_member.IsValid())
+	{
+		return false;
+	}
+
+	// make remove and add atomic to avoid racing with separate world messages
+	DynamicZoneMembersRepository::RemoveMember(GetDatabase(), m_id, remove_member.id);
+	GetDatabase().RemoveClientFromInstance(m_instance_id, remove_member.id);
+
+	DynamicZoneMembersRepository::AddMember(GetDatabase(), m_id, add_member.id);
+	GetDatabase().AddClientToInstance(m_instance_id, add_member.id);
+
+	ProcessMemberAddRemove(remove_member, true);
+	ProcessMemberAddRemove(add_member, false);
+	SendServerPacket(CreateServerMemberSwapPacket(remove_member, add_member).get());
+
+	return true;
+}
+
+void DynamicZoneBase::RemoveAllMembers()
+{
 	DynamicZoneMembersRepository::RemoveAllMembers(GetDatabase(), m_id);
 	GetDatabase().RemoveClientsFromInstance(GetInstanceID());
+
+	ProcessRemoveAllMembers();
+	SendServerPacket(CreateServerRemoveAllMembersPacket().get());
 }
 
 void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
@@ -181,7 +240,6 @@ void DynamicZoneBase::SaveMembers(const std::vector<DynamicZoneMember>& members)
 		DynamicZoneMembersRepository::DynamicZoneMembers member_entry{};
 		member_entry.dynamic_zone_id = m_id;
 		member_entry.character_id = member.id;
-		member_entry.is_current_member = true;
 		insert_members.emplace_back(member_entry);
 
 		InstanceListPlayerRepository::InstanceListPlayer player_entry;
@@ -206,7 +264,7 @@ void DynamicZoneBase::SetCompass(const DynamicZoneLocation& location, bool updat
 		DynamicZonesRepository::UpdateCompass(GetDatabase(),
 			m_id, m_compass.zone_id, m_compass.x, m_compass.y, m_compass.z);
 
-		SendGlobalLocationChange(ServerOP_DzSetCompass, location);
+		SendServerPacket(CreateServerDzLocationPacket(ServerOP_DzSetCompass, location).get());
 	}
 }
 
@@ -227,7 +285,7 @@ void DynamicZoneBase::SetSafeReturn(const DynamicZoneLocation& location, bool up
 		DynamicZonesRepository::UpdateSafeReturn(GetDatabase(), m_id, m_safereturn.zone_id,
 			m_safereturn.x, m_safereturn.y, m_safereturn.z, m_safereturn.heading);
 
-		SendGlobalLocationChange(ServerOP_DzSetSafeReturn, location);
+		SendServerPacket(CreateServerDzLocationPacket(ServerOP_DzSetSafeReturn, location).get());
 	}
 }
 
@@ -249,7 +307,7 @@ void DynamicZoneBase::SetZoneInLocation(const DynamicZoneLocation& location, boo
 		DynamicZonesRepository::UpdateZoneIn(GetDatabase(), m_id, m_zone_id,
 			m_zonein.x, m_zonein.y, m_zonein.z, m_zonein.heading, m_has_zonein);
 
-		SendGlobalLocationChange(ServerOP_DzSetZoneIn, location);
+		SendServerPacket(CreateServerDzLocationPacket(ServerOP_DzSetZoneIn, location).get());
 	}
 }
 
@@ -258,35 +316,71 @@ void DynamicZoneBase::SetZoneInLocation(float x, float y, float z, float heading
 	SetZoneInLocation({ 0, x, y, z, heading }, update_db);
 }
 
+void DynamicZoneBase::SetLeader(const DynamicZoneMember& new_leader, bool update_db)
+{
+	m_leader = new_leader;
+
+	if (update_db)
+	{
+		DynamicZonesRepository::UpdateLeaderID(GetDatabase(), m_id, new_leader.id);
+	}
+}
+
 uint32_t DynamicZoneBase::GetSecondsRemaining() const
 {
 	auto remaining = std::chrono::duration_cast<std::chrono::seconds>(GetDurationRemaining()).count();
 	return std::max(0, static_cast<int>(remaining));
 }
 
-std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerAddRemoveCharacterPacket(
-	uint32_t character_id, bool removed)
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerMemberAddRemovePacket(
+	const DynamicZoneMember& member, bool removed)
 {
-	constexpr uint32_t pack_size = sizeof(ServerDzCharacter_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_DzAddRemoveCharacter, pack_size);
-	auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-	buf->zone_id = GetZoneID();
-	buf->instance_id = GetInstanceID();
-	buf->remove = removed;
-	buf->character_id = character_id;
+	constexpr uint32_t pack_size = sizeof(ServerDzMember_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzAddRemoveMember, pack_size);
+	auto buf = reinterpret_cast<ServerDzMember_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->dz_zone_id = GetZoneID();
+	buf->dz_instance_id = GetInstanceID();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->removed = removed;
+	buf->character_id = member.id;
+	buf->character_status = static_cast<uint8_t>(member.status);
+	strn0cpy(buf->character_name, member.name.c_str(), sizeof(buf->character_name));
 
 	return pack;
 }
 
-std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerRemoveAllCharactersPacket()
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerMemberSwapPacket(
+	const DynamicZoneMember& remove_member, const DynamicZoneMember& add_member)
 {
-	constexpr uint32_t pack_size = sizeof(ServerDzCharacter_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_DzRemoveAllCharacters, pack_size);
-	auto buf = reinterpret_cast<ServerDzCharacter_Struct*>(pack->pBuffer);
-	buf->zone_id = GetZoneID();
-	buf->instance_id = GetInstanceID();
-	buf->remove = true;
-	buf->character_id = 0;
+	constexpr uint32_t pack_size = sizeof(ServerDzMemberSwap_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzSwapMembers, pack_size);
+	auto buf = reinterpret_cast<ServerDzMemberSwap_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->dz_zone_id = GetZoneID();
+	buf->dz_instance_id = GetInstanceID();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->add_character_status = static_cast<uint8_t>(add_member.status);
+	buf->add_character_id = add_member.id;
+	buf->remove_character_id = remove_member.id;
+	strn0cpy(buf->add_character_name, add_member.name.c_str(), sizeof(buf->add_character_name));
+	strn0cpy(buf->remove_character_name, remove_member.name.c_str(), sizeof(buf->remove_character_name));
+
+	return pack;
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerRemoveAllMembersPacket()
+{
+	constexpr uint32_t pack_size = sizeof(ServerDzID_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzRemoveAllMembers, pack_size);
+	auto buf = reinterpret_cast<ServerDzID_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->dz_zone_id = GetZoneID();
+	buf->dz_instance_id = GetInstanceID();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
 
 	return pack;
 }
@@ -309,10 +403,25 @@ std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzLocationPacket(
 	return pack;
 }
 
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerMemberStatusPacket(
+	uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	constexpr uint32_t pack_size = sizeof(ServerDzMemberStatus_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzUpdateMemberStatus, pack_size);
+	auto buf = reinterpret_cast<ServerDzMemberStatus_Struct*>(pack->pBuffer);
+	buf->dz_id = GetID();
+	buf->sender_zone_id = GetCurrentZoneID();
+	buf->sender_instance_id = GetCurrentInstanceID();
+	buf->status = static_cast<uint8_t>(status);
+	buf->character_id = character_id;
+
+	return pack;
+}
+
 uint32_t DynamicZoneBase::GetDatabaseMemberCount()
 {
 	return DynamicZoneMembersRepository::GetCountWhere(GetDatabase(),
-		fmt::format("dynamic_zone_id = {} AND is_current_member = TRUE", m_id));
+		fmt::format("dynamic_zone_id = {}", m_id));
 }
 
 bool DynamicZoneBase::HasDatabaseMember(uint32_t character_id)
@@ -323,7 +432,7 @@ bool DynamicZoneBase::HasDatabaseMember(uint32_t character_id)
 	}
 
 	auto entries = DynamicZoneMembersRepository::GetWhere(GetDatabase(), fmt::format(
-		"dynamic_zone_id = {} AND character_id = {} AND is_current_member = TRUE",
+		"dynamic_zone_id = {} AND character_id = {}",
 		m_id, character_id
 	));
 
@@ -411,6 +520,33 @@ bool DynamicZoneBase::SetInternalMemberStatus(uint32_t character_id, DynamicZone
 	return false;
 }
 
+void DynamicZoneBase::SetMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	auto update_member = GetMemberData(character_id);
+	if (update_member.IsValid())
+	{
+		ProcessMemberStatusChange(character_id, status);
+		SendServerPacket(CreateServerMemberStatusPacket(character_id, status).get());
+	}
+}
+
+void DynamicZoneBase::ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed)
+{
+	if (!removed)
+	{
+		AddInternalMember(member);
+	}
+	else
+	{
+		RemoveInternalMember(member.id);
+	}
+}
+
+bool DynamicZoneBase::ProcessMemberStatusChange(uint32_t character_id, DynamicZoneMemberStatus status)
+{
+	return SetInternalMemberStatus(character_id, status);
+}
+
 std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 {
 	switch (dz_type)
@@ -427,4 +563,37 @@ std::string DynamicZoneBase::GetDynamicZoneTypeName(DynamicZoneType dz_type)
 			return "Quest";
 	}
 	return "Unknown";
+}
+
+EQ::Net::DynamicPacket DynamicZoneBase::GetSerializedDzPacket()
+{
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, *this);
+
+	LogDynamicZonesDetail("Serialized server dz size [{}]", dyn_pack.Length());
+	return dyn_pack;
+}
+
+std::unique_ptr<ServerPacket> DynamicZoneBase::CreateServerDzCreatePacket(
+	uint16_t origin_zone_id, uint16_t origin_instance_id)
+{
+	EQ::Net::DynamicPacket dyn_pack = GetSerializedDzPacket();
+
+	auto pack_size = sizeof(ServerDzCreateSerialized_Struct) + dyn_pack.Length();
+	auto pack = std::make_unique<ServerPacket>(ServerOP_DzCreated, static_cast<uint32_t>(pack_size));
+	auto buf = reinterpret_cast<ServerDzCreateSerialized_Struct*>(pack->pBuffer);
+	buf->origin_zone_id = origin_zone_id;
+	buf->origin_instance_id = origin_instance_id;
+	buf->cereal_size = static_cast<uint32_t>(dyn_pack.Length());
+	memcpy(buf->cereal_data, dyn_pack.Data(), dyn_pack.Length());
+
+	return pack;
+}
+
+void DynamicZoneBase::LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size)
+{
+	LogDynamicZonesDetail("Deserializing server dz size [{}]", cereal_size);
+	EQ::Util::MemoryStreamReader ss(cereal_data, cereal_size);
+	cereal::BinaryInputArchive archive(ss);
+	archive(*this);
 }

@@ -121,7 +121,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	m_ClientVersion = eqs->ClientVersion();
 	m_ClientVersionBit = EQ::versions::ConvertClientVersionToClientVersionBit(m_ClientVersion);
-	
+
 	numclients++;
 }
 
@@ -833,18 +833,11 @@ bool Client::HandleEnterWorldPacket(const EQApplicationPacket *app) {
 
 	if(instance_id > 0)
 	{
-		if(!database.VerifyInstanceAlive(instance_id, GetCharID()))
+		if (!database.VerifyInstanceAlive(instance_id, GetCharID()) ||
+		    !database.VerifyZoneInstance(zone_id, instance_id))
 		{
-			zone_id = database.MoveCharacterToBind(charid);
+			zone_id = database.MoveCharacterToInstanceSafeReturn(charid, zone_id, instance_id);
 			instance_id = 0;
-		}
-		else
-		{
-			if(!database.VerifyZoneInstance(zone_id, instance_id))
-			{
-				zone_id = database.MoveCharacterToBind(charid);
-				instance_id = 0;
-			}
 		}
 	}
 
@@ -1154,34 +1147,23 @@ void Client::EnterWorld(bool TryBootup) {
 		return;
 
 	ZoneServer* zone_server = nullptr;
-	if(instance_id > 0)
+	if (instance_id > 0)
 	{
-		if(database.VerifyInstanceAlive(instance_id, GetCharID()))
-		{
-			if(database.VerifyZoneInstance(zone_id, instance_id))
-			{
-				zone_server = zoneserver_list.FindByInstanceID(instance_id);
-			}
-			else
-			{
-				instance_id = 0;
-				zone_server = nullptr;
-				database.MoveCharacterToBind(GetCharID());
-				TellClientZoneUnavailable();
-				return;
-			}
-		}
-		else
+		if (!database.VerifyInstanceAlive(instance_id, GetCharID()) ||
+		    !database.VerifyZoneInstance(zone_id, instance_id))
 		{
 			instance_id = 0;
-			zone_server = nullptr;
-			database.MoveCharacterToBind(GetCharID());
+			database.MoveCharacterToInstanceSafeReturn(GetCharID(), zone_id, instance_id);
 			TellClientZoneUnavailable();
 			return;
 		}
+
+		zone_server = zoneserver_list.FindByInstanceID(instance_id);
 	}
 	else
+	{
 		zone_server = zoneserver_list.FindByZoneID(zone_id);
+	}
 
 	const char *zone_name = ZoneName(zone_id, true);
 	if (zone_server) {

@@ -6,7 +6,10 @@
 #include "../common/eq_packet_structs.h"
 #include "../common/net/packet.h"
 #include <cereal/cereal.hpp>
+#include <cereal/archives/binary.hpp>
+#include <cereal/types/chrono.hpp>
 #include <cereal/types/string.hpp>
+#include <cereal/types/vector.hpp>
 
 #define SERVER_TIMEOUT	45000	// how often keepalive gets sent
 #define INTERSERVER_TIMER					10000
@@ -141,14 +144,9 @@
 #define ServerOP_LFPMatches			0x0214
 #define ServerOP_ClientVersionSummary 0x0215
 
+// expedition
 #define ServerOP_ExpeditionCreate             0x0400
-#define ServerOP_ExpeditionDeleted            0x0401
-#define ServerOP_ExpeditionLeaderChanged      0x0402
 #define ServerOP_ExpeditionLockout            0x0403
-#define ServerOP_ExpeditionMemberChange       0x0404
-#define ServerOP_ExpeditionMemberSwap         0x0405
-#define ServerOP_ExpeditionMemberStatus       0x0406
-#define ServerOP_ExpeditionGetMemberStatuses  0x0407
 #define ServerOP_ExpeditionDzAddPlayer        0x0408
 #define ServerOP_ExpeditionDzMakeLeader       0x0409
 #define ServerOP_ExpeditionCharacterLockout   0x040d
@@ -156,17 +154,23 @@
 #define ServerOP_ExpeditionRequestInvite      0x040f
 #define ServerOP_ExpeditionReplayOnJoin       0x0410
 #define ServerOP_ExpeditionLockState          0x0411
-#define ServerOP_ExpeditionMembersRemoved     0x0412
 #define ServerOP_ExpeditionLockoutDuration    0x0414
-#define ServerOP_ExpeditionExpireWarning      0x0416
 
-#define ServerOP_DzAddRemoveCharacter         0x0450
-#define ServerOP_DzRemoveAllCharacters        0x0451
+// dz
+#define ServerOP_DzAddRemoveMember            0x0450
+#define ServerOP_DzRemoveAllMembers           0x0451
 #define ServerOP_DzSetSecondsRemaining        0x0452
 #define ServerOP_DzDurationUpdate             0x0453
 #define ServerOP_DzSetCompass                 0x0454
 #define ServerOP_DzSetSafeReturn              0x0455
 #define ServerOP_DzSetZoneIn                  0x0456
+#define ServerOP_DzSwapMembers                0x0457
+#define ServerOP_DzGetMemberStatuses          0x0458
+#define ServerOP_DzUpdateMemberStatus         0x0459
+#define ServerOP_DzLeaderChanged              0x045a
+#define ServerOP_DzExpireWarning              0x045b
+#define ServerOP_DzCreated                    0x045c
+#define ServerOP_DzDeleted                    0x045d
 
 #define ServerOP_LSInfo				0x1000
 #define ServerOP_LSStatus			0x1001
@@ -395,7 +399,10 @@ public:
 	}
 
 	void WriteUInt8(uint8 value) { *(uint8 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8); }
+	void WriteInt8(uint8_t value) { *(uint8_t *)(pBuffer + _wpos) = value; _wpos += sizeof(uint8_t); }
 	void WriteUInt32(uint32 value) { *(uint32 *)(pBuffer + _wpos) = value; _wpos += sizeof(uint32); }
+	void WriteInt32(int32_t value) { *(int32_t *)(pBuffer + _wpos) = value; _wpos += sizeof(int32_t); }
+
 	void WriteString(const char * str) { uint32 len = static_cast<uint32>(strlen(str)) + 1; memcpy(pBuffer + _wpos, str, len); _wpos += len; }
 
 	uint8 ReadUInt8() { uint8 value = *(uint8 *)(pBuffer + _rpos); _rpos += sizeof(uint8); return value; }
@@ -2025,47 +2032,28 @@ struct ServerExpeditionID_Struct {
 	uint32 sender_instance_id;
 };
 
-struct ServerExpeditionLeaderID_Struct {
-	uint32 expedition_id;
+struct ServerDzLeaderID_Struct {
+	uint32 dz_id;
 	uint32 leader_id;
 };
 
-struct ServerExpeditionMemberChange_Struct {
-	uint32 expedition_id;
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
-	uint8  removed; // 0: added, 1: removed
-	uint32 char_id;
-	char   char_name[64];
-};
-
-struct ServerExpeditionMemberSwap_Struct {
-	uint32 expedition_id;
-	uint32 sender_zone_id;
-	uint16 sender_instance_id;
-	uint32 add_char_id;
-	uint32 remove_char_id;
-	char   add_char_name[64];
-	char   remove_char_name[64];
-};
-
-struct ServerExpeditionMemberStatus_Struct {
-	uint32 expedition_id;
+struct ServerDzMemberStatus_Struct {
+	uint32 dz_id;
 	uint32 sender_zone_id;
 	uint16 sender_instance_id;
 	uint8  status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 	uint32 character_id;
 };
 
-struct ServerExpeditionMemberStatusEntry_Struct {
+struct ServerDzMemberStatusEntry_Struct {
 	uint32 character_id;
 	uint8  online_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
 };
 
-struct ServerExpeditionMemberStatuses_Struct {
-	uint32 expedition_id;
+struct ServerDzMemberStatuses_Struct {
+	uint32 dz_id;
 	uint32 count;
-	ServerExpeditionMemberStatusEntry_Struct entries[0];
+	ServerDzMemberStatusEntry_Struct entries[0];
 };
 
 struct ServerExpeditionLockout_Struct {
@@ -2109,8 +2097,8 @@ struct ServerExpeditionCharacterID_Struct {
 	uint32_t character_id;
 };
 
-struct ServerExpeditionExpireWarning_Struct {
-	uint32_t expedition_id;
+struct ServerDzExpireWarning_Struct {
+	uint32_t dz_id;
 	uint32_t minutes_remaining;
 };
 
@@ -2123,11 +2111,19 @@ struct ServerDzCommand_Struct {
 };
 
 struct ServerDzCommandMakeLeader_Struct {
-	uint32 expedition_id;
+	uint32 dz_id;
 	uint32 requester_id;
 	uint8  is_online;  // set by world, 0: new leader name offline, 1: online
 	uint8  is_success; // set by world, 0: makeleader failed, 1: success (is online member)
 	char   new_leader_name[64];
+};
+
+struct ServerDzID_Struct {
+	uint32 dz_id;
+	uint16 dz_zone_id;
+	uint16 dz_instance_id; // for cache-independent redundancy (messages to dz's instance)
+	uint32 sender_zone_id;
+	uint16 sender_instance_id;
 };
 
 struct ServerDzLocation_Struct {
@@ -2141,16 +2137,41 @@ struct ServerDzLocation_Struct {
 	float  heading;
 };
 
-struct ServerDzCharacter_Struct {
-	uint16 zone_id;
-	uint16 instance_id;
-	uint8  remove; // 0: added 1: removed
+struct ServerDzMember_Struct {
+	uint32 dz_id;
+	uint16 dz_zone_id;
+	uint16 dz_instance_id; // for cache redundancy
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint8  removed; // 0: added, 1: removed
 	uint32 character_id;
+	uint8  character_status; // 0: unknown 1: Online 2: Offline 3: In Dynamic Zone 4: Link Dead
+	char   character_name[64];
+};
+
+struct ServerDzMemberSwap_Struct {
+	uint32 dz_id;
+	uint16 dz_zone_id;
+	uint16 dz_instance_id; // for cache redundancy
+	uint16 sender_zone_id;
+	uint16 sender_instance_id;
+	uint32 add_character_id;
+	uint32 remove_character_id;
+	uint8  add_character_status;
+	char   add_character_name[64];
+	char   remove_character_name[64];
 };
 
 struct ServerDzSetDuration_Struct {
 	uint32 dz_id;
 	uint32 seconds;
+};
+
+struct ServerDzCreateSerialized_Struct {
+	uint16_t origin_zone_id;
+	uint16_t origin_instance_id;
+	uint32_t cereal_size;
+	char     cereal_data[0];
 };
 
 #pragma pack()

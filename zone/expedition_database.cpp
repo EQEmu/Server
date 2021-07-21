@@ -26,25 +26,21 @@
 #include "../common/string_util.h"
 #include <fmt/core.h>
 
-uint32_t ExpeditionDatabase::InsertExpedition(
-	const std::string& uuid, uint32_t dz_id, const std::string& expedition_name,
-	uint32_t leader_id, uint32_t min_players, uint32_t max_players)
+uint32_t ExpeditionDatabase::InsertExpedition(uint32_t dz_id)
 {
-	LogExpeditionsDetail(
-		"Inserting new expedition [{}] leader [{}] uuid [{}]", expedition_name, leader_id, uuid
-	);
+	LogExpeditionsDetail("Inserting new expedition dz [{}]", dz_id);
 
 	std::string query = fmt::format(SQL(
 		INSERT INTO expeditions
-			(uuid, dynamic_zone_id, expedition_name, leader_id, min_players, max_players)
+			(dynamic_zone_id)
 		VALUES
-			('{}', {}, '{}', {}, {}, {});
-	), uuid, dz_id, EscapeString(expedition_name), leader_id, min_players, max_players);
+			({});
+	), dz_id);
 
 	auto results = database.QueryDatabase(query);
 	if (!results.Success())
 	{
-		LogExpeditions("Failed to obtain an expedition id for [{}]", expedition_name);
+		LogExpeditions("Failed to obtain an expedition id for dz [{}]", dz_id);
 		return 0;
 	}
 

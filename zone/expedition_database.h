@@ -35,9 +35,7 @@ class MySQLRequestResult;
 
 namespace ExpeditionDatabase
 {
-	uint32_t InsertExpedition(
-		const std::string& uuid, uint32_t instance_id, const std::string& expedition_name,
-		uint32_t leader_id, uint32_t min_players, uint32_t max_players);
+	uint32_t InsertExpedition(uint32_t dz_id);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id);
 	std::vector<ExpeditionLockoutTimer> LoadCharacterLockouts(uint32_t character_id,
 		const std::string& expedition_name);

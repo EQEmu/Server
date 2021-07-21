@@ -203,17 +203,18 @@ foreach my $table_to_generate (@tables) {
     }
 
     # 2nd pass
-    my $default_entries      = "";
-    my $insert_one_entries   = "";
-    my $insert_many_entries  = "";
-    my $find_one_entries     = "";
-    my $column_names_quoted  = "";
-    my $table_struct_columns = "";
-    my $update_one_entries   = "";
-    my $all_entries          = "";
-    my $index                = 0;
-    my %table_data           = ();
-    my %table_primary_key    = ();
+    my $default_entries            = "";
+    my $insert_one_entries         = "";
+    my $insert_many_entries        = "";
+    my $find_one_entries           = "";
+    my $column_names_quoted        = "";
+    my $select_column_names_quoted = "";
+    my $table_struct_columns       = "";
+    my $update_one_entries         = "";
+    my $all_entries                = "";
+    my $index                      = 0;
+    my %table_data                 = ();
+    my %table_primary_key          = ();
     $ex->execute($database_name, $table_to_generate);
 
     while (my @row                = $ex->fetchrow_array()) {
@@ -233,11 +234,9 @@ foreach my $table_to_generate (@tables) {
             }
         }
 
-        print $column_default . "\n";
-
         my $default_value = 0;
         if ($column_default eq "current_timestamp()") {
-            $default_value = '""';
+            $default_value = "std::time(nullptr)"
         }
         elsif ($column_default ne "NULL" && $column_default ne "") {
             $column_default =~ s/'/"/g;
@@ -246,7 +245,7 @@ foreach my $table_to_generate (@tables) {
         elsif ($column_default eq "''") {
             $default_value = '""';
         }
-        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar|datetime/i) {
+        elsif ((trim($column_default) eq "" || $column_default eq "NULL") && $column_type =~ /text|varchar/i) {
             $default_value = '""';
         }
 
@@ -260,12 +259,21 @@ foreach my $table_to_generate (@tables) {
 
         # column names (string)
         $column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
+        if ($data_type =~ /datetime/) {
+            $select_column_names_quoted .= sprintf("\t\t\t\"UNIX_TIMESTAMP(%s)\",\n", format_column_name_for_mysql($column_name));
+        }
+        else {
+            $select_column_names_quoted .= sprintf("\t\t\t\"%s\",\n", format_column_name_for_mysql($column_name));
+        }
 
         # update one
         if ($extra ne "auto_increment") {
             my $query_value = sprintf('\'" + EscapeString(%s_entry.%s) + "\'");', $table_name, $column_name_formatted);
             if ($data_type =~ /int|float|double|decimal/) {
                 $query_value = sprintf('" + std::to_string(%s_entry.%s));', $table_name, $column_name_formatted);
+            }
+            elsif ($data_type =~ /datetime/) {
+                $query_value = sprintf('FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")");', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
             }
 
             $update_one_entries .= sprintf(
@@ -280,14 +288,21 @@ foreach my $table_to_generate (@tables) {
         if ($data_type =~ /int|float|double|decimal/) {
             $value = sprintf('std::to_string(%s_entry.%s)', $table_name, $column_name_formatted);
         }
+        elsif ($data_type =~ /datetime/) {
+            $value = sprintf('"FROM_UNIXTIME(" + (%s_entry.%s > 0 ? std::to_string(%s_entry.%s) : "null") + ")"', $table_name, $column_name_formatted, $table_name, $column_name_formatted);
+        }
 
         $insert_one_entries  .= sprintf("\t\tinsert_values.push_back(%s);\n", $value);
         $insert_many_entries .= sprintf("\t\t\tinsert_values.push_back(%s);\n", $value);
 
         # find one / all (select)
         if ($data_type =~ /bigint/) {
-            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], NULL, 10);\n", $column_name_formatted, $index);
-            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], NULL, 10);\n", $column_name_formatted, $index);
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s], nullptr, 10);\n", $column_name_formatted, $index);
+        }
+        elsif ($data_type =~ /datetime/) {
+            $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
+            $find_one_entries .= sprintf("\t\t\tentry.%-${longest_column_length}s = strtoll(row[%s] ? row[%s] : \"-1\", nullptr, 10);\n", $column_name_formatted, $index, $index);
         }
         elsif ($data_type =~ /int/) {
             $all_entries      .= sprintf("\t\t\tentry.%-${longest_column_length}s = atoi(row[%s]);\n", $column_name_formatted, $index);
@@ -366,6 +381,7 @@ foreach my $table_to_generate (@tables) {
     }
 
     chomp($column_names_quoted);
+    chomp($select_column_names_quoted);
     chomp($table_struct_columns);
     chomp($default_entries);
     chomp($update_one_entries);
@@ -391,6 +407,7 @@ foreach my $table_to_generate (@tables) {
     $new_base_repository =~ s/\{\{DATABASE_CONNECTION}}/$database_connection/g;
     $new_base_repository =~ s/\{\{DEFAULT_ENTRIES}}/$default_entries/g;
     $new_base_repository =~ s/\{\{COLUMNS_LIST_QUOTED}}/$column_names_quoted/g;
+    $new_base_repository =~ s/\{\{SELECT_COLUMNS_LIST_QUOTED}}/$select_column_names_quoted/g;
     $new_base_repository =~ s/\{\{TABLE_STRUCT_COLUMNS}}/$table_struct_columns/g;
     $new_base_repository =~ s/\{\{FIND_ONE_ENTRIES}}/$find_one_entries/g;
     $new_base_repository =~ s/\{\{UPDATE_ONE_ENTRIES}}/$update_one_entries/g;
@@ -409,6 +426,7 @@ foreach my $table_to_generate (@tables) {
     $new_repository =~ s/\{\{DATABASE_CONNECTION}}/$database_connection/g;
     $new_repository =~ s/\{\{DEFAULT_ENTRIES}}/$default_entries/g;
     $new_repository =~ s/\{\{COLUMNS_LIST_QUOTED}}/$column_names_quoted/g;
+    $new_repository =~ s/\{\{SELECT_COLUMNS_LIST_QUOTED}}/$select_column_names_quoted/g;
     $new_repository =~ s/\{\{TABLE_STRUCT_COLUMNS}}/$table_struct_columns/g;
     $new_repository =~ s/\{\{FIND_ONE_ENTRIES}}/$find_one_entries/g;
     $new_repository =~ s/\{\{UPDATE_ONE_ENTRIES}}/$update_one_entries/g;
@@ -486,6 +504,9 @@ sub translate_mysql_data_type_to_c {
     }
     elsif ($mysql_data_type =~ /float|double|decimal/) {
         $struct_data_type = 'float';
+    }
+    elsif ($mysql_data_type =~ /datetime/) {
+        $struct_data_type = 'time_t';
     }
 
     return $struct_data_type;

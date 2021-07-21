@@ -26,7 +26,6 @@ class ServerPacket;
 namespace ExpeditionMessage
 {
 	void AddPlayer(ServerPacket* pack);
-	void GetMemberStatuses(ServerPacket* pack);
 	void HandleZoneMessage(ServerPacket* pack);
 	void MakeLeader(ServerPacket* pack);
 	void RequestInvite(ServerPacket* pack);

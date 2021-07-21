@@ -18,15 +18,10 @@
 class BaseExpeditionsRepository {
 public:
 	struct Expeditions {
-		int         id;
-		std::string uuid;
-		int         dynamic_zone_id;
-		std::string expedition_name;
-		int         leader_id;
-		int         min_players;
-		int         max_players;
-		int         add_replay_on_join;
-		int         is_locked;
+		int id;
+		int dynamic_zone_id;
+		int add_replay_on_join;
+		int is_locked;
 	};
 
 	static std::string PrimaryKey()
@@ -38,12 +33,7 @@ public:
 	{
 		return {
 			"id",
-			"uuid",
 			"dynamic_zone_id",
-			"expedition_name",
-			"leader_id",
-			"min_players",
-			"max_players",
 			"add_replay_on_join",
 			"is_locked",
 		};
@@ -82,12 +72,7 @@ public:
 		Expeditions entry{};
 
 		entry.id                 = 0;
-		entry.uuid               = "";
 		entry.dynamic_zone_id    = 0;
-		entry.expedition_name    = "";
-		entry.leader_id          = 0;
-		entry.min_players        = 0;
-		entry.max_players        = 0;
 		entry.add_replay_on_join = 1;
 		entry.is_locked          = 0;
 
@@ -126,14 +111,9 @@ public:
 			Expeditions entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.uuid               = row[1] ? row[1] : "";
-			entry.dynamic_zone_id    = atoi(row[2]);
-			entry.expedition_name    = row[3] ? row[3] : "";
-			entry.leader_id          = atoi(row[4]);
-			entry.min_players        = atoi(row[5]);
-			entry.max_players        = atoi(row[6]);
-			entry.add_replay_on_join = atoi(row[7]);
-			entry.is_locked          = atoi(row[8]);
+			entry.dynamic_zone_id    = atoi(row[1]);
+			entry.add_replay_on_join = atoi(row[2]);
+			entry.is_locked          = atoi(row[3]);
 
 			return entry;
 		}
@@ -167,14 +147,9 @@ public:
 
 		auto columns = Columns();
 
-		update_values.push_back(columns[1] + " = '" + EscapeString(expeditions_entry.uuid) + "'");
-		update_values.push_back(columns[2] + " = " + std::to_string(expeditions_entry.dynamic_zone_id));
-		update_values.push_back(columns[3] + " = '" + EscapeString(expeditions_entry.expedition_name) + "'");
-		update_values.push_back(columns[4] + " = " + std::to_string(expeditions_entry.leader_id));
-		update_values.push_back(columns[5] + " = " + std::to_string(expeditions_entry.min_players));
-		update_values.push_back(columns[6] + " = " + std::to_string(expeditions_entry.max_players));
-		update_values.push_back(columns[7] + " = " + std::to_string(expeditions_entry.add_replay_on_join));
-		update_values.push_back(columns[8] + " = " + std::to_string(expeditions_entry.is_locked));
+		update_values.push_back(columns[1] + " = " + std::to_string(expeditions_entry.dynamic_zone_id));
+		update_values.push_back(columns[2] + " = " + std::to_string(expeditions_entry.add_replay_on_join));
+		update_values.push_back(columns[3] + " = " + std::to_string(expeditions_entry.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -197,12 +172,7 @@ public:
 		std::vector<std::string> insert_values;
 
 		insert_values.push_back(std::to_string(expeditions_entry.id));
-		insert_values.push_back("'" + EscapeString(expeditions_entry.uuid) + "'");
 		insert_values.push_back(std::to_string(expeditions_entry.dynamic_zone_id));
-		insert_values.push_back("'" + EscapeString(expeditions_entry.expedition_name) + "'");
-		insert_values.push_back(std::to_string(expeditions_entry.leader_id));
-		insert_values.push_back(std::to_string(expeditions_entry.min_players));
-		insert_values.push_back(std::to_string(expeditions_entry.max_players));
 		insert_values.push_back(std::to_string(expeditions_entry.add_replay_on_join));
 		insert_values.push_back(std::to_string(expeditions_entry.is_locked));
 
@@ -235,12 +205,7 @@ public:
 			std::vector<std::string> insert_values;
 
 			insert_values.push_back(std::to_string(expeditions_entry.id));
-			insert_values.push_back("'" + EscapeString(expeditions_entry.uuid) + "'");
 			insert_values.push_back(std::to_string(expeditions_entry.dynamic_zone_id));
-			insert_values.push_back("'" + EscapeString(expeditions_entry.expedition_name) + "'");
-			insert_values.push_back(std::to_string(expeditions_entry.leader_id));
-			insert_values.push_back(std::to_string(expeditions_entry.min_players));
-			insert_values.push_back(std::to_string(expeditions_entry.max_players));
 			insert_values.push_back(std::to_string(expeditions_entry.add_replay_on_join));
 			insert_values.push_back(std::to_string(expeditions_entry.is_locked));
 
@@ -277,14 +242,9 @@ public:
 			Expeditions entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.uuid               = row[1] ? row[1] : "";
-			entry.dynamic_zone_id    = atoi(row[2]);
-			entry.expedition_name    = row[3] ? row[3] : "";
-			entry.leader_id          = atoi(row[4]);
-			entry.min_players        = atoi(row[5]);
-			entry.max_players        = atoi(row[6]);
-			entry.add_replay_on_join = atoi(row[7]);
-			entry.is_locked          = atoi(row[8]);
+			entry.dynamic_zone_id    = atoi(row[1]);
+			entry.add_replay_on_join = atoi(row[2]);
+			entry.is_locked          = atoi(row[3]);
 
 			all_entries.push_back(entry);
 		}
@@ -310,14 +270,9 @@ public:
 			Expeditions entry{};
 
 			entry.id                 = atoi(row[0]);
-			entry.uuid               = row[1] ? row[1] : "";
-			entry.dynamic_zone_id    = atoi(row[2]);
-			entry.expedition_name    = row[3] ? row[3] : "";
-			entry.leader_id          = atoi(row[4]);
-			entry.min_players        = atoi(row[5]);
-			entry.max_players        = atoi(row[6]);
-			entry.add_replay_on_join = atoi(row[7]);
-			entry.is_locked          = atoi(row[8]);
+			entry.dynamic_zone_id    = atoi(row[1]);
+			entry.add_replay_on_join = atoi(row[2]);
+			entry.is_locked          = atoi(row[3]);
 
 			all_entries.push_back(entry);
 		}

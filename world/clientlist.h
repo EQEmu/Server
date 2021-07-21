@@ -72,6 +72,13 @@ public:
 
 	void GetClientList(Json::Value &response);
 
+	void SendCharacterMessage(uint32_t character_id, int chat_type, const std::string& message);
+	void SendCharacterMessage(const std::string& character_name, int chat_type, const std::string& message);
+	void SendCharacterMessage(ClientListEntry* character, int chat_type, const std::string& message);
+	void SendCharacterMessageID(uint32_t character_id, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
+	void SendCharacterMessageID(const std::string& character_name, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
+	void SendCharacterMessageID(ClientListEntry* character, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
+
 private:
 	void OnTick(EQ::Timer *t);
 	inline uint32 GetNextCLEID() { return NextCLEID++; }

@@ -1093,7 +1093,7 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 			}
 
 			if (RuleB(TaskSystem, EnableTaskSystem)) {
-				UpdateTasksForItem(ActivityTradeSkill, itr->first, itr->second);
+				UpdateTasksForItem(TaskActivityType::TradeSkill, itr->first, itr->second);
 			}
 
 			++itr;

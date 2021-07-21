@@ -18,9 +18,8 @@
  *
  */
 
-#include "expedition.h"
+#include "dynamic_zone.h"
 #include "expedition_message.h"
-#include "expedition_state.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "zonelist.h"
@@ -37,48 +36,7 @@ void ExpeditionMessage::HandleZoneMessage(ServerPacket* pack)
 	{
 	case ServerOP_ExpeditionCreate:
 	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.CacheFromDatabase(buf->expedition_id);
 		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberChange:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberChange_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, { buf->char_id, buf->char_name }, buf->removed);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberSwap:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberSwap_Struct*>(pack->pBuffer);
-		expedition_state.MemberChange(buf->expedition_id, { buf->add_char_id, buf->add_char_name }, false);
-		expedition_state.MemberChange(buf->expedition_id, { buf->remove_char_id, buf->remove_char_name }, true);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMembersRemoved:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-		expedition_state.RemoveAllMembers(buf->expedition_id);
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionMemberStatus:
-	{
-		auto buf = reinterpret_cast<ServerExpeditionMemberStatus_Struct*>(pack->pBuffer);
-		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-		if (expedition)
-		{
-			auto status = static_cast<DynamicZoneMemberStatus>(buf->status);
-			expedition->UpdateMemberStatus(buf->character_id, status);
-		}
-		zoneserver_list.SendPacket(pack);
-		break;
-	}
-	case ServerOP_ExpeditionGetMemberStatuses:
-	{
-		ExpeditionMessage::GetMemberStatuses(pack);
 		break;
 	}
 	case ServerOP_ExpeditionDzAddPlayer:
@@ -145,10 +103,10 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	ClientListEntry* new_leader_cle = client_list.FindCharacter(buf->new_leader_name);
 	if (new_leader_cle && new_leader_cle->Server())
 	{
-		auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-		if (expedition)
+		auto dz = DynamicZone::FindDynamicZoneByID(buf->dz_id);
+		if (dz && dz->GetLeaderID() == buf->requester_id)
 		{
-			buf->is_success = expedition->SetNewLeader({ new_leader_cle->CharID(), new_leader_cle->name() });
+			buf->is_success = dz->SetNewLeader(new_leader_cle->CharID());
 		}
 
 		buf->is_online = true;
@@ -161,16 +119,6 @@ void ExpeditionMessage::MakeLeader(ServerPacket* pack)
 	if (requester_cle && requester_cle->Server() && requester_cle->Server() != new_leader_zs)
 	{
 		requester_cle->Server()->SendPacket(pack);
-	}
-}
-
-void ExpeditionMessage::GetMemberStatuses(ServerPacket* pack)
-{
-	auto buf = reinterpret_cast<ServerExpeditionID_Struct*>(pack->pBuffer);
-	auto expedition = expedition_state.GetExpedition(buf->expedition_id);
-	if (expedition)
-	{
-		expedition->SendZoneMemberStatuses(buf->sender_zone_id, buf->sender_instance_id);
 	}
 }
 
