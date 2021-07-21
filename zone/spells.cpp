@@ -439,6 +439,32 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	// ok now we know the target
 	casting_spell_targetid = target_id;
 
+	if (IsInvisSpell(spell_id) && RuleB(Spells, InvisRequiresGroup)) {
+
+		Mob* target = GetTarget();
+
+		if (target && target->IsClient()) {
+			Client* spelltarget = entity_list.GetClientByID(target_id);
+			if (spelltarget && spelltarget->GetID() != GetID()) {
+				if (!spelltarget->IsGrouped()) {
+					InterruptSpell(spell_id);
+					Message(Chat::Red, "You cannot invis someone who is not in your group.");
+					return(false);
+				}
+				else if (spelltarget->IsGrouped()) {
+					Group* targetg = spelltarget->GetGroup();
+					Group* myg = GetGroup();
+					if (targetg && myg && (targetg->GetID() != myg->GetID())) {
+						InterruptSpell(spell_id);
+							Message(Chat::Red, "You cannot invis someone who is not in your group.");
+							return(false);
+					}
+				}
+			}
+
+		}
+	}
+
 	// We don't get actual mana cost here, that's done when we consume the mana
 	if (mana_cost == -1)
 		mana_cost = spell.mana;
@@ -2793,6 +2819,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 				 target->itembonuses.IllusionPersistence) &&
 	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
 		res = 10000; // ~16h override
+	
 
 	res = mod_buff_duration(res, caster, target, spell_id);
 
