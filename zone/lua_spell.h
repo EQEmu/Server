@@ -107,6 +107,7 @@ public:
 	float GetMaxDistMod();
 	float GetMinRange();
 	int GetDamageShieldType();
+	int GetRank();
 };
 
 #endif

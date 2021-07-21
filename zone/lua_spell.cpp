@@ -474,6 +474,11 @@ int Lua_Spell::GetDamageShieldType() {
 	return self->DamageShieldType;
 }
 
+int Lua_Spell::GetRank() {
+	Lua_Safe_Call_Int();
+	return self->rank;
+}
+
 luabind::scope lua_register_spell() {
 	return luabind::class_<Lua_Spell>("Spell")
 		.def(luabind::constructor<>())
@@ -561,7 +566,8 @@ luabind::scope lua_register_spell() {
 		.def("MaxDist", &Lua_Spell::GetMaxDist)
 		.def("MaxDistMod", &Lua_Spell::GetMaxDistMod)
 		.def("MinRange", &Lua_Spell::GetMinRange)
-		.def("DamageShieldType", &Lua_Spell::GetDamageShieldType);
+		.def("DamageShieldType", &Lua_Spell::GetDamageShieldType)
+		.def("Rank", &Lua_Spell::GetRank);
 }
 
 #endif
