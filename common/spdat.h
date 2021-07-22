@@ -843,8 +843,8 @@ typedef enum {
 //#define SE_Ff_FocusCastProcNoBypass	497 //
 //#define SE_AddExtraAttackPct_1h_Primary	498 //
 //#define SE_AddExtraAttackPct_1h_Secondary	499 //
-#define SE_Fc_CastTimeMod2				500 // implemented, @Fc, On Caster, cast time mod pct, base: pct
-#define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds
+#define SE_Fc_CastTimeMod2				500 // implemented, @Fc, On Caster, cast time mod pct, base: pct, Note: Can reduce to instant cast
+#define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
 #define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
 #define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
 //#define SE_Melee_Damage_Position_Amt	504 //
