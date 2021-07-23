@@ -11,7 +11,6 @@ namespace EQ
 			ServertalkClientHello = 1,
 			ServertalkServerHello,
 			ServertalkClientHandshake,
-			ServertalkClientDowngradeSecurityHandshake,
 			ServertalkMessage,
 		};
 	}

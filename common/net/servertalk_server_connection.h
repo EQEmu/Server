@@ -4,9 +4,6 @@
 #include "servertalk_common.h"
 #include "packet.h"
 #include <vector>
-#ifdef ENABLE_SECURITY
-#include <sodium.h>
-#endif
 
 namespace EQ
 {
@@ -16,7 +13,7 @@ namespace EQ
 		class ServertalkServerConnection
 		{
 		public:
-			ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, ServertalkServer *parent, bool encrypted, bool allow_downgrade);
+			ServertalkServerConnection(std::shared_ptr<EQ::Net::TCPConnection> c, ServertalkServer *parent);
 			~ServertalkServerConnection();
 
 			void Send(uint16_t opcode, EQ::Net::Packet &p);
@@ -33,8 +30,7 @@ namespace EQ
 			void OnDisconnect(TCPConnection* c);
 			void SendHello();
 			void InternalSend(ServertalkPacketType type, EQ::Net::Packet &p);
-			void ProcessHandshake(EQ::Net::Packet &p) { ProcessHandshake(p, false); }
-			void ProcessHandshake(EQ::Net::Packet &p, bool security_downgrade);
+			void ProcessHandshake(EQ::Net::Packet &p);
 			void ProcessMessage(EQ::Net::Packet &p);
 
 			std::shared_ptr<EQ::Net::TCPConnection> m_connection;
@@ -45,19 +41,6 @@ namespace EQ
 			std::function<void(uint16_t, EQ::Net::Packet&)> m_message_callback;
 			std::string m_identifier;
 			std::string m_uuid;
-
-			bool m_encrypted;
-			bool m_allow_downgrade;
-#ifdef ENABLE_SECURITY
-			unsigned char m_public_key_ours[crypto_box_PUBLICKEYBYTES];
-			unsigned char m_private_key_ours[crypto_box_SECRETKEYBYTES];
-			unsigned char m_nonce_ours[crypto_box_NONCEBYTES];
-
-			unsigned char m_public_key_theirs[crypto_box_PUBLICKEYBYTES];
-			unsigned char m_nonce_theirs[crypto_box_NONCEBYTES];
-
-			unsigned char m_shared_key[crypto_box_BEFORENMBYTES];
-#endif
 		};
 	}
 }
