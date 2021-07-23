@@ -8,8 +8,6 @@ namespace EQ
 	{
 		enum ServertalkPacketType
 		{
-			ServertalkClientHello = 1,
-			ServertalkServerHello,
 			ServertalkClientHandshake,
 			ServertalkMessage,
 		};

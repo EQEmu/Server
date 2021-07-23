@@ -81,11 +81,6 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		if (length == 0) {
 			EQ::Net::DynamicPacket p;
 			switch (type) {
-			case ServertalkClientHello:
-			{
-				SendHello();
-			}
-			break;
 			case ServertalkClientHandshake:
 				ProcessHandshake(p);
 				break;
@@ -97,11 +92,6 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 		else {
 			EQ::Net::StaticPacket p(&m_buffer[current + 5], length);
 			switch (type) {
-			case ServertalkClientHello:
-			{
-				SendHello();
-			}
-			break;
 			case ServertalkClientHandshake:
 				ProcessHandshake(p);
 				break;
@@ -125,14 +115,6 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 void EQ::Net::ServertalkServerConnection::OnDisconnect(TCPConnection *c)
 {
 	m_parent->ConnectionDisconnected(this);
-}
-
-void EQ::Net::ServertalkServerConnection::SendHello()
-{
-	EQ::Net::DynamicPacket hello;
-	hello.PutInt8(0, 0);
-
-	InternalSend(ServertalkServerHello, hello);
 }
 
 void EQ::Net::ServertalkServerConnection::InternalSend(ServertalkPacketType type, EQ::Net::Packet &p)

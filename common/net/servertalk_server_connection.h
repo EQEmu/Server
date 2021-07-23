@@ -28,7 +28,6 @@ namespace EQ
 			void OnRead(TCPConnection* c, const unsigned char* data, size_t sz);
 			void ProcessReadBuffer();
 			void OnDisconnect(TCPConnection* c);
-			void SendHello();
 			void InternalSend(ServertalkPacketType type, EQ::Net::Packet &p);
 			void ProcessHandshake(EQ::Net::Packet &p);
 			void ProcessMessage(EQ::Net::Packet &p);
