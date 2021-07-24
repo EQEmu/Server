@@ -92,3 +92,12 @@ SharedTaskRequestCharacters SharedTask::GetRequestCharacters(Database& db, uint3
 
 	return request;
 }
+
+void SharedTask::AddCharacterToMemberHistory(uint32_t character_id)
+{
+	auto it = std::find(member_id_history.begin(), member_id_history.end(), character_id);
+	if (it == member_id_history.end())
+	{
+		member_id_history.emplace_back(character_id);
+	}
+}

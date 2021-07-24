@@ -1241,7 +1241,7 @@ void ClientTaskState::IncrementDoneCount(
 			RewardTask(client, task_information);
 			//RemoveTask(c, TaskIndex);
 
-			// add replay timer (world adds timers to shared task members but messages here)
+			// add replay timer (world adds timers to shared task members)
 			AddReplayTimer(client, *info, *task_information);
 
 			// TODO: shared task intercept completion
@@ -2661,24 +2661,21 @@ void ClientTaskState::ListTaskTimers(Client* client)
 
 void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
 {
-	if (task.replay_timer_seconds > 0 && client)
+	// world adds timers for shared tasks and handles messages
+	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0 && client)
 	{
 		int expire_time = client_task.accepted_time + task.replay_timer_seconds;
 
 		auto seconds = expire_time - std::time(nullptr);
 		if (seconds > 0) // not already expired
 		{
-			// world adds timers for shared tasks (we still message here for them)
-			if (task.type != TaskType::Shared)
-			{
-				auto timer = CharacterTaskTimersRepository::NewEntity();
-				timer.character_id = client->CharacterID();
-				timer.task_id      = client_task.task_id;
-				timer.expire_time  = expire_time;
-				timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+			auto timer = CharacterTaskTimersRepository::NewEntity();
+			timer.character_id = client->CharacterID();
+			timer.task_id      = client_task.task_id;
+			timer.expire_time  = expire_time;
+			timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
 
-				CharacterTaskTimersRepository::InsertOne(database, timer);
-			}
+			CharacterTaskTimersRepository::InsertOne(database, timer);
 
 			client->Message(Chat::Yellow, fmt::format(
 				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),

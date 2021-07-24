@@ -147,6 +147,7 @@ public:
 	// used in both zone and world validation
 	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
 
+	void AddCharacterToMemberHistory(uint32_t character_id);
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 
@@ -166,6 +167,7 @@ public:
 
 	std::vector<SharedTaskActivityStateEntry> m_shared_task_activity_state;
 	std::vector<SharedTaskMember>             m_members;
+	std::vector<uint32_t>                     member_id_history; // past and present members for replay timers
 	std::vector<uint32_t>                     dynamic_zone_ids;
 
 protected:

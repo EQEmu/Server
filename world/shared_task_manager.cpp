@@ -126,6 +126,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 
 		shared_task_db_members.emplace_back(e);
 
+		new_shared_task.AddCharacterToMemberHistory(m.character_id); // memory member history
+
 		if (task.request_timer_seconds > 0) {
 			auto timer = CharacterTaskTimersRepository::NewEntity();
 			timer.character_id = m.character_id;
@@ -432,6 +434,9 @@ void SharedTaskManager::LoadSharedTaskState()
 					member.character_id,
 					member.is_leader
 				);
+
+				// add member to history (if restoring state from a world restart we lost real past member history)
+				ns.AddCharacterToMemberHistory(m.character_id);
 			}
 		}
 
@@ -1074,6 +1079,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		s->SetMembers(members);
 		SaveMembers(s, members);
 		SendSharedTaskMemberListToAllMembers(s);
+		s->AddCharacterToMemberHistory(character_id);
 
 		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
@@ -1633,22 +1639,38 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 {
 	if (s->GetTaskData().replay_timer_seconds > 0) {
 		auto expire_time = s->GetDbSharedTask().accepted_time + s->GetTaskData().replay_timer_seconds;
-		if (expire_time > std::time(nullptr)) // not already expired
+		auto seconds = expire_time - std::time(nullptr);
+		if (seconds > 0) // not already expired
 		{
-			// todo: on live past members of the shared task also receive lockouts (hold past members in memory)
 			std::vector<CharacterTaskTimersRepository::CharacterTaskTimers> task_timers;
 
-			for (const auto &m : s->GetMembers()) {
+			// on live past members of the shared task also receive lockouts (use member history)
+			for (const auto& member_id : s->member_id_history) {
 				auto timer = CharacterTaskTimersRepository::NewEntity();
-				timer.character_id = m.character_id;
+				timer.character_id = member_id;
 				timer.task_id      = s->GetTaskData().id;
 				timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
 				timer.expire_time  = expire_time;
 
 				task_timers.emplace_back(timer);
+
+				client_list.SendCharacterMessage(member_id, Chat::Yellow, fmt::format(
+					SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+					s->GetTaskData().title,
+					fmt::format_int(seconds / 86400).c_str(),       // days
+					fmt::format_int((seconds / 3600) % 24).c_str(), // hours
+					fmt::format_int((seconds / 60) % 60).c_str()    // minutes
+				));
 			}
 
 			if (!task_timers.empty()) {
+				// replay timers replace any existing timer (even if it expires sooner)
+				// this can occur if a player has a timer for being a past member of
+				// a shared task but joined another before the first was completed
+				CharacterTaskTimersRepository::DeleteWhere(*m_database, fmt::format(
+					"task_id = {} AND character_id IN ({})",
+					s->GetTaskData().id, fmt::join(s->member_id_history, ",")));
+
 				CharacterTaskTimersRepository::InsertMany(*m_database, task_timers);
 			}
 		}
