@@ -3771,7 +3771,7 @@ struct SharedTaskAccept_Struct {
 	int32_t  unknown04;
 	uint32_t npc_entity_id;  // npc task giver entity id (sent in selection window)
 	uint32_t task_id;
-	float    unk_adjustment; // added after titanium (sent in selection window)
+	float    reward_multiplier; // added after titanium (sent in selection window)
 };
 
 #if 0

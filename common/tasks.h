@@ -210,7 +210,7 @@ struct TaskInformation {
 	void SerializeSelector(SerializeBuffer& out, EQ::versions::ClientVersion client_version) const
 	{
 		if (client_version != EQ::versions::ClientVersion::Titanium) {
-			out.WriteFloat(1.0f); // adjustment (affects color)
+			out.WriteFloat(1.0f); // reward multiplier (affects color, <1.0: yellow-red, 1.0: white, >1.0: lightgreen-green)
 		}
 
 		out.WriteUInt32(duration);    // task duration (seconds) (0: task_duration_code used, "Unlimited" on live)
