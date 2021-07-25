@@ -3424,6 +3424,7 @@ XS(XS_Client_SetGMStatus) {
 		int newStatus = (int)SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAdminStatus(newStatus);
+		THIS->UpdateAdmin(true);
 	}
 	XSRETURN_EMPTY;
 }
