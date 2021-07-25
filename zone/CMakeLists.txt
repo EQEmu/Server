@@ -45,6 +45,7 @@ SET(zone_sources
 	horse.cpp
 	inventory.cpp
 	loottables.cpp
+	lua_bot.cpp
 	lua_bit.cpp
 	lua_corpse.cpp
 	lua_client.cpp
@@ -102,6 +103,7 @@ SET(zone_sources
 	pathfinder_nav_mesh.cpp
 	pathfinder_null.cpp
 	pathing.cpp
+	perl_bot.cpp
 	perl_client.cpp
 	perl_doors.cpp
 	perl_entity.cpp
@@ -195,6 +197,7 @@ SET(zone_headers
 	hate_list.h
 	heal_rotation.h
 	horse.h
+	lua_bot.h
 	lua_bit.h
 	lua_client.h
 	lua_corpse.h

@@ -3666,6 +3666,8 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		buffs[slot_id].caston_z = caston_z;
 		buffs[slot_id].ExtraDIChance = ExtraDIChance;
 		buffs[slot_id].RootBreakChance = 0;
+		buffs[slot_id].focusproclimit_time = 0;
+		buffs[slot_id].focusproclimit_procamt = 0;
 		buffs[slot_id].UpdateClient = false;
 		buffs[slot_id].instrument_mod = instrument_mod;
 	}
@@ -3930,8 +3932,8 @@ bool ZoneDatabase::GetFactionData(FactionMods* fm, uint32 class_mod, uint32 race
 	}
 
 	fm->base = faction_array[faction_id]->base;
-	fm->min = faction_array[faction_id]->min; // The lowest your personal earned faction can go - before race/class/diety adjustments.
-	fm->max = faction_array[faction_id]->max; // The highest your personal earned faction can go - before race/class/diety adjustments.
+	fm->min = faction_array[faction_id]->min; // The lowest your personal earned faction can go - before race/class/deity adjustments.
+	fm->max = faction_array[faction_id]->max; // The highest your personal earned faction can go - before race/class/deity adjustments.
 
 	if(class_mod > 0) {
 		char str[32];
@@ -4131,7 +4133,7 @@ bool ZoneDatabase::LoadFactionData()
 		LogInfo("Unable to load Faction Base data...");
 	}
 
-	// load race, class and diety modifiers
+	// load race, class and deity modifiers
 	query = fmt::format("SELECT `faction_id`, `mod`, `mod_name` FROM `faction_list_mod` WHERE `faction_id` IN ({})", faction_id_criteria);
 
 	auto modifier_results = QueryDatabase(query);

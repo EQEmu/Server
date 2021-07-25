@@ -2131,31 +2131,31 @@ struct AdventureLeaderboard_Struct
 };*/
 
 struct Illusion_Struct { //size: 256 - SoF
-/*000*/	uint32	spawnid;
-/*004*/	char charname[64];		//
-/*068*/	uint16	race;			//
-/*070*/	char	unknown006[2];
-/*072*/	uint8	gender;
-/*073*/	uint8	texture;
-/*074*/	uint8	unknown008;		//
-/*075*/	uint8	unknown009;		//
-/*076*/	uint8	helmtexture;	//
-/*077*/	uint8	unknown010;		//
-/*078*/	uint8	unknown011;		//
-/*079*/	uint8	unknown012;		//
-/*080*/	uint32	face;			//
-/*084*/	uint8	hairstyle;		//
-/*085*/	uint8	haircolor;		//
-/*086*/	uint8	beard;			//
-/*087*/	uint8	beardcolor;		//
-/*088*/	float	size;			//
-/*092*/	uint32	drakkin_heritage;	//
-/*096*/	uint32	drakkin_tattoo;		//
-/*100*/	uint32	drakkin_details;	//
-/*104*/	EQ::TintProfile	armor_tint;	//
-/*140*/	uint8	eyecolor1;		// Field Not Identified in any Illusion Struct
-/*141*/	uint8	eyecolor2;		// Field Not Identified in any Illusion Struct
-/*142*/	uint8	unknown138[114];	//
+/*000*/    uint32          spawnid;
+/*004*/    char            charname[64];        //
+/*068*/    uint16          race;            //
+/*070*/    char            unknown006[2];
+/*072*/    uint8           gender;
+/*073*/    uint8           texture;
+/*074*/    uint8           unknown008;        //
+/*075*/    uint8           unknown009;        //
+/*076*/    uint8           helmtexture;    //
+/*077*/    uint8           unknown010;        //
+/*078*/    uint8           unknown011;        //
+/*079*/    uint8           unknown012;        //
+/*080*/    uint32          face;            //
+/*084*/    uint8           hairstyle;        //
+/*085*/    uint8           haircolor;        //
+/*086*/    uint8           beard;            //
+/*087*/    uint8           beardcolor;        //
+/*088*/    float           size;            //
+/*092*/    uint32          drakkin_heritage;    //
+/*096*/    uint32          drakkin_tattoo;        //
+/*100*/    uint32          drakkin_details;    //
+/*104*/    EQ::TintProfile armor_tint;    //
+/*140*/    uint8           eyecolor1;        // Field Not Identified in any Illusion Struct
+/*141*/    uint8           eyecolor2;        // Field Not Identified in any Illusion Struct
+/*142*/    uint8           unknown138[114];    //
 /*256*/
 };
 

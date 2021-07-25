@@ -10102,7 +10102,7 @@ std::vector<int> Client::GetScribedSpells() {
 		if (IsValidSpell(m_pp.spell_book[index])) {
 			scribed_spells.push_back(m_pp.spell_book[index]);
 		}
-	}		
+	}
 	return scribed_spells;
 }
 
@@ -10128,6 +10128,117 @@ void Client::SetAFK(uint8 afk_flag) {
 	spawn_appearance->parameter = afk_flag;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
+}
+
+void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
+	uint32 zone_id = ZoneID(zone_short_name);
+	std::string current_instance_type = str_tolower(instance_type);
+	std::string instance_type_name = "public";
+	if (current_instance_type.find("solo") != std::string::npos) {
+		instance_type_name = GetCleanName();
+	} else if (current_instance_type.find("group") != std::string::npos) {
+		uint32 group_id = (GetGroup() ? GetGroup()->GetID() : 0);
+		instance_type_name = itoa(group_id);
+	} else if (current_instance_type.find("raid") != std::string::npos) {
+		uint32 raid_id = (GetRaid() ? GetRaid()->GetID() : 0);
+		instance_type_name = itoa(raid_id);
+	} else if (current_instance_type.find("guild") != std::string::npos) {
+		uint32 guild_id = (GuildID() > 0 ? GuildID() : 0);
+		instance_type_name = itoa(guild_id);
+	}
+
+	std::string full_bucket_name = fmt::format(
+		"{}_{}_{}_{}",
+		current_instance_type,
+		instance_type_name,
+		instance_identifier,
+		zone_short_name
+	);
+	std::string current_bucket_value = DataBucket::GetData(full_bucket_name);
+	uint16 instance_id = 0;
+
+	if (current_bucket_value.length() > 0) {
+		instance_id = atoi(current_bucket_value.c_str());
+	} else {
+		if(!database.GetUnusedInstanceID(instance_id)) {
+			Message(Chat::White, "Server was unable to find a free instance id.");
+			return;
+		}
+
+		if(!database.CreateInstance(instance_id, zone_id, instance_version, duration)) {
+			Message(Chat::White, "Server was unable to create a new instance.");
+			return;
+		}
+
+		DataBucket::SetData(full_bucket_name, itoa(instance_id), itoa(duration));		
+	}
+
+	AssignToInstance(instance_id);
+	MovePC(zone_id, instance_id, x, y, z, heading);
+}
+
+int Client::CountItem(uint32 item_id)
+{
+	int quantity = 0;
+	EQ::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				quantity += (item->IsStackable() ? item->GetCharges() : 1);
+			}
+		}
+	}
+
+	return quantity;
+}
+
+void Client::RemoveItem(uint32 item_id, uint32 quantity)
+{
+	EQ::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	int removed_count = 0;
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {		
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			if (removed_count == quantity) {
+				break;
+			}
+
+			item = GetInv().GetItem(slot_id);
+			if (item && item->GetID() == item_id) {
+				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
+				if ((removed_count + stack_size) <= quantity) {
+					removed_count += stack_size;
+					DeleteItemInInventory(slot_id, stack_size, true);
+				} else {
+					int amount_left = (quantity - removed_count);
+					if (amount_left > 0 && stack_size >= amount_left) {
+						removed_count += amount_left;
+						DeleteItemInInventory(slot_id, amount_left, true);
+					}
+				}
+			}
+		}
+	}
 }
 
 void Client::SetAdminStatus(int newStatus) {

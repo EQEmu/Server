@@ -15,6 +15,8 @@
 #include "bot_database.h"
 #endif
 
+#define WOLF 42
+
 class Client;
 class Corpse;
 class Merc;
@@ -243,6 +245,17 @@ struct ClientMercEntry {
 	uint32 npcid;
 };
 
+namespace BeastlordPetData {	
+	struct PetStruct {
+		uint16 race_id = WOLF;
+		uint8 texture = 0;
+		uint8 helm_texture = 0;
+		uint8 gender = 2;
+		float size_modifier = 1.0f;
+		uint8 face = 0;
+	};
+}
+
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
@@ -438,6 +451,7 @@ public:
 	void		AddWP(Client *c, uint32 gridid, uint32 wpnum, const glm::vec4& position, uint32 pause, uint16 zoneid);
 	uint32		AddWPForSpawn(Client *c, uint32 spawn2id, const glm::vec4& position, uint32 pause, int type1, int type2, uint16 zoneid);
 	void		ModifyGrid(Client *c, bool remove, uint32 id, uint8 type = 0, uint8 type2 = 0, uint16 zoneid = 0);
+	bool		GridExistsInZone(uint32 zone_id, uint32 grid_id);
 	void		ModifyWP(Client *c, uint32 grid_id, uint32 wp_num, const glm::vec3& location, uint32 script = 0, uint16 zoneid = 0);
 	uint8		GetGridType(uint32 grid, uint32 zoneid);
 	uint8		GetGridType2(uint32 grid, uint16 zoneid);
@@ -461,6 +475,7 @@ public:
 	bool		GetPetEntry(const char *pet_type, PetRecord *into);
 	bool		GetPoweredPetEntry(const char *pet_type, int16 petpower, PetRecord *into);
 	bool		GetBasePetItems(int32 equipmentset, uint32 *items);
+	BeastlordPetData::PetStruct GetBeastlordPetData(uint16 race_id);
 	void		AddLootTableToNPC(NPC* npc, uint32 loottable_id, ItemList* itemlist, uint32* copper, uint32* silver, uint32* gold, uint32* plat);
 	void		AddLootDropToNPC(NPC* npc, uint32 lootdrop_id, ItemList* item_list, uint8 droplimit, uint8 mindrop);
 	uint32		GetMaxNPCSpellsID();

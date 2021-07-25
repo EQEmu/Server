@@ -5334,6 +5334,92 @@ XS(XS_Client_AddLDoNWin) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetHideMe);
+XS(XS_Client_SetHideMe) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetHideMe(THIS, bool hide_me_state)");
+	{
+		Client* THIS;
+		bool hide_me_state = (bool) SvTRUE(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetHideMe(hide_me_state);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_ResetAllDisciplineTimers);
+XS(XS_Client_ResetAllDisciplineTimers) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::ResetAllDisciplineTimers(THIS)"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ResetAllDisciplineTimers();
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SendToInstance);
+XS(XS_Client_SendToInstance) {
+	dXSARGS;
+	if (items != 10)
+		Perl_croak(aTHX_ "Usage: Client::SendToInstance(THIS, std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration)");
+	{
+		Client* THIS;
+		std::string instance_type = (std::string) SvPV_nolen(ST(1));
+		std::string zone_short_name = (std::string) SvPV_nolen(ST(2));
+		uint32 instance_version = (uint32) SvUV(ST(3));
+		float x = (float) SvNV(ST(4));
+		float y = (float) SvNV(ST(5));
+		float z = (float) SvNV(ST(6));
+		float heading = (float) SvNV(ST(7));
+		std::string instance_identifier = (std::string) SvPV_nolen(ST(8));
+		uint32 duration = (uint32) SvUV(ST(9));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SendToInstance(instance_type, zone_short_name, instance_version, x, y, z, heading, instance_identifier, duration);
+  }
+  XSRETURN_EMPTY;
+}
+
+XS(XS_Client_CountItem);
+XS(XS_Client_CountItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::CountItem(THIS, uint32 item_id)");
+	{
+		Client* THIS;
+		int item_count = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		item_count = THIS->CountItem(item_id);
+		XSprePUSH;
+		PUSHu((UV) item_count);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_RemoveItem);
+XS(XS_Client_RemoveItem) {
+	dXSARGS;
+	if (items != 2 && items != 3)
+		Perl_croak(aTHX_ "Usage: Client::RemoveItem(THIS, uint32 item_id, [uint32 quantity = 1])"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		uint32 quantity = 1;
+		VALIDATE_THIS_IS_CLIENT;
+		if (items == 3) {
+			quantity = (uint32) SvUV(ST(2));
+		}
+
+		THIS->RemoveItem(item_id, quantity);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5384,6 +5470,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "ClearZoneFlag"), XS_Client_ClearZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "CreateExpedition"), XS_Client_CreateExpedition, file, "$$$$$$$;$");
 	newXSproto(strcpy(buf, "Connected"), XS_Client_Connected, file, "$");
+	newXSproto(strcpy(buf, "CountItem"), XS_Client_CountItem, file, "$$");
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
 	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
@@ -5552,8 +5639,10 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RefundAA"), XS_Client_RefundAA, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
+	newXSproto(strcpy(buf, "RemoveItem"), XS_Client_RemoveItem, file, "$$;$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
+	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
 	newXSproto(strcpy(buf, "ResetDisciplineTimer"), XS_Client_ResetDisciplineTimer, file, "$$");
 	newXSproto(strcpy(buf, "ResetTrade"), XS_Client_ResetTrade, file, "$");
 	newXSproto(strcpy(buf, "Save"), XS_Client_Save, file, "$$");
@@ -5565,6 +5654,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SendSound"), XS_Client_SendSound, file, "$");
 	newXSproto(strcpy(buf, "SendSpellAnim"), XS_Client_SendSpellAnim, file, "$$$");
 	newXSproto(strcpy(buf, "SendTargetCommand"), XS_Client_SendTargetCommand, file, "$$");
+	newXSproto(strcpy(buf, "SendToInstance"), XS_Client_SendToInstance, file, "$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendToGuildHall"), XS_Client_SendToGuildHall, file, "$");
 	newXSproto(strcpy(buf, "SendWebLink"), XS_Client_SendWebLink, file, "$:$");
 	newXSproto(strcpy(buf, "SendZoneFlagInfo"), XS_Client_SendZoneFlagInfo, file, "$$");
@@ -5595,6 +5685,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetFactionLevel2"), XS_Client_SetFactionLevel2, file, "$$$$$$$");
 	newXSproto(strcpy(buf, "SetFeigned"), XS_Client_SetFeigned, file, "$$");
 	newXSproto(strcpy(buf, "SetGM"), XS_Client_SetGM, file, "$$");
+	newXSproto(strcpy(buf, "SetHideMe"), XS_Client_SetHideMe, file, "$$");
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");

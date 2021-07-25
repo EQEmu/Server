@@ -199,6 +199,7 @@ public:
 	Lua_Mob GetPet();
 	Lua_Mob GetOwner();
 	Lua_HateList GetHateList();
+	Lua_HateList GetShuffledHateList();
 	Lua_HateList GetHateListByDistance();
 	Lua_HateList GetHateListByDistance(int distance);
 	Lua_Mob GetHateTop();
@@ -354,6 +355,7 @@ public:
 	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
+	void RemoveAllNimbusEffects();
 	bool IsRunning();
 	void SetRunning(bool running);
 	void SetBodyType(int new_body, bool overwrite_orig);
@@ -429,7 +431,6 @@ public:
 	int GetBodyType();
 	int GetOrigBodyType();
 	void CheckNumHitsRemaining(int type, int32 buff_slot, uint16 spell_id);
-
 	void DeleteBucket(std::string bucket_name);
 	std::string GetBucket(std::string bucket_name);
 	std::string GetBucketExpires(std::string bucket_name);
@@ -438,6 +439,8 @@ public:
 	void SetBucket(std::string bucket_name, std::string bucket_value);
 	void SetBucket(std::string bucket_name, std::string bucket_value, std::string expiration);
 	bool IsHorse();
+	bool CanClassEquipItem(uint32 item_id);
+	bool CanRaceEquipItem(uint32 item_id);
 };
 
 #endif

@@ -383,7 +383,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			Chat::SpellFailure,
 			(IsClient() ? FilterPCSpells : FilterNPCSpells),
 			(fizzle_msg == MISS_NOTE ? MISSED_NOTE_OTHER : SPELL_FIZZLE_OTHER),
-			/* 
+			/*
 				MessageFormat: You miss a note, bringing your song to a close! (if missed note)
 				MessageFormat: A missed note brings %1's song to a close!
 				MessageFormat: %1's spell fizzles!
@@ -406,8 +406,7 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		spell.targettype == ST_Self ||
 		spell.targettype == ST_AECaster ||
 		spell.targettype == ST_Ring ||
-		spell.targettype == ST_Beam ||
-		spell.targettype == ST_TargetOptional) && target_id == 0)
+		spell.targettype == ST_Beam) && target_id == 0)
 	{
 		LogSpells("Spell [{}] auto-targeted the caster. Group? [{}], target type [{}]", spell_id, IsGroupSpell(spell_id), spell.targettype);
 		target_id = GetID();
@@ -1235,7 +1234,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 				else {
 					if (!RuleB(Character, PetsUseReagents) && (IsEffectInSpell(spell_id, SE_SummonPet) || IsEffectInSpell(spell_id, SE_NecPet))) {
 						//bypass reagent cost
-					} 
+					}
 					else if(c->GetInv().HasItem(component, component_count, invWhereWorn|invWherePersonal) == -1) // item not found
 					{
 						if (!missingreags)
@@ -1393,6 +1392,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
+	TryOnSpellFinished(this, target, spell_id);
+
 	TryTwincast(this, target, spell_id);
 
 	TryTriggerOnCast(spell_id, 0);
@@ -1419,7 +1420,9 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		if(IsClient())
 		{
 			Client *c = CastToClient();
-			c->CheckSongSkillIncrease(spell_id);
+			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
+				c->CheckSongSkillIncrease(spell_id);
+			}
 			if (spells[spell_id].EndurTimerIndex > 0 && slot < CastingSlot::MaxGems)
 				c->SetLinkedSpellReuseTimer(spells[spell_id].EndurTimerIndex, spells[spell_id].recast_time / 1000);
 			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
@@ -1442,7 +1445,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			SetMana(GetMana());
 
 			// skills
-			if (EQ::skills::IsCastingSkill(spells[spell_id].skill)) {
+			if (EQ::skills::IsCastingSkill(spells[spell_id].skill) && ((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem)) {
 				c->CheckIncreaseSkill(spells[spell_id].skill, nullptr);
 
 				// increased chance of gaining channel skill if you regained concentration
@@ -1581,8 +1584,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 
 		case ST_TargetOptional:
 		{
-			if(!spell_target)
-				spell_target = this;
+			if (!spell_target)
+			{
+				LogSpells("Spell [{}] canceled: invalid target (normal)", spell_id);
+				MessageString(Chat::Red, SPELL_NEED_TAR);
+				return false;	// can't cast these unless we have a target
+			}
 			CastAction = SingleTarget;
 			break;
 		}
@@ -2044,9 +2051,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	if(!IsValidSpell(spell_id))
 		return false;
 
-	//Guard Assist Code
-	if (RuleB(Character, PVPEnableGuardFactionAssist) && IsDetrimentalSpell(spell_id) && spell_target != this) {
-		if (IsClient() || (HasOwner() && GetOwner()->IsClient())) {
+	//Death Touch targets the pet owner instead of the pet when said pet is tanking.
+	if ((RuleB(Spells, CazicTouchTargetsPetOwner) && spell_target && spell_target->HasOwner()) && spell_id == SPELL_CAZIC_TOUCH || spell_id == SPELL_TOUCH_OF_VINITRAS) {
+		Mob* owner =  spell_target->GetOwner();
+
+		if (owner) {
+			spell_target = owner;
+		}
+	}
+
+  //Guard Assist Code
+	if (RuleB(Character, PVPEnableGuardFactionAssist) && spell_target && IsDetrimentalSpell(spell_id) && spell_target != this) {
+		if (IsClient() && spell_target->IsClient()|| (HasOwner() && GetOwner()->IsClient() && spell_target->IsClient())) {
 			auto& mob_list = entity_list.GetCloseMobList(spell_target);
 			for (auto& e : mob_list) {
 				auto mob = e.second;
@@ -2060,8 +2076,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 					}
 				}
 			}
-		}
-	}
+    }
+  }
 
 	if( spells[spell_id].zonetype == 1 && !zone->CanCastOutdoor()){
 		if(IsClient()){
@@ -3337,6 +3353,8 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].dot_rune = 0;
 	buffs[emptyslot].ExtraDIChance = 0;
 	buffs[emptyslot].RootBreakChance = 0;
+	buffs[emptyslot].focusproclimit_time = 0;
+	buffs[emptyslot].focusproclimit_procamt = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
 	if (level_override > 0) {
@@ -3419,7 +3437,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 				firstfree = i;
 		}
 		if(ret == -1) {
-			
+
 			LogAI("Buff [{}] would conflict with [{}] in slot [{}], reporting stack failure", spellid, curbuf.spellid, i);
 			return -1;	// stop the spell, can't stack it
 		}
@@ -3554,7 +3572,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		spelltar, /* Sender */
 		action_packet, /* Packet */
 		true, /* Ignore Sender */
-		RuleI(Range, SpellMessages), 
+		RuleI(Range, SpellMessages),
 		this, /* Skip this Mob */
 		true, /* Packet ACK */
 		(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* EQ Filter Type: (8 or 9) */
@@ -3897,7 +3915,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 					spelltar->CastToClient()->BreakSneakWhenCastOn(this, true);
 					spelltar->CastToClient()->BreakFeignDeathWhenCastOn(true);
 				}
-				
+
 				spelltar->CheckNumHitsRemaining(NumHit::IncomingSpells);
 				CheckNumHitsRemaining(NumHit::OutgoingSpells);
 
@@ -3959,6 +3977,10 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		return false;
 	}
 
+	//Check SE_Fc_Cast_Spell_On_Land SPA 481 on target, if hit by this spell and Conditions are Met then target will cast the specified spell.
+	if (spelltar)
+		spelltar->CastSpellOnLand(this, spell_id);
+
 	if (IsValidSpell(spells[spell_id].RecourseLink) && spells[spell_id].RecourseLink != spell_id)
 		SpellFinished(spells[spell_id].RecourseLink, this, CastingSlot::Item, 0, -1, spells[spells[spell_id].RecourseLink].ResistDiff);
 
@@ -4013,7 +4035,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			spelltar, /* Sender */
 			message_packet, /* Packet */
 			false, /* Ignore Sender */
-			RuleI(Range, SpellMessages), 
+			RuleI(Range, SpellMessages),
 			0, /* Skip this mob */
 			true, /* Packet ACK */
 			(spelltar->IsClient() ? FilterPCSpells : FilterNPCSpells) /* Message Filter Type: (8 or 9) */
@@ -4087,17 +4109,17 @@ bool Mob::FindBuff(uint16 spellid)
 uint16 Mob::FindBuffBySlot(int slot) {
 	if (buffs[slot].spellid != SPELL_UNKNOWN)
 		return buffs[slot].spellid;
-	
+
 	return 0;
 }
 
 uint32 Mob::BuffCount() {
 	uint32 active_buff_count = 0;
 	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; i++) 
+	for (int i = 0; i < buff_count; i++)
 		if (buffs[i].spellid != SPELL_UNKNOWN)
 			active_buff_count++;
-	
+
 	return active_buff_count;
 }
 
@@ -5012,7 +5034,7 @@ void Mob::Mesmerize()
 
 	if (spell_id)
 		InterruptSpell(spell_id);
-	
+
 	StopNavigation();
 }
 
@@ -5130,7 +5152,7 @@ uint32 Client::GetSpellIDByBookSlot(int book_slot) {
 uint16 Client::FindMemmedSpellBySlot(int slot) {
 	if (m_pp.mem_spells[slot] != 0xFFFFFFFF)
 		return m_pp.mem_spells[slot];
-	
+
 	return 0;
 }
 
@@ -5139,7 +5161,7 @@ int Client::MemmedCount() {
 	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++)
 		if (m_pp.mem_spells[i] != 0xFFFFFFFF)
 			memmed_count++;
-		
+
 	return memmed_count;
 }
 
@@ -5238,6 +5260,27 @@ int Client::FindSpellBookSlotBySpellID(uint16 spellid) {
 	return -1;	//default
 }
 
+uint32 Client::GetHighestScribedSpellinSpellGroup(uint32 spell_group)
+{
+	//Typical live spells follow 1/5/10 rank value for actual ranks 1/2/3, but this can technically be set as anything.
+
+	int highest_rank = 0; //highest ranked found in spellgroup
+	uint32 highest_spell_id = 0;  //spell_id of the highest ranked spell you have scribed in that spell rank.
+
+	for (int i = 0; i < EQ::spells::SPELLBOOK_SIZE; i++) {
+
+		if (IsValidSpell(m_pp.spell_book[i])) {
+			if (spells[m_pp.spell_book[i]].spellgroup == spell_group) {
+				if (highest_rank < spells[m_pp.spell_book[i]].rank) {
+					highest_rank = spells[m_pp.spell_book[i]].rank;
+					highest_spell_id = m_pp.spell_book[i];
+				}
+			}
+		}
+	}
+	return highest_spell_id;
+}
+
 bool Client::SpellGlobalCheck(uint16 spell_id, uint32 char_id) {
 	std::string spell_global_name;
 	int spell_global_value;
@@ -5317,7 +5360,7 @@ bool Client::SpellBucketCheck(uint16 spell_id, uint32 char_id) {
 
 	if (results.RowCount() != 1)
 		return true;
-	
+
 	auto row = results.begin();
 	spell_bucket_name = row[0];
 	spell_bucket_value = atoi(row[1]);

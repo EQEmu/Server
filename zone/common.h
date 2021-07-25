@@ -124,6 +124,7 @@ typedef enum {	//focus types
 	focusSpellHateMod,
 	focusTriggerOnCast,
 	focusSpellVulnerability,
+	focusFcSpellDamagePctIncomingPC,
 	focusTwincast,
 	focusSympatheticProc,
 	focusFcDamageAmt,
@@ -135,6 +136,8 @@ typedef enum {	//focus types
 	focusBlockNextSpell,
 	focusFcHealPctIncoming,
 	focusFcDamageAmtIncoming,
+	focusFcSpellDamageAmtIncomingPC,
+	focusFcCastSpellOnLand,
 	focusFcHealAmtIncoming,
 	focusFcBaseEffects,
 	focusIncreaseNumHits,
@@ -319,6 +322,8 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;
@@ -461,6 +466,7 @@ struct StatBonuses {
 	uint32	SpellOnKill[MAX_SPELL_TRIGGER*3];	// Chance to proc after killing a mob
 	uint32	SpellOnDeath[MAX_SPELL_TRIGGER*2];	// Chance to have effect cast when you die
 	int32	CritDmgMod[EQ::skills::HIGHEST_SKILL + 2];		// All Skills + -1
+	int32	CritDmgModNoStack[EQ::skills::HIGHEST_SKILL + 2];// Critical melee damage modifier by percent, does not stack.
 	int32	SkillReuseTime[EQ::skills::HIGHEST_SKILL + 1];	// Reduces skill timers
 	int32	SkillDamageAmount[EQ::skills::HIGHEST_SKILL + 2];	// All Skills + -1
 	int32	TwoHandBluntBlock;					// chance to block when wielding two hand blunt weapon
@@ -494,7 +500,8 @@ struct StatBonuses {
 	uint32	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
 	bool	TriggerMeleeThreshold;				// Has Melee Threshhold
 	bool	TriggerSpellThreshold;				// Has Spell Threshhold
-	uint32	ManaAbsorbPercentDamage[2];			// 0 = Mitigation value 1 = Buff Slot
+	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value 
+	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost 
 	int32	ShieldBlock;						// Chance to Shield Block
 	int32	BlockBehind;						// Chance to Block Behind (with our without shield)
 	bool	CriticalRegenDecay;					// increase critical regen chance, decays based on spell level cast
@@ -522,7 +529,19 @@ struct StatBonuses {
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
+	uint32  PC_Pet_AE_Rampage[2];				// 0= % chance to AE rampage, 1=damage modifier
 	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
+	int32   Attack_Accuracy_Max_Percent;		// Increase ATK accuracy by percent.
+	int32   AC_Mitigation_Max_Percent;			// Increase AC mitigation by percent
+	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
+	int32   Damage_Taken_Position_Mod[2];		// base = percent melee damage reduction base2 0=back 1=front. [0]Back[1]Front
+	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
+	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
+	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
+	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
+	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
+	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
+
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%

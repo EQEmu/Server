@@ -4769,6 +4769,16 @@ void EntityList::GetClientList(std::list<Client *> &c_list)
 	}
 }
 
+#ifdef BOTS
+void EntityList::GetBotList(std::list<Bot *> &b_list)
+{
+	b_list.clear();
+	for (auto bot_iterator : bot_list) {
+		b_list.push_back(bot_iterator);
+	}
+}
+#endif
+
 void EntityList::GetCorpseList(std::list<Corpse *> &c_list)
 {
 	c_list.clear();
@@ -5303,4 +5313,13 @@ int EntityList::MovePlayerCorpsesToGraveyard(bool force_move_from_instance)
 	}
 
 	return moved_count;
+}
+
+void EntityList::DespawnGridNodes(int32 grid_id) {
+	for (auto mob_iterator : mob_list) {
+		Mob *mob = mob_iterator.second;
+		if (mob->IsNPC() && mob->GetRace() == 2254 && mob->EntityVariableExists("grid_id") && atoi(mob->GetEntityVariable("grid_id")) == grid_id) {
+			mob->Depop();
+		}
+	}
 }

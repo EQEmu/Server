@@ -662,6 +662,7 @@ public:
 	void MoveZoneInstanceGroup(uint16 instance_id);
 	void MoveZoneInstanceRaid(uint16 instance_id);
 	void SendToGuildHall();
+	void SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration);
 	void AssignToInstance(uint16 instance_id);
 	void RemoveFromInstance(uint16 instance_id);
 	void WhoAll();
@@ -907,6 +908,8 @@ public:
 	bool PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update = false);
 	void SendCursorBuffer();
 	void DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
+	int CountItem(uint32 item_id);
+	void RemoveItem(uint32 item_id, uint32 quantity = 1);
 	bool SwapItem(MoveItem_Struct* move_in);
 	void SwapItemResync(MoveItem_Struct* move_slots);
 	void QSSwapItemAuditor(MoveItem_Struct* move_in, bool postaction_call = false);
@@ -982,8 +985,10 @@ public:
 	void ResetTrade();
 	void DropInst(const EQ::ItemInstance* inst);
 	bool TrainDiscipline(uint32 itemid);
+	bool MemorizeSpellFromItem(uint32 item_id);
 	void TrainDiscBySpellID(int32 spell_id);
 	uint32 GetDisciplineTimer(uint32 timer_id);
+	void ResetAllDisciplineTimers();
 	int GetDiscSlotBySpellID(int32 spellid);
 	void ResetDisciplineTimer(uint32 timer_id);
 	void SendDisciplineUpdate();
@@ -1016,6 +1021,7 @@ public:
 	int GetNextAvailableSpellBookSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return FindSpellBookSlotBySpellID(spellid) != -1; }
+	uint32 GetHighestScribedSpellinSpellGroup(uint32 spell_group);
 	uint16 GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid, uint16 maxSkill);
 	void SendPopupToClient(const char *Title, const char *Text, uint32 PopupID = 0, uint32 Buttons = 0, uint32 Duration = 0);
 	void SendFullPopup(const char *Title, const char *Text, uint32 PopupID = 0, uint32 NegativeID = 0, uint32 Buttons = 0, uint32 Duration = 0, const char *ButtonName0 = 0, const char *ButtonName1 = 0, uint32 SoundControls = 0);

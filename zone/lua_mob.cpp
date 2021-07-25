@@ -967,6 +967,23 @@ Lua_HateList Lua_Mob::GetHateList() {
 	return ret;
 }
 
+Lua_HateList Lua_Mob::GetShuffledHateList() {
+	Lua_Safe_Call_Class(Lua_HateList);
+	Lua_HateList ret;
+
+	auto h_list = self->GetHateList();
+	auto iter = h_list.begin();
+	while(iter != h_list.end()) {
+		Lua_HateEntry e(*iter);
+		ret.entries.push_back(e);
+		++iter;
+	}
+
+	zone->random.Shuffle(ret.entries.begin(), ret.entries.end());
+
+	return ret;
+}
+
 Lua_Mob Lua_Mob::GetHateTop() {
 	Lua_Safe_Call_Class(Lua_Mob);
 	return Lua_Mob(self->GetHateTop());
@@ -2347,6 +2364,21 @@ const char *Lua_Mob::GetLastName() {
 	return self->GetLastName();
 }
 
+bool Lua_Mob::CanClassEquipItem(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->CanClassEquipItem(item_id);
+}
+
+bool Lua_Mob::CanRaceEquipItem(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->CanRaceEquipItem(item_id);
+}
+
+void Lua_Mob::RemoveAllNimbusEffects() {
+	Lua_Safe_Call_Void();
+	self->RemoveAllNimbusEffects();
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2513,6 +2545,7 @@ luabind::scope lua_register_mob() {
 		.def("GetPet", &Lua_Mob::GetPet)
 		.def("GetOwner", &Lua_Mob::GetOwner)
 		.def("GetHateList", &Lua_Mob::GetHateList)
+		.def("GetShuffledHateList", &Lua_Mob::GetShuffledHateList)
 		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(void))&Lua_Mob::GetHateListByDistance)
 		.def("GetHateListByDistance", (Lua_HateList(Lua_Mob::*)(int))&Lua_Mob::GetHateListByDistance)
 		.def("GetHateTop", (Lua_Mob(Lua_Mob::*)(void))&Lua_Mob::GetHateTop)
@@ -2749,7 +2782,10 @@ luabind::scope lua_register_mob() {
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string))&Lua_Mob::SetBucket)
 		.def("SetBucket", (void(Lua_Mob::*)(std::string,std::string,std::string))&Lua_Mob::SetBucket)
 		.def("IsHorse", &Lua_Mob::IsHorse)
-		.def("GetLastName", &Lua_Mob::GetLastName);
+		.def("GetLastName", &Lua_Mob::GetLastName)
+		.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
+		.def("CanRaceEquipItem", &Lua_Mob::CanRaceEquipItem)
+		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects);
 }
 
 luabind::scope lua_register_special_abilities() {

@@ -114,7 +114,7 @@ public:
 	virtual ~NPC();
 
 	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
-	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_number, int32 zoffset);
+	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_number, int32 zoffset);
 	static void SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
 
 	//abstract virtual function implementations requird by base abstract class
@@ -198,6 +198,7 @@ public:
 	void	RemoveItem(uint32 item_id, uint16 quantity = 0, uint16 slot = 0);
 	void	CheckTrivialMinMaxLevelDrop(Mob *killer);
 	void	ClearItemList();
+	inline const ItemList &GetItemList() { return itemlist; }
 	ServerLootItem_Struct*	GetItem(int slot_id);
 	void	AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum);
 	void	AddCash();

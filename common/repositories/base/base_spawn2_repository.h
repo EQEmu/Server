@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -29,6 +29,7 @@ public:
 		int         respawntime;
 		int         variance;
 		int         pathgrid;
+		int         path_when_zone_idle;
 		int         _condition;
 		int         cond_value;
 		int         enabled;
@@ -58,6 +59,7 @@ public:
 			"respawntime",
 			"variance",
 			"pathgrid",
+			"path_when_zone_idle",
 			"_condition",
 			"cond_value",
 			"enabled",
@@ -112,6 +114,7 @@ public:
 		entry.respawntime            = 0;
 		entry.variance               = 0;
 		entry.pathgrid               = 0;
+		entry.path_when_zone_idle    = 0;
 		entry._condition             = 0;
 		entry.cond_value             = 1;
 		entry.enabled                = 1;
@@ -166,14 +169,15 @@ public:
 			entry.respawntime            = atoi(row[8]);
 			entry.variance               = atoi(row[9]);
 			entry.pathgrid               = atoi(row[10]);
-			entry._condition             = atoi(row[11]);
-			entry.cond_value             = atoi(row[12]);
-			entry.enabled                = atoi(row[13]);
-			entry.animation              = atoi(row[14]);
-			entry.min_expansion          = atoi(row[15]);
-			entry.max_expansion          = atoi(row[16]);
-			entry.content_flags          = row[17] ? row[17] : "";
-			entry.content_flags_disabled = row[18] ? row[18] : "";
+			entry.path_when_zone_idle    = atoi(row[11]);
+			entry._condition             = atoi(row[12]);
+			entry.cond_value             = atoi(row[13]);
+			entry.enabled                = atoi(row[14]);
+			entry.animation              = atoi(row[15]);
+			entry.min_expansion          = atoi(row[16]);
+			entry.max_expansion          = atoi(row[17]);
+			entry.content_flags          = row[18] ? row[18] : "";
+			entry.content_flags_disabled = row[19] ? row[19] : "";
 
 			return entry;
 		}
@@ -217,14 +221,15 @@ public:
 		update_values.push_back(columns[8] + " = " + std::to_string(spawn2_entry.respawntime));
 		update_values.push_back(columns[9] + " = " + std::to_string(spawn2_entry.variance));
 		update_values.push_back(columns[10] + " = " + std::to_string(spawn2_entry.pathgrid));
-		update_values.push_back(columns[11] + " = " + std::to_string(spawn2_entry._condition));
-		update_values.push_back(columns[12] + " = " + std::to_string(spawn2_entry.cond_value));
-		update_values.push_back(columns[13] + " = " + std::to_string(spawn2_entry.enabled));
-		update_values.push_back(columns[14] + " = " + std::to_string(spawn2_entry.animation));
-		update_values.push_back(columns[15] + " = " + std::to_string(spawn2_entry.min_expansion));
-		update_values.push_back(columns[16] + " = " + std::to_string(spawn2_entry.max_expansion));
-		update_values.push_back(columns[17] + " = '" + EscapeString(spawn2_entry.content_flags) + "'");
-		update_values.push_back(columns[18] + " = '" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
+		update_values.push_back(columns[11] + " = " + std::to_string(spawn2_entry.path_when_zone_idle));
+		update_values.push_back(columns[12] + " = " + std::to_string(spawn2_entry._condition));
+		update_values.push_back(columns[13] + " = " + std::to_string(spawn2_entry.cond_value));
+		update_values.push_back(columns[14] + " = " + std::to_string(spawn2_entry.enabled));
+		update_values.push_back(columns[15] + " = " + std::to_string(spawn2_entry.animation));
+		update_values.push_back(columns[16] + " = " + std::to_string(spawn2_entry.min_expansion));
+		update_values.push_back(columns[17] + " = " + std::to_string(spawn2_entry.max_expansion));
+		update_values.push_back(columns[18] + " = '" + EscapeString(spawn2_entry.content_flags) + "'");
+		update_values.push_back(columns[19] + " = '" + EscapeString(spawn2_entry.content_flags_disabled) + "'");
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -257,6 +262,7 @@ public:
 		insert_values.push_back(std::to_string(spawn2_entry.respawntime));
 		insert_values.push_back(std::to_string(spawn2_entry.variance));
 		insert_values.push_back(std::to_string(spawn2_entry.pathgrid));
+		insert_values.push_back(std::to_string(spawn2_entry.path_when_zone_idle));
 		insert_values.push_back(std::to_string(spawn2_entry._condition));
 		insert_values.push_back(std::to_string(spawn2_entry.cond_value));
 		insert_values.push_back(std::to_string(spawn2_entry.enabled));
@@ -305,6 +311,7 @@ public:
 			insert_values.push_back(std::to_string(spawn2_entry.respawntime));
 			insert_values.push_back(std::to_string(spawn2_entry.variance));
 			insert_values.push_back(std::to_string(spawn2_entry.pathgrid));
+			insert_values.push_back(std::to_string(spawn2_entry.path_when_zone_idle));
 			insert_values.push_back(std::to_string(spawn2_entry._condition));
 			insert_values.push_back(std::to_string(spawn2_entry.cond_value));
 			insert_values.push_back(std::to_string(spawn2_entry.enabled));
@@ -357,14 +364,15 @@ public:
 			entry.respawntime            = atoi(row[8]);
 			entry.variance               = atoi(row[9]);
 			entry.pathgrid               = atoi(row[10]);
-			entry._condition             = atoi(row[11]);
-			entry.cond_value             = atoi(row[12]);
-			entry.enabled                = atoi(row[13]);
-			entry.animation              = atoi(row[14]);
-			entry.min_expansion          = atoi(row[15]);
-			entry.max_expansion          = atoi(row[16]);
-			entry.content_flags          = row[17] ? row[17] : "";
-			entry.content_flags_disabled = row[18] ? row[18] : "";
+			entry.path_when_zone_idle    = atoi(row[11]);
+			entry._condition             = atoi(row[12]);
+			entry.cond_value             = atoi(row[13]);
+			entry.enabled                = atoi(row[14]);
+			entry.animation              = atoi(row[15]);
+			entry.min_expansion          = atoi(row[16]);
+			entry.max_expansion          = atoi(row[17]);
+			entry.content_flags          = row[18] ? row[18] : "";
+			entry.content_flags_disabled = row[19] ? row[19] : "";
 
 			all_entries.push_back(entry);
 		}
@@ -400,14 +408,15 @@ public:
 			entry.respawntime            = atoi(row[8]);
 			entry.variance               = atoi(row[9]);
 			entry.pathgrid               = atoi(row[10]);
-			entry._condition             = atoi(row[11]);
-			entry.cond_value             = atoi(row[12]);
-			entry.enabled                = atoi(row[13]);
-			entry.animation              = atoi(row[14]);
-			entry.min_expansion          = atoi(row[15]);
-			entry.max_expansion          = atoi(row[16]);
-			entry.content_flags          = row[17] ? row[17] : "";
-			entry.content_flags_disabled = row[18] ? row[18] : "";
+			entry.path_when_zone_idle    = atoi(row[11]);
+			entry._condition             = atoi(row[12]);
+			entry.cond_value             = atoi(row[13]);
+			entry.enabled                = atoi(row[14]);
+			entry.animation              = atoi(row[15]);
+			entry.min_expansion          = atoi(row[16]);
+			entry.max_expansion          = atoi(row[17]);
+			entry.content_flags          = row[18] ? row[18] : "";
+			entry.content_flags_disabled = row[19] ? row[19] : "";
 
 			all_entries.push_back(entry);
 		}

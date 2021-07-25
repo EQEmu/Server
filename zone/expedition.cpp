@@ -62,7 +62,6 @@ void Expedition::SetDynamicZone(DynamicZone&& dz)
 	dz.SetLeader(GetLeader());
 
 	m_dynamiczone = std::move(dz);
-	m_dynamiczone.RegisterOnCompassChange([this]() { SendCompassUpdateToZoneMembers(); });
 }
 
 Expedition* Expedition::TryCreate(
@@ -1837,18 +1836,6 @@ void Expedition::HandleWorldMessage(ServerPacket* pack)
 		}
 		break;
 	}
-	}
-}
-
-void Expedition::SendCompassUpdateToZoneMembers()
-{
-	for (const auto& member : GetDynamicZone().GetMembers())
-	{
-		Client* member_client = entity_list.GetClientByCharID(member.id);
-		if (member_client)
-		{
-			member_client->SendDzCompassUpdate();
-		}
 	}
 }
 

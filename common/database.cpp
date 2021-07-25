@@ -906,6 +906,26 @@ std::string Database::GetNPCNameByID(uint32 npc_id) {
 	return res;
 }
 
+std::string Database::GetCleanNPCNameByID(uint32 npc_id) {
+	std::string query = fmt::format("SELECT `name` FROM `npc_types` WHERE id = {}", npc_id);
+	auto results = QueryDatabase(query);
+	std::string res;
+	std::string mob_name;
+
+	if (!results.Success()) {
+		return res;
+	}
+
+	if (results.RowCount() == 0) {
+		return res;
+	}
+
+	auto row = results.begin();
+	mob_name = row[0];
+	CleanMobName(mob_name.begin(), mob_name.end(), std::back_inserter(res));
+	return res;
+}
+
 bool Database::LoadVariables() {
 	auto results = QueryDatabase(StringFormat("SELECT varname, value, unix_timestamp() FROM variables where unix_timestamp(ts) >= %d", varcache.last_update));
 
@@ -2169,95 +2189,6 @@ uint32 Database::GetRaidIDByCharID(uint32 character_id) {
 		return atoi(row[0]);
 	}
 	return 0;
-}
-
-/**
- * @param log_settings
- */
-void Database::LoadLogSettings(EQEmuLogSys::LogSettings *log_settings)
-{
-	std::string query =
-					"SELECT "
-					"log_category_id, "
-					"log_category_description, "
-					"log_to_console, "
-					"log_to_file, "
-					"log_to_gmsay "
-					"FROM "
-					"logsys_categories "
-					"ORDER BY log_category_id";
-
-	auto results         = QueryDatabase(query);
-	int  log_category_id = 0;
-
-	int *categories_in_database = new int[1000];
-
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		log_category_id = atoi(row[0]);
-		if (log_category_id <= Logs::None || log_category_id >= Logs::MaxCategoryID) {
-			continue;
-		}
-
-		log_settings[log_category_id].log_to_console = static_cast<uint8>(atoi(row[2]));
-		log_settings[log_category_id].log_to_file    = static_cast<uint8>(atoi(row[3]));
-		log_settings[log_category_id].log_to_gmsay   = static_cast<uint8>(atoi(row[4]));
-
-		/**
-		 * Determine if any output method is enabled for the category
-		 * and set it to 1 so it can used to check if category is enabled
-		 */
-		const bool log_to_console      = log_settings[log_category_id].log_to_console > 0;
-		const bool log_to_file         = log_settings[log_category_id].log_to_file > 0;
-		const bool log_to_gmsay        = log_settings[log_category_id].log_to_gmsay > 0;
-		const bool is_category_enabled = log_to_console || log_to_file || log_to_gmsay;
-
-		if (is_category_enabled) {
-			log_settings[log_category_id].is_category_enabled = 1;
-		}
-
-		/**
-		 * This determines whether or not the process needs to actually file log anything.
-		 * If we go through this whole loop and nothing is set to any debug level, there is no point to create a file or keep anything open
-		 */
-		if (log_settings[log_category_id].log_to_file > 0) {
-			LogSys.file_logs_enabled = true;
-		}
-
-		categories_in_database[log_category_id] = 1;
-	}
-
-	/**
-	 * Auto inject categories that don't exist in the database...
-	 */
-	for (int log_index = Logs::AA; log_index != Logs::MaxCategoryID; log_index++) {
-		if (categories_in_database[log_index] != 1) {
-
-			LogInfo(
-				"New Log Category [{0}] doesn't exist... Automatically adding to [logsys_categories] table...",
-				Logs::LogCategoryName[log_index]
-			);
-
-			auto inject_query = fmt::format(
-				"INSERT INTO logsys_categories "
-				"(log_category_id, "
-				"log_category_description, "
-				"log_to_console, "
-				"log_to_file, "
-				"log_to_gmsay) "
-				"VALUES "
-				"({0}, '{1}', {2}, {3}, {4})",
-				log_index,
-				EscapeString(Logs::LogCategoryName[log_index]),
-				std::to_string(log_settings[log_index].log_to_console),
-				std::to_string(log_settings[log_index].log_to_file),
-				std::to_string(log_settings[log_index].log_to_gmsay)
-			);
-
-			QueryDatabase(inject_query);
-		}
-	}
-
-	delete[] categories_in_database;
 }
 
 int Database::CountInvSnapshots() {

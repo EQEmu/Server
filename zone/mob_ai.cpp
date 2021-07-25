@@ -1125,6 +1125,9 @@ void Mob::AI_Process() {
 
 		ProjectileAttack();
 
+		if (focus_proc_limit_timer.Check())
+			FocusProcLimitProcess();
+
 		auto npcSpawnPoint = CastToNPC()->GetSpawnPoint();
 		if (GetSpecialAbility(TETHER)) {
 			float tether_range = static_cast<float>(GetSpecialAbilityParam(TETHER, 0));
@@ -1218,16 +1221,15 @@ void Mob::AI_Process() {
 						}
 					}
 
+
+					//SE_PC_Pet_Rampage SPA 464 on pet, chance modifier
 					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
-						if (spellbonuses.PC_Pet_Rampage[0] || itembonuses.PC_Pet_Rampage[0] ||
-							aabonuses.PC_Pet_Rampage[0]) {
-							int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] +
-										 aabonuses.PC_Pet_Rampage[0];
-							if (zone->random.Roll(chance)) {
-								Rampage(nullptr);
-							}
+						int chance = spellbonuses.PC_Pet_Rampage[0] + itembonuses.PC_Pet_Rampage[0] + aabonuses.PC_Pet_Rampage[0];
+						if (chance && zone->random.Roll(chance)) {
+							Rampage(nullptr);
 						}
 					}
+				
 
 					if (GetSpecialAbility(SPECATK_RAMPAGE) && !specialed) {
 						int rampage_chance = GetSpecialAbilityParam(SPECATK_RAMPAGE, 0);
@@ -1260,6 +1262,14 @@ void Mob::AI_Process() {
 							}
 							Rampage(&opts);
 							specialed = true;
+						}
+					}
+
+					//SE_PC_Pet_Rampage SPA 465 on pet, chance modifier
+					if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
+						int chance = spellbonuses.PC_Pet_AE_Rampage[0] + itembonuses.PC_Pet_AE_Rampage[0] + aabonuses.PC_Pet_AE_Rampage[0];
+						if (chance && zone->random.Roll(chance)) {
+							Rampage(nullptr);
 						}
 					}
 

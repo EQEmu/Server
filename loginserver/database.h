@@ -202,11 +202,6 @@ public:
 	);
 
 	/**
-	 * @param log_settings
-	 */
-	void LoadLogSettings(EQEmuLogSys::LogSettings *log_settings);
-
-	/**
 	 * @param write_mode
 	 * @param read_mode
 	 * @return

@@ -119,7 +119,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DEATH_ZONE",
 	"EVENT_USE_SKILL",
 	"EVENT_COMBINE_VALIDATE",
-	"EVENT_BOT_COMMAND"
+	"EVENT_BOT_COMMAND",
+	"EVENT_TEST_BUFF"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -976,6 +977,14 @@ void PerlembParser::MapFunctions()
 
 		"package Expedition;"
 		"&boot_Expedition;"
+
+#ifdef BOTS
+		"package Bot;"
+		"our @ISA = qw(NPC);" // Bot inherits NPC
+		"&boot_Mob;" // load our Mob XS
+		"&boot_NPC;" // load our NPC XS
+		"&boot_Bot;" // load our Bot XS
+#endif
 
 		#endif
 		"package main;"

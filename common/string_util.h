@@ -206,4 +206,17 @@ std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
 std::string FormatName(const std::string& char_name);
 
+template<typename InputIterator, typename OutputIterator>
+auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)
+{
+    for (; first != last; ++first) {
+        if(*first == '_') {
+            *result = ' ';
+        } else if (isalpha(*first) || *first == '`') {
+            *result = *first;
+        }
+    }
+    return result;
+}
+
 #endif

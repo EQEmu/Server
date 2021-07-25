@@ -23,8 +23,9 @@
 
 #include <iostream>
 #include <fstream>
-#include <stdio.h>
+#include <cstdio>
 #include <functional>
+#include <algorithm>
 
 #ifdef _WIN32
 #ifdef utf16_to_utf8
@@ -37,9 +38,9 @@
 
 namespace Logs {
 	enum DebugLevel {
-		General = 1,	/* 1 - Low-Level general debugging, useful info on single line */
-		Moderate,		/* 2 - Informational based, used in functions, when particular things load */
-		Detail			/* 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication */
+		General = 1,    // 1 - Low-Level general debugging, useful info on single line
+		Moderate,       // 2 - Informational based, used in functions, when particular things load
+		Detail          // 3 - Use this for extreme detail in logging, usually in extreme debugging in the stack or interprocess communication
 	};
 
 	/**
@@ -127,7 +128,7 @@ namespace Logs {
 	/**
 	 * If you add to this, make sure you update LogCategory
 	 */
-	static const char* LogCategoryName[LogCategory::MaxCategoryID] = {
+	static const char *LogCategoryName[LogCategory::MaxCategoryID] = {
 		"",
 		"AA",
 		"AI",
@@ -206,6 +207,8 @@ namespace Logs {
 
 #include "eqemu_logsys_log_aliases.h"
 
+class Database;
+
 class EQEmuLogSys {
 public:
 	EQEmuLogSys();
@@ -216,7 +219,8 @@ public:
 	 * This should be handled on deconstructor but to be safe we use it anyways.
 	 */
 	void CloseFileLogs();
-	void LoadLogSettingsDefaults();
+	EQEmuLogSys *LoadLogSettingsDefaults();
+	EQEmuLogSys *LoadLogDatabaseSettings();
 
 	/**
 	 * @param directory_name
@@ -246,7 +250,7 @@ public:
 	 * Used in file logs to prepend a timestamp entry for logs
 	 * @param time_stamp
 	 */
-	void SetCurrentTimeStamp(char* time_stamp);
+	void SetCurrentTimeStamp(char *time_stamp);
 
 	/**
 	 * @param log_name
@@ -273,101 +277,53 @@ public:
 	/**
 	 * Internally used memory reference for all log settings per category
 	 * These are loaded via DB and have defaults loaded in LoadLogSettingsDefaults
-	 * Database loaded via Database::LoadLogSettings(log_settings)
+	 * Database loaded via LogSys.SetDatabase(&database)->LoadLogDatabaseSettings();
 	*/
 	LogSettings log_settings[Logs::LogCategory::MaxCategoryID]{};
 
 	bool file_logs_enabled = false;
 
-	/**
-	 * Sets Executable platform (Zone/World/UCS) etc.
-	 */
-	int log_platform = 0;
+	int                                                                               log_platform = 0;
+	std::string                                                                       platform_file_name;
 
-	/**
-	 * File name used in writing logs
-	 */
-	std::string platform_file_name;
 
-	/**
-	 * GMSay Client Message colors mapped by category
-	 *
-	 * @param log_category
-	 * @return
-	 */
+	// gmsay
 	uint16 GetGMSayColorFromCategory(uint16 log_category);
 
-	/**
-	 * @param f
-	 */
-	void SetGMSayHandler(std::function<void(uint16 log_type, const std::string&)> f) { on_log_gmsay_hook = f; }
+	EQEmuLogSys * SetGMSayHandler(std::function<void(uint16 log_type, const std::string &)> f) {
+		on_log_gmsay_hook = f;
+		return this;
+	}
 
-	/**
-	 * @param f
-	 */
-	void SetConsoleHandler(std::function<void(uint16 debug_level, uint16 log_type, const std::string&)> f) { on_log_console_hook = f; }
-
-	/**
-	 * Silence console logging
-	 */
+	// console
+	void SetConsoleHandler(
+		std::function<void(
+			uint16 debug_level,
+			uint16 log_type,
+			const std::string &
+		)> f
+	) { on_log_console_hook = f; }
 	void SilenceConsoleLogging();
-
-	/**
-	 * Turn on all console logging
-	 */
 	void EnableConsoleLogging();
+
+	// database
+	EQEmuLogSys *SetDatabase(Database *db);
 
 private:
 
-	/**
-	 * Callback pointer to zone process for hooking logs to zone using GMSay
-	 */
-	std::function<void(uint16 log_category, const std::string&)> on_log_gmsay_hook;
-	std::function<void(uint16 debug_level, uint16 log_category, const std::string&)> on_log_console_hook;
+	// reference to database
+	Database *m_database;
 
-	/**
-	 * Formats log messages like '[Category] This is a log message'
-	 */
+	std::function<void(uint16 log_category, const std::string &)>                     on_log_gmsay_hook;
+	std::function<void(uint16 debug_level, uint16 log_category, const std::string &)> on_log_console_hook;
+
 	std::string FormatOutMessageString(uint16 log_category, const std::string &in_message);
-
-	/**
-	 * Linux console color messages mapped by category
-	 *
-	 * @param log_category
-	 * @return
-	 */
 	std::string GetLinuxConsoleColorFromCategory(uint16 log_category);
-
-	/**
-	 * Windows console color messages mapped by category
-	 */
 	uint16 GetWindowsConsoleColorFromCategory(uint16 log_category);
 
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
 	void ProcessConsoleMessage(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
 	void ProcessGMSay(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param debug_level
-	 * @param log_category
-	 * @param message
-	 */
 	void ProcessLogWrite(uint16 debug_level, uint16 log_category, const std::string &message);
-
-	/**
-	 * @param log_category
-	 * @return
-	 */
 	bool IsRfc5424LogCategory(uint16 log_category);
 };
 

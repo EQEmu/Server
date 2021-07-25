@@ -120,9 +120,9 @@ int main(int argc, char **argv)
 		content_db.SetMysql(database.getMySQL());
 	}
 
-	/* Register Log System and Settings */
-	database.LoadLogSettings(LogSys.log_settings);
-	LogSys.StartFileLogs();
+	LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings()
+		->StartFileLogs();
 
 	std::string shared_mem_directory = Config->SharedMemDir;
 	if (MakeDirectory(shared_mem_directory)) {
