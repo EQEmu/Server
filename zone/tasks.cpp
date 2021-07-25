@@ -19,7 +19,7 @@ void Client::LoadClientTaskState()
 			safe_delete(task_state);
 		}
 
-		task_state = new ClientTaskState;
+		task_state = new ClientTaskState();
 		if (!task_manager->LoadClientState(this, task_state)) {
 			safe_delete(task_state);
 		}

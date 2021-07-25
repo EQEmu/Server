@@ -122,7 +122,7 @@ private:
 			ClientTaskInformation m_active_shared_task; // only one
 			ClientTaskInformation m_active_quests[MAXACTIVEQUESTS];
 		};
-		ClientTaskInformation m_active_tasks[MAXACTIVEQUESTS + 2];
+		ClientTaskInformation m_active_tasks[MAXACTIVEQUESTS + 2] = {};
 	};
 	// Shared tasks should be limited to 1 as well
 	int                                   m_active_task_count;
