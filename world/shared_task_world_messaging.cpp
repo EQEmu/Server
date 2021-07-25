@@ -194,7 +194,6 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					);
 
 					std::string character_name = r->player_name;
-//					shared_task_manager.AddPlayerByPlayerName(t, character_name);
 					shared_task_manager.InvitePlayerByPlayerName(t, character_name);
 				}
 			}
@@ -223,7 +222,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				if (r->accepted)
 				{
-					shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
+					shared_task_manager.AddPlayerByCharacterIdAndName(t, r->source_character_id, r->player_name);
 				}
 				else
 				{

@@ -1,5 +1,4 @@
 #include "shared_task_manager.h"
-#include "../common/repositories/character_task_timers_repository.h"
 #include "cliententry.h"
 #include "clientlist.h"
 #include "dynamic_zone.h"
@@ -7,6 +6,8 @@
 #include "zonelist.h"
 #include "zoneserver.h"
 #include "shared_task_world_messaging.h"
+#include "../common/repositories/character_data_repository.h"
+#include "../common/repositories/character_task_timers_repository.h"
 #include "../common/repositories/shared_task_members_repository.h"
 #include "../common/repositories/shared_task_activity_state_repository.h"
 #include "../common/repositories/completed_shared_tasks_repository.h"
@@ -34,18 +35,19 @@ SharedTaskManager *SharedTaskManager::SetContentDatabase(Database *db)
 
 std::vector<SharedTaskMember> SharedTaskManager::GetRequestMembers(
 	uint32 requestor_character_id,
-	const std::vector<uint32_t> &character_ids
+	const std::vector<CharacterDataRepository::CharacterData>& characters
 )
 {
 	std::vector<SharedTaskMember> request_members = {};
-	request_members.reserve(character_ids.size());
+	request_members.reserve(characters.size());
 
-	for (auto &id: character_ids) {
+	for (const auto& character : characters) {
 		SharedTaskMember member = {};
-		member.character_id = id;
+		member.character_id   = character.id;
+		member.character_name = character.name;
 
 		// if the solo/raid/group member is a leader, make sure we tag it as such
-		if (id == requestor_character_id) {
+		if (character.id == requestor_character_id) {
 			member.is_leader = true;
 		}
 
@@ -77,7 +79,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		return;
 	}
 
-	auto request_members = GetRequestMembers(requested_character_id, request.character_ids);
+	auto request_members = GetRequestMembers(requested_character_id, request.characters);
 	if (!request_members.empty()) {
 		for (auto &m: request_members) {
 			LogTasksDetail(
@@ -346,6 +348,19 @@ void SharedTaskManager::LoadSharedTaskState()
 	// eager load all member state data
 	auto shared_task_members_data = SharedTaskMembersRepository::All(*m_database);
 
+	// load character data for member names
+	std::vector<CharacterDataRepository::CharacterData> shared_task_character_data;
+	if (!shared_task_members_data.empty())
+	{
+		std::vector<uint32_t> character_ids;
+		for (const auto& m: shared_task_members_data) {
+			character_ids.emplace_back(m.character_id);
+		}
+
+		shared_task_character_data = CharacterDataRepository::GetWhere(*m_database,
+			fmt::format("id IN ({})", fmt::join(character_ids, ",")));
+	}
+
 	auto shared_task_dynamic_zones_data = SharedTaskDynamicZonesRepository::All(*m_database);
 
 	// load shared tasks not already completed
@@ -421,12 +436,22 @@ void SharedTaskManager::LoadSharedTaskState()
 				member.character_id = m.character_id;
 				member.is_leader    = (m.is_leader ? 1 : 0);
 
+				auto it = std::find_if(shared_task_character_data.begin(), shared_task_character_data.end(),
+					[&](const CharacterDataRepository::CharacterData& character) {
+						return character.id == m.character_id;
+					});
+
+				if (it != shared_task_character_data.end()) {
+					member.character_name = it->name;
+				}
+
 				shared_task_members.emplace_back(member);
 
 				LogTasksDetail(
-					"[LoadSharedTaskState] shared_task_id [{}] adding member character_id [{}] is_leader [{}]",
+					"[LoadSharedTaskState] shared_task_id [{}] adding member character_id [{}] character_name [{}] is_leader [{}]",
 					s.id,
 					member.character_id,
+					member.character_name,
 					member.is_leader
 				);
 
@@ -958,20 +983,6 @@ void SharedTaskManager::SaveMembers(SharedTask *s, std::vector<SharedTaskMember>
 	SharedTaskMembersRepository::InsertMany(*m_database, dm);
 }
 
-void SharedTaskManager::AddPlayerByPlayerName(SharedTask *s, const std::string &character_name)
-{
-	auto character = CharacterDataRepository::GetWhere(
-		*m_database,
-		fmt::format("`name` = '{}' LIMIT 1", EscapeString(character_name))
-	);
-
-	if (!character.empty()) {
-		int64 character_id = character[0].id;
-
-		AddPlayerByCharacterId(s, character_id);
-	}
-}
-
 void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::string &player_name)
 {
 	auto character = CharacterDataRepository::GetWhere(
@@ -1031,7 +1042,7 @@ void SharedTaskManager::SendSharedTaskInvitePacket(SharedTask *s, int64 invited_
 	}
 }
 
-void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id)
+void SharedTaskManager::AddPlayerByCharacterIdAndName(SharedTask *s, int64 character_id, const std::string& character_name)
 {
 	// fetch
 	std::vector<SharedTaskMember> members = s->GetMembers();
@@ -1039,6 +1050,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 	// create
 	auto new_member = SharedTaskMember{};
 	new_member.character_id = character_id;
+	new_member.character_name = character_name;
 
 	bool does_member_exist = false;
 
@@ -1048,7 +1060,7 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		}
 	}
 
-	if (!does_member_exist && CanAddPlayer(s, character_id, {}, true)) {
+	if (!does_member_exist && CanAddPlayer(s, character_id, character_name, true)) {
 		members.push_back(new_member);
 
 		// add request timer (validation will prevent non-expired duplicates)
@@ -1078,10 +1090,8 @@ void SharedTaskManager::AddPlayerByCharacterId(SharedTask *s, int64 character_id
 		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 			if (dz) {
-				auto        cle            = client_list.FindCLEByCharacterID(new_member.character_id);
-				std::string character_name = cle ? cle->name() : ""; // must be in cle to have accepted invite
-				auto        status         = DynamicZoneMemberStatus::Online;
-				dz->AddMember({static_cast<uint32_t>(character_id), character_name, status});
+				auto status = DynamicZoneMemberStatus::Online;
+				dz->AddMember({static_cast<uint32_t>(character_id), character_name, status });
 			}
 		}
 	}

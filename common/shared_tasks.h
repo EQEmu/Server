@@ -72,6 +72,7 @@ struct ServerSharedTaskAttemptRemove_Struct {
 // used in the shared task request process (currently)
 struct SharedTaskMember {
 	uint32      character_id = 0;
+	std::string character_name;
 	bool        is_leader    = false;
 };
 

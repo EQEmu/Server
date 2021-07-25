@@ -28,7 +28,7 @@ public:
 
 	// gets group / raid members belonging to requested character
 	// this may change later depending on how shared tasks develop
-	std::vector<SharedTaskMember> GetRequestMembers(uint32 requestor_character_id, const std::vector<uint32_t>& character_ids);
+	std::vector<SharedTaskMember> GetRequestMembers(uint32 requestor_character_id, const std::vector<CharacterDataRepository::CharacterData>& characters);
 
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
@@ -58,8 +58,7 @@ public:
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string& character_name);
-	void AddPlayerByPlayerName(SharedTask *s, const std::string& character_name);
-	void AddPlayerByCharacterId(SharedTask *s, int64 character_id);
+	void AddPlayerByCharacterIdAndName(SharedTask *s, int64 character_id, const std::string& character_name);
 	void InvitePlayerByPlayerName(SharedTask *s, const std::string& player_name);
 
 	// invitations
