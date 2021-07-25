@@ -962,7 +962,7 @@ void SharedTaskManager::AddPlayerByPlayerName(SharedTask *s, const std::string &
 {
 	auto character = CharacterDataRepository::GetWhere(
 		*m_database,
-		fmt::format("`name` LIKE '%%{}%%' LIMIT 1", EscapeString(character_name))
+		fmt::format("`name` = '{}' LIMIT 1", EscapeString(character_name))
 	);
 
 	if (!character.empty()) {
@@ -976,19 +976,18 @@ void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::strin
 {
 	auto character = CharacterDataRepository::GetWhere(
 		*m_database,
-		fmt::format("`name` LIKE '%%{}%%' LIMIT 1", EscapeString(player_name))
+		fmt::format("`name` = '{}' LIMIT 1", EscapeString(player_name))
 	);
 
-	if (!character.empty()) {
-		int64 character_id = character[0].id;
+	auto character_id = !character.empty() ? character.front().id : 0;
 
-		if (CanAddPlayer(s, character_id, character.front().name, false)) {
-			// send dialogue window
-			SendSharedTaskInvitePacket(s, character_id);
+	// we call validation even for an invalid player so error messages occur
+	if (CanAddPlayer(s, character_id, player_name, false)) {
+		// send dialogue window
+		SendSharedTaskInvitePacket(s, character_id);
 
-			// keep track of active invitations at world
-			QueueActiveInvitation(s->GetDbSharedTask().id, character_id);
-		}
+		// keep track of active invitations at world
+		QueueActiveInvitation(s->GetDbSharedTask().id, character_id);
 	}
 }
 
