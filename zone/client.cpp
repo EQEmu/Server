@@ -10129,3 +10129,10 @@ void Client::SetAFK(uint8 afk_flag) {
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 }
+
+void Client::SetAdminStatus(int newStatus) {
+	if (this->Admin() != newStatus)
+		database.UpdateGMStatus(this->AccountID(), newStatus);
+
+	return;
+}
