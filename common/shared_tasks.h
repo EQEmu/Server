@@ -133,6 +133,8 @@ struct ServerSharedTaskMakeLeader_Struct {
 struct ServerSharedTaskInviteAccepted_Struct {
 	uint32 source_character_id;
 	uint32 shared_task_id;
+	bool   accepted;
+	char   player_name[64];
 };
 
 struct ServerSharedTaskCreateDynamicZone_Struct {

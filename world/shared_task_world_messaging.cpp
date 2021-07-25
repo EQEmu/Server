@@ -205,9 +205,10 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			auto *r = (ServerSharedTaskInviteAccepted_Struct *) pack->pBuffer;
 
 			LogTasksDetail(
-				"[ServerOP_SharedTaskInviteAcceptedPlayer] Received request from source_character_id [{}] shared_task_id [{}]",
+				"[ServerOP_SharedTaskInviteAcceptedPlayer] Received request from source_character_id [{}] shared_task_id [{}] accepted [{}]",
 				r->source_character_id,
-				r->shared_task_id
+				r->shared_task_id,
+				r->accepted
 			);
 
 			auto t = shared_task_manager.FindSharedTaskById(r->shared_task_id);
@@ -219,7 +220,15 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 				);
 
 				shared_task_manager.RemoveActiveInvitation(r->shared_task_id, r->source_character_id);
-				shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
+
+				if (r->accepted)
+				{
+					shared_task_manager.AddPlayerByCharacterId(t, r->source_character_id);
+				}
+				else
+				{
+					shared_task_manager.SendLeaderMessageID(t, Chat::Red, SharedTaskMessage::PLAYER_DECLINED_OFFER, { r->player_name });
+				}
 			}
 			break;
 		}

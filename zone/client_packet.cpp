@@ -15440,32 +15440,29 @@ void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
 		r->accepted
 	);
 
-	// TODO: Inform original client we rejected if we did not accept
-	if (r->accepted > 0) {
-		LogTasks("[Handle_OP_SharedTaskInviteResponse] Accepted");
+	// struct
+	auto p = new ServerPacket(
+		ServerOP_SharedTaskInviteAcceptedPlayer,
+		sizeof(ServerSharedTaskInviteAccepted_Struct)
+	);
 
-		// struct
-		auto p = new ServerPacket(
-			ServerOP_SharedTaskInviteAcceptedPlayer,
-			sizeof(ServerSharedTaskInviteAccepted_Struct)
-		);
+	auto *c = (ServerSharedTaskInviteAccepted_Struct *) p->pBuffer;
 
-		auto *c = (ServerSharedTaskInviteAccepted_Struct *) p->pBuffer;
+	// fill
+	c->source_character_id = CharacterID();
+	c->shared_task_id      = r->invite_id;
+	c->accepted            = r->accepted;
+	strn0cpy(c->player_name, GetName(), sizeof(c->player_name));
 
-		// fill
-		c->source_character_id = CharacterID();
-		c->shared_task_id      = r->invite_id;
+	LogTasks(
+		"[ServerOP_SharedTaskInviteAcceptedPlayer] source_character_id [{}] shared_task_id [{}]",
+		c->source_character_id,
+		c->shared_task_id
+	);
 
-		LogTasks(
-			"[ServerOP_SharedTaskInviteAcceptedPlayer] source_character_id [{}] shared_task_id [{}]",
-			c->source_character_id,
-			c->shared_task_id
-		);
-
-		// send
-		worldserver.SendPacket(p);
-		safe_delete(p);
-	}
+	// send
+	worldserver.SendPacket(p);
+	safe_delete(p);
 }
 
 void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
