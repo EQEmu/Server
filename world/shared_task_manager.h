@@ -6,6 +6,12 @@
 
 class DynamicZone;
 
+namespace EQ {
+	namespace Net {
+		class DynamicPacket;
+	}
+}
+
 struct SharedTaskActiveInvitation {
 	uint32 shared_task_id;
 	uint32 character_id;
@@ -52,7 +58,8 @@ public:
 	bool IsSharedTaskLeader(SharedTask *s, uint32 character_id);
 	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
-	void SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id);
+	void SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember>& members);
+	void SendSharedTaskMemberList(uint32 character_id, const EQ::Net::DynamicPacket& serialized_members);
 	void SendSharedTaskMemberChange(uint32 character_id, int64 shared_task_id, const std::string& player_name, bool removed);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();

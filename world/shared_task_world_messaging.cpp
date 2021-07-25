@@ -98,7 +98,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 
 				shared_task_manager.SendSharedTaskMemberList(
 					r->source_character_id,
-					t->GetDbSharedTask().id
+					t->GetMembers()
 				);
 			}
 

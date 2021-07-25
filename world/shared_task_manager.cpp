@@ -198,8 +198,8 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 			npc_context_id,
 			shared_task_entity.accepted_time
 		);
-		SendSharedTaskMemberList(m.character_id, new_shared_task.GetDbSharedTask().id);
 	}
+	SendSharedTaskMemberListToAllMembers(&new_shared_task);
 
 	LogTasks(
 		"[AttemptSharedTaskCreation] shared_task_id [{}] created successfully | task_id [{}] member_count [{}] activity_count [{}] current tasks in state [{}]",
@@ -761,18 +761,26 @@ void SharedTaskManager::SendRemovePlayerFromSharedTaskPacket(
 	}
 }
 
-void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id)
+void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember>& members)
+{
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, members);
+
+	SendSharedTaskMemberList(character_id, dyn_pack);
+}
+
+void SharedTaskManager::SendSharedTaskMemberList(uint32 character_id, const EQ::Net::DynamicPacket& serialized_members)
 {
 	// send member list packet
-	// TODO: move this to serialized list sent over the wire
 	auto p = std::make_unique<ServerPacket>(
 		ServerOP_SharedTaskMemberlist,
-		sizeof(ServerSharedTaskMemberListPacket_Struct)
+		sizeof(ServerSharedTaskMemberListPacket_Struct) + serialized_members.Length()
 	);
 
 	auto d = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(p->pBuffer);
 	d->destination_character_id = character_id;
-	d->shared_task_id           = shared_task_id;
+	d->cereal_size = static_cast<uint32_t>(serialized_members.Length());
+	memcpy(d->cereal_serialized_members, serialized_members.Data(), serialized_members.Length());
 
 	// send memberlist
 	ClientListEntry *cle = client_list.FindCLEByCharacterID(character_id);
@@ -907,10 +915,14 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, co
 
 void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
 {
+	// serialize once so we don't re-serialize it for every member
+	EQ::Net::DynamicPacket dyn_pack;
+	dyn_pack.PutSerialize(0, s->GetMembers());
+
 	for (auto &m: s->GetMembers()) {
 		SendSharedTaskMemberList(
 			m.character_id,
-			s->GetDbSharedTask().id
+			dyn_pack
 		);
 	}
 }

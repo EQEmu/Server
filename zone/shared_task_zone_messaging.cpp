@@ -76,54 +76,33 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 		case ServerOP_SharedTaskMemberlist: {
 			auto p = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(pack->pBuffer);
 
-			LogTasks(
-				"[ServerOP_SharedTaskMemberlist] We're back in zone and I'm searching for [{}]",
-				p->destination_character_id,
-				sizeof(pack->pBuffer)
-			);
-
-
-			// temp hack until we make this better
-			auto characters = CharacterDataRepository::GetWhere(
-				database,
-				fmt::format(
-					"id IN (select character_id from shared_task_members where shared_task_id = {})",
-					p->shared_task_id
-				)
-			);
-
-			auto members = SharedTaskMembersRepository::GetWhere(
-				database,
-				fmt::format("shared_task_id = {}", p->shared_task_id)
-			);
-
-			SerializeBuffer buf(sizeof(SharedTaskMemberList_Struct) + 15 * members.size());
-			buf.WriteInt32(0); // unknown ids
-			buf.WriteInt32(0);
-			buf.WriteInt32((int32) members.size());
-
-			for (auto &c : characters) {
-				buf.WriteString(c.name);
-				buf.WriteInt32(0); // monster mission
-
-				bool      is_leader = false;
-				for (auto &m: members) {
-					if (m.character_id == c.id && m.is_leader) {
-						is_leader = true;
-					}
-				}
-
-				buf.WriteInt8((int8) (is_leader ? 1 : 0));
-			}
+			LogTasks("[ServerOP_SharedTaskMemberlist] We're back in zone and I'm searching for [{}]", p->destination_character_id);
 
 			// find character and route packet
 			auto c = entity_list.GetClientByCharID(p->destination_character_id);
 			if (c) {
 				LogTasks("[ServerOP_SharedTaskMemberlist] We're back in zone and I found [{}]", c->GetCleanName());
 
-				auto outapp = new EQApplicationPacket(OP_SharedTaskMemberList, buf);
-				c->QueuePacket(outapp);
-				safe_delete(outapp);
+				std::vector<SharedTaskMember> members;
+
+				// deserialize members from world
+				EQ::Util::MemoryStreamReader ss(p->cereal_serialized_members, p->cereal_size);
+				cereal::BinaryInputArchive archive(ss);
+				archive(members);
+
+				SerializeBuffer buf(sizeof(SharedTaskMemberList_Struct) + 15 * members.size());
+				buf.WriteInt32(0); // unknown ids
+				buf.WriteInt32(0);
+				buf.WriteInt32((int32) members.size());
+
+				for (auto &m : members) {
+					buf.WriteString(m.character_name);
+					buf.WriteInt32(0); // monster mission
+					buf.WriteInt8(m.is_leader ? 1 : 0);
+				}
+
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_SharedTaskMemberList, buf);
+				c->QueuePacket(outapp.get());
 			}
 
 			break;

@@ -76,6 +76,12 @@ struct SharedTaskMember {
 	uint32      character_id = 0;
 	std::string character_name;
 	bool        is_leader    = false;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(character_id, character_name, is_leader);
+	}
 };
 
 // used in shared task requests to validate group/raid members
@@ -91,7 +97,8 @@ struct SharedTaskRequestCharacters {
 // builds the buffer and sends to clients directly
 struct ServerSharedTaskMemberListPacket_Struct {
 	uint32 destination_character_id;
-	uint32 shared_task_id;
+	uint32 cereal_size;
+	char   cereal_serialized_members[0]; // serialized member list using cereal
 };
 
 struct ServerSharedTaskMemberChangePacket_Struct {
