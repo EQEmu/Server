@@ -157,6 +157,7 @@ public:
 	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
 
 	void AddCharacterToMemberHistory(uint32_t character_id);
+	SharedTaskMember FindMemberFromCharacterName(const std::string& character_name) const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 

@@ -236,14 +236,11 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 			if (!IsSharedTaskLeader(t, requested_character_id)) {
 				for (auto &m: t->GetMembers()) {
 					if (m.is_leader) {
-						auto c = CharacterDataRepository::FindOne(*m_database, m.character_id);
-						if (c.id != 0) {
-							client_list.SendCharacterMessageID(
-								requested_character_id,
-								Chat::Red,
-								SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {c.name}
-							);
-						}
+						client_list.SendCharacterMessageID(
+							requested_character_id,
+							Chat::Red,
+							SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {m.character_name}
+						);
 						break;
 					}
 				}
@@ -870,40 +867,27 @@ void SharedTaskManager::PrintSharedTaskState()
 
 void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string &character_name)
 {
-	auto character = CharacterDataRepository::GetWhere(
-		*m_database,
-		fmt::format("`name` = '{}' LIMIT 1", EscapeString(character_name))
+	auto member = s->FindMemberFromCharacterName(character_name);
+	if (member.character_id == 0)
+	{
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::IS_NOT_MEMBER, { character_name });
+		return;
+	}
+
+	LogTasksDetail(
+		"[RemovePlayerFromSharedTaskByPlayerName] shared_task_id [{}] character_name [{}]",
+		s->GetDbSharedTask().id,
+		character_name
 	);
 
-	if (!character.empty()) {
-		int64 character_id = character[0].id;
+	RemovePlayerFromSharedTask(s, member.character_id);
+	SendRemovePlayerFromSharedTaskPacket(
+		member.character_id,
+		s->GetDbSharedTask().task_id,
+		true
+	);
 
-		for (auto &m: s->GetMembers()) {
-			LogTasksDetail(
-				"[RemovePlayerFromSharedTaskByPlayerName] character_id [{}] m.character_name [{}]",
-				character_id,
-				m.character_id
-			);
-
-			// not leader being removed
-			if (character_id == m.character_id) {
-				LogTasksDetail(
-					"[RemovePlayerFromSharedTaskByPlayerName] shared_task_id [{}] character_name [{}]",
-					s->GetDbSharedTask().id,
-					character_name
-				);
-
-				RemovePlayerFromSharedTask(s, m.character_id);
-				SendRemovePlayerFromSharedTaskPacket(
-					m.character_id,
-					s->GetDbSharedTask().task_id,
-					true
-				);
-			}
-		}
-
-		SendSharedTaskMemberListToAllMembers(s);
-	}
+	SendSharedTaskMemberListToAllMembers(s);
 }
 
 void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
@@ -918,48 +902,47 @@ void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
 
 void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string &character_name)
 {
-	auto character = CharacterDataRepository::GetWhere(
-		*m_database,
-		fmt::format("`name` = '{}' LIMIT 1", EscapeString(character_name))
-	);
+	auto new_leader = s->FindMemberFromCharacterName(character_name);
+	if (new_leader.character_id == 0)
+	{
+		SendLeaderMessageID(s, Chat::Red, SharedTaskMessage::IS_NOT_MEMBER, { character_name });
+		return;
+	}
 
-	if (!character.empty()) {
-		int64 character_id     = character[0].id;
-		bool  found_new_leader = false;
+	bool found_new_leader = false;
 
-		std::vector<SharedTaskMember> members = s->GetMembers();
-		for (auto                     &m: members) {
+	std::vector<SharedTaskMember> members = s->GetMembers();
+	for (auto                     &m: members) {
+		LogTasksDetail(
+			"[MakeLeaderByPlayerName] character_id [{}] m.character_id [{}]",
+			new_leader.character_id,
+			m.character_id
+		);
+
+		m.is_leader = false;
+
+		// destination character is in shared task, make swap
+		if (new_leader.character_id == m.character_id) {
+			found_new_leader = true;
 			LogTasksDetail(
-				"[MakeLeaderByPlayerName] character_id [{}] m.character_name [{}]",
-				character_id,
-				m.character_id
+				"[MakeLeaderByPlayerName] shared_task_id [{}] character_name [{}]",
+				s->GetDbSharedTask().id,
+				character_name
 			);
 
-			m.is_leader = false;
-
-			// destination character is in shared task, make swap
-			if (character_id == m.character_id) {
-				found_new_leader = true;
-				LogTasksDetail(
-					"[MakeLeaderByPlayerName] shared_task_id [{}] character_name [{}]",
-					s->GetDbSharedTask().id,
-					character_name
-				);
-
-				m.is_leader = true;
-			}
+			m.is_leader = true;
 		}
+	}
 
-		if (found_new_leader) {
-			s->SetMembers(members);
-			SaveMembers(s, members);
-			SendSharedTaskMemberListToAllMembers(s);
+	if (found_new_leader) {
+		s->SetMembers(members);
+		SaveMembers(s, members);
+		SendSharedTaskMemberListToAllMembers(s);
 
-			for (const auto &dz_id : s->dynamic_zone_ids) {
-				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
-				if (dz) {
-					dz->SetNewLeader(static_cast<uint32_t>(character_id));
-				}
+		for (const auto &dz_id : s->dynamic_zone_ids) {
+			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+			if (dz) {
+				dz->SetNewLeader(static_cast<uint32_t>(new_leader.character_id));
 			}
 		}
 	}
@@ -1171,18 +1154,11 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 
 void SharedTaskManager::CreateDynamicZone(SharedTask *shared_task, DynamicZone &dz_request)
 {
-	// get names from db in case of offline members
-	auto characters = CharacterDataRepository::GetWhere(
-		*m_database, fmt::format(
-			"id IN (select character_id from shared_task_members where shared_task_id = {})",
-			shared_task->GetDbSharedTask().id
-		));
-
 	std::vector<DynamicZoneMember> dz_members;
-	for (const auto                &member : characters) {
-		dz_members.emplace_back(member.id, member.name);
-		if (IsSharedTaskLeader(shared_task, member.id)) {
-			dz_request.SetLeader({static_cast<uint32_t>(member.id), member.name});
+	for (const auto& member : shared_task->GetMembers()) {
+		dz_members.emplace_back(member.character_id, member.character_name);
+		if (member.is_leader) {
+			dz_request.SetLeader({ member.character_id, member.character_name });
 		}
 	}
 
