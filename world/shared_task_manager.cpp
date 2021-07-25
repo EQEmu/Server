@@ -274,12 +274,7 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 				{"Everyone", task.title}
 			);
 
-			for (const auto &dz_id : t->dynamic_zone_ids) {
-				auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
-				if (dz) {
-					dz->RemoveAllMembers();
-				}
-			}
+			RemoveAllMembersFromDynamicZones(t);
 
 			// persistence
 			DeleteSharedTask(t->GetDbSharedTask().id, requested_character_id);
@@ -1699,9 +1694,25 @@ std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::
 
 void SharedTaskManager::PurgeAllSharedTasks()
 {
+	for (auto& shared_task : m_shared_tasks)
+	{
+		RemoveAllMembersFromDynamicZones(&shared_task);
+	}
+
 	SharedTasksRepository::Truncate(*m_database);
 	SharedTaskMembersRepository::Truncate(*m_database);
 	SharedTaskActivityStateRepository::Truncate(*m_database);
+	SharedTaskDynamicZonesRepository::Truncate(*m_database);
 
 	LoadSharedTaskState();
+}
+
+void SharedTaskManager::RemoveAllMembersFromDynamicZones(SharedTask* s)
+{
+	for (const auto &dz_id : s->dynamic_zone_ids) {
+		auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+		if (dz) {
+			dz->RemoveAllMembers();
+		}
+	}
 }

@@ -96,6 +96,7 @@ protected:
 	void SendMembersMessage(SharedTask* s, int chat_type, const std::string& message);
 	void SendMembersMessageID(SharedTask* s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
 	void RecordSharedTaskCompletion(SharedTask *s);
+	void RemoveAllMembersFromDynamicZones(SharedTask* s);
 
 	// memory search
 	std::vector<uint32_t> FindCharactersInSharedTasks(const std::vector<uint32_t>& find_characters);
