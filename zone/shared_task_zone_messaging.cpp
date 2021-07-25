@@ -128,7 +128,31 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 			break;
 		}
+		case ServerOP_SharedTaskMemberChange: {
+			auto p = reinterpret_cast<ServerSharedTaskMemberChangePacket_Struct*>(pack->pBuffer);
 
+			LogTasksDetail("[ServerOP_SharedTaskMemberChange] Searching for [{}]", p->destination_character_id);
+
+			auto c = entity_list.GetClientByCharID(p->destination_character_id);
+			if (c)
+			{
+				LogTasksDetail("[ServerOP_SharedTaskMemberChange] Found [{}]", c->GetCleanName());
+
+				SerializeBuffer buf;
+				buf.WriteInt32(0);                 // unique character id of receiver, leave 0 for emu
+				buf.WriteInt32(0);                 // unknown, seen 50, 4, 0
+				buf.WriteInt8(p->removed ? 0 : 1); // 0: removed 1: added
+				buf.WriteString(p->player_name);
+
+				// live sends more after the name but it might just be garbage from
+				// a re-used buffer (possibly a former name[64] buffer?)
+
+				auto outapp = std::make_unique<EQApplicationPacket>(OP_SharedTaskMemberChange, buf);
+				c->QueuePacket(outapp.get());
+			}
+
+			break;
+		}
 		case ServerOP_SharedTaskInvitePlayer: {
 			auto p = reinterpret_cast<ServerSharedTaskInvitePlayer_Struct *>(pack->pBuffer);
 			auto c = entity_list.GetClientByCharID(p->requested_character_id);

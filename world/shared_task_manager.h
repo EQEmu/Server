@@ -53,6 +53,7 @@ public:
 	void SendAcceptNewSharedTaskPacket(uint32 character_id, uint32 task_id, uint32_t npc_context_id, int accept_time);
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
 	void SendSharedTaskMemberList(uint32 character_id, int64 shared_task_id);
+	void SendSharedTaskMemberChange(uint32 character_id, int64 shared_task_id, const std::string& player_name, bool removed);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name);
@@ -94,6 +95,8 @@ protected:
 	bool CanAddPlayer(SharedTask* s, uint32_t character_id, std::string player_name, bool accepted);
 	bool CanRequestSharedTask(uint32_t task_id, uint32_t character_id, const SharedTaskRequestCharacters& request);
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
+	void SendSharedTaskMemberAddedToAllMembers(SharedTask *s, const std::string& player_name);
+	void SendSharedTaskMemberRemovedToAllMembers(SharedTask *s, const std::string& player_name);
 	void SaveMembers(SharedTask *s, std::vector<SharedTaskMember> members);
 	void SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id);
 	void RecordSharedTaskCompletion(SharedTask *s);

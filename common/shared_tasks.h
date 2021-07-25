@@ -35,6 +35,7 @@
 #define ServerOP_SharedTaskCreateDynamicZone        0x0311 // zone -> world
 #define ServerOP_SharedTaskPurgeAllCommand          0x0312 // zone -> world
 #define ServerOP_SharedTaskPlayerList               0x0313 // zone -> world /taskplayerlist command
+#define ServerOP_SharedTaskMemberChange             0x0314 // world -> zone. Send shared task single member added/removed (client also handles message)
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -91,6 +92,13 @@ struct SharedTaskRequestCharacters {
 struct ServerSharedTaskMemberListPacket_Struct {
 	uint32 destination_character_id;
 	uint32 shared_task_id;
+};
+
+struct ServerSharedTaskMemberChangePacket_Struct {
+	uint32 destination_character_id;
+	uint32 shared_task_id;
+	bool   removed;
+	char   player_name[64];
 };
 
 struct SharedTaskActivityStateEntry {
@@ -157,6 +165,7 @@ public:
 	static SharedTaskRequestCharacters GetRequestCharacters(Database& db, uint32_t requested_character_id);
 
 	void AddCharacterToMemberHistory(uint32_t character_id);
+	SharedTaskMember FindMemberFromCharacterID(uint32_t character_id) const;
 	SharedTaskMember FindMemberFromCharacterName(const std::string& character_name) const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;

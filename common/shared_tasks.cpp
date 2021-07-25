@@ -102,6 +102,16 @@ void SharedTask::AddCharacterToMemberHistory(uint32_t character_id)
 	}
 }
 
+SharedTaskMember SharedTask::FindMemberFromCharacterID(uint32_t character_id) const
+{
+	auto it = std::find_if(m_members.begin(), m_members.end(),
+		[&](const SharedTaskMember& member) {
+			return member.character_id == character_id;
+		});
+
+	return it != m_members.end() ? *it : SharedTaskMember{};
+}
+
 SharedTaskMember SharedTask::FindMemberFromCharacterName(const std::string& character_name) const
 {
 	auto it = std::find_if(m_members.begin(), m_members.end(),
