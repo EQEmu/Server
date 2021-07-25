@@ -8,6 +8,7 @@
 #include "string_ids.h"
 #include "tasks.h"
 #include "zonedb.h"
+#include "../common/repositories/character_task_timers_repository.h"
 
 extern QueryServ *QServ;
 
@@ -152,4 +153,9 @@ void Client::StartTaskRequestCooldownTimer()
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_TaskRequestTimer, size);
 	outapp->WriteUInt32(milliseconds);
 	QueuePacket(outapp.get());
+}
+
+void Client::PurgeTaskTimers()
+{
+	CharacterTaskTimersRepository::DeleteWhere(database, fmt::format("character_id = {}", CharacterID()));
 }
