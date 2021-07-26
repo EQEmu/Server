@@ -224,6 +224,11 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
+	if (!HarmonySpellLevelCheck(spell_id, target_id)) {
+		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
+		return false;
+	}
+
 	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
 	{
 		for(int i = 0; i < EFFECT_COUNT; i++) {

@@ -7415,3 +7415,25 @@ void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 		MessageString(Chat::SpellFailure,FD_CAST_ON);
 	}
 }
+
+bool Mob::HarmonySpellLevelCheck(int32 spell_id, int target_id)
+{
+	//'this' = caster of spell
+	if (IsClient() && IsHarmonySpell(spell_id))
+	{
+		Mob *target = entity_list.GetMobID(target_id);
+
+		if (!target)
+			return false;
+
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+			// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
+			if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
+				if ((spells[spell_id].max[i] != 0 && target->GetLevel() > spells[spell_id].max[i]) || target->GetSpecialAbility(IMMUNE_PACIFY)) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}

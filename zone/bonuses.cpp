@@ -1715,7 +1715,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ChangeFrenzyRad:
 			{
-				// redundant to have level check here
+				if (max != 0 && GetLevel() > max)
+					break;
+
 				if(new_bonus->AggroRange == -1 || effect_value < new_bonus->AggroRange)
 				{
 					new_bonus->AggroRange = static_cast<float>(effect_value);
@@ -1725,6 +1727,8 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_Harmony:
 			{
+				if (max != 0 && GetLevel() > max)
+					break;
 				// Harmony effect as buff - kinda tricky
 				// harmony could stack with a lull spell, which has better aggro range
 				// take the one with less range in any case
