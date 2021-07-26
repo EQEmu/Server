@@ -174,6 +174,7 @@ public:
 	void AddCharacterToMemberHistory(uint32_t character_id);
 	SharedTaskMember FindMemberFromCharacterID(uint32_t character_id) const;
 	SharedTaskMember FindMemberFromCharacterName(const std::string& character_name) const;
+	SharedTaskMember GetLeader() const;
 	std::vector<SharedTaskActivityStateEntry> GetActivityState() const;
 	std::vector<SharedTaskMember> GetMembers() const;
 

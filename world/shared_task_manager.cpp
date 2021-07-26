@@ -232,18 +232,13 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 		// make sure the one requesting is leader before removing everyone and deleting the shared task
 		if (remove_everyone) {
-			// todo: this is ugly and needs cleaned up, need leader name for message though
-			if (!IsSharedTaskLeader(t, requested_character_id)) {
-				for (auto &m: t->GetMembers()) {
-					if (m.is_leader) {
-						client_list.SendCharacterMessageID(
-							requested_character_id,
-							Chat::Red,
-							SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {m.character_name}
-						);
-						break;
-					}
-				}
+			auto leader = t->GetLeader();
+			if (leader.character_id != requested_character_id) {
+				client_list.SendCharacterMessageID(
+					requested_character_id,
+					Chat::Red,
+					SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
+				);
 				return;
 			}
 			LogTasksDetail(
@@ -264,6 +259,9 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 					requested_task_id,
 					remove_from_db
 				);
+
+				client_list.SendCharacterMessageID(m.character_id, Chat::Yellow,
+					SharedTaskMessage::YOU_HAVE_BEEN_REMOVED, { task.title });
 			}
 
 			client_list.SendCharacterMessageID(
@@ -296,6 +294,9 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 		// inform clients of removal of self
 		SendSharedTaskMemberRemovedToAllMembers(t, removed.character_name);
+
+		client_list.SendCharacterMessageID(requested_character_id, Chat::Yellow,
+			SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { removed.character_name, task.title });
 	}
 }
 
@@ -911,6 +912,14 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, co
 	);
 
 	SendSharedTaskMemberRemovedToAllMembers(s, member.character_name);
+
+	// leader and removed player get server messages (leader sees two messages)
+	// results in double messages if leader removed self (live behavior)
+	client_list.SendCharacterMessageID(leader.character_id, Chat::Yellow,
+		SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { member.character_name, s->GetTaskData().title });
+
+	client_list.SendCharacterMessageID(member.character_id, Chat::Yellow,
+		SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { member.character_name, s->GetTaskData().title });
 }
 
 void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
@@ -979,6 +988,8 @@ void SharedTaskManager::MakeLeaderByPlayerName(SharedTask *s, const std::string 
 		s->SetMembers(members);
 		SaveMembers(s, members);
 		SendSharedTaskMemberListToAllMembers(s);
+		SendMembersMessageID(s, Chat::Yellow, SharedTaskMessage::PLAYER_NOW_LEADER,
+			{ new_leader.character_name, s->GetTaskData().title });
 
 		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
@@ -1060,6 +1071,7 @@ void SharedTaskManager::SendSharedTaskInvitePacket(SharedTask *s, int64 invited_
 			// get requested character zone server
 			ClientListEntry *cle = client_list.FindCLEByCharacterID(invited_character_id);
 			if (cle && cle->Server()) {
+				SendLeaderMessageID(s, Chat::Yellow, SharedTaskMessage::SEND_INVITE_TO, { cle->name() });
 				cle->Server()->SendPacket(p.get());
 			}
 		}

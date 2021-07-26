@@ -121,3 +121,13 @@ SharedTaskMember SharedTask::FindMemberFromCharacterName(const std::string& char
 
 	return it != m_members.end() ? *it : SharedTaskMember{};
 }
+
+SharedTaskMember SharedTask::GetLeader() const
+{
+	for (const auto& member : m_members) {
+		if (member.is_leader) {
+			return member;
+		}
+	}
+	return {};
+}

@@ -122,7 +122,12 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					t->GetDbSharedTask().id
 				);
 
-				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
+				auto leader = t->GetLeader();
+				if (leader.character_id != r->source_character_id) {
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red,
+						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { leader.character_name });
+				}
+				else {
 					LogTasksDetail(
 						"[ServerOP_SharedTaskRemovePlayer] character_id [{}] shared_task_id [{}] is_leader",
 						r->source_character_id,
@@ -155,7 +160,15 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					t->GetDbSharedTask().id
 				);
 
-				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
+				auto leader = t->GetLeader();
+				if (leader.character_id != r->source_character_id) {
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red,
+						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { leader.character_name });
+				}
+				else if (strcasecmp(leader.character_name.c_str(), r->player_name) == 0) {
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red, SharedTaskMessage::YOU_ALREADY_LEADER);
+				}
+				else {
 					LogTasksDetail(
 						"[ServerOP_SharedTaskMakeLeader] character_id [{}] shared_task_id [{}] is_leader",
 						r->source_character_id,
@@ -187,7 +200,13 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 					t->GetDbSharedTask().id
 				);
 
-				if (shared_task_manager.IsSharedTaskLeader(t, r->source_character_id)) {
+				auto leader = t->GetLeader();
+				if (leader.character_id != r->source_character_id) {
+					// taskadd is client sided with System color in newer clients, server side might still be red
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red,
+						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { leader.character_name });
+				}
+				else {
 					LogTasksDetail(
 						"[ServerOP_SharedTaskAddPlayer] character_id [{}] shared_task_id [{}] is_leader",
 						r->source_character_id,
