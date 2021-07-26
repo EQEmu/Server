@@ -3422,7 +3422,7 @@ XS(XS_Client_SetGMStatus) {
 		Client *THIS;
 		int newStatus = (int)SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetAdminStatus(newStatus);
+		THIS->SetGMStatus(newStatus);
 		THIS->UpdateAdmin(true);
 	}
 	XSRETURN_EMPTY;

@@ -10241,9 +10241,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 	}
 }
 
-void Client::SetAdminStatus(int newStatus) {
+void Client::SetGMStatus(int newStatus) {
 	if (this->Admin() != newStatus)
 		database.UpdateGMStatus(this->AccountID(), newStatus);
-
-	return;
 }

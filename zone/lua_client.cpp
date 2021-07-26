@@ -2158,6 +2158,11 @@ void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	return self->RemoveItem(item_id, quantity);
 }
 
+void Lua_Client::SetGMStatus(uint32 newStatus) {
+	Lua_Safe_Call_Void();
+	return self->SetGMStatus(newStatus);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2525,7 +2530,8 @@ luabind::scope lua_register_client() {
 		.def("SendToInstance", (void(Lua_Client::*)(std::string,std::string,uint32,float,float,float,float,std::string,uint32))&Lua_Client::SendToInstance)
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
-		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem);
+		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
+		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus);
 }
 
 luabind::scope lua_register_inventory_where() {
