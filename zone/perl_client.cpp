@@ -3420,7 +3420,6 @@ XS(XS_Client_SetGMStatus) {
 		Perl_croak(aTHX_ "Usage: Client::SetGMStatus(THIS, int newStatus)"); // @categories Script Utility
 	{
 		Client *THIS;
-		uint32 accID = THIS->AccountID();
 		int newStatus = (int)SvIV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
 		THIS->SetAdminStatus(newStatus);
