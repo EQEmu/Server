@@ -13,6 +13,7 @@
 #include "../common/shared_tasks.h"
 #include "worldserver.h"
 #include "dynamic_zone.h"
+#include "string_ids.h"
 
 extern WorldServer worldserver;
 extern QueryServ   *QServ;
@@ -1184,7 +1185,7 @@ void ClientTaskState::IncrementDoneCount(
 		// Send the updated task/activity_information list to the client
 		task_manager->SendSingleActiveTaskToClient(client, *info, task_complete, false);
 		// Inform the client the task has been updated, both by a chat message
-		client->Message(Chat::White, "Your task '%s' has been updated.", task_information->title.c_str());
+		client->MessageString(Chat::White, TASK_UPDATED, task_information->title.c_str());
 
 		if (task_information->activity_information[activity_id].goal_method != METHODQUEST) {
 			if (!ignore_quest_update) {
@@ -2320,11 +2321,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	if (max_tasks) {
-		client->Message(
-			Chat::Red,
-			"You already have the maximum allowable number of active tasks (%i)",
-			MAXACTIVEQUESTS
-		);
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, client->GetName());
 		return;
 	}
 
@@ -2332,14 +2329,15 @@ void ClientTaskState::AcceptNewTask(
 	if (task->type == TaskType::Quest) {
 		for (auto &active_quest : m_active_quests) {
 			if (active_quest.task_id == task_id) {
-				client->Message(Chat::Red, "You have already been assigned this task.");
+				// live doesn't have an eqstr for it but this seems to be the string used for this scenario
+				client->Message(Chat::Yellow, "You are already working on a task for this person, you must finish it before asking for another.");
 				return;
 			}
 		}
 	}
 
 	if (enforce_level_requirement && !task_manager->ValidateLevel(task_id, client->GetLevel())) {
-		client->Message(Chat::Red, "You are outside the level range of this task.");
+		client->MessageString(Chat::Yellow, TASK_NOT_RIGHT_LEVEL);
 		return;
 	}
 
@@ -2413,11 +2411,7 @@ void ClientTaskState::AcceptNewTask(
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		client->Message(
-			Chat::Red,
-			"You already have the maximum allowable number of active tasks (%i)",
-			MAXACTIVEQUESTS
-		);
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, client->GetName());
 		return;
 	}
 
@@ -2470,11 +2464,8 @@ void ClientTaskState::AcceptNewTask(
 
 	task_manager->SendSingleActiveTaskToClient(client, *active_slot, false, true);
 	client->StartTaskRequestCooldownTimer();
-	client->Message(
-		Chat::White,
-		"You have been assigned the task '%s'.",
-		task_manager->m_task_data[task_id]->title.c_str()
-	);
+	client->MessageString(Chat::White, YOU_ASSIGNED_TASK, task->title.c_str());
+
 	task_manager->SaveClientState(client, this);
 	std::string buf = std::to_string(task_id);
 
@@ -2617,6 +2608,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 {
 	LogTasksDetail("[ListTaskTimers] Client [{}]", client->GetCleanName());
 
+	// this isn't live-like but we need to throttle query (alternative is caching timers)
 	if (!client->m_list_task_timers_rate_limit.Check()) {
 		client->Message(Chat::White, "Sending messages too fast");
 		return;
@@ -2654,8 +2646,7 @@ void ClientTaskState::ListTaskTimers(Client* client)
 	}
 
 	if (character_task_timers.empty()) {
-		// TODO: Replace with any official eqstr
-		client->Message(Chat::White, "You have no current task timers");
+		client->MessageString(Chat::Yellow, SharedTaskMessage::YOU_NO_CURRENT_REPLAY_TIMERS);
 	}
 }
 
