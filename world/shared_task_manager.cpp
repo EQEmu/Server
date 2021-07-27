@@ -1039,41 +1039,29 @@ void SharedTaskManager::InvitePlayerByPlayerName(SharedTask *s, const std::strin
 
 void SharedTaskManager::SendSharedTaskInvitePacket(SharedTask *s, int64 invited_character_id)
 {
-	int64     leader_character_id = 0;
-	for (auto &m: s->GetMembers()) {
-		if (m.is_leader) {
-			leader_character_id = m.character_id;
-		}
-	}
+	auto leader = s->GetLeader();
 
-	if (leader_character_id > 0) {
-		auto leader = CharacterDataRepository::FindOne(
-			*m_database,
-			(int) leader_character_id
+	// found leader
+	if (leader.character_id > 0) {
+
+		// init packet
+		auto p = std::make_unique<ServerPacket>(
+			ServerOP_SharedTaskInvitePlayer,
+			sizeof(ServerSharedTaskInvitePlayer_Struct)
 		);
 
-		// found leader
-		if (leader.id > 0) {
+		// fill
+		auto d = reinterpret_cast<ServerSharedTaskInvitePlayer_Struct *>(p->pBuffer);
+		d->requested_character_id = invited_character_id;
+		d->invite_shared_task_id  = s->GetDbSharedTask().id;
+		strn0cpy(d->inviter_name, leader.character_name.c_str(), sizeof(d->inviter_name));
+		strn0cpy(d->task_name, s->GetTaskData().title.c_str(), sizeof(d->task_name));
 
-			// init packet
-			auto p = std::make_unique<ServerPacket>(
-				ServerOP_SharedTaskInvitePlayer,
-				sizeof(ServerSharedTaskInvitePlayer_Struct)
-			);
-
-			// fill
-			auto d = reinterpret_cast<ServerSharedTaskInvitePlayer_Struct *>(p->pBuffer);
-			d->requested_character_id = invited_character_id;
-			d->invite_shared_task_id  = s->GetDbSharedTask().id;
-			strn0cpy(d->inviter_name, leader.name.c_str(), 64);
-			strn0cpy(d->task_name, s->GetTaskData().title.c_str(), 64);
-
-			// get requested character zone server
-			ClientListEntry *cle = client_list.FindCLEByCharacterID(invited_character_id);
-			if (cle && cle->Server()) {
-				SendLeaderMessageID(s, Chat::Yellow, SharedTaskMessage::SEND_INVITE_TO, { cle->name() });
-				cle->Server()->SendPacket(p.get());
-			}
+		// get requested character zone server
+		ClientListEntry *cle = client_list.FindCLEByCharacterID(invited_character_id);
+		if (cle && cle->Server()) {
+			SendLeaderMessageID(s, Chat::Yellow, SharedTaskMessage::SEND_INVITE_TO, { cle->name() });
+			cle->Server()->SendPacket(p.get());
 		}
 	}
 }
