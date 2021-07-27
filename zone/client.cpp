@@ -10485,6 +10485,7 @@ void Client::CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to)
 		LogCheat(message.c_str());
 		break;
 	}
+}
 
 void Client::SetGMStatus(int newStatus) {
 	if (this->Admin() != newStatus)
