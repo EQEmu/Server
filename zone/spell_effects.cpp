@@ -7416,27 +7416,18 @@ void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 	}
 }
 
-bool Mob::HarmonySpellLevelCheck(int32 spell_id, int target_id, Mob *target)
+bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 {
 	//'this' = caster of spell
-	if (IsClient() && IsHarmonySpell(spell_id))
-	{
-		Mob *spell_target = nullptr;
+	if (!target) {
+		return false;
+	}
 
-		if (target_id)
-			spell_target = entity_list.GetMobID(target_id);
-		else
-			spell_target = target;
-
-		if (!spell_target)
-			return false;
-
-		for (int i = 0; i < EFFECT_COUNT; i++) {
-			// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
-			if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
-				if ((spells[spell_id].max[i] != 0 && spell_target->GetLevel() > spells[spell_id].max[i]) || spell_target->GetSpecialAbility(IMMUNE_PACIFY)) {
-					return false;
-				}
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
+		if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
+			if ((spells[spell_id].max[i] != 0 && target->GetLevel() > spells[spell_id].max[i]) || target->GetSpecialAbility(IMMUNE_PACIFY)) {
+				return false;
 			}
 		}
 	}

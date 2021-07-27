@@ -224,7 +224,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
-	if (!HarmonySpellLevelCheck(spell_id, target_id)) {
+	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
 		return false;
 	}
@@ -3782,7 +3782,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		}
 	}
 	//Need this to account for special AOE cases.
-	if (!HarmonySpellLevelCheck(spell_id, 0, spelltar)) {
+	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, spelltar)) {
 		MessageString(Chat::SpellFailure, SPELL_NO_EFFECT);
 		return false;
 	}
