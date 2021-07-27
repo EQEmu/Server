@@ -1673,7 +1673,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 			if (dstbag)
 				dstbagid = dstbag->GetItem()->ID;
 		}
-		if (srcitemid==17899 || srcbagid==17899 || dstitemid==17899 || dstbagid==17899){
+		if ((srcbagid && srcbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstbagid && dstbag->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (srcitemid && src_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel) ||
+		    (dstitemid && dst_inst->GetItem()->BagType == EQ::item::BagTypeTradersSatchel)) {
 			this->Trader_EndTrader();
 			this->Message(Chat::Red,"You cannot move your Trader Satchels, or items inside them, while Trading.");
 		}

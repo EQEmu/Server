@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -38,7 +38,7 @@ public:
 		int         level;
 		int         race;
 		int         gender;
-		int         class;
+		int         class_;
 		int         deity;
 		int         texture;
 		int         helm_texture;
@@ -95,7 +95,7 @@ public:
 			"level",
 			"race",
 			"gender",
-			"class",
+			"`class`",
 			"deity",
 			"texture",
 			"helm_texture",
@@ -177,7 +177,7 @@ public:
 		entry.level            = 0;
 		entry.race             = 0;
 		entry.gender           = 0;
-		entry.class            = 0;
+		entry.class_           = 0;
 		entry.deity            = 0;
 		entry.texture          = 0;
 		entry.helm_texture     = 0;
@@ -259,7 +259,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);
@@ -338,7 +338,7 @@ public:
 		update_values.push_back(columns[17] + " = " + std::to_string(character_corpses_entry.level));
 		update_values.push_back(columns[18] + " = " + std::to_string(character_corpses_entry.race));
 		update_values.push_back(columns[19] + " = " + std::to_string(character_corpses_entry.gender));
-		update_values.push_back(columns[20] + " = " + std::to_string(character_corpses_entry.class));
+		update_values.push_back(columns[20] + " = " + std::to_string(character_corpses_entry.class_));
 		update_values.push_back(columns[21] + " = " + std::to_string(character_corpses_entry.deity));
 		update_values.push_back(columns[22] + " = " + std::to_string(character_corpses_entry.texture));
 		update_values.push_back(columns[23] + " = " + std::to_string(character_corpses_entry.helm_texture));
@@ -406,7 +406,7 @@ public:
 		insert_values.push_back(std::to_string(character_corpses_entry.level));
 		insert_values.push_back(std::to_string(character_corpses_entry.race));
 		insert_values.push_back(std::to_string(character_corpses_entry.gender));
-		insert_values.push_back(std::to_string(character_corpses_entry.class));
+		insert_values.push_back(std::to_string(character_corpses_entry.class_));
 		insert_values.push_back(std::to_string(character_corpses_entry.deity));
 		insert_values.push_back(std::to_string(character_corpses_entry.texture));
 		insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
@@ -482,7 +482,7 @@ public:
 			insert_values.push_back(std::to_string(character_corpses_entry.level));
 			insert_values.push_back(std::to_string(character_corpses_entry.race));
 			insert_values.push_back(std::to_string(character_corpses_entry.gender));
-			insert_values.push_back(std::to_string(character_corpses_entry.class));
+			insert_values.push_back(std::to_string(character_corpses_entry.class_));
 			insert_values.push_back(std::to_string(character_corpses_entry.deity));
 			insert_values.push_back(std::to_string(character_corpses_entry.texture));
 			insert_values.push_back(std::to_string(character_corpses_entry.helm_texture));
@@ -562,7 +562,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);
@@ -633,7 +633,7 @@ public:
 			entry.level            = atoi(row[17]);
 			entry.race             = atoi(row[18]);
 			entry.gender           = atoi(row[19]);
-			entry.class            = atoi(row[20]);
+			entry.class_           = atoi(row[20]);
 			entry.deity            = atoi(row[21]);
 			entry.texture          = atoi(row[22]);
 			entry.helm_texture     = atoi(row[23]);

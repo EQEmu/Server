@@ -1218,6 +1218,12 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_LimitUseType:
 	case SE_GravityEffect:
 	case 425:
+	//Spell effects implemented after ROF2, following same pattern, lets assume these should go here.
+	case SE_Fc_Spell_Damage_Pct_IncomingPC:	
+	case SE_Fc_Spell_Damage_Amt_IncomingPC:
+	case SE_Ff_CasterClass:
+	case SE_Ff_Same_Caster: 
+	case SE_Proc_Timer_Modifier:
 		return true;
 	default:
 		return false;

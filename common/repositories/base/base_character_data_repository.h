@@ -4,7 +4,7 @@
  * This repository was automatically generated and is NOT to be modified directly.
  * Any repository modifications are meant to be made to the repository extending the base.
  * Any modifications to base repositories are to be made by the generator only
- * 
+ *
  * @generator ./utils/scripts/generators/repository-generator.pl
  * @docs https://eqemu.gitbook.io/server/in-development/developer-area/repositories
  */
@@ -32,7 +32,7 @@ public:
 		float       heading;
 		int         gender;
 		int         race;
-		int         class;
+		int         class_;
 		int         level;
 		int         deity;
 		int         birthday;
@@ -72,7 +72,7 @@ public:
 		int         sta;
 		int         cha;
 		int         dex;
-		int         int;
+		int         int_;
 		int         agi;
 		int         wis;
 		int         zone_change_count;
@@ -144,7 +144,7 @@ public:
 			"heading",
 			"gender",
 			"race",
-			"class",
+			"`class`",
 			"level",
 			"deity",
 			"birthday",
@@ -184,7 +184,7 @@ public:
 			"sta",
 			"cha",
 			"dex",
-			"int",
+			"`int`",
 			"agi",
 			"wis",
 			"zone_change_count",
@@ -281,7 +281,7 @@ public:
 		entry.heading                 = 0;
 		entry.gender                  = 0;
 		entry.race                    = 0;
-		entry.class                   = 0;
+		entry.class_                  = 0;
 		entry.level                   = 0;
 		entry.deity                   = 0;
 		entry.birthday                = 0;
@@ -321,7 +321,7 @@ public:
 		entry.sta                     = 0;
 		entry.cha                     = 0;
 		entry.dex                     = 0;
-		entry.int                     = 0;
+		entry.int_                    = 0;
 		entry.agi                     = 0;
 		entry.wis                     = 0;
 		entry.zone_change_count       = 0;
@@ -368,7 +368,7 @@ public:
 		entry.aa_points_spent_old     = 0;
 		entry.aa_points_old           = 0;
 		entry.e_last_invsnapshot      = 0;
-		entry.deleted_at              = 0;
+		entry.deleted_at              = "";
 
 		return entry;
 	}
@@ -418,7 +418,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -458,7 +458,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);
@@ -552,7 +552,7 @@ public:
 		update_values.push_back(columns[11] + " = " + std::to_string(character_data_entry.heading));
 		update_values.push_back(columns[12] + " = " + std::to_string(character_data_entry.gender));
 		update_values.push_back(columns[13] + " = " + std::to_string(character_data_entry.race));
-		update_values.push_back(columns[14] + " = " + std::to_string(character_data_entry.class));
+		update_values.push_back(columns[14] + " = " + std::to_string(character_data_entry.class_));
 		update_values.push_back(columns[15] + " = " + std::to_string(character_data_entry.level));
 		update_values.push_back(columns[16] + " = " + std::to_string(character_data_entry.deity));
 		update_values.push_back(columns[17] + " = " + std::to_string(character_data_entry.birthday));
@@ -592,7 +592,7 @@ public:
 		update_values.push_back(columns[51] + " = " + std::to_string(character_data_entry.sta));
 		update_values.push_back(columns[52] + " = " + std::to_string(character_data_entry.cha));
 		update_values.push_back(columns[53] + " = " + std::to_string(character_data_entry.dex));
-		update_values.push_back(columns[54] + " = " + std::to_string(character_data_entry.int));
+		update_values.push_back(columns[54] + " = " + std::to_string(character_data_entry.int_));
 		update_values.push_back(columns[55] + " = " + std::to_string(character_data_entry.agi));
 		update_values.push_back(columns[56] + " = " + std::to_string(character_data_entry.wis));
 		update_values.push_back(columns[57] + " = " + std::to_string(character_data_entry.zone_change_count));
@@ -675,7 +675,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.heading));
 		insert_values.push_back(std::to_string(character_data_entry.gender));
 		insert_values.push_back(std::to_string(character_data_entry.race));
-		insert_values.push_back(std::to_string(character_data_entry.class));
+		insert_values.push_back(std::to_string(character_data_entry.class_));
 		insert_values.push_back(std::to_string(character_data_entry.level));
 		insert_values.push_back(std::to_string(character_data_entry.deity));
 		insert_values.push_back(std::to_string(character_data_entry.birthday));
@@ -715,7 +715,7 @@ public:
 		insert_values.push_back(std::to_string(character_data_entry.sta));
 		insert_values.push_back(std::to_string(character_data_entry.cha));
 		insert_values.push_back(std::to_string(character_data_entry.dex));
-		insert_values.push_back(std::to_string(character_data_entry.int));
+		insert_values.push_back(std::to_string(character_data_entry.int_));
 		insert_values.push_back(std::to_string(character_data_entry.agi));
 		insert_values.push_back(std::to_string(character_data_entry.wis));
 		insert_values.push_back(std::to_string(character_data_entry.zone_change_count));
@@ -806,7 +806,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.heading));
 			insert_values.push_back(std::to_string(character_data_entry.gender));
 			insert_values.push_back(std::to_string(character_data_entry.race));
-			insert_values.push_back(std::to_string(character_data_entry.class));
+			insert_values.push_back(std::to_string(character_data_entry.class_));
 			insert_values.push_back(std::to_string(character_data_entry.level));
 			insert_values.push_back(std::to_string(character_data_entry.deity));
 			insert_values.push_back(std::to_string(character_data_entry.birthday));
@@ -846,7 +846,7 @@ public:
 			insert_values.push_back(std::to_string(character_data_entry.sta));
 			insert_values.push_back(std::to_string(character_data_entry.cha));
 			insert_values.push_back(std::to_string(character_data_entry.dex));
-			insert_values.push_back(std::to_string(character_data_entry.int));
+			insert_values.push_back(std::to_string(character_data_entry.int_));
 			insert_values.push_back(std::to_string(character_data_entry.agi));
 			insert_values.push_back(std::to_string(character_data_entry.wis));
 			insert_values.push_back(std::to_string(character_data_entry.zone_change_count));
@@ -941,7 +941,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -981,7 +981,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);
@@ -1067,7 +1067,7 @@ public:
 			entry.heading                 = static_cast<float>(atof(row[11]));
 			entry.gender                  = atoi(row[12]);
 			entry.race                    = atoi(row[13]);
-			entry.class                   = atoi(row[14]);
+			entry.class_                  = atoi(row[14]);
 			entry.level                   = atoi(row[15]);
 			entry.deity                   = atoi(row[16]);
 			entry.birthday                = atoi(row[17]);
@@ -1107,7 +1107,7 @@ public:
 			entry.sta                     = atoi(row[51]);
 			entry.cha                     = atoi(row[52]);
 			entry.dex                     = atoi(row[53]);
-			entry.int                     = atoi(row[54]);
+			entry.int_                    = atoi(row[54]);
 			entry.agi                     = atoi(row[55]);
 			entry.wis                     = atoi(row[56]);
 			entry.zone_change_count       = atoi(row[57]);

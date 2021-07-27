@@ -13089,7 +13089,7 @@ void Client::Handle_OP_ShopPlayerBuy(const EQApplicationPacket *app)
 	int16 charges = 0;
 	if (item->Stackable || tmpmer_used)
 		charges = mp->quantity;
-	else if ( item->MaxCharges > 1)
+	else if ( item->MaxCharges >= 1)
 		charges = item->MaxCharges;
 
 	EQ::ItemInstance* inst = database.CreateItem(item, charges);
