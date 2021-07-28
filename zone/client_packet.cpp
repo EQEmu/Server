@@ -4505,7 +4505,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 	if (dist == 0) {
 		if (m_distance_since_last_position_check > 0.0) {
 			if ((cur_time - m_time_since_last_position_check) > 0) {
-				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
+				float runs = ceil(GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f));
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
 					if (IsShadowStepExempted()) {
@@ -4551,7 +4551,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 		else {
 			if ((cur_time - m_time_since_last_position_check) > 2500) {
-				float runs = ceil(GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor));
+				float runs = ceil(GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f));
 				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
 				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
 					if (IsShadowStepExempted()) {

@@ -10257,9 +10257,9 @@ void Client::SetShadowStepExemption(bool v)
 		uint32 cur_time = Timer::GetCurrentTime();
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
+			int runs = GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f);
 			if (speed > runs) {
-				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f)))))
 				{
 					if (IsShadowStepExempted())
 					{
@@ -10303,9 +10303,9 @@ void Client::SetKnockBackExemption(bool v)
 		uint32 cur_time = Timer::GetCurrentTime();
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
+			int runs = GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f);
 			if (speed > runs) {
-				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f)))))
 				{
 					if (IsShadowStepExempted())
 					{
@@ -10349,9 +10349,9 @@ void Client::SetPortExemption(bool v)
 		uint32 cur_time = Timer::GetCurrentTime();
 		if ((cur_time - m_time_since_last_position_check) > 1000) {
 			float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-			int runs = GetRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor);
+			int runs = GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f);
 			if (speed > runs) {
-				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / RuleR(Zone, MQWarpDetectionDistanceFactor)))))
+				if (!GetGMSpeed() && (runs >= GetBaseRunspeed() || (speed > (GetBaseRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f)))))
 				{
 					if (IsShadowStepExempted())
 					{
