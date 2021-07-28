@@ -819,7 +819,7 @@ typedef enum {
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-//#define SE_Weapon_Stance				476 //
+#define SE_Weapon_Stance				476 //
 #define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 //#define SE_Ff_Value_Min				479 //
