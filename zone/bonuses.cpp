@@ -1561,13 +1561,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		{
 			if (newbon->ExtraAttackChance[0] < base1) {
 				newbon->ExtraAttackChance[0] = base1;
-
-				if (base2) {
-					newbon->ExtraAttackChance[1] = base2;
-				}
-				else {
-					newbon->ExtraAttackChance[1] = 1;
-				}
+				newbon->ExtraAttackChance[1] = base2 ? base2 : 1;
 			}
 			break;
 		}
@@ -1576,13 +1570,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		{
 			if (newbon->ExtraAttackChancePrimary[0] < base1) {
 				newbon->ExtraAttackChancePrimary[0] = base1;
-				
-				if (base2) {
-					newbon->ExtraAttackChancePrimary[1] = base2;
-				}
-				else {
-					newbon->ExtraAttackChancePrimary[1] = 1;
-				}
+				newbon->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
 			}
 			break;
 		}
@@ -1592,12 +1580,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 			if (newbon->ExtraAttackChanceSecondary[0] < base1) {
 				newbon->ExtraAttackChanceSecondary[0] = base1;
-				if (base2) {
-					newbon->ExtraAttackChanceSecondary[1] = base2;
-				}
-				else {
-					newbon->ExtraAttackChanceSecondary[1] = 1;
-				}
+				newbon->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
 			}
 			break;
 		}
@@ -2402,14 +2385,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChance[0] += effect_value;
-					new_bonus->ExtraAttackChance[1] = base2;
+					new_bonus->ExtraAttackChance[1] = base2 ? base2 : 1;
 				}
-
 				if (new_bonus->ExtraAttackChance[0] < effect_value) {
 					new_bonus->ExtraAttackChance[0] = effect_value;
-					new_bonus->ExtraAttackChance[1] = base2;
+					new_bonus->ExtraAttackChance[1] = base2 ? base2 : 1;
 				}
-				
 				break;
 			}
 
@@ -2417,14 +2398,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChancePrimary[0] += effect_value;
-					new_bonus->ExtraAttackChancePrimary[1] = base2;
+					new_bonus->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
 				}
 
 				if (new_bonus->ExtraAttackChancePrimary[0] < effect_value) {
 					new_bonus->ExtraAttackChancePrimary[0] = effect_value;
-					new_bonus->ExtraAttackChancePrimary[1] = base2;
+					new_bonus->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
 				}
-
 				break;
 			}
 
@@ -2432,14 +2412,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				if (AdditiveWornBonus) {
 					new_bonus->ExtraAttackChanceSecondary[0] += effect_value;
-					new_bonus->ExtraAttackChanceSecondary[1] = base2;
+					new_bonus->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
 				}
 
 				if (new_bonus->ExtraAttackChanceSecondary[0] < effect_value) {
 					new_bonus->ExtraAttackChanceSecondary[0] = effect_value;
-					new_bonus->ExtraAttackChanceSecondary[1] = base2;
+					new_bonus->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
 				}
-
 				break;
 			}
 
