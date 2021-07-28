@@ -4811,7 +4811,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = base1;
 			break;
 
@@ -5381,7 +5381,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = focus_spell.base[i];
 			break;
 
