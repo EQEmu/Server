@@ -1624,7 +1624,7 @@ void Merc::AI_Process() {
 						}
 					}
 
-					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance;
+					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] + aabonuses.ExtraAttackChance[0];
 
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))

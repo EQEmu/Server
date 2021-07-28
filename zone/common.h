@@ -445,7 +445,9 @@ struct StatBonuses {
 	int32	MinDamageModifier[EQ::skills::HIGHEST_SKILL + 2]; //i
 	int32	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int32	ProcChanceSPA;						// ProcChance from spell effects
-	int32	ExtraAttackChance;
+	int32	ExtraAttackChance[2];				// base chance(w/ 2H weapon)=0, amt of extra attacks=1
+	int32	ExtraAttackChancePrimary[2];		// base chance=0, , amt of extra attacks=1
+	int32	ExtraAttackChanceSecondary[2];		// base chance=0, , amt of extra attacks=1
 	int32	DoTShielding;
 	int32	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
 	uint32	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt
