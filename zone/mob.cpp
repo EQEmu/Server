@@ -234,7 +234,9 @@ Mob::Mob(
 	has_shieldequiped       = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped   = false;
+	has_duelweaponsequiped  = false;
 	can_facestab            = false;
+	weaponstance_enabled	= false;
 	has_numhits             = false;
 	has_MGB                 = false;
 	has_ProjectIllusion     = false;

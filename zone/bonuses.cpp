@@ -154,6 +154,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	SetShieldEquiped(false);
 	SetTwoHandBluntEquiped(false);
 	SetTwoHanderEquipped(false);
+	SetDuelWeaponsEquiped(false);
 
 	unsigned int i;
 	// Update: MainAmmo should only calc skill mods (TODO: Check for other cases)
@@ -173,6 +174,9 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		}
 		else if (i == EQ::invslot::slotPrimary && (item && (item->ItemType == EQ::item::ItemType2HSlash || item->ItemType == EQ::item::ItemType2HPiercing)))
 			SetTwoHanderEquipped(true);
+		
+		if (CanThisClassDualWield())
+			SetDuelWeaponsEquiped(true);
 	}
 
 	//tribute items
@@ -182,6 +186,8 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			continue;
 		AddItemBonuses(inst, newbon, false, true);
 	}
+
+	ApplyWeaponsStance();
 
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
 	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQ::item::ItemEffectWorn){
@@ -1568,10 +1574,12 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					if (IsValidSpell(newbon->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 						if (spells[newbon->WeaponStance[base2]].rank < spells[newbon->WeaponStance[base2]].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 							newbon->WeaponStance[base2] = base1; //Overwrite with new effect
+							SetWeaponStanceEnabled(true);
 						}
 					}
 					else {
 						newbon->WeaponStance[base2] = base1; //If no prior effect exists, then apply
+						SetWeaponStanceEnabled(true);
 					}
 				}
 			}
@@ -3436,16 +3444,18 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 
 			case SE_Weapon_Stance: {
-
+				Shout("Bonus. Effect value %i base2 %i", effect_value, base2);
 				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff
 					if (base2 < 3) { //0=2H, 1=Shield, 2=DW
 						if (IsValidSpell(new_bonus->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 							if (spells[new_bonus->WeaponStance[base2]].rank < spells[new_bonus->WeaponStance[base2]].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 								new_bonus->WeaponStance[base2] = effect_value; //Overwrite with new effect
+								SetWeaponStanceEnabled(true);
 							}
 						}
 						else {
 							new_bonus->WeaponStance[base2] = effect_value; //If no prior effect exists, then apply
+							SetWeaponStanceEnabled(true);
 						}
 					}
 				}

@@ -433,6 +433,10 @@ public:
 	inline void SetTwoHandBluntEquiped(bool val) { has_twohandbluntequiped = val; }
 	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
 	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
+	bool HasDuelWeaponsEquiped() const { return has_duelweaponsequiped; }
+	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
+	bool IsWeaponStanceEnabled() const { return weaponstance_enabled; }
+	inline void SetWeaponStanceEnabled(bool val) { weaponstance_enabled = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
@@ -1487,6 +1491,8 @@ protected:
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
+	bool has_duelweaponsequiped;
+	bool weaponstance_enabled;
 	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;

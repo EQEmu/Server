@@ -10245,3 +10245,93 @@ void Client::SetGMStatus(int newStatus) {
 	if (this->Admin() != newStatus)
 		database.UpdateGMStatus(this->AccountID(), newStatus);
 }
+
+void Client::ApplyWeaponsStance()
+{
+
+	Shout("Apply Weapon Stance [%i]", IsWeaponStanceEnabled());
+
+	if (!IsWeaponStanceEnabled())
+		return;
+
+	Shout("State 2H [%i]", HasTwoHanderEquipped());
+	Shout("State SH [%i]", HasShieldEquiped());
+	Shout("State DW [%i]", HasDuelWeaponsEquiped());
+
+	bool enabled = false;
+	bool hasbuff = false;
+	bool stance_type = false;
+	int spellbonus_spell_id = 0;
+	int stance_spell_id2 = 0;
+	int stance_spell_id3 = 0;
+
+	for (int i = 0; i < 3; ++i) {
+
+		hasbuff = false;
+		stance_type = false;
+
+		if (spellbonuses.WeaponStance[i]) {
+
+			if (!IsValidSpell(spellbonuses.WeaponStance[i]))
+				continue;
+
+			enabled = true;
+
+			hasbuff = FindBuff(spellbonuses.WeaponStance[i]);
+
+			if (i = 0) {
+				stance_type = HasTwoHanderEquipped();
+			}
+			else if (i = 1) {
+				stance_type = HasShieldEquiped();
+			}
+			else if (i = 2) {
+				stance_type = HasDuelWeaponsEquiped();
+			}
+
+			Shout("[%i] hasbuff [%i] stance_type [%i]", i, hasbuff, stance_type);
+
+			if (!stance_type && hasbuff) {
+				BuffFadeBySpellID(spellbonuses.WeaponStance[i]);
+				Shout("[%i] Fade buff %i", i, spellbonuses.WeaponStance[i]);
+			}
+			else if (stance_type && !hasbuff) {
+				spellbonus_spell_id = spellbonuses.WeaponStance[i];
+				Shout("[%i] Save spell id %i", i, spellbonus_spell_id);
+			}
+			else
+				Shout("[%i] No action needed", i);
+		}
+	}
+	Shout("Apply this spell on weapon change [%i]", spellbonus_spell_id);
+	if (spellbonus_spell_id) {
+		SpellOnTarget(spellbonus_spell_id, this);
+	}
+	
+	if (!enabled) {
+		SetWeaponStanceEnabled(false);
+		Shout("Should disable WeaponStance");
+	}
+	/*
+	if (spellbonuses.WeaponStance[0] || spellbonuses.WeaponStance[1] || spellbonuses.WeaponStance[2])
+
+		if (HasTwoHanderEquipped() && IsValidSpell(spellbonuses.WeaponStance[0]) && !FindBuff(spellbonuses.WeaponStance[0]))
+			SpellOnTarget(spellbonuses.WeaponStance[0], this);
+
+		else if (HasShieldEquiped() && IsValidSpell(spellbonuses.WeaponStance[1]) && !FindBuff(spellbonuses.WeaponStance[1]))
+			SpellOnTarget(spellbonuses.WeaponStance[1], this);
+
+		else if (HasDuelWeaponsEquiped() && IsValidSpell(spellbonuses.WeaponStance[2]) && !FindBuff(spellbonuses.WeaponStance[2]))
+			SpellOnTarget(spellbonuses.WeaponStance[2], this);
+
+		if (!HasTwoHanderEquipped() && IsValidSpell(spellbonuses.WeaponStance[0]) && FindBuff(spellbonuses.WeaponStance[0]))
+			BuffFadeBySpellID(spellbonuses.WeaponStance[0]);
+
+		else if (!HasShieldEquiped() && IsValidSpell(spellbonuses.WeaponStance[1]) && FindBuff(spellbonuses.WeaponStance[1]))
+			BuffFadeBySpellID((spellbonuses.WeaponStance[1]);
+
+		else if (!HasDuelWeaponsEquiped() && IsValidSpell(spellbonuses.WeaponStance[2]) && FindBuff(spellbonuses.WeaponStance[2]))
+				BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
+
+	*/
+}
