@@ -5483,13 +5483,40 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 		CheckIncreaseSkill(EQ::skills::SkillDoubleAttack, target, -10);
 		if (CheckDoubleAttack()) {
 			Attack(target, hand, false, false, IsFromSpell);
-
-			// Modern AA description: Increases your chance of ... performing one additional hit with a 2-handed weapon when double attacking by 2%.
+			
 			if (hand == EQ::invslot::slotPrimary) {
-				auto extraattackchance = aabonuses.ExtraAttackChance + spellbonuses.ExtraAttackChance +
-							 itembonuses.ExtraAttackChance;
-				if (extraattackchance && HasTwoHanderEquipped() && zone->random.Roll(extraattackchance))
-					Attack(target, hand, false, false, IsFromSpell);
+
+				if (HasTwoHanderEquipped()) {
+					auto extraattackchance = aabonuses.ExtraAttackChance[0] + spellbonuses.ExtraAttackChance[0] +
+						itembonuses.ExtraAttackChance[0];
+					if (extraattackchance && zone->random.Roll(extraattackchance)) {
+						auto extraattackamt = std::max({ aabonuses.ExtraAttackChance[1], spellbonuses.ExtraAttackChance[1], itembonuses.ExtraAttackChance[1] });
+						for (int i = 0; i < extraattackamt; i++) {
+							Attack(target, hand, false, false, IsFromSpell);
+						}
+					}
+				}
+				else {
+					auto extraattackchance_primary = aabonuses.ExtraAttackChancePrimary[0] + spellbonuses.ExtraAttackChancePrimary[0] +
+						itembonuses.ExtraAttackChancePrimary[0];
+					if (extraattackchance_primary && zone->random.Roll(extraattackchance_primary)) {
+						auto extraattackamt_primary = std::max({ aabonuses.ExtraAttackChancePrimary[1], spellbonuses.ExtraAttackChancePrimary[1], itembonuses.ExtraAttackChancePrimary[1] });
+						for (int i = 0; i < extraattackamt_primary; i++) {
+							Attack(target, hand, false, false, IsFromSpell);
+						}
+					}
+				}
+			}
+
+			if (hand == EQ::invslot::slotSecondary) {
+				auto extraattackchance_secondary = aabonuses.ExtraAttackChanceSecondary[0] + spellbonuses.ExtraAttackChanceSecondary[0] +
+					itembonuses.ExtraAttackChanceSecondary[0];
+				if (extraattackchance_secondary && zone->random.Roll(extraattackchance_secondary)) {
+					auto extraattackamt_secondary = std::max({ aabonuses.ExtraAttackChanceSecondary[1], spellbonuses.ExtraAttackChanceSecondary[1], itembonuses.ExtraAttackChanceSecondary[1] });
+					for (int i = 0; i < extraattackamt_secondary; i++) {
+						Attack(target, hand, false, false, IsFromSpell);
+					}
+				}
 			}
 
 			// you can only triple from the main hand
