@@ -236,7 +236,6 @@ Mob::Mob(
 	has_twohanderequipped   = false;
 	has_duelweaponsequiped  = false;
 	can_facestab            = false;
-	weaponstance_enabled	= false;
 	has_numhits             = false;
 	has_MGB                 = false;
 	has_ProjectIllusion     = false;
@@ -409,6 +408,14 @@ Mob::Mob(
 	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
+
+	weaponstance.enabled = false;
+	weaponstance.spellbonus_enabled = false;	 //Set when bonus is applied
+	weaponstance.itembonus_enabled = false;		//Set when bonus is applied
+	weaponstance.aabonus_enabled = true;		//Controlled by function TogglePassiveAA
+	weaponstance.spellbonus_buff_spell_id = 0;
+	weaponstance.itembonus_buff_spell_id = 0;
+	weaponstance.aabonus_buff_spell_id = 0;
 
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;

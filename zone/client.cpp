@@ -10248,75 +10248,191 @@ void Client::SetGMStatus(int newStatus) {
 
 void Client::ApplyWeaponsStance()
 {
-	
-	Shout("Apply Weapon Stance [%i]", IsWeaponStanceEnabled());
+	/*
+	If you have a weapons stance bonus from at least one bonus type, each time you change weapons this function will ensure the correct
+	associated buffs are applied, and previous buff is removed. If your weapon stance bonus is completely removed it will, ensure buff is
+	also removed (ie, removing an item that has worn effect with weapon stance, or clicking off a buff). If client no longer has/never had 
+	any spells/item/aa bonuses with weapon stance effect this function will only do a simple bool check.
+	Only buff spells should be used as triggered spell effect. IsBuffSpell function also checks spell id validity.
+	WeaponStance bonus arrary: 0=2H Weapon 1=Shield 2=Duelweild
+	*/
+	Shout("Apply Weapon Stance [%i] Lock [%i]", IsWeaponStanceEnabled(),0);
 
 	if (!IsWeaponStanceEnabled())
 		return;
+
 
 	Shout("State 2H [%i]", HasTwoHanderEquipped());
 	Shout("State SH [%i]", HasShieldEquiped());
 	Shout("State DW [%i]", HasDuelWeaponsEquiped());
 
-	Shout("Bonus Values [%i] [%i] [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2]);
+	Shout("Spell Bonus Values [%i] [%i] [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2]);
+	Shout("Item Bonus Values [%i] [%i] [%i]", itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2]);
+	Shout("AA Bonus Values [%i] [%i] [%i]", aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2]);
+
+	weaponstance.spellbonus_buff_spell_id = weaponstance.spellbonus_buff_spell_id + 1;
+	Shout("Total Count %i", weaponstance.spellbonus_buff_spell_id);
+
 
 	bool enabled = false;
-
-	int spellbonus_spell_id = 0;
-	int stance_spell_id2 = 0;
-	int stance_spell_id3 = 0;
+	bool item_bonus_exists = false;
+	bool aa_bonus_exists = false;
 
 	if (spellbonuses.WeaponStance[0] || spellbonuses.WeaponStance[1] || spellbonuses.WeaponStance[2]) {
 
 		enabled = true;
-		
+
 		//Check if no longer has correct combination of weapon type and buff, if so remove buff.
-		if (!HasTwoHanderEquipped() && IsValidSpell(spellbonuses.WeaponStance[0]) && FindBuff(spellbonuses.WeaponStance[0]))
+		if (!HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0]) && FindBuff(spellbonuses.WeaponStance[0])) {
 			BuffFadeBySpellID(spellbonuses.WeaponStance[0]);
+		}
 
-		else if (!HasShieldEquiped() && IsValidSpell(spellbonuses.WeaponStance[1]) && FindBuff(spellbonuses.WeaponStance[1]))
+		else if (!HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1]) && FindBuff(spellbonuses.WeaponStance[1])) {
 			BuffFadeBySpellID(spellbonuses.WeaponStance[1]);
+		}
 
-		else if (!HasDuelWeaponsEquiped() && IsValidSpell(spellbonuses.WeaponStance[2]) && FindBuff(spellbonuses.WeaponStance[2]))
-				BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
+		else if (!HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2]) && FindBuff(spellbonuses.WeaponStance[2])) {
+			BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
+		}
 
 		//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
-		if (HasTwoHanderEquipped() && IsValidSpell(spellbonuses.WeaponStance[0]) && !FindBuff(spellbonuses.WeaponStance[0]))
+		if (HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0]) && !FindBuff(spellbonuses.WeaponStance[0])) {
 			SpellOnTarget(spellbonuses.WeaponStance[0], this);
+		}
 
-		else if (HasShieldEquiped() && IsValidSpell(spellbonuses.WeaponStance[1]) && !FindBuff(spellbonuses.WeaponStance[1]))
+		else if (HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1]) && !FindBuff(spellbonuses.WeaponStance[1])) {
 			SpellOnTarget(spellbonuses.WeaponStance[1], this);
+		}
 
-		else if (HasDuelWeaponsEquiped() && IsValidSpell(spellbonuses.WeaponStance[2]) && !FindBuff(spellbonuses.WeaponStance[2]))
+		else if (HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2]) && !FindBuff(spellbonuses.WeaponStance[2])) {
 			SpellOnTarget(spellbonuses.WeaponStance[2], this);
+		}
 	}
 
-	if (itembonuses.WeaponStance[0] || itembonuses.WeaponStance[1] || itembonuses.WeaponStance[2]) {
+	if (weaponstance.itembonus_enabled) {
+		Shout("Item enabled Check [%i]", weaponstance.itembonus_enabled);
+		if (itembonuses.WeaponStance[0] || itembonuses.WeaponStance[1] || itembonuses.WeaponStance[2]) {
 
-		enabled = true;
+			enabled = true;
+			item_bonus_exists = true;
+			Shout("Try apply items");
 
-		//Check if no longer has correct combination of weapon type and buff, if so remove buff.
-		if (!HasTwoHanderEquipped() && IsValidSpell(itembonuses.WeaponStance[0]) && FindBuff(itembonuses.WeaponStance[0]))
-			BuffFadeBySpellID(itembonuses.WeaponStance[0]);
+			//Check if no longer has correct combination of weapon type and buff, if so remove buff.
+			if (!HasTwoHanderEquipped() && IsBuffSpell(itembonuses.WeaponStance[0]) && FindBuff(itembonuses.WeaponStance[0])) {
+				BuffFadeBySpellID(itembonuses.WeaponStance[0]);
+			}
 
-		else if (!HasShieldEquiped() && IsValidSpell(itembonuses.WeaponStance[1]) && FindBuff(itembonuses.WeaponStance[1]))
-			BuffFadeBySpellID(itembonuses.WeaponStance[1]);
+			else if (!HasShieldEquiped() && IsBuffSpell(itembonuses.WeaponStance[1]) && FindBuff(itembonuses.WeaponStance[1])) {
+				BuffFadeBySpellID(itembonuses.WeaponStance[1]);
+			}
 
-		else if (!HasDuelWeaponsEquiped() && IsValidSpell(itembonuses.WeaponStance[2]) && FindBuff(itembonuses.WeaponStance[2]))
-			BuffFadeBySpellID(itembonuses.WeaponStance[2]);
+			else if (!HasDuelWeaponsEquiped() && IsBuffSpell(itembonuses.WeaponStance[2]) && FindBuff(itembonuses.WeaponStance[2])) {
+				BuffFadeBySpellID(itembonuses.WeaponStance[2]);
+			}
 
-		//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
-		if (HasTwoHanderEquipped() && IsValidSpell(itembonuses.WeaponStance[0]) && !FindBuff(itembonuses.WeaponStance[0]))
-			SpellOnTarget(itembonuses.WeaponStance[0], this);
+			//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
+			if (HasTwoHanderEquipped() && IsBuffSpell(itembonuses.WeaponStance[0])) {
+				if (!FindBuff(itembonuses.WeaponStance[0])) {
+					SpellOnTarget(itembonuses.WeaponStance[0], this);
+				}
+				weaponstance.itembonus_buff_spell_id = itembonuses.WeaponStance[0];
+			}
 
-		else if (HasShieldEquiped() && IsValidSpell(itembonuses.WeaponStance[1]) && !FindBuff(itembonuses.WeaponStance[1]))
-			SpellOnTarget(itembonuses.WeaponStance[1], this);
+			else if (HasShieldEquiped() && IsBuffSpell(itembonuses.WeaponStance[1])) {
+				if (!FindBuff(itembonuses.WeaponStance[1])) {
+					SpellOnTarget(itembonuses.WeaponStance[1], this);
+				}
+				weaponstance.itembonus_buff_spell_id = itembonuses.WeaponStance[1];
+			}
 
-		else if (HasDuelWeaponsEquiped() && IsValidSpell(itembonuses.WeaponStance[2]) && !FindBuff(itembonuses.WeaponStance[2]))
-			SpellOnTarget(itembonuses.WeaponStance[2], this);
+			else if (HasDuelWeaponsEquiped() && IsBuffSpell(itembonuses.WeaponStance[2])) {
+
+				if (!FindBuff(itembonuses.WeaponStance[2])) {
+					SpellOnTarget(itembonuses.WeaponStance[2], this);
+				}
+				weaponstance.itembonus_buff_spell_id = itembonuses.WeaponStance[2];
+			}
+		}
+	}
+	Shout("Check Item Buff ID: %i", weaponstance.itembonus_buff_spell_id);
+	if (!item_bonus_exists && weaponstance.itembonus_enabled) {
+		weaponstance.itembonus_enabled = false;
+		Shout("Disable Items [Buff id %i", weaponstance.itembonus_buff_spell_id);
+
+		if (weaponstance.itembonus_buff_spell_id) {
+			BuffFadeBySpellID(weaponstance.itembonus_buff_spell_id);
+			weaponstance.itembonus_buff_spell_id = 0;
+		}
 	}
 
+	if (weaponstance.aabonus_enabled) {
+		Shout("AA enabled Check [%i]", weaponstance.aabonus_enabled);
+		if (aabonuses.WeaponStance[0] || aabonuses.WeaponStance[1] || aabonuses.WeaponStance[2]) {
+
+			enabled = true;
+			aa_bonus_exists = true;
+			Shout("Try apply AA");
+
+		
+
+			//Check if no longer has correct combination of weapon type and buff, if so remove buff.
+			if (!HasTwoHanderEquipped() && IsBuffSpell(aabonuses.WeaponStance[0]) && FindBuff(aabonuses.WeaponStance[0])) {
+				BuffFadeBySpellID(aabonuses.WeaponStance[0]);
+			}
+
+			else if (!HasShieldEquiped() && IsBuffSpell(aabonuses.WeaponStance[1]) && FindBuff(aabonuses.WeaponStance[1])) {
+				BuffFadeBySpellID(aabonuses.WeaponStance[1]);
+			}
+
+			else if (!HasDuelWeaponsEquiped() && IsBuffSpell(aabonuses.WeaponStance[2]) && FindBuff(aabonuses.WeaponStance[2])) {
+				BuffFadeBySpellID(aabonuses.WeaponStance[2]);
+			}
+
+			//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
+			if (HasTwoHanderEquipped() && IsBuffSpell(aabonuses.WeaponStance[0])) {
+				if (!FindBuff(aabonuses.WeaponStance[0])) {
+					SpellOnTarget(aabonuses.WeaponStance[0], this);
+				}
+				weaponstance.aabonus_buff_spell_id = aabonuses.WeaponStance[0];
+			}
+
+			else if (HasShieldEquiped() && IsBuffSpell(aabonuses.WeaponStance[1])) {
+				if (!FindBuff(aabonuses.WeaponStance[1])) {
+					SpellOnTarget(aabonuses.WeaponStance[1], this);
+				}
+				weaponstance.aabonus_buff_spell_id = aabonuses.WeaponStance[1];
+			}
+
+			else if (HasDuelWeaponsEquiped() && IsBuffSpell(aabonuses.WeaponStance[2])) {
+
+				if (!FindBuff(aabonuses.WeaponStance[2])) {
+					SpellOnTarget(aabonuses.WeaponStance[2], this);
+				}
+				weaponstance.aabonus_buff_spell_id = aabonuses.WeaponStance[2];
+			}
+
+		}
+	}
+
+	
+	Shout("Check AA Buff ID: %i", weaponstance.aabonus_buff_spell_id);
+	/*
+	if (!aa_bonus_exists && weaponstance.aabonus_enabled) {
+		weaponstance.aabonus_enabled = false;
+		Shout("Disable AA [Buff id %i", weaponstance.aabonus_buff_spell_id);
+
+		if (weaponstance.aabonus_buff_spell_id) {
+			BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+			weaponstance.aabonus_buff_spell_id = 0;
+		}
+	}
+	*/
+
+
+	//If no bonuses remain present, prevent additional future checks until new bonus is applied.
 	if (!enabled) {
+		Shout("Disable Weapon Stance.");
 		SetWeaponStanceEnabled(false);
 	}
+
 }

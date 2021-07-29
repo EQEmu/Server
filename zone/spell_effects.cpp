@@ -4350,6 +4350,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				If we click off the spell buff giving us Weapon Stance effects, set global flag false
 				and remove all possible weapons stance applied buffs
 				*/
+				
 				SetWeaponStanceEnabled(false);
 
 				if (spellbonuses.WeaponStance[0])
@@ -6229,7 +6230,7 @@ bool Mob::TryDivineSave()
 			}
 		}
 
-		SpellOnTarget(4789, this); //Touch of the Divine=4789, an Invulnerability/HoT/Purify effect
+		SpellOnTarget(SPELL_TOUCH_OF_THE_DIVINE, this); //Touch of the Divine=4789, an Invulnerability/HoT/Purify effect
 		SendHPUpdate();
 		return true;
 	}

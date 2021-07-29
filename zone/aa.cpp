@@ -1160,8 +1160,49 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 	GrantAlternateAdvancementAbility(rank->base_ability->id, points + 1, true);
 }
 
+void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
+{
+	/*
+	Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
+	The spell "Disable Ability" contains no actual SPA id or data, thus it must be hardcoded to do this effect when triggered.
+	Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
+	*/
+
+	if (spell_id == 46164) {
+		//Disable *Not implemented yet. If we import AA data that supports it at someone will be made aware by the message.
+		Message(Chat::Red, "Use of Disably Ability through spell id 46164 is not implemented at this time, contact Kayen who will likely be in a retirement home at this time.");
+		return;
+	}
+
+	//Can add any specific use cases below.
+
+	int effect = 0;
+
+	for (const auto &e : rank.effects) {
+		effect = e.effect_id;
+				
+		switch (effect) {
+
+		case SE_Weapon_Stance: 
+			if (weaponstance.aabonus_enabled) {
+				weaponstance.aabonus_enabled = false;
+				Message(Chat::LightNavy, "You disable an ability."); //Message live gives you.
+				Message(Chat::LightBlue, "You disable an ability."); //Message live gives you.
+				BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+				return;
+			}
+			else {
+				weaponstance.aabonus_enabled = true; //No message needed, you instantly get the buff
+				ApplyWeaponsStance();
+				return;
+			}
+		}
+	}
+}
+
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+
 	if(!rank) {
 		return;
 	}
@@ -1181,6 +1222,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 
 	//make sure it is not a passive
 	if(!rank->effects.empty()) {
+		TogglePassiveAA(*rank, rank->spell);
 		return;
 	}
 
@@ -1188,7 +1230,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	// We don't have the AA
 	if (!GetAA(rank_id, &charges))
 		return;
-
 	//if expendable make sure we have charges
 	if(ability->charges > 0 && charges < 1)
 		return;

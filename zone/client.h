@@ -1554,6 +1554,7 @@ public:
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
 	void ApplyWeaponsStance();
+	void TogglePassiveAA(const AA::Rank &rank, int spell_id);
 
 	void TripInterrogateInvState() { interrogateinv_flag = true; }
 	bool GetInterrogateInvState() { return interrogateinv_flag; }

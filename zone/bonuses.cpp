@@ -1568,6 +1568,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_Weapon_Stance: {
+			Shout("[Bonus] Effect value %i base2 %i ", base1, base2);
+			Shout("[Bonus] AA Bonus Values [%i] [%i] [%i]", aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2]);
 
 			if (IsValidSpell(base1)) { //base1 is the spell_id of buff
 				if (base2 < 3){ //0=2H, 1=Shield, 2=DW
@@ -3444,18 +3446,30 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 
 			case SE_Weapon_Stance: {
-				Shout("Bonus. Effect value %i base2 %i", effect_value, base2);
+				Shout("[Bonus] Effect value %i base2 %i [From item? [%i] effect value %i", effect_value, base2, WornType, effect_value);
+				Shout("[Bonus] Spell Bonus Values [%i] [%i] [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2]);
+				Shout("[Bonus]Item Bonus Values [%i] [%i] [%i]", itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2]);
 				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff
 					if (base2 < 3) { //0=2H, 1=Shield, 2=DW
 						if (IsValidSpell(new_bonus->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 							if (spells[new_bonus->WeaponStance[base2]].rank < spells[new_bonus->WeaponStance[base2]].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 								new_bonus->WeaponStance[base2] = effect_value; //Overwrite with new effect
 								SetWeaponStanceEnabled(true);
+
+								if (WornType)
+									weaponstance.itembonus_enabled = true;
+								else
+									weaponstance.spellbonus_enabled = true;
 							}
 						}
 						else {
 							new_bonus->WeaponStance[base2] = effect_value; //If no prior effect exists, then apply
 							SetWeaponStanceEnabled(true);
+
+							if (WornType)
+								weaponstance.itembonus_enabled = true;
+							else
+								weaponstance.spellbonus_enabled = true;
 						}
 					}
 				}

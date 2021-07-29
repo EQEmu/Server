@@ -64,6 +64,7 @@
 #define SPELL_SHAPECHANGE70 6503
 #define SPELL_MANA_BURN 2751
 #define SPELL_LIFE_BURN 2755
+#define SPELL_TOUCH_OF_THE_DIVINE 4789
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502

@@ -322,7 +322,7 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
-	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects 
 	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
@@ -624,6 +624,16 @@ typedef struct
 struct Shielders_Struct {
 	uint32 shielder_id;
 	uint16 shielder_bonus;
+};
+
+struct WeaponStance_Struct {
+	bool enabled;
+	bool spellbonus_enabled;
+	bool itembonus_enabled;
+	bool aabonus_enabled;
+	int spellbonus_buff_spell_id;
+	int itembonus_buff_spell_id;
+	int aabonus_buff_spell_id;
 };
 
 typedef struct

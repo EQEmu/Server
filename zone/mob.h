@@ -435,8 +435,6 @@ public:
 	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
 	bool HasDuelWeaponsEquiped() const { return has_duelweaponsequiped; }
 	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
-	bool IsWeaponStanceEnabled() const { return weaponstance_enabled; }
-	inline void SetWeaponStanceEnabled(bool val) { weaponstance_enabled = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
@@ -1130,6 +1128,10 @@ public:
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
 
+	WeaponStance_Struct weaponstance;
+	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
+	inline void SetWeaponStanceEnabled(bool val) { weaponstance.enabled = val; }
+
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
 	inline int GetCWP() const { return(cur_wp); }
@@ -1492,7 +1494,6 @@ protected:
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
 	bool has_duelweaponsequiped;
-	bool weaponstance_enabled;
 	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;
