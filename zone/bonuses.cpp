@@ -1173,6 +1173,17 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Skill_Base_Damage_Mod: {
+			// Bad data or unsupported new skill
+			if (base2 > EQ::skills::HIGHEST_SKILL)
+				break;
+			if (base2 == ALL_SKILLS)
+				newbon->DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] += base1;
+			else
+				newbon->DamageModifier3[base2] += base1;
+			break;
+		}
+
 		case SE_SlayUndead: {
 			if (newbon->SlayUndead[1] < base1)
 				newbon->SlayUndead[0] = base1; // Rate
@@ -2344,6 +2355,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 					new_bonus->DamageModifier2[skill] = effect_value;
 				else if (effect_value > 0 && new_bonus->DamageModifier2[skill] < effect_value)
 					new_bonus->DamageModifier2[skill] = effect_value;
+				break;
+			}
+
+			case SE_Skill_Base_Damage_Mod:
+			{
+				// Bad data or unsupported new skill
+				if (base2 > EQ::skills::HIGHEST_SKILL)
+					break;
+				int skill = base2 == ALL_SKILLS ? EQ::skills::HIGHEST_SKILL + 1 : base2;
+				if (effect_value < 0 && new_bonus->DamageModifier3[skill] > effect_value)
+					new_bonus->DamageModifier3[skill] = effect_value;
+				else if (effect_value > 0 && new_bonus->DamageModifier3[skill] < effect_value)
+					new_bonus->DamageModifier3[skill] = effect_value;
 				break;
 			}
 
@@ -4302,6 +4326,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					}
 					break;
 				}
+
+				case SE_Skill_Base_Damage_Mod:
+				{
+					for (int e = 0; e < EQ::skills::HIGHEST_SKILL + 1; e++)
+					{
+						spellbonuses.DamageModifier3[e] = effect_value;
+						aabonuses.DamageModifier3[e] = effect_value;
+						itembonuses.DamageModifier3[e] = effect_value;
+					}
+					break;
+				}
+
 
 				case SE_MinDamageModifier:
 				{

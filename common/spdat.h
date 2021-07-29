@@ -825,7 +825,7 @@ typedef enum {
 //#define SE_Ff_Value_Min				479 //
 //#define SE_Ff_Value_Max				480 //
 #define SE_Fc_Cast_Spell_On_Land		481 // Implemented - [FOCUS] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
-//#define SE_Skill_Base_Damage_Mod		482 //
+#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
 #define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - [FOCUS] modifies incoming spell damage by percent
 #define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - [FOCUS] modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
 #define SE_Ff_CasterClass				485 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.

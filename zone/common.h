@@ -442,6 +442,7 @@ struct StatBonuses {
 	int32	HitChanceEffect[EQ::skills::HIGHEST_SKILL + 2];	//Spell effect Chance to Hit, straight percent increase
 	int32	DamageModifier[EQ::skills::HIGHEST_SKILL + 2];	//i
 	int32	DamageModifier2[EQ::skills::HIGHEST_SKILL + 2];	//i
+	int32	DamageModifier3[EQ::skills::HIGHEST_SKILL + 2];	//i
 	int32	MinDamageModifier[EQ::skills::HIGHEST_SKILL + 2]; //i
 	int32	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int32	ProcChanceSPA;						// ProcChance from spell effects
