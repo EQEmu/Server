@@ -3702,9 +3702,6 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	if(!IsValidSpell(spell_id))
 		return;
 
-	if (IsEffectInSpell(spell_id, SE_TwinCastBlocker))
-		return;
-
 	if(IsClient())
 	{
 		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
