@@ -3214,6 +3214,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Fc_Cast_Spell_On_Land:
 			case SE_Ff_CasterClass:
 			case SE_Ff_Same_Caster:
+			case SE_Weapon_Stance:
 			{
 				break;
 			}
@@ -4343,6 +4344,23 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					}
 			}
 
+			case SE_Weapon_Stance:
+			{
+				/*
+				If we click off the spell buff giving us Weapon Stance effects, set global flag false
+				and remove all possible weapons stance applied buffs
+				*/
+				SetWeaponStanceEnabled(false);
+
+				if (spellbonuses.WeaponStance[0])
+					BuffFadeBySpellID(spellbonuses.WeaponStance[0]);
+				if (spellbonuses.WeaponStance[1])
+					BuffFadeBySpellID(spellbonuses.WeaponStance[1]);
+				if (spellbonuses.WeaponStance[2])
+					BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
+
+				Shout("Weapon stance faded");
+			}
 		}
 	}
 
