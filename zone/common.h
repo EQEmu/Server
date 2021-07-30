@@ -639,6 +639,11 @@ struct WeaponStance_Struct {
 	int aabonus_buff_spell_id;
 };
 
+constexpr uint16 WEAPON_STANCE_TYPE_2H = 0;
+constexpr uint16 WEAPON_STANCE_TYPE_SHIELD = 1;
+constexpr uint16 WEAPON_STANCE_TYPE_DUAL_WIELD = 2;
+constexpr uint16 WEAPON_STANCE_TYPE_MAX = 2;
+
 typedef struct
 {
 	uint16 increment;

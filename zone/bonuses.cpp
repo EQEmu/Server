@@ -172,11 +172,13 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
 		}
-		else if (i == EQ::invslot::slotPrimary && (item && (item->ItemType == EQ::item::ItemType2HSlash || item->ItemType == EQ::item::ItemType2HPiercing)))
+		else if (i == EQ::invslot::slotPrimary && (item && (item->ItemType == EQ::item::ItemType2HSlash || item->ItemType == EQ::item::ItemType2HPiercing))) {
 			SetTwoHanderEquipped(true);
-		
-		if (CanThisClassDualWield())
-			SetDuelWeaponsEquiped(true);
+		}
+	}
+
+	if (CanThisClassDualWield()) {
+		SetDuelWeaponsEquiped(true);
 	}
 
 	//tribute items
@@ -1577,7 +1579,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_Weapon_Stance: 
 		{
 			if (IsValidSpell(base1)) { //base1 is the spell_id of buff
-				if (base2 < 3){ //0=2H, 1=Shield, 2=DW
+				if (base2 <= WEAPON_STANCE_TYPE_MAX){ //0=2H, 1=Shield, 2=DW
 					if (IsValidSpell(newbon->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 						if (spells[newbon->WeaponStance[base2]].rank < spells[base1].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 							newbon->WeaponStance[base2] = base1; //Overwrite with new effect
@@ -3534,7 +3536,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_Weapon_Stance: {
 				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff
-					if (base2 < 3) { //0=2H, 1=Shield, 2=DW
+					if (base2 <= WEAPON_STANCE_TYPE_MAX) { //0=2H, 1=Shield, 2=DW
 						if (IsValidSpell(new_bonus->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 							if (spells[new_bonus->WeaponStance[base2]].rank < spells[effect_value].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 								new_bonus->WeaponStance[base2] = effect_value; //Overwrite with new effect

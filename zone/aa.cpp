@@ -1807,7 +1807,6 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
 	*/
 
 	//Can add any specific use cases below.
-
 	int effect = 0;
 
 	for (const auto &e : rank.effects) {
