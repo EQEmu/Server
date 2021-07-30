@@ -10255,67 +10255,99 @@ void Client::ApplyWeaponsStance()
 	any spells/item/aa bonuses with weapon stance effect this function will only do a simple bool check.
 	Only buff spells should be used as triggered spell effect. IsBuffSpell function also checks spell id validity.
 	WeaponStance bonus arrary: 0=2H Weapon 1=Shield 2=Duelweild
+	Toggling ON or OFF
+	- From spells, just remove the Primary buff that contains the WeaponStance effect in it.
+	- For items with worn effect, unequip the item.
+	- For AA abilities, need to make sure any AA made with this also has a Hotkey. The hotkey will serve as toggle on/off, checked in TogglePassiveAA in aa.cpp.
+	Rank
+	- Most important for AA, but if you have more than one of WeaponStance effect for a given type, the spell trigger buff will apply whatever has the highest
+	rank value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
 	*/
-	Shout("Apply Weapon Stance [%i] Lock [%i]", IsWeaponStanceEnabled(),0);
+
+	Shout(">>>START<<<< Apply Weapon Stance [%i] SAVE itemspell [%i]", IsWeaponStanceEnabled(), weaponstance.itembonus_buff_spell_id);
 
 	if (!IsWeaponStanceEnabled())
 		return;
-
-
+	
 	Shout("State 2H [%i]", HasTwoHanderEquipped());
 	Shout("State SH [%i]", HasShieldEquiped());
 	Shout("State DW [%i]", HasDuelWeaponsEquiped());
 
-	Shout("Spell Bonus Values [%i] [%i] [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2]);
-	Shout("Item Bonus Values [%i] [%i] [%i]", itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2]);
-	Shout("AA Bonus Values [%i] [%i] [%i]", aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2]);
-
-	weaponstance.spellbonus_buff_spell_id = weaponstance.spellbonus_buff_spell_id + 1;
-	Shout("Total Count %i", weaponstance.spellbonus_buff_spell_id);
-
-
+	Shout("Spell Bonus Values [%i] [%i] [%i] enabled [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2], weaponstance.spellbonus_enabled);
+	Shout("Item Bonus Values [%i] [%i] [%i] enabled [%i]", itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2], weaponstance.itembonus_enabled);
+	Shout("AA Bonus Values [%i] [%i] [%i] enabled [%i]", aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2], weaponstance.aabonus_enabled);
+	
 	bool enabled = false;
 	bool item_bonus_exists = false;
 	bool aa_bonus_exists = false;
 
-	if (spellbonuses.WeaponStance[0] || spellbonuses.WeaponStance[1] || spellbonuses.WeaponStance[2]) {
+	if (weaponstance.spellbonus_enabled) {
 
-		enabled = true;
+		if (spellbonuses.WeaponStance[0] || spellbonuses.WeaponStance[1] || spellbonuses.WeaponStance[2]) {
 
-		//Check if no longer has correct combination of weapon type and buff, if so remove buff.
-		if (!HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0]) && FindBuff(spellbonuses.WeaponStance[0])) {
-			BuffFadeBySpellID(spellbonuses.WeaponStance[0]);
-		}
+			enabled = true;
 
-		else if (!HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1]) && FindBuff(spellbonuses.WeaponStance[1])) {
-			BuffFadeBySpellID(spellbonuses.WeaponStance[1]);
-		}
+			//Check if no longer has correct combination of weapon type and buff, if so remove buff.
+			if (!HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0]) && FindBuff(spellbonuses.WeaponStance[0])) {
+				BuffFadeBySpellID(spellbonuses.WeaponStance[0]);
+			}
 
-		else if (!HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2]) && FindBuff(spellbonuses.WeaponStance[2])) {
-			BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
-		}
+			else if (!HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1]) && FindBuff(spellbonuses.WeaponStance[1])) {
+				BuffFadeBySpellID(spellbonuses.WeaponStance[1]);
+			}
 
-		//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
-		if (HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0]) && !FindBuff(spellbonuses.WeaponStance[0])) {
-			SpellOnTarget(spellbonuses.WeaponStance[0], this);
-		}
+			else if (!HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2]) && FindBuff(spellbonuses.WeaponStance[2])) {
+				BuffFadeBySpellID(spellbonuses.WeaponStance[2]);
+			}
 
-		else if (HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1]) && !FindBuff(spellbonuses.WeaponStance[1])) {
-			SpellOnTarget(spellbonuses.WeaponStance[1], this);
-		}
+			//If you have correct combination of weapon type and bonus, and do not already have buff, then apply buff.
+			if (HasTwoHanderEquipped() && IsBuffSpell(spellbonuses.WeaponStance[0])) {
+				if (!FindBuff(spellbonuses.WeaponStance[0])) {
+					SpellOnTarget(spellbonuses.WeaponStance[0], this);
+				}
+				weaponstance.spellbonus_buff_spell_id = spellbonuses.WeaponStance[0];
+			}
 
-		else if (HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2]) && !FindBuff(spellbonuses.WeaponStance[2])) {
-			SpellOnTarget(spellbonuses.WeaponStance[2], this);
+			else if (HasShieldEquiped() && IsBuffSpell(spellbonuses.WeaponStance[1])) {
+				if (!FindBuff(spellbonuses.WeaponStance[1])) {
+					SpellOnTarget(spellbonuses.WeaponStance[1], this);
+				}
+				weaponstance.spellbonus_buff_spell_id = spellbonuses.WeaponStance[1];
+			}
+
+			else if (HasDuelWeaponsEquiped() && IsBuffSpell(spellbonuses.WeaponStance[2])) {
+				if (!FindBuff(spellbonuses.WeaponStance[2])) {
+					SpellOnTarget(spellbonuses.WeaponStance[2], this);
+				}
+				weaponstance.spellbonus_buff_spell_id = spellbonuses.WeaponStance[2];
+			}
 		}
 	}
 
-	if (weaponstance.itembonus_enabled) {
-		Shout("Item enabled Check [%i]", weaponstance.itembonus_enabled);
-		if (itembonuses.WeaponStance[0] || itembonuses.WeaponStance[1] || itembonuses.WeaponStance[2]) {
+	//Spellbonus effect removal is checked in BuffFadeBySlot(int slot, bool iRecalcBonuses) in spell_effects.cpp when the buff is clicked off or fades.
 
+	if (weaponstance.itembonus_enabled) {
+
+		if (itembonuses.WeaponStance[0] || itembonuses.WeaponStance[1] || itembonuses.WeaponStance[2]) {
+			Shout("<<<<START ITEM CHECK>>>>> CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
 			enabled = true;
 			item_bonus_exists = true;
-			Shout("Try apply items");
+
+
+			//Edge case check if have multiple items with WeaponStance worn effect. Make sure correct buffs are applied if items are removed but others left on.
+			if (weaponstance.itembonus_buff_spell_id){
+
+				bool buff_desync = true;
+				if (weaponstance.itembonus_buff_spell_id == itembonuses.WeaponStance[0] || weaponstance.itembonus_buff_spell_id == itembonuses.WeaponStance[1] ||
+					(weaponstance.itembonus_buff_spell_id == itembonuses.WeaponStance[2])) {
+					buff_desync = false;
+				}
+				if (buff_desync) {
+					int fade_spell = weaponstance.itembonus_buff_spell_id;
+					weaponstance.itembonus_buff_spell_id = 0; //Need to zero this before we fade to prevent any recursive loops.
+					BuffFadeBySpellID(fade_spell);
+				}
+			}
 
 			//Check if no longer has correct combination of weapon type and buff, if so remove buff.
 			if (!HasTwoHanderEquipped() && IsBuffSpell(itembonuses.WeaponStance[0]) && FindBuff(itembonuses.WeaponStance[0])) {
@@ -10352,13 +10384,15 @@ void Client::ApplyWeaponsStance()
 				}
 				weaponstance.itembonus_buff_spell_id = itembonuses.WeaponStance[2];
 			}
+
+			Shout("<<<<END ITEM CHECK>>>>> CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
 		}
 	}
-	Shout("Check Item Buff ID: %i", weaponstance.itembonus_buff_spell_id);
+
+	//Itembonus effect removal when item is removed
 	if (!item_bonus_exists && weaponstance.itembonus_enabled) {
 		weaponstance.itembonus_enabled = false;
-		Shout("Disable Items [Buff id %i", weaponstance.itembonus_buff_spell_id);
-
+		Shout("<<<NO BONUS ACTIVE FOR ITEMS>>>>> REMOVE CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
 		if (weaponstance.itembonus_buff_spell_id) {
 			BuffFadeBySpellID(weaponstance.itembonus_buff_spell_id);
 			weaponstance.itembonus_buff_spell_id = 0;
@@ -10366,14 +10400,11 @@ void Client::ApplyWeaponsStance()
 	}
 
 	if (weaponstance.aabonus_enabled) {
-		Shout("AA enabled Check [%i]", weaponstance.aabonus_enabled);
+
 		if (aabonuses.WeaponStance[0] || aabonuses.WeaponStance[1] || aabonuses.WeaponStance[2]) {
 
 			enabled = true;
 			aa_bonus_exists = true;
-			Shout("Try apply AA");
-
-		
 
 			//Check if no longer has correct combination of weapon type and buff, if so remove buff.
 			if (!HasTwoHanderEquipped() && IsBuffSpell(aabonuses.WeaponStance[0]) && FindBuff(aabonuses.WeaponStance[0])) {
@@ -10414,25 +10445,12 @@ void Client::ApplyWeaponsStance()
 		}
 	}
 
-	
-	Shout("Check AA Buff ID: %i", weaponstance.aabonus_buff_spell_id);
-	/*
-	if (!aa_bonus_exists && weaponstance.aabonus_enabled) {
-		weaponstance.aabonus_enabled = false;
-		Shout("Disable AA [Buff id %i", weaponstance.aabonus_buff_spell_id);
-
-		if (weaponstance.aabonus_buff_spell_id) {
-			BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
-			weaponstance.aabonus_buff_spell_id = 0;
-		}
-	}
-	*/
+	//AA bonus removal is checked in TogglePassiveAA in aa.cpp. when the hot key is toggled.
 
 
 	//If no bonuses remain present, prevent additional future checks until new bonus is applied.
 	if (!enabled) {
-		Shout("Disable Weapon Stance.");
 		SetWeaponStanceEnabled(false);
 	}
-
+	Shout(">>>END<<<< Apply Weapon Stance [%i] SAVE itemspell [%i]", IsWeaponStanceEnabled(), weaponstance.itembonus_buff_spell_id);
 }
