@@ -5186,76 +5186,23 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		// handle effects
 		case SE_ImprovedDamage:
-			if (type == focusImprovedDamage) {
-				// This is used to determine which focus should be used for the random calculation
-				if (best_focus) {
-					// If the spell contains a value in the base2 field then that is the max value
-					if (focus_spell.base2[i] != 0) {
-						value = focus_spell.base2[i];
-					}
-					// If the spell does not contain a base2 value, then its a straight non random
-					// value
-					else {
-						value = focus_spell.base[i];
-					}
-				}
-				// Actual focus calculation starts here
-				else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
-				}
-			}
+			if (type == focusImprovedDamage)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_ImprovedDamage2:
-			if (type == focusImprovedDamage2) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0) {
-						value = focus_spell.base2[i];
-					}
-					else {
-						value = focus_spell.base[i];
-					}
-				}
-				else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
-				}
-			}
+			if (type == focusImprovedDamage2)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_ImprovedHeal:
-			if (type == focusImprovedHeal) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0) {
-						value = focus_spell.base2[i];
-					} else {
-						value = focus_spell.base[i];
-					}
-				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
-				}
-			}
+			if (type == focusImprovedHeal)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_ReduceManaCost:
-			if (type == focusManaCost) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0) {
-						value = focus_spell.base2[i];
-					} else {
-						value = focus_spell.base[i];
-					}
-				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
-				}
-			}
+			if (type == focusManaCost)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_IncreaseSpellHaste:
@@ -5284,8 +5231,8 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_ReduceReagentCost:
-			if (type == focusReagentCost && focus_spell.base[i] > value)
-				value = focus_spell.base[i];
+			if (type == focusReagentCost)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_PetPowerIncrease:
@@ -5294,34 +5241,13 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_SpellResistReduction:
-			if (type == focusResistRate) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0) {
-						value = focus_spell.base2[i];
-					} else {
-						value = focus_spell.base[i];
-					}
-				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i];
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]);
-				}
-			}
+			if (type == focusResistRate)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_SpellHateMod:
-			if (type == focusSpellHateMod) {
-				if (value != 0) {
-					if (value > 0) {
-						if (focus_spell.base[i] > value)
-							value = focus_spell.base[i];
-					} else {
-						if (focus_spell.base[i] < value)
-							value = focus_spell.base[i];
-					}
-				} else
-					value = focus_spell.base[i];
-			}
+			if (type == focusSpellHateMod)
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			break;
 
 		case SE_ReduceReuseTimer:
@@ -5353,33 +5279,13 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_FcSpellVulnerability:
 			if (type == focusSpellVulnerability) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0)
-						value = focus_spell.base2[i]; //max damage
-					else
-						value = focus_spell.base[i]; //min damage
-				} else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i]; //If no max damage set, then default to min damage
-				} else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]); //else random for value
-				}
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			}
 			break;
 
 		case SE_Fc_Spell_Damage_Pct_IncomingPC:
 			if (type == focusFcSpellDamagePctIncomingPC) {
-				if (best_focus) {
-					if (focus_spell.base2[i] != 0)
-						value = focus_spell.base2[i]; //max damage
-					else
-						value = focus_spell.base[i]; //min damage
-				}
-				else if (focus_spell.base2[i] == 0 || focus_spell.base[i] == focus_spell.base2[i]) {
-					value = focus_spell.base[i]; //If no max damage set, then default to min damage
-				}
-				else {
-					value = zone->random.Int(focus_spell.base[i], focus_spell.base2[i]); //else random for value
-				}
+				value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 			}
 			break;
 
@@ -7473,7 +7379,9 @@ bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 	case focusFcDamagePctCrit:
 	case focusReagentCost:
 	case focusSpellHateMod:
-		return 1;
+	case focusSpellVulnerability:
+	case focusFcSpellDamagePctIncomingPC:
+	return 1;
 	}
 	return 0;
 }
@@ -7499,6 +7407,5 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 	else {
 		value = zone->random.Int(focus_base, focus_base2);
 	}
-
 	return value;
 }
