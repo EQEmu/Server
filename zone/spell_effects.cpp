@@ -5569,7 +5569,8 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 	//Spell Focus
 	if (spellbonuses.FocusEffects[type]) {
 
-		for (int buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
+		int buff_slot = 0;
+		for (buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
 
 			focus_spell_id = buffs[buff_slot].spellid;
 			if (!IsValidSpell(focus_spell_id))
@@ -5583,7 +5584,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 				TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
 			}
 			
-			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell_id);
+			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_slot);
 		}
 	}
 	//Only use of this focus per AA effect.
