@@ -359,6 +359,7 @@ int command_init(void)
 		command_add("repop", "[delay] - Repop the zone with optional delay", 100, command_repop) ||
 		command_add("resetaa", "- Resets a Player's AA in their profile and refunds spent AA's to unspent, may disconnect player.", 200, command_resetaa) ||
 		command_add("resetaa_timer", "Command to reset AA cooldown timers.", 200, command_resetaa_timer) ||
+		command_add("resetdisc_timer", "Command to reset all discipline cooldown timers.", 200, command_resetdisc_timer) ||
 		command_add("revoke", "[charname] [1/0] - Makes charname unable to talk on OOC", 200, command_revoke) ||
 		command_add("roambox", "Manages roambox settings for an NPC", 200, command_roambox) ||
 		command_add("rules", "(subcommand) - Manage server rules", 250, command_rules) ||
@@ -13722,6 +13723,32 @@ void command_resetaa_timer(Client *c, const Seperator *sep) {
 	else
 	{
 		c->Message(Chat::White, "usage: #resetaa_timer [all | timer_id]");
+	}
+}
+
+void command_resetdisc_timer(Client *c, const Seperator *sep) {
+	Client *target = nullptr;
+	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
+		target = c;
+	}
+	else {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	if (sep->IsNumber(1))
+	{
+		int timer_id = atoi(sep->arg[1]);
+		c->Message(Chat::White, "Reset of disc timer %i for %s", timer_id, c->GetName());
+		c->ResetDisciplineTimer(timer_id);;
+	}
+	else if (!strcasecmp(sep->arg[1], "all"))
+	{
+		c->Message(Chat::White, "Reset all disc timers for %s", c->GetName());
+		c->ResetAllDisciplineTimers();
+	}
+	else
+	{
+		c->Message(Chat::White, "usage: #resetdisc_timer [all | timer_id]");
 	}
 }
 
