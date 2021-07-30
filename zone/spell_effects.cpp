@@ -3215,6 +3215,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Ff_CasterClass:
 			case SE_Ff_Same_Caster:
 			case SE_Weapon_Stance:
+			case SE_AddExtraAttackPct_1h_Primary:
+			case SE_AddExtraAttackPct_1h_Secondary:
+			case SE_Skill_Base_Damage_Mod:
 			{
 				break;
 			}
@@ -4823,7 +4826,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = base1;
 			break;
 
@@ -5393,7 +5396,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = focus_spell.base[i];
 			break;
 
@@ -7449,4 +7452,22 @@ void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 		SetFeigned(false);
 		MessageString(Chat::SpellFailure,FD_CAST_ON);
 	}
+}
+
+bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
+{
+	//'this' = caster of spell
+	if (!target) {
+		return false;
+	}
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
+		if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
+			if ((spells[spell_id].max[i] != 0 && target->GetLevel() > spells[spell_id].max[i]) || target->GetSpecialAbility(IMMUNE_PACIFY)) {
+				return false;
+			}
+		}
+	}
+	return true;
 }

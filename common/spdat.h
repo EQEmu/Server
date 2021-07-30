@@ -610,7 +610,7 @@ typedef enum {
 #define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
-#define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
+#define SE_ExtraAttackChance			266 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 2-handed primary weapon, base: chance, limit: amt attacks, max: none
 #define SE_AddPetCommand				267 // implemented - sets command base2 to base1
 #define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
@@ -826,7 +826,7 @@ typedef enum {
 //#define SE_Ff_Value_Min				479 //
 //#define SE_Ff_Value_Max				480 //
 #define SE_Fc_Cast_Spell_On_Land		481 // Implemented - [FOCUS] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
-//#define SE_Skill_Base_Damage_Mod		482 //
+#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
 #define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - [FOCUS] modifies incoming spell damage by percent
 #define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - [FOCUS] modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
 #define SE_Ff_CasterClass				485 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.
@@ -842,8 +842,8 @@ typedef enum {
 //#define SE_Ff_DurationMax				495 //
 #define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
 //#define SE_Ff_FocusCastProcNoBypass	497 //
-//#define SE_AddExtraAttackPct_1h_Primary	498 //
-//#define SE_AddExtraAttackPct_1h_Secondary	499 //
+#define SE_AddExtraAttackPct_1h_Primary	498 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed primary weapon, base: chance, limit: amt attacks, max: none
+#define SE_AddExtraAttackPct_1h_Secondary	499 //implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed secondary weapon, base: chance, limit: amt attacks, max: none
 //#define SE_Fc_CastTimeMod2			500 //
 //#define SE_Fc_CastTimeAmt				501 //
 #define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
