@@ -5640,7 +5640,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2 || type == focusResistRate))
+	if(RuleB(Spells, LiveLikeFocusEffects) && CanFocusUseRandomEffectivenessByType(type))
 		rand_effectiveness = true;
 
 	//Check if item focus effect exists for the client.
@@ -7458,4 +7458,47 @@ bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 		}
 	}
 	return true;
+}
+
+
+bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
+{
+	switch (type)
+	{
+	case focusImprovedDamage:
+	case focusImprovedDamage2:
+	case focusImprovedHeal:
+	case focusManaCost:
+	case focusResistRate:
+	case focusFcDamagePctCrit:
+	case focusReagentCost:
+	case focusSpellHateMod:
+		return 1;
+	}
+	return 0;
+}
+
+int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus)
+{
+	int value = 0;
+	// This is used to determine which focus should be used for the random calculation
+	if (best_focus) {
+		// If the spell contains a value in the base2 field then that is the max value
+		if (focus_base2 != 0) {
+			value = focus_base2;
+		}
+		// If the spell does not contain a base2 value, then its a straight non random
+		else {
+			value = focus_base;
+		}
+	}
+	// Actual focus calculation starts here
+	else if (focus_base2 == 0 || focus_base == focus_base2) {
+		value = focus_base;
+	}
+	else {
+		value = zone->random.Int(focus_base, focus_base2);
+	}
+
+	return value;
 }
