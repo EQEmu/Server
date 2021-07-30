@@ -75,8 +75,6 @@
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
 #include "../common/content/world_content_service.h"
-
-#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include "../common/http/httplib.h"
 
 extern QueryServ* QServ;

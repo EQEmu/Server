@@ -289,6 +289,9 @@ public:
 	void DeleteBuyLines(uint32 CharID);
 	void UpdateBuyLine(uint32 CharID, uint32 BuySlot, uint32 Quantity);
 
+
+	void UpdateGMStatus(uint32 accID, int newStatus);
+
 	/**
 	 ************************************************
 	 * Character

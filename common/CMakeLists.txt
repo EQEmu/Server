@@ -451,6 +451,7 @@ SET(repositories
 )
 
 SET(common_headers
+	additive_lagged_fibonacci_engine.h
 	any.h
 	base_packet.h
 	base_data.h

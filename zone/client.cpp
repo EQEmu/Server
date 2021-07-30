@@ -10130,7 +10130,6 @@ void Client::SetAFK(uint8 afk_flag) {
 	safe_delete(outapp);
 }
 
-
 void Client::SendToInstance(std::string instance_type, std::string zone_short_name, uint32 instance_version, float x, float y, float z, float heading, std::string instance_identifier, uint32 duration) {
 	uint32 zone_id = ZoneID(zone_short_name);
 	std::string current_instance_type = str_tolower(instance_type);
@@ -10240,4 +10239,9 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 			}
 		}
 	}
+}
+
+void Client::SetGMStatus(int newStatus) {
+	if (this->Admin() != newStatus)
+		database.UpdateGMStatus(this->AccountID(), newStatus);
 }

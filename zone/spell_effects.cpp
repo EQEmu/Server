@@ -3226,6 +3226,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Ff_ReuseTimeMax:
 			case SE_Ff_Value_Min:
 			case SE_Ff_Value_Max:
+			case SE_AddExtraAttackPct_1h_Primary:
+			case SE_AddExtraAttackPct_1h_Secondary:
+			case SE_Skill_Base_Damage_Mod:
+
 			{
 				break;
 			}
@@ -4890,7 +4894,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = base1;
 			break;
 
@@ -5531,7 +5535,7 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			break;
 
 		case SE_FcTwincast:
-			if (type == focusTwincast)
+			if (type == focusTwincast && !IsEffectInSpell(spell_id, SE_TwinCastBlocker))
 				value = focus_spell.base[i];
 			break;
 
@@ -7144,7 +7148,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	return false;
 }
 
-bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
+bool Mob::TrySpellProjectile(Mob* spell_target, uint16 spell_id, float speed) {
 
 	/*For mage 'Bolt' line and other various spells.
 	-This is mostly accurate for how the modern clients handle this effect.
@@ -7169,7 +7173,7 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 
 	//Make sure there is an avialable bolt to be cast.
 	for (int i = 0; i < MAX_SPELL_PROJECTILE; i++) {
-		if (ProjectileAtk[i].target_id == 0){
+		if (ProjectileAtk[i].target_id == 0) {
 			slot = i;
 			break;
 		}
@@ -7178,11 +7182,35 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 	if (slot < 0)
 		return false;
 
+	float arc = 0.0f;
+	float distance_mod = 0.0f;
+
 	if (CheckLosFN(spell_target)) {
 
-		float speed_mod = speed; //Constant for adjusting speeds to match calculated impact time.
 		float distance = spell_target->CalculateDistance(GetX(), GetY(), GetZ());
-		float hit = 1200.0f + (10 * distance / speed_mod);
+
+		/*
+		New Distance Mod constant (7/25/21 update), modifier is needed to adjust slower speeds to have correct impact times at short distances.
+		We use archery 4.0 speed as a baseline for the forumla.  At speed 1.5 at 50 pct distance mod is needed, where as speed 4.0 there is no modifer.
+		Therefore, we derive out our modifer as follows. distance_mod = (speed - 4) * ((50 - 0)/(1.5-4)). The ratio there is -20.0f. distance_mod = (speed - 4) * -20.0f
+		For distances >125 we use different modifier, this was all meticulously tested by eye to get the best possible outcome for projectile impact times. Not perfect though.
+		*/
+
+		if (distance <= 125.0f) {
+			distance_mod = (speed - 4.0f) * -20.0f;
+			distance += distance * distance_mod / 100.0f;
+		}
+		else if (distance > 125.0f && distance <= 200.0f)
+			distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+
+		else if (distance > 200.0f) {
+			arc = 50.0f - ((distance - 200.0f) * 0.266f); //Arc angle gets drastically larger if >200 distance, lets lower it down gradually for better effect.
+			arc = std::max(arc, 20.0f); //No lower than 20 arc
+			distance = distance * 1.30f; //Add 30% to base distance if over 200 range to tighten up hit timing.
+			distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+		}
+
+		float hit = 1200.0f + (10 * distance / speed);
 
 		ProjectileAtk[slot].increment = 1;
 		ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); //This projected hit time if target does NOT MOVE
@@ -7192,34 +7220,33 @@ bool Mob::TrySpellProjectile(Mob* spell_target,  uint16 spell_id, float speed){
 		ProjectileAtk[slot].origin_y = GetY();
 		ProjectileAtk[slot].origin_z = GetZ();
 		ProjectileAtk[slot].skill = EQ::skills::SkillConjuration;
-		ProjectileAtk[slot].speed_mod = speed_mod;
+		ProjectileAtk[slot].speed_mod = speed;
 
 		SetProjectileAttack(true);
 	}
 
 	//This will use the correct graphic as defined in the player_1 field of spells_new table. Found in UF+ spell files.
 	if (RuleB(Spells, UseLiveSpellProjectileGFX)) {
-		ProjectileAnimation(spell_target,0, false, speed,0,0,0, spells[spell_id].player_1);
+		ProjectileAnimation(spell_target, 0, false, speed, 0.0f, 0.0f, arc, spells[spell_id].player_1);
 	}
-
 	//This allows limited support for server using older spell files that do not contain data for bolt graphics.
 	else {
 		//Only use fire graphic for fire spells.
 		if (spells[spell_id].resisttype == RESIST_FIRE) {
 
-			if (IsClient()){
+			if (IsClient()) {
 				if (CastToClient()->ClientVersionBit() <= 4) //Titanium needs alternate graphic.
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_Titanium)), false, speed);
+					ProjectileAnimation(spell_target, (RuleI(Spells, FRProjectileItem_Titanium)), false, speed, 0.0f, 0.0f, arc);
 				else
-					ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_SOF)), false, speed);
-				}
+					ProjectileAnimation(spell_target, (RuleI(Spells, FRProjectileItem_SOF)), false, speed, 0.0f, 0.0f, arc);
+			}
 
 			else
-				ProjectileAnimation(spell_target,(RuleI(Spells, FRProjectileItem_NPC)), false, speed);
+				ProjectileAnimation(spell_target, (RuleI(Spells, FRProjectileItem_NPC)), false, speed, 0.0f, 0.0f, arc);
 		}
 		//Default to an arrow if not using a mage bolt (Use up to date spell file and enable above rules for best results)
 		else
-			ProjectileAnimation(spell_target,0, 1, speed);
+			ProjectileAnimation(spell_target, 0, 1, speed, 0.0f, 0.0f, arc);
 	}
 
 	if (spells[spell_id].CastingAnim == 64)
@@ -7563,4 +7590,22 @@ void Client::BreakFeignDeathWhenCastOn(bool IsResisted)
 		SetFeigned(false);
 		MessageString(Chat::SpellFailure,FD_CAST_ON);
 	}
+}
+
+bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
+{
+	//'this' = caster of spell
+	if (!target) {
+		return false;
+	}
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
+		if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
+			if ((spells[spell_id].max[i] != 0 && target->GetLevel() > spells[spell_id].max[i]) || target->GetSpecialAbility(IMMUNE_PACIFY)) {
+				return false;
+			}
+		}
+	}
+	return true;
 }

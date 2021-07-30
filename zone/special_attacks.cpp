@@ -929,11 +929,31 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 	if (slot < 0)
 		return false;
 
-	float speed_mod = speed;
-
+	float distance_mod = 0.0f;
 	float distance = other->CalculateDistance(GetX(), GetY(), GetZ());
-	float hit =
-	    1200.0f + (10 * distance / speed_mod); // Calcuation: 60 = Animation Lag, 1.8 = Speed modifier for speed of (4)
+
+	/*
+	New Distance Mod constant (7/25/21 update), modifier is needed to adjust slower speeds to have correct impact times at short distances.
+	We use archery 4.0 speed as a baseline for the forumla.  At speed 1.5 at 50 pct distance mod is needed, where as speed 4.0 there is no modifer.
+	Therefore, we derive out our modifer as follows. distance_mod = (speed - 4) * ((50 - 0)/(1.5-4)). The ratio there is -20.0f. distance_mod = (speed - 4) * -20.0f
+	For distances >125 we use different modifier, this was all meticulously tested by eye to get the best possible outcome for projectile impact times. Not perfect though.
+	*/
+
+	if (distance <= 125.0f) {
+		if (speed != 4.0f) { //Standard functions will always be 4.0f for archery.
+			distance_mod = (speed - 4.0f) * -20.0f;
+			distance += distance * distance_mod / 100.0f;
+		}
+	}
+	else if (distance > 125.0f && distance <= 200.0f)
+		distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+
+	else if (distance > 200.0f) {
+		distance = distance * 1.30f; //Add 30% to base distance if over 200 range to tighten up hit timing.
+		distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+	}
+
+	float hit = 1200.0f + (10 * distance / speed);
 
 	ProjectileAtk[slot].increment = 1;
 	ProjectileAtk[slot].hit_increment = static_cast<uint16>(hit); // This projected hit time if target does NOT MOVE
@@ -951,14 +971,12 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 
 	ProjectileAtk[slot].ammo_slot = 0;
 	ProjectileAtk[slot].skill = skillInUse;
-	ProjectileAtk[slot].speed_mod = speed_mod;
+	ProjectileAtk[slot].speed_mod = speed;
 
 	SetProjectileAttack(true);
 
 	if (item)
 		SendItemAnimation(other, item, skillInUse, speed);
-	// else if (IsNPC())
-	// ProjectileAnimation(other, 0,false,speed,0,0,0,CastToNPC()->GetAmmoIDfile(),skillInUse);
 
 	return true;
 }
@@ -978,23 +996,40 @@ void Mob::ProjectileAttack()
 		disable = false;
 		Mob *target = entity_list.GetMobID(ProjectileAtk[i].target_id);
 
-		if (target && target->IsMoving()) { // Only recalculate hit increment if target moving
-			// Due to frequency that we need to check increment the targets position variables may not be
-			// updated even if moving. Do a simple check before calculating distance.
+		if (target && target->IsMoving()) { 
+			/*
+			Only recalculate hit increment if target is moving.
+			Due to frequency that we need to check increment the targets position variables may not be 
+			updated even if moving. Do a simple check before calculating distance.
+			*/
 			if (ProjectileAtk[i].tlast_x != target->GetX() || ProjectileAtk[i].tlast_y != target->GetY()) {
+				
 				ProjectileAtk[i].tlast_x = target->GetX();
 				ProjectileAtk[i].tlast_y = target->GetY();
-				float distance = target->CalculateDistance(
-				    ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y, ProjectileAtk[i].origin_z);
-				float hit = 1200.0f + (10 * distance / ProjectileAtk[i].speed_mod); // Calcuation: 60 =
-											     // Animation Lag, 1.8 =
-											     // Speed modifier for speed
-											     // of (4)
+
+				//Recalculate from the original location the projectile was fired in relation to the current targets location.
+				float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y, ProjectileAtk[i].origin_z);
+				float distance_mod = 0.0f;
+				
+				if (distance <= 125.0f) {
+					distance_mod = (ProjectileAtk[i].speed_mod - 4.0f) * -20.0f;
+					distance += distance * distance_mod / 100.0f;
+				}
+				else if (distance > 125.0f && distance <= 200.0f)
+					distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+
+				else if (distance > 200.0f) {
+					distance = distance * 1.30f; //Add 30% to base distance if over 200 range to tighten up hit timing.
+					distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
+				}
+				
+				float hit = 1200.0f + (10 * distance / ProjectileAtk[i].speed_mod);
+
 				ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
 			}
 		}
 
-		// We hit I guess?
+		// Check if we hit. 
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment) {
 			if (target) {
 				if (IsNPC()) {
@@ -1496,7 +1531,7 @@ void Mob::ProjectileAnimation(Mob* to, int item_id, bool IsArrow, float speed, f
 		speed = 4.0;
 	}
 	if(!angle) {
-		angle = CalculateHeadingToTarget(to->GetX(), to->GetY()) * 2;
+		angle = CalculateHeadingToTarget(to->GetX(), to->GetY());
 	}
 	if(!tilt) {
 		tilt = 125;

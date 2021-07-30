@@ -3413,6 +3413,21 @@ XS(XS_Client_ReadBook) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SetGMStatus); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetGMStatus) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetGMStatus(THIS, int newStatus)"); // @categories Script Utility
+	{
+		Client *THIS;
+		int newStatus = (int)SvIV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetGMStatus(newStatus);
+		THIS->UpdateAdmin(true);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_UpdateGroupAAs); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_UpdateGroupAAs) {
 	dXSARGS;
@@ -5706,6 +5721,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
 	newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
 	newXSproto(strcpy(buf, "UpdateAdmin"), XS_Client_UpdateAdmin, file, "$;$");
+	newXSproto(strcpy(buf, "SetGMStatus"), XS_Client_SetGMStatus, file, "$$");
 	newXSproto(strcpy(buf, "UpdateGroupAAs"), XS_Client_UpdateGroupAAs, file, "$$$");
 	newXSproto(strcpy(buf, "UpdateLDoNPoints"), XS_Client_UpdateLDoNPoints, file, "$$$");
 	newXSproto(strcpy(buf, "UpdateTaskActivity"), XS_Client_UpdateTaskActivity, file, "$$$$;$");

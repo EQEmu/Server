@@ -3708,9 +3708,6 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	if(!IsValidSpell(spell_id))
 		return;
 
-	if (IsEffectInSpell(spell_id, SE_TwinCastBlocker))
-		return;
-
 	if(IsClient())
 	{
 		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
@@ -4861,6 +4858,9 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 
 	dmg_mod += itembonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] +
 				itembonuses.DamageModifier2[skill] + spellbonuses.DamageModifier2[skill] + aabonuses.DamageModifier2[skill];
+
+	dmg_mod += itembonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.DamageModifier3[skill] + spellbonuses.DamageModifier3[skill] + aabonuses.DamageModifier3[skill];
 
 	if(dmg_mod < -100)
 		dmg_mod = -100;

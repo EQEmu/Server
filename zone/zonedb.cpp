@@ -4977,3 +4977,21 @@ void ZoneDatabase::SetEXPModifier(uint32 character_id, uint32 zone_id, double ex
 	);
 	database.QueryDatabase(query);
 }
+
+void ZoneDatabase::UpdateGMStatus(uint32 accID, int newStatus)
+{
+	if (accID) {
+		std::string query = fmt::format(
+			SQL(
+				UPDATE
+				`account`
+				SET `status` = {}
+				WHERE
+				`id` = {}
+			),
+			newStatus,
+			accID
+		);
+		database.QueryDatabase(query);
+	}
+}
