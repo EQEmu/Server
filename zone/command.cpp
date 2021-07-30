@@ -13728,6 +13728,7 @@ void command_resetaa_timer(Client *c, const Seperator *sep) {
 
 void command_resetdisc_timer(Client *c, const Seperator *sep) {
 	Client *target = nullptr;
+
 	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
 		target = c;
 	}
@@ -13739,7 +13740,7 @@ void command_resetdisc_timer(Client *c, const Seperator *sep) {
 	{
 		int timer_id = atoi(sep->arg[1]);
 		c->Message(Chat::White, "Reset of disc timer %i for %s", timer_id, c->GetName());
-		c->ResetDisciplineTimer(timer_id);;
+		c->ResetDisciplineTimer(timer_id);
 	}
 	else if (!strcasecmp(sep->arg[1], "all"))
 	{
