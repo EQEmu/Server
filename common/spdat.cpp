@@ -1258,6 +1258,8 @@ bool IsFocusLimit(int spa)
 	case SE_LimitManaMin:
 	case SE_LimitSpellGroup:
 	case SE_LimitManaMax:
+	case SE_LimitSpellClass:
+	case SE_LimitSpellSubclass:
 	case SE_LimitClass:
 	case SE_LimitRace:
 	case SE_LimitCastingSkill:
