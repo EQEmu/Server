@@ -170,6 +170,25 @@ const int Z_AGGRO=10;
 
 const uint32 MobAISpellRange=100; // max range of buffs
 
+enum FocusLimitIncludes {
+	Include_Exists_SE_LimitResist = 0,
+	Include_Found_SE_LimitResist = 1,
+	Include_Exists_SE_LimitSpell = 2,
+	Include_Found_SE_LimitSpell = 3,
+	Include_Exists_SE_LimitEffect = 4,
+	Include_Found_SE_LimitEffect = 5,
+	Include_Exists_SE_LimitTarget = 6,
+	Include_Found_SE_LimitTarget = 7,
+	Include_Exists_SE_LimitSpellGroup = 8,
+	Include_Found_SE_LimitSpellGroup = 9,
+	Include_Exists_SE_LimitCastingSkill = 10,
+	Include_Found_SE_LimitCastingSkill = 11,
+	Include_Exists_SE_LimitSpellClass = 12,
+	Include_Found_SE_LimitSpellClass = 13,
+	Include_Exists_SE_LimitSpellSubclass = 14,
+	Include_Found_SE_LimitSpellSubclass = 15
+};
+
 enum SpellTypes : uint32
 {
 	SpellType_Nuke = (1 << 0),
@@ -746,8 +765,8 @@ typedef enum {
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_LimitSpellClass				403 // implemented - Limits to specific types of spells (see CheckSpellCategory)
-#define SE_LimitSpellSubclass			404 // *not implemented - Limits to specific types of spells (see CheckSpellCategory) [Categories NOT defined yet]
+#define SE_LimitSpellClass				403 // implemented, @Ff, 'Spell Category' using table field 'spell_class' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
+#define SE_LimitSpellSubclass			404 // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative 
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
@@ -1018,8 +1037,8 @@ struct SPDat_Spell_Struct
 /* 218 */	int aemaxtargets;  //Is used for various AE effects -- MAX_TARGETS
 /* 219 */	int no_heal_damage_item_mod; // -- NO_HEAL_DAMAGE_ITEM_MOD
 /* 220 */	//int caster_requirement_id; // -- CASTER_REQUIREMENT_ID
-/* 221 */	//int spell_class; // -- SPELL_CLASS
-/* 222 */	//int spell_subclass; // -- SPELL_SUBCLASS
+/* 221 */	int spell_class; // -- SPELL_CLASS
+/* 222 */	int spell_subclass; // -- SPELL_SUBCLASS
 /* 223 */	//int ai_valid_targets; // -- AI_VALID_TARGETS
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death -- NO_STRIP_ON_DEATH
 /* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE

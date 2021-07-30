@@ -4500,9 +4500,9 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			}
 			else {
-				LimitInclude[0] = true;
+				LimitInclude[Include_Exists_SE_LimitResist] = true;
 				if (spell.resisttype == base1) // Include
-					LimitInclude[1] = true;
+					LimitInclude[Include_Found_SE_LimitResist] = true;
 			}
 			break;
 
@@ -4552,9 +4552,9 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			}
 			else {
-				LimitInclude[2] = true;
+				LimitInclude[Include_Exists_SE_LimitSpell] = true;
 				if (spell_id == base1) // Include
-					LimitInclude[3] = true;
+					LimitInclude[Include_Found_SE_LimitSpell] = true;
 			}
 			break;
 
@@ -4570,15 +4570,15 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			}
 			else {
-				LimitInclude[4] = true;
+				LimitInclude[Include_Exists_SE_LimitEffect] = true;
 				// they use 33 here for all classes ... unsure if the type check is really needed
 				if (base1 == SE_SummonPet && type == focusReagentCost) {
 					if (IsSummonPetSpell(spell_id) || IsSummonSkeletonSpell(spell_id))
-						LimitInclude[5] = true;
+						LimitInclude[Include_Found_SE_LimitEffect] = true;
 				}
 				else {
 					if (IsEffectInSpell(spell_id, base1)) // Include
-						LimitInclude[5] = true;
+						LimitInclude[Include_Found_SE_LimitEffect] = true;
 				}
 			}
 			break;
@@ -4612,9 +4612,9 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			}
 			else {
-				LimitInclude[6] = true;
+				LimitInclude[Include_Exists_SE_LimitTarget] = true;
 				if (base1 == spell.targettype) // Include
-					LimitInclude[7] = true;
+					LimitInclude[Include_Found_SE_LimitTarget] = true;
 			}
 			break;
 
@@ -4644,33 +4644,33 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 			}
 			else {
-				LimitInclude[10] = true;
+				LimitInclude[Include_Exists_SE_LimitCastingSkill] = true;
 				if (base1 == spell.skill)
-					LimitInclude[11] = true;
+					LimitInclude[Include_Found_SE_LimitCastingSkill] = true;
 			}
 			break;
 
 		case SE_LimitSpellClass:
 			if (base1 < 0) { // Exclude
-				if (CheckSpellCategory(spell_id, base1, SE_LimitSpellClass))
-					return (0);
+				if (-base1 == spell.spell_class);
+				LimitFailure = true;
 			}
 			else {
-				LimitInclude[12] = true;
-				if (CheckSpellCategory(spell_id, base1, SE_LimitSpellClass)) // Include
-					LimitInclude[13] = true;
+				LimitInclude[Include_Exists_SE_LimitSpellClass] = true;
+				if (base1 == spell.spell_class) // Include
+					LimitInclude[Include_Found_SE_LimitSpellClass] = true;
 			}
 			break;
 
 		case SE_LimitSpellSubclass:
 			if (base1 < 0) { // Exclude
-				if (CheckSpellCategory(spell_id, base1, SE_LimitSpellSubclass))
-					return (0);
+				if (-base1 == spell.spell_subclass);
+				LimitFailure = true;
 			}
 			else {
-				LimitInclude[14] = true;
-				if (CheckSpellCategory(spell_id, base1, SE_LimitSpellSubclass)) // Include
-					LimitInclude[15] = true;
+				LimitInclude[Include_Exists_SE_LimitSpellSubclass] = true;
+				if (base1 == spell.spell_subclass) // Include
+					LimitInclude[Include_Found_SE_LimitSpellSubclass] = true;
 			}
 			break;
 
@@ -4971,10 +4971,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) {
 				if (spell.resisttype == -focus_spell.base[i]) // Exclude
 					return 0;
-			} else {
-				LimitInclude[0] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitResist] = true;
 				if (spell.resisttype == focus_spell.base[i]) // Include
-					LimitInclude[1] = true;
+					LimitInclude[Include_Found_SE_LimitResist] = true;
 			}
 			break;
 
@@ -5025,10 +5026,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) { // Exclude
 				if (spell_id == -focus_spell.base[i])
 					return (0);
-			} else {
-				LimitInclude[2] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitSpell] = true;
 				if (spell_id == focus_spell.base[i]) // Include
-					LimitInclude[3] = true;
+					LimitInclude[Include_Found_SE_LimitSpell] = true;
 			}
 			break;
 
@@ -5042,10 +5044,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) {
 				if (IsEffectInSpell(spell_id, -focus_spell.base[i])) // Exclude
 					return 0;
-			} else {
-				LimitInclude[4] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitEffect] = true;
 				if (IsEffectInSpell(spell_id, focus_spell.base[i])) // Include
-					LimitInclude[5] = true;
+					LimitInclude[Include_Found_SE_LimitEffect] = true;
 			}
 			break;
 
@@ -5079,10 +5082,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) {
 				if (-focus_spell.base[i] == spell.targettype) // Exclude
 					return 0;
-			} else {
-				LimitInclude[6] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitTarget] = true;
 				if (focus_spell.base[i] == spell.targettype) // Include
-					LimitInclude[7] = true;
+					LimitInclude[Include_Found_SE_LimitTarget] = true;
 			}
 			break;
 
@@ -5100,10 +5104,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) {
 				if (-focus_spell.base[i] == spell.spellgroup) // Exclude
 					return 0;
-			} else {
-				LimitInclude[8] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitSpellGroup] = true;
 				if (focus_spell.base[i] == spell.spellgroup) // Include
-					LimitInclude[9] = true;
+					LimitInclude[Include_Found_SE_LimitSpellGroup] = true;
 			}
 			break;
 
@@ -5111,10 +5116,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			if (focus_spell.base[i] < 0) {
 				if (-focus_spell.base[i] == spell.skill)
 					return 0;
-			} else {
-				LimitInclude[10] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitCastingSkill] = true;
 				if (focus_spell.base[i] == spell.skill)
-					LimitInclude[11] = true;
+					LimitInclude[Include_Found_SE_LimitCastingSkill] = true;
 			}
 			break;
 
@@ -5147,23 +5153,25 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 		case SE_LimitSpellClass:
 			if (focus_spell.base[i] < 0) { // Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass))
+				if (-focus_spell.base[i] == spell.spell_class)
 					return (0);
-			} else {
-				LimitInclude[12] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellClass)) // Include
-					LimitInclude[13] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitSpellClass] = true;
+				if (focus_spell.base[i] == spell.spell_class) // Include
+					LimitInclude[Include_Found_SE_LimitSpellClass] = true;
 			}
 			break;
 
 		case SE_LimitSpellSubclass:
 			if (focus_spell.base[i] < 0) { // Exclude
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass))
+				if (-focus_spell.base[i] == spell.spell_subclass)
 					return (0);
-			} else {
-				LimitInclude[14] = true;
-				if (CheckSpellCategory(spell_id, focus_spell.base[i], SE_LimitSpellSubclass)) // Include
-					LimitInclude[15] = true;
+			}
+			else {
+				LimitInclude[Include_Exists_SE_LimitSpellSubclass] = true;
+				if (focus_spell.base[i] == spell.spell_subclass) // Include
+					LimitInclude[Include_Found_SE_LimitSpellSubclass] = true;
 			}
 			break;
 
@@ -7304,57 +7312,6 @@ void Mob::FocusProcLimitProcess()
 	if (stop_timer) {
 		focus_proc_limit_timer.Disable();
 	}
-}
-
-bool Mob::CheckSpellCategory(uint16 spell_id, int category_id, int effect_id){
-
-	if (!IsValidSpell(spell_id) || !category_id)
-		return false;
-
-	int effectid = 0;
-	int category = 0;
-
-	/*Category ID SE_LimitSpellClass [(+) Include (-) Exclude]
-	1 = UNK
-	2 = Cures
-	3 = Offensive Spells
-	4 = UNK
-	5 = UNK
-	6 = Lifetap
-	*/
-
-	/*Category ID SE_LimitSpellSubClass [(+) Include (-) Exclude]
-	5 = UNK
-	8 = UNK
-	*/
-
-	if (effect_id == SE_LimitSpellClass) {
-
-		switch(category_id)
-		{
-			case 2:
-			if (IsCureSpell(spell_id))
-				return true;
-			break;
-
-			case 3:
-			if (IsDetrimentalSpell(spell_id))
-				return true;
-			break;
-
-			case 6:
-			if (spells[spell_id].targettype == ST_Tap || spells[spell_id].targettype == ST_TargetAETap)
-				return true;
-			break;
-		}
-	}
-
-	else if (effect_id == SE_LimitSpellSubclass) {
-		//Pending Implementation when category types are figured out.
-		return false;
-	}
-
-	return false;
 }
 
 void Mob::CalcSpellPowerDistanceMod(uint16 spell_id, float range, Mob* caster)
