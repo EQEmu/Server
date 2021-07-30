@@ -5282,28 +5282,34 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		case SE_Ff_Endurance_Min:
 			if (spell.EndurCost < focus_spell.base[i])
 				return 0;
+			break;
 
 		case SE_Ff_Endurance_Max:
 			if (spell.EndurCost > focus_spell.base[i])
 				return 0;
+			break;
 
 		case SE_Ff_ReuseTimeMin:
 			if (spell.recast_time < focus_spell.base[i])
 				return 0;
+			break;
 
 		case SE_Ff_ReuseTimeMax:
 			if (spell.recast_time > focus_spell.base[i])
 				return 0;
+			break;
 
 		case SE_Ff_Value_Min:
 			index_id = GetSpellEffectIndex(spell_id, focus_spell.base2[i]);
 			if (index_id >= 0 && spell.base[index_id] < focus_spell.base[i])
 				return 0;
+			break;
 
 		case SE_Ff_Value_Max:
 			index_id = GetSpellEffectIndex(spell_id, focus_spell.base2[i]);
 			if (index_id >= 0 && spell.base[index_id] > focus_spell.base[i])
 				return 0;
+			break;
 
 		// handle effects
 		case SE_ImprovedDamage:
