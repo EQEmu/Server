@@ -4347,8 +4347,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Weapon_Stance:
 			{
 				/*
-				If we click off the spell buff giving us Weapon Stance effects it should remove
-				all associated buff.
+				If we click off the spell buff (or fades naturally) giving us 
+				Weapon Stance effects it should remove all associated buff.
 				*/
 				if (weaponstance.spellbonus_buff_spell_id) {
 					BuffFadeBySpellID(weaponstance.spellbonus_buff_spell_id);

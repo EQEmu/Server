@@ -1568,30 +1568,20 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_Weapon_Stance: {
-			Shout("<<<<<<<<<<<<<<<<<<<<<<<BONUS AA START>>>>>>>>>>>>>>>>>>>>>>>>>>");
-			Shout("[AA Bonus %i] Effect value %i base2 %i ", base1, base2,base1);
-			Shout("[AA Bonus %i] AA Bonus Values [%i] [%i] [%i]", base1, aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2]);
-
 			if (IsValidSpell(base1)) { //base1 is the spell_id of buff
 				if (base2 < 3){ //0=2H, 1=Shield, 2=DW
 					if (IsValidSpell(newbon->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 						if (spells[newbon->WeaponStance[base2]].rank < spells[base1].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
-							Shout("Applied from >>>>>>BONUS<<<<< exists");
-							Shout("This rank is better OLD [%i] New [%i] [%i and %i]", spells[newbon->WeaponStance[base2]].rank, spells[base1].rank, newbon->WeaponStance[base2], base1);
 							newbon->WeaponStance[base2] = base1; //Overwrite with new effect
 							SetWeaponStanceEnabled(true);
 						}
-						else
-							Shout("CAN NOT APPLY %i rank too low %i", base1, spells[base1].rank);
 					}
 					else {
-						Shout("Applied from <<<<NO BONUS>>>> exists");
 						newbon->WeaponStance[base2] = base1; //If no prior effect exists, then apply
 						SetWeaponStanceEnabled(true);
 					}
 				}
 			}
-			Shout("<<<<<<<<<<<<<<<<<<<<<<<BONUS AA END>>>>>>>>>>>>>>>>>>>>>>>>>>");
 			break;
 		}
 
@@ -3453,18 +3443,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 
 			case SE_Weapon_Stance: {
-				Shout("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Bonus Start>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-				Shout("[Bonus 1 Spell %i] Effect value [%i] base2 [%i][From item? [%i]", spell_id, effect_value, base2, WornType);
-				Shout("[Bonus 2 Spell %i] Current Spell Bonus Values [%i] [%i] [%i]",spell_id, spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2]);
-				Shout("[Bonus 3 Spell %i] Current Item Bonus Values [%i] [%i] [%i]", spell_id, itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2]);
 				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff
 					if (base2 < 3) { //0=2H, 1=Shield, 2=DW
 						if (IsValidSpell(new_bonus->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 							if (spells[new_bonus->WeaponStance[base2]].rank < spells[effect_value].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 								new_bonus->WeaponStance[base2] = effect_value; //Overwrite with new effect
 								SetWeaponStanceEnabled(true);
-								Shout("Applied from >>>>>>BONUS<<<<< exists");
-								Shout("This rank is better OLD [%i] New [%i] [%i and %i]", spells[new_bonus->WeaponStance[base2]].rank, spells[effect_value].rank, new_bonus->WeaponStance[base2], effect_id);
 								
 								if (WornType) {
 									weaponstance.itembonus_enabled = true;
@@ -3475,7 +3459,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 							}
 						}
 						else {
-							Shout("Applied from <<<<NO BONUS>>>> exists");
 							new_bonus->WeaponStance[base2] = effect_value; //If no prior effect exists, then apply
 							SetWeaponStanceEnabled(true);
 
@@ -3488,10 +3471,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 						}
 					}
 				}
-				Shout("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<Bonus END>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-
 				break;
-				
 			}
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table

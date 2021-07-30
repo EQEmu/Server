@@ -10264,18 +10264,8 @@ void Client::ApplyWeaponsStance()
 	rank value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
 	*/
 
-	Shout(">>>START<<<< Apply Weapon Stance [%i] SAVE itemspell [%i]", IsWeaponStanceEnabled(), weaponstance.itembonus_buff_spell_id);
-
 	if (!IsWeaponStanceEnabled())
 		return;
-	
-	Shout("State 2H [%i]", HasTwoHanderEquipped());
-	Shout("State SH [%i]", HasShieldEquiped());
-	Shout("State DW [%i]", HasDuelWeaponsEquiped());
-
-	Shout("Spell Bonus Values [%i] [%i] [%i] enabled [%i]", spellbonuses.WeaponStance[0], spellbonuses.WeaponStance[1], spellbonuses.WeaponStance[2], weaponstance.spellbonus_enabled);
-	Shout("Item Bonus Values [%i] [%i] [%i] enabled [%i]", itembonuses.WeaponStance[0], itembonuses.WeaponStance[1], itembonuses.WeaponStance[2], weaponstance.itembonus_enabled);
-	Shout("AA Bonus Values [%i] [%i] [%i] enabled [%i]", aabonuses.WeaponStance[0], aabonuses.WeaponStance[1], aabonuses.WeaponStance[2], weaponstance.aabonus_enabled);
 	
 	bool enabled = false;
 	bool item_bonus_exists = false;
@@ -10329,7 +10319,7 @@ void Client::ApplyWeaponsStance()
 	if (weaponstance.itembonus_enabled) {
 
 		if (itembonuses.WeaponStance[0] || itembonuses.WeaponStance[1] || itembonuses.WeaponStance[2]) {
-			Shout("<<<<START ITEM CHECK>>>>> CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
+
 			enabled = true;
 			item_bonus_exists = true;
 
@@ -10392,7 +10382,7 @@ void Client::ApplyWeaponsStance()
 	//Itembonus effect removal when item is removed
 	if (!item_bonus_exists && weaponstance.itembonus_enabled) {
 		weaponstance.itembonus_enabled = false;
-		Shout("<<<NO BONUS ACTIVE FOR ITEMS>>>>> REMOVE CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
+
 		if (weaponstance.itembonus_buff_spell_id) {
 			BuffFadeBySpellID(weaponstance.itembonus_buff_spell_id);
 			weaponstance.itembonus_buff_spell_id = 0;
@@ -10452,5 +10442,4 @@ void Client::ApplyWeaponsStance()
 	if (!enabled) {
 		SetWeaponStanceEnabled(false);
 	}
-	Shout(">>>END<<<< Apply Weapon Stance [%i] SAVE itemspell [%i]", IsWeaponStanceEnabled(), weaponstance.itembonus_buff_spell_id);
 }
