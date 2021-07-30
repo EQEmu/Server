@@ -1806,12 +1806,6 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
 	Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
 	*/
 
-	if (spell_id == 46164) {
-		//Disable *Not implemented yet. If we import AA data that supports it at someone will be made aware by the message.
-		Message(Chat::Red, "Use of Disably Ability through spell id 46164 is not implemented at this time, contact Kayen who will likely be in a retirement home at this time.");
-		return;
-	}
-
 	//Can add any specific use cases below.
 
 	int effect = 0;

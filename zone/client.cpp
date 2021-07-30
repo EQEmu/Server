@@ -10374,8 +10374,6 @@ void Client::ApplyWeaponsStance()
 				}
 				weaponstance.itembonus_buff_spell_id = itembonuses.WeaponStance[2];
 			}
-
-			Shout("<<<<END ITEM CHECK>>>>> CURRENT SPELL ID SAVED IS [%i]", weaponstance.itembonus_buff_spell_id);
 		}
 	}
 
