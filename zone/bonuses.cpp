@@ -1185,9 +1185,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_SlayUndead: {
-			if (newbon->SlayUndead[1] < base1)
-				newbon->SlayUndead[0] = base1; // Rate
-			newbon->SlayUndead[1] = base2;	 // Damage Modifier
+			if (newbon->SlayUndead[SLAYUNDEAD_DMG_MOD] < base1)
+				newbon->SlayUndead[SLAYUNDEAD_RATE_MOD] = base1; // Rate
+			newbon->SlayUndead[SLAYUNDEAD_DMG_MOD] = base2;	 // Damage Modifier
 			break;
 		}
 
@@ -1199,13 +1199,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_GiveDoubleRiposte: {
 			// 0=Regular Riposte 1=Skill Attack Riposte 2=Skill
 			if (base2 == 0) {
-				if (newbon->GiveDoubleRiposte[0] < base1)
-					newbon->GiveDoubleRiposte[0] = base1;
+				if (newbon->GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] < base1)
+					newbon->GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] = base1;
 			}
 			// Only for special attacks.
-			else if (base2 > 0 && (newbon->GiveDoubleRiposte[1] < base1)) {
-				newbon->GiveDoubleRiposte[1] = base1;
-				newbon->GiveDoubleRiposte[2] = base2;
+			else if (base2 > 0 && (newbon->GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL_ATK_CHANCE] < base1)) {
+				newbon->GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL_ATK_CHANCE] = base1;
+				newbon->GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL] = base2;
 			}
 
 			break;
@@ -3117,17 +3117,17 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			{
 				//Only allow for regular double riposte chance.
 				if(new_bonus->GiveDoubleRiposte[base2] == 0){
-					if(new_bonus->GiveDoubleRiposte[0] < effect_value)
-						new_bonus->GiveDoubleRiposte[0] = effect_value;
+					if(new_bonus->GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] < effect_value)
+						new_bonus->GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] = effect_value;
 				}
 				break;
 			}
 
 			case SE_SlayUndead:
 			{
-				if(new_bonus->SlayUndead[1] < effect_value)
-					new_bonus->SlayUndead[0] = effect_value; // Rate
-					new_bonus->SlayUndead[1] = base2; // Damage Modifier
+				if(new_bonus->SlayUndead[SLAYUNDEAD_DMG_MOD] < effect_value)
+					new_bonus->SlayUndead[SLAYUNDEAD_RATE_MOD] = effect_value; // Rate
+					new_bonus->SlayUndead[SLAYUNDEAD_DMG_MOD] = base2; // Damage Modifier
 				break;
 			}
 
@@ -4894,18 +4894,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_GiveDoubleRiposte:
-					spellbonuses.GiveDoubleRiposte[0] = effect_value;
-					itembonuses.GiveDoubleRiposte[0] = effect_value;
-					aabonuses.GiveDoubleRiposte[0] = effect_value;
+					spellbonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] = effect_value;
+					itembonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] = effect_value;
+					aabonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] = effect_value;
 					break;
 
 				case SE_SlayUndead:
-					spellbonuses.SlayUndead[0] = effect_value;
-					spellbonuses.SlayUndead[1] = effect_value;
-					itembonuses.SlayUndead[0] = effect_value;
-					itembonuses.SlayUndead[1] = effect_value;
-					aabonuses.SlayUndead[0] = effect_value;
-					aabonuses.SlayUndead[1] = effect_value;
+					spellbonuses.SlayUndead[SLAYUNDEAD_RATE_MOD] = effect_value;
+					spellbonuses.SlayUndead[SLAYUNDEAD_DMG_MOD] = effect_value;
+					itembonuses.SlayUndead[SLAYUNDEAD_RATE_MOD] = effect_value;
+					itembonuses.SlayUndead[SLAYUNDEAD_DMG_MOD] = effect_value;
+					aabonuses.SlayUndead[SLAYUNDEAD_RATE_MOD] = effect_value;
+					aabonuses.SlayUndead[SLAYUNDEAD_DMG_MOD] = effect_value;
 					break;
 
 				case SE_DoubleRangedAttack:

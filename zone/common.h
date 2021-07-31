@@ -654,7 +654,11 @@ constexpr uint16 PET_RAMPAGE_DMG_MOD= 1;					//SPA 465,465
 constexpr uint16 SKILLPROC_CHANCE = 0;						//SPA 427
 constexpr uint16 SKILLPROC_SKILL = 1;						//SPA 427
 constexpr uint16 SKILLPROC_SPELL_ID = 2;					//SPA 427
-
+constexpr uint16 SLAYUNDEAD_RATE_MOD = 0;					//SPA 219
+constexpr uint16 SLAYUNDEAD_DMG_MOD = 1;					//SPA 219
+constexpr uint16 DOUBLE_RIPOSTE_CHANCE = 0;					//SPA 223
+constexpr uint16 DOUBLE_RIPOSTE_SKILL_ATK_CHANCE = 1;		//SPA 223
+constexpr uint16 DOUBLE_RIPOSTE_SKILL = 2;					//SPA 223
 
 
 

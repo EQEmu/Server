@@ -4384,12 +4384,12 @@ void Mob::TryCriticalHit(Mob *defender, DamageHitInfo &hit, ExtraAttackOptions *
 	// 1: Try Slay Undead
 	if (defender->GetBodyType() == BT_Undead || defender->GetBodyType() == BT_SummonedUndead ||
 		defender->GetBodyType() == BT_Vampire) {
-		int SlayRateBonus = aabonuses.SlayUndead[0] + itembonuses.SlayUndead[0] + spellbonuses.SlayUndead[0];
+		int SlayRateBonus = aabonuses.SlayUndead[SLAYUNDEAD_RATE_MOD] + itembonuses.SlayUndead[SLAYUNDEAD_RATE_MOD] + spellbonuses.SlayUndead[SLAYUNDEAD_RATE_MOD];
 		if (SlayRateBonus) {
 			float slayChance = static_cast<float>(SlayRateBonus) / 10000.0f;
 			if (zone->random.Roll(slayChance)) {
 				int SlayDmgBonus = std::max(
-				{ aabonuses.SlayUndead[1], itembonuses.SlayUndead[1], spellbonuses.SlayUndead[1] });
+				{ aabonuses.SlayUndead[SLAYUNDEAD_DMG_MOD], itembonuses.SlayUndead[SLAYUNDEAD_DMG_MOD], spellbonuses.SlayUndead[SLAYUNDEAD_DMG_MOD] });
 				hit.damage_done = std::max(hit.damage_done, hit.base_damage) + 5;
 				hit.damage_done = (hit.damage_done * SlayDmgBonus) / 100;
 
@@ -4622,8 +4622,8 @@ void Mob::DoRiposte(Mob *defender)
 			return;
 	}
 
-	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[0] + defender->spellbonuses.GiveDoubleRiposte[0] +
-		defender->itembonuses.GiveDoubleRiposte[0];
+	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] + defender->spellbonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE] +
+		defender->itembonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_CHANCE];
 
 	// Live AA - Double Riposte
 	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
@@ -4636,15 +4636,15 @@ void Mob::DoRiposte(Mob *defender)
 	// Double Riposte effect, allows for a chance to do RIPOSTE with a skill specific special attack (ie Return Kick).
 	// Coded narrowly: Limit to one per client. Limit AA only. [1 = Skill Attack Chance, 2 = Skill]
 
-	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[1];
+	DoubleRipChance = defender->aabonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL_ATK_CHANCE];
 
 	if (DoubleRipChance && zone->random.Roll(DoubleRipChance)) {
 		LogCombat("Preforming a return SPECIAL ATTACK ([{}] percent chance)", DoubleRipChance);
 
 		if (defender->GetClass() == MONK)
-			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[2]);
+			defender->MonkSpecialAttack(this, defender->aabonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL]);
 		else if (defender->IsClient()) // so yeah, even if you don't have the skill you can still do the attack :P (and we don't crash anymore)
-			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[2], true);
+			defender->CastToClient()->DoClassAttacks(this, defender->aabonuses.GiveDoubleRiposte[DOUBLE_RIPOSTE_SKILL], true);
 	}
 }
 
