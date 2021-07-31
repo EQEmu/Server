@@ -5514,8 +5514,8 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 		return;
 	}
 
-	uint16 focus_spell_id = 0;
-	uint16 proc_spellid = 0;
+	int32 focus_spell_id = 0;
+	int32 proc_spellid = 0;
 	//item focus
 	if  (IsClient() && itembonuses.FocusEffects[type]) {
 
@@ -5616,10 +5616,15 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 
 		if (target) {
 			SpellFinished(proc_spellid, target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
-			return 1;
+			return true;
+		}
+		//Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		else if (!SpellRequiresTarget(proc_spellid)) {
+			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+			return true;
 		}
 	}
-	return 0;
+	return false;
 }
 
 uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
