@@ -616,6 +616,32 @@ struct StatBonuses {
 	bool hunger; // Song of Sustenance -- min caps to 3500
 };
 
+constexpr uint16 BUFFSTACKER_EXISTS = 0;					//SPA 446-449
+constexpr uint16 BUFFSTACKER_VALUE = 1;						//SPA 446-449
+constexpr uint16 EXTRA_ATTACK_CHANCE = 0;					//SPA 266,498,499
+constexpr uint16 EXTRA_ATTACK_NUM_ATKS = 1;					//SPA 266,498,499
+constexpr uint16 DIVINE_SAVE_CHANCE = 0;					//SPA 232
+constexpr uint16 DIVINE_SAVE_SPELL_TRIGGER_ID = 1;			//SPA 232
+constexpr uint16 DEATH_SAVE_TYPE = 0;						//SPA 150
+constexpr uint16 DEATH_SAVE_BUFFSLOT = 1;					//SPA 150
+constexpr uint16 DEATH_SAVE_MIN_LEVEL_FOR_HEAL = 2;			//SPA 150
+constexpr uint16 DEATH_SAVE_HEAL_AMT = 3;					//SPA 150
+constexpr uint16 RESOURCE_PERCENT_CAP = 0;					//SPA 408-410
+constexpr uint16 RESOURCE_AMOUNT_CAP = 1;					//SPA 408-419
+constexpr uint16 NEGATE_ATK_EXISTS = 0;						//SPA 163
+constexpr uint16 NEGATE_ATK_BUFFSLOT = 1;					//SPA 163
+constexpr uint16 NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT = 2;		//SPA 163
+constexpr uint16 MITIGATION_RUNE_PERCENT = 0;				//SPA 161,162,450
+constexpr uint16 MITIGATION_RUNE_BUFFSLOT = 1;				//SPA 161,162,450
+constexpr uint16 MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT = 2;//SPA 161,162,450
+constexpr uint16 MITIGATION_RUNE_MAX_HP_AMT = 3;			//SPA 161,162,450
+
+constexpr uint16 THRESHOLDGUARD_MITIGATION_PERCENT = 0;		//SPA 451,452
+constexpr uint16 THRESHOLDGUARD_BUFFSLOT = 1;				//SPA 451,452
+constexpr uint16 THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER = 2;	//SPA 451,452
+
+
+
 typedef struct
 {
 	uint16 spellID;

@@ -1239,9 +1239,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_DivineSave: {
-			if (newbon->DivineSaveChance[0] < base1) {
-				newbon->DivineSaveChance[0] = base1;
-				newbon->DivineSaveChance[1] = base2;
+			if (newbon->DivineSaveChance[DIVINE_SAVE_CHANCE] < base1) {
+				newbon->DivineSaveChance[DIVINE_SAVE_CHANCE] = base1;
+				newbon->DivineSaveChance[DIVINE_SAVE_SPELL_TRIGGER_ID] = base2;
 			}
 			break;
 		}
@@ -1570,18 +1570,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_ExtraAttackChance:
 		{
-			if (newbon->ExtraAttackChance[0] < base1) {
-				newbon->ExtraAttackChance[0] = base1;
-				newbon->ExtraAttackChance[1] = base2 ? base2 : 1;
+			if (newbon->ExtraAttackChance[EXTRA_ATTACK_CHANCE] < base1) {
+				newbon->ExtraAttackChance[EXTRA_ATTACK_CHANCE] = base1;
+				newbon->ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 			}
 			break;
 		}
 
 		case SE_AddExtraAttackPct_1h_Primary:
 		{
-			if (newbon->ExtraAttackChancePrimary[0] < base1) {
-				newbon->ExtraAttackChancePrimary[0] = base1;
-				newbon->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
+			if (newbon->ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] < base1) {
+				newbon->ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] = base1;
+				newbon->ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 			}
 			break;
 		}
@@ -1589,9 +1589,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_AddExtraAttackPct_1h_Secondary:
 		{
 
-			if (newbon->ExtraAttackChanceSecondary[0] < base1) {
-				newbon->ExtraAttackChanceSecondary[0] = base1;
-				newbon->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
+			if (newbon->ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] < base1) {
+				newbon->ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] = base1;
+				newbon->ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 			}
 			break;
 		}
@@ -2412,12 +2412,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_ExtraAttackChance:
 			{
 				if (AdditiveWornBonus) {
-					new_bonus->ExtraAttackChance[0] += effect_value;
-					new_bonus->ExtraAttackChance[1] = base2 ? base2 : 1;
+					new_bonus->ExtraAttackChance[EXTRA_ATTACK_CHANCE] += effect_value;
+					new_bonus->ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
-				if (new_bonus->ExtraAttackChance[0] < effect_value) {
-					new_bonus->ExtraAttackChance[0] = effect_value;
-					new_bonus->ExtraAttackChance[1] = base2 ? base2 : 1;
+				if (new_bonus->ExtraAttackChance[EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChance[EXTRA_ATTACK_CHANCE] = effect_value;
+					new_bonus->ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
 				break;
 			}
@@ -2425,13 +2425,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_AddExtraAttackPct_1h_Primary:
 			{
 				if (AdditiveWornBonus) {
-					new_bonus->ExtraAttackChancePrimary[0] += effect_value;
-					new_bonus->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
+					new_bonus->ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] += effect_value;
+					new_bonus->ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
 
-				if (new_bonus->ExtraAttackChancePrimary[0] < effect_value) {
-					new_bonus->ExtraAttackChancePrimary[0] = effect_value;
-					new_bonus->ExtraAttackChancePrimary[1] = base2 ? base2 : 1;
+				if (new_bonus->ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] = effect_value;
+					new_bonus->ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
 				break;
 			}
@@ -2439,13 +2439,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_AddExtraAttackPct_1h_Secondary:
 			{
 				if (AdditiveWornBonus) {
-					new_bonus->ExtraAttackChanceSecondary[0] += effect_value;
-					new_bonus->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
+					new_bonus->ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] += effect_value;
+					new_bonus->ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
 
-				if (new_bonus->ExtraAttackChanceSecondary[0] < effect_value) {
-					new_bonus->ExtraAttackChanceSecondary[0] = effect_value;
-					new_bonus->ExtraAttackChanceSecondary[1] = base2 ? base2 : 1;
+				if (new_bonus->ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] < effect_value) {
+					new_bonus->ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] = effect_value;
+					new_bonus->ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
 				}
 				break;
 			}
@@ -2459,13 +2459,13 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_DeathSave:
 			{
-				if(new_bonus->DeathSave[0] < effect_value)
+				if(new_bonus->DeathSave[DEATH_SAVE_TYPE] < effect_value)
 				{
-					new_bonus->DeathSave[0] = effect_value; //1='Partial' 2='Full'
-					new_bonus->DeathSave[1] = buffslot;
+					new_bonus->DeathSave[DEATH_SAVE_TYPE] = effect_value; //1='Partial' 2='Full'
+					new_bonus->DeathSave[DEATH_SAVE_BUFFSLOT] = buffslot;
 					//These are used in later expansion spell effects.
-					new_bonus->DeathSave[2] = base2;//Min level for HealAmt
-					new_bonus->DeathSave[3] = max;//HealAmt
+					new_bonus->DeathSave[DEATH_SAVE_MIN_LEVEL_FOR_HEAL] = base2;//Min level for HealAmt
+					new_bonus->DeathSave[DEATH_SAVE_HEAL_AMT] = max;//HealAmt
 				}
 				break;
 			}
@@ -2473,14 +2473,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_DivineSave:
 			{
 				if (AdditiveWornBonus) {
-					new_bonus->DivineSaveChance[0] += effect_value;
-					new_bonus->DivineSaveChance[1] = 0;
+					new_bonus->DivineSaveChance[DIVINE_SAVE_CHANCE] += effect_value;
+					new_bonus->DivineSaveChance[DIVINE_SAVE_SPELL_TRIGGER_ID] = 0;
 				}
 
-				else if(new_bonus->DivineSaveChance[0] < effect_value)
+				else if(new_bonus->DivineSaveChance[DIVINE_SAVE_CHANCE] < effect_value)
 				{
-					new_bonus->DivineSaveChance[0] = effect_value;
-					new_bonus->DivineSaveChance[1] = base2;
+					new_bonus->DivineSaveChance[DIVINE_SAVE_CHANCE] = effect_value;
+					new_bonus->DivineSaveChance[DIVINE_SAVE_SPELL_TRIGGER_ID] = base2;
 				}
 				break;
 			}
@@ -2712,39 +2712,39 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_LimitHPPercent:
 			{
-				if(new_bonus->HPPercCap[0] != 0 && new_bonus->HPPercCap[0] > effect_value){
-					new_bonus->HPPercCap[0] = effect_value;
-					new_bonus->HPPercCap[1] = base2;
+				if(new_bonus->HPPercCap[RESOURCE_PERCENT_CAP] != 0 && new_bonus->HPPercCap[RESOURCE_PERCENT_CAP] > effect_value){
+					new_bonus->HPPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->HPPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
-				else if(new_bonus->HPPercCap[0] == 0){
-					new_bonus->HPPercCap[0] = effect_value;
-					new_bonus->HPPercCap[1] = base2;
+				else if(new_bonus->HPPercCap[RESOURCE_PERCENT_CAP] == 0){
+					new_bonus->HPPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->HPPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
 				break;
 			}
 			case SE_LimitManaPercent:
 			{
-				if(new_bonus->ManaPercCap[0] != 0 && new_bonus->ManaPercCap[0] > effect_value){
-					new_bonus->ManaPercCap[0] = effect_value;
-					new_bonus->ManaPercCap[1] = base2;
+				if(new_bonus->ManaPercCap[RESOURCE_PERCENT_CAP] != 0 && new_bonus->ManaPercCap[RESOURCE_PERCENT_CAP] > effect_value){
+					new_bonus->ManaPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->ManaPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
-				else if(new_bonus->ManaPercCap[0] == 0) {
-					new_bonus->ManaPercCap[0] = effect_value;
-					new_bonus->ManaPercCap[1] = base2;
+				else if(new_bonus->ManaPercCap[RESOURCE_PERCENT_CAP] == 0) {
+					new_bonus->ManaPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->ManaPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
 
 				break;
 			}
 			case SE_LimitEndPercent:
 			{
-				if(new_bonus->EndPercCap[0] != 0 && new_bonus->EndPercCap[0] > effect_value) {
-					new_bonus->EndPercCap[0] = effect_value;
-					new_bonus->EndPercCap[1] = base2;
+				if(new_bonus->EndPercCap[RESOURCE_PERCENT_CAP] != 0 && new_bonus->EndPercCap[RESOURCE_PERCENT_CAP] > effect_value) {
+					new_bonus->EndPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->EndPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
 
-				else if(new_bonus->EndPercCap[0] == 0){
-					new_bonus->EndPercCap[0] = effect_value;
-					new_bonus->EndPercCap[1] = base2;
+				else if(new_bonus->EndPercCap[RESOURCE_PERCENT_CAP] == 0){
+					new_bonus->EndPercCap[RESOURCE_PERCENT_CAP] = effect_value;
+					new_bonus->EndPercCap[RESOURCE_AMOUNT_CAP] = base2;
 				}
 
 				break;
@@ -2802,22 +2802,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_NegateAttacks:
 			{
-				if (!new_bonus->NegateAttacks[0] ||
-					((new_bonus->NegateAttacks[0] && new_bonus->NegateAttacks[2]) && (new_bonus->NegateAttacks[2] < max))){
-					new_bonus->NegateAttacks[0] = 1;
-					new_bonus->NegateAttacks[1] = buffslot;
-					new_bonus->NegateAttacks[2] = max;
+				if (!new_bonus->NegateAttacks[NEGATE_ATK_EXISTS] ||
+					((new_bonus->NegateAttacks[NEGATE_ATK_EXISTS] && new_bonus->NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]) && (new_bonus->NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] < max))){
+					new_bonus->NegateAttacks[NEGATE_ATK_EXISTS] = 1;
+					new_bonus->NegateAttacks[NEGATE_ATK_BUFFSLOT] = buffslot;
+					new_bonus->NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] = max;
 				}
 				break;
 			}
 
 			case SE_MitigateMeleeDamage:
 			{
-				if (new_bonus->MitigateMeleeRune[0] < effect_value){
-					new_bonus->MitigateMeleeRune[0] = effect_value;
-					new_bonus->MitigateMeleeRune[1] = buffslot;
-					new_bonus->MitigateMeleeRune[2] = base2;
-					new_bonus->MitigateMeleeRune[3] = max;
+				if (new_bonus->MitigateMeleeRune[MITIGATION_RUNE_PERCENT] < effect_value){
+					new_bonus->MitigateMeleeRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					new_bonus->MitigateMeleeRune[MITIGATION_RUNE_BUFFSLOT] = buffslot;
+					new_bonus->MitigateMeleeRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] = base2;
+					new_bonus->MitigateMeleeRune[MITIGATION_RUNE_MAX_HP_AMT] = max;
 				}
 				break;
 			}
@@ -2825,42 +2825,42 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MeleeThresholdGuard:
 			{
-				if (new_bonus->MeleeThresholdGuard[0] < effect_value){
-					new_bonus->MeleeThresholdGuard[0] = effect_value;
-					new_bonus->MeleeThresholdGuard[1] = buffslot;
-					new_bonus->MeleeThresholdGuard[2] = base2;
+				if (new_bonus->MeleeThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] < effect_value){
+					new_bonus->MeleeThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+					new_bonus->MeleeThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = buffslot;
+					new_bonus->MeleeThresholdGuard[THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER] = base2;
 				}
 				break;
 			}
 
 			case SE_SpellThresholdGuard:
 			{
-				if (new_bonus->SpellThresholdGuard[0] < effect_value){
-					new_bonus->SpellThresholdGuard[0] = effect_value;
-					new_bonus->SpellThresholdGuard[1] = buffslot;
-					new_bonus->SpellThresholdGuard[2] = base2;
+				if (new_bonus->SpellThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] < effect_value){
+					new_bonus->SpellThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+					new_bonus->SpellThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = buffslot;
+					new_bonus->SpellThresholdGuard[THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER] = base2;
 				}
 				break;
 			}
 
 			case SE_MitigateSpellDamage:
 			{
-				if (new_bonus->MitigateSpellRune[0] < effect_value){
-					new_bonus->MitigateSpellRune[0] = effect_value;
-					new_bonus->MitigateSpellRune[1] = buffslot;
-					new_bonus->MitigateSpellRune[2] = base2;
-					new_bonus->MitigateSpellRune[3] = max;
+				if (new_bonus->MitigateSpellRune[MITIGATION_RUNE_PERCENT] < effect_value){
+					new_bonus->MitigateSpellRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					new_bonus->MitigateSpellRune[MITIGATION_RUNE_BUFFSLOT] = buffslot;
+					new_bonus->MitigateSpellRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] = base2;
+					new_bonus->MitigateSpellRune[MITIGATION_RUNE_MAX_HP_AMT] = max;
 				}
 				break;
 			}
 
 			case SE_MitigateDotDamage:
 			{
-				if (new_bonus->MitigateDotRune[0] < effect_value){
-					new_bonus->MitigateDotRune[0] = effect_value;
-					new_bonus->MitigateDotRune[1] = buffslot;
-					new_bonus->MitigateDotRune[2] = base2;
-					new_bonus->MitigateDotRune[3] = max;
+				if (new_bonus->MitigateDotRune[MITIGATION_RUNE_PERCENT] < effect_value){
+					new_bonus->MitigateDotRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					new_bonus->MitigateDotRune[MITIGATION_RUNE_BUFFSLOT] = buffslot;
+					new_bonus->MitigateDotRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] = base2;
+					new_bonus->MitigateDotRune[MITIGATION_RUNE_MAX_HP_AMT] = max;
 				}
 				break;
 			}
@@ -3222,23 +3222,23 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_AStacker:
-				new_bonus->AStacker[0] = 1;
-				new_bonus->AStacker[1] = effect_value;
+				new_bonus->AStacker[BUFFSTACKER_EXISTS] = 1;
+				new_bonus->AStacker[BUFFSTACKER_VALUE] = effect_value;
 				break;
 
 			case SE_BStacker:
-				new_bonus->BStacker[0] = 1;
-				new_bonus->BStacker[1] = effect_value;
+				new_bonus->BStacker[BUFFSTACKER_EXISTS] = 1;
+				new_bonus->BStacker[BUFFSTACKER_VALUE] = effect_value;
 				break;
 
 			case SE_CStacker:
-				new_bonus->CStacker[0] = 1;
-				new_bonus->CStacker[1] = effect_value;
+				new_bonus->CStacker[BUFFSTACKER_EXISTS] = 1;
+				new_bonus->CStacker[BUFFSTACKER_VALUE] = effect_value;
 				break;
 
 			case SE_DStacker:
-				new_bonus->DStacker[0] = 1;
-				new_bonus->DStacker[1] = effect_value;
+				new_bonus->DStacker[BUFFSTACKER_EXISTS] = 1;
+				new_bonus->DStacker[BUFFSTACKER_VALUE] = effect_value;
 				break;
 
 			case SE_Berserk:
@@ -4367,21 +4367,21 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ExtraAttackChance:
-					spellbonuses.ExtraAttackChance[0] = effect_value;
-					aabonuses.ExtraAttackChance[0] = effect_value;
-					itembonuses.ExtraAttackChance[0] = effect_value;
+					spellbonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE] = effect_value;
+					aabonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE] = effect_value;
+					itembonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE] = effect_value;
 					break;
 
 				case SE_AddExtraAttackPct_1h_Primary:
-					spellbonuses.ExtraAttackChancePrimary[0] = effect_value;
-					aabonuses.ExtraAttackChancePrimary[0] = effect_value;
-					itembonuses.ExtraAttackChancePrimary[0] = effect_value;
+					spellbonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] = effect_value;
+					aabonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] = effect_value;
+					itembonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] = effect_value;
 					break;
 
 				case SE_AddExtraAttackPct_1h_Secondary:
-					spellbonuses.ExtraAttackChanceSecondary[0] = effect_value;
-					aabonuses.ExtraAttackChanceSecondary[0] = effect_value;
-					itembonuses.ExtraAttackChanceSecondary[0] = effect_value;
+					spellbonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] = effect_value;
+					aabonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] = effect_value;
+					itembonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] = effect_value;
 					break;
 
 				case SE_PercentXPIncrease:
@@ -4616,35 +4616,35 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 				}
 
 				case SE_NegateAttacks:
-					spellbonuses.NegateAttacks[0] = effect_value;
-					spellbonuses.NegateAttacks[1] = effect_value;
+					spellbonuses.NegateAttacks[NEGATE_ATK_EXISTS] = effect_value;
+					spellbonuses.NegateAttacks[NEGATE_ATK_BUFFSLOT] = effect_value;
 					break;
 
 				case SE_MitigateMeleeDamage:
-					spellbonuses.MitigateMeleeRune[0] = effect_value;
-					spellbonuses.MitigateMeleeRune[1] = -1;
+					spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_BUFFSLOT] = -1;
 					break;
 
 				case SE_MeleeThresholdGuard:
-					spellbonuses.MeleeThresholdGuard[0] = effect_value;
-					spellbonuses.MeleeThresholdGuard[1] = -1;
-					spellbonuses.MeleeThresholdGuard[1] = effect_value;
+					spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+					spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = -1;
+					spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = effect_value;
 					break;
 
 				case SE_SpellThresholdGuard:
-					spellbonuses.SpellThresholdGuard[0] = effect_value;
-					spellbonuses.SpellThresholdGuard[1] = -1;
-					spellbonuses.SpellThresholdGuard[1] = effect_value;
+					spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] = effect_value;
+					spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = -1;
+					spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_BUFFSLOT] = effect_value;
 					break;
 
 				case SE_MitigateSpellDamage:
-					spellbonuses.MitigateSpellRune[0] = effect_value;
-					spellbonuses.MitigateSpellRune[1] = -1;
+					spellbonuses.MitigateSpellRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					spellbonuses.MitigateSpellRune[MITIGATION_RUNE_BUFFSLOT] = -1;
 					break;
 
 				case SE_MitigateDotDamage:
-					spellbonuses.MitigateDotRune[0] = effect_value;
-					spellbonuses.MitigateDotRune[1] = -1;
+					spellbonuses.MitigateDotRune[MITIGATION_RUNE_PERCENT] = effect_value;
+					spellbonuses.MitigateDotRune[MITIGATION_RUNE_BUFFSLOT] = -1;
 					break;
 
 				case SE_ManaAbsorbPercentDamage:

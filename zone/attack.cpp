@@ -3122,8 +3122,8 @@ int32 Mob::ReduceDamage(int32 damage)
 	int32 slot = -1;
 	bool DisableMeleeRune = false;
 
-	if (spellbonuses.NegateAttacks[0]) {
-		slot = spellbonuses.NegateAttacks[1];
+	if (spellbonuses.NegateAttacks[NEGATE_ATK_EXISTS]) {
+		slot = spellbonuses.NegateAttacks[NEGATE_ATK_BUFFSLOT];
 		if (slot >= 0) {
 			if (--buffs[slot].numhits == 0) {
 
@@ -3131,21 +3131,21 @@ int32 Mob::ReduceDamage(int32 damage)
 					BuffFadeBySlot(slot, true);
 			}
 
-			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
-				damage -= spellbonuses.NegateAttacks[2];
+			if (spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
+				damage -= spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT];
 			else
 				return DMG_RUNE;
 		}
 	}
 
 	//Only mitigate if damage is above the minimium specified.
-	if (spellbonuses.MeleeThresholdGuard[0]) {
-		slot = spellbonuses.MeleeThresholdGuard[1];
+	if (spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT]) {
+		slot = spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_BUFFSLOT];
 
-		if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[2]))
+		if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER]))
 		{
 			DisableMeleeRune = true;
-			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[0] / 100;
+			int damage_to_reduce = damage * spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
 			if (damage_to_reduce >= buffs[slot].melee_rune)
 			{
 				LogSpells("Mob::ReduceDamage SE_MeleeThresholdGuard [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
@@ -3162,16 +3162,16 @@ int32 Mob::ReduceDamage(int32 damage)
 		}
 	}
 
-	if (spellbonuses.MitigateMeleeRune[0] && !DisableMeleeRune) {
-		slot = spellbonuses.MitigateMeleeRune[1];
+	if (spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_PERCENT] && !DisableMeleeRune) {
+		slot = spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_BUFFSLOT];
 		if (slot >= 0)
 		{
-			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[0] / 100;
+			int damage_to_reduce = damage * spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_PERCENT] / 100;
 
-			if (spellbonuses.MitigateMeleeRune[2] && (damage_to_reduce > spellbonuses.MitigateMeleeRune[2]))
-				damage_to_reduce = spellbonuses.MitigateMeleeRune[2];
+			if (spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
+				damage_to_reduce = spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
 
-			if (spellbonuses.MitigateMeleeRune[3] && (damage_to_reduce >= buffs[slot].melee_rune))
+			if (spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_MAX_HP_AMT] && (damage_to_reduce >= buffs[slot].melee_rune))
 			{
 				LogSpells("Mob::ReduceDamage SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].melee_rune);
 				damage -= buffs[slot].melee_rune;
@@ -3182,7 +3182,7 @@ int32 Mob::ReduceDamage(int32 damage)
 			{
 				LogSpells("Mob::ReduceDamage SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].melee_rune);
 
-				if (spellbonuses.MitigateMeleeRune[3])
+				if (spellbonuses.MitigateMeleeRune[MITIGATION_RUNE_MAX_HP_AMT])
 					buffs[slot].melee_rune = (buffs[slot].melee_rune - damage_to_reduce);
 
 				damage -= damage_to_reduce;
@@ -3211,8 +3211,8 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	int32 slot = -1;
 
 	// See if we block the spell outright first
-	if (!iBuffTic && spellbonuses.NegateAttacks[0]) {
-		slot = spellbonuses.NegateAttacks[1];
+	if (!iBuffTic && spellbonuses.NegateAttacks[NEGATE_ATK_EXISTS]) {
+		slot = spellbonuses.NegateAttacks[NEGATE_ATK_BUFFSLOT];
 		if (slot >= 0) {
 			if (--buffs[slot].numhits == 0) {
 
@@ -3220,8 +3220,8 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 					BuffFadeBySlot(slot, true);
 			}
 
-			if (spellbonuses.NegateAttacks[2] && (damage > spellbonuses.NegateAttacks[2]))
-				damage -= spellbonuses.NegateAttacks[2];
+			if (spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT] && (damage > spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT]))
+				damage -= spellbonuses.NegateAttacks[NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT];
 			else
 				return 0;
 		}
@@ -3231,16 +3231,16 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	if (iBuffTic) {
 		damage -= (damage * itembonuses.DoTShielding / 100);
 
-		if (spellbonuses.MitigateDotRune[0]) {
-			slot = spellbonuses.MitigateDotRune[1];
+		if (spellbonuses.MitigateDotRune[MITIGATION_RUNE_PERCENT]) {
+			slot = spellbonuses.MitigateDotRune[MITIGATION_RUNE_BUFFSLOT];
 			if (slot >= 0)
 			{
-				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[0] / 100;
+				int damage_to_reduce = damage * spellbonuses.MitigateDotRune[MITIGATION_RUNE_PERCENT] / 100;
 
-				if (spellbonuses.MitigateDotRune[2] && (damage_to_reduce > spellbonuses.MitigateDotRune[2]))
-					damage_to_reduce = spellbonuses.MitigateDotRune[2];
+				if (spellbonuses.MitigateDotRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateDotRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
+					damage_to_reduce = spellbonuses.MitigateDotRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
 
-				if (spellbonuses.MitigateDotRune[3] && (damage_to_reduce >= buffs[slot].dot_rune))
+				if (spellbonuses.MitigateDotRune[MITIGATION_RUNE_MAX_HP_AMT] && (damage_to_reduce >= buffs[slot].dot_rune))
 				{
 					damage -= buffs[slot].dot_rune;
 					if (!TryFadeEffect(slot))
@@ -3248,7 +3248,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				}
 				else
 				{
-					if (spellbonuses.MitigateDotRune[3])
+					if (spellbonuses.MitigateDotRune[MITIGATION_RUNE_MAX_HP_AMT])
 						buffs[slot].dot_rune = (buffs[slot].dot_rune - damage_to_reduce);
 
 					damage -= damage_to_reduce;
@@ -3264,13 +3264,13 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 		damage -= (damage * itembonuses.SpellShield / 100);
 
 		//Only mitigate if damage is above the minimium specified.
-		if (spellbonuses.SpellThresholdGuard[0]) {
-			slot = spellbonuses.SpellThresholdGuard[1];
+		if (spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT]) {
+			slot = spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_BUFFSLOT];
 
-			if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[2]))
+			if (slot >= 0 && (damage > spellbonuses.MeleeThresholdGuard[THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER]))
 			{
 				DisableSpellRune = true;
-				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[0] / 100;
+				int damage_to_reduce = damage * spellbonuses.SpellThresholdGuard[THRESHOLDGUARD_MITIGATION_PERCENT] / 100;
 				if (damage_to_reduce >= buffs[slot].magic_rune)
 				{
 					damage -= buffs[slot].magic_rune;
@@ -3286,16 +3286,16 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 		}
 
 		// Do runes now.
-		if (spellbonuses.MitigateSpellRune[0] && !DisableSpellRune) {
-			slot = spellbonuses.MitigateSpellRune[1];
+		if (spellbonuses.MitigateSpellRune[MITIGATION_RUNE_PERCENT] && !DisableSpellRune) {
+			slot = spellbonuses.MitigateSpellRune[MITIGATION_RUNE_BUFFSLOT];
 			if (slot >= 0)
 			{
-				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[0] / 100;
+				int damage_to_reduce = damage * spellbonuses.MitigateSpellRune[MITIGATION_RUNE_PERCENT] / 100;
 
-				if (spellbonuses.MitigateSpellRune[2] && (damage_to_reduce > spellbonuses.MitigateSpellRune[2]))
-					damage_to_reduce = spellbonuses.MitigateSpellRune[2];
+				if (spellbonuses.MitigateSpellRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT] && (damage_to_reduce > spellbonuses.MitigateSpellRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT]))
+					damage_to_reduce = spellbonuses.MitigateSpellRune[MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT];
 
-				if (spellbonuses.MitigateSpellRune[3] && (damage_to_reduce >= buffs[slot].magic_rune))
+				if (spellbonuses.MitigateSpellRune[MITIGATION_RUNE_MAX_HP_AMT] && (damage_to_reduce >= buffs[slot].magic_rune))
 				{
 					LogSpells("Mob::ReduceDamage SE_MitigateSpellDamage [{}] damage negated, [{}] damage remaining, fading buff", damage_to_reduce, buffs[slot].magic_rune);
 					damage -= buffs[slot].magic_rune;
@@ -3306,7 +3306,7 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 				{
 					LogSpells("Mob::ReduceDamage SE_MitigateMeleeDamage [{}] damage negated, [{}] damage remaining", damage_to_reduce, buffs[slot].magic_rune);
 
-					if (spellbonuses.MitigateSpellRune[3])
+					if (spellbonuses.MitigateSpellRune[MITIGATION_RUNE_MAX_HP_AMT])
 						buffs[slot].magic_rune = (buffs[slot].magic_rune - damage_to_reduce);
 
 					damage -= damage_to_reduce;
@@ -5487,20 +5487,20 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			if (hand == EQ::invslot::slotPrimary) {
 
 				if (HasTwoHanderEquipped()) {
-					auto extraattackchance = aabonuses.ExtraAttackChance[0] + spellbonuses.ExtraAttackChance[0] +
-						itembonuses.ExtraAttackChance[0];
+					auto extraattackchance = aabonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE] +
+						itembonuses.ExtraAttackChance[EXTRA_ATTACK_CHANCE];
 					if (extraattackchance && zone->random.Roll(extraattackchance)) {
-						auto extraattackamt = std::max({ aabonuses.ExtraAttackChance[1], spellbonuses.ExtraAttackChance[1], itembonuses.ExtraAttackChance[1] });
+						auto extraattackamt = std::max({ aabonuses.ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChance[EXTRA_ATTACK_NUM_ATKS] });
 						for (int i = 0; i < extraattackamt; i++) {
 							Attack(target, hand, false, false, IsFromSpell);
 						}
 					}
 				}
 				else {
-					auto extraattackchance_primary = aabonuses.ExtraAttackChancePrimary[0] + spellbonuses.ExtraAttackChancePrimary[0] +
-						itembonuses.ExtraAttackChancePrimary[0];
+					auto extraattackchance_primary = aabonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE] +
+						itembonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_CHANCE];
 					if (extraattackchance_primary && zone->random.Roll(extraattackchance_primary)) {
-						auto extraattackamt_primary = std::max({ aabonuses.ExtraAttackChancePrimary[1], spellbonuses.ExtraAttackChancePrimary[1], itembonuses.ExtraAttackChancePrimary[1] });
+						auto extraattackamt_primary = std::max({ aabonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChancePrimary[EXTRA_ATTACK_NUM_ATKS] });
 						for (int i = 0; i < extraattackamt_primary; i++) {
 							Attack(target, hand, false, false, IsFromSpell);
 						}
@@ -5509,10 +5509,10 @@ void Client::DoAttackRounds(Mob *target, int hand, bool IsFromSpell)
 			}
 
 			if (hand == EQ::invslot::slotSecondary) {
-				auto extraattackchance_secondary = aabonuses.ExtraAttackChanceSecondary[0] + spellbonuses.ExtraAttackChanceSecondary[0] +
-					itembonuses.ExtraAttackChanceSecondary[0];
+				auto extraattackchance_secondary = aabonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] + spellbonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE] +
+					itembonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_CHANCE];
 				if (extraattackchance_secondary && zone->random.Roll(extraattackchance_secondary)) {
-					auto extraattackamt_secondary = std::max({ aabonuses.ExtraAttackChanceSecondary[1], spellbonuses.ExtraAttackChanceSecondary[1], itembonuses.ExtraAttackChanceSecondary[1] });
+					auto extraattackamt_secondary = std::max({ aabonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS], spellbonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS], itembonuses.ExtraAttackChanceSecondary[EXTRA_ATTACK_NUM_ATKS] });
 					for (int i = 0; i < extraattackamt_secondary; i++) {
 						Attack(target, hand, false, false, IsFromSpell);
 					}
