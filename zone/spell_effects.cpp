@@ -5582,9 +5582,8 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 			proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
 			if (proc_spellid) {
 				TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+				CheckNumHitsRemaining(NumHit::MatchingSpells, buff_slot);
 			}
-			
-			CheckNumHitsRemaining(NumHit::MatchingSpells, buff_slot);
 		}
 	}
 	//Only use of this focus per AA effect.
@@ -5613,7 +5612,7 @@ bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc
 {
 	//We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
-		Mob* target = target = GetTarget();
+		Mob* target = GetTarget();
 
 		if (target) {
 			SpellFinished(proc_spellid, target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
