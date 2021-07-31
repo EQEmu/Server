@@ -322,7 +322,7 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
-	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects 
 	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
@@ -544,7 +544,7 @@ struct StatBonuses {
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
-
+	int32   WeaponStance[3];					// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -628,6 +628,21 @@ struct Shielders_Struct {
 	uint32 shielder_id;
 	uint16 shielder_bonus;
 };
+
+struct WeaponStance_Struct {
+	bool enabled;
+	bool spellbonus_enabled;
+	bool itembonus_enabled;
+	bool aabonus_enabled;
+	int spellbonus_buff_spell_id;
+	int itembonus_buff_spell_id;
+	int aabonus_buff_spell_id;
+};
+
+constexpr uint16 WEAPON_STANCE_TYPE_2H = 0;
+constexpr uint16 WEAPON_STANCE_TYPE_SHIELD = 1;
+constexpr uint16 WEAPON_STANCE_TYPE_DUAL_WIELD = 2;
+constexpr uint16 WEAPON_STANCE_TYPE_MAX = 2;
 
 typedef struct
 {

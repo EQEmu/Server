@@ -3214,6 +3214,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Fc_Cast_Spell_On_Land:
 			case SE_Ff_CasterClass:
 			case SE_Ff_Same_Caster:
+			case SE_Weapon_Stance:
 			case SE_AddExtraAttackPct_1h_Primary:
 			case SE_AddExtraAttackPct_1h_Secondary:
 			case SE_Skill_Base_Damage_Mod:
@@ -4346,6 +4347,17 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					}
 			}
 
+			case SE_Weapon_Stance:
+			{
+				/*
+				If we click off the spell buff (or fades naturally) giving us 
+				Weapon Stance effects it should remove all associated buff.
+				*/
+				if (weaponstance.spellbonus_buff_spell_id) {
+					BuffFadeBySpellID(weaponstance.spellbonus_buff_spell_id);
+				}
+				weaponstance.spellbonus_enabled = false;
+			}
 		}
 	}
 
@@ -6214,7 +6226,7 @@ bool Mob::TryDivineSave()
 			}
 		}
 
-		SpellOnTarget(4789, this); //Touch of the Divine=4789, an Invulnerability/HoT/Purify effect
+		SpellOnTarget(SPELL_TOUCH_OF_THE_DIVINE, this); //Touch of the Divine=4789, an Invulnerability/HoT/Purify effect
 		SendHPUpdate();
 		return true;
 	}

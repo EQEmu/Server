@@ -64,6 +64,7 @@
 #define SPELL_SHAPECHANGE70 6503
 #define SPELL_MANA_BURN 2751
 #define SPELL_LIFE_BURN 2755
+#define SPELL_TOUCH_OF_THE_DIVINE 4789
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502
@@ -819,7 +820,7 @@ typedef enum {
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-//#define SE_Weapon_Stance				476 //
+#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Duel Wield is equiped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
 #define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 //#define SE_Ff_Value_Min				479 //
