@@ -6645,22 +6645,22 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
 bool Mob::ImprovedTaunt(){
 
-	if (spellbonuses.ImprovedTaunt[0]){
+	if (spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_MAX_LV]){
 
-		if (GetLevel() > spellbonuses.ImprovedTaunt[0])
+		if (GetLevel() > spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_MAX_LV])
 			return false;
 
-		if (spellbonuses.ImprovedTaunt[2] >= 0){
+		if (spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT] >= 0){
 
-			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT]].casterid);
 
 			if (target){
 				SetTarget(target);
 				return true;
 			}
 			else {
-				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[2]))
-					BuffFadeBySlot(spellbonuses.ImprovedTaunt[2], true); //If caster killed removed effect.
+				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT]))
+					BuffFadeBySlot(spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT], true); //If caster killed removed effect.
 			}
 		}
 	}

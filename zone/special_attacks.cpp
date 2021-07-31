@@ -193,12 +193,12 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	DoAttack(who, my_hit);
 
 	who->AddToHateList(this, hate, 0);
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
-	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
-		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SKILLPROC_SKILL] == skill &&
+	    IsValidSpell(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SKILLPROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], who, EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+			SpellFinished(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID], who, EQ::spells::CastingSlot::Item, 0, -1,
+				      spells[aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID]].ResistDiff);
 	}
 
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
@@ -2198,12 +2198,12 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	}
 
 	other->AddToHateList(this, hate, 0);
-	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
-	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
-		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+	if (damage > 0 && aabonuses.SkillAttackProc[SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SKILLPROC_SKILL] == skillinuse &&
+	    IsValidSpell(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SKILLPROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+			SpellFinished(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
+				      spells[aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID]].ResistDiff);
 	}
 
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);

@@ -1145,9 +1145,9 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_SkillAttackProc: {
 			// You can only have one of these per client. [AA Dragon Punch]
-			newbon->SkillAttackProc[0] = base1; // Chance base 1000 = 100% proc rate
-			newbon->SkillAttackProc[1] = base2; // Skill to Proc Off
-			newbon->SkillAttackProc[2] = rank.spell; // spell to proc
+			newbon->SkillAttackProc[SKILLPROC_CHANCE] = base1; // Chance base 1000 = 100% proc rate
+			newbon->SkillAttackProc[SKILLPROC_SKILL] = base2; // Skill to Proc Off
+			newbon->SkillAttackProc[SKILLPROC_SPELL_ID] = rank.spell; // spell to proc
 			break;
 		}
 
@@ -1439,16 +1439,16 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_PC_Pet_Rampage: {
-			newbon->PC_Pet_Rampage[0] += base1; //Chance to rampage
-			if (newbon->PC_Pet_Rampage[1] < base2)
-				newbon->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
+			newbon->PC_Pet_Rampage[PET_RAMPAGE_CHANCE] += base1; //Chance to rampage
+			if (newbon->PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] < base2)
+				newbon->PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] = base2; //Damage modifer - take highest
 			break;
 		}
 
 		case SE_PC_Pet_AE_Rampage: {
-			newbon->PC_Pet_AE_Rampage[0] += base1; //Chance to rampage
-			if (newbon->PC_Pet_AE_Rampage[1] < base2)
-				newbon->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+			newbon->PC_Pet_AE_Rampage[PET_RAMPAGE_CHANCE] += base1; //Chance to rampage
+			if (newbon->PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] < base2)
+				newbon->PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] = base2; //Damage modifer - take highest
 			break;
 		}
 
@@ -2875,9 +2875,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_Endurance_Absorb_Pct_Damage:
 			{
-				if (new_bonus->EnduranceAbsorbPercentDamage[0] < effect_value) {
-					new_bonus->EnduranceAbsorbPercentDamage[0] = effect_value;
-					new_bonus->EnduranceAbsorbPercentDamage[1] = base2;
+				if (new_bonus->EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_MITIGIATION] < effect_value) {
+					new_bonus->EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_MITIGIATION] = effect_value;
+					new_bonus->EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_DRAIN_PER_HP] = base2;
 				}
 				break;
 			}
@@ -3141,10 +3141,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_ImprovedTaunt:
-				if (new_bonus->ImprovedTaunt[0] < effect_value) {
-					new_bonus->ImprovedTaunt[0] = effect_value;
-					new_bonus->ImprovedTaunt[1] = base2;
-					new_bonus->ImprovedTaunt[2] = buffslot;
+				if (new_bonus->ImprovedTaunt[IMPROVED_TAUNT_MAX_LV] < effect_value) {
+					new_bonus->ImprovedTaunt[IMPROVED_TAUNT_MAX_LV] = effect_value;
+					new_bonus->ImprovedTaunt[IMPROVED_TAUNT_AGGRO_MOD] = base2;
+					new_bonus->ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT] = buffslot;
 				}
 				break;
 
@@ -3158,38 +3158,38 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 
 			case SE_Root:
-				if (new_bonus->Root[0] && (new_bonus->Root[1] > buffslot)){
-					new_bonus->Root[0] = 1;
-					new_bonus->Root[1] = buffslot;
+				if (new_bonus->Root[ROOT_EXISTS] && (new_bonus->Root[ROOT_BUFFSLOT] > buffslot)){
+					new_bonus->Root[ROOT_EXISTS] = 1;
+					new_bonus->Root[ROOT_BUFFSLOT] = buffslot;
 				}
-				else if (!new_bonus->Root[0]){
-					new_bonus->Root[0] = 1;
-					new_bonus->Root[1] = buffslot;
+				else if (!new_bonus->Root[ROOT_EXISTS]){
+					new_bonus->Root[ROOT_EXISTS] = 1;
+					new_bonus->Root[ROOT_BUFFSLOT] = buffslot;
 				}
 				break;
 
 			case SE_Rune:
 
-				if (new_bonus->MeleeRune[0] && (new_bonus->MeleeRune[1] > buffslot)){
+				if (new_bonus->MeleeRune[RUNE_AMOUNT] && (new_bonus->MeleeRune[RUNE_BUFFSLOT] > buffslot)){
 
-					new_bonus->MeleeRune[0] = effect_value;
-					new_bonus->MeleeRune[1] = buffslot;
+					new_bonus->MeleeRune[RUNE_AMOUNT] = effect_value;
+					new_bonus->MeleeRune[RUNE_BUFFSLOT] = buffslot;
 				}
-				else if (!new_bonus->MeleeRune[0]){
-					new_bonus->MeleeRune[0] = effect_value;
-					new_bonus->MeleeRune[1] = buffslot;
+				else if (!new_bonus->MeleeRune[RUNE_AMOUNT]){
+					new_bonus->MeleeRune[RUNE_AMOUNT] = effect_value;
+					new_bonus->MeleeRune[RUNE_BUFFSLOT] = buffslot;
 				}
 
 				break;
 
 			case SE_AbsorbMagicAtt:
-				if (new_bonus->AbsorbMagicAtt[0] && (new_bonus->AbsorbMagicAtt[1] > buffslot)){
-					new_bonus->AbsorbMagicAtt[0] = effect_value;
-					new_bonus->AbsorbMagicAtt[1] = buffslot;
+				if (new_bonus->AbsorbMagicAtt[RUNE_AMOUNT] && (new_bonus->AbsorbMagicAtt[RUNE_BUFFSLOT] > buffslot)){
+					new_bonus->AbsorbMagicAtt[RUNE_AMOUNT] = effect_value;
+					new_bonus->AbsorbMagicAtt[RUNE_BUFFSLOT] = buffslot;
 				}
-				else if (!new_bonus->AbsorbMagicAtt[0]){
-					new_bonus->AbsorbMagicAtt[0] = effect_value;
-					new_bonus->AbsorbMagicAtt[1] = buffslot;
+				else if (!new_bonus->AbsorbMagicAtt[RUNE_AMOUNT]){
+					new_bonus->AbsorbMagicAtt[RUNE_AMOUNT] = effect_value;
+					new_bonus->AbsorbMagicAtt[RUNE_BUFFSLOT] = buffslot;
 				}
 				break;
 
@@ -3379,16 +3379,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_PC_Pet_Rampage: {
-				new_bonus->PC_Pet_Rampage[0] += effect_value; //Chance to rampage
-				if (new_bonus->PC_Pet_Rampage[1] < base2)
-					new_bonus->PC_Pet_Rampage[1] = base2; //Damage modifer - take highest
+				new_bonus->PC_Pet_Rampage[PET_RAMPAGE_CHANCE] += effect_value; //Chance to rampage
+				if (new_bonus->PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] < base2)
+					new_bonus->PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] = base2; //Damage modifer - take highest
 				break;
 			}
 
 			case SE_PC_Pet_AE_Rampage: {
-				new_bonus->PC_Pet_AE_Rampage[0] += effect_value; //Chance to rampage
-				if (new_bonus->PC_Pet_AE_Rampage[1] < base2)
-					new_bonus->PC_Pet_AE_Rampage[1] = base2; //Damage modifer - take highest
+				new_bonus->PC_Pet_AE_Rampage[PET_RAMPAGE_CHANCE] += effect_value; //Chance to rampage
+				if (new_bonus->PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] < base2)
+					new_bonus->PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] = base2; //Damage modifer - take highest
 				break;
 			}
 
@@ -4652,8 +4652,8 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Endurance_Absorb_Pct_Damage:
-					spellbonuses.EnduranceAbsorbPercentDamage[0] = effect_value;
-					spellbonuses.EnduranceAbsorbPercentDamage[1] = effect_value;
+					spellbonuses.EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_MITIGIATION] = effect_value;
+					spellbonuses.EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_DRAIN_PER_HP] = effect_value;
 					break;
 
 				case SE_ShieldBlock:
@@ -4955,9 +4955,9 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_ImprovedTaunt:
-					spellbonuses.ImprovedTaunt[0] = effect_value;
-					spellbonuses.ImprovedTaunt[1] = effect_value;
-					spellbonuses.ImprovedTaunt[2] = -1;
+					spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_MAX_LV] = effect_value;
+					spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_AGGRO_MOD] = effect_value;
+					spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT] = -1;
 					break;
 
 				case SE_FrenziedDevastation:
@@ -4967,18 +4967,18 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Root:
-					spellbonuses.Root[0] = effect_value;
-					spellbonuses.Root[1] = -1;
+					spellbonuses.Root[ROOT_EXISTS] = effect_value;
+					spellbonuses.Root[ROOT_BUFFSLOT] = -1;
 					break;
 
 				case SE_Rune:
-					spellbonuses.MeleeRune[0] = effect_value;
-					spellbonuses.MeleeRune[1] = -1;
+					spellbonuses.MeleeRune[RUNE_AMOUNT] = effect_value;
+					spellbonuses.MeleeRune[RUNE_BUFFSLOT] = -1;
 					break;
 
 				case SE_AbsorbMagicAtt:
-					spellbonuses.AbsorbMagicAtt[0] = effect_value;
-					spellbonuses.AbsorbMagicAtt[1] = -1;
+					spellbonuses.AbsorbMagicAtt[RUNE_AMOUNT] = effect_value;
+					spellbonuses.AbsorbMagicAtt[RUNE_BUFFSLOT] = -1;
 					break;
 
 				case SE_Berserk:
@@ -5095,21 +5095,21 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Melee_Damage_Position_Mod:
-					spellbonuses.Melee_Damage_Position_Mod[0] = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[0] = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[0] = effect_value;
-					spellbonuses.Melee_Damage_Position_Mod[1] = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[1] = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[1] = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[POSITIONAL_LOCATION] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[POSITIONAL_LOCATION] = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[POSITIONAL_LOCATION] = effect_value;
 					break;
 
 				case SE_Damage_Taken_Position_Mod:
-					spellbonuses.Damage_Taken_Position_Mod[0] = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[0] = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[0] = effect_value;
-					spellbonuses.Damage_Taken_Position_Mod[1] = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[1] = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[1] = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[POSITIONAL_DAMAGE_MOD] = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[POSITIONAL_LOCATION] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[POSITIONAL_LOCATION] = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[POSITIONAL_LOCATION] = effect_value;
 					break;
 
 
@@ -5138,21 +5138,21 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_PC_Pet_Rampage:
-					spellbonuses.PC_Pet_Rampage[0] = effect_value;
-					itembonuses.PC_Pet_Rampage[0] = effect_value;
-					aabonuses.PC_Pet_Rampage[0] = effect_value;
-					spellbonuses.PC_Pet_Rampage[1] = effect_value;
-					itembonuses.PC_Pet_Rampage[1] = effect_value;
-					aabonuses.PC_Pet_Rampage[1] = effect_value;
+					spellbonuses.PC_Pet_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					itembonuses.PC_Pet_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					aabonuses.PC_Pet_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					spellbonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
+					itembonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
+					aabonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
 					break;
 
 				case SE_PC_Pet_AE_Rampage:
-					spellbonuses.PC_Pet_AE_Rampage[0] = effect_value;
-					itembonuses.PC_Pet_AE_Rampage[0] = effect_value;
-					aabonuses.PC_Pet_AE_Rampage[0] = effect_value;
-					spellbonuses.PC_Pet_AE_Rampage[1] = effect_value;
-					itembonuses.PC_Pet_AE_Rampage[1] = effect_value;
-					aabonuses.PC_Pet_AE_Rampage[1] = effect_value;
+					spellbonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_CHANCE] = effect_value;
+					spellbonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
+					itembonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
+					aabonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] = effect_value;
 					break;
 
 

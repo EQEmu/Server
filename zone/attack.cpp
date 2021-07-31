@@ -1547,12 +1547,12 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == my_hit.skill &&
-		IsValidSpell(aabonuses.SkillAttackProc[2])) {
-		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SKILLPROC_SKILL] == my_hit.skill &&
+		IsValidSpell(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SKILLPROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, EQ::spells::CastingSlot::Item, 0, -1,
-				spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+			SpellFinished(aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
+				spells[aabonuses.SkillAttackProc[SKILLPROC_SPELL_ID]].ResistDiff);
 	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
@@ -2746,9 +2746,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 	if (damage > GetHP())
 		damage = GetHP();
 
-	if (spellbonuses.ImprovedTaunt[1] && (GetLevel() < spellbonuses.ImprovedTaunt[0])
-		&& other && (buffs[spellbonuses.ImprovedTaunt[2]].casterid != other->GetID()))
-		hate = (hate*spellbonuses.ImprovedTaunt[1]) / 100;
+	if (spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_AGGRO_MOD] && (GetLevel() < spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_MAX_LV])
+		&& other && (buffs[spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_BUFFSLOT]].casterid != other->GetID()))
+		hate = (hate*spellbonuses.ImprovedTaunt[IMPROVED_TAUNT_AGGRO_MOD]) / 100;
 
 	hate_list.AddEntToHateList(other, hate, damage, bFrenzy, !iBuffTic);
 
@@ -3193,7 +3193,7 @@ int32 Mob::ReduceDamage(int32 damage)
 	if (damage < 1)
 		return DMG_RUNE;
 
-	if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
+	if (spellbonuses.MeleeRune[RUNE_AMOUNT] && spellbonuses.MeleeRune[RUNE_BUFFSLOT] >= 0)
 		damage = RuneAbsorb(damage, SE_Rune);
 
 	if (damage < 1)
@@ -3318,10 +3318,10 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			return 0;
 
 		//Regular runes absorb spell damage (except dots) - Confirmed on live.
-		if (spellbonuses.MeleeRune[0] && spellbonuses.MeleeRune[1] >= 0)
+		if (spellbonuses.MeleeRune[RUNE_AMOUNT] && spellbonuses.MeleeRune[RUNE_BUFFSLOT] >= 0)
 			damage = RuneAbsorb(damage, SE_Rune);
 
-		if (spellbonuses.AbsorbMagicAtt[0] && spellbonuses.AbsorbMagicAtt[1] >= 0)
+		if (spellbonuses.AbsorbMagicAtt[RUNE_AMOUNT] && spellbonuses.AbsorbMagicAtt[RUNE_BUFFSLOT] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
 
 		if (damage < 1)
@@ -3344,9 +3344,9 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		}
 	}
 
-	if (spellbonuses.EnduranceAbsorbPercentDamage[0]) {
-		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[0] / 10000; //If hit for 1000, at 10% then lower damage by 100;
-		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[1] / 10000; //Reduce endurance by 0.05% per HP loss
+	if (spellbonuses.EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_MITIGIATION]) {
+		int32 damage_reduced = damage * spellbonuses.EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_MITIGIATION] / 10000; //If hit for 1000, at 10% then lower damage by 100;
+		int32 endurance_drain = damage_reduced * spellbonuses.EnduranceAbsorbPercentDamage[ENDURANCE_ABSORD_DRAIN_PER_HP] / 10000; //Reduce endurance by 0.05% per HP loss
 		if (endurance_drain < 1)
 			endurance_drain = 1;
 
@@ -5067,13 +5067,13 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 	- Root break chance values obtained from live parses.
 	*/
 
-	if (!attacker || !spellbonuses.Root[0] || spellbonuses.Root[1] < 0)
+	if (!attacker || !spellbonuses.Root[ROOT_EXISTS] || spellbonuses.Root[ROOT_BUFFSLOT] < 0)
 		return false;
 
-	if (IsDetrimentalSpell(spellbonuses.Root[1]) && spellbonuses.Root[1] != buffslot) {
+	if (IsDetrimentalSpell(spellbonuses.Root[ROOT_BUFFSLOT]) && spellbonuses.Root[ROOT_BUFFSLOT] != buffslot) {
 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
 
-		BreakChance -= BreakChance*buffs[spellbonuses.Root[1]].RootBreakChance / 100;
+		BreakChance -= BreakChance*buffs[spellbonuses.Root[ROOT_BUFFSLOT]].RootBreakChance / 100;
 		int level_diff = attacker->GetLevel() - GetLevel();
 
 		//Use baseline if level difference <= 1 (ie. If target is (1) level less than you, or equal or greater level)
@@ -5092,8 +5092,8 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 
 		if (zone->random.Roll(BreakChance)) {
 
-			if (!TryFadeEffect(spellbonuses.Root[1])) {
-				BuffFadeBySlot(spellbonuses.Root[1]);
+			if (!TryFadeEffect(spellbonuses.Root[ROOT_BUFFSLOT])) {
+				BuffFadeBySlot(spellbonuses.Root[ROOT_BUFFSLOT]);
 				LogCombat("Spell broke root! BreakChance percent chance");
 				return true;
 			}
@@ -5109,7 +5109,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	uint32 buff_max = GetMaxTotalSlots();
 	if (type == SE_Rune) {
 		for (uint32 slot = 0; slot < buff_max; slot++) {
-			if (slot == spellbonuses.MeleeRune[1] && spellbonuses.MeleeRune[0] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
+			if (slot == spellbonuses.MeleeRune[RUNE_BUFFSLOT] && spellbonuses.MeleeRune[RUNE_AMOUNT] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
 				int melee_rune_left = buffs[slot].melee_rune;
 
 				if (melee_rune_left > damage)
@@ -5133,7 +5133,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 
 	else {
 		for (uint32 slot = 0; slot < buff_max; slot++) {
-			if (slot == spellbonuses.AbsorbMagicAtt[1] && spellbonuses.AbsorbMagicAtt[0] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)) {
+			if (slot == spellbonuses.AbsorbMagicAtt[RUNE_BUFFSLOT] && spellbonuses.AbsorbMagicAtt[RUNE_AMOUNT] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)) {
 				int magic_rune_left = buffs[slot].magic_rune;
 				if (magic_rune_left > damage)
 				{
@@ -5255,7 +5255,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 			//SE_PC_Pet_Rampage SPA 464 on pet, damage modifier
-			int spell_mod = spellbonuses.PC_Pet_Rampage[1] + itembonuses.PC_Pet_Rampage[1] + aabonuses.PC_Pet_Rampage[1];
+			int spell_mod = spellbonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_Rampage[PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
 				spec_mod = spell_mod;
 		}
@@ -5266,7 +5266,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 			spec_mod = mod;
 		if ((IsPet() || IsTempPet()) && IsPetOwnerClient()) {
 			//SE_PC_Pet_AE_Rampage SPA 465 on pet, damage modifier
-			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[1] + itembonuses.PC_Pet_AE_Rampage[1] + aabonuses.PC_Pet_AE_Rampage[1];
+			int spell_mod = spellbonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] + itembonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD] + aabonuses.PC_Pet_AE_Rampage[PET_RAMPAGE_DMG_MOD];
 			if (spell_mod > spec_mod)
 				spec_mod = spell_mod;
 		}

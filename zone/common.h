@@ -512,7 +512,7 @@ struct StatBonuses {
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
 	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
-	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
+	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buff slot
 	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
 	int32	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	uint32	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
@@ -635,10 +635,26 @@ constexpr uint16 MITIGATION_RUNE_PERCENT = 0;				//SPA 161,162,450
 constexpr uint16 MITIGATION_RUNE_BUFFSLOT = 1;				//SPA 161,162,450
 constexpr uint16 MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT = 2;//SPA 161,162,450
 constexpr uint16 MITIGATION_RUNE_MAX_HP_AMT = 3;			//SPA 161,162,450
-
 constexpr uint16 THRESHOLDGUARD_MITIGATION_PERCENT = 0;		//SPA 451,452
 constexpr uint16 THRESHOLDGUARD_BUFFSLOT = 1;				//SPA 451,452
 constexpr uint16 THRESHOLDGUARD_MIN_DMG_TO_TRIGGGER = 2;	//SPA 451,452
+constexpr uint16 ENDURANCE_ABSORD_MITIGIATION = 0;			//SPA 521
+constexpr uint16 ENDURANCE_ABSORD_DRAIN_PER_HP = 1;			//SPA 521
+constexpr uint16 IMPROVED_TAUNT_MAX_LV = 0;					//SPA 444
+constexpr uint16 IMPROVED_TAUNT_AGGRO_MOD = 1;				//SPA 444
+constexpr uint16 IMPROVED_TAUNT_BUFFSLOT = 2;				//SPA 444
+constexpr uint16 ROOT_EXISTS = 0;							//SPA 99
+constexpr uint16 ROOT_BUFFSLOT = 1;							//SPA 99
+constexpr uint16 RUNE_AMOUNT = 0;							//SPA 55
+constexpr uint16 RUNE_BUFFSLOT = 1;							//SPA 78
+constexpr uint16 POSITIONAL_DAMAGE_MOD = 0;					//SPA 503-506
+constexpr uint16 POSITIONAL_LOCATION = 1;					//SPA 503-506
+constexpr uint16 PET_RAMPAGE_CHANCE = 0;					//SPA 464,465
+constexpr uint16 PET_RAMPAGE_DMG_MOD= 1;					//SPA 465,465
+constexpr uint16 SKILLPROC_CHANCE = 0;						//SPA 427
+constexpr uint16 SKILLPROC_SKILL = 1;						//SPA 427
+constexpr uint16 SKILLPROC_SPELL_ID = 2;					//SPA 427
+
 
 
 
