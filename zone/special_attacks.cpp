@@ -2061,9 +2061,9 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 	// Only works on YOUR target.
 	if (defender && defender->GetBodyType() == BT_Humanoid && !defender->IsClient() &&
 	    skillInUse == EQ::skills::SkillArchery && GetTarget() == defender) {
-		uint32 HeadShot_Dmg = aabonuses.HeadShot[1] + spellbonuses.HeadShot[1] + itembonuses.HeadShot[1];
+		uint32 HeadShot_Dmg = aabonuses.HeadShot[FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[FINISHING_EFFECT_DMG] + itembonuses.HeadShot[FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
-		HeadShot_Level = std::max({aabonuses.HSLevel[0], spellbonuses.HSLevel[0], itembonuses.HSLevel[0]});
+		HeadShot_Level = std::max({aabonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX], spellbonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX], itembonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX]});
 
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
@@ -2071,10 +2071,10 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 			if (IsClient())
 				chance += CastToClient()->GetHeroicDEX() / 25;
 			chance *= 10;
-			int norm = aabonuses.HSLevel[1];
+			int norm = aabonuses.HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
 				chance = chance * norm / 100;
-			chance += aabonuses.HeadShot[0] + spellbonuses.HeadShot[0] + itembonuses.HeadShot[0];
+			chance += aabonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE] + itembonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE];
 			if (zone->random.Int(1, 1000) <= chance) {
 				entity_list.MessageCloseString(
 					this, false, 200, Chat::MeleeCrit, FATAL_BOW_SHOT,
@@ -2097,7 +2097,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 			if (IsClient())
 				chance += CastToClient()->GetHeroicDEX();
 			chance *= 10;
-			int norm = aabonuses.AssassinateLevel[1];
+			int norm = aabonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
 				chance = chance * norm / 100;
 		} else if (skillInUse == EQ::skills::SkillThrowing) {
@@ -2107,14 +2107,14 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 				chance += 5;
 		}
 
-		chance += aabonuses.Assassinate[0] + spellbonuses.Assassinate[0] + itembonuses.Assassinate[0];
+		chance += aabonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE] + itembonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE];
 
 		uint32 Assassinate_Dmg =
-		    aabonuses.Assassinate[1] + spellbonuses.Assassinate[1] + itembonuses.Assassinate[1];
+		    aabonuses.Assassinate[FINISHING_EFFECT_DMG] + spellbonuses.Assassinate[FINISHING_EFFECT_DMG] + itembonuses.Assassinate[FINISHING_EFFECT_DMG];
 
 		uint8 Assassinate_Level = 0; // Get Highest Headshot Level
 		Assassinate_Level = std::max(
-		    {aabonuses.AssassinateLevel[0], spellbonuses.AssassinateLevel[0], itembonuses.AssassinateLevel[0]});
+		    {aabonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX], spellbonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX], itembonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX]});
 
 		// revamped AAs require AA line I believe?
 		if (!Assassinate_Level)

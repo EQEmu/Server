@@ -1272,18 +1272,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_FinishingBlow: {
 			// base1 = chance, base2 = damage
-			if (newbon->FinishingBlow[1] < base2) {
-				newbon->FinishingBlow[0] = base1;
-				newbon->FinishingBlow[1] = base2;
+			if (newbon->FinishingBlow[FINISHING_EFFECT_DMG] < base2) {
+				newbon->FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] = base1;
+				newbon->FinishingBlow[FINISHING_EFFECT_DMG] = base2;
 			}
 			break;
 		}
 
 		case SE_FinishingBlowLvl: {
 			// base1 = level, base2 = ??? (Set to 200 in AA data, possible proc rate mod?)
-			if (newbon->FinishingBlowLvl[0] < base1) {
-				newbon->FinishingBlowLvl[0] = base1;
-				newbon->FinishingBlowLvl[1] = base2;
+			if (newbon->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] < base1) {
+				newbon->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] = base1;
+				newbon->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 			}
 			break;
 		}
@@ -1344,32 +1344,32 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_HeadShot: {
-			if (newbon->HeadShot[1] < base2) {
-				newbon->HeadShot[0] = base1;
-				newbon->HeadShot[1] = base2;
+			if (newbon->HeadShot[FINISHING_EFFECT_DMG] < base2) {
+				newbon->HeadShot[FINISHING_EFFECT_PROC_CHANCE] = base1;
+				newbon->HeadShot[FINISHING_EFFECT_DMG] = base2;
 			}
 			break;
 		}
 
 		case SE_HeadShotLevel: {
-			if (newbon->HSLevel[0] < base1)
-				newbon->HSLevel[0] = base1;
-				newbon->HSLevel[1] = base2;
+			if (newbon->HSLevel[FINISHING_EFFECT_LEVEL_MAX] < base1)
+				newbon->HSLevel[FINISHING_EFFECT_LEVEL_MAX] = base1;
+				newbon->HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 			break;
 		}
 
 		case SE_Assassinate: {
-			if (newbon->Assassinate[1] < base2) {
-				newbon->Assassinate[0] = base1;
-				newbon->Assassinate[1] = base2;
+			if (newbon->Assassinate[FINISHING_EFFECT_DMG] < base2) {
+				newbon->Assassinate[FINISHING_EFFECT_PROC_CHANCE] = base1;
+				newbon->Assassinate[FINISHING_EFFECT_DMG] = base2;
 			}
 			break;
 		}
 
 		case SE_AssassinateLevel: {
-			if (newbon->AssassinateLevel[0] < base1) {
-				newbon->AssassinateLevel[0] = base1;
-				newbon->AssassinateLevel[1] = base2;
+			if (newbon->AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] < base1) {
+				newbon->AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] = base1;
+				newbon->AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 			}
 			break;
 		}
@@ -3262,36 +3262,36 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_HeadShot:
 			{
-				if(new_bonus->HeadShot[1] < base2){
-					new_bonus->HeadShot[0] = effect_value;
-					new_bonus->HeadShot[1] = base2;
+				if(new_bonus->HeadShot[FINISHING_EFFECT_DMG] < base2){
+					new_bonus->HeadShot[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					new_bonus->HeadShot[FINISHING_EFFECT_DMG] = base2;
 				}
 				break;
 			}
 
 			case SE_HeadShotLevel:
 			{
-				if(new_bonus->HSLevel[0] < effect_value) {
-					new_bonus->HSLevel[0] = effect_value;
-					new_bonus->HSLevel[1] = base2;
+				if(new_bonus->HSLevel[FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
+					new_bonus->HSLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					new_bonus->HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 				}
 				break;
 			}
 
 			case SE_Assassinate:
 			{
-				if(new_bonus->Assassinate[1] < base2){
-					new_bonus->Assassinate[0] = effect_value;
-					new_bonus->Assassinate[1] = base2;
+				if(new_bonus->Assassinate[FINISHING_EFFECT_DMG] < base2){
+					new_bonus->Assassinate[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					new_bonus->Assassinate[FINISHING_EFFECT_DMG] = base2;
 				}
 				break;
 			}
 
 			case SE_AssassinateLevel:
 			{
-				if(new_bonus->AssassinateLevel[0] < effect_value) {
-					new_bonus->AssassinateLevel[0] = effect_value;
-					new_bonus->AssassinateLevel[1] = base2;
+				if(new_bonus->AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] < effect_value) {
+					new_bonus->AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					new_bonus->AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 				}
 				break;
 			}
@@ -3299,9 +3299,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_FinishingBlow:
 			{
 				//base1 = chance, base2 = damage
-				if (new_bonus->FinishingBlow[1] < base2){
-					new_bonus->FinishingBlow[0] = effect_value;
-					new_bonus->FinishingBlow[1] = base2;
+				if (new_bonus->FinishingBlow[FINISHING_EFFECT_DMG] < base2){
+					new_bonus->FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					new_bonus->FinishingBlow[FINISHING_EFFECT_DMG] = base2;
 				}
 				break;
 			}
@@ -3309,9 +3309,9 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_FinishingBlowLvl:
 			{
 				//base1 = level, base2 = ??? (Set to 200 in AA data, possible proc rate mod?)
-				if (new_bonus->FinishingBlowLvl[0] < effect_value){
-					new_bonus->FinishingBlowLvl[0] = effect_value;
-					new_bonus->FinishingBlowLvl[1] = base2;
+				if (new_bonus->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] < effect_value){
+					new_bonus->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					new_bonus->FinishingBlowLvl[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = base2;
 				}
 				break;
 			}
@@ -5006,57 +5006,57 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_HeadShot:
-					spellbonuses.HeadShot[0] = effect_value;
-					aabonuses.HeadShot[0] = effect_value;
-					itembonuses.HeadShot[0] = effect_value;
-					spellbonuses.HeadShot[1] = effect_value;
-					aabonuses.HeadShot[1] = effect_value;
-					itembonuses.HeadShot[1] = effect_value;
+					spellbonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					aabonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					itembonuses.HeadShot[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					spellbonuses.HeadShot[FINISHING_EFFECT_DMG] = effect_value;
+					aabonuses.HeadShot[FINISHING_EFFECT_DMG] = effect_value;
+					itembonuses.HeadShot[FINISHING_EFFECT_DMG] = effect_value;
 					break;
 
 				case SE_HeadShotLevel:
-					spellbonuses.HSLevel[0] = effect_value;
-					aabonuses.HSLevel[0] = effect_value;
-					itembonuses.HSLevel[0] = effect_value;
-					spellbonuses.HSLevel[1] = effect_value;
-					aabonuses.HSLevel[1] = effect_value;
-					itembonuses.HSLevel[1] = effect_value;
+					spellbonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					aabonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					itembonuses.HSLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					spellbonuses.HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					aabonuses.HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					itembonuses.HSLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
 					break;
 
 				case SE_Assassinate:
-					spellbonuses.Assassinate[0] = effect_value;
-					aabonuses.Assassinate[0] = effect_value;
-					itembonuses.Assassinate[0] = effect_value;
-					spellbonuses.Assassinate[1] = effect_value;
-					aabonuses.Assassinate[1] = effect_value;
-					itembonuses.Assassinate[1] = effect_value;
+					spellbonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					aabonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					itembonuses.Assassinate[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					spellbonuses.Assassinate[FINISHING_EFFECT_DMG] = effect_value;
+					aabonuses.Assassinate[FINISHING_EFFECT_DMG] = effect_value;
+					itembonuses.Assassinate[FINISHING_EFFECT_DMG] = effect_value;
 					break;
 
 				case SE_AssassinateLevel:
-					spellbonuses.AssassinateLevel[0] = effect_value;
-					aabonuses.AssassinateLevel[0] = effect_value;
-					itembonuses.AssassinateLevel[0] = effect_value;
-					spellbonuses.AssassinateLevel[1] = effect_value;
-					aabonuses.AssassinateLevel[1] = effect_value;
-					itembonuses.AssassinateLevel[1] = effect_value;
+					spellbonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					aabonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					itembonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					spellbonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					aabonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					itembonuses.AssassinateLevel[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
 					break;
 
 				case SE_FinishingBlow:
-					spellbonuses.FinishingBlow[0] = effect_value;
-					aabonuses.FinishingBlow[0] = effect_value;
-					itembonuses.FinishingBlow[0] = effect_value;
-					spellbonuses.FinishingBlow[1] = effect_value;
-					aabonuses.FinishingBlow[1] = effect_value;
-					itembonuses.FinishingBlow[1] = effect_value;
+					spellbonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					aabonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					itembonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] = effect_value;
+					spellbonuses.FinishingBlow[FINISHING_EFFECT_DMG] = effect_value;
+					aabonuses.FinishingBlow[FINISHING_EFFECT_DMG] = effect_value;
+					itembonuses.FinishingBlow[FINISHING_EFFECT_DMG] = effect_value;
 					break;
 
 				case SE_FinishingBlowLvl:
-					spellbonuses.FinishingBlowLvl[0] = effect_value;
-					aabonuses.FinishingBlowLvl[0] = effect_value;
-					itembonuses.FinishingBlowLvl[0] = effect_value;
-					spellbonuses.FinishingBlowLvl[1] = effect_value;
-					aabonuses.FinishingBlowLvl[1] = effect_value;
-					itembonuses.FinishingBlowLvl[1] = effect_value;
+					spellbonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					aabonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					itembonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX] = effect_value;
+					spellbonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					aabonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
+					itembonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_CHANCE_BONUS] = effect_value;
 					break;
 
 				case SE_Sanctuary:

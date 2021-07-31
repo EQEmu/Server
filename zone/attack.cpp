@@ -4560,18 +4560,18 @@ bool Mob::TryFinishingBlow(Mob *defender, int &damage)
 	if (defender && !defender->IsClient() && defender->GetHPRatio() < 10) {
 
 		uint32 FB_Dmg =
-			aabonuses.FinishingBlow[1] + spellbonuses.FinishingBlow[1] + itembonuses.FinishingBlow[1];
+			aabonuses.FinishingBlow[FINISHING_EFFECT_DMG] + spellbonuses.FinishingBlow[FINISHING_EFFECT_DMG] + itembonuses.FinishingBlow[FINISHING_EFFECT_DMG];
 
 		uint32 FB_Level = 0;
-		FB_Level = aabonuses.FinishingBlowLvl[0];
-		if (FB_Level < spellbonuses.FinishingBlowLvl[0])
-			FB_Level = spellbonuses.FinishingBlowLvl[0];
-		else if (FB_Level < itembonuses.FinishingBlowLvl[0])
-			FB_Level = itembonuses.FinishingBlowLvl[0];
+		FB_Level = aabonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX];
+		if (FB_Level < spellbonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX])
+			FB_Level = spellbonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX];
+		else if (FB_Level < itembonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX])
+			FB_Level = itembonuses.FinishingBlowLvl[FINISHING_EFFECT_LEVEL_MAX];
 
 		// modern AA description says rank 1 (500) is 50% chance
 		int ProcChance =
-			aabonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0] + spellbonuses.FinishingBlow[0];
+			aabonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.FinishingBlow[FINISHING_EFFECT_PROC_CHANCE];
 
 		if (FB_Level && FB_Dmg && (defender->GetLevel() <= FB_Level) &&
 			(ProcChance >= zone->random.Int(1, 1000))) {
