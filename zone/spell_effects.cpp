@@ -5544,8 +5544,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 
 			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y)
 			{
-				EQ::ItemInstance *aug = nullptr;
-				aug = ins->GetAugment(y);
+				EQ::ItemInstance *aug = ins->GetAugment(y);
 				if (aug)
 				{
 					const EQ::ItemData* temp_item_aug = aug->GetItem();
@@ -5588,6 +5587,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 	}
 	//Only use of this focus per AA effect.
 	if (IsClient() && aabonuses.FocusEffects[type]) {
+
 		for (const auto &aa : aa_ranks) {
 
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
