@@ -2552,11 +2552,11 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	return false;
 }
 
-int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
-	int16 realTotal3 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
+	int32 realTotal3 = 0;
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
@@ -2572,10 +2572,10 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
-		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 UsedFocusID = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		//item focus
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; ++x)
@@ -2623,14 +2623,14 @@ int16 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 	if (spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid = 0;
-		uint16 focusspell_tracker = 0;
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
 		uint32 buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
