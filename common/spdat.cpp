@@ -266,8 +266,9 @@ bool IsInvisSpell(uint16 spell_id)
 		IsEffectInSpell(spell_id, SE_Invisibility2) ||
 		IsEffectInSpell(spell_id, SE_InvisVsUndead) ||
 		IsEffectInSpell(spell_id, SE_InvisVsUndead2) ||
-		IsEffectInSpell(spell_id, SE_InvisVsAnimals))
+		IsEffectInSpell(spell_id, SE_InvisVsAnimals)) {
 		return true;
+	}
 	return false;
 }
 
