@@ -4541,8 +4541,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				lvldiff     = spell_level - base1;
 				// every level over cap reduces the effect by base2 percent unless from a clicky when
 				// ItemCastsUseFocus is true
-				if (lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) ||
-									RuleB(Character, ItemCastsUseFocus) == false)) {
+				if (lvldiff > 0 && (spell_level <= RuleI(Character, MaxLevel) || RuleB(Character, ItemCastsUseFocus) == false)) {
 					if (base2 > 0) {
 						lvlModifier -= base2 * lvldiff;
 						if (lvlModifier < 1) {
@@ -4673,9 +4672,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[8] = true;
+					LimitInclude[IncludeExistsSELimitSpellGroup] = true;
 					if (base1 == spell.spellgroup) { // Include
-						LimitInclude[9] = true;
+						LimitInclude[IncludeFoundSELimitSpellGroup] = true;
 					}
 				}
 				break;
