@@ -1818,6 +1818,9 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
 					ApplyWeaponsStance();
 					return;
 				}
+				break;
+			default:
+				break;
 		}
 	}
 }
