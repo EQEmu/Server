@@ -171,22 +171,22 @@ const int Z_AGGRO=10;
 const uint32 MobAISpellRange=100; // max range of buffs
 
 enum FocusLimitIncludes {
-	Include_Exists_SE_LimitResist = 0,
-	Include_Found_SE_LimitResist = 1,
-	Include_Exists_SE_LimitSpell = 2,
-	Include_Found_SE_LimitSpell = 3,
-	Include_Exists_SE_LimitEffect = 4,
-	Include_Found_SE_LimitEffect = 5,
-	Include_Exists_SE_LimitTarget = 6,
-	Include_Found_SE_LimitTarget = 7,
-	Include_Exists_SE_LimitSpellGroup = 8,
-	Include_Found_SE_LimitSpellGroup = 9,
-	Include_Exists_SE_LimitCastingSkill = 10,
-	Include_Found_SE_LimitCastingSkill = 11,
-	Include_Exists_SE_LimitSpellClass = 12,
-	Include_Found_SE_LimitSpellClass = 13,
-	Include_Exists_SE_LimitSpellSubclass = 14,
-	Include_Found_SE_LimitSpellSubclass = 15
+	IncludeExistsSELimitResist        = 0,
+	IncludeFoundSELimitResist         = 1,
+	IncludeExistsSELimitSpell         = 2,
+	IncludeFoundSELimitSpell          = 3,
+	IncludeExistsSELimitEffect        = 4,
+	IncludeFoundSELimitEffect         = 5,
+	IncludeExistsSELimitTarget        = 6,
+	IncludeFoundSELimitTarget         = 7,
+	IncludeExistsSELimitSpellGroup    = 8,
+	IncludeFoundSELimitSpellGroup     = 9,
+	IncludeExistsSELimitCastingSkill  = 10,
+	IncludeFoundSELimitCastingSkill   = 11,
+	IncludeExistsSELimitSpellClass    = 12,
+	IncludeFoundSELimitSpellClass     = 13,
+	IncludeExistsSELimitSpellSubclass = 14,
+	IncludeFoundSELimitSpellSubclass  = 15
 };
 
 enum SpellTypes : uint32
@@ -766,7 +766,7 @@ typedef enum {
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
 #define SE_LimitSpellClass				403 // implemented, @Ff, 'Spell Category' using table field 'spell_class' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
-#define SE_LimitSpellSubclass			404 // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative 
+#define SE_LimitSpellSubclass			404 // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
@@ -879,7 +879,7 @@ typedef enum {
 //#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
 #define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
-//#define SE_Attack_Offense_Max_Percent	517 // 
+//#define SE_Attack_Offense_Max_Percent	517 //
 #define SE_Attack_Accuracy_Max_Percent	518 // implemented - stackable accurary modifer
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
