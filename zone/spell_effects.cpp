@@ -7380,9 +7380,10 @@ bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 		case focusSpellHateMod:
 		case focusSpellVulnerability:
 		case focusFcSpellDamagePctIncomingPC:
-			return 1;
+			return true;
 	}
-	return 0;
+	
+	return false;
 }
 
 int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus)
