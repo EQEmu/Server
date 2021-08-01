@@ -8122,31 +8122,31 @@ void command_summonitem(Client *c, const Seperator *sep)
 			).c_str()
 		);
 	}
-	
+
 	if (arguments >= 2 && sep->IsNumber(2)) {
 		charges = atoi(sep->arg[2]);
 	}
-	
+
 	if (arguments >= 3 && sep->IsNumber(3)) {
 		augment_one = atoi(sep->arg[3]);
 	}
-	
+
 	if (arguments >= 4 && sep->IsNumber(4)) {
 		augment_two = atoi(sep->arg[4]);
 	}
-	
+
 	if (arguments >= 5 && sep->IsNumber(5)) {
 		augment_three = atoi(sep->arg[5]);
 	}
-	
+
 	if (arguments >= 6 && sep->IsNumber(6)) {
 		augment_four = atoi(sep->arg[6]);
 	}
-	
+
 	if (arguments >= 7 && sep->IsNumber(7)) {
 		augment_five = atoi(sep->arg[7]);
 	}
-	
+
 	if (arguments == 8 && sep->IsNumber(8)) {
 		augment_six = atoi(sep->arg[8]);
 	}
@@ -8190,7 +8190,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 			c->Message(Chat::Red, "Usage: #giveitem [item id | link] [charges] [augment_one_id] [augment_two_id] [augment_three_id] [augment_four_id] [augment_five_id] [augment_six_id] (Charges are optional.)");
 			return;
 		}
-		
+
 		Client *client_target = c->GetTarget()->CastToClient();
 		uint8 item_status = 0;
 		uint8 current_status = c->Admin();
@@ -8198,7 +8198,7 @@ void command_giveitem(Client *c, const Seperator *sep)
 		if (item) {
 			item_status = item->MinStatus;
 		}
-		
+
 		if (item_status > current_status) {
 			c->Message(
 				Chat::White,
@@ -8210,23 +8210,23 @@ void command_giveitem(Client *c, const Seperator *sep)
 			);
 			return;
 		}
-			
+
 		if (arguments >= 2 && sep->IsNumber(2)) {
 			charges = atoi(sep->arg[2]);
 		}
-		
+
 		if (arguments >= 3 && sep->IsNumber(3)) {
 			augment_one = atoi(sep->arg[3]);
 		}
-		
+
 		if (arguments >= 4 && sep->IsNumber(4)) {
 			augment_two = atoi(sep->arg[4]);
 		}
-		
+
 		if (arguments >= 5 && sep->IsNumber(5)) {
 			augment_three = atoi(sep->arg[5]);
 		}
-		
+
 		if (arguments >= 6 && sep->IsNumber(6)) {
 			augment_four = atoi(sep->arg[6]);
 		}
@@ -13726,29 +13726,23 @@ void command_resetaa_timer(Client *c, const Seperator *sep) {
 	}
 }
 
-void command_resetdisc_timer(Client *c, const Seperator *sep) {
-	Client *target = nullptr;
-
+void command_resetdisc_timer(Client *c, const Seperator *sep)
+{
+	Client *target = c->GetTarget()->CastToClient();
 	if (!c->GetTarget() || !c->GetTarget()->IsClient()) {
 		target = c;
 	}
-	else {
-		target = c->GetTarget()->CastToClient();
-	}
 
-	if (sep->IsNumber(1))
-	{
+	if (sep->IsNumber(1)) {
 		int timer_id = atoi(sep->arg[1]);
 		c->Message(Chat::White, "Reset of disc timer %i for %s", timer_id, c->GetName());
 		c->ResetDisciplineTimer(timer_id);
 	}
-	else if (!strcasecmp(sep->arg[1], "all"))
-	{
+	else if (!strcasecmp(sep->arg[1], "all")) {
 		c->Message(Chat::White, "Reset all disc timers for %s", c->GetName());
 		c->ResetAllDisciplineTimers();
 	}
-	else
-	{
+	else {
 		c->Message(Chat::White, "usage: #resetdisc_timer [all | timer_id]");
 	}
 }

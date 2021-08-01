@@ -2903,10 +2903,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if (zone->random.Roll(spells[spell_id].base[i]) && IsValidSpell(spells[spell_id].base2[i]))
 						caster->SpellFinished(spells[spell_id].base2[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
-				
+
 				break;
 			}
-					
+
 			case SE_Hatelist_To_Tail_Index: {
 				if (caster && zone->random.Roll(spells[spell_id].base[i]))
 					caster->SetBottomRampageList();
@@ -2940,7 +2940,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					else
 						Stun(spells[spell_id].base[i]);
 				}
-				else 
+				else
 					caster->MessageString(Chat::SpellFailure, FEAR_TOO_HIGH);
 				break;
 			}
@@ -2949,7 +2949,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
 				break;
 			}
-	
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3928,11 +3928,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			int32 amt = abs(GetMaxHP() * effect_value / 100);
 			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
 				amt = spells[buff.spellid].max[i];
-			
-			if (effect_value < 0) { 
+
+			if (effect_value < 0) {
 				Damage(this, amt, 0, EQ::skills::SkillEvocation, false);
 			}
-			else { 
+			else {
 				HealDamage(amt);
 			}
 			break;
@@ -3945,7 +3945,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				amt = spells[buff.spellid].max[i];
 
 			if (effect_value < 0) {
-				
+
 				SetMana(GetMana() - amt);
 			}
 			else {
@@ -5504,8 +5504,8 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	return (value * lvlModifier / 100);
 }
 
-void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
-
+void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
+{
 	if (IsBardSong(spell_id)) {
 		return;
 	}
@@ -5515,22 +5515,20 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 	}
 
 	int32 focus_spell_id = 0;
-	int32 proc_spellid = 0;
-	//item focus
-	if  (IsClient() && itembonuses.FocusEffects[type]) {
+	int32 proc_spellid   = 0;
 
-		const EQ::ItemData* temp_item = nullptr;
+	// item focus
+	if (IsClient() && itembonuses.FocusEffects[type]) {
+		const EQ::ItemData *temp_item = nullptr;
 
-		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
-		{
+		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
 			temp_item = nullptr;
-			EQ::ItemInstance* ins = CastToClient()->GetInv().GetItem(x);
+			EQ::ItemInstance *ins = CastToClient()->GetInv().GetItem(x);
 			if (!ins) {
 				continue;
 			}
 			temp_item = ins->GetItem();
 			if (temp_item && temp_item->Focus.Effect > 0 && IsValidSpell(temp_item->Focus.Effect)) {
-
 				focus_spell_id = temp_item->Focus.Effect;
 				if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
 					continue;
@@ -5542,14 +5540,11 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 				}
 			}
 
-			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y)
-			{
+			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y) {
 				EQ::ItemInstance *aug = ins->GetAugment(y);
-				if (aug)
-				{
-					const EQ::ItemData* temp_item_aug = aug->GetItem();
+				if (aug) {
+					const EQ::ItemData *temp_item_aug = aug->GetItem();
 					if (temp_item_aug && temp_item_aug->Focus.Effect > 0 && IsValidSpell(temp_item_aug->Focus.Effect)) {
-
 						focus_spell_id = temp_item_aug->Focus.Effect;
 
 						if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
@@ -5565,18 +5560,19 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 			}
 		}
 	}
-	//Spell Focus
-	if (spellbonuses.FocusEffects[type]) {
 
+	// Spell Focus
+	if (spellbonuses.FocusEffects[type]) {
 		int buff_slot = 0;
 		for (buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
-
 			focus_spell_id = buffs[buff_slot].spellid;
-			if (!IsValidSpell(focus_spell_id))
+			if (!IsValidSpell(focus_spell_id)) {
 				continue;
+			}
 
-			if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast))
+			if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
 				continue;
+			}
 
 			proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
 			if (proc_spellid) {
@@ -5585,20 +5581,21 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 			}
 		}
 	}
-	//Only use of this focus per AA effect.
+
+	// Only use of this focus per AA effect.
 	if (IsClient() && aabonuses.FocusEffects[type]) {
-
 		for (const auto &aa : aa_ranks) {
-
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
-			auto ability = ability_rank.first;
-			auto rank = ability_rank.second;
+			auto ability      = ability_rank.first;
+			auto rank         = ability_rank.second;
 
-			if (!ability) 
+			if (!ability) {
 				continue;
+			}
 
-			if (rank->effects.empty())
+			if (rank->effects.empty()) {
 				continue;
+			}
 
 			proc_spellid = CastToClient()->CalcAAFocus(type, *rank, spell_id);
 			if (proc_spellid) {
@@ -5610,15 +5607,14 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id) {
 
 bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid)
 {
-	//We confirm spell_id and focuspellid are valid before passing into this.
+	// We confirm spell_id and focuspellid are valid before passing into this.
 	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
-		Mob* target = GetTarget();
-
-		if (target) {
-			SpellFinished(proc_spellid, target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+		Mob* proc_target = GetTarget();
+		if (proc_target) {
+			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
 			return true;
 		}
-		//Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
 		else if (!SpellRequiresTarget(proc_spellid)) {
 			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
 			return true;
@@ -7310,7 +7306,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	the CalcFocusEffect function if not 100pct.
 	ApplyFocusProcLimiter() function checks for SE_Proc_Timer_Modifier which allows for limiting how often a spell from effect can be triggered
 	for example, if set to base=1 and base2= 1500, then for everyone 1 successful trigger, you will be unable to trigger again for 1.5 seconds.
-	
+
 	Live only has this focus in buffs/debuffs that can be placed on a target. TODO: Will consider adding support for it as AA and Item.
 	*/
 	if (!caster)
@@ -7344,7 +7340,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 								SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
 						}
 					}
-				
+
 					if (i >= 0)
 						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 				}
@@ -7360,13 +7356,13 @@ bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
 
 	//Do not allow spell cast if timer is active.
 	if (buffs[buffslot].focusproclimit_time > 0)
-		return false; 
+		return false;
 
 	/*
-	SE_Proc_Timer_Modifier 
+	SE_Proc_Timer_Modifier
 	base1= amount of total procs allowed until lock out timer is triggered, should be set to at least 1 in any spell for the effect to function.
 	base2= lock out timer, which prevents any more procs set in ms 1500 = 1.5 seconds
-	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie. 
+	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie.
 	*/
 
 	if (IsValidSpell(spell_id)) {
@@ -7393,7 +7389,7 @@ bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
 						if (!focus_proc_limit_timer.Enabled()) {
 							focus_proc_limit_timer.Start(250);
 						}
-				
+
 						return true;
 					}
 				}
