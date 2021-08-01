@@ -1848,7 +1848,8 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 				if (weaponstance.aabonus_enabled) {
 					Shout("Put Rank Backward -1 Current Rank %i", rank.id);
 					ExpendAlternateAdvancement(ability_id); //uint32 aa_id
-					PurchaseAlternateAdvancementRank(rank.prev_id);
+					//PurchaseAlternateAdvancementRank(rank.prev_id);
+					TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
 					weaponstance.aabonus_enabled = false;
 					Message(Chat::Spells, "You disable an ability."); //Message live gives you.
 					BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
@@ -1857,7 +1858,8 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 			}
 			else {
 				Shout("Advance Rank Forward +1 Current Rank %i", rank.id);
-				PurchaseAlternateAdvancementRank(rank.next_id);
+				//PurchaseAlternateAdvancementRank(rank.next_id);
+				TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
 				weaponstance.aabonus_enabled = true;
 				ApplyWeaponsStance();
@@ -1866,6 +1868,9 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 		}
 	}
 	Shout("TogglePassiveAA: No action taken");
+	
+
+
 }
 
 bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
@@ -1886,7 +1891,7 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
 	return false;
 }
 
-void Mob::ExpendAlternateAdvancement(uint32 aa_id) {
+void Client::ExpendAlternateAdvancement(uint32 aa_id) {
 	for(auto &iter : aa_ranks) {
 		Shout("1 Expend Start [aa_id %i] iter.first [%i]", aa_id, iter.first);
 		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);//Find first stored value per aa ranks which is rankid....
@@ -1894,36 +1899,58 @@ void Mob::ExpendAlternateAdvancement(uint32 aa_id) {
 
 		if(ability && aa_id == ability->id) {
 			Shout("iter.second [%i] iter.second.second [%i] iter.second.first [%i]", iter.second, iter.second.second, iter.second.first);
-			if(ability) {
 
-				if(ability) {
-					if(IsClient()) {
-						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
+			AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
 
-						if(r) {
-							Shout("Get expended_aa %i", CastToClient()->GetEPP().expended_aa);
-							CastToClient()->GetEPP().expended_aa += r->cost;
-							Shout("Get expended_aa + r->cast[%i] = [%i]", r->cost, CastToClient()->GetEPP().expended_aa);
-						}
-					}
-					if (IsClient()) {
-						auto c = CastToClient();
-						c->RemoveExpendedAA(ability->first_rank_id);
-						Shout("dbase query: RemoveExpendedAA %i", ability->first_rank_id);//Remove complete here
-					}
-					aa_ranks.erase(iter.first);
-					Shout("aa.rank.erase %i", iter.first);
-				}
-
-				if(IsClient()) {
-					Client *c = CastToClient();
-					c->SaveAA();
-					c->SendAlternateAdvancementPoints(); //Then when it updates?
-					Shout("save and update client");
-				}
+			if(r) {
+				Shout("Get expended_aa %i", CastToClient()->GetEPP().expended_aa);
+				CastToClient()->GetEPP().expended_aa += r->cost;
+				Shout("Get expended_aa + r->cast[%i] = [%i]", r->cost, CastToClient()->GetEPP().expended_aa);
 			}
+
+			RemoveExpendedAA(ability->first_rank_id);
+			Shout("dbase query: RemoveExpendedAA %i", ability->first_rank_id);//Remove complete here
+
+			aa_ranks.erase(iter.first);
+			Shout("aa.rank.erase %i", iter.first);
+				
+			SaveAA();
+			SendAlternateAdvancementPoints(); //Then when it updates?
+			Shout("save and update client");
+
+			
 
 			return;
 		}
 	}
+}
+
+void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
+
+	//Stripped down version of purchasing AA. Will give no messages.
+
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+	if (!rank) {
+		return;
+	}
+
+	if (!rank->base_ability) {
+		return;
+	}
+
+	if (!CanPurchaseAlternateAdvancementRank(rank, false, false)) {
+		return;
+	}
+
+	rank_id = rank->base_ability->first_rank_id;
+	SetAA(rank_id, rank->current_value, 0);
+
+	if (rank->next) {
+		SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
+	}
+
+	SaveAA();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+	CalcBonuses();
 }
