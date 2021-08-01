@@ -1282,3 +1282,14 @@ const char* GetSpellName(uint16 spell_id)
     return spells[spell_id].name;
 }
 
+bool SpellRequiresTarget(int spell_id)
+{
+	if (spells[spell_id].targettype == ST_AEClientV1 ||
+		spells[spell_id].targettype == ST_Self ||
+		spells[spell_id].targettype == ST_AECaster ||
+		spells[spell_id].targettype == ST_Ring ||
+		spells[spell_id].targettype == ST_Beam) {
+		return false;
+	}
+	return true;
+}

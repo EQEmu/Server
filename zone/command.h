@@ -256,6 +256,7 @@ void command_reloadzps(Client *c, const Seperator *sep);
 void command_repop(Client *c, const Seperator *sep);
 void command_resetaa(Client* c,const Seperator *sep);
 void command_resetaa_timer(Client *c, const Seperator *sep);
+void command_resetdisc_timer(Client *c, const Seperator *sep);
 void command_revoke(Client *c, const Seperator *sep);
 void command_roambox(Client *c, const Seperator *sep);
 void command_rules(Client *c, const Seperator *sep);

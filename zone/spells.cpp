@@ -1384,11 +1384,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
-	TryOnSpellFinished(this, target, spell_id);
+	TryOnSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
 
 	TryTwincast(this, target, spell_id);
 
-	TryTriggerOnCast(spell_id, 0);
+	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);

@@ -4463,7 +4463,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 		when the next valid focus effect is found.
 		*/
 
-		if (IsFocusEffect(0, 0, true, effect) || (effect == SE_TriggerOnCast)) {
+		if (IsFocusEffect(0, 0, true, effect)) {
 			FocusCount++;
 			// If limit found on prior check next, else end loop.
 			if (FocusCount > 1) {
@@ -5502,6 +5502,125 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	}
 
 	return (value * lvlModifier / 100);
+}
+
+void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
+{
+	if (IsBardSong(spell_id)) {
+		return;
+	}
+
+	if (!IsValidSpell(spell_id)) {
+		return;
+	}
+
+	int32 focus_spell_id = 0;
+	int32 proc_spellid   = 0;
+
+	// item focus
+	if (IsClient() && itembonuses.FocusEffects[type]) {
+		const EQ::ItemData *temp_item = nullptr;
+
+		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
+			temp_item = nullptr;
+			EQ::ItemInstance *ins = CastToClient()->GetInv().GetItem(x);
+			if (!ins) {
+				continue;
+			}
+			temp_item = ins->GetItem();
+			if (temp_item && temp_item->Focus.Effect > 0 && IsValidSpell(temp_item->Focus.Effect)) {
+				focus_spell_id = temp_item->Focus.Effect;
+				if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+					continue;
+				}
+
+				proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+				if (proc_spellid) {
+					TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+				}
+			}
+
+			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y) {
+				EQ::ItemInstance *aug = ins->GetAugment(y);
+				if (aug) {
+					const EQ::ItemData *temp_item_aug = aug->GetItem();
+					if (temp_item_aug && temp_item_aug->Focus.Effect > 0 && IsValidSpell(temp_item_aug->Focus.Effect)) {
+						focus_spell_id = temp_item_aug->Focus.Effect;
+
+						if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+							continue;
+						}
+
+						proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+						if (proc_spellid) {
+							TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Spell Focus
+	if (spellbonuses.FocusEffects[type]) {
+		int buff_slot = 0;
+		for (buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
+			focus_spell_id = buffs[buff_slot].spellid;
+			if (!IsValidSpell(focus_spell_id)) {
+				continue;
+			}
+
+			if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+				continue;
+			}
+
+			proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+			if (proc_spellid) {
+				TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+				CheckNumHitsRemaining(NumHit::MatchingSpells, buff_slot);
+			}
+		}
+	}
+
+	// Only use of this focus per AA effect.
+	if (IsClient() && aabonuses.FocusEffects[type]) {
+		for (const auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability      = ability_rank.first;
+			auto rank         = ability_rank.second;
+
+			if (!ability) {
+				continue;
+			}
+
+			if (rank->effects.empty()) {
+				continue;
+			}
+
+			proc_spellid = CastToClient()->CalcAAFocus(type, *rank, spell_id);
+			if (proc_spellid) {
+				TryTriggerOnCastProc(0, spell_id, proc_spellid);
+			}
+		}
+	}
+}
+
+bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid)
+{
+	// We confirm spell_id and focuspellid are valid before passing into this.
+	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
+		Mob* proc_target = GetTarget();
+		if (proc_target) {
+			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+			return true;
+		}
+		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		else if (!SpellRequiresTarget(proc_spellid)) {
+			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+			return true;
+		}
+	}
+	return false;
 }
 
 uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
