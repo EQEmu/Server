@@ -862,10 +862,10 @@ int32 Merc::CalcMaxHP() {
 	if (current_hp > max_hp)
 		current_hp = max_hp;
 
-	int hp_perc_cap = spellbonuses.HPPercCap[0];
+	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if(hp_perc_cap) {
 		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1]))
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP]))
 			current_hp = curHP_cap;
 	}
 
@@ -904,10 +904,10 @@ int32 Merc::CalcMaxMana()
 		current_mana = max_mana;
 	}
 
-	int mana_perc_cap = spellbonuses.ManaPercCap[0];
+	int mana_perc_cap = spellbonuses.ManaPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if(mana_perc_cap) {
 		int curMana_cap = (max_mana * mana_perc_cap) / 100;
-		if (current_mana > curMana_cap  || (spellbonuses.ManaPercCap[1] && current_mana > spellbonuses.ManaPercCap[1]))
+		if (current_mana > curMana_cap  || (spellbonuses.ManaPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_mana > spellbonuses.ManaPercCap[SBIndex::RESOURCE_AMOUNT_CAP]))
 			current_mana = curMana_cap;
 	}
 
@@ -999,10 +999,10 @@ void Merc::CalcMaxEndurance()
 		cur_end = max_end;
 	}
 
-	int end_perc_cap = spellbonuses.EndPercCap[0];
+	int end_perc_cap = spellbonuses.EndPercCap[SBIndex::RESOURCE_PERCENT_CAP];
 	if(end_perc_cap) {
 		int curEnd_cap = (max_end * end_perc_cap) / 100;
-		if (cur_end > curEnd_cap || (spellbonuses.EndPercCap[1] && cur_end > spellbonuses.EndPercCap[1]))
+		if (cur_end > curEnd_cap || (spellbonuses.EndPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && cur_end > spellbonuses.EndPercCap[SBIndex::RESOURCE_AMOUNT_CAP]))
 			cur_end = curEnd_cap;
 	}
 }
@@ -1624,7 +1624,7 @@ void Merc::AI_Process() {
 						}
 					}
 
-					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] + aabonuses.ExtraAttackChance[0];
+					int16 ExtraAttackChanceBonus = spellbonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] + itembonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE] + aabonuses.ExtraAttackChance[SBIndex::EXTRA_ATTACK_CHANCE];
 
 					if (GetTarget() && ExtraAttackChanceBonus) {
 						if(zone->random.Roll(ExtraAttackChanceBonus))

@@ -193,12 +193,12 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	DoAttack(who, my_hit);
 
 	who->AddToHateList(this, hate, 0);
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skill &&
-	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
-		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SKILL] == skill &&
+		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], who, EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID], who, EQ::spells::CastingSlot::Item, 0, -1,
+						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID]].ResistDiff);
 	}
 
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
@@ -996,21 +996,21 @@ void Mob::ProjectileAttack()
 		disable = false;
 		Mob *target = entity_list.GetMobID(ProjectileAtk[i].target_id);
 
-		if (target && target->IsMoving()) { 
+		if (target && target->IsMoving()) {
 			/*
 			Only recalculate hit increment if target is moving.
-			Due to frequency that we need to check increment the targets position variables may not be 
+			Due to frequency that we need to check increment the targets position variables may not be
 			updated even if moving. Do a simple check before calculating distance.
 			*/
 			if (ProjectileAtk[i].tlast_x != target->GetX() || ProjectileAtk[i].tlast_y != target->GetY()) {
-				
+
 				ProjectileAtk[i].tlast_x = target->GetX();
 				ProjectileAtk[i].tlast_y = target->GetY();
 
 				//Recalculate from the original location the projectile was fired in relation to the current targets location.
 				float distance = target->CalculateDistance(ProjectileAtk[i].origin_x, ProjectileAtk[i].origin_y, ProjectileAtk[i].origin_z);
 				float distance_mod = 0.0f;
-				
+
 				if (distance <= 125.0f) {
 					distance_mod = (ProjectileAtk[i].speed_mod - 4.0f) * -20.0f;
 					distance += distance * distance_mod / 100.0f;
@@ -1022,14 +1022,14 @@ void Mob::ProjectileAttack()
 					distance = distance * 1.30f; //Add 30% to base distance if over 200 range to tighten up hit timing.
 					distance = 3.14f * (distance / 2.0f); //Get distance of arc to better reflect projectile path length
 				}
-				
+
 				float hit = 1200.0f + (10 * distance / ProjectileAtk[i].speed_mod);
 
 				ProjectileAtk[i].hit_increment = static_cast<uint16>(hit);
 			}
 		}
 
-		// Check if we hit. 
+		// Check if we hit.
 		if (ProjectileAtk[i].hit_increment <= ProjectileAtk[i].increment) {
 			if (target) {
 				if (IsNPC()) {
@@ -2061,9 +2061,9 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 	// Only works on YOUR target.
 	if (defender && defender->GetBodyType() == BT_Humanoid && !defender->IsClient() &&
 	    skillInUse == EQ::skills::SkillArchery && GetTarget() == defender) {
-		uint32 HeadShot_Dmg = aabonuses.HeadShot[1] + spellbonuses.HeadShot[1] + itembonuses.HeadShot[1];
+		uint32 HeadShot_Dmg = aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_DMG];
 		uint8 HeadShot_Level = 0; // Get Highest Headshot Level
-		HeadShot_Level = std::max({aabonuses.HSLevel[0], spellbonuses.HSLevel[0], itembonuses.HSLevel[0]});
+		HeadShot_Level = std::max({aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], spellbonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], itembonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]});
 
 		if (HeadShot_Dmg && HeadShot_Level && (defender->GetLevel() <= HeadShot_Level)) {
 			int chance = GetDEX();
@@ -2071,10 +2071,10 @@ int Mob::TryHeadShot(Mob *defender, EQ::skills::SkillType skillInUse)
 			if (IsClient())
 				chance += CastToClient()->GetHeroicDEX() / 25;
 			chance *= 10;
-			int norm = aabonuses.HSLevel[1];
+			int norm = aabonuses.HSLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
 				chance = chance * norm / 100;
-			chance += aabonuses.HeadShot[0] + spellbonuses.HeadShot[0] + itembonuses.HeadShot[0];
+			chance += aabonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + itembonuses.HeadShot[SBIndex::FINISHING_EFFECT_PROC_CHANCE];
 			if (zone->random.Int(1, 1000) <= chance) {
 				entity_list.MessageCloseString(
 					this, false, 200, Chat::MeleeCrit, FATAL_BOW_SHOT,
@@ -2097,7 +2097,7 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 			if (IsClient())
 				chance += CastToClient()->GetHeroicDEX();
 			chance *= 10;
-			int norm = aabonuses.AssassinateLevel[1];
+			int norm = aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_CHANCE_BONUS];
 			if (norm > 0)
 				chance = chance * norm / 100;
 		} else if (skillInUse == EQ::skills::SkillThrowing) {
@@ -2107,14 +2107,14 @@ int Mob::TryAssassinate(Mob *defender, EQ::skills::SkillType skillInUse)
 				chance += 5;
 		}
 
-		chance += aabonuses.Assassinate[0] + spellbonuses.Assassinate[0] + itembonuses.Assassinate[0];
+		chance += aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE] + itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_PROC_CHANCE];
 
 		uint32 Assassinate_Dmg =
-		    aabonuses.Assassinate[1] + spellbonuses.Assassinate[1] + itembonuses.Assassinate[1];
+				   aabonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG] + spellbonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG] + itembonuses.Assassinate[SBIndex::FINISHING_EFFECT_DMG];
 
 		uint8 Assassinate_Level = 0; // Get Highest Headshot Level
 		Assassinate_Level = std::max(
-		    {aabonuses.AssassinateLevel[0], spellbonuses.AssassinateLevel[0], itembonuses.AssassinateLevel[0]});
+		    {aabonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], spellbonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX], itembonuses.AssassinateLevel[SBIndex::FINISHING_EFFECT_LEVEL_MAX]});
 
 		// revamped AAs require AA line I believe?
 		if (!Assassinate_Level)
@@ -2198,12 +2198,12 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	}
 
 	other->AddToHateList(this, hate, 0);
-	if (damage > 0 && aabonuses.SkillAttackProc[0] && aabonuses.SkillAttackProc[1] == skillinuse &&
-	    IsValidSpell(aabonuses.SkillAttackProc[2])) {
-		float chance = aabonuses.SkillAttackProc[0] / 1000.0f;
+	if (damage > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SKILL] == skillinuse &&
+		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[2], other, EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[aabonuses.SkillAttackProc[2]].ResistDiff);
+			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
+						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID]].ResistDiff);
 	}
 
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);

@@ -2903,10 +2903,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if (zone->random.Roll(spells[spell_id].base[i]) && IsValidSpell(spells[spell_id].base2[i]))
 						caster->SpellFinished(spells[spell_id].base2[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
-				
+
 				break;
 			}
-					
+
 			case SE_Hatelist_To_Tail_Index: {
 				if (caster && zone->random.Roll(spells[spell_id].base[i]))
 					caster->SetBottomRampageList();
@@ -2940,7 +2940,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					else
 						Stun(spells[spell_id].base[i]);
 				}
-				else 
+				else
 					caster->MessageString(Chat::SpellFailure, FEAR_TOO_HIGH);
 				break;
 			}
@@ -2949,7 +2949,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
 				break;
 			}
-	
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3928,11 +3928,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			int32 amt = abs(GetMaxHP() * effect_value / 100);
 			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
 				amt = spells[buff.spellid].max[i];
-			
-			if (effect_value < 0) { 
+
+			if (effect_value < 0) {
 				Damage(this, amt, 0, EQ::skills::SkillEvocation, false);
 			}
-			else { 
+			else {
 				HealDamage(amt);
 			}
 			break;
@@ -3945,7 +3945,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				amt = spells[buff.spellid].max[i];
 
 			if (effect_value < 0) {
-				
+
 				SetMana(GetMana() - amt);
 			}
 			else {
@@ -6192,16 +6192,16 @@ bool Mob::TryDivineSave()
 	-If desired, additional spells can be triggered from the AA/item/spell effect, generally a heal.
 	*/
 
-	int32 SuccessChance = aabonuses.DivineSaveChance[0] + itembonuses.DivineSaveChance[0] + spellbonuses.DivineSaveChance[0];
+	int32 SuccessChance = aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE];
 	if (SuccessChance && zone->random.Roll(SuccessChance))
 	{
 		SetHP(1);
 
 		int32 EffectsToTry[] =
 		{
-			aabonuses.DivineSaveChance[1],
-			itembonuses.DivineSaveChance[1],
-			spellbonuses.DivineSaveChance[1]
+			aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID],
+			itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID],
+			spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID]
 		};
 		//Fade the divine save effect here after saving the old effects off.
 		//That way, if desired, the effect could apply SE_DivineSave again.
@@ -6236,10 +6236,10 @@ bool Mob::TryDeathSave() {
 	-In later expansions this SE_DeathSave was given a level limit and a heal value in its effect data.
 	*/
 
-	if (spellbonuses.DeathSave[0]){
+	if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE]){
 
 		int SuccessChance = 0;
-		int buffSlot = spellbonuses.DeathSave[1];
+		int buffSlot = spellbonuses.DeathSave[SBIndex::DEATH_SAVE_BUFFSLOT];
 		int32 UD_HealMod = 0;
 		int HealAmt = 300; //Death Pact max Heal
 
@@ -6254,12 +6254,12 @@ bool Mob::TryDeathSave() {
 
 			if(zone->random.Roll(SuccessChance)) {
 
-				if(spellbonuses.DeathSave[0] == 2)
+				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 					HealAmt = RuleI(Spells, DivineInterventionHeal); //8000HP is how much LIVE Divine Intervention max heals
 
 				//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-				if (spellbonuses.DeathSave[3] && (GetLevel() >= spellbonuses.DeathSave[2]))
-					HealAmt += spellbonuses.DeathSave[3];
+				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+					HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
 
 				if ((GetMaxHP() - GetHP()) < HealAmt)
 					HealAmt = GetMaxHP() - GetHP();
@@ -6267,7 +6267,7 @@ bool Mob::TryDeathSave() {
 				SetHP((GetHP()+HealAmt));
 				Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
-				if(spellbonuses.DeathSave[0] == 2)
+				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 					entity_list.MessageCloseString(
 						this,
 						false,
@@ -6291,12 +6291,12 @@ bool Mob::TryDeathSave() {
 
 				if(zone->random.Roll(SuccessChance)) {
 
-					if(spellbonuses.DeathSave[0] == 2)
+					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 						HealAmt = RuleI(Spells, DivineInterventionHeal);
 
 					//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-					if (spellbonuses.DeathSave[3] && (GetLevel() >= spellbonuses.DeathSave[2]))
-						HealAmt += spellbonuses.DeathSave[3];
+					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+						HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
 
 					HealAmt = HealAmt*UD_HealMod/100;
 
@@ -6306,7 +6306,7 @@ bool Mob::TryDeathSave() {
 					SetHP((GetHP()+HealAmt));
 					Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
-					if(spellbonuses.DeathSave[0] == 2)
+					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 						entity_list.MessageCloseString(
 							this,
 							false,
@@ -6645,22 +6645,22 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
 bool Mob::ImprovedTaunt(){
 
-	if (spellbonuses.ImprovedTaunt[0]){
+	if (spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL]){
 
-		if (GetLevel() > spellbonuses.ImprovedTaunt[0])
+		if (GetLevel() > spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL])
 			return false;
 
-		if (spellbonuses.ImprovedTaunt[2] >= 0){
+		if (spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT] >= 0){
 
-			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT]].casterid);
 
 			if (target){
 				SetTarget(target);
 				return true;
 			}
 			else {
-				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[2]))
-					BuffFadeBySlot(spellbonuses.ImprovedTaunt[2], true); //If caster killed removed effect.
+				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT]))
+					BuffFadeBySlot(spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT], true); //If caster killed removed effect.
 			}
 		}
 	}
@@ -7187,7 +7187,7 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 	the CalcFocusEffect function if not 100pct.
 	ApplyFocusProcLimiter() function checks for SE_Proc_Timer_Modifier which allows for limiting how often a spell from effect can be triggered
 	for example, if set to base=1 and base2= 1500, then for everyone 1 successful trigger, you will be unable to trigger again for 1.5 seconds.
-	
+
 	Live only has this focus in buffs/debuffs that can be placed on a target. TODO: Will consider adding support for it as AA and Item.
 	*/
 	if (!caster)
@@ -7221,7 +7221,7 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 								SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
 						}
 					}
-				
+
 					if (i >= 0)
 						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 				}
@@ -7237,13 +7237,13 @@ bool Mob::ApplyFocusProcLimiter(int32 spell_id, int buffslot)
 
 	//Do not allow spell cast if timer is active.
 	if (buffs[buffslot].focusproclimit_time > 0)
-		return false; 
+		return false;
 
 	/*
-	SE_Proc_Timer_Modifier 
+	SE_Proc_Timer_Modifier
 	base1= amount of total procs allowed until lock out timer is triggered, should be set to at least 1 in any spell for the effect to function.
 	base2= lock out timer, which prevents any more procs set in ms 1500 = 1.5 seconds
-	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie. 
+	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie.
 	*/
 
 	if (IsValidSpell(spell_id)) {
@@ -7270,7 +7270,7 @@ bool Mob::ApplyFocusProcLimiter(int32 spell_id, int buffslot)
 						if (!focus_proc_limit_timer.Enabled()) {
 							focus_proc_limit_timer.Start(250);
 						}
-				
+
 						return true;
 					}
 				}

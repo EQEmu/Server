@@ -503,8 +503,8 @@ struct StatBonuses {
 	uint32	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
 	bool	TriggerMeleeThreshold;				// Has Melee Threshhold
 	bool	TriggerSpellThreshold;				// Has Spell Threshhold
-	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value 
-	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost 
+	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value
+	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost
 	int32	ShieldBlock;						// Chance to Shield Block
 	int32	BlockBehind;						// Chance to Block Behind (with our without shield)
 	bool	CriticalRegenDecay;					// increase critical regen chance, decays based on spell level cast
@@ -512,7 +512,7 @@ struct StatBonuses {
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
 	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
-	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
+	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buff slot
 	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
 	int32	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	uint32	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
@@ -615,6 +615,58 @@ struct StatBonuses {
 	int trap_slots;
 	bool hunger; // Song of Sustenance -- min caps to 3500
 };
+
+// StatBonus Indexes
+namespace SBIndex {
+	constexpr uint16 BUFFSTACKER_EXISTS                     = 0; // SPA 446-449
+	constexpr uint16 BUFFSTACKER_VALUE                      = 1; // SPA 446-449
+	constexpr uint16 EXTRA_ATTACK_CHANCE                    = 0; // SPA 266,498,499
+	constexpr uint16 EXTRA_ATTACK_NUM_ATKS                  = 1; // SPA 266,498,499
+	constexpr uint16 DIVINE_SAVE_CHANCE                     = 0; // SPA 232
+	constexpr uint16 DIVINE_SAVE_SPELL_TRIGGER_ID           = 1; // SPA 232
+	constexpr uint16 DEATH_SAVE_TYPE                        = 0; // SPA 150
+	constexpr uint16 DEATH_SAVE_BUFFSLOT                    = 1; // SPA 150
+	constexpr uint16 DEATH_SAVE_MIN_LEVEL_FOR_HEAL          = 2; // SPA 150
+	constexpr uint16 DEATH_SAVE_HEAL_AMT                    = 3; // SPA 150
+	constexpr uint16 RESOURCE_PERCENT_CAP                   = 0; // SPA 408-410
+	constexpr uint16 RESOURCE_AMOUNT_CAP                    = 1; // SPA 408-419
+	constexpr uint16 NEGATE_ATK_EXISTS                      = 0; // SPA 163
+	constexpr uint16 NEGATE_ATK_BUFFSLOT                    = 1; // SPA 163
+	constexpr uint16 NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT      = 2; // SPA 163
+	constexpr uint16 MITIGATION_RUNE_PERCENT                = 0; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_BUFFSLOT               = 1; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT = 2; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_MAX_HP_AMT             = 3; // SPA 161,162,450
+	constexpr uint16 THRESHOLDGUARD_MITIGATION_PERCENT      = 0; // SPA 451,452
+	constexpr uint16 THRESHOLDGUARD_BUFFSLOT                = 1; // SPA 451,452
+	constexpr uint16 THRESHOLDGUARD_MIN_DMG_TO_TRIGGER      = 2; // SPA 451,452
+	constexpr uint16 ENDURANCE_ABSORD_MITIGIATION           = 0; // SPA 521
+	constexpr uint16 ENDURANCE_ABSORD_DRAIN_PER_HP          = 1; // SPA 521
+	constexpr uint16 IMPROVED_TAUNT_MAX_LVL                 = 0; // SPA 444
+	constexpr uint16 IMPROVED_TAUNT_AGGRO_MOD               = 1; // SPA 444
+	constexpr uint16 IMPROVED_TAUNT_BUFFSLOT                = 2; // SPA 444
+	constexpr uint16 ROOT_EXISTS                            = 0; // SPA 99
+	constexpr uint16 ROOT_BUFFSLOT                          = 1; // SPA 99
+	constexpr uint16 RUNE_AMOUNT                            = 0; // SPA 55
+	constexpr uint16 RUNE_BUFFSLOT                          = 1; // SPA 78
+	constexpr uint16 POSITIONAL_DAMAGE_MOD                  = 0; // SPA 503-506
+	constexpr uint16 POSITIONAL_LOCATION                    = 1; // SPA 503-506
+	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
+	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
+	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427
+	constexpr uint16 SKILLPROC_SKILL                        = 1; // SPA 427
+	constexpr uint16 SKILLPROC_SPELL_ID                     = 2; // SPA 427
+	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
+	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
+	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
+	constexpr uint16 DOUBLE_RIPOSTE_SKILL_ATK_CHANCE        = 1; // SPA 223
+	constexpr uint16 DOUBLE_RIPOSTE_SKILL                   = 2; // SPA 223
+	constexpr uint16 FINISHING_EFFECT_PROC_CHANCE           = 0; // SPA 278, 439, 217
+	constexpr uint16 FINISHING_EFFECT_DMG                   = 1; // SPA 278, 439, 217
+	constexpr uint16 FINISHING_EFFECT_LEVEL_MAX             = 0; // SPA 440, 345, 346
+	constexpr uint16 FINISHING_EFFECT_LEVEL_CHANCE_BONUS    = 1; // SPA 440, 345, 346
+};
+
 
 typedef struct
 {
