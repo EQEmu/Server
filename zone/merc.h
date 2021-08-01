@@ -272,7 +272,7 @@ protected:
 	void AddItemBonuses(const EQ::ItemData *item, StatBonuses* newbon);
 	int CalcRecommendedLevelBonus(uint8 level, uint8 reclevel, int basestat);
 
-	int16 GetFocusEffect(focusType type, uint16 spell_id);
+	int32 GetFocusEffect(focusType type, uint16 spell_id);
 
 	std::vector<MercSpell> merc_spells;
 	std::map<uint32,MercTimer> timers;

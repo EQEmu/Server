@@ -1152,6 +1152,7 @@ bool IsStackableDot(uint16 spell_id);
 bool IsBardOnlyStackEffect(int effect);
 bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
+bool SpellRequiresTarget(int targettype);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);

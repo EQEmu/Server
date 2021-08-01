@@ -3497,68 +3497,15 @@ void Mob::SetNimbusEffect(uint32 nimbus_effect)
 	}
 }
 
-void Mob::TryTriggerOnCast(uint32 spell_id, bool aa_trigger)
-{
-	if(!IsValidSpell(spell_id))
-			return;
-
-	if (aabonuses.SpellTriggers[0] || spellbonuses.SpellTriggers[0] || itembonuses.SpellTriggers[0]){
-
-		for(int i = 0; i < MAX_SPELL_TRIGGER; i++){
-
-			if(aabonuses.SpellTriggers[i] && IsClient())
-				TriggerOnCast(aabonuses.SpellTriggers[i], spell_id,1);
-
-			if(spellbonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-
-			if(itembonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-		}
-	}
-}
-
-void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
-{
-	if (!IsValidSpell(focus_spell) || !IsValidSpell(spell_id))
-		return;
-
-	uint32 trigger_spell_id = 0;
-
-	if (aa_trigger && IsClient()) {
-		// focus_spell = aaid
-		auto rank = zone->GetAlternateAdvancementRank(focus_spell);
-		if (rank)
-			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget())
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-	}
-
-	else {
-		trigger_spell_id = CalcFocusEffect(focusTriggerOnCast, focus_spell, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget()) {
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
-		}
-	}
-}
-
-
-
-
 bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
 	if (!target || !IsValidSpell(spell_id))
 		return false;
 
 	/*The effects SE_SpellTrigger (SPA 340) and SE_Chance_Best_in_Spell_Grp (SPA 469) work as follows, you typically will have 2-3 different spells each with their own
-	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast. 
-	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance). 
-	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there 
+	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast.
+	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance).
+	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there
 	is only 1 effect using the trigger effect. In those situations we simply roll a chance for that spell to be cast once.
 	Note: Both SPA 340 and 469 can be in same spell and both cummulative add up to 100 pct chances. SPA469 only difference being the spell cast will
 	be "best in spell group", instead of a defined spell_id.*/
@@ -3567,7 +3514,7 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	int total_chance = 0;
 	int effect_slot = effect;
 	bool CastSpell = false;
-	
+
 	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
 		if (spells[spell_id].effectid[i] == SE_SpellTrigger || spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)
@@ -3752,7 +3699,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 	if (!IsValidSpell(spell_id))
 		return;
 
-	/*Apply damage from Lifeburn type effects on caster at end of spell cast. 
+	/*Apply damage from Lifeburn type effects on caster at end of spell cast.
 	 This allows for the AE spells to function without repeatedly killing caster
 	 Damage or heal portion can be found as regular single use spell effect
 	*/
@@ -3775,7 +3722,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
 	/*
-	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists. 
+	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists.
 	Can be applied through quest function, spell focus or npc_spells_effects table. This function is run on the target of the spell.
 	*/
 
@@ -3798,7 +3745,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		innate_mod = Vulnerability_Mod[HIGHEST_RESIST+1];
 
 	//[Apply spell derived vulnerabilities] Step 1: Check this focus effect exists on the mob.
-	if (spellbonuses.FocusEffects[focusSpellVulnerability]){ 
+	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
 
 		int32 tmp_focus = 0;
 		int tmp_buffslot = -1;
@@ -3912,8 +3859,8 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Damage_Taken_Position_Mod[0] + aabonuses.Damage_Taken_Position_Mod[0] + spellbonuses.Damage_Taken_Position_Mod[0];
-	front_arc += itembonuses.Damage_Taken_Position_Mod[1] + aabonuses.Damage_Taken_Position_Mod[1] + spellbonuses.Damage_Taken_Position_Mod[1];
+	back_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD];
+	front_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
@@ -4906,8 +4853,8 @@ int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Melee_Damage_Position_Mod[0] + aabonuses.Melee_Damage_Position_Mod[0] + spellbonuses.Melee_Damage_Position_Mod[0];
-	front_arc += itembonuses.Melee_Damage_Position_Mod[1] + aabonuses.Melee_Damage_Position_Mod[1] + spellbonuses.Melee_Damage_Position_Mod[1];
+	back_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD];
+	front_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (BehindMob(defender, GetX(), GetY()))//Check if attacker is striking from behind

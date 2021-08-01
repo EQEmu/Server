@@ -4433,11 +4433,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CalcBonuses();
 }
 
-int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
+int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
-	int16 value = 0;
+	int32 value = 0;
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
@@ -4475,7 +4475,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 		when the next valid focus effect is found.
 		*/
 
-		if (IsFocusEffect(0, 0, true, effect) || (effect == SE_TriggerOnCast)) {
+		if (IsFocusEffect(0, 0, true, effect)) {
 			FocusCount++;
 			// If limit found on prior check next, else end loop.
 			if (FocusCount > 1) {
@@ -4939,7 +4939,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 //given an item/spell's focus ID and the spell being cast, determine the focus ammount, if any
 //assumes that spell_id is not a bard spell and that both ids are valid spell ids
-int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid)
+int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid)
 {
 	/*
 	'this' is always the caster of the spell_id, most foci check for effects on the caster, however some check for effects on the target.
@@ -4952,11 +4952,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	const SPDat_Spell_Struct &focus_spell = spells[focus_id];
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
-	int16 value = 0;
+	int32 value = 0;
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
-	uint32 Caston_spell_id = 0;
+	int32 Caston_spell_id = 0;
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Ie. Add damage to fire OR ice
@@ -5516,6 +5516,125 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	return (value * lvlModifier / 100);
 }
 
+void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
+{
+	if (IsBardSong(spell_id)) {
+		return;
+	}
+
+	if (!IsValidSpell(spell_id)) {
+		return;
+	}
+
+	int32 focus_spell_id = 0;
+	int32 proc_spellid   = 0;
+
+	// item focus
+	if (IsClient() && itembonuses.FocusEffects[type]) {
+		const EQ::ItemData *temp_item = nullptr;
+
+		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++) {
+			temp_item = nullptr;
+			EQ::ItemInstance *ins = CastToClient()->GetInv().GetItem(x);
+			if (!ins) {
+				continue;
+			}
+			temp_item = ins->GetItem();
+			if (temp_item && temp_item->Focus.Effect > 0 && IsValidSpell(temp_item->Focus.Effect)) {
+				focus_spell_id = temp_item->Focus.Effect;
+				if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+					continue;
+				}
+
+				proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+				if (proc_spellid) {
+					TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+				}
+			}
+
+			for (int y = EQ::invaug::SOCKET_BEGIN; y <= EQ::invaug::SOCKET_END; ++y) {
+				EQ::ItemInstance *aug = ins->GetAugment(y);
+				if (aug) {
+					const EQ::ItemData *temp_item_aug = aug->GetItem();
+					if (temp_item_aug && temp_item_aug->Focus.Effect > 0 && IsValidSpell(temp_item_aug->Focus.Effect)) {
+						focus_spell_id = temp_item_aug->Focus.Effect;
+
+						if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+							continue;
+						}
+
+						proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+						if (proc_spellid) {
+							TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Spell Focus
+	if (spellbonuses.FocusEffects[type]) {
+		int buff_slot = 0;
+		for (buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
+			focus_spell_id = buffs[buff_slot].spellid;
+			if (!IsValidSpell(focus_spell_id)) {
+				continue;
+			}
+
+			if (!IsEffectInSpell(focus_spell_id, SE_TriggerOnCast)) {
+				continue;
+			}
+
+			proc_spellid = CalcFocusEffect(type, focus_spell_id, spell_id);
+			if (proc_spellid) {
+				TryTriggerOnCastProc(focus_spell_id, spell_id, proc_spellid);
+				CheckNumHitsRemaining(NumHit::MatchingSpells, buff_slot);
+			}
+		}
+	}
+
+	// Only use of this focus per AA effect.
+	if (IsClient() && aabonuses.FocusEffects[type]) {
+		for (const auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability      = ability_rank.first;
+			auto rank         = ability_rank.second;
+
+			if (!ability) {
+				continue;
+			}
+
+			if (rank->effects.empty()) {
+				continue;
+			}
+
+			proc_spellid = CastToClient()->CalcAAFocus(type, *rank, spell_id);
+			if (proc_spellid) {
+				TryTriggerOnCastProc(0, spell_id, proc_spellid);
+			}
+		}
+	}
+}
+
+bool Mob::TryTriggerOnCastProc(uint16 focusspellid, uint16 spell_id, uint16 proc_spellid)
+{
+	// We confirm spell_id and focuspellid are valid before passing into this.
+	if (IsValidSpell(proc_spellid) && spell_id != focusspellid && spell_id != proc_spellid) {
+		Mob* proc_target = GetTarget();
+		if (proc_target) {
+			SpellFinished(proc_spellid, proc_target, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+			return true;
+		}
+		// Edge cases where proc spell does not require a target such as PBAE, allows proc to still occur even if target potentially dead. Live spells exist with PBAE procs.
+		else if (!SpellRequiresTarget(proc_spellid)) {
+			SpellFinished(proc_spellid, this, EQ::spells::CastingSlot::Item, 0, -1, spells[proc_spellid].ResistDiff);
+			return true;
+		}
+	}
+	return false;
+}
+
 uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 
 	if (IsBardSong(spell_id))
@@ -5637,7 +5756,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
+int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 {
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
 		return 0;
@@ -5645,9 +5764,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (spells[spell_id].not_focusable)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
-	int16 realTotal3 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
+	int32 realTotal3 = 0;
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
@@ -5661,9 +5780,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		//item focus
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
@@ -5824,14 +5943,14 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid = 0;
-		uint16 focusspell_tracker = 0;
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
 		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
@@ -5877,7 +5996,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	// AA Focus
 	if (aabonuses.FocusEffects[type]){
 
-		int16 Total3 = 0;
+		int32 Total3 = 0;
 
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
@@ -5907,20 +6026,20 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	//by reagent conservation for obvious reasons.
 
 	//Non-Live like feature to allow for an additive focus bonus to be applied from foci that are placed in worn slot. (No limit checks)
-	int16 worneffect_bonus = 0;
+	int32 worneffect_bonus = 0;
 	if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
 		worneffect_bonus = itembonuses.FocusEffectsWorn[type];
 
 	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
-int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	if (spells[spell_id].not_focusable)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
@@ -5933,9 +6052,9 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		//item focus
 		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++){
@@ -5981,14 +6100,14 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 	if (RuleB(Spells, NPC_UseFocusFromSpells) && spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid = 0;
-		uint16 focusspell_tracker = 0;
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
 		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
@@ -6204,16 +6323,16 @@ bool Mob::TryDivineSave()
 	-If desired, additional spells can be triggered from the AA/item/spell effect, generally a heal.
 	*/
 
-	int32 SuccessChance = aabonuses.DivineSaveChance[0] + itembonuses.DivineSaveChance[0] + spellbonuses.DivineSaveChance[0];
+	int32 SuccessChance = aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE] + spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_CHANCE];
 	if (SuccessChance && zone->random.Roll(SuccessChance))
 	{
 		SetHP(1);
 
 		int32 EffectsToTry[] =
 		{
-			aabonuses.DivineSaveChance[1],
-			itembonuses.DivineSaveChance[1],
-			spellbonuses.DivineSaveChance[1]
+			aabonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID],
+			itembonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID],
+			spellbonuses.DivineSaveChance[SBIndex::DIVINE_SAVE_SPELL_TRIGGER_ID]
 		};
 		//Fade the divine save effect here after saving the old effects off.
 		//That way, if desired, the effect could apply SE_DivineSave again.
@@ -6248,10 +6367,10 @@ bool Mob::TryDeathSave() {
 	-In later expansions this SE_DeathSave was given a level limit and a heal value in its effect data.
 	*/
 
-	if (spellbonuses.DeathSave[0]){
+	if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE]){
 
 		int SuccessChance = 0;
-		int buffSlot = spellbonuses.DeathSave[1];
+		int buffSlot = spellbonuses.DeathSave[SBIndex::DEATH_SAVE_BUFFSLOT];
 		int32 UD_HealMod = 0;
 		int HealAmt = 300; //Death Pact max Heal
 
@@ -6266,12 +6385,12 @@ bool Mob::TryDeathSave() {
 
 			if(zone->random.Roll(SuccessChance)) {
 
-				if(spellbonuses.DeathSave[0] == 2)
+				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 					HealAmt = RuleI(Spells, DivineInterventionHeal); //8000HP is how much LIVE Divine Intervention max heals
 
 				//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-				if (spellbonuses.DeathSave[3] && (GetLevel() >= spellbonuses.DeathSave[2]))
-					HealAmt += spellbonuses.DeathSave[3];
+				if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+					HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
 
 				if ((GetMaxHP() - GetHP()) < HealAmt)
 					HealAmt = GetMaxHP() - GetHP();
@@ -6279,7 +6398,7 @@ bool Mob::TryDeathSave() {
 				SetHP((GetHP()+HealAmt));
 				Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
-				if(spellbonuses.DeathSave[0] == 2)
+				if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 					entity_list.MessageCloseString(
 						this,
 						false,
@@ -6303,12 +6422,12 @@ bool Mob::TryDeathSave() {
 
 				if(zone->random.Roll(SuccessChance)) {
 
-					if(spellbonuses.DeathSave[0] == 2)
+					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 						HealAmt = RuleI(Spells, DivineInterventionHeal);
 
 					//Check if bonus Heal amount can be applied ([3] Bonus Heal [2] Level limit)
-					if (spellbonuses.DeathSave[3] && (GetLevel() >= spellbonuses.DeathSave[2]))
-						HealAmt += spellbonuses.DeathSave[3];
+					if (spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT] && (GetLevel() >= spellbonuses.DeathSave[SBIndex::DEATH_SAVE_MIN_LEVEL_FOR_HEAL]))
+						HealAmt += spellbonuses.DeathSave[SBIndex::DEATH_SAVE_HEAL_AMT];
 
 					HealAmt = HealAmt*UD_HealMod/100;
 
@@ -6318,7 +6437,7 @@ bool Mob::TryDeathSave() {
 					SetHP((GetHP()+HealAmt));
 					Message(263, "The gods have healed you for %i points of damage.", HealAmt);
 
-					if(spellbonuses.DeathSave[0] == 2)
+					if(spellbonuses.DeathSave[SBIndex::DEATH_SAVE_TYPE] == 2)
 						entity_list.MessageCloseString(
 							this,
 							false,
@@ -6657,22 +6776,22 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
 bool Mob::ImprovedTaunt(){
 
-	if (spellbonuses.ImprovedTaunt[0]){
+	if (spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL]){
 
-		if (GetLevel() > spellbonuses.ImprovedTaunt[0])
+		if (GetLevel() > spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_MAX_LVL])
 			return false;
 
-		if (spellbonuses.ImprovedTaunt[2] >= 0){
+		if (spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT] >= 0){
 
-			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[2]].casterid);
+			target = entity_list.GetMob(buffs[spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT]].casterid);
 
 			if (target){
 				SetTarget(target);
 				return true;
 			}
 			else {
-				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[2]))
-					BuffFadeBySlot(spellbonuses.ImprovedTaunt[2], true); //If caster killed removed effect.
+				if(!TryFadeEffect(spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT]))
+					BuffFadeBySlot(spellbonuses.ImprovedTaunt[SBIndex::IMPROVED_TAUNT_BUFFSLOT], true); //If caster killed removed effect.
 			}
 		}
 	}
@@ -7191,7 +7310,7 @@ void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
 	}
 }
 
-void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
+void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 {
 	/*
 	This function checks for incoming spells on a mob, if they meet the criteria for focus SE_Fc_Cast_Spell_on_Land then
@@ -7205,7 +7324,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	if (!caster)
 		return;
 
-	uint32 trigger_spell_id = 0;
+	int32 trigger_spell_id = 0;
 
 	//Step 1: Check this focus effect exists on the mob.
 	if (spellbonuses.FocusEffects[focusFcCastSpellOnLand]) {
@@ -7242,7 +7361,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	}
 }
 
-bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
+bool Mob::ApplyFocusProcLimiter(int32 spell_id, int buffslot)
 {
 	if (buffslot < 0)
 		return false;
