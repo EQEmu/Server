@@ -2949,6 +2949,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
 				break;
 			}
+
+			case SE_Weapon_Stance: {
+				if (IsClient()) {
+					CastToClient()->ApplyWeaponsStance();
+				}
+				break;
+			}
+
 	
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
@@ -3214,7 +3222,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Fc_Cast_Spell_On_Land:
 			case SE_Ff_CasterClass:
 			case SE_Ff_Same_Caster:
-			case SE_Weapon_Stance:
 			case SE_AddExtraAttackPct_1h_Primary:
 			case SE_AddExtraAttackPct_1h_Secondary:
 			case SE_Skill_Base_Damage_Mod:
@@ -4350,8 +4357,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_Weapon_Stance:
 			{
 				/*
-				If we click off the spell buff (or fades naturally) giving us 
-				Weapon Stance effects it should remove all associated buff.
+					If we click off the spell buff (or fades naturally) giving us 
+					Weapon Stance effects it should remove all associated buff.
 				*/
 				if (weaponstance.spellbonus_buff_spell_id) {
 					BuffFadeBySpellID(weaponstance.spellbonus_buff_spell_id);

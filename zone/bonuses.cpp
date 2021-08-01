@@ -189,8 +189,6 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 		AddItemBonuses(inst, newbon, false, true);
 	}
 
-	ApplyWeaponsStance();
-
 	//Optional ability to have worn effects calculate as an addititive bonus instead of highest value
 	if (RuleI(Spells, AdditiveBonusWornType) && RuleI(Spells, AdditiveBonusWornType) != EQ::item::ItemEffectWorn){
 		for (i = EQ::invslot::BONUS_BEGIN; i <= EQ::invslot::BONUS_STAT_END; i++) {

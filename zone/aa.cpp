@@ -1179,10 +1179,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
+	
+	bool use_toggle_passive_hotkey = UseTogglePassiveHotkey(*rank, rank->spell);
 
 	//make sure it is not a passive
-	if(!rank->effects.empty()) {
-		TogglePassiveAA(*rank, rank->spell);
+	if(!rank->effects.empty() && !use_toggle_passive_hotkey) {
 		return;
 	}
 
@@ -1242,15 +1243,22 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		}
 	}
 
-	// Bards can cast instant cast AAs while they are casting another song
-	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
-			return;
-		}
+	if (use_toggle_passive_hotkey) {
+
 		ExpendAlternateAdvancementCharge(ability->id);
-	} else {
-		if(!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
-			return;
+	}
+	else {
+		// Bards can cast instant cast AAs while they are casting another song
+		if (spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
+			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+				return;
+			}
+			ExpendAlternateAdvancementCharge(ability->id);
+		}
+		else {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+				return;
+			}
 		}
 	}
 
@@ -1798,13 +1806,20 @@ bool Mob::CheckAATimer(int timer)
 	return false;
 }
 
-void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
+void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 aa_id)
 {
 	/*
 	Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
 	The spell "Disable Ability" contains no actual SPA id or data, thus it must be hardcoded to do this effect when triggered.
 	Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
 	*/
+	//ExpendAlternateAdvancementCharge(ability->id);
+
+	//If have effect then it is enabled.
+	//First rank you get has no effect in it, if you click it you learn second rank which has effect (Key says disabled), if you click hotkey with second rank you are set back to rank one (key says Enabled)
+	//thus clicking key toggles it to other effect.
+	//TO DO THIS WILL MAKE NON FUNCTIONAL EFFECT BE WEAPONSTANCE BUT WITH NO VALUES.
+	//THUS WE CAN CHECK BASE1 to tell if this is active version or not, then if not active, buy next rank. IF active, then lose rank. then prob recalc bonus
 
 	//Can add any specific use cases below.
 	int effect = 0;
@@ -1829,4 +1844,22 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
 			}
 		}
 	}
+}
+
+bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
+
+	int effect = 0;
+
+	for (const auto &e : rank.effects) {
+		effect = e.effect_id;
+
+		switch (effect) {
+
+		case SE_Weapon_Stance:
+			return true;
+		default:
+			return false;
+		}
+	}
+	return false;
 }
