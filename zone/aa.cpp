@@ -1797,36 +1797,27 @@ bool Mob::CheckAATimer(int timer)
 	}
 	return false;
 }
-
+// Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
+// The spell "Disable Ability" contains no actual SPA id or data, thus it must be hardcoded to do this effect when triggered.
+// Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
 void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id)
 {
-	/*
-	Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
-	The spell "Disable Ability" contains no actual SPA id or data, thus it must be hardcoded to do this effect when triggered.
-	Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
-	*/
-
-	//Can add any specific use cases below.
-	int effect = 0;
-
+	// Can add any specific use cases below.
 	for (const auto &e : rank.effects) {
-		effect = e.effect_id;
-
-		switch (effect) {
-
-		case SE_Weapon_Stance:
-			if (weaponstance.aabonus_enabled) {
-				weaponstance.aabonus_enabled = false;
-				Message(Chat::Spells, "You disable an ability."); //Message live gives you.
-				BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
-				return;
-			}
-			else {
-				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
-				weaponstance.aabonus_enabled = true;
-				ApplyWeaponsStance();
-				return;
-			}
+		switch (e.effect_id) {
+			case SE_Weapon_Stance:
+				if (weaponstance.aabonus_enabled) {
+					weaponstance.aabonus_enabled = false;
+					Message(Chat::Spells, "You disable an ability."); // Message live gives you.
+					BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+					return;
+				}
+				else {
+					Message(Chat::Spells, "You enable an ability."); // Message live gives you.
+					weaponstance.aabonus_enabled = true;
+					ApplyWeaponsStance();
+					return;
+				}
 		}
 	}
 }
