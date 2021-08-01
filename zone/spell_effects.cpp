@@ -4440,7 +4440,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 	bool not_focusable = spells[spell_id].not_focusable;
 
-	int16  value       = 0;
+	int32  value       = 0;
 	int    lvlModifier = 100;
 	int    spell_level = 0;
 	int    lvldiff     = 0;
