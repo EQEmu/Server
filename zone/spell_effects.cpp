@@ -4465,7 +4465,8 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	14/15 SE_LimitSpellSubClass:
 	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
 	*/
-	int  FocusCount                    = 0;
+
+	int FocusCount = 0;
 
 	for (const auto &e : rank.effects) {
 		effect = e.effect_id;
@@ -4485,8 +4486,8 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			// If limit found on prior check next, else end loop.
 			if (FocusCount > 1) {
 
-				for (int e = 0; e < MaxLimitInclude; e += 2) {
-					if (LimitInclude[e] && !LimitInclude[e + 1]) {
+				for (int i = 0; i < MaxLimitInclude; i += 2) {
+					if (LimitInclude[i] && !LimitInclude[i + 1]) {
 						LimitFailure = true;
 					}
 				}
@@ -4495,8 +4496,8 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					value        = 0;
 					LimitFailure = false;
 
-					for (int e = 0; e < MaxLimitInclude; e++) {
-						LimitInclude[e] = false; // Reset array
+					for (bool & l : LimitInclude) {
+						l = false; // Reset array
 					}
 				}
 
@@ -4579,9 +4580,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[2] = true;
+					LimitInclude[IncludeExistsSELimitSpell] = true;
 					if (spell_id == base1) { // Include
-						LimitInclude[3] = true;
+						LimitInclude[IncludeFoundSELimitSpell] = true;
 					}
 				}
 				break;
@@ -4599,16 +4600,16 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[4] = true;
+					LimitInclude[IncludeExistsSELimitEffect] = true;
 					// they use 33 here for all classes ... unsure if the type check is really needed
 					if (base1 == SE_SummonPet && type == focusReagentCost) {
 						if (IsSummonPetSpell(spell_id) || IsSummonSkeletonSpell(spell_id)) {
-							LimitInclude[5] = true;
+							LimitInclude[IncludeFoundSELimitEffect] = true;
 						}
 					}
 					else {
 						if (IsEffectInSpell(spell_id, base1)) { // Include
-							LimitInclude[5] = true;
+							LimitInclude[IncludeFoundSELimitEffect] = true;
 						}
 					}
 				}
@@ -4648,9 +4649,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[6] = true;
+					LimitInclude[IncludeExistsSELimitTarget] = true;
 					if (base1 == spell.targettype) { // Include
-						LimitInclude[7] = true;
+						LimitInclude[IncludeFoundSELimitTarget] = true;
 					}
 				}
 				break;
@@ -4686,9 +4687,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[10] = true;
+					LimitInclude[IncludeExistsSELimitCastingSkill] = true;
 					if (base1 == spell.skill) {
-						LimitInclude[11] = true;
+						LimitInclude[IncludeFoundSELimitCastingSkill] = true;
 					}
 				}
 				break;
