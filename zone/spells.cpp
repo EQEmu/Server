@@ -1384,11 +1384,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
-	TryOnSpellFinished(this, target, spell_id);
+	TryOnSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
 
 	TryTwincast(this, target, spell_id);
 
-	TryTriggerOnCast(spell_id, 0);
+	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
@@ -2945,31 +2945,33 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				}
 			}
 
-			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
-			If checking same type ie A vs A, which ever effect base value is higher will take hold.
-			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
-			is not fully removed at the time of the trgger*/
-			if (spellbonuses.AStacker[0]) {
-				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[1]))
+			/*
+				Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+				If checking same type ie A vs A, which ever effect base value is higher will take hold.
+				Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
+				is not fully removed at the time of the trigger
+			*/
+			if (spellbonuses.AStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 			}
 
-			if (spellbonuses.BStacker[0]) {
-				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[1]))
+			if (spellbonuses.BStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.CStacker[0]) {
-				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[1]))
+			if (spellbonuses.CStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.DStacker[0]) {
-				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[1]))
+			if (spellbonuses.DStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
 					return -1;
@@ -3786,7 +3788,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		MessageString(Chat::SpellFailure, SPELL_NO_EFFECT);
 		return false;
 	}
-			
+
 	// Block next spell effect should be used up first(since its blocking the next spell)
 	if(CanBlockSpell()) {
 		int buff_count = GetMaxTotalSlots();
