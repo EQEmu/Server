@@ -2903,10 +2903,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				if (zone->random.Roll(spells[spell_id].base[i]) && IsValidSpell(spells[spell_id].base2[i]))
 						caster->SpellFinished(spells[spell_id].base2[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
-				
+
 				break;
 			}
-					
+
 			case SE_Hatelist_To_Tail_Index: {
 				if (caster && zone->random.Roll(spells[spell_id].base[i]))
 					caster->SetBottomRampageList();
@@ -2940,7 +2940,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					else
 						Stun(spells[spell_id].base[i]);
 				}
-				else 
+				else
 					caster->MessageString(Chat::SpellFailure, FEAR_TOO_HIGH);
 				break;
 			}
@@ -2949,7 +2949,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
 				break;
 			}
-	
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3928,11 +3928,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			int32 amt = abs(GetMaxHP() * effect_value / 100);
 			if (spells[buff.spellid].max[i] && amt > spells[buff.spellid].max[i])
 				amt = spells[buff.spellid].max[i];
-			
-			if (effect_value < 0) { 
+
+			if (effect_value < 0) {
 				Damage(this, amt, 0, EQ::skills::SkillEvocation, false);
 			}
-			else { 
+			else {
 				HealDamage(amt);
 			}
 			break;
@@ -3945,7 +3945,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				amt = spells[buff.spellid].max[i];
 
 			if (effect_value < 0) {
-				
+
 				SetMana(GetMana() - amt);
 			}
 			else {
@@ -7093,7 +7093,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	the CalcFocusEffect function if not 100pct.
 	ApplyFocusProcLimiter() function checks for SE_Proc_Timer_Modifier which allows for limiting how often a spell from effect can be triggered
 	for example, if set to base=1 and base2= 1500, then for everyone 1 successful trigger, you will be unable to trigger again for 1.5 seconds.
-	
+
 	Live only has this focus in buffs/debuffs that can be placed on a target. TODO: Will consider adding support for it as AA and Item.
 	*/
 	if (!caster)
@@ -7127,7 +7127,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 								SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
 						}
 					}
-				
+
 					if (i >= 0)
 						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 				}
@@ -7143,13 +7143,13 @@ bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
 
 	//Do not allow spell cast if timer is active.
 	if (buffs[buffslot].focusproclimit_time > 0)
-		return false; 
+		return false;
 
 	/*
-	SE_Proc_Timer_Modifier 
+	SE_Proc_Timer_Modifier
 	base1= amount of total procs allowed until lock out timer is triggered, should be set to at least 1 in any spell for the effect to function.
 	base2= lock out timer, which prevents any more procs set in ms 1500 = 1.5 seconds
-	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie. 
+	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie.
 	*/
 
 	if (IsValidSpell(spell_id)) {
@@ -7176,7 +7176,7 @@ bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
 						if (!focus_proc_limit_timer.Enabled()) {
 							focus_proc_limit_timer.Start(250);
 						}
-				
+
 						return true;
 					}
 				}
@@ -7369,19 +7369,18 @@ bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 {
-	switch (type)
-	{
-	case focusImprovedDamage:
-	case focusImprovedDamage2:
-	case focusImprovedHeal:
-	case focusManaCost:
-	case focusResistRate:
-	case focusFcDamagePctCrit:
-	case focusReagentCost:
-	case focusSpellHateMod:
-	case focusSpellVulnerability:
-	case focusFcSpellDamagePctIncomingPC:
-	return 1;
+	switch (type) {
+		case focusImprovedDamage:
+		case focusImprovedDamage2:
+		case focusImprovedHeal:
+		case focusManaCost:
+		case focusResistRate:
+		case focusFcDamagePctCrit:
+		case focusReagentCost:
+		case focusSpellHateMod:
+		case focusSpellVulnerability:
+		case focusFcSpellDamagePctIncomingPC:
+			return 1;
 	}
 	return 0;
 }
@@ -7391,21 +7390,17 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 	int value = 0;
 	// This is used to determine which focus should be used for the random calculation
 	if (best_focus) {
+		// If the spell does not contain a base2 value, then its a straight non random
+		value = focus_base;
 		// If the spell contains a value in the base2 field then that is the max value
 		if (focus_base2 != 0) {
 			value = focus_base2;
 		}
-		// If the spell does not contain a base2 value, then its a straight non random
-		else {
-			value = focus_base;
-		}
+		return value
 	}
-	// Actual focus calculation starts here
-	else if (focus_base2 == 0 || focus_base == focus_base2) {
-		value = focus_base;
+	else if (focus_base2 == 0 || focus_base == focus_base2) { // Actual focus calculation starts here
+		return focus_base;
 	}
-	else {
-		value = zone->random.Int(focus_base, focus_base2);
-	}
-	return value;
+
+	return zone->random.Int(focus_base, focus_base2);
 }
