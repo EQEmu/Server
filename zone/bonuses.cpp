@@ -2750,10 +2750,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_BlockNextSpellFocus:
-				new_bonus->BlockNextSpell = true;
-				break;
-
 			case SE_NegateSpellEffect:
 				new_bonus->NegateEffects = true;
 				break;
@@ -3827,8 +3823,7 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 		case SE_Fc_Spell_Damage_Pct_IncomingPC:
 			return focusFcSpellDamagePctIncomingPC;
 		case SE_BlockNextSpellFocus:
-			//return focusBlockNextSpell;
-			return 0; //This is calculated as an actual bonus
+			return focusBlockNextSpell;
 		case SE_FcTwincast:
 			return focusTwincast;
 		case SE_SympatheticProc:
