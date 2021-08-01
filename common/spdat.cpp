@@ -1224,6 +1224,57 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_Ff_CasterClass:
 	case SE_Ff_Same_Caster: 
 	case SE_Proc_Timer_Modifier:
+	case SE_TwinCastBlocker:
+	case SE_Fc_CastTimeAmt:
+	case SE_Fc_CastTimeMod2:
+	case SE_Ff_DurationMax:
+	case SE_Ff_Endurance_Max:
+	case SE_Ff_Endurance_Min:
+	case SE_Ff_ReuseTimeMin:
+	case SE_Ff_ReuseTimeMax:
+	case SE_Ff_Value_Min:
+	case SE_Ff_Value_Max:
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool IsFocusLimit(int spa)
+{
+	switch (spa) {
+	case SE_LimitMaxLevel:
+	case SE_LimitResist:
+	case SE_LimitTarget:
+	case SE_LimitEffect:
+	case SE_LimitSpellType:
+	case SE_LimitSpell:
+	case SE_LimitMinDur:
+	case SE_LimitInstant:
+	case SE_LimitMinLevel:
+	case SE_LimitCastTimeMin:
+	case SE_LimitCastTimeMax:
+	case SE_LimitCombatSkills:
+	case SE_LimitManaMin:
+	case SE_LimitSpellGroup:
+	case SE_LimitManaMax:
+	case SE_LimitSpellClass:
+	case SE_LimitSpellSubclass:
+	case SE_LimitClass:
+	case SE_LimitRace:
+	case SE_LimitCastingSkill:
+	case SE_LimitUseMin:
+	case SE_LimitUseType:
+	case SE_Ff_Override_NotFocusable:
+	case SE_Ff_CasterClass:
+	case SE_Ff_Same_Caster:
+	case SE_Ff_DurationMax:
+	case SE_Ff_Endurance_Max:
+	case SE_Ff_Endurance_Min:
+	case SE_Ff_ReuseTimeMin:
+	case SE_Ff_ReuseTimeMax:
+	case SE_Ff_Value_Min:
+	case SE_Ff_Value_Max:
 		return true;
 	default:
 		return false;
