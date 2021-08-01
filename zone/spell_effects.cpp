@@ -4519,9 +4519,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				else {
-					LimitInclude[0] = true;
+					LimitInclude[IncludeExistsSELimitResist] = true;
 					if (spell.resisttype == base1) { // Include
-						LimitInclude[1] = true;
+						LimitInclude[IncludeFoundSELimitResist] = true;
 					}
 				}
 				break;
