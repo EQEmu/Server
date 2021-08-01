@@ -1205,6 +1205,7 @@ public:
 	bool CanPurchaseAlternateAdvancementRank(AA::Rank *rank, bool check_price, bool check_grant);
 	int GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in);
 	void ExpendAlternateAdvancementCharge(uint32 aa_id);
+	void ExpendAlternateAdvancement(uint32 aa_id);
 	void CalcAABonuses(StatBonuses* newbon);
 	void ApplyAABonuses(const AA::Rank &rank, StatBonuses* newbon);
 	bool CheckAATimer(int timer);

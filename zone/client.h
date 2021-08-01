@@ -1555,7 +1555,7 @@ public:
 
 	void ApplyWeaponsStance1();
 	void ApplyWeaponsStance();
-	void TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 aa_id);
+	void TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_id, int rank_id=0);
 	bool UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id);
 
 	void TripInterrogateInvState() { interrogateinv_flag = true; }

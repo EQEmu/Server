@@ -1244,8 +1244,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 
 	if (use_toggle_passive_hotkey) {
-
-		ExpendAlternateAdvancementCharge(ability->id);
+		TogglePassiveAA(*rank, rank->spell, ability->id);
 	}
 	else {
 		// Bards can cast instant cast AAs while they are casting another song
@@ -1297,23 +1296,33 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 	for(auto &iter : aa_ranks) {
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
+		Shout("1 Expend Start [aa_id %i] iter.first [%i]", aa_id, iter.first);
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);//Find first stored value per aa ranks which is rankid....
+		
+
 		if(ability && aa_id == ability->id) {
+			Shout("iter.second [%i] iter.second.second [%i]", iter.second, iter.second.second);
 			if(iter.second.second > 0) {
+				Shout("3 Expend Loop get ID %i", iter.second.second);
 				iter.second.second -= 1;
+
+				Shout("3 Expend Loop -1 get ID %i [We want 0]", iter.second.second);
 
 				if(iter.second.second == 0) {
 					if(IsClient()) {
 						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
 						if(r) {
 							CastToClient()->GetEPP().expended_aa += r->cost;
+							Shout("xExpend2");
 						}
 					}
 					if (IsClient()) {
 						auto c = CastToClient();
 						c->RemoveExpendedAA(ability->first_rank_id);
+						Shout("xExpend3");
 					}
 					aa_ranks.erase(iter.first);
+					Shout("xExpend4");
 				}
 
 				if(IsClient()) {
@@ -1806,7 +1815,7 @@ bool Mob::CheckAATimer(int timer)
 	return false;
 }
 
-void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 aa_id)
+void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_id, int rank_id)
 {
 	/*
 	Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
@@ -1823,20 +1832,32 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 aa_id)
 
 	//Can add any specific use cases below.
 	int effect = 0;
-
+	int base1 = 0;
+	Shout("ToggleAA: Ability ID: %i", ability_id);
 	for (const auto &e : rank.effects) {
 		effect = e.effect_id;
+		base1 = e.base1;
 
 		switch (effect) {
 
 		case SE_Weapon_Stance:
-			if (weaponstance.aabonus_enabled) {
-				weaponstance.aabonus_enabled = false;
-				Message(Chat::Spells, "You disable an ability."); //Message live gives you.
-				BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
-				return;
+
+			int enabled_rank = e.base1; //Weapon stance trigger spellid is present in effect
+			Shout("Check Enabled %i", enabled_rank);
+			if (enabled_rank) {
+				if (weaponstance.aabonus_enabled) {
+					Shout("Put Rank Backward -1 Current Rank %i", rank.id);
+					ExpendAlternateAdvancement(ability_id); //uint32 aa_id
+					PurchaseAlternateAdvancementRank(rank.prev_id);
+					weaponstance.aabonus_enabled = false;
+					Message(Chat::Spells, "You disable an ability."); //Message live gives you.
+					BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+					return;
+				}
 			}
 			else {
+				Shout("Advance Rank Forward +1 Current Rank %i", rank.id);
+				PurchaseAlternateAdvancementRank(rank.next_id);
 				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
 				weaponstance.aabonus_enabled = true;
 				ApplyWeaponsStance();
@@ -1844,6 +1865,7 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 aa_id)
 			}
 		}
 	}
+	Shout("TogglePassiveAA: No action taken");
 }
 
 bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
@@ -1862,4 +1884,46 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
 		}
 	}
 	return false;
+}
+
+void Mob::ExpendAlternateAdvancement(uint32 aa_id) {
+	for(auto &iter : aa_ranks) {
+		Shout("1 Expend Start [aa_id %i] iter.first [%i]", aa_id, iter.first);
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);//Find first stored value per aa ranks which is rankid....
+		
+
+		if(ability && aa_id == ability->id) {
+			Shout("iter.second [%i] iter.second.second [%i] iter.second.first [%i]", iter.second, iter.second.second, iter.second.first);
+			if(ability) {
+
+				if(ability) {
+					if(IsClient()) {
+						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
+
+						if(r) {
+							Shout("Get expended_aa %i", CastToClient()->GetEPP().expended_aa);
+							CastToClient()->GetEPP().expended_aa += r->cost;
+							Shout("Get expended_aa + r->cast[%i] = [%i]", r->cost, CastToClient()->GetEPP().expended_aa);
+						}
+					}
+					if (IsClient()) {
+						auto c = CastToClient();
+						c->RemoveExpendedAA(ability->first_rank_id);
+						Shout("dbase query: RemoveExpendedAA %i", ability->first_rank_id);//Remove complete here
+					}
+					aa_ranks.erase(iter.first);
+					Shout("aa.rank.erase %i", iter.first);
+				}
+
+				if(IsClient()) {
+					Client *c = CastToClient();
+					c->SaveAA();
+					c->SendAlternateAdvancementPoints(); //Then when it updates?
+					Shout("save and update client");
+				}
+			}
+
+			return;
+		}
+	}
 }
