@@ -5121,7 +5121,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	const SPDat_Spell_Struct &focus_spell = spells[focus_id];
 	const SPDat_Spell_Struct &spell       = spells[spell_id];
 
-	int16  value           = 0;
+	int32  value           = 0;
 	int    lvlModifier     = 100;
 	int    spell_level     = 0;
 	int    lvldiff         = 0;
@@ -6114,16 +6114,17 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
-	int16 realTotal3 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
+	int32 realTotal3 = 0;
 
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2 || type == focusResistRate))
+	if (RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2 || type == focusResistRate)) {
 		rand_effectiveness = true;
+	}
 
 	//Check if item focus effect exists for the client.
 	if (itembonuses.FocusEffects[type]){
@@ -6386,8 +6387,8 @@ int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 
 int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
 
 	bool rand_effectiveness = false;
 
