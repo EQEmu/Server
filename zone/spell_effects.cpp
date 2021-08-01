@@ -4421,11 +4421,11 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CalcBonuses();
 }
 
-int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
+int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 {
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
-	int16 value = 0;
+	int32 value = 0;
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
@@ -4927,7 +4927,7 @@ int16 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 //given an item/spell's focus ID and the spell being cast, determine the focus ammount, if any
 //assumes that spell_id is not a bard spell and that both ids are valid spell ids
-int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid)
+int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, bool best_focus, uint16 casterid)
 {
 	/*
 	'this' is always the caster of the spell_id, most foci check for effects on the caster, however some check for effects on the target.
@@ -4940,11 +4940,11 @@ int16 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	const SPDat_Spell_Struct &focus_spell = spells[focus_id];
 	const SPDat_Spell_Struct &spell = spells[spell_id];
 
-	int16 value = 0;
+	int32 value = 0;
 	int lvlModifier = 100;
 	int spell_level = 0;
 	int lvldiff = 0;
-	uint32 Caston_spell_id = 0;
+	int32 Caston_spell_id = 0;
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Ie. Add damage to fire OR ice
@@ -5625,7 +5625,7 @@ uint16 Client::GetSympatheticFocusEffect(focusType type, uint16 spell_id) {
 	return 0;
 }
 
-int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
+int32 Client::GetFocusEffect(focusType type, uint16 spell_id)
 {
 	if (IsBardSong(spell_id) && type != focusFcBaseEffects && type != focusSpellDuration)
 		return 0;
@@ -5633,9 +5633,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (spells[spell_id].not_focusable)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
-	int16 realTotal3 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
+	int32 realTotal3 = 0;
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
@@ -5649,9 +5649,9 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		//item focus
 		for (int x = EQ::invslot::EQUIPMENT_BEGIN; x <= EQ::invslot::EQUIPMENT_END; x++)
@@ -5812,14 +5812,14 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	if (spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid = 0;
-		uint16 focusspell_tracker = 0;
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
 		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
@@ -5865,7 +5865,7 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	// AA Focus
 	if (aabonuses.FocusEffects[type]){
 
-		int16 Total3 = 0;
+		int32 Total3 = 0;
 
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
@@ -5895,20 +5895,20 @@ int16 Client::GetFocusEffect(focusType type, uint16 spell_id)
 	//by reagent conservation for obvious reasons.
 
 	//Non-Live like feature to allow for an additive focus bonus to be applied from foci that are placed in worn slot. (No limit checks)
-	int16 worneffect_bonus = 0;
+	int32 worneffect_bonus = 0;
 	if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
 		worneffect_bonus = itembonuses.FocusEffectsWorn[type];
 
 	return realTotal + realTotal2 + realTotal3 + worneffect_bonus;
 }
 
-int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
+int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	if (spells[spell_id].not_focusable)
 		return 0;
 
-	int16 realTotal = 0;
-	int16 realTotal2 = 0;
+	int32 realTotal = 0;
+	int32 realTotal2 = 0;
 	bool rand_effectiveness = false;
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
@@ -5921,9 +5921,9 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 		const EQ::ItemData* TempItem = nullptr;
 		const EQ::ItemData* UsedItem = nullptr;
 		uint16 UsedFocusID = 0;
-		int16 Total = 0;
-		int16 focus_max = 0;
-		int16 focus_max_real = 0;
+		int32 Total = 0;
+		int32 focus_max = 0;
+		int32 focus_max_real = 0;
 
 		//item focus
 		for (int i = EQ::invslot::EQUIPMENT_BEGIN; i <= EQ::invslot::EQUIPMENT_END; i++){
@@ -5969,14 +5969,14 @@ int16 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 	if (RuleB(Spells, NPC_UseFocusFromSpells) && spellbonuses.FocusEffects[type]){
 
 		//Spell Focus
-		int16 Total2 = 0;
-		int16 focus_max2 = 0;
-		int16 focus_max_real2 = 0;
+		int32 Total2 = 0;
+		int32 focus_max2 = 0;
+		int32 focus_max_real2 = 0;
 
 		int buff_tracker = -1;
 		int buff_slot = 0;
-		uint16 focusspellid = 0;
-		uint16 focusspell_tracker = 0;
+		int32 focusspellid = 0;
+		int32 focusspell_tracker = 0;
 		int buff_max = GetMaxTotalSlots();
 		for (buff_slot = 0; buff_slot < buff_max; buff_slot++) {
 			focusspellid = buffs[buff_slot].spellid;
@@ -7179,7 +7179,7 @@ void Mob::TryTriggerThreshHold(int32 damage, int effect_id,  Mob* attacker){
 	}
 }
 
-void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
+void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 {
 	/*
 	This function checks for incoming spells on a mob, if they meet the criteria for focus SE_Fc_Cast_Spell_on_Land then
@@ -7193,7 +7193,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	if (!caster)
 		return;
 
-	uint32 trigger_spell_id = 0;
+	int32 trigger_spell_id = 0;
 
 	//Step 1: Check this focus effect exists on the mob.
 	if (spellbonuses.FocusEffects[focusFcCastSpellOnLand]) {
@@ -7230,7 +7230,7 @@ void Mob::CastSpellOnLand(Mob* caster, uint32 spell_id)
 	}
 }
 
-bool Mob::ApplyFocusProcLimiter(uint32 spell_id, int buffslot)
+bool Mob::ApplyFocusProcLimiter(int32 spell_id, int buffslot)
 {
 	if (buffslot < 0)
 		return false;
