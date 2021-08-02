@@ -1295,37 +1295,27 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 }
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
-	for(auto &iter : aa_ranks) {
-		Shout("1 Expend Start [aa_id %i] iter.first [%i]", aa_id, iter.first);
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);//Find first stored value per aa ranks which is rankid....
-		
-
-		if(ability && aa_id == ability->id) {
-			Shout("iter.second [%i] iter.second.second [%i]", iter.second, iter.second.second);
-			if(iter.second.second > 0) {
-				Shout("3 Expend Loop get ID %i", iter.second.second);
+	for (auto &iter : aa_ranks) {
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
+		if (ability && aa_id == ability->id) {
+			if (iter.second.second > 0) {
 				iter.second.second -= 1;
 
-				Shout("3 Expend Loop -1 get ID %i [We want 0]", iter.second.second);
-
-				if(iter.second.second == 0) {
-					if(IsClient()) {
+				if (iter.second.second == 0) {
+					if (IsClient()) {
 						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
-						if(r) {
+						if (r) {
 							CastToClient()->GetEPP().expended_aa += r->cost;
-							Shout("xExpend2");
 						}
 					}
 					if (IsClient()) {
 						auto c = CastToClient();
 						c->RemoveExpendedAA(ability->first_rank_id);
-						Shout("xExpend3");
 					}
 					aa_ranks.erase(iter.first);
-					Shout("xExpend4");
 				}
 
-				if(IsClient()) {
+				if (IsClient()) {
 					Client *c = CastToClient();
 					c->SaveAA();
 					c->SendAlternateAdvancementPoints();
@@ -1971,3 +1961,4 @@ void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
 	SendAlternateAdvancementStats();
 	CalcBonuses();
 }
+
