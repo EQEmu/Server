@@ -605,7 +605,7 @@ public:
 	inline double GetEXPModifier(uint32 zone_id) const { return database.GetEXPModifier(CharacterID(), zone_id); };
 	inline void SetAAEXPModifier(uint32 zone_id, double aa_modifier) { database.SetAAEXPModifier(CharacterID(), zone_id, aa_modifier); };
 	inline void SetEXPModifier(uint32 zone_id, double exp_modifier) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier); };
-	
+
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
@@ -1024,7 +1024,7 @@ public:
 	const bool IsPortExempted() const { return m_port_exemption; }
 	const bool IsSenseExempted() const { return m_sense_exemption; }
 	const bool IsAssistExempted() const { return m_assist_exemption; }
-	void CheatDetected(CheatTypes CheatType, glm::vec3 from, glm::vec3 to = glm::vec3());
+	void CheatDetected(CheatTypes cheat_type, glm::vec3 from, glm::vec3 to = glm::vec3());
 	bool m_shadow_step_exemption;
 	bool m_knock_back_exemption;
 	bool m_port_exemption;
