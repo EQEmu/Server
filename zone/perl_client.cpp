@@ -2111,6 +2111,19 @@ XS(XS_Client_IsStanding)
 	XSRETURN(1);
 }
 
+XS(XS_Client_Sit); 
+XS(XS_Client_Sit) {
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: Client::Sit(THIS)"); 
+    {
+        Client *THIS;
+        VALIDATE_THIS_IS_CLIENT;
+        THIS->Sit();
+    }
+    XSRETURN_EMPTY;
+}
+
 XS(XS_Client_IsSitting); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_IsSitting) {
 	dXSARGS;
@@ -5702,6 +5715,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetTitleSuffix"), XS_Client_SetTitleSuffix, file, "$$;$");
 	newXSproto(strcpy(buf, "SetZoneFlag"), XS_Client_SetZoneFlag, file, "$$");
 	newXSproto(strcpy(buf, "SilentMessage"), XS_Client_SilentMessage, file, "$$");
+	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
 	newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");

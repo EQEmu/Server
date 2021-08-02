@@ -94,6 +94,11 @@ void Lua_Client::Duck() {
 	self->Duck();
 }
 
+void Lua_Client::Sit() {
+	Lua_Safe_Call_Void();
+	self->Sit();
+}
+
 void Lua_Client::DyeArmorBySlot(uint8 slot, uint8 red, uint8 green, uint8 blue) {
 	Lua_Safe_Call_Void();
 	self->DyeArmorBySlot(slot, red, green, blue);
@@ -2080,7 +2085,7 @@ void Lua_Client::SetAAEXPModifier(uint32 zone_id, double aa_modifier) {
 
 void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier) {
 	Lua_Safe_Call_Void();
-	self->SetEXPModifier(zone_id, exp_modifier);	
+	self->SetEXPModifier(zone_id, exp_modifier);
 }
 
 void Lua_Client::AddLDoNLoss(uint32 theme_id) {
@@ -2181,6 +2186,7 @@ luabind::scope lua_register_client() {
 		.def("SetAFK", (void(Lua_Client::*)(uint8))&Lua_Client::SetAFK)
 		.def("GetAnon", (int(Lua_Client::*)(void))&Lua_Client::GetAnon)
 		.def("SetAnon", (void(Lua_Client::*)(uint8))&Lua_Client::SetAnon)
+		.def("Sit", (void(Lua_Client::*)(void))&Lua_Client::Sit)
 		.def("Duck", (void(Lua_Client::*)(void))&Lua_Client::Duck)
 		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
 		.def("DyeArmorBySlot", (void(Lua_Client::*)(uint8,uint8,uint8,uint8,uint8))&Lua_Client::DyeArmorBySlot)
