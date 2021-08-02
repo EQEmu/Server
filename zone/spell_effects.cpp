@@ -2950,6 +2950,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_Weapon_Stance: {
+				if (IsClient()) {
+					CastToClient()->ApplyWeaponsStance();
+				}
+				break;
+			}
+
 			case SE_PersistentEffect:
 				MakeAura(spell_id);
 				break;
@@ -3214,7 +3221,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Fc_Cast_Spell_On_Land:
 			case SE_Ff_CasterClass:
 			case SE_Ff_Same_Caster:
-			case SE_Weapon_Stance:
 			case SE_AddExtraAttackPct_1h_Primary:
 			case SE_AddExtraAttackPct_1h_Secondary:
 			case SE_Skill_Base_Damage_Mod:

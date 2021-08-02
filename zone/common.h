@@ -106,6 +106,8 @@
 #define PET_BUTTON_SPELLHOLD	9
 
 #define AURA_HARDCAP		2
+#define WEAPON_STANCE_TYPE_MAX 2
+
 
 typedef enum {	//focus types
 	focusSpellHaste = 1,
@@ -542,7 +544,7 @@ struct StatBonuses {
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
-	int32   WeaponStance[3];					// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
+	int32   WeaponStance[WEAPON_STANCE_TYPE_MAX +1];// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -692,7 +694,6 @@ struct WeaponStance_Struct {
 constexpr uint16 WEAPON_STANCE_TYPE_2H = 0;
 constexpr uint16 WEAPON_STANCE_TYPE_SHIELD = 1;
 constexpr uint16 WEAPON_STANCE_TYPE_DUAL_WIELD = 2;
-constexpr uint16 WEAPON_STANCE_TYPE_MAX = 2;
 
 typedef struct
 {
