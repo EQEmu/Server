@@ -540,6 +540,8 @@ struct StatBonuses {
 	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
 	int32   Damage_Taken_Position_Mod[2];		// base = percent melee damage reduction base2 0=back 1=front. [0]Back[1]Front
 	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
+	int32   Damage_Taken_Position_Amt[2];		// base = flat amt melee damage reduction base2 0=back 1=front. [0]Back[1]Front
+	int32   Melee_Damage_Position_Amt[2];		// base = flat amt melee damage increase base2 0=back 1=front. [0]Back[1]Front
 	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
 	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
@@ -650,8 +652,8 @@ namespace SBIndex {
 	constexpr uint16 ROOT_BUFFSLOT                          = 1; // SPA 99
 	constexpr uint16 RUNE_AMOUNT                            = 0; // SPA 55
 	constexpr uint16 RUNE_BUFFSLOT                          = 1; // SPA 78
-	constexpr uint16 POSITIONAL_DAMAGE_MOD                  = 0; // SPA 503-506
-	constexpr uint16 POSITIONAL_LOCATION                    = 1; // SPA 503-506
+	constexpr uint16 POSITION_BACK							= 0; // SPA 503-506
+	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
 	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
 	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427

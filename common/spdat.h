@@ -871,9 +871,9 @@ typedef enum {
 #define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
 #define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
 #define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
-//#define SE_Melee_Damage_Position_Amt	504 //
+#define SE_Melee_Damage_Position_Amt	504 // implemented - modify melee damage by amt if done from Front or Behind
 #define SE_Damage_Taken_Position_Mod	505 // implemented - mitigate melee damage by pct if dmg taken from Front or Behind
-//#define SE_Damage_Taken_Position_Amt	506 //
+#define SE_Damage_Taken_Position_Amt	506 // implemented - modify melee damage by amt if dmg taken from Front or Behind
 #define SE_Fc_Amplify_Mod				507 // implemented, @Fc, On Caster, damage-heal-dot mod pct, base: pct
 #define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor

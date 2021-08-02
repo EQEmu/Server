@@ -3193,7 +3193,7 @@ int32 Mob::ReduceDamage(int32 damage)
 	if (damage < 1)
 		return DMG_RUNE;
 
-	if (spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && spellbonuses.MeleeRune[SBIndex::POSITIONAL_DAMAGE_MOD] >= 0)
+	if (spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && spellbonuses.MeleeRune[SBIndex::RUNE_BUFFSLOT] >= 0)
 		damage = RuneAbsorb(damage, SE_Rune);
 
 	if (damage < 1)
@@ -3318,10 +3318,10 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 			return 0;
 
 		//Regular runes absorb spell damage (except dots) - Confirmed on live.
-		if (spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && spellbonuses.MeleeRune[SBIndex::POSITIONAL_DAMAGE_MOD] >= 0)
+		if (spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && spellbonuses.MeleeRune[SBIndex::RUNE_BUFFSLOT] >= 0)
 			damage = RuneAbsorb(damage, SE_Rune);
 
-		if (spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && spellbonuses.AbsorbMagicAtt[SBIndex::POSITIONAL_DAMAGE_MOD] >= 0)
+		if (spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] >= 0)
 			damage = RuneAbsorb(damage, SE_AbsorbMagicAtt);
 
 		if (damage < 1)
@@ -5109,7 +5109,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 	uint32 buff_max = GetMaxTotalSlots();
 	if (type == SE_Rune) {
 		for (uint32 slot = 0; slot < buff_max; slot++) {
-			if (slot == spellbonuses.MeleeRune[SBIndex::POSITIONAL_DAMAGE_MOD] && spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
+			if (slot == spellbonuses.MeleeRune[SBIndex::RUNE_BUFFSLOT] && spellbonuses.MeleeRune[SBIndex::RUNE_AMOUNT] && buffs[slot].melee_rune && IsValidSpell(buffs[slot].spellid)) {
 				int melee_rune_left = buffs[slot].melee_rune;
 
 				if (melee_rune_left > damage)
@@ -5133,7 +5133,7 @@ int32 Mob::RuneAbsorb(int32 damage, uint16 type)
 
 	else {
 		for (uint32 slot = 0; slot < buff_max; slot++) {
-			if (slot == spellbonuses.AbsorbMagicAtt[SBIndex::POSITIONAL_DAMAGE_MOD] && spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)) {
+			if (slot == spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_BUFFSLOT] && spellbonuses.AbsorbMagicAtt[SBIndex::RUNE_AMOUNT] && buffs[slot].magic_rune && IsValidSpell(buffs[slot].spellid)) {
 				int magic_rune_left = buffs[slot].magic_rune;
 				if (magic_rune_left > damage)
 				{
@@ -5219,7 +5219,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	// Seems the crit message is generated before some of them :P
 
 	// worn item +skill dmg, SPA 220, 418. Live has a normalized version that should be here too
-	hit.min_damage += GetSkillDmgAmt(hit.skill);
+	hit.min_damage += GetSkillDmgAmt(hit.skill) + GetPositionalDmgAmt(defender);
 
 	// shielding mod2
 	if (defender->itembonuses.MeleeMitigation)
@@ -5276,7 +5276,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	int pct_damage_reduction = defender->GetSkillDmgTaken(hit.skill, opts) + defender->GetPositionalDmgTaken(this);
 
-	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
+	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill)) + defender->GetPositionalDmgTaken(this);
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }

@@ -1539,6 +1539,26 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Damage_Taken_Position_Amt:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+
+			newbon->Damage_Taken_Position_Amt[base2] += base1;
+			break;
+		}
+
+		case SE_Melee_Damage_Position_Amt:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+
+			newbon->Melee_Damage_Position_Amt[base2] += base1;
+			break;
+		}
+
 		case SE_DS_Mitigation_Amount:
 			newbon->DS_Mitigation_Amount += base1;
 			break;
@@ -3458,6 +3478,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Damage_Taken_Position_Amt:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+
+				new_bonus->Damage_Taken_Position_Amt[base2] += effect_value;
+				break;
+			}
+
+			case SE_Melee_Damage_Position_Amt:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+
+				new_bonus->Melee_Damage_Position_Amt[base2] += effect_value;
+				break;
+			}
+
 			case SE_DS_Mitigation_Amount:
 				new_bonus->DS_Mitigation_Amount += effect_value;
 				break;
@@ -5062,21 +5102,39 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Melee_Damage_Position_Mod:
-					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]    = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]  = effect_value;
-					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]   = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]      = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]    = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]    = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]   = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]      = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]    = effect_value;
 					break;
 
 				case SE_Damage_Taken_Position_Mod:
-					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]    = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]  = effect_value;
-					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]   = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]      = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]    = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]    = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]   = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]      = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]    = effect_value;
+					break;
+
+				case SE_Melee_Damage_Position_Amt:
+					spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					break;
+
+				case SE_Damage_Taken_Position_Amt:
+					spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
 					break;
 
 
