@@ -1830,8 +1830,11 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		Note: Live uses a spell 'Disable Ability' ID 46164 to trigger a script to do the AA rank changes. At present time it is not coded to require that, any spell id works.
 		Note: Discovered a bug on ROF2, where when you buy first rank of an AA with a hotkey, it will always display the title of the second rank in the database. Be aware. No easy fix.
 
-		Dev Note(Kayen 8/1/21): The method of setting the Disabled rank by checking for AA rank cost based on simplicity. If an alternative method is needed in the future when we have 
-		live AA's that naturually use this effect, the code can easily be altered to check whatever makes sense in the tables. 	Many ways to do this, this servers as a frame work for future development.
+		Dev Note(Kayen 8/1/21): The method of setting the Disabled rank by checking for an effect_id = Weaponstance with no base1 value is based on simplicity. I do not think this
+		is how live does it exactly. This effect can be accomplished by checking different variables or combinations of variables. At present time we do not have AA in database that use this 
+		effect, in the future if we have live AA that do have this effect we can likely narrow down the best way to do this based on the actual live data. This is just a framework.
+		On live this is likely tied to custom code based the specific spell_id used for the hotkey. I did not want to require making custom spell or hardcoded spell id just to use this. It is
+		unlikely they set any data in the aa_ranks table for the disabled effect.
 
 		Instructions for how to make the AA - assuming a basic level of knowledge of how AA's work.
 		- aa_abilities table : Create new ability with a hotkey, type 3, zero charges
@@ -1852,6 +1855,9 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 2, 476, 174,1);
 								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 3, 476, 172,2);
 
+		Warning: If you want to design an AA that only uses one weapon type to trigger, like will only apply buff if Shield. Do not include data for other types. Never have a base value=0
+		in the Enabled rank.
+
 	*/
 	int effect = 0;
 	int base1 = 0;
@@ -1865,19 +1871,9 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 
 		case SE_Weapon_Stance:
 
-			int is_disabled = rank.cost; //TRUE when your disabled COST > 0, FALSE when Enabled Cost = 0.
+			int is_enabled = base1; //TRUE when your enabled base1=spell_id, FALSE when disabled base1=0.
 
-			if (is_disabled) {
-				
-				//Enable
-				TogglePurchaseAlternativeAdvancementRank(rank.next_id);
-				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
-				weaponstance.aabonus_enabled = true;
-				ApplyWeaponsStance();
-				return;
-				
-			}
-			else {
+			if (is_enabled) {
 				
 				//Disable
 				ResetAlternateAdvancementRank(ability_id);
@@ -1885,6 +1881,15 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 				weaponstance.aabonus_enabled = false;
 				Message(Chat::Spells, "You disable an ability."); //Message live gives you.
 				BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+				return;
+			}
+			else {
+				
+				//Enable
+				TogglePurchaseAlternativeAdvancementRank(rank.next_id);
+				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
+				weaponstance.aabonus_enabled = true;
+				ApplyWeaponsStance();
 				return;
 				
 			}
