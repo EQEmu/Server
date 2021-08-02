@@ -412,7 +412,7 @@ Mob::Mob(
 	weaponstance.enabled = false;
 	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied
 	weaponstance.itembonus_enabled = false;		//Set when bonus is applied
-	weaponstance.aabonus_enabled = true;		//Controlled by function TogglePassiveAA
+	weaponstance.aabonus_enabled = false;		//Controlled by function TogglePassiveAA
 	weaponstance.spellbonus_buff_spell_id = 0;
 	weaponstance.itembonus_buff_spell_id = 0;
 	weaponstance.aabonus_buff_spell_id = 0;

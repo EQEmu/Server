@@ -1553,12 +1553,11 @@ public:
 
 	void ShowNumHits(); // work around function for numhits not showing on buffs
 
-	void ApplyWeaponsStance1();
 	void ApplyWeaponsStance();
-	void TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_id, int rank_id=0);
-	bool UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id);
+	void TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ability_id);
+	bool UseTogglePassiveHotkey(const AA::Rank &rank);
 	void TogglePurchaseAlternativeAdvancementRank(int rank_id);
-	void ExpendAlternateAdvancement(uint32 aa_id);
+	void ResetAlternateAdvancementRank(uint32 aa_id);
 
 	void TripInterrogateInvState() { interrogateinv_flag = true; }
 	bool GetInterrogateInvState() { return interrogateinv_flag; }

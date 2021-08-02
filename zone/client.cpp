@@ -10255,40 +10255,29 @@ void Client::ApplyWeaponsStance()
 		also removed (ie, removing an item that has worn effect with weapon stance, or clicking off a buff). If client no longer has/never had
 		any spells/item/aa bonuses with weapon stance effect this function will only do a simple bool check.
 
+		Note: Live like behavior is once you have the triggered buff you can manually click it off to remove it. Swaping any items in inventory will
+		reapply it automatically.
+
 	 	Only buff spells should be used as triggered spell effect. IsBuffSpell function also checks spell id validity.
 		WeaponStance bonus arrary: 0=2H Weapon 1=Shield 2=Dualweild
 
 		Toggling ON or OFF
 			- From spells, just remove the Primary buff that contains the WeaponStance effect in it.
 			- For items with worn effect, unequip the item.
-			- For AA abilities, need to make sure any AA made with this also has a Hotkey. The hotkey will serve as toggle on/off, checked in TogglePassiveAA in aa.cpp.
+			- For AA abilities, a hotkey is used to Enable and Disable the effect. See. Client::TogglePassiveAlternativeAdvancement in aa.cpp for extensive details.
+			
 		Rank
 			- Most important for AA, but if you have more than one of WeaponStance effect for a given type, the spell trigger buff will apply whatever has the highest
-		rank value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
+		'rank' value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
 
-	If you have a weapons stance bonus from at least one bonus type, each time you change weapons this function will ensure the correct
-	associated buffs are applied, and previous buff is removed. If your weapon stance bonus is completely removed it will, ensure buff is
-	also removed (ie, removing an item that has worn effect with weapon stance, or clicking off a buff). If client no longer has/never had
-	any spells/item/aa bonuses with weapon stance effect this function will only do a simple bool check.
-	Only buff spells should be used as triggered spell effect. IsBuffSpell function also checks spell id validity.
-	WeaponStance bonus arrary: 0=2H Weapon 1=Shield 2=Dualweild
-	Toggling ON or OFF
-	- From spells, just remove the Primary buff that contains the WeaponStance effect in it.
-	- For items with worn effect, unequip the item.
-	- For AA abilities, need to make sure any AA made with this also has a Hotkey. The hotkey will serve as toggle on/off, checked in TogglePassiveAA in aa.cpp.
-	Rank
-	- Most important for AA, but if you have more than one of WeaponStance effect for a given type, the spell trigger buff will apply whatever has the highest
-	rank value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
-	
-	See 
+		When creating weapon stance effects, you do not need to use all three types. For example, can make an effect where you only get a buff from equiping shield.
 
 	*/
 
 	if (!IsWeaponStanceEnabled()) {
 		return;
 	}
-
-
+	
 	bool enabled           = false;
 	bool item_bonus_exists = false;
 	bool aa_bonus_exists   = false;
@@ -10468,5 +10457,8 @@ void Client::ApplyWeaponsStance()
 	// If no bonuses remain present, prevent additional future checks until new bonus is applied.
 	if (!enabled) {
 		SetWeaponStanceEnabled(false);
+		weaponstance.aabonus_enabled = false;
+		weaponstance.itembonus_enabled = false;
+		weaponstance.spellbonus_enabled = false;
 	}
 }
