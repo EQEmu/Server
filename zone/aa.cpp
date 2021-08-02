@@ -1818,22 +1818,45 @@ bool Mob::CheckAATimer(int timer)
 void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_id, int rank_id)
 {
 	/*
-	Live passive AA effects that can be toggled by hotkey include in the passive effect a trigger on cast of spell "Disable Ability" id 46164
-	The spell "Disable Ability" contains no actual SPA id or data, thus it must be hardcoded to do this effect when triggered.
-	Since this spell does not exist on our current database (7/29/21) and we don't have innate AA yet who would naturally use it. Will hold off on implementation using it.
+		Certain AA, like Weapon Stance line use a special toggle Hotkey to enable or disable the AA's passive abilities.
+		This is occurs by doing the following. Each 'rank' of Weapon Stance is actually 2 actual ranks.
+		First rank is always the Disabled version which cost X amount of AA. Second rank is the Enabled version which cost 0 AA.
+		When you buy the first rank, you make a hotkey that on live say 'Weapon Stance Disabled', if you clik that it then BUYS the
+		next rank of AA (cost 0) which switches the hotkey to 'Enabled Weapon Stance' and you are given the passive buff effects.
+		If you click the Enabled hotkey, it causes you to lose an AA rank and once again be disabled. Thus, you are switching between
+		two AA ranks. Thefore when creating an AA using this ability, you need generate both ranks. Follow the same pattern for additional ranks.
+
+		Note: On live the Enabled rank is shown having a Charge of 1, while Disabled rank has no charges. Our current code doesn't support that. Do not use charges.
+		Note: Live uses a spell 'Disable Ability' ID 46164 to trigger a script to do the AA rank changes. At present time it is not coded to require that, any spell id works.
+		Note: Discovered a bug on ROF2, where when you buy first rank of an AA with a hotkey, it will always display the title of the second rank in the database. Be aware. No easy fix.
+		
+		Dev Note(Kayen 8/1/21): The method of setting the Disabled rank by checking for an effect_id = Weaponstance with no base1 value is based on simplicity. If an alternative 
+		method is needed in the future when we have live AA's that naturually use this effect, the code can easily be altered to check whatever makes sense in the tables. Many ways to do this.
+
+		Instructions for how to make the AA - assuming a basic level of knowledge of how AA's work.
+		- aa_abilities table : Create new ability with a hotkey, type 3, zero charges
+		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
+							[Enabled rank] Second rank, should have a cost = 0, Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
+							*Recommend if doing custom, just make the hotkey titled 'Toggle Ability' and use for both.
+
+		- aa_rank_effects table : [Disabled rank] First rank set effect_id = 457 (weapon stance), then set base1 = 0 and base2=0 (Isn't checked doesnt matter) do this for slot 1,2,3.
+								  [Enabled rank]  Second rank set effect_id = 457 (weapon stance), slot 1,2,3, base1= spell triggers, base= weapon type (0=2H,1=SH,2=DW), for slot 1,2,3
+
+			Example SQL			-Disabled
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 1, 476, 0,0);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 2, 476, 0,1);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 3, 476, 0,2);
+
+								-Enabled
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 1, 476, 145,0);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 2, 476, 174,1);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 3, 476, 172,2);
+
 	*/
-	//ExpendAlternateAdvancementCharge(ability->id);
 
-	//If have effect then it is enabled.
-	//First rank you get has no effect in it, if you click it you learn second rank which has effect (Key says disabled), if you click hotkey with second rank you are set back to rank one (key says Enabled)
-	//thus clicking key toggles it to other effect.
-	//TO DO THIS WILL MAKE NON FUNCTIONAL EFFECT BE WEAPONSTANCE BUT WITH NO VALUES.
-	//THUS WE CAN CHECK BASE1 to tell if this is active version or not, then if not active, buy next rank. IF active, then lose rank. then prob recalc bonus
-
-	//Can add any specific use cases below.
 	int effect = 0;
 	int base1 = 0;
-	Shout("ToggleAA: Ability ID: %i", ability_id);
+
 	for (const auto &e : rank.effects) {
 		effect = e.effect_id;
 		base1 = e.base1;
@@ -1842,13 +1865,12 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 
 		case SE_Weapon_Stance:
 
-			int enabled_rank = e.base1; //Weapon stance trigger spellid is present in effect
-			Shout("Check Enabled %i", enabled_rank);
+			int enabled_rank = e.base1; //We use if Weapon Stance base1 has a spell id set to check if enabled.
+
 			if (enabled_rank) {
 				if (weaponstance.aabonus_enabled) {
-					Shout("Put Rank Backward -1 Current Rank %i", rank.id);
-					ExpendAlternateAdvancement(ability_id); //uint32 aa_id
-					//PurchaseAlternateAdvancementRank(rank.prev_id);
+
+					ExpendAlternateAdvancement(ability_id);
 					TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
 					weaponstance.aabonus_enabled = false;
 					Message(Chat::Spells, "You disable an ability."); //Message live gives you.
@@ -1857,8 +1879,7 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 				}
 			}
 			else {
-				Shout("Advance Rank Forward +1 Current Rank %i", rank.id);
-				//PurchaseAlternateAdvancementRank(rank.next_id);
+
 				TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
 				weaponstance.aabonus_enabled = true;
@@ -1867,13 +1888,13 @@ void Client::TogglePassiveAA(const AA::Rank &rank, int spell_id, uint32 ability_
 			}
 		}
 	}
-	Shout("TogglePassiveAA: No action taken");
-	
-
-
 }
 
 bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
+
+	/*
+		Effects that can use a toggle system. To be expanded upon as needed.
+	*/
 
 	int effect = 0;
 
@@ -1892,42 +1913,30 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank, int spell_id) {
 }
 
 void Client::ExpendAlternateAdvancement(uint32 aa_id) {
+	
+	/*
+		Resets your AA to baseline
+	*/
+
 	for(auto &iter : aa_ranks) {
-		Shout("1 Expend Start [aa_id %i] iter.first [%i]", aa_id, iter.first);
-		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);//Find first stored value per aa ranks which is rankid....
-		
+
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
 
 		if(ability && aa_id == ability->id) {
-			Shout("iter.second [%i] iter.second.second [%i] iter.second.first [%i]", iter.second, iter.second.second, iter.second.first);
-
-			AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
-
-			if(r) {
-				Shout("Get expended_aa %i", CastToClient()->GetEPP().expended_aa);
-				CastToClient()->GetEPP().expended_aa += r->cost;
-				Shout("Get expended_aa + r->cast[%i] = [%i]", r->cost, CastToClient()->GetEPP().expended_aa);
-			}
-
 			RemoveExpendedAA(ability->first_rank_id);
-			Shout("dbase query: RemoveExpendedAA %i", ability->first_rank_id);//Remove complete here
-
 			aa_ranks.erase(iter.first);
-			Shout("aa.rank.erase %i", iter.first);
-				
 			SaveAA();
-			SendAlternateAdvancementPoints(); //Then when it updates?
-			Shout("save and update client");
-
-			
-
+			SendAlternateAdvancementPoints();
 			return;
 		}
 	}
 }
 
 void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
-
-	//Stripped down version of purchasing AA. Will give no messages.
+	
+	/*
+		Stripped down version of purchasing AA. Will give no messages.
+	*/
 
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
 	if (!rank) {
