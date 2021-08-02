@@ -1883,6 +1883,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].override_crit_chance = atoi(row[217]);
 		sp[tempid].aemaxtargets = atoi(row[218]);
 		sp[tempid].no_heal_damage_item_mod = atoi(row[219]);
+		sp[tempid].spell_class = atoi(row[221]);
+		sp[tempid].spell_subclass = atoi(row[222]);
 		sp[tempid].persistdeath = atoi(row[224]) != 0;
 		sp[tempid].min_dist = atof(row[227]);
 		sp[tempid].min_dist_mod = atof(row[228]);

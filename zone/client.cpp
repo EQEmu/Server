@@ -2010,6 +2010,10 @@ void Client::Stand() {
 	SetAppearance(eaStanding, false);
 }
 
+void Client::Sit() {
+    SetAppearance(eaSitting, false);
+}
+
 void Client::ChangeLastName(const char* in_lastname) {
 	memset(m_pp.last_name, 0, sizeof(m_pp.last_name));
 	strn0cpy(m_pp.last_name, in_lastname, sizeof(m_pp.last_name));
