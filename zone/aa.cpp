@@ -1857,8 +1857,11 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		//Enable
 		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
+		
+		//Add Check here for weapon stance specifically
 		weaponstance.aabonus_enabled = true;
 		ApplyWeaponsStance();
+		
 		return;
 	}
 	else {
@@ -1867,6 +1870,8 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		ResetAlternateAdvancementRank(ability_id);
 		TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
 		Message(Chat::Spells, "You disable an ability."); //Message live gives you. Should come from spell.
+
+		//Add Check here for weapon stance specifically
 		weaponstance.aabonus_enabled = false;
 		BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
 	
@@ -1879,30 +1884,20 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 	/*
 		Effects that can use a toggle system. To be expanded upon as needed.
 		Disabled rank will spell containg the SE_Buy_AA_Rank effect to return true.
-		Enabled rank will have SE_Weapon_Stance to return true.
-		Note: On live the enabled rank is Expendable with Charge 1, thus if that worked, you don't need to check it here.
-		our AA system doesn't support that.
+		Enabled rank should contain a spell, a passive and cost 0. We check the first two before calling the function.
+
+		Note: On live the enabled rank is Expendable with Charge 1.
+
+		We have already confirmed the rank spell is valid before this function is called.
 	*/
 
 
-	if (rank.spell && IsEffectInSpell(rank.spell, SE_Buy_AA_Rank))
+	if (IsEffectInSpell(rank.spell, SE_Buy_AA_Rank)) {//Disabled Rank should contain this effect.
 		return true;
-
-	int effect = 0;
-
-	for (const auto &e : rank.effects) {
-		effect = e.effect_id;
-		effect = e.effect_id;
-
-		switch (effect) {
-
-		case SE_Weapon_Stance:
-			return true;
-		default:
-			return false;
-		}
 	}
-	return false;
+	else if (rank.cost == 0) { //Enabled Rank should cost zero and not have spell with SE_Buy_AA_Rank
+		return true;
+	}
 }
 
 bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int effect_id) {
