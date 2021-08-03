@@ -1559,6 +1559,7 @@ public:
 	bool UseTogglePassiveHotkey(const AA::Rank &rank);
 	void TogglePurchaseAlternativeAdvancementRank(int rank_id);
 	void ResetAlternateAdvancementRank(uint32 aa_id);
+	bool IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int effect_id);
 
 	void TripInterrogateInvState() { interrogateinv_flag = true; }
 	bool GetInterrogateInvState() { return interrogateinv_flag; }

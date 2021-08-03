@@ -3236,6 +3236,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_AddExtraAttackPct_1h_Primary:
 			case SE_AddExtraAttackPct_1h_Secondary:
 			case SE_Skill_Base_Damage_Mod:
+			case SE_Buy_AA_Rank:
 
 			{
 				break;

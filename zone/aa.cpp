@@ -1849,41 +1849,28 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		in the Enabled rank.
 
 	*/
-	int effect = 0;
-	int base1 = 0;
 
-	for (const auto &e : rank.effects) {
-		
-		effect = e.effect_id;
-		base1 = e.base1;
+	bool enable_next_rank = IsEffectInSpell(rank.spell, SE_Buy_AA_Rank);
 
-		switch (effect) {
+	if (enable_next_rank) {
 
-		case SE_Weapon_Stance:
+		//Enable
+		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
+		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
+		weaponstance.aabonus_enabled = true;
+		ApplyWeaponsStance();
+		return;
+	}
+	else {
 
-			int is_enabled = base1; //TRUE when your enabled base1=spell_id, FALSE when disabled base1=0.
-
-			if (is_enabled) {
-				
-				//Disable
-				ResetAlternateAdvancementRank(ability_id);
-				TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
-				weaponstance.aabonus_enabled = false;
-				Message(Chat::Spells, "You disable an ability."); //Message live gives you.
-				BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
-				return;
-			}
-			else {
-				
-				//Enable
-				TogglePurchaseAlternativeAdvancementRank(rank.next_id);
-				Message(Chat::Spells, "You enable an ability."); //Message live gives you.
-				weaponstance.aabonus_enabled = true;
-				ApplyWeaponsStance();
-				return;
-				
-			}
-		}
+		//Disable
+		ResetAlternateAdvancementRank(ability_id);
+		TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
+		Message(Chat::Spells, "You disable an ability."); //Message live gives you. Should come from spell.
+		weaponstance.aabonus_enabled = false;
+		BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+	
+		return;
 	}
 }
 
@@ -1891,11 +1878,20 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 
 	/*
 		Effects that can use a toggle system. To be expanded upon as needed.
+		Disabled rank will spell containg the SE_Buy_AA_Rank effect to return true.
+		Enabled rank will have SE_Weapon_Stance to return true.
+		Note: On live the enabled rank is Expendable with Charge 1, thus if that worked, you don't need to check it here.
+		our AA system doesn't support that.
 	*/
+
+
+	if (rank.spell && IsEffectInSpell(rank.spell, SE_Buy_AA_Rank))
+		return true;
 
 	int effect = 0;
 
 	for (const auto &e : rank.effects) {
+		effect = e.effect_id;
 		effect = e.effect_id;
 
 		switch (effect) {
@@ -1904,6 +1900,17 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 			return true;
 		default:
 			return false;
+		}
+	}
+	return false;
+}
+
+bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int effect_id) {
+
+	for (const auto &e : rank.effects) {
+
+		if (e.effect_id == effect_id) {
+			return true;
 		}
 	}
 	return false;
