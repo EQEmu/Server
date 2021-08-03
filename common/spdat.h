@@ -844,16 +844,11 @@ typedef enum {
 #define SE_Ff_Value_Min					479 // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value
 #define SE_Ff_Value_Max					480 // implemented, @Ff, Max base value of a spell that can be focused, base: spells to be focused base1 value
 #define SE_Fc_Cast_Spell_On_Land		481 // implemented, @Fc, On Target, cast spell if hit by spell, base: chance pct, limit: spellid
+#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
 #define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
 #define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // implemented, @Fc, On Target, damage taken flat amt, base: amt	
 #define SE_Ff_CasterClass				485 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells must be specified class(es). base1: class(es), Note: Set multiple classes same as would for items
 #define SE_Ff_Same_Caster				486 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells, base1: 0=Must be different caster 1=Must be same caster
-#define SE_Fc_Cast_Spell_On_Land		481 // Implemented - [FOCUS] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
-#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
-#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - [FOCUS] modifies incoming spell damage by percent
-#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - [FOCUS] modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
-#define SE_Ff_CasterClass				485 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.
-#define SE_Ff_Same_Caster				486 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells 0=Must be different caster 1=Must be same caster
 //#define SE_Extend_Tradeskill_Cap		487 //
 //#define SE_Defender_Melee_Force_Pct_PC	488 //
 //#define SE_Worn_Endurance_Regen_Cap	489 //
