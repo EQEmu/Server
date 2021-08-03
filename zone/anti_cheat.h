@@ -57,6 +57,8 @@ public:
 		m_time_since_last_memorization = 0;
 		m_time_since_last_position_check = 0;
 		m_time_since_last_warp_detection.Start();
+		m_time_since_last_movement_history.Start(70000);
+		m_warp_counter = 0;
 	}
 	void set_client(Client* cli);
 	void set_exempt_status(ExemptionType type, bool v);
@@ -64,9 +66,10 @@ public:
 	void cheat_detected(CheatTypes type, glm::vec3 position1, glm::vec3 position2 = glm::vec3(0, 0, 0));
 	void movement_check(glm::vec3 updated_position);
 	void movement_check(uint32 time_between_checks = 1000);
-	void start_mem_check();
-	void restart_mem_check();
+	void check_mem_timer();
 	void process_movement_history(const EQApplicationPacket* app);
+	void process_spawn_apperance(uint16 spawn_id, uint16 type, uint32 parameter);
+	void process_item_verify_request(int32 slot_id, uint32 target_id);
 	void client_process();
 private:
 	bool m_exemption[ExemptionType::MAX_EXEMPTIONS];
@@ -76,6 +79,9 @@ private:
 	Client* m_target;
 	uint32 m_time_since_last_position_check;
 	uint32 m_time_since_last_memorization;
+	uint32 m_time_since_last_action;
 	Timer m_time_since_last_warp_detection;
+	Timer m_time_since_last_movement_history;
+	uint32 m_warp_counter;
 };
 #endif ANTICHEAT_H

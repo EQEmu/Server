@@ -174,6 +174,9 @@ void anti_cheat::cheat_detected(CheatTypes type, glm::vec3 position1, glm::vec3 
 }
 
 void anti_cheat::movement_check(glm::vec3 updated_position) {
+	if (m_time_since_last_movement_history.GetRemainingTime() == 0)
+		cheat_detected(MQWarp, updated_position);	// someone is spoofing.
+
 	float dist = DistanceNoZ(m_target->GetPosition(), updated_position);
 	uint32 cur_time = Timer::GetCurrentTime();
 	if (dist == 0) {
@@ -236,11 +239,7 @@ void anti_cheat::movement_check(uint32 time_between_checks) {
 	}
 }
 
-void anti_cheat::start_mem_check() {
-	m_time_since_last_memorization = Timer::GetCurrentTime();
-}
-
-void anti_cheat::restart_mem_check() {
+void anti_cheat::check_mem_timer() {
 	if (m_target == nullptr)
 		return;
 	if (m_time_since_last_memorization - Timer::GetCurrentTime() <= 1) {
@@ -251,25 +250,39 @@ void anti_cheat::restart_mem_check() {
 }
 
 void anti_cheat::process_movement_history(const EQApplicationPacket* app) {
-	if (get_exempt_status(Port))
-		return;
+	// if they haven't sent sent the packet within this time... they are probably spoofing... 
+	// linux users reported that they don't send this packet at all but i can't prove they don't so i'm not sure if thats a fake or not.
+	m_time_since_last_movement_history.Start(70000);
 	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
 	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
+		glm::vec3 to = glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z);
 		switch (m_MovementHistory[index].type) {
 		case UpdateMovementType::ZoneLine:
+			if (get_exempt_status(Port))
+				cheat_detected(MQWarp, to); // spoofing detected.
 			set_exempt_status(Port, true);
-			// break from the switch case
 			break;
 		case UpdateMovementType::TeleportA:
-			if (index != 0)
-				cheat_detected(MQWarpAbsolute,
-					glm::vec3(m_MovementHistory[index - 1].X, m_MovementHistory[index - 1].Y, m_MovementHistory[index - 1].Z),
-					glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z)
-				);
+			if (index != 0 || get_exempt_status(Port)) {
+				glm::vec3 from = glm::vec3(m_MovementHistory[index - 1].X, m_MovementHistory[index - 1].Y, m_MovementHistory[index - 1].Z);
+				cheat_detected(MQWarpAbsolute, from, to);
+			}
 			set_exempt_status(Port, false);
 			break;
 		}
 	}
+}
+
+void anti_cheat::process_spawn_apperance(uint16 spawn_id, uint16 type, uint32 parameter) {
+	if (type == AT_Anim && parameter == ANIM_SIT)
+		m_time_since_last_memorization = Timer::GetCurrentTime();
+	else if (spawn_id == 0 && type == AT_AntiCheat)
+		m_time_since_last_action = parameter;
+}
+
+void anti_cheat::process_item_verify_request(int32 slot_id, uint32 target_id) {
+	if (slot_id == -1 && m_warp_counter != target_id)
+		m_warp_counter = target_id;
 }
 
 void anti_cheat::client_process() {

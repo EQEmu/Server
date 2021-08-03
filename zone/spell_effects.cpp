@@ -4345,7 +4345,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 
 			case SE_MovementSpeed:
 			{
-				CastToClient()->eq_anti_cheat.movement_check();
+				if (IsClient())
+					CastToClient()->eq_anti_cheat.movement_check();
 			}
 		}
 	}

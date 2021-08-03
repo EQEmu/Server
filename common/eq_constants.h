@@ -65,6 +65,7 @@
 #define AT_FindBits 46		// set FindBits, whatever those are!
 #define AT_TextureType 48	// TextureType
 #define AT_FacePick 49		// Turns off face pick window? maybe ...
+#define AT_AntiCheat 51		// sent by the client randomly telling the server how long since last action has occured
 #define AT_GuildShow 52		// this is what MQ2 call sit, not sure
 #define AT_Offline 53		// Offline mode
 

@@ -8765,6 +8765,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	slot_id = request->slot;
 	target_id = request->target;
 
+	eq_anti_cheat.process_item_verify_request(request->slot, request->target);
 
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
@@ -9614,7 +9615,7 @@ return;
 
 void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
-	eq_anti_cheat.restart_mem_check();
+	eq_anti_cheat.check_mem_timer();
 	OPMemorizeSpell(app);
 	return;
 }
@@ -13501,6 +13502,8 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)app->pBuffer;
 
+	eq_anti_cheat.process_spawn_apperance(sa->spawn_id, sa->type, sa->parameter);
+
 	if (sa->spawn_id != GetID())
 		return;
 
@@ -13543,7 +13546,6 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			BindWound(this, false, true);
 			tmSitting = Timer::GetCurrentTime();
 			BuffFadeBySitModifier();
-			eq_anti_cheat.start_mem_check();
 		}
 		else if (sa->parameter == ANIM_CROUCH) {
 			if (!UseBardSpellLogic())
