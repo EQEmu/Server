@@ -253,17 +253,17 @@ void anti_cheat::process_movement_history(const EQApplicationPacket* app) {
 	// if they haven't sent sent the packet within this time... they are probably spoofing... 
 	// linux users reported that they don't send this packet at all but i can't prove they don't so i'm not sure if thats a fake or not.
 	m_time_since_last_movement_history.Start(70000);
+	if (get_exempt_status(Port))
+		return;
 	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
 	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
 		glm::vec3 to = glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z);
 		switch (m_MovementHistory[index].type) {
 		case UpdateMovementType::ZoneLine:
-			if (get_exempt_status(Port))
-				cheat_detected(MQWarp, to); // spoofing detected.
 			set_exempt_status(Port, true);
 			break;
 		case UpdateMovementType::TeleportA:
-			if (index != 0 || get_exempt_status(Port)) {
+			if (index != 0) {
 				glm::vec3 from = glm::vec3(m_MovementHistory[index - 1].X, m_MovementHistory[index - 1].Y, m_MovementHistory[index - 1].Z);
 				cheat_detected(MQWarpAbsolute, from, to);
 			}
