@@ -4672,7 +4672,7 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 {
 	if(IsClient())
 	{
-		CastToClient()->SetKnockBackExemption(true);
+		CastToClient()->eq_anti_cheat.set_exempt_status(KnockBack, true);
 		auto outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 

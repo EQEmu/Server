@@ -2919,7 +2919,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
-				SetAssistExemption(true);
+				eq_anti_cheat.set_exempt_status(Assist, true);
 				eid->entity_id = new_target->GetID();
 			} else {
 				eid->entity_id = 0;
@@ -4498,93 +4498,8 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
-	glm::vec3 cli_updated_position = glm::vec3(cx, cy, cz);
-	float dist = DistanceNoZ(m_Position, cli_updated_position);
-	uint32 cur_time = Timer::GetCurrentTime();
+	eq_anti_cheat.movement_check(glm::vec3(cx, cy, cz));
 
-	if (dist == 0) {
-		if (m_distance_since_last_position_check > 0.0) {
-			if ((cur_time - m_time_since_last_position_check) > 0) {
-				float runs = ceil(GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f));
-				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
-					if (IsShadowStepExempted()) {
-						if (m_distance_since_last_position_check > 800.0f) {
-							CheatDetected(MQWarpShadowStep, m_Position, cli_updated_position);
-						}
-					}
-					else if (IsKnockBackExempted()) {
-						if (speed > 30.0f) {
-							CheatDetected(MQWarpKnockBack, m_Position, cli_updated_position);
-						}
-					}
-					else if (!IsPortExempted()) {
-						if (speed > (runs * 1.5)) {
-							m_time_since_last_position_check = cur_time;
-							m_distance_since_last_position_check = 0.0f;
-							CheatDetected(MQWarp, m_Position, cli_updated_position);
-						}
-						else {
-							CheatDetected(MQWarpLight, m_Position, cli_updated_position);
-						}
-						LogCheatDetail("{} moving with a speed {}. Expected speed: {}", GetName(), speed, runs);
-					}
-				}
-				SetShadowStepExemption(false);
-				SetKnockBackExemption(false);
-				SetPortExemption(false);
-				m_time_since_last_position_check = cur_time;
-				m_distance_since_last_position_check = 0.0f;
-				m_cheat_detect_moved = false;
-			}
-		}
-		else {
-			m_time_since_last_position_check = Timer::GetCurrentTime();
-			m_cheat_detect_moved = false;
-		}
-	}
-	else {
-		m_distance_since_last_position_check += dist;
-		m_cheat_detect_moved = true;
-		if (m_time_since_last_position_check == 0) {
-			m_time_since_last_position_check = Timer::GetCurrentTime();
-		}
-		else {
-			if ((cur_time - m_time_since_last_position_check) > 2500) {
-				float runs = ceil(GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f));
-				float speed = (m_distance_since_last_position_check * 100) / (float)(cur_time - m_time_since_last_position_check);
-				if (speed > runs && GetRunspeed() != 0 && !GetGMSpeed()) {
-					if (IsShadowStepExempted()) {
-						if (m_distance_since_last_position_check > 800.0f) {
-							CheatDetected(MQWarpShadowStep, m_Position, cli_updated_position);
-						}
-					}
-					else if (IsKnockBackExempted()) {
-						if (speed > 30.0f) {
-							CheatDetected(MQWarpKnockBack, m_Position, cli_updated_position);
-						}
-					}
-					else if (!IsPortExempted()) {
-						if (speed > (runs * 1.5)) {
-							m_time_since_last_position_check = cur_time;
-							m_distance_since_last_position_check = 0.0f;
-							CheatDetected(MQWarp, m_Position, cli_updated_position);
-						}
-						else {
-							CheatDetected(MQWarpLight, m_Position, cli_updated_position);
-						}
-						LogCheatDetail("{} moving with a speed {}. Expected speed: {} Distance: {}", GetName(), speed, runs, dist);
-					}
-				}
-				SetShadowStepExemption(false);
-				SetKnockBackExemption(false);
-				SetPortExemption(false);
-				m_time_since_last_position_check = cur_time;
-				m_distance_since_last_position_check = 0.0f;
-			}
-		}
-	}
-	
 	if (IsDraggingCorpse())
 		DragCorpses();
 
@@ -9699,10 +9614,7 @@ return;
 
 void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
-	// no reason you could actually get a 0 or 1
-	if ((m_time_since_last_memorization - Timer::SetCurrentTime()) <= 1) {
-		CheatDetected(MQFastMem, glm::vec3(GetX(), GetY(), GetZ()));
-	}
+	eq_anti_cheat.restart_mem_check();
 	OPMemorizeSpell(app);
 	return;
 }
@@ -13631,7 +13543,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 			BindWound(this, false, true);
 			tmSitting = Timer::GetCurrentTime();
 			BuffFadeBySitModifier();
-			m_time_since_last_memorization = Timer::GetCurrentTime();
+			eq_anti_cheat.start_mem_check();
 		}
 		else if (sa->parameter == ANIM_CROUCH) {
 			if (!UseBardSpellLogic())
@@ -14042,10 +13954,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (IsAssistExempted())
-			{
+			else if (eq_anti_cheat.get_exempt_status(Assist)) {
 				GetTarget()->IsTargeted(1);
-				SetAssistExemption(false);
+				eq_anti_cheat.set_exempt_status(Assist, false);
 				return;
 			}
 			else if (GetTarget()->IsClient())
@@ -14063,15 +13974,13 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				SetTarget((Mob*)nullptr);
 				return;
 			}
-			else if (IsPortExempted())
-			{
+			else if (eq_anti_cheat.get_exempt_status(Port)) {
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (IsSenseExempted())
-			{
+			else if (eq_anti_cheat.get_exempt_status(Sense)) {
 				GetTarget()->IsTargeted(1);
-				SetSenseExemption(false);
+				eq_anti_cheat.set_exempt_status(Sense, false);
 				return;
 			}
 			else if (IsXTarget(GetTarget()))
@@ -15315,37 +15224,7 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 	}
 	return;
 }
-/// <summary>
-/// handles OP_FloatListThing, this is actually called OP_MovementHistoryList
-/// </summary>
-/// <param name="app">Generic Application Packet</param>
+
 void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
-	if (IsPortExempted())
-		return;
-	// Push the EQ Application packet onto m_MovementHistory
-	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
-	// Iterate through the packet, since the packet is dynamic sized we need to figure out what the size of the array is by getting the packet size and dividing it by the size of what entries are suppose to be
-	// entrie size is 17 bytes long
-	//(there will be a remaining 1 byte left over at the end signifying that is the end of the packet)
-	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
-		// switch case to determain what code we execute based off the entry's type See EQ::UpdateMovementType for more detail on the different types
-		switch (m_MovementHistory[index].type) {
-			// there are some client side built in "zone lines" (IE BoThunder, Felwithb, and erudint)
-		case EQ::UpdateMovementType::ZoneLine:
-			// this sets the port exemption for these client side built in zone lines
-			SetPortExemption(true);
-			// break from the switch case
-			break;
-			// this is sent any time a player moves instantly from point a to point b. most cases its client only side zone lines
-		case EQ::UpdateMovementType::TeleportA:
-			// for warps this is always index 1 or higher, but lets do a sanity check anyways
-			if (index != 0)
-				CheatDetected(MQWarpAbsolute,	// we found a possible hacker, we will pass this to CheatDetected to figure out if there is an exemption in place currently or if this is a hack
-					glm::vec3(m_MovementHistory[index-1].X, m_MovementHistory[index-1].Y, m_MovementHistory[index-1].Z), // passing the previous index gives us the location for where the person warped from.
-					glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z)			// passing the current index gives us the location for where the person warped to.
-				);
-			SetPortExemption(false); // setting the port exemption to false, we shouldn't need it anymore.
-			break; // break from this switch statement.
-		}
-	}
+	eq_anti_cheat.process_movement_history(app);
 }

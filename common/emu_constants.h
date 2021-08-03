@@ -326,18 +326,6 @@ namespace EQ
 		};
 	}; // namespace consent
 
-	enum UpdateMovementType : uint8 {
-		Collision = 1,
-		TeleportB,
-		TeleportA,
-		ZoneLine,
-		Unknown0x5,
-		Unknown0x6,
-		SpellA, // Titanium - UF
-		Unknown0x8,
-		SpellB // Used in RoF+
-	};
-
 } /*EQEmu*/
 
 #endif /*COMMON_EMU_CONSTANTS_H*/
