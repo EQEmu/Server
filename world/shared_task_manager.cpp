@@ -1194,6 +1194,17 @@ void SharedTaskManager::RemoveActiveInvitation(int64 shared_task_id, int64 chara
 	);
 }
 
+void SharedTaskManager::RemoveActiveInvitationByCharacterID(uint32_t character_id)
+{
+	m_active_invitations.erase(
+		std::remove_if(m_active_invitations.begin(), m_active_invitations.end(),
+			[&](SharedTaskActiveInvitation const &i) {
+				return i.character_id == character_id;
+			}
+		), m_active_invitations.end()
+	);
+}
+
 void SharedTaskManager::CreateDynamicZone(SharedTask *shared_task, DynamicZone &dz_request)
 {
 	std::vector<DynamicZoneMember> dz_members;

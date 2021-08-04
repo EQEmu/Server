@@ -73,6 +73,7 @@ public:
 	void QueueActiveInvitation(int64 shared_task_id, int64 character_id);
 	bool IsInvitationActive(uint32 shared_task_id, uint32 character_id);
 	void RemoveActiveInvitation(int64 shared_task_id, int64 character_id);
+	void RemoveActiveInvitationByCharacterID(uint32_t character_id);
 
 	void CreateDynamicZone(SharedTask* s, DynamicZone& dz_request);
 
