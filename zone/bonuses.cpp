@@ -1583,6 +1583,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Worn_Endurance_Regen_Cap:
+			newbon->ItemEnduranceRegenCap += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3474,6 +3478,14 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->Pet_Add_Atk += effect_value;
 				break;
 
+			case SE_Worn_Endurance_Regen_Cap:
+				new_bonus->ItemEnduranceRegenCap += effect_value;
+				break;
+
+			case SE_ItemManaRegenCapIncrease:
+				new_bonus->ItemManaRegenCap += effect_value;
+				break;
+
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 
@@ -4824,6 +4836,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.ItemHPRegenCap = effect_value;
 					aabonuses.ItemHPRegenCap = effect_value;
 					itembonuses.ItemHPRegenCap = effect_value;
+					break;
+
+				case SE_Worn_Endurance_Regen_Cap:
+					spellbonuses.ItemEnduranceRegenCap = effect_value;
+					aabonuses.ItemEnduranceRegenCap = effect_value;
+					itembonuses.ItemEnduranceRegenCap = effect_value;
 					break;
 
 				case SE_OffhandRiposteFail:

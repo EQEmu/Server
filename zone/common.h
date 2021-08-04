@@ -545,6 +545,7 @@ struct StatBonuses {
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
+	int32	ItemEnduranceRegenCap;				// modify endurance regen cap
 
 
 	// AAs
