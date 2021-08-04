@@ -1583,6 +1583,15 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Double_Melee_Round:
+		{
+			if (newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] < base1) {
+				newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = base1;
+				newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] = base2;
+			}
+			break;
+		}
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -2433,6 +2442,20 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] < effect_value) {
 					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]   = effect_value;
 					new_bonus->ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_NUM_ATKS] = base2 ? base2 : 1;
+				}
+				break;
+			}
+
+			case SE_Double_Melee_Round:
+			{
+				if (AdditiveWornBonus) {
+					new_bonus->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] += effect_value;
+					new_bonus->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] += base2;
+				}
+
+				if (new_bonus->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] < effect_value) {
+					new_bonus->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = effect_value;
+					new_bonus->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] = base2;
 				}
 				break;
 			}
@@ -4360,6 +4383,12 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					spellbonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE] = effect_value;
 					aabonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]    = effect_value;
 					itembonuses.ExtraAttackChanceSecondary[SBIndex::EXTRA_ATTACK_CHANCE]  = effect_value;
+					break;
+
+				case SE_Double_Melee_Round:
+					spellbonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = effect_value;
+					aabonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = effect_value;
+					itembonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = effect_value;
 					break;
 
 				case SE_PercentXPIncrease:

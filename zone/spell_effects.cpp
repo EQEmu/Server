@@ -3228,6 +3228,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Ff_Value_Max:
 			case SE_AddExtraAttackPct_1h_Primary:
 			case SE_AddExtraAttackPct_1h_Secondary:
+			case SE_Double_Melee_Round:
 			case SE_Skill_Base_Damage_Mod:
 
 			{

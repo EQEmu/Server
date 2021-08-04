@@ -840,6 +840,10 @@ public:
 	bool CanFocusUseRandomEffectivenessByType(focusType type);
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
 	
+	bool TryDoubleMeleeRoundEffect();
+	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
+	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }
+	
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
@@ -1489,6 +1493,7 @@ protected:
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
+	bool use_double_melee_round_dmg_bonus;
 	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;
