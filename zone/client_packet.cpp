@@ -413,6 +413,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_YellForHelp] = &Client::Handle_OP_YellForHelp;
 	ConnectedOpcodes[OP_ZoneChange] = &Client::Handle_OP_ZoneChange;
 	ConnectedOpcodes[OP_ResetAA] = &Client::Handle_OP_ResetAA;
+	ConnectedOpcodes[OP_UnderWorld] = &Client::Handle_OP_UnderWorld;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -15229,4 +15230,18 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
 	eq_anti_cheat.process_movement_history(app);
+}
+
+void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
+	UnderWorld* m_UnderWorld = (UnderWorld*)app->pBuffer;
+	if (app->size < sizeof(UnderWorld))
+	{
+		LogDebug("Size mismatch in OP_UnderWorld, expected {}, got [{}]", sizeof(UnderWorld), app->size);
+		DumpPacket(app);
+		return;
+	}
+	auto dist = Distance(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld), glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
+	eq_anti_cheat.movement_check(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
+	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0)
+		eq_anti_cheat.set_exempt_status(Port, true);
 }

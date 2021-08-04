@@ -1912,7 +1912,9 @@ ZonePoint* Zone::GetClosestZonePoint(const glm::vec3& location, uint32 to, Clien
 	if ((zone->HasWaterMap() && !zone->watermap->InZoneLine(glm::vec3(client->GetPosition()))) || (!zone->HasWaterMap() && closest_dist > 400.0f && closest_dist < max_distance2))
 	{
 		if (client) {
-			client->eq_anti_cheat.cheat_detected(MQZoneUnknownDest, location);
+			if (!client->eq_anti_cheat.get_exempt_status(Port)) {
+				client->eq_anti_cheat.cheat_detected(MQZoneUnknownDest, location);
+			}
 		}
 		LogInfo("WARNING: Closest zone point for zone id [{}] is [{}], you might need to update your zone_points table if you dont arrive at the right spot", to, closest_dist);
 		LogInfo("<Real Zone Points>. [{}]", to_string(location).c_str());

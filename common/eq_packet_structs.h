@@ -5539,6 +5539,14 @@ struct UpdateMovementEntry {
 	/* 17 */
 };
 
+struct UnderWorld {
+	/* 00 */	int spawn_id;
+	/* 04 */	float y;
+	/* 08 */	float x;
+	/* 12 */	float z;
+	/* 16 */
+};
+
 // Restore structure packing to default
 #pragma pack()
 
