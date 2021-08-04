@@ -1816,29 +1816,27 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		If you click the Enabled hotkey, it causes you to lose an AA rank and once again be disabled. Thus, you are switching between
 		two AA ranks. Thefore when creating an AA using this ability, you need generate both ranks. Follow the same pattern for additional ranks.
 
+		IMPORTANT! The toggle system can be used to Enable or Disable ANY passive AA. You just need to follow the instructions on how to create it.
+		Example: Enable or Disable a buff that gives a large hate modifier. Play may Enable when tanking and Disable when DPS ect.
+
 		Note: On live the Enabled rank is shown having a Charge of 1, while Disabled rank has no charges. Our current code doesn't support that. Do not use charges.
 		Note: Live uses a spell 'Disable Ability' ID 46164 to trigger a script to do the AA rank changes. At present time it is not coded to require that, any spell id works.
 		Note: Discovered a bug on ROF2, where when you buy first rank of an AA with a hotkey, it will always display the title of the second rank in the database. Be aware. No easy fix.
 
-		Dev Note(Kayen 8/1/21): The method of setting the Disabled rank by checking for an effect_id = Weaponstance with no base1 value is based on simplicity. I do not think this
-		is how live does it exactly. This effect can be accomplished by checking different variables or combinations of variables. At present time we do not have AA in database that use this 
-		effect, in the future if we have live AA that do have this effect we can likely narrow down the best way to do this based on the actual live data. This is just a framework.
-		On live this is likely tied to custom code based the specific spell_id used for the hotkey. I did not want to require making custom spell or hardcoded spell id just to use this. It is
-		unlikely they set any data in the aa_ranks table for the disabled effect.
+		Dev Note(Kayen 8/1/21): The system as set up is very similar to live, with exception that live gives the Enabled rank 1 Charge. The code here emulates what happens when a
+		charge would be expended.
 
 		Instructions for how to make the AA - assuming a basic level of knowledge of how AA's work.
 		- aa_abilities table : Create new ability with a hotkey, type 3, zero charges
-		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
+		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, MUST SET A SPELL CONTAINING EFFECT SE_Buy_AA_Rank(SPA 472), set a short recast timer.
 							[Enabled rank] Second rank, should have a cost = 0, Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
-							*Recommend if doing custom, just make the hotkey titled 'Toggle Ability' and use for both.
+							*Recommend if doing custom, just make the hotkey titled 'Toggle <Ability Name>' and use for both.
 
-		- aa_rank_effects table : [Disabled rank] First rank set effect_id = 457 (weapon stance), then set base1 = 0 and base2=0 (Isn't checked doesnt matter) do this for slot 1,2,3.
+		- aa_rank_effects table : [Disabled rank] No data needed in the aa_ranks_effect table
 								  [Enabled rank]  Second rank set effect_id = 457 (weapon stance), slot 1,2,3, base1= spell triggers, base= weapon type (0=2H,1=SH,2=DW), for slot 1,2,3
 
 			Example SQL			-Disabled
-								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 1, 476, 0,0);
-								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 2, 476, 0,1);
-								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20002, 3, 476, 0,2);
+								DO NOT ADD any data to the aa_rank_effects for this rank_id
 
 								-Enabled
 								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 1, 476, 145,0);
@@ -1858,10 +1856,13 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
 		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
 		
-		//Add Check here for weapon stance specifically
-		weaponstance.aabonus_enabled = true;
-		ApplyWeaponsStance();
+		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
 		
+		//Add checks for any special cases for toggle.
+		if (IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
+			weaponstance.aabonus_enabled = true;
+			ApplyWeaponsStance();
+		}
 		return;
 	}
 	else {
@@ -1871,10 +1872,11 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 		TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
 		Message(Chat::Spells, "You disable an ability."); //Message live gives you. Should come from spell.
 
-		//Add Check here for weapon stance specifically
-		weaponstance.aabonus_enabled = false;
-		BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
-	
+		//Add checks for any special cases for toggle.
+		if (IsEffectinAlternateAdvancementRankEffects(rank, SE_Weapon_Stance)) {
+			weaponstance.aabonus_enabled = false;
+			BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+		}
 		return;
 	}
 }
@@ -1882,9 +1884,8 @@ void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ab
 bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 
 	/*
-		Effects that can use a toggle system. To be expanded upon as needed.
-		Disabled rank will spell containg the SE_Buy_AA_Rank effect to return true.
-		Enabled rank should contain a spell, a passive and cost 0. We check the first two before calling the function.
+		Disabled rank needs a rank spell containing the SE_Buy_AA_Rank effect to return true.
+		Enabled rank checks to see if the prior rank contains a rank spell with SE_Buy_AA_Rank, if so true.
 
 		Note: On live the enabled rank is Expendable with Charge 1.
 
@@ -1892,12 +1893,17 @@ bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
 	*/
 
 
-	if (IsEffectInSpell(rank.spell, SE_Buy_AA_Rank)) {//Disabled Rank should contain this effect.
+	if (IsEffectInSpell(rank.spell, SE_Buy_AA_Rank)) {//Checked when is Disabled.
 		return true;
 	}
-	else if (rank.cost == 0) { //Enabled Rank should cost zero and not have spell with SE_Buy_AA_Rank
-		return true;
+	else if (rank.prev_id != -1) {//Check when effect is Enabled.
+		AA::Rank *rank_prev = zone->GetAlternateAdvancementRank(rank.prev_id);
+
+		if (IsEffectInSpell(rank_prev->spell, SE_Buy_AA_Rank)) {
+			return true;
+		}
 	}
+	return false;
 }
 
 bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int effect_id) {

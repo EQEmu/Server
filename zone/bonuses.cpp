@@ -1561,10 +1561,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->Pet_Add_Atk += base1;
 			break;
 
-		case SE_Weapon_Stance: 
+		case SE_Weapon_Stance:
 		{
 			if (IsValidSpell(base1)) { //base1 is the spell_id of buff
-				if (base2 <= WEAPON_STANCE_TYPE_MAX){ //0=2H, 1=Shield, 2=DW
+				if (base2 <= WEAPON_STANCE_TYPE_MAX) { //0=2H, 1=Shield, 2=DW
 					if (IsValidSpell(newbon->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
 						if (spells[newbon->WeaponStance[base2]].rank < spells[base1].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
 							newbon->WeaponStance[base2] = base1; //Overwrite with new effect
