@@ -283,7 +283,6 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 		auto removed = t->FindMemberFromCharacterID(requested_character_id);
 
-		// non-leader
 		// remove self
 		RemovePlayerFromSharedTask(t, requested_character_id);
 		SendRemovePlayerFromSharedTaskPacket(
@@ -297,6 +296,11 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 		client_list.SendCharacterMessageID(requested_character_id, Chat::Yellow,
 			SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { removed.character_name, task.title });
+
+		if (removed.is_leader)
+		{
+			ChooseNewLeader(t);
+		}
 	}
 }
 
@@ -904,6 +908,8 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, co
 		character_name
 	);
 
+	auto leader = s->GetLeader(); // get leader now for msg in case leader is one removed
+
 	RemovePlayerFromSharedTask(s, member.character_id);
 	SendRemovePlayerFromSharedTaskPacket(
 		member.character_id,
@@ -920,6 +926,11 @@ void SharedTaskManager::RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, co
 
 	client_list.SendCharacterMessageID(member.character_id, Chat::Yellow,
 		SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED, { member.character_name, s->GetTaskData().title });
+
+	if (member.is_leader)
+	{
+		ChooseNewLeader(s);
+	}
 }
 
 void SharedTaskManager::SendSharedTaskMemberListToAllMembers(SharedTask *s)
@@ -1752,5 +1763,20 @@ void SharedTaskManager::RemoveAllMembersFromDynamicZones(SharedTask* s)
 		if (dz) {
 			dz->RemoveAllMembers();
 		}
+	}
+}
+
+void SharedTaskManager::ChooseNewLeader(SharedTask* s)
+{
+	// live doesn't prioritize choosing an online player here
+	auto members = s->GetMembers();
+	auto it = std::find_if(members.begin(), members.end(),
+		[&](const SharedTaskMember& member) {
+			return member.is_leader == false;
+		});
+
+	if (it != members.end())
+	{
+		MakeLeaderByPlayerName(s, it->character_name);
 	}
 }

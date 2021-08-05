@@ -102,6 +102,7 @@ protected:
 	void AddReplayTimers(SharedTask* s);
 	bool CanAddPlayer(SharedTask* s, uint32_t character_id, std::string player_name, bool accepted);
 	bool CanRequestSharedTask(uint32_t task_id, uint32_t character_id, const SharedTaskRequestCharacters& request);
+	void ChooseNewLeader(SharedTask* s);
 	void SendSharedTaskMemberListToAllMembers(SharedTask *s);
 	void SendSharedTaskMemberAddedToAllMembers(SharedTask *s, const std::string& player_name);
 	void SendSharedTaskMemberRemovedToAllMembers(SharedTask *s, const std::string& player_name);
