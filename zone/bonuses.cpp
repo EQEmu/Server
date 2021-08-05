@@ -1583,6 +1583,22 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_ExtendedShielding: 
+		{
+			if (newbon->ExtendedShielding < base1) {
+				newbon->ExtendedShielding = base1;
+			}
+			break;
+		}
+
+		case SE_ShieldDuration: 
+		{
+			if (newbon->ShieldDuration < base1) {
+				newbon->ShieldDuration = base1;
+			}
+			break;
+		}
+				
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -1591,10 +1607,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_BandolierSlots:
 			break;
 		case SE_SecondaryForte:
-			break;
-		case SE_ExtendedShielding:
-			break;
-		case SE_ShieldDuration:
 			break;
 		case SE_ReduceApplyPoisonTime:
 			break;
@@ -3473,6 +3485,22 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Pet_Add_Atk:
 				new_bonus->Pet_Add_Atk += effect_value;
 				break;
+
+			case SE_ExtendedShielding:
+			{
+				if (new_bonus->ExtendedShielding < effect_value) {
+					new_bonus->ExtendedShielding = effect_value;
+				}
+				break;
+			}
+
+			case SE_ShieldDuration:
+			{
+				if (new_bonus->ShieldDuration < effect_value) {
+					new_bonus->ShieldDuration = effect_value;
+				}
+				break;
+			}
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {

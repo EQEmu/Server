@@ -1126,7 +1126,15 @@ public:
 	void SetMoved(bool moveflag) { moved = moveflag; }
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
+
 	Trade* trade;
+
+	ShieldAbility_Struct shield_ability;
+	void DoShieldDamageOnShielder(Mob* defender, DamageHitInfo &hit);
+	inline int GetShielderID() { return shield_ability.shielder_id; }
+	inline int SetShielderID(int ent_id) { shield_ability.shielder_id = ent_id; }
+	inline int GetShieldTargetID() { return shield_ability.shield_target_id; }
+	inline int SetShieldTargetID(int ent_id) { shield_ability.shield_target_id = ent_id; }
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }

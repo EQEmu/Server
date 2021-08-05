@@ -592,7 +592,7 @@ typedef enum {
 #define SE_ReduceSkillTimer				227	// implemented
 #define SE_ReduceFallDamage				228	// implented - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
-#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
+#define SE_ExtendedShielding			230	// implemented XXXXXXXXX not used as bonus - increase range of /shield ability
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
 #define SE_Metabolism					233	// implemented - Modifies food/drink consumption rates.
@@ -617,7 +617,7 @@ typedef enum {
 #define SE_FrontalBackstabChance		252	// implemented[AA] - chance to perform a full damage backstab from front.
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
 #define SE_Blank						254 // implemented
-#define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
+#define SE_ShieldDuration				255	// implemented, XXXXXXXXXXXX not implemented as bonus - increases duration of /shield
 #define SE_ShroudofStealth				256	// implemented
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab

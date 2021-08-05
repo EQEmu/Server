@@ -548,7 +548,9 @@ struct StatBonuses {
 
 
 	// AAs
-	int8	Packrat;							//weight reduction for items, 1 point = 10%
+	int32	ShieldDuration;						// extends duration of /shield ability
+	int32	ExtendedShielding;					// extends range of /shield ability
+	int8	Packrat;							// weight reduction for items, 1 point = 10%
 	uint8	BuffSlotIncrease;					// Increases number of available buff slots
 	uint32	DelayDeath;							// how far below 0 hp you can go
 	int8	BaseMovementSpeed;					// Adjust base run speed, does not stack with other movement bonuses.
@@ -678,8 +680,15 @@ typedef struct
 } tProc;
 
 struct Shielders_Struct {
+	
 	uint32 shielder_id;
 	uint16 shielder_bonus;
+};
+
+struct ShieldAbility_Struct{
+
+	uint32 shield_target_id;
+	uint32 shielder_id;
 };
 
 typedef struct

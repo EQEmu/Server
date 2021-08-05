@@ -380,6 +380,9 @@ Mob::Mob(
 		shielder[m].shielder_id    = 0;
 		shielder[m].shielder_bonus = 0;
 	}
+	
+	shield_ability.shield_target_id = 0;
+	shield_ability.shielder_id = 0;
 
 	destructibleobject = false;
 	wandertype         = 0;

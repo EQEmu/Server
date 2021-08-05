@@ -5278,7 +5278,47 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
+	if (defender->shield_ability.shielder_id = GetID()) {
+		hit.damage_done *= 0.50;//Don't round.
+		DoShieldDamageOnShielder(defender, hit);
+	}
+
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
+}
+
+void Mob::DoShieldDamageOnShielder(Mob* defender, DamageHitInfo &hit)
+{
+	if (!defender) {
+		return;
+	}
+
+	Mob *current_shielder = entity_list.GetMob(defender->shield_ability.shielder_id);
+
+	if (!current_shielder) {
+		return;
+	}
+
+	int mitigation = 75;
+
+	if (current_shielder->HasShieldEquiped() && current_shielder->IsClient()) {
+		
+		EQ::ItemInstance* inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
+
+		if (inst) {
+
+			const EQ::ItemData* shield = inst->GetItem();
+			if (shield && shield->ItemType == EQ::item::ItemTypeShield) {
+				mitigation -= shield->AC * 0.50; //1% increase per 2 AC
+			}
+		}
+	}
+	
+	mitigation = std::max(mitigation, 50);
+
+	int shielder_damage_taken = hit.damage_done * 75 / 100;
+
+	current_shielder->Damage(this, shielder_damage_taken, SPELL_UNKNOWN, hit.skill, true, -1, false, m_specialattacks);
+	current_shielder->CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
 void Mob::CommonBreakInvisibleFromCombat()

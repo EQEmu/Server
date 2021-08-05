@@ -12808,83 +12808,65 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		LogError("OP size error: OP_Shielding expected:[{}] got:[{}]", sizeof(Shielding_Struct), app->size);
 		return;
 	}
-	if (GetClass() != WARRIOR)
-	{
+	//Enforce level
+	//Augs on shieldd?
+
+	if (GetLevel() < 30) {
+		return; //Client gives message
+	}
+
+	if (GetClass() != WARRIOR){
 		return;
 	}
 
-	if (shield_target)
-	{
-		entity_list.MessageCloseString(
-			this, false, 100, 0,
-			END_SHIELDING, GetName(), shield_target->GetName());
-		for (int y = 0; y < 2; y++)
-		{
-			if (shield_target->shielder[y].shielder_id == GetID())
-			{
-				shield_target->shielder[y].shielder_id = 0;
-				shield_target->shielder[y].shielder_bonus = 0;
-			}
-		}
-	}
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
+
 	shield_target = entity_list.GetMob(shield->target_id);
-	bool ack = false;
-	EQ::ItemInstance* inst = GetInv().GetItem(EQ::invslot::slotSecondary);
-	if (!shield_target)
-		return;
-	if (inst)
-	{
-		const EQ::ItemData* shield = inst->GetItem();
-		if (shield && shield->ItemType == EQ::item::ItemTypeShield)
-		{
-			for (int x = 0; x < 2; x++)
-			{
-				if (shield_target->shielder[x].shielder_id == 0)
-				{
-					entity_list.MessageCloseString(
-						this, false, 100, 0,
-						START_SHIELDING, GetName(), shield_target->GetName());
-					shield_target->shielder[x].shielder_id = GetID();
-					int shieldbonus = shield->AC * 2;
-					switch (GetAA(197))
-					{
-					case 1:
-						shieldbonus = shieldbonus * 115 / 100;
-						break;
-					case 2:
-						shieldbonus = shieldbonus * 125 / 100;
-						break;
-					case 3:
-						shieldbonus = shieldbonus * 150 / 100;
-						break;
-					}
-					shield_target->shielder[x].shielder_bonus = shieldbonus;
-					shield_timer.Start();
-					ack = true;
-					break;
-				}
-			}
-		}
-		else
-		{
-			Message(0, "You must have a shield equipped to shield a target!");
-			shield_target = 0;
-			return;
-		}
-	}
-	else
-	{
-		Message(0, "You must have a shield equipped to shield a target!");
-		shield_target = 0;
+
+	if (!shield_target) {
 		return;
 	}
-	if (!ack)
-	{
+
+	
+	if (shield_target->IsNPC()) {
+		//You must first target a living player //TODO Find string
+		return;
+	}
+
+	if (shield_target->GetID() == GetID()) { //Client will give message "You can not shield yourself"
+		return;
+	}
+	   
+	//Does 'Shield Target' already have a 'Shielder'
+	if (shield_target->shield_ability.shielder_id = GetID()) {
 		MessageString(Chat::White, ALREADY_SHIELDED);
-		shield_target = 0;
 		return;
 	}
+
+	//Does 'Shielder' already have a 'Shield Target' already have a shielder
+	if (shield_ability.shielder_id = GetID()) {
+		MessageString(Chat::White, ALREADY_SHIELDED);
+		return;
+	}
+	//AA to increase SPA 230 extended shielding
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > 15.0f) {
+		return; //Too far away, no message is given thoughh. //TODO: Timer to enforce distance check
+	}
+
+	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetName(), shield_target->GetName()); 
+	
+	//Apply to Shielder
+	shield_ability.shielder_id = GetID();
+	shield_ability.shield_target_id = shield_target->GetID();
+	
+	//Apply to Shield Target
+	shield_target->shield_ability.shielder_id = GetID();
+	shield_target->shield_ability.shield_target_id = shield_target->GetID();
+	
+	//Calculate AA for adding time SPA 255 extend shield duration
+
+	shield_timer.Start(12000);
+
 	return;
 }
 
