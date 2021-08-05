@@ -9103,9 +9103,9 @@ void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
 			expedition->DzKickPlayers(this);
 		}
 	}
-	else if (buf->kick_task && GetTaskState()->HasActiveSharedTask())
+	else if (buf->kick_task && GetTaskState() && GetTaskState()->HasActiveSharedTask())
 	{
-		CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared, true);
+		GetTaskState()->KickPlayersSharedTask(this);
 	}
 }
 

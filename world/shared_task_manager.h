@@ -38,7 +38,7 @@ public:
 
 	// client attempting to create a shared task
 	void AttemptSharedTaskCreation(uint32 requested_task_id, uint32 requested_character_id, uint32 npc_type_id);
-	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_everyone, bool remove_from_db);
+	void AttemptSharedTaskRemoval(uint32 requested_task_id, uint32 requested_character_id, bool remove_from_db);
 
 	// shared task activity update middleware
 	void SharedTaskActivityUpdate(
@@ -64,6 +64,7 @@ public:
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string& character_name);
+	void RemoveEveryoneFromSharedTask(SharedTask* s, uint32 requested_character_id);
 
 	void MakeLeaderByPlayerName(SharedTask *s, const std::string& character_name);
 	void AddPlayerByCharacterIdAndName(SharedTask *s, int64 character_id, const std::string& character_name);

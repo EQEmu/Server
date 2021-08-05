@@ -2078,24 +2078,24 @@ void ClientTaskState::CancelAllTasks(Client *client)
 
 	// task
 	// these cancels lock up the client for some reason
-	CancelTask(client, TASKSLOTTASK, TaskType::Task, false, false);
+	CancelTask(client, TASKSLOTTASK, TaskType::Task, false);
 	m_active_task.task_id = TASKSLOTEMPTY;
 
 	// shared task
-	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false, false);
+	CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, false);
 	m_active_shared_task.task_id = TASKSLOTEMPTY;
 
 	// "quests"
 	for (int task_index = 0; task_index < MAXACTIVEQUESTS; task_index++)
 		if (m_active_quests[task_index].task_id != TASKSLOTEMPTY) {
-			CancelTask(client, task_index, TaskType::Quest, false, false);
+			CancelTask(client, task_index, TaskType::Quest, false);
 			m_active_quests[task_index].task_id = TASKSLOTEMPTY;
 		}
 
 	// TODO: shared
 }
 
-void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_everyone, bool remove_from_db)
+void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_type, bool remove_from_db)
 {
 	LogTasks("CancelTask");
 
@@ -2110,7 +2110,6 @@ void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_t
 		// fill
 		r->requested_character_id = c->CharacterID();
 		r->requested_task_id      = m_active_shared_task.task_id;
-		r->remove_everyone        = remove_everyone;
 		r->remove_from_db         = remove_from_db;
 
 		// send
@@ -2136,6 +2135,18 @@ void ClientTaskState::CancelTask(Client *c, int sequence_number, TaskType task_t
 	if (remove_from_db) {
 		RemoveTask(c, sequence_number, task_type);
 	}
+}
+
+void ClientTaskState::KickPlayersSharedTask(Client* client)
+{
+	uint32_t pack_size = sizeof(ServerSharedTaskKickPlayers_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskKickPlayers, pack_size);
+	auto buf = reinterpret_cast<ServerSharedTaskKickPlayers_Struct*>(pack->pBuffer);
+
+	buf->source_character_id = client->CharacterID();
+	buf->task_id             = m_active_shared_task.task_id;
+
+	worldserver.SendPacket(pack.get());
 }
 
 void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType task_type)

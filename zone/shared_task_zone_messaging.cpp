@@ -64,7 +64,6 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 					c,
 					TASKSLOTSHAREDTASK,
 					static_cast<TaskType>((int) TASK_TYPE_SHARED),
-					p->remove_everyone,
 					p->remove_from_db
 				);
 				c->m_requested_shared_task_removal = false;

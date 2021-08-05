@@ -41,19 +41,39 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 		case ServerOP_SharedTaskAttemptRemove: {
 			auto *r = (ServerSharedTaskAttemptRemove_Struct *) pack->pBuffer;
 			LogTasksDetail(
-				"[ServerOP_SharedTaskAttemptRemove] Received request from character [{}] task_id [{}] remove_everyone [{}] remove_from_db [{}]",
+				"[ServerOP_SharedTaskAttemptRemove] Received request from character [{}] task_id [{}] remove_from_db [{}]",
 				r->requested_character_id,
 				r->requested_task_id,
-				r->remove_everyone,
 				r->remove_from_db
 			);
 
 			shared_task_manager.AttemptSharedTaskRemoval(
 				r->requested_task_id,
 				r->requested_character_id,
-				r->remove_everyone,
 				r->remove_from_db
 			);
+
+			break;
+		}
+		case ServerOP_SharedTaskKickPlayers: {
+			auto r = reinterpret_cast<ServerSharedTaskKickPlayers_Struct*>(pack->pBuffer);
+			LogTasksDetail(
+				"[ServerOP_SharedTaskKickPlayers] Received request from character [{}] task_id [{}]",
+				r->source_character_id,
+				r->task_id
+			);
+
+			auto t = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(r->task_id, r->source_character_id);
+			if (t) {
+				auto leader = t->GetLeader();
+				if (leader.character_id != r->source_character_id) {
+					client_list.SendCharacterMessageID(r->source_character_id, Chat::Red,
+						SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, { leader.character_name });
+				}
+				else {
+					shared_task_manager.RemoveEveryoneFromSharedTask(t, r->source_character_id);
+				}
+			}
 
 			break;
 		}

@@ -36,6 +36,7 @@
 #define ServerOP_SharedTaskPurgeAllCommand          0x0312 // zone -> world
 #define ServerOP_SharedTaskPlayerList               0x0313 // zone -> world /taskplayerlist command
 #define ServerOP_SharedTaskMemberChange             0x0314 // world -> zone. Send shared task single member added/removed (client also handles message)
+#define ServerOP_SharedTaskKickPlayers              0x0315 // zone -> world /kickplayers task
 
 enum class SharedTaskRequestGroupType {
 	Solo = 0,
@@ -67,7 +68,6 @@ struct ServerSharedTaskInvitePlayer_Struct {
 struct ServerSharedTaskAttemptRemove_Struct {
 	uint32 requested_character_id;
 	uint32 requested_task_id;
-	bool   remove_everyone;
 	bool   remove_from_db;
 };
 
@@ -162,6 +162,11 @@ struct ServerSharedTaskCreateDynamicZone_Struct {
 };
 
 struct ServerSharedTaskPlayerList_Struct {
+	uint32 source_character_id;
+	uint32 task_id;
+};
+
+struct ServerSharedTaskKickPlayers_Struct {
 	uint32 source_character_id;
 	uint32 task_id;
 };

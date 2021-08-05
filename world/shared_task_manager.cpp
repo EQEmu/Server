@@ -214,7 +214,6 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 void SharedTaskManager::AttemptSharedTaskRemoval(
 	uint32 requested_task_id,
 	uint32 requested_character_id,
-	bool remove_everyone,
 	bool remove_from_db // inherited from zone logic - we're just passing through
 )
 {
@@ -229,58 +228,6 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 
 	auto t = FindSharedTaskByTaskIdAndCharacterId(requested_task_id, requested_character_id);
 	if (t) {
-
-		// make sure the one requesting is leader before removing everyone and deleting the shared task
-		if (remove_everyone) {
-			auto leader = t->GetLeader();
-			if (leader.character_id != requested_character_id) {
-				client_list.SendCharacterMessageID(
-					requested_character_id,
-					Chat::Red,
-					SharedTaskMessage::YOU_ARE_NOT_LEADER_COMMAND_ISSUE, {leader.character_name}
-				);
-				return;
-			}
-			LogTasksDetail(
-				"[AttemptSharedTaskRemoval] Leader [{}]",
-				requested_character_id
-			);
-
-			// inform clients of removal
-			for (auto &m: t->GetMembers()) {
-				LogTasksDetail(
-					"[AttemptSharedTaskRemoval] Sending removal to [{}] shared_task_id [{}]",
-					m.character_id,
-					requested_task_id
-				);
-
-				SendRemovePlayerFromSharedTaskPacket(
-					m.character_id,
-					requested_task_id,
-					remove_from_db
-				);
-
-				client_list.SendCharacterMessageID(m.character_id, Chat::Yellow,
-					SharedTaskMessage::YOU_HAVE_BEEN_REMOVED, { task.title });
-			}
-
-			client_list.SendCharacterMessageID(
-				requested_character_id,
-				Chat::Red,
-				SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED,
-				{"Everyone", task.title}
-			);
-
-			RemoveAllMembersFromDynamicZones(t);
-
-			// persistence
-			DeleteSharedTask(t->GetDbSharedTask().id, requested_character_id);
-
-			PrintSharedTaskState();
-
-			return;
-		}
-
 		auto removed = t->FindMemberFromCharacterID(requested_character_id);
 
 		// remove self
@@ -302,6 +249,36 @@ void SharedTaskManager::AttemptSharedTaskRemoval(
 			ChooseNewLeader(t);
 		}
 	}
+}
+
+void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask* t, uint32 requested_character_id)
+{
+	// caller validates leader
+	LogTasksDetail("[RemoveEveryoneFromSharedTask] Leader [{}]", requested_character_id);
+
+	// inform clients of removal
+	for (auto &m: t->GetMembers()) {
+		LogTasksDetail("[RemoveEveryoneFromSharedTask] Sending removal to [{}] task_id [{}]", m.character_id, t->GetTaskData().id);
+
+		SendRemovePlayerFromSharedTaskPacket(m.character_id, t->GetTaskData().id, true);
+
+		client_list.SendCharacterMessageID(m.character_id, Chat::Yellow,
+			SharedTaskMessage::YOU_HAVE_BEEN_REMOVED, { t->GetTaskData().title });
+	}
+
+	client_list.SendCharacterMessageID(
+		requested_character_id,
+		Chat::Red,
+		SharedTaskMessage::PLAYER_HAS_BEEN_REMOVED,
+		{"Everyone", t->GetTaskData().title}
+	);
+
+	RemoveAllMembersFromDynamicZones(t);
+
+	// persistence
+	DeleteSharedTask(t->GetDbSharedTask().id, requested_character_id);
+
+	PrintSharedTaskState();
 }
 
 void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_character_id)
