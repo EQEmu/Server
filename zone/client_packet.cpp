@@ -12808,8 +12808,8 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		LogError("OP size error: OP_Shielding expected:[{}] got:[{}]", sizeof(Shielding_Struct), app->size);
 		return;
 	}
-	//Enforce level
-	//Augs on shieldd?
+
+	//TODO: Defensive makes it not cast?
 
 	if (GetLevel() < 30) {
 		return; //Client gives message
@@ -12849,7 +12849,13 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		return;
 	}
 	//AA to increase SPA 230 extended shielding
-	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > 15.0f) {
+
+	int max_shielder_distance = 15;
+	int distance_mod = aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
+	max_shielder_distance += max_shielder_distance * distance_mod / 100;
+	max_shielder_distance = std::max(max_shielder_distance, 1); //Incase of negative effects limit it to range of 1
+	
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shielder_distance)) {
 		return; //Too far away, no message is given thoughh. //TODO: Timer to enforce distance check
 	}
 
@@ -12864,8 +12870,13 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	shield_target->shield_ability.shield_target_id = shield_target->GetID();
 	
 	//Calculate AA for adding time SPA 255 extend shield duration
+	int shield_duration = 12000;
 
-	shield_timer.Start(12000);
+	shield_duration += (aabonuses.ShieldDuration + itembonuses.ShieldDuration + spellbonuses.ShieldDuration) * 1000;
+
+	shield_duration = std::max(shield_duration, 1000); //Incase of negative modifiers lets just make min duration 1 second.
+
+	shield_timer.Start(shield_duration);
 
 	return;
 }

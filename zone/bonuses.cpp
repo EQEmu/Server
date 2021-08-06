@@ -3488,17 +3488,25 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ExtendedShielding:
 			{
-				if (new_bonus->ExtendedShielding < effect_value) {
-					new_bonus->ExtendedShielding = effect_value;
+				if (AdditiveWornBonus) {
+					new_bonus->ExtendedShielding += effect_value;
 				}
+				else if (effect_value < 0 && new_bonus->ExtendedShielding > effect_value)
+					new_bonus->ExtendedShielding = effect_value;
+				else if (effect_value > 0 && new_bonus->ExtendedShielding < effect_value)
+					new_bonus->ExtendedShielding = effect_value;
 				break;
 			}
 
 			case SE_ShieldDuration:
 			{
-				if (new_bonus->ShieldDuration < effect_value) {
-					new_bonus->ShieldDuration = effect_value;
+				if (AdditiveWornBonus) {
+					new_bonus->ShieldDuration += effect_value;
 				}
+				else if (effect_value < 0 && new_bonus->ShieldDuration > effect_value)
+					new_bonus->ShieldDuration = effect_value;
+				else if (effect_value > 0 && new_bonus->ShieldDuration < effect_value)
+					new_bonus->ShieldDuration = effect_value;
 				break;
 			}
 

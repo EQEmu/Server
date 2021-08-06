@@ -5278,15 +5278,15 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
-	if (defender->shield_ability.shielder_id = GetID()) {
+	if (defender->shield_ability.shielder_id) {
 		hit.damage_done *= 0.50;//Don't round.
-		DoShieldDamageOnShielder(defender, hit);
+		DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
 	}
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::DoShieldDamageOnShielder(Mob* defender, DamageHitInfo &hit)
+void Mob::DoShieldDamageOnShielder(Mob* defender, int shielder_damage_taken, EQ::skills::SkillType skillInUse)
 {
 	if (!defender) {
 		return;
@@ -5315,9 +5315,9 @@ void Mob::DoShieldDamageOnShielder(Mob* defender, DamageHitInfo &hit)
 	
 	mitigation = std::max(mitigation, 50);
 
-	int shielder_damage_taken = hit.damage_done * 75 / 100;
+	shielder_damage_taken = shielder_damage_taken * mitigation / 100;
 
-	current_shielder->Damage(this, shielder_damage_taken, SPELL_UNKNOWN, hit.skill, true, -1, false, m_specialattacks);
+	current_shielder->Damage(this, shielder_damage_taken, SPELL_UNKNOWN, skillInUse, true, -1, false, m_specialattacks);
 	current_shielder->CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 

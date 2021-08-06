@@ -1130,7 +1130,7 @@ public:
 	Trade* trade;
 
 	ShieldAbility_Struct shield_ability;
-	void DoShieldDamageOnShielder(Mob* defender, DamageHitInfo &hit);
+	void DoShieldDamageOnShielder(Mob* defender, int shielder_damage_taken, EQ::skills::SkillType skillInUse);
 	inline int GetShielderID() { return shield_ability.shielder_id; }
 	inline int SetShielderID(int ent_id) { shield_ability.shielder_id = ent_id; }
 	inline int GetShieldTargetID() { return shield_ability.shield_target_id; }
