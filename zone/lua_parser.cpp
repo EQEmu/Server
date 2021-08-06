@@ -198,6 +198,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_PLAYER_PICKUP] = handle_player_pick_up;
 	PlayerArgumentDispatch[EVENT_CAST] = handle_player_cast;
 	PlayerArgumentDispatch[EVENT_CAST_BEGIN] = handle_player_cast;
+	PlayerArgumentDispatch[EVENT_CAST_ON] = handle_player_cast;
 	PlayerArgumentDispatch[EVENT_TASK_FAIL] = handle_player_task_fail;
 	PlayerArgumentDispatch[EVENT_ZONE] = handle_player_zone;
 	PlayerArgumentDispatch[EVENT_DUEL_WIN] = handle_player_duel_win;
