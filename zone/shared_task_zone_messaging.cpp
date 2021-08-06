@@ -29,6 +29,7 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 						(int) p->requested_npc_type_id,
 						p->accept_time
 					);
+				c->LoadClientTaskState();
 				c->m_requesting_shared_task = false;
 			}
 
