@@ -72,12 +72,8 @@ void EQ::Net::ServertalkClient::Connect()
 		m_connection->OnRead(std::bind(&EQ::Net::ServertalkClient::ProcessData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 		m_connection->Start();
 
-		SendHandshake();
+		SendHello();
 		m_connecting = false;
-
-		if (m_on_connect_cb) {
-			m_on_connect_cb(this);
-		}
 	});
 }
 
@@ -85,6 +81,12 @@ void EQ::Net::ServertalkClient::ProcessData(EQ::Net::TCPConnection *c, const uns
 {
 	m_buffer.insert(m_buffer.end(), (const char*)data, (const char*)data + length);
 	ProcessReadBuffer();
+}
+
+void EQ::Net::ServertalkClient::SendHello()
+{
+	EQ::Net::DynamicPacket p;
+	InternalSend(ServertalkClientHello, p);
 }
 
 void EQ::Net::ServertalkClient::InternalSend(ServertalkPacketType type, EQ::Net::Packet &p)
@@ -131,6 +133,9 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 		if (length == 0) {
 			EQ::Net::DynamicPacket p;
 			switch (type) {
+			case ServertalkServerHello:
+				ProcessHello(p);
+				break;
 			case ServertalkMessage:
 				ProcessMessage(p);
 				break;
@@ -139,6 +144,9 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 		else {
 			EQ::Net::StaticPacket p(&m_buffer[current + 5], length);
 			switch (type) {
+			case ServertalkServerHello:
+				ProcessHello(p);
+				break;
 			case ServertalkMessage:
 				ProcessMessage(p);
 				break;
@@ -153,6 +161,25 @@ void EQ::Net::ServertalkClient::ProcessReadBuffer()
 	}
 	else {
 		m_buffer.erase(m_buffer.begin(), m_buffer.begin() + current);
+	}
+}
+
+void EQ::Net::ServertalkClient::ProcessHello(EQ::Net::Packet &p)
+{
+	try {
+		SendHandshake();
+
+		if (m_on_connect_cb) {
+			m_on_connect_cb(this);
+		}
+}
+	catch (std::exception &ex) {
+		LogError("Error parsing hello from server: {0}", ex.what());
+		m_connection->Disconnect();
+
+		if (m_on_connect_cb) {
+			m_on_connect_cb(nullptr);
+		}
 	}
 }
 

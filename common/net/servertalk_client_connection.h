@@ -26,8 +26,10 @@ namespace EQ
 		private:
 			void Connect();
 			void ProcessData(EQ::Net::TCPConnection *c, const unsigned char *data, size_t length);
+			void SendHello();
 			void InternalSend(ServertalkPacketType type, EQ::Net::Packet &p);
 			void ProcessReadBuffer();
+			void ProcessHello(EQ::Net::Packet &p);
 			void ProcessMessage(EQ::Net::Packet &p);
 			void SendHandshake();
 
