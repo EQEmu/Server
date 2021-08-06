@@ -5286,13 +5286,13 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::DoShieldDamageOnShielder(Mob* defender, int shielder_damage_taken, EQ::skills::SkillType skillInUse)
+void Mob::DoShieldDamageOnShielder(Mob* shield_target, int shielder_damage_taken, EQ::skills::SkillType skillInUse)
 {
-	if (!defender) {
+	if (!shield_target) {
 		return;
 	}
 
-	Mob *current_shielder = entity_list.GetMob(defender->shield_ability.shielder_id);
+	Mob *current_shielder = entity_list.GetMob(shield_target->shield_ability.shielder_id);
 
 	if (!current_shielder) {
 		return;
