@@ -4188,7 +4188,7 @@ XS(XS_Mob_GetShieldTarget) {
 		Mob *THIS;
 		Mob *RETVAL;
 		VALIDATE_THIS_IS_MOB;
-		RETVAL = THIS->GetShieldTarget();
+		//RETVAL = THIS->GetShieldTarget();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
 	}
@@ -4212,7 +4212,7 @@ XS(XS_Mob_SetShieldTarget) {
 		if (mob == nullptr)
 			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
 
-		THIS->SetShieldTarget(mob);
+		//THIS->SetShieldTarget(mob);
 	}
 	XSRETURN_EMPTY;
 }

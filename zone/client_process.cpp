@@ -459,33 +459,16 @@ bool Client::Process() {
 			if (gravity_timer.Check())
 				DoGravityEffect();
 		}
+		
+		if (shield_timer.Check()) {
+			Mob *current_shield_target = entity_list.GetMob(GetShieldTargetID());
 
-		if (shield_timer.Check())
-		{
-			if (shield_target)
-			{
-				if (!CombatRange(shield_target))
-				{
-					entity_list.MessageCloseString(
-						this, false, 100, 0,
-						END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
-					for (int y = 0; y < 2; y++)
-					{
-						if (shield_target->shielder[y].shielder_id == GetID())
-						{
-							shield_target->shielder[y].shielder_id = 0;
-							shield_target->shielder[y].shielder_bonus = 0;
-						}
-					}
-					shield_target = 0;
-					shield_timer.Disable();
-				}
+			if (current_shield_target) {
+				entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), current_shield_target->GetCleanName());
 			}
-			else
-			{
-				shield_target = 0;
-				shield_timer.Disable();
-			}
+			shield_timer.Disable();
+			SetShieldTargetID(0);
+			current_shield_target->SetShielderID(0);
 		}
 
 		SpellProcess();

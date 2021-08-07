@@ -1086,8 +1086,6 @@ public:
 
 	void InstillDoubt(Mob *who);
 	int16 GetResist(uint8 type) const;
-	Mob* GetShieldTarget() const { return shield_target; }
-	void SetShieldTarget(Mob* mob) { shield_target = mob; }
 	bool HasActiveSong() const { return(bardsong != 0); }
 	bool Charmed() const { return typeofpet == petCharmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
@@ -1125,16 +1123,13 @@ public:
 	bool IsMoved() { return moved; }
 	void SetMoved(bool moveflag) { moved = moveflag; }
 
-	Shielders_Struct shielder[MAX_SHIELDERS];
-
 	Trade* trade;
 
-	ShieldAbility_Struct shield_ability;
-	void DoShieldDamageOnShielder(Mob* shield_target, int shielder_damage_taken, EQ::skills::SkillType skillInUse);
-	inline int GetShielderID() { return shield_ability.shielder_id; }
-	inline int SetShielderID(int ent_id) { shield_ability.shielder_id = ent_id; }
-	inline int GetShieldTargetID() { return shield_ability.shield_target_id; }
-	inline int SetShieldTargetID(int ent_id) { shield_ability.shield_target_id = ent_id; }
+	void DoShieldDamageOnShielder(Mob* shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
+	inline int GetShielderID() const { return shielder_id; }
+	inline void SetShielderID(int ent_id) { shielder_id = ent_id; }
+	inline int GetShieldTargetID() const { return shield_target_id; }
+	inline void SetShieldTargetID(int ent_id) { shield_target_id = ent_id; }
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
@@ -1435,6 +1430,10 @@ protected:
 	Timer mana_timer;
 	Timer focus_proc_limit_timer;
 
+	Timer shield_timer;
+	uint32 shield_target_id;
+	uint32 shielder_id;
+
 	//spell casting vars
 	Timer spellend_timer;
 	uint16 casting_spell_id;
@@ -1480,8 +1479,6 @@ protected:
 	EQ::TintProfile armor_tint;
 
 	uint8 aa_title;
-
-	Mob* shield_target;
 
 	int ExtraHaste; // for the #haste command
 	bool mezzed;

@@ -5278,29 +5278,45 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill));
 
-	if (defender->shield_ability.shielder_id) {
-		hit.damage_done *= 0.50;//Don't round.
+	Shout("Shielder ID [%i]", defender->GetShielderID());
+
+	if (defender->GetShielderID()) {
+		hit.damage_done = hit.damage_done * 50 / 100;//Don't round.
 		DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
 	}
 
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
-void Mob::DoShieldDamageOnShielder(Mob* shield_target, int shielder_damage_taken, EQ::skills::SkillType skillInUse)
+void Mob::DoShieldDamageOnShielder(Mob* shielder_target, int hit_damage_done, EQ::skills::SkillType skillInUse)
 {
-	if (!shield_target) {
+	if (!shielder_target) {
 		return;
 	}
 
-	Mob *current_shielder = entity_list.GetMob(shield_target->shield_ability.shielder_id);
+	Mob *shielder = entity_list.GetMob(shielder_target->GetShielderID());
 
-	if (!current_shielder) {
+	if (!shielder) {
 		return;
+	}
+
+	//AA to increase SPA 230 extended shielding
+	int max_shielder_distance = 15;
+	int distance_mod = aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
+	max_shielder_distance += max_shielder_distance * distance_mod / 100;
+	max_shielder_distance = std::max(max_shielder_distance, 0);
+
+	if (shielder_target->CalculateDistance(shielder->GetX(), shielder->GetY(), shielder->GetZ()) > static_cast<float>(max_shielder_distance)) {
+		//Clear variables Shield end
+		Shout("Clear variables shield end");
+		shielder->SetShieldTargetID(0);
+		shielder_target->SetShielderID(0);
+		return; //Too far away, no message is given thoughh.
 	}
 
 	int mitigation = 75;
 
-	if (current_shielder->HasShieldEquiped() && current_shielder->IsClient()) {
+	if (shielder->HasShieldEquiped() && shielder->IsClient()) {
 		
 		EQ::ItemInstance* inst = CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
 
@@ -5315,10 +5331,10 @@ void Mob::DoShieldDamageOnShielder(Mob* shield_target, int shielder_damage_taken
 	
 	mitigation = std::max(mitigation, 50);
 
-	shielder_damage_taken = shielder_damage_taken * mitigation / 100;
+	hit_damage_done = hit_damage_done * mitigation / 100;
 
-	current_shielder->Damage(this, shielder_damage_taken, SPELL_UNKNOWN, skillInUse, true, -1, false, m_specialattacks);
-	current_shielder->CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
+	shielder->Damage(this, hit_damage_done, SPELL_UNKNOWN, skillInUse, true, -1, false, m_specialattacks);
+	shielder->CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
 void Mob::CommonBreakInvisibleFromCombat()

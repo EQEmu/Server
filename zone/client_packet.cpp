@@ -12810,9 +12810,10 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	//TODO: Defensive makes it not cast?
+	//TODO: Bankers ect don't let you shjield 6826 You can not perform shielding while you are speaking with a banker, a merchant, or a guildmaster.
 
-	if (GetLevel() < 30) {
-		return; //Client gives message
+	if (GetLevel() < 30) { //Client gives message
+		return; 
 	}
 
 	if (GetClass() != WARRIOR){
@@ -12821,7 +12822,10 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
 
-	shield_target = entity_list.GetMob(shield->target_id);
+	Mob* shield_target = entity_list.GetMob(shield->target_id);
+
+	Shout("PACKET Shielder %i", shield_target->GetShielderID());
+	Shout("PACKET Shield Target %i", GetShieldTargetID());
 
 	if (!shield_target) {
 		return;
@@ -12838,13 +12842,13 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	   
 	//Does 'Shield Target' already have a 'Shielder'
-	if (shield_target->shield_ability.shielder_id = GetID()) {
+	if (shield_target->GetShielderID() == GetID()) {
 		MessageString(Chat::White, ALREADY_SHIELDED);
 		return;
 	}
 
-	//Does 'Shielder' already have a 'Shield Target' already have a shielder
-	if (shield_ability.shielder_id = GetID()) {
+	//Does 'Shielder' already have a 'Shield Target'
+	if (GetShieldTargetID() == GetID()) {
 		MessageString(Chat::White, ALREADY_SHIELDED);
 		return;
 	}
@@ -12853,29 +12857,31 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	int max_shielder_distance = 15;
 	int distance_mod = aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
 	max_shielder_distance += max_shielder_distance * distance_mod / 100;
-	max_shielder_distance = std::max(max_shielder_distance, 1); //Incase of negative effects limit it to range of 1
+	max_shielder_distance = std::max(max_shielder_distance, 0);
 	
 	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shielder_distance)) {
-		return; //Too far away, no message is given thoughh. //TODO: Timer to enforce distance check
+		return; //Too far away, no message is given thoughh.
 	}
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetName(), shield_target->GetName()); 
 	
 	//Apply to Shielder
-	shield_ability.shielder_id = GetID();
-	shield_ability.shield_target_id = shield_target->GetID();
+	//shield_ability.shield_target_id = shield_target->GetID();
 	
 	//Apply to Shield Target
-	shield_target->shield_ability.shielder_id = GetID();
-	shield_target->shield_ability.shield_target_id = shield_target->GetID();
+	//shield_target->shield_ability.shielder_id = GetID();
 	
+	SetShieldTargetID(shield_target->GetID());
+	shield_target->SetShielderID(GetID());
+
+
 	//Calculate AA for adding time SPA 255 extend shield duration
 	int shield_duration = 12000;
-
+	Shout("1 Duration %i", shield_duration);
 	shield_duration += (aabonuses.ShieldDuration + itembonuses.ShieldDuration + spellbonuses.ShieldDuration) * 1000;
-
-	shield_duration = std::max(shield_duration, 1000); //Incase of negative modifiers lets just make min duration 1 second.
-
+	Shout("2 Duration %i", shield_duration);
+	shield_duration = std::max(shield_duration, 1); //Incase of negative modifiers lets just make min duration 1 ms.
+	Shout("3 Duration %i", shield_duration);
 	shield_timer.Start(shield_duration);
 
 	return;

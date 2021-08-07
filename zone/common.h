@@ -22,8 +22,6 @@
 #define SEE_POSITION 0.5f	//ratio of GetSize() where NPCs try to see for LOS
 #define CHECK_LOS_STEP 1.0f
 
-#define MAX_SHIELDERS 2		//I dont know if this is based on a client limit
-
 #define ARCHETYPE_HYBRID	1
 #define ARCHETYPE_CASTER	2
 #define ARCHETYPE_MELEE		3
@@ -678,18 +676,6 @@ typedef struct
 	uint16 base_spellID;
 	int level_override;
 } tProc;
-
-struct Shielders_Struct {
-	
-	uint32 shielder_id;
-	uint16 shielder_bonus;
-};
-
-struct ShieldAbility_Struct{
-
-	uint32 shield_target_id;
-	uint32 shielder_id;
-};
 
 typedef struct
 {

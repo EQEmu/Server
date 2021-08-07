@@ -260,7 +260,6 @@ Mob::Mob(
 	MR                = CR = FR = DR = PR = Corrup = PhR = 0;
 	ExtraHaste        = 0;
 	bEnraged          = false;
-	shield_target     = nullptr;
 	current_mana      = 0;
 	max_mana          = 0;
 	hp_regen          = in_hp_regen;
@@ -375,14 +374,10 @@ Mob::Mob(
 	silenced       = false;
 	amnesiad       = false;
 	inWater        = false;
-	int m;
-	for (m = 0; m < MAX_SHIELDERS; m++) {
-		shielder[m].shielder_id    = 0;
-		shielder[m].shielder_bonus = 0;
-	}
 	
-	shield_ability.shield_target_id = 0;
-	shield_ability.shielder_id = 0;
+	shield_timer.Disable();
+	shield_target_id = 0;
+	shielder_id = 0;
 
 	destructibleobject = false;
 	wandertype         = 0;
