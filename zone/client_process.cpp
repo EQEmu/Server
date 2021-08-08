@@ -461,14 +461,14 @@ bool Client::Process() {
 		}
 		
 		if (shield_timer.Check()) {
-			Mob *current_shield_target = entity_list.GetMob(GetShieldTargetID());
+			Mob * shield_target = entity_list.GetMob(GetShieldTargetID());
 
-			if (current_shield_target) {
-				entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), current_shield_target->GetCleanName());
+			if (shield_target) {
+				entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 			}
 			shield_timer.Disable();
 			SetShieldTargetID(0);
-			current_shield_target->SetShielderID(0);
+			shield_target->SetShielderID(0);
 		}
 
 		SpellProcess();
