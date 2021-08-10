@@ -6267,7 +6267,7 @@ XS(XS_Mob_ShieldAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ShieldAbility) {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, int32 max_shielder_distance, int32 shield_duration [ms]"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, [int32 max_shielder_distance = 15], [int32 shield_duration = 12000], [int32 shield_target_mitigation= 50], [int32 shielder_mitigation = 50]"); // @categories Spells and Disciplines
 	{
 		Mob *THIS;
 		uint32             target_id = (uint32)SvUV(ST(1));

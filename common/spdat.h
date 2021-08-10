@@ -572,7 +572,7 @@ typedef enum {
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
 #define SE_DispelBeneficial				209 // implemented
-#define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: 1 (Time multiplier 1=12 seconds, 2=24 ect), limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live) 
+#define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live) 
 #define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
 #define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
