@@ -852,7 +852,7 @@ typedef enum {
 #define SE_Ff_Same_Caster				486 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells, base1: 0=Must be different caster 1=Must be same caster
 //#define SE_Extend_Tradeskill_Cap		487 //
 //#define SE_Defender_Melee_Force_Pct_PC	488 //
-//#define SE_Worn_Endurance_Regen_Cap	489 //
+#define SE_Worn_Endurance_Regen_Cap		489 // implemented, modify worn regen cap, base: amt, limit: none, max: none
 #define SE_Ff_ReuseTimeMin				490 // implemented, @Ff, Minimum recast time of a spell that can be focused, base: recast time
 #define SE_Ff_ReuseTimeMax				491 // implemented, @Ff, Max recast time of a spell that can be focused, base: recast time 
 #define SE_Ff_Endurance_Min				492 // implemented, @Ff, Minimum endurance cost of a spell that can be focused, base: endurance cost
