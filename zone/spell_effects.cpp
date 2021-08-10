@@ -3212,6 +3212,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Critical_Melee_Damage_Mod_Max:
 			case SE_Melee_Damage_Position_Mod:
 			case SE_Damage_Taken_Position_Mod:
+			case SE_Melee_Damage_Position_Amt:
+			case SE_Damage_Taken_Position_Amt:
 			case SE_DS_Mitigation_Amount:
 			case SE_DS_Mitigation_Percentage:
 			case SE_Double_Backstab_Front:

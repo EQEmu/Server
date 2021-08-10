@@ -806,6 +806,7 @@ public:
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
 	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	int32 GetPositionalDmgTaken(Mob *attacker);
+	int32 GetPositionalDmgTakenAmt(Mob *attacker);
 	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
 	int16 CalcResistChanceBonus();
 	int16 CalcFearResistChance();
@@ -823,6 +824,7 @@ public:
 	int16 GetSkillReuseTime(uint16 skill);
 	int GetCriticalChanceBonus(uint16 skill);
 	int16 GetSkillDmgAmt(uint16 skill);
+	int16 GetPositionalDmgAmt(Mob* defender);
 	bool TryReflectSpell(uint32 spell_id);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
