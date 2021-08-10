@@ -2954,13 +2954,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsPet()) {
 					Mob* petowner = GetOwner();
 					if (petowner) {
-						
+
 						int shield_duration = spells[spell_id].base[i] * 12 * 1000;
 						int shld_target_mitigation = spells[spell_id].base2[i] ? spells[spell_id].base2[i] : 50;
 						int shlder_mitigation = spells[spell_id].max[i] ? spells[spell_id].base2[i] : 50;
 						ShieldAbility(petowner->GetID(), 25, shield_duration, shld_target_mitigation, shlder_mitigation);
-            break;
+						break;
 					}
+				}
+			}
 
 			case SE_Weapon_Stance: {
 				if (IsClient()) {
