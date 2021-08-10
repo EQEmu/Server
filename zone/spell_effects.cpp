@@ -3177,7 +3177,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_LimitManaMax:
 			case SE_DoubleRangedAttack:
 			case SE_ShieldEquipDmgMod:
-			case SE_GroupShielding:
 			case SE_TriggerOnReqTarget:
 			case SE_LimitRace:
 			case SE_FcLimitUse:
