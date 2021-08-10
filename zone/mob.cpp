@@ -234,6 +234,7 @@ Mob::Mob(
 	has_shieldequiped       = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped   = false;
+	has_duelweaponsequiped  = false;
 	can_facestab            = false;
 	has_numhits             = false;
 	has_MGB                 = false;
@@ -407,6 +408,14 @@ Mob::Mob(
 	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
+
+	weaponstance.enabled = false;
+	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied
+	weaponstance.itembonus_enabled = false;		//Set when bonus is applied
+	weaponstance.aabonus_enabled = false;		//Controlled by function TogglePassiveAA
+	weaponstance.spellbonus_buff_spell_id = 0;
+	weaponstance.itembonus_buff_spell_id = 0;
+	weaponstance.aabonus_buff_spell_id = 0;
 
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
@@ -3858,8 +3867,8 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD];
-	front_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION];
+	back_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
@@ -3875,6 +3884,29 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 
 	return total_mod;
 }
+
+int32 Mob::GetPositionalDmgTakenAmt(Mob *attacker)
+{
+	if (!attacker)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_amt = 0;
+
+	back_arc += itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] + aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] + spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] + aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] + spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT];
+
+	if (back_arc || front_arc) {
+		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
+			total_amt = back_arc;
+		else
+			total_amt = front_arc;
+	}
+
+	return total_amt;
+}
+
 
 int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
@@ -4856,8 +4888,8 @@ int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD];
-	front_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION];
+	back_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (BehindMob(defender, GetX(), GetY()))//Check if attacker is striking from behind
@@ -4894,6 +4926,30 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 				+ itembonuses.SkillDamageAmount2[skill] + spellbonuses.SkillDamageAmount2[skill];
 
 	return skill_dmg;
+}
+
+int16 Mob::GetPositionalDmgAmt(Mob* defender)
+{
+	if (!defender)
+		return 0;
+
+	//SPA 504
+	int front_arc_dmg_amt = 0;
+	int back_arc_dmg_amt = 0;
+
+	int total_amt = 0;
+
+	back_arc_dmg_amt += itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] + aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] + spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK];
+	front_arc_dmg_amt += itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] + aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] + spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT];
+
+	if (back_arc_dmg_amt || front_arc_dmg_amt) {
+		if (BehindMob(defender, GetX(), GetY()))
+			total_amt = back_arc_dmg_amt; 
+		else
+			total_amt = front_arc_dmg_amt;
+	}
+	
+	return total_amt;
 }
 
 void Mob::MeleeLifeTap(int32 damage) {

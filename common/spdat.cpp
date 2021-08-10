@@ -1236,6 +1236,7 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_Ff_CasterClass:
 	case SE_Ff_Same_Caster: 
 	case SE_Proc_Timer_Modifier:
+	case SE_Weapon_Stance:
 	case SE_TwinCastBlocker:
 	case SE_Fc_CastTimeAmt:
 	case SE_Fc_CastTimeMod2:

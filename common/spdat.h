@@ -64,6 +64,7 @@
 #define SPELL_SHAPECHANGE70 6503
 #define SPELL_MANA_BURN 2751
 #define SPELL_LIFE_BURN 2755
+#define SPELL_TOUCH_OF_THE_DIVINE 4789
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502
@@ -834,11 +835,11 @@ typedef enum {
 #define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
 #define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
 #define SE_Double_Melee_Round			471 // implemenetd, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
-//#define SE_Buy_AA_Rank				472 //
+#define SE_Buy_AA_Rank					472 // implemented,  @Special, Used in AA abilities that have Enable/Disable toggle. Spell on Disabled Rank has this effect in it, base: 1, limit: none, max: none, Note: This will not just buy an AA
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-//#define SE_Weapon_Stance				476 //
+#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Duel Wield is equiped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
 #define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
 #define SE_Ff_Value_Min					479 // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value
@@ -865,10 +866,10 @@ typedef enum {
 #define SE_Fc_CastTimeMod2				500 // implemented, @Fc, On Caster, cast time mod pct, base: pct, Note: Can reduce to instant cast
 #define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
 #define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
-#define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
-//#define SE_Melee_Damage_Position_Amt	504 //
-#define SE_Damage_Taken_Position_Mod	505 // implemented - mitigate melee damage by pct if dmg taken from Front or Behind
-//#define SE_Damage_Taken_Position_Amt	506 //
+#define SE_Melee_Damage_Position_Mod	503 // implemented, @OffBonus, modify melee damage by percent if done from Front or Behind opponent, base: pct, limit: 0=back 1=front, max: none
+#define SE_Melee_Damage_Position_Amt	504 // implemented, @OffBonus, modify melee damage by flat amount if done from Front or Behind opponent, base: amt, limit: 0=back 1=front, max: none
+#define SE_Damage_Taken_Position_Mod	505 // implemented, @DefBonus, modify melee damage by percent if dmg taken from Front or Behind, base: pct, limit: 0=back 1=front, max: none
+#define SE_Damage_Taken_Position_Amt	506 // implemented -@DefBonus, modify melee damage by flat amount if dmg taken from your Front or Behind, base: amt, limit: 0=back 1=front, max: none
 #define SE_Fc_Amplify_Mod				507 // implemented, @Fc, On Caster, damage-heal-dot mod pct, base: pct
 #define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
