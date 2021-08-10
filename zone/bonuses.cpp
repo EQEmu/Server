@@ -154,6 +154,7 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 	SetShieldEquiped(false);
 	SetTwoHandBluntEquiped(false);
 	SetTwoHanderEquipped(false);
+	SetDuelWeaponsEquiped(false);
 
 	unsigned int i;
 	// Update: MainAmmo should only calc skill mods (TODO: Check for other cases)
@@ -171,8 +172,13 @@ void Client::CalcItemBonuses(StatBonuses* newbon) {
 			SetTwoHandBluntEquiped(true);
 			SetTwoHanderEquipped(true);
 		}
-		else if (i == EQ::invslot::slotPrimary && (item && (item->ItemType == EQ::item::ItemType2HSlash || item->ItemType == EQ::item::ItemType2HPiercing)))
+		else if (i == EQ::invslot::slotPrimary && (item && (item->ItemType == EQ::item::ItemType2HSlash || item->ItemType == EQ::item::ItemType2HPiercing))) {
 			SetTwoHanderEquipped(true);
+		}
+	}
+
+	if (CanThisClassDualWield()) {
+		SetDuelWeaponsEquiped(true);
 	}
 
 	//tribute items
@@ -1539,6 +1545,26 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
+		case SE_Damage_Taken_Position_Amt:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+
+			newbon->Damage_Taken_Position_Amt[base2] += base1;
+			break;
+		}
+
+		case SE_Melee_Damage_Position_Amt:
+		{
+			//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+			if (base2 < 0 || base2 > 2)
+				break;
+
+			newbon->Melee_Damage_Position_Amt[base2] += base1;
+			break;
+		}
+
 		case SE_DS_Mitigation_Amount:
 			newbon->DS_Mitigation_Amount += base1;
 			break;
@@ -1554,6 +1580,25 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_Pet_Add_Atk:
 			newbon->Pet_Add_Atk += base1;
 			break;
+
+		case SE_Weapon_Stance:
+		{
+			if (IsValidSpell(base1)) { //base1 is the spell_id of buff
+				if (base2 <= WEAPON_STANCE_TYPE_MAX) { //0=2H, 1=Shield, 2=DW
+					if (IsValidSpell(newbon->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
+						if (spells[newbon->WeaponStance[base2]].rank < spells[base1].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
+							newbon->WeaponStance[base2] = base1; //Overwrite with new effect
+							SetWeaponStanceEnabled(true);
+						}
+					}
+					else {
+						newbon->WeaponStance[base2] = base1; //If no prior effect exists, then apply
+						SetWeaponStanceEnabled(true);
+					}
+				}
+			}
+			break;
+		}
 
 		case SE_ExtraAttackChance:
 		{
@@ -1598,7 +1643,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			break;
 		}
-				
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -1614,6 +1659,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		case SE_TrapCircumvention:
 			break;
+
 
 		// not handled here
 		case SE_HastenedAASkill:
@@ -3470,6 +3516,26 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
+			case SE_Damage_Taken_Position_Amt:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+
+				new_bonus->Damage_Taken_Position_Amt[base2] += effect_value;
+				break;
+			}
+
+			case SE_Melee_Damage_Position_Amt:
+			{
+				//Mitigate if damage taken from behind base2 = 0, from front base2 = 1
+				if (base2 < 0 || base2 > 2)
+					break;
+
+				new_bonus->Melee_Damage_Position_Amt[base2] += effect_value;
+				break;
+			}
+
 			case SE_DS_Mitigation_Amount:
 				new_bonus->DS_Mitigation_Amount += effect_value;
 				break;
@@ -3491,10 +3557,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (AdditiveWornBonus) {
 					new_bonus->ExtendedShielding += effect_value;
 				}
-				else if (effect_value < 0 && new_bonus->ExtendedShielding > effect_value)
+				else if (effect_value < 0 && new_bonus->ExtendedShielding > effect_value){
 					new_bonus->ExtendedShielding = effect_value;
-				else if (effect_value > 0 && new_bonus->ExtendedShielding < effect_value)
+        }
+				else if (effect_value > 0 && new_bonus->ExtendedShielding < effect_value){
 					new_bonus->ExtendedShielding = effect_value;
+        }
 				break;
 			}
 
@@ -3503,10 +3571,44 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				if (AdditiveWornBonus) {
 					new_bonus->ShieldDuration += effect_value;
 				}
-				else if (effect_value < 0 && new_bonus->ShieldDuration > effect_value)
+				else if (effect_value < 0 && new_bonus->ShieldDuration > effect_value){
 					new_bonus->ShieldDuration = effect_value;
-				else if (effect_value > 0 && new_bonus->ShieldDuration < effect_value)
+        }
+				else if (effect_value > 0 && new_bonus->ShieldDuration < effect_value){
 					new_bonus->ShieldDuration = effect_value;
+        }
+        break;
+      }
+
+			case SE_Weapon_Stance: {
+				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff
+					if (base2 <= WEAPON_STANCE_TYPE_MAX) { //0=2H, 1=Shield, 2=DW
+						if (IsValidSpell(new_bonus->WeaponStance[base2])) { //Check if we already a spell_id saved for this effect
+							if (spells[new_bonus->WeaponStance[base2]].rank < spells[effect_value].rank) { //If so, check if any new spellids with higher rank exist (live spells for this are ranked).
+								new_bonus->WeaponStance[base2] = effect_value; //Overwrite with new effect
+								SetWeaponStanceEnabled(true);
+								
+								if (WornType) {
+									weaponstance.itembonus_enabled = true;
+								}
+								else {
+									weaponstance.spellbonus_enabled = true;
+								}
+							}
+						}
+						else {
+							new_bonus->WeaponStance[base2] = effect_value; //If no prior effect exists, then apply
+							SetWeaponStanceEnabled(true);
+
+							if (WornType) {
+								weaponstance.itembonus_enabled = true;
+							}
+							else {
+								weaponstance.spellbonus_enabled = true;
+							}
+						}
+					}
+				}
 				break;
 			}
 
@@ -5098,21 +5200,39 @@ void Mob::NegateSpellsBonuses(uint16 spell_id)
 					break;
 
 				case SE_Melee_Damage_Position_Mod:
-					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]    = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]  = effect_value;
-					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]   = effect_value;
-					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]      = effect_value;
-					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITIONAL_LOCATION]    = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]    = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+					spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]   = effect_value;
+					aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]      = effect_value;
+					itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT]    = effect_value;
 					break;
 
 				case SE_Damage_Taken_Position_Mod:
-					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD] = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]    = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_DAMAGE_MOD]  = effect_value;
-					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]   = effect_value;
-					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]      = effect_value;
-					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITIONAL_LOCATION]    = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]    = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK]  = effect_value;
+					spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]   = effect_value;
+					aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]      = effect_value;
+					itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT]    = effect_value;
+					break;
+
+				case SE_Melee_Damage_Position_Amt:
+					spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					break;
+
+				case SE_Damage_Taken_Position_Amt:
+					spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] = effect_value;
+					spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
+					itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] = effect_value;
 					break;
 
 

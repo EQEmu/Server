@@ -104,6 +104,8 @@
 #define PET_BUTTON_SPELLHOLD	9
 
 #define AURA_HARDCAP		2
+#define WEAPON_STANCE_TYPE_MAX 2
+
 
 #define SHIELD_ABILITY_RECAST_TIME 180
 
@@ -325,7 +327,7 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
-	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects 
 	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
@@ -540,11 +542,15 @@ struct StatBonuses {
 	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
 	int32   Damage_Taken_Position_Mod[2];		// base = percent melee damage reduction base2 0=back 1=front. [0]Back[1]Front
 	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
+	int32   Damage_Taken_Position_Amt[2];		// base = flat amt melee damage reduction base2 0=back 1=front. [0]Back[1]Front
+	int32   Melee_Damage_Position_Amt[2];		// base = flat amt melee damage increase base2 0=back 1=front. [0]Back[1]Front
 	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
 	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
+	int32   WeaponStance[WEAPON_STANCE_TYPE_MAX +1];// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
+
 
 	// AAs
 	int32	ShieldDuration;						// extends duration of /shield ability
@@ -651,8 +657,8 @@ namespace SBIndex {
 	constexpr uint16 ROOT_BUFFSLOT                          = 1; // SPA 99
 	constexpr uint16 RUNE_AMOUNT                            = 0; // SPA 55
 	constexpr uint16 RUNE_BUFFSLOT                          = 1; // SPA 78
-	constexpr uint16 POSITIONAL_DAMAGE_MOD                  = 0; // SPA 503-506
-	constexpr uint16 POSITIONAL_LOCATION                    = 1; // SPA 503-506
+	constexpr uint16 POSITION_BACK							= 0; // SPA 503-506
+	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
 	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
 	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427
@@ -677,6 +683,21 @@ typedef struct
 	uint16 base_spellID;
 	int level_override;
 } tProc;
+
+
+struct WeaponStance_Struct {
+	bool enabled;
+	bool spellbonus_enabled;
+	bool itembonus_enabled;
+	bool aabonus_enabled;
+	int spellbonus_buff_spell_id;
+	int itembonus_buff_spell_id;
+	int aabonus_buff_spell_id;
+};
+
+constexpr uint16 WEAPON_STANCE_TYPE_2H = 0;
+constexpr uint16 WEAPON_STANCE_TYPE_SHIELD = 1;
+constexpr uint16 WEAPON_STANCE_TYPE_DUAL_WIELD = 2;
 
 typedef struct
 {

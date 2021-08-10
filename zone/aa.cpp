@@ -1162,6 +1162,7 @@ void Client::IncrementAlternateAdvancementRank(int rank_id) {
 
 void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+
 	if(!rank) {
 		return;
 	}
@@ -1178,9 +1179,11 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	if(!CanUseAlternateAdvancementRank(rank)) {
 		return;
 	}
+	
+	bool use_toggle_passive_hotkey = UseTogglePassiveHotkey(*rank);
 
 	//make sure it is not a passive
-	if(!rank->effects.empty()) {
+	if(!rank->effects.empty() && !use_toggle_passive_hotkey) {
 		return;
 	}
 
@@ -1188,7 +1191,6 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	// We don't have the AA
 	if (!GetAA(rank_id, &charges))
 		return;
-
 	//if expendable make sure we have charges
 	if(ability->charges > 0 && charges < 1)
 		return;
@@ -1241,15 +1243,21 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		}
 	}
 
-	// Bards can cast instant cast AAs while they are casting another song
-	if(spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-		if(!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
-			return;
+	if (use_toggle_passive_hotkey) {
+		TogglePassiveAlternativeAdvancement(*rank, ability->id);
+	}
+	else {
+		// Bards can cast instant cast AAs while they are casting another song
+		if (spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
+			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+				return;
+			}
+			ExpendAlternateAdvancementCharge(ability->id);
 		}
-		ExpendAlternateAdvancementCharge(ability->id);
-	} else {
-		if(!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
-			return;
+		else {
+			if (!CastSpell(rank->spell, target_id, EQ::spells::CastingSlot::AltAbility, -1, -1, 0, -1, rank->spell_type + pTimerAAStart, cooldown, nullptr, rank->id)) {
+				return;
+			}
 		}
 	}
 
@@ -1287,16 +1295,16 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 }
 
 void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
-	for(auto &iter : aa_ranks) {
+	for (auto &iter : aa_ranks) {
 		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
-		if(ability && aa_id == ability->id) {
-			if(iter.second.second > 0) {
+		if (ability && aa_id == ability->id) {
+			if (iter.second.second > 0) {
 				iter.second.second -= 1;
 
-				if(iter.second.second == 0) {
-					if(IsClient()) {
+				if (iter.second.second == 0) {
+					if (IsClient()) {
 						AA::Rank *r = ability->GetRankByPointsSpent(iter.second.first);
-						if(r) {
+						if (r) {
 							CastToClient()->GetEPP().expended_aa += r->cost;
 						}
 					}
@@ -1307,7 +1315,7 @@ void Mob::ExpendAlternateAdvancementCharge(uint32 aa_id) {
 					aa_ranks.erase(iter.first);
 				}
 
-				if(IsClient()) {
+				if (IsClient()) {
 					Client *c = CastToClient();
 					c->SaveAA();
 					c->SendAlternateAdvancementPoints();
@@ -1796,3 +1804,169 @@ bool Mob::CheckAATimer(int timer)
 	}
 	return false;
 }
+
+void Client::TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ability_id)
+{
+	/*
+		Certain AA, like Weapon Stance line use a special toggle Hotkey to enable or disable the AA's passive abilities.
+		This is occurs by doing the following. Each 'rank' of Weapon Stance is actually 2 actual ranks.
+		First rank is always the Disabled version which cost X amount of AA. Second rank is the Enabled version which cost 0 AA.
+		When you buy the first rank, you make a hotkey that on live say 'Weapon Stance Disabled', if you clik that it then BUYS the
+		next rank of AA (cost 0) which switches the hotkey to 'Enabled Weapon Stance' and you are given the passive buff effects.
+		If you click the Enabled hotkey, it causes you to lose an AA rank and once again be disabled. Thus, you are switching between
+		two AA ranks. Thefore when creating an AA using this ability, you need generate both ranks. Follow the same pattern for additional ranks.
+
+		IMPORTANT! The toggle system can be used to Enable or Disable ANY passive AA. You just need to follow the instructions on how to create it.
+		Example: Enable or Disable a buff that gives a large hate modifier. Play may Enable when tanking and Disable when DPS ect.
+
+		Note: On live the Enabled rank is shown having a Charge of 1, while Disabled rank has no charges. Our current code doesn't support that. Do not use charges.
+		Note: Live uses a spell 'Disable Ability' ID 46164 to trigger a script to do the AA rank changes. At present time it is not coded to require that, any spell id works.
+		Note: Discovered a bug on ROF2, where when you buy first rank of an AA with a hotkey, it will always display the title of the second rank in the database. Be aware. No easy fix.
+
+		Dev Note(Kayen 8/1/21): The system as set up is very similar to live, with exception that live gives the Enabled rank 1 Charge. The code here emulates what happens when a
+		charge would be expended.
+
+		Instructions for how to make the AA - assuming a basic level of knowledge of how AA's work.
+		- aa_abilities table : Create new ability with a hotkey, type 3, zero charges
+		- aa_ranks table :  [Disabled rank] First rank, should have a cost > 0 (this is what you buy), Set hotkeys, MUST SET A SPELL CONTAINING EFFECT SE_Buy_AA_Rank(SPA 472), set a short recast timer.
+							[Enabled rank] Second rank, should have a cost = 0, Set hotkeys, Set any valid spell ID you want (it has to exist but does nothing), set a short recast timer.
+							*Recommend if doing custom, just make the hotkey titled 'Toggle <Ability Name>' and use for both.
+
+		- aa_rank_effects table : [Disabled rank] No data needed in the aa_ranks_effect table
+								  [Enabled rank]  Second rank set effect_id = 457 (weapon stance), slot 1,2,3, base1= spell triggers, base= weapon type (0=2H,1=SH,2=DW), for slot 1,2,3
+
+			Example SQL			-Disabled
+								DO NOT ADD any data to the aa_rank_effects for this rank_id
+
+								-Enabled
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 1, 476, 145,0);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 2, 476, 174,1);
+								INSERT INTO aa_rank_effects (rank_id, slot, effect_id, base1, base2) VALUES (20003, 3, 476, 172,2);
+
+		Warning: If you want to design an AA that only uses one weapon type to trigger, like will only apply buff if Shield. Do not include data for other types. Never have a base value=0
+		in the Enabled rank.
+
+	*/
+
+	bool enable_next_rank = IsEffectInSpell(rank.spell, SE_Buy_AA_Rank);
+
+	if (enable_next_rank) {
+
+		//Enable
+		TogglePurchaseAlternativeAdvancementRank(rank.next_id);
+		Message(Chat::Spells, "You enable an ability."); //Message live gives you. Should come from spell.
+		
+		AA::Rank *rank_next = zone->GetAlternateAdvancementRank(rank.next_id);
+		
+		//Add checks for any special cases for toggle.
+		if (IsEffectinAlternateAdvancementRankEffects(*rank_next, SE_Weapon_Stance)) {
+			weaponstance.aabonus_enabled = true;
+			ApplyWeaponsStance();
+		}
+		return;
+	}
+	else {
+
+		//Disable
+		ResetAlternateAdvancementRank(ability_id);
+		TogglePurchaseAlternativeAdvancementRank(rank.prev_id);
+		Message(Chat::Spells, "You disable an ability."); //Message live gives you. Should come from spell.
+
+		//Add checks for any special cases for toggle.
+		if (IsEffectinAlternateAdvancementRankEffects(rank, SE_Weapon_Stance)) {
+			weaponstance.aabonus_enabled = false;
+			BuffFadeBySpellID(weaponstance.aabonus_buff_spell_id);
+		}
+		return;
+	}
+}
+
+bool Client::UseTogglePassiveHotkey(const AA::Rank &rank) {
+
+	/*
+		Disabled rank needs a rank spell containing the SE_Buy_AA_Rank effect to return true.
+		Enabled rank checks to see if the prior rank contains a rank spell with SE_Buy_AA_Rank, if so true.
+
+		Note: On live the enabled rank is Expendable with Charge 1.
+
+		We have already confirmed the rank spell is valid before this function is called.
+	*/
+
+
+	if (IsEffectInSpell(rank.spell, SE_Buy_AA_Rank)) {//Checked when is Disabled.
+		return true;
+	}
+	else if (rank.prev_id != -1) {//Check when effect is Enabled.
+		AA::Rank *rank_prev = zone->GetAlternateAdvancementRank(rank.prev_id);
+
+		if (IsEffectInSpell(rank_prev->spell, SE_Buy_AA_Rank)) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Client::IsEffectinAlternateAdvancementRankEffects(const AA::Rank &rank, int effect_id) {
+
+	for (const auto &e : rank.effects) {
+
+		if (e.effect_id == effect_id) {
+			return true;
+		}
+	}
+	return false;
+}
+
+void Client::ResetAlternateAdvancementRank(uint32 aa_id) {
+	
+	/*
+		Resets your AA to baseline
+	*/
+
+	for(auto &iter : aa_ranks) {
+
+		AA::Ability *ability = zone->GetAlternateAdvancementAbility(iter.first);
+
+		if(ability && aa_id == ability->id) {
+			RemoveExpendedAA(ability->first_rank_id);
+			aa_ranks.erase(iter.first);
+			SaveAA();
+			SendAlternateAdvancementPoints();
+			return;
+		}
+	}
+}
+
+void Client::TogglePurchaseAlternativeAdvancementRank(int rank_id){
+	
+	/*
+		Stripped down version of purchasing AA. Will give no messages.
+		Used with toggle hotkey functions.
+	*/
+
+	AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+	if (!rank) {
+		return;
+	}
+
+	if (!rank->base_ability) {
+		return;
+	}
+
+	if (!CanPurchaseAlternateAdvancementRank(rank, false, false)) {
+		return;
+	}
+
+	rank_id = rank->base_ability->first_rank_id;
+	SetAA(rank_id, rank->current_value, 0);
+
+	if (rank->next) {
+		SendAlternateAdvancementRank(rank->base_ability->id, rank->next->current_value);
+	}
+
+	SaveAA();
+	SendAlternateAdvancementPoints();
+	SendAlternateAdvancementStats();
+	CalcBonuses();
+}
+
