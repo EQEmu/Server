@@ -1502,7 +1502,7 @@ protected:
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
 	bool has_duelweaponsequiped;
-  bool use_double_melee_round_dmg_bonus;
+	bool use_double_melee_round_dmg_bonus;
 	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;

@@ -834,7 +834,7 @@ typedef enum {
 #define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
 #define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
 #define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
-#define SE_Double_Melee_Round			471 // implemenetd, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
+#define SE_Double_Melee_Round			471 // implemented, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
 #define SE_Buy_AA_Rank					472 // implemented,  @Special, Used in AA abilities that have Enable/Disable toggle. Spell on Disabled Rank has this effect in it, base: 1, limit: none, max: none, Note: This will not just buy an AA
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
