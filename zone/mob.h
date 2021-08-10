@@ -432,6 +432,8 @@ public:
 	inline void SetTwoHandBluntEquiped(bool val) { has_twohandbluntequiped = val; }
 	bool HasTwoHanderEquipped() { return has_twohanderequipped; }
 	void SetTwoHanderEquipped(bool val) { has_twohanderequipped = val; }
+	bool HasDualWeaponsEquiped() const { return has_duelweaponsequiped; }
+	inline void SetDuelWeaponsEquiped(bool val) { has_duelweaponsequiped = val; }
 	bool CanFacestab() { return can_facestab; }
 	void SetFacestab(bool val) { can_facestab = val; }
 	virtual uint16 GetSkill(EQ::skills::SkillType skill_num) const { return 0; }
@@ -804,6 +806,7 @@ public:
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
 	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	int32 GetPositionalDmgTaken(Mob *attacker);
+	int32 GetPositionalDmgTakenAmt(Mob *attacker);
 	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
 	int16 CalcResistChanceBonus();
 	int16 CalcFearResistChance();
@@ -821,6 +824,7 @@ public:
 	int16 GetSkillReuseTime(uint16 skill);
 	int GetCriticalChanceBonus(uint16 skill);
 	int16 GetSkillDmgAmt(uint16 skill);
+	int16 GetPositionalDmgAmt(Mob* defender);
 	bool TryReflectSpell(uint32 spell_id);
 	inline bool CanBlockSpell() const { return(spellbonuses.FocusEffects[focusBlockNextSpell]); }
 	bool DoHPToManaCovert(uint16 mana_cost = 0);
@@ -1127,6 +1131,10 @@ public:
 
 	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
+
+	WeaponStance_Struct weaponstance;
+	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
+	inline void SetWeaponStanceEnabled(bool val) { weaponstance.enabled = val; }
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
@@ -1489,6 +1497,7 @@ protected:
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
 	bool has_twohanderequipped;
+	bool has_duelweaponsequiped;
 	bool can_facestab;
 	bool has_numhits;
 	bool has_MGB;
