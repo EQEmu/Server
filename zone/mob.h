@@ -1125,11 +1125,20 @@ public:
 
 	Trade* trade;
 
+	void ShieldAbility(uint32 target_id, int max_shlder_distance = 15, int shield_duration = 12000, int shld_target_mitigation = 50, int shlder_mitigation = 75);
 	void DoShieldDamageOnShielder(Mob* shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
-	inline int GetShielderID() const { return shielder_id; }
-	inline void SetShielderID(int ent_id) { shielder_id = ent_id; }
-	inline int GetShieldTargetID() const { return shield_target_id; }
-	inline void SetShieldTargetID(int ent_id) { shield_target_id = ent_id; }
+	void ShieldAbilityFinish();
+	void ShieldAbilityClearVariables();
+	inline uint32 GetShielderID() const { return shielder_id; }
+	inline void SetShielderID(uint32 val) { shielder_id = val; }
+	inline uint32 GetShieldTargetID() const { return shield_target_id; }
+	inline void SetShieldTargetID(uint32 val) { shield_target_id = val; }
+	inline int GetShieldTargetMitigation() const { return shield_target_mitigation; }
+	inline void SetShieldTargetMitigation(int val) { shield_target_mitigation = val; }
+	inline int GetShielderMitigation() const { return shielder_mitigation; }
+	inline void SetShielderMitigation(int val) { shielder_mitigation = val; }
+	inline int GetMaxShielderDistance() const { return shielder_max_distance; }
+	inline void SetShielerMaxDistance(int val) { shielder_max_distance = val; }
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
@@ -1433,6 +1442,9 @@ protected:
 	Timer shield_timer;
 	uint32 shield_target_id;
 	uint32 shielder_id;
+	int shield_target_mitigation;
+	int shielder_mitigation;
+	int shielder_max_distance;
 
 	//spell casting vars
 	Timer spellend_timer;

@@ -287,7 +287,9 @@
 #define SUSPEND_MINION_SUSPEND		3268	//%1 tells you, 'By your command, master.'
 #define ONLY_SUMMONED_PETS			3269	//3269 This effect only works with summoned pets.
 #define SUSPEND_MINION_FIGHTING		3270	//Your pet must be at peace, first.
+#define SHIELD_TARGET_NPC			3278	//You must first target a living Player Character.
 #define ALREADY_SHIELDED			3279	//Either you or your target is already being shielded.
+#define ALREADY_SHIELDING			3280	//Either you or your target is already shielding another.
 #define START_SHIELDING				3281	//%1 begins to use %2 as a living shield!
 #define END_SHIELDING				3282	//%1 ceases protecting %2.
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.

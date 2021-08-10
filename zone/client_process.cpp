@@ -461,14 +461,7 @@ bool Client::Process() {
 		}
 		
 		if (shield_timer.Check()) {
-			Mob * shield_target = entity_list.GetMob(GetShieldTargetID());
-
-			if (shield_target) {
-				entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
-			}
-			shield_timer.Disable();
-			SetShieldTargetID(0);
-			shield_target->SetShielderID(0);
+			ShieldAbilityFinish();
 		}
 
 		SpellProcess();

@@ -378,6 +378,9 @@ Mob::Mob(
 	shield_timer.Disable();
 	shield_target_id = 0;
 	shielder_id = 0;
+	shield_target_mitigation = 0;
+	shielder_mitigation = 0;
+	shielder_max_distance = 0;
 
 	destructibleobject = false;
 	wandertype         = 0;
@@ -6116,6 +6119,104 @@ void Mob::CommonBreakInvisible()
 
 float Mob::GetDefaultRaceSize() const {
 	return GetRaceGenderDefaultHeight(race, gender);
+}
+
+void Mob::ShieldAbility(uint32 target_id, int max_shlder_distance, int shield_duration, int shld_target_mitigation, int shlder_mitigation)
+{
+
+	Mob* shield_target = entity_list.GetMob(target_id);
+
+	if (!shield_target) {
+		return;
+	}
+
+	if (shield_target->GetID() == GetID()) {
+		return;
+	}
+
+	//You have a shielder, or your 'Shield Target' already has a 'Shielder'
+	if (GetShielderID() || shield_target->GetShielderID()) {
+		
+		if (IsClient()) {
+			MessageString(Chat::White, ALREADY_SHIELDED);
+		}
+		return;
+	}
+
+	//You are being shielded or already have a 'Shield Target'
+	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
+		
+		if (IsClient()) {
+			MessageString(Chat::White, ALREADY_SHIELDING);
+			return;
+		}
+	}
+
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shlder_distance)) {
+		if (IsClient()) {
+			MessageString(Chat::White, TARGET_TOO_FAR); //Live doesn't give any message for failure, for the quest ability lets allow it. 
+		}
+		return;
+	}
+
+	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
+
+	SetShieldTargetID(shield_target->GetID());
+	SetShielderMitigation(shlder_mitigation);
+	SetShielerMaxDistance(max_shlder_distance);
+
+	shield_target->SetShielderID(GetID());
+	shield_target->SetShieldTargetMitigation(shld_target_mitigation);
+	
+	shield_timer.Start(shield_duration);
+}
+
+void Mob::ShieldAbilityFinish()
+{
+	Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
+
+	if (shield_target) {
+		entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
+		shield_target->SetShielderID(0);
+		shield_target->SetShieldTargetMitigation(0);
+	}
+	SetShieldTargetID(0);
+	SetShielderMitigation(0);
+	SetShielerMaxDistance(0);
+	shield_timer.Disable();
+}
+
+void Mob::ShieldAbilityClearVariables()
+{
+	//If 'shield target' dies
+	if (GetShielderID()){
+		
+		Mob* shielder = entity_list.GetMob(GetShielderID());
+
+		if (shielder) {
+			shielder->SetShieldTargetID(0);
+			shielder->SetShielderMitigation(0);
+			shielder->SetShielerMaxDistance(0);
+			shielder->shield_timer.Disable();
+		}
+		SetShielderID(0);
+		SetShieldTargetMitigation(0);
+	}
+
+	//If 'shielder' dies
+	if (GetShieldTargetID()) {
+
+		Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
+
+		if (shield_target) {
+			shield_target->SetShielderID(0);
+			shield_target->SetShieldTargetMitigation(0);
+		}
+		SetShieldTargetID(0);
+		SetShielderMitigation(0);
+		SetShielerMaxDistance(0);
+		shield_timer.Disable();
+	}
 }
 
 #ifdef BOTS

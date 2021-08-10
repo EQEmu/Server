@@ -4179,44 +4179,6 @@ XS(XS_Mob_GetResist) {
 	XSRETURN(1);
 }
 
-XS(XS_Mob_GetShieldTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_GetShieldTarget) {
-	dXSARGS;
-	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::GetShieldTarget(THIS)"); // @categories Script Utility
-	{
-		Mob *THIS;
-		Mob *RETVAL;
-		VALIDATE_THIS_IS_MOB;
-		//RETVAL = THIS->GetShieldTarget();
-		ST(0) = sv_newmortal();
-		sv_setref_pv(ST(0), "Mob", (void *) RETVAL);
-	}
-	XSRETURN(1);
-}
-
-XS(XS_Mob_SetShieldTarget); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_SetShieldTarget) {
-	dXSARGS;
-	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Mob::SetShieldTarget(THIS, mob)"); // @categories Script Utility
-	{
-		Mob *THIS;
-		Mob *mob;
-		VALIDATE_THIS_IS_MOB;
-		if (sv_derived_from(ST(1), "Mob")) {
-			IV tmp = SvIV((SV *) SvRV(ST(1)));
-			mob = INT2PTR(Mob *, tmp);
-		} else
-			Perl_croak(aTHX_ "mob is not of type Mob");
-		if (mob == nullptr)
-			Perl_croak(aTHX_ "mob is nullptr, avoiding crash.");
-
-		//THIS->SetShieldTarget(mob);
-	}
-	XSRETURN_EMPTY;
-}
-
 XS(XS_Mob_Charmed); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_Charmed) {
 	dXSARGS;
@@ -6301,6 +6263,50 @@ XS(XS_Mob_AddNimbusEffect) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_ShieldAbility); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_ShieldAbility) {
+	dXSARGS;
+	if (items < 2 || items > 6)
+		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, int32 max_shielder_distance, int32 shield_duration [ms]"); // @categories Spells and Disciplines
+	{
+		Mob *THIS;
+		uint32             target_id = (uint32)SvUV(ST(1));
+		int32			   max_shlder_distance;
+		int32			   shld_duration;
+		int32			   shld_target_mitigation;
+		int32			   shlder_mitigation;
+
+		VALIDATE_THIS_IS_MOB;
+		if (items < 3)
+			max_shlder_distance = 15;
+		else {
+			max_shlder_distance = max_shlder_distance = (int32)SvUV(ST(2));
+		}
+
+		if (items < 4)
+			shld_duration = 12000;
+		else {
+			shld_duration = (int32)SvUV(ST(3));
+		}
+
+		if (items < 5)
+			shld_target_mitigation = 50;
+		else {
+			shld_target_mitigation = (int32)SvUV(ST(4));
+		}
+
+		if (items < 6)
+			shlder_mitigation = 50;
+		else {
+			shlder_mitigation = (int32)SvUV(ST(5));
+		}
+
+		THIS->ShieldAbility(target_id, max_shlder_distance, shld_duration, shld_target_mitigation, shlder_mitigation);
+	
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef BOTS
 XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToBot)
@@ -6561,8 +6567,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "DontRootMeBefore"), XS_Mob_DontRootMeBefore, file, "$");
 	newXSproto(strcpy(buf, "DontSnareMeBefore"), XS_Mob_DontSnareMeBefore, file, "$");
 	newXSproto(strcpy(buf, "GetResist"), XS_Mob_GetResist, file, "$$");
-	newXSproto(strcpy(buf, "GetShieldTarget"), XS_Mob_GetShieldTarget, file, "$");
-	newXSproto(strcpy(buf, "SetShieldTarget"), XS_Mob_SetShieldTarget, file, "$$");
 	newXSproto(strcpy(buf, "Charmed"), XS_Mob_Charmed, file, "$");
 	newXSproto(strcpy(buf, "GetLevelHP"), XS_Mob_GetLevelHP, file, "$$");
 	newXSproto(strcpy(buf, "GetZoneID"), XS_Mob_GetZoneID, file, "$");
@@ -6672,6 +6676,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "CanRaceEquipItem"), XS_Mob_CanRaceEquipItem, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllNimbusEffects"), XS_Mob_RemoveAllNimbusEffects, file, "$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
+	newXSproto(strcpy(buf, "ShieldAbility"), XS_Mob_ShieldAbility, file, "$$$$$$");
 #ifdef BOTS
 	newXSproto(strcpy(buf, "CastToBot"), XS_Mob_CastToBot, file, "$");
 #endif

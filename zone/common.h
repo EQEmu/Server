@@ -105,6 +105,8 @@
 
 #define AURA_HARDCAP		2
 
+#define SHIELD_ABILITY_RECAST_TIME 180
+
 typedef enum {	//focus types
 	focusSpellHaste = 1,				//@Fc, SPA: 127, SE_IncreaseSpellHaste,				On Caster, cast time mod pct, base: pct
 	focusSpellDuration,					//@Fc, SPA: 128, SE_IncreaseSpellDuration,			On Caster, spell duration mod pct, base: pct
@@ -543,7 +545,6 @@ struct StatBonuses {
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
-
 
 	// AAs
 	int32	ShieldDuration;						// extends duration of /shield ability
