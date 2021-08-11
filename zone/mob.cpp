@@ -471,6 +471,8 @@ Mob::Mob(
 	AssistAggro = false;
 	npc_assist_cap = 0;
 
+	use_double_melee_round_dmg_bonus = false;
+
 #ifdef BOTS
 	m_manual_follow = false;
 #endif
@@ -4841,6 +4843,10 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	dmg_mod += itembonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] +
 		itembonuses.DamageModifier3[skill] + spellbonuses.DamageModifier3[skill] + aabonuses.DamageModifier3[skill];
 
+	if (GetUseDoubleMeleeRoundDmgBonus()) {
+		dmg_mod += itembonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] + spellbonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] + aabonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS];
+	}
+
 	if(dmg_mod < -100)
 		dmg_mod = -100;
 
@@ -4962,6 +4968,20 @@ void Mob::MeleeLifeTap(int32 damage) {
 		else
 			Damage(this, -lifetap_amt, 0, EQ::skills::SkillEvocation, false); //Dmg self for modified damage amount.
 	}
+}
+
+bool Mob::TryDoubleMeleeRoundEffect() {
+
+	auto chance = aabonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] + itembonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] +
+							spellbonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE];
+
+	if (chance && zone->random.Roll(chance)) {
+		SetUseDoubleMeleeRoundDmgBonus(true);
+		return true;
+	}
+
+	SetUseDoubleMeleeRoundDmgBonus(false);
+	return false;
 }
 
 bool Mob::TryReflectSpell(uint32 spell_id)
