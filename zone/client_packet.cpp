@@ -1718,6 +1718,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	ApplyWeaponsStance();
+
 	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
 
 	/**

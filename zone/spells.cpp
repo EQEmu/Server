@@ -224,17 +224,9 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (spellbonuses.NegateIfCombat)
 		BuffFadeByEffect(SE_NegateIfCombat);
 
-	if(IsClient() && GetTarget() && IsHarmonySpell(spell_id))
-	{
-		for(int i = 0; i < EFFECT_COUNT; i++) {
-			// not important to check limit on SE_Lull as it doesnt have one and if the other components won't land, then SE_Lull wont either
-			if (spells[spell_id].effectid[i] == SE_ChangeFrenzyRad || spells[spell_id].effectid[i] == SE_Harmony) {
-				if((spells[spell_id].max[i] != 0 && GetTarget()->GetLevel() > spells[spell_id].max[i]) || GetTarget()->GetSpecialAbility(IMMUNE_PACIFY)) {
-					InterruptSpell(CANNOT_AFFECT_NPC, 0x121, spell_id);
-					return(false);
-				}
-			}
-		}
+	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
+		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
+		return false;
 	}
 
 	if (HasActiveSong() && IsBardSong(spell_id)) {
@@ -438,6 +430,28 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	// ok now we know the target
 	casting_spell_targetid = target_id;
+
+	if (RuleB(Spells, InvisRequiresGroup) && IsInvisSpell(spell_id)) {
+		if (GetTarget() && GetTarget()->IsClient()) {
+			Client *spell_target = entity_list.GetClientByID(target_id);
+			if (spell_target && spell_target->GetID() != GetID()) {
+				if (!spell_target->IsGrouped()) {
+					InterruptSpell(spell_id);
+					Message(Chat::Red, "You cannot invis someone who is not in your group.");
+					return false;
+				}
+				else if (spell_target->IsGrouped()) {
+					Group *target_group = spell_target->GetGroup();
+					Group *my_group     = GetGroup();
+					if (target_group && my_group && (target_group->GetID() != my_group->GetID())) {
+						InterruptSpell(spell_id);
+						Message(Chat::Red, "You cannot invis someone who is not in your group.");
+						return false;
+					}
+				}
+			}
+		}
+	}
 
 	// We don't get actual mana cost here, that's done when we consume the mana
 	if (mana_cost == -1)
@@ -1392,11 +1406,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		TrySympatheticProc(target, spell_id);
 	}
 
-	TryOnSpellFinished(this, target, spell_id);
+	TryOnSpellFinished(this, target, spell_id); //Use for effects that should be checked after SpellFinished is completed.
 
 	TryTwincast(this, target, spell_id);
 
-	TryTriggerOnCast(spell_id, 0);
+	TryTriggerOnCastFocusEffect(focusTriggerOnCast, spell_id);
 
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
@@ -2810,6 +2824,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
 		res = 10000; // ~16h override
 
+
 	res = mod_buff_duration(res, caster, target, spell_id);
 
 	LogSpells("Spell [{}]: Casting level [{}], formula [{}], base_duration [{}]: result [{}]",
@@ -2969,31 +2984,33 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 				}
 			}
 
-			/*Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
-			If checking same type ie A vs A, which ever effect base value is higher will take hold.
-			Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
-			is not fully removed at the time of the trgger*/
-			if (spellbonuses.AStacker[0]) {
-				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[1]))
+			/*
+				Buff stacking prevention spell effects (446 - 449) works as follows... If B prevent A, if C prevent B, if D prevent C.
+				If checking same type ie A vs A, which ever effect base value is higher will take hold.
+				Special check is added to make sure the buffs stack properly when applied from fade on duration effect, since the buff
+				is not fully removed at the time of the trigger
+			*/
+			if (spellbonuses.AStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_AStacker) && (sp2.effectid[i] <= spellbonuses.AStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 			}
 
-			if (spellbonuses.BStacker[0]) {
-				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[1]))
+			if (spellbonuses.BStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_BStacker) && (sp2.effectid[i] <= spellbonuses.BStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_AStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_BStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.CStacker[0]) {
-				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[1]))
+			if (spellbonuses.CStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_CStacker) && (sp2.effectid[i] <= spellbonuses.CStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_BStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_CStacker)))
 					return -1;
 			}
 
-			if (spellbonuses.DStacker[0]) {
-				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[1]))
+			if (spellbonuses.DStacker[SBIndex::BUFFSTACKER_EXISTS]) {
+				if ((effect2 == SE_DStacker) && (sp2.effectid[i] <= spellbonuses.DStacker[SBIndex::BUFFSTACKER_VALUE]))
 					return -1;
 				if ((effect2 == SE_CStacker) && (!IsCastonFadeDurationSpell(spellid1) && buffs[buffslot].ticsremaining != 1 && IsEffectInSpell(spellid1, SE_DStacker)))
 					return -1;
@@ -3805,6 +3822,12 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			return false;
 		}
 	}
+	//Need this to account for special AOE cases.
+	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, spelltar)) {
+		MessageString(Chat::SpellFailure, SPELL_NO_EFFECT);
+		return false;
+	}
+
 	// Block next spell effect should be used up first(since its blocking the next spell)
 	if(CanBlockSpell()) {
 		int buff_count = GetMaxTotalSlots();
@@ -4559,7 +4582,12 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
 
 	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
+
 	resist_modifier -= 2 * focus_resist;
+
+	int focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id);
+
+	resist_modifier -= focus_incoming_resist;
 
 	//Check for fear resist
 	bool IsFear = false;

@@ -31,6 +31,7 @@ public:
 	}
 
 	void SendSound();
+	void Sit();
 	void Save();
 	void Save(int commit_now);
 	void SaveBackup();
@@ -56,7 +57,7 @@ public:
 	bool GetGM();
 	void SetBaseClass(int v);
 	void SetBaseRace(int v);
-	void SetBaseGender(int v);	
+	void SetBaseGender(int v);
 	int GetClassBitmask();
 	int GetRaceBitmask();
 	int GetBaseFace();

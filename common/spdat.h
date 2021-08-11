@@ -64,6 +64,7 @@
 #define SPELL_SHAPECHANGE70 6503
 #define SPELL_MANA_BURN 2751
 #define SPELL_LIFE_BURN 2755
+#define SPELL_TOUCH_OF_THE_DIVINE 4789
 // these have known hardcoded behavior but we don't do anything yet, move them above this comment when fixed
 #define SPELL_THE_DAINS_JUSTICE 1476
 #define SPELL_MODULATION 1502
@@ -169,6 +170,25 @@
 const int Z_AGGRO=10;
 
 const uint32 MobAISpellRange=100; // max range of buffs
+
+enum FocusLimitIncludes {
+	IncludeExistsSELimitResist        = 0,
+	IncludeFoundSELimitResist         = 1,
+	IncludeExistsSELimitSpell         = 2,
+	IncludeFoundSELimitSpell          = 3,
+	IncludeExistsSELimitEffect        = 4,
+	IncludeFoundSELimitEffect         = 5,
+	IncludeExistsSELimitTarget        = 6,
+	IncludeFoundSELimitTarget         = 7,
+	IncludeExistsSELimitSpellGroup    = 8,
+	IncludeFoundSELimitSpellGroup     = 9,
+	IncludeExistsSELimitCastingSkill  = 10,
+	IncludeFoundSELimitCastingSkill   = 11,
+	IncludeExistsSELimitSpellClass    = 12,
+	IncludeFoundSELimitSpellClass     = 13,
+	IncludeExistsSELimitSpellSubclass = 14,
+	IncludeFoundSELimitSpellSubclass  = 15
+};
 
 enum SpellTypes : uint32
 {
@@ -470,24 +490,24 @@ typedef enum {
 #define SE_ImprovedDamage				124 // implemented
 #define SE_ImprovedHeal					125 // implemented
 #define SE_SpellResistReduction			126 // implemented
-#define SE_IncreaseSpellHaste			127 // implemented
-#define SE_IncreaseSpellDuration		128 // implemented
-#define SE_IncreaseRange				129 // implemented
-#define SE_SpellHateMod					130 // implemented
-#define SE_ReduceReagentCost			131 // implemented
-#define SE_ReduceManaCost				132 // implemented
-#define SE_FcStunTimeMod				133	// implemented - Modify duration of stuns.
-#define SE_LimitMaxLevel				134 // implemented
-#define SE_LimitResist					135 // implemented
-#define SE_LimitTarget					136 // implemented
-#define SE_LimitEffect					137 // implemented
-#define SE_LimitSpellType				138 // implemented
-#define SE_LimitSpell					139 // implemented
-#define SE_LimitMinDur					140 // implemented
-#define SE_LimitInstant					141 // implemented
-#define SE_LimitMinLevel				142 // implemented
-#define SE_LimitCastTimeMin				143 // implemented
-#define SE_LimitCastTimeMax				144	// implemented (*not used in any known live spell)
+#define SE_IncreaseSpellHaste			127 // implemented, @Fc, On Caster, cast time mod pct, base: pct
+#define SE_IncreaseSpellDuration		128 // implemented, @Fc, On Caster, spell duration mod pct, base: pct
+#define SE_IncreaseRange				129 // implemented, @Fc, On Caster, spell range mod pct, base: pct
+#define SE_SpellHateMod					130 // implemented, @Fc, On Caster, spell hate mod pct, base: min pct, limit: max pct
+#define SE_ReduceReagentCost			131 // implemented, @Fc, On Caster, do not consume reagent pct chance, base: min pct, limit: max pct
+#define SE_ReduceManaCost				132 // implemented, @Fc, On Caster, reduce mana cost by pct, base: min pct, limt: max pct
+#define SE_FcStunTimeMod				133	// implemented, @Fc, On Caster, spell range mod pct, base: pct
+#define SE_LimitMaxLevel				134 // implemented, @Ff, Max level of spell that can be focused, if base2 then decrease effectiviness by base2 % per level over max, base:  lv, base2: effectiveness pct
+#define SE_LimitResist					135 // implemented, @Ff, Resist Type(s) that a spell focus can require or exclude, base1: resist type, Include: Positive Exclude: Negative
+#define SE_LimitTarget					136 // implemented, @Ff, Target Type(s) that a spell focus can require or exclude, base1: target type, Include: Positive Exclude: Negative
+#define SE_LimitEffect					137 // implemented, @Ff, Spell effect(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
+#define SE_LimitSpellType				138 // implemented, @Ff, Only allow focus spells that are Beneficial or Detrimental, base1: 0=det 1=bene
+#define SE_LimitSpell					139 // implemented, @Ff, Specific spell id(s) that a spell focus can require or exclude, base1: SPA id, Include: Positive Exclude: Negative
+#define SE_LimitMinDur					140 // implemented, @Ff, Mininum duration of spell that can be focused, base1: tics
+#define SE_LimitInstant					141 // implemented, @Ff, Include or exclude if an isntant cast spell can be focused, base1: 0=Exclude if Instant 1=Allow only if Instant
+#define SE_LimitMinLevel				142 // implemented, @Ff, Mininum level of spell that can be focused, base1: lv
+#define SE_LimitCastTimeMin				143 // implemented, @Ff, Mininum cast time of spell that can be focused, base1: milliseconds
+#define SE_LimitCastTimeMax				144	// implemented, @Ff, Max cast time of spell that can be focused, base1: milliseconds
 #define SE_Teleport2					145	// implemented - Banishment of the Pantheon
 //#define SE_ElectricityResist			146	// *not implemented TODO: Now used on live, xyz for teleport spells? also in temp pets?
 #define SE_PercentalHeal				147 // implemented
@@ -510,7 +530,7 @@ typedef enum {
 #define SE_AppraiseLDonChest			164	// implemented
 #define SE_DisarmLDoNTrap				165	// implemented
 #define SE_UnlockLDoNChest				166	// implemented
-#define SE_PetPowerIncrease				167 // implemented
+#define SE_PetPowerIncrease				167 // implemented, @Fc, On Caster, pet power mod, base: value
 #define SE_MeleeMitigation				168	// implemented
 #define SE_CriticalHitChance			169	// implemented
 #define SE_SpellCritChance				170	// implemented
@@ -609,7 +629,7 @@ typedef enum {
 #define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill			    264 // implemented
 #define SE_MasteryofPast				265 // implemented[AA] - Spells less than effect values level can not be fizzled
-#define SE_ExtraAttackChance			266 // implemented - increase chance to score an extra attack with a 2-Handed Weapon.
+#define SE_ExtraAttackChance			266 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 2-handed primary weapon, base: chance, limit: amt attacks, max: none
 #define SE_AddPetCommand				267 // implemented - sets command base2 to base1
 #define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
@@ -629,8 +649,8 @@ typedef enum {
 #define SE_DoubleSpecialAttack			283	// implemented[AA] - Chance to perform second special attack as monk
 //#define SE_LoHSetHeal					284	// not used
 #define SE_NimbleEvasion				285	// *not implemented - base1 = 100 for max
-#define SE_FcDamageAmt					286	// implemented - adds direct spell damage
-#define SE_SpellDurationIncByTic		287 // implemented
+#define SE_FcDamageAmt					286	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
+#define SE_SpellDurationIncByTic		287 // implemented, @Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
 #define SE_SkillAttackProc				288	// implemented[AA] - Chance to proc spell on skill attack usage (ex. Dragon Punch)
 #define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
@@ -639,22 +659,22 @@ typedef enum {
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
 //#define SE_ReduceTimerSpecial			295	// not used
-#define SE_FcSpellVulnerability			296	// implemented - increase in incoming spell damage [base1= min dmg base2= max dmg]
-#define SE_FcDamageAmtIncoming			297 // implemented - debuff that adds points damage to spells cast on target (focus effect).
+#define SE_FcSpellVulnerability			296	// implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+#define SE_FcDamageAmtIncoming			297 // implemetned, @Fc, On Target, damage taken flat amt, base: amt
 #define SE_ChangeHeight					298	// implemented
 #define SE_WakeTheDead					299	// implemented
 #define SE_Doppelganger					300	// implemented
 #define SE_ArcheryDamageModifier		301	// implemented[AA] - increase archery damage by percent
-#define SE_FcDamagePctCrit				302	// implemented - spell focus that is applied after critical hits has been calculated.
-#define SE_FcDamageAmtCrit				303	// implemented - adds direct spell damage
+#define SE_FcDamagePctCrit				302	// implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct, Note: applied after critical hits has been calculated.
+#define SE_FcDamageAmtCrit				303	// implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
 #define SE_OffhandRiposteFail			304 // implemented as bonus - enemy cannot riposte offhand attacks
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 //#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
 #define SE_SuspendMinion				308 // implemented
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
-#define SE_ReduceReuseTimer				310 // implemented
-#define SE_LimitCombatSkills			311 // implemented - Excludes focus from procs (except if proc is a memorizable spell)
+#define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, disc reuse time mod, base: milliseconds
+#define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs (non-memorizable spells) from being focused, base1: 0=Exclude if proc 1=Allow only if proc
 #define SE_Sanctuary					312 // implemented - Places caster at bottom hate list, effect fades if cast cast spell on targets other than self.
 #define SE_ForageAdditionalItems		313	// implemented[AA] - chance to forage additional items
 #define SE_Invisibility2				314 // implemented - fixed duration invisible
@@ -678,11 +698,11 @@ typedef enum {
 #define SE_SummonToCorpse				332 // *not implemented AA - Call of the Wild (Druid/Shaman Res spell with no exp) TOOD: implement this.
 #define SE_CastOnRuneFadeEffect			333 // implemented
 #define SE_BardAEDot					334	// implemented
-#define SE_BlockNextSpellFocus			335	// implemented - base1 chance to block next spell ie Puratus (8494)
+#define SE_BlockNextSpellFocus			335	// implemented, @Fc, On Caster, chance to block next spell, base: chance
 //#define SE_IllusionaryTarget			336	// not used
 #define SE_PercentXPIncrease			337	// implemented
 #define SE_SummonAndResAllCorpses		338	// implemented
-#define SE_TriggerOnCast				339	// implemented
+#define SE_TriggerOnCast				339	// implemented, @Fc, On Caster, cast on spell use, base: chance pct limit: spellid		
 #define SE_SpellTrigger					340	// implemented - chance to trigger spell [Share rolls with 469] All base2 spells share roll chance, only 1 cast.
 #define SE_ItemAttackCapIncrease		341	// implemented[AA] - increases the maximum amount of attack you can gain from items.
 #define SE_ImmuneFleeing				342	// implemented - stop mob from fleeing
@@ -691,7 +711,7 @@ typedef enum {
 #define SE_AssassinateLevel				345	// implemented as bonus - AA Assisination max level to kill
 #define SE_HeadShotLevel				346	// implemented[AA] - HeadShot max level to kill
 #define SE_DoubleRangedAttack			347	// implemented - chance at an additional archery attack (consumes arrow)
-#define SE_LimitManaMin					348	// implemented
+#define SE_LimitManaMin					348	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
 #define SE_ShieldEquipDmgMod			349	// implemented[AA] Increase melee base damage (indirectly increasing hate) when wearing a shield.
 #define SE_ManaBurn						350	// implemented - Drains mana for damage/heal at a defined ratio up to a defined maximum amount of mana.
 #define SE_PersistentEffect				351	// *not implemented. creates a trap/totem that casts a spell (spell id + base1?) when anything comes near it. can probably make a beacon for this
@@ -700,7 +720,7 @@ typedef enum {
 //#define SE_DeactivateAllTraps			354	// *not implemented - looks to be some type of invulnerability? Test DAT (8757)
 //#define SE_LearnTrap					355	// *not implemented - looks to be some type of invulnerability? Test LT (8758)
 //#define SE_ChangeTriggerType			356	// not used
-#define SE_FcMute						357	// implemented - silences casting of spells that contain specific spell effects (focus limited)
+#define SE_FcMute						357	// implemented, @Fc, On Caster, prevents spell casting, base: chance pct
 #define SE_CurrentManaOnce				358	// implemented
 //#define SE_PassiveSenseTrap			359	// *not implemented - Invulnerability (Brell's Blessing)
 #define SE_ProcOnKillShot				360	// implemented - a buff that has a base1 % to cast spell base2 when you kill a "challenging foe" base3 min level
@@ -726,47 +746,47 @@ typedef enum {
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
 //#define SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
 #define SE_NegateSpellEffect			382 // implemented - negates specific spell bonuses for duration of the debuff.
-#define SE_SympatheticProc				383 // implemented - focus on items that has chance to proc a spell when you cast
+#define SE_SympatheticProc				383 // implemented, @Fc, On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
 #define SE_Leap							384	// implemented - Leap effect, ie stomping leap
-#define SE_LimitSpellGroup				385	// implemented - Limits to spell group(ie type 3 reuse reduction augs that are class specific and thus all share s SG)
+#define SE_LimitSpellGroup				385	// implemented, @Ff, Spell group(s) that a spell focus can require or exclude, base1: spellgroup id, Include: Positive Exclude: Negative
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
 #define SE_SummonCorpseZone				388 // implemented - summons a corpse from any zone(nec AA)
-#define SE_FcTimerRefresh				389 // implemented - Refresh spell icons
+#define SE_FcTimerRefresh				389 // implemented, @Fc, On Caster, reset all recast timers, base: 1
 //#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
-#define SE_LimitManaMax					391	// implemented
-#define SE_FcHealAmt					392 // implemented - Adds or removes healing from spells
-#define SE_FcHealPctIncoming			393 // implemented - HealRate with focus restrictions.
-#define SE_FcHealAmtIncoming			394 // implemented - Adds/Removes amount of healing on target by X value with foucs restrictions.
-#define SE_FcHealPctCritIncoming		395 // implemented[AA] - Increases chance of having a heal crit when cast on you. [focus limited]
-#define SE_FcHealAmtCrit				396 // implemented - Adds a direct healing amount to spells
+#define SE_LimitManaMax					391	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
+#define SE_FcHealAmt					392 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
+#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received critical chance mod, base: chance pct
+#define SE_FcHealAmtIncoming			394 // implemented, @Fc, On Target, heal received mod flat amt, base: amt
+#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct
+#define SE_FcHealAmtCrit				396 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
 #define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
 #define SE_FcTwincast					399 // implemented - cast 2 spells for every 1
 #define SE_HealGroupFromMana			400 // implemented - Drains mana and heals for each point of mana drained
 #define SE_ManaDrainWithDmg				401 // implemented - Deals damage based on the amount of mana drained
 #define SE_EndDrainWithDmg				402 // implemented - Deals damage for the amount of endurance drained
-#define SE_LimitSpellClass				403 // implemented - Limits to specific types of spells (see CheckSpellCategory)
-#define SE_LimitSpellSubclass			404 // *not implemented - Limits to specific types of spells (see CheckSpellCategory) [Categories NOT defined yet]
+#define SE_LimitSpellClass				403 // implemented, @Ff, 'Spell Category' using table field 'spell_class' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
+#define SE_LimitSpellSubclass			404 // implemented, @Ff, 'Spell Category Subclass' using table field 'spell_subclass' that a spell focus can require or exclude, base1: category type, Include: Positive Exclude: Negative
 #define SE_TwoHandBluntBlock			405 // implemented - chance to block attacks when using two hand blunt weapons (similiar to shield block)
 #define SE_CastonNumHitFade				406 // implemented - casts a spell when a buff fades due to its numhits being depleted
 #define SE_CastonFocusEffect			407 // implemented - casts a spell if focus limits are met (ie triggers when a focus effects is applied)
 #define SE_LimitHPPercent				408 // implemented - limited to a certain percent of your hp(ie heals up to 50%)
 #define SE_LimitManaPercent				409 // implemented - limited to a certain percent of your mana
 #define SE_LimitEndPercent				410 // implemented - limited to a certain percent of your end
-#define SE_LimitClass					411 // implemented - Limits to spells of a certain class (Note: The class value in dbase is +1 in relation to item class value)
-#define SE_LimitRace					412 // implemented - Limits to spells cast by a certain race (Note: not used in any known live spells)
-#define SE_FcBaseEffects				413 // implemented - Increases the power of bard songs, skill attacks, runes, bard allowed foci, damage/heal
-#define SE_LimitCastingSkill			414 // implemented - Limit a focus to include spells cast using a specific skill.
+#define SE_LimitClass					411 // implemented, @Ff, Class(es) that can use the spell focus, base1: class(es), Note: The class value in dbase is +1 in relation to item class value, set as you would item for multiple classes
+#define SE_LimitRace					412 // implemented, @Ff, Race that can use the spell focus, base1: race, Note: not used in any known live spells. Use only single race at a time.
+#define SE_FcBaseEffects				413 // implemented, @Fc, On Caster, base spell effectiveness mod pct, base: pct
+#define SE_LimitCastingSkill			414 // implemented, @Ff, Spell and singing skills(s) that a spell focus can require or exclude, base1: skill id, Include: Positive Exclude: Negative
 //#define SE_FFItemClass				415 // not used - base1 matches ItemType, base2 matches SubType, -1 ignored, max is bitmask of valid slots
 #define SE_ACv2							416 // implemented - New AC spell effect
 #define SE_ManaRegen_v2					417 // implemented - New mana regen effect
 #define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks
 #define SE_AddMeleeProc					419 // implemented - Adds a proc
-#define SE_FcLimitUse					420 // implemented - increases numhits count by percent (Note: not used in any known live spells)
-#define SE_FcIncreaseNumHits			421 // implemented[AA] - increases number of hits a buff has till fade. (focus)
-#define SE_LimitUseMin					422 // implemented - limit a focus to require a min amount of numhits value (used with above)
-#define SE_LimitUseType					423 // implemented	- limit a focus to require a certain numhits type
+#define SE_FcLimitUse					420 // implemented, @Fc, On Caster, numhits mod pct, base: pct, Note: not used in any known live spells
+#define SE_FcIncreaseNumHits			421 // implemented, @Fc, On Caster, numhits mod flat amt, base: amt
+#define SE_LimitUseMin					422 // implemented, @Ff Minium amount of numhits for a spell to be focused, base: numhit amt
+#define SE_LimitUseType					423 // implemented,	@Ff Focus will only affect if has this numhits type, base: numhit type
 #define SE_GravityEffect				424 // implemented - Pulls/pushes you toward/away the mob at a set pace
 //#define SE_Display					425 // *not implemented - Illusion: Flying Dragon(21626)
 #define SE_IncreaseExtTargetWindow		426 // *not implmented[AA] - increases the capacity of your extended target window
@@ -803,9 +823,9 @@ typedef enum {
 #define SE_ResourceTap					457 // implemented  Coverts a percent of dmg from dmg spells(DD/DoT) to hp/mana/end.
 #define SE_FactionModPct				458 // implemented  Modifies faction gains and losses by percent.
 #define SE_DamageModifier2				459 // implemented - Modifies melee damage by skill type
-//#define SE_Ff_Override_NotFocusable	460 //
-#define SE_ImprovedDamage2				461 // implemented - Increase spell damage by percent (SE_Fc_Damage_%2)
-#define SE_FcDamageAmt2					462 // implemented - Increase spell damage by flat amount (SE_Fc_Damage_Amt2)
+#define SE_Ff_Override_NotFocusable		460 // implemented, @Fc, Allow spell to be focused event if flagged with 'not_focusable' in spell table, base: 1
+#define SE_ImprovedDamage2				461 // implemented, @Fc, On Caster, spell damage mod pct, base: min pct, limit: max pct
+#define SE_FcDamageAmt2					462 // implemented, @Fc, On Caster, spell damage mod flat amt, base: amt
 //#define SE_Shield_Target				463 //
 #define SE_PC_Pet_Rampage				464 // implemented - Base1 % chance to do rampage for base2 % of damage each melee round
 #define SE_PC_Pet_AE_Rampage			465 // implemented - Base1 % chance to do AE rampage for base2 % of damage each melee round
@@ -814,53 +834,53 @@ typedef enum {
 #define SE_DS_Mitigation_Percentage		468 // implemented - Modify incoming damage shield damage by percentage
 #define SE_Chance_Best_in_Spell_Grp     469 // implemented - Chance to cast highest scribed spell within a spell group. All base2 spells share roll chance, only 1 cast.
 #define SE_Trigger_Best_in_Spell_Grp	470 // implemented - Chance to cast highest scribed spell within a spell group. Each spell has own chance.
-//#define SE_Double_Melee_Round			471 //
-//#define SE_Buy_AA_Rank				472 //
+#define SE_Double_Melee_Round			471 // implemented, @OffBonus, percent chance to repeat primary weapon round with a percent damage modifier, base: pct chance repeat, limit: pct dmg mod, max: none
+#define SE_Buy_AA_Rank					472 // implemented,  @Special, Used in AA abilities that have Enable/Disable toggle. Spell on Disabled Rank has this effect in it, base: 1, limit: none, max: none, Note: This will not just buy an AA
 #define SE_Double_Backstab_Front		473 // implemented - Chance to double backstab from front
 #define SE_Pet_Crit_Melee_Damage_Pct_Owner	474 // implemenetd - Critical damage mod applied to pets from owner
 #define SE_Trigger_Spell_Non_Item		475 // implemented - Trigger spell on cast only if not from item click.
-//#define SE_Weapon_Stance				476 //
+#define SE_Weapon_Stance				476 // implemented, @Misc, Apply a specific spell buffs automatically depending 2Hander, Shield or Duel Wield is equiped, base: spellid, base: 0=2H 1=Shield 2=DW, max: none
 #define SE_Hatelist_To_Top_Index		477 // Implemented - Chance to be set to top of rampage list
 #define SE_Hatelist_To_Tail_Index		478 // Implemented - Chance to be set to bottom of rampage list
-//#define SE_Ff_Value_Min				479 //
-//#define SE_Ff_Value_Max				480 //
-#define SE_Fc_Cast_Spell_On_Land		481 // Implemented - [FOCUS] Spells cast on target with this Focus Effect will have chance to cause a Spell to be cast if limits met.
-//#define SE_Skill_Base_Damage_Mod		482 //
-#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // Implemented - [FOCUS] modifies incoming spell damage by percent
-#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // Implemented - [FOCUS] modifies incoming spell damage by flat amount. Typically adds damage to incoming spells.
-#define SE_Ff_CasterClass				485 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells must be specified class.
-#define SE_Ff_Same_Caster				486 // Implemented - [FOCUS LIMIT] Caster of spell on target with a focus effect that is checked by incoming spells 0=Must be different caster 1=Must be same caster
+#define SE_Ff_Value_Min					479 // implemented, @Ff, Minimum base value of a spell that can be focused, base: spells to be focused base1 value
+#define SE_Ff_Value_Max					480 // implemented, @Ff, Max base value of a spell that can be focused, base: spells to be focused base1 value
+#define SE_Fc_Cast_Spell_On_Land		481 // implemented, @Fc, On Target, cast spell if hit by spell, base: chance pct, limit: spellid
+#define SE_Skill_Base_Damage_Mod		482 // implemented, @OffBonus, modify base melee damage by percent, base: pct, limit: skill(-1=ALL), max: none
+#define SE_Fc_Spell_Damage_Pct_IncomingPC	483 // implemented, @Fc, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+#define SE_Fc_Spell_Damage_Amt_IncomingPC	484 // implemented, @Fc, On Target, damage taken flat amt, base: amt	
+#define SE_Ff_CasterClass				485 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells must be specified class(es). base1: class(es), Note: Set multiple classes same as would for items
+#define SE_Ff_Same_Caster				486 // implemented, @Ff, Caster of spell on target with a focus effect that is checked by incoming spells, base1: 0=Must be different caster 1=Must be same caster
 //#define SE_Extend_Tradeskill_Cap		487 //
 //#define SE_Defender_Melee_Force_Pct_PC	488 //
-//#define SE_Worn_Endurance_Regen_Cap	489 //
-//#define SE_Ff_ReuseTimeMin			490 //
-//#define SE_Ff_ReuseTimeMax			491 //
-//#define SE_Ff_Endurance_Min			492 //
-//#define SE_Ff_Endurance_Max			493 //
+#define SE_Worn_Endurance_Regen_Cap		489 // implemented, modify worn regen cap, base: amt, limit: none, max: none
+#define SE_Ff_ReuseTimeMin				490 // implemented, @Ff, Minimum recast time of a spell that can be focused, base: recast time
+#define SE_Ff_ReuseTimeMax				491 // implemented, @Ff, Max recast time of a spell that can be focused, base: recast time 
+#define SE_Ff_Endurance_Min				492 // implemented, @Ff, Minimum endurance cost of a spell that can be focused, base: endurance cost
+#define SE_Ff_Endurance_Max				493 // implemented, @Ff, Max endurance cost of a spell that can be focused, base: endurance cost
 #define SE_Pet_Add_Atk					494 // implemented - Bonus on pet owner which gives their pet increased attack stat
-//#define SE_Ff_DurationMax				495 //
+#define SE_Ff_DurationMax				495 // implemented, @Ff, Max duration of spell that can be focused, base: tics
 #define SE_Critical_Melee_Damage_Mod_Max	496 // implemented - increase or decrease by percent critical damage (not stackable)
 //#define SE_Ff_FocusCastProcNoBypass	497 //
-//#define SE_AddExtraAttackPct_1h_Primary	498 //
-//#define SE_AddExtraAttackPct_1h_Secondary	499 //
-//#define SE_Fc_CastTimeMod2			500 //
-//#define SE_Fc_CastTimeAmt				501 //
+#define SE_AddExtraAttackPct_1h_Primary	498 // implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed primary weapon, base: chance, limit: amt attacks, max: none
+#define SE_AddExtraAttackPct_1h_Secondary	499 //implemented, @OffBonus, gives your double attacks a percent chance to perform an extra attack with 1-handed secondary weapon, base: chance, limit: amt attacks, max: none
+#define SE_Fc_CastTimeMod2				500 // implemented, @Fc, On Caster, cast time mod pct, base: pct, Note: Can reduce to instant cast
+#define SE_Fc_CastTimeAmt				501 // implemented, @Fc, On Caster, cast time mod flat amt, base: milliseconds, Note: Can reduce to instant cast
 #define SE_Fearstun						502 // implemented - Stun with a max level limit. Normal stun restrictions don't apply.
-#define SE_Melee_Damage_Position_Mod	503 // implemented - modify melee damage by pct if done from Front or Behind
-//#define SE_Melee_Damage_Position_Amt	504 //
-#define SE_Damage_Taken_Position_Mod	505 // implemented - mitigate melee damage by pct if dmg taken from Front or Behind
-//#define SE_Damage_Taken_Position_Amt	506 //
-//#define SE_Fc_Amplify_Mod				507 //
-//#define SE_Fc_Amplify_Amt				508 //
+#define SE_Melee_Damage_Position_Mod	503 // implemented, @OffBonus, modify melee damage by percent if done from Front or Behind opponent, base: pct, limit: 0=back 1=front, max: none
+#define SE_Melee_Damage_Position_Amt	504 // implemented, @OffBonus, modify melee damage by flat amount if done from Front or Behind opponent, base: amt, limit: 0=back 1=front, max: none
+#define SE_Damage_Taken_Position_Mod	505 // implemented, @DefBonus, modify melee damage by percent if dmg taken from Front or Behind, base: pct, limit: 0=back 1=front, max: none
+#define SE_Damage_Taken_Position_Amt	506 // implemented -@DefBonus, modify melee damage by flat amount if dmg taken from your Front or Behind, base: amt, limit: 0=back 1=front, max: none
+#define SE_Fc_Amplify_Mod				507 // implemented, @Fc, On Caster, damage-heal-dot mod pct, base: pct
+#define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
-//#define SE_Fc_ResistIncoming			510 //
+#define SE_Fc_ResistIncoming			510 // implemented, @Fc, On Target, resist modifier, base: amt
 //#define SE_Ff_FocusTimerMin			511 //
 #define SE_Proc_Timer_Modifier 			512 // implemented - spell trigger limiter used currently with SPA 481, ie. limit to 1 proc every 1.5 seconds (base=1 base2=1500).
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
 #define SE_AC_Mitigation_Max_Percent	516 // implemented - stackable defense modifier
-//#define SE_Attack_Offense_Max_Percent	517 // 
+//#define SE_Attack_Offense_Max_Percent	517 //
 #define SE_Attack_Accuracy_Max_Percent	518 // implemented - stackable accurary modifer
 //#define SE_Luck_Amount				519 //
 //#define SE_Luck_Percent				520 //
@@ -1018,8 +1038,8 @@ struct SPDat_Spell_Struct
 /* 218 */	int aemaxtargets;  //Is used for various AE effects -- MAX_TARGETS
 /* 219 */	int no_heal_damage_item_mod; // -- NO_HEAL_DAMAGE_ITEM_MOD
 /* 220 */	//int caster_requirement_id; // -- CASTER_REQUIREMENT_ID
-/* 221 */	//int spell_class; // -- SPELL_CLASS
-/* 222 */	//int spell_subclass; // -- SPELL_SUBCLASS
+/* 221 */	int spell_class; // -- SPELL_CLASS
+/* 222 */	int spell_subclass; // -- SPELL_SUBCLASS
 /* 223 */	//int ai_valid_targets; // -- AI_VALID_TARGETS
 /* 224 */	bool persistdeath; // buff doesn't get stripped on death -- NO_STRIP_ON_DEATH
 /* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE
@@ -1059,6 +1079,7 @@ bool IsPercentalHealSpell(uint16 spell_id);
 bool IsGroupOnlySpell(uint16 spell_id);
 bool IsBeneficialSpell(uint16 spell_id);
 bool IsDetrimentalSpell(uint16 spell_id);
+bool IsInvisSpell(uint16 spell_id);
 bool IsInvulnerabilitySpell(uint16 spell_id);
 bool IsCHDurationSpell(uint16 spell_id);
 bool IsPoisonCounterSpell(uint16 spell_id);
@@ -1151,6 +1172,8 @@ bool IsStackableDot(uint16 spell_id);
 bool IsBardOnlyStackEffect(int effect);
 bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
+bool IsFocusLimit(int spa);
+bool SpellRequiresTarget(int targettype);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);

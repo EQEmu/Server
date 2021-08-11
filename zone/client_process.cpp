@@ -396,6 +396,11 @@ bool Client::Process() {
 				TriggerDefensiveProcs(auto_attack_target, EQ::invslot::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+
+				if (TryDoubleMeleeRoundEffect()) {
+					DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
+				}
+
 				if (CheckAATimer(aaTimerRampage)) {
 					entity_list.AEAttack(this, 30);
 				}
