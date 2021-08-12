@@ -87,6 +87,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 			}
 			break;
 			case ServertalkClientHandshake:
+			case ServertalkClientDowngradeSecurityHandshake:
 				ProcessHandshake(p);
 				break;
 			case ServertalkMessage:
@@ -103,6 +104,7 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 			}
 			break;
 			case ServertalkClientHandshake:
+			case ServertalkClientDowngradeSecurityHandshake:
 				ProcessHandshake(p);
 				break;
 			case ServertalkMessage:

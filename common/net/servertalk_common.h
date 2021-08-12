@@ -9,9 +9,10 @@ namespace EQ
 		enum ServertalkPacketType
 		{
 			ServertalkClientHello = 1,
-			ServertalkServerHello = 2,
-			ServertalkClientHandshake = 3,
-			ServertalkMessage = 5,
+			ServertalkServerHello,
+			ServertalkClientHandshake,
+			ServertalkClientDowngradeSecurityHandshake,
+			ServertalkMessage,
 		};
 	}
 }

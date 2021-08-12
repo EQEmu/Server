@@ -215,5 +215,5 @@ void EQ::Net::ServertalkClient::SendHandshake()
 	handshake.PutString(0, m_identifier);
 	handshake.PutString(m_identifier.length() + 1, m_credentials);
 	handshake.PutUInt8(m_identifier.length() + 1 + m_credentials.length(), 0);
-	InternalSend(ServertalkClientHandshake, handshake);
+	InternalSend(ServertalkClientDowngradeSecurityHandshake, handshake);
 }
