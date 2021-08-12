@@ -756,3 +756,24 @@ void DynamicZone::ProcessLeaderChanged(uint32_t new_leader_id)
 		SendLeaderNameToZoneMembers();
 	}
 }
+
+bool DynamicZone::CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t entity_id)
+{
+	// non-members of a dz cannot loot corpses inside the dz
+	if (!HasMember(client->CharacterID()))
+	{
+		return false;
+	}
+
+	// expeditions may prevent looting based on client's lockouts
+	if (GetType() == DynamicZoneType::Expedition)
+	{
+		auto expedition = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
+		if (expedition && !expedition->CanClientLootCorpse(client, npc_type_id, entity_id))
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

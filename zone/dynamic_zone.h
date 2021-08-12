@@ -51,6 +51,7 @@ public:
 	void SetSecondsRemaining(uint32_t seconds_remaining) override;
 
 	void DoAsyncZoneMemberUpdates();
+	bool CanClientLootCorpse(Client* client, uint32_t npc_type_id, uint32_t entity_id);
 	bool IsCurrentZoneDzInstance() const;
 	void RegisterOnClientAddRemove(std::function<void(Client* client, bool removed, bool silent)> on_client_addremove);
 	void SendClientWindowUpdate(Client* client);
