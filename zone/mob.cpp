@@ -6177,7 +6177,7 @@ float Mob::GetDefaultRaceSize() const {
 	return GetRaceGenderDefaultHeight(race, gender);
 }
 
-void Mob::ShieldAbility(uint32 target_id, int max_shlder_distance, int shield_duration, int shld_target_mitigation, int shlder_mitigation)
+void Mob::ShieldAbility(uint32 target_id, int m_max_shielder_distance, int shield_duration, int m_shield_target_mitigation, int m_shielder_mitigation)
 {
 
 	Mob* shield_target = entity_list.GetMob(target_id);
@@ -6208,7 +6208,7 @@ void Mob::ShieldAbility(uint32 target_id, int max_shlder_distance, int shield_du
 		}
 	}
 
-	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shlder_distance)) {
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(m_max_shielder_distance)) {
 		if (IsClient()) {
 			MessageString(Chat::White, TARGET_TOO_FAR); //Live doesn't give any message for failure, for the quest ability lets allow it. 
 		}
@@ -6218,11 +6218,11 @@ void Mob::ShieldAbility(uint32 target_id, int max_shlder_distance, int shield_du
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 
 	SetShieldTargetID(shield_target->GetID());
-	SetShielderMitigation(shlder_mitigation);
-	SetShielerMaxDistance(max_shlder_distance);
+	SetShielderMitigation(m_shield_target_mitigation);
+	SetShielerMaxDistance(m_max_shielder_distance);
 
 	shield_target->SetShielderID(GetID());
-	shield_target->SetShieldTargetMitigation(shld_target_mitigation);
+	shield_target->SetShieldTargetMitigation(m_shield_target_mitigation);
 	
 	shield_timer.Start(shield_duration);
 }

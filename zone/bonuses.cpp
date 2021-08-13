@@ -3559,10 +3559,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				}
 				else if (effect_value < 0 && new_bonus->ExtendedShielding > effect_value){
 					new_bonus->ExtendedShielding = effect_value;
-        }
+				}
 				else if (effect_value > 0 && new_bonus->ExtendedShielding < effect_value){
 					new_bonus->ExtendedShielding = effect_value;
-        }
+				}
 				break;
 			}
 
@@ -3573,12 +3573,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				}
 				else if (effect_value < 0 && new_bonus->ShieldDuration > effect_value){
 					new_bonus->ShieldDuration = effect_value;
-        }
+				}
 				else if (effect_value > 0 && new_bonus->ShieldDuration < effect_value){
 					new_bonus->ShieldDuration = effect_value;
-        }
-        break;
-      }
+				}
+				break;
+			}
 
 			case SE_Weapon_Stance: {
 				if (IsValidSpell(effect_value)) { //base1 is the spell_id of buff

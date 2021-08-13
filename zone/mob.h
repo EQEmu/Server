@@ -1129,7 +1129,7 @@ public:
 
 	Trade* trade;
 
-	void ShieldAbility(uint32 target_id, int max_shlder_distance = 15, int shield_duration = 12000, int shld_target_mitigation = 50, int shlder_mitigation = 75);
+	void ShieldAbility(uint32 target_id, int m_shielder_max_distance = 15, int shield_duration = 12000, int m_shielld_target_mitigation = 50, int m_shielder_mitigation = 75);
 	void DoShieldDamageOnShielder(Mob* shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
 	void ShieldAbilityFinish();
 	void ShieldAbilityClearVariables();

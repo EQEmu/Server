@@ -12876,11 +12876,11 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 	
 	//AA to increase SPA 230 extended shielding
-	int max_shlder_distance = 15;
-	max_shlder_distance += aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
-	max_shlder_distance = std::max(max_shlder_distance, 0);
+	int m_shielder_max_distance = 15;
+	m_shielder_max_distance += aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
+	m_shielder_max_distance = std::max(m_shielder_max_distance, 0);
 
-	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shlder_distance)) {
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(m_shielder_max_distance)) {
 		return; //Too far away, no message is given thoughh.
 	}
 
@@ -12888,7 +12888,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	
 	SetShieldTargetID(shield_target->GetID());
 	SetShielderMitigation(25);
-	SetShielerMaxDistance(max_shlder_distance);
+	SetShielerMaxDistance(m_shielder_max_distance);
 
 	shield_target->SetShielderID(GetID());
 	shield_target->SetShieldTargetMitigation(50);

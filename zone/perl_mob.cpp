@@ -6267,42 +6267,34 @@ XS(XS_Mob_ShieldAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ShieldAbility) {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, [int32 max_shielder_distance = 15], [int32 shield_duration = 12000], [int32 shield_target_mitigation= 50], [int32 shielder_mitigation = 50]"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, [int32 shielder__max_distance = 15], [int32 shield_duration = 12000], [int32 shield_target_mitigation= 50], [int32 shielder_mitigation = 50]"); // @categories Spells and Disciplines
 	{
-		Mob *THIS;
-		uint32             target_id = (uint32)SvUV(ST(1));
-		int32			   max_shlder_distance;
-		int32			   shld_duration;
-		int32			   shld_target_mitigation;
-		int32			   shlder_mitigation;
+		Mob    *THIS;
+		uint32 target_id = (uint32)SvUV(ST(1));
+		int32  shielder_max_distance = (int32)SvUV(ST(2));
+		int32  shield_duration = (int32)SvUV(ST(3));
+		int32  shield_target_mitigation = (int32)SvUV(ST(4));
+		int32  shielder_mitigation = (int32)SvUV(ST(5));
 
 		VALIDATE_THIS_IS_MOB;
-		if (items < 3)
-			max_shlder_distance = 15;
-		else {
-			max_shlder_distance = max_shlder_distance = (int32)SvUV(ST(2));
+		if (items < 3) {
+			shielder_max_distance = 15;
 		}
 
-		if (items < 4)
-			shld_duration = 12000;
-		else {
-			shld_duration = (int32)SvUV(ST(3));
+		if (items < 4) {
+			shield_duration = 12000;
 		}
 
-		if (items < 5)
-			shld_target_mitigation = 50;
-		else {
-			shld_target_mitigation = (int32)SvUV(ST(4));
+		if (items < 5) {
+			shield_target_mitigation = 50;
 		}
 
-		if (items < 6)
-			shlder_mitigation = 50;
-		else {
-			shlder_mitigation = (int32)SvUV(ST(5));
+		if (items < 6) {
+			shielder_mitigation = 50;
 		}
 
-		THIS->ShieldAbility(target_id, max_shlder_distance, shld_duration, shld_target_mitigation, shlder_mitigation);
-	
+		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_duration, shield_duration);
+
 	}
 	XSRETURN_EMPTY;
 }
