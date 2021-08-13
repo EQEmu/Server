@@ -1133,20 +1133,20 @@ public:
 
 	Trade* trade;
 
-	void ShieldAbility(uint32 target_id, int m_shielder_max_distance = 15, int shield_duration = 12000, int m_shielld_target_mitigation = 50, int m_shielder_mitigation = 75);
+	void ShieldAbility(uint32 target_id, int shielder_max_distance = 15, int shield_duration = 12000, int shielld_target_mitigation = 50, int shielder_mitigation = 75);
 	void DoShieldDamageOnShielder(Mob* shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
 	void ShieldAbilityFinish();
 	void ShieldAbilityClearVariables();
-	inline uint32 GetShielderID() const { return shielder_id; }
-	inline void SetShielderID(uint32 val) { shielder_id = val; }
-	inline uint32 GetShieldTargetID() const { return shield_target_id; }
-	inline void SetShieldTargetID(uint32 val) { shield_target_id = val; }
-	inline int GetShieldTargetMitigation() const { return shield_target_mitigation; }
-	inline void SetShieldTargetMitigation(int val) { shield_target_mitigation = val; }
-	inline int GetShielderMitigation() const { return shielder_mitigation; }
-	inline void SetShielderMitigation(int val) { shielder_mitigation = val; }
-	inline int GetMaxShielderDistance() const { return shielder_max_distance; }
-	inline void SetShielerMaxDistance(int val) { shielder_max_distance = val; }
+	inline uint32 GetShielderID() const { return m_shielder_id; }
+	inline void SetShielderID(uint32 val) { m_shielder_id = val; }
+	inline uint32 GetShieldTargetID() const { return m_shield_target_id; }
+	inline void SetShieldTargetID(uint32 val) { m_shield_target_id = val; }
+	inline int GetShieldTargetMitigation() const { return m_shield_target_mitigation; }
+	inline void SetShieldTargetMitigation(int val) { m_shield_target_mitigation = val; }
+	inline int GetShielderMitigation() const { return m_shielder_mitigation; }
+	inline void SetShielderMitigation(int val) { m_shielder_mitigation = val; }
+	inline int GetMaxShielderDistance() const { return m_shielder_max_distance; }
+	inline void SetShielerMaxDistance(int val) { m_shielder_max_distance = val; }
 
 	WeaponStance_Struct weaponstance;
 	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
@@ -1453,11 +1453,11 @@ protected:
 	Timer focus_proc_limit_timer;
 
 	Timer shield_timer;
-	uint32 shield_target_id;
-	uint32 shielder_id;
-	int shield_target_mitigation;
-	int shielder_mitigation;
-	int shielder_max_distance;
+	uint32 m_shield_target_id;
+	uint32 m_shielder_id;
+	int m_shield_target_mitigation;
+	int m_shielder_mitigation;
+	int m_shielder_max_distance;
 
 	//spell casting vars
 	Timer spellend_timer;
