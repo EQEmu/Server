@@ -5281,7 +5281,7 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill)) + defender->GetPositionalDmgTakenAmt(this);
 
-	if (defender->GetShielderID()) {
+	if (defender->GetShielder()) {
 		DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
 		hit.damage_done -= hit.damage_done * defender->GetShieldTargetMitigation() / 100; //Default shielded takes 50 pct damage
 	}
@@ -5295,20 +5295,20 @@ void Mob::DoShieldDamageOnShielder(Mob* shield_target, int hit_damage_done, EQ::
 		return;
 	}
 
-	Mob *shielder = entity_list.GetMob(shield_target->GetShielderID());
+	Mob *shielder = shield_target->GetShielder();
 
 	if (!shielder) {
 		return;
 	}
 
 	if (shield_target->CalculateDistance(shielder->GetX(), shielder->GetY(), shielder->GetZ()) > static_cast<float>(shielder->GetMaxShielderDistance())) {
-		shielder->SetShieldTargetID(0);
+		shielder->SetShieldTarget(nullptr);
 		shielder->SetShielderMitigation(0);
 		shielder->SetShielerMaxDistance(0);
 		shielder->shield_timer.Disable();
-		shield_target->SetShielderID(0);
+		shield_target->SetShielder(nullptr);
 		shield_target->SetShieldTargetMitigation(0);
-		return; //Too far away, no message is given thoughh.
+			return; //Too far away, no message is given thoughh.
 	}
 
 	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equiping a shield item

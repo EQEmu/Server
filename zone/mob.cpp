@@ -377,8 +377,8 @@ Mob::Mob(
 	inWater        = false;
 	
 	shield_timer.Disable();
-	m_shield_target_id = 0;
-	m_shielder_id = 0;
+	m_shield_target = nullptr;
+	m_shielder = nullptr;
 	m_shield_target_mitigation = 0;
 	m_shielder_mitigation = 0;
 	m_shielder_max_distance = 0;
@@ -6211,7 +6211,7 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 	}
 
 	//You have a shielder, or your 'Shield Target' already has a 'Shielder'
-	if (GetShielderID() || shield_target->GetShielderID()) {
+	if (GetShielder() || shield_target->GetShielder()) {
 		
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDED);
@@ -6220,7 +6220,7 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 	}
 
 	//You are being shielded or already have a 'Shield Target'
-	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
+	if (GetShieldTarget() || shield_target->GetShieldTarget()) {
 		
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDING);
@@ -6237,11 +6237,11 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 
-	SetShieldTargetID(shield_target->GetID());
+	SetShieldTarget(shield_target);
 	SetShielderMitigation(shield_target_mitigation);
 	SetShielerMaxDistance(max_shielder_distance);
 
-	shield_target->SetShielderID(GetID());
+	shield_target->SetShielder(this);
 	shield_target->SetShieldTargetMitigation(shield_target_mitigation);
 	
 	shield_timer.Start(shield_duration);
@@ -6249,14 +6249,14 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 
 void Mob::ShieldAbilityFinish()
 {
-	Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
+	Mob* shield_target = GetShieldTarget();
 
 	if (shield_target) {
 		entity_list.MessageCloseString(this, false, 100, 0, END_SHIELDING, GetCleanName(), shield_target->GetCleanName());
-		shield_target->SetShielderID(0);
+		shield_target->SetShielder(nullptr);
 		shield_target->SetShieldTargetMitigation(0);
 	}
-	SetShieldTargetID(0);
+	SetShieldTarget(nullptr);
 	SetShielderMitigation(0);
 	SetShielerMaxDistance(0);
 	shield_timer.Disable();
@@ -6265,30 +6265,30 @@ void Mob::ShieldAbilityFinish()
 void Mob::ShieldAbilityClearVariables()
 {
 	//If 'shield target' dies
-	if (GetShielderID()){
+	if (GetShielder()){
 		
-		Mob* shielder = entity_list.GetMob(GetShielderID());
+		Mob* shielder = GetShielder();
 
 		if (shielder) {
-			shielder->SetShieldTargetID(0);
+			shielder->SetShieldTarget(nullptr);
 			shielder->SetShielderMitigation(0);
 			shielder->SetShielerMaxDistance(0);
 			shielder->shield_timer.Disable();
 		}
-		SetShielderID(0);
+		SetShielder(nullptr);
 		SetShieldTargetMitigation(0);
 	}
 
 	//If 'shielder' dies
-	if (GetShieldTargetID()) {
+	if (GetShieldTarget()) {
 
-		Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
+		Mob* shield_target = GetShieldTarget();
 
 		if (shield_target) {
-			shield_target->SetShielderID(0);
+			shield_target->SetShielder(nullptr);
 			shield_target->SetShieldTargetMitigation(0);
 		}
-		SetShieldTargetID(0);
+		SetShieldTarget(nullptr);
 		SetShielderMitigation(0);
 		SetShielerMaxDistance(0);
 		shield_timer.Disable();
