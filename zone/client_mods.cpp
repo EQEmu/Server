@@ -781,7 +781,7 @@ int32 Client::CalcManaRegen(bool bCombat)
 
 int32 Client::CalcManaRegenCap()
 {
-	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap;
+	int32 cap = RuleI(Character, ItemManaRegenCap) + aabonuses.ItemManaRegenCap + itembonuses.ItemManaRegenCap + spellbonuses.ItemManaRegenCap;
 	return (cap * RuleI(Character, ManaRegenMultiplier) / 100);
 }
 
@@ -1751,7 +1751,7 @@ int32 Client::CalcEnduranceRegen(bool bCombat)
 
 int32 Client::CalcEnduranceRegenCap()
 {
-	int cap = RuleI(Character, ItemEnduranceRegenCap);
+	int cap = RuleI(Character, ItemEnduranceRegenCap) + aabonuses.ItemEnduranceRegenCap + itembonuses.ItemEnduranceRegenCap + spellbonuses.ItemEnduranceRegenCap;
 	return (cap * RuleI(Character, EnduranceRegenMultiplier) / 100);
 }
 
