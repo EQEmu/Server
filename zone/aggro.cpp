@@ -1105,6 +1105,7 @@ int32 Mob::CheckAggroAmount(uint16 spell_id, Mob *target, bool isproc)
 			}
 			case SE_CancelMagic:
 			case SE_DispelDetrimental:
+			case SE_DispelBeneficial:
 				dispel = true;
 				break;
 			case SE_ReduceHate:
