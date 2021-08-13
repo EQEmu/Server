@@ -72,8 +72,12 @@ void EQ::Net::ServertalkClient::Connect()
 		m_connection->OnRead(std::bind(&EQ::Net::ServertalkClient::ProcessData, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 		m_connection->Start();
 
-		//SendHello();
 		SendHandshake();
+
+		if (m_on_connect_cb) {
+			m_on_connect_cb(this);
+		}
+
 		m_connecting = false;
 	});
 }
