@@ -341,7 +341,7 @@ void SharedTaskManager::LoadSharedTaskState()
 	auto shared_task_dynamic_zones_data = SharedTaskDynamicZonesRepository::All(*m_database);
 
 	// load shared tasks not already completed
-	auto st = SharedTasksRepository::GetWhere(*m_database, "completion_time IS NULL");
+	auto st = SharedTasksRepository::GetWhere(*m_database, "TRUE");
 	shared_tasks.reserve(st.size());
 	for (auto &s: st) {
 		SharedTask ns = {};
