@@ -1137,11 +1137,10 @@ public:
 	void DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
 	void ShieldAbilityFinish();
 	void ShieldAbilityClearVariables();
-
-	inline Mob* GetShielder() const { return m_shielder; }
-	virtual void SetShielder(Mob* mob) { m_shielder = mob; }
-	inline Mob* GetShieldTarget() const { return m_shield_target; }
-	virtual void SetShieldTarget(Mob* mob) { m_shield_target = mob; }
+	inline uint32 GetShielderID() const { return m_shielder_id; }
+	inline void SetShielderID(uint32 val) { m_shielder_id = val; }
+	inline uint32 GetShieldTargetID() const { return m_shield_target_id; }
+	inline void SetShieldTargetID(uint32 val) { m_shield_target_id = val; }
 	inline int GetShieldTargetMitigation() const { return m_shield_target_mitigation; }
 	inline void SetShieldTargetMitigation(int val) { m_shield_target_mitigation = val; }
 	inline int GetShielderMitigation() const { return m_shielder_mitigation; }
@@ -1454,8 +1453,8 @@ protected:
 	Timer focus_proc_limit_timer;
 
 	Timer shield_timer;
-	Mob* m_shield_target;
-	Mob* m_shielder;
+	uint32 m_shield_target_id;
+	uint32 m_shielder_id;
 	int m_shield_target_mitigation;
 	int m_shielder_mitigation;
 	int m_shielder_max_distance;

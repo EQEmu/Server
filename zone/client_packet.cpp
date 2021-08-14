@@ -12862,15 +12862,15 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	if (shield_target->GetID() == GetID()) { //Client will give message "You can not shield yourself"
 		return;
 	}
-
+	   
 	//You are a 'Shield Target' already have a 'Shielder'
-	if (GetShielder() || shield_target->GetShielder()) {
+	if (GetShielderID() || shield_target->GetShielderID()) {
 		MessageString(Chat::White, ALREADY_SHIELDED);
 		return;
 	}
 
 	//You are being shielded or already have a 'Shield Target'
-	if (GetShieldTarget() || shield_target->GetShieldTarget()) {
+	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
 		MessageString(Chat::White, ALREADY_SHIELDING);
 		return;
 	}
@@ -12886,11 +12886,11 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetName(), shield_target->GetName()); 
 	
-	SetShieldTarget(shield_target);
+	SetShieldTargetID(shield_target->GetID());
 	SetShielderMitigation(25);
 	SetShielerMaxDistance(shielder_max_distance);
 
-	shield_target->SetShielder(this);
+	shield_target->SetShielderID(GetID());
 	shield_target->SetShieldTargetMitigation(50);
 			
 	//Calculate AA for adding time SPA 255 extend shield duration
