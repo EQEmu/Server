@@ -5298,6 +5298,8 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::
 	Mob *shielder = entity_list.GetMob(shield_target->GetShielderID());
 
 	if (!shielder) {
+		shield_target->SetShielderID(0);
+		shield_target->SetShieldTargetMitigation(0);
 		return;
 	}
 
