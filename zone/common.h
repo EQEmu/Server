@@ -143,7 +143,8 @@ typedef enum {	//focus types
 	focusIncreaseNumHits,				//@Fc, SPA: 421, SE_FcIncreaseNumHits,				On Caster, numhits mod flat amt, base: amt
 	focusFcLimitUse,					//@Fc, SPA: 420, SE_FcLimitUse,						On Caster, numhits mod pct, base: pct
 	focusFcMute,						//@Fc, SPA: 357, SE_FcMute,							On Caster, prevents spell casting, base: chance pct
-	focusFcTimerRefresh,				//@Fc, SPA: 389, SE_FcTimerRefresh,					On Caster, reset all recast timers, base: 1
+	focusFcTimerRefresh,				//@Fc, SPA: 389, SE_FcTimerRefresh,					On Caster, reset spell recast timer, base: 1
+	focusFcTimerLockout,				//@Fc, SPA: 390, SE_FcTimerLockout,					On Caster, set a spell to be on recast timer, base: recast duration milliseconds
 	focusFcStunTimeMod,					//@Fc, SPA: 133, SE_FcStunTimeMod,					On Caster, stun time mod pct, base: chance pct
 	focusFcResistIncoming,				//@Fc, SPA: 510, SE_Fc_Resist_Incoming,				On Target, resist modifier, base: amt
 	focusFcAmplifyMod,					//@Fc, SPA: 507, SE_Fc_Amplify_Mod,					On Caster, damage-heal-dot mod pct, base: pct
