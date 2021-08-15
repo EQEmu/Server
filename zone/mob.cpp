@@ -6210,6 +6210,15 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 		return;
 	}
 
+	//Edge case situations. If 'Shield Target' still has Shielder set but Shielder is not in zone. Catch and fix here.
+	if (shield_target->GetShielderID() && !entity_list.GetMob(shield_target->GetShielderID())) {
+		shield_target->SetShielderID(0);
+	}
+
+	if (GetShielderID() && !entity_list.GetMob(GetShielderID())) {
+		SetShielderID(0);
+	}
+
 	//You have a shielder, or your 'Shield Target' already has a 'Shielder'
 	if (GetShielderID() || shield_target->GetShielderID()) {
 		

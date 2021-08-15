@@ -12862,6 +12862,15 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	if (shield_target->GetID() == GetID()) { //Client will give message "You can not shield yourself"
 		return;
 	}
+
+	//Edge case situations. If 'Shield Target' still has Shielder set but Shielder is not in zone. Catch and fix here.
+	if (shield_target->GetShielderID() && !entity_list.GetMob(shield_target->GetShielderID())) {
+		shield_target->SetShielderID(0);
+	}
+
+	if (GetShielderID() && !entity_list.GetMob(GetShielderID())) {
+		SetShielderID(0);
+	}
 	   
 	//You are a 'Shield Target' already have a 'Shielder'
 	if (GetShielderID() || shield_target->GetShielderID()) {
@@ -12900,7 +12909,6 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	shield_timer.Start(static_cast<uint32>(shield_duration));
 
 	p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
-
 	return;
 }
 
