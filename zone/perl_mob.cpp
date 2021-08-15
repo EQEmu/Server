@@ -6267,7 +6267,7 @@ XS(XS_Mob_ShieldAbility); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_ShieldAbility) {
 	dXSARGS;
 	if (items < 2 || items > 6)
-		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, [int32 shielder__max_distance = 15], [int32 shield_duration = 12000], [int32 shield_target_mitigation= 50], [int32 shielder_mitigation = 50]"); // @categories Spells and Disciplines
+		Perl_croak(aTHX_ "Usage: Mob::ShieldAbility(THIS, uint32 target_id, [int32 shielder__max_distance = 15], [int32 shield_duration = 12000], [int32 shield_target_mitigation= 50], [int32 shielder_mitigation = 50], [bool use_aa = false], bool [can_shield_npc = true]"); // @categories Spells and Disciplines
 	{
 		Mob    *THIS;
 		uint32 target_id = (uint32)SvUV(ST(1));
@@ -6275,6 +6275,8 @@ XS(XS_Mob_ShieldAbility) {
 		int32  shield_duration = (int32)SvUV(ST(3));
 		int32  shield_target_mitigation = (int32)SvUV(ST(4));
 		int32  shielder_mitigation = (int32)SvUV(ST(5));
+		bool   use_aa = (bool)SvTRUE(ST(6));
+		bool   can_shield_npc = (bool)SvTRUE(ST(7));
 
 		VALIDATE_THIS_IS_MOB;
 		if (items < 3) {
@@ -6293,7 +6295,14 @@ XS(XS_Mob_ShieldAbility) {
 			shielder_mitigation = 50;
 		}
 
-		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_duration, shield_duration);
+		if (items < 7) {
+			use_aa = false;
+		}
+
+		if (items < 8) {
+			can_shield_npc = true;
+		}
+		THIS->ShieldAbility(target_id, shielder_max_distance, shield_duration, shield_duration, shield_duration, use_aa, can_shield_npc);
 
 	}
 	XSRETURN_EMPTY;
@@ -6668,7 +6677,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "CanRaceEquipItem"), XS_Mob_CanRaceEquipItem, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllNimbusEffects"), XS_Mob_RemoveAllNimbusEffects, file, "$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
-	newXSproto(strcpy(buf, "ShieldAbility"), XS_Mob_ShieldAbility, file, "$$$$$$");
+	newXSproto(strcpy(buf, "ShieldAbility"), XS_Mob_ShieldAbility, file, "$$$$$$$$");
 #ifdef BOTS
 	newXSproto(strcpy(buf, "CastToBot"), XS_Mob_CastToBot, file, "$");
 #endif

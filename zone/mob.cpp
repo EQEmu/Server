@@ -6197,17 +6197,25 @@ float Mob::GetDefaultRaceSize() const {
 	return GetRaceGenderDefaultHeight(race, gender);
 }
 
-void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_duration, int shield_target_mitigation, int shielder_mitigation)
+bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_duration, int shield_target_mitigation, int shielder_mitigation, bool use_aa, bool can_shield_npc)
 {
 
 	Mob* shield_target = entity_list.GetMob(target_id);
 
 	if (!shield_target) {
-		return;
+		return false;
 	}
 
-	if (shield_target->GetID() == GetID()) {
-		return;
+	if (!can_shield_npc && shield_target->IsNPC()) {
+
+		if (IsClient()) {
+			MessageString(Chat::White, SHIELD_TARGET_NPC);
+		}
+		return false;
+	}
+
+	if (shield_target->GetID() == GetID()) { //Client will give message "You can not shield yourself"
+		return false;
 	}
 
 	//Edge case situations. If 'Shield Target' still has Shielder set but Shielder is not in zone. Catch and fix here.
@@ -6225,7 +6233,7 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDED);
 		}
-		return;
+		return false;
 	}
 
 	//You are being shielded or already have a 'Shield Target'
@@ -6233,27 +6241,37 @@ void Mob::ShieldAbility(uint32 target_id, int max_shielder_distance, int shield_
 		
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDING);
-			return;
 		}
+		return false;
 	}
 
-	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(max_shielder_distance)) {
-		if (IsClient()) {
-			MessageString(Chat::White, TARGET_TOO_FAR); //Live doesn't give any message for failure, for the quest ability lets allow it. 
-		}
-		return;
+	//AA to increase SPA 230 extended shielding (default live is 15 distance units)
+	if (use_aa) {
+		shielder_max_distance += aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
+		shielder_max_distance = std::max(shielder_max_distance, 0);
+	}
+
+	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
+		return false; //Live does not give a message when out of range.
 	}
 
 	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetCleanName(), shield_target->GetCleanName());
 
 	SetShieldTargetID(shield_target->GetID());
 	SetShielderMitigation(shield_target_mitigation);
-	SetShielerMaxDistance(max_shielder_distance);
+	SetShielerMaxDistance(shielder_max_distance);
 
 	shield_target->SetShielderID(GetID());
 	shield_target->SetShieldTargetMitigation(shield_target_mitigation);
+
+	//Calculate AA for adding time SPA 255 extend shield duration (Baseline ability is 12 seconds)
+	if (use_aa) {
+		shield_duration += (aabonuses.ShieldDuration + itembonuses.ShieldDuration + spellbonuses.ShieldDuration) * 1000;
+		shield_duration = std::max(shield_duration, 1); //Incase of negative modifiers lets just make min duration 1 ms.
+	}
 	
-	shield_timer.Start(shield_duration);
+	shield_timer.Start(static_cast<uint32>(shield_duration));
+	return true;
 }
 
 void Mob::ShieldAbilityFinish()

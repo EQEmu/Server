@@ -12847,68 +12847,11 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-
-	Mob* shield_target = entity_list.GetMob(shield->target_id);
-
-	if (!shield_target) {
-		return;
-	}
-	
-	if (shield_target->IsNPC()) {
-		MessageString(Chat::White, SHIELD_TARGET_NPC);
-		return;
-	}
-
-	if (shield_target->GetID() == GetID()) { //Client will give message "You can not shield yourself"
-		return;
-	}
-
-	//Edge case situations. If 'Shield Target' still has Shielder set but Shielder is not in zone. Catch and fix here.
-	if (shield_target->GetShielderID() && !entity_list.GetMob(shield_target->GetShielderID())) {
-		shield_target->SetShielderID(0);
-	}
-
-	if (GetShielderID() && !entity_list.GetMob(GetShielderID())) {
-		SetShielderID(0);
-	}
-	   
-	//You are a 'Shield Target' already have a 'Shielder'
-	if (GetShielderID() || shield_target->GetShielderID()) {
-		MessageString(Chat::White, ALREADY_SHIELDED);
-		return;
-	}
-
-	//You are being shielded or already have a 'Shield Target'
-	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
-		MessageString(Chat::White, ALREADY_SHIELDING);
-		return;
-	}
-	
-	//AA to increase SPA 230 extended shielding
-	int shielder_max_distance = 15;
-	shielder_max_distance += aabonuses.ExtendedShielding + itembonuses.ExtendedShielding + spellbonuses.ExtendedShielding;
-	shielder_max_distance = std::max(shielder_max_distance, 0);
-
-	if (shield_target->CalculateDistance(GetX(), GetY(), GetZ()) > static_cast<float>(shielder_max_distance)) {
-		return; //Too far away, no message is given thoughh.
-	}
-
-	entity_list.MessageCloseString(this, false, 100, 0, START_SHIELDING, GetName(), shield_target->GetName()); 
-	
-	SetShieldTargetID(shield_target->GetID());
-	SetShielderMitigation(25);
-	SetShielerMaxDistance(shielder_max_distance);
-
-	shield_target->SetShielderID(GetID());
-	shield_target->SetShieldTargetMitigation(50);
 			
-	//Calculate AA for adding time SPA 255 extend shield duration
-	int shield_duration = 12000;
-	shield_duration += (aabonuses.ShieldDuration + itembonuses.ShieldDuration + spellbonuses.ShieldDuration) * 1000;
-	shield_duration = std::max(shield_duration, 1); //Incase of negative modifiers lets just make min duration 1 ms.
-	shield_timer.Start(static_cast<uint32>(shield_duration));
+	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
+		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
+	}
 
-	p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	return;
 }
 
