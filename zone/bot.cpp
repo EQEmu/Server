@@ -3272,7 +3272,9 @@ void Bot::AI_Process()
 					}
 
 					TEST_COMBATANTS();
-					int32 ExtraAttackChanceBonus = (spellbonuses.ExtraAttackChance + itembonuses.ExtraAttackChance + aabonuses.ExtraAttackChance);
+					auto ExtraAttackChanceBonus =
+					    (spellbonuses.ExtraAttackChance[0] + itembonuses.ExtraAttackChance[0] +
+					     aabonuses.ExtraAttackChance[0]);
 					if (ExtraAttackChanceBonus) {
 
 						if (p_item && p_item->GetItem()->IsType2HWeapon()) {

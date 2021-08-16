@@ -1718,6 +1718,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	/* Task Packets */
 	LoadClientTaskState();
 
+	ApplyWeaponsStance();
+
 	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
 
 	/**
@@ -2920,7 +2922,7 @@ void Client::Handle_OP_Assist(const EQApplicationPacket *app)
 			Mob *new_target = assistee->GetTarget();
 			if (new_target && (GetGM() ||
 				Distance(m_Position, assistee->GetPosition()) <= TARGETING_RANGE)) {
-				eq_anti_cheat.set_exempt_status(Assist, true);
+				cheat_manager.SetExemptStatus(Assist, true);
 				eid->entity_id = new_target->GetID();
 			} else {
 				eid->entity_id = 0;
@@ -4487,7 +4489,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 			double cosine = std::cos(thetar);
 			double sine = std::sin(thetar);
 
-			double normalizedx, normalizedy;	
+			double normalizedx, normalizedy;
 			normalizedx = cx * cosine - -cy * sine;
 			normalizedy = -cx * sine + cy * cosine;
 
@@ -4499,7 +4501,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		}
 	}
 
-	eq_anti_cheat.movement_check(glm::vec3(cx, cy, cz));
+	cheat_manager.MovementCheck(glm::vec3(cx, cy, cz));
 
 	if (IsDraggingCorpse())
 		DragCorpses();
@@ -8766,7 +8768,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	slot_id = request->slot;
 	target_id = request->target;
 
-	eq_anti_cheat.process_item_verify_request(request->slot, request->target);
+	cheat_manager.ProcessItemVerifyRequest(request->slot, request->target);
 
 	EQApplicationPacket *outapp = nullptr;
 	outapp = new EQApplicationPacket(OP_ItemVerifyReply, sizeof(ItemVerifyReply_Struct));
@@ -9616,7 +9618,7 @@ return;
 
 void Client::Handle_OP_MemorizeSpell(const EQApplicationPacket *app)
 {
-	eq_anti_cheat.check_mem_timer();
+	cheat_manager.CheckMemTimer();
 	OPMemorizeSpell(app);
 	return;
 }
@@ -13503,7 +13505,7 @@ void Client::Handle_OP_SpawnAppearance(const EQApplicationPacket *app)
 	}
 	SpawnAppearance_Struct* sa = (SpawnAppearance_Struct*)app->pBuffer;
 
-	eq_anti_cheat.process_spawn_apperance(sa->spawn_id, sa->type, sa->parameter);
+	cheat_manager.ProcessSpawnApperance(sa->spawn_id, sa->type, sa->parameter);
 
 	if (sa->spawn_id != GetID())
 		return;
@@ -13957,9 +13959,9 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (eq_anti_cheat.get_exempt_status(Assist)) {
+			else if (cheat_manager.GetExemptStatus(Assist)) {
 				GetTarget()->IsTargeted(1);
-				eq_anti_cheat.set_exempt_status(Assist, false);
+				cheat_manager.SetExemptStatus(Assist, false);
 				return;
 			}
 			else if (GetTarget()->IsClient())
@@ -13977,13 +13979,13 @@ void Client::Handle_OP_TargetCommand(const EQApplicationPacket *app)
 				SetTarget((Mob*)nullptr);
 				return;
 			}
-			else if (eq_anti_cheat.get_exempt_status(Port)) {
+			else if (cheat_manager.GetExemptStatus(Port)) {
 				GetTarget()->IsTargeted(1);
 				return;
 			}
-			else if (eq_anti_cheat.get_exempt_status(Sense)) {
+			else if (cheat_manager.GetExemptStatus(Sense)) {
 				GetTarget()->IsTargeted(1);
-				eq_anti_cheat.set_exempt_status(Sense, false);
+				cheat_manager.SetExemptStatus(Sense, false);
 				return;
 			}
 			else if (IsXTarget(GetTarget()))
@@ -15229,7 +15231,7 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 }
 
 void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
-	eq_anti_cheat.process_movement_history(app);
+	cheat_manager.ProcessMovementHistory(app);
 }
 
 void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
@@ -15241,7 +15243,7 @@ void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
 		return;
 	}
 	auto dist = Distance(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld), glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
-	eq_anti_cheat.movement_check(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
+	cheat_manager.MovementCheck(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
 	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0)
-		eq_anti_cheat.set_exempt_status(Port, true);
+		cheat_manager.SetExemptStatus(Port, true);
 }

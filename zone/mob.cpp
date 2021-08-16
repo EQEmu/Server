@@ -234,6 +234,7 @@ Mob::Mob(
 	has_shieldequiped       = false;
 	has_twohandbluntequiped = false;
 	has_twohanderequipped   = false;
+	has_duelweaponsequiped  = false;
 	can_facestab            = false;
 	has_numhits             = false;
 	has_MGB                 = false;
@@ -408,6 +409,14 @@ Mob::Mob(
 		viral_spells[i] = 0;
 	}
 
+	weaponstance.enabled = false;
+	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied
+	weaponstance.itembonus_enabled = false;		//Set when bonus is applied
+	weaponstance.aabonus_enabled = false;		//Controlled by function TogglePassiveAA
+	weaponstance.spellbonus_buff_spell_id = 0;
+	weaponstance.itembonus_buff_spell_id = 0;
+	weaponstance.aabonus_buff_spell_id = 0;
+
 	pStandingPetOrder = SPO_Follow;
 	pseudo_rooted     = false;
 
@@ -461,6 +470,8 @@ Mob::Mob(
 	PrimaryAggro = false;
 	AssistAggro = false;
 	npc_assist_cap = 0;
+
+	use_double_melee_round_dmg_bonus = false;
 
 #ifdef BOTS
 	m_manual_follow = false;
@@ -3120,7 +3131,8 @@ uint32 Mob::GetLevelHP(uint8 tlevel)
 int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 {
 	int32 cast_reducer = GetFocusEffect(focusSpellHaste, spell_id);
-	auto min_cap = casttime / 2;
+	int32 cast_reducer_amt = GetFocusEffect(focusFcCastTimeAmt, spell_id);
+	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
 
 	if (level > 50 && casttime >= 3000 && !spells[spell_id].goodEffect &&
 	    (GetClass() == RANGER || GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == BEASTLORD)) {
@@ -3128,8 +3140,13 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 		cast_reducer += level_mod * 3;
 	}
 
+	cast_reducer = std::min(cast_reducer, 50);  //Max cast time with focusSpellHaste and level reducer is 50% of cast time.
+	cast_reducer += cast_reducer_no_limit;
 	casttime = casttime * (100 - cast_reducer) / 100;
-	return std::max(casttime, min_cap);
+	casttime -= cast_reducer_amt;
+
+	return std::max(casttime, 0);
+
 }
 
 void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on, int level_override) {
@@ -3488,68 +3505,15 @@ void Mob::SetNimbusEffect(uint32 nimbus_effect)
 	}
 }
 
-void Mob::TryTriggerOnCast(uint32 spell_id, bool aa_trigger)
-{
-	if(!IsValidSpell(spell_id))
-			return;
-
-	if (aabonuses.SpellTriggers[0] || spellbonuses.SpellTriggers[0] || itembonuses.SpellTriggers[0]){
-
-		for(int i = 0; i < MAX_SPELL_TRIGGER; i++){
-
-			if(aabonuses.SpellTriggers[i] && IsClient())
-				TriggerOnCast(aabonuses.SpellTriggers[i], spell_id,1);
-
-			if(spellbonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-
-			if(itembonuses.SpellTriggers[i])
-				TriggerOnCast(spellbonuses.SpellTriggers[i], spell_id,0);
-		}
-	}
-}
-
-void Mob::TriggerOnCast(uint32 focus_spell, uint32 spell_id, bool aa_trigger)
-{
-	if (!IsValidSpell(focus_spell) || !IsValidSpell(spell_id))
-		return;
-
-	uint32 trigger_spell_id = 0;
-
-	if (aa_trigger && IsClient()) {
-		// focus_spell = aaid
-		auto rank = zone->GetAlternateAdvancementRank(focus_spell);
-		if (rank)
-			trigger_spell_id = CastToClient()->CalcAAFocus(focusTriggerOnCast, *rank, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget())
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-	}
-
-	else {
-		trigger_spell_id = CalcFocusEffect(focusTriggerOnCast, focus_spell, spell_id);
-
-		if (IsValidSpell(trigger_spell_id) && GetTarget()) {
-			SpellFinished(trigger_spell_id, GetTarget(), EQ::spells::CastingSlot::Item, 0, -1,
-				      spells[trigger_spell_id].ResistDiff);
-			CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
-		}
-	}
-}
-
-
-
-
 bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 {
 	if (!target || !IsValidSpell(spell_id))
 		return false;
 
 	/*The effects SE_SpellTrigger (SPA 340) and SE_Chance_Best_in_Spell_Grp (SPA 469) work as follows, you typically will have 2-3 different spells each with their own
-	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast. 
-	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance). 
-	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there 
+	chance to be triggered with all chances equaling up to 100 pct, with only 1 spell out of the group being ultimately cast.
+	(ie Effect1 trigger spellA with 30% chance, Effect2 triggers spellB with 20% chance, Effect3 triggers spellC with 50% chance).
+	The following function ensures a stastically accurate chance for each spell to be cast based on their chance values. These effects are also  used in spells where there
 	is only 1 effect using the trigger effect. In those situations we simply roll a chance for that spell to be cast once.
 	Note: Both SPA 340 and 469 can be in same spell and both cummulative add up to 100 pct chances. SPA469 only difference being the spell cast will
 	be "best in spell group", instead of a defined spell_id.*/
@@ -3558,7 +3522,7 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	int total_chance = 0;
 	int effect_slot = effect;
 	bool CastSpell = false;
-	
+
 	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
 		if (spells[spell_id].effectid[i] == SE_SpellTrigger || spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)
@@ -3702,9 +3666,6 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 	if(!IsValidSpell(spell_id))
 		return;
 
-	if (IsEffectInSpell(spell_id, SE_TwinCastBlocker))
-		return;
-
 	if(IsClient())
 	{
 		int32 focus = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
@@ -3746,7 +3707,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 	if (!IsValidSpell(spell_id))
 		return;
 
-	/*Apply damage from Lifeburn type effects on caster at end of spell cast. 
+	/*Apply damage from Lifeburn type effects on caster at end of spell cast.
 	 This allows for the AE spells to function without repeatedly killing caster
 	 Damage or heal portion can be found as regular single use spell effect
 	*/
@@ -3769,7 +3730,7 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 {
 	/*
-	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists. 
+	Modifies incoming spell damage by percent, to increase or decrease damage, can be limited to specific resists.
 	Can be applied through quest function, spell focus or npc_spells_effects table. This function is run on the target of the spell.
 	*/
 
@@ -3792,7 +3753,7 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 		innate_mod = Vulnerability_Mod[HIGHEST_RESIST+1];
 
 	//[Apply spell derived vulnerabilities] Step 1: Check this focus effect exists on the mob.
-	if (spellbonuses.FocusEffects[focusSpellVulnerability]){ 
+	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
 
 		int32 tmp_focus = 0;
 		int tmp_buffslot = -1;
@@ -3906,8 +3867,8 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Damage_Taken_Position_Mod[0] + aabonuses.Damage_Taken_Position_Mod[0] + spellbonuses.Damage_Taken_Position_Mod[0];
-	front_arc += itembonuses.Damage_Taken_Position_Mod[1] + aabonuses.Damage_Taken_Position_Mod[1] + spellbonuses.Damage_Taken_Position_Mod[1];
+	back_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] + aabonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT] + spellbonuses.Damage_Taken_Position_Mod[SBIndex::POSITION_FRONT];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))//Check if attacker is striking from behind
@@ -3923,6 +3884,29 @@ int32 Mob::GetPositionalDmgTaken(Mob *attacker)
 
 	return total_mod;
 }
+
+int32 Mob::GetPositionalDmgTakenAmt(Mob *attacker)
+{
+	if (!attacker)
+		return 0;
+
+	int front_arc = 0;
+	int back_arc = 0;
+	int total_amt = 0;
+
+	back_arc += itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] + aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK] + spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] + aabonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT] + spellbonuses.Damage_Taken_Position_Amt[SBIndex::POSITION_FRONT];
+
+	if (back_arc || front_arc) {
+		if (attacker->BehindMob(this, attacker->GetX(), attacker->GetY()))
+			total_amt = back_arc;
+		else
+			total_amt = front_arc;
+	}
+
+	return total_amt;
+}
+
 
 int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
 
@@ -4672,7 +4656,7 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 {
 	if(IsClient())
 	{
-		CastToClient()->eq_anti_cheat.set_exempt_status(KnockBack, true);
+		CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
 		auto outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 
@@ -4857,6 +4841,13 @@ int16 Mob::GetMeleeDamageMod_SE(uint16 skill)
 	dmg_mod += itembonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier2[EQ::skills::HIGHEST_SKILL + 1] +
 				itembonuses.DamageModifier2[skill] + spellbonuses.DamageModifier2[skill] + aabonuses.DamageModifier2[skill];
 
+	dmg_mod += itembonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + spellbonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] + aabonuses.DamageModifier3[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.DamageModifier3[skill] + spellbonuses.DamageModifier3[skill] + aabonuses.DamageModifier3[skill];
+
+	if (GetUseDoubleMeleeRoundDmgBonus()) {
+		dmg_mod += itembonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] + spellbonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] + aabonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS];
+	}
+
 	if(dmg_mod < -100)
 		dmg_mod = -100;
 
@@ -4898,8 +4889,8 @@ int16 Mob::GetMeleeDmgPositionMod(Mob* defender)
 	int back_arc = 0;
 	int total_mod = 0;
 
-	back_arc += itembonuses.Melee_Damage_Position_Mod[0] + aabonuses.Melee_Damage_Position_Mod[0] + spellbonuses.Melee_Damage_Position_Mod[0];
-	front_arc += itembonuses.Melee_Damage_Position_Mod[1] + aabonuses.Melee_Damage_Position_Mod[1] + spellbonuses.Melee_Damage_Position_Mod[1];
+	back_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_BACK];
+	front_arc += itembonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] + aabonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT] + spellbonuses.Melee_Damage_Position_Mod[SBIndex::POSITION_FRONT];
 
 	if (back_arc || front_arc) { //Do they have this bonus?
 		if (BehindMob(defender, GetX(), GetY()))//Check if attacker is striking from behind
@@ -4938,6 +4929,30 @@ int16 Mob::GetSkillDmgAmt(uint16 skill)
 	return skill_dmg;
 }
 
+int16 Mob::GetPositionalDmgAmt(Mob* defender)
+{
+	if (!defender)
+		return 0;
+
+	//SPA 504
+	int front_arc_dmg_amt = 0;
+	int back_arc_dmg_amt = 0;
+
+	int total_amt = 0;
+
+	back_arc_dmg_amt += itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] + aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK] + spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_BACK];
+	front_arc_dmg_amt += itembonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] + aabonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT] + spellbonuses.Melee_Damage_Position_Amt[SBIndex::POSITION_FRONT];
+
+	if (back_arc_dmg_amt || front_arc_dmg_amt) {
+		if (BehindMob(defender, GetX(), GetY()))
+			total_amt = back_arc_dmg_amt;
+		else
+			total_amt = front_arc_dmg_amt;
+	}
+
+	return total_amt;
+}
+
 void Mob::MeleeLifeTap(int32 damage) {
 
 	int32 lifetap_amt = 0;
@@ -4954,6 +4969,20 @@ void Mob::MeleeLifeTap(int32 damage) {
 		else
 			Damage(this, -lifetap_amt, 0, EQ::skills::SkillEvocation, false); //Dmg self for modified damage amount.
 	}
+}
+
+bool Mob::TryDoubleMeleeRoundEffect() {
+
+	auto chance = aabonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] + itembonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] +
+							spellbonuses.DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE];
+
+	if (chance && zone->random.Roll(chance)) {
+		SetUseDoubleMeleeRoundDmgBonus(true);
+		return true;
+	}
+
+	SetUseDoubleMeleeRoundDmgBonus(false);
+	return false;
 }
 
 bool Mob::TryReflectSpell(uint32 spell_id)

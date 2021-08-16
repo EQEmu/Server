@@ -572,7 +572,7 @@ int32 Lua_StatBonuses::GetProcChanceSPA() const {
 
 int32 Lua_StatBonuses::GetExtraAttackChance() const {
 	Lua_Safe_Call_Int();
-	return self->ExtraAttackChance;
+	return self->ExtraAttackChance[0];
 }
 
 int32 Lua_StatBonuses::GetDoTShielding() const {
@@ -677,7 +677,7 @@ int Lua_StatBonuses::GetXPRateMod() const {
 
 bool Lua_StatBonuses::GetBlockNextSpell() const {
 	Lua_Safe_Call_Bool();
-	return self->BlockNextSpell;
+	//return self->BlockNextSpell; bonus no longer used due to effect being a focus
 }
 
 bool Lua_StatBonuses::GetImmuneToFlee() const {

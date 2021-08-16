@@ -106,48 +106,53 @@
 #define PET_BUTTON_SPELLHOLD	9
 
 #define AURA_HARDCAP		2
+#define WEAPON_STANCE_TYPE_MAX 2
+
 
 typedef enum {	//focus types
-	focusSpellHaste = 1,
-	focusSpellDuration,
-	focusRange,
-	focusReagentCost,
-	focusManaCost,
-	focusImprovedHeal,
-	focusImprovedDamage,
-	focusImprovedDamage2,
-	focusImprovedDOT,		//i dont know about this...
-	focusFcDamagePctCrit,
-	focusImprovedUndeadDamage,
-	focusPetPower,
-	focusResistRate,
-	focusSpellHateMod,
-	focusTriggerOnCast,
-	focusSpellVulnerability,
-	focusFcSpellDamagePctIncomingPC,
-	focusTwincast,
-	focusSympatheticProc,
-	focusFcDamageAmt,
-	focusFcDamageAmt2,
-	focusFcDamageAmtCrit,
-	focusSpellDurByTic,
-	focusSwarmPetDuration,
-	focusReduceRecastTime,
-	focusBlockNextSpell,
-	focusFcHealPctIncoming,
-	focusFcDamageAmtIncoming,
-	focusFcSpellDamageAmtIncomingPC,
-	focusFcCastSpellOnLand,
-	focusFcHealAmtIncoming,
-	focusFcBaseEffects,
-	focusIncreaseNumHits,
-	focusFcLimitUse,
-	focusFcMute,
-	focusFcTimerRefresh,
-	focusFcStunTimeMod,
-	focusFcHealPctCritIncoming,
-	focusFcHealAmt,
-	focusFcHealAmtCrit,
+	focusSpellHaste = 1,				//@Fc, SPA: 127, SE_IncreaseSpellHaste,				On Caster, cast time mod pct, base: pct
+	focusSpellDuration,					//@Fc, SPA: 128, SE_IncreaseSpellDuration,			On Caster, spell duration mod pct, base: pct
+	focusRange,							//@Fc, SPA: 129, SE_IncreaseRange,					On Caster, spell range mod pct, base: pct	
+	focusReagentCost,					//@Fc, SPA: 131, SE_ReduceReagentCost,				On Caster, do not consume reagent pct chance, base: min pct, limit: max pct  
+	focusManaCost,						//@Fc, SPA: 132, SE_ReduceManaCost,					On Caster, reduce mana cost by pct, base: min pct, limt: max pct
+	focusImprovedHeal,					//@Fc, SPA: 125, SE_ImprovedHeal,					On Caster, spell healing mod pct, base: min pct, limit: max pct
+	focusImprovedDamage,				//@Fc, SPA: 124, SE_ImprovedDamage,					On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusImprovedDamage2,				//@Fc, SPA: 461, SE_ImprovedDamage2,				On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusFcDamagePctCrit,				//@Fc, SPA: 302, SE_FcDamagePctCrit,				On Caster, spell damage mod pct, base: min pct, limit: max pct
+	focusPetPower,						//@Fc, SPA: 167, SE_PetPowerIncrease,				On Caster, pet power mod, base: value
+	focusResistRate,					//@Fc, SPA: 126, SE_SpellResistReduction,			On Caster, casted spell resist mod pct, base: min pct, limit: max pct
+	focusSpellHateMod,					//@Fc, SPA: 130, SE_SpellHateMod,					On Caster, spell hate mod pct, base: min pct, limit: max pct
+	focusTriggerOnCast,					//@Fc, SPA: 339, SE_TriggerOnCast,					On Caster, cast on spell use, base: chance pct limit: spellid			
+	focusSpellVulnerability,			//@Fc, SPA: 296, SE_FcSpellVulnerability,			On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	focusFcSpellDamagePctIncomingPC,	//@Fc, SPA: 483, SE_Fc_Spell_Damage_Pct_IncomingPC, On Target, spell damage taken mod pct, base: min pct, limit: max pct
+	focusTwincast,						//@Fc, SPA: 399, SE_FcTwincast,						On Caster, chance cast spell twice, base: chance pct
+	focusSympatheticProc,				//@Fc, SPA: 383, SE_SympatheticProc,				On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
+	focusFcDamageAmt,					//@Fc, SPA: 286, SE_FcDamageAmt,					On Caster, spell damage mod flat amt, base: amt
+	focusFcDamageAmt2,					//@Fc, SPA: 462, SE_FcDamageAmt2,					On Caster, spell damage mod flat amt, base: amt
+	focusFcDamageAmtCrit,				//@Fc, SPA: 303, SE_FFcDamageAmtCrit,				On Caster, spell damage mod flat amt, base: amt
+	focusSpellDurByTic,					//@Fc, SPA: 287, SE_SpellDurationIncByTic,			On Caster, spell buff duration mod, base: tics
+	focusSwarmPetDuration,				//@Fc, SPA: 398, SE_SwarmPetDuration,				On Caster, swarm pet duration mod, base: milliseconds
+	focusReduceRecastTime,				//@Fc, SPA: 310, SE_ReduceReuseTimer,				On Caster, disc reuse time mod, base: milliseconds
+	focusBlockNextSpell,				//@Fc, SPA: 335, SE_BlockNextSpellFocus,			On Caster, chance to block next spell, base: chance
+	focusFcHealPctIncoming,				//@Fc, SPA: 395, SE_FcHealPctCritIncoming,			On Target, heal received mod pct, base: pct
+	focusFcDamageAmtIncoming,			//@Fc, SPA: 297, SE_FcDamageAmtIncoming,			On Target, damage taken flat amt, base: amt
+	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SE_Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt	
+	focusFcCastSpellOnLand,				//@Fc, SPA: 481, SE_Fc_Cast_Spell_On_Land,			On Target, cast spell if hit by spell, base: chance pct, limit: spellid
+	focusFcHealAmtIncoming,				//@Fc, SPA: 394, SE_FcHealAmtIncoming,				On Target, heal received mod flat amt, base: amt
+	focusFcBaseEffects,					//@Fc, SPA: 413, SE_FcBaseEffects,					On Caster, base spell effectiveness mod pct, base: pct
+	focusIncreaseNumHits,				//@Fc, SPA: 421, SE_FcIncreaseNumHits,				On Caster, numhits mod flat amt, base: amt
+	focusFcLimitUse,					//@Fc, SPA: 420, SE_FcLimitUse,						On Caster, numhits mod pct, base: pct
+	focusFcMute,						//@Fc, SPA: 357, SE_FcMute,							On Caster, prevents spell casting, base: chance pct
+	focusFcTimerRefresh,				//@Fc, SPA: 389, SE_FcTimerRefresh,					On Caster, reset all recast timers, base: 1
+	focusFcStunTimeMod,					//@Fc, SPA: 133, SE_FcStunTimeMod,					On Caster, stun time mod pct, base: chance pct
+	focusFcResistIncoming,				//@Fc, SPA: 510, SE_Fc_Resist_Incoming,				On Target, resist modifier, base: amt
+	focusFcAmplifyMod,					//@Fc, SPA: 507, SE_Fc_Amplify_Mod,					On Caster, damage-heal-dot mod pct, base: pct
+	focusFcAmplifyAmt,					//@Fc, SPA: 508, SE_Fc_Amplify_Amt,					On Caster, damage-heal-dot mod flat amt, base: amt
+	focusFcCastTimeMod2,				//@Fc, SPA: 500, SE_Fc_CastTimeMod2,				On Caster, cast time mod pct, base: pct
+	focusFcCastTimeAmt,					//@Fc, SPA: 501, SE_Fc_CastTimeAmt,					On Caster, cast time mod flat amt, base: milliseconds
+	focusFcHealPctCritIncoming,			//@Fc, SPA: 393, SE_FcHealPctCritIncoming,			On Target, heal received critical chance mod, base: chance pct
+	focusFcHealAmt,						//@Fc, SPA: 392, SE_FcHealAmt,						On Caster, spell healing mod flat amt, base: amt
+	focusFcHealAmtCrit,					//@Fc, SPA: 396, SE_FcHealAmtCrit,					On Caster, spell healing mod flat amt, base: amt
 } focusType; //Any new FocusType needs to be added to the Mob::IsFocus function
 #define HIGHEST_FOCUS	focusFcHealAmtCrit //Should always be last focusType in enum
 
@@ -322,7 +327,7 @@ struct Buffs_Struct {
 	int32	ExtraDIChance;
 	int16	RootBreakChance; //Not saved to dbase
 	uint32	instrument_mod;
-	int16   focusproclimit_time;	//timer to limit number of procs from focus effects
+	int16   focusproclimit_time;	//timer to limit number of procs from focus effects 
 	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
@@ -442,10 +447,14 @@ struct StatBonuses {
 	int32	HitChanceEffect[EQ::skills::HIGHEST_SKILL + 2];	//Spell effect Chance to Hit, straight percent increase
 	int32	DamageModifier[EQ::skills::HIGHEST_SKILL + 2];	//i
 	int32	DamageModifier2[EQ::skills::HIGHEST_SKILL + 2];	//i
+	int32	DamageModifier3[EQ::skills::HIGHEST_SKILL + 2];	//i
 	int32	MinDamageModifier[EQ::skills::HIGHEST_SKILL + 2]; //i
 	int32	ProcChance;							// ProcChance/10 == % increase i = CombatEffects
 	int32	ProcChanceSPA;						// ProcChance from spell effects
-	int32	ExtraAttackChance;
+	int32	ExtraAttackChance[2];				// base chance(w/ 2H weapon)=0, amt of extra attacks=1
+	int32	ExtraAttackChancePrimary[2];		// base chance=0, , amt of extra attacks=1
+	int32	ExtraAttackChanceSecondary[2];		// base chance=0, , amt of extra attacks=1
+	int32	DoubleMeleeRound[2];				// base chance=0, damage mod=1
 	int32	DoTShielding;
 	int32	DivineSaveChance[2];				// Second Chance (base1 = chance, base2 = spell on trigger)
 	uint32	DeathSave[4];						// Death Pact [0](value = 1 partial 2 = full) [1]=slot [2]=LvLimit [3]=HealAmt
@@ -480,8 +489,6 @@ struct StatBonuses {
 	int		HPPercCap[2];						//Spell effect that limits you to being healed/regening beyond a % of your max
 	int		ManaPercCap[2];						// ^^ 0 = % Cap 1 = Flat Amount Cap
 	int		EndPercCap[2];						// ^^
-	bool	BlockNextSpell;						// Indicates whether the client can block a spell or not
-	//uint16	BlockSpellEffect[EFFECT_COUNT];		// Prevents spells with certain effects from landing on you *no longer used
 	bool	ImmuneToFlee;						// Bypass the fleeing flag
 	uint32	VoiceGraft;							// Stores the ID of the mob with which to talk through
 	int32	SpellProcChance;					// chance to proc from sympathetic spell effects
@@ -500,8 +507,8 @@ struct StatBonuses {
 	uint32	MitigateDotRune[4];					// 0 = Mitigation value 1 = Buff Slot 2 = Max mitigation per tick 3 = Rune Amt
 	bool	TriggerMeleeThreshold;				// Has Melee Threshhold
 	bool	TriggerSpellThreshold;				// Has Spell Threshhold
-	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value 
-	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost 
+	uint32	ManaAbsorbPercentDamage;			// 0 = Mitigation value
+	int32	EnduranceAbsorbPercentDamage[2];	// 0 = Mitigation value 1 = Percent Endurance drain per HP lost
 	int32	ShieldBlock;						// Chance to Shield Block
 	int32	BlockBehind;						// Chance to Block Behind (with our without shield)
 	bool	CriticalRegenDecay;					// increase critical regen chance, decays based on spell level cast
@@ -509,7 +516,7 @@ struct StatBonuses {
 	bool	CriticalDotDecay;					// increase critical dot chance, decays based on spell level cast
 	bool	DivineAura;							// invulnerability
 	bool	DistanceRemoval;					// Check if Cancle if Moved effect is present
-	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buffid
+	int32	ImprovedTaunt[3];					// 0 = Max Level 1 = Aggro modifier 2 = buff slot
 	int8	Root[2];							// The lowest buff slot a root can be found. [0] = Bool if has root [1] = buff slot
 	int32	FrenziedDevastation;				// base1= AArank(used) base2= chance increase spell criticals + all DD spells 2x mana.
 	uint32	AbsorbMagicAtt[2];					// 0 = magic rune value 1 = buff slot
@@ -536,12 +543,15 @@ struct StatBonuses {
 	int32   AC_Avoidance_Max_Percent;			// Increase AC avoidance by percent
 	int32   Damage_Taken_Position_Mod[2];		// base = percent melee damage reduction base2 0=back 1=front. [0]Back[1]Front
 	int32   Melee_Damage_Position_Mod[2];		// base = percent melee damage increase base2 0=back 1=front. [0]Back[1]Front
+	int32   Damage_Taken_Position_Amt[2];		// base = flat amt melee damage reduction base2 0=back 1=front. [0]Back[1]Front
+	int32   Melee_Damage_Position_Amt[2];		// base = flat amt melee damage increase base2 0=back 1=front. [0]Back[1]Front
 	int32   Double_Backstab_Front;				// base = percent chance to double back stab front
 	int32   DS_Mitigation_Amount;				// base = flat amt DS mitigation. Negative value to reduce
 	int32	DS_Mitigation_Percentage;			// base = percent amt of DS mitigation. Negative value to reduce
 	int32   Pet_Crit_Melee_Damage_Pct_Owner;	// base = percent mod for pet critcal damage from owner
 	int32	Pet_Add_Atk;						// base = Pet ATK bonus from owner
-
+	int32	ItemEnduranceRegenCap;				// modify endurance regen cap
+	int32   WeaponStance[WEAPON_STANCE_TYPE_MAX +1];// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
 
 	// AAs
 	int8	Packrat;							//weight reduction for items, 1 point = 10%
@@ -613,6 +623,60 @@ struct StatBonuses {
 	bool hunger; // Song of Sustenance -- min caps to 3500
 };
 
+// StatBonus Indexes
+namespace SBIndex {
+	constexpr uint16 BUFFSTACKER_EXISTS                     = 0; // SPA 446-449
+	constexpr uint16 BUFFSTACKER_VALUE                      = 1; // SPA 446-449
+	constexpr uint16 EXTRA_ATTACK_CHANCE                    = 0; // SPA 266,498,499
+	constexpr uint16 EXTRA_ATTACK_NUM_ATKS                  = 1; // SPA 266,498,499
+	constexpr uint16 DIVINE_SAVE_CHANCE                     = 0; // SPA 232
+	constexpr uint16 DIVINE_SAVE_SPELL_TRIGGER_ID           = 1; // SPA 232
+	constexpr uint16 DEATH_SAVE_TYPE                        = 0; // SPA 150
+	constexpr uint16 DEATH_SAVE_BUFFSLOT                    = 1; // SPA 150
+	constexpr uint16 DEATH_SAVE_MIN_LEVEL_FOR_HEAL          = 2; // SPA 150
+	constexpr uint16 DEATH_SAVE_HEAL_AMT                    = 3; // SPA 150
+	constexpr uint16 RESOURCE_PERCENT_CAP                   = 0; // SPA 408-410
+	constexpr uint16 RESOURCE_AMOUNT_CAP                    = 1; // SPA 408-419
+	constexpr uint16 NEGATE_ATK_EXISTS                      = 0; // SPA 163
+	constexpr uint16 NEGATE_ATK_BUFFSLOT                    = 1; // SPA 163
+	constexpr uint16 NEGATE_ATK_MAX_DMG_ABSORB_PER_HIT      = 2; // SPA 163
+	constexpr uint16 MITIGATION_RUNE_PERCENT                = 0; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_BUFFSLOT               = 1; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_MAX_DMG_ABSORB_PER_HIT = 2; // SPA 161,162,450
+	constexpr uint16 MITIGATION_RUNE_MAX_HP_AMT             = 3; // SPA 161,162,450
+	constexpr uint16 THRESHOLDGUARD_MITIGATION_PERCENT      = 0; // SPA 451,452
+	constexpr uint16 THRESHOLDGUARD_BUFFSLOT                = 1; // SPA 451,452
+	constexpr uint16 THRESHOLDGUARD_MIN_DMG_TO_TRIGGER      = 2; // SPA 451,452
+	constexpr uint16 ENDURANCE_ABSORD_MITIGIATION           = 0; // SPA 521
+	constexpr uint16 ENDURANCE_ABSORD_DRAIN_PER_HP          = 1; // SPA 521
+	constexpr uint16 IMPROVED_TAUNT_MAX_LVL                 = 0; // SPA 444
+	constexpr uint16 IMPROVED_TAUNT_AGGRO_MOD               = 1; // SPA 444
+	constexpr uint16 IMPROVED_TAUNT_BUFFSLOT                = 2; // SPA 444
+	constexpr uint16 ROOT_EXISTS                            = 0; // SPA 99
+	constexpr uint16 ROOT_BUFFSLOT                          = 1; // SPA 99
+	constexpr uint16 RUNE_AMOUNT                            = 0; // SPA 55
+	constexpr uint16 RUNE_BUFFSLOT                          = 1; // SPA 78
+	constexpr uint16 POSITION_BACK							= 0; // SPA 503-506
+	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
+	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
+	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
+	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427
+	constexpr uint16 SKILLPROC_SKILL                        = 1; // SPA 427
+	constexpr uint16 SKILLPROC_SPELL_ID                     = 2; // SPA 427
+	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
+	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
+	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
+	constexpr uint16 DOUBLE_RIPOSTE_SKILL_ATK_CHANCE        = 1; // SPA 223
+	constexpr uint16 DOUBLE_RIPOSTE_SKILL                   = 2; // SPA 223
+	constexpr uint16 FINISHING_EFFECT_PROC_CHANCE           = 0; // SPA 278, 439, 217
+	constexpr uint16 FINISHING_EFFECT_DMG                   = 1; // SPA 278, 439, 217
+	constexpr uint16 FINISHING_EFFECT_LEVEL_MAX             = 0; // SPA 440, 345, 346
+	constexpr uint16 FINISHING_EFFECT_LEVEL_CHANCE_BONUS    = 1; // SPA 440, 345, 346
+	constexpr uint16 DOUBLE_MELEE_ROUND_CHANCE              = 0; // SPA 471
+	constexpr uint16 DOUBLE_MELEE_ROUND_DMG_BONUS			= 1; // SPA 471
+};
+
+
 typedef struct
 {
 	uint16 spellID;
@@ -625,6 +689,20 @@ struct Shielders_Struct {
 	uint32 shielder_id;
 	uint16 shielder_bonus;
 };
+
+struct WeaponStance_Struct {
+	bool enabled;
+	bool spellbonus_enabled;
+	bool itembonus_enabled;
+	bool aabonus_enabled;
+	int spellbonus_buff_spell_id;
+	int itembonus_buff_spell_id;
+	int aabonus_buff_spell_id;
+};
+
+constexpr uint16 WEAPON_STANCE_TYPE_2H = 0;
+constexpr uint16 WEAPON_STANCE_TYPE_SHIELD = 1;
+constexpr uint16 WEAPON_STANCE_TYPE_DUAL_WIELD = 2;
 
 typedef struct
 {
