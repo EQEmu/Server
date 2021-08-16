@@ -2559,6 +2559,35 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
+			case SE_FcTimerLockout: {
+				if (IsClient()) {
+					for (unsigned int mem_spell : CastToClient()->m_pp.mem_spells) {
+						if (IsValidSpell(mem_spell)) {
+							int32 new_recast_timer = CalcFocusEffect(
+								focusFcTimerLockout,
+								spell_id,
+								mem_spell
+							);
+							if (new_recast_timer) {
+								bool apply_recast_timer = true;
+								if (IsCasting() && casting_spell_id == mem_spell) {
+									apply_recast_timer = false;
+								}
+								if (apply_recast_timer) {
+									new_recast_timer = new_recast_timer / 1000;
+									CastToClient()->GetPTimers().Start(
+										pTimerSpellStart + mem_spell,
+										static_cast<uint32>(new_recast_timer)
+									);
+								}
+							}
+						}
+					}
+					SetMana(GetMana());
+				}
+				break;
+			}
+
 			case SE_HealGroupFromMana: {
 				if(!caster)
 					break;
@@ -5749,6 +5778,12 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_FcTimerRefresh:
 				if (type == focusFcTimerRefresh) {
+					value = focus_spell.base[i];
+				}
+				break;
+
+			case SE_FcTimerLockout:
+				if (type == focusFcTimerLockout) {
 					value = focus_spell.base[i];
 				}
 				break;

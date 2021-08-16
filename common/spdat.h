@@ -752,8 +752,8 @@ typedef enum {
 #define SE_CastOnCurer					386 // implemented - Casts a spell on the person curing
 #define SE_CastOnCure					387 // implemented - Casts a spell on the cured person
 #define SE_SummonCorpseZone				388 // implemented - summons a corpse from any zone(nec AA)
-#define SE_FcTimerRefresh				389 // implemented, @Fc, On Caster, reset all recast timers, base: 1
-//#define SE_FcTimerLockout				390 // *not implemented - Sets recast timers to specific value, focus limited.
+#define SE_FcTimerRefresh				389 // implemented, @Fc, On Caster, reset all recast timers, base: 1, Note: Applied from casted spells only
+#define SE_FcTimerLockout				390 // implemented, @Fc, On Caster, set a spell to be on recast timer, base: recast duration milliseconds, Note: Applied from casted spells only
 #define SE_LimitManaMax					391	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
 #define SE_FcHealAmt					392 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
 #define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received critical chance mod, base: chance pct
