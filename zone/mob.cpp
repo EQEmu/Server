@@ -375,7 +375,7 @@ Mob::Mob(
 	silenced       = false;
 	amnesiad       = false;
 	inWater        = false;
-	
+
 	shield_timer.Disable();
 	m_shield_target_id = 0;
 	m_shielder_id = 0;
@@ -3145,7 +3145,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	cast_reducer += cast_reducer_no_limit;
 	casttime = casttime * (100 - cast_reducer) / 100;
 	casttime -= cast_reducer_amt;
-	
+
 	return std::max(casttime, 0);
 
 }
@@ -4945,11 +4945,11 @@ int16 Mob::GetPositionalDmgAmt(Mob* defender)
 
 	if (back_arc_dmg_amt || front_arc_dmg_amt) {
 		if (BehindMob(defender, GetX(), GetY()))
-			total_amt = back_arc_dmg_amt; 
+			total_amt = back_arc_dmg_amt;
 		else
 			total_amt = front_arc_dmg_amt;
 	}
-	
+
 	return total_amt;
 }
 
@@ -6199,15 +6199,12 @@ float Mob::GetDefaultRaceSize() const {
 
 bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_duration, int shield_target_mitigation, int shielder_mitigation, bool use_aa, bool can_shield_npc)
 {
-
 	Mob* shield_target = entity_list.GetMob(target_id);
-
 	if (!shield_target) {
 		return false;
 	}
 
 	if (!can_shield_npc && shield_target->IsNPC()) {
-
 		if (IsClient()) {
 			MessageString(Chat::White, SHIELD_TARGET_NPC);
 		}
@@ -6229,7 +6226,6 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	//You have a shielder, or your 'Shield Target' already has a 'Shielder'
 	if (GetShielderID() || shield_target->GetShielderID()) {
-		
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDED);
 		}
@@ -6238,7 +6234,6 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	//You are being shielded or already have a 'Shield Target'
 	if (GetShieldTargetID() || shield_target->GetShieldTargetID()) {
-		
 		if (IsClient()) {
 			MessageString(Chat::White, ALREADY_SHIELDING);
 		}
@@ -6269,7 +6264,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 		shield_duration += (aabonuses.ShieldDuration + itembonuses.ShieldDuration + spellbonuses.ShieldDuration) * 1000;
 		shield_duration = std::max(shield_duration, 1); //Incase of negative modifiers lets just make min duration 1 ms.
 	}
-	
+
 	shield_timer.Start(static_cast<uint32>(shield_duration));
 	return true;
 }
@@ -6293,9 +6288,7 @@ void Mob::ShieldAbilityClearVariables()
 {
 	//If 'shield target' dies
 	if (GetShielderID()){
-		
 		Mob* shielder = entity_list.GetMob(GetShielderID());
-
 		if (shielder) {
 			shielder->SetShieldTargetID(0);
 			shielder->SetShielderMitigation(0);
@@ -6308,9 +6301,7 @@ void Mob::ShieldAbilityClearVariables()
 
 	//If 'shielder' dies
 	if (GetShieldTargetID()) {
-
 		Mob* shield_target = entity_list.GetMob(GetShieldTargetID());
-
 		if (shield_target) {
 			shield_target->SetShielderID(0);
 			shield_target->SetShieldTargetMitigation(0);

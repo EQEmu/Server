@@ -2954,11 +2954,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsPet()) {
 					Mob* petowner = GetOwner();
 					if (petowner) {
-
-						int shield_duration = spells[spell_id].base[i] * 12 * 1000;
-						int m_shield_target_mitigation = spells[spell_id].base2[i] ? spells[spell_id].base2[i] : 50;
-						int m_shielder_mitigation = spells[spell_id].max[i] ? spells[spell_id].base2[i] : 50;
-						ShieldAbility(petowner->GetID(), 25, shield_duration, m_shield_target_mitigation, m_shielder_mitigation);
+						int shield_duration          = spells[spell_id].base[i] * 12 * 1000;
+						int shield_target_mitigation = spells[spell_id].base2[i] ? spells[spell_id].base2[i] : 50;
+						int shielder_mitigation      = spells[spell_id].max[i] ? spells[spell_id].base2[i] : 50;
+						ShieldAbility(petowner->GetID(), 25, shield_duration, shield_target_mitigation, shielder_mitigation);
 						break;
 					}
 				}

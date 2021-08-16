@@ -1655,9 +1655,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	int exploss = 0;
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
-	/*
-	#1: Send death packet to everyone
-	*/
+	// #1: Send death packet to everyone
 	uint8 killed_level = GetLevel();
 
 	SendLogoutPackets();
@@ -1684,9 +1682,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	app.priority = 6;
 	entity_list.QueueClients(this, &app);
 
-	/*
-	#2: figure out things that affect the player dying and mark them dead
-	*/
+	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
 	SetPet(0);
@@ -5296,7 +5292,6 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::
 	}
 
 	Mob *shielder = entity_list.GetMob(shield_target->GetShielderID());
-
 	if (!shielder) {
 		shield_target->SetShielderID(0);
 		shield_target->SetShieldTargetMitigation(0);
@@ -5314,13 +5309,9 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::
 	}
 
 	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equiping a shield item
-
 	if (shielder->IsClient() && shielder->HasShieldEquiped()) {
-		
 		EQ::ItemInstance* inst = shielder->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
-
 		if (inst) {
-
 			const EQ::ItemData* shield = inst->GetItem();
 			if (shield && shield->ItemType == EQ::item::ItemTypeShield) {
 				mitigation += shield->AC * 50 / 100; //1% increase per 2 AC
