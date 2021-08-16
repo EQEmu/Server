@@ -2561,23 +2561,24 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_FcTimerLockout: {
 				if (IsClient()) {
-
-					for (unsigned int i = 0; i < EQ::spells::SPELL_GEM_COUNT; ++i) {
-
-						if (IsValidSpell(CastToClient()->m_pp.mem_spells[i])) {
-
-							int32 new_recast_timer = CalcFocusEffect(focusFcTimerLockout, spell_id, CastToClient()->m_pp.mem_spells[i]);
+					for (unsigned int gem_index = 0; gem_index < EQ::spells::SPELL_GEM_COUNT; ++gem_index) {
+						if (IsValidSpell(CastToClient()->m_pp.mem_spells[gem_index])) {
+							int32 new_recast_timer = CalcFocusEffect(
+								focusFcTimerLockout,
+								spell_id,
+								CastToClient()->m_pp.mem_spells[gem_index]
+							);
 							if (new_recast_timer) {
-
 								bool apply_recast_timer = true;
-								if (IsCasting() && casting_spell_id == CastToClient()->m_pp.mem_spells[i]) {
-									
+								if (IsCasting() && casting_spell_id == CastToClient()->m_pp.mem_spells[gem_index]) {
 									apply_recast_timer = false;
 								}
 								if (apply_recast_timer) {
-									
 									new_recast_timer = new_recast_timer / 1000;
-									CastToClient()->GetPTimers().Start(pTimerSpellStart + CastToClient()->m_pp.mem_spells[i], static_cast<uint32>(new_recast_timer));
+									CastToClient()->GetPTimers().Start(
+										pTimerSpellStart + CastToClient()->m_pp.mem_spells[gem_index],
+										static_cast<uint32>(new_recast_timer)
+									);
 								}
 							}
 						}
