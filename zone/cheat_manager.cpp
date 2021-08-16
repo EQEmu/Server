@@ -264,17 +264,14 @@ void CheatManager::MovementCheck(uint32 time_between_checks)
 {
 	uint32 cur_time = Timer::GetCurrentTime();
 	if ((cur_time - m_time_since_last_position_check) > time_between_checks) {
-		float speed =
+		float estimated_speed =
 				  (m_distance_since_last_position_check * 100) / (float) (cur_time - m_time_since_last_position_check);
-		int   runs  = m_target->GetRunspeed() / std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f);
-		if (speed > runs) {
-			if (!m_target->GetGMSpeed() && (runs >= m_target->GetBaseRunspeed() || (speed >
-																					(m_target->GetBaseRunspeed() /
-																					 std::min(
-																						 RuleR(Zone,
-																							   MQWarpDetectionDistanceFactor),
-																						 1.0f
-																					 ))))) {
+		float run_speed  = m_target->GetRunspeed() / 
+			std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f); // MQWarpDetection shouldn't go below 1.0f so we can't end up dividing by 0.
+		if (estimated_speed > run_speed) {
+			bool using_gm_speed = m_target->GetGMSpeed();
+			bool is_immobile = m_target->GetRunspeed() == 0; // this covers stuns, roots, mez, and pseudorooted.
+			if (!using_gm_speed && !is_immobile) {
 				if (GetExemptStatus(ShadowStep)) {
 					if (m_distance_since_last_position_check > 800) {
 						CheatDetected(
@@ -288,12 +285,12 @@ void CheatManager::MovementCheck(uint32 time_between_checks)
 					}
 				}
 				else if (GetExemptStatus(KnockBack)) {
-					if (speed > 30.0f) {
+					if (estimated_speed > 30.0f) {
 						CheatDetected(MQWarpKnockBack, glm::vec3(m_target->GetX(), m_target->GetY(), m_target->GetZ()));
 					}
 				}
 				else if (!GetExemptStatus(Port)) {
-					if (speed > (runs * 1.5)) {
+					if (estimated_speed > (run_speed * 1.5)) {
 						CheatDetected(MQWarp, glm::vec3(m_target->GetX(), m_target->GetY(), m_target->GetZ()));
 						m_time_since_last_position_check     = cur_time;
 						m_distance_since_last_position_check = 0.0f;
