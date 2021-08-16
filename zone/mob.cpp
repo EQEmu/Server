@@ -6254,7 +6254,7 @@ bool Mob::ShieldAbility(uint32 target_id, int shielder_max_distance, int shield_
 
 	SetShieldTargetID(shield_target->GetID());
 	SetShielderMitigation(shield_target_mitigation);
-	SetShielerMaxDistance(shielder_max_distance);
+	SetShielderMaxDistance(shielder_max_distance);
 
 	shield_target->SetShielderID(GetID());
 	shield_target->SetShieldTargetMitigation(shield_target_mitigation);
@@ -6280,7 +6280,7 @@ void Mob::ShieldAbilityFinish()
 	}
 	SetShieldTargetID(0);
 	SetShielderMitigation(0);
-	SetShielerMaxDistance(0);
+	SetShielderMaxDistance(0);
 	shield_timer.Disable();
 }
 
@@ -6292,7 +6292,7 @@ void Mob::ShieldAbilityClearVariables()
 		if (shielder) {
 			shielder->SetShieldTargetID(0);
 			shielder->SetShielderMitigation(0);
-			shielder->SetShielerMaxDistance(0);
+			shielder->SetShielderMaxDistance(0);
 			shielder->shield_timer.Disable();
 		}
 		SetShielderID(0);
@@ -6308,7 +6308,7 @@ void Mob::ShieldAbilityClearVariables()
 		}
 		SetShieldTargetID(0);
 		SetShielderMitigation(0);
-		SetShielerMaxDistance(0);
+		SetShielderMaxDistance(0);
 		shield_timer.Disable();
 	}
 }

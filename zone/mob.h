@@ -843,11 +843,11 @@ public:
 	bool HarmonySpellLevelCheck(int32 spell_id, Mob* target = nullptr);
 	bool CanFocusUseRandomEffectivenessByType(focusType type);
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
-	
+
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
 	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }
-	
+
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
@@ -1146,7 +1146,7 @@ public:
 	inline int GetShielderMitigation() const { return m_shielder_mitigation; }
 	inline void SetShielderMitigation(int val) { m_shielder_mitigation = val; }
 	inline int GetMaxShielderDistance() const { return m_shielder_max_distance; }
-	inline void SetShielerMaxDistance(int val) { m_shielder_max_distance = val; }
+	inline void SetShielderMaxDistance(int val) { m_shielder_max_distance = val; }
 
 	WeaponStance_Struct weaponstance;
 	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
@@ -1644,7 +1644,7 @@ protected:
 
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 	Timer aa_timers[aaTimerMax];
-	
+
 	bool is_horse;
 
 	AuraMgr aura_mgr;

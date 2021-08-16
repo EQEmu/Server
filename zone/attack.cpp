@@ -5301,7 +5301,7 @@ void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::
 	if (shield_target->CalculateDistance(shielder->GetX(), shielder->GetY(), shielder->GetZ()) > static_cast<float>(shielder->GetMaxShielderDistance())) {
 		shielder->SetShieldTargetID(0);
 		shielder->SetShielderMitigation(0);
-		shielder->SetShielerMaxDistance(0);
+		shielder->SetShielderMaxDistance(0);
 		shielder->shield_timer.Disable();
 		shield_target->SetShielderID(0);
 		shield_target->SetShieldTargetMitigation(0);
