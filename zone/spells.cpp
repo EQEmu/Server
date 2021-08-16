@@ -2744,14 +2744,14 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 				{
 					if (!IsBuffSpell(spell_id))
 					{
-						CastToClient()->eq_anti_cheat.set_exempt_status(KnockBack,true);
+						CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
 					}
 				}
 			}
 
 			if (IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
 			{
-				CastToClient()->eq_anti_cheat.set_exempt_status(ShadowStep,true);
+				CastToClient()->cheat_manager.SetExemptStatus(ShadowStep, true);
 			}
 
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
@@ -4043,7 +4043,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		{
 			if (!IsBuffSpell(spell_id))
 			{
-				spelltar->CastToClient()->eq_anti_cheat.set_exempt_status(KnockBack, true);
+				spelltar->CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
 			}
 		}
 		else if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
@@ -4056,7 +4056,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if (spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
 	{
-		spelltar->CastToClient()->eq_anti_cheat.set_exempt_status(ShadowStep,true);
+		spelltar->CastToClient()->cheat_manager.SetExemptStatus(ShadowStep, true);
 	}
 
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))

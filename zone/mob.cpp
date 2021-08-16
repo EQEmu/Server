@@ -3144,7 +3144,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	cast_reducer += cast_reducer_no_limit;
 	casttime = casttime * (100 - cast_reducer) / 100;
 	casttime -= cast_reducer_amt;
-	
+
 	return std::max(casttime, 0);
 
 }
@@ -4656,7 +4656,7 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 {
 	if(IsClient())
 	{
-		CastToClient()->eq_anti_cheat.set_exempt_status(KnockBack, true);
+		CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
 		auto outapp_push = new EQApplicationPacket(OP_ClientUpdate, sizeof(PlayerPositionUpdateServer_Struct));
 		PlayerPositionUpdateServer_Struct* spu = (PlayerPositionUpdateServer_Struct*)outapp_push->pBuffer;
 
@@ -4945,11 +4945,11 @@ int16 Mob::GetPositionalDmgAmt(Mob* defender)
 
 	if (back_arc_dmg_amt || front_arc_dmg_amt) {
 		if (BehindMob(defender, GetX(), GetY()))
-			total_amt = back_arc_dmg_amt; 
+			total_amt = back_arc_dmg_amt;
 		else
 			total_amt = front_arc_dmg_amt;
 	}
-	
+
 	return total_amt;
 }
 

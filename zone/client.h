@@ -66,7 +66,7 @@ namespace EQ
 #include "zone_store.h"
 #include "task_manager.h"
 #include "task_client_state.h"
-#include "anti_cheat.h"
+#include "cheat_manager.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -1588,7 +1588,8 @@ public:
 	Raid *p_raid_instance;
 
 	void ShowDevToolsMenu();
-	anti_cheat eq_anti_cheat;
+	CheatManager cheat_manager;
+
 protected:
 	friend class Mob;
 	void CalcItemBonuses(StatBonuses* newbon);

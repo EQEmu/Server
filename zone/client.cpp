@@ -61,7 +61,7 @@ extern volatile bool RunLoops;
 #include "mob_movement_manager.h"
 #include "../common/content/world_content_service.h"
 #include "../common/expedition_lockout_timer.h"
-#include "anti_cheat.h"
+#include "cheat_manager.h"
 
 extern QueryServ* QServ;
 extern EntityList entity_list;
@@ -179,7 +179,7 @@ Client::Client(EQStreamInterface* ieqs)
 
 	for (int client_filter = 0; client_filter < _FilterCount; client_filter++)
 		ClientFilters[client_filter] = FilterShow;
-	eq_anti_cheat.set_client(this);
+	cheat_manager.SetClient(this);
 	mMovementManager->AddClient(this);
 	character_id = 0;
 	conn_state = NoPacketsReceived;
@@ -10270,7 +10270,7 @@ void Client::ApplyWeaponsStance()
 			- From spells, just remove the Primary buff that contains the WeaponStance effect in it.
 			- For items with worn effect, unequip the item.
 			- For AA abilities, a hotkey is used to Enable and Disable the effect. See. Client::TogglePassiveAlternativeAdvancement in aa.cpp for extensive details.
-			
+
 		Rank
 			- Most important for AA, but if you have more than one of WeaponStance effect for a given type, the spell trigger buff will apply whatever has the highest
 		'rank' value from the spells table. AA's on live for this effect naturally do this. Be awere of this if making custom spells/worn effects/AA.
@@ -10282,7 +10282,7 @@ void Client::ApplyWeaponsStance()
 	if (!IsWeaponStanceEnabled()) {
 		return;
 	}
-	
+
 	bool enabled           = false;
 	bool item_bonus_exists = false;
 	bool aa_bonus_exists   = false;
@@ -10338,7 +10338,7 @@ void Client::ApplyWeaponsStance()
 
 		if (itembonuses.WeaponStance[WEAPON_STANCE_TYPE_2H] || itembonuses.WeaponStance[WEAPON_STANCE_TYPE_SHIELD] ||
 			itembonuses.WeaponStance[WEAPON_STANCE_TYPE_DUAL_WIELD]) {
-			
+
 			enabled           = true;
 			item_bonus_exists = true;
 
