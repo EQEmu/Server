@@ -15234,7 +15234,7 @@ void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
 
 void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
 	UnderWorld* m_UnderWorld = (UnderWorld*)app->pBuffer;
-	if (app->size < sizeof(UnderWorld))
+	if (app->size != sizeof(UnderWorld))
 	{
 		LogDebug("Size mismatch in OP_UnderWorld, expected {}, got [{}]", sizeof(UnderWorld), app->size);
 		DumpPacket(app);

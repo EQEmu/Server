@@ -256,6 +256,12 @@ void anti_cheat::process_movement_history(const EQApplicationPacket* app) {
 	if (get_exempt_status(Port))
 		return;
 	UpdateMovementEntry* m_MovementHistory = (UpdateMovementEntry*)app->pBuffer;
+	if (app->size < sizeof(UpdateMovementEntry))
+	{
+		LogDebug("Size mismatch in OP_MovementHistoryList, expected {}, got [{}]", sizeof(UpdateMovementEntry), app->size);
+		DumpPacket(app);
+		return;
+	}
 	for (int index = 0; index < (app->size) / sizeof(UpdateMovementEntry); index++) {
 		glm::vec3 to = glm::vec3(m_MovementHistory[index].X, m_MovementHistory[index].Y, m_MovementHistory[index].Z);
 		switch (m_MovementHistory[index].type) {
