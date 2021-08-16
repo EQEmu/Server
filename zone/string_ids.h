@@ -422,6 +422,7 @@
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define YOU_HAVE_BEEN_GIVEN         8994    //You have been given: %1
 #define NO_MORE_TRAPS				9002	//You have already placed your maximum number of traps.
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
 #define SLOW_MOSTLY_SUCCESSFUL		9029	//Your spell was mostly successful.

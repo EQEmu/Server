@@ -1285,7 +1285,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 				client->SummonItem(task_information->reward_id);
 				item_data = database.GetItem(task_information->reward_id);
 				if (item_data) {
-					client->Message(Chat::Yellow, "You receive %s as a reward.", item_data->Name);
+					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
 				}
 			}
 			break;
@@ -1296,7 +1296,7 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 				client->SummonItem(item_id);
 				item_data = database.GetItem(item_id);
 				if (item_data) {
-					client->Message(Chat::Yellow, "You receive %s as a reward.", item_data->Name);
+					client->MessageString(Chat::Yellow, YOU_HAVE_BEEN_GIVEN, item_data->Name);
 				}
 			}
 			break;
