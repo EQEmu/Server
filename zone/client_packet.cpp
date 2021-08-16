@@ -12806,87 +12806,52 @@ void Client::Handle_OP_SetTitle(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 {
+	/*
+		/shield command mechanics
+		Warriors get this skill at level 30
+		Used by typing /shield while targeting a player
+		While active for the duration of 12 seconds baseline. The 'shield target' will take 50 pct less damage and
+		the 'shielder' will be hit with the damage taken by the 'shield target' after all applicable mitigiont is calculated,
+		the damage on the 'shielder' will be reduced by 25 percent, this reduction can be increased to 50 pct if equiping a shield.
+		You receive a 1% increase in mitigation for every 2 AC on the shield. 
+		Shielder must stay with in a close distance (15 units) to your 'shield target'. If either move out of range, shield ends, no message given.
+		Both duration and shield range can be modified by AA.
+		Recast is 3 minutes.
+
+		For custom use cases, Mob::ShieldAbility can be used in quests with all parameters being altered. This functional
+		is also used for SPA 201 SE_PetShield, which functions in a simalar manner with pet shielding owner.
+		
+		Note: If either the shielder or the shield target die all variables are reset on both.
+	
+	*/
+
 	if (app->size != sizeof(Shielding_Struct)) {
 		LogError("OP size error: OP_Shielding expected:[{}] got:[{}]", sizeof(Shielding_Struct), app->size);
 		return;
 	}
-	if (GetClass() != WARRIOR)
-	{
+
+	if (GetLevel() < 30) { //Client gives message
+		return; 
+	}
+
+	if (GetClass() != WARRIOR){
 		return;
 	}
 
-	if (shield_target)
-	{
-		entity_list.MessageCloseString(
-			this, false, 100, 0,
-			END_SHIELDING, GetName(), shield_target->GetName());
-		for (int y = 0; y < 2; y++)
-		{
-			if (shield_target->shielder[y].shielder_id == GetID())
-			{
-				shield_target->shielder[y].shielder_id = 0;
-				shield_target->shielder[y].shielder_bonus = 0;
-			}
-		}
+	pTimerType timer = pTimerShieldAbility;
+
+	if (!p_timers.Expired(&database, timer, false)) {
+		uint32 remain = p_timers.GetRemainingTime(timer);
+		Message(Chat::White, "You can use the ability /shield in %d minutes %d seconds.", ((remain) / 60), (remain % 60));
+		return;
 	}
+
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-	shield_target = entity_list.GetMob(shield->target_id);
-	bool ack = false;
-	EQ::ItemInstance* inst = GetInv().GetItem(EQ::invslot::slotSecondary);
-	if (!shield_target)
-		return;
-	if (inst)
-	{
-		const EQ::ItemData* shield = inst->GetItem();
-		if (shield && shield->ItemType == EQ::item::ItemTypeShield)
-		{
-			for (int x = 0; x < 2; x++)
-			{
-				if (shield_target->shielder[x].shielder_id == 0)
-				{
-					entity_list.MessageCloseString(
-						this, false, 100, 0,
-						START_SHIELDING, GetName(), shield_target->GetName());
-					shield_target->shielder[x].shielder_id = GetID();
-					int shieldbonus = shield->AC * 2;
-					switch (GetAA(197))
-					{
-					case 1:
-						shieldbonus = shieldbonus * 115 / 100;
-						break;
-					case 2:
-						shieldbonus = shieldbonus * 125 / 100;
-						break;
-					case 3:
-						shieldbonus = shieldbonus * 150 / 100;
-						break;
-					}
-					shield_target->shielder[x].shielder_bonus = shieldbonus;
-					shield_timer.Start();
-					ack = true;
-					break;
-				}
-			}
-		}
-		else
-		{
-			Message(0, "You must have a shield equipped to shield a target!");
-			shield_target = 0;
-			return;
-		}
+			
+	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
+		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
-	else
-	{
-		Message(0, "You must have a shield equipped to shield a target!");
-		shield_target = 0;
-		return;
-	}
-	if (!ack)
-	{
-		MessageString(Chat::White, ALREADY_SHIELDED);
-		shield_target = 0;
-		return;
-	}
+
 	return;
 }
 

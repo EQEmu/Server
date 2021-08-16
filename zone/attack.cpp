@@ -1655,9 +1655,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	int exploss = 0;
 	LogCombat("Fatal blow dealt by [{}] with [{}] damage, spell [{}], skill [{}]", killerMob ? killerMob->GetName() : "Unknown", damage, spell, attack_skill);
 
-	/*
-	#1: Send death packet to everyone
-	*/
+	// #1: Send death packet to everyone
 	uint8 killed_level = GetLevel();
 
 	SendLogoutPackets();
@@ -1684,13 +1682,12 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	app.priority = 6;
 	entity_list.QueueClients(this, &app);
 
-	/*
-	#2: figure out things that affect the player dying and mark them dead
-	*/
+	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
 	SetPet(0);
 	SetHorseId(0);
+	ShieldAbilityClearVariables();
 	dead = true;
 
 	if (GetMerc()) {
@@ -2251,6 +2248,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		zone->DelAggroMob();
 		Log(Logs::Detail, Logs::Attack, "%s Mobs currently Aggro %i", __FUNCTION__, zone->MobsAggroCount());
 	}
+
+	ShieldAbilityClearVariables();
 
 	SetHP(0);
 	SetPet(0);
@@ -5278,7 +5277,52 @@ void Mob::CommonOutgoingHitSuccess(Mob* defender, DamageHitInfo &hit, ExtraAttac
 
 	hit.damage_done += (hit.damage_done * pct_damage_reduction / 100) + (defender->GetFcDamageAmtIncoming(this, 0, true, hit.skill)) + defender->GetPositionalDmgTakenAmt(this);
 
+	if (defender->GetShielderID()) {
+		DoShieldDamageOnShielder(defender, hit.damage_done, hit.skill);
+		hit.damage_done -= hit.damage_done * defender->GetShieldTargetMitigation() / 100; //Default shielded takes 50 pct damage
+	}
+
 	CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
+}
+
+void Mob::DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse)
+{
+	if (!shield_target) {
+		return;
+	}
+
+	Mob *shielder = entity_list.GetMob(shield_target->GetShielderID());
+	if (!shielder) {
+		shield_target->SetShielderID(0);
+		shield_target->SetShieldTargetMitigation(0);
+		return;
+	}
+
+	if (shield_target->CalculateDistance(shielder->GetX(), shielder->GetY(), shielder->GetZ()) > static_cast<float>(shielder->GetMaxShielderDistance())) {
+		shielder->SetShieldTargetID(0);
+		shielder->SetShielderMitigation(0);
+		shielder->SetShielderMaxDistance(0);
+		shielder->shield_timer.Disable();
+		shield_target->SetShielderID(0);
+		shield_target->SetShieldTargetMitigation(0);
+		return; //Too far away, no message is given thoughh.
+	}
+
+	int mitigation = shielder->GetShielderMitigation(); //Default shielder mitigates 25 pct of damage taken, this can be increased up to max 50 by equiping a shield item
+	if (shielder->IsClient() && shielder->HasShieldEquiped()) {
+		EQ::ItemInstance* inst = shielder->CastToClient()->GetInv().GetItem(EQ::invslot::slotSecondary);
+		if (inst) {
+			const EQ::ItemData* shield = inst->GetItem();
+			if (shield && shield->ItemType == EQ::item::ItemTypeShield) {
+				mitigation += shield->AC * 50 / 100; //1% increase per 2 AC
+				std::min(50, mitigation);//50 pct max mitigation bonus from /shield
+			}
+		}
+	}
+
+	hit_damage_done -= hit_damage_done * mitigation / 100;
+	shielder->Damage(this, hit_damage_done, SPELL_UNKNOWN, skillInUse, true, -1, false, m_specialattacks);
+	shielder->CheckNumHitsRemaining(NumHit::OutgoingHitSuccess);
 }
 
 void Mob::CommonBreakInvisibleFromCombat()

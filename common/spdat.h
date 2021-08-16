@@ -573,7 +573,7 @@ typedef enum {
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
 #define SE_DispelBeneficial				209 // implemented
-//#define SE_PetShield					210	// *not implemented
+#define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live) 
 #define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
 #define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.
 #define SE_PetMaxHP						213	// implemented[AA] - increases the maximum hit points of your pet
@@ -593,7 +593,7 @@ typedef enum {
 #define SE_ReduceSkillTimer				227	// implemented
 #define SE_ReduceFallDamage				228	// implented - reduce the damage that you take from falling
 #define SE_PersistantCasting			229 // implemented
-#define SE_ExtendedShielding			230	// not used as bonus - increase range of /shield ability
+#define SE_ExtendedShielding			230	// implemented, @ShieldAbility, extends the range of your /shield ability by an amount of distance, base: distance units, limit: none, max: none
 #define SE_StunBashChance				231	// implemented - increase chance to stun from bash.
 #define SE_DivineSave					232	// implemented (base1 == % chance on death to insta-res) (base2 == spell cast on save)
 #define SE_Metabolism					233	// implemented - Modifies food/drink consumption rates.
@@ -618,7 +618,7 @@ typedef enum {
 #define SE_FrontalBackstabChance		252	// implemented[AA] - chance to perform a full damage backstab from front.
 #define SE_FrontalBackstabMinDmg		253	// implemented[AA] - allow a frontal backstab for mininum damage.
 #define SE_Blank						254 // implemented
-#define SE_ShieldDuration				255	// not implemented as bonus - increases duration of /shield
+#define SE_ShieldDuration				255	// implemented, , @ShieldAbility, extends the duration of your /shield ability, base: seconds, limit: none, max: none
 #define SE_ShroudofStealth				256	// implemented
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
@@ -729,7 +729,7 @@ typedef enum {
 #define SE_BandolierSlots				363	// *not implemented[AA] 'Battle Ready' expands the bandolier by one additional save slot per rank.
 #define SE_TripleAttackChance			364	// implemented
 #define SE_ProcOnSpellKillShot			365	// implemented - chance to trigger a spell on kill when the kill is caused by a specific spell with this effect in it (10470 Venin)
-#define SE_GroupShielding				366	// *not implemented[AA] This gives you /shieldgroup
+//#define SE_GroupShielding				366	// *not implemented[AA] This gives you /shieldgroup
 #define SE_SetBodyType					367	// implemented - set body type of base1 so it can be affected by spells that are limited to that type (Plant, Animal, Undead, etc)
 //#define SE_FactionMod					368	// *not implemented - increases faction with base1 (faction id, live won't match up w/ ours) by base2
 #define SE_CorruptionCounter			369	// implemented

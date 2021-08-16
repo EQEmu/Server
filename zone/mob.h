@@ -843,11 +843,11 @@ public:
 	bool HarmonySpellLevelCheck(int32 spell_id, Mob* target = nullptr);
 	bool CanFocusUseRandomEffectivenessByType(focusType type);
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
-	
+
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
 	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }
-	
+
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
@@ -1094,8 +1094,6 @@ public:
 
 	void InstillDoubt(Mob *who);
 	int16 GetResist(uint8 type) const;
-	Mob* GetShieldTarget() const { return shield_target; }
-	void SetShieldTarget(Mob* mob) { shield_target = mob; }
 	bool HasActiveSong() const { return(bardsong != 0); }
 	bool Charmed() const { return typeofpet == petCharmed; }
 	static uint32 GetLevelHP(uint8 tlevel);
@@ -1133,12 +1131,27 @@ public:
 	bool IsMoved() { return moved; }
 	void SetMoved(bool moveflag) { moved = moveflag; }
 
-	Shielders_Struct shielder[MAX_SHIELDERS];
 	Trade* trade;
+
+	bool ShieldAbility(uint32 target_id, int shielder_max_distance = 15, int shield_duration = 12000, int shield_target_mitigation = 50, int shielder_mitigation = 75, bool use_aa = false, bool can_shield_npc = true);
+	void DoShieldDamageOnShielder(Mob *shield_target, int hit_damage_done, EQ::skills::SkillType skillInUse);
+	void ShieldAbilityFinish();
+	void ShieldAbilityClearVariables();
+	inline uint32 GetShielderID() const { return m_shielder_id; }
+	inline void SetShielderID(uint32 val) { m_shielder_id = val; }
+	inline uint32 GetShieldTargetID() const { return m_shield_target_id; }
+	inline void SetShieldTargetID(uint32 val) { m_shield_target_id = val; }
+	inline int GetShieldTargetMitigation() const { return m_shield_target_mitigation; }
+	inline void SetShieldTargetMitigation(int val) { m_shield_target_mitigation = val; }
+	inline int GetShielderMitigation() const { return m_shielder_mitigation; }
+	inline void SetShielderMitigation(int val) { m_shielder_mitigation = val; }
+	inline int GetMaxShielderDistance() const { return m_shielder_max_distance; }
+	inline void SetShielderMaxDistance(int val) { m_shielder_max_distance = val; }
 
 	WeaponStance_Struct weaponstance;
 	bool IsWeaponStanceEnabled() const { return weaponstance.enabled; }
 	inline void SetWeaponStanceEnabled(bool val) { weaponstance.enabled = val; }
+
 
 	inline glm::vec4 GetCurrentWayPoint() const { return m_CurrentWayPoint; }
 	inline float GetCWPP() const { return(static_cast<float>(cur_wp_pause)); }
@@ -1439,6 +1452,13 @@ protected:
 	Timer mana_timer;
 	Timer focus_proc_limit_timer;
 
+	Timer shield_timer;
+	uint32 m_shield_target_id;
+	uint32 m_shielder_id;
+	int m_shield_target_mitigation;
+	int m_shielder_mitigation;
+	int m_shielder_max_distance;
+
 	//spell casting vars
 	Timer spellend_timer;
 	uint16 casting_spell_id;
@@ -1484,8 +1504,6 @@ protected:
 	EQ::TintProfile armor_tint;
 
 	uint8 aa_title;
-
-	Mob* shield_target;
 
 	int ExtraHaste; // for the #haste command
 	bool mezzed;
@@ -1626,7 +1644,7 @@ protected:
 
 	std::unordered_map<uint32, std::pair<uint32, uint32>> aa_ranks;
 	Timer aa_timers[aaTimerMax];
-	
+
 	bool is_horse;
 
 	AuraMgr aura_mgr;

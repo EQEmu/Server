@@ -138,7 +138,6 @@ Client::Client(EQStreamInterface* ieqs)
   linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
   dead_timer(2000),
   global_channel_timer(1000),
-  shield_timer(500),
   fishing_timer(8000),
   endupkeep_timer(1000),
   forget_timer(0),
@@ -200,7 +199,6 @@ Client::Client(EQStreamInterface* ieqs)
 	account_id = 0;
 	admin = 0;
 	lsaccountid = 0;
-	shield_target = nullptr;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
 	GuildBanker = false;
@@ -236,7 +234,6 @@ Client::Client(EQStreamInterface* ieqs)
 	pQueuedSaveWorkID = 0;
 	position_update_same_count = 0;
 	fishing_timer.Disable();
-	shield_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
 	autosave_timer.Disable();
@@ -418,16 +415,6 @@ Client::~Client() {
 			entity->CastToClient()->SetDuelTarget(0);
 			entity_list.DuelMessage(entity->CastToClient(),this,true);
 		}
-	}
-
-	if (shield_target) {
-		for (int y = 0; y < 2; y++) {
-			if (shield_target->shielder[y].shielder_id == GetID()) {
-				shield_target->shielder[y].shielder_id = 0;
-				shield_target->shielder[y].shielder_bonus = 0;
-			}
-		}
-		shield_target = nullptr;
 	}
 
 	if(GetTarget())

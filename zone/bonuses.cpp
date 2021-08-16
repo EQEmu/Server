@@ -1633,6 +1633,23 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] < base1) {
 				newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_CHANCE] = base1;
 				newbon->DoubleMeleeRound[SBIndex::DOUBLE_MELEE_ROUND_DMG_BONUS] = base2;
+
+			}
+			break;
+		}
+
+		case SE_ExtendedShielding: 
+		{
+			if (newbon->ExtendedShielding < base1) {
+				newbon->ExtendedShielding = base1;
+			}
+			break;
+		}
+
+		case SE_ShieldDuration: 
+		{
+			if (newbon->ShieldDuration < base1) {
+				newbon->ShieldDuration = base1;
 			}
 			break;
 		}
@@ -1649,10 +1666,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_BandolierSlots:
 			break;
 		case SE_SecondaryForte:
-			break;
-		case SE_ExtendedShielding:
-			break;
-		case SE_ShieldDuration:
 			break;
 		case SE_ReduceApplyPoisonTime:
 			break;
@@ -3566,6 +3579,34 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			case SE_Pet_Add_Atk:
 				new_bonus->Pet_Add_Atk += effect_value;
 				break;
+
+			case SE_ExtendedShielding:
+			{
+				if (AdditiveWornBonus) {
+					new_bonus->ExtendedShielding += effect_value;
+				}
+				else if (effect_value < 0 && new_bonus->ExtendedShielding > effect_value){
+					new_bonus->ExtendedShielding = effect_value;
+				}
+				else if (effect_value > 0 && new_bonus->ExtendedShielding < effect_value){
+					new_bonus->ExtendedShielding = effect_value;
+				}
+				break;
+			}
+
+			case SE_ShieldDuration:
+			{
+				if (AdditiveWornBonus) {
+					new_bonus->ShieldDuration += effect_value;
+				}
+				else if (effect_value < 0 && new_bonus->ShieldDuration > effect_value){
+					new_bonus->ShieldDuration = effect_value;
+				}
+				else if (effect_value > 0 && new_bonus->ShieldDuration < effect_value){
+					new_bonus->ShieldDuration = effect_value;
+				}
+				break;
+			}
 
 			case SE_Worn_Endurance_Regen_Cap:
 				new_bonus->ItemEnduranceRegenCap += effect_value;
