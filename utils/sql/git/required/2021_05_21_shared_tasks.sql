@@ -87,3 +87,6 @@ CREATE TABLE `character_task_timers`
     KEY            `character_id` (`character_id`),
     KEY            `task_id` (`task_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+ALTER TABLE `tasks`
+  CHANGE COLUMN `completion_emote` `completion_emote` VARCHAR(512) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `faction_reward`;
