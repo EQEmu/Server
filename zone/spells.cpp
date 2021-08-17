@@ -2712,15 +2712,25 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 			return;
 		}
 		//extend the spell if it will expire before the next pulse
-		if(buffs[buffs_i].ticsremaining <= 3) {
+		if(buffs[buffs_i].ticsremaining <= 3 && !IsDetrimentalSpell(spell_id)) {
 			buffs[buffs_i].ticsremaining += 3;
 			LogSpells("Bard Song Pulse [{}]: extending duration in slot [{}] to [{}] tics", spell_id, buffs_i, buffs[buffs_i].ticsremaining);
+		}
+		float resist_check = 0;
+		if (IsDetrimentalSpell(spell_id)) {
+			resist_check = ResistSpell(spells[spell_id].resisttype, spell_id, caster, false, 0, true, true);
+			if (resist_check == 100) {
+				caster->SpellOnTarget(spell_id, this, false, true, -1000);
+			}
+			else {
+				caster->SpellOnTarget(spell_id, this, false, true, 1000);
+			}
 		}
 
 		//should we send this buff update to the client... seems like it would
 		//be a lot of traffic for no reason...
 //this may be the wrong packet...
-		if(IsClient()) {
+	if((IsClient() && !IsDetrimentalSpell(spell_id)) || (!resist_check == 0 && buffs[buffs_i].ticsremaining == 0 && IsDetrimentalSpell(spell_id))) {
 			auto packet = new EQApplicationPacket(OP_Action, sizeof(Action_Struct));
 
 			Action_Struct* action = (Action_Struct*) packet->pBuffer;
