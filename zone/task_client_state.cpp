@@ -1191,24 +1191,22 @@ void ClientTaskState::IncrementDoneCount(
 		// Inform the client the task has been updated, both by a chat message
 		client->MessageString(Chat::White, TASK_UPDATED, task_information->title.c_str());
 
-		if (task_information->activity_information[activity_id].goal_method != METHODQUEST) {
-			if (!ignore_quest_update) {
-				char buf[24];
-				snprintf(buf, 23, "%d %d", info->task_id, info->activity[activity_id].activity_id);
-				buf[23] = '\0';
-				parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, buf, 0);
-			}
-			/* QS: PlayerLogTaskUpdates :: Update */
-			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
-				std::string event_desc = StringFormat(
-					"Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
-					info->task_id,
-					info->activity[activity_id].activity_id,
-					info->activity[activity_id].done_count,
-					client->GetZoneID(),
-					client->GetInstanceID());
-				QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
-			}
+		if (!ignore_quest_update) {
+			char buf[24];
+			snprintf(buf, 23, "%d %d", info->task_id, info->activity[activity_id].activity_id);
+			buf[23] = '\0';
+			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, buf, 0);
+		}
+		/* QS: PlayerLogTaskUpdates :: Update */
+		if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
+			std::string event_desc = StringFormat(
+				"Task Stage Complete :: taskid:%i activityid:%i donecount:%i in zoneid:%i instid:%i",
+				info->task_id,
+				info->activity[activity_id].activity_id,
+				info->activity[activity_id].done_count,
+				client->GetZoneID(),
+				client->GetInstanceID());
+			QServ->PlayerLogEvent(Player_Log_Task_Updates, client->CharacterID(), event_desc);
 		}
 
 		// If this task is now complete, the Completed tasks will have been
