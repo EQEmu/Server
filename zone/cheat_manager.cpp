@@ -184,14 +184,15 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQGhost:
+			// this isn't just for ghost, its also for if a person isn't sending their MovementHistory packet also.
 			if (RuleB(Cheat, EnableMQGhostDetector) &&
 				((m_target->Admin() < RuleI(Cheat, MQGhostExemptStatus) || (RuleI(Cheat, MQGhostExemptStatus)) == -1))) {
 				database.SetMQDetectionFlag(
 					m_target->AccountName(),
 					m_target->GetName(),
-					"/MQGhost",
+					"Packet blocking detected.",
 					zone->GetShortName());
-				LogCheat("/MQGhost");
+				LogCheat("{} was caught not sending the proper packets as regularly as they were suppose to.");
 			}
 			break;
 		case MQFastMem:
@@ -234,8 +235,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 void CheatManager::MovementCheck(glm::vec3 updated_position)
 {
 	if (m_time_since_last_movement_history.GetRemainingTime() == 0) {
-		CheatDetected(MQWarp, updated_position);
-	}    // someone is spoofing.
+		CheatDetected(MQGhost, updated_position);
+	}
 
 	float  dist     = DistanceNoZ(m_target->GetPosition(), updated_position);
 	uint32 cur_time = Timer::GetCurrentTime();
