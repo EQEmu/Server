@@ -194,6 +194,8 @@ struct TaskInformation {
 	int                 experience_reward{};
 	int                 faction_reward{};   // just a npc_faction_id
 	TaskMethodType      reward_method;
+	int                 reward_radiant_crystals;
+	int                 reward_ebon_crystals;
 	int                 activity_count{};
 	SequenceType        sequence_mode;
 	int                 last_step{};

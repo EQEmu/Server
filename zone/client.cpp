@@ -5737,16 +5737,27 @@ void Client::AddPVPPoints(uint32 Points)
 	SendPVPStats();
 }
 
-void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
+void Client::AddCrystals(uint32 radiant, uint32 ebon)
 {
-	m_pp.currentRadCrystals += Radiant;
-	m_pp.careerRadCrystals += Radiant;
-	m_pp.currentEbonCrystals += Ebon;
-	m_pp.careerEbonCrystals += Ebon;
+	m_pp.currentRadCrystals += radiant;
+	m_pp.careerRadCrystals += radiant;
+	m_pp.currentEbonCrystals += ebon;
+	m_pp.careerEbonCrystals += ebon;
 
 	SaveCurrency();
 
 	SendCrystalCounts();
+
+	// newer clients handle message client side (older clients likely used eqstr 5967 and 5968, this matches live)
+	if (radiant > 0)
+	{
+		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Radiant Crystals", radiant).c_str());
+	}
+
+	if (ebon > 0)
+	{
+		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Ebon Crystals", ebon).c_str());
+	}
 }
 
 void Client::SetEbonCrystals(uint32 value) {

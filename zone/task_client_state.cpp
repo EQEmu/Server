@@ -1392,6 +1392,11 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		}
 	}
 
+	if (task_information->reward_radiant_crystals > 0 || task_information->reward_ebon_crystals > 0)
+	{
+		client->AddCrystals(task_information->reward_radiant_crystals, task_information->reward_ebon_crystals);
+	}
+
 	client->SendSound();
 }
 

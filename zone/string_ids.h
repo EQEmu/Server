@@ -372,6 +372,7 @@
 #define FAILED_TAUNT				5811	//You have failed to taunt your target.
 #define PHYSICAL_RESIST_FAIL		5817	//Your target avoided your %1 ability.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
+#define YOU_RECEIVE                 5941    //You receive %1.
 #define MAX_ACTIVE_TASKS			6010	//Sorry %3, you already have the maximum number of active tasks.
 #define TASK_REQUEST_COOLDOWN_TIMER 6011    //Sorry, %3, but you can't request another task for %4 minutes and %5 seconds.
 #define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!

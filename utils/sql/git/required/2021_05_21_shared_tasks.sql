@@ -90,3 +90,7 @@ CREATE TABLE `character_task_timers`
 
 ALTER TABLE `tasks`
   CHANGE COLUMN `completion_emote` `completion_emote` VARCHAR(512) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `faction_reward`;
+
+ALTER TABLE `tasks`
+  ADD COLUMN `reward_radiant_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `rewardmethod`,
+  ADD COLUMN `reward_ebon_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `reward_radiant_crystals`;
