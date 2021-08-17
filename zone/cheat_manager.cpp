@@ -24,8 +24,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 {
 	switch (type) {
 		case MQWarp:
-			if (m_time_since_last_warp_detection.GetRemainingTime() == 0 && RuleB(Zone, EnableMQWarpDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1))) {
+			if (m_time_since_last_warp_detection.GetRemainingTime() == 0 && RuleB(Cheat, EnableMQWarpDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQWarp (large warp detection) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}] Distance [{:.2f}]",
 					position1.x,
@@ -48,8 +48,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQWarpAbsolute:
-			if (RuleB(Zone, EnableMQWarpDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQWarpDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQWarp (Absolute) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] to x [{:.2f}] y [{:.2f}] z [{:.2f}] Distance [{:.2f}]",
 					position1.x,
@@ -73,8 +73,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQWarpShadowStep:
-			if (RuleB(Zone, EnableMQWarpDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQWarpDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQWarp(ShadowStep) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was shadow step exempt but we still found this suspicious.",
 					position1.x,
@@ -91,8 +91,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQWarpKnockBack:
-			if (RuleB(Zone, EnableMQWarpDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQWarpDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was Knock Back exempt but we still found this suspicious.",
 					position1.x,
@@ -110,9 +110,9 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			break;
 
 		case MQWarpLight:
-			if (RuleB(Zone, EnableMQWarpDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQWarpExemptStatus) || (RuleI(Zone, MQWarpExemptStatus)) == -1))) {
-				if (RuleB(Zone, MarkMQWarpLT)) {
+			if (RuleB(Cheat, EnableMQWarpDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
+				if (RuleB(Cheat, MarkMQWarpLT)) {
 					std::string message = fmt::format(
 						"/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] running fast but not fast enough to get killed, possibly: small warp, speed hack, excessive lag, marked as suspicious.",
 						position1.x,
@@ -131,8 +131,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			break;
 
 		case MQZone:
-			if (RuleB(Zone, EnableMQZoneDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQZoneDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQZoneExemptStatus) || (RuleI(Cheat, MQZoneExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}]",
 					position1.x,
@@ -149,8 +149,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQZoneUnknownDest:
-			if (RuleB(Zone, EnableMQZoneDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQZoneExemptStatus) || (RuleI(Zone, MQZoneExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQZoneDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQZoneExemptStatus) || (RuleI(Cheat, MQZoneExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQZone used at x [{:.2f}] y [{:.2f}] z [{:.2f}] with Unknown Destination",
 					position1.x,
@@ -162,12 +162,12 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					m_target->GetName(),
 					message.c_str(),
 					zone->GetShortName());
-				LogCheat(message.c_str());
+				LogCheat(message);
 			}
 			break;
 		case MQGate:
-			if (RuleB(Zone, EnableMQGateDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQGateExemptStatus) || (RuleI(Zone, MQGateExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQGateDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQGateExemptStatus) || (RuleI(Cheat, MQGateExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQGate used at x [{:.2f}] y [{:.2f}] z [{:.2f}]",
 					position1.x,
@@ -184,8 +184,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQGhost:
-			if (RuleB(Zone, EnableMQGhostDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQGhostExemptStatus) || (RuleI(Zone, MQGhostExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQGhostDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQGhostExemptStatus) || (RuleI(Cheat, MQGhostExemptStatus)) == -1))) {
 				database.SetMQDetectionFlag(
 					m_target->AccountName(),
 					m_target->GetName(),
@@ -195,9 +195,9 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			}
 			break;
 		case MQFastMem:
-			if (RuleB(Zone, EnableMQFastMemDetector) &&
-				((m_target->Admin() < RuleI(Zone, MQFastMemExemptStatus) ||
-				  (RuleI(Zone, MQFastMemExemptStatus)) == -1))) {
+			if (RuleB(Cheat, EnableMQFastMemDetector) &&
+				((m_target->Admin() < RuleI(Cheat, MQFastMemExemptStatus) ||
+				  (RuleI(Cheat, MQFastMemExemptStatus)) == -1))) {
 				std::string message = fmt::format(
 					"/MQFastMem used at x [{:.2f}] y [{:.2f}] z [{:.2f}]",
 					position1.x,
@@ -267,7 +267,7 @@ void CheatManager::MovementCheck(uint32 time_between_checks)
 		float estimated_speed =
 				  (m_distance_since_last_position_check * 100) / (float) (cur_time - m_time_since_last_position_check);
 		float run_speed  = m_target->GetRunspeed() / 
-			std::min(RuleR(Zone, MQWarpDetectionDistanceFactor), 1.0f); // MQWarpDetection shouldn't go below 1.0f so we can't end up dividing by 0.
+			std::min(RuleR(Cheat, MQWarpDetectionDistanceFactor), 1.0f); // MQWarpDetection shouldn't go below 1.0f so we can't end up dividing by 0.
 		if (estimated_speed > run_speed) {
 			bool using_gm_speed = m_target->GetGMSpeed();
 			bool is_immobile = m_target->GetRunspeed() == 0; // this covers stuns, roots, mez, and pseudorooted.
