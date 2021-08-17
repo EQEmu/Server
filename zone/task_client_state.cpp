@@ -1276,6 +1276,10 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 		return;
 	}
 
+	if (!task_information->completion_emote.empty()) {
+		client->Message(Chat::Yellow, task_information->completion_emote.c_str());
+	}
+
 	const EQ::ItemData *item_data;
 	std::vector<int>   reward_list;
 
@@ -1306,13 +1310,6 @@ void ClientTaskState::RewardTask(Client *client, TaskInformation *task_informati
 			break;
 		}
 	}
-
-	if (!task_information->completion_emote.empty()) {
-		client->SendColoredText(
-			Chat::Yellow,
-			task_information->completion_emote
-		);
-	} // unsure if they use this packet or color, should work
 
 	// just use normal NPC faction ID stuff
 	if (task_information->faction_reward) {
