@@ -447,16 +447,18 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 				}
 			}
 
-			CompletedTaskInformation completed_task_information{};
-			completed_task_information.task_id        = task_info.task_id;
-			completed_task_information.completed_time = time(nullptr);
+			if (p_task_data->type != TaskType::Shared) {
+				CompletedTaskInformation completed_task_information{};
+				completed_task_information.task_id        = task_info.task_id;
+				completed_task_information.completed_time = time(nullptr);
 
-			for (int i = 0; i < p_task_data->activity_count; i++) {
-				completed_task_information.activity_done[i] = (task_info.activity[i].activity_state ==
-															   ActivityCompleted);
+				for (int i = 0; i < p_task_data->activity_count; i++) {
+					completed_task_information.activity_done[i] = (task_info.activity[i].activity_state ==
+						ActivityCompleted);
+				}
+
+				m_completed_tasks.push_back(completed_task_information);
 			}
-
-			m_completed_tasks.push_back(completed_task_information);
 		}
 
 		LogTasks("Returning sequential task, AllActivitiesComplete is [{}]", all_activities_complete);
@@ -535,16 +537,18 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 				}
 			}
 
-			CompletedTaskInformation completed_task_information{};
-			completed_task_information.task_id        = task_info.task_id;
-			completed_task_information.completed_time = time(nullptr);
+			if (p_task_data->type != TaskType::Shared) {
+				CompletedTaskInformation completed_task_information{};
+				completed_task_information.task_id        = task_info.task_id;
+				completed_task_information.completed_time = time(nullptr);
 
-			for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-				completed_task_information.activity_done[activity_id] =
-					(task_info.activity[activity_id].activity_state == ActivityCompleted);
+				for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+					completed_task_information.activity_done[activity_id] =
+						(task_info.activity[activity_id].activity_state == ActivityCompleted);
+				}
+
+				m_completed_tasks.push_back(completed_task_information);
 			}
-
-			m_completed_tasks.push_back(completed_task_information);
 		}
 		return true;
 	}
