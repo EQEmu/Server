@@ -7447,7 +7447,7 @@ bool Mob::PassCasterRestriction(int value)
 		Range -1        : UNKNOWN
 		Range 1         : UNKNOWN
 		Range 3         : UKN 30183 | Mind Spiral
-		Range 5  		: Not on mount
+		Range 5         : Not on mount
 		Range 203       : HP Less Than 20 Percent
 		Range 204       : HP Less Than 50 Percent
 		Range 429       : Mana Above 10 Percent
