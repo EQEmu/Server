@@ -1037,7 +1037,7 @@ struct SPDat_Spell_Struct
 /* 217 */   int override_crit_chance; //Places a cap on the max chance to critical -- OVERRIDE_CRIT_CHANCE
 /* 218 */	int aemaxtargets;  //Is used for various AE effects -- MAX_TARGETS
 /* 219 */	int no_heal_damage_item_mod; // -- NO_HEAL_DAMAGE_ITEM_MOD
-/* 220 */	//int caster_requirement_id; // -- CASTER_REQUIREMENT_ID
+/* 220 */	int caster_requirement_id; // -- CASTER_REQUIREMENT_ID
 /* 221 */	int spell_class; // -- SPELL_CLASS
 /* 222 */	int spell_subclass; // -- SPELL_SUBCLASS
 /* 223 */	//int ai_valid_targets; // -- AI_VALID_TARGETS
