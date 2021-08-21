@@ -2731,7 +2731,7 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 		if (c->GetSharedTaskId() == p_client->GetSharedTaskId()) {
 			auto t = c->GetTaskState()->GetClientTaskInfo(p_information->type, task_index);
 			if (t == nullptr) {
-				return;
+				continue;
 			}
 
 			LogTasksDetail(
