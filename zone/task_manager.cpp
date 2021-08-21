@@ -1694,6 +1694,8 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 					if (fell_behind_state) {
 						SaveClientState(c, cts);
 					}
+
+					c->SetSharedTaskId(shared_task_id);
 				}
 			}
 		}

@@ -15509,3 +15509,13 @@ void Client::Handle_OP_SharedTaskPlayerList(const EQApplicationPacket* app)
 		worldserver.SendPacket(pack.get());
 	}
 }
+
+int64 Client::GetSharedTaskId() const
+{
+	return m_shared_task_id;
+}
+
+void Client::SetSharedTaskId(int64 shared_task_id)
+{
+	Client::m_shared_task_id = shared_task_id;
+}

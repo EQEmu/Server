@@ -1143,6 +1143,14 @@ void ClientTaskState::IncrementDoneCount(
 			(ignore_quest_update ? "true" : "false")
 		);
 
+		SyncSharedTaskZoneClientDoneCountState(
+			client,
+			task_information,
+			task_index,
+			activity_id,
+			r->done_count
+		);
+
 		// send
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
@@ -2690,6 +2698,49 @@ void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& clie
 				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
 				fmt::format_int((seconds / 60) % 60).c_str()    // minutes
 			).c_str());
+		}
+	}
+}
+
+// Sync zone client donecount state
+//
+// World is always authoritative, but we still need to keep zone state in sync with reality and in this case we need
+// to update zone since world hasn't had a chance to let clients at the zone level know it's ok to progress to the next
+// donecount
+//
+// If we send updates too fast and world has not had a chance to confirm and then inform clients to set their
+// absolute state we will miss and discard updates because each update sets the same donecount
+//
+// Example: say we have a 100 kill task and we kill 10 mobs in an AOE, world gets 10 updates at once but they are
+// all from the same donecount so world only confirms 1 was actually killed and the task updates only 1 which is not
+// intended behavior.
+//
+// In this case we need to ensure that clients at the zone level increment internally even if they aren't
+// necessarily confirmed by world yet because any of them could inform world of the next donecount so we need to sync
+// zone-level before sending updates to world
+void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
+	Client *p_client,
+	TaskInformation *p_information,
+	int task_index,
+	int activity_id,
+	uint32 done_count
+)
+{
+	for (auto &e : entity_list.GetClientList()) {
+		auto c = e.second;
+		if (c->GetSharedTaskId() == p_client->GetSharedTaskId()) {
+			auto t = c->GetTaskState()->GetClientTaskInfo(p_information->type, task_index);
+			if (t == nullptr) {
+				return;
+			}
+
+			LogTasksDetail(
+				"[IncrementDoneCount] Setting internally client [{}] to donecount [{}]",
+				c->GetCleanName(),
+				done_count
+			);
+
+			t->activity[activity_id].done_count = (int) done_count;
 		}
 	}
 }

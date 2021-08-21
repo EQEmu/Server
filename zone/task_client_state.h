@@ -133,6 +133,14 @@ private:
 	bool                                  m_checked_touch_activities;
 
 	static void ShowClientTaskInfoMessage(ClientTaskInformation *task, Client *c);
+
+	void SyncSharedTaskZoneClientDoneCountState(
+		Client *p_client,
+		TaskInformation *p_information,
+		int task_index,
+		int activity_id,
+		uint32 done_count
+	);
 };
 
 
