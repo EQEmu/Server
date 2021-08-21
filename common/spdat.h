@@ -514,7 +514,7 @@ typedef enum {
 #define SE_StackingCommand_Block		148 // implemented?
 #define SE_StackingCommand_Overwrite	149 // implemented?
 #define SE_DeathSave					150 // implemented
-#define SE_SuspendPet					151	// *not implemented as bonus
+#define SE_SuspendPet					151	// implemented, @Pet, allow caster to have an extra suspended pet, base: 0=no buffs/items 1=buffs+items, limit: none, max: none
 #define SE_TemporaryPets				152	// implemented
 #define SE_BalanceHP					153 // implemented
 #define SE_DispelDetrimental			154 // implemented
@@ -671,7 +671,7 @@ typedef enum {
 #define SE_MitigateDamageShield			305 // implemented - off hand attacks only (Shielding Resistance)
 //#define SE_ArmyOfTheDead				306 // *not implemented NecroAA - This ability calls up to five shades of nearby corpses back to life to serve the necromancer. The soulless abominations will mindlessly fight the target until called back to the afterlife some time later. The first rank summons up to three shades that serve for 60 seconds, and each additional rank adds one more possible shade and increases their duration by 15 seconds
 //#define SE_Appraisal					307 // *not implemented Rogue AA - This ability allows you to estimate the selling price of an item you are holding on your cursor.
-#define SE_SuspendMinion				308 // implemented
+#define SE_ZoneSuspendMinion			308 // implemented, @Pet, allow suspended pets to be resummoned upon zoning, base: 1, limit: none, max: none, Calc: Bool
 #define SE_GateCastersBindpoint			309 // implemented - Gate to casters bind point
 #define SE_ReduceReuseTimer				310 // implemented, @Fc, On Caster, disc reuse time mod, base: milliseconds
 #define SE_LimitCombatSkills			311 // implemented, @Ff, Include or exclude combat skills or procs (non-memorizable spells) from being focused, base1: 0=Exclude if proc 1=Allow only if proc
