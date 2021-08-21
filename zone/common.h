@@ -556,6 +556,7 @@ struct StatBonuses {
 
 
 	// AAs
+	uint16  SecondaryForte;						// allow a second skill to be specialized with a cap of this value.
 	int32	ShieldDuration;						// extends duration of /shield ability
 	int32	ExtendedShielding;					// extends range of /shield ability
 	int8	Packrat;							// weight reduction for items, 1 point = 10%

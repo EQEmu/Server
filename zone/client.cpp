@@ -2502,8 +2502,8 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 	uint16 PrimarySpecialization = 0, SecondaryForte = 0;
 
 	uint16 PrimarySkillValue = 0, SecondarySkillValue = 0;
-
-	uint16 MaxSpecializations = GetAA(aaSecondaryForte) ? 2 : 1;
+	
+	uint16 MaxSpecializations = aabonuses.SecondaryForte ? 2 : 1;
 
 	if (skillid >= EQ::skills::SkillSpecializeAbjure && skillid <= EQ::skills::SkillSpecializeEvocation)
 	{
@@ -2552,6 +2552,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 				}
 				else
 				{
+					Shout("Skill id %i PrimarySpec %i SecondaryForte skillid %i [aa bonus %i]", skillid, PrimarySpecialization, SecondaryForte, aabonuses.SecondaryForte);
 					if((skillid != PrimarySpecialization) && ((skillid == SecondaryForte) || (SecondaryForte == 0)))
 					{
 						if((PrimarySkillValue > 100) || (!SecondaryForte))
