@@ -680,9 +680,11 @@ int main(int argc, char **argv)
 				}
 			}
 			if (!RuleB(World, UseBannedIPsTable)) {
-				LogInfo("New connection from [{}]:[{}], processing connection",
-						inet_ntoa(in),
-						ntohs(eqsi->GetRemotePort()));
+				LogInfo(
+					"New connection from [{}]:[{}], processing connection",
+					inet_ntoa(in),
+					ntohs(eqsi->GetRemotePort())
+				);
 				auto client = new Client(eqsi);
 				// @merth: client->zoneattempt=0;
 				client_list.Add(client);
