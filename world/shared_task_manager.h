@@ -89,6 +89,9 @@ public:
 	void SendMembersMessage(SharedTask *s, int chat_type, const std::string &message);
 	void SendMembersMessageID(SharedTask *s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
 
+	const std::vector<SharedTask> &GetSharedTasks() const;
+	void SetSharedTasks(const std::vector<SharedTask> &shared_tasks);
+
 protected:
 	// reference to database
 	Database *m_database;

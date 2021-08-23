@@ -313,11 +313,6 @@ void SharedTaskManager::LoadSharedTaskState()
 {
 	LogTasksDetail("[LoadSharedTaskState] Restoring state from the database");
 
-	// [x] preload task data and activity data
-	// [x] load shared tasks themselves
-	// [x] load shared task activities
-	// [x] load shared task members
-
 	// load shared tasks
 	std::vector<SharedTask> shared_tasks = {};
 
@@ -337,7 +332,8 @@ void SharedTaskManager::LoadSharedTaskState()
 
 		shared_task_character_data = CharacterDataRepository::GetWhere(
 			*m_database,
-			fmt::format("id IN ({})", fmt::join(character_ids, ",")));
+			fmt::format("id IN ({})", fmt::join(character_ids, ","))
+		);
 	}
 
 	auto shared_task_dynamic_zones_data = SharedTaskDynamicZonesRepository::All(*m_database);
@@ -468,7 +464,7 @@ void SharedTaskManager::LoadSharedTaskState()
 		shared_tasks.emplace_back(ns);
 	}
 
-	m_shared_tasks = shared_tasks;
+	SetSharedTasks(shared_tasks);
 
 	LogTasks(
 		"[LoadSharedTaskState] Loaded [{}] shared tasks",
@@ -1781,4 +1777,14 @@ void SharedTaskManager::ChooseNewLeader(SharedTask *s)
 	if (it != members.end()) {
 		MakeLeaderByPlayerName(s, it->character_name);
 	}
+}
+
+const std::vector<SharedTask> &SharedTaskManager::GetSharedTasks() const
+{
+	return m_shared_tasks;
+}
+
+void SharedTaskManager::SetSharedTasks(const std::vector<SharedTask> &shared_tasks)
+{
+	SharedTaskManager::m_shared_tasks = shared_tasks;
 }
