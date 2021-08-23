@@ -75,7 +75,10 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 		case ServerOP_SharedTaskMemberlist: {
 			auto p = reinterpret_cast<ServerSharedTaskMemberListPacket_Struct *>(pack->pBuffer);
 
-			LogTasks("[ServerOP_SharedTaskMemberlist] We're back in zone and I'm searching for [{}]", p->destination_character_id);
+			LogTasks(
+				"[ServerOP_SharedTaskMemberlist] We're back in zone and I'm searching for [{}]",
+				p->destination_character_id
+			);
 
 			// find character and route packet
 			auto c = entity_list.GetClientByCharID(p->destination_character_id);
@@ -86,7 +89,7 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 
 				// deserialize members from world
 				EQ::Util::MemoryStreamReader ss(p->cereal_serialized_members, p->cereal_size);
-				cereal::BinaryInputArchive archive(ss);
+				cereal::BinaryInputArchive   archive(ss);
 				archive(members);
 
 				SerializeBuffer buf(sizeof(SharedTaskMemberList_Struct) + 15 * members.size());
@@ -107,13 +110,12 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 			break;
 		}
 		case ServerOP_SharedTaskMemberChange: {
-			auto p = reinterpret_cast<ServerSharedTaskMemberChangePacket_Struct*>(pack->pBuffer);
+			auto p = reinterpret_cast<ServerSharedTaskMemberChangePacket_Struct *>(pack->pBuffer);
 
 			LogTasksDetail("[ServerOP_SharedTaskMemberChange] Searching for [{}]", p->destination_character_id);
 
 			auto c = entity_list.GetClientByCharID(p->destination_character_id);
-			if (c)
-			{
+			if (c) {
 				LogTasksDetail("[ServerOP_SharedTaskMemberChange] Found [{}]", c->GetCleanName());
 
 				SerializeBuffer buf;

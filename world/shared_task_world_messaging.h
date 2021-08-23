@@ -10,7 +10,7 @@
 
 class SharedTaskWorldMessaging {
 public:
-	static void HandleZoneMessage(ServerPacket* pack);
+	static void HandleZoneMessage(ServerPacket *pack);
 };
 
 

@@ -5,7 +5,7 @@ class ServerPacket;
 
 class SharedTaskZoneMessaging {
 public:
-	static void HandleWorldMessage(ServerPacket* pack);
+	static void HandleWorldMessage(ServerPacket *pack);
 };
 
 
