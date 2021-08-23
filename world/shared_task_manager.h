@@ -33,7 +33,6 @@ public:
 	std::vector<TaskActivitiesRepository::TaskActivities> GetSharedTaskActivityDataByTaskId(uint32 task_id);
 
 	// gets group / raid members belonging to requested character
-	// this may change later depending on how shared tasks develop
 	std::vector<SharedTaskMember> GetRequestMembers(
 		uint32 requestor_character_id,
 		const std::vector<CharacterDataRepository::CharacterData> &characters
@@ -63,8 +62,12 @@ public:
 	void SendRemovePlayerFromSharedTaskPacket(uint32 character_id, uint32 task_id, bool remove_from_db);
 	void SendSharedTaskMemberList(uint32 character_id, const std::vector<SharedTaskMember> &members);
 	void SendSharedTaskMemberList(uint32 character_id, const EQ::Net::DynamicPacket &serialized_members);
-	void
-	SendSharedTaskMemberChange(uint32 character_id, int64 shared_task_id, const std::string &player_name, bool removed);
+	void SendSharedTaskMemberChange(
+		uint32 character_id,
+		int64 shared_task_id,
+		const std::string &player_name,
+		bool removed
+	);
 	void RemovePlayerFromSharedTask(SharedTask *s, uint32 character_id);
 	void PrintSharedTaskState();
 	void RemovePlayerFromSharedTaskByPlayerName(SharedTask *s, const std::string &character_name);

@@ -1713,6 +1713,7 @@ void SharedTaskManager::AddReplayTimers(SharedTask *s)
 	}
 }
 
+// memory search
 std::vector<uint32_t> SharedTaskManager::FindCharactersInSharedTasks(const std::vector<uint32_t> &find_characters)
 {
 	std::vector<uint32_t> characters = {};

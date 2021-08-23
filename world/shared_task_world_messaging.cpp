@@ -158,7 +158,6 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 						t->GetDbSharedTask().id
 					);
 
-					// TODO: Clean this up a bit more later as other functionality is A-Z'ed
 					std::string character_name = r->player_name;
 					shared_task_manager.RemovePlayerFromSharedTaskByPlayerName(t, character_name);
 				}
