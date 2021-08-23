@@ -14,8 +14,8 @@
 #include "../common/repositories/task_activities_repository.h"
 #include "dynamic_zone.h"
 
-extern ClientList client_list;
-extern ZSList zoneserver_list;
+extern ClientList        client_list;
+extern ZSList            zoneserver_list;
 extern SharedTaskManager shared_task_manager;
 
 void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
@@ -328,6 +328,7 @@ void SharedTaskWorldMessaging::HandleZoneMessage(ServerPacket *pack)
 			auto s = shared_task_manager.FindSharedTaskByTaskIdAndCharacterId(buf->task_id, buf->source_character_id);
 			if (s) {
 				std::vector<std::string> player_names;
+
 				for (const auto &member : s->GetMembers()) {
 					player_names.emplace_back(member.character_name);
 

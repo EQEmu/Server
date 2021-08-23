@@ -479,40 +479,47 @@ int WorldDatabase::MoveCharacterToBind(int character_id, uint8 bind_number)
 }
 
 int WorldDatabase::MoveCharacterToInstanceSafeReturn(
-	int character_id, int instance_zone_id, int instance_id)
+	int character_id,
+	int instance_zone_id,
+	int instance_id
+)
 {
 	int zone_id = 0;
 
 	// only moves if safe return is for specified zone instance
-	auto entries = CharacterInstanceSafereturnsRepository::GetWhere(database, fmt::format(
-		"character_id = {} AND instance_zone_id = {} AND instance_id = {} AND safe_zone_id > 0",
-		character_id, instance_zone_id, instance_id));
+	auto entries = CharacterInstanceSafereturnsRepository::GetWhere(
+		database,
+		fmt::format(
+			"character_id = {} AND instance_zone_id = {} AND instance_id = {} AND safe_zone_id > 0",
+			character_id, instance_zone_id, instance_id
+		)
+	);
 
-	if (!entries.empty())
-	{
+	if (!entries.empty()) {
 		auto entry = entries.front();
 
-		auto results = QueryDatabase(fmt::format(SQL(
-			UPDATE character_data
-			SET zone_id = {}, zone_instance = 0, x = {}, y = {}, z = {}, heading = {}
-			WHERE id = {};
-		),
-			entry.safe_zone_id,
-			entry.safe_x,
-			entry.safe_y,
-			entry.safe_z,
-			entry.safe_heading,
-			character_id
-		));
+		auto results = QueryDatabase(
+			fmt::format(
+				SQL(
+					UPDATE character_data
+					SET zone_id = {}, zone_instance = 0, x = {}, y = {}, z = {}, heading = {}
+						WHERE id = {};
+				),
+				entry.safe_zone_id,
+				entry.safe_x,
+				entry.safe_y,
+				entry.safe_z,
+				entry.safe_heading,
+				character_id
+			)
+		);
 
-		if (results.Success() && results.RowsAffected() > 0)
-		{
+		if (results.Success() && results.RowsAffected() > 0) {
 			zone_id = entry.safe_zone_id;
 		}
 	}
 
-	if (zone_id == 0)
-	{
+	if (zone_id == 0) {
 		zone_id = MoveCharacterToBind(character_id);
 	}
 
