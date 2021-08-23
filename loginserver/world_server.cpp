@@ -72,7 +72,7 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> wo
 		std::bind(&WorldServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2)
 	);
 
-	m_keepalive = std::make_unique<EQ::Timer>(5000, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1));
 }
 
 WorldServer::~WorldServer() = default;

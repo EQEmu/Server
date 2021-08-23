@@ -552,7 +552,7 @@ bool LoginServer::Connect()
 		);
 	}
 
-	m_keepalive = std::make_unique<EQ::Timer>(5000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
 
 	return true;
 }
