@@ -11,16 +11,7 @@
 #include <string>
 #include <iostream>
 
-// shared tasks
-//#define ServerOP_SharedTaskGrant          0x0301 // world -> zone. World verified everything is good
-//#define ServerOP_SharedTaskReject         0x0302 // world -> zone. Something failed ABORT
-//#define ServerOP_SharedTaskRemovePlayer   0x0304 // .. /taskremoveplayer ..
-//#define ServerOP_SharedTaskZoneCreated    0x0305 // zone -> world. Something didn't go wrong creating the new task! Now World needs to tell other players to join world -> zone response to tell someone to join
-//#define ServerOP_SharedTaskZoneFailed     0x0306 // zone -> world. Something went wrong above ABORT
-//#define ServerOP_SharedTaskActivityUpdate 0x0307 // zone -> world. Is this valid update? world -> zone update activity
-//#define ServerOP_SharedTaskCompleted      0x0308 // world -> zone. We completed! Do stuff zone!
-
-// handled
+// ops
 #define ServerOP_SharedTaskRequest                  0x0300 // zone -> world. Player trying to get task. Relayed world -> zone on confirmation
 #define ServerOP_SharedTaskAddPlayer                0x0301 // bidirectional. /taskaddplayer request zone -> world. success world -> zone
 #define ServerOP_SharedTaskMakeLeader               0x0302 // zone -> world -> zone
