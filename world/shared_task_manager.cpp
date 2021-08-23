@@ -1779,7 +1779,7 @@ void SharedTaskManager::ChooseNewLeader(SharedTask *s)
 	auto it      = std::find_if(
 		members.begin(), members.end(),
 		[&](const SharedTaskMember &member) {
-			return member.is_leader == false;
+			return !member.is_leader;
 		}
 	);
 
