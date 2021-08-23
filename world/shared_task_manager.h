@@ -83,10 +83,12 @@ public:
 	void RemoveActiveInvitation(int64 shared_task_id, int64 character_id);
 	void RemoveActiveInvitationByCharacterID(uint32_t character_id);
 
+	// dz
 	void CreateDynamicZone(SharedTask *s, DynamicZone &dz_request);
 
 	void PurgeAllSharedTasks();
 
+	// messages
 	void SendLeaderMessage(SharedTask *s, int chat_type, const std::string &message);
 	void SendLeaderMessageID(SharedTask *s, int chat_type, int eqstr_id, std::initializer_list<std::string> args = {});
 	void SendMembersMessage(SharedTask *s, int chat_type, const std::string &message);
