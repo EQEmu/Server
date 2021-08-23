@@ -1119,8 +1119,6 @@ void ClientTaskState::IncrementDoneCount(
 
 	// shared task shim
 	// intercept and pass to world first before processing normally
-	// TODO: Add zone level cache for determining if an update was sent for a particular shared task already instead
-	// TODO: ...of sending it to world each time (many clients optimization)
 	if (!client->m_shared_task_update && task_information->type == TaskType::Shared) {
 
 		// struct
@@ -1255,7 +1253,6 @@ void ClientTaskState::IncrementDoneCount(
 			// add replay timer (world adds timers to shared task members)
 			AddReplayTimer(client, *info, *task_information);
 
-			// TODO: shared task intercept completion
 			// shared tasks linger at the completion step and do not get removed from the task window unlike quests/task
 			if (task_information->type == TaskType::Shared) {
 				return;
@@ -1899,7 +1896,6 @@ void ClientTaskState::TaskPeriodicChecks(Client *client)
 	}
 
 	// type "shared"
-	// TODO: this will eventually be in world
 	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
 		if (TaskOutOfTime(TaskType::Shared, TASKSLOTSHAREDTASK)) {
 			// Send Red Task Failed Message

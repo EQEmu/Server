@@ -953,7 +953,6 @@ void Client::CompleteConnect()
 	}
 
 	// shared tasks memberlist
-	// TODO: shared_task move this to something else later
 	if (GetTaskState()->HasActiveSharedTask()) {
 
 		// struct
