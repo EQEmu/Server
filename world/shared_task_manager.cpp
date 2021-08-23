@@ -562,8 +562,6 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 						a.done_count
 					);
 
-					// TODO: Check for cap / max here
-
 					// loop through members - send update
 					for (auto &m: shared_task->GetMembers()) {
 
@@ -637,16 +635,11 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 SharedTask *SharedTaskManager::FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id)
 {
-//	LogTasksDetail("[FindSharedTaskByTaskIdAndCharacterId] pre task_id [{}] character_id [{}]", task_id, character_id);
-
 	for (auto &s: m_shared_tasks) {
-//		LogTasksDetail("[FindSharedTaskByTaskIdAndCharacterId] task_id [{}] character_id [{}]", task_id, character_id);
 		// grep for task
 		if (s.GetTaskData().id == task_id) {
-//			LogTasksDetail("[FindSharedTaskByTaskIdAndCharacterId] -- task_id [{}] character_id [{}]", task_id, character_id);
 			// find member in shared task
 			for (auto &m: s.GetMembers()) {
-//				LogTasksDetail("[FindSharedTaskByTaskIdAndCharacterId] -- m -- m.character_id [{}] task_id [{}] character_id [{}]", m.character_id, task_id, character_id);
 				if (m.character_id == character_id) {
 					return &s;
 				}
