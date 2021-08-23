@@ -725,7 +725,8 @@ int main(int argc, char **argv)
 			std::string window_title = StringFormat(
 				"World: %s Clients: %i",
 				Config->LongName.c_str(),
-				client_list.GetClientCount());
+				client_list.GetClientCount()
+			);
 			UpdateWindowTitle(window_title);
 		}
 
