@@ -1098,13 +1098,14 @@ void SharedTaskManager::AddPlayerByCharacterIdAndName(
 		// inform client
 		SendAcceptNewSharedTaskPacket(character_id, s->GetTaskData().id, 0, s->GetDbSharedTask().accepted_time);
 
-		// add
+		// add to shared task
 		SendSharedTaskMemberAddedToAllMembers(s, character_name);
 		s->SetMembers(members);
 		SaveMembers(s, members);
 		SendSharedTaskMemberList(character_id, s->GetMembers()); // new member gets full member list
 		s->AddCharacterToMemberHistory(character_id);
 
+		// add to dzs tied to shared task
 		for (const auto &dz_id : s->dynamic_zone_ids) {
 			auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
 			if (dz) {
