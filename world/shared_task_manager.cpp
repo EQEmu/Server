@@ -104,11 +104,6 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 
 	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
 
-	// something failed here, bail out
-	if (created_db_shared_task.id == 0) {
-		// TODO: Handle failure, happy path for now
-	}
-
 	// active record
 	new_shared_task.SetDbSharedTask(created_db_shared_task);
 
