@@ -531,6 +531,18 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 
 		for (auto &a : shared_task->m_shared_task_activity_state) {
 			if (a.activity_id == activity_id) {
+
+				// discard updates out of bounds
+				if (a.done_count == a.max_done_count) {
+					LogTasksDetail(
+						"[SharedTaskActivityUpdate] done_count [{}] is greater than max [{}] discarding...",
+						done_count,
+						a.max_done_count
+					);
+					return;
+				}
+
+				// if we are progressing
 				if (a.done_count < done_count) {
 					LogTasksDetail(
 						"[SharedTaskActivityUpdate] Propagating update for shared_task_id [{}] character_id [{}] task_id [{}] activity_id [{}] old_done_count [{}] new_done_count [{}]",
@@ -548,6 +560,11 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 					// if the activity is done, lets mark it as such
 					if (a.done_count == a.max_done_count) {
 						a.completed_time = std::time(nullptr);
+					}
+
+					// if the update came in larger than the max for whatever reason, clamp
+					if (a.done_count > a.max_done_count) {
+						a.done_count = a.max_done_count;
 					}
 
 					// sync state as each update comes in (for now)
@@ -1786,9 +1803,9 @@ void SharedTaskManager::SetSharedTasks(const std::vector<SharedTask> &shared_tas
 	SharedTaskManager::m_shared_tasks = shared_tasks;
 }
 
-SharedTaskManager * SharedTaskManager::PurgeExpiredSharedTasks()
+SharedTaskManager *SharedTaskManager::PurgeExpiredSharedTasks()
 {
-	auto now = std::time(nullptr);
+	auto      now = std::time(nullptr);
 	for (auto &s: m_shared_tasks) {
 		if (s.GetDbSharedTask().expire_time > 0 && s.GetDbSharedTask().expire_time <= now) {
 			LogTasksDetail("[PurgeExpiredSharedTasks] Deleting expired task [{}]", s.GetDbSharedTask().id);
