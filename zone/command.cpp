@@ -10655,7 +10655,8 @@ void command_task(Client *c, const Seperator *sep) {
 
 	if (!strcasecmp(sep->arg[1], "sharedpurge")) {
 		if (!strcasecmp(sep->arg[2], "confirm")) {
-			auto pack = new ServerPacket(ServerOP_SharedTaskPurgeAllCommand, 0);
+			LogTasksDetail("Sending purge request");
+			auto pack = new ServerPacket(ServerOP_SharedTaskPurgeAllCommand, 1);
 			worldserver.SendPacket(pack);
 			safe_delete(pack);
 
