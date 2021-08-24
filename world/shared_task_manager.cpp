@@ -557,14 +557,14 @@ void SharedTaskManager::SharedTaskActivityUpdate(
 					a.done_count   = done_count;
 					a.updated_time = std::time(nullptr);
 
-					// if the activity is done, lets mark it as such
-					if (a.done_count == a.max_done_count) {
-						a.completed_time = std::time(nullptr);
-					}
-
 					// if the update came in larger than the max for whatever reason, clamp
 					if (a.done_count > a.max_done_count) {
 						a.done_count = a.max_done_count;
+					}
+
+					// if the activity is done, lets mark it as such
+					if (a.done_count == a.max_done_count) {
+						a.completed_time = std::time(nullptr);
 					}
 
 					// sync state as each update comes in (for now)
@@ -1763,6 +1763,9 @@ void SharedTaskManager::PurgeAllSharedTasks()
 	SharedTaskMembersRepository::Truncate(*m_database);
 	SharedTaskActivityStateRepository::Truncate(*m_database);
 	SharedTaskDynamicZonesRepository::Truncate(*m_database);
+	CompletedSharedTasksRepository::Truncate(*m_database);
+	CompletedSharedTaskMembersRepository::Truncate(*m_database);
+	CompletedSharedTaskActivityStateRepository::Truncate(*m_database);
 
 	LoadSharedTaskState();
 }
