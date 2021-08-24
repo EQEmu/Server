@@ -19,6 +19,11 @@ EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
 
 void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet & p)
 {
+	// pad zero size packets
+	if (p.Length() == 0) {
+		p.PutUInt8(0, 0);
+	}
+
 	EQ::Net::DynamicPacket out;
 	out.PutUInt32(0, p.Length());
 	out.PutUInt16(4, opcode);
