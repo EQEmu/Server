@@ -325,6 +325,7 @@ namespace Tasks {
 
 namespace SharedTaskMessage {
 	constexpr uint16 TASK_ASSIGN_WAIT_REPLAY_TIMER                     = 8017; // This task can not be assigned to you because you must wait %1d:%2h:%3m before you can do another task of this type.
+	constexpr uint16 COULD_NOT_USE_COMMAND                             = 8272; // You could not use this command because you are not currently assigned to a shared task.
 	constexpr uint16 AVG_LVL_LOW                                       = 8553; // You can not be assigned this shared task because your party's average level is too low.
 	constexpr uint16 AVG_LVL_HIGH                                      = 8889; // You can not be assigned this shared task because your party's average level is too high.
 	constexpr uint16 LVL_SPREAD_HIGH                                   = 8890; // You can not be assigned this shared task because your party's level spread is too high.
@@ -417,6 +418,8 @@ namespace SharedTaskMessage {
 	{
 		switch (eqstr_id)
 		{
+		case SharedTaskMessage::COULD_NOT_USE_COMMAND:
+			return "You could not use this command because you are not currently assigned to a shared task.";
 		case SharedTaskMessage::TASK_ASSIGN_WAIT_REQUEST_TIMER:
 			return "This task can not be assigned to you because you must wait {}d:{}h:{}m before you can request another task of this type.";
 		case SharedTaskMessage::REQUEST_TIMER_REMAINING:

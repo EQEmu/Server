@@ -15298,7 +15298,7 @@ void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
 		r->player_name
 	);
 
-	// TODO: Send error message if not in active task
+	// live no-ops this command if not in a shared task
 	if (GetTaskState()->HasActiveSharedTask()) {
 		// struct
 		auto p = new ServerPacket(
@@ -15345,9 +15345,11 @@ void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
 		r->player_name
 	);
 
-	// TODO: Send error message if not in active task
-	if (GetTaskState()->HasActiveSharedTask()) {
-
+	if (!GetTaskState()->HasActiveSharedTask()) {
+		// this message is generated client-side in newer clients
+		Message(Chat::System, SharedTaskMessage::GetEQStr(SharedTaskMessage::COULD_NOT_USE_COMMAND));
+	}
+	else {
 		// struct
 		auto p = new ServerPacket(
 			ServerOP_SharedTaskAddPlayer,
@@ -15393,7 +15395,7 @@ void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
 		r->player_name
 	);
 
-	// TODO: Send error message if not in active task
+	// live no-ops this command if not in a shared task
 	if (GetTaskState()->HasActiveSharedTask()) {
 		// struct
 		auto p = new ServerPacket(
