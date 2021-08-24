@@ -72,7 +72,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 		);
 	}
 
-	// shared task validation needs character names and levels (not stored in SharedTaskMember)
+	// shared task validation
 	auto request = SharedTask::GetRequestCharacters(*m_database, requested_character_id);
 	if (!CanRequestSharedTask(task.id, requested_character_id, request)) {
 		LogTasksDetail("[AttemptSharedTaskCreation] Shared task validation failed");
