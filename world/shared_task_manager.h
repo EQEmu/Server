@@ -54,7 +54,7 @@ public:
 	SharedTask *FindSharedTaskByTaskIdAndCharacterId(uint32 task_id, uint32 character_id);
 	SharedTask *FindSharedTaskById(int64 shared_task_id);
 
-	void DeleteSharedTask(int64 shared_task_id, uint32 requested_character_id);
+	void DeleteSharedTask(int64 shared_task_id);
 	void SaveSharedTaskActivityState(int64 shared_task_id, std::vector<SharedTaskActivityStateEntry> activity_state);
 
 	bool IsSharedTaskLeader(SharedTask *s, uint32 character_id);
@@ -97,6 +97,7 @@ public:
 	const std::vector<SharedTask> &GetSharedTasks() const;
 	void SetSharedTasks(const std::vector<SharedTask> &shared_tasks);
 
+	SharedTaskManager * PurgeExpiredSharedTasks();
 protected:
 	// reference to database
 	Database *m_database;

@@ -508,6 +508,8 @@ int main(int argc, char **argv)
 		->LoadTaskData()
 		->LoadSharedTaskState();
 
+	shared_task_manager.PurgeExpiredSharedTasks();
+
 	std::unique_ptr<EQ::Net::ConsoleServer> console;
 	if (Config->TelnetEnabled) {
 		LogInfo("Console (TCP) listener started");

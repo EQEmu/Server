@@ -1,10 +1,10 @@
-
 -- shared task tables
 CREATE TABLE `shared_tasks`
 (
     `id`              bigint(20) NOT NULL AUTO_INCREMENT,
     `task_id`         int(11) DEFAULT NULL,
     `accepted_time`   datetime DEFAULT NULL,
+    `expire_time`     datetime DEFAULT NULL,
     `completion_time` datetime DEFAULT NULL,
     `is_locked`       tinyint(1) DEFAULT NULL,
     PRIMARY KEY (`id`)
@@ -42,6 +42,7 @@ CREATE TABLE `completed_shared_tasks`
     `id`              bigint(20) NOT NULL,
     `task_id`         int(11) DEFAULT NULL,
     `accepted_time`   datetime DEFAULT NULL,
+    `expire_time`     datetime DEFAULT NULL,
     `completion_time` datetime DEFAULT NULL,
     `is_locked`       tinyint(1) DEFAULT NULL,
     PRIMARY KEY (`id`)
@@ -89,8 +90,8 @@ CREATE TABLE `character_task_timers`
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `tasks`
-  CHANGE COLUMN `completion_emote` `completion_emote` VARCHAR(512) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `faction_reward`;
+    CHANGE COLUMN `completion_emote` `completion_emote` VARCHAR (512) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci' AFTER `faction_reward`;
 
 ALTER TABLE `tasks`
-  ADD COLUMN `reward_radiant_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `rewardmethod`,
+    ADD COLUMN `reward_radiant_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `rewardmethod`,
   ADD COLUMN `reward_ebon_crystals` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `reward_radiant_crystals`;

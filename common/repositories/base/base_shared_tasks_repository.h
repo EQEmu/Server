@@ -22,6 +22,7 @@ public:
 		int64  id;
 		int    task_id;
 		time_t accepted_time;
+		time_t expire_time;
 		time_t completion_time;
 		int    is_locked;
 	};
@@ -37,6 +38,7 @@ public:
 			"id",
 			"task_id",
 			"accepted_time",
+			"expire_time",
 			"completion_time",
 			"is_locked",
 		};
@@ -48,6 +50,7 @@ public:
 			"id",
 			"task_id",
 			"UNIX_TIMESTAMP(accepted_time)",
+			"UNIX_TIMESTAMP(expire_time)",
 			"UNIX_TIMESTAMP(completion_time)",
 			"is_locked",
 		};
@@ -93,6 +96,7 @@ public:
 		entry.id              = 0;
 		entry.task_id         = 0;
 		entry.accepted_time   = 0;
+		entry.expire_time     = 0;
 		entry.completion_time = 0;
 		entry.is_locked       = 0;
 
@@ -133,8 +137,9 @@ public:
 			entry.id              = strtoll(row[0], nullptr, 10);
 			entry.task_id         = atoi(row[1]);
 			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[4]);
+			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.is_locked       = atoi(row[5]);
 
 			return entry;
 		}
@@ -170,8 +175,9 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(shared_tasks_entry.task_id));
 		update_values.push_back(columns[2] + " = FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
-		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
-		update_values.push_back(columns[4] + " = " + std::to_string(shared_tasks_entry.is_locked));
+		update_values.push_back(columns[3] + " = FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
+		update_values.push_back(columns[4] + " = FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
+		update_values.push_back(columns[5] + " = " + std::to_string(shared_tasks_entry.is_locked));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -196,6 +202,7 @@ public:
 		insert_values.push_back(std::to_string(shared_tasks_entry.id));
 		insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
 		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
+		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
 		insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
 		insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
 
@@ -230,6 +237,7 @@ public:
 			insert_values.push_back(std::to_string(shared_tasks_entry.id));
 			insert_values.push_back(std::to_string(shared_tasks_entry.task_id));
 			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.accepted_time > 0 ? std::to_string(shared_tasks_entry.accepted_time) : "null") + ")");
+			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.expire_time > 0 ? std::to_string(shared_tasks_entry.expire_time) : "null") + ")");
 			insert_values.push_back("FROM_UNIXTIME(" + (shared_tasks_entry.completion_time > 0 ? std::to_string(shared_tasks_entry.completion_time) : "null") + ")");
 			insert_values.push_back(std::to_string(shared_tasks_entry.is_locked));
 
@@ -268,8 +276,9 @@ public:
 			entry.id              = strtoll(row[0], nullptr, 10);
 			entry.task_id         = atoi(row[1]);
 			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[4]);
+			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.is_locked       = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}
@@ -297,8 +306,9 @@ public:
 			entry.id              = strtoll(row[0], nullptr, 10);
 			entry.task_id         = atoi(row[1]);
 			entry.accepted_time   = strtoll(row[2] ? row[2] : "-1", nullptr, 10);
-			entry.completion_time = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
-			entry.is_locked       = atoi(row[4]);
+			entry.expire_time     = strtoll(row[3] ? row[3] : "-1", nullptr, 10);
+			entry.completion_time = strtoll(row[4] ? row[4] : "-1", nullptr, 10);
+			entry.is_locked       = atoi(row[5]);
 
 			all_entries.push_back(entry);
 		}

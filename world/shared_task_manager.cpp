@@ -101,6 +101,7 @@ void SharedTaskManager::AttemptSharedTaskCreation(
 	auto shared_task_entity = SharedTasksRepository::NewEntity();
 	shared_task_entity.task_id       = (int) requested_task_id;
 	shared_task_entity.accepted_time = static_cast<int>(std::time(nullptr));
+	shared_task_entity.expire_time   = task.duration > 0 ? (std::time(nullptr) + task.duration) : 0;
 
 	auto created_db_shared_task = SharedTasksRepository::InsertOne(*m_database, shared_task_entity);
 
@@ -278,12 +279,12 @@ void SharedTaskManager::RemoveEveryoneFromSharedTask(SharedTask *t, uint32 reque
 	RemoveAllMembersFromDynamicZones(t);
 
 	// persistence
-	DeleteSharedTask(t->GetDbSharedTask().id, requested_character_id);
+	DeleteSharedTask(t->GetDbSharedTask().id);
 
 	PrintSharedTaskState();
 }
 
-void SharedTaskManager::DeleteSharedTask(int64 shared_task_id, uint32 requested_character_id)
+void SharedTaskManager::DeleteSharedTask(int64 shared_task_id)
 {
 	LogTasksDetail(
 		"[DeleteSharedTask] shared_task_id [{}]",
@@ -1624,6 +1625,7 @@ void SharedTaskManager::RecordSharedTaskCompletion(SharedTask *s)
 	ct.id              = t.id;
 	ct.task_id         = t.task_id;
 	ct.accepted_time   = t.accepted_time;
+	ct.expire_time     = t.expire_time;
 	ct.completion_time = t.completion_time;
 	ct.is_locked       = t.is_locked;
 
@@ -1782,4 +1784,17 @@ const std::vector<SharedTask> &SharedTaskManager::GetSharedTasks() const
 void SharedTaskManager::SetSharedTasks(const std::vector<SharedTask> &shared_tasks)
 {
 	SharedTaskManager::m_shared_tasks = shared_tasks;
+}
+
+SharedTaskManager * SharedTaskManager::PurgeExpiredSharedTasks()
+{
+	auto now = std::time(nullptr);
+	for (auto &s: m_shared_tasks) {
+		if (s.GetDbSharedTask().expire_time > 0 && s.GetDbSharedTask().expire_time <= now) {
+			LogTasksDetail("[PurgeExpiredSharedTasks] Deleting expired task [{}]", s.GetDbSharedTask().id);
+			DeleteSharedTask(s.GetDbSharedTask().id);
+		}
+	}
+
+	return this;
 }
