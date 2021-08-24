@@ -6,6 +6,7 @@
 #include "task_proximity_manager.h"
 #include "task_goal_list_manager.h"
 #include "../common/types.h"
+#include "../common/repositories/character_tasks_repository.h"
 #include <list>
 #include <vector>
 #include <string>
@@ -91,6 +92,7 @@ private:
 	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
 	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
 	void SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list);
+	void SyncClientSharedTaskStateToLocal(Client *c);
 };
 
 

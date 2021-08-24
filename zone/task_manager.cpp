@@ -389,7 +389,8 @@ bool TaskManager::SaveClientState(Client *client, ClientTaskState *client_task_s
 		}
 	}
 
-	if (!RuleB(TaskSystem, RecordCompletedTasks) || (client_task_state->m_completed_tasks.size() <= (unsigned int) client_task_state->m_last_completed_task_loaded)) {
+	if (!RuleB(TaskSystem, RecordCompletedTasks) || (client_task_state->m_completed_tasks.size() <=
+													 (unsigned int) client_task_state->m_last_completed_task_loaded)) {
 		client_task_state->m_last_completed_task_loaded = client_task_state->m_completed_tasks.size();
 		return true;
 	}
@@ -649,11 +650,9 @@ void TaskManager::TaskQuestSetSelector(
 	// live prevents mixing selection types (also uses diff opcodes for solo vs shared tasks)
 	// to keep shared task validation live-like (and simple), any shared task will
 	// forward this to shared task validation and non-shared tasks will be dropped
-	for (int i = 0; i < count; ++i)
-	{
+	for (int i = 0; i < count; ++i) {
 		auto task = tasks[i];
-		if (m_task_data[task] && m_task_data[task]->type == TaskType::Shared)
-		{
+		if (m_task_data[task] && m_task_data[task]->type == TaskType::Shared) {
 			SharedTaskSelector(client, mob, count, tasks);
 			return;
 		}
@@ -690,7 +689,7 @@ void TaskManager::TaskQuestSetSelector(
 	}
 }
 
-void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* tasks)
+void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, int *tasks)
 {
 	LogTasks("[UPDATE] SharedTaskSelector called for array size [{}]", count);
 
@@ -700,8 +699,7 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 	}
 
 	// check if requester already has a shared task (no need to query group/raid members if so)
-	if (client->GetTaskState()->HasActiveSharedTask())
-	{
+	if (client->GetTaskState()->HasActiveSharedTask()) {
 		client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_HAVE_ONE);
 		return;
 	}
@@ -711,57 +709,59 @@ void TaskManager::SharedTaskSelector(Client* client, Mob* mob, int count, int* t
 
 	// check if any group/raid member already has a shared task (already checked solo character)
 	bool validation_failed = false;
-	if (request.group_type != SharedTaskRequestGroupType::Solo)
-	{
-		auto shared_task_members = SharedTaskMembersRepository::GetWhere(database,
+	if (request.group_type != SharedTaskRequestGroupType::Solo) {
+		auto shared_task_members = SharedTaskMembersRepository::GetWhere(
+			database,
 			fmt::format("character_id IN ({}) LIMIT 1", fmt::join(request.character_ids, ",")));
 
-		if (!shared_task_members.empty())
-		{
+		if (!shared_task_members.empty()) {
 			validation_failed = true;
 
-			auto it = std::find_if(request.characters.begin(), request.characters.end(),
-				[&](const CharacterDataRepository::CharacterData& char_data) {
+			auto it = std::find_if(
+				request.characters.begin(), request.characters.end(),
+				[&](const CharacterDataRepository::CharacterData &char_data) {
 					return char_data.id == shared_task_members.front().character_id;
-				});
+				}
+			);
 
-			if (it != request.characters.end())
-			{
+			if (it != request.characters.end()) {
 				if (request.group_type == SharedTaskRequestGroupType::Group) {
-					client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE, it->name.c_str());
-				} else {
-					client->MessageString(Chat::Red, SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE, it->name.c_str());
+					client->MessageString(
+						Chat::Red,
+						SharedTaskMessage::NO_REQUEST_BECAUSE_GROUP_HAS_ONE,
+						it->name.c_str());
+				}
+				else {
+					client->MessageString(
+						Chat::Red,
+						SharedTaskMessage::NO_REQUEST_BECAUSE_RAID_HAS_ONE,
+						it->name.c_str());
 				}
 			}
 		}
 	}
 
-	if (!validation_failed)
-	{
+	if (!validation_failed) {
 		// run type and level filters on task selections
 		int task_list[MAXCHOOSERENTRIES] = {0};
-		int task_list_index = 0;
+		int task_list_index              = 0;
 
-		for (int i = 0; i < count && task_list_index < MAXCHOOSERENTRIES; ++i)
-		{
+		for (int i = 0; i < count && task_list_index < MAXCHOOSERENTRIES; ++i) {
 			// todo: are there non repeatable shared tasks? (would need to check all group/raid members)
 			auto task = tasks[i];
 			if (m_task_data[task] &&
-			    m_task_data[task]->type == TaskType::Shared &&
-			    request.lowest_level >= m_task_data[task]->min_level &&
-			    (m_task_data[task]->max_level == 0 || request.highest_level <= m_task_data[task]->max_level))
-			{
+				m_task_data[task]->type == TaskType::Shared &&
+				request.lowest_level >= m_task_data[task]->min_level &&
+				(m_task_data[task]->max_level == 0 || request.highest_level <= m_task_data[task]->max_level)) {
 				task_list[task_list_index++] = task;
 			}
 		}
 
 		// check if any tasks are left to offer after filtering
-		if (task_list_index > 0)
-		{
+		if (task_list_index > 0) {
 			SendSharedTaskSelector(client, mob, task_list_index, task_list);
 		}
-		else
-		{
+		else {
 			client->MessageString(Chat::Red, SharedTaskMessage::YOU_DO_NOT_MEET_REQ_AVAILABLE);
 		}
 	}
@@ -826,7 +826,7 @@ void TaskManager::SendTaskSelector(Client *client, Mob *mob, int task_count, int
 	client->QueuePacket(outapp.get());
 }
 
-void TaskManager::SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list)
+void TaskManager::SendSharedTaskSelector(Client *client, Mob *mob, int task_count, int *task_list)
 {
 	LogTasks("SendSharedTaskSelector for [{}] Tasks", task_count);
 
@@ -840,8 +840,7 @@ void TaskManager::SendSharedTaskSelector(Client* client, Mob* mob, int task_coun
 	buf.WriteUInt32(static_cast<uint32_t>(TaskType::Shared));
 	buf.WriteUInt32(mob->GetID()); // task giver entity id
 
-	for (int i = 0; i < task_count; ++i)
-	{
+	for (int i = 0; i < task_count; ++i) {
 		int task_id = task_list[i];
 		buf.WriteUInt32(task_id);
 		m_task_data[task_id]->SerializeSelector(buf, client->ClientVersion());
@@ -1000,7 +999,7 @@ void TaskManager::SendTaskActivityLong(
 	buf.WriteUInt32(activity_id);
 	buf.WriteUInt32(0);        // unknown3
 
-	const auto& activity = m_task_data[task_id]->activity_information[activity_id];
+	const auto &activity = m_task_data[task_id]->activity_information[activity_id];
 	int done_count = client->GetTaskActivityDoneCount(m_task_data[task_id]->type, client_task_index, activity_id);
 
 	activity.SerializeObjective(buf, client->ClientVersion(), done_count);
@@ -1035,7 +1034,10 @@ void TaskManager::SendActiveTaskToClient(
 		false
 	);
 
-	LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}] task_index [{}]", task_id, GetActivityCount(task_id), task_index);
+	LogTasks("[SendActiveTasksToClient] task_id [{}] activity_count [{}] task_index [{}]",
+			 task_id,
+			 GetActivityCount(task_id),
+			 task_index);
 
 	int      sequence    = 0;
 	int      fixed_index = task_index;
@@ -1219,8 +1221,8 @@ void TaskManager::SendActiveTaskDescription(
 	task_description_header->open_window    = bring_up_task_journal;
 	task_description_header->task_type      = static_cast<uint32>(m_task_data[task_id]->type);
 
-	constexpr uint32_t reward_radiant_type  = 4; // Radiant Crystals, anything else is Ebon for shared tasks
-	task_description_header->reward_type    = m_task_data[task_id]->reward_radiant_crystals > 0 ? reward_radiant_type : 0;
+	constexpr uint32_t reward_radiant_type = 4; // Radiant Crystals, anything else is Ebon for shared tasks
+	task_description_header->reward_type = m_task_data[task_id]->reward_radiant_crystals > 0 ? reward_radiant_type : 0;
 
 	Ptr = (char *) task_description_header + sizeof(TaskDescriptionHeader_Struct);
 
@@ -1263,7 +1265,7 @@ void TaskManager::SendActiveTaskDescription(
 
 	tdt = (TaskDescriptionTrailer_Struct *) Ptr;
 	// shared tasks show radiant/ebon crystal reward, non-shared tasks show generic points
-	tdt->Points = m_task_data[task_id]->reward_ebon_crystals;
+	tdt->Points               = m_task_data[task_id]->reward_ebon_crystals;
 	if (m_task_data[task_id]->reward_radiant_crystals > 0) {
 		tdt->Points = m_task_data[task_id]->reward_radiant_crystals;
 	}
@@ -1284,6 +1286,10 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 	client_task_state->m_active_task_count = 0;
 
 	LogTasks("[LoadClientState] for character_id [{}]", character_id);
+
+	// in a case where a client somehow lost local state with what state exists in world - we need
+	// to perform an inverse sync where we inject the task
+	SyncClientSharedTaskStateToLocal(client);
 
 	auto character_tasks = CharacterTasksRepository::GetWhere(
 		database,
@@ -1725,7 +1731,11 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 				cts->m_active_shared_task.task_id
 			);
 
-			std::string delete_where = fmt::format("charid = {} and taskid = {}", c->CharacterID(), cts->m_active_shared_task.task_id);
+			std::string delete_where = fmt::format(
+				"charid = {} and taskid = {}",
+				c->CharacterID(),
+				cts->m_active_shared_task.task_id
+			);
 			CharacterTasksRepository::DeleteWhere(database, delete_where);
 			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
 
@@ -1734,6 +1744,81 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 
 			// persist removal from local record
 			SaveClientState(c, cts);
+		}
+	}
+}
+
+// in a case where a client somehow lost local state with what state exists in world - we need
+// to perform an inverse sync where we inject the task
+void TaskManager::SyncClientSharedTaskStateToLocal(
+	Client *c
+)
+{
+	auto character_tasks = CharacterTasksRepository::GetWhere(
+		database,
+		fmt::format("charid = {} ORDER BY acceptedtime", c->CharacterID())
+	);
+
+	bool has_character_shared_task = false;
+
+	for (auto &character_task: character_tasks) {
+		if (character_task.type == TASK_TYPE_SHARED) {
+			has_character_shared_task = true;
+		}
+	}
+
+	if (!has_character_shared_task) {
+		LogTasksDetail("[SyncClientSharedTaskStateToLocal] We don't have a shared character task locally");
+		auto stm = SharedTaskMembersRepository::GetWhere(
+			database,
+			fmt::format(
+				"character_id = {}",
+				c->CharacterID()
+			)
+		);
+
+		if (!stm.empty()) {
+			LogTasksDetail("[SyncClientSharedTaskStateToLocal] We have membership in database");
+			auto s = SharedTasksRepository::FindOne(
+				database,
+				(int) stm.front().shared_task_id
+			);
+
+			if (s.id > 0) {
+				LogTasksDetail("[SyncClientSharedTaskStateToLocal] Creating entity");
+
+				// create task locally
+				auto ct = CharacterTasksRepository::NewEntity();
+				ct.charid       = (int) c->CharacterID();
+				ct.acceptedtime = (int) s.accepted_time;
+				ct.taskid       = (int) s.task_id;
+				ct.slot         = 0;
+				ct.type         = TASK_TYPE_SHARED;
+				character_tasks.emplace_back(ct);
+				CharacterTasksRepository::InsertOne(database, ct);
+
+				// create activities locally
+				auto activities = SharedTaskActivityStateRepository::GetWhere(
+					database,
+					fmt::format(
+						"shared_task_id = {}",
+						(int) stm.front().shared_task_id
+					)
+				);
+
+				std::vector<CharacterActivitiesRepository::CharacterActivities> character_activities = {};
+
+				for (auto &a: activities) {
+					auto ca = CharacterActivitiesRepository::NewEntity();
+					ca.completed  = a.completed_time > 0;
+					ca.charid     = (int) c->CharacterID();
+					ca.donecount  = a.done_count;
+					ca.taskid     = s.task_id;
+					ca.activityid = a.activity_id;
+					character_activities.emplace_back(ca);
+				}
+				CharacterActivitiesRepository::InsertMany(database, character_activities);
+			}
 		}
 	}
 }
