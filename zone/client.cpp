@@ -2580,7 +2580,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 
 		}
 	}
-
+	Shout("Result %i Max skill %i [%i]", Result, maxSkill, skillid);
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
 
 	if (skillid == EQ::skills::SkillType::SkillForage)
