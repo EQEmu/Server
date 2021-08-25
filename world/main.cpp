@@ -297,9 +297,15 @@ int main(int argc, char** argv) {
 
 	guild_mgr.SetDatabase(&database);
 
-	LogSys.SetDatabase(&database)
-		->LoadLogDatabaseSettings()
-		->StartFileLogs();
+	// logging system init
+	auto logging = LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings();
+
+	if (RuleB(Logging, WorldGMSayLogging)) {
+		logging->SetGMSayHandler(&GMSayHookCallBackProcessWorld);
+	}
+
+	logging->StartFileLogs();
 
 	/**
 	 * Parse simple CLI passes
