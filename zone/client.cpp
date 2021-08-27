@@ -2552,7 +2552,6 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 				}
 				else
 				{
-					Shout("Skill id %i PrimarySpec %i SecondaryForte skillid %i [aa bonus %i]", skillid, PrimarySpecialization, SecondaryForte, aabonuses.SecondaryForte);
 					if((skillid != PrimarySpecialization) && ((skillid == SecondaryForte) || (SecondaryForte == 0)))
 					{
 						if((PrimarySkillValue > 100) || (!SecondaryForte))
@@ -2580,7 +2579,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 
 		}
 	}
-	Shout("Result %i Max skill %i [%i]", Result, maxSkill, skillid);
+
 	Result += spellbonuses.RaiseSkillCap[skillid] + itembonuses.RaiseSkillCap[skillid] + aabonuses.RaiseSkillCap[skillid];
 
 	if (skillid == EQ::skills::SkillType::SkillForage)
