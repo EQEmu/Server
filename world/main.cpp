@@ -246,7 +246,7 @@ static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string messa
 			zoneserver_list.SendEmoteMessage(
 				nullptr,
 				0,
-				0,
+				80,
 				LogSys.GetGMSayColorFromCategory(log_category),
 				" %s%s",
 				(iter == 0 ? " ---" : ""),
@@ -260,7 +260,7 @@ static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string messa
 	zoneserver_list.SendEmoteMessage(
 		nullptr,
 		0,
-		0,
+		80,
 		LogSys.GetGMSayColorFromCategory(log_category),
 		"%s",
 		message.c_str()
