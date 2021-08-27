@@ -3257,11 +3257,16 @@ int Mob::GetHaste()
 		h = cap;
 
 	// 51+ 25 (despite there being higher spells...), 1-50 10
-	if (level > 50) // 51+
-		h += spellbonuses.hastetype3 > 25 ? 25 : spellbonuses.hastetype3;
-	else // 1-50
+	if (level > 50) { // 51+
+		cap = RuleI(Character, Hastev3Cap);
+		if (spellbonuses.hastetype3 > cap) {
+			h += cap;
+		} else {
+			h += spellbonuses.hastetype3;
+		}
+	} else { // 1-50
 		h += spellbonuses.hastetype3 > 10 ? 10 : spellbonuses.hastetype3;
-
+	}
 	h += ExtraHaste;	//GM granted haste.
 
 	return 100 + h;
