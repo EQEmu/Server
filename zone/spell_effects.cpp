@@ -7113,1093 +7113,945 @@ bool Mob::ImprovedTaunt(){
 
 bool Mob::PassCastRestriction(int value)
 {
-	Shout("Start Pass Cast Restriction");
-	//Note: Live calculates these different now then how it was done in ROF2
-	//For effecst from SPA 0 that have multiple entries it used to calculate it by trying each one individually then apply the effect, now
-	//it just applies the highest value. Will maintain calculating individually since that is how it is done for ROF2. For pet effects
+	/*
+		Restriction ID corresponds to the type 39 value in dstr_us on live clients (2021). See enum SpellRestriction for full list.
+		Modern client will give a message corresponding the type 39 field in the dstr_us for many of these effects upon failure.
 
-	/*If return TRUE spell met all restrictions and can continue (this = target).
-	This check is used when the spell_new field CastRestriction is defined OR spell effect '0'(DD/Heal) has a defined limit
-	Range 1			: UNKNOWN -- the spells with this seem to not have a restiction, true for now
-	Range 100		: *Animal OR Humanoid
-	Range 101		: *Dragon
-	Range 102		: *Animal OR Insect
-	Range 103		: NOT USED
-	Range 104		: *Animal
-	Range 105		: Plant
-	Range 106		: *Giant
-	Range 107		: NOT USED
-	Range 108		: NOT Animal or Humaniod
-	Range 109		: *Bixie
-	Range 111		: *Harpy
-	Range 112		: *Sporali
-	Range 113		: *Kobold
-	Range 114		: *Shade Giant
-	Range 115		: *Drakkin
-	Range 116		: NOT USED
-	Range 117		: *Animal OR Plant
-	Range 118		: *Summoned
-	Range 119		: *Firepet
-	Range 120		: Undead
-	Range 121		: *Living (NOT Undead)
-	Range 122		: *Fairy
-	Range 123		: Humanoid
-	Range 124		: *Undead HP < 10%
-	Range 125		: *Clockwork HP < 10%
-	Range 126		: *Wisp HP < 10%
-	Range 127		: UNKNOWN
-	Range 128		: pure melee -- guess
-	Range 129		: pure caster -- guess
-	Range 130		: hybrid -- guess
-	Range 150		: UNKNOWN
-	Range 190		: No Raid boss flag *not implemented
-	Range 191		: This spell will deal less damage to 'exceptionally strong targets' - Raid boss flag *not implemented
-	Range 201		: Damage if HP > 75%
-	Range 203		: Damage if HP < 20%
-	Range 216		: TARGET NOT IN COMBAT
-	Range 221 - 249	: Causing damage dependent on how many pets/swarmpets are attacking your target.
-	Range 250		: Damage if HP < 35%
-	Range 300 - 303	: UNKOWN *not implemented
-	Range 304		: Chain + Plate class (buffs)
-	Range 399 - 409	: Heal if HP within a specified range (400 = 0-25% 401 = 25 - 35% 402 = 35-45% ect)
-	Range 410 - 411 : UNKOWN -- examples are auras that cast on NPCs maybe in combat/out of combat?
-	Range 500 - 599	: Heal if HP less than a specified value
-	Range 600 - 699	: Limit to Body Type [base2 - 600 = Body]
-	Range 700		: NPC only -- from patch notes "Wizard - Arcane Fusion no longer deals damage to non-NPC targets. This should ensure that wizards who fail their Bucolic Gambit are slightly less likely to annihilate themselves."
-	Range 701		: NOT PET
-	Range 800		: UKNOWN -- Target's Target Test (16598)
-	Range 812		: UNKNOWN -- triggered by Thaumatize Owner
-	Range 814		: UNKNOWN -- Vegetentacles
-	Range 815		: UNKNOWN -- Pumpkin Pulp Splash
-	Range 816		: UNKNOWN -- Rotten Fruit Splash
-	Range 817		: UNKNOWN -- Tainted Bixie Pollen Splash
-	Range 818 - 819 : If Undead/If Not Undead
-	Range 820 - 822	: UKNOWN
-	Range 835 		: Unknown *not implemented
-	Range 836 -	837	: Progression Server / Live Server *not fully implemented
-	Range 839 		: Progression Server and GoD released -- broken until Oct 21 2015 on live *not fully implemented
-	Range 842 - 844 : Humaniod lv MAX ((842 - 800) * 2)
-	Range 845 - 847	: UNKNOWN
-	Range 860 - 871	: Humanoid lv MAX 860 = 90, 871 = 104 *not implemented
-	Range 10000 - 11000	: Limit to Race [base2 - 10000 = Race] (*Not on live: Too useful a function to not implement)
-	THIS IS A WORK IN PROGRESS
+		Use with spell_news table field 'CastRestriction' which limits targets by restrictions below and 'caster_requirement' (field220)
+		which limits caster by restrictions below.
+		These restrictions also apply to direct damage,dot, heal spells using SPA 0 or SPA 79 by placing a restriction id in the LIMIT field.
+
+		Note: (ID 221 - 249) For effect seen in mage spell 'Shock of Many' which increases damage based on number of pets on targets hatelist. The way it is implemented
+		works for how our ROF2 spell file handles the effect where each slot fires individually, while on live it only takes the highest
+		value. In the future the way check is done will need to be adjusted to check a defined range instead of just great than. 
 	*/
 
-	if (value <= 0)
+	if (value <= 0) {
 		return true;
+	}
 
-	//if (IsDamage || UseCastRestriction) {
-
-		switch(value)
-		{
-			case 1:
-				return true;
-
-			case IS_ANIMAL_OR_HUMANOID:
-				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Humanoid))
-					return true;
-				break;
-
-			case IS_DRAGON:
-				if (GetBodyType() == BT_Dragon || GetBodyType() == BT_VeliousDragon || GetBodyType() == BT_Dragon3)
-					return true;
-				break;
-
-			case IS_ANIMAL_OR_INSECT:
-				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Insect))
-					return true;
-				break;
-
-			case IS_BODY_TYPE_MISC:
-				if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) || 
-					(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)|| 
-					(GetBodyType() == BT_Construct) || (GetBodyType() == BT_Dragon)		 || (GetBodyType() == BT_Insect)||
-					(GetBodyType() == BT_VeliousDragon) || (GetBodyType() == BT_Muramite) || (GetBodyType() == BT_Magical))
-					return true;
-				break;
-
-			case IS_BODY_TYPE_MISC2:
-				if ((GetBodyType() == BT_Humanoid) || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
-					(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal) ||
-					(GetBodyType() == BT_Insect))
-					return true;
-				break;
-
-			case IS_PLANT:
-				if (GetBodyType() == BT_Plant)
-					return true;
-				break;
-
-			case IS_GIANT:
-				if (GetBodyType() == BT_Giant)
-					return true;
-				break;
-
-			case IS_NOT_ANIMAL_OR_HUMANOID:
-				if ((GetBodyType() != BT_Animal) || (GetBodyType() != BT_Humanoid))
-					return true;
-				break;
-
-			case IS_BIXIE:
-			case IS_BIXIE2:
-				if ((GetRace() == RT_BIXIE) ||(GetRace() == RT_BIXIE_2))
-					return true;
-				break;
-
-			case IS_HARPY:
-				if ((GetRace() == RT_HARPY) ||(GetRace() == RT_HARPY_2))
-					return true;
-				break;
-
-			case IS_GNOLL:
-				if ((GetRace() == RT_GNOLL) || (GetRace() == RT_GNOLL_2) || (GetRace() == RT_GNOLL_3))
-					return true;
-				break;
-
-			case IS_SPORALI:
-				if ((GetRace() == RT_SPORALI) ||(GetRace() == RT_FUNGUSMAN))
-					return true;
-				break;
-
-			case IS_KOBALD:
-				if ((GetRace() == RT_KOBOLD) ||(GetRace() == RT_KOBOLD_2))
-					return true;
-				break;
-
-			case IS_FROSTCRYPT_SHADE:
-				if (GetRace() == RT_GIANT_SHADE)
-					return true;
-				break;
-
-			case IS_DRAKKIN:
-				if (GetRace() == RT_DRAKKIN)
-					return true;
-				break;
-
-			case IS_UNDEAD_OR_VALDEHOLM_GIANT:
-				if (GetBodyType() == BT_Undead || GetRace() == RT_GIANT_12 || GetRace() == RT_GIANT_13)
-					return true;
-				break;
-
-			case IS_ANIMAL_OR_PLANT:
-				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Plant))
-					return true;
-				break;
-
-			case IS_SUMMONED:
-				if (GetBodyType() == BT_Summoned)
-					return true;
-				break;
-
-			case IS_CLASS_WIZARD:
-			case IS_WIZARD_USED_ON_MAGE_FIRE_PET:
-				if (GetClass() == WIZARD)
-					return true;
-				break;
-
-			case IS_UNDEAD:
-				if (GetBodyType() == BT_Undead)
-					return true;
-				break;
-
-			case IS_NOT_UNDEAD_OR_SUMMONED_OR_VAMPIRE:
-				if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Vampire))
-					return true;
-				break;
-
-			case IS_FAE_OR_PIXIE:
-				if ((GetRace() == RT_PIXIE) || (GetRace() == RT_FAY_DRAKE))
-					return  true;
-				break;
-
-			case IS_HUMANOID:
-				if (GetBodyType() == BT_Humanoid)
-					return true;
-				break;
-
-			case IS_UNDEAD_AND_HP_LESS_THAN_10_PCT:
-				if ((GetBodyType() == BT_Undead) && (GetHPRatio() < 10))
-					return true;
-				break;
-
-			case IS_CLOCKWORK_AND_HP_LESS_THAN_45_PCT:
-				if ((GetRace() == RT_GNOMEWORK || GetRace() == RACE_CLOCKWORK_GNOME_88) && (GetHPRatio() < 45))
-					return true;
-				break;
-
-			case IS_WISP_AND_HP_LESS_THAN_10_PCT:
-				if ((GetRace() == RT_WILL_O_WISP) && (GetHPRatio() < 10))
-					return true;
-				break;
-
-			case IS_CLASS_MELEE_THAT_CAN_BASH_OR_KICK_EXCEPT_BARD:
-				if ((GetClass() != BARD) && (GetClass() != ROGUE) && IsFighterClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLASS_PURE_MELEE:
-				if (GetClass() == ROGUE || GetClass() == WARRIOR || GetClass() == BERSERKER || GetClass() == MONK)
-					return true;
-				break;
-
-			case IS_CLASS_PURE_CASTER:
-				if (IsINTCasterClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLASS_HYBRID_CLASS:
-				if (IsHybridClass(GetClass()))
-					return true;
-				break;
-			
-			case IS_CLASS_WARRIOR:
-				if (GetClass() == WARRIOR)
-					return true;
-				break;
-
-			case IS_CLASS_CLERIC:
-				if (GetClass() == CLERIC)
-					return true;
-				break;
-
-			case IS_CLASS_PALADIN:
-				if (GetClass() == PALADIN)
-					return true;
-				break;
-
-			case IS_CLASS_RANGER:
-				if (GetClass() == RANGER)
-					return true;
-				break;
-
-			case IS_CLASS_SHADOWKNIGHT:
-				if (GetClass() == SHADOWKNIGHT)
-					return true;
-				break;
-
-			case IS_CLASS_DRUID:
-				if (GetClass() == DRUID)
-					return true;
-				break;
-
-			case IS_CLASS_MONK:
-				if (GetClass() == MONK)
-					return true;
-				break;
-
-			case IS_CLASS_BARD2:
-			case IS_CLASS_BARD:
-				if (GetClass() == BARD)
-					return true;
-				break;
-
-			case IS_CLASS_ROGUE:
-				if (GetClass() == ROGUE)
-					return true;
-				break;
-
-			case IS_CLASS_SHAMAN:
-				if (GetClass() == SHAMAN)
-					return true;
-				break;
-
-			case IS_CLASS_NECRO:
-				if (GetClass() == NECROMANCER)
-					return true;
-				break;
-
-			case IS_CLASS_MAGE:
-				if (GetClass() == MAGICIAN)
-					return true;
-				break;
-
-			case IS_CLASS_ENCHANTER:
-				if (GetClass() == ENCHANTER)
-					return true;
-				break;
-
-			case IS_CLASS_BEASTLORD:
-				if (GetClass() == BEASTLORD)
-					return true;
-				break;
-
-			case IS_CLASS_BERSERKER:
-				if (GetClass() == BERSERKER)
-					return true;
-				break;
-
-			case IS_CLASS_CLR_SHM_DRU:
-				if (IsWISCasterClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLASS_NOT_WAR_PAL_SK:
-				if ((GetClass() != WARRIOR) && (GetClass() != PALADIN) && (GetClass() != SHADOWKNIGHT))
-					return true;
-				break;
-
-			case IS_LEVEL_UNDER_100:
-				if (GetLevel() < 100)
-					return true;
-				break;
-
-			case IS_NOT_RAID_BOSS:
-				if (!IsRaidTarget())
-					return true;
-				break;
-
-			case IS_RAID_BOSS:
-				if (IsRaidTarget())
-					return true;
-				break;
-
-			case FRENZIED_BURNOUT_ACTIVE: {
-				for (int i = 0; i < GetMaxTotalSlots(); i++) {
-					if (IsValidSpell(buffs[i].spellid) && spells[buffs[i].spellid].spellgroup == SPELLGROUP_FRENZIED_BURNOUT) {
-						return true;
-					}
-				}
-				break;
-			}
-
-			case FRENZIED_BURNOUT_NOT_ACTIVE: {
-				bool has_effect = false;
-				for (int i = 0; i < GetMaxTotalSlots(); i++) {
-					if (IsValidSpell(buffs[i].spellid) && spells[buffs[i].spellid].spellgroup == SPELLGROUP_FRENZIED_BURNOUT) {
-						bool has_effect = true;
-					}
-				}
-				if (!has_effect) {
-					return true;
-				}
-				break;
-			}
-
-			case IS_HP_ABOVE_75_PCT:
-				if (GetHPRatio() > 75)
-					return true;
-				break;
-			
-			case IS_HP_LESS_THAN_20_PCT:
-				if (GetHPRatio() <= 20)
-					return true;
-				break;
-
-			case IS_HP_LESS_THAN_50_PCT:
-				if (GetHPRatio() <= 50)
-					return true;
-				break;
-
-			case IS_HP_LESS_THAN_75_PCT:
-				if (GetHPRatio() <= 75)
-					return true;
-				break;
-
-			case IS_NOT_IN_COMBAT:
-				if (!IsEngaged())
-					return true;
-				break;
-
-			case IS_HP_LESS_THAN_35_PCT:
-				if (GetHPRatio() <= 35)
-					return true;
-				break;
-
-			case HAS_BETWEEN_1_TO_2_PETS_ON_HATELIST: {
-				int count = hate_list.GetSummonedPetCountOnHateList(this);
-				if (count >= 1 && count <= 2) {
-					return true;
-				}
-				break;
-			}
-
-			case HAS_BETWEEN_3_TO_5_PETS_ON_HATELIST: {
-				int count = hate_list.GetSummonedPetCountOnHateList(this);
-				if (count >= 3 && count <= 5) {
-					return true;
-				}
-				break;
-			}
-
-			case HAS_BETWEEN_6_TO_9_PETS_ON_HATELIST: {
-				int count = hate_list.GetSummonedPetCountOnHateList(this);
-				if (count >= 6 && count <= 9) {
-					return true;
-				}
-				break;
-			}
-
-			case HAS_BETWEEN_10_TO_14_PETS_ON_HATELIST: {
-				int count = hate_list.GetSummonedPetCountOnHateList(this);
-				if (count >= 10 && count <= 14) {
-					return true;
-				}
-				break;
-			}
-
-			case HAS_MORE_THAN_14_PETS_ON_HATELIST: {
-				int count = hate_list.GetSummonedPetCountOnHateList(this);
-				if (count > 14) {
-					return true;
-				}
-				break;
-			}
-
-			case IS_CLASS_CHAIN_OR_PLATE:
-				if (IsClient() &&
-					((GetClass() == WARRIOR) || (GetClass() == BARD)  || (GetClass() == SHADOWKNIGHT)  || (GetClass() == PALADIN)  || (GetClass() == CLERIC)
-					 || (GetClass() == RANGER) || (GetClass() == SHAMAN) || (GetClass() == ROGUE)  || (GetClass() == BERSERKER)))
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_5_AND_9_PCT:
-				if (GetHPRatio() >= 5 && GetHPRatio() <= 9)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_10_AND_14_PCT:
-				if (GetHPRatio() >= 10 && GetHPRatio() <= 14)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_15_AND_19_PCT:
-				if (GetHPRatio() >= 15 && GetHPRatio() <= 19)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_20_AND_24_PCT:
-				if (GetHPRatio() >= 20 && GetHPRatio() <= 24)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_25_AND_29_PCT:
-				if (GetHPRatio() >= 25 && GetHPRatio() <= 29)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_30_AND_34_PCT:
-				if (GetHPRatio() >= 30 && GetHPRatio() <= 34)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_35_AND_39_PCT:
-				if (GetHPRatio() >= 35 && GetHPRatio() <= 39)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_40_AND_44_PCT:
-				if (GetHPRatio() >= 40 && GetHPRatio() <= 44)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_45_AND_49_PCT:
-				if (GetHPRatio() >= 45 && GetHPRatio() <= 49)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_50_AND_54_PCT:
-				if (GetHPRatio() >= 50 && GetHPRatio() <= 54)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_55_AND_59_PCT:
-				if (GetHPRatio() >= 55 && GetHPRatio() <= 59)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_5_AND_15_PCT:
-				if (GetHPRatio() >= 5 && GetHPRatio() <= 15)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_15_AND_25_PCT:
-				if (GetHPRatio() >= 15 && GetHPRatio() <= 25)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_1_AND_25_PCT:
-				if (GetHPRatio() <= 25)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_25_AND_35_PCT:
-				if (GetHPRatio() > 25 && GetHPRatio() <= 35)
-					return true;
-				break;
-			
-			case IS_HP_BETWEEN_35_AND_45_PCT:
-				if (GetHPRatio() > 35 && GetHPRatio() <= 45)
-					return true;
-				break;
-			
-			case IS_HP_BETWEEN_45_AND_55_PCT:
-				if (GetHPRatio() > 45 && GetHPRatio() <= 55)
-					return true;
-				break;
-			
-			case IS_HP_BETWEEN_55_AND_65_PCT:
-				if (GetHPRatio() > 55 && GetHPRatio() <= 65)
-					return true;
-				break;
-			
-			case IS_HP_BETWEEN_65_AND_75_PCT:
-				if (GetHPRatio() > 65 && GetHPRatio() <= 75)
-					return true;
-				break;
-			
-			case IS_HP_BETWEEN_75_AND_85_PCT:
-				if (GetHPRatio() > 75 && GetHPRatio() <= 85)
-					return true;
-				break;
-
-			case IS_HP_BETWEEN_85_AND_95_PCT:
-				if (GetHPRatio() > 85 && GetHPRatio() <= 95)
-					return true;
-				break;
-			
-			case IS_HP_ABOVE_45_PCT:
-				if (GetHPRatio() > 45)
-					return true;
-				break;
-
-			case IS_HP_ABOVE_55_PCT:
-				if (GetHPRatio() > 55)
-					return true;
-				break;
-
-			case IS_MANA_ABOVE_10_PCT:
-				if (GetManaRatio() > 10)
-					return true;
-				break;
-
-			case IS_ENDURANCE_BELOW_40_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 40)
-					return true;
-				break;
-
-			case IS_MANA_BELOW_40_PCT:
-				if (GetManaRatio() <= 40)
-					return true;
-				break;
-
-			case IS_HP_ABOVE_20_PCT:
-				if (GetHPRatio() > 20)
-					return true;
-				break;
-
-			case IS_NOT_UNDEAD_OR_SUMMONED:
-				if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned))
-					return true;
-				break;
-
-			case IS_NOT_PLANT:
-				if (GetBodyType() != BT_Plant)
-					return true;
-				break;
-			
-			case IS_NOT_CLIENT:
-				if (!IsClient())
-					return true;
-				break;
-
-			case IS_CLIENT:
-				if (IsClient())
-					return true;
-				break;
-
-			case IS_LEVEL_ABOVE_42_AND_IS_CLIENT:
-				if (IsClient() && GetLevel() > 42)
-					return true;
-				break;		
-			
-			case IS_TREANT:
-				if (GetRace() == RT_TREANT || GetRace() == RT_TREANT_2 || GetRace() == RT_TREANT_3)
-					return true;
-				break;
-
-			case IS_SCARECROW:
-				if (GetRace() == RT_SCARECROW || GetRace() == RT_SCARECROW_2)
-					return true;
-				break;
-
-			case IS_VAMPIRE_OR_UNDEAD_OR_UNDEADPET:
-				if (GetBodyType() == BT_Vampire || GetBodyType() == BT_Undead || GetBodyType() == BT_SummonedUndead)
-					return true;
-				break;
-
-			case IS_NOT_VAMPIRE_OR_UNDEAD:
-				if (GetBodyType() != BT_Vampire && GetBodyType() != BT_Undead && GetBodyType() != BT_SummonedUndead)
-					return true;
-				break;
-
-			case IS_CLASS_KNIGHT_HYBRID_MELEE:
-				if (IsHybridClass(GetClass()) || IsNonSpellFighterClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLASS_WARRIOR_CASTER_PRIEST:
-				if (IsCasterClass(GetClass()) || GetClass() == WARRIOR)
-					return true;
-				break;
-
-			case IS_END_BELOW_21_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 21)
-					return true;
-				break;
-
-			case IS_END_BELOW_25_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 25)
-					return true;
-				break;
-
-			case IS_END_BELOW_29_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 29)
-					return true;
-				break;
-
-			case IS_REGULAR_SERVER:
-				return true; // todo implement progression flag assume not progression for now
-				break;
-
-			case IS_PROGRESSION_SERVER:
-				return false; // todo implement progression flag assume not progression for now
-				break;
-
-			case IS_GOD_EXPANSION_UNLOCKED:
-				return true; // todo implement progression flag assume not progression for now, this one is a check if GoD is live
-				break;
-
-			case IS_HUMANOID_LEVEL_84_MAX:
-				if (GetBodyType() == BT_Humanoid && GetLevel() <= 84)
-					return true;
-				break;
-
-			case IS_HUMANOID_LEVEL_86_MAX:
-				if (GetBodyType() == BT_Humanoid && GetLevel() <= 86)
-					return true;
-				break;
-
-			case IS_HUMANOID_LEVEL_88_MAX:
-				if (GetBodyType() == BT_Humanoid && GetLevel() <= 88)
-					return true;
-				break;
-
-			case IS_LEVEL_90_MAX:
-				if (GetLevel() <= 90)
-					return true;
-				break;
-
-			case IS_LEVEL_92_MAX:
-				if (GetLevel() <= 92)
-					return true;
-				break;
-
-			case IS_LEVEL_94_MAX:
-				if (GetLevel() <= 94)
-					return true;
-				break;
-
-			case IS_LEVEL_95_MAX:
-				if (GetLevel() <= 95)
-					return true;
-				break;
-
-			case IS_LEVEL_97_MAX:
-				if (GetLevel() <= 97)
-					return true;
-				break;
-
-			case IS_LEVEL_99_MAX:
-				if (GetLevel() <= 99)
-					return true;
-				break;
-
-			case IS_LEVEL_100_MAX:
-				if (GetLevel() <= 100)
-					return true;
-				break;
-
-			case IS_LEVEL_102_MAX:
-				if (GetLevel() <= 102)
-					return true;
-				break;
-
-			case IS_LEVEL_104_MAX:
-				if (GetLevel() <= 104)
-					return true;
-				break;
-			case IS_LEVEL_105_MAX:
-				if (GetLevel() <= 105)
-					return true;
-				break;
-
-			case IS_LEVEL_107_MAX:
-				if (GetLevel() <= 107)
-					return true;
-				break;
-
-			case IS_LEVEL_109_MAX:
-				if (GetLevel() <= 109)
-					return true;
-				break;
-			case IS_LEVEL_110_MAX:
-				if (GetLevel() <= 110)
-					return true;
-				break;
-
-			case IS_LEVEL_112_MAX:
-				if (GetLevel() <= 112)
-					return true;
-				break;
-
-			case IS_LEVEL_114_MAX:
-				if (GetLevel() <= 114)
-					return true;
-				break;
-
-			case IS_BETWEEN_LEVEL_1_AND_75:
-				if (GetLevel() >= 1 && GetLevel() <= 75)
-					return true;
-				break;
-
-			case IS_BETWEEN_LEVEL_76_AND_85:
-				if (GetLevel() >= 76 && GetLevel() <= 85)
-					return true;
-				break;
-
-			case IS_BETWEEN_LEVEL_86_AND_95:
-				if (GetLevel() >= 86 && GetLevel() <= 95)
-					return true;
-				break;
-
-			case IS_BETWEEN_LEVEL_96_AND_105:
-				if (GetLevel() >= 96 && GetLevel() <= 105)
-					return true;
-				break;
-
-			case IS_HP_LESS_THAN_80_PCT:
-				if (GetHPRatio() < 80)
-					return true;
-				break;
-
-			case IS_LEVEL_ABOVE_34:
-				if (GetLevel() < 34)
-					return true;
-				break;
-
-			case HAS_NO_MANA_BURN_BUFF: {
-				bool has_effect = false;
-				for (int i = 0; i < GetMaxTotalSlots(); i++) {
-					if (IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_ManaBurn)) {
-						has_effect = true;
-					}
-				}
-				if (!has_effect) {
-					return true;
-				}
-				break;
-			}
-			
-			case IS_CLIENT_AND_MALE_PLATE_USER:
-				if (IsClient() && GetGender() == MALE && IsPlateClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-				if (IsClient() && GetGender() == MALE && (IsCasterClass(GetClass()) && GetClass() != CLERIC))
-					return true;
-				break;
-
-			case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-				if (IsClient() && GetGender() == MALE && 
-					(GetClass() == BEASTLORD || GetClass() == BERSERKER || GetClass() == MONK || GetClass() == RANGER || GetClass() == ROGUE))
-					return true;
-				break;
-
-			case IS_CLIENT_AND_FEMALE_PLATE_USER:
-				if (IsClient() && GetGender() == FEMALE && IsPlateClass(GetClass()))
-					return true;
-				break;
-
-			case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
-				if (IsClient() && GetGender() == FEMALE && (IsCasterClass(GetClass()) && GetClass() != CLERIC))
-					return true;
-				break;
-
-			case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-				if (IsClient() && GetGender() == FEMALE &&
-					(GetClass() == BEASTLORD || GetClass() == BERSERKER || GetClass() == MONK || GetClass() == RANGER || GetClass() == ROGUE))
-					return true;
-				break;
-
-			case IS_HP_ABOVE_50_PCT:
-				if (GetHPRatio() > 50)
-					return true;
-				break;
-
-			case IS_HP_BELOW_50_PCT:
-				if (GetHPRatio() <= 50)
-					return true;
-				break;
-
-			case IS_OFF_HAND_EQUIPED:
-				if (HasShieldEquiped() || CanThisClassDualWield())
-					return true;
-				break;
-
-			case IS_MANA_BELOW_20_PCT:
-				if (GetManaRatio() <= 20)
-					return true;
-				break;
-
-			case IS_MANA_ABOVE_50_PCT:
-				if (GetManaRatio() >= 50)
-					return true;
-				break;
-
-			case IS_SUMMONED_OR_UNDEAD:
-				if (GetBodyType() == BT_Summoned || GetBodyType() == BT_Undead)
-					return true;
-				break;
-
-
-			case IS_CLASS_CASTER_PRIEST:
-				if (IsCasterClass(GetClass()))
-					return true;
-				break;
-
-			case IS_END_OR_MANA_ABOVE_20_PCT: {
-				if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() >= 20) {
-					return true;
-				}
-				else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() >= 20) {
-					return true;
-				}
-				break;
-			}
-
-			case IS_END_OR_MANA_BELOW_30_PCT:
-			case IS_END_OR_MANA_BELOW_30_PCT2: {
-				if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {
-					return true;
-				}
-				else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 30) {
-					return true;
-				}
-				break;
-			}
-			
-			case IS_NOT_CLASS_BARD:
-				if (GetClass() != BARD)
-					return true;
-				break;
-
-			//Not handled, just allow them to pass for now.
-			case HAS_CRYSTALLIZED_FLAME_BUFF:
-			case HAS_INCENDIARY_OOZE_BUFF:
-			case UNKNOWN_199:
-			case UNKNOWN_TOO_MUCH_HP_410:
-			case UNKNOWN_TOO_MUCH_HP_411:
-			case HAS_TBL_ESIANTI_ACCESS:
-			case HAS_ITEM_CLOCKWORK_SCRAPS:
-			case IN_TWO_HANDED_STANCE:
-			case IN_DUAL_WIELD_HANDED_STANCE:
-			case IN_SHIELD_STANCE:
-			case NOT_IN_TWO_HANDED_STANCE:
-			case NOT_IN_DUAL_WIELD_HANDED_STANCE:
-			case NOT_IN_SHIELD_STANCE:
-			case DISABLED_UNTIL_EXPANSION_ROK:
-			case DISABLED_UNTIL_EXPANSION_SOV:
-			case DISABLED_UNTIL_EXPANSION_SOL:
-			case DISABLED_UNTIL_EXPANSION_POP:
-			case DISABLED_UNTIL_EXPANSION_LOY:
-			case DISABLED_UNTIL_EXPANSION_LDON:
-			case DISABLED_UNTIL_EXPANSION_GOD:
-			case DISABLED_UNTIL_EXPANSION_OOW:
-			case DISABLED_UNTIL_EXPANSION_DON:
-			case DISABLED_UNTIL_EXPANSION_DOD:
-			case DISABLED_UNTIL_EXPANSION_POR:
-			case DISABLED_UNTIL_EXPANSION_TSS:
-			case DISABLED_UNTIL_EXPANSION_TBS:
-			case DISABLED_UNTIL_EXPANSION_SOF:
-			case DISABLED_UNTIL_EXPANSION_SOD:
-			case DISABLED_UNTIL_EXPANSION_UF:
-			case DISABLED_UNTIL_EXPANSION_HOT:
-			case DISABLED_UNTIL_EXPANSION_VOA:
-			case DISABLED_UNTIL_EXPANSION_ROF:
-			case DISABLED_UNTIL_EXPANSION_COF:
-			case DISABLED_UNTIL_EXPANSION_TDS:
-			case DISABLED_UNTIL_EXPANSION_TBM:
-			case DISABLED_UNTIL_EXPANSION_EOK:
-			case DISABLED_UNTIL_EXPANSION_ROS:
-			case DISABLED_UNTIL_EXPANSION_TBL:
-			case DISABLED_UNTIL_EXPANSION_TOV:
-			case DISABLED_UNTIL_EXPANSION_COV:
-			case HAS_TRAVELED_TO_STRATOS:
-			case HAS_TRAVELED_TO_AALISHAI:
-			case HAS_TRAVELED_TO_MEARATS:
-			case HAS_NO_PACT_OF_FATE_RECOURSE_BUFF:
-			case HAS_NO_SHROUD_OF_PRAYER_BUFF:
-			case COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
-			case NOT_COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
-			case HAS_NO_ROGUES_FURY_BUFF:
-			case HAS_NO_FURIOUS_RAMPAGE_BUFF:
-			case HAS_NO_HARMONIOUS_PRECISION_BUFF:
-			case HAS_NO_HARMONIOUS_EXPANSE_BUFF:
-			case HAS_NO_ILLUSIONS_OF_GRANDEUR_BUFF:
-				return true;
-			break;
-		}
-
-		if (value >= HAS_AT_LEAST_1_PET_ON_HATELIST && value <= HAS_AT_LEAST_20_PETS_ON_HATELIST) {
-			int count = hate_list.GetSummonedPetCountOnHateList(this);
-			int minium_amount_of_pets_needed = (1 + value) - HAS_AT_LEAST_1_PET_ON_HATELIST;
-
-			if (count >= minium_amount_of_pets_needed) {
-				return true;
-			}
-		}
-
-		if (value >= IS_HP_BELOW_5_PCT && value <= IS_HP_BELOW_95_PCT) {
-			int hp_below_amt = 5 * ((1 + value) - IS_HP_BELOW_5_PCT);
-			if (GetHPRatio() <= hp_below_amt) {
-				return true;
-			}
-		}
-
-		if (value >= IS_BODY_TYPE_UNDEFINED &&  value <= IS_BODY_TYPE_MURAMITE){
-			if (GetBodyType() == (value - IS_BODY_TYPE_UNDEFINED))
-				return true;
-		}
-
-		//Limit to Race. *Not implemented on live
-		if (value >= 10000 && value <= 11000){
-			if (GetRace() == (value - 10000))
-				return true;
-		}
-
-	/*
-	if (!IsDamage || UseCastRestriction) {
-
-		//Heal only if HP within specified range. [Doesn't follow a set forumla for all values...]
-		if (value >= 400 && value <= 408){
-			for (int base2_value = 400; base2_value <= 408; ++base2_value){
-				if (value == base2_value){
-
-					if (value == 400 && GetHPRatio() <= 25)
-							return true;
-
-					else if (value == base2_value){
-						if (GetHPRatio() > 25+((base2_value - 401)*10) && GetHPRatio() <= 35+((base2_value - 401)*10))
-							return true;
-					}
-				}
-			}
-		}
-
-		else if (value >= 500 && value <= 549){
-			for (int base2_value = 500; base2_value <= 520; ++base2_value){
-				if (value == base2_value){
-					if (GetHPRatio() < (base2_value - 500)*5)
-						return true;
-				}
-			}
-		}
-
-		else if (value == 399) {
-			if (GetHPRatio() > 15 && GetHPRatio() <= 25)
-				return true;
-		}
-	} // End Heal
-	*/
-
-	return false;
-}
-
-bool Mob::PassCasterRestriction(int value)
-{
-	/*
-		If return TRUE if spell has met the restriction (this = caster). 
-		This check is used when the spell_new field caster_requirement_id (field220)
-		The following conditions must be true to allow casting.
-		Range -1        : UNKNOWN
-		Range 1         : UNKNOWN
-		Range 3         : UKN 30183 | Mind Spiral
-		Range 5         : Not on mount
-		Range 203       : HP Less Than 20 Percent
-		Range 204       : HP Less Than 50 Percent
-		Range 429       : Mana Above 10 Percent
-		Range 518       : HP Below 90 Percent
-		Range 825       : End Below 21 Percent
-		Range 826       : End Below 25 Percent
-		Range 827       : End Below 29 Percent
-		Range 840       : UNKOWN 6883 | Expedient Recovery
-		Range 841       : UNKOWN 32192 | Merciless Blow
-		Range 866       : UNKNOWN 41088 | Defensive Proficiency      *Weaponstance
-		Range 867       : UNKNOWN 41086 | Two-Handed Proficiency     *Weaponstance
-		Range 868       : UNKNOWN 41087 | Dual-Wielding Proficiency  *Weaponstance
-		Range 29556     : UNKNOWN 40372 | Pact of Fate
-		Range 38311     : UNKNOWN 38312 | Mana Reserve
-		Range 38312     : UNKNOWN 38311 | Mana Reserve
-		Range 40297     : UNKNOWN 40297 | Knifeplay Discipline
-		Range 99999     : UNKNOWN 27672 | Strike of Ire
-		THIS IS A WORK IN PROGRESS
-	*/
-
-	switch (value)
+	switch(value)
 	{
-		case 5:
-			if (IsClient() && !CastToClient()->GetHorseId()) {
+		case 1:
+			return true;
+			break;
+
+		case IS_NOT_ON_HORSE:
+			if (IsClient() && !CastToClient()->GetHorseId())
+				return true;
+			break;
+
+		case IS_ANIMAL_OR_HUMANOID:
+			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Humanoid))
+				return true;
+			break;
+
+		case IS_DRAGON:
+			if (GetBodyType() == BT_Dragon || GetBodyType() == BT_VeliousDragon || GetBodyType() == BT_Dragon3)
+				return true;
+			break;
+
+		case IS_ANIMAL_OR_INSECT:
+			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Insect))
+				return true;
+			break;
+
+		case IS_BODY_TYPE_MISC:
+			if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) || 
+				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)|| 
+				(GetBodyType() == BT_Construct) || (GetBodyType() == BT_Dragon)		 || (GetBodyType() == BT_Insect)||
+				(GetBodyType() == BT_VeliousDragon) || (GetBodyType() == BT_Muramite) || (GetBodyType() == BT_Magical))
+				return true;
+			break;
+
+		case IS_BODY_TYPE_MISC2:
+			if ((GetBodyType() == BT_Humanoid) || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
+				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal) ||
+				(GetBodyType() == BT_Insect))
+				return true;
+			break;
+
+		case IS_PLANT:
+			if (GetBodyType() == BT_Plant)
+				return true;
+			break;
+
+		case IS_GIANT:
+			if (GetBodyType() == BT_Giant)
+				return true;
+			break;
+
+		case IS_NOT_ANIMAL_OR_HUMANOID:
+			if ((GetBodyType() != BT_Animal) || (GetBodyType() != BT_Humanoid))
+				return true;
+			break;
+
+		case IS_BIXIE:
+		case IS_BIXIE2:
+			if ((GetRace() == RT_BIXIE) ||(GetRace() == RT_BIXIE_2))
+				return true;
+			break;
+
+		case IS_HARPY:
+			if ((GetRace() == RT_HARPY) ||(GetRace() == RT_HARPY_2))
+				return true;
+			break;
+
+		case IS_GNOLL:
+			if ((GetRace() == RT_GNOLL) || (GetRace() == RT_GNOLL_2) || (GetRace() == RT_GNOLL_3))
+				return true;
+			break;
+
+		case IS_SPORALI:
+			if ((GetRace() == RT_SPORALI) ||(GetRace() == RT_FUNGUSMAN))
+				return true;
+			break;
+
+		case IS_KOBALD:
+			if ((GetRace() == RT_KOBOLD) ||(GetRace() == RT_KOBOLD_2))
+				return true;
+			break;
+
+		case IS_FROSTCRYPT_SHADE:
+			if (GetRace() == RT_GIANT_SHADE)
+				return true;
+			break;
+
+		case IS_DRAKKIN:
+			if (GetRace() == RT_DRAKKIN)
+				return true;
+			break;
+
+		case IS_UNDEAD_OR_VALDEHOLM_GIANT:
+			if (GetBodyType() == BT_Undead || GetRace() == RT_GIANT_12 || GetRace() == RT_GIANT_13)
+				return true;
+			break;
+
+		case IS_ANIMAL_OR_PLANT:
+			if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Plant))
+				return true;
+			break;
+
+		case IS_SUMMONED:
+			if (GetBodyType() == BT_Summoned)
+				return true;
+			break;
+
+		case IS_CLASS_WIZARD:
+		case IS_WIZARD_USED_ON_MAGE_FIRE_PET:
+			if (GetClass() == WIZARD)
+				return true;
+			break;
+
+		case IS_UNDEAD:
+			if (GetBodyType() == BT_Undead)
+				return true;
+			break;
+
+		case IS_NOT_UNDEAD_OR_SUMMONED_OR_VAMPIRE:
+			if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned) && (GetBodyType() != BT_Vampire))
+				return true;
+			break;
+
+		case IS_FAE_OR_PIXIE:
+			if ((GetRace() == RT_PIXIE) || (GetRace() == RT_FAY_DRAKE))
+				return  true;
+			break;
+
+		case IS_HUMANOID:
+			if (GetBodyType() == BT_Humanoid)
+				return true;
+			break;
+
+		case IS_UNDEAD_AND_HP_LESS_THAN_10_PCT:
+			if ((GetBodyType() == BT_Undead) && (GetHPRatio() < 10))
+				return true;
+			break;
+
+		case IS_CLOCKWORK_AND_HP_LESS_THAN_45_PCT:
+			if ((GetRace() == RT_GNOMEWORK || GetRace() == RACE_CLOCKWORK_GNOME_88) && (GetHPRatio() < 45))
+				return true;
+			break;
+
+		case IS_WISP_AND_HP_LESS_THAN_10_PCT:
+			if ((GetRace() == RT_WILL_O_WISP) && (GetHPRatio() < 10))
+				return true;
+			break;
+
+		case IS_CLASS_MELEE_THAT_CAN_BASH_OR_KICK_EXCEPT_BARD:
+			if ((GetClass() != BARD) && (GetClass() != ROGUE) && IsFighterClass(GetClass()))
+				return true;
+			break;
+
+		case IS_CLASS_PURE_MELEE:
+			if (GetClass() == ROGUE || GetClass() == WARRIOR || GetClass() == BERSERKER || GetClass() == MONK)
+				return true;
+			break;
+
+		case IS_CLASS_PURE_CASTER:
+			if (IsINTCasterClass(GetClass()))
+				return true;
+			break;
+
+		case IS_CLASS_HYBRID_CLASS:
+			if (IsHybridClass(GetClass()))
+				return true;
+			break;
+			
+		case IS_CLASS_WARRIOR:
+			if (GetClass() == WARRIOR)
+				return true;
+			break;
+
+		case IS_CLASS_CLERIC:
+			if (GetClass() == CLERIC)
+				return true;
+			break;
+
+		case IS_CLASS_PALADIN:
+			if (GetClass() == PALADIN)
+				return true;
+			break;
+
+		case IS_CLASS_RANGER:
+			if (GetClass() == RANGER)
+				return true;
+			break;
+
+		case IS_CLASS_SHADOWKNIGHT:
+			if (GetClass() == SHADOWKNIGHT)
+				return true;
+			break;
+
+		case IS_CLASS_DRUID:
+			if (GetClass() == DRUID)
+				return true;
+			break;
+
+		case IS_CLASS_MONK:
+			if (GetClass() == MONK)
+				return true;
+			break;
+
+		case IS_CLASS_BARD2:
+		case IS_CLASS_BARD:
+			if (GetClass() == BARD)
+				return true;
+			break;
+
+		case IS_CLASS_ROGUE:
+			if (GetClass() == ROGUE)
+				return true;
+			break;
+
+		case IS_CLASS_SHAMAN:
+			if (GetClass() == SHAMAN)
+				return true;
+			break;
+
+		case IS_CLASS_NECRO:
+			if (GetClass() == NECROMANCER)
+				return true;
+			break;
+
+		case IS_CLASS_MAGE:
+			if (GetClass() == MAGICIAN)
+				return true;
+			break;
+
+		case IS_CLASS_ENCHANTER:
+			if (GetClass() == ENCHANTER)
+				return true;
+			break;
+
+		case IS_CLASS_BEASTLORD:
+			if (GetClass() == BEASTLORD)
+				return true;
+			break;
+
+		case IS_CLASS_BERSERKER:
+			if (GetClass() == BERSERKER)
+				return true;
+			break;
+
+		case IS_CLASS_CLR_SHM_DRU:
+			if (IsWISCasterClass(GetClass()))
+				return true;
+			break;
+
+		case IS_CLASS_NOT_WAR_PAL_SK:
+			if ((GetClass() != WARRIOR) && (GetClass() != PALADIN) && (GetClass() != SHADOWKNIGHT))
+				return true;
+			break;
+
+		case IS_LEVEL_UNDER_100:
+			if (GetLevel() < 100)
+				return true;
+			break;
+
+		case IS_NOT_RAID_BOSS:
+			if (!IsRaidTarget())
+				return true;
+			break;
+
+		case IS_RAID_BOSS:
+			if (IsRaidTarget())
+				return true;
+			break;
+
+		case FRENZIED_BURNOUT_ACTIVE:
+			if (HasBuffWithSpellGroup(SPELLGROUP_FRENZIED_BURNOUT))
+				return true;
+			break;
+
+		case FRENZIED_BURNOUT_NOT_ACTIVE: 
+			if (!HasBuffWithSpellGroup(SPELLGROUP_FRENZIED_BURNOUT))
+				return true;
+			break;
+
+		case IS_HP_ABOVE_75_PCT:
+			if (GetHPRatio() > 75)
+				return true;
+			break;
+			
+		case IS_HP_LESS_THAN_20_PCT:
+			if (GetHPRatio() <= 20)
+				return true;
+			break;
+
+		case IS_HP_LESS_THAN_50_PCT:
+			if (GetHPRatio() <= 50)
+				return true;
+			break;
+
+		case IS_HP_LESS_THAN_75_PCT:
+			if (GetHPRatio() <= 75)
+				return true;
+			break;
+
+		case IS_NOT_IN_COMBAT:
+			if (!IsEngaged())
+				return true;
+			break;
+
+		case IS_HP_LESS_THAN_35_PCT:
+			if (GetHPRatio() <= 35)
+				return true;
+			break;
+
+		case HAS_BETWEEN_1_TO_2_PETS_ON_HATELIST: {
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
+			if (count >= 1 && count <= 2) {
 				return true;
 			}
 			break;
+		}
 
-		case 203:
-			if (GetHPRatio() < 20) {
+		case HAS_BETWEEN_3_TO_5_PETS_ON_HATELIST: {
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
+			if (count >= 3 && count <= 5) {
 				return true;
 			}
 			break;
+		}
 
-		case 204:
-			if (GetHPRatio() < 50) {
+		case HAS_BETWEEN_6_TO_9_PETS_ON_HATELIST: {
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
+			if (count >= 6 && count <= 9) {
 				return true;
 			}
 			break;
+		}
 
-		case 429:
-			if (GetManaRatio() > 10) {
+		case HAS_BETWEEN_10_TO_14_PETS_ON_HATELIST: {
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
+			if (count >= 10 && count <= 14) {
 				return true;
 			}
 			break;
+		}
 
-		case 518:
-			if (GetHPRatio() < 90) {
+		case HAS_MORE_THAN_14_PETS_ON_HATELIST: {
+			int count = hate_list.GetSummonedPetCountOnHateList(this);
+			if (count > 14) {
 				return true;
 			}
 			break;
+		}
 
-		case 825:
-			if (GetEndurancePercent() < 21) {
+		case IS_CLASS_CHAIN_OR_PLATE:
+			if (IsClient() &&
+				((GetClass() == WARRIOR) || (GetClass() == BARD)  || (GetClass() == SHADOWKNIGHT)  || (GetClass() == PALADIN)  || (GetClass() == CLERIC)
+					|| (GetClass() == RANGER) || (GetClass() == SHAMAN) || (GetClass() == ROGUE)  || (GetClass() == BERSERKER)))
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_5_AND_9_PCT:
+			if (GetHPRatio() >= 5 && GetHPRatio() <= 9)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_10_AND_14_PCT:
+			if (GetHPRatio() >= 10 && GetHPRatio() <= 14)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_15_AND_19_PCT:
+			if (GetHPRatio() >= 15 && GetHPRatio() <= 19)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_20_AND_24_PCT:
+			if (GetHPRatio() >= 20 && GetHPRatio() <= 24)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_25_AND_29_PCT:
+			if (GetHPRatio() >= 25 && GetHPRatio() <= 29)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_30_AND_34_PCT:
+			if (GetHPRatio() >= 30 && GetHPRatio() <= 34)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_35_AND_39_PCT:
+			if (GetHPRatio() >= 35 && GetHPRatio() <= 39)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_40_AND_44_PCT:
+			if (GetHPRatio() >= 40 && GetHPRatio() <= 44)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_45_AND_49_PCT:
+			if (GetHPRatio() >= 45 && GetHPRatio() <= 49)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_50_AND_54_PCT:
+			if (GetHPRatio() >= 50 && GetHPRatio() <= 54)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_55_AND_59_PCT:
+			if (GetHPRatio() >= 55 && GetHPRatio() <= 59)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_5_AND_15_PCT:
+			if (GetHPRatio() >= 5 && GetHPRatio() <= 15)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_15_AND_25_PCT:
+			if (GetHPRatio() >= 15 && GetHPRatio() <= 25)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_1_AND_25_PCT:
+			if (GetHPRatio() <= 25)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_25_AND_35_PCT:
+			if (GetHPRatio() > 25 && GetHPRatio() <= 35)
+				return true;
+			break;
+			
+		case IS_HP_BETWEEN_35_AND_45_PCT:
+			if (GetHPRatio() > 35 && GetHPRatio() <= 45)
+				return true;
+			break;
+			
+		case IS_HP_BETWEEN_45_AND_55_PCT:
+			if (GetHPRatio() > 45 && GetHPRatio() <= 55)
+				return true;
+			break;
+			
+		case IS_HP_BETWEEN_55_AND_65_PCT:
+			if (GetHPRatio() > 55 && GetHPRatio() <= 65)
+				return true;
+			break;
+			
+		case IS_HP_BETWEEN_65_AND_75_PCT:
+			if (GetHPRatio() > 65 && GetHPRatio() <= 75)
+				return true;
+			break;
+			
+		case IS_HP_BETWEEN_75_AND_85_PCT:
+			if (GetHPRatio() > 75 && GetHPRatio() <= 85)
+				return true;
+			break;
+
+		case IS_HP_BETWEEN_85_AND_95_PCT:
+			if (GetHPRatio() > 85 && GetHPRatio() <= 95)
+				return true;
+			break;
+			
+		case IS_HP_ABOVE_45_PCT:
+			if (GetHPRatio() > 45)
+				return true;
+			break;
+
+		case IS_HP_ABOVE_55_PCT:
+			if (GetHPRatio() > 55)
+				return true;
+			break;
+
+		case IS_MANA_ABOVE_10_PCT:
+			if (GetManaRatio() > 10)
+				return true;
+			break;
+
+		case IS_ENDURANCE_BELOW_40_PCT:
+			if (IsClient() && CastToClient()->GetEndurancePercent() <= 40)
+				return true;
+			break;
+
+		case IS_MANA_BELOW_40_PCT:
+			if (GetManaRatio() <= 40)
+				return true;
+			break;
+
+		case IS_HP_ABOVE_20_PCT:
+			if (GetHPRatio() > 20)
+				return true;
+			break;
+
+		case IS_NOT_UNDEAD_OR_SUMMONED:
+			if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned))
+				return true;
+			break;
+
+		case IS_NOT_PLANT:
+			if (GetBodyType() != BT_Plant)
+				return true;
+			break;
+			
+		case IS_NOT_CLIENT:
+			if (!IsClient())
+				return true;
+			break;
+
+		case IS_CLIENT:
+			if (IsClient())
+				return true;
+			break;
+
+		case IS_LEVEL_ABOVE_42_AND_IS_CLIENT:
+			if (IsClient() && GetLevel() > 42)
+				return true;
+			break;		
+			
+		case IS_TREANT:
+			if (GetRace() == RT_TREANT || GetRace() == RT_TREANT_2 || GetRace() == RT_TREANT_3)
+				return true;
+			break;
+
+		case IS_SCARECROW:
+			if (GetRace() == RT_SCARECROW || GetRace() == RT_SCARECROW_2)
+				return true;
+			break;
+
+		case IS_VAMPIRE_OR_UNDEAD_OR_UNDEADPET:
+			if (GetBodyType() == BT_Vampire || GetBodyType() == BT_Undead || GetBodyType() == BT_SummonedUndead)
+				return true;
+			break;
+
+		case IS_NOT_VAMPIRE_OR_UNDEAD:
+			if (GetBodyType() != BT_Vampire && GetBodyType() != BT_Undead && GetBodyType() != BT_SummonedUndead)
+				return true;
+			break;
+
+		case IS_CLASS_KNIGHT_HYBRID_MELEE:
+			if (IsHybridClass(GetClass()) || IsNonSpellFighterClass(GetClass()))
+				return true;
+			break;
+
+		case IS_CLASS_WARRIOR_CASTER_PRIEST:
+			if (IsCasterClass(GetClass()) || GetClass() == WARRIOR)
+				return true;
+			break;
+
+		case IS_END_BELOW_21_PCT:
+			if (IsClient() && CastToClient()->GetEndurancePercent() <= 21)
+				return true;
+			break;
+
+		case IS_END_BELOW_25_PCT:
+			if (IsClient() && CastToClient()->GetEndurancePercent() <= 25)
+				return true;
+			break;
+
+		case IS_END_BELOW_29_PCT:
+			if (IsClient() && CastToClient()->GetEndurancePercent() <= 29)
+				return true;
+			break;
+
+		case IS_REGULAR_SERVER:
+			return true; // todo implement progression flag assume not progression for now
+			break;
+
+		case IS_PROGRESSION_SERVER:
+			return false; // todo implement progression flag assume not progression for now
+			break;
+
+		case IS_GOD_EXPANSION_UNLOCKED:
+			return true; // todo implement progression flag assume not progression for now, this one is a check if GoD is live
+			break;
+
+		case IS_HUMANOID_LEVEL_84_MAX:
+			if (GetBodyType() == BT_Humanoid && GetLevel() <= 84)
+				return true;
+			break;
+
+		case IS_HUMANOID_LEVEL_86_MAX:
+			if (GetBodyType() == BT_Humanoid && GetLevel() <= 86)
+				return true;
+			break;
+
+		case IS_HUMANOID_LEVEL_88_MAX:
+			if (GetBodyType() == BT_Humanoid && GetLevel() <= 88)
+				return true;
+			break;
+
+		case IS_LEVEL_90_MAX:
+			if (GetLevel() <= 90)
+				return true;
+			break;
+
+		case IS_LEVEL_92_MAX:
+			if (GetLevel() <= 92)
+				return true;
+			break;
+
+		case IS_LEVEL_94_MAX:
+			if (GetLevel() <= 94)
+				return true;
+			break;
+
+		case IS_LEVEL_95_MAX:
+			if (GetLevel() <= 95)
+				return true;
+			break;
+
+		case IS_LEVEL_97_MAX:
+			if (GetLevel() <= 97)
+				return true;
+			break;
+
+		case IS_LEVEL_99_MAX:
+			if (GetLevel() <= 99)
+				return true;
+			break;
+
+		case IS_LEVEL_100_MAX:
+			if (GetLevel() <= 100)
+				return true;
+			break;
+
+		case IS_LEVEL_102_MAX:
+			if (GetLevel() <= 102)
+				return true;
+			break;
+
+		case IS_LEVEL_104_MAX:
+			if (GetLevel() <= 104)
+				return true;
+			break;
+		case IS_LEVEL_105_MAX:
+			if (GetLevel() <= 105)
+				return true;
+			break;
+
+		case IS_LEVEL_107_MAX:
+			if (GetLevel() <= 107)
+				return true;
+			break;
+
+		case IS_LEVEL_109_MAX:
+			if (GetLevel() <= 109)
+				return true;
+			break;
+		case IS_LEVEL_110_MAX:
+			if (GetLevel() <= 110)
+				return true;
+			break;
+
+		case IS_LEVEL_112_MAX:
+			if (GetLevel() <= 112)
+				return true;
+			break;
+
+		case IS_LEVEL_114_MAX:
+			if (GetLevel() <= 114)
+				return true;
+			break;
+
+		case IS_BETWEEN_LEVEL_1_AND_75:
+			if (GetLevel() >= 1 && GetLevel() <= 75)
+				return true;
+			break;
+
+		case IS_BETWEEN_LEVEL_76_AND_85:
+			if (GetLevel() >= 76 && GetLevel() <= 85)
+				return true;
+			break;
+
+		case IS_BETWEEN_LEVEL_86_AND_95:
+			if (GetLevel() >= 86 && GetLevel() <= 95)
+				return true;
+			break;
+
+		case IS_BETWEEN_LEVEL_96_AND_105:
+			if (GetLevel() >= 96 && GetLevel() <= 105)
+				return true;
+			break;
+
+		case IS_HP_LESS_THAN_80_PCT:
+			if (GetHPRatio() < 80)
+				return true;
+			break;
+
+		case IS_LEVEL_ABOVE_34:
+			if (GetLevel() < 34)
+				return true;
+			break;
+
+		case HAS_NO_MANA_BURN_BUFF: {
+			bool has_effect = false;
+			for (int i = 0; i < GetMaxTotalSlots(); i++) {
+				if (IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_ManaBurn)) {
+					has_effect = true;
+				}
+			}
+			if (!has_effect) {
 				return true;
 			}
 			break;
+		}
+			
+		case IS_CLIENT_AND_MALE_PLATE_USER:
+			if (IsClient() && GetGender() == MALE && IsPlateClass(GetClass()))
+				return true;
+			break;
 
-		case 826:
-			if (GetEndurancePercent() < 25) {
+		case IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
+			if (IsClient() && GetGender() == MALE && (IsCasterClass(GetClass()) && GetClass() != CLERIC))
+				return true;
+			break;
+
+		case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
+			if (IsClient() && GetGender() == MALE && 
+				(GetClass() == BEASTLORD || GetClass() == BERSERKER || GetClass() == MONK || GetClass() == RANGER || GetClass() == ROGUE))
+				return true;
+			break;
+
+		case IS_CLIENT_AND_FEMALE_PLATE_USER:
+			if (IsClient() && GetGender() == FEMALE && IsPlateClass(GetClass()))
+				return true;
+			break;
+
+		case IS_CLIENT_AND_FEMALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD:
+			if (IsClient() && GetGender() == FEMALE && (IsCasterClass(GetClass()) && GetClass() != CLERIC))
+				return true;
+			break;
+
+		case IS_CLIENT_AND_FEMALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
+			if (IsClient() && GetGender() == FEMALE &&
+				(GetClass() == BEASTLORD || GetClass() == BERSERKER || GetClass() == MONK || GetClass() == RANGER || GetClass() == ROGUE))
+				return true;
+			break;
+
+		case IS_HP_ABOVE_50_PCT:
+			if (GetHPRatio() > 50)
+				return true;
+			break;
+
+		case IS_HP_BELOW_50_PCT:
+			if (GetHPRatio() <= 50)
+				return true;
+			break;
+
+		case IS_OFF_HAND_EQUIPED:
+			if (HasShieldEquiped() || CanThisClassDualWield())
+				return true;
+			break;
+
+		case IS_MANA_BELOW_20_PCT:
+			if (GetManaRatio() <= 20)
+				return true;
+			break;
+
+		case IS_MANA_ABOVE_50_PCT:
+			if (GetManaRatio() >= 50)
+				return true;
+			break;
+
+		case IS_SUMMONED_OR_UNDEAD:
+			if (GetBodyType() == BT_Summoned || GetBodyType() == BT_Undead)
+				return true;
+			break;
+
+
+		case IS_CLASS_CASTER_PRIEST:
+			if (IsCasterClass(GetClass()))
+				return true;
+			break;
+
+		case IS_END_OR_MANA_ABOVE_20_PCT: {
+			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() >= 20) {
+				return true;
+			}
+			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() >= 20) {
 				return true;
 			}
 			break;
+		}
 
-		case 827:
-			if (GetEndurancePercent() < 29) {
+		case IS_END_OR_MANA_BELOW_30_PCT:
+		case IS_END_OR_MANA_BELOW_30_PCT2: {
+			if (IsNonSpellFighterClass(GetClass()) && CastToClient()->GetEndurancePercent() <= 30) {
+				return true;
+			}
+			else if (!IsNonSpellFighterClass(GetClass()) && GetManaRatio() <= 30) {
 				return true;
 			}
 			break;
-
-		default:
-			return true;//If we don't have a case for this yet, just allow spell to pass.
+		}
+			
+		case IS_NOT_CLASS_BARD:
+			if (GetClass() != BARD)
+				return true;
 			break;
 
+		case HAS_NO_PACT_OF_FATE_RECOURSE_BUFF:
+			if (!FindBuff(SPELL_PACT_OF_HATE_RECOURSE))
+				return true;
+			break;
+
+		case HAS_NO_ROGUES_FURY_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_ROGUES_FURY))
+				return true;
+			break;
+
+		case HAS_NO_ILLUSIONS_OF_GRANDEUR_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_ILLUSION_OF_GRANDEUR))
+				return true;
+			break;
+
+		case HAS_NO_HARMONIOUS_PRECISION_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_HARMONIOUS_PRECISION))
+				return true;
+			break;
+
+		case HAS_NO_HARMONIOUS_EXPANSE_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_HARMONIOUS_EXPANSE))
+				return true;
+			break;
+
+		case HAS_NO_FURIOUS_RAMPAGE_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_FURIOUS_RAMPAGE))
+				return true;
+			break;
+
+		case HAS_NO_SHROUD_OF_PRAYER_BUFF:
+			if (!HasBuffWithSpellGroup(SPELLGROUP_SHROUD_OF_PRAYER))
+				return true;
+			break;
+
+		case HAS_INCENDIARY_OOZE_BUFF:
+			if (FindBuff(SPELL_INCENDIARY_OOZE_BUFF))
+				return true;
+			break;
+				
+		//Not handled, just allow them to pass for now.
+		case UNKNOWN_3:
+		case HAS_CRYSTALLIZED_FLAME_BUFF:
+		case UNKNOWN_199:
+		case UNKNOWN_TOO_MUCH_HP_410:
+		case UNKNOWN_TOO_MUCH_HP_411:
+		case HAS_TBL_ESIANTI_ACCESS:
+		case HAS_ITEM_CLOCKWORK_SCRAPS:
+		case IN_TWO_HANDED_STANCE:
+		case IN_DUAL_WIELD_HANDED_STANCE:
+		case IN_SHIELD_STANCE:
+		case NOT_IN_TWO_HANDED_STANCE:
+		case NOT_IN_DUAL_WIELD_HANDED_STANCE:
+		case NOT_IN_SHIELD_STANCE:
+		case DISABLED_UNTIL_EXPANSION_ROK:
+		case DISABLED_UNTIL_EXPANSION_SOV:
+		case DISABLED_UNTIL_EXPANSION_SOL:
+		case DISABLED_UNTIL_EXPANSION_POP:
+		case DISABLED_UNTIL_EXPANSION_LOY:
+		case DISABLED_UNTIL_EXPANSION_LDON:
+		case DISABLED_UNTIL_EXPANSION_GOD:
+		case DISABLED_UNTIL_EXPANSION_OOW:
+		case DISABLED_UNTIL_EXPANSION_DON:
+		case DISABLED_UNTIL_EXPANSION_DOD:
+		case DISABLED_UNTIL_EXPANSION_POR:
+		case DISABLED_UNTIL_EXPANSION_TSS:
+		case DISABLED_UNTIL_EXPANSION_TBS:
+		case DISABLED_UNTIL_EXPANSION_SOF:
+		case DISABLED_UNTIL_EXPANSION_SOD:
+		case DISABLED_UNTIL_EXPANSION_UF:
+		case DISABLED_UNTIL_EXPANSION_HOT:
+		case DISABLED_UNTIL_EXPANSION_VOA:
+		case DISABLED_UNTIL_EXPANSION_ROF:
+		case DISABLED_UNTIL_EXPANSION_COF:
+		case DISABLED_UNTIL_EXPANSION_TDS:
+		case DISABLED_UNTIL_EXPANSION_TBM:
+		case DISABLED_UNTIL_EXPANSION_EOK:
+		case DISABLED_UNTIL_EXPANSION_ROS:
+		case DISABLED_UNTIL_EXPANSION_TBL:
+		case DISABLED_UNTIL_EXPANSION_TOV:
+		case DISABLED_UNTIL_EXPANSION_COV:
+		case HAS_TRAVELED_TO_STRATOS:
+		case HAS_TRAVELED_TO_AALISHAI:
+		case HAS_TRAVELED_TO_MEARATS:
+		case COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
+		case NOT_COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER:
+		case HAS_WEAPONSTANCE_DEFENSIVE_PROFICIENCY:
+		case HAS_WEAPONSTANCE_TWO_HAND_PROFICIENCY:
+		case HAS_WEAPONSTANCE_DUAL_WEILD_PROFICIENCY:
+		case UNKNOWN_812:
+		case UNKNOWN_814:
+		case UNKNOWN_822:
+		case UNKNOWN_840:
+		case UNKNOWN_841:
+		case UNKNOWN_99999:
+			return true;
+		break;
+	}
+
+	if (value >= HAS_AT_LEAST_1_PET_ON_HATELIST && value <= HAS_AT_LEAST_20_PETS_ON_HATELIST) {
+		int count = hate_list.GetSummonedPetCountOnHateList(this);
+		int minium_amount_of_pets_needed = (1 + value) - HAS_AT_LEAST_1_PET_ON_HATELIST;
+
+		if (count >= minium_amount_of_pets_needed) {
+			return true;
+		}
+	}
+
+	if (value >= IS_HP_BELOW_5_PCT && value <= IS_HP_BELOW_95_PCT) {
+		int hp_below_amt = 5 * ((1 + value) - IS_HP_BELOW_5_PCT);
+		if (GetHPRatio() <= hp_below_amt) {
+			return true;
+		}
+	}
+
+	if (value >= IS_BODY_TYPE_UNDEFINED &&  value <= IS_BODY_TYPE_MURAMITE){
+		if (GetBodyType() == (value - IS_BODY_TYPE_UNDEFINED))
+			return true;
+	}
+
+	//Limit to Race. *Not implemented on live, too much potential not to give an option here.
+	if (value >= IS_RACE_FIRST_CUSTOM && value <= IS_RACE_LAST_CUSTOM){
+		if (GetRace() == (value - IS_RACE_FIRST_CUSTOM))
+			return true;
 	}
 
 	return false;

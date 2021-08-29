@@ -1535,12 +1535,12 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
 		targetType = ST_Target;
 
-	if (spell_target && !spell_target->PassCastRestriction(spells[spell_id].CastRestriction)){
-		Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description form dbstr_us type 39
+	if (spell_target && spells[spell_id].CastRestriction && !spell_target->PassCastRestriction(spells[spell_id].CastRestriction)){
+		Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description after this from dbstr_us type 39
 		return false;
 	}
 
-	if (spells[spell_id].caster_requirement_id && !PassCasterRestriction(spells[spell_id].caster_requirement_id)) {
+	if (spells[spell_id].caster_requirement_id && !PassCastRestriction(spells[spell_id].caster_requirement_id)) {
 		MessageString(Chat::Red, SPELL_WOULDNT_HOLD);
 		return false;
 	}
@@ -4149,6 +4149,16 @@ uint32 Mob::BuffCount() {
 			active_buff_count++;
 
 	return active_buff_count;
+}
+
+bool Mob::HasBuffWithSpellGroup(int spellgroup)
+{
+	for (int i = 0; i < GetMaxTotalSlots(); i++) {
+		if (IsValidSpell(buffs[i].spellid) && spells[buffs[i].spellid].spellgroup == spellgroup) {
+			return true;
+		}
+	}
+	return false;
 }
 
 // removes all buffs

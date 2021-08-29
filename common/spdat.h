@@ -155,9 +155,17 @@
 #define SPELL_RESURRECTION_SICKNESS 756
 #define SPELL_RESURRECTION_SICKNESS2 5249
 #define SPELL_REVIVAL_SICKNESS 13087
+#define SPELL_PACT_OF_HATE_RECOURSE 40375
+#define SPELL_INCENDIARY_OOZE_BUFF 32513
 
 //spellgroup ids
 #define SPELLGROUP_FRENZIED_BURNOUT 2754
+#define SPELLGROUP_ILLUSION_OF_GRANDEUR 38603
+#define SPELLGROUP_ROGUES_FURY 16861
+#define SPELLGROUP_HARMONIOUS_PRECISION 15634
+#define SPELLGROUP_HARMONIOUS_EXPANSE 15633
+#define SPELLGROUP_FURIOUS_RAMPAGE 38106
+#define SPELLGROUP_SHROUD_OF_PRAYER 41050
 
 
 
@@ -197,7 +205,8 @@ enum FocusLimitIncludes {
 //If set as limit in a direct damage or heal spell (SPA 0) then these do not give message.
 enum SpellRestriction
 {
-	IS_NOT_ON_HORSE                                                           = 5,   //  NEED TO ADD THIS!
+	UNKNOWN_3                                                                 = 3,   // | caster restriction | seen in spell 30183 Mind Spiral
+	IS_NOT_ON_HORSE                                                           = 5,   // | caster restriction |
 	IS_ANIMAL_OR_HUMANOID                                                     = 100, // This spell will only work on animals or humanoid creatures. 
 	IS_DRAGON                                                                 = 101, // This spell will only work on dragons. 
 	IS_ANIMAL_OR_INSECT                                                       = 102, // This spell will only work on animals or insects. 
@@ -253,8 +262,8 @@ enum SpellRestriction
 	FRENZIED_BURNOUT_NOT_ACTIVE                                               = 193, // This spell will only cast if you do not have Frenzied Burnout active. 
 	UNKNOWN_199                                                               = 199, //
 	IS_HP_ABOVE_75_PCT                                                        = 201, //  
-	IS_HP_LESS_THAN_20_PCT                                                    = 203, // Your target's HP must be at 20% of its maximum or below.
-	IS_HP_LESS_THAN_50_PCT                                                    = 204, //	Your target's HP must be at 50% of its maximum or below.
+	IS_HP_LESS_THAN_20_PCT                                                    = 203, // Your target's HP must be at 20% of its maximum or below. | caster restriction |
+	IS_HP_LESS_THAN_50_PCT                                                    = 204, //	Your target's HP must be at 50% of its maximum or below. | caster restriction |
 	IS_HP_LESS_THAN_75_PCT                                                    = 205, // Your target's HP must be at 75% of its maximum or below.	
 	IS_NOT_IN_COMBAT                                                          = 216, // This spell will only affect creatures that are not in combat.	
 	HAS_AT_LEAST_1_PET_ON_HATELIST                                            = 221, //		
@@ -310,7 +319,7 @@ enum SpellRestriction
 	UNKNOWN_TOO_MUCH_HP_410                                                   = 410, //	Your target has too much HP to be affected by this spell.	
 	UNKNOWN_TOO_MUCH_HP_411                                                   = 411, //	Your target has too much HP to be affected by this spell.	
 	IS_HP_ABOVE_99_PCT                                                        = 412, //		
-	IS_MANA_ABOVE_10_PCT                                                      = 429, //	You must have at least 10% of your maximum mana available to cast this spell.	
+	IS_MANA_ABOVE_10_PCT                                                      = 429, //	You must have at least 10% of your maximum mana available to cast this spell. | caster restriction | 
 	IS_HP_BELOW_5_PCT                                                         = 501, //		
 	IS_HP_BELOW_10_PCT                                                        = 502, //		
 	IS_HP_BELOW_15_PCT                                                        = 503, //		
@@ -328,7 +337,7 @@ enum SpellRestriction
 	IS_HP_BELOW_75_PCT                                                        = 515, //		
 	IS_HP_BELOW_80_PCT                                                        = 516, //		
 	IS_HP_BELOW_85_PCT                                                        = 517, //		
-	IS_HP_BELOW_90_PCT                                                        = 518, //	This ability requires you to be at or below 90% of your maximum HP.	
+	IS_HP_BELOW_90_PCT                                                        = 518, //	This ability requires you to be at or below 90% of your maximum HP.	| caster restriction |
 	IS_HP_BELOW_95_PCT                                                        = 519, //		
 	IS_MANA_BELOW_UNKNOWN_PCT                                                 = 521, //
 	IS_ENDURANCE_BELOW_40_PCT                                                 = 522, //		
@@ -368,7 +377,9 @@ enum SpellRestriction
 	IS_NOT_PLANT                                                              = 636, //	This spell will not affect plants.	
 	IS_NOT_CLIENT                                                             = 700, //	This spell will not work on adventurers.	
 	IS_CLIENT                                                                 = 701, //	This spell will only work on adventurers.	
-	IS_LEVEL_ABOVE_42_AND_IS_CLIENT                                           = 800, //	This spell will only work on level 43 or higher adventurers.	
+	IS_LEVEL_ABOVE_42_AND_IS_CLIENT                                           = 800, //	This spell will only work on level 43 or higher adventurers.
+	UNKNOWN_812                                                               = 812, //	| seen in spell 22616 Thaumatize Pet Mana Regen Base |
+	UNKNOWN_814                                                               = 814, //	| seen in spell 22704 Vegetentacles I |
 	IS_TREANT                                                                 = 815, //	This spell will only work on treants.	
 	IS_BIXIE2                                                                 = 816, //	This spell will only work on bixies.	
 	IS_SCARECROW                                                              = 817, //	This spell will only work on scarecrows.	
@@ -376,16 +387,19 @@ enum SpellRestriction
 	IS_NOT_VAMPIRE_OR_UNDEAD                                                  = 819, //	This spell will not work on vampires or undead creatures.	
 	IS_CLASS_KNIGHT_HYBRID_MELEE                                              = 820, //	This spell will only work on knights, hybrids, or melee classes.	
 	IS_CLASS_WARRIOR_CASTER_PRIEST                                            = 821, //	This spell will only work on warriors, casters, or priests.	
+	UNKNOWN_822                                                               = 822, // | seen in spell 22870 Morell's Distraction 822 |
 	IS_END_BELOW_21_PCT                                                       = 825, //	This ability requires you to be at or below 21% of your maximum endurance.	
 	IS_END_BELOW_25_PCT                                                       = 826, //	This ability requires you to be at or below 25% of your maximum endurance.	
 	IS_END_BELOW_29_PCT                                                       = 827, //	This ability requires you to be at or below 29% of your maximum endurance.	
 	IS_REGULAR_SERVER                                                         = 836, //	
 	IS_PROGRESSION_SERVER                                                     = 837, //		
-	IS_GOD_EXPANSION_UNLOCKED                                                 = 839, //		
+	IS_GOD_EXPANSION_UNLOCKED                                                 = 839, //
+	UNKNOWN_840                                                               = 840, // | caster restriction | seen in spell 6883 Expedient Recovery
+	UNKNOWN_841                                                               = 841, // | caster restriction | seen in spell 32192 Merciless Blow
 	IS_HUMANOID_LEVEL_84_MAX                                                  = 842, //		
 	IS_HUMANOID_LEVEL_86_MAX                                                  = 843, //		
 	IS_HUMANOID_LEVEL_88_MAX                                                  = 844, //		
-	HAS_CRYSTALLIZED_FLAME_BUFF                                               = 845, //	This spell will only work on targets afflicted by Crystallized Flame.	
+	HAS_CRYSTALLIZED_FLAME_BUFF                                               = 845, //	This spell will only work on targets afflicted by Crystallized Flame. | On live spell does not appear to be a buff
 	HAS_INCENDIARY_OOZE_BUFF                                                  = 847, //	This spell will only work on targets afflicted by Incendiary Ooze.	
 	IS_LEVEL_90_MAX                                                           = 860, //		
 	IS_LEVEL_92_MAX                                                           = 861, //		
@@ -393,7 +407,9 @@ enum SpellRestriction
 	IS_LEVEL_95_MAX                                                           = 863, //		
 	IS_LEVEL_97_MAX                                                           = 864, //		
 	IS_LEVEL_99_MAX                                                           = 865, //		
-	//... max for ROF2 spell file.
+	HAS_WEAPONSTANCE_DEFENSIVE_PROFICIENCY                                    = 866, // | caster restriction |
+	HAS_WEAPONSTANCE_TWO_HAND_PROFICIENCY                                     = 867, // | caster restriction |	
+	HAS_WEAPONSTANCE_DUAL_WEILD_PROFICIENCY                                   = 868, // | caster restriction |
 	IS_LEVEL_100_MAX                                                          = 869, //		
 	IS_LEVEL_102_MAX                                                          = 870, //		
 	IS_LEVEL_104_MAX                                                          = 871, //		
@@ -446,6 +462,8 @@ enum SpellRestriction
 	DISABLED_UNTIL_EXPANSION_TOV                                              = 7025, // This ability is disabled until Torment of Velious. 
 	DISABLED_UNTIL_EXPANSION_COV                                              = 7026, // This ability is disabled until Claws of Veeshan. 
 	HAS_NO_MANA_BURN_BUFF                                                     = 8450,  // This spell will not take hold until the effects of the previous Mana Burn have expired. 
+	IS_RACE_FIRST_CUSTOM                                                      = 10000, // | custom range to restrict targets or casters by race *not on live* |
+	IS_RACE_LAST_CUSTOM                                                       = 11000, // | custom range to restrict targets or casters by race *not on live* |
 	IS_CLIENT_AND_MALE_PLATE_USER                                             = 11044, // Your target wouldn't look right as that Jann.	
 	IS_CLEINT_AND_MALE_DRUID_ENCHANTER_MAGICIAN_NECROANCER_SHAMAN_OR_WIZARD   = 11090, // Your target wouldn't look right as that Jann. 
 	IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE               = 11209, // Your target wouldn't look right as that Jann.	
@@ -459,12 +477,12 @@ enum SpellRestriction
 	IS_HP_ABOVE_50_PCT                                                        = 16010, //  
 	IS_HP_UNDER_50_PCT                                                        = 16031, //  
 	IS_OFF_HAND_EQUIPED                                                       = 27672, // You must be wielding a weapon or shield in your offhand to use this ability. 
-	HAS_NO_PACT_OF_FATE_RECOURSE_BUFF                                         = 29556, // This spell will not work while Pact of Fate Recourse is active. 
+	HAS_NO_PACT_OF_FATE_RECOURSE_BUFF                                         = 29556, // This spell will not work while Pact of Fate Recourse is active. | caster restriction |
 	HAS_NO_SHROUD_OF_PRAYER_BUFF                                              = 32339, // Your target cannot receive another Quiet Prayer this soon. 
 	IS_MANA_BELOW_20_PCT                                                      = 38311, // This ability requires you to be at or below 20% of your maximum mana. 
 	IS_MANA_ABOVE_50_PCT                                                      = 38312, // This ability requires you to be at or above 50% of your maximum mana. 
 	COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER                                  = 39281, // You have completed Legendary Answerer. 
-	HAS_NO_ROGUES_FURY_BUFF                                                   = 40297, // This spell will not affect anyone that currently has Rogue's Fury active.	
+	HAS_NO_ROGUES_FURY_BUFF                                                   = 40297, // This spell will not affect anyone that currently has Rogue's Fury active.	| caster restriction |
 	NOT_COMPLETED_ACHIEVEMENT_LEGENDARY_ANSWERER                              = 42280, // You must complete Legendary Answerer.	
 	IS_SUMMONED_OR_UNDEAD                                                     = 49326, //		
 	IS_CLASS_CASTER_PRIEST                                                    = 49529, //		
@@ -475,7 +493,8 @@ enum SpellRestriction
 	HAS_NO_FURIOUS_RAMPAGE_BUFF                                               = 49612, // This ability cannot be activated while Furious Rampage is active.	
 	IS_END_OR_MANA_BELOW_30_PCT2                                              = 49809, // You can only perform this solo if you have less than 30% mana or endurance.	
 	HAS_NO_HARMONIOUS_PRECISION_BUFF                                          = 50003, // This spell will not work if you have the Harmonious Precision line active.	
-	HAS_NO_HARMONIOUS_EXPANSE_BUFF                                            = 50009, // This spell will not work if you have the Harmonious Expanse line active.	
+	HAS_NO_HARMONIOUS_EXPANSE_BUFF                                            = 50009, // This spell will not work if you have the Harmonious Expanse line active.
+	UNKNOWN_99999                                                             = 99999, // | caster restriction | works will spell 27672 Strike of Ire
 };
 
 
