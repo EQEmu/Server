@@ -231,12 +231,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (buffslot >= 0)
 					break;
 
+				if (spells[spell_id].base2[i] && !PassCastRestriction(spells[spell_id].base2[i])) {
+					break; //no messages are given on live if this fails.
+				}
+
 				// for offensive spells check if we have a spell rune on
 				int32 dmg = effect_value;
 				if(dmg < 0)
 				{
-					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
-						break;
 
 					// take partial damage into account
 					dmg = (int32) (dmg * partial / 100);
@@ -252,9 +254,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				else if(dmg > 0) {
 					//healing spell...
-
-					if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
-						break;
 
 					if(caster)
 						dmg = caster->GetActSpellHealing(spell_id, dmg, this);
@@ -289,15 +288,15 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				// hack fix for client health not reflecting server value
 				last_hp = 0;
 
+				if (spells[spell_id].base2[i] && !PassCastRestriction(spells[spell_id].base2[i])) {
+					break;
+				}
+
 				//do any AAs apply to these spells?
 				if(dmg < 0) {
-					if (!PassCastRestriction(false, spells[spell_id].base2[i], true))
-						break;
 					dmg = -dmg;
 					Damage(caster, dmg, spell_id, spell.skill, false, buffslot, false);
 				} else {
-					if (!PassCastRestriction(false, spells[spell_id].base2[i], false))
-						break;
 					HealDamage(dmg, caster);
 				}
 				break;
@@ -3751,8 +3750,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		switch (effect) {
 		case SE_CurrentHP: {
-			if (!PassCastRestriction(false, spells[buff.spellid].base2[i], true))
+			
+			if (spells[buff.spellid].base2[i] && !PassCastRestriction(spells[buff.spellid].base2[i])) {
 				break;
+			}
+
 			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod,
 							    caster, buff.ticsremaining);
 			// Handle client cast DOTs here.
@@ -7109,8 +7111,13 @@ bool Mob::ImprovedTaunt(){
 }
 
 
-bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDamage)
+bool Mob::PassCastRestriction(int value)
 {
+	Shout("Start Pass Cast Restriction");
+	//Note: Live calculates these different now then how it was done in ROF2
+	//For effecst from SPA 0 that have multiple entries it used to calculate it by trying each one individually then apply the effect, now
+	//it just applies the highest value. Will maintain calculating individually since that is how it is done for ROF2. For pet effects
+
 	/*If return TRUE spell met all restrictions and can continue (this = target).
 	This check is used when the spell_new field CastRestriction is defined OR spell effect '0'(DD/Heal) has a defined limit
 	Range 1			: UNKNOWN -- the spells with this seem to not have a restiction, true for now
@@ -7181,7 +7188,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 	if (value <= 0)
 		return true;
 
-	if (IsDamage || UseCastRestriction) {
+	//if (IsDamage || UseCastRestriction) {
 
 		switch(value)
 		{
@@ -7610,38 +7617,43 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 					return true;
 				break;
 
+			case IS_HP_BETWEEN_1_AND_25_PCT:
+				if (GetHPRatio() <= 25)
+					return true;
+				break;
+
 			case IS_HP_BETWEEN_25_AND_35_PCT:
-				if (GetHPRatio() >= 25 && GetHPRatio() <= 35)
+				if (GetHPRatio() > 25 && GetHPRatio() <= 35)
 					return true;
 				break;
 			
 			case IS_HP_BETWEEN_35_AND_45_PCT:
-				if (GetHPRatio() >= 35 && GetHPRatio() <= 45)
+				if (GetHPRatio() > 35 && GetHPRatio() <= 45)
 					return true;
 				break;
 			
 			case IS_HP_BETWEEN_45_AND_55_PCT:
-				if (GetHPRatio() >= 45 && GetHPRatio() <= 55)
+				if (GetHPRatio() > 45 && GetHPRatio() <= 55)
 					return true;
 				break;
 			
 			case IS_HP_BETWEEN_55_AND_65_PCT:
-				if (GetHPRatio() >= 55 && GetHPRatio() <= 65)
+				if (GetHPRatio() > 55 && GetHPRatio() <= 65)
 					return true;
 				break;
 			
 			case IS_HP_BETWEEN_65_AND_75_PCT:
-				if (GetHPRatio() >= 65 && GetHPRatio() <= 75)
+				if (GetHPRatio() > 65 && GetHPRatio() <= 75)
 					return true;
 				break;
 			
 			case IS_HP_BETWEEN_75_AND_85_PCT:
-				if (GetHPRatio() >= 75 && GetHPRatio() <= 85)
+				if (GetHPRatio() > 75 && GetHPRatio() <= 85)
 					return true;
 				break;
 
 			case IS_HP_BETWEEN_85_AND_95_PCT:
-				if (GetHPRatio() >= 85 && GetHPRatio() <= 95)
+				if (GetHPRatio() > 85 && GetHPRatio() <= 95)
 					return true;
 				break;
 			
@@ -7851,7 +7863,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				break;
 
 			case IS_BETWEEN_LEVEL_76_AND_85:
-				if (GetLevel() >= 85 && GetLevel() <= 86)
+				if (GetLevel() >= 76 && GetLevel() <= 85)
 					return true;
 				break;
 
@@ -8065,8 +8077,8 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 			if (GetRace() == (value - 10000))
 				return true;
 		}
-	} //End Damage
 
+	/*
 	if (!IsDamage || UseCastRestriction) {
 
 		//Heal only if HP within specified range. [Doesn't follow a set forumla for all values...]
@@ -8099,7 +8111,7 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				return true;
 		}
 	} // End Heal
-
+	*/
 
 	return false;
 }

@@ -1535,8 +1535,8 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 	if (isproc && IsNPC() && CastToNPC()->GetInnateProcSpellID() == spell_id)
 		targetType = ST_Target;
 
-	if (spell_target && !spell_target->PassCastRestriction(true, spells[spell_id].CastRestriction)){
-		MessageString(Chat::Red,SPELL_NEED_TAR);
+	if (spell_target && !spell_target->PassCastRestriction(spells[spell_id].CastRestriction)){
+		Message(Chat::Red, "Your target does not meet the spell requirements."); //Current live also adds description form dbstr_us type 39
 		return false;
 	}
 

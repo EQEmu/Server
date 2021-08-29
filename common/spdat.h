@@ -193,9 +193,11 @@ enum FocusLimitIncludes {
 	IncludeFoundSELimitSpellSubclass  = 15
 };
 //The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
+//If from CasterRestriction spell field. "Your target does not meet the spell requirements. <insert below corresponding string>." Msg in combat window, color red.
+//If set as limit in a direct damage or heal spell (SPA 0) then these do not give message.
 enum SpellRestriction
 {
-	IS_NOT_ON_HORSE                                                           = 5, //  
+	IS_NOT_ON_HORSE                                                           = 5,   //  NEED TO ADD THIS!
 	IS_ANIMAL_OR_HUMANOID                                                     = 100, // This spell will only work on animals or humanoid creatures. 
 	IS_DRAGON                                                                 = 101, // This spell will only work on dragons. 
 	IS_ANIMAL_OR_INSECT                                                       = 102, // This spell will only work on animals or insects. 
