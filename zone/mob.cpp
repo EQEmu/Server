@@ -5903,6 +5903,7 @@ int32 Mob::GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot)
 	else if (id == "rank") {return spells[spell_id].rank; }
 	else if (id == "no_resist") {return spells[spell_id].no_resist; }
 	else if (id == "CastRestriction") {return spells[spell_id].CastRestriction; }
+	else if (id == "caster_requirement_id") { return spells[spell_id].caster_requirement_id; }
 	else if (id == "AllowRest") {return spells[spell_id].AllowRest; }
 	else if (id == "InCombat") {return spells[spell_id].InCombat; }
 	else if (id == "OutofCombat") {return spells[spell_id].OutofCombat; }

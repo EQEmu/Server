@@ -8116,6 +8116,95 @@ bool Mob::PassCastRestriction(int value)
 	return false;
 }
 
+bool Mob::PassCasterRestriction(int value)
+{
+	/*
+		If return TRUE if spell has met the restriction (this = caster). 
+		This check is used when the spell_new field caster_requirement_id (field220)
+		The following conditions must be true to allow casting.
+		Range -1        : UNKNOWN
+		Range 1         : UNKNOWN
+		Range 3         : UKN 30183 | Mind Spiral
+		Range 5         : Not on mount
+		Range 203       : HP Less Than 20 Percent
+		Range 204       : HP Less Than 50 Percent
+		Range 429       : Mana Above 10 Percent
+		Range 518       : HP Below 90 Percent
+		Range 825       : End Below 21 Percent
+		Range 826       : End Below 25 Percent
+		Range 827       : End Below 29 Percent
+		Range 840       : UNKOWN 6883 | Expedient Recovery
+		Range 841       : UNKOWN 32192 | Merciless Blow
+		Range 866       : UNKNOWN 41088 | Defensive Proficiency      *Weaponstance
+		Range 867       : UNKNOWN 41086 | Two-Handed Proficiency     *Weaponstance
+		Range 868       : UNKNOWN 41087 | Dual-Wielding Proficiency  *Weaponstance
+		Range 29556     : UNKNOWN 40372 | Pact of Fate
+		Range 38311     : UNKNOWN 38312 | Mana Reserve
+		Range 38312     : UNKNOWN 38311 | Mana Reserve
+		Range 40297     : UNKNOWN 40297 | Knifeplay Discipline
+		Range 99999     : UNKNOWN 27672 | Strike of Ire
+		THIS IS A WORK IN PROGRESS
+	*/
+
+	switch (value)
+	{
+		case 5:
+			if (IsClient() && !CastToClient()->GetHorseId()) {
+				return true;
+			}
+			break;
+
+		case 203:
+			if (GetHPRatio() < 20) {
+				return true;
+			}
+			break;
+
+		case 204:
+			if (GetHPRatio() < 50) {
+				return true;
+			}
+			break;
+
+		case 429:
+			if (GetManaRatio() > 10) {
+				return true;
+			}
+			break;
+
+		case 518:
+			if (GetHPRatio() < 90) {
+				return true;
+			}
+			break;
+
+		case 825:
+			if (GetEndurancePercent() < 21) {
+				return true;
+			}
+			break;
+
+		case 826:
+			if (GetEndurancePercent() < 25) {
+				return true;
+			}
+			break;
+
+		case 827:
+			if (GetEndurancePercent() < 29) {
+				return true;
+			}
+			break;
+
+		default:
+			return true;//If we don't have a case for this yet, just allow spell to pass.
+			break;
+
+	}
+
+	return false;
+}
+
 bool Mob::TrySpellProjectile(Mob* spell_target, uint16 spell_id, float speed) {
 
 	/*For mage 'Bolt' line and other various spells.

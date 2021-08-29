@@ -1540,6 +1540,11 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 		return false;
 	}
 
+	if (spells[spell_id].caster_requirement_id && !PassCasterRestriction(spells[spell_id].caster_requirement_id)) {
+		MessageString(Chat::Red, SPELL_WOULDNT_HOLD);
+		return false;
+	}
+
 	//Must be out of combat. (If Beneficial checks casters combat state, Deterimental checks targets)
 	if (!spells[spell_id].InCombat && spells[spell_id].OutofCombat) {
 		if (IsDetrimentalSpell(spell_id)) {
