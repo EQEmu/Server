@@ -214,7 +214,7 @@ enum SpellRestriction
 	IS_UNDEAD_OR_VALDEHOLM_GIANT                                              = 116, // This spell will only work on undead creatures or the inhabitants of Valdeholm. 
 	IS_ANIMAL_OR_PLANT                                                        = 117, // This spell will only work on plants or animals. 
 	IS_SUMMONED                                                               = 118, // This spell will only work on constructs, elementals, or summoned elemental minions. 
-	IS_WIZARD                                                                 = 119, // This spell will only work on wizards. | Live uses this on high level mage fire pets, which are wizard class 
+	IS_WIZARD_USED_ON_MAGE_FIRE_PET                                           = 119, // This spell will only work on wizards. | Live uses this on high level mage fire pets, which are wizard class 
 	IS_UNDEAD                                                                 = 120, //  
 	IS_NOT_UNDEAD_OR_SUMMONED_OR_VAMPIRE                                      = 121, // This spell will only work on creatures that are not undead, constructs, elementals, or vampires. 
 	IS_FAE_OR_PIXIE                                                           = 122, // This spell will only work on Fae or pixies. 

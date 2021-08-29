@@ -7284,7 +7284,8 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 					return true;
 				break;
 
-			case IS_WIZARD:
+			case IS_CLASS_WIZARD:
+			case IS_WIZARD_USED_ON_MAGE_FIRE_PET:
 				if (GetClass() == WIZARD)
 					return true;
 				break;
@@ -7335,87 +7336,100 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				break;
 
 			case IS_CLASS_PURE_CASTER:
-				if (IsINTCasterClass(GetClass()));
+				if (IsINTCasterClass(GetClass()))
 					return true;
 				break;
 
 			case IS_CLASS_HYBRID_CLASS:
-				if (IsHybridClass(GetClass()));
+				if (IsHybridClass(GetClass()))
 					return true;
 				break;
 			
 			case IS_CLASS_WARRIOR:
-				if (GetClass() == WARRIOR);
-				return true;
+				if (GetClass() == WARRIOR)
+					return true;
+				break;
 
 			case IS_CLASS_CLERIC:
-				if (GetClass() == CLERIC);
-				return true;
+				if (GetClass() == CLERIC)
+					return true;
+				break;
 
 			case IS_CLASS_PALADIN:
-				if (GetClass() == PALADIN);
-				return true;
+				if (GetClass() == PALADIN)
+					return true;
+				break;
 
 			case IS_CLASS_RANGER:
-				if (GetClass() == RANGER);
-				return true;
+				if (GetClass() == RANGER)
+					return true;
+				break;
 
 			case IS_CLASS_SHADOWKNIGHT:
-				if (GetClass() == SHADOWKNIGHT);
-				return true;
+				if (GetClass() == SHADOWKNIGHT)
+					return true;
+				break;
 
 			case IS_CLASS_DRUID:
-				if (GetClass() == DRUID);
-				return true;
+				if (GetClass() == DRUID)
+					return true;
+				break;
 
 			case IS_CLASS_MONK:
-				if (GetClass() == MONK);
-				return true;
+				if (GetClass() == MONK)
+					return true;
+				break;
 
 			case IS_CLASS_BARD2:
 			case IS_CLASS_BARD:
-				if (GetClass() == BARD);
-				return true;
+				if (GetClass() == BARD)
+					return true;
+				break;
 
 			case IS_CLASS_ROGUE:
-				if (GetClass() == ROGUE);
-				return true;
+				if (GetClass() == ROGUE)
+					return true;
+				break;
 
 			case IS_CLASS_SHAMAN:
-				if (GetClass() == SHAMAN);
-				return true;
+				if (GetClass() == SHAMAN)
+					return true;
+				break;
 
 			case IS_CLASS_NECRO:
-				if (GetClass() == NECROMANCER);
-				return true;
-
-			case IS_CLASS_WIZARD:
-				if (GetClass() == WIZARD);
-				return true;
+				if (GetClass() == NECROMANCER)
+					return true;
+				break;
 
 			case IS_CLASS_MAGE:
-				if (GetClass() == MAGICIAN);
-				return true;
+				if (GetClass() == MAGICIAN)
+					return true;
+				break;
 
 			case IS_CLASS_ENCHANTER:
-				if (GetClass() == ENCHANTER);
-				return true;
+				if (GetClass() == ENCHANTER)
+					return true;
+				break;
 
 			case IS_CLASS_BEASTLORD:
-				if (GetClass() == BEASTLORD);
-				return true;
+				if (GetClass() == BEASTLORD)
+					return true;
+				break;
 
 			case IS_CLASS_BERSERKER:
-				if (GetClass() == BERSERKER);
-				return true;
+				if (GetClass() == BERSERKER)
+					return true;
+				break;
 
 			case IS_CLASS_CLR_SHM_DRU:
-				if (IsWISCasterClass(GetClass()));
-				return true;
+				if (IsWISCasterClass(GetClass()))
+					return true;
+				break;
 
 			case IS_CLASS_NOT_WAR_PAL_SK:
-				if ((GetClass() != WARRIOR) && (GetClass() != PALADIN) && (GetClass() != SHADOWKNIGHT));
-				return true;
+				if ((GetClass() != WARRIOR) && (GetClass() != PALADIN) && (GetClass() != SHADOWKNIGHT))
+					return true;
+				break;
 
 			case IS_LEVEL_UNDER_100:
 				if (GetLevel() < 100)
@@ -7647,27 +7661,27 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				break;
 
 			case IS_ENDURANCE_BELOW_40_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 40);
+				if (IsClient() && CastToClient()->GetEndurancePercent() <= 40)
 					return true;
 				break;
 
 			case IS_MANA_BELOW_40_PCT:
-				if (GetManaRatio() <= 40);
+				if (GetManaRatio() <= 40)
 					return true;
 				break;
 
 			case IS_HP_ABOVE_20_PCT:
-				if (GetHPRatio() > 20);
+				if (GetHPRatio() > 20)
 					return true;
 				break;
 
 			case IS_NOT_UNDEAD_OR_SUMMONED:
-				if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned));
+				if ((GetBodyType() != BT_Undead) && (GetBodyType() != BT_Summoned))
 					return true;
 				break;
 
 			case IS_NOT_PLANT:
-				if (GetBodyType() != BT_Plant);
+				if (GetBodyType() != BT_Plant)
 					return true;
 				break;
 			
@@ -7717,17 +7731,17 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 				break;
 
 			case IS_END_BELOW_21_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 21);
+				if (IsClient() && CastToClient()->GetEndurancePercent() <= 21)
 					return true;
 				break;
 
 			case IS_END_BELOW_25_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 25);
+				if (IsClient() && CastToClient()->GetEndurancePercent() <= 25)
 					return true;
 				break;
 
 			case IS_END_BELOW_29_PCT:
-				if (IsClient() && CastToClient()->GetEndurancePercent() <= 29);
+				if (IsClient() && CastToClient()->GetEndurancePercent() <= 29)
 					return true;
 				break;
 
