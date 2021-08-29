@@ -200,9 +200,11 @@ enum FocusLimitIncludes {
 	IncludeExistsSELimitSpellSubclass = 14,
 	IncludeFoundSELimitSpellSubclass  = 15
 };
-//The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
-//If from CasterRestriction spell field. "Your target does not meet the spell requirements. <insert below corresponding string>." Msg in combat window, color red.
-//If set as limit in a direct damage or heal spell (SPA 0) then these do not give message.
+/*
+The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
+If from CasterRestriction spell field. "Your target does not meet the spell requirements. <insert below corresponding string>." Msg in combat window, color red.
+If set as limit in a direct damage or heal spell (SPA 0) do not give message.
+*/
 enum SpellRestriction
 {
 	UNKNOWN_3                                                                 = 3,   // | caster restriction | seen in spell 30183 Mind Spiral
