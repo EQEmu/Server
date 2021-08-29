@@ -142,6 +142,7 @@ private:
 		int activity_id,
 		uint32 done_count
 	);
+	bool HasActiveTasks();
 };
 
 

@@ -596,8 +596,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 
 	int is_updating = false;
 
-	// If the client has no tasks, there is nothing further to check.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return false;
 	}
 
@@ -674,8 +673,7 @@ int ClientTaskState::ActiveSpeakTask(int npc_type_id)
 
 	// This method is to be used from Perl quests only and returns the task_id of the first
 	// active task found which has an active SpeakWith activity_information for this NPC.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return 0;
 	}
 
@@ -721,8 +719,7 @@ int ClientTaskState::ActiveSpeakActivity(int npc_type_id, int task_id)
 
 	// This method is to be used from Perl quests only and returns the activity_id of the first
 	// active activity_information found in the specified task which is to SpeakWith this NPC.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return -1;
 	}
 	if (task_id <= 0 || task_id >= MAXTASKS) {
@@ -783,8 +780,7 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 		item_id
 	);
 
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -853,8 +849,8 @@ void ClientTaskState::UpdateTasksForItem(Client *client, TaskActivityType activi
 void ClientTaskState::UpdateTasksOnExplore(Client *client, int explore_id)
 {
 	LogTasks("[UpdateTasksOnExplore] explore_id [{}]", explore_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -944,8 +940,8 @@ bool ClientTaskState::UpdateTasksOnDeliver(
 	bool is_updated = false;
 
 	LogTasks("[UpdateTasksOnDeliver] [{}]", npc_type_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return false;
 	}
 
@@ -1040,8 +1036,8 @@ void ClientTaskState::UpdateTasksOnTouch(Client *client, int zone_id)
 	// If the client has no tasks, there is nothing further to check.
 
 	LogTasks("[UpdateTasksOnTouch] [{}] ", zone_id);
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY &&
-						  m_active_shared_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -2743,8 +2739,7 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 
 void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
 {
-	// If the client has no tasks, there is nothing further to check.
-	if (!task_manager || (m_active_task_count == 0 && m_active_task.task_id == TASKSLOTEMPTY)) { // could be better ...
+	if (!HasActiveTasks()) {
 		return;
 	}
 
@@ -2847,4 +2842,29 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 			client->UpdateTasksOnKill(npc_type_id);
 		}
 	}
+}
+bool ClientTaskState::HasActiveTasks()
+{
+	if (!task_manager) {
+		return false;
+	}
+
+	if (m_active_task.task_id != TASKSLOTEMPTY) {
+		return true;
+	}
+
+	if (m_active_shared_task.task_id != TASKSLOTEMPTY) {
+		return true;
+	}
+
+	bool has_active_quest = false;
+	for (auto &active_quest : m_active_quests) {
+		if (active_quest.task_id == TASKSLOTEMPTY) {
+			continue;
+		}
+
+		return true;
+	}
+
+	return false;
 }
