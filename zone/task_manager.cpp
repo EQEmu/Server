@@ -1338,9 +1338,10 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 			i.activity_id = -1;
 		}
 
-		if (type == TaskType::Quest) {
+		// this check keeps a lot of core task updating code from working properly (shared or otherwise)
+//		if (type == TaskType::Quest) {
 			++client_task_state->m_active_task_count;
-		}
+//		}
 
 		LogTasks(
 			"[LoadClientState] character_id [{}] task_id [{}] slot [{}] accepted_time [{}]",
