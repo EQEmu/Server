@@ -199,8 +199,8 @@ enum SpellRestriction
 	IS_ANIMAL_OR_HUMANOID                                                     = 100, // This spell will only work on animals or humanoid creatures. 
 	IS_DRAGON                                                                 = 101, // This spell will only work on dragons. 
 	IS_ANIMAL_OR_INSECT                                                       = 102, // This spell will only work on animals or insects. 
-	IS_ALIVE_TYPE1                                                            = 103, // This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, insects, constructs, dragons, Skyshrine dragons, Muramites, or creatures constructed from magic. 
-	IS_ALIVE_TYPE2                                                            = 104, // This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, or insects. 
+	IS_BODY_TYPE_MISC                                                         = 103, // This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, insects, constructs, dragons, Skyshrine dragons, Muramites, or creatures constructed from magic. 
+	IS_BODY_TYPE_MISC2                                                        = 104, // This spell will only work on humanoids, lycanthropes, giants, Kael Drakkel giants, Coldain, animals, or insects. 
 	IS_PLANT                                                                  = 105, // This spell will only work on plants. 
 	IS_GIANT                                                                  = 106, // This spell will only work on animals. | Live used to have this on spells restricted to Giants, but those spells were removed... We still have them
 	IS_NOT_ANIMAL_OR_HUMANOID                                                 = 108, // This spell will only work on targets that are neither animals or humanoid. 

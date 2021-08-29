@@ -7203,14 +7203,18 @@ bool Mob::PassCastRestriction(bool UseCastRestriction,  int16 value, bool IsDama
 					return true;
 				break;
 
-			//FIX
-			case IS_ALIVE_TYPE1:
-				if ((GetBodyType() == BT_Animal) || (GetBodyType() == BT_Insect))
+			case IS_BODY_TYPE_MISC:
+				if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) || 
+					(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)|| 
+					(GetBodyType() == BT_Construct) || (GetBodyType() == BT_Dragon)		 || (GetBodyType() == BT_Insect)||
+					(GetBodyType() == BT_VeliousDragon) || (GetBodyType() == BT_Muramite) || (GetBodyType() == BT_Magical))
 					return true;
 				break;
-			//FIX
-			case IS_ALIVE_TYPE2:
-				if (GetBodyType() == BT_Animal)
+
+			case IS_BODY_TYPE_MISC2:
+				if ((GetBodyType() == BT_Humanoid) || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
+					(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal) ||
+					(GetBodyType() == BT_Insect))
 					return true;
 				break;
 
