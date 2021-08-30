@@ -568,7 +568,14 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 		return;
 	}
 
-	// todo: forward to shared task selector validation if set contains a shared task
+	// forward to shared task selector validation if set contains a shared task
+	for (const auto& task_id : m_task_sets[task_set_id])
+	{
+		if (m_task_data[task_id] && m_task_data[task_id]->type == TaskType::Shared) {
+			SharedTaskSelector(client, mob, m_task_sets[task_set_id].size(), m_task_sets[task_set_id].data());
+			return;
+		}
+	}
 
 	if (client->HasTaskRequestCooldownTimer()) {
 		client->SendTaskRequestCooldownTimerMessage();
@@ -689,7 +696,7 @@ void TaskManager::TaskQuestSetSelector(
 	}
 }
 
-void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, int *tasks)
+void TaskManager::SharedTaskSelector(Client *client, Mob *mob, int count, const int *tasks)
 {
 	LogTasks("[UPDATE] SharedTaskSelector called for array size [{}]", count);
 

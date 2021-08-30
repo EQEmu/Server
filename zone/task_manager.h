@@ -44,7 +44,7 @@ public:
 		int count,
 		int *tasks
 	);
-	void SharedTaskSelector(Client* client, Mob* mob, int count, int* tasks);
+	void SharedTaskSelector(Client* client, Mob* mob, int count, const int* tasks);
 	void SendActiveTasksToClient(Client *client, bool task_complete = false);
 	void SendSingleActiveTaskToClient(
 		Client *client,
