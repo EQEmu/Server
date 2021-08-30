@@ -583,13 +583,7 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 	}
 
 	if (m_task_sets[task_set_id].empty()) {
-		// I think this is suppose to be yellow
-		mob->SayString(
-			client,
-			Chat::Yellow,
-			MAX_ACTIVE_TASKS,
-			client->GetName()
-		);
+		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -624,13 +618,7 @@ void TaskManager::TaskSetSelector(Client *client, ClientTaskState *client_task_s
 		SendTaskSelector(client, mob, task_list_index, task_list);
 	}
 	else {
-		// TODO: check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
-		mob->SayString(
-			client,
-			Chat::Yellow,
-			MAX_ACTIVE_TASKS,
-			client->GetName()
-		);
+		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
 	}
 }
 
@@ -686,13 +674,7 @@ void TaskManager::TaskQuestSetSelector(
 		SendTaskSelector(client, mob, task_list_index, task_list);
 	}
 	else {
-		// TODO: check color, I think this might be only for (Shared) Tasks, w/e -- think should be yellow
-		mob->SayString(
-			client,
-			Chat::Yellow,
-			MAX_ACTIVE_TASKS,
-			client->GetName()
-		);
+		client->MessageString(Chat::Yellow, NO_TASK_OFFERS, ".", ".", client->GetName());
 	}
 }
 
