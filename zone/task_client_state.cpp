@@ -2336,7 +2336,7 @@ void ClientTaskState::AcceptNewTask(
 	}
 
 	if (max_tasks) {
-		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, client->GetName());
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
@@ -2426,7 +2426,7 @@ void ClientTaskState::AcceptNewTask(
 
 	// This shouldn't happen unless there is a bug in the handling of ActiveTaskCount somewhere
 	if (active_slot == nullptr) {
-		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, client->GetName());
+		client->MessageString(Chat::Yellow, MAX_ACTIVE_TASKS, ".", ".", client->GetName());
 		return;
 	}
 
