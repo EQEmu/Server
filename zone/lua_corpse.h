@@ -54,6 +54,10 @@ public:
 	uint32 GetGold();
 	uint32 GetPlatinum();
 	void AddLooter(Lua_Mob who);
+	bool HasItem(uint32 item_id);
+	uint16 CountItem(uint32 item_id);
+	uint32 GetItemIDBySlot(uint16 loot_slot);
+	uint16 GetFirstSlotByItemID(uint32 item_id);
 };
 
 #endif

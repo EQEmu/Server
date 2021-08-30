@@ -674,6 +674,75 @@ void NPC::QueryLoot(Client* to)
 	to->Message(Chat::White, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
 }
 
+bool NPC::HasItem(uint32 item_id) {
+	if (!database.GetItem(item_id)) {
+		return false;
+	}
+
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::CountItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::CountItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			return true;
+		}
+	}	
+	return false;
+}
+
+uint16 NPC::CountItem(uint32 item_id) {
+	uint16 item_count = 0;
+	if (!database.GetItem(item_id)) {
+		return item_count;
+	}
+
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::CountItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::CountItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			item_count += loot_item->charges;
+		}
+	}
+	return item_count;
+}
+
+uint32 NPC::GetItemIDBySlot(uint16 loot_slot) {
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (loot_item->lootslot == loot_slot) {
+			return loot_item->item_id;
+		}
+	}
+	return 0;
+}
+
+uint16 NPC::GetFirstSlotByItemID(uint32 item_id) {
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (loot_item->item_id == item_id) {
+			return loot_item->lootslot;
+		}
+	}
+	return 0;
+}
+
 void NPC::AddCash(uint16 in_copper, uint16 in_silver, uint16 in_gold, uint16 in_platinum) {
 	if(in_copper >= 0)
 		copper = in_copper;

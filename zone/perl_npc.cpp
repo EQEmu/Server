@@ -1741,6 +1741,77 @@ XS(XS_NPC_IsRaidTarget) {
 	XSRETURN(1);
 }
 
+XS(XS_NPC_HasItem);  /* prototype to pass -Wmissing-prototypes */
+XS(XS_NPC_HasItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::HasItem(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		NPC *THIS;
+		bool has_item = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_NPC;
+		has_item = THIS->HasItem(item_id);
+		ST(0) = boolSV(has_item);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_NPC_CountItem);
+XS(XS_NPC_CountItem) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::CountItem(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		NPC *THIS;
+		uint16 item_count = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_NPC;
+		item_count = THIS->CountItem(item_id);
+		XSprePUSH;
+		PUSHu((UV) item_count);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_NPC_GetItemIDBySlot);
+XS(XS_NPC_GetItemIDBySlot) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::GetItemIDBySlot(THIS, uint16 loot_slot)"); // @categories Script Utility
+	{
+		NPC *THIS;
+		uint32 item_id = 0;
+		uint16 loot_slot = (uint16) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_NPC;
+		item_id = THIS->GetItemIDBySlot(loot_slot);
+		XSprePUSH;
+		PUSHu((UV) item_id);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_NPC_GetFirstSlotByItemID);
+XS(XS_NPC_GetFirstSlotByItemID) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: NPC::GetFirstSlotByItemID(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		NPC *THIS;
+		uint16 loot_slot = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_NPC;
+		loot_slot = THIS->GetFirstSlotByItemID(item_id);
+		XSprePUSH;
+		PUSHu((UV) loot_slot);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -1859,6 +1930,10 @@ XS(boot_NPC) {
 	newXSproto(strcpy(buf, "RecalculateSkills"), XS_NPC_RecalculateSkills, file, "$");
 	newXSproto(strcpy(buf, "ScaleNPC"), XS_NPC_ScaleNPC, file, "$$");
 	newXSproto(strcpy(buf, "IsRaidTarget"), XS_NPC_IsRaidTarget, file, "$");
+	newXSproto(strcpy(buf, "HasItem"), XS_NPC_HasItem, file, "$$");
+	newXSproto(strcpy(buf, "CountItem"), XS_NPC_CountItem, file, "$$");
+	newXSproto(strcpy(buf, "GetItemIDBySlot"), XS_NPC_GetItemIDBySlot, file, "$$");
+	newXSproto(strcpy(buf, "GetFirstSlotByItemID"), XS_NPC_GetFirstSlotByItemID, file, "$$");
 	XSRETURN_YES;
 }
 

@@ -528,6 +528,77 @@ XS(XS_Corpse_IsRezzed) {
 	XSRETURN(1);
 }
 
+XS(XS_Corpse_HasItem);  /* prototype to pass -Wmissing-prototypes */
+XS(XS_Corpse_HasItem) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Corpse::HasItem(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		bool has_item = false;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CORPSE;
+		has_item = THIS->HasItem(item_id);
+		ST(0) = boolSV(has_item);
+		sv_2mortal(ST(0));
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Corpse_CountItem);
+XS(XS_Corpse_CountItem) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Corpse::CountItem(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		uint16 item_count = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CORPSE;
+		item_count = THIS->CountItem(item_id);
+		XSprePUSH;
+		PUSHu((UV) item_count);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Corpse_GetItemIDBySlot);
+XS(XS_Corpse_GetItemIDBySlot) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Corpse::GetItemIDBySlot(THIS, uint16 loot_slot)"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		uint32 item_id = 0;
+		uint16 loot_slot = (uint16) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CORPSE;
+		item_id = THIS->GetItemIDBySlot(loot_slot);
+		XSprePUSH;
+		PUSHu((UV) item_id);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Corpse_GetFirstSlotByItemID);
+XS(XS_Corpse_GetFirstSlotByItemID) {	
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Corpse::GetFirstSlotByItemID(THIS, uint32 item_id)"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		uint16 loot_slot = 0;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CORPSE;
+		loot_slot = THIS->GetFirstSlotByItemID(item_id);
+		XSprePUSH;
+		PUSHu((UV) loot_slot);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -574,6 +645,10 @@ XS(boot_Corpse) {
 	newXSproto(strcpy(buf, "AllowMobLoot"), XS_Corpse_AllowMobLoot, file, "$$$");
 	newXSproto(strcpy(buf, "AddLooter"), XS_Corpse_AddLooter, file, "$$");
 	newXSproto(strcpy(buf, "IsRezzed"), XS_Corpse_IsRezzed, file, "$");
+	newXSproto(strcpy(buf, "HasItem"), XS_Corpse_HasItem, file, "$$");
+	newXSproto(strcpy(buf, "CountItem"), XS_Corpse_CountItem, file, "$$");
+	newXSproto(strcpy(buf, "GetItemIDBySlot"), XS_Corpse_GetItemIDBySlot, file, "$$");
+	newXSproto(strcpy(buf, "GetFirstSlotByItemID"), XS_Corpse_GetFirstSlotByItemID, file, "$$");
 	XSRETURN_YES;
 }
 
