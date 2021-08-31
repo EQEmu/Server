@@ -4591,7 +4591,18 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	}
 
 	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
-	int resist_modifier = (use_resist_override) ? resist_override : spells[spell_id].ResistDiff;
+	int resist_modifier = 0;
+	if (use_resist_override) {
+		resist_modifier = resist_override;
+	} else {
+		// PVP, we don't have the normal per_level or cap stuff implemented ... so ahh do that
+		// and make sure the PVP versions are also handled.
+		if (IsClient() && caster->IsClient()) {
+			resist_modifier = spells[spell_id].pvpresistbase;
+		} else {
+			resist_modifier = spells[spell_id].ResistDiff;
+		}
+	}
 
 	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
 		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
