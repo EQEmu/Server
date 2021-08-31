@@ -113,6 +113,10 @@ class Corpse : public Mob {
 
 	/* Corpse: Loot */
 	void	QueryLoot(Client* to);
+	bool	HasItem(uint32 item_id);
+	uint16	CountItem(uint32 item_id);
+	uint32	GetItemIDBySlot(uint16 loot_slot);
+	uint16	GetFirstSlotByItemID(uint32 item_id);
 	void	LootItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);

@@ -204,6 +204,10 @@ public:
 	void	AddCash();
 	void	RemoveCash();
 	void	QueryLoot(Client* to);
+	bool	HasItem(uint32 item_id);
+	uint16	CountItem(uint32 item_id);
+	uint32	GetItemIDBySlot(uint16 loot_slot);
+	uint16	GetFirstSlotByItemID(uint32 item_id);
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 	virtual void UpdateEquipmentLight();

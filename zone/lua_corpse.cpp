@@ -152,6 +152,26 @@ void Lua_Corpse::AddLooter(Lua_Mob who) {
 	self->AddLooter(who);
 }
 
+bool Lua_Corpse::HasItem(uint32 item_id) {
+	Lua_Safe_Call_Bool();
+	return self->HasItem(item_id);
+}
+
+uint16 Lua_Corpse::CountItem(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->CountItem(item_id);
+}
+
+uint32 Lua_Corpse::GetItemIDBySlot(uint16 loot_slot) {
+	Lua_Safe_Call_Int();
+	return self->GetItemIDBySlot(loot_slot);
+}
+
+uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
+	Lua_Safe_Call_Int();
+	return self->GetFirstSlotByItemID(item_id);
+}
+
 luabind::scope lua_register_corpse() {
 	return luabind::class_<Lua_Corpse, Lua_Mob>("Corpse")
 		.def(luabind::constructor<>())
@@ -185,7 +205,11 @@ luabind::scope lua_register_corpse() {
 		.def("GetSilver", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetSilver)
 		.def("GetGold", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetGold)
 		.def("GetPlatinum", (uint32(Lua_Corpse::*)(void))&Lua_Corpse::GetPlatinum)
-		.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter);
+		.def("AddLooter", (void(Lua_Corpse::*)(Lua_Mob))&Lua_Corpse::AddLooter)
+		.def("HasItem", (bool(Lua_Corpse::*)(uint32))&Lua_Corpse::HasItem)
+		.def("CountItem", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
+		.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
+		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID);
 }
 
 #endif

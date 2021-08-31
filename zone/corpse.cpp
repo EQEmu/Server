@@ -1454,6 +1454,75 @@ void Corpse::QueryLoot(Client* to) {
 	}
 }
 
+bool Corpse::HasItem(uint32 item_id) {
+	if (!database.GetItem(item_id)) {
+		return false;
+	}
+
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::CountItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::CountItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			return true;
+		}
+	}	
+	return false;
+}
+
+uint16 Corpse::CountItem(uint32 item_id) {
+	uint16 item_count = 0;
+	if (!database.GetItem(item_id)) {
+		return item_count;
+	}
+
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::CountItem() - ItemList error, null item");
+			continue;
+		}
+
+		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
+			LogError("NPC::CountItem() - Database error, invalid item");
+			continue;
+		}
+
+		if (loot_item->item_id == item_id) {
+			item_count += loot_item->charges;
+		}
+	}
+	return item_count;
+}
+
+uint32 Corpse::GetItemIDBySlot(uint16 loot_slot) {
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (loot_item->lootslot == loot_slot) {
+			return loot_item->item_id;
+		}
+	}
+	return 0;
+}
+
+uint16 Corpse::GetFirstSlotByItemID(uint32 item_id) {
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (loot_item->item_id == item_id) {
+			return loot_item->lootslot;
+		}
+	}
+	return 0;
+}
+
 bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	uint32 dist2 = 10000; // pow(100, 2);
 	if (!spell) {
