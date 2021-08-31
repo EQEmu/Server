@@ -7207,7 +7207,7 @@ bool Mob::PassCastRestriction(int value)
 				return true;
 			break;
 
-		case IS_KOBALD:
+		case IS_KOBOLD:
 			if ((GetRace() == RT_KOBOLD) ||(GetRace() == RT_KOBOLD_2))
 				return true;
 			break;

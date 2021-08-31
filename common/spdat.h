@@ -201,9 +201,9 @@ enum FocusLimitIncludes {
 	IncludeFoundSELimitSpellSubclass  = 15
 };
 /*
-The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
-If from CasterRestriction spell field. "Your target does not meet the spell requirements. <insert below corresponding string>." Msg in combat window, color red.
-If set as limit in a direct damage or heal spell (SPA 0) do not give message.
+	The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
+	If from CasterRestriction spell field. "Your target does not meet the spell requirements. <insert below corresponding string>." Msg in combat window, color red.
+	If set as limit in a direct damage or heal spell (SPA 0) do not give message.
 */
 enum SpellRestriction
 {
@@ -221,7 +221,7 @@ enum SpellRestriction
 	IS_HARPY                                                                  = 110, // This spell will only work on harpies. 
 	IS_GNOLL                                                                  = 111, // This spell will only work on gnolls. 
 	IS_SPORALI                                                                = 112, // This spell will only work on fungusoids. 
-	IS_KOBALD                                                                 = 113, // This spell will only work on kobolds. 
+	IS_KOBOLD                                                                 = 113, // This spell will only work on kobolds. 
 	IS_FROSTCRYPT_SHADE                                                       = 114, // This spell will only work on undead creatures or the Shades of Frostcrypt. 
 	IS_DRAKKIN                                                                = 115, // This spell will only work on Drakkin. 
 	IS_UNDEAD_OR_VALDEHOLM_GIANT                                              = 116, // This spell will only work on undead creatures or the inhabitants of Valdeholm. 
