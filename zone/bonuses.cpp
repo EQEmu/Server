@@ -1658,6 +1658,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ItemEnduranceRegenCap += base1;
 			break;
 
+
+		case SE_SecondaryForte:
+			if (newbon->SecondaryForte < base1) {
+				newbon->SecondaryForte = base1;
+			}
+			break;
+        
 		case SE_ZoneSuspendMinion:
 			newbon->ZoneSuspendMinion = base1;
 			break;
@@ -1668,8 +1675,6 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_PotionBeltSlots:
 			break;
 		case SE_BandolierSlots:
-			break;
-		case SE_SecondaryForte:
 			break;
 		case SE_ReduceApplyPoisonTime:
 			break;
