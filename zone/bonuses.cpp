@@ -1658,9 +1658,15 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ItemEnduranceRegenCap += base1;
 			break;
 
+
 		case SE_SecondaryForte:
-			if (newbon->SecondaryForte < base1)
+			if (newbon->SecondaryForte < base1) {
 				newbon->SecondaryForte = base1;
+      }
+      break;
+        
+		case SE_ZoneSuspendMinion:
+			newbon->ZoneSuspendMinion = base1;
 			break;
 
 		// to do
@@ -3650,6 +3656,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				}
 				break;
 			}
+
+			case SE_ZoneSuspendMinion:
+				new_bonus->ZoneSuspendMinion = effect_value;
+				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {

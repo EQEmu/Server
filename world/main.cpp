@@ -229,6 +229,44 @@ void RegisterLoginservers()
 	}
 }
 
+static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string message)
+{
+	// Cut messages down to 4000 max to prevent client crash
+	if (!message.empty()) {
+		message = message.substr(0, 4000);
+	}
+
+	// Replace Occurrences of % or MessageStatus will crash
+	find_replace(message, std::string("%"), std::string("."));
+
+	if (message.find('\n') != std::string::npos) {
+		auto message_split = SplitString(message, '\n');
+
+		for (size_t iter = 0; iter < message_split.size(); ++iter) {
+			zoneserver_list.SendEmoteMessage(
+				nullptr,
+				0,
+				80,
+				LogSys.GetGMSayColorFromCategory(log_category),
+				" %s%s",
+				(iter == 0 ? " ---" : ""),
+				message_split[iter].c_str()
+			);
+		}
+
+		return;
+	}
+
+	zoneserver_list.SendEmoteMessage(
+		nullptr,
+		0,
+		80,
+		LogSys.GetGMSayColorFromCategory(log_category),
+		"%s",
+		message.c_str()
+	);
+}
+
 /**
  * World process entrypoint
  *
@@ -297,9 +335,15 @@ int main(int argc, char** argv) {
 
 	guild_mgr.SetDatabase(&database);
 
-	LogSys.SetDatabase(&database)
-		->LoadLogDatabaseSettings()
-		->StartFileLogs();
+	// logging system init
+	auto logging = LogSys.SetDatabase(&database)
+		->LoadLogDatabaseSettings();
+
+	if (RuleB(Logging, WorldGMSayLogging)) {
+		logging->SetGMSayHandler(&GMSayHookCallBackProcessWorld);
+	}
+
+	logging->StartFileLogs();
 
 	/**
 	 * Parse simple CLI passes

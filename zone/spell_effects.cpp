@@ -2534,11 +2534,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_SuspendMinion:
 			case SE_SuspendPet:
 			{
 				if(IsClient())
-					CastToClient()->SuspendMinion();
+					CastToClient()->SuspendMinion(spell.base[i]);
 
 				break;
 			}
