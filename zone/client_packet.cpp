@@ -538,6 +538,9 @@ void Client::CompleteConnect()
 	/* Sets GM Flag if needed & Sends Petition Queue */
 	UpdateAdmin(false);
 
+	// Task Packets
+	LoadClientTaskState();
+
 	if (IsInAGuild()) {
 		uint8 rank = GuildRank();
 		if (ClientVersion() >= EQ::versions::ClientVersion::RoF)
@@ -1747,10 +1750,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
-	/* Task Packets */
-	LoadClientTaskState();
-
 	ApplyWeaponsStance();
+
 	auto dynamic_zone_member_entries = DynamicZoneMembersRepository::GetWhere(database,
 		fmt::format("character_id = {}", CharacterID()));
 
