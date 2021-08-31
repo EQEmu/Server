@@ -384,6 +384,8 @@ public:
 	std::string getgendername(uint32 gender_id);
 	std::string getdeityname(uint32 deity_id);
 	std::string getinventoryslotname(int16 slot_id);
+	int getitemstat(uint32 item_id, std::string stat_identifier);
+	int getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot = 0);
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;

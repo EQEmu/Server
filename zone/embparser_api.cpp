@@ -6839,6 +6839,47 @@ XS(XS__get_data_remaining) {
 	XSRETURN(1);
 }
 
+XS(XS__getitemstat);
+XS(XS__getitemstat) {
+	dXSARGS;
+	int stat_value;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::getitemstat(uint32 item_id, string stat_identifier)");
+
+	dXSTARG;
+	uint32 item_id = (uint32) SvUV(ST(0));
+	std::string stat_identifier = (std::string) SvPV_nolen(ST(1));
+	stat_value = quest_manager.getitemstat(item_id, stat_identifier);
+
+	XSprePUSH;
+	PUSHi((IV)stat_value);
+
+	XSRETURN(1);
+}
+
+XS(XS__getspellstat);
+XS(XS__getspellstat) {
+	dXSARGS;
+	int stat_value;
+	if (items != 2 && items != 3)
+		Perl_croak(aTHX_ "Usage: quest::getspellstat(uint32 spell_id, string stat_identifier, uint8 slot)");
+
+	dXSTARG;
+	uint32 spell_id = (uint32) SvUV(ST(0));
+	std::string stat_identifier = (std::string) SvPV_nolen(ST(1));
+	uint8 slot = 0;
+	if (items == 3)
+		slot = (uint8) SvUV(ST(2));
+		
+	stat_value = quest_manager.getspellstat(spell_id, stat_identifier, slot);
+
+	XSprePUSH;
+	PUSHi((IV)stat_value);
+
+	XSRETURN(1);
+}
+
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -7077,6 +7118,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
+	newXS(strcpy(buf, "getitemstat"), XS__getitemstat, file);
 	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
@@ -7091,6 +7133,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
 	newXS(strcpy(buf, "get_spell_level"), XS__get_spell_level, file);
+	newXS(strcpy(buf, "getspellstat"), XS__getspellstat, file);
 	newXS(strcpy(buf, "getskillname"), XS__getskillname, file);
 	newXS(strcpy(buf, "getlevel"), XS__getlevel, file);
 	newXS(strcpy(buf, "getplayerburiedcorpsecount"), XS__getplayerburiedcorpsecount, file);
