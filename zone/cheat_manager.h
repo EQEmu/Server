@@ -85,4 +85,5 @@ private:
 	Timer  m_time_since_last_movement_history;
 	uint32 m_warp_counter;
 };
-#endif ANTICHEAT_H
+
+#endif //ANTICHEAT_H
