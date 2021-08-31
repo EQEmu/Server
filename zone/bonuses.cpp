@@ -1,4 +1,4 @@
-/*	EQEMu: Everquest Server Emulator
+/*	EQEMuSE_SecondaryForteSE_SecondaryForte: Everquest Server Emulator
 	Copyright (C) 2001-2004 EQEMu Development Team (http://eqemu.org)
 
 	This program is free software; you can redistribute it and/or modify
@@ -1662,8 +1662,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_SecondaryForte:
 			if (newbon->SecondaryForte < base1) {
 				newbon->SecondaryForte = base1;
-      }
-      break;
+			}
+			break;
         
 		case SE_ZoneSuspendMinion:
 			newbon->ZoneSuspendMinion = base1;
