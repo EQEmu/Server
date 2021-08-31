@@ -199,8 +199,8 @@ public:
 		int         pvpresistcalc;
 		int         pvpresistcap;
 		int         spell_category;
-		int         field181;
-		int         field182;
+		int         pvp_duration;
+		int         pvp_duration_cap;
 		int         pcnpc_only_flag;
 		int         cast_not_standing;
 		int         can_mgb;
@@ -446,8 +446,8 @@ public:
 			"pvpresistcalc",
 			"pvpresistcap",
 			"spell_category",
-			"field181",
-			"field182",
+			"pvp_duration",
+			"pvp_duration_cap",
 			"pcnpc_only_flag",
 			"cast_not_standing",
 			"can_mgb",
@@ -718,8 +718,8 @@ public:
 		entry.pvpresistcalc        = 100;
 		entry.pvpresistcap         = -150;
 		entry.spell_category       = -99;
-		entry.field181             = 7;
-		entry.field182             = 65;
+		entry.pvp_duration         = 0;
+		entry.pvp_duration_cap     = 0;
 		entry.pcnpc_only_flag      = 0;
 		entry.cast_not_standing    = 0;
 		entry.can_mgb              = 0;
@@ -990,8 +990,8 @@ public:
 			entry.pvpresistcalc        = atoi(row[178]);
 			entry.pvpresistcap         = atoi(row[179]);
 			entry.spell_category       = atoi(row[180]);
-			entry.field181             = atoi(row[181]);
-			entry.field182             = atoi(row[182]);
+			entry.pvp_duration         = atoi(row[181]);
+			entry.pvp_duration_cap     = atoi(row[182]);
 			entry.pcnpc_only_flag      = atoi(row[183]);
 			entry.cast_not_standing    = atoi(row[184]);
 			entry.can_mgb              = atoi(row[185]);
@@ -1260,8 +1260,8 @@ public:
 		update_values.push_back(columns[178] + " = " + std::to_string(spells_new_entry.pvpresistcalc));
 		update_values.push_back(columns[179] + " = " + std::to_string(spells_new_entry.pvpresistcap));
 		update_values.push_back(columns[180] + " = " + std::to_string(spells_new_entry.spell_category));
-		update_values.push_back(columns[181] + " = " + std::to_string(spells_new_entry.field181));
-		update_values.push_back(columns[182] + " = " + std::to_string(spells_new_entry.field182));
+		update_values.push_back(columns[181] + " = " + std::to_string(spells_new_entry.pvp_duration));
+		update_values.push_back(columns[182] + " = " + std::to_string(spells_new_entry.pvp_duration_cap));
 		update_values.push_back(columns[183] + " = " + std::to_string(spells_new_entry.pcnpc_only_flag));
 		update_values.push_back(columns[184] + " = " + std::to_string(spells_new_entry.cast_not_standing));
 		update_values.push_back(columns[185] + " = " + std::to_string(spells_new_entry.can_mgb));
@@ -1518,8 +1518,8 @@ public:
 		insert_values.push_back(std::to_string(spells_new_entry.pvpresistcalc));
 		insert_values.push_back(std::to_string(spells_new_entry.pvpresistcap));
 		insert_values.push_back(std::to_string(spells_new_entry.spell_category));
-		insert_values.push_back(std::to_string(spells_new_entry.field181));
-		insert_values.push_back(std::to_string(spells_new_entry.field182));
+		insert_values.push_back(std::to_string(spells_new_entry.pvp_duration));
+		insert_values.push_back(std::to_string(spells_new_entry.pvp_duration_cap));
 		insert_values.push_back(std::to_string(spells_new_entry.pcnpc_only_flag));
 		insert_values.push_back(std::to_string(spells_new_entry.cast_not_standing));
 		insert_values.push_back(std::to_string(spells_new_entry.can_mgb));
@@ -1784,8 +1784,8 @@ public:
 			insert_values.push_back(std::to_string(spells_new_entry.pvpresistcalc));
 			insert_values.push_back(std::to_string(spells_new_entry.pvpresistcap));
 			insert_values.push_back(std::to_string(spells_new_entry.spell_category));
-			insert_values.push_back(std::to_string(spells_new_entry.field181));
-			insert_values.push_back(std::to_string(spells_new_entry.field182));
+			insert_values.push_back(std::to_string(spells_new_entry.pvp_duration));
+			insert_values.push_back(std::to_string(spells_new_entry.pvp_duration_cap));
 			insert_values.push_back(std::to_string(spells_new_entry.pcnpc_only_flag));
 			insert_values.push_back(std::to_string(spells_new_entry.cast_not_standing));
 			insert_values.push_back(std::to_string(spells_new_entry.can_mgb));
@@ -2054,8 +2054,8 @@ public:
 			entry.pvpresistcalc        = atoi(row[178]);
 			entry.pvpresistcap         = atoi(row[179]);
 			entry.spell_category       = atoi(row[180]);
-			entry.field181             = atoi(row[181]);
-			entry.field182             = atoi(row[182]);
+			entry.pvp_duration         = atoi(row[181]);
+			entry.pvp_duration_cap     = atoi(row[182]);
 			entry.pcnpc_only_flag      = atoi(row[183]);
 			entry.cast_not_standing    = atoi(row[184]);
 			entry.can_mgb              = atoi(row[185]);
@@ -2315,8 +2315,8 @@ public:
 			entry.pvpresistcalc        = atoi(row[178]);
 			entry.pvpresistcap         = atoi(row[179]);
 			entry.spell_category       = atoi(row[180]);
-			entry.field181             = atoi(row[181]);
-			entry.field182             = atoi(row[182]);
+			entry.pvp_duration         = atoi(row[181]);
+			entry.pvp_duration_cap     = atoi(row[182]);
 			entry.pcnpc_only_flag      = atoi(row[183]);
 			entry.cast_not_standing    = atoi(row[184]);
 			entry.can_mgb              = atoi(row[185]);

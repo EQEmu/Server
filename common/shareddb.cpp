@@ -1855,6 +1855,8 @@ void SharedDatabase::LoadSpells(void *data, int max_spells) {
 		sp[tempid].pvpresistcalc=atoi(row[178]);
 		sp[tempid].pvpresistcap=atoi(row[179]);
 		sp[tempid].spell_category=atoi(row[180]);
+		sp[tempid].pvp_duration = atoi(row[181]);
+		sp[tempid].pvp_duration_cap = atoi(row[182]);
 		sp[tempid].pcnpc_only_flag=atoi(row[183]);
 		sp[tempid].cast_not_standing = atoi(row[184]) != 0;
 		sp[tempid].can_mgb=atoi(row[185]);

@@ -2816,8 +2816,14 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 	if(!target)
 		target = caster;
 
-	formula = spells[spell_id].buffdurationformula;
-	duration = spells[spell_id].buffduration;
+	// PVP duration
+	if (IsDetrimentalSpell(spell_id) && target->IsClient() && caster->IsClient()) {
+		formula = spells[spell_id].pvp_duration;
+		duration = spells[spell_id].pvp_duration_cap;
+	} else {
+		formula = spells[spell_id].buffdurationformula;
+		duration = spells[spell_id].buffduration;
+	}
 
 	int castlevel = caster->GetCasterLevel(spell_id);
 	if(caster_level_override > 0)

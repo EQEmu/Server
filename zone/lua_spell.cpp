@@ -354,6 +354,16 @@ int Lua_Spell::GetSpellCategory() {
 	return self->spell_category;
 }
 
+int Lua_Spell::GetPVPDuration() {
+	Lua_Safe_Call_Int();
+	return self->pvp_duration;
+}
+
+int Lua_Spell::GetPVPDurationCap() {
+	Lua_Safe_Call_Int();
+	return self->pvp_duration_cap;
+}
+
 int Lua_Spell::GetCanMGB() {
 	Lua_Safe_Call_Int();
 	return self->can_mgb;
@@ -543,6 +553,8 @@ luabind::scope lua_register_spell() {
 		.def("PVPResistCalc", &Lua_Spell::GetPVPResistCalc)
 		.def("PVPResistCap", &Lua_Spell::GetPVPResistCap)
 		.def("SpellCategory", &Lua_Spell::GetSpellCategory)
+		.def("PVPDuration", &Lua_Spell::GetPVPDuration)
+		.def("PVPDurationCap", &Lua_Spell::GetPVPDurationCap)
 		.def("CanMGB", &Lua_Spell::GetCanMGB)
 		.def("DispelFlag", &Lua_Spell::GetDispelFlag)
 		.def("MinResist", &Lua_Spell::GetMinResist)
