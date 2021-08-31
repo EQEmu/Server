@@ -646,6 +646,16 @@
         OutF(LogSys, Logs::Detail, Logs::Scheduler, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogCheat(message, ...) do {\
+    if (LogSys.log_settings[Logs::Cheat].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogCheatDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::Cheat].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\

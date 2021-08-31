@@ -66,6 +66,7 @@ namespace EQ
 #include "zone_store.h"
 #include "task_manager.h"
 #include "task_client_state.h"
+#include "cheat_manager.h"
 
 #ifdef _WINDOWS
 	// since windows defines these within windef.h (which windows.h include)
@@ -119,17 +120,6 @@ typedef enum {
 	Rewind, // Summon to /rewind location.
 	EvacToSafeCoords
 } ZoneMode;
-
-typedef enum {
-	MQWarp,
-	MQWarpShadowStep,
-	MQWarpKnockBack,
-	MQWarpLight,
-	MQZone,
-	MQZoneUnknownDest,
-	MQGate,
-	MQGhost
-} CheatTypes;
 
 enum {
 	HideCorpseNone = 0,
@@ -604,7 +594,7 @@ public:
 	inline double GetEXPModifier(uint32 zone_id) const { return database.GetEXPModifier(CharacterID(), zone_id); };
 	inline void SetAAEXPModifier(uint32 zone_id, double aa_modifier) { database.SetAAEXPModifier(CharacterID(), zone_id, aa_modifier); };
 	inline void SetEXPModifier(uint32 zone_id, double exp_modifier) { database.SetEXPModifier(CharacterID(), zone_id, exp_modifier); };
-	
+
 	bool UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetPVPPoints(uint32 Points) { m_pp.PVPCurrentPoints = Points; }
 	uint32 GetPVPPoints() { return m_pp.PVPCurrentPoints; }
@@ -1598,6 +1588,7 @@ public:
 	Raid *p_raid_instance;
 
 	void ShowDevToolsMenu();
+	CheatManager cheat_manager;
 
 protected:
 	friend class Mob;

@@ -2743,6 +2743,22 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 
 			action->effect_flag = 4;
 
+			if (spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
+			{
+				if (IsClient())
+				{
+					if (!IsBuffSpell(spell_id))
+					{
+						CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
+					}
+				}
+			}
+
+			if (IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
+			{
+				CastToClient()->cheat_manager.SetExemptStatus(ShadowStep, true);
+			}
+
 			if(!IsEffectInSpell(spell_id, SE_BindAffinity))
 			{
 				CastToClient()->QueuePacket(packet);
@@ -4028,12 +4044,24 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 
 	if(spells[spell_id].pushback != 0.0f || spells[spell_id].pushup != 0.0f)
 	{
-		if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
+		if (spelltar->IsClient())
+		{
+			if (!IsBuffSpell(spell_id))
+			{
+				spelltar->CastToClient()->cheat_manager.SetExemptStatus(KnockBack, true);
+			}
+		}
+		else if (RuleB(Spells, NPCSpellPush) && !spelltar->IsRooted() && spelltar->ForcedMovement == 0) {
 			spelltar->m_Delta.x += action->force * g_Math.FastSin(action->hit_heading);
 			spelltar->m_Delta.y += action->force * g_Math.FastCos(action->hit_heading);
 			spelltar->m_Delta.z += action->hit_pitch;
 			spelltar->ForcedMovement = 6;
 		}
+	}
+
+	if (spelltar->IsClient() && IsEffectInSpell(spell_id, SE_ShadowStep))
+	{
+		spelltar->CastToClient()->cheat_manager.SetExemptStatus(ShadowStep, true);
 	}
 
 	if(!IsEffectInSpell(spell_id, SE_BindAffinity))

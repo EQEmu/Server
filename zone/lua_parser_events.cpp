@@ -561,6 +561,18 @@ void handle_player_bot_command(QuestInterface* parse, lua_State* L, Client* clie
 	lua_setfield(L, -2, "args");
 }
 
+void handle_player_warp(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any>* extra_pointers) {
+	Seperator sep(data.c_str());
+	lua_pushnumber(L, std::stof(sep.arg[0]));
+	lua_setfield(L, -2, "from_x");
+
+	lua_pushnumber(L, std::stof(sep.arg[1]));
+	lua_setfield(L, -2, "from_y");
+
+	lua_pushnumber(L, std::stof(sep.arg[2]));
+	lua_setfield(L, -2, "from_z");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQ::Any> *extra_pointers) {

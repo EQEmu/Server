@@ -5530,6 +5530,23 @@ struct SayLinkBodyFrame_Struct {
 /*056*/
 };
 
+struct UpdateMovementEntry {
+	/* 00 */	float Y;
+	/* 04 */	float X;
+	/* 08 */	float Z;
+	/* 12 */	uint8 type;
+	/* 13 */	unsigned int timestamp;
+	/* 17 */
+};
+
+struct UnderWorld {
+	/* 00 */	int spawn_id;
+	/* 04 */	float y;
+	/* 08 */	float x;
+	/* 12 */	float z;
+	/* 16 */
+};
+
 // Restore structure packing to default
 #pragma pack()
 
