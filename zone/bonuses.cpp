@@ -4047,13 +4047,14 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 		return;
 
 	int effect_value = 0;
-	bool negate_spellbonus = false;
-	bool negate_aabonus    = false;
-	bool negate_itembonus  = false;
 
 
 	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
+		bool negate_spellbonus = false;
+		bool negate_aabonus = false;
+		bool negate_itembonus = false;
+
 		if (spells[spell_id].effectid[i] == SE_NegateSpellEffect) {
 
 			//Set negate types
