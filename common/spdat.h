@@ -499,7 +499,16 @@ enum SpellRestriction
 	UNKNOWN_99999                                                             = 99999, // | caster restriction | works will spell 27672 Strike of Ire
 };
 
-
+enum NegateSpellEffectType
+{
+	NEGATE_SPA_ALL_BONUSES                = 0,
+	NEGATE_SPA_SPELLBONUS                 = 1,
+	NEGATE_SPA_ITEMBONUS                  = 2,
+	NEGATE_SPA_SPELLBONUS_AND_ITEMBONUS   = 3,
+	NEGATE_SPA_AABONUS                    = 4,
+	NEGATE_SPA_SPELLBONUS_AND_AABONUS     = 5,
+	NEGATE_SPA_ITEMBONUS_AND_AABONUS      = 6,
+};
 
 enum SpellTypes : uint32
 {

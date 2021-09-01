@@ -297,7 +297,7 @@ public:
 	void ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses* newbon, uint16 casterID = 0,
 		uint8 WornType = 0, int32 ticsremaining = 0, int buffslot = -1, int instrument_mod = 10,
 		bool IsAISpellEffect = false, uint16 effect_id = 0, int32 se_base = 0, int32 se_limit = 0, int32 se_max = 0);
-	void NegateSpellsBonuses(uint16 spell_id);
+	void NegateSpellEffects(uint16 spell_id);
 	virtual float GetActSpellRange(uint16 spell_id, float range, bool IsBard = false);
 	virtual int32 GetActSpellDamage(uint16 spell_id, int32 value, Mob* target = nullptr);
 	virtual int32 GetActDoTDamage(uint16 spell_id, int32 value, Mob* target);
