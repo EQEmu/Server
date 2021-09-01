@@ -1747,7 +1747,7 @@ void Mob::CalcSpellBonuses(StatBonuses* newbon)
 	if (spellbonuses.NegateEffects){
 		for(i = 0; i < buff_count; i++) {
 			if( (buffs[i].spellid != SPELL_UNKNOWN) && (IsEffectInSpell(buffs[i].spellid, SE_NegateSpellEffect)) )
-				NegateSpellEffects(buffs[i].spellid);
+				NegateSpellEffectBonuses(buffs[i].spellid);
 		}
 	}
 
@@ -4041,7 +4041,7 @@ uint8 Mob::IsFocusEffect(uint16 spell_id,int effect_index, bool AA,uint32 aa_eff
 	return 0;
 }
 
-void Mob::NegateSpellEffects(uint16 spell_id)
+void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 {
 	if (!IsValidSpell(spell_id))
 		return;
