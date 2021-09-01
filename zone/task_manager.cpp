@@ -1700,11 +1700,8 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 
 void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts)
 {
-	ClientTaskInformation *shared_task = nullptr;
-	shared_task = &cts->m_active_shared_task;
-
 	// has active shared task
-	if (shared_task) {
+	if (cts->HasActiveSharedTask()) {
 		auto members = SharedTaskMembersRepository::GetWhere(
 			database,
 			fmt::format(
@@ -1728,6 +1725,9 @@ void TaskManager::SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTa
 			);
 			CharacterTasksRepository::DeleteWhere(database, delete_where);
 			CharacterActivitiesRepository::DeleteWhere(database, delete_where);
+
+			c->MessageString(Chat::Yellow, SharedTaskMessage::YOU_ARE_NO_LONGER_A_MEMBER,
+				m_task_data[cts->m_active_shared_task.task_id]->title.c_str());
 
 			// remove as active task if doesn't exist
 			cts->m_active_shared_task = {};
