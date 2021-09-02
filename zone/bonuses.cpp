@@ -4060,38 +4060,38 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 			//Set negate types
 			switch (spells[spell_id].base[i])
 			{
-			case NEGATE_SPA_ALL_BONUSES:
-				negate_spellbonus = true;
-				negate_aabonus = true;
-				negate_itembonus = true;
-				break;
+				case NEGATE_SPA_ALL_BONUSES:
+					negate_spellbonus = true;
+					negate_aabonus = true;
+					negate_itembonus = true;
+					break;
 
-			case NEGATE_SPA_SPELLBONUS:
-				negate_spellbonus = true;
-				break;
+				case NEGATE_SPA_SPELLBONUS:
+					negate_spellbonus = true;
+					break;
 
-			case NEGATE_SPA_ITEMBONUS:
-				negate_itembonus = true;
-				break;
+				case NEGATE_SPA_ITEMBONUS:
+					negate_itembonus = true;
+					break;
 
-			case NEGATE_SPA_AABONUS:
-				negate_aabonus = true;
-				break;
+				case NEGATE_SPA_AABONUS:
+					negate_aabonus = true;
+					break;
 
-			case NEGATE_SPA_ITEMBONUS_AND_AABONUS:
-				negate_aabonus = true;
-				negate_itembonus = true;
-				break;
+				case NEGATE_SPA_ITEMBONUS_AND_AABONUS:
+					negate_aabonus = true;
+					negate_itembonus = true;
+					break;
 
-			case NEGATE_SPA_SPELLBONUS_AND_AABONUS:
-				negate_aabonus = true;
-				negate_spellbonus = true;
-				break;
+				case NEGATE_SPA_SPELLBONUS_AND_AABONUS:
+					negate_aabonus = true;
+					negate_spellbonus = true;
+					break;
 
-			case NEGATE_SPA_SPELLBONUS_AND_ITEMBONUS:
-				negate_spellbonus = true;
-				negate_itembonus = true;
-				break;
+				case NEGATE_SPA_SPELLBONUS_AND_ITEMBONUS:
+					negate_spellbonus = true;
+					negate_itembonus = true;
+					break;
 			}
 
 			//Negate focus effects
