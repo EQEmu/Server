@@ -4048,7 +4048,6 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 
 	int effect_value = 0;
 
-
 	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
 		bool negate_spellbonus = false;
