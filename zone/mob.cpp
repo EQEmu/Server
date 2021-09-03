@@ -1355,19 +1355,15 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	}
 }
 
-void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= false*/) {
+void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= false*/)
+{
 
-	/**
-	 * If our HP is different from last HP update call - let's update selves
-	 */
+	// If our HP is different from last HP update call - let's update selves
 	if (IsClient()) {
 
-		// delay to allow the client to catch up on buff states
+		// delay allowing the client to catch up on buff states
 		if (max_hp != last_max_hp) {
-
 			last_max_hp = max_hp;
-			CastToClient()->hp_self_update_throttle_timer.Trigger();
-
 			return;
 		}
 
@@ -1376,10 +1372,10 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			/**
 			 * This is to prevent excessive packet sending under trains/fast combat
 			 */
-			if (this->CastToClient()->hp_self_update_throttle_timer.Check() || force_update_all) {
-				Log(Logs::General, Logs::HPUpdate,
-					"Mob::SendHPUpdate :: Update HP of self (%s) HP: %i/%i last: %i/%i skip_self: %s",
-					this->GetCleanName(),
+			if (force_update_all) {
+				LogHPUpdate(
+					"[SendHPUpdate] Update HP of self [{}] HP: [{}/{}] last: [{}/{}] skip_self: [{}]",
+					GetCleanName(),
 					current_hp,
 					max_hp,
 					last_hp,
@@ -1402,9 +1398,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 					ResetHPUpdateTimer();
 				}
 
-				/**
-				 * Used to check if HP has changed to update self next round
-				 */
+				// Used to check if HP has changed to update self next round
 				last_hp = current_hp;
 			}
 		}
@@ -1412,25 +1406,25 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 	auto current_hp_percent = GetIntHPRatio();
 
-	Log(Logs::General,
-		Logs::HPUpdate,
-		"Mob::SendHPUpdate :: SendHPUpdate %s HP is %i last %i",
-		this->GetCleanName(),
+	LogHPUpdate(
+		"[SendHPUpdate] Client [{}] HP is [{}] last [{}]",
+		GetCleanName(),
 		current_hp_percent,
-		last_hp_percent);
+		last_hp_percent
+	);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: Same HP - skipping update");
+		LogHPUpdate("[SendHPUpdate] Same HP - skipping update");
 		ResetHPUpdateTimer();
 		return;
 	}
 	else {
 
 		if (IsClient() && RuleB(Character, MarqueeHPUpdates)) {
-			this->CastToClient()->SendHPUpdateMarquee();
+			CastToClient()->SendHPUpdateMarquee();
 		}
 
-		Log(Logs::General, Logs::HPUpdate, "Mob::SendHPUpdate :: HP Changed - Send update");
+		LogHPUpdate("[SendHPUpdate] HP Changed - Send update");
 
 		last_hp_percent = current_hp_percent;
 	}
@@ -1440,24 +1434,16 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 	CreateHPPacket(&hp_packet);
 
-	/**
-	 * Update those who have us targeted
-	 */
+	// update those who have us targeted
 	entity_list.QueueClientsByTarget(this, &hp_packet, false, 0, false, true, EQ::versions::maskAllClients);
 
-	/**
-	 * Update those who have us on x-target
-	 */
+	// Update those who have us on x-target
 	entity_list.QueueClientsByXTarget(this, &hp_packet, false);
 
-	/**
-	 * Update groups using Group LAA health name tag counter
-	 */
+	// Update groups using Group LAA health name tag counter
 	entity_list.QueueToGroupsForNPCHealthAA(this, &hp_packet);
 
-	/**
-	 * Group
-	 */
+	// Group
 	if (IsGrouped()) {
 		group = entity_list.GetGroupByMob(this);
 		if (group) {
@@ -1465,9 +1451,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
-	/**
-	 * Raid
-	 */
+	// Raid
 	if (IsClient()) {
 		Raid *raid = entity_list.GetRaidByClient(CastToClient());
 		if (raid) {
@@ -1475,9 +1459,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 		}
 	}
 
-	/**
-	 * Pet
-	 */
+	// Pet
 	if (GetOwner() && GetOwner()->IsClient()) {
 		GetOwner()->CastToClient()->QueuePacket(&hp_packet, false);
 		group = entity_list.GetGroupByClient(GetOwner()->CastToClient());
@@ -3282,8 +3264,8 @@ void Mob::SetTarget(Mob *mob)
 	else if (IsClient()) {
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-		if (this->CastToClient()->admin > 200) {
-			this->DisplayInfo(mob);
+		if (CastToClient()->admin > 200) {
+			DisplayInfo(mob);
 		}
 
 #ifdef BOTS
@@ -3295,8 +3277,8 @@ void Mob::SetTarget(Mob *mob)
 		GetOwner()->CastToClient()->UpdateXTargetType(MyPetTarget, mob);
 	}
 
-	if (this->IsClient() && this->GetTarget() && this->CastToClient()->hp_other_update_throttle_timer.Check()) {
-		this->GetTarget()->SendHPUpdate(false, true);
+	if (IsClient() && GetTarget()) {
+		GetTarget()->SendHPUpdate(false, true);
 	}
 }
 
