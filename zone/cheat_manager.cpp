@@ -9,7 +9,7 @@ void CheatManager::SetClient(Client *cli)
 
 void CheatManager::SetExemptStatus(ExemptionType type, bool v)
 {
-	if (v == true) {
+	if (v) {
 		MovementCheck();
 	}
 	m_exemption[type] = v;
@@ -76,7 +76,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			if (RuleB(Cheat, EnableMQWarpDetector) &&
 				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
-					"/MQWarp(ShadowStep) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was shadow step exempt but we still found this suspicious.",
+					"/MQWarp (ShadowStep) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was shadow step exempt but we still found this suspicious.",
 					position1.x,
 					position1.y,
 					position1.z
@@ -94,7 +94,7 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 			if (RuleB(Cheat, EnableMQWarpDetector) &&
 				((m_target->Admin() < RuleI(Cheat, MQWarpExemptStatus) || (RuleI(Cheat, MQWarpExemptStatus)) == -1))) {
 				std::string message = fmt::format(
-					"/MQWarp(Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was Knock Back exempt but we still found this suspicious.",
+					"/MQWarp (Knockback) with location from x [{:.2f}] y [{:.2f}] z [{:.2f}] the target was Knock Back exempt but we still found this suspicious.",
 					position1.x,
 					position1.y,
 					position1.z
@@ -161,7 +161,8 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 					m_target->AccountName(),
 					m_target->GetName(),
 					message.c_str(),
-					zone->GetShortName());
+					zone->GetShortName()
+				);
 				LogCheat(message);
 			}
 			break;
@@ -186,13 +187,19 @@ void CheatManager::CheatDetected(CheatTypes type, glm::vec3 position1, glm::vec3
 		case MQGhost:
 			// this isn't just for ghost, its also for if a person isn't sending their MovementHistory packet also.
 			if (RuleB(Cheat, EnableMQGhostDetector) &&
-				((m_target->Admin() < RuleI(Cheat, MQGhostExemptStatus) || (RuleI(Cheat, MQGhostExemptStatus)) == -1))) {
+				((m_target->Admin() < RuleI(Cheat, MQGhostExemptStatus) ||
+				  (RuleI(Cheat, MQGhostExemptStatus)) == -1))) {
 				database.SetMQDetectionFlag(
 					m_target->AccountName(),
 					m_target->GetName(),
 					"Packet blocking detected.",
-					zone->GetShortName());
-				LogCheat("{} was caught not sending the proper packets as regularly as they were suppose to.");
+					zone->GetShortName()
+				);
+				LogCheat(
+					"[MQGhost] [{}] [{}] was caught not sending the proper packets as regularly as they were suppose to.",
+					m_target->AccountName(),
+					m_target->GetName()
+				);
 			}
 			break;
 		case MQFastMem:
@@ -267,11 +274,16 @@ void CheatManager::MovementCheck(uint32 time_between_checks)
 	if ((cur_time - m_time_since_last_position_check) > time_between_checks) {
 		float estimated_speed =
 				  (m_distance_since_last_position_check * 100) / (float) (cur_time - m_time_since_last_position_check);
-		float run_speed  = m_target->GetRunspeed() / 
-			std::min(RuleR(Cheat, MQWarpDetectionDistanceFactor), 1.0f); // MQWarpDetection shouldn't go below 1.0f so we can't end up dividing by 0.
+
+		// MQWarpDetection shouldn't go below 1.0f so we can't end up dividing by 0.
+		float run_speed = m_target->GetRunspeed() /
+						  std::min(
+							  RuleR(Cheat, MQWarpDetectionDistanceFactor),
+							  1.0f
+						  );
 		if (estimated_speed > run_speed) {
 			bool using_gm_speed = m_target->GetGMSpeed();
-			bool is_immobile = m_target->GetRunspeed() == 0; // this covers stuns, roots, mez, and pseudorooted.
+			bool is_immobile    = m_target->GetRunspeed() == 0; // this covers stuns, roots, mez, and pseudorooted.
 			if (!using_gm_speed && !is_immobile) {
 				if (GetExemptStatus(ShadowStep)) {
 					if (m_distance_since_last_position_check > 800) {
@@ -333,9 +345,12 @@ void CheatManager::ProcessMovementHistory(const EQApplicationPacket *app)
 		return;
 	}
 	auto *m_MovementHistory = (UpdateMovementEntry *) app->pBuffer;
-	if (app->size < sizeof(UpdateMovementEntry))
-	{
-		LogDebug("Size mismatch in OP_MovementHistoryList, expected {}, got [{}]", sizeof(UpdateMovementEntry), app->size);
+	if (app->size < sizeof(UpdateMovementEntry)) {
+		LogDebug(
+			"Size mismatch in OP_MovementHistoryList, expected {}, got [{}]",
+			sizeof(UpdateMovementEntry),
+			app->size
+		);
 		DumpPacket(app);
 		return;
 	}
