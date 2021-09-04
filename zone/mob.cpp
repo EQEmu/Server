@@ -1369,38 +1369,34 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 		if (current_hp != last_hp || force_update_all) {
 
-			/**
-			 * This is to prevent excessive packet sending under trains/fast combat
-			 */
-			if (force_update_all) {
-				LogHPUpdate(
-					"[SendHPUpdate] Update HP of self [{}] HP: [{}/{}] last: [{}/{}] skip_self: [{}]",
-					GetCleanName(),
-					current_hp,
-					max_hp,
-					last_hp,
-					last_max_hp,
-					(skip_self ? "true" : "false")
-				);
+			// This is to prevent excessive packet sending under trains/fast combat
+			LogHPUpdate(
+				"[SendHPUpdate] Update HP of self [{}] HP: [{}/{}] last: [{}/{}] skip_self: [{}]",
+				GetCleanName(),
+				current_hp,
+				max_hp,
+				last_hp,
+				last_max_hp,
+				(skip_self ? "true" : "false")
+			);
 
-				if (!skip_self || this->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-					auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-					auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
+			if (!skip_self || this->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
+				auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+				auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
 
-					hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
-					hp_packet_client->spawn_id = GetID();
-					hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
+				hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
+				hp_packet_client->spawn_id = GetID();
+				hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
 
-					CastToClient()->QueuePacket(client_packet);
+				CastToClient()->QueuePacket(client_packet);
 
-					safe_delete(client_packet);
+				safe_delete(client_packet);
 
-					ResetHPUpdateTimer();
-				}
-
-				// Used to check if HP has changed to update self next round
-				last_hp = current_hp;
+				ResetHPUpdateTimer();
 			}
+
+			// Used to check if HP has changed to update self next round
+			last_hp = current_hp;
 		}
 	}
 
