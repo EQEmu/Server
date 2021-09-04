@@ -13,7 +13,6 @@
 
 void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 {
-// ServerOP_SharedTaskAcceptNewTask
 	switch (pack->opcode) {
 		case ServerOP_SharedTaskAcceptNewTask: {
 			auto p = reinterpret_cast<ServerSharedTaskRequest_Struct *>(pack->pBuffer);
