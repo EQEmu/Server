@@ -91,6 +91,7 @@ RULE_INT(Character, ItemDSMitigationCap, 50, "Limit on damageshield mitigation g
 RULE_INT(Character, ItemEnduranceRegenCap, 15, "Limit on endurance regeneration granted by items")
 RULE_INT(Character, ItemExtraDmgCap, 150, "Cap for bonuses to melee skills like Bash, Frenzy, etc.")
 RULE_INT(Character, HasteCap, 100, "Haste cap for non-v3(over haste) haste")
+RULE_INT(Character, Hastev3Cap, 25, "Haste cap for v3(over haste) haste")
 RULE_INT(Character, SkillUpModifier, 100, "The probability for a skill-up is multiplied by value/100")
 RULE_BOOL(Character, SharedBankPlat, false, "Shared bank platinum. Off by default to prevent duplication")
 RULE_BOOL(Character, BindAnywhere, false, "Allows players to bind their soul anywhere in the world")
