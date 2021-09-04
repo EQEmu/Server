@@ -1038,6 +1038,12 @@
 #define LogDynamicZonesDetail(message, ...) do {\
 } while (0)
 
+#define LogCheatList(message, ...) do {\
+} while (0)
+
+#define LogCheatDetail(message, ...) do {\
+} while (0)
+
 #define LogClientList(message, ...) do {\
 } while (0)
 
