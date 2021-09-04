@@ -1406,7 +1406,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 
 	auto current_hp_percent = GetIntHPRatio();
 
-	LogHPUpdate(
+	LogHPUpdateDetail(
 		"[SendHPUpdate] Client [{}] HP is [{}] last [{}]",
 		GetCleanName(),
 		current_hp_percent,
@@ -1414,7 +1414,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		LogHPUpdate("[SendHPUpdate] Same HP - skipping update");
+		LogHPUpdateDetail("[SendHPUpdate] Same HP - skipping update");
 		ResetHPUpdateTimer();
 		return;
 	}
