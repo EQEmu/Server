@@ -422,7 +422,7 @@
 9166|2021_02_12_dynamic_zone_members.sql|SHOW TABLES LIKE 'dynamic_zone_members'|empty|
 9167|2021_06_06_beastlord_pets.sql|SHOW TABLES LIKE 'pets_beastlord_data'|empty|
 9168|2021_08_31_pvp_duration.sql|SHOW COLUMNS FROM `spells_new` LIKE 'pvp_duration'|empty|
-9169|2021_06_06_dynamic_zone_moved_columns.sql|SELECT * FROM db_version WHERE version >= 9167|empty|
+9169|2021_06_06_dynamic_zone_moved_columns.sql|SELECT * FROM db_version WHERE version >= 9169|empty|
 9170|2021_03_03_instance_safereturns.sql|SHOW TABLES LIKE 'character_instance_safereturns'|empty|
 9171|2021_03_30_remove_dz_is_current_member.sql|SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'|not_empty|
 
