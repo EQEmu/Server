@@ -1655,7 +1655,7 @@ void TaskManager::SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskSt
 				shared_task = &cts->m_active_shared_task;
 
 				// has active shared task
-				if (shared_task) {
+				if (cts->HasActiveSharedTask()) {
 
 					LogTasksDetail(
 						"[SyncClientSharedTaskWithPersistedState] Client [{}] has shared_task, sync with database",
