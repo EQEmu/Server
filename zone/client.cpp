@@ -169,8 +169,6 @@ Client::Client(EQStreamInterface* ieqs)
   last_region_type(RegionTypeUnsupported),
   m_dirtyautohaters(false),
   mob_close_scan_timer(6000),
-  hp_self_update_throttle_timer(300),
-  hp_other_update_throttle_timer(500),
   position_update_timer(10000),
   consent_throttle_timer(2000),
   tmSitting(0)
@@ -2503,7 +2501,7 @@ uint16 Client::GetMaxSkillAfterSpecializationRules(EQ::skills::SkillType skillid
 	uint16 PrimarySpecialization = 0, SecondaryForte = 0;
 
 	uint16 PrimarySkillValue = 0, SecondarySkillValue = 0;
-	
+
 	uint16 MaxSpecializations = aabonuses.SecondaryForte ? 2 : 1;
 
 	if (skillid >= EQ::skills::SkillSpecializeAbjure && skillid <= EQ::skills::SkillSpecializeEvocation)
