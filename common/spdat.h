@@ -499,7 +499,16 @@ enum SpellRestriction
 	UNKNOWN_99999                                                             = 99999, // | caster restriction | works will spell 27672 Strike of Ire
 };
 
-
+enum NegateSpellEffectType
+{
+	NEGATE_SPA_ALL_BONUSES                = 0,
+	NEGATE_SPA_SPELLBONUS                 = 1,
+	NEGATE_SPA_ITEMBONUS                  = 2,
+	NEGATE_SPA_SPELLBONUS_AND_ITEMBONUS   = 3,
+	NEGATE_SPA_AABONUS                    = 4,
+	NEGATE_SPA_SPELLBONUS_AND_AABONUS     = 5,
+	NEGATE_SPA_ITEMBONUS_AND_AABONUS      = 6,
+};
 
 enum SpellTypes : uint32
 {
@@ -1056,7 +1065,7 @@ typedef enum {
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
 //#define SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
-#define SE_NegateSpellEffect			382 // implemented - negates specific spell bonuses for duration of the debuff.
+#define SE_NegateSpellEffect			382 // implemented, @Debuff, negates specific spell effect benefits for the duration of the debuff, base: see NegateSpellEffecttype Enum, limit: SPA id, max: none
 #define SE_SympatheticProc				383 // implemented, @Fc, On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
 #define SE_Leap							384	// implemented - Leap effect, ie stomping leap
 #define SE_LimitSpellGroup				385	// implemented, @Ff, Spell group(s) that a spell focus can require or exclude, base1: spellgroup id, Include: Positive Exclude: Negative
