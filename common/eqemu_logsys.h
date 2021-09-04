@@ -204,7 +204,7 @@ namespace Logs {
 		"Expeditions",
 		"DynamicZones",
 		"Scheduler",
-		"Cheat"
+		"Cheat",
 		"ClientList",
 	};
 }
