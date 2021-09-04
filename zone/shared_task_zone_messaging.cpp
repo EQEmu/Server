@@ -68,6 +68,8 @@ void SharedTaskZoneMessaging::HandleWorldMessage(ServerPacket *pack)
 					p->remove_from_db
 				);
 				c->m_requested_shared_task_removal = false;
+
+				c->SetSharedTaskId(0);
 			}
 
 			break;

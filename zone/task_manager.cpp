@@ -1270,6 +1270,8 @@ bool TaskManager::LoadClientState(Client *client, ClientTaskState *client_task_s
 		return false;
 	}
 
+	client->SetSharedTaskId(0);
+
 	int character_id = client->CharacterID();
 
 	client_task_state->m_active_task_count = 0;
