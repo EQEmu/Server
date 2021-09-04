@@ -652,8 +652,8 @@
 } while (0)
 
 #define LogCheatDetail(message, ...) do {\
-    if (LogSys.log_settings[Logs::CheatDetail].is_category_enabled == 1)\
-    OutF(LogSys, Logs::Detail, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+    if (LogSys.log_settings[Logs::Cheat].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
 #define LogClientList(message, ...) do {\
