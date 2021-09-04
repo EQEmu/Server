@@ -1414,7 +1414,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 	);
 
 	if (current_hp_percent == last_hp_percent && !force_update_all) {
-		LogHPUpdateDetail("[SendHPUpdate] Same HP - skipping update");
+		LogHPUpdateDetail("[SendHPUpdate] Same HP for mob [{}] skipping update", GetCleanName());
 		ResetHPUpdateTimer();
 		return;
 	}
@@ -1424,7 +1424,7 @@ void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= fal
 			CastToClient()->SendHPUpdateMarquee();
 		}
 
-		LogHPUpdate("[SendHPUpdate] HP Changed - Send update");
+		LogHPUpdate("[SendHPUpdate] HP Changed for mob [{}] send update", GetCleanName());
 
 		last_hp_percent = current_hp_percent;
 	}
