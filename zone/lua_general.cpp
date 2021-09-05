@@ -1045,482 +1045,6 @@ void lua_send_mail(const char *to, const char *from, const char *subject, const 
 	quest_manager.SendMail(to, from, subject, message);
 }
 
-void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id) {
-	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id);
-}
-
-void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id, bool enforce_level_requirement) {
-	quest_manager.CrossZoneAssignTaskByCharID(character_id, task_id, enforce_level_requirement);
-}
-
-void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id) {
-	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id);
-}
-
-void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id, bool enforce_level_requirement) {
-	quest_manager.CrossZoneAssignTaskByGroupID(group_id, task_id, enforce_level_requirement);
-}
-
-void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id) {
-	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id);
-}
-
-void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id, bool enforce_level_requirement) {
-	quest_manager.CrossZoneAssignTaskByRaidID(raid_id, task_id, enforce_level_requirement);
-}
-
-void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id) {
-	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id);
-}
-
-void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id, bool enforce_level_requirement) {
-	quest_manager.CrossZoneAssignTaskByGuildID(guild_id, task_id, enforce_level_requirement);
-}
-
-void lua_cross_zone_cast_spell_by_char_id(int character_id, uint32 spell_id) {
-	quest_manager.CrossZoneCastSpellByCharID(character_id, spell_id);
-}
-
-void lua_cross_zone_cast_spell_by_group_id(int group_id, uint32 spell_id) {
-	quest_manager.CrossZoneCastSpellByGroupID(group_id, spell_id);
-}
-
-void lua_cross_zone_cast_spell_by_raid_id(int raid_id, uint32 spell_id) {
-	quest_manager.CrossZoneCastSpellByRaidID(raid_id, spell_id);
-}
-
-void lua_cross_zone_cast_spell_by_guild_id(int guild_id, uint32 spell_id) {
-	quest_manager.CrossZoneCastSpellByGuildID(guild_id, spell_id);
-}
-
-void lua_cross_zone_disable_task_by_char_id(int character_id, uint32 task_id) {
-	quest_manager.CrossZoneDisableTaskByCharID(character_id, task_id);
-}
-
-void lua_cross_zone_disable_task_by_group_id(int group_id, uint32 task_id) {
-	quest_manager.CrossZoneDisableTaskByGroupID(group_id, task_id);
-}
-
-void lua_cross_zone_disable_task_by_raid_id(int raid_id, uint32 task_id) {
-	quest_manager.CrossZoneDisableTaskByRaidID(raid_id, task_id);
-}
-
-void lua_cross_zone_disable_task_by_guild_id(int guild_id, uint32 task_id) {
-	quest_manager.CrossZoneDisableTaskByGuildID(guild_id, task_id);
-}
-
-void lua_cross_zone_enable_task_by_char_id(int character_id, uint32 task_id) {
-	quest_manager.CrossZoneEnableTaskByCharID(character_id, task_id);
-}
-
-void lua_cross_zone_enable_task_by_group_id(int group_id, uint32 task_id) {
-	quest_manager.CrossZoneEnableTaskByGroupID(group_id, task_id);
-}
-
-void lua_cross_zone_enable_task_by_raid_id(int raid_id, uint32 task_id) {
-	quest_manager.CrossZoneEnableTaskByRaidID(raid_id, task_id);
-}
-
-void lua_cross_zone_enable_task_by_guild_id(int guild_id, uint32 task_id) {
-	quest_manager.CrossZoneEnableTaskByGuildID(guild_id, task_id);
-}
-
-void lua_cross_zone_fail_task_by_char_id(int character_id, uint32 task_id) {
-	quest_manager.CrossZoneFailTaskByCharID(character_id, task_id);
-}
-
-void lua_cross_zone_fail_task_by_group_id(int group_id, uint32 task_id) {
-	quest_manager.CrossZoneFailTaskByGroupID(group_id, task_id);
-}
-
-void lua_cross_zone_fail_task_by_raid_id(int raid_id, uint32 task_id) {
-	quest_manager.CrossZoneFailTaskByRaidID(raid_id, task_id);
-}
-
-void lua_cross_zone_fail_task_by_guild_id(int guild_id, uint32 task_id) {
-	quest_manager.CrossZoneFailTaskByGuildID(guild_id, task_id);
-}
-
-void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	quest_manager.CrossZoneMarqueeByCharID(character_id, type, priority, fade_in, fade_out, duration, message);
-}
-
-void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	quest_manager.CrossZoneMarqueeByGroupID(group_id, type, priority, fade_in, fade_out, duration, message);
-}
-
-void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	quest_manager.CrossZoneMarqueeByRaidID(raid_id, type, priority, fade_in, fade_out, duration, message);
-}
-
-void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	quest_manager.CrossZoneMarqueeByGuildID(guild_id, type, priority, fade_in, fade_out, duration, message);
-}
-
-void lua_cross_zone_message_player_by_name(uint32 type, const char *character_name, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByName(type, character_name, message);
-}
-
-void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByGroupID(type, group_id, message);
-}
-
-void lua_cross_zone_message_player_by_raid_id(uint32 type, int raid_id, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByRaidID(type, raid_id, message);
-}
-
-void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const char *message) {
-	quest_manager.CrossZoneMessagePlayerByGuildID(type, guild_id, message);
-}
-
-void lua_cross_zone_move_player_by_char_id(int character_id, const char *zone_short_name) {
-	quest_manager.CrossZoneMovePlayerByCharID(character_id, zone_short_name);
-}
-
-void lua_cross_zone_move_player_by_group_id(int group_id, const char *zone_short_name) {
-	quest_manager.CrossZoneMovePlayerByGroupID(group_id, zone_short_name);
-}
-
-void lua_cross_zone_move_player_by_raid_id(int raid_id, const char *zone_short_name) {
-	quest_manager.CrossZoneMovePlayerByRaidID(raid_id, zone_short_name);
-}
-
-void lua_cross_zone_move_player_by_guild_id(int guild_id, const char *zone_short_name) {
-	quest_manager.CrossZoneMovePlayerByGuildID(guild_id, zone_short_name);
-}
-
-void lua_cross_zone_move_instance_by_char_id(int character_id, uint16 instance_id) {
-	quest_manager.CrossZoneMoveInstanceByCharID(character_id, instance_id);
-}
-
-void lua_cross_zone_move_instance_by_group_id(int group_id, uint16 instance_id) {
-	quest_manager.CrossZoneMoveInstanceByGroupID(group_id, instance_id);
-}
-
-void lua_cross_zone_move_instance_by_raid_id(int raid_id, uint16 instance_id) {
-	quest_manager.CrossZoneMoveInstanceByRaidID(raid_id, instance_id);
-}
-
-void lua_cross_zone_move_instance_by_guild_id(int guild_id, uint16 instance_id) {
-	quest_manager.CrossZoneMoveInstanceByGuildID(guild_id, instance_id);
-}
-
-void lua_cross_zone_remove_spell_by_char_id(int character_id, uint32 spell_id) {
-	quest_manager.CrossZoneRemoveSpellByCharID(character_id, spell_id);
-}
-
-void lua_cross_zone_remove_spell_by_group_id(int group_id, uint32 spell_id) {
-	quest_manager.CrossZoneRemoveSpellByGroupID(group_id, spell_id);
-}
-
-void lua_cross_zone_remove_spell_by_raid_id(int raid_id, uint32 spell_id) {
-	quest_manager.CrossZoneRemoveSpellByRaidID(raid_id, spell_id);
-}
-
-void lua_cross_zone_remove_spell_by_guild_id(int guild_id, uint32 spell_id) {
-	quest_manager.CrossZoneRemoveSpellByGuildID(guild_id, spell_id);
-}
-
-void lua_cross_zone_remove_task_by_char_id(int character_id, uint32 task_id) {
-	quest_manager.CrossZoneRemoveTaskByCharID(character_id, task_id);
-}
-
-void lua_cross_zone_remove_task_by_group_id(int group_id, uint32 task_id) {
-	quest_manager.CrossZoneRemoveTaskByGroupID(group_id, task_id);
-}
-
-void lua_cross_zone_remove_task_by_raid_id(int raid_id, uint32 task_id) {
-	quest_manager.CrossZoneRemoveTaskByRaidID(raid_id, task_id);
-}
-
-void lua_cross_zone_remove_task_by_guild_id(int guild_id, uint32 task_id) {
-	quest_manager.CrossZoneRemoveTaskByGuildID(guild_id, task_id);
-}
-
-void lua_cross_zone_reset_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneResetActivityByCharID(character_id, task_id, activity_id);
-}
-
-void lua_cross_zone_reset_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneResetActivityByGroupID(group_id, task_id, activity_id);
-}
-
-void lua_cross_zone_reset_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneResetActivityByRaidID(raid_id, task_id, activity_id);
-}
-
-void lua_cross_zone_reset_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneResetActivityByGuildID(guild_id, task_id, activity_id);
-}
-
-void lua_cross_zone_set_entity_variable_by_client_name(const char *character_name, const char *variable_name, const char *variable_value) {
-	quest_manager.CrossZoneSetEntityVariableByClientName(character_name, variable_name, variable_value);
-}
-
-void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char *variable_name, const char *variable_value) {
-	quest_manager.CrossZoneSetEntityVariableByGroupID(group_id, variable_name, variable_value);
-}
-
-void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char *variable_name, const char *variable_value) {
-	quest_manager.CrossZoneSetEntityVariableByRaidID(raid_id, variable_name, variable_value);
-}
-
-void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char *variable_name, const char *variable_value) {
-	quest_manager.CrossZoneSetEntityVariableByGuildID(guild_id, variable_name, variable_value);
-}
-
-void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByCharID(character_id, signal);
-}
-
-void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByGroupID(group_id, signal);
-}
-
-void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByRaidID(raid_id, signal);
-}
-
-void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
-	quest_manager.CrossZoneSignalPlayerByGuildID(guild_id, signal);
-}
-
-void lua_cross_zone_signal_client_by_name(const char *character_name, int signal) {
-	quest_manager.CrossZoneSignalPlayerByName(character_name, signal);
-}
-
-void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal) {
-	quest_manager.CrossZoneSignalNPCByNPCTypeID(npctype_id, signal);
-}
-
-void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id);
-}
-
-void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id, int activity_count) {
-	quest_manager.CrossZoneUpdateActivityByCharID(character_id, task_id, activity_id, activity_count);
-}
-
-void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id);
-}
-
-void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id, int activity_count) {
-	quest_manager.CrossZoneUpdateActivityByGroupID(group_id, task_id, activity_id, activity_count);
-}
-
-void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id);
-}
-
-void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id, int activity_count) {
-	quest_manager.CrossZoneUpdateActivityByRaidID(raid_id, task_id, activity_id, activity_count);
-}
-
-void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
-	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id);
-}
-
-void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id, int activity_count) {
-	quest_manager.CrossZoneUpdateActivityByGuildID(guild_id, task_id, activity_id, activity_count);
-}
-
-void lua_world_wide_assign_task(uint32 task_id) {
-	quest_manager.WorldWideAssignTask(task_id);
-}
-
-void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement) {
-	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement);
-}
-
-void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status) {
-	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status);
-}
-
-void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideAssignTask(task_id, enforce_level_requirement, min_status, max_status);
-}
-
-void lua_world_wide_cast_spell(uint32 spell_id) {
-	quest_manager.WorldWideCastSpell(spell_id);
-}
-
-void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status) {
-	quest_manager.WorldWideCastSpell(spell_id, min_status);
-}
-
-void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideCastSpell(spell_id, min_status, max_status);
-}
-
-void lua_world_wide_disable_task(uint32 task_id) {
-	quest_manager.WorldWideDisableTask(task_id);
-}
-
-void lua_world_wide_disable_task(uint32 task_id, uint8 min_status) {
-	quest_manager.WorldWideDisableTask(task_id, min_status);
-}
-
-void lua_world_wide_disable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideDisableTask(task_id, min_status, max_status);
-}
-
-void lua_world_wide_enable_task(uint32 task_id) {
-	quest_manager.WorldWideEnableTask(task_id);
-}
-
-void lua_world_wide_enable_task(uint32 task_id, uint8 min_status) {
-	quest_manager.WorldWideEnableTask(task_id, min_status);
-}
-
-void lua_world_wide_enable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideEnableTask(task_id, min_status, max_status);
-}
-
-void lua_world_wide_fail_task(uint32 task_id) {
-	quest_manager.WorldWideFailTask(task_id);
-}
-
-void lua_world_wide_fail_task(uint32 task_id, uint8 min_status) {
-	quest_manager.WorldWideFailTask(task_id, min_status);
-}
-
-void lua_world_wide_fail_task(uint32 task_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideFailTask(task_id, min_status, max_status);
-}
-
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message) {
-	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
-}
-
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status) {
-	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
-}
-
-void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char *message, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
-}
-
-void lua_world_wide_message(uint32 type, const char *message) {
-	quest_manager.WorldWideMessage(type, message);
-}
-
-void lua_world_wide_message(uint32 type, const char *message, uint8 min_status) {
-	quest_manager.WorldWideMessage(type, message, min_status);
-}
-
-void lua_world_wide_message(uint32 type, const char *message, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideMessage(type, message, min_status, max_status);
-}
-
-void lua_world_wide_move(const char *zone_short_name) {
-	quest_manager.WorldWideMove(zone_short_name);
-}
-
-void lua_world_wide_move(const char *zone_short_name, uint8 min_status) {
-	quest_manager.WorldWideMove(zone_short_name, min_status);
-}
-
-void lua_world_wide_move(const char *zone_short_name, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideMove(zone_short_name, min_status, max_status);
-}
-
-void lua_world_wide_move_instance(uint16 instance_id) {
-	quest_manager.WorldWideMoveInstance(instance_id);
-}
-
-void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status) {
-	quest_manager.WorldWideMoveInstance(instance_id, min_status);
-}
-
-void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideMoveInstance(instance_id, min_status, max_status);
-}
-
-void lua_world_wide_remove_spell(uint32 spell_id) {
-	quest_manager.WorldWideRemoveSpell(spell_id);
-}
-
-void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status) {
-	quest_manager.WorldWideRemoveSpell(spell_id, min_status);
-}
-
-void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideRemoveSpell(spell_id, min_status, max_status);
-}
-
-void lua_world_wide_remove_task(uint32 task_id) {
-	quest_manager.WorldWideRemoveTask(task_id);
-}
-
-void lua_world_wide_remove_task(uint32 task_id, uint8 min_status) {
-	quest_manager.WorldWideRemoveTask(task_id, min_status);
-}
-
-void lua_world_wide_remove_task(uint32 task_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideRemoveTask(task_id, min_status, max_status);
-}
-
-void lua_world_wide_reset_activity(uint32 task_id, int activity_id) {
-	quest_manager.WorldWideResetActivity(task_id, activity_id);
-}
-
-void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status) {
-	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status);
-}
-
-void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideResetActivity(task_id, activity_id, min_status, max_status);
-}
-
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value) {
-	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value);
-}
-
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status) {
-	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status);
-}
-
-void lua_world_wide_set_entity_variable_client(const char *variable_name, const char *variable_value, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideSetEntityVariableClient(variable_name, variable_value, min_status, max_status);
-}
-
-void lua_world_wide_set_entity_variable_npc(const char *variable_name, const char *variable_value) {
-	quest_manager.WorldWideSetEntityVariableNPC(variable_name, variable_value);
-}
-
-void lua_world_wide_signal_client(uint32 signal) {
-	quest_manager.WorldWideSignalClient(signal);
-}
-
-void lua_world_wide_signal_client(uint32 signal, uint8 min_status) {
-	quest_manager.WorldWideSignalClient(signal, min_status);
-}
-
-void lua_world_wide_signal_client(uint32 signal, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideSignalClient(signal, min_status, max_status);
-}
-
-void lua_world_wide_signal_npc(uint32 signal) {
-	quest_manager.WorldWideSignalNPC(signal);
-}
-
-void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
-	quest_manager.WorldWideUpdateActivity(task_id, activity_id);
-}
-
-void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count) {
-	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count);
-}
-
-void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status) {
-	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status);
-}
-
-void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status, uint8 max_status) {
-	quest_manager.WorldWideUpdateActivity(task_id, activity_id, activity_count, min_status, max_status);
-}
-
 luabind::adl::object lua_get_qglobals(lua_State *L, Lua_NPC npc, Lua_Client client) {
 	luabind::adl::object ret = luabind::newtable(L);
 
@@ -2365,96 +1889,6 @@ void lua_add_ldon_win(uint32 theme_id) {
 	quest_manager.addldonwin(theme_id);
 }
 
-void lua_cross_zone_add_ldon_loss_by_char_id(int character_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_points_by_char_id(int character_id, uint32 theme_id, int points) {
-	uint8 update_type = CZLDoNUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id, points);
-}
-
-void lua_cross_zone_add_ldon_win_by_char_id(int character_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_loss_by_group_id(int group_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_points_by_group_id(int group_id, uint32 theme_id, int points) {
-	uint8 update_type = CZLDoNUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id, points);
-}
-
-void lua_cross_zone_add_ldon_win_by_group_id(int group_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_loss_by_raid_id(int raid_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_points_by_raid_id(int raid_id, uint32 theme_id, int points) {
-	uint8 update_type = CZLDoNUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id, points);
-}
-
-void lua_cross_zone_add_ldon_win_by_raid_id(int raid_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_loss_by_guild_id(int guild_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_points_by_guild_id(int guild_id, uint32 theme_id, int points) {
-	uint8 update_type = CZLDoNUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id, points);
-}
-
-void lua_cross_zone_add_ldon_win_by_guild_id(int guild_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_loss_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-}
-
-void lua_cross_zone_add_ldon_points_by_expedition_id(uint32 expedition_id, uint32 theme_id, int points) {
-	uint8 update_type = CZLDoNUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id, points);
-}
-
-void lua_cross_zone_add_ldon_win_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
-	uint8 update_type = CZLDoNUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
-	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
-}
-
 std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
@@ -2489,6 +1923,1202 @@ int lua_get_spell_stat(uint32 spell_id, std::string stat_identifier) {
 
 int lua_get_spell_stat(uint32 spell_id, std::string stat_identifier, uint8 slot) {
 	return quest_manager.getspellstat(spell_id, stat_identifier, slot);
+}
+
+void lua_cross_zone_add_ldon_loss_by_char_id(int character_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_loss_by_group_id(int group_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_loss_by_raid_id(int raid_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_loss_by_guild_id(int guild_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_loss_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_loss_by_client_name(const char* client_name, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
+}
+
+void lua_cross_zone_add_ldon_points_by_char_id(int character_id, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id, points);
+}
+
+void lua_cross_zone_add_ldon_points_by_group_id(int group_id, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id, points);
+}
+
+void lua_cross_zone_add_ldon_points_by_raid_id(int raid_id, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id, points);
+}
+
+void lua_cross_zone_add_ldon_points_by_guild_id(int guild_id, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id, points);
+}
+
+void lua_cross_zone_add_ldon_points_by_expedition_id(uint32 expedition_id, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id, points);
+}
+
+void lua_cross_zone_add_ldon_points_by_client_name(const char* client_name, uint32 theme_id, int points) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	int update_identifier = 0;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
+}
+
+void lua_cross_zone_add_ldon_win_by_char_id(int character_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_win_by_group_id(int group_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_win_by_raid_id(int raid_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_win_by_guild_id(int guild_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_win_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
+}
+
+void lua_cross_zone_add_ldon_win_by_client_name(const char* client_name, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
+}
+
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_char_id(int character_id, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_group_id(int group_id, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_raid_id(int raid_id, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_guild_id(int guild_id, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_expedition_id(uint32 expedition_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_expedition_id(uint32 expedition_id, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_assign_task_by_client_name(const char* client_name, uint32 task_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_assign_task_by_client_name(const char* client_name, uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_AssignTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_cast_spell_by_char_id(int character_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, character_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_group_id(int group_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, group_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, raid_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, guild_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_expedition_id(uint32 expedition_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, expedition_id, spell_id);
+}
+
+void lua_cross_zone_cast_spell_by_client_name(const char* client_name, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZSpellUpdateSubtype_Cast;
+	int update_identifier = 0;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, update_identifier, spell_id, client_name);
+}
+
+void lua_cross_zone_disable_task_by_char_id(int character_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_disable_task_by_group_id(int group_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_disable_task_by_raid_id(int raid_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_disable_task_by_guild_id(int guild_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_disable_task_by_expedition_id(uint32 expedition_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_disable_task_by_client_name(const char* client_name, uint32 task_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_enable_task_by_char_id(int character_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_enable_task_by_group_id(int group_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_enable_task_by_raid_id(int raid_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_enable_task_by_guild_id(int guild_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_enable_task_by_expedition_id(uint32 expedition_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_enable_task_by_client_name(const char* client_name, uint32 task_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_EnableTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_fail_task_by_char_id(int character_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_fail_task_by_group_id(int group_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_fail_task_by_raid_id(int raid_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_fail_task_by_guild_id(int guild_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_fail_task_by_expedition_id(uint32 expedition_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_fail_task_by_client_name(const char* client_name, uint32 task_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_FailTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_marquee_by_char_id(int character_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_Character;
+	quest_manager.CrossZoneMarquee(update_type, character_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_group_id(int group_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_Group;
+	quest_manager.CrossZoneMarquee(update_type, group_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_raid_id(int raid_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_Raid;
+	quest_manager.CrossZoneMarquee(update_type, raid_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_guild_id(int guild_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_Guild;
+	quest_manager.CrossZoneMarquee(update_type, guild_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_expedition_id(uint32 expedition_id, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_Expedition;
+	quest_manager.CrossZoneMarquee(update_type, expedition_id, type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_cross_zone_marquee_by_client_name(const char* client_name, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	quest_manager.CrossZoneMarquee(update_type, update_identifier, type, priority, fade_in, fade_out, duration, message, client_name);
+}
+
+void lua_cross_zone_message_player_by_char_id(uint32 type, int character_id, const char* message) {
+	uint8 update_type = CZUpdateType_Character;
+	quest_manager.CrossZoneMessage(update_type, character_id, type, message);
+}
+
+void lua_cross_zone_message_player_by_group_id(uint32 type, int group_id, const char* message) {
+	uint8 update_type = CZUpdateType_Group;
+	quest_manager.CrossZoneMessage(update_type, group_id, type, message);
+}
+
+void lua_cross_zone_message_player_by_raid_id(uint32 type, int raid_id, const char* message) {
+	uint8 update_type = CZUpdateType_Raid;
+	quest_manager.CrossZoneMessage(update_type, raid_id, type, message);
+}
+
+void lua_cross_zone_message_player_by_guild_id(uint32 type, int guild_id, const char* message) {
+	uint8 update_type = CZUpdateType_Guild;
+	quest_manager.CrossZoneMessage(update_type, guild_id, type, message);
+}
+
+void lua_cross_zone_message_player_by_expedition_id(uint32 type, int expedition_id, const char* message) {
+	uint8 update_type = CZUpdateType_Expedition;
+	quest_manager.CrossZoneMessage(update_type, expedition_id, type, message);
+}
+
+void lua_cross_zone_message_player_by_name(uint32 type, const char* client_name, const char* message) {
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	quest_manager.CrossZoneMessage(update_type, update_identifier, type, message, client_name);
+}
+
+void lua_cross_zone_move_player_by_char_id(int character_id, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_player_by_group_id(int group_id, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_player_by_raid_id(int raid_id, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_player_by_guild_id(int guild_id, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_player_by_expedition_id(int expedition_id, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_player_by_client_name(const char* client_name, const char* zone_short_name) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
+	int update_identifier = 0;
+	uint16 instance_id = 0;
+	quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
+}
+
+void lua_cross_zone_move_instance_by_char_id(int character_id, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, character_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_group_id(int group_id, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, group_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_raid_id(int raid_id, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, raid_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_guild_id(int guild_id, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, guild_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_expedition_id(uint32 expedition_id, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, expedition_id, zone_short_name, instance_id);
+}
+
+void lua_cross_zone_move_instance_by_client_name(const char* client_name, uint16 instance_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
+	int update_identifier = 0;
+	const char* zone_short_name = "";
+	quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
+}
+
+void lua_cross_zone_remove_spell_by_char_id(int character_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, character_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_group_id(int group_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, group_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_raid_id(int raid_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, raid_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_guild_id(int guild_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, guild_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_expedition_id(uint32 expedition_id, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, expedition_id, spell_id);
+}
+
+void lua_cross_zone_remove_spell_by_client_name(const char* client_name, uint32 spell_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
+	int update_identifier = 0;
+	quest_manager.CrossZoneSpell(update_type, update_subtype, update_identifier, spell_id, client_name);
+}
+
+void lua_cross_zone_remove_task_by_char_id(int character_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_remove_task_by_group_id(int group_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_remove_task_by_raid_id(int raid_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_remove_task_by_guild_id(int guild_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_remove_task_by_expedition_id(uint32 expedition_id, uint32 task_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_remove_task_by_client_name(const char* client_name, uint32 task_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_RemoveTask;
+	int update_identifier = 0;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, task_subidentifier, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_reset_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_reset_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_reset_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_reset_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_reset_activity_by_expedition_id(uint32 expedition_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_reset_activity_by_client_name(const char* client_name, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityReset;
+	int update_identifier = 0;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, activity_id, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_set_entity_variable_by_char_id(int character_id, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_Character;
+	quest_manager.CrossZoneSetEntityVariable(update_type, character_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_group_id(int group_id, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_Group;
+	quest_manager.CrossZoneSetEntityVariable(update_type, group_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_raid_id(int raid_id, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_Raid;
+	quest_manager.CrossZoneSetEntityVariable(update_type, raid_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_guild_id(int guild_id, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_Guild;
+	quest_manager.CrossZoneSetEntityVariable(update_type, guild_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_expedition_id(uint32 expedition_id, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_Expedition;
+	quest_manager.CrossZoneSetEntityVariable(update_type, expedition_id, variable_name, variable_value);
+}
+
+void lua_cross_zone_set_entity_variable_by_client_name(const char* character_name, const char* variable_name, const char* variable_value) {
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	quest_manager.CrossZoneSetEntityVariable(update_type, update_identifier, variable_name, variable_value, character_name);
+}
+
+void lua_cross_zone_signal_client_by_char_id(uint32 character_id, int signal) {
+	uint8 update_type = CZUpdateType_Character;
+	quest_manager.CrossZoneSignal(update_type, character_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_group_id(uint32 group_id, int signal) {
+	uint8 update_type = CZUpdateType_Group;
+	quest_manager.CrossZoneSignal(update_type, group_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_raid_id(uint32 raid_id, int signal) {
+	uint8 update_type = CZUpdateType_Raid;
+	quest_manager.CrossZoneSignal(update_type, raid_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_guild_id(uint32 guild_id, int signal) {
+	uint8 update_type = CZUpdateType_Guild;
+	quest_manager.CrossZoneSignal(update_type, guild_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_expedition_id(uint32 expedition_id, int signal) {
+	uint8 update_type = CZUpdateType_Expedition;
+	quest_manager.CrossZoneSignal(update_type, expedition_id, signal);
+}
+
+void lua_cross_zone_signal_client_by_name(const char* client_name, int signal) {
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	quest_manager.CrossZoneSignal(update_type, update_identifier, signal, client_name);
+}
+
+void lua_cross_zone_signal_npc_by_npctype_id(uint32 npctype_id, int signal) {
+	uint8 update_type = CZUpdateType_NPC;
+	quest_manager.CrossZoneSignal(update_type, npctype_id, signal);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_char_id(int character_id, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, character_id, task_id, activity_id, activity_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_group_id(int group_id, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, group_id, task_id, activity_id, activity_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_raid_id(int raid_id, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, raid_id, task_id, activity_id, activity_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_guild_id(int guild_id, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, guild_id, task_id, activity_id, activity_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_expedition_id(uint32 expedition_id, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, activity_id, update_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_expedition_id(uint32 expedition_id, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, expedition_id, task_id, activity_id, activity_count, enforce_level_requirement);
+}
+
+void lua_cross_zone_update_activity_by_client_name(const char* client_name, uint32 task_id, int activity_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_identifier = 0;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, activity_id, update_count, enforce_level_requirement, client_name);
+}
+
+void lua_cross_zone_update_activity_by_client_name(const char* client_name, uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZTaskUpdateSubtype_ActivityUpdate;
+	int update_identifier = 0;
+	bool enforce_level_requirement = false;
+	quest_manager.CrossZoneTaskUpdate(update_type, update_subtype, update_identifier, task_id, activity_id, activity_count, enforce_level_requirement, client_name);
+}
+
+void lua_world_wide_add_ldon_loss(uint32 theme_id) {
+	uint8 update_type = WWLDoNUpdateType_Loss;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
+}
+
+void lua_world_wide_add_ldon_loss(uint32 theme_id, uint8 min_status) {
+	uint8 update_type = WWLDoNUpdateType_Loss;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
+}
+
+void lua_world_wide_add_ldon_loss(uint32 theme_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWLDoNUpdateType_Loss;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
+}
+
+void lua_world_wide_add_ldon_points(uint32 theme_id, int points) {
+	uint8 update_type = WWLDoNUpdateType_Points;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points);
+}
+
+void lua_world_wide_add_ldon_points(uint32 theme_id, int points, uint8 min_status) {
+	uint8 update_type = WWLDoNUpdateType_Points;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
+}
+
+void lua_world_wide_add_ldon_points(uint32 theme_id, int points, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWLDoNUpdateType_Points;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
+}
+
+void lua_world_wide_add_ldon_win(uint32 theme_id) {
+	uint8 update_type = WWLDoNUpdateType_Win;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
+}
+
+void lua_world_wide_add_ldon_win(uint32 theme_id, uint8 min_status) {
+	uint8 update_type = WWLDoNUpdateType_Win;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
+}
+
+void lua_world_wide_add_ldon_win(uint32 theme_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWLDoNUpdateType_Win;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
+}
+
+void lua_world_wide_assign_task(uint32 task_id) {
+	uint8 update_type = WWTaskUpdateType_AssignTask;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement) {
+	uint8 update_type = WWTaskUpdateType_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_assign_task(uint32 task_id, bool enforce_level_requirement, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_AssignTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id) {
+	uint8 update_type = WWSpellUpdateType_Cast;
+	quest_manager.WorldWideSpell(update_type, spell_id);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status) {
+	uint8 update_type = WWSpellUpdateType_Cast;
+	quest_manager.WorldWideSpell(update_type, spell_id, min_status);
+}
+
+void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWSpellUpdateType_Cast;
+	quest_manager.WorldWideSpell(update_type, spell_id, min_status, max_status);
+}
+
+void lua_world_wide_disable_task(uint32 task_id) {
+	uint8 update_type = WWTaskUpdateType_DisableTask;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id);
+}
+
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_disable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_DisableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_enable_task(uint32 task_id) {
+	uint8 update_type = WWTaskUpdateType_EnableTask;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_enable_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_EnableTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_fail_task(uint32 task_id) {
+	uint8 update_type = WWTaskUpdateType_FailTask;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id);
+}
+
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_fail_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_FailTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status);
+}
+
+void lua_world_wide_marquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMarquee(type, priority, fade_in, fade_out, duration, message, min_status, max_status);
+}
+
+void lua_world_wide_message(uint32 type, const char* message) {
+	quest_manager.WorldWideMessage(type, message);
+}
+
+void lua_world_wide_message(uint32 type, const char* message, uint8 min_status) {
+	quest_manager.WorldWideMessage(type, message, min_status);
+}
+
+void lua_world_wide_message(uint32 type, const char* message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideMessage(type, message, min_status, max_status);
+}
+
+void lua_world_wide_move(const char* zone_short_name) {
+	uint8 update_type = WWMoveUpdateType_MoveZone;
+	quest_manager.WorldWideMove(update_type, zone_short_name);
+}
+
+void lua_world_wide_move(const char* zone_short_name, uint8 min_status) {
+	uint8 update_type = WWMoveUpdateType_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status);
+}
+
+void lua_world_wide_move(const char* zone_short_name, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWMoveUpdateType_MoveZone;
+	uint16 instance_id = 0;
+	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status, max_status);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id) {
+	uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status) {
+	uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status);
+}
+
+void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
+	const char* zone_short_name = "";
+	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status, max_status);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id) {
+	uint8 update_type = WWSpellUpdateType_Remove;
+	quest_manager.WorldWideSpell(update_type, spell_id);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status) {
+	uint8 update_type = WWSpellUpdateType_Remove;
+	quest_manager.WorldWideSpell(update_type, spell_id, min_status);
+}
+
+void lua_world_wide_remove_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWSpellUpdateType_Remove;
+	quest_manager.WorldWideSpell(update_type, spell_id, min_status, max_status);
+}
+
+void lua_world_wide_remove_task(uint32 task_id) {
+	uint8 update_type = WWTaskUpdateType_RemoveTask;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id);
+}
+
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_remove_task(uint32 task_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_RemoveTask;
+	int task_subidentifier = -1;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, task_subidentifier, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id) {
+	uint8 update_type = WWTaskUpdateType_ActivityReset;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, update_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_reset_activity(uint32 task_id, int activity_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_ActivityReset;
+	int update_count = 1;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, update_count, enforce_level_requirement, min_status, max_status);
+}
+
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value) {
+	uint8 update_type = WWSetEntityVariableUpdateType_Character;
+	quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value);
+}
+
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value, uint8 min_status) {
+	uint8 update_type = WWSetEntityVariableUpdateType_Character;
+	quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value, min_status);
+}
+
+void lua_world_wide_set_entity_variable_client(const char* variable_name, const char* variable_value, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWSetEntityVariableUpdateType_Character;
+	quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value, min_status, max_status);
+}
+
+void lua_world_wide_set_entity_variable_npc(const char* variable_name, const char* variable_value) {
+	uint8 update_type = WWSetEntityVariableUpdateType_NPC;
+	quest_manager.WorldWideSetEntityVariable(update_type, variable_name, variable_value);
+}
+
+void lua_world_wide_signal_client(uint32 signal) {
+	uint8 update_type = WWSignalUpdateType_Character;
+	quest_manager.WorldWideSignal(update_type, signal);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status) {
+	uint8 update_type = WWSignalUpdateType_Character;
+	quest_manager.WorldWideSignal(update_type, signal, min_status);
+}
+
+void lua_world_wide_signal_client(uint32 signal, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWSignalUpdateType_Character;
+	quest_manager.WorldWideSignal(update_type, signal, min_status, max_status);
+}
+
+void lua_world_wide_signal_npc(uint32 signal) {
+	uint8 update_type = WWSignalUpdateType_NPC;
+	quest_manager.WorldWideSignal(update_type, signal);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id) {
+	uint8 update_type = WWTaskUpdateType_ActivityUpdate;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count) {
+	uint8 update_type = WWTaskUpdateType_ActivityUpdate;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, activity_count);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status) {
+	uint8 update_type = WWTaskUpdateType_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, activity_count, enforce_level_requirement, min_status);
+}
+
+void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activity_count, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWTaskUpdateType_ActivityUpdate;
+	bool enforce_level_requirement = false;
+	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, activity_count, enforce_level_requirement, min_status, max_status);
 }
 
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
@@ -2866,125 +3496,6 @@ luabind::scope lua_register_general() {
 		luabind::def("wear_change", &lua_wear_change),
 		luabind::def("voice_tell", &lua_voice_tell),
 		luabind::def("send_mail", &lua_send_mail),
-		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_char_id),
-		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_char_id),
-		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_group_id),
-		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_group_id),
-		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_raid_id),
-		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
-		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
-		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
-		luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
-		luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
-		luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
-		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
-		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
-		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
-		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
-		luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
-		luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
-		luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
-		luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
-		luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
-		luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
-		luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
-		luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
-		luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
-		luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
-		luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
-		luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
-		luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
-		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
-		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
-		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
-		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
-		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
-		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
-		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
-		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
-		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
-		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
-		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
-		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
-		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
-		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
-		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
-		luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
-		luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
-		luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
-		luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
-		luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
-		luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
-		luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
-		luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
-		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
-		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
-		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
-		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
-		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
-		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
-		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
-		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
-		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
-		luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
-		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_char_id),
-		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_char_id),
-		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_group_id),
-		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_group_id),
-		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_raid_id),
-		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_raid_id),
-		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_guild_id),
-		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
-		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
-		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8,uint8))&lua_world_wide_assign_task),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
-		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
-		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
-		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32))&lua_world_wide_enable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8))&lua_world_wide_enable_task),
-		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_enable_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32))&lua_world_wide_fail_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8))&lua_world_wide_fail_task),
-		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_fail_task),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*))&lua_world_wide_marquee),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8))&lua_world_wide_marquee),
-		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8,uint8))&lua_world_wide_marquee),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*))&lua_world_wide_message),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8))&lua_world_wide_message),
-		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8,uint8))&lua_world_wide_message),
-		luabind::def("world_wide_move", (void(*)(const char*))&lua_world_wide_move),
-		luabind::def("world_wide_move", (void(*)(const char*,uint8))&lua_world_wide_move),
-		luabind::def("world_wide_move", (void(*)(const char*,uint8,uint8))&lua_world_wide_move),
-		luabind::def("world_wide_move_instance", (void(*)(uint16))&lua_world_wide_move_instance),
-		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8))&lua_world_wide_move_instance),
-		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8,uint8))&lua_world_wide_move_instance),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_spell),
-		luabind::def("world_wide_remove_task", (void(*)(uint32))&lua_world_wide_remove_task),
-		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8))&lua_world_wide_remove_task),
-		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_task),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_reset_activity),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
-		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
-		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
-		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8))&lua_world_wide_update_activity),
-		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8,uint8))&lua_world_wide_update_activity),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_Client))&lua_get_qglobals),
 		luabind::def("get_qglobals", (luabind::adl::object(*)(lua_State*,Lua_NPC))&lua_get_qglobals),
@@ -3041,21 +3552,6 @@ luabind::scope lua_register_general() {
 		luabind::def("add_ldon_loss", &lua_add_ldon_loss),
 		luabind::def("add_ldon_points", &lua_add_ldon_points),
 		luabind::def("add_ldon_win", &lua_add_ldon_win),
-		luabind::def("cross_zone_add_ldon_loss_by_char_id", &lua_cross_zone_add_ldon_loss_by_char_id),
-		luabind::def("cross_zone_add_ldon_points_by_char_id", &lua_cross_zone_add_ldon_points_by_char_id),
-		luabind::def("cross_zone_add_ldon_win_by_char_id", &lua_cross_zone_add_ldon_win_by_char_id),
-		luabind::def("cross_zone_add_ldon_loss_by_group_id", &lua_cross_zone_add_ldon_loss_by_group_id),
-		luabind::def("cross_zone_add_ldon_points_by_group_id", &lua_cross_zone_add_ldon_points_by_group_id),
-		luabind::def("cross_zone_add_ldon_win_by_group_id", &lua_cross_zone_add_ldon_win_by_group_id),
-		luabind::def("cross_zone_add_ldon_loss_by_raid_id", &lua_cross_zone_add_ldon_loss_by_raid_id),
-		luabind::def("cross_zone_add_ldon_points_by_raid_id", &lua_cross_zone_add_ldon_points_by_raid_id),
-		luabind::def("cross_zone_add_ldon_win_by_raid_id", &lua_cross_zone_add_ldon_win_by_raid_id),
-		luabind::def("cross_zone_add_ldon_loss_by_guild_id", &lua_cross_zone_add_ldon_loss_by_guild_id),
-		luabind::def("cross_zone_add_ldon_points_by_guild_id", &lua_cross_zone_add_ldon_points_by_guild_id),
-		luabind::def("cross_zone_add_ldon_win_by_guild_id", &lua_cross_zone_add_ldon_win_by_guild_id),
-		luabind::def("cross_zone_add_ldon_loss_by_expedition_id", &lua_cross_zone_add_ldon_loss_by_expedition_id),
-		luabind::def("cross_zone_add_ldon_points_by_expedition_id", &lua_cross_zone_add_ldon_points_by_expedition_id),
-		luabind::def("cross_zone_add_ldon_win_by_expedition_id", &lua_cross_zone_add_ldon_win_by_expedition_id),
 		luabind::def("get_gender_name", &lua_get_gender_name),
 		luabind::def("get_deity_name", &lua_get_deity_name),
 		luabind::def("get_inventory_slot_name", &lua_get_inventory_slot_name),
@@ -3064,6 +3560,193 @@ luabind::scope lua_register_general() {
 		luabind::def("get_item_stat", &lua_get_item_stat),
 		luabind::def("get_spell_stat", (int(*)(uint32,std::string))&lua_get_spell_stat),
 		luabind::def("get_spell_stat", (int(*)(uint32,std::string,uint8))&lua_get_spell_stat),
+
+		/*
+			Cross Zone
+		*/
+		luabind::def("cross_zone_add_ldon_loss_by_char_id", &lua_cross_zone_add_ldon_loss_by_char_id),
+		luabind::def("cross_zone_add_ldon_loss_by_group_id", &lua_cross_zone_add_ldon_loss_by_group_id),
+		luabind::def("cross_zone_add_ldon_loss_by_raid_id", &lua_cross_zone_add_ldon_loss_by_raid_id),
+		luabind::def("cross_zone_add_ldon_loss_by_guild_id", &lua_cross_zone_add_ldon_loss_by_guild_id),
+		luabind::def("cross_zone_add_ldon_loss_by_expedition_id", &lua_cross_zone_add_ldon_loss_by_expedition_id),
+		luabind::def("cross_zone_add_ldon_loss_by_client_name", &lua_cross_zone_add_ldon_loss_by_client_name),
+		luabind::def("cross_zone_add_ldon_points_by_char_id", &lua_cross_zone_add_ldon_points_by_char_id),
+		luabind::def("cross_zone_add_ldon_points_by_group_id", &lua_cross_zone_add_ldon_points_by_group_id),
+		luabind::def("cross_zone_add_ldon_points_by_raid_id", &lua_cross_zone_add_ldon_points_by_raid_id),
+		luabind::def("cross_zone_add_ldon_points_by_guild_id", &lua_cross_zone_add_ldon_points_by_guild_id),
+		luabind::def("cross_zone_add_ldon_points_by_expedition_id", &lua_cross_zone_add_ldon_points_by_expedition_id),
+		luabind::def("cross_zone_add_ldon_points_by_client_name", &lua_cross_zone_add_ldon_points_by_client_name),
+		luabind::def("cross_zone_add_ldon_win_by_char_id", &lua_cross_zone_add_ldon_win_by_char_id),
+		luabind::def("cross_zone_add_ldon_win_by_group_id", &lua_cross_zone_add_ldon_win_by_group_id),
+		luabind::def("cross_zone_add_ldon_win_by_raid_id", &lua_cross_zone_add_ldon_win_by_raid_id),
+		luabind::def("cross_zone_add_ldon_win_by_guild_id", &lua_cross_zone_add_ldon_win_by_guild_id),
+		luabind::def("cross_zone_add_ldon_win_by_expedition_id", &lua_cross_zone_add_ldon_win_by_expedition_id),
+		luabind::def("cross_zone_add_ldon_win_by_client_name", &lua_cross_zone_add_ldon_win_by_client_name),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_char_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_char_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_group_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_group_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_raid_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_raid_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32))&lua_cross_zone_assign_task_by_guild_id),
+		luabind::def("cross_zone_assign_task_by_guild_id", (void(*)(int,uint32,bool))&lua_cross_zone_assign_task_by_guild_id),
+		luabind::def("cross_zone_assign_task_by_expedition_id", (void(*)(uint32,uint32))&lua_cross_zone_assign_task_by_expedition_id),
+		luabind::def("cross_zone_assign_task_by_expedition_id", (void(*)(uint32,uint32,bool))&lua_cross_zone_assign_task_by_expedition_id),
+		luabind::def("cross_zone_assign_task_by_client_name", (void(*)(const char*,uint32))&lua_cross_zone_assign_task_by_client_name),
+		luabind::def("cross_zone_assign_task_by_client_name", (void(*)(const char*,uint32,bool))&lua_cross_zone_assign_task_by_client_name),
+		luabind::def("cross_zone_cast_spell_by_char_id", &lua_cross_zone_cast_spell_by_char_id),
+		luabind::def("cross_zone_cast_spell_by_group_id", &lua_cross_zone_cast_spell_by_group_id),
+		luabind::def("cross_zone_cast_spell_by_raid_id", &lua_cross_zone_cast_spell_by_raid_id),
+		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
+		luabind::def("cross_zone_cast_spell_by_expedition_id", &lua_cross_zone_cast_spell_by_expedition_id),
+		luabind::def("cross_zone_cast_spell_by_client_name", &lua_cross_zone_cast_spell_by_client_name),
+		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
+		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
+		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
+		luabind::def("cross_zone_disable_task_by_guild_id", &lua_cross_zone_disable_task_by_guild_id),
+		luabind::def("cross_zone_disable_task_by_expedition_id", &lua_cross_zone_disable_task_by_expedition_id),
+		luabind::def("cross_zone_disable_task_by_client_name", &lua_cross_zone_disable_task_by_client_name),
+		luabind::def("cross_zone_enable_task_by_char_id", &lua_cross_zone_enable_task_by_char_id),
+		luabind::def("cross_zone_enable_task_by_group_id", &lua_cross_zone_enable_task_by_group_id),
+		luabind::def("cross_zone_enable_task_by_raid_id", &lua_cross_zone_enable_task_by_raid_id),
+		luabind::def("cross_zone_enable_task_by_guild_id", &lua_cross_zone_enable_task_by_guild_id),
+		luabind::def("cross_zone_enable_task_by_expedition_id", &lua_cross_zone_enable_task_by_expedition_id),
+		luabind::def("cross_zone_enable_task_by_client_name", &lua_cross_zone_enable_task_by_client_name),
+		luabind::def("cross_zone_fail_task_by_char_id", &lua_cross_zone_fail_task_by_char_id),
+		luabind::def("cross_zone_fail_task_by_group_id", &lua_cross_zone_fail_task_by_group_id),
+		luabind::def("cross_zone_fail_task_by_raid_id", &lua_cross_zone_fail_task_by_raid_id),
+		luabind::def("cross_zone_fail_task_by_guild_id", &lua_cross_zone_fail_task_by_guild_id),
+		luabind::def("cross_zone_fail_task_by_expedition_id", &lua_cross_zone_fail_task_by_expedition_id),
+		luabind::def("cross_zone_fail_task_by_client_name", &lua_cross_zone_fail_task_by_client_name),
+		luabind::def("cross_zone_marquee_by_char_id", &lua_cross_zone_marquee_by_char_id),
+		luabind::def("cross_zone_marquee_by_group_id", &lua_cross_zone_marquee_by_group_id),
+		luabind::def("cross_zone_marquee_by_raid_id", &lua_cross_zone_marquee_by_raid_id),
+		luabind::def("cross_zone_marquee_by_guild_id", &lua_cross_zone_marquee_by_guild_id),
+		luabind::def("cross_zone_marquee_by_expedition_id", &lua_cross_zone_marquee_by_expedition_id),
+		luabind::def("cross_zone_marquee_by_client_name", &lua_cross_zone_marquee_by_client_name),
+		luabind::def("cross_zone_message_player_by_char_id", &lua_cross_zone_message_player_by_char_id),
+		luabind::def("cross_zone_message_player_by_group_id", &lua_cross_zone_message_player_by_group_id),
+		luabind::def("cross_zone_message_player_by_raid_id", &lua_cross_zone_message_player_by_raid_id),
+		luabind::def("cross_zone_message_player_by_guild_id", &lua_cross_zone_message_player_by_guild_id),
+		luabind::def("cross_zone_message_player_by_expedition_id", &lua_cross_zone_message_player_by_expedition_id),
+		luabind::def("cross_zone_message_player_by_name", &lua_cross_zone_message_player_by_name),
+		luabind::def("cross_zone_move_player_by_char_id", &lua_cross_zone_move_player_by_char_id),
+		luabind::def("cross_zone_move_player_by_group_id", &lua_cross_zone_move_player_by_group_id),
+		luabind::def("cross_zone_move_player_by_raid_id", &lua_cross_zone_move_player_by_raid_id),
+		luabind::def("cross_zone_move_player_by_guild_id", &lua_cross_zone_move_player_by_guild_id),
+		luabind::def("cross_zone_move_player_by_expedition_id", &lua_cross_zone_move_player_by_expedition_id),
+		luabind::def("cross_zone_move_player_by_client_name", &lua_cross_zone_move_player_by_client_name),
+		luabind::def("cross_zone_move_instance_by_char_id", &lua_cross_zone_move_instance_by_char_id),
+		luabind::def("cross_zone_move_instance_by_group_id", &lua_cross_zone_move_instance_by_group_id),
+		luabind::def("cross_zone_move_instance_by_raid_id", &lua_cross_zone_move_instance_by_raid_id),
+		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
+		luabind::def("cross_zone_move_instance_by_expedition_id", &lua_cross_zone_move_instance_by_expedition_id),
+		luabind::def("cross_zone_move_instance_by_client_name", &lua_cross_zone_move_instance_by_client_name),
+		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
+		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
+		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
+		luabind::def("cross_zone_remove_spell_by_guild_id", &lua_cross_zone_remove_spell_by_guild_id),
+		luabind::def("cross_zone_remove_spell_by_expedition_id", &lua_cross_zone_remove_spell_by_expedition_id),
+		luabind::def("cross_zone_remove_spell_by_client_name", &lua_cross_zone_remove_spell_by_client_name),
+		luabind::def("cross_zone_remove_task_by_char_id", &lua_cross_zone_remove_task_by_char_id),
+		luabind::def("cross_zone_remove_task_by_group_id", &lua_cross_zone_remove_task_by_group_id),
+		luabind::def("cross_zone_remove_task_by_raid_id", &lua_cross_zone_remove_task_by_raid_id),
+		luabind::def("cross_zone_remove_task_by_guild_id", &lua_cross_zone_remove_task_by_guild_id),
+		luabind::def("cross_zone_remove_task_by_expedition_id", &lua_cross_zone_remove_task_by_expedition_id),
+		luabind::def("cross_zone_remove_task_by_client_name", &lua_cross_zone_remove_task_by_client_name),
+		luabind::def("cross_zone_reset_activity_by_char_id", &lua_cross_zone_reset_activity_by_char_id),
+		luabind::def("cross_zone_reset_activity_by_group_id", &lua_cross_zone_reset_activity_by_group_id),
+		luabind::def("cross_zone_reset_activity_by_raid_id", &lua_cross_zone_reset_activity_by_raid_id),
+		luabind::def("cross_zone_reset_activity_by_guild_id", &lua_cross_zone_reset_activity_by_guild_id),
+		luabind::def("cross_zone_reset_activity_by_expedition_id", &lua_cross_zone_reset_activity_by_expedition_id),
+		luabind::def("cross_zone_reset_activity_by_client_name", &lua_cross_zone_reset_activity_by_client_name),
+		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
+		luabind::def("cross_zone_set_entity_variable_by_group_id", &lua_cross_zone_set_entity_variable_by_group_id),
+		luabind::def("cross_zone_set_entity_variable_by_raid_id", &lua_cross_zone_set_entity_variable_by_raid_id),
+		luabind::def("cross_zone_set_entity_variable_by_guild_id", &lua_cross_zone_set_entity_variable_by_guild_id),
+		luabind::def("cross_zone_set_entity_variable_by_expedition_id", &lua_cross_zone_set_entity_variable_by_expedition_id),
+		luabind::def("cross_zone_set_entity_variable_by_client_name", &lua_cross_zone_set_entity_variable_by_client_name),
+		luabind::def("cross_zone_signal_client_by_char_id", &lua_cross_zone_signal_client_by_char_id),
+		luabind::def("cross_zone_signal_client_by_group_id", &lua_cross_zone_signal_client_by_group_id),
+		luabind::def("cross_zone_signal_client_by_raid_id", &lua_cross_zone_signal_client_by_raid_id),
+		luabind::def("cross_zone_signal_client_by_guild_id", &lua_cross_zone_signal_client_by_guild_id),
+		luabind::def("cross_zone_signal_client_by_expedition_id", &lua_cross_zone_signal_client_by_expedition_id),
+		luabind::def("cross_zone_signal_client_by_name", &lua_cross_zone_signal_client_by_name),
+		luabind::def("cross_zone_signal_npc_by_npctype_id", &lua_cross_zone_signal_npc_by_npctype_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_char_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_char_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_group_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_group_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_raid_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_raid_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("cross_zone_update_activity_by_guild_id", (void(*)(int,uint32,int,int))&lua_cross_zone_update_activity_by_guild_id),
+		luabind::def("cross_zone_update_activity_by_expedition_id", (void(*)(uint32,uint32,int))&lua_cross_zone_update_activity_by_expedition_id),
+		luabind::def("cross_zone_update_activity_by_expedition_id", (void(*)(uint32,uint32,int,int))&lua_cross_zone_update_activity_by_expedition_id),
+		luabind::def("cross_zone_update_activity_by_client_name", (void(*)(const char*,uint32,int))&lua_cross_zone_update_activity_by_client_name),
+		luabind::def("cross_zone_update_activity_by_client_name", (void(*)(const char*,uint32,int,int))&lua_cross_zone_update_activity_by_client_name),
+
+		/*
+			World Wide
+		*/
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32))&lua_world_wide_add_ldon_loss),
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8))&lua_world_wide_add_ldon_loss),
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8,uint8))&lua_world_wide_add_ldon_loss),
+		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int))&lua_world_wide_add_ldon_points),
+		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int,uint8))&lua_world_wide_add_ldon_points),
+		luabind::def("world_wide_add_ldon_points", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_add_ldon_points),
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_add_ldon_loss", (void(*)(uint32,uint8,uint8))&lua_world_wide_add_ldon_win),
+		luabind::def("world_wide_assign_task", (void(*)(uint32))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_assign_task", (void(*)(uint32,bool,uint8,uint8))&lua_world_wide_assign_task),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_enable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_enable_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_fail_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_fail_task),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_marquee", (void(*)(uint32,uint32,uint32,uint32,uint32,const char*,uint8,uint8))&lua_world_wide_marquee),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_message", (void(*)(uint32,const char*,uint8,uint8))&lua_world_wide_message),
+		luabind::def("world_wide_move", (void(*)(const char*))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move", (void(*)(const char*,uint8,uint8))&lua_world_wide_move),
+		luabind::def("world_wide_move_instance", (void(*)(uint16))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_move_instance", (void(*)(uint16,uint8,uint8))&lua_world_wide_move_instance),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_spell),
+		luabind::def("world_wide_remove_task", (void(*)(uint32))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_remove_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_remove_task),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_reset_activity", (void(*)(uint32,int,uint8,uint8))&lua_world_wide_reset_activity),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_client", (void(*)(const char*,const char*,uint8,uint8))&lua_world_wide_set_entity_variable_client),
+		luabind::def("world_wide_set_entity_variable_npc", &lua_world_wide_set_entity_variable_npc),
+		luabind::def("world_wide_signal_client", (void(*)(uint32))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_client", (void(*)(uint32,uint8,uint8))&lua_world_wide_signal_client),
+		luabind::def("world_wide_signal_npc", &lua_world_wide_signal_npc),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8))&lua_world_wide_update_activity),
+		luabind::def("world_wide_update_activity", (void(*)(uint32,int,int,uint8,uint8))&lua_world_wide_update_activity),
 
 		/**
 		 * Expansions
