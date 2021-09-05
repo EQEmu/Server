@@ -32,7 +32,6 @@ SET(common_sources
 	eq_stream_proxy.cpp
 	eqtime.cpp
 	event_sub.cpp
-	expedition_base.cpp
 	expedition_lockout_timer.cpp
 	extprofile.cpp
 	faction.cpp
@@ -72,6 +71,7 @@ SET(common_sources
 	serialize_buffer.cpp
 	server_event_scheduler.cpp
 	serverinfo.cpp
+	shared_tasks.cpp
 	shareddb.cpp
 	skills.cpp
 	spdat.cpp
@@ -154,6 +154,7 @@ SET(repositories
 	repositories/base/base_character_disciplines_repository.h
 	repositories/base/base_character_expedition_lockouts_repository.h
 	repositories/base/base_character_inspect_messages_repository.h
+	repositories/base/base_character_instance_safereturns_repository.h
 	repositories/base/base_character_item_recast_repository.h
 	repositories/base/base_character_languages_repository.h
 	repositories/base/base_character_leadership_abilities_repository.h
@@ -165,11 +166,15 @@ SET(repositories
 	repositories/base/base_character_potionbelt_repository.h
 	repositories/base/base_character_skills_repository.h
 	repositories/base/base_character_spells_repository.h
+	repositories/base/base_character_task_timers_repository.h
 	repositories/base/base_character_tasks_repository.h
 	repositories/base/base_char_create_combinations_repository.h
 	repositories/base/base_char_create_point_allocations_repository.h
 	repositories/base/base_char_recipe_list_repository.h
 	repositories/base/base_completed_tasks_repository.h
+	repositories/base/base_completed_shared_tasks_repository.h
+	repositories/base/base_completed_shared_task_members_repository.h
+	repositories/base/base_completed_shared_task_activity_state_repository.h
 	repositories/base/base_content_flags_repository.h
 	repositories/base/base_damageshieldtypes_repository.h
 	repositories/base/base_data_buckets_repository.h
@@ -255,6 +260,10 @@ SET(repositories
 	repositories/base/base_rule_values_repository.h
 	repositories/base/base_saylink_repository.h
 	repositories/base/base_server_scheduled_events_repository.h
+	repositories/base/base_shared_tasks_repository.h
+	repositories/base/base_shared_task_activity_state_repository.h
+	repositories/base/base_shared_task_dynamic_zones_repository.h
+	repositories/base/base_shared_task_members_repository.h
 	repositories/base/base_skill_caps_repository.h
 	repositories/base/base_spawn2_repository.h
 	repositories/base/base_spawnentry_repository.h
@@ -318,6 +327,7 @@ SET(repositories
 	repositories/character_disciplines_repository.h
 	repositories/character_expedition_lockouts_repository.h
 	repositories/character_inspect_messages_repository.h
+	repositories/character_instance_safereturns_repository.h
 	repositories/character_item_recast_repository.h
 	repositories/character_languages_repository.h
 	repositories/character_leadership_abilities_repository.h
@@ -329,11 +339,15 @@ SET(repositories
 	repositories/character_potionbelt_repository.h
 	repositories/character_skills_repository.h
 	repositories/character_spells_repository.h
+	repositories/character_task_timers_repository.h
 	repositories/character_tasks_repository.h
 	repositories/char_create_combinations_repository.h
 	repositories/char_create_point_allocations_repository.h
 	repositories/char_recipe_list_repository.h
 	repositories/completed_tasks_repository.h
+	repositories/completed_shared_tasks_repository.h
+	repositories/completed_shared_task_members_repository.h
+	repositories/completed_shared_task_activity_state_repository.h
 	repositories/content_flags_repository.h
 	repositories/damageshieldtypes_repository.h
 	repositories/data_buckets_repository.h
@@ -419,6 +433,10 @@ SET(repositories
 	repositories/rule_values_repository.h
 	repositories/saylink_repository.h
 	repositories/server_scheduled_events_repository.h
+	repositories/shared_tasks_repository.h
+	repositories/shared_task_activity_state_repository.h
+	repositories/shared_task_dynamic_zones_repository.h
+	repositories/shared_task_members_repository.h
 	repositories/skill_caps_repository.h
 	repositories/spawn2_repository.h
 	repositories/spawnentry_repository.h
@@ -497,7 +515,6 @@ SET(common_headers
 	eqtime.h
 	errmsg.h
 	event_sub.h
-	expedition_base.h
 	expedition_lockout_timer.h
 	extprofile.h
 	faction.h
@@ -553,11 +570,13 @@ SET(common_headers
 	server_event_scheduler.h
 	serverinfo.h
 	servertalk.h
+	shared_tasks.h
 	shareddb.h
 	skills.h
 	spdat.h
     string_util.h
 	struct_strategy.h
+	tasks.h
 	textures.h
 	timer.h
 	types.h

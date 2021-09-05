@@ -6,6 +6,7 @@
 #include "task_proximity_manager.h"
 #include "task_goal_list_manager.h"
 #include "../common/types.h"
+#include "../common/repositories/character_tasks_repository.h"
 #include <list>
 #include <vector>
 #include <string>
@@ -31,7 +32,6 @@ public:
 	bool LoadClientState(Client *client, ClientTaskState *client_task_state);
 	bool SaveClientState(Client *client, ClientTaskState *client_task_state);
 	void SendTaskSelector(Client *client, Mob *mob, int task_count, int *task_list);
-	void SendTaskSelectorNew(Client *client, Mob *mob, int task_count, int *task_list);
 	bool ValidateLevel(int task_id, int player_level);
 	std::string GetTaskName(uint32 task_id);
 	TaskType GetTaskType(uint32 task_id);
@@ -44,6 +44,7 @@ public:
 		int count,
 		int *tasks
 	);
+	void SharedTaskSelector(Client* client, Mob* mob, int count, const int* tasks);
 	void SendActiveTasksToClient(Client *client, bool task_complete = false);
 	void SendSingleActiveTaskToClient(
 		Client *client,
@@ -57,15 +58,6 @@ public:
 		int task_id,
 		int activity_id,
 		int client_task_index,
-		bool optional,
-		bool task_complete = false
-	);
-	void SendTaskActivityNew(
-		Client *client,
-		int task_id,
-		int activity_id,
-		int client_task_index,
-		bool optional,
 		bool task_complete = false
 	);
 	void SendCompletedTasksToClient(Client *c, ClientTaskState *client_task_state);
@@ -77,6 +69,8 @@ public:
 
 	friend class ClientTaskState;
 
+	// shared tasks
+	void SyncClientSharedTaskState(Client *c, ClientTaskState *cts);
 
 private:
 	TaskGoalListManager  m_goal_list_manager;
@@ -92,6 +86,13 @@ private:
 		bool bring_up_task_journal = false
 	);
 
+	void SendActiveTaskToClient(ClientTaskInformation *task, Client *client, int task_index, bool task_complete);
+
+	// shared tasks
+	void SyncClientSharedTaskWithPersistedState(Client *c, ClientTaskState *cts);
+	void SyncClientSharedTaskRemoveLocalIfNotExists(Client *c, ClientTaskState *cts);
+	void SendSharedTaskSelector(Client* client, Mob* mob, int task_count, int* task_list);
+	void SyncClientSharedTaskStateToLocal(Client *c);
 };
 
 

@@ -348,9 +348,10 @@ Client::Client(EQStreamInterface* ieqs)
 	temp_pvp = false;
 	is_client_moving = false;
 
-	/**
-	 * GM
-	 */
+	// rate limiter
+	m_list_task_timers_rate_limit.Start(1000);
+
+	// gm
 	SetDisplayMobInfoWindow(true);
 	SetDevToolsEnabled(true);
 
@@ -1550,46 +1551,56 @@ void Client::SendSound(){//Makes a sound.
 	safe_delete(outapp);
 
 }
-void Client::UpdateWho(uint8 remove) {
-	if (account_id == 0)
+void Client::UpdateWho(uint8 remove)
+{
+	if (account_id == 0) {
 		return;
-	if (!worldserver.Connected())
+	}
+	if (!worldserver.Connected()) {
 		return;
+	}
+
 	auto pack = new ServerPacket(ServerOP_ClientList, sizeof(ServerClientList_Struct));
-	ServerClientList_Struct* scl = (ServerClientList_Struct*) pack->pBuffer;
-	scl->remove = remove;
-	scl->wid = this->GetWID();
-	scl->IP = this->GetIP();
-	scl->charid = this->CharacterID();
-	strcpy(scl->name, this->GetName());
+	auto *s   = (ServerClientList_Struct *) pack->pBuffer;
+	s->remove = remove;
+	s->wid    = this->GetWID();
+	s->IP     = this->GetIP();
+	s->charid = this->CharacterID();
+	strcpy(s->name, this->GetName());
 
-	scl->gm = GetGM();
-	scl->Admin = this->Admin();
-	scl->AccountID = this->AccountID();
-	strcpy(scl->AccountName, this->AccountName());
-	scl->LSAccountID = this->LSAccountID();
-	strn0cpy(scl->lskey, lskey, sizeof(scl->lskey));
-	scl->zone = zone->GetZoneID();
-	scl->instance_id = zone->GetInstanceID();
-	scl->race = this->GetRace();
-	scl->class_ = GetClass();
-	scl->level = GetLevel();
-	if (m_pp.anon == 0)
-		scl->anon = 0;
-	else if (m_pp.anon == 1)
-		scl->anon = 1;
-	else if (m_pp.anon >= 2)
-		scl->anon = 2;
+	s->gm        = GetGM();
+	s->Admin     = this->Admin();
+	s->AccountID = this->AccountID();
+	strcpy(s->AccountName, this->AccountName());
 
-	scl->ClientVersion = static_cast<unsigned int>(ClientVersion());
-	scl->tellsoff = tellsoff;
-	scl->guild_id = guild_id;
-	scl->LFG = LFG;
-	if(LFG) {
-		scl->LFGFromLevel = LFGFromLevel;
-		scl->LFGToLevel = LFGToLevel;
-		scl->LFGMatchFilter = LFGMatchFilter;
-		memcpy(scl->LFGComments, LFGComments, sizeof(scl->LFGComments));
+	s->LSAccountID = this->LSAccountID();
+	strn0cpy(s->lskey, lskey, sizeof(s->lskey));
+
+	s->zone        = zone->GetZoneID();
+	s->instance_id = zone->GetInstanceID();
+	s->race        = this->GetRace();
+	s->class_      = GetClass();
+	s->level       = GetLevel();
+
+	if (m_pp.anon == 0) {
+		s->anon = 0;
+	}
+	else if (m_pp.anon == 1) {
+		s->anon = 1;
+	}
+	else if (m_pp.anon >= 2) {
+		s->anon = 2;
+	}
+
+	s->ClientVersion = static_cast<unsigned int>(ClientVersion());
+	s->tellsoff      = tellsoff;
+	s->guild_id      = guild_id;
+	s->LFG           = LFG;
+	if (LFG) {
+		s->LFGFromLevel   = LFGFromLevel;
+		s->LFGToLevel     = LFGToLevel;
+		s->LFGMatchFilter = LFGMatchFilter;
+		memcpy(s->LFGComments, LFGComments, sizeof(s->LFGComments));
 	}
 
 	worldserver.SendPacket(pack);
@@ -3368,11 +3379,7 @@ void Client::LinkDead()
 		raid->MemberZoned(this);
 	}
 
-	Expedition* expedition = GetExpedition();
-	if (expedition)
-	{
-		expedition->SetMemberStatus(this, DynamicZoneMemberStatus::LinkDead);
-	}
+	SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::LinkDead);
 
 //	save_timer.Start(2500);
 	linkdead_timer.Start(RuleI(Zone,ClientLinkdeadMS));
@@ -5730,16 +5737,27 @@ void Client::AddPVPPoints(uint32 Points)
 	SendPVPStats();
 }
 
-void Client::AddCrystals(uint32 Radiant, uint32 Ebon)
+void Client::AddCrystals(uint32 radiant, uint32 ebon)
 {
-	m_pp.currentRadCrystals += Radiant;
-	m_pp.careerRadCrystals += Radiant;
-	m_pp.currentEbonCrystals += Ebon;
-	m_pp.careerEbonCrystals += Ebon;
+	m_pp.currentRadCrystals += radiant;
+	m_pp.careerRadCrystals += radiant;
+	m_pp.currentEbonCrystals += ebon;
+	m_pp.careerEbonCrystals += ebon;
 
 	SaveCurrency();
 
 	SendCrystalCounts();
+
+	// newer clients handle message client side (older clients likely used eqstr 5967 and 5968, this matches live)
+	if (radiant > 0)
+	{
+		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Radiant Crystals", radiant).c_str());
+	}
+
+	if (ebon > 0)
+	{
+		MessageString(Chat::Yellow, YOU_RECEIVE, fmt::format("{} Ebon Crystals", ebon).c_str());
+	}
 }
 
 void Client::SetEbonCrystals(uint32 value) {
@@ -9515,28 +9533,25 @@ void Client::SendCrossZoneMessageString(
 	}
 }
 
-void Client::UpdateExpeditionInfoAndLockouts()
+void Client::SendDynamicZoneUpdates()
 {
-	// this is processed by client after entering a zone
+	// bit inefficient since each do lookups but it avoids duplicating code here
 	SendDzCompassUpdate();
+	SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Online);
 
 	m_expedition_lockouts = ExpeditionDatabase::LoadCharacterLockouts(CharacterID());
 
+	// expeditions are the only dz type that keep the window updated
 	auto expedition = GetExpedition();
 	if (expedition)
 	{
-		expedition->SendClientExpeditionInfo(this);
+		expedition->GetDynamicZone()->SendClientWindowUpdate(this);
 
 		// live synchronizes lockouts obtained during the active expedition to
 		// members once they zone into the expedition's dynamic zone instance
-		if (expedition->GetDynamicZone().IsCurrentZoneDzInstance())
+		if (expedition->GetDynamicZone()->IsCurrentZoneDzInstance())
 		{
 			expedition->SyncCharacterLockouts(CharacterID(), m_expedition_lockouts);
-			expedition->SetMemberStatus(this, DynamicZoneMemberStatus::InDynamicZone);
-		}
-		else
-		{
-			expedition->SetMemberStatus(this, DynamicZoneMemberStatus::Online);
 		}
 	}
 
@@ -9546,18 +9561,29 @@ void Client::UpdateExpeditionInfoAndLockouts()
 	RequestPendingExpeditionInvite();
 }
 
-Expedition* Client::CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request)
+Expedition* Client::CreateExpedition(DynamicZone& dz, bool disable_messages)
 {
-	return Expedition::TryCreate(this, dz_instance, request);
+	return Expedition::TryCreate(this, dz, disable_messages);
 }
 
 Expedition* Client::CreateExpedition(
 	const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
 	uint32 min_players, uint32 max_players, bool disable_messages)
 {
-	DynamicZone dz_instance{ ZoneID(zone_name), version, duration, DynamicZoneType::Expedition };
-	ExpeditionRequest request{ expedition_name, min_players, max_players, disable_messages };
-	return Expedition::TryCreate(this, dz_instance, request);
+	DynamicZone dz{ ZoneID(zone_name), version, duration, DynamicZoneType::Expedition };
+	dz.SetName(expedition_name);
+	dz.SetMinPlayers(min_players);
+	dz.SetMaxPlayers(max_players);
+
+	return Expedition::TryCreate(this, dz, disable_messages);
+}
+
+void Client::CreateTaskDynamicZone(int task_id, DynamicZone& dz_request)
+{
+	if (task_state)
+	{
+		task_state->CreateTaskDynamicZone(this, task_id, dz_request);
+	}
 }
 
 Expedition* Client::GetExpedition() const
@@ -9877,22 +9903,57 @@ void Client::GoToDzSafeReturnOrBind(const DynamicZone* dynamic_zone)
 	GoToBind();
 }
 
+void Client::AddDynamicZoneID(uint32_t dz_id)
+{
+	auto it = std::find_if(m_dynamic_zone_ids.begin(), m_dynamic_zone_ids.end(),
+		[&](uint32_t current_dz_id) { return current_dz_id == dz_id; });
+
+	if (it == m_dynamic_zone_ids.end())
+	{
+		LogDynamicZonesDetail("Adding dz [{}] to client [{}]", dz_id, GetName());
+		m_dynamic_zone_ids.push_back(dz_id);
+	}
+}
+
+void Client::RemoveDynamicZoneID(uint32_t dz_id)
+{
+	LogDynamicZonesDetail("Removing dz [{}] from client [{}]", dz_id, GetName());
+	m_dynamic_zone_ids.erase(std::remove_if(m_dynamic_zone_ids.begin(), m_dynamic_zone_ids.end(),
+		[&](uint32_t current_dz_id) { return current_dz_id == dz_id; }
+	), m_dynamic_zone_ids.end());
+}
+
 std::vector<DynamicZone*> Client::GetDynamicZones(uint32_t zone_id, int zone_version)
 {
 	std::vector<DynamicZone*> client_dzs;
 
-	// check client systems for any associated dynamic zones optionally filtered by zone
-	Expedition* expedition = GetExpedition();
-	if (expedition &&
-	   (zone_id == 0 || expedition->GetDynamicZone().GetZoneID() == zone_id) &&
-	   (zone_version < 0 || expedition->GetDynamicZone().GetZoneVersion() == zone_version))
+	for (uint32_t dz_id : m_dynamic_zone_ids)
 	{
-		client_dzs.emplace_back(&expedition->GetDynamicZone());
+		auto dz = DynamicZone::FindDynamicZoneByID(dz_id);
+		if (dz &&
+		   (zone_id == 0 || dz->GetZoneID() == zone_id) &&
+		   (zone_version < 0 || dz->GetZoneVersion() == zone_version))
+		{
+			client_dzs.emplace_back(dz);
+		}
 	}
 
-	// todo: tasks, missions (shared tasks), and quests with an associated dz to zone_id
-
 	return client_dzs;
+}
+
+void Client::SetDynamicZoneMemberStatus(DynamicZoneMemberStatus status)
+{
+	// sets status on all associated dzs client may have. if client is online
+	// inside a dz, only that dz has the "In Dynamic Zone" status set
+	for (auto& dz : GetDynamicZones())
+	{
+		// the rule to disable this status is handled internally by the dz
+		if (status == DynamicZoneMemberStatus::Online && dz->IsCurrentZoneDzInstance())
+		{
+			status = DynamicZoneMemberStatus::InDynamicZone;
+		}
+		dz->SetMemberStatus(CharacterID(), status);
+	}
 }
 
 void Client::MovePCDynamicZone(uint32 zone_id, int zone_version, bool msg_if_invalid)

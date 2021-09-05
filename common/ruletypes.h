@@ -538,6 +538,7 @@ RULE_BOOL(TaskSystem, RecordCompletedTasks, true, "Record completed tasks")
 RULE_BOOL(TaskSystem, RecordCompletedOptionalActivities, false, "Record completed optional activities")
 RULE_BOOL(TaskSystem, KeepOneRecordPerCompletedTask, true, "Keep only one record per completed task")
 RULE_BOOL(TaskSystem, EnableTaskProximity, true, "Enable task proximity system")
+RULE_INT(TaskSystem, RequestCooldownTimerSeconds, 15, "Seconds between allowing characters to request tasks (live-like default: 15 seconds)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Range)

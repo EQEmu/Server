@@ -2,6 +2,7 @@
 #define COMMON_DYNAMIC_ZONE_BASE_H
 
 #include "eq_constants.h"
+#include "net/packet.h"
 #include "repositories/dynamic_zones_repository.h"
 #include "repositories/dynamic_zone_members_repository.h"
 #include <algorithm>
@@ -18,7 +19,7 @@ struct DynamicZoneMember
 {
 	uint32_t id = 0;
 	std::string name;
-	DynamicZoneMemberStatus status = DynamicZoneMemberStatus::Online;
+	DynamicZoneMemberStatus status = DynamicZoneMemberStatus::Unknown;
 
 	DynamicZoneMember() = default;
 	DynamicZoneMember(uint32_t id, std::string name_)
@@ -29,6 +30,12 @@ struct DynamicZoneMember
 	bool IsOnline() const { return status == DynamicZoneMemberStatus::Online ||
 	                               status == DynamicZoneMemberStatus::InDynamicZone; }
 	bool IsValid() const { return id != 0 && !name.empty(); }
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(id, name, status);
+	}
 };
 
 struct DynamicZoneLocation
@@ -42,6 +49,12 @@ struct DynamicZoneLocation
 	DynamicZoneLocation() = default;
 	DynamicZoneLocation(uint32_t zone_id_, float x_, float y_, float z_, float heading_)
 		: zone_id(zone_id_), x(x_), y(y_), z(z_), heading(heading_) {}
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(zone_id, x, y, z, heading);
+	}
 };
 
 class DynamicZoneBase
@@ -64,6 +77,7 @@ public:
 	uint64_t GetExpireTime() const { return std::chrono::system_clock::to_time_t(m_expire_time); }
 	uint32_t GetID() const { return m_id; }
 	uint16_t GetInstanceID() const { return static_cast<uint16_t>(m_instance_id); }
+	uint32_t GetLeaderID() const { return m_leader.id; }
 	uint32_t GetMaxPlayers() const { return m_max_players; }
 	uint32_t GetMemberCount() const { return static_cast<uint32_t>(m_members.size()); }
 	uint32_t GetMinPlayers() const { return m_min_players; }
@@ -74,6 +88,7 @@ public:
 	DynamicZoneType GetType() const { return m_type; }
 	const std::string& GetLeaderName() const { return m_leader.name; }
 	const std::string& GetName() const { return m_name; }
+	const std::string& GetUUID() const { return m_uuid; }
 	const DynamicZoneMember& GetLeader() const { return m_leader; }
 	const std::vector<DynamicZoneMember>& GetMembers() const { return m_members; }
 	const DynamicZoneLocation& GetCompassLocation() const { return m_compass; }
@@ -81,14 +96,12 @@ public:
 	const DynamicZoneLocation& GetZoneInLocation() const { return m_zonein; }
 	std::chrono::system_clock::duration GetDurationRemaining() const { return m_expire_time - std::chrono::system_clock::now(); }
 
-	void AddCharacter(uint32_t character_id);
-	void AddInternalMember(const DynamicZoneMember& member);
+	bool AddMember(const DynamicZoneMember& add_member);
 	void AddMemberFromRepositoryResult(DynamicZoneMembersRepository::MemberWithName&& entry);
-	void ClearInternalMembers() { m_members.clear(); }
-	uint32_t Create();
 	uint32_t GetDatabaseMemberCount();
 	DynamicZoneMember GetMemberData(uint32_t character_id);
 	DynamicZoneMember GetMemberData(const std::string& character_name);
+	EQ::Net::DynamicPacket GetSerializedDzPacket();
 	bool HasDatabaseMember(uint32_t character_id);
 	bool HasMember(uint32_t character_id);
 	bool HasMember(const std::string& character_name);
@@ -98,38 +111,52 @@ public:
 	bool IsInstanceID(uint32_t instance_id) const { return (m_instance_id != 0 && m_instance_id == instance_id); }
 	bool IsValid() const { return m_instance_id != 0; }
 	bool IsSameDz(uint32_t zone_id, uint32_t instance_id) const { return zone_id == m_zone_id && instance_id == m_instance_id; }
-	void RemoveAllCharacters(bool enable_removal_timers = true);
-	void RemoveCharacter(uint32_t character_id);
-	void RemoveInternalMember(uint32_t character_id);
+	void LoadSerializedDzPacket(char* cereal_data, uint32_t cereal_size);
+	void RemoveAllMembers();
+	bool RemoveMember(uint32_t character_id);
+	bool RemoveMember(const std::string& character_name);
+	bool RemoveMember(const DynamicZoneMember& remove_member);
 	void SaveMembers(const std::vector<DynamicZoneMember>& members);
 	void SetCompass(const DynamicZoneLocation& location, bool update_db = false);
 	void SetCompass(uint32_t zone_id, float x, float y, float z, bool update_db = false);
-	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
-	void SetLeader(const DynamicZoneMember& leader) { m_leader = leader; }
+	void SetDuration(uint32_t seconds) { m_duration = std::chrono::seconds(seconds); }
+	void SetLeader(const DynamicZoneMember& leader, bool update_db = false);
 	void SetMaxPlayers(uint32_t max_players) { m_max_players = max_players; }
+	void SetMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 	void SetMinPlayers(uint32_t min_players) { m_min_players = min_players; }
 	void SetName(const std::string& name) { m_name = name; }
 	void SetSafeReturn(const DynamicZoneLocation& location, bool update_db = false);
 	void SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading, bool update_db = false);
+	void SetType(DynamicZoneType type) { m_type = type; }
+	void SetUUID(std::string uuid) { m_uuid = std::move(uuid); }
 	void SetZoneInLocation(const DynamicZoneLocation& location, bool update_db = false);
 	void SetZoneInLocation(float x, float y, float z, float heading, bool update_db = false);
+	bool SwapMember(const DynamicZoneMember& add_member, const std::string& remove_char_name);
 
 protected:
 	virtual uint16_t GetCurrentInstanceID() { return 0; }
 	virtual uint16_t GetCurrentZoneID() { return 0; }
 	virtual Database& GetDatabase() = 0;
 	virtual void ProcessCompassChange(const DynamicZoneLocation& location) { m_compass = location; }
-	virtual void SendInstanceAddRemoveCharacter(uint32_t character_id, bool remove) = 0;
-	virtual void SendInstanceRemoveAllCharacters() = 0;
-	virtual void SendGlobalLocationChange(uint16_t server_opcode, const DynamicZoneLocation& location) = 0;
+	virtual void ProcessMemberAddRemove(const DynamicZoneMember& member, bool removed);
+	virtual bool ProcessMemberStatusChange(uint32_t member_id, DynamicZoneMemberStatus status);
+	virtual void ProcessRemoveAllMembers(bool silent = false) { m_members.clear(); }
+	virtual bool SendServerPacket(ServerPacket* packet) = 0;
 
+	void AddInternalMember(const DynamicZoneMember& member);
+	uint32_t Create();
 	uint32_t CreateInstance();
 	void LoadRepositoryResult(DynamicZonesRepository::DynamicZoneInstance&& dz_entry);
+	void RemoveInternalMember(uint32_t character_id);
 	uint32_t SaveToDatabase();
+	bool SetInternalMemberStatus(uint32_t character_id, DynamicZoneMemberStatus status);
 
-	std::unique_ptr<ServerPacket> CreateServerAddRemoveCharacterPacket(uint32_t character_id, bool removed);
-	std::unique_ptr<ServerPacket> CreateServerRemoveAllCharactersPacket();
+	std::unique_ptr<ServerPacket> CreateServerDzCreatePacket(uint16_t origin_zone_id, uint16_t origin_instance_id);
 	std::unique_ptr<ServerPacket> CreateServerDzLocationPacket(uint16_t server_opcode, const DynamicZoneLocation& location);
+	std::unique_ptr<ServerPacket> CreateServerMemberAddRemovePacket(const DynamicZoneMember& member, bool removed);
+	std::unique_ptr<ServerPacket> CreateServerMemberStatusPacket(uint32_t character_id, DynamicZoneMemberStatus status);
+	std::unique_ptr<ServerPacket> CreateServerMemberSwapPacket(const DynamicZoneMember& remove_member, const DynamicZoneMember& add_member);
+	std::unique_ptr<ServerPacket> CreateServerRemoveAllMembersPacket();
 
 	uint32_t m_id = 0;
 	uint32_t m_zone_id = 0;
@@ -139,7 +166,9 @@ protected:
 	uint32_t m_max_players = 0;
 	bool m_never_expires = false;
 	bool m_has_zonein = false;
+	bool m_has_member_statuses = false;
 	std::string m_name;
+	std::string m_uuid;
 	DynamicZoneMember m_leader;
 	DynamicZoneType m_type{ DynamicZoneType::None };
 	DynamicZoneLocation m_compass;
@@ -149,6 +178,34 @@ protected:
 	std::chrono::time_point<std::chrono::system_clock> m_start_time;
 	std::chrono::time_point<std::chrono::system_clock> m_expire_time;
 	std::vector<DynamicZoneMember> m_members;
+
+public:
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(
+			m_id,
+			m_zone_id,
+			m_instance_id,
+			m_zone_version,
+			m_min_players,
+			m_max_players,
+			m_never_expires,
+			m_has_zonein,
+			m_has_member_statuses,
+			m_name,
+			m_uuid,
+			m_leader,
+			m_type,
+			m_compass,
+			m_safereturn,
+			m_zonein,
+			m_duration,
+			m_start_time,
+			m_expire_time,
+			m_members
+		);
+	}
 };
 
 #endif

@@ -30,12 +30,10 @@
 
 constexpr char SystemName[] = "expedition";
 
-ExpeditionRequest::ExpeditionRequest(std::string expedition_name,
-	uint32_t min_players, uint32_t max_players, bool disable_messages
-) :
-	m_expedition_name(std::move(expedition_name)),
-	m_min_players(min_players),
-	m_max_players(max_players),
+ExpeditionRequest::ExpeditionRequest(const DynamicZone& dz, bool disable_messages) :
+	m_expedition_name(dz.GetName()),
+	m_min_players(dz.GetMinPlayers()),
+	m_max_players(dz.GetMaxPlayers()),
 	m_disable_messages(disable_messages)
 {
 }

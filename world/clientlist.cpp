@@ -332,30 +332,91 @@ void ClientList::CLCheckStale() {
 	}
 }
 
-void ClientList::ClientUpdate(ZoneServer* zoneserver, ServerClientList_Struct* scl) {
-	LinkedListIterator<ClientListEntry*> iterator(clientlist);
-	ClientListEntry* cle;
+void ClientList::ClientUpdate(ZoneServer *zoneserver, ServerClientList_Struct *scl)
+{
+	LinkedListIterator<ClientListEntry *> iterator(clientlist);
+	ClientListEntry                       *cle;
 	iterator.Reset();
-	while(iterator.MoreElements()) {
+	while (iterator.MoreElements()) {
 		if (iterator.GetData()->GetID() == scl->wid) {
 			cle = iterator.GetData();
-			if (scl->remove == 2){
+			if (scl->remove == 2) {
 				cle->LeavingZone(zoneserver, CLE_Status::Offline);
 			}
-			else if (scl->remove == 1)
+			else if (scl->remove == 1) {
 				cle->LeavingZone(zoneserver, CLE_Status::Zoning);
-			else
+			}
+			else {
 				cle->Update(zoneserver, scl);
+			}
 			return;
 		}
 		iterator.Advance();
 	}
-	if (scl->remove == 2)
+	if (scl->remove == 2) {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::Online);
-	else if (scl->remove == 1)
+	}
+	else if (scl->remove == 1) {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::Zoning);
-	else
+	}
+	else {
 		cle = new ClientListEntry(GetNextCLEID(), zoneserver, scl, CLE_Status::InZone);
+	}
+
+	LogClientListDetail(
+		"[ClientUpdate] "
+		" remove [{}]"
+		" wid [{}]"
+		" IP [{}]"
+		" zone [{}]"
+		" instance_id [{}]"
+		" Admin [{}]"
+		" charid [{}]"
+		" name [{}]"
+		" AccountID [{}]"
+		" AccountName [{}]"
+		" LSAccountID [{}]"
+		" lskey [{}]"
+		" race [{}]"
+		" class_ [{}]"
+		" level [{}]"
+		" anon [{}]"
+		" tellsoff [{}]"
+		" guild_id [{}]"
+		" LFG [{}]"
+		" gm [{}]"
+		" ClientVersion [{}]"
+		" LFGFromLevel [{}]"
+		" LFGToLevel [{}]"
+		" LFGMatchFilter [{}]"
+		" LFGComments [{}]",
+		scl->remove,
+		scl->wid,
+		scl->IP,
+		scl->zone,
+		scl->instance_id,
+		scl->Admin,
+		scl->charid,
+		scl->name,
+		scl->AccountID,
+		scl->AccountName,
+		scl->LSAccountID,
+		scl->lskey,
+		scl->race,
+		scl->class_,
+		scl->level,
+		scl->anon,
+		scl->tellsoff,
+		scl->guild_id,
+		scl->LFG,
+		scl->gm,
+		scl->ClientVersion,
+		scl->LFGFromLevel,
+		scl->LFGToLevel,
+		scl->LFGMatchFilter,
+		scl->LFGComments
+	);
+
 	clientlist.Insert(cle);
 	zoneserver->ChangeWID(scl->charid, cle->GetID());
 }
@@ -1507,4 +1568,74 @@ void ClientList::GetClientList(Json::Value &response)
 
 		Iterator.Advance();
 	}
+}
+
+void ClientList::SendCharacterMessage(uint32_t character_id, int chat_type, const std::string& message)
+{
+	auto character = FindCLEByCharacterID(character_id);
+	SendCharacterMessage(character, chat_type, message);
+}
+
+void ClientList::SendCharacterMessage(const std::string& character_name, int chat_type, const std::string& message)
+{
+	auto character = FindCharacter(character_name.c_str());
+	SendCharacterMessage(character, chat_type, message);
+}
+
+void ClientList::SendCharacterMessage(ClientListEntry* character, int chat_type, const std::string& message)
+{
+	if (!character || !character->Server())
+	{
+		return;
+	}
+
+	uint32_t pack_size = sizeof(CZMessagePlayer_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessagePlayer, pack_size);
+	auto buf = reinterpret_cast<CZMessagePlayer_Struct*>(pack->pBuffer);
+	buf->type = chat_type;
+	strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
+	strn0cpy(buf->message, message.c_str(), sizeof(buf->message));
+
+	character->Server()->SendPacket(pack.get());
+}
+
+void ClientList::SendCharacterMessageID(uint32_t character_id,
+	int chat_type, int eqstr_id, std::initializer_list<std::string> args)
+{
+	auto character = FindCLEByCharacterID(character_id);
+	SendCharacterMessageID(character, chat_type, eqstr_id, args);
+}
+
+void ClientList::SendCharacterMessageID(const std::string& character_name,
+	int chat_type, int eqstr_id, std::initializer_list<std::string> args)
+{
+	auto character = FindCharacter(character_name.c_str());
+	SendCharacterMessageID(character, chat_type, eqstr_id, args);
+}
+
+void ClientList::SendCharacterMessageID(ClientListEntry* character,
+	int chat_type, int eqstr_id, std::initializer_list<std::string> args)
+{
+	if (!character || !character->Server())
+	{
+		return;
+	}
+
+	SerializeBuffer serialized_args;
+	for (const auto& arg : args)
+	{
+		serialized_args.WriteString(arg);
+	}
+
+	uint32_t args_size = static_cast<uint32_t>(serialized_args.size());
+	uint32_t pack_size = sizeof(CZClientMessageString_Struct) + args_size;
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZClientMessageString, pack_size);
+	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
+	buf->string_id = eqstr_id;
+	buf->chat_type = chat_type;
+	strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
+	buf->args_size = args_size;
+	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
+
+	character->Server()->SendPacket(pack.get());
 }

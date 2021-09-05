@@ -38,6 +38,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_store.h"
 #include "dynamic_zone.h"
 #include "expedition_message.h"
+#include "shared_task_world_messaging.h"
+#include "../common/shared_tasks.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -1181,7 +1183,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		adventure_manager.IncrementAssassinationCount(*((uint16*)pack->pBuffer));
 		break;
 	}
-
 	case ServerOP_AdventureZoneData:
 	{
 		adventure_manager.GetZoneData(*((uint16*)pack->pBuffer));
@@ -1368,17 +1369,28 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ExpeditionLockoutDuration:
 	case ServerOP_ExpeditionLockState:
 	case ServerOP_ExpeditionReplayOnJoin:
-	case ServerOP_ExpeditionExpireWarning:
 	{
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
+	case ServerOP_SharedTaskRequest:
+	case ServerOP_SharedTaskAddPlayer:
+	case ServerOP_SharedTaskAttemptRemove:
+	case ServerOP_SharedTaskUpdate:
+	case ServerOP_SharedTaskRequestMemberlist:
+	case ServerOP_SharedTaskRemovePlayer:
+	case ServerOP_SharedTaskInviteAcceptedPlayer:
+	case ServerOP_SharedTaskMakeLeader:
+	case ServerOP_SharedTaskCreateDynamicZone:
+	case ServerOP_SharedTaskPurgeAllCommand:
+	case ServerOP_SharedTaskPlayerList:
+	case ServerOP_SharedTaskKickPlayers:
+	{
+		SharedTaskWorldMessaging::HandleZoneMessage(pack);
+		break;
+	}
+
 	case ServerOP_ExpeditionCreate:
-	case ServerOP_ExpeditionGetMemberStatuses:
-	case ServerOP_ExpeditionMemberChange:
-	case ServerOP_ExpeditionMemberStatus:
-	case ServerOP_ExpeditionMemberSwap:
-	case ServerOP_ExpeditionMembersRemoved:
 	case ServerOP_ExpeditionDzAddPlayer:
 	case ServerOP_ExpeditionDzMakeLeader:
 	case ServerOP_ExpeditionCharacterLockout:
@@ -1388,12 +1400,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		ExpeditionMessage::HandleZoneMessage(pack);
 		break;
 	}
-	case ServerOP_DzAddRemoveCharacter:
-	case ServerOP_DzRemoveAllCharacters:
+	case ServerOP_DzCreated:
+	case ServerOP_DzAddRemoveMember:
+	case ServerOP_DzSwapMembers:
+	case ServerOP_DzRemoveAllMembers:
+	case ServerOP_DzGetMemberStatuses:
 	case ServerOP_DzSetSecondsRemaining:
 	case ServerOP_DzSetCompass:
 	case ServerOP_DzSetSafeReturn:
 	case ServerOP_DzSetZoneIn:
+	case ServerOP_DzUpdateMemberStatus:
 	{
 		DynamicZone::HandleZoneMessage(pack);
 		break;

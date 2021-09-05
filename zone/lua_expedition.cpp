@@ -59,7 +59,7 @@ void Lua_Expedition::AddReplayLockoutDuration(int seconds, bool members_only) {
 
 uint32_t Lua_Expedition::GetDynamicZoneID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetID();
+	return self->GetDynamicZoneID();
 }
 
 uint32_t Lua_Expedition::GetID() {
@@ -69,7 +69,7 @@ uint32_t Lua_Expedition::GetID() {
 
 int Lua_Expedition::GetInstanceID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetInstanceID();
+	return self->GetDynamicZone()->GetInstanceID();
 }
 
 std::string Lua_Expedition::GetLeaderName() {
@@ -104,7 +104,7 @@ std::string Lua_Expedition::GetLootEventBySpawnID(uint32_t spawn_id) {
 
 uint32_t Lua_Expedition::GetMemberCount() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetMemberCount();
+	return self->GetDynamicZone()->GetMemberCount();
 }
 
 luabind::object Lua_Expedition::GetMembers(lua_State* L) {
@@ -113,7 +113,7 @@ luabind::object Lua_Expedition::GetMembers(lua_State* L) {
 	if (d_)
 	{
 		auto self = reinterpret_cast<NativeType*>(d_);
-		for (const auto& member : self->GetDynamicZone().GetMembers())
+		for (const auto& member : self->GetDynamicZone()->GetMembers())
 		{
 			lua_table[member.name] = member.id;
 		}
@@ -128,27 +128,27 @@ std::string Lua_Expedition::GetName() {
 
 int Lua_Expedition::GetSecondsRemaining() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetSecondsRemaining();
+	return self->GetDynamicZone()->GetSecondsRemaining();
 }
 
 std::string Lua_Expedition::GetUUID() {
 	Lua_Safe_Call_String();
-	return self->GetUUID();
+	return self->GetDynamicZone()->GetUUID();
 }
 
 int Lua_Expedition::GetZoneID() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetZoneID();
+	return self->GetDynamicZone()->GetZoneID();
 }
 
 std::string Lua_Expedition::GetZoneName() {
 	Lua_Safe_Call_String();
-	return ZoneName(self->GetDynamicZone().GetZoneID());
+	return ZoneName(self->GetDynamicZone()->GetZoneID());
 }
 
 int Lua_Expedition::GetZoneVersion() {
 	Lua_Safe_Call_Int();
-	return self->GetDynamicZone().GetZoneVersion();
+	return self->GetDynamicZone()->GetZoneVersion();
 }
 
 bool Lua_Expedition::HasLockout(std::string event_name) {
@@ -168,7 +168,7 @@ bool Lua_Expedition::IsLocked() {
 
 void Lua_Expedition::RemoveCompass() {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetCompass(0, 0, 0, 0, true);
+	self->GetDynamicZone()->SetCompass(0, 0, 0, 0, true);
 }
 
 void Lua_Expedition::RemoveLockout(std::string event_name) {
@@ -178,12 +178,12 @@ void Lua_Expedition::RemoveLockout(std::string event_name) {
 
 void Lua_Expedition::SetCompass(uint32_t zone_id, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetCompass(zone_id, x, y, z, true);
+	self->GetDynamicZone()->SetCompass(zone_id, x, y, z, true);
 }
 
 void Lua_Expedition::SetCompass(std::string zone_name, float x, float y, float z) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetCompass(ZoneID(zone_name), x, y, z, true);
+	self->GetDynamicZone()->SetCompass(ZoneID(zone_name), x, y, z, true);
 }
 
 void Lua_Expedition::SetLocked(bool lock_expedition) {
@@ -218,23 +218,23 @@ void Lua_Expedition::SetReplayLockoutOnMemberJoin(bool enable) {
 
 void Lua_Expedition::SetSafeReturn(uint32_t zone_id, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetSafeReturn(zone_id, x, y, z, heading, true);
+	self->GetDynamicZone()->SetSafeReturn(zone_id, x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSafeReturn(std::string zone_name, float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
+	self->GetDynamicZone()->SetSafeReturn(ZoneID(zone_name), x, y, z, heading, true);
 }
 
 void Lua_Expedition::SetSecondsRemaining(uint32_t seconds_remaining)
 {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetSecondsRemaining(seconds_remaining);
+	self->GetDynamicZone()->SetSecondsRemaining(seconds_remaining);
 }
 
 void Lua_Expedition::SetZoneInLocation(float x, float y, float z, float heading) {
 	Lua_Safe_Call_Void();
-	self->GetDynamicZone().SetZoneInLocation(x, y, z, heading, true);
+	self->GetDynamicZone()->SetZoneInLocation(x, y, z, heading, true);
 }
 
 void Lua_Expedition::UpdateLockoutDuration(std::string event_name, uint32_t duration) {

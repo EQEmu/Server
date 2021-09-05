@@ -222,6 +222,7 @@ public:
 	std::vector<GridRepository::Grid>             zone_grids;
 	std::vector<GridEntriesRepository::GridEntry> zone_grid_entries;
 
+	std::unordered_map<uint32, std::unique_ptr<DynamicZone>> dynamic_zone_cache;
 	std::unordered_map<uint32, std::unique_ptr<Expedition>> expedition_cache;
 
 	time_t weather_timer;

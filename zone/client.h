@@ -80,6 +80,7 @@ namespace EQ
 #include <algorithm>
 #include <memory>
 #include <deque>
+#include <ctime>
 
 
 #define CLIENT_TIMEOUT 90000
@@ -1030,6 +1031,9 @@ public:
 	void SendTaskActivityComplete(int task_id, int activity_id, int task_index, TaskType task_type, int task_incomplete=1);
 	void SendTaskFailed(int task_id, int task_index, TaskType task_type);
 	void SendTaskComplete(int task_index);
+	bool HasTaskRequestCooldownTimer();
+	void SendTaskRequestCooldownTimerMessage();
+	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
 	inline void CancelTask(int task_index, TaskType task_type)
 	{
@@ -1095,7 +1099,7 @@ public:
 		}
 	}
 	inline void UpdateTasksForItem(
-		ActivityType activity_type,
+		TaskActivityType activity_type,
 		int item_id,
 		int count = 1
 	)
@@ -1202,7 +1206,7 @@ public:
 		bool enforce_level_requirement = false
 	) {
 		if (task_state) {
-			task_state->AcceptNewTask(this, task_id, npc_id, enforce_level_requirement);
+			task_state->AcceptNewTask(this, task_id, npc_id, std::time(nullptr), enforce_level_requirement);
 		}
 	}
 	inline int ActiveSpeakTask(int npc_type_id)
@@ -1262,6 +1266,15 @@ public:
 	{
 		return (task_state ? task_state->CompletedTasksInSet(task_set_id) : 0);
 	}
+	void PurgeTaskTimers();
+
+	// shared task shims / middleware
+	// these variables are used as a shim to intercept normal localized task functionality
+	// and pipe it into zone -> world and back to world -> zone
+	// world is authoritative
+	bool m_requesting_shared_task        = false;
+	bool m_shared_task_update            = false;
+	bool m_requested_shared_task_removal = false;
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }
@@ -1330,9 +1343,9 @@ public:
 		const std::string& event_Name, int seconds, const std::string& uuid = {}, bool update_db = false);
 	void AddNewExpeditionLockout(const std::string& expedition_name,
 		const std::string& event_name, uint32_t duration, std::string uuid = {});
-	Expedition* CreateExpedition(DynamicZone& dz_instance, ExpeditionRequest& request);
-	Expedition* CreateExpedition(
-		const std::string& zone_name, uint32 version, uint32 duration, const std::string& expedition_name,
+	Expedition* CreateExpedition(DynamicZone& dz, bool disable_messages = false);
+	Expedition* CreateExpedition(const std::string& zone_name,
+		uint32 version, uint32 duration, const std::string& expedition_name,
 		uint32 min_players, uint32 max_players, bool disable_messages = false);
 	Expedition* GetExpedition() const;
 	uint32 GetExpeditionID() const { return m_expedition_id; }
@@ -1350,7 +1363,6 @@ public:
 	void SendExpeditionLockoutTimers();
 	void SetExpeditionID(uint32 expedition_id) { m_expedition_id = expedition_id; };
 	void SetPendingExpeditionInvite(ExpeditionInvite&& invite) { m_pending_expedition_invite = invite; }
-	void UpdateExpeditionInfoAndLockouts();
 	void DzListTimers();
 	void SetDzRemovalTimer(bool enable_timer);
 	void SendDzCompassUpdate();
@@ -1360,6 +1372,11 @@ public:
 	std::vector<DynamicZone*> GetDynamicZones(uint32_t zone_id = 0, int zone_version = -1);
 	std::unique_ptr<EQApplicationPacket> CreateDzSwitchListPacket(const std::vector<DynamicZone*>& dzs);
 	std::unique_ptr<EQApplicationPacket> CreateCompassPacket(const std::vector<DynamicZoneCompassEntry_Struct>& entries);
+	void AddDynamicZoneID(uint32_t dz_id);
+	void RemoveDynamicZoneID(uint32_t dz_id);
+	void SendDynamicZoneUpdates();
+	void SetDynamicZoneMemberStatus(DynamicZoneMemberStatus status);
+	void CreateTaskDynamicZone(int task_id, DynamicZone& dz_request);
 
 	void CalcItemScale();
 	bool CalcItemScale(uint32 slot_x, uint32 slot_y); // behavior change: 'slot_y' is now [RANGE]_END and not [RANGE]_END + 1
@@ -1589,6 +1606,9 @@ public:
 
 	void ShowDevToolsMenu();
 	CheatManager cheat_manager;
+
+	// rate limit
+	Timer m_list_task_timers_rate_limit = {};
 
 protected:
 	friend class Mob;
@@ -1821,6 +1841,7 @@ private:
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
+	Timer task_request_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
@@ -1854,6 +1875,14 @@ private:
 
 	ClientTaskState *task_state;
 	int TotalSecondsPlayed;
+
+	// we use this very sparingly at the zone level
+	// used for keeping clients in donecount sync before world sends absolute confirmations of state
+	int64 m_shared_task_id = 0;
+public:
+	void SetSharedTaskId(int64 shared_task_id);
+	int64 GetSharedTaskId() const;
+private:
 
 	//Anti Spam Stuff
 	Timer *KarmaUpdateTimer;
@@ -1927,6 +1956,7 @@ private:
 	std::vector<ExpeditionLockoutTimer> m_expedition_lockouts;
 	glm::vec3 m_quest_compass;
 	bool m_has_quest_compass = false;
+	std::vector<uint32_t> m_dynamic_zone_ids;
 
 #ifdef BOTS
 

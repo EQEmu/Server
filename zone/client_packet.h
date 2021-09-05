@@ -282,6 +282,7 @@
 	void Handle_OP_TargetCommand(const EQApplicationPacket *app);
 	void Handle_OP_TargetMouse(const EQApplicationPacket *app);
 	void Handle_OP_TaskHistoryRequest(const EQApplicationPacket *app);
+	void Handle_OP_TaskTimers(const EQApplicationPacket *app);
 	void Handle_OP_Taunt(const EQApplicationPacket *app);
 	void Handle_OP_TestBuff(const EQApplicationPacket *app);
 	void Handle_OP_TGB(const EQApplicationPacket *app);
@@ -315,3 +316,12 @@
 	void Handle_OP_ResetAA(const EQApplicationPacket *app);
 	void Handle_OP_MovementHistoryList(const EQApplicationPacket* app);
 	void Handle_OP_UnderWorld(const EQApplicationPacket* app);
+
+	// shared tasks
+	void Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskAccept(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskQuit(const EQApplicationPacket *app);
+	void Handle_OP_SharedTaskPlayerList(const EQApplicationPacket *app);

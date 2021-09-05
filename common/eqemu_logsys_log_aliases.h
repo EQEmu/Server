@@ -656,6 +656,16 @@
         OutF(LogSys, Logs::Detail, Logs::Cheat, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
 } while (0)
 
+#define LogClientList(message, ...) do {\
+    if (LogSys.log_settings[Logs::ClientList].is_category_enabled == 1)\
+        OutF(LogSys, Logs::General, Logs::ClientList, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
+#define LogClientListDetail(message, ...) do {\
+    if (LogSys.log_settings[Logs::ClientList].is_category_enabled == 1)\
+        OutF(LogSys, Logs::Detail, Logs::ClientList, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
+} while (0)
+
 #define Log(debug_level, log_category, message, ...) do {\
     if (LogSys.log_settings[log_category].is_category_enabled == 1)\
         LogSys.Out(debug_level, log_category, __FILE__, __func__, __LINE__, message, ##__VA_ARGS__);\
@@ -1026,6 +1036,18 @@
 } while (0)
 
 #define LogDynamicZonesDetail(message, ...) do {\
+} while (0)
+
+#define LogCheatList(message, ...) do {\
+} while (0)
+
+#define LogCheatDetail(message, ...) do {\
+} while (0)
+
+#define LogClientList(message, ...) do {\
+} while (0)
+
+#define LogClientListDetail(message, ...) do {\
 } while (0)
 
 #define Log(debug_level, log_category, message, ...) do {\

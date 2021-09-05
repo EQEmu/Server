@@ -173,6 +173,7 @@
 #define GENERIC_STRINGID_SAY		554		//%1 says '%T2'
 #define CANNOT_WAKE					555		//%1 tells you, 'I am unable to wake %2, master.'
 #define SUMMONING_CORPSE_ZONE		596		//Summoning %1's corpse(s).
+#define TASK_NOT_RIGHT_LEVEL        615     //You are not at the right level for this task.
 #define PET_HOLD_SET_ON				698		//The pet hold mode has been set to on.
 #define PET_HOLD_SET_OFF			699		//The pet hold mode has been set to off.
 #define PET_FOCUS_SET_ON			700		//The pet focus mode has been set to on.
@@ -295,6 +296,8 @@
 #define TRADESKILL_MISSING_ITEM		3455	//You are missing a %1.
 #define TRADESKILL_MISSING_COMPONENTS	3456	//Sorry, but you don't have everything you need for this recipe in your general inventory.
 #define TRADESKILL_LEARN_RECIPE		3457	//You have learned the recipe %1!
+#define TASK_UPDATED                3471    //Your task '%1' has been updated.
+#define YOU_ASSIGNED_TASK           3472    //You have been assigned the task '%1'.
 #define EXPEDITION_YOU_BELONG       3500    //You cannot create this expedition since you already belong to another.
 #define EXPEDITION_YOU_PLAYED_HERE  3501    //You cannot create this expedition for another %1d:%2h:%3m since you have recently played here.
 #define REQUIRED_PLAYER_COUNT       3503    //You do not meet the player count requirement.  You have %1 players.  You must have at least %2 and no more than %3.
@@ -369,7 +372,10 @@
 #define FAILED_TAUNT				5811	//You have failed to taunt your target.
 #define PHYSICAL_RESIST_FAIL		5817	//Your target avoided your %1 ability.
 #define AA_NO_TARGET				5825	//You must first select a target for this ability!
+#define YOU_RECEIVE                 5941    //You receive %1.
+#define NO_TASK_OFFERS              6009    //Sorry %3, I don't have anything for someone with your abilities.
 #define MAX_ACTIVE_TASKS			6010	//Sorry %3, you already have the maximum number of active tasks.
+#define TASK_REQUEST_COOLDOWN_TIMER 6011    //Sorry, %3, but you can't request another task for %4 minutes and %5 seconds.
 #define FORAGE_MASTERY				6012	//Your forage mastery has enabled you to find something else!
 #define GUILD_BANK_CANNOT_DEPOSIT	6097	// Cannot deposit this item. Containers must be empty, and only one of each LORE and no NO TRADE or TEMPORARY items may be deposited.
 #define GUILD_BANK_FULL				6098	// There is no more room in the Guild Bank.
@@ -418,6 +424,7 @@
 #define GAIN_GROUP_LEADERSHIP_EXP	8788	//
 #define GAIN_RAID_LEADERSHIP_EXP	8789	//
 #define BUFF_MINUTES_REMAINING		8799	//%1 (%2 minutes remaining)
+#define YOU_HAVE_BEEN_GIVEN         8994    //You have been given: %1
 #define NO_MORE_TRAPS				9002	//You have already placed your maximum number of traps.
 #define FEAR_TOO_HIGH				9035	//Your target is too high of a level for your fear spell.
 #define SLOW_MOSTLY_SUCCESSFUL		9029	//Your spell was mostly successful.

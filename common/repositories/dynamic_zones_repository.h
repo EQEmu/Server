@@ -68,6 +68,11 @@ public:
 	struct DynamicZoneInstance
 	{
 		uint32_t id;
+		std::string uuid;
+		std::string name;
+		int      leader_id;
+		int      min_players;
+		int      max_players;
 		int      instance_id;
 		int      type;
 		int      compass_zone_id;
@@ -97,6 +102,11 @@ public:
 		return std::string(SQL(
 			SELECT
 				dynamic_zones.id,
+				dynamic_zones.uuid,
+				dynamic_zones.name,
+				dynamic_zones.leader_id,
+				dynamic_zones.min_players,
+				dynamic_zones.max_players,
 				dynamic_zones.instance_id,
 				dynamic_zones.type,
 				dynamic_zones.compass_zone_id,
@@ -130,6 +140,11 @@ public:
 
 		int col = 0;
 		entry.id                  = strtoul(row[col++], nullptr, 10);
+		entry.uuid                = row[col++];
+		entry.name                = row[col++];
+		entry.leader_id           = strtol(row[col++], nullptr, 10);
+		entry.min_players         = strtol(row[col++], nullptr, 10);
+		entry.max_players         = strtol(row[col++], nullptr, 10);
 		entry.instance_id         = strtol(row[col++], nullptr, 10);
 		entry.type                = strtol(row[col++], nullptr, 10);
 		entry.compass_zone_id     = strtol(row[col++], nullptr, 10);
@@ -157,21 +172,15 @@ public:
 		return entry;
 	}
 
-	static std::vector<DynamicZoneInstance> GetWithInstance(Database& db,
-		const std::vector<uint32_t>& dynamic_zone_ids)
+	static std::vector<DynamicZoneInstance> AllWithInstanceNotExpired(Database& db)
 	{
-		if (dynamic_zone_ids.empty())
-		{
-			return {};
-		}
-
 		std::vector<DynamicZoneInstance> all_entries;
 
-		auto results = db.QueryDatabase(fmt::format(
-			"{} WHERE dynamic_zones.id IN ({}) ORDER BY dynamic_zones.id;",
-			SelectDynamicZoneJoinInstance(),
-			fmt::join(dynamic_zone_ids, ",")
-		));
+		auto results = db.QueryDatabase(fmt::format(SQL(
+			{} WHERE
+				(instance_list.start_time + instance_list.duration) > UNIX_TIMESTAMP()
+				AND instance_list.never_expires = 0
+		), SelectDynamicZoneJoinInstance()));
 
 		if (results.Success())
 		{
@@ -240,6 +249,18 @@ public:
 		}
 	}
 
+	static void UpdateLeaderID(Database& db, uint32_t dz_id, uint32_t leader_id)
+	{
+		if (dz_id != 0)
+		{
+			std::string query = fmt::format(SQL(
+				UPDATE {} SET leader_id = {} WHERE {} = {};
+			), TableName(), leader_id, PrimaryKey(), dz_id);
+
+			db.QueryDatabase(query);
+		}
+	}
+
 	struct DynamicZoneInstancePlayerCount
 	{
 		uint32_t id;
@@ -267,7 +288,6 @@ public:
 			FROM dynamic_zones
 				INNER JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
 				LEFT JOIN dynamic_zone_members ON dynamic_zones.id = dynamic_zone_members.dynamic_zone_id
-					AND dynamic_zone_members.is_current_member = TRUE
 			GROUP BY instance_list.id
 			ORDER BY dynamic_zones.id;
 		));
@@ -299,6 +319,41 @@ public:
 				all_entries.emplace_back(std::move(entry));
 			}
 		}
+		return all_entries;
+	}
+
+	static std::vector<uint32_t> GetStaleIDs(Database& db)
+	{
+		std::vector<uint32_t> all_entries;
+
+		// dzs with no members, missing instance, or expired instance
+		auto results = db.QueryDatabase(SQL(
+			SELECT
+				dynamic_zones.id
+			FROM dynamic_zones
+				LEFT JOIN instance_list ON dynamic_zones.instance_id = instance_list.id
+				LEFT JOIN
+					(
+						SELECT dynamic_zone_id, COUNT(*) member_count
+						FROM dynamic_zone_members
+						GROUP BY dynamic_zone_id
+					) dynamic_zone_members
+					ON dynamic_zone_members.dynamic_zone_id = dynamic_zones.id
+			WHERE
+				instance_list.id IS NULL
+				OR dynamic_zone_members.member_count IS NULL
+				OR dynamic_zone_members.member_count = 0
+				OR ((instance_list.start_time + instance_list.duration) <= UNIX_TIMESTAMP()
+					AND instance_list.never_expires = 0);
+		));
+
+		all_entries.reserve(results.RowCount());
+
+		for (auto row = results.begin(); row != results.end(); ++row)
+		{
+			all_entries.push_back(atoi(row[0]));
+		}
+
 		return all_entries;
 	}
 };

@@ -21,7 +21,6 @@ public:
 		int id;
 		int dynamic_zone_id;
 		int character_id;
-		int is_current_member;
 	};
 
 	static std::string PrimaryKey()
@@ -35,7 +34,6 @@ public:
 			"id",
 			"dynamic_zone_id",
 			"character_id",
-			"is_current_member",
 		};
 	}
 
@@ -71,10 +69,9 @@ public:
 	{
 		DynamicZoneMembers entry{};
 
-		entry.id                = 0;
-		entry.dynamic_zone_id   = 0;
-		entry.character_id      = 0;
-		entry.is_current_member = 1;
+		entry.id              = 0;
+		entry.dynamic_zone_id = 0;
+		entry.character_id    = 0;
 
 		return entry;
 	}
@@ -110,10 +107,9 @@ public:
 		if (results.RowCount() == 1) {
 			DynamicZoneMembers entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.dynamic_zone_id   = atoi(row[1]);
-			entry.character_id      = atoi(row[2]);
-			entry.is_current_member = atoi(row[3]);
+			entry.id              = atoi(row[0]);
+			entry.dynamic_zone_id = atoi(row[1]);
+			entry.character_id    = atoi(row[2]);
 
 			return entry;
 		}
@@ -149,7 +145,6 @@ public:
 
 		update_values.push_back(columns[1] + " = " + std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
 		update_values.push_back(columns[2] + " = " + std::to_string(dynamic_zone_members_entry.character_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(dynamic_zone_members_entry.is_current_member));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -174,7 +169,6 @@ public:
 		insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
 		insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
 		insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
-		insert_values.push_back(std::to_string(dynamic_zone_members_entry.is_current_member));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -207,7 +201,6 @@ public:
 			insert_values.push_back(std::to_string(dynamic_zone_members_entry.id));
 			insert_values.push_back(std::to_string(dynamic_zone_members_entry.dynamic_zone_id));
 			insert_values.push_back(std::to_string(dynamic_zone_members_entry.character_id));
-			insert_values.push_back(std::to_string(dynamic_zone_members_entry.is_current_member));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -241,10 +234,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneMembers entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.dynamic_zone_id   = atoi(row[1]);
-			entry.character_id      = atoi(row[2]);
-			entry.is_current_member = atoi(row[3]);
+			entry.id              = atoi(row[0]);
+			entry.dynamic_zone_id = atoi(row[1]);
+			entry.character_id    = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}
@@ -269,10 +261,9 @@ public:
 		for (auto row = results.begin(); row != results.end(); ++row) {
 			DynamicZoneMembers entry{};
 
-			entry.id                = atoi(row[0]);
-			entry.dynamic_zone_id   = atoi(row[1]);
-			entry.character_id      = atoi(row[2]);
-			entry.is_current_member = atoi(row[3]);
+			entry.id              = atoi(row[0]);
+			entry.dynamic_zone_id = atoi(row[1]);
+			entry.character_id    = atoi(row[2]);
 
 			all_entries.push_back(entry);
 		}

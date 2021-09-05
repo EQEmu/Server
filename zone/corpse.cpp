@@ -1261,16 +1261,16 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			return;
 		}
 
-		if (zone && zone->GetInstanceID() != 0)
+		if (!IsPlayerCorpse())
 		{
-			// expeditions may prevent looting based on client's lockouts
-			auto expedition = Expedition::FindCachedExpeditionByZoneInstance(zone->GetZoneID(), zone->GetInstanceID());
-			if (expedition && !expedition->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
+			// dynamic zones may prevent looting by non-members or based on lockouts
+			auto dz = zone->GetDynamicZone();
+			if (dz && !dz->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
 			{
-				client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+				// note on live this message is only sent once on the first loot attempt of an open corpse
+				client->MessageString(Chat::Loot, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+				lootitem->auto_loot = -1; // generates client eqstr 1370 "You may not loot that item from this corpse."
 				client->QueuePacket(app);
-				SendEndLootErrorPacket(client);
-				ResetLooter();
 				delete inst;
 				return;
 			}
@@ -1307,7 +1307,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 
 		/* Update any tasks that have an activity to loot this item */
 		if (RuleB(TaskSystem, EnableTaskSystem))
-			client->UpdateTasksForItem(ActivityLoot, item->ID);
+			client->UpdateTasksForItem(TaskActivityType::Loot, item->ID);
 
 		/* Remove it from Corpse */
 		if (item_data) {

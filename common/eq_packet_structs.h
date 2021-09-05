@@ -3714,15 +3714,64 @@ struct SetTitleReply_Struct {
 	uint32	entity_id;
 };
 
-struct TaskMemberList_Struct {
-/*00*/ uint32	gopher_id;
-/*04*/ uint32	unknown04;
-/*08*/ uint32	member_count;	//1 less than the number of members
-/*12*/ char	list_pointer[0];
+struct SharedTaskMemberList_Struct {
+/*00*/ uint32 gopher_id;
+/*04*/ uint32 unknown04;
+/*08*/ uint32 member_count;    //1 less than the number of members
+///*12*/ char   list_pointer[0];
+	char      member_name[1];    //null terminated string
+	uint32    monster_mission; // class chosen
+	uint8     task_leader;    //boolean flag
+
 /*	list is of the form:
-	char member_name[1]	//null terminated string
 	uint8	task_leader	//boolean flag
 */
+};
+
+struct SharedTaskQuit_Struct {
+	int32 field1;
+	int32 field2;
+	int32 field3;
+};
+
+struct SharedTaskAddPlayer_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
+};
+
+struct SharedTaskMakeLeader_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
+};
+
+struct SharedTaskRemovePlayer_Struct {
+	int32 field1;
+	int32 field2;
+	char  player_name[64];
+};
+
+struct SharedTaskInvite_Struct {
+	int32_t unknown00;      // probably the unique character id sent in some packets
+	int32_t invite_id;      // invite id sent back in response
+	char    task_name[64];
+	char    inviter_name[64];
+};
+
+struct SharedTaskInviteResponse_Struct {
+	int32_t unknown00;  // 0
+	int32_t invite_id;  // same id sent in the invite, probably for server verification
+	int8_t  accepted;   // 0: declined 1: accepted
+	int8_t  padding[3]; // padding garbage probably
+};
+
+struct SharedTaskAccept_Struct {
+	int32_t  unknown00;
+	int32_t  unknown04;
+	uint32_t npc_entity_id;  // npc task giver entity id (sent in selection window)
+	uint32_t task_id;
+	float    reward_multiplier; // added after titanium (sent in selection window)
 };
 
 #if 0
@@ -3817,7 +3866,7 @@ struct TaskHistory_Struct {
 #endif
 
 struct AcceptNewTask_Struct {
-	uint32	unknown00;
+	uint32	task_type; // type sent in selection window
 	uint32	task_id;		//set to 0 for 'decline'
 	uint32	task_master_id;	//entity ID
 };

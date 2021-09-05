@@ -63,7 +63,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "worldserver.h"
 #include "zone.h"
 #include "mob_movement_manager.h"
+#include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
+#include "../common/shared_tasks.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -381,6 +383,7 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_TargetCommand] = &Client::Handle_OP_TargetCommand;
 	ConnectedOpcodes[OP_TargetMouse] = &Client::Handle_OP_TargetMouse;
 	ConnectedOpcodes[OP_TaskHistoryRequest] = &Client::Handle_OP_TaskHistoryRequest;
+	ConnectedOpcodes[OP_TaskTimers] = &Client::Handle_OP_TaskTimers;
 	ConnectedOpcodes[OP_Taunt] = &Client::Handle_OP_Taunt;
 	ConnectedOpcodes[OP_TestBuff] = &Client::Handle_OP_TestBuff;
 	ConnectedOpcodes[OP_TGB] = &Client::Handle_OP_TGB;
@@ -414,6 +417,15 @@ void MapOpcodes()
 	ConnectedOpcodes[OP_ZoneChange] = &Client::Handle_OP_ZoneChange;
 	ConnectedOpcodes[OP_ResetAA] = &Client::Handle_OP_ResetAA;
 	ConnectedOpcodes[OP_UnderWorld] = &Client::Handle_OP_UnderWorld;
+
+	// shared tasks
+	ConnectedOpcodes[OP_SharedTaskRemovePlayer]   = &Client::Handle_OP_SharedTaskRemovePlayer;
+	ConnectedOpcodes[OP_SharedTaskAddPlayer]      = &Client::Handle_OP_SharedTaskAddPlayer;
+	ConnectedOpcodes[OP_SharedTaskMakeLeader]     = &Client::Handle_OP_SharedTaskMakeLeader;
+	ConnectedOpcodes[OP_SharedTaskInviteResponse] = &Client::Handle_OP_SharedTaskInviteResponse;
+	ConnectedOpcodes[OP_SharedTaskAcceptNew]      = &Client::Handle_OP_SharedTaskAccept;
+	ConnectedOpcodes[OP_SharedTaskQuit]           = &Client::Handle_OP_SharedTaskQuit;
+	ConnectedOpcodes[OP_SharedTaskPlayerList]     = &Client::Handle_OP_SharedTaskPlayerList;
 }
 
 void ClearMappedOpcode(EmuOpcode op)
@@ -525,6 +537,9 @@ void Client::CompleteConnect()
 
 	/* Sets GM Flag if needed & Sends Petition Queue */
 	UpdateAdmin(false);
+
+	// Task Packets
+	LoadClientTaskState();
 
 	if (IsInAGuild()) {
 		uint8 rank = GuildRank();
@@ -899,7 +914,7 @@ void Client::CompleteConnect()
 		guild_mgr.RequestOnlineGuildMembers(this->CharacterID(), this->GuildID());
 	}
 
-	UpdateExpeditionInfoAndLockouts();
+	SendDynamicZoneUpdates();
 
 	/** Request adventure info **/
 	auto pack = new ServerPacket(ServerOP_AdventureDataRequest, 64);
@@ -940,6 +955,25 @@ void Client::CompleteConnect()
 		ShowDevToolsMenu();
 	}
 
+	// shared tasks memberlist
+	if (GetTaskState()->HasActiveSharedTask()) {
+
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskRequestMemberlist,
+			sizeof(ServerSharedTaskRequestMemberlist_Struct)
+		);
+
+		auto *r = (ServerSharedTaskRequestMemberlist_Struct *) p->pBuffer;
+
+		// fill
+		r->source_character_id = CharacterID();
+		r->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
 }
 
 // connecting opcode handlers
@@ -1716,12 +1750,40 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_inv.SetGMInventory((bool)m_pp.gm); // reset back to current gm state
 	}
 
-	/* Task Packets */
-	LoadClientTaskState();
-
 	ApplyWeaponsStance();
 
+	auto dynamic_zone_member_entries = DynamicZoneMembersRepository::GetWhere(database,
+		fmt::format("character_id = {}", CharacterID()));
+
+	for (const auto& entry : dynamic_zone_member_entries)
+	{
+		m_dynamic_zone_ids.emplace_back(entry.dynamic_zone_id);
+	}
+
 	m_expedition_id = ExpeditionsRepository::GetIDByMemberID(database, CharacterID());
+
+	auto dz = zone->GetDynamicZone();
+	if (dz && dz->GetSafeReturnLocation().zone_id != 0)
+	{
+		auto safereturn = dz->GetSafeReturnLocation();
+
+		auto safereturn_entry = CharacterInstanceSafereturnsRepository::NewEntity();
+		safereturn_entry.character_id     = CharacterID();
+		safereturn_entry.instance_zone_id = zone->GetZoneID();
+		safereturn_entry.instance_id      = zone->GetInstanceID();
+		safereturn_entry.safe_zone_id     = safereturn.zone_id;
+		safereturn_entry.safe_x           = safereturn.x;
+		safereturn_entry.safe_y           = safereturn.y;
+		safereturn_entry.safe_z           = safereturn.z;
+		safereturn_entry.safe_heading     = safereturn.heading;
+
+		CharacterInstanceSafereturnsRepository::InsertOneOrUpdate(database, safereturn_entry);
+	}
+	else
+	{
+		CharacterInstanceSafereturnsRepository::DeleteWhere(database,
+			fmt::format("character_id = {}", character_id));
+	}
 
 	/**
 	 * DevTools Load Settings
@@ -1828,7 +1890,7 @@ void Client::Handle_OP_AcceptNewTask(const EQApplicationPacket *app)
 	AcceptNewTask_Struct *ant = (AcceptNewTask_Struct*)app->pBuffer;
 
 	if (ant->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state)
-		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id);
+		task_state->AcceptNewTask(this, ant->task_id, ant->task_master_id, std::time(nullptr));
 }
 
 void Client::Handle_OP_AdventureInfoRequest(const EQApplicationPacket *app)
@@ -9041,9 +9103,9 @@ void Client::Handle_OP_KickPlayers(const EQApplicationPacket *app)
 			expedition->DzKickPlayers(this);
 		}
 	}
-	else if (buf->kick_task)
+	else if (buf->kick_task && GetTaskState() && GetTaskState()->HasActiveSharedTask())
 	{
-		// todo: shared tasks
+		GetTaskState()->KickPlayersSharedTask(this);
 	}
 }
 
@@ -12820,16 +12882,16 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 		While active for the duration of 12 seconds baseline. The 'shield target' will take 50 pct less damage and
 		the 'shielder' will be hit with the damage taken by the 'shield target' after all applicable mitigiont is calculated,
 		the damage on the 'shielder' will be reduced by 25 percent, this reduction can be increased to 50 pct if equiping a shield.
-		You receive a 1% increase in mitigation for every 2 AC on the shield. 
+		You receive a 1% increase in mitigation for every 2 AC on the shield.
 		Shielder must stay with in a close distance (15 units) to your 'shield target'. If either move out of range, shield ends, no message given.
 		Both duration and shield range can be modified by AA.
 		Recast is 3 minutes.
 
 		For custom use cases, Mob::ShieldAbility can be used in quests with all parameters being altered. This functional
 		is also used for SPA 201 SE_PetShield, which functions in a simalar manner with pet shielding owner.
-		
+
 		Note: If either the shielder or the shield target die all variables are reset on both.
-	
+
 	*/
 
 	if (app->size != sizeof(Shielding_Struct)) {
@@ -12838,7 +12900,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	if (GetLevel() < 30) { //Client gives message
-		return; 
+		return;
 	}
 
 	if (GetClass() != WARRIOR){
@@ -12854,7 +12916,7 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	}
 
 	Shielding_Struct* shield = (Shielding_Struct*)app->pBuffer;
-			
+
 	if (ShieldAbility(shield->target_id, 15, 12000, 50, 25, true, false)) {
 		p_timers.Start(timer, SHIELD_ABILITY_RECAST_TIME);
 	}
@@ -15196,20 +15258,266 @@ void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 	return;
 }
 
-void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket* app) {
+void Client::Handle_OP_MovementHistoryList(const EQApplicationPacket *app)
+{
 	cheat_manager.ProcessMovementHistory(app);
 }
 
-void Client::Handle_OP_UnderWorld(const EQApplicationPacket* app) {
-	UnderWorld* m_UnderWorld = (UnderWorld*)app->pBuffer;
-	if (app->size != sizeof(UnderWorld))
-	{
+void Client::Handle_OP_UnderWorld(const EQApplicationPacket *app)
+{
+	UnderWorld *m_UnderWorld = (UnderWorld *) app->pBuffer;
+	if (app->size != sizeof(UnderWorld)) {
 		LogDebug("Size mismatch in OP_UnderWorld, expected {}, got [{}]", sizeof(UnderWorld), app->size);
 		DumpPacket(app);
 		return;
 	}
-	auto dist = Distance(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld), glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
+	auto dist = Distance(
+		glm::vec3(m_UnderWorld->x, m_UnderWorld->y, zone->newzone_data.underworld),
+		glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
 	cheat_manager.MovementCheck(glm::vec3(m_UnderWorld->x, m_UnderWorld->y, m_UnderWorld->z));
-	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0)
+	if (m_UnderWorld->spawn_id == GetID() && dist <= 5.0f && zone->newzone_data.underworld_teleport_index != 0) {
 		cheat_manager.SetExemptStatus(Port, true);
+	}
+}
+
+void Client::Handle_OP_SharedTaskRemovePlayer(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SharedTaskRemovePlayer_Struct)) {
+		LogPacketClientServer(
+			"Wrong size on Handle_OP_SharedTaskRemovePlayer | got [{}] expected [{}]",
+			app->size,
+			sizeof(SharedTaskRemovePlayer_Struct)
+		);
+		return;
+	}
+	auto *r = (SharedTaskRemovePlayer_Struct *) app->pBuffer;
+
+	LogTasks(
+		"[Handle_OP_SharedTaskRemovePlayer] field1 [{}] field2 [{}] player_name [{}]",
+		r->field1,
+		r->field2,
+		r->player_name
+	);
+
+	// live no-ops this command if not in a shared task
+	if (GetTaskState()->HasActiveSharedTask()) {
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskRemovePlayer,
+			sizeof(ServerSharedTaskRemovePlayer_Struct)
+		);
+
+		auto *rp = (ServerSharedTaskRemovePlayer_Struct *) p->pBuffer;
+
+		// fill
+		rp->source_character_id = CharacterID();
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
+
+		LogTasks(
+			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			rp->source_character_id,
+			rp->task_id,
+			rp->player_name
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
+}
+
+void Client::Handle_OP_SharedTaskAddPlayer(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SharedTaskAddPlayer_Struct)) {
+		LogPacketClientServer(
+			"Wrong size on Handle_OP_SharedTaskAddPlayer | got [{}] expected [{}]",
+			app->size,
+			sizeof(SharedTaskAddPlayer_Struct)
+		);
+		return;
+	}
+	auto *r = (SharedTaskAddPlayer_Struct *) app->pBuffer;
+
+	LogTasks(
+		"[SharedTaskAddPlayer_Struct] field1 [{}] field2 [{}] player_name [{}]",
+		r->field1,
+		r->field2,
+		r->player_name
+	);
+
+	if (!GetTaskState()->HasActiveSharedTask()) {
+		// this message is generated client-side in newer clients
+		Message(Chat::System, SharedTaskMessage::GetEQStr(SharedTaskMessage::COULD_NOT_USE_COMMAND));
+	}
+	else {
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskAddPlayer,
+			sizeof(ServerSharedTaskAddPlayer_Struct)
+		);
+
+		auto *rp = (ServerSharedTaskAddPlayer_Struct *) p->pBuffer;
+
+		// fill
+		rp->source_character_id = CharacterID();
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
+
+		LogTasks(
+			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			rp->source_character_id,
+			rp->task_id,
+			rp->player_name
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
+}
+
+void Client::Handle_OP_SharedTaskMakeLeader(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SharedTaskMakeLeader_Struct)) {
+		LogPacketClientServer(
+			"Wrong size on Handle_OP_SharedTaskMakeLeader | got [{}] expected [{}]",
+			app->size,
+			sizeof(SharedTaskMakeLeader_Struct)
+		);
+		return;
+	}
+
+	auto *r = (SharedTaskMakeLeader_Struct *) app->pBuffer;
+	LogTasks(
+		"[SharedTaskMakeLeader_Struct] field1 [{}] field2 [{}] player_name [{}]",
+		r->field1,
+		r->field2,
+		r->player_name
+	);
+
+	// live no-ops this command if not in a shared task
+	if (GetTaskState()->HasActiveSharedTask()) {
+		// struct
+		auto p = new ServerPacket(
+			ServerOP_SharedTaskMakeLeader,
+			sizeof(ServerSharedTaskMakeLeader_Struct)
+		);
+
+		auto *rp = (ServerSharedTaskMakeLeader_Struct *) p->pBuffer;
+
+		// fill
+		rp->source_character_id = CharacterID();
+		rp->task_id             = GetTaskState()->GetActiveSharedTask().task_id;
+		strn0cpy(rp->player_name, r->player_name, sizeof(r->player_name));
+
+		LogTasks(
+			"[Handle_OP_SharedTaskRemovePlayer] source_character_id [{}] task_id [{}] player_name [{}]",
+			rp->source_character_id,
+			rp->task_id,
+			rp->player_name
+		);
+
+		// send
+		worldserver.SendPacket(p);
+		safe_delete(p);
+	}
+}
+
+void Client::Handle_OP_SharedTaskInviteResponse(const EQApplicationPacket *app)
+{
+	if (app->size != sizeof(SharedTaskInviteResponse_Struct)) {
+		LogPacketClientServer(
+			"Wrong size on SharedTaskInviteResponse | got [{}] expected [{}]",
+			app->size,
+			sizeof(SharedTaskInviteResponse_Struct)
+		);
+		return;
+	}
+
+	auto *r = (SharedTaskInviteResponse_Struct *) app->pBuffer;
+	LogTasks(
+		"[SharedTaskInviteResponse] unknown00 [{}] invite_id [{}] accepted [{}]",
+		r->unknown00,
+		r->invite_id,
+		r->accepted
+	);
+
+	// struct
+	auto p = new ServerPacket(
+		ServerOP_SharedTaskInviteAcceptedPlayer,
+		sizeof(ServerSharedTaskInviteAccepted_Struct)
+	);
+
+	auto *c = (ServerSharedTaskInviteAccepted_Struct *) p->pBuffer;
+
+	// fill
+	c->source_character_id = CharacterID();
+	c->shared_task_id      = r->invite_id;
+	c->accepted            = r->accepted;
+	strn0cpy(c->player_name, GetName(), sizeof(c->player_name));
+
+	LogTasks(
+		"[ServerOP_SharedTaskInviteAcceptedPlayer] source_character_id [{}] shared_task_id [{}]",
+		c->source_character_id,
+		c->shared_task_id
+	);
+
+	// send
+	worldserver.SendPacket(p);
+	safe_delete(p);
+}
+
+void Client::Handle_OP_SharedTaskAccept(const EQApplicationPacket* app)
+{
+	auto buf = reinterpret_cast<SharedTaskAccept_Struct*>(app->pBuffer);
+
+	LogTasksDetail(
+		"[OP_SharedTaskAccept] unknown00 [{}] unknown04 [{}] npc_entity_id [{}] task_id [{}]",
+		buf->unknown00,
+		buf->unknown04,
+		buf->npc_entity_id,
+		buf->task_id
+	);
+
+	if (buf->task_id > 0 && RuleB(TaskSystem, EnableTaskSystem) && task_state) {
+		task_state->AcceptNewTask(this, buf->task_id, buf->npc_entity_id, std::time(nullptr));
+	}
+}
+
+void Client::Handle_OP_SharedTaskQuit(const EQApplicationPacket* app)
+{
+	if (GetTaskState()->HasActiveSharedTask())
+	{
+		CancelTask(TASKSLOTSHAREDTASK, TaskType::Shared);
+	}
+}
+
+void Client::Handle_OP_TaskTimers(const EQApplicationPacket* app)
+{
+	GetTaskState()->ListTaskTimers(this);
+}
+
+void Client::Handle_OP_SharedTaskPlayerList(const EQApplicationPacket* app)
+{
+	if (GetTaskState()->HasActiveSharedTask())
+	{
+		uint32_t size = sizeof(ServerSharedTaskPlayerList_Struct);
+		auto pack = std::make_unique<ServerPacket>(ServerOP_SharedTaskPlayerList, size);
+		auto buf = reinterpret_cast<ServerSharedTaskPlayerList_Struct*>(pack->pBuffer);
+		buf->source_character_id = CharacterID();
+		buf->task_id = GetTaskState()->GetActiveSharedTask().task_id;
+
+		worldserver.SendPacket(pack.get());
+	}
+}
+
+int64 Client::GetSharedTaskId() const
+{
+	return m_shared_task_id;
+}
+
+void Client::SetSharedTaskId(int64 shared_task_id)
+{
+	Client::m_shared_task_id = shared_task_id;
 }

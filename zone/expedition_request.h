@@ -35,8 +35,7 @@ class Raid;
 class ExpeditionRequest
 {
 public:
-	ExpeditionRequest(std::string expedition_name, uint32_t min_players,
-		uint32_t max_players, bool disable_messages = false);
+	ExpeditionRequest(const DynamicZone& dz, bool disable_messages = false);
 
 	bool Validate(Client* requester);
 
