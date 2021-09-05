@@ -190,7 +190,6 @@ Mob::Mob(
 
 	last_hp_percent = 0;
 	last_hp         = 0;
-	last_max_hp     = 0;
 
 	current_speed = base_runspeed;
 
@@ -1355,32 +1354,22 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	}
 }
 
-void Mob::SendHPUpdate(bool skip_self /*= false*/, bool force_update_all /*= false*/)
+void Mob::SendHPUpdate(bool force_update_all)
 {
 
 	// If our HP is different from last HP update call - let's update selves
 	if (IsClient()) {
-
-		// delay allowing the client to catch up on buff states
-		if (max_hp != last_max_hp) {
-			last_max_hp = max_hp;
-			return;
-		}
-
 		if (current_hp != last_hp || force_update_all) {
 
-			// This is to prevent excessive packet sending under trains/fast combat
 			LogHPUpdate(
-				"[SendHPUpdate] Update HP of self [{}] HP: [{}/{}] last: [{}/{}] skip_self: [{}]",
+				"[SendHPUpdate] Update HP of self [{}] current_hp [{}] max_hp [{}] last_hp [{}]",
 				GetCleanName(),
 				current_hp,
 				max_hp,
-				last_hp,
-				last_max_hp,
-				(skip_self ? "true" : "false")
+				last_hp
 			);
 
-			if (!skip_self || this->CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
+			if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
 				auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
 				auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
 
@@ -3279,7 +3268,7 @@ void Mob::SetTarget(Mob *mob)
 	}
 
 	if (IsClient() && GetTarget()) {
-		GetTarget()->SendHPUpdate(false, true);
+		GetTarget()->SendHPUpdate(true);
 	}
 }
 

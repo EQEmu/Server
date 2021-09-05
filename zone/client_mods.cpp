@@ -337,9 +337,6 @@ int32 Client::CalcMaxHP()
 		}
 	}
 
-	// hack fix for client health not reflecting server value
-	last_max_hp = 0;
-
 	return max_hp;
 }
 
