@@ -11132,6 +11132,7 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 	/**
 	 * Handle any EQEmu defined popup Ids first
 	 */
+	std::string response;
 	switch (popup_response->popupid) {
 		case POPUPID_UPDATE_SHOWSTATSWINDOW:
 			if (GetTarget() && GetTarget()->IsClient()) {
@@ -11141,6 +11142,13 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 				SendStatsWindow(this, true);
 			}
 			return;
+			break;
+
+		case POPUPID_DIAWIND:
+			response = GetEntityVariable(DIAWIND_RESPONSE_KEY.c_str());
+			if (!response.empty()) {
+				ChannelMessageReceived(8, 0, 100, response.c_str());
+			}
 			break;
 
 		case EQ::popupresponse::MOB_INFO_DISMISS:

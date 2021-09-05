@@ -116,6 +116,42 @@ std::vector<std::string> SplitString(const std::string &str, const char delim) {
 	return ret;
 }
 
+// this one takes delimiter length into consideration
+std::vector<std::string> split_string(std::string s, std::string delimiter)
+{
+	size_t                   pos_start = 0, pos_end, delim_len = delimiter.length();
+	std::string              token;
+	std::vector<std::string> res;
+
+	while ((pos_end = s.find(delimiter, pos_start)) != std::string::npos) {
+		token     = s.substr(pos_start, pos_end - pos_start);
+		pos_start = pos_end + delim_len;
+		res.push_back(token);
+	}
+
+	res.push_back(s.substr(pos_start));
+	return res;
+}
+
+std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim)
+{
+	if (s.find(start_delim) == std::string::npos && s.find(stop_delim) == std::string::npos) {
+		return "";
+	}
+
+	auto first_split = split_string(s, start_delim);
+	if (!first_split.empty()) {
+		std::string remaining_block = first_split[1];
+		auto        second_split    = split_string(remaining_block, stop_delim);
+		if (!second_split.empty()) {
+			std::string between = second_split[0];
+			return between;
+		}
+	}
+
+	return "";
+}
+
 std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator)
 {
 	// this shouldn't go out of bounds, even without obvious bounds checks
@@ -280,7 +316,16 @@ void find_replace(std::string &string_subject, const std::string &search_string,
 		string_subject.replace(start_pos, search_string.length(), replace_string);
 		start_pos += replace_string.length();
 	}
+}
 
+std::string replace_string(std::string subject, const std::string &search, const std::string &replace)
+{
+	size_t pos = 0;
+	while ((pos = subject.find(search, pos)) != std::string::npos) {
+		subject.replace(pos, search.length(), replace);
+		pos += replace.length();
+	}
+	return subject;
 }
 
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver)

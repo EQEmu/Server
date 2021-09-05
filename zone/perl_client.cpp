@@ -39,6 +39,7 @@
 #include "client.h"
 #include "expedition.h"
 #include "titles.h"
+#include "dialogue_window.h"
 
 #ifdef THIS        /* this macro seems to leak out on some systems */
 #undef THIS
@@ -2111,11 +2112,11 @@ XS(XS_Client_IsStanding)
 	XSRETURN(1);
 }
 
-XS(XS_Client_Sit); 
+XS(XS_Client_Sit);
 XS(XS_Client_Sit) {
     dXSARGS;
     if (items != 1)
-        Perl_croak(aTHX_ "Usage: Client::Sit(THIS)"); 
+        Perl_croak(aTHX_ "Usage: Client::Sit(THIS)");
     {
         Client *THIS;
         VALIDATE_THIS_IS_CLIENT;
@@ -5052,7 +5053,7 @@ XS(XS_Client_Fling) {
 		VALIDATE_THIS_IS_CLIENT;
 		if (items > 5)
 			ignore_los = (bool) SvTRUE(ST(5));
-			
+
 		if (items > 6)
 			clipping = (bool) SvTRUE(ST(6));
 
@@ -5124,7 +5125,7 @@ XS(XS_Client_GetLearnableDisciplines) {
 		min_level = (uint8)SvUV(ST(1));
 	if (items > 2)
 		max_level = (uint8)SvUV(ST(2));
-	
+
 	Client* THIS;
 	VALIDATE_THIS_IS_CLIENT;
 	auto learnable_disciplines = THIS->GetLearnableDisciplines(min_level, max_level);
@@ -5146,7 +5147,7 @@ XS(XS_Client_GetLearnedDisciplines) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Client::GetLearnedDisciplines(THIS)");
-	
+
 	Client* THIS;
 	VALIDATE_THIS_IS_CLIENT;
 	auto learned_disciplines = THIS->GetLearnedDisciplines();
@@ -5168,7 +5169,7 @@ XS(XS_Client_GetMemmedSpells) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Client::GetMemmedSpells(THIS)");
-	
+
 	Client* THIS;
 	VALIDATE_THIS_IS_CLIENT;
 	auto memmed_spells = THIS->GetMemmedSpells();
@@ -5190,7 +5191,7 @@ XS(XS_Client_GetScribeableSpells) {
 	dXSARGS;
 	if (items < 1 || items > 3)
 		Perl_croak(aTHX_ "Usage: Client::GetScribeableSpells(THIS, [uint8 min_level, uint8 max_level])");
-	
+
 	uint8 min_level = 1;
 	uint8 max_level = 0;
 	if (items > 1)
@@ -5219,7 +5220,7 @@ XS(XS_Client_GetScribedSpells) {
 	dXSARGS;
 	if (items != 1)
 		Perl_croak(aTHX_ "Usage: Client::GetScribedSpells(THIS)");
-	
+
 	Client* THIS;
 	VALIDATE_THIS_IS_CLIENT;
 	auto scribed_spells = THIS->GetScribedSpells();
@@ -5262,7 +5263,7 @@ XS(XS_Client_GetAAEXPModifier) {
 		double aa_modifier = 1.0f;
 		uint32 zone_id = (uint32)SvUV(ST(1));
 		dXSTARG;
-		VALIDATE_THIS_IS_CLIENT;			
+		VALIDATE_THIS_IS_CLIENT;
 		aa_modifier = THIS->GetAAEXPModifier(zone_id);
 		XSprePUSH;
 		PUSHn((double) aa_modifier);
@@ -5432,6 +5433,39 @@ XS(XS_Client_RemoveItem) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_DialogueWindow); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_DialogueWindow) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::DialogueWindow(THIS, string window_markdown)"); // @categories Script Utility
+		{
+			Client *THIS;
+			dXSTARG;
+			VALIDATE_THIS_IS_CLIENT;
+
+			std::string window_markdown(SvPV_nolen(ST(1)));
+			DialogueWindow::Render(THIS, window_markdown);
+		}
+		XSRETURN_EMPTY;
+}
+
+XS(XS_Client_DiaWind); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_DiaWind) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::DiaWind(THIS, string window_markdown)"); // @categories Script Utility
+		{
+			Client *THIS;
+			dXSTARG;
+			VALIDATE_THIS_IS_CLIENT;
+
+			std::string window_markdown(SvPV_nolen(ST(1)));
+			DialogueWindow::Render(THIS, window_markdown);
+
+		}
+		XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5486,6 +5520,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "DecreaseByID"), XS_Client_DecreaseByID, file, "$$$");
 	newXSproto(strcpy(buf, "DeleteItemInInventory"), XS_Client_DeleteItemInInventory, file, "$$;$$");
 	newXSproto(strcpy(buf, "Disconnect"), XS_Client_Disconnect, file, "$");
+	newXSproto(strcpy(buf, "DiaWind"), XS_Client_DiaWind, file, "$$");
+	newXSproto(strcpy(buf, "DialogueWindow"), XS_Client_DialogueWindow, file, "$$");
 	newXSproto(strcpy(buf, "DropItem"), XS_Client_DropItem, file, "$$");
 	newXSproto(strcpy(buf, "Duck"), XS_Client_Duck, file, "$");
 	newXSproto(strcpy(buf, "DyeArmorBySlot"), XS_Client_DyeArmorBySlot, file, "$$$$$;$");
