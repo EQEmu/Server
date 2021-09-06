@@ -78,6 +78,7 @@
 #include "../common/content/world_content_service.h"
 #include "../common/http/httplib.h"
 #include "../common/shared_tasks.h"
+#include "gm_commands/door_manipulation.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -202,6 +203,7 @@ int command_init(void)
 		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.",  80, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
+		command_add("door", "Door editing command", 80, command_door) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
 		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
@@ -12938,6 +12940,10 @@ void command_distance(Client *c, const Seperator *sep) {
 
 		c->Message(Chat::White, "Your target, %s, is %1.1f units from you.",  c->GetTarget()->GetName(), Distance(c->GetPosition(), target->GetPosition()));
 	}
+}
+
+void command_door(Client *c, const Seperator *sep) {
+	DoorManipulation::CommandHandler(c, sep);
 }
 
 void command_cvs(Client *c, const Seperator *sep)

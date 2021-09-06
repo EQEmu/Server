@@ -66,6 +66,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
+#include "gm_commands/door_manipulation.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -4354,6 +4355,23 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	{
 		Message(0, "Unable to find door, please notify a GM (DoorID: %i).", cd->doorid);
 		return;
+	}
+
+	// set door selected
+	if (IsDevToolsEnabled()) {
+		SetDoorToolEntityId(currentdoor->GetID());
+
+		// $client->Message(15, "Door $doorid [" . quest::saylink("Close Door $doorid", 1, "Close Door") . "][" . quest::saylink("Open Door $doorid", 1, "Open Door") . "] [" . quest::saylink("#door edit", 1, "Edit Door") . "]");
+
+		DoorManipulation::CommandHeader(this);
+		Message(
+			Chat::White,
+			fmt::format(
+				"Door ({}) [{}]",
+				currentdoor->GetID(),
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
+			).c_str()
+		);
 	}
 
 	char buf[20];

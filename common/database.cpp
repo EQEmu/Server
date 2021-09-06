@@ -39,6 +39,8 @@
 #include "unix.h"
 #include <netinet/in.h>
 #include <sys/time.h>
+#include <codecvt>
+
 #endif
 
 #include "database.h"
@@ -46,6 +48,8 @@
 #include "extprofile.h"
 #include "string_util.h"
 #include "database_schema.h"
+#include "http/httplib.h"
+#include "http/uri.h"
 
 extern Client client;
 
@@ -2416,5 +2420,62 @@ bool Database::CopyCharacter(
 	TransactionCommit();
 
 	return true;
+}
+
+void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string url)
+{
+	std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	std::wstring wurl = converter.from_bytes(url);
+	Uri result = Uri::Parse(wurl);
+
+//	std::cout << "Path " << converter.to_bytes(result.Path) << std::endl;
+//	std::cout << "Host " << converter.to_bytes(result.Host) << std::endl;
+//	std::cout << "QueryString " << converter.to_bytes(result.QueryString) << std::endl;
+//	std::cout << "Protocol " << converter.to_bytes(result.Protocol) << std::endl;
+//	std::cout << "Port " << converter.to_bytes(result.Port) << std::endl;
+
+	if (!DoesTableExist(table_name)) {
+		LogMySQLQuery("Table [{}] does not exist. Downloading from Github and installing...", table_name);
+
+		// http get request
+		httplib::Client cli(
+			fmt::format(
+				"{}://{}",
+				converter.to_bytes(result.Protocol),
+				converter.to_bytes(result.Host)
+			).c_str()
+		);
+
+		cli.set_connection_timeout(0, 60000000); // 60 sec
+		cli.set_read_timeout(60, 0); // 60 seconds
+		cli.set_write_timeout(60, 0); // 60 seconds
+
+		int sourced_queries     = 0;
+		std::string request_url = converter.to_bytes(result.Path);
+
+		if (auto res = cli.Get(request_url.c_str())) {
+			if (res->status == 200) {
+				for (auto &s: SplitString(res->body, ';')) {
+					if (!trim(s).empty()) {
+						auto results = QueryDatabase(s);
+						if (!results.ErrorMessage().empty()) {
+							LogError("Error sourcing SQL [{}]", results.ErrorMessage());
+							return;
+						}
+						sourced_queries++;
+					}
+				}
+			}
+		}
+		else {
+			LogError("Error retrieving URL [{}]", url);
+		}
+
+		LogMySQLQuery(
+			"Table [{}] installed. Sourced [{}] queries",
+			table_name,
+			sourced_queries
+		);
+	}
 }
 
