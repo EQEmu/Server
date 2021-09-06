@@ -65,7 +65,26 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	}
 
 	if (arg1 == "edit") {
+		Doors       *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		std::string model = str_toupper(arg2);
+		if (door) {
+			door->SetDoorName(model.c_str());
 
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Door Selected ID [{}] Name [{}] OpenType [{}] Invertstate [{}]",
+					c->GetDoorToolEntityId(),
+					door->GetDoorName(),
+					door->GetOpenType(),
+					door->GetInvertState()
+				).c_str()
+			);
+
+			return;
+		}
+
+		c->Message(Chat::Red, "Door selection invalid...");
 	}
 
 //	if (arg1 == "showmodelszone") {
