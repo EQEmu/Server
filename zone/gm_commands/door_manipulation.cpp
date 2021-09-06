@@ -33,6 +33,12 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		);
 	}
 
+	// save needs to be implemented
+	// saylinks need to be added to main menu
+	// inverted needs to either be supported or dropped
+	// opentype needs to be handled
+	// any other polish
+
 	// option
 	if (arg1.empty()) {
 		DoorManipulation::CommandHeader(c);
