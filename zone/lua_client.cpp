@@ -15,6 +15,7 @@
 #include "lua_group.h"
 #include "lua_raid.h"
 #include "lua_packet.h"
+#include "dialogue_window.h"
 #include "../common/expedition_lockout_timer.h"
 
 struct InventoryWhere { };
@@ -1824,6 +1825,11 @@ int Lua_Client::GetClientMaxLevel() {
 	return self->GetClientMaxLevel();
 }
 
+void Lua_Client::DialogueWindow(std::string markdown) {
+	Lua_Safe_Call_Void();
+	DialogueWindow::Render(self, std::move(markdown));
+}
+
 DynamicZoneLocation GetDynamicZoneLocationFromTable(const luabind::object& lua_table)
 {
 	DynamicZoneLocation zone_location;
@@ -2496,6 +2502,9 @@ luabind::scope lua_register_client() {
 		.def("GetAlternateCurrencyValue", (int(Lua_Client::*)(uint32))&Lua_Client::GetAlternateCurrencyValue)
 		.def("SendWebLink", (void(Lua_Client::*)(const char *))&Lua_Client::SendWebLink)
 		.def("HasSpellScribed", (bool(Lua_Client::*)(int))&Lua_Client::HasSpellScribed)
+		.def("DiaWind", (void(Lua_Client::*)(std::string))&Lua_Client::DialogueWindow)
+		.def("DialogueWindow", (void(Lua_Client::*)(std::string))&Lua_Client::DialogueWindow)
+		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 		.def("SetAccountFlag", (void(Lua_Client::*)(std::string,std::string))&Lua_Client::SetAccountFlag)
 		.def("GetAccountFlag", (std::string(Lua_Client::*)(std::string))&Lua_Client::GetAccountFlag)
 		.def("GetGroup", (Lua_Group(Lua_Client::*)(void))&Lua_Client::GetGroup)

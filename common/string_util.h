@@ -177,6 +177,8 @@ std::vector<std::string> join_tuple(const std::string &glue, const std::pair<cha
 }
 
 std::vector<std::string> SplitString(const std::string &s, const char delim = ',');
+std::vector<std::string> split_string(std::string s, std::string delimiter);
+std::string get_between(const std::string &s, std::string start_delim, std::string stop_delim);
 std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator = ',');
 std::string EscapeString(const char *src, size_t sz);
 std::string EscapeString(const std::string &s);
@@ -185,6 +187,7 @@ void ToLowerString(std::string &s);
 void ToUpperString(std::string &s);
 std::string JoinString(const std::vector<std::string>& ar, const std::string &delim);
 void find_replace(std::string& string_subject, const std::string& search_string, const std::string& replace_string);
+std::string replace_string(std::string subject, const std::string &search, const std::string &replace);
 void ParseAccountString(const std::string &s, std::string &account, std::string &loginserver);
 
 //const char based
