@@ -1,6 +1,7 @@
 #include "door_manipulation.h"
 #include "../doors.h"
 #include "../../common/repositories/tool_game_objects_repository.h"
+#include "../../common/misc_functions.h"
 
 void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 {
@@ -38,14 +39,14 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
 		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
 		c->Message(Chat::White, "#door model <modelname> | Changes door model for selected door");
-		c->Message(Chat::White, "#door save | Creates database entry for highlighted door");
+		c->Message(Chat::White, "#door save | Creates database entry for selected door");
+		c->Message(Chat::White, "#door showmodelszone | Shows models in zone - used to change a selected door");
+		c->Message(Chat::White, "#door showmodelsglobal | Shows global model files");
 		c->Message(
 			Chat::White,
-			fmt::format(
-				"{} - lists doors in zone",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door list", false, "#door list")
-			).c_str()
+			"#door showmodelsfromfile | Shows models from s3d or eqg file. Example tssequip.eqg or wallet01.eqg"
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -59,6 +60,13 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			fmt::format(
 				"{} - Brings up editing interface for selected door",
 				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "#door showmodelszone")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} - lists doors in zone",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#list doors", false, "#list doors")
 			).c_str()
 		);
 
@@ -311,7 +319,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			uint16 helper_mob_y_negative = 0;
 
 			for (auto &n: entity_list.GetNPCList()) {
-				NPC * npc = n.second;
+				NPC         *npc     = n.second;
 				std::string npc_name = npc->GetName();
 				if (npc_name.find("-X") != std::string::npos) {
 					helper_mob_x_negative = npc->GetID();
@@ -331,9 +339,10 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			glm::vec4 door_position = door->GetPosition();
 			if (helper_mob_x_negative == 0) {
 				door_position.x = door_position.x - 15;
-				auto node = NPC::SpawnNodeNPC("-X", "", door_position);
+				auto node       = NPC::SpawnNodeNPC("-X", "", door_position);
 				helper_mob_x_negative = node->GetID();
-			} else {
+			}
+			else {
 				auto n = entity_list.GetNPCByID(helper_mob_x_negative);
 				n->GMMove(door->GetX() - 15, door->GetY(), door->GetZ(), n->GetHeading());
 			}
@@ -344,7 +353,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				door_position.x = door_position.x + 15;
 				auto node = NPC::SpawnNodeNPC("+X", "", door_position);
 				helper_mob_x_positive = node->GetID();
-			} else {
+			}
+			else {
 				auto n = entity_list.GetNPCByID(helper_mob_x_positive);
 				n->GMMove(door->GetX() + 15, door->GetY(), door->GetZ(), n->GetHeading());
 			}
@@ -355,7 +365,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				door_position.y = door_position.y - 15;
 				auto node = NPC::SpawnNodeNPC("-Y", "", door_position);
 				helper_mob_y_negative = node->GetID();
-			} else {
+			}
+			else {
 				auto n = entity_list.GetNPCByID(helper_mob_y_negative);
 				n->GMMove(door->GetX(), door->GetY() - 15, door->GetZ(), n->GetHeading());
 			}
@@ -366,7 +377,8 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 				door_position.y = door_position.y + 15;
 				auto node = NPC::SpawnNodeNPC("+Y", "", door_position);
 				helper_mob_y_positive = node->GetID();
-			} else {
+			}
+			else {
 				auto n = entity_list.GetNPCByID(helper_mob_y_positive);
 				n->GMMove(door->GetX(), door->GetY() + 15, door->GetZ(), n->GetHeading());
 			}
@@ -455,6 +467,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	//		}
 	//	}
 
+	// create
 	if (arg1 == "create") {
 		std::string model     = str_toupper(arg2);
 		uint16      entity_id = entity_list.CreateDoor(
@@ -470,6 +483,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->SetDoorToolEntityId(entity_id);
 	}
 
+	// set model
 	if (arg1 == "model") {
 		Doors       *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		std::string model = str_toupper(arg2);
@@ -478,6 +492,123 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		}
 	}
 
+	// open type
+	if (arg1 == "opentype" && !arg2.empty() && StringIsNumber(arg2)) {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		if (door) {
+			door->SetOpenType(std::atoi(arg2.c_str()));
+		}
+	}
+
+	// incline
+	if (arg1 == "setincline" && !arg2.empty() && StringIsNumber(arg2)) {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		if (door) {
+			door->SetIncline(std::atoi(arg2.c_str()));
+		}
+	}
+
+	// incline incremental
+	if (arg1 == "setinclineinc" && !arg2.empty() && StringIsNumber(arg2)) {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		if (door) {
+			door->SetIncline(door->GetIncline() + std::atoi(arg2.c_str()));
+		}
+	}
+	if (arg1 == "setinclineinc") {
+		std::map<float, std::string> incline_values = {
+			{.01,    "Upright"},
+			{63.75,  "45 Degrees",},
+			{130,    "90 Degrees"},
+			{192.5,  "135 Degrees"},
+			{255,    "180 Degrees"},
+			{321.25, "225 Degrees"},
+			{385,    "270 Degrees"},
+			{448.75, "315 Degrees"},
+			{512.5,  "360 Degrees"}
+		};
+
+		std::vector<std::string> incline_normal_options;
+		std::vector<std::string> incline_positive_options;
+		std::vector<std::string> incline_negative_options;
+		for (auto                incline_value : incline_values) {
+			incline_normal_options.emplace_back(
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format(
+						"#door setincline {}",
+						incline_value.first
+					),
+					false,
+					incline_value.second
+				)
+			);
+		}
+
+		for (int incline_index = 0; incline_index <= 100; incline_index += 10) {
+			int incline_value = (incline_index == 0 ? 1 : incline_index);
+			incline_positive_options.emplace_back(
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format(
+						"#door setinclineinc {}",
+						incline_value
+					),
+					false,
+					itoa(std::abs(incline_value))
+				)
+			);
+		}
+
+		for (int incline_index = -100; incline_index <= 1; incline_index += 10) {
+			int incline_value = (incline_index == 0 ? -1 : incline_index);
+			incline_negative_options.emplace_back(
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format(
+						"#door setinclineinc {}",
+						incline_value
+					),
+					false,
+					itoa(std::abs(incline_value))
+				)
+			);
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[Incline] [{}]",
+				implode(" | ", incline_normal_options)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"[Incline Increments] [{}] - | + [{}]",
+				implode(" | ", incline_negative_options),
+				implode(" | ", incline_positive_options)
+			).c_str()
+		);
+	}
+
+	// show models in zone
+	if (arg1 == "showmodelsglobal") {
+		auto game_objects = ToolGameObjectsRepository::GetWhere(
+			database,
+			"object_name LIKE '%IT%' AND zoneid = 0 AND object_name NOT LIKE '%OBJ%' GROUP by file_from"
+		);
+
+		if (game_objects.empty()) {
+			c->Message(Chat::White, "There are no models to display...");
+		}
+
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(Chat::White, "# Models (Global)");
+		c->Message(Chat::White, "------------------------------------------------");
+
+		DisplayModelsFromFileResults(c, game_objects);
+	}
+
+	// show models in zone
 	if (arg1 == "showmodelszone") {
 		auto game_objects = ToolGameObjectsRepository::GetWhere(
 			database,
@@ -489,57 +620,30 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		}
 
 		c->Message(Chat::White, "------------------------------------------------");
-		c->Message(Chat::White, "# Doors from zone");
+		c->Message(Chat::White, "# Models from zone");
 		c->Message(Chat::White, "------------------------------------------------");
 
-		std::vector<std::string> objects;
-		for (auto                &g: game_objects) {
-			objects.emplace_back(g.object_name);
-		}
-
-		int                      character_length = 0;
-		std::vector<std::string> object_names;
-		for (auto                &o: objects) {
-			character_length += o.length();
-			object_names.emplace_back(o);
-
-			if (character_length > 500) {
-				std::string message_buffer;
-				for (auto   &object_name: object_names) {
-					message_buffer += fmt::format(
-						"[{}] ",
-						EQ::SayLinkEngine::GenerateQuestSaylink(
-							fmt::format("#door model {}", object_name),
-							false,
-							object_name
-						)
-					);
-				}
-
-				c->Message(Chat::White, message_buffer.c_str());
-
-				character_length = 0;
-				object_names     = {};
-			}
-		}
-
-		std::string message_buffer;
-		for (auto   &object_name: object_names) {
-			message_buffer += fmt::format(
-				"[{}] ",
-				EQ::SayLinkEngine::GenerateQuestSaylink(
-					fmt::format("#door model {}", object_name),
-					false,
-					object_name
-				)
-			);
-		}
-
-		c->Message(Chat::White, message_buffer.c_str());
-
-
+		DisplayObjectResultToClient(c, game_objects);
 	}
 
+	// show models from file name
+	if (arg1 == "showmodelsfromfile" && !arg2.empty()) {
+		const std::string &file_name   = arg2;
+		auto              game_objects = ToolGameObjectsRepository::GetWhere(
+			database,
+			fmt::format("file_from = '{}'", file_name)
+		);
+
+		if (game_objects.empty()) {
+			c->Message(Chat::White, "There are no models for this zone...");
+		}
+
+		c->Message(Chat::White, "------------------------------------------------");
+		c->Message(Chat::White, fmt::format("# Models from file name [{}]", file_name).c_str());
+		c->Message(Chat::White, "------------------------------------------------");
+
+		DisplayObjectResultToClient(c, game_objects);
+	}
 }
 
 void DoorManipulation::CommandHeader(Client *c)
@@ -547,4 +651,100 @@ void DoorManipulation::CommandHeader(Client *c)
 	c->Message(Chat::White, "------------------------------------------------");
 	c->Message(Chat::White, "# Door Commands");
 	c->Message(Chat::White, "------------------------------------------------");
+}
+
+void DoorManipulation::DisplayObjectResultToClient(
+	Client *c,
+	std::vector<ToolGameObjectsRepository::ToolGameObjects> game_objects
+)
+{
+	std::vector<std::string> say_links;
+
+	for (auto &g: game_objects) {
+		say_links.emplace_back(
+			fmt::format(
+				"[{}] ",
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format("#door model {}", g.object_name),
+					false,
+					g.object_name
+				)
+			)
+		);
+	}
+
+	int                      character_length = 0;
+	std::vector<std::string> buffered_links;
+
+	for (auto &links: say_links) {
+		buffered_links.emplace_back(links);
+		character_length += links.length();
+
+		// empty buffer
+		if (character_length > 1000) {
+			std::string message_buffer;
+
+			for (auto &buffered_link: buffered_links) {
+				message_buffer += buffered_link;
+			}
+
+			c->Message(Chat::White, message_buffer.c_str());
+
+			// reset
+			character_length = 0;
+			buffered_links   = {};
+		}
+	}
+
+	if (!buffered_links.empty()) {
+		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+	}
+}
+
+void DoorManipulation::DisplayModelsFromFileResults(
+	Client *c,
+	std::vector<ToolGameObjectsRepository::ToolGameObjects> game_objects
+)
+{
+	std::vector<std::string> say_links;
+
+	for (auto &g: game_objects) {
+		say_links.emplace_back(
+			fmt::format(
+				"[{}] ",
+				EQ::SayLinkEngine::GenerateQuestSaylink(
+					fmt::format("#door showmodelsfromfile {}", g.file_from),
+					false,
+					g.file_from
+				)
+			)
+		);
+	}
+
+	int                      character_length = 0;
+	std::vector<std::string> buffered_links;
+
+	for (auto &links: say_links) {
+		buffered_links.emplace_back(links);
+		character_length += links.length();
+
+		// empty buffer
+		if (character_length > 1000) {
+			std::string message_buffer;
+
+			for (auto &buffered_link: buffered_links) {
+				message_buffer += buffered_link;
+			}
+
+			c->Message(Chat::White, message_buffer.c_str());
+
+			// reset
+			character_length = 0;
+			buffered_links   = {};
+		}
+	}
+
+	if (!buffered_links.empty()) {
+		c->Message(Chat::White, implode(" ", buffered_links).c_str());
+	}
 }
