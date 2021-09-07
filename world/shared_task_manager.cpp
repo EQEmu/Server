@@ -1311,7 +1311,7 @@ void SharedTaskManager::SendMembersMessageID(
 	for (const auto &member : shared_task->GetMembers()) {
 		auto character = client_list.FindCLEByCharacterID(member.character_id);
 		if (character && character->Server()) {
-			strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
+			strn0cpy(buf->client_name, character->name(), sizeof(buf->client_name));
 			character->Server()->SendPacket(pack.get());
 		}
 	}
