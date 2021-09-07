@@ -1570,7 +1570,7 @@ struct WWSpell_Struct {
 
 struct WWTaskUpdate_Struct {
 	uint8 update_type; // 0 - Activity Reset, 1 - Activity Update, 2 - Assign Task, 3 - Disable Task, 4 - Enable Task, 5 - Fail Task, 6 - Remove Task
-	int task_identifier;
+	uint32 task_identifier;
 	int task_subidentifier; // Activity ID for Activity Reset and Activity Update, NPC Entity ID for Assign Task, else -1
 	int update_count; // Update Count for Activity Update, else 1
 	bool enforce_level_requirement; // Only used by Assign Task, else false

@@ -1988,7 +1988,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 update_type = CZTU->update_type;
 		uint8 update_subtype = CZTU->update_subtype;
 		int update_identifier = CZTU->update_identifier;
-		int task_identifier = CZTU->task_identifier;
+		uint32 task_identifier = CZTU->task_identifier;
 		int task_subidentifier = CZTU->task_subidentifier;
 		int update_count = CZTU->update_count;
 		bool enforce_level_requirement = CZTU->enforce_level_requirement;
@@ -2631,17 +2631,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWLDoNUpdateType_Loss:
-					if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->AddLDoNLoss(theme_id);
 					}
 					break;
 				case WWLDoNUpdateType_Points:
-					if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->UpdateLDoNPoints(theme_id, points);
 					}
 					break;
 				case WWLDoNUpdateType_Win:
-					if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->AddLDoNWin(theme_id);
 					}
 					break;
@@ -2661,7 +2661,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 				client.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 			}
 		}
@@ -2670,12 +2670,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_WWMessage:
 	{
 		WWMessage_Struct* WWM = (WWMessage_Struct*) pack->pBuffer;
-		uint8 type = WWM->type;
+		uint32 type = WWM->type;
 		const char* message = WWM->message;
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 				client.second->Message(type, message);
 			}
 		}
@@ -2692,12 +2692,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWMoveUpdateType_MoveZone:
-					if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->MoveZone(zone_short_name);
 					}
 					break;
 				case WWMoveUpdateType_MoveZoneInstance:
-					if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->MoveZoneInstance(instance_id);
 					}
 					break;
@@ -2715,7 +2715,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWSEV->max_status;
 		if (update_type == WWSetEntityVariableUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 					client.second->SetEntityVariable(variable_name, variable_value);
 				}
 			}
@@ -2735,7 +2735,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSignalUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 					client.second->Signal(signal);
 				}
 			}
@@ -2755,13 +2755,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSpellUpdateType_Cast) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 					client.second->SpellFinished(spell_id, client.second);
 				}
 			}
 		} else if (update_type == WWSpellUpdateType_Remove) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 					client.second->BuffFadeBySpellID(spell_id);
 				}
 			}
@@ -2772,14 +2772,14 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	{
 		WWTaskUpdate_Struct* WWTU = (WWTaskUpdate_Struct*) pack->pBuffer;
 		uint8 update_type = WWTU->update_type;
-		int task_identifier = WWTU->task_identifier;
+		uint32 task_identifier = WWTU->task_identifier;
 		int task_subidentifier = WWTU->task_subidentifier;
 		int update_count = WWTU->update_count;
 		bool enforce_level_requirement = WWTU->enforce_level_requirement;
 		uint8 min_status = WWTU->min_status;
 		uint8 max_status = WWTU->max_status;		
 		for (auto &client : entity_list.GetClientList()) {				
-			if (client.second->Admin() >= min_status && client.second->Admin() <= max_status) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 				switch (update_type) {
 					case WWTaskUpdateType_ActivityReset:
 						client.second->ResetTaskActivity(task_identifier, task_subidentifier);

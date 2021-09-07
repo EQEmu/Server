@@ -6425,7 +6425,7 @@ XS(XS__crosszonemoveplayerbyname) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::crosszonemoveplayerbyname(const char* client_name, string zone_short_name)");
 	{
-		uint8 update_type = CZUpdateType_Expedition;
+		uint8 update_type = CZUpdateType_ClientName;
 		uint8 update_subtype = CZMoveUpdateSubtype_MoveZone;
 		int update_identifier = 0;
 		const char* client_name = (const char*) SvPV_nolen(ST(0));
@@ -6490,7 +6490,7 @@ XS(XS__crosszonemoveinstancebyguildid) {
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::crosszonemoveinstancebyguildid(int guild_id, uint16 instance_id)");
 	{
-		uint8 update_type = CZUpdateType_Raid;
+		uint8 update_type = CZUpdateType_Guild;
 		uint8 update_subtype = CZMoveUpdateSubtype_MoveZoneInstance;
 		const char* zone_short_name = "";
 		int guild_id = (int) SvIV(ST(0));
@@ -7328,7 +7328,7 @@ XS(XS__worldwidemessage) {
 	if (items < 2 || items > 4)
 		Perl_croak(aTHX_ "Usage: quest::worldwidemessage(uint32 type, const char* message, [uint8 min_status = 0, uint8 max_status = 0])");
 	{
-		uint32 type = (uint32)SvUV(ST(0));
+		uint32 type = (uint32) SvUV(ST(0));
 		const char* message = (const char*) SvPV_nolen(ST(1));
 		uint8 min_status = 0;
 		uint8 max_status = 0;
