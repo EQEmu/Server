@@ -4360,9 +4360,6 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	// set door selected
 	if (IsDevToolsEnabled()) {
 		SetDoorToolEntityId(currentdoor->GetEntityID());
-
-		// $client->Message(15, "Door $doorid [" . quest::saylink("Close Door $doorid", 1, "Close Door") . "][" . quest::saylink("Open Door $doorid", 1, "Open Door") . "] [" . quest::saylink("#door edit", 1, "Edit Door") . "]");
-
 		DoorManipulation::CommandHeader(this);
 		Message(
 			Chat::White,
