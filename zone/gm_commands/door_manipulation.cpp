@@ -1,7 +1,8 @@
 #include "door_manipulation.h"
 #include "../doors.h"
-#include "../../common/repositories/tool_game_objects_repository.h"
 #include "../../common/misc_functions.h"
+
+#define MAX_CLIENT_MESSAGE_LENGTH 2000
 
 void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 {
@@ -33,39 +34,47 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		);
 	}
 
-	// save needs to be implemented
-	// saylinks need to be added to main menu
-	// inverted needs to either be supported or dropped
-	// opentype needs to be handled
-	// any other polish
-
 	// option
 	if (arg1.empty()) {
 		DoorManipulation::CommandHeader(c);
+		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
 		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
 		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
-		c->Message(Chat::White, "#door model <modelname> | Changes door model for selected door");
-		c->Message(Chat::White, "#door save | Creates database entry for selected door");
-		c->Message(Chat::White, "#door showmodelszone | Shows models in zone - used to change a selected door");
-		c->Message(Chat::White, "#door showmodelsglobal | Shows global model files");
 		c->Message(
 			Chat::White,
-			"#door showmodelsfromfile | Shows models from s3d or eqg file. Example tssequip.eqg or wallet01.eqg"
+			fmt::format(
+				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "local zone"),
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "global")
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			"#door showmodelsfromfile <file.eqg|file.s3d> | Shows models from s3d or eqg file. Example tssequip.eqg or wallet01.eqg"
 		);
 
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} - Brings up editing interface for selected door",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
+				"{} | Shows available models in the current zone that you are in",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "#door showmodelszone")
 			).c_str()
-		);;
+		);
+
 		c->Message(
 			Chat::White,
-			// "#door model <modelname> or select from " . quest::saylink("#door showmodelszone", 1, "Local Zone") . " " . quest::saylink("#door showmodelsglobal", 1, "Global")
+			fmt::format(
+				"{} | Shows available models globally by first listing all global model files",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "#door showmodelsglobal")
+			).c_str()
+		);
+
+		c->Message(Chat::White, "#door save | Creates database entry for selected door");
+		c->Message(
+			Chat::White,
 			fmt::format(
 				"{} - Brings up editing interface for selected door",
-				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "#door showmodelszone")
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
 			).c_str()
 		);
 		c->Message(
@@ -79,17 +88,20 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		return;
 	}
 
+	// edit menu
 	if (arg1 == "edit") {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Door Selected ID [{}] Name [{}] OpenType [{}] Invertstate [{}]",
+					"Door Selected ID [{}] Name [{}] OpenType [{}] Invertstate [{} | {}/{}] ",
 					c->GetDoorToolEntityId(),
 					door->GetDoorName(),
 					door->GetOpenType(),
-					door->GetInvertState()
+					door->GetInvertState(),
+					EQ::SayLinkEngine::GenerateQuestSaylink("#door setinvertstate 0", false, "0"),
+					EQ::SayLinkEngine::GenerateQuestSaylink("#door setinvertstate 1", false, "1")
 				).c_str()
 			);
 
@@ -345,8 +357,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			glm::vec4 door_position = door->GetPosition();
 			if (helper_mob_x_negative == 0) {
 				door_position.x = door_position.x - 15;
-				auto node       = NPC::SpawnNodeNPC("-X", "", door_position);
-				helper_mob_x_negative = node->GetID();
+				helper_mob_x_negative = NPC::SpawnNodeNPC("-X", "", door_position)->GetID();
 			}
 			else {
 				auto n = entity_list.GetNPCByID(helper_mob_x_negative);
@@ -357,8 +368,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			door_position = door->GetPosition();
 			if (helper_mob_x_positive == 0) {
 				door_position.x = door_position.x + 15;
-				auto node = NPC::SpawnNodeNPC("+X", "", door_position);
-				helper_mob_x_positive = node->GetID();
+				helper_mob_x_positive = NPC::SpawnNodeNPC("+X", "", door_position)->GetID();
 			}
 			else {
 				auto n = entity_list.GetNPCByID(helper_mob_x_positive);
@@ -369,8 +379,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			door_position = door->GetPosition();
 			if (helper_mob_y_negative == 0) {
 				door_position.y = door_position.y - 15;
-				auto node = NPC::SpawnNodeNPC("-Y", "", door_position);
-				helper_mob_y_negative = node->GetID();
+				helper_mob_y_negative = NPC::SpawnNodeNPC("-Y", "", door_position)->GetID();
 			}
 			else {
 				auto n = entity_list.GetNPCByID(helper_mob_y_negative);
@@ -381,8 +390,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			door_position = door->GetPosition();
 			if (helper_mob_y_positive == 0) {
 				door_position.y = door_position.y + 15;
-				auto node = NPC::SpawnNodeNPC("+Y", "", door_position);
-				helper_mob_y_positive = node->GetID();
+				helper_mob_y_positive = NPC::SpawnNodeNPC("+Y", "", door_position)->GetID();
 			}
 			else {
 				auto n = entity_list.GetNPCByID(helper_mob_y_positive);
@@ -458,21 +466,6 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		c->Message(Chat::Red, "Door selection invalid...");
 	}
 
-	//	if (arg1 == "showmodelszone") {
-	//		auto game_objects = ToolGameObjectsRepository::GetWhere(
-	//			database,
-	//			fmt::format("zoneid = {}", zone->GetZoneID())
-	//		);
-	//
-	//		if (game_objects.empty()) {
-	//			c->Message(Chat::White, "There are no models for this zone...");
-	//		}
-	//
-	//		for (auto &g: game_objects) {
-	//			c->Message(Chat::White, g.object_name.c_str());
-	//		}
-	//	}
-
 	// create
 	if (arg1 == "create") {
 		std::string model     = str_toupper(arg2);
@@ -498,6 +491,18 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		}
 	}
 
+	// change model queue
+	if (arg1 == "changemodelqueue") {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"#door model <modelname> | Changes door model for selected door or select from [{}] or [{}]",
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelszone", false, "local zone"),
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door showmodelsglobal", false, "global")
+			).c_str()
+		);
+	}
+
 	// open type
 	if (arg1 == "opentype" && !arg2.empty() && StringIsNumber(arg2)) {
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
@@ -511,6 +516,23 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
 		if (door) {
 			door->SetIncline(std::atoi(arg2.c_str()));
+		}
+	}
+
+	// incline
+	if (arg1 == "setinvertstate" && !arg2.empty() && StringIsNumber(arg2)) {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		if (door) {
+			door->SetInvertState(std::atoi(arg2.c_str()));
+		}
+	}
+
+	// save
+	if (arg1 == "save") {
+		Doors *door = entity_list.GetDoorsByID(c->GetDoorToolEntityId());
+		if (door) {
+			door->CreateDatabaseEntry();
+			c->Message(Chat::White, "Door saved");
 		}
 	}
 
@@ -687,7 +709,7 @@ void DoorManipulation::DisplayObjectResultToClient(
 		character_length += links.length();
 
 		// empty buffer
-		if (character_length > 1000) {
+		if (character_length > MAX_CLIENT_MESSAGE_LENGTH) {
 			std::string message_buffer;
 
 			for (auto &buffered_link: buffered_links) {
@@ -735,7 +757,7 @@ void DoorManipulation::DisplayModelsFromFileResults(
 		character_length += links.length();
 
 		// empty buffer
-		if (character_length > 1000) {
+		if (character_length > MAX_CLIENT_MESSAGE_LENGTH) {
 			std::string message_buffer;
 
 			for (auto &buffered_link: buffered_links) {
