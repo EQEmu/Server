@@ -26,6 +26,7 @@
 #include "worldserver.h"
 #include "mob_movement_manager.h"
 #include "water_map.h"
+#include "dialogue_window.h"
 
 #include <limits.h>
 #include <math.h>
@@ -2923,16 +2924,35 @@ void Mob::Say(const char *format, ...)
 		talker = this;
 	}
 
-	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
+	int16 distance = 200;
+
+	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
+		for (auto &e : entity_list.GetCloseMobList(talker, (distance * distance))) {
+			Mob *mob = e.second;
+
+			if (!mob->IsClient()) {
+				continue;
+			}
+
+			Client *client = mob->CastToClient();
+			if (client->GetTarget() && client->GetTarget()->IsMob() && client->GetTarget()->CastToMob() == talker) {
+				std::string window_markdown = buf;
+				DialogueWindow::Render(client, window_markdown);
+			}
+		}
+
+		return;
+	}
+	else if (RuleB(Chat, AutoInjectSaylinksToSay)) {
 		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(buf);
 		entity_list.MessageCloseString(
-			talker, false, 200, 10,
+			talker, false, distance, Chat::NPCQuestSay,
 			GENERIC_SAY, GetCleanName(), new_message.c_str()
 		);
 	}
 	else {
 		entity_list.MessageCloseString(
-			talker, false, 200, 10,
+			talker, false, distance, Chat::NPCQuestSay,
 			GENERIC_SAY, GetCleanName(), buf
 		);
 	}

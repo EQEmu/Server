@@ -4203,8 +4203,6 @@ void EntityList::QuestJournalledSayClose(
 	buf.WriteInt32(0);
 	buf.WriteInt32(0);
 
-	std::cout << "We're in here" << std::endl;
-
 	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
 		for (auto &e : GetCloseMobList(sender, (dist * dist))) {
 			Mob *mob = e.second;
@@ -4215,10 +4213,10 @@ void EntityList::QuestJournalledSayClose(
 
 			Client *client = mob->CastToClient();
 
-			//if (client->GetTarget() && client->GetTarget()->IsMob() && client->GetTarget()->CastToMob() == sender) {
+			if (client->GetTarget() && client->GetTarget()->IsMob() && client->GetTarget()->CastToMob() == sender) {
 				std::string window_markdown = message;
-				DialogueWindow::Render(sender->GetTarget()->CastToClient(), window_markdown);
-			//}
+				DialogueWindow::Render(client, window_markdown);
+			}
 		}
 
 		return;

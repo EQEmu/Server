@@ -11145,9 +11145,11 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 
 		case POPUPID_DIAWIND:
-			response = GetEntityVariable(DIAWIND_RESPONSE_KEY.c_str());
-			if (!response.empty()) {
-				ChannelMessageReceived(8, 0, 100, response.c_str());
+			if (EntityVariableExists(DIAWIND_RESPONSE_KEY.c_str())) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_KEY.c_str());
+				if (!response.empty()) {
+					ChannelMessageReceived(8, 0, 100, response.c_str());
+				}
 			}
 			break;
 
