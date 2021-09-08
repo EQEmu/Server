@@ -37,6 +37,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	// option
 	if (arg1.empty()) {
 		DoorManipulation::CommandHeader(c);
+		c->Message(Chat::White, "#door create <modelname> | Creates a door from a model. (Example IT78 creates a campfire)");
 		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
 		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
 		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
