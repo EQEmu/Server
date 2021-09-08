@@ -41,6 +41,7 @@ typedef const char Const_char;
 #include "mob.h"
 #include "client.h"
 #include "../common/spdat.h"
+#include "dialogue_window.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -2621,8 +2622,11 @@ XS(XS_Mob_Message) {
 		char *message = (char *) SvPV_nolen(ST(2));
 		VALIDATE_THIS_IS_MOB;
 
-		// auto inject saylinks
-		if (RuleB(Chat, AutoInjectSaylinksToClientMessage)) {
+		if (RuleB(Chat, QuestDialogueUsesDialogueWindow) && THIS->IsClient()) {
+			std::string window_markdown = message;
+			DialogueWindow::Render(THIS->CastToClient(), window_markdown);
+		}
+		else if (RuleB(Chat, AutoInjectSaylinksToClientMessage)) {
 			std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
 			THIS->Message(type, new_message.c_str());
 		}

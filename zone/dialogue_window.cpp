@@ -4,6 +4,10 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 {
 	std::string output = markdown;
 
+	if (!c->ClientDataLoaded()) {
+		return;
+	}
+
 	// this is the NPC that the client is interacting with if there is dialogue going on
 	Mob *target;
 	if (c->GetTarget()) {
