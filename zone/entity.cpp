@@ -4205,7 +4205,7 @@ void EntityList::QuestJournalledSayClose(
 	// auto inject saylinks (say)
 	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
 		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
-		buf.WriteString(new_message.c_str());
+		buf.WriteString(new_message);
 	}
 	else {
 		buf.WriteString(message);
