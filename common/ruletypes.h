@@ -598,6 +598,8 @@ RULE_INT(Chat, IntervalDurationMS, 60000, "Interval length in milliseconds")
 RULE_INT(Chat, KarmaUpdateIntervalMS, 1200000, "Karma update interval in milliseconds")
 RULE_INT(Chat, KarmaGlobalChatLimit, 72, "Amount of karma you need to be able to talk in ooc/auction/chat below the level limit")
 RULE_INT(Chat, GlobalChatLevelLimit, 8, "Level limit you need to of reached to talk in ooc/auction/chat if your karma is too low")
+RULE_BOOL(Chat, AutoInjectSaylinksToSay, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
+RULE_BOOL(Chat, AutoInjectSaylinksToClientMessage, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)
