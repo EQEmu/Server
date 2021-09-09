@@ -593,7 +593,7 @@ RULE_BOOL(Chat, SuppressCommandErrors, false, "Do not suppress command errors by
 RULE_INT(Chat, MinStatusToBypassAntiSpam, 100, "Minimum status to bypass the anti-spam system")
 RULE_INT(Chat, MinimumMessagesPerInterval, 4, "Minimum number of chat messages allowed per interval. The karma value is added to this value")
 RULE_INT(Chat, MaximumMessagesPerInterval, 12, "Maximum value of chat messages allowed per interval")
-RULE_INT(Chat, MaxMessagesBeforeKick, 20, "	If an attempt is made to send more than the maximum allowed number of chat messages per interval, the client will be disconnected after this absolute number of messages")
+RULE_INT(Chat, MaxMessagesBeforeKick, 20, "If an attempt is made to send more than the maximum allowed number of chat messages per interval, the client will be disconnected after this absolute number of messages")
 RULE_INT(Chat, IntervalDurationMS, 60000, "Interval length in milliseconds")
 RULE_INT(Chat, KarmaUpdateIntervalMS, 1200000, "Karma update interval in milliseconds")
 RULE_INT(Chat, KarmaGlobalChatLimit, 72, "Amount of karma you need to be able to talk in ooc/auction/chat below the level limit")
