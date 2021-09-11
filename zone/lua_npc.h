@@ -146,6 +146,7 @@ public:
 	uint16 GetFirstSlotByItemID(uint32 item_id);
 	float GetHealScale();
 	float GetSpellScale();
+	luabind::object GetLootList(lua_State* L);
 };
 
 #endif

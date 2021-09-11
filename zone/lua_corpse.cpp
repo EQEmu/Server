@@ -172,6 +172,20 @@ uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
 	return self->GetFirstSlotByItemID(item_id);
 }
 
+luabind::object Lua_Corpse::GetLootList(lua_State* L) {
+	auto lua_table = luabind::newtable(L);
+	if (d_) {
+		auto self = reinterpret_cast<NativeType*>(d_);
+		auto corpse_items = self->GetLootList();
+		int index = 0;
+		for (auto item_id : corpse_items) {
+			lua_table[index] = item_id;
+			index++;
+		}
+	}
+	return lua_table;
+}
+
 luabind::scope lua_register_corpse() {
 	return luabind::class_<Lua_Corpse, Lua_Mob>("Corpse")
 		.def(luabind::constructor<>())
@@ -209,7 +223,8 @@ luabind::scope lua_register_corpse() {
 		.def("HasItem", (bool(Lua_Corpse::*)(uint32))&Lua_Corpse::HasItem)
 		.def("CountItem", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
 		.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
-		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID);
+		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID)
+		.def("GetLootList", (luabind::object(Lua_Corpse::*)(lua_State* L))&Lua_Corpse::GetLootList);
 }
 
 #endif

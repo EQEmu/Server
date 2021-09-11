@@ -208,6 +208,7 @@ public:
 	uint16	CountItem(uint32 item_id);
 	uint32	GetItemIDBySlot(uint16 loot_slot);
 	uint16	GetFirstSlotByItemID(uint32 item_id);
+	std::vector<int> GetLootList();
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 	virtual void UpdateEquipmentLight();
