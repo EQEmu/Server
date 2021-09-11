@@ -37,6 +37,12 @@ Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 extern QueryServ* QServ;
 
+namespace detail
+{
+	static const uint32 PhantomStatId = 999999;
+}
+
+
 void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, uint32 duration_override, bool followme, bool sticktarg, uint16 *eye_id) {
 
 	//It might not be a bad idea to put these into the database, eventually..
@@ -845,6 +851,8 @@ void Client::SendAlternateAdvancementTable() {
 			SendAlternateAdvancementRank(aa.first, 1);
 		}
 	}
+
+	SendPhantomStatsAlternateAdvancementRank();
 }
 
 void Client::SendAlternateAdvancementRank(int aa_id, int level) {
@@ -918,6 +926,82 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	safe_delete(outapp);
 }
 
+void Client::SendPhantomStatsAlternateAdvancementRank() {
+	//We only need to send phantom stats if stats are set to a custom value
+	if (RuleI(Character, StatCap) <= 0) {
+		return;
+	}
+
+	auto diff = RuleI(Character, StatCap) - GetMaxStat(false);
+	int size = sizeof(AARankInfo_Struct) + (sizeof(AARankEffect_Struct) * 7);
+	auto outapp = new EQApplicationPacket(OP_SendAATable, size);
+	AARankInfo_Struct *aai = (AARankInfo_Struct*)outapp->pBuffer;
+
+	aai->id = detail::PhantomStatId;
+	aai->upper_hotkey_sid = -1;
+	aai->lower_hotkey_sid = -1;
+	aai->title_sid = detail::PhantomStatId;
+	aai->desc_sid = detail::PhantomStatId;
+	aai->cost = 1;
+	aai->seq = detail::PhantomStatId;
+	aai->type = 3;
+	aai->spell = -1;
+	aai->spell_type = 0;
+	aai->spell_refresh = 0;
+	aai->classes = 16777215;
+	aai->level_req = 1;
+	aai->current_level = 2;
+	aai->max_level = 1;
+	aai->prev_id = -1;
+	aai->next_id = -1;
+	aai->total_cost = 1;
+	aai->expansion = 0;
+	aai->category = -1;
+	aai->charges = 0;
+	aai->grant_only = 1;
+	aai->total_effects = 7;
+	aai->total_prereqs = 0;
+
+	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(0);
+	outapp->WriteSInt32(1);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(1);
+	outapp->WriteSInt32(2);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(2);
+	outapp->WriteSInt32(3);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(3);
+	outapp->WriteSInt32(4);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(4);
+	outapp->WriteSInt32(5);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(5);
+	outapp->WriteSInt32(6);
+
+	outapp->WriteSInt32(262);
+	outapp->WriteSInt32(diff);
+	outapp->WriteSInt32(6);
+	outapp->WriteSInt32(7);
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+
 void Client::SendAlternateAdvancementStats() {
 	auto outapp = new EQApplicationPacket(OP_AAExpUpdate, sizeof(AltAdvStats_Struct));
 	AltAdvStats_Struct *aps = (AltAdvStats_Struct *)outapp->pBuffer;
@@ -933,7 +1017,19 @@ void Client::SendAlternateAdvancementPoints() {
 	AATable_Struct* aa2 = (AATable_Struct *)outapp->pBuffer;
 
 	int i = 0;
+	if (RuleI(Character, StatCap) > 0)
+	{
+		aa2->aa_list[i].AA = detail::PhantomStatId;
+		aa2->aa_list[i].value = 1;
+		aa2->aa_list[i].charges = 0;
+		i++;
+	}
+
 	for(auto &aa : zone->aa_abilities) {
+		if (i >= 300) {
+			continue;
+		}
+
 		uint32 charges = 0;
 		auto ranks = GetAA(aa.second->first_rank_id, &charges);
 		if(ranks) {

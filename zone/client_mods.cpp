@@ -34,11 +34,12 @@
 #include <algorithm>
 
 
-int32 Client::GetMaxStat() const
+int32 Client::GetMaxStat(bool check_stat_cap) const
 {
-	if ((RuleI(Character, StatCap)) > 0) {
-		return (RuleI(Character, StatCap));
+	if (check_stat_cap && RuleI(Character, StatCap) > 0) {
+		return RuleI(Character, StatCap);
 	}
+
 	int level = GetLevel();
 	int32 base = 0;
 	if (level < 61) {
@@ -68,49 +69,49 @@ int32 Client::GetMaxResist() const
 
 int32 Client::GetMaxSTR() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.STRCapMod
 	       + spellbonuses.STRCapMod
 	       + aabonuses.STRCapMod;
 }
 int32 Client::GetMaxSTA() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.STACapMod
 	       + spellbonuses.STACapMod
 	       + aabonuses.STACapMod;
 }
 int32 Client::GetMaxDEX() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.DEXCapMod
 	       + spellbonuses.DEXCapMod
 	       + aabonuses.DEXCapMod;
 }
 int32 Client::GetMaxAGI() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.AGICapMod
 	       + spellbonuses.AGICapMod
 	       + aabonuses.AGICapMod;
 }
 int32 Client::GetMaxINT() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.INTCapMod
 	       + spellbonuses.INTCapMod
 	       + aabonuses.INTCapMod;
 }
 int32 Client::GetMaxWIS() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.WISCapMod
 	       + spellbonuses.WISCapMod
 	       + aabonuses.WISCapMod;
 }
 int32 Client::GetMaxCHA() const
 {
-	return GetMaxStat()
+	return GetMaxStat(true)
 	       + itembonuses.CHACapMod
 	       + spellbonuses.CHACapMod
 	       + aabonuses.CHACapMod;
@@ -314,14 +315,16 @@ int32 Client::CalcHPRegenCap()
 
 int32 Client::CalcMaxHP()
 {
-	float nd = 10000;
-	max_hp = (CalcBaseHP() + itembonuses.HP);
+	int64 nd = 10000;
+	int64 max_hp = (CalcBaseHP() + itembonuses.HP);
 	//The AA desc clearly says it only applies to base hp..
 	//but the actual effect sent on live causes the client
 	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
 	//the aa description
 	nd += aabonuses.MaxHP;	//Natural Durability, Physical Enhancement, Planar Durability
-	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
+	max_hp = max_hp * nd / 10000; //this is to fix the HP-above-495k issue
+	max_hp += 5;
+	max_hp += GetHeroicSTA() * 10;
 	max_hp += spellbonuses.HP + aabonuses.HP;
 	max_hp += GroupLeadershipAAHealthEnhancement();
 	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
@@ -337,7 +340,8 @@ int32 Client::CalcMaxHP()
 		}
 	}
 
-	return max_hp;
+	this->max_hp = std::min(max_hp, 2147483647LL);
+	return this->max_hp;
 }
 
 uint32 Mob::GetClassLevelFactor()
@@ -485,11 +489,10 @@ int32 Client::CalcBaseHP()
 			stats = (stats - 255) / 2;
 			stats += 255;
 		}
-		base_hp = 5;
+		base_hp = 0;
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
 			base_hp += base_data->base_hp + (base_data->hp_factor * stats);
-			base_hp += (GetHeroicSTA() * 10);
 		}
 	}
 	else {
@@ -621,7 +624,7 @@ int32 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
+					max_m = base_data->base_mana + static_cast<int32>(ConvertedWisInt * base_data->mana_factor) + (GetHeroicINT() * 10);
 				}
 			}
 			else {
@@ -653,7 +656,7 @@ int32 Client::CalcBaseMana()
 				}
 				auto base_data = database.GetBaseData(GetLevel(), GetClass());
 				if (base_data) {
-					max_m = base_data->base_mana + (ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
+					max_m = base_data->base_mana + static_cast<int32>(ConvertedWisInt * base_data->mana_factor) + (GetHeroicWIS() * 10);
 				}
 			}
 			else {
@@ -1610,6 +1613,12 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 void Client::CalcMaxEndurance()
 {
 	max_end = CalcBaseEndurance() + spellbonuses.Endurance + itembonuses.Endurance + aabonuses.Endurance;
+	int32 heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4;
+
+	if (heroic_stats > 0) {
+		max_end += heroic_stats * 10;
+	}
+
 	if (max_end < 0) {
 		max_end = 0;
 	}
@@ -1629,17 +1638,18 @@ int32 Client::CalcBaseEndurance()
 {
 	int32 base_end = 0;
 	if (ClientVersion() >= EQ::versions::ClientVersion::SoF && RuleB(Character, SoDClientUseSoDHPManaEnd)) {
-		double heroic_stats = (GetHeroicSTR() + GetHeroicSTA() + GetHeroicDEX() + GetHeroicAGI()) / 4.0f;
-		double stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4.0f;
-		if (stats > 201.0f) {
-			stats = 1.25f * (stats - 201.0f) + 352.5f;
+		int32 stats = (GetSTR() + GetSTA() + GetDEX() + GetAGI()) / 4;
+		if (stats > 100) {
+			if (stats > 200) {
+				stats -= (stats - 200) / 2;
+			}
+
+			stats += (3 * stats - 300) / 2;
 		}
-		else if (stats > 100.0f) {
-			stats = 2.5f * (stats - 100.0f) + 100.0f;
-		}
+		
 		auto base_data = database.GetBaseData(GetLevel(), GetClass());
 		if (base_data) {
-			base_end = base_data->base_end + (heroic_stats * 10.0f) + (base_data->endurance_factor * static_cast<int>(stats));
+			base_end = base_data->base_end + static_cast<int32>(base_data->endurance_factor * stats);
 		}
 	}
 	else {

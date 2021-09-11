@@ -480,7 +480,7 @@ public:
 	inline virtual int32 GetCorrup() const { return Corrup; }
 	inline virtual int32 GetPhR() const { return PhR; }
 
-	int32 GetMaxStat() const;
+	int32 GetMaxStat(bool check_stat_cap) const;
 	int32 GetMaxResist() const;
 	int32 GetMaxSTR() const;
 	int32 GetMaxSTA() const;
@@ -858,6 +858,7 @@ public:
 
 	//New AA Methods
 	void SendAlternateAdvancementRank(int aa_id, int level);
+	void SendPhantomStatsAlternateAdvancementRank();
 	void SendAlternateAdvancementTable();
 	void SendAlternateAdvancementStats();
 	void PurchaseAlternateAdvancementRank(int rank_id);

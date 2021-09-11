@@ -2155,15 +2155,6 @@ namespace RoF2
 			outapp->WriteUInt32(emu->aa_array[r].charges);
 		}
 
-		// Fill the other 60 AAs with zeroes
-
-		for (uint32 r = 0; r < structs::MAX_PP_AA_ARRAY - MAX_PP_AA_ARRAY; r++)
-		{
-			outapp->WriteUInt32(0);
-			outapp->WriteUInt32(0);
-			outapp->WriteUInt32(0);
-		}
-
 		outapp->WriteUInt32(structs::MAX_PP_SKILL);
 
 		for (uint32 r = 0; r < structs::MAX_PP_SKILL; r++)

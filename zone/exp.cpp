@@ -860,7 +860,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
-	this->SendAppearancePacket(AT_WhoLevel, set_level); // who level change
+	SendAppearancePacket(AT_WhoLevel, set_level); // who level change
 
 	LogInfo("Setting Level for [{}] to [{}]", GetName(), set_level);
 
@@ -881,8 +881,8 @@ void Client::SetLevel(uint8 set_level, bool command)
 	SendHPUpdate();
 	SetMana(CalcMaxMana());
 	UpdateWho();
-
 	UpdateMercLevel();
+	SendPhantomStatsAlternateAdvancementRank();
 
 	Save();
 }

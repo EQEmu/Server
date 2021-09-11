@@ -860,7 +860,7 @@ static const uint32 MAX_PP_LANGUAGE = 28;
 
 static const uint32 MAX_PP_SKILL		= PACKET_SKILL_ARRAY_SIZE;	// 100 - actual skills buffer size
 static const uint32 MAX_PP_INNATE_SKILL	= 25;
-static const uint32 MAX_PP_AA_ARRAY		= 240;
+static const uint32 MAX_PP_AA_ARRAY		= 300;
 static const uint32 MAX_GROUP_MEMBERS	= 6;
 static const uint32 MAX_RECAST_TYPES	= 20;
 
