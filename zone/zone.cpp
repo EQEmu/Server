@@ -534,6 +534,10 @@ void Zone::LoadTempMerchantData()
 		)
 	);
 
+    if (!results.Success() || results.RowCount() == 0) {
+        return;
+	}
+
 	std::vector<std::string> npc_ids;
 	for (auto row = results.begin(); row != results.end(); ++row) {
 		npc_ids.push_back(row[0]);
