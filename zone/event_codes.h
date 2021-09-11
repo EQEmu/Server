@@ -90,6 +90,7 @@ typedef enum {
 	EVENT_BOT_COMMAND,
 	EVENT_WARP,
 	EVENT_TEST_BUFF,
+	EVENT_CONSIDER,
 	_LargestEventID
 } QuestEventID;
 

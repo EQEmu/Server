@@ -4839,6 +4839,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob == 0)
 		return;
 
+	parse->EventPlayer(EVENT_CONSIDER, this, fmt::format("{}", conin->targetid), 0);
+
 	if (tmob->GetClass() == LDON_TREASURE)
 	{
 		Message(Chat::Yellow, "%s", tmob->GetCleanName());

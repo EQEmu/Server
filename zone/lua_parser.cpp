@@ -132,7 +132,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_combine_validate",
 	"event_bot_command",
 	"event_warp",
-	"event_test_buff"
+	"event_test_buff",
+	"event_consider"
 };
 
 extern Zone *zone;
@@ -220,6 +221,7 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_COMBINE_VALIDATE] = handle_player_combine_validate;
 	PlayerArgumentDispatch[EVENT_BOT_COMMAND] = handle_player_bot_command;
 	PlayerArgumentDispatch[EVENT_WARP] = handle_player_warp;
+	PlayerArgumentDispatch[EVENT_CONSIDER] = handle_player_consider;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
