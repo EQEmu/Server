@@ -1445,35 +1445,104 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				// Racial Illusions
 				else {
-					SendIllusionPacket
-					(
-						spell.base[i],
-						Mob::GetDefaultGender(spell.base[i], GetGender()),
-						spell.base2[i],
-						spell.max[i]
-					);
-					if(spell.base[i] == OGRE){
+					if (spell.max[i] > 0) {
+						if (spell.base2[i] == 0) {
+							SendIllusionPacket(
+								spell.base[i],
+								(spell.max[i] - 1)
+							);
+						} else {
+							if (spell.max[i] != 3) {
+								SendIllusionPacket(
+									spell.base[i],
+									(spell.max[i] - 1),
+									spell.base2[i],
+									spell.max[i]
+								);
+							} else {
+								SendIllusionPacket(
+									spell.base[i],
+									Mob::GetDefaultGender(spell.base[i], GetGender()),
+									spell.base2[i],
+									spell.base2[i]
+								);
+							}
+						}
+					} else {
+						SendIllusionPacket(
+							spell.base[i],
+							Mob::GetDefaultGender(spell.base[i], GetGender()),
+							spell.base2[i],
+							spell.max[i]
+						);
+					}
+
+					if (
+						spell.base[i] == RACE_OGRE_10 ||
+						spell.base[i] == RACE_OGGOK_CITIZEN_93 ||
+						spell.base[i] == RACE_RALLOS_OGRE_325 ||
+						spell.base[i] == RACE_OGRE_PIRATE_340 ||
+						spell.base[i] == RACE_OGRE_NPC_MALE_624
+					) {
 						SendAppearancePacket(AT_Size, 9);
-					}
-					else if(spell.base[i] == TROLL){
+					} else if (
+						spell.base[i] == RACE_TROLL_9 ||
+						spell.base[i] == RACE_GROBB_CITIZEN_92 ||
+						spell.base[i] == RACE_TROLL_CREW_MEMBER_331 ||
+						spell.base[i] == RACE_PIRATE_DECKHAND_332 ||
+						spell.base[i] == RACE_SPIRITMASTER_NADOX_336 ||
+						spell.base[i] == RACE_BROKEN_SKULL_TASKMASTER_337
+					) {
 						SendAppearancePacket(AT_Size, 8);
-					}
-					else if(spell.base[i] == VAHSHIR || spell.base[i] == BARBARIAN){
+					} else if (
+						spell.base[i] == RACE_BARBARIAN_2 ||
+						spell.base[i] == RACE_HALAS_CITIZEN_90 ||
+						spell.base[i] == RACE_VAH_SHIR_130 ||
+						spell.base[i] == RACE_VAH_SHIR_SKELETON_234 ||
+						spell.base[i] == RACE_VAH_SHIR_KING_238 ||
+						spell.base[i] == RACE_VAH_SHIR_GUARD_239
+					) {
 						SendAppearancePacket(AT_Size, 7);
-					}
-					else if(spell.base[i] == HALF_ELF || spell.base[i] == WOOD_ELF || spell.base[i] == DARK_ELF || spell.base[i] == FROGLOK){
+					} else if (
+						spell.base[i] == RACE_WOOD_ELF_4 ||
+						spell.base[i] == RACE_DARK_ELF_6 ||
+						spell.base[i] == RACE_HALF_ELF_7 ||
+						spell.base[i] == RACE_FROGLOK_26 ||
+						spell.base[i] == RACE_FROGLOK_GHOUL_27 ||
+						spell.base[i] == RACE_FROGLOK_330 ||
+						spell.base[i] == RACE_DARK_ELF_PIRATE_339 ||
+						spell.base[i] == RACE_FROGLOK_SKELETON_349 ||
+						spell.base[i] == RACE_UNDEAD_FROGLOK_350 ||
+						spell.base[i] == RACE_FROGLOK_GHOST_371 ||
+						spell.base[i] == RACE_ELVEN_BOAT_544
+					) {
 						SendAppearancePacket(AT_Size, 5);
-					}
-					else if(spell.base[i] == DWARF){
+					} else if (
+						spell.base[i] == RACE_DWARF_8 ||
+						spell.base[i] == RACE_KALADIM_CITIZEN_94 ||
+						spell.base[i] == RACE_DWARF_GHOST_117 ||
+						spell.base[i] == RACE_COLDAIN_183 ||
+						spell.base[i] == RACE_BRELL_640 ||
+						spell.base[i] == RACE_COLDAIN_645 ||
+						spell.base[i] == RACE_COLDAIN_646
+					) {
 						SendAppearancePacket(AT_Size, 4);
-					}
-					else if(spell.base[i] == HALFLING || spell.base[i] == GNOME){
+					} else if (
+						spell.base[i] == RACE_HALFLING_11 ||
+						spell.base[i] == RACE_GNOME_12 ||
+						spell.base[i] == RACE_RIVERVALE_CITIZEN_81 ||
+						spell.base[i] == RACE_CLOCKWORK_GNOME_88 ||
+						spell.base[i] == RACE_GNOME_PIRATE_338
+					) {
 						SendAppearancePacket(AT_Size, 3);
-					}
-					else if(spell.base[i] == WOLF) {
+					} else if (
+						spell.base[i] == RACE_WOLF_42 ||
+						spell.base[i] == RACE_WOLF_ELEMENTAL_120 ||
+						spell.base[i] == RACE_DIRE_WOLF_171 ||
+						spell.base[i] == RACE_WOLF_482 
+					) {
 						SendAppearancePacket(AT_Size, 2);
-					}
-					else{
+					} else {
 						SendAppearancePacket(AT_Size, 6);
 					}
 				}
