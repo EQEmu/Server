@@ -2167,8 +2167,7 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		} else {
 			return in_gender;
 		}
-	}
-	else if (
+	} else if (
 		in_race == RACE_FREEPORT_GUARD_44 ||
 		in_race == RACE_MIMIC_52 ||
 		in_race == RACE_HUMAN_BEGGAR_55 ||
@@ -2185,13 +2184,9 @@ uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
 		in_race == RACE_ERUDITE_678
 	) { // Male only races
 		return 0;
-	}
-	else if (in_race == RACE_FAIRY_25 || in_race == RACE_PIXIE_56) {
-		// Female only races
+	} else if (in_race == RACE_FAIRY_25 || in_race == RACE_PIXIE_56) { // Female only races
 		return 1;
-	}
-	else {
-		// Neutral default for NPC Races
+	} else { // Neutral default for NPC Races
 		return 2;
 	}
 }
