@@ -2,10 +2,15 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <luabind/iterator_policy.hpp>
 
 #include "npc.h"
 #include "lua_npc.h"
 #include "lua_client.h"
+
+struct Lua_NPC_Loot_List {
+	std::vector<uint32> entries;
+};
 
 void Lua_NPC::Signal(int id) {
 	Lua_Safe_Call_Void();
@@ -618,18 +623,16 @@ float Lua_NPC::GetSpellScale()
 	return self->GetSpellScale();
 }
 
-luabind::object Lua_NPC::GetLootList(lua_State* L) {
-	auto lua_table = luabind::newtable(L);
-	if (d_) {
-		auto self = reinterpret_cast<NativeType*>(d_);
-		auto npc_items = self->GetLootList();
-		int index = 0;
-		for (auto item_id : npc_items) {
-			lua_table[index] = item_id;
-			index++;
-		}
+Lua_NPC_Loot_List Lua_NPC::GetLootList(lua_State* L) {
+	Lua_Safe_Call_Class(Lua_NPC_Loot_List);
+	Lua_NPC_Loot_List ret;
+	auto loot_list = self->GetLootList();
+
+	for (auto item_id : loot_list) {
+		ret.entries.push_back(item_id);
 	}
-	return lua_table;
+
+	return ret;
 }
 
 luabind::scope lua_register_npc() {
@@ -755,7 +758,12 @@ luabind::scope lua_register_npc() {
 		.def("GetFirstSlotByItemID", (uint16(Lua_NPC::*)(uint32))&Lua_NPC::GetFirstSlotByItemID)
 		.def("GetHealScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetHealScale)
 		.def("GetSpellScale", (float(Lua_NPC::*)(void))&Lua_NPC::GetSpellScale)
-		.def("GetLootList", (luabind::object(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList);
+		.def("GetLootList", (Lua_NPC_Loot_List(Lua_NPC::*)(lua_State* L))&Lua_NPC::GetLootList);
+}
+
+luabind::scope lua_register_npc_loot_list() {
+	return luabind::class_<Lua_NPC_Loot_List>("NPCLootList")
+			.def_readwrite("entries", &Lua_NPC_Loot_List::entries, luabind::return_stl_iterator);
 }
 
 #endif

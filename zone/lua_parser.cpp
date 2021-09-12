@@ -1121,6 +1121,8 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_object_list(),
 			lua_register_door_list(),
 			lua_register_spawn_list(),
+			lua_register_corpse_loot_list(),
+			lua_register_npc_loot_list(),
 			lua_register_group(),
 			lua_register_raid(),
 			lua_register_corpse(),

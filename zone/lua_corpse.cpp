@@ -2,10 +2,15 @@
 
 #include "lua.hpp"
 #include <luabind/luabind.hpp>
+#include <luabind/iterator_policy.hpp>
 
 #include "corpse.h"
 #include "lua_corpse.h"
 #include "lua_client.h"
+
+struct Lua_Corpse_Loot_List {
+	std::vector<uint32> entries;
+};
 
 uint32 Lua_Corpse::GetCharID() {
 	Lua_Safe_Call_Int();
@@ -172,18 +177,16 @@ uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
 	return self->GetFirstSlotByItemID(item_id);
 }
 
-luabind::object Lua_Corpse::GetLootList(lua_State* L) {
-	auto lua_table = luabind::newtable(L);
-	if (d_) {
-		auto self = reinterpret_cast<NativeType*>(d_);
-		auto corpse_items = self->GetLootList();
-		int index = 0;
-		for (auto item_id : corpse_items) {
-			lua_table[index] = item_id;
-			index++;
-		}
+Lua_Corpse_Loot_List Lua_Corpse::GetLootList(lua_State* L) {
+	Lua_Safe_Call_Class(Lua_Corpse_Loot_List);
+	Lua_Corpse_Loot_List ret;
+	auto loot_list = self->GetLootList();
+	
+	for (auto item_id : loot_list) {
+		ret.entries.push_back(item_id);
 	}
-	return lua_table;
+
+	return ret;
 }
 
 luabind::scope lua_register_corpse() {
@@ -224,7 +227,12 @@ luabind::scope lua_register_corpse() {
 		.def("CountItem", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
 		.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
 		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID)
-		.def("GetLootList", (luabind::object(Lua_Corpse::*)(lua_State* L))&Lua_Corpse::GetLootList);
+		.def("GetLootList", (Lua_Corpse_Loot_List(Lua_Corpse::*)(lua_State* L))&Lua_Corpse::GetLootList);
+}
+
+luabind::scope lua_register_corpse_loot_list() {
+	return luabind::class_<Lua_Corpse_Loot_List>("CorpseLootList")
+			.def_readwrite("entries", &Lua_Corpse_Loot_List::entries, luabind::return_stl_iterator);
 }
 
 #endif
