@@ -1850,7 +1850,7 @@ XS(XS_NPC_GetLootList);
 XS(XS_NPC_GetLootList) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: NPC::GetLootList(THIS)");
+		Perl_croak(aTHX_ "Usage: NPC::GetLootList(THIS)"); // @categories Script Utility
 	{
 		NPC *THIS;
 		VALIDATE_THIS_IS_NPC;

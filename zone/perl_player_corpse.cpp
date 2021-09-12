@@ -603,7 +603,7 @@ XS(XS_Corpse_GetLootList);
 XS(XS_Corpse_GetLootList) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Corpse::GetLootList(THIS)");
+		Perl_croak(aTHX_ "Usage: Corpse::GetLootList(THIS)"); // @categories Script Utility
 	{
 		Corpse *THIS;
 		VALIDATE_THIS_IS_CORPSE;
