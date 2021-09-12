@@ -375,6 +375,14 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 	}
 
 	DBTradeskillRecipe_Struct spec;
+
+	if (parse->EventPlayer(EVENT_COMBINE, user, std::to_string(in_combine->container_slot), 0) == 1) {
+		auto outapp = new EQApplicationPacket(OP_TradeSkillCombine, 0);
+		user->QueuePacket(outapp);
+		safe_delete(outapp);
+		return;
+	}
+
 	if (!content_db.GetTradeRecipe(container, c_type, some_id, user->CharacterID(), &spec)) {
 
 		LogTradeskillsDetail("[HandleCombine] Check 2");
