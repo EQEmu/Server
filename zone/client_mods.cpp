@@ -340,7 +340,7 @@ int32 Client::CalcMaxHP()
 		}
 	}
 
-	this->max_hp = std::min(max_hp, (int64)2147483647);
+	this->max_hp = std::min(max_hp, (int64)std::numeric_limits<decltype(Mob::max_hp)>::max());
 	return this->max_hp;
 }
 

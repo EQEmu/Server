@@ -963,40 +963,12 @@ void Client::SendPhantomStatsAlternateAdvancementRank() {
 	aai->total_prereqs = 0;
 
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(0);
-	outapp->WriteSInt32(1);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(1);
-	outapp->WriteSInt32(2);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(2);
-	outapp->WriteSInt32(3);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(3);
-	outapp->WriteSInt32(4);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(4);
-	outapp->WriteSInt32(5);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(5);
-	outapp->WriteSInt32(6);
-
-	outapp->WriteSInt32(262);
-	outapp->WriteSInt32(diff);
-	outapp->WriteSInt32(6);
-	outapp->WriteSInt32(7);
+	for (int i = 0; i < 7; ++i) {
+		outapp->WriteSInt32(SE_RaiseStatCap);
+		outapp->WriteSInt32(diff);
+		outapp->WriteSInt32(0);
+		outapp->WriteSInt32(i + 1);
+	}
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
