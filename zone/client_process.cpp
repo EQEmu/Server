@@ -803,10 +803,12 @@ void Client::BulkSendInventoryItems()
 
 void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	const EQ::ItemData* handyitem = nullptr;
-	uint32 numItemSlots = 80; //The max number of items passed in the transaction.
+	bool merchant_slots_limited = true;
+	uint32 numItemSlots = 80; //Max items pre-ROF+
 	if (m_ClientVersionBit & EQ::versions::maskRoFAndLater) { // RoF+ can send 200 items
-		numItemSlots = 200;
+		merchant_slots_limited = false;
 	}
+
 	const EQ::ItemData *item = nullptr;
 	std::list<MerchantList> merlist = zone->merchanttable[merchant_id];
 	std::list<MerchantList>::const_iterator itr;
@@ -822,7 +824,12 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 
 	uint32 i = 1;
 	uint8 handychance = 0;
-	for (itr = merlist.begin(); itr != merlist.end() && i <= numItemSlots; ++itr) {
+	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
+
+		// Only stop sending items if limited by client
+		if (merchant_slots_limited && i > numItemSlots)
+			break;
+
 		MerchantList ml = *itr;
 		if (ml.probability != 100 && zone->random.Int(1, 100) > ml.probability)
 			continue;
@@ -883,7 +890,11 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 	}
 	std::list<TempMerchantList> origtmp_merlist = zone->tmpmerchanttable[npcid];
 	tmp_merlist.clear();
-	for (tmp_itr = origtmp_merlist.begin(); tmp_itr != origtmp_merlist.end() && i <= numItemSlots; ++tmp_itr) {
+	for (tmp_itr = origtmp_merlist.begin(); tmp_itr != origtmp_merlist.end(); ++tmp_itr) {
+
+		if (merchant_slots_limited && i > numItemSlots)
+			break;
+
 		TempMerchantList ml = *tmp_itr;
 		item = database.GetItem(ml.item);
 		ml.slot = i;
@@ -910,7 +921,7 @@ void Client::BulkSendMerchantInventory(int merchant_id, int npcid) {
 					inst->SetCharges(item->MaxCharges);//inst->SetCharges(charges);
 				else
 					inst->SetCharges(1);
-				SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
+				//SendItemPacket(ml.slot-1, inst, ItemPacketMerchant);
 				safe_delete(inst);
 			}
 		}
