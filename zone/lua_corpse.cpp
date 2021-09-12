@@ -172,6 +172,16 @@ uint16 Lua_Corpse::GetFirstSlotByItemID(uint32 item_id) {
 	return self->GetFirstSlotByItemID(item_id);
 }
 
+void Lua_Corpse::RemoveItemByID(uint32 item_id) {
+	Lua_Safe_Call_Void();
+	self->RemoveItemByID(item_id);
+}
+
+void Lua_Corpse::RemoveItemByID(uint32 item_id, int quantity) {
+	Lua_Safe_Call_Void();
+	self->RemoveItemByID(item_id, quantity);	
+}
+
 luabind::scope lua_register_corpse() {
 	return luabind::class_<Lua_Corpse, Lua_Mob>("Corpse")
 		.def(luabind::constructor<>())
@@ -209,7 +219,9 @@ luabind::scope lua_register_corpse() {
 		.def("HasItem", (bool(Lua_Corpse::*)(uint32))&Lua_Corpse::HasItem)
 		.def("CountItem", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::CountItem)
 		.def("GetItemIDBySlot", (uint32(Lua_Corpse::*)(uint16))&Lua_Corpse::GetItemIDBySlot)
-		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID);
+		.def("GetFirstSlotByItemID", (uint16(Lua_Corpse::*)(uint32))&Lua_Corpse::GetFirstSlotByItemID)
+		.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32))&Lua_Corpse::RemoveItemByID)
+		.def("RemoveItemByID", (void(Lua_Corpse::*)(uint32,int))&Lua_Corpse::RemoveItemByID);
 }
 
 #endif
