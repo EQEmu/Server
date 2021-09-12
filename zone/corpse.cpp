@@ -813,8 +813,7 @@ void Corpse::RemoveItemByID(uint32 item_id, int quantity) {
 				removed_count += stack_size;
 				is_corpse_changed = true;
 				itemlist.erase(current_item);
-			}
-			else {
+			} else {
 				int amount_left = (quantity - removed_count);
 				if (amount_left > 0) {
 					if (stack_size > amount_left) {
