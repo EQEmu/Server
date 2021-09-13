@@ -269,6 +269,8 @@ public:
 	int		CountInvSnapshots();
 	void	ClearInvSnapshots(bool from_now = false);
 
+	void SourceDatabaseTableFromUrl(std::string table_name, std::string url);
+
 
 private:
 

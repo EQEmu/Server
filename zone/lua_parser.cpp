@@ -133,7 +133,9 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_bot_command",
 	"event_warp",
 	"event_test_buff",
-	"event_combine"
+	"event_combine",
+	"event_consider",
+	"event_consider_corpse"
 };
 
 extern Zone *zone;
@@ -222,6 +224,8 @@ LuaParser::LuaParser() {
 	PlayerArgumentDispatch[EVENT_BOT_COMMAND] = handle_player_bot_command;
 	PlayerArgumentDispatch[EVENT_WARP] = handle_player_warp;
 	PlayerArgumentDispatch[EVENT_COMBINE] = handle_player_quest_combine;
+	PlayerArgumentDispatch[EVENT_CONSIDER] = handle_player_consider;
+	PlayerArgumentDispatch[EVENT_CONSIDER_CORPSE] = handle_player_consider_corpse;
 
 	ItemArgumentDispatch[EVENT_ITEM_CLICK] = handle_item_click;
 	ItemArgumentDispatch[EVENT_ITEM_CLICK_CAST] = handle_item_click;
@@ -1123,6 +1127,8 @@ void LuaParser::MapFunctions(lua_State *L) {
 			lua_register_object_list(),
 			lua_register_door_list(),
 			lua_register_spawn_list(),
+			lua_register_corpse_loot_list(),
+			lua_register_npc_loot_list(),
 			lua_register_group(),
 			lua_register_raid(),
 			lua_register_corpse(),

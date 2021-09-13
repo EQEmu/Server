@@ -1445,37 +1445,53 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				// Racial Illusions
 				else {
-					SendIllusionPacket
-					(
-						spell.base[i],
-						Mob::GetDefaultGender(spell.base[i], GetGender()),
-						spell.base2[i],
-						spell.max[i]
+					auto gender_id = (
+						spell.max[i] > 0 &&
+						(
+							spell.max[i] != 3 ||
+							spell.base2[i] == 0
+						) ?
+						(spell.max[i] - 1) :
+						Mob::GetDefaultGender(spell.base[i], GetGender())
 					);
-					if(spell.base[i] == OGRE){
-						SendAppearancePacket(AT_Size, 9);
+
+					auto race_size = GetRaceGenderDefaultHeight(
+						spell.base[i],
+						gender_id
+					);
+					
+					if (spell.max[i] > 0) {
+						if (spell.base2[i] == 0) {
+							SendIllusionPacket(
+								spell.base[i],
+								gender_id
+							);
+						} else {
+							if (spell.max[i] != 3) {
+								SendIllusionPacket(
+									spell.base[i],
+									gender_id,
+									spell.base2[i],
+									spell.max[i]
+								);
+							} else {
+								SendIllusionPacket(
+									spell.base[i],
+									gender_id,
+									spell.base2[i],
+									spell.base2[i]
+								);
+							}
+						}
+					} else {
+						SendIllusionPacket(
+							spell.base[i],
+							gender_id,
+							spell.base2[i],
+							spell.max[i]
+						);
 					}
-					else if(spell.base[i] == TROLL){
-						SendAppearancePacket(AT_Size, 8);
-					}
-					else if(spell.base[i] == VAHSHIR || spell.base[i] == BARBARIAN){
-						SendAppearancePacket(AT_Size, 7);
-					}
-					else if(spell.base[i] == HALF_ELF || spell.base[i] == WOOD_ELF || spell.base[i] == DARK_ELF || spell.base[i] == FROGLOK){
-						SendAppearancePacket(AT_Size, 5);
-					}
-					else if(spell.base[i] == DWARF){
-						SendAppearancePacket(AT_Size, 4);
-					}
-					else if(spell.base[i] == HALFLING || spell.base[i] == GNOME){
-						SendAppearancePacket(AT_Size, 3);
-					}
-					else if(spell.base[i] == WOLF) {
-						SendAppearancePacket(AT_Size, 2);
-					}
-					else{
-						SendAppearancePacket(AT_Size, 6);
-					}
+					SendAppearancePacket(AT_Size, race_size);					
 				}
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {

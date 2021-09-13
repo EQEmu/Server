@@ -6,12 +6,14 @@
 
 class Corpse;
 class Lua_Client;
+struct Lua_Corpse_Loot_List;
 
 namespace luabind {
 	struct scope;
 }
 
 luabind::scope lua_register_corpse();
+luabind::scope lua_register_corpse_loot_list();
 
 class Lua_Corpse : public Lua_Mob
 {
@@ -58,6 +60,7 @@ public:
 	uint16 CountItem(uint32 item_id);
 	uint32 GetItemIDBySlot(uint16 loot_slot);
 	uint16 GetFirstSlotByItemID(uint32 item_id);
+	Lua_Corpse_Loot_List GetLootList(lua_State* L);
 };
 
 #endif

@@ -80,6 +80,7 @@ SET(zone_sources
 	fearpath.cpp
 	forage.cpp
 	global_loot_manager.cpp
+	gm_commands/door_manipulation.cpp
 	groups.cpp
 	guild.cpp
 	guild_mgr.cpp
@@ -198,6 +199,7 @@ SET(zone_headers
 	fastmath.h
 	forage.h
 	global_loot_manager.h
+	gm_commands/door_manipulation.h
 	groups.h
 	guild_mgr.h
 	hate_list.h

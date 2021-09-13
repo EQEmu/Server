@@ -10515,3 +10515,13 @@ void Client::ApplyWeaponsStance()
 		weaponstance.spellbonus_enabled = false;
 	}
 }
+
+uint16 Client::GetDoorToolEntityId() const
+{
+	return m_door_tool_entity_id;
+}
+
+void Client::SetDoorToolEntityId(uint16 door_tool_entity_id)
+{
+	Client::m_door_tool_entity_id = door_tool_entity_id;
+}

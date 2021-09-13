@@ -576,6 +576,16 @@ void handle_player_warp(QuestInterface* parse, lua_State* L, Client* client, std
 void handle_player_quest_combine(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any>* extra_pointers) {
 	lua_pushinteger(L, std::stoi(data));
 	lua_setfield(L, -2, "container_slot");
+ }
+ 
+void handle_player_consider(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any>* extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "entity_id");
+}
+
+void handle_player_consider_corpse(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any>* extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "corpse_entity_id");
 }
 
 //Item

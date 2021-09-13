@@ -91,6 +91,8 @@ typedef enum {
 	EVENT_WARP,
 	EVENT_TEST_BUFF,
 	EVENT_COMBINE,
+	EVENT_CONSIDER,
+	EVENT_CONSIDER_CORPSE,
 	_LargestEventID
 } QuestEventID;
 

@@ -598,6 +598,8 @@ RULE_INT(Chat, IntervalDurationMS, 60000, "Interval length in milliseconds")
 RULE_INT(Chat, KarmaUpdateIntervalMS, 1200000, "Karma update interval in milliseconds")
 RULE_INT(Chat, KarmaGlobalChatLimit, 72, "Amount of karma you need to be able to talk in ooc/auction/chat below the level limit")
 RULE_INT(Chat, GlobalChatLevelLimit, 8, "Level limit you need to of reached to talk in ooc/auction/chat if your karma is too low")
+RULE_BOOL(Chat, AutoInjectSaylinksToSay, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
+RULE_BOOL(Chat, AutoInjectSaylinksToClientMessage, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)
@@ -777,6 +779,10 @@ RULE_BOOL(Cheat, EnableMQGateDetector, true, "Enable the MQGate Detector. Set to
 RULE_BOOL(Cheat, EnableMQGhostDetector, true, "Enable the MQGhost Detector. Set to False to disable this feature.")
 RULE_BOOL(Cheat, EnableMQFastMemDetector, true, "Enable the MQFastMem Detector. Set to False to disable this feature.")
 RULE_BOOL(Cheat, MarkMQWarpLT, false, "Mark clients makeing smaller warps")
+RULE_CATEGORY_END()
+
+RULE_CATEGORY(Command)
+RULE_BOOL(Command, DyeCommandRequiresDyes, false, "Enable this to require a Prismatic Dye (32557) each time someone uses #dye.")
 RULE_CATEGORY_END()
 
 #undef RULE_CATEGORY
