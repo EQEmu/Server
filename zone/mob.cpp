@@ -2123,26 +2123,70 @@ uint16 Mob::GetFactionRace() {
 }
 
 uint8 Mob::GetDefaultGender(uint16 in_race, uint8 in_gender) {
-	if (Mob::IsPlayerRace(in_race) || in_race == 15 || in_race == 50 || in_race == 57 || in_race == 70 || in_race == 98 || in_race == 118 || in_race == 562) {
-		if (in_gender >= 2) {
-			// Male default for PC Races
+	if (
+		Mob::IsPlayerRace(in_race) ||
+		in_race == RACE_BROWNIE_15 ||
+		in_race == RACE_KERRAN_23 ||
+		in_race == RACE_LION_50 ||
+		in_race == RACE_DRACNID_57 ||
+		in_race == RACE_ZOMBIE_70 ||
+		in_race == RACE_QEYNOS_CITIZEN_71 ||
+		in_race == RACE_RIVERVALE_CITIZEN_81 ||
+		in_race == RACE_HALAS_CITIZEN_90 ||
+		in_race == RACE_GROBB_CITIZEN_92 ||
+		in_race == RACE_OGGOK_CITIZEN_93 ||
+		in_race == RACE_KALADIM_CITIZEN_94 ||
+		in_race == RACE_ELF_VAMPIRE_98 ||
+		in_race == RACE_FELGUARD_106 ||
+		in_race == RACE_FAYGUARD_112 ||
+		in_race == RACE_ERUDITE_GHOST_118 ||
+		in_race == RACE_IKSAR_CITIZEN_139 ||
+		in_race == RACE_TROLL_CREW_MEMBER_331 ||
+		in_race == RACE_PIRATE_DECKHAND_332 ||
+		in_race == RACE_GNOME_PIRATE_338 ||
+		in_race == RACE_DARK_ELF_PIRATE_339 ||
+		in_race == RACE_OGRE_PIRATE_340 ||
+		in_race == RACE_HUMAN_PIRATE_341 ||
+		in_race == RACE_ERUDITE_PIRATE_342 ||
+		in_race == RACE_UNDEAD_PIRATE_344 ||
+		in_race == RACE_KNIGHT_OF_HATE_351 ||
+		in_race == RACE_WARLOCK_OF_HATE_352 ||
+		in_race == RACE_UNDEAD_VAMPIRE_359 ||
+		in_race == RACE_VAMPIRE_360 ||
+		in_race == RACE_ZOMBIE_471 ||
+		in_race == RACE_VAMPIRE_497 ||
+		in_race == RACE_KERRAN_562 ||
+		in_race == RACE_BROWNIE_568 ||
+		in_race == RACE_HUMAN_566 ||
+		in_race == RACE_ELVEN_GHOST_587 ||
+		in_race == RACE_HUMAN_GHOST_588 ||
+		in_race == RACE_COLDAIN_645
+	) {
+		if (in_gender >= 2) { // Male default for PC Races
 			return 0;
-		}
-		else
+		} else {
 			return in_gender;
-	}
-	else if (in_race == 44 || in_race == 52 || in_race == 55 || in_race == 65 || in_race == 67 || in_race == 88 || in_race == 117 || in_race == 127 ||
-		in_race == 77 || in_race == 78 || in_race == 81 || in_race == 90 || in_race == 92 || in_race == 93 || in_race == 94 || in_race == 106 || in_race == 112 || in_race == 471) {
-		// Male only races
+		}
+	} else if (
+		in_race == RACE_FREEPORT_GUARD_44 ||
+		in_race == RACE_MIMIC_52 ||
+		in_race == RACE_HUMAN_BEGGAR_55 ||
+		in_race == RACE_VAMPIRE_65 ||
+		in_race == RACE_HIGHPASS_CITIZEN_67 ||
+		in_race == RACE_NERIAK_CITIZEN_77 ||
+		in_race == RACE_ERUDITE_CITIZEN_78 ||
+		in_race == RACE_CLOCKWORK_GNOME_88 ||
+		in_race == RACE_DWARF_GHOST_117 ||
+		in_race == RACE_SPECTRAL_IKSAR_147 ||
+		in_race == RACE_INVISIBLE_MAN_127 ||
+		in_race == RACE_VAMPYRE_208 ||
+		in_race == RACE_BROKEN_SKULL_PIRATE_333 ||
+		in_race == RACE_ERUDITE_678
+	) { // Male only races
 		return 0;
-
-	}
-	else if (in_race == 25 || in_race == 56) {
-		// Female only races
+	} else if (in_race == RACE_FAIRY_25 || in_race == RACE_PIXIE_56) { // Female only races
 		return 1;
-	}
-	else {
-		// Neutral default for NPC Races
+	} else { // Neutral default for NPC Races
 		return 2;
 	}
 }
@@ -2923,10 +2967,19 @@ void Mob::Say(const char *format, ...)
 		talker = this;
 	}
 
-	entity_list.MessageCloseString(
-		talker, false, 200, 10,
-		GENERIC_SAY, GetCleanName(), buf
-	);
+	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(buf);
+		entity_list.MessageCloseString(
+			talker, false, 200, 10,
+			GENERIC_SAY, GetCleanName(), new_message.c_str()
+		);
+	}
+	else {
+		entity_list.MessageCloseString(
+			talker, false, 200, 10,
+			GENERIC_SAY, GetCleanName(), buf
+		);
+	}
 }
 
 //

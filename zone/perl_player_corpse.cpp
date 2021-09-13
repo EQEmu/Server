@@ -599,6 +599,29 @@ XS(XS_Corpse_GetFirstSlotByItemID) {
 	XSRETURN(1);
 }
 
+XS(XS_Corpse_GetLootList);
+XS(XS_Corpse_GetLootList) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Corpse::GetLootList(THIS)"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		VALIDATE_THIS_IS_CORPSE;
+		auto corpse_items = THIS->GetLootList();
+		auto item_count = corpse_items.size();
+		if (item_count > 0) {
+			EXTEND(sp, item_count);
+			for (int index = 0; index < item_count; ++index) {
+				ST(index) = sv_2mortal(newSVuv(corpse_items[index]));
+			}
+			XSRETURN(item_count);
+		}
+		SV* return_value = &PL_sv_undef;
+		ST(0) = return_value;
+		XSRETURN(1);
+	}
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -649,6 +672,7 @@ XS(boot_Corpse) {
 	newXSproto(strcpy(buf, "CountItem"), XS_Corpse_CountItem, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDBySlot"), XS_Corpse_GetItemIDBySlot, file, "$$");
 	newXSproto(strcpy(buf, "GetFirstSlotByItemID"), XS_Corpse_GetFirstSlotByItemID, file, "$$");
+	newXSproto(strcpy(buf, "GetLootList"), XS_Corpse_GetLootList, file, "$");
 	XSRETURN_YES;
 }
 

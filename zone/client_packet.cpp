@@ -66,6 +66,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/character_instance_safereturns_repository.h"
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
+#include "gm_commands/door_manipulation.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -4356,6 +4357,20 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		return;
 	}
 
+	// set door selected
+	if (IsDevToolsEnabled()) {
+		SetDoorToolEntityId(currentdoor->GetEntityID());
+		DoorManipulation::CommandHeader(this);
+		Message(
+			Chat::White,
+			fmt::format(
+				"Door ({}) [{}]",
+				currentdoor->GetEntityID(),
+				EQ::SayLinkEngine::GenerateQuestSaylink("#door edit", false, "#door edit")
+			).c_str()
+		);
+	}
+
 	char buf[20];
 	snprintf(buf, 19, "%u", cd->doorid);
 	buf[19] = '\0';
@@ -4964,6 +4979,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
 	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
 	if (tcorpse && tcorpse->IsNPCCorpse()) {
+		parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0);
 		uint32 min; uint32 sec; uint32 ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds
@@ -4977,6 +4993,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
+		parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0);
 		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds
@@ -4991,22 +5008,6 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
 			Message(0, "This corpse %s be resurrected.", tcorpse->IsRezzed() ? "cannot" : "can");
-			/*
-			hour = 0;
-
-			if((ttime = tcorpse->GetResTime()) != 0) {
-			sec = (ttime/1000)%60; // Total seconds
-			min = (ttime/60000)%60; // Total seconds
-			hour = (ttime/3600000)%24; // Total hours
-			if(hour)
-			Message(0, "This corpse can be resurrected for %i hours, %i minutes and %i seconds.", hour, min, sec);
-			else
-			Message(0, "This corpse can be resurrected for %i minutes and %i seconds.", min, sec);
-			}
-			else {
-			MessageString(Chat::White, CORPSE_TOO_OLD);
-			}
-			*/
 		}
 		else {
 			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);

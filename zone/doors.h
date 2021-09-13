@@ -54,6 +54,7 @@ public:
 	void SetDoorName(const char *name);
 	void SetEntityID(uint32 entity) { entity_id = entity; }
 	void SetIncline(int in);
+	void SetInvertState(int in);
 	void SetKeyItem(uint32 in) { key_item_id = in; }
 	void SetLocation(float x, float y, float z);
 	void SetLockpick(uint16 in) { lockpick = in; }
