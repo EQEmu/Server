@@ -4977,6 +4977,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
 	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
 	if (tcorpse && tcorpse->IsNPCCorpse()) {
+		parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0);
 		uint32 min; uint32 sec; uint32 ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds
@@ -4990,6 +4991,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
+		parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0);
 		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds
@@ -5004,22 +5006,6 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
 
 			Message(0, "This corpse %s be resurrected.", tcorpse->IsRezzed() ? "cannot" : "can");
-			/*
-			hour = 0;
-
-			if((ttime = tcorpse->GetResTime()) != 0) {
-			sec = (ttime/1000)%60; // Total seconds
-			min = (ttime/60000)%60; // Total seconds
-			hour = (ttime/3600000)%24; // Total hours
-			if(hour)
-			Message(0, "This corpse can be resurrected for %i hours, %i minutes and %i seconds.", hour, min, sec);
-			else
-			Message(0, "This corpse can be resurrected for %i minutes and %i seconds.", min, sec);
-			}
-			else {
-			MessageString(Chat::White, CORPSE_TOO_OLD);
-			}
-			*/
 		}
 		else {
 			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
