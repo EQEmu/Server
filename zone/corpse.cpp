@@ -1462,12 +1462,12 @@ bool Corpse::HasItem(uint32 item_id) {
 	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
 		ServerLootItem_Struct* loot_item = *current_item;
 		if (!loot_item) {
-			LogError("NPC::CountItem() - ItemList error, null item");
+			LogError("Corpse::HasItem() - ItemList error, null item");
 			continue;
 		}
 
 		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::CountItem() - Database error, invalid item");
+			LogError("Corpse::HasItem() - Database error, invalid item");
 			continue;
 		}
 
@@ -1487,12 +1487,12 @@ uint16 Corpse::CountItem(uint32 item_id) {
 	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
 		ServerLootItem_Struct* loot_item = *current_item;
 		if (!loot_item) {
-			LogError("NPC::CountItem() - ItemList error, null item");
+			LogError("Corpse::CountItem() - ItemList error, null item");
 			continue;
 		}
 
 		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::CountItem() - Database error, invalid item");
+			LogError("Corpse::CountItem() - Database error, invalid item");
 			continue;
 		}
 
@@ -1746,4 +1746,22 @@ bool Corpse::MovePlayerCorpseToNonInstance()
 	}
 
 	return false;
+}
+
+std::vector<int> Corpse::GetLootList() {
+	std::vector<int> corpse_items;
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("Corpse::GetLootList() - ItemList error, null item");
+			continue;
+		}
+
+		if (std::find(corpse_items.begin(), corpse_items.end(), loot_item->item_id) != corpse_items.end()) {
+			continue;
+		}
+		
+		corpse_items.push_back(loot_item->item_id);
+	}
+	return corpse_items;
 }

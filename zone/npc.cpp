@@ -682,12 +682,12 @@ bool NPC::HasItem(uint32 item_id) {
 	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
 		ServerLootItem_Struct* loot_item = *current_item;
 		if (!loot_item) {
-			LogError("NPC::CountItem() - ItemList error, null item");
+			LogError("NPC::HasItem() - ItemList error, null item");
 			continue;
 		}
 
 		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::CountItem() - Database error, invalid item");
+			LogError("NPC::HasItem() - Database error, invalid item");
 			continue;
 		}
 
@@ -3473,4 +3473,22 @@ bool NPC::IsGuard()
 		return true;
 	}
 	return false;
+}
+
+std::vector<int> NPC::GetLootList() {
+	std::vector<int> npc_items;
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::GetLootList() - ItemList error, null item");
+			continue;
+		}
+
+		if (std::find(npc_items.begin(), npc_items.end(), loot_item->item_id) != npc_items.end()) {
+			continue;
+		}
+		
+		npc_items.push_back(loot_item->item_id);
+	}
+	return npc_items;
 }
