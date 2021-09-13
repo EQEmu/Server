@@ -203,7 +203,7 @@ int command_init(void)
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
-		command_add("dye", "[slot|'help'] [red] [green] [blue] - Dyes the specified armor slot to Red, Green, and Blue provided, allows you to bypass darkness limits.", 20, command_dye) ||
+		command_add("dye", "[slot|'help'] [red] [green] [blue] [use_tint] - Dyes the specified armor slot to Red, Green, and Blue provided, allows you to bypass darkness limits.", 20, command_dye) ||
 		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
@@ -14678,7 +14678,7 @@ void command_dye(Client *c, const Seperator *sep)
 	int arguments = sep->argnum;
 
 	if (arguments == 0) {
-		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue]");
+		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		return;
 	}
 	
@@ -14701,7 +14701,7 @@ void command_dye(Client *c, const Seperator *sep)
 	if (arguments == 1 && !strcasecmp(sep->arg[1], "help")) {
 		int slot_id = 0;
 		std::vector<std::string> slot_messages;
-		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue]");
+		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
 		
 		for (const auto& slot : dye_slots) {
@@ -14734,6 +14734,10 @@ void command_dye(Client *c, const Seperator *sep)
 
 	if (arguments >= 4 && sep->IsNumber(4)) {
 		blue = atoi(sep->arg[4]);
+	}
+
+	if (arguments >= 5 && sep->IsNumber(5)) {
+		use_tint = atoi(sep->arg[5]);
 	}
 
 	if (RuleB(Command, DyeCommandRequiresDyes)) {
