@@ -92,6 +92,7 @@ void command_disablerecipe(Client *c, const Seperator *sep);
 void command_disarmtrap(Client *c, const Seperator *sep);
 void command_distance(Client *c, const Seperator *sep);
 void command_doanim(Client *c, const Seperator *sep);
+void command_dye(Client *c, const Seperator *sep);
 void command_dz(Client *c, const Seperator *sep);
 void command_dzkickplayers(Client *c, const Seperator *sep);
 void command_editmassrespawn(Client* c, const Seperator* sep);
