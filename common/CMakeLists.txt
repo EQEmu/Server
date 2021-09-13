@@ -526,6 +526,7 @@ SET(common_headers
 	guild_base.h
 	guilds.h
 	http/httplib.h
+	http/uri.h
 	inventory_profile.h
 	inventory_slot.h
 	ipc_mutex.h
@@ -638,7 +639,8 @@ SET(common_headers
 	StackWalker/StackWalker.h
 	util/memory_stream.h
 	util/directory.h
-	util/uuid.h)
+	util/uuid.h
+)
 
 SOURCE_GROUP(Event FILES
 	event/event_loop.h

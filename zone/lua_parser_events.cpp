@@ -573,6 +573,11 @@ void handle_player_warp(QuestInterface* parse, lua_State* L, Client* client, std
 	lua_setfield(L, -2, "from_z");
 }
 
+void handle_player_consider_corpse(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data, std::vector<EQ::Any>* extra_pointers) {
+	lua_pushinteger(L, std::stoi(data));
+	lua_setfield(L, -2, "corpse_entity_id");
+}
+
 //Item
 void handle_item_click(QuestInterface *parse, lua_State* L, Client* client, EQ::ItemInstance* item, Mob *mob, std::string data, uint32 extra_data,
 					   std::vector<EQ::Any> *extra_pointers) {

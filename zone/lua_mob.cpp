@@ -755,7 +755,15 @@ double Lua_Mob::GetSize() {
 
 void Lua_Mob::Message(int type, const char *message) {
 	Lua_Safe_Call_Void();
-	self->Message(type, message);
+
+	// auto inject saylinks
+	if (RuleB(Chat, AutoInjectSaylinksToClientMessage)) {
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
+		self->Message(type, new_message.c_str());
+	}
+	else {
+		self->Message(type, message);
+	}
 }
 
 void Lua_Mob::MessageString(int type, int string_id, uint32 distance) {
@@ -2747,7 +2755,7 @@ luabind::scope lua_register_mob() {
 		.def("GetNimbusEffect2", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect2)
 		.def("GetNimbusEffect3", (uint8(Lua_Mob::*)(void))&Lua_Mob::GetNimbusEffect3)
 		.def("IsTargetable", (bool(Lua_Mob::*)(void))&Lua_Mob::IsTargetable)
-		.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)		
+		.def("HasShieldEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasShieldEquiped)
 		.def("HasTwoHandBluntEquiped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHandBluntEquiped)
 		.def("HasTwoHanderEquipped", (bool(Lua_Mob::*)(void))&Lua_Mob::HasTwoHanderEquipped)
 		.def("GetHerosForgeModel", (int32(Lua_Mob::*)(uint8))&Lua_Mob::GetHerosForgeModel)

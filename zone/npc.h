@@ -115,7 +115,7 @@ public:
 
 	static NPC *SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position);
 	static void SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_number, int32 zoffset);
-	static void SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
+	static NPC * SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position);
 
 	//abstract virtual function implementations requird by base abstract class
 	virtual bool Death(Mob* killerMob, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill);
@@ -208,6 +208,7 @@ public:
 	uint16	CountItem(uint32 item_id);
 	uint32	GetItemIDBySlot(uint16 loot_slot);
 	uint16	GetFirstSlotByItemID(uint32 item_id);
+	std::vector<int> GetLootList();
 	uint32	CountLoot();
 	inline uint32	GetLoottableID()	const { return loottable_id; }
 	virtual void UpdateEquipmentLight();

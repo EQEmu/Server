@@ -39,6 +39,7 @@
 #include "unix.h"
 #include <netinet/in.h>
 #include <sys/time.h>
+
 #endif
 
 #include "database.h"
@@ -46,6 +47,8 @@
 #include "extprofile.h"
 #include "string_util.h"
 #include "database_schema.h"
+#include "http/httplib.h"
+#include "http/uri.h"
 
 extern Client client;
 
@@ -2416,5 +2419,69 @@ bool Database::CopyCharacter(
 	TransactionCommit();
 
 	return true;
+}
+
+void Database::SourceDatabaseTableFromUrl(std::string table_name, std::string url)
+{
+	try {
+		uri request_uri(url);
+
+		LogHTTP(
+			"[SourceDatabaseTableFromUrl] parsing url [{}] path [{}] host [{}] query_string [{}] protocol [{}] port [{}]",
+			url,
+			request_uri.get_path(),
+			request_uri.get_host(),
+			request_uri.get_query(),
+			request_uri.get_scheme(),
+			request_uri.get_port()
+		);
+
+		if (!DoesTableExist(table_name)) {
+			LogMySQLQuery("Table [{}] does not exist. Downloading from Github and installing...", table_name);
+
+			// http get request
+			httplib::Client cli(
+				fmt::format(
+					"{}://{}",
+					request_uri.get_scheme(),
+					request_uri.get_host()
+				).c_str()
+			);
+
+			cli.set_connection_timeout(0, 60000000); // 60 sec
+			cli.set_read_timeout(60, 0); // 60 seconds
+			cli.set_write_timeout(60, 0); // 60 seconds
+
+			int sourced_queries = 0;
+
+			if (auto res = cli.Get(request_uri.get_path().c_str())) {
+				if (res->status == 200) {
+					for (auto &s: SplitString(res->body, ';')) {
+						if (!trim(s).empty()) {
+							auto results = QueryDatabase(s);
+							if (!results.ErrorMessage().empty()) {
+								LogError("Error sourcing SQL [{}]", results.ErrorMessage());
+								return;
+							}
+							sourced_queries++;
+						}
+					}
+				}
+			}
+			else {
+				LogError("Error retrieving URL [{}]", url);
+			}
+
+			LogMySQLQuery(
+				"Table [{}] installed. Sourced [{}] queries",
+				table_name,
+				sourced_queries
+			);
+		}
+
+	}
+	catch (std::invalid_argument iae) {
+		LogError("[SourceDatabaseTableFromUrl] URI parser error [{}]", iae.what());
+	}
 }
 

@@ -284,7 +284,7 @@ NPC::NPC(const NPCType *npc_type_data, Spawn2 *in_respawn, const glm::vec4 &posi
 	entity_list.MakeNameUnique(name);
 
 	npc_aggro = npc_type_data->npc_aggro;
-	
+
 	AISpellVar.fail_recast                     = static_cast<uint32>(RuleI(Spells, AI_SpellCastFinishedFailRecast));
 	AISpellVar.engaged_no_sp_recast_min        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMinRecast));
 	AISpellVar.engaged_no_sp_recast_max        = static_cast<uint32>(RuleI(Spells, AI_EngagedNoSpellMaxRecast));
@@ -682,19 +682,19 @@ bool NPC::HasItem(uint32 item_id) {
 	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
 		ServerLootItem_Struct* loot_item = *current_item;
 		if (!loot_item) {
-			LogError("NPC::CountItem() - ItemList error, null item");
+			LogError("NPC::HasItem() - ItemList error, null item");
 			continue;
 		}
 
 		if (!loot_item->item_id || !database.GetItem(loot_item->item_id)) {
-			LogError("NPC::CountItem() - Database error, invalid item");
+			LogError("NPC::HasItem() - Database error, invalid item");
 			continue;
 		}
 
 		if (loot_item->item_id == item_id) {
 			return true;
 		}
-	}	
+	}
 	return false;
 }
 
@@ -1124,7 +1124,7 @@ bool NPC::SpawnZoneController()
 	memset(npc_type, 0, sizeof(NPCType));
 
 	strncpy(npc_type->name, "zone_controller", 60);
-	npc_type->current_hp           = 2000000000;
+	npc_type->current_hp       = 2000000000;
 	npc_type->max_hp           = 2000000000;
 	npc_type->hp_regen         = 100000000;
 	npc_type->race             = 240;
@@ -1207,7 +1207,7 @@ void NPC::SpawnGridNodeNPC(const glm::vec4 &position, int32 grid_id, int32 grid_
 	entity_list.AddNPC(npc);
 }
 
-void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
+NPC * NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
 {
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
@@ -1235,6 +1235,8 @@ void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
 	npc_type->show_name        = true;
 	npc_type->findable         = true;
 
+	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
+
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
 	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
 
@@ -1243,14 +1245,15 @@ void NPC::SpawnZonePointNodeNPC(std::string name, const glm::vec4 &position)
 	npc->GiveNPCTypeData(npc_type);
 
 	entity_list.AddNPC(npc);
+
+	return npc;
 }
 
 NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4 &position) {
 	auto npc_type = new NPCType;
 	memset(npc_type, 0, sizeof(NPCType));
 
-	sprintf(npc_type->name, "%s", name.c_str());
-	sprintf(npc_type->lastname, "%s", last_name.c_str());
+	strncpy(npc_type->name, name.c_str(), 60);
 
 	npc_type->current_hp       = 4000000;
 	npc_type->max_hp           = 4000000;
@@ -1272,8 +1275,12 @@ NPC * NPC::SpawnNodeNPC(std::string name, std::string last_name, const glm::vec4
 	npc_type->findable         = true;
 	npc_type->runspeed         = 1.25;
 
+	strcpy(npc_type->special_abilities, "12,1^13,1^14,1^15,1^16,1^17,1^19,1^22,1^24,1^25,1^28,1^31,1^35,1^39,1^42,1");
+
 	auto node_position = glm::vec4(position.x, position.y, position.z, position.w);
 	auto npc           = new NPC(npc_type, nullptr, node_position, GravityBehavior::Flying);
+
+	npc->name[strlen(npc->name) - 3] = (char) NULL;
 
 	npc->GiveNPCTypeData(npc_type);
 
@@ -3466,4 +3473,22 @@ bool NPC::IsGuard()
 		return true;
 	}
 	return false;
+}
+
+std::vector<int> NPC::GetLootList() {
+	std::vector<int> npc_items;
+	for (auto current_item  = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* loot_item = *current_item;
+		if (!loot_item) {
+			LogError("NPC::GetLootList() - ItemList error, null item");
+			continue;
+		}
+
+		if (std::find(npc_items.begin(), npc_items.end(), loot_item->item_id) != npc_items.end()) {
+			continue;
+		}
+		
+		npc_items.push_back(loot_item->item_id);
+	}
+	return npc_items;
 }

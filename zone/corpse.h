@@ -118,6 +118,7 @@ class Corpse : public Mob {
 	uint16	CountItem(uint32 item_id);
 	uint32	GetItemIDBySlot(uint16 loot_slot);
 	uint16	GetFirstSlotByItemID(uint32 item_id);
+	std::vector<int> GetLootList();
 	void	LootItem(Client* client, const EQApplicationPacket* app);
 	void	EndLoot(Client* client, const EQApplicationPacket* app);
 	void	MakeLootRequestPackets(Client* client, const EQApplicationPacket* app);
