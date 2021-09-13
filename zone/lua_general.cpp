@@ -3242,6 +3242,7 @@ luabind::scope lua_register_events() {
 			luabind::value("use_skill", static_cast<int>(EVENT_USE_SKILL)),
 			luabind::value("warp", static_cast<int>(EVENT_WARP)),
 			luabind::value("test_buff", static_cast<int>(EVENT_TEST_BUFF)),
+			luabind::value("consider", static_cast<int>(EVENT_CONSIDER)),
 			luabind::value("consider_corpse", static_cast<int>(EVENT_CONSIDER_CORPSE))
 		];
 }
