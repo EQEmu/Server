@@ -781,6 +781,10 @@ RULE_BOOL(Cheat, EnableMQFastMemDetector, true, "Enable the MQFastMem Detector. 
 RULE_BOOL(Cheat, MarkMQWarpLT, false, "Mark clients makeing smaller warps")
 RULE_CATEGORY_END()
 
+RULE_CATEGORY(Command)
+RULE_BOOL(Command, DyeCommandRequiresDyes, false, "Enable this to require a Prismatic Dye (32557) each time someone uses #dye.")
+RULE_CATEGORY_END()
+
 #undef RULE_CATEGORY
 #undef RULE_INT
 #undef RULE_REAL
