@@ -1649,8 +1649,8 @@ void PerlembParser::ExportEventVariables(
     
 		case EVENT_CONSIDER: {
 			ExportVar(package_name.c_str(), "entity_id", std::stoi(data));
-      break;
-    }
+			break;
+		}
     
 		case EVENT_CONSIDER_CORPSE: {
 			ExportVar(package_name.c_str(), "corpse_entity_id", std::stoi(data));
