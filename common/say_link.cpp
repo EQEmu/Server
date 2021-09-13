@@ -1,5 +1,5 @@
 /*	EQEMu: Everquest Server Emulator
-	
+
 	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.net)
 
 	This program is free software; you can redistribute it and/or modify
@@ -11,7 +11,7 @@
 	are required to give you total support for your newly bought product;
 	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
 	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-	
+
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -339,4 +339,48 @@ std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bo
 	linker.SetProxyText(link_name.c_str());
 
 	return linker.GenerateLink();
+}
+
+std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
+{
+	std::string new_message = message;
+
+	int link_index = 0;
+	std::vector<std::string> links = {};
+
+	// loop through brackets until none exist
+	while (new_message.find('[') != std::string::npos && new_message.find(']') != std::string::npos) {
+		std::string bracket_message = get_between(new_message, "[", "]");
+
+		// already a saylink
+		// todo: improve this later
+		if (!bracket_message.empty() && bracket_message.length() > 50) {
+			links.emplace_back(bracket_message);
+		}
+		else {
+			links.emplace_back(EQ::SayLinkEngine::GenerateQuestSaylink(bracket_message, false, bracket_message));
+		}
+
+		// replace with anchor
+		find_replace(
+			new_message,
+			fmt::format("[{}]", bracket_message),
+			fmt::format("<link:{}>", link_index)
+		);
+
+		link_index++;
+	}
+
+	// pop links onto anchors
+	link_index = 0;
+	for (auto &link: links) {
+		find_replace(
+			new_message,
+			fmt::format("<link:{}>", link_index),
+			fmt::format("[{}]", link)
+		);
+		link_index++;
+	}
+
+	return new_message;
 }

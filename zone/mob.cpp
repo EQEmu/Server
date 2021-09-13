@@ -2923,10 +2923,19 @@ void Mob::Say(const char *format, ...)
 		talker = this;
 	}
 
-	entity_list.MessageCloseString(
-		talker, false, 200, 10,
-		GENERIC_SAY, GetCleanName(), buf
-	);
+	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(buf);
+		entity_list.MessageCloseString(
+			talker, false, 200, 10,
+			GENERIC_SAY, GetCleanName(), new_message.c_str()
+		);
+	}
+	else {
+		entity_list.MessageCloseString(
+			talker, false, 200, 10,
+			GENERIC_SAY, GetCleanName(), buf
+		);
+	}
 }
 
 //
