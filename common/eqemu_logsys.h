@@ -125,6 +125,7 @@ namespace Logs {
 		Cheat,
 		ClientList,
 		DiaWind,
+		HTTP,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -208,6 +209,7 @@ namespace Logs {
 		"Cheat",
 		"ClientList",
 		"DialogueWindow",
+		"HTTP",
 	};
 }
 
