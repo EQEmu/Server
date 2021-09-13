@@ -599,6 +599,24 @@ XS(XS_Corpse_GetFirstSlotByItemID) {
 	XSRETURN(1);
 }
 
+XS(XS_Corpse_RemoveItemByID);
+XS(XS_Corpse_RemoveItemByID) {
+	dXSARGS;
+	if (items != 2 && items != 3)
+		Perl_croak(aTHX_ "Usage: Corpse::RemoveItemByID(THIS, uint32 item_id, [int quantity = 1])"); // @categories Script Utility
+	{
+		Corpse *THIS;
+		uint32 item_id = (uint32) SvUV(ST(1));
+		int quantity = 1;
+		VALIDATE_THIS_IS_CORPSE;
+		if (items == 3)
+			quantity = (int) SvIV(ST(2));
+
+		THIS->RemoveItemByID(item_id, quantity);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Corpse_GetLootList);
 XS(XS_Corpse_GetLootList) {
 	dXSARGS;
@@ -672,6 +690,7 @@ XS(boot_Corpse) {
 	newXSproto(strcpy(buf, "CountItem"), XS_Corpse_CountItem, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDBySlot"), XS_Corpse_GetItemIDBySlot, file, "$$");
 	newXSproto(strcpy(buf, "GetFirstSlotByItemID"), XS_Corpse_GetFirstSlotByItemID, file, "$$");
+	newXSproto(strcpy(buf, "RemoveItemByID"), XS_Corpse_RemoveItemByID, file, "$$;$");
 	newXSproto(strcpy(buf, "GetLootList"), XS_Corpse_GetLootList, file, "$");
 	XSRETURN_YES;
 }

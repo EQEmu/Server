@@ -791,6 +791,45 @@ void Corpse::RemoveItem(ServerLootItem_Struct* item_data)
 	}
 }
 
+void Corpse::RemoveItemByID(uint32 item_id, int quantity) {
+	if (!database.GetItem(item_id)) {
+		return;
+	}
+
+	if (!HasItem(item_id)) {
+		return;
+	}
+
+	int removed_count = 0;
+	for (auto current_item = itemlist.begin(); current_item != itemlist.end(); ++current_item) {
+		ServerLootItem_Struct* sitem = *current_item;
+		if (removed_count == quantity) {
+			break;
+		}
+
+		if (sitem && sitem->item_id == item_id) {
+			int stack_size = sitem->charges > 1 ? sitem->charges : 1;
+			if ((removed_count + stack_size) <= quantity) {
+				removed_count += stack_size;
+				is_corpse_changed = true;
+				itemlist.erase(current_item);
+			} else {
+				int amount_left = (quantity - removed_count);
+				if (amount_left > 0) {
+					if (stack_size > amount_left) {
+						removed_count += amount_left;
+						sitem->charges -= amount_left;
+						is_corpse_changed = true;
+					} else if (stack_size == amount_left) {
+						removed_count += amount_left;
+						itemlist.erase(current_item);
+					}
+				}
+			}
+		}
+	}
+}
+
 void Corpse::SetCash(uint32 in_copper, uint32 in_silver, uint32 in_gold, uint32 in_platinum) {
 	this->copper = in_copper;
 	this->silver = in_silver;
