@@ -90,6 +90,7 @@ void command_devtools(Client *c, const Seperator *sep);
 void command_details(Client *c, const Seperator *sep);
 void command_disablerecipe(Client *c, const Seperator *sep);
 void command_disarmtrap(Client *c, const Seperator *sep);
+void command_door(Client *c, const Seperator *sep);
 void command_distance(Client *c, const Seperator *sep);
 void command_doanim(Client *c, const Seperator *sep);
 void command_dz(Client *c, const Seperator *sep);

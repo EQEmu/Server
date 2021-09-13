@@ -801,6 +801,12 @@ void Doors::SetIncline(int in) {
 	entity_list.RespawnAllDoors();
 }
 
+void Doors::SetInvertState(int in) {
+	entity_list.DespawnAllDoors();
+	invert_state = in;
+	entity_list.RespawnAllDoors();
+}
+
 void Doors::SetOpenType(uint8 in) {
 	entity_list.DespawnAllDoors();
 	open_type = in;
