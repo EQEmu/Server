@@ -43,6 +43,7 @@
 #include "water_map.h"
 #include "npc_scale_manager.h"
 #include "../common/say_link.h"
+#include "dialogue_window.h"
 
 #ifdef _WINDOWS
 	#define snprintf	_snprintf
@@ -4202,8 +4203,25 @@ void EntityList::QuestJournalledSayClose(
 	buf.WriteInt32(0);
 	buf.WriteInt32(0);
 
-	// auto inject saylinks (say)
-	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
+	if (RuleB(Chat, QuestDialogueUsesDialogueWindow)) {
+		for (auto &e : GetCloseMobList(sender, (dist * dist))) {
+			Mob *mob = e.second;
+
+			if (!mob->IsClient()) {
+				continue;
+			}
+
+			Client *client = mob->CastToClient();
+
+			if (client->GetTarget() && client->GetTarget()->IsMob() && client->GetTarget()->CastToMob() == sender) {
+				std::string window_markdown = message;
+				DialogueWindow::Render(client, window_markdown);
+			}
+		}
+
+		return;
+	}
+	else if (RuleB(Chat, AutoInjectSaylinksToSay)) {
 		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
 		buf.WriteString(new_message);
 	}
