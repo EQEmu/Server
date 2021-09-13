@@ -122,7 +122,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_BOT_COMMAND",
 	"EVENT_WARP",
 	"EVENT_TEST_BUFF",
-	"EVENT_CONSIDER"
+	"EVENT_CONSIDER",
 	"EVENT_CONSIDER_CORPSE"
 };
 
