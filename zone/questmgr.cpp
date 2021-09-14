@@ -4317,14 +4317,7 @@ void QuestManager::CrossZoneLDoNUpdate(uint8 type, uint8 subtype, int identifier
 }
 
 std::string QuestManager::getgendername(uint32 gender_id) {
-	auto gender_name = "Unknown";
-	if (gender_id == MALE) {
-		gender_name = "Male";
-	} else if (gender_id == FEMALE) {
-		gender_name = "Female";
-	} else if (gender_id == NEUTER) {
-		gender_name = "Neuter";
-	}
+	std::string gender_name = GetGenderName(gender_id);
 	return gender_name;
 }
 
