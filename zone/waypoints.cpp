@@ -935,6 +935,32 @@ void Mob::TryMoveAlong(float distance, float angle, bool send)
 	Teleport(new_pos);
 }
 
+// like above, but takes a starting position and returns a new location instead of actually moving
+glm::vec4 Mob::TryMoveAlong(const glm::vec4 &start, float distance, float angle)
+{
+	angle += start.w;
+	angle = FixHeading(angle);
+
+	glm::vec3 tmp_pos;
+	glm::vec3 new_pos = start;
+	new_pos.x += distance * g_Math.FastSin(angle);
+	new_pos.y += distance * g_Math.FastCos(angle);
+	new_pos.z += GetZOffset();
+
+	if (zone->HasMap()) {
+		auto new_z = zone->zonemap->FindClosestZ(new_pos, nullptr);
+		if (new_z != BEST_Z_INVALID)
+			new_pos.z = new_z;
+
+		if (zone->zonemap->LineIntersectsZone(start, new_pos, 0.0f, &tmp_pos))
+			new_pos = tmp_pos;
+	}
+
+	new_pos.z = GetFixedZ(new_pos);
+
+	return {new_pos.x, new_pos.y, new_pos.z, start.w};
+}
+
 int	ZoneDatabase::GetHighestGrid(uint32 zoneid) {
 
 	std::string query = StringFormat("SELECT COALESCE(MAX(id), 0) FROM grid WHERE zoneid = %i", zoneid);
