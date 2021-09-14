@@ -1919,8 +1919,8 @@ namespace RoF2
 		eq->SkyRelated2 = -1;
 		eq->NPCAggroMaxDist = 600;
 		eq->FilterID = 2008; // Guild Lobby observed value
-		eq->LavaDamage = 50;
-		eq->MinLavaDamage = 10;
+		OUT(LavaDamage);
+		OUT(MinLavaDamage);
 		eq->bDisallowManaStone = 1;
 		eq->bNoBind = 0;
 		eq->bNoAttack = 0;
