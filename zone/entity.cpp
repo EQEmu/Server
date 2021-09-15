@@ -4185,8 +4185,10 @@ bool Entity::CheckCoordLosNoZLeaps(float cur_x, float cur_y, float cur_z,
 	return false;
 }
 
-void EntityList::QuestJournalledSayClose(Mob *sender, float dist, const char *mobname, const char *message,
-					 Journal::Options &opts)
+void EntityList::QuestJournalledSayClose(
+	Mob *sender, float dist, const char *mobname, const char *message,
+	Journal::Options &opts
+)
 {
 	SerializeBuffer buf(sizeof(SpecialMesgHeader_Struct) + 12 + 64 + 64);
 
@@ -4199,7 +4201,15 @@ void EntityList::QuestJournalledSayClose(Mob *sender, float dist, const char *mo
 	buf.WriteInt32(0); // location, client doesn't seem to do anything with this
 	buf.WriteInt32(0);
 	buf.WriteInt32(0);
-	buf.WriteString(message);
+
+	// auto inject saylinks (say)
+	if (RuleB(Chat, AutoInjectSaylinksToSay)) {
+		std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
+		buf.WriteString(new_message);
+	}
+	else {
+		buf.WriteString(message);
+	}
 
 	auto outapp = new EQApplicationPacket(OP_SpecialMesg, buf);
 

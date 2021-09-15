@@ -361,7 +361,8 @@ void Zone::DumpMerchantList(uint32 npcid) {
 
 int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charges, bool sold) {
 
-	LogInventory("Transaction of [{}] [{}]", charges, item);
+	LogInventory("[{}] [{}] charges of [{}]", ((sold) ? "Sold" : "Bought"),
+		charges, item);
 	//DumpMerchantList(npcid);
 	// Iterate past main items.
 	// If the item being transacted is in this list, return 0;
@@ -419,8 +420,7 @@ int Zone::SaveTempItem(uint32 merchantid, uint32 npcid, uint32 item, int32 charg
 				if (!ml.origslot) {
 					ml.origslot = ml.slot;
 				}
-				bool is_stackable = database.GetItem(item)->Stackable;
-				if ((is_stackable && charges > 0) || (!is_stackable && sold)) {
+				if (ml.charges > 0) {
 					database.SaveMerchantTemp(npcid, ml.origslot, item, ml.charges);
 					tmp_merlist.push_back(ml);
 				} else {
@@ -533,6 +533,10 @@ void Zone::LoadTempMerchantData()
 			GetInstanceVersion()
 		)
 	);
+
+    if (!results.Success() || results.RowCount() == 0) {
+        return;
+	}
 
 	std::vector<std::string> npc_ids;
 	for (auto row = results.begin(); row != results.end(); ++row) {

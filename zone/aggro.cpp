@@ -851,6 +851,17 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 	size_mod *= RuleR(Combat,HitBoxMod);		// used for testing sizemods on different races.
 	size_mod *= fixed_size_mod;					// used to extend the size_mod
 
+	// Melee chasing fleeing mobs is borked.  The client updates don't
+	// come to the server quickly enough, especially when mob is running
+	// and/or PC has good run speed.  This change is a hack, but it greatly
+	// improved playability and "you are too far away" while chasing
+	// a fleeing mob.  The Blind check is to make sure that this does not
+	// apply to disoriented fleeing mobs who need proximity to turn and fight.
+	if  (other->currently_fleeing && !other->IsBlind())
+	{
+		size_mod *= 3;
+	}
+
 	// prevention of ridiculously sized hit boxes
 	if (size_mod > 10000)
 		size_mod = size_mod / 7;
@@ -901,6 +912,7 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		}
 		return true;
 	}
+
 	return false;
 }
 

@@ -1593,7 +1593,7 @@ XS(XS__addldonpoints) {
 	dXSARGS;
 	if (items != 2)
 		Perl_croak(aTHX_ "Usage: quest::addldonpoints(uint32 theme_id, int points)");
-	
+
 	uint32 theme_id = (uint32) SvUV(ST(0));
 	int points = (int) SvIV(ST(1));
 	quest_manager.addldonpoints(theme_id, points);

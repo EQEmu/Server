@@ -4789,12 +4789,25 @@ void bot_command_taunt(Client *c, const Seperator *sep)
 
 		++taunting_count;
 	}
+	for (auto bot_iter : sbl) {
+		if (!bot_iter->HasPet())
+			continue;
+		if (!bot_iter->GetPet()->GetSkill(EQ::skills::SkillTaunt))
+			continue;
+		if (toggle_taunt)
+			bot_iter->GetPet()->CastToNPC()->SetTaunting(!bot_iter->GetPet()->CastToNPC()->IsTaunting());
+		else
+			bot_iter->GetPet()->CastToNPC()->SetTaunting(taunt_state);
+		if (sbl.size() == 1)
+			Bot::BotGroupSay(bot_iter, "My Pet is %s taunting", bot_iter->GetPet()->CastToNPC()->IsTaunting() ? "now" : "no longer");
+		++taunting_count;
+	}
 
 	if (taunting_count) {
 		if (toggle_taunt)
-			c->Message(m_action, "%i of your bots %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
+			c->Message(m_action, "%i of your bots and their pets %s toggled their taunting state", taunting_count, ((taunting_count != 1) ? ("have") : ("has")));
 		else
-			c->Message(m_action, "%i of your bots %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
+			c->Message(m_action, "%i of your bots and their pets %s %s taunting", taunting_count, ((taunting_count != 1) ? ("have") : ("has")), ((taunt_state) ? ("started") : ("stopped")));
 	}
 	else {
 		c->Message(m_fail, "None of your bots are capable of taunting");

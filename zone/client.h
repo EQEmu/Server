@@ -1764,8 +1764,16 @@ private:
 	int Haste; //precalced value
 	uint32 tmSitting; // time stamp started sitting, used for HP regen bonus added on MAY 5, 2004
 
+
+	// dev tools
 	bool display_mob_info_window;
 	bool dev_tools_enabled;
+
+	uint16 m_door_tool_entity_id;
+public:
+	uint16 GetDoorToolEntityId() const;
+	void SetDoorToolEntityId(uint16 door_tool_entity_id);
+private:
 
 	int32 max_end;
 	int32 current_endurance;

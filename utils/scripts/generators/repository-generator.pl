@@ -157,7 +157,7 @@ foreach my $table_to_generate (@tables) {
         $table_found_in_schema = 0;
     }
 
-    if ($table_found_in_schema == 0) {
+    if ($table_found_in_schema == 0 && ($requested_table_to_generate eq "" || $requested_table_to_generate eq "all")) {
         print "Table [$table_to_generate] not found in schema, skipping\n";
         next;
     }

@@ -78,6 +78,7 @@
 #include "../common/content/world_content_service.h"
 #include "../common/http/httplib.h"
 #include "../common/shared_tasks.h"
+#include "gm_commands/door_manipulation.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -202,7 +203,9 @@ int command_init(void)
 		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.",  80, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", 80, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.",  80, command_distance) ||
+		command_add("door", "Door editing command", 80, command_door) ||
 		command_add("doanim", "[animnum] [type] - Send an EmoteAnim for you or your target", 50, command_doanim) ||
+		command_add("dye", "[slot|'help'] [red] [green] [blue] [use_tint] - Dyes the specified armor slot to Red, Green, and Blue provided, allows you to bypass darkness limits.", 20, command_dye) ||
 		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
@@ -12941,6 +12944,10 @@ void command_distance(Client *c, const Seperator *sep) {
 	}
 }
 
+void command_door(Client *c, const Seperator *sep) {
+	DoorManipulation::CommandHandler(c, sep);
+}
+
 void command_cvs(Client *c, const Seperator *sep)
 {
 	if(c)
@@ -14672,6 +14679,91 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 		);
 	}
 }
+
+void command_dye(Client *c, const Seperator *sep)
+{
+	int arguments = sep->argnum;
+
+	if (arguments == 0) {
+		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
+		return;
+	}
+	
+	uint8 slot = 0;
+	uint8 red = 255;
+	uint8 green = 255;
+	uint8 blue = 255;
+	uint8 use_tint = 255;
+
+	std::vector<std::string> dye_slots = {
+		"Helmet",
+		"Chest",
+		"Arms",
+		"Wrist",
+		"Hands",
+		"Legs",
+		"Feet"
+	};
+
+	if (arguments == 1 && !strcasecmp(sep->arg[1], "help")) {
+		int slot_id = 0;
+		std::vector<std::string> slot_messages;
+		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
+		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
+		
+		for (const auto& slot : dye_slots) {
+			slot_messages.push_back(fmt::format("({}) {}", slot_id, slot));
+			slot_id++;
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} {}",
+				"Slots are as follows:",
+				implode(", ", slot_messages)
+			).c_str()
+		);
+		return;
+	}
+
+	if (arguments >= 1 && sep->IsNumber(1)) {
+		slot = atoi(sep->arg[1]);
+	}
+
+	if (arguments >= 2 && sep->IsNumber(2)) {
+		red = atoi(sep->arg[2]);
+	}
+
+	if (arguments >= 3 && sep->IsNumber(3)) {
+		green = atoi(sep->arg[3]);
+	}
+
+	if (arguments >= 4 && sep->IsNumber(4)) {
+		blue = atoi(sep->arg[4]);
+	}
+
+	if (arguments >= 5 && sep->IsNumber(5)) {
+		use_tint = atoi(sep->arg[5]);
+	}
+
+	if (RuleB(Command, DyeCommandRequiresDyes)) {
+		uint32 dye_item_id = 32557;
+		if (c->CountItem(dye_item_id) >= 1) {
+			c->RemoveItem(dye_item_id);
+		} else {
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkItemData);
+			const EQ::ItemData *dye_item = database.GetItem(dye_item_id);
+			linker.SetItemData(dye_item);
+			c->Message(Chat::White, fmt::format("This command requires a {} to use.", linker.GenerateLink()).c_str());
+			return;
+		}
+	}
+
+	c->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 #ifdef BOTS
 #include "bot_command.h"
