@@ -183,6 +183,8 @@ bool Client::Process() {
 
 			SetDynamicZoneMemberStatus(DynamicZoneMemberStatus::Offline);
 
+			parse->EventPlayer(EVENT_DISCONNECT, this, "", 0);
+
 			return false; //delete client
 		}
 
