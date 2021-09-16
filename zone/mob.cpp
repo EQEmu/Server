@@ -3602,81 +3602,28 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	return false;
 }
 
-
-
-void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsPet)
+void Mob::TryTriggerOnCastRequirement()
 {
-	/*
-	At present time there is no obvious difference between ReqTarget and ReqCaster
-	ReqTarget is typically used in spells cast on a target where the trigger occurs on that target.
-	ReqCaster is typically self only spells where the triggers on self.
-	Regardless both trigger on the owner of the buff.
-	*/
-
-	/*
-	Base2 Range: 1004	 = Below < 80% HP
-	Base2 Range: 500-520 = Below (base2 - 500)*5 HP
-	Base2 Range: 521	 = Below (?) Mana UKNOWN - Will assume its 20% unless proven otherwise
-	Base2 Range: 522	 = Below (40%) Endurance
-	Base2 Range: 523	 = Below (40%) Mana
-	Base2 Range: 220-?	 = Number of pets on hatelist to trigger (base2 - 220) (Set at 30 pets max for now)
-	38311 = < 10% mana;
-	*/
-
-	if (!spellbonuses.TriggerOnValueAmount)
-		return;
-
-	if (spellbonuses.TriggerOnValueAmount){
+	if (spellbonuses.TriggerOnCastRequirement) {
 
 		int buff_count = GetMaxTotalSlots();
 
-		for(int e = 0; e < buff_count; e++){
+		for (int e = 0; e < buff_count; e++) {
 
 			uint32 spell_id = buffs[e].spellid;
 
-			if (IsValidSpell(spell_id)){
+			if (IsValidSpell(spell_id)) {
 
-				for(int i = 0; i < EFFECT_COUNT; i++){
+				for (int i = 0; i < EFFECT_COUNT; i++) {
 
 					if ((spells[spell_id].effectid[i] == SE_TriggerOnReqTarget) || (spells[spell_id].effectid[i] == SE_TriggerOnReqCaster)) {
-
-						int base2 = spells[spell_id].base2[i];
-						bool use_spell = false;
-
-						if (IsHP){
-							if ((base2 >= 500 && base2 <= 520) && GetHPRatio() < (base2 - 500)*5)
-								use_spell = true;
-
-							else if (base2 == 1004 && GetHPRatio() < 80)
-								use_spell = true;
-						}
-
-						else if (IsMana){
-							if ( (base2 = 521 && GetManaRatio() < 20) || (base2 = 523 && GetManaRatio() < 40))
-								use_spell = true;
-
-							else if (base2 == 38311 && GetManaRatio() < 10)
-								use_spell = true;
-						}
-
-						else if (IsEndur){
-							if (base2 == 522 && GetEndurancePercent() < 40){
-								use_spell = true;
-							}
-						}
-
-						else if (IsPet){
-							int count = hate_list.GetSummonedPetCountOnHateList(this);
-							if ((base2 >= 220 && base2 <= 250) && count >= (base2 - 220)){
-								use_spell = true;
-							}
-						}
-
-						if (use_spell){
+						Shout("ID: %i", spells[spell_id].base2[i]);
+						if (PassCastRestriction(spells[spell_id].base2[i])) {
 							SpellFinished(spells[spell_id].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
-
-							if(!TryFadeEffect(e))
+							Shout("Success");
+							if (!TryFadeEffect(e)) {
 								BuffFadeBySlot(e);
+							}
 						}
 					}
 				}
@@ -3684,7 +3631,6 @@ void Mob::TryTriggerOnValueAmount(bool IsHP, bool IsMana, bool IsEndur, bool IsP
 		}
 	}
 }
-
 
 //Twincast Focus effects should stack across different types (Spell, AA - when implemented ect)
 void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)

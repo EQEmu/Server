@@ -387,7 +387,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							caster->SetMana(caster->GetMana() + std::abs(effect_value));
 
 						if (effect_value < 0)
-							TryTriggerOnValueAmount(false, true);
+							TryTriggerOnCastRequirement();
 #ifdef SPELL_EFFECT_SPAM
 						if (caster)
 							caster->Message(Chat::White, "You have gained %+i mana!", effect_value);
@@ -403,7 +403,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 				SetMana(GetMana() + effect_value);
 				if (effect_value < 0)
-					TryTriggerOnValueAmount(false, true);
+					TryTriggerOnCastRequirement();
 				}
 
 				break;
@@ -2458,8 +2458,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #endif
 				if(IsClient()) {
 					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + effect_value);
-					if (effect_value < 0)
-						TryTriggerOnValueAmount(false, false, true);
+					if (effect_value < 0) {
+						TryTriggerOnCastRequirement();
+					}
 				}
 				break;
 			}
@@ -2470,10 +2471,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Current Endurance Once: %+i", effect_value);
 #endif
 
-				if(IsClient()) {
+				if (IsClient()) {
 					CastToClient()->SetEndurance(CastToClient()->GetEndurance() + effect_value);
-					if (effect_value < 0)
-						TryTriggerOnValueAmount(false, false, true);
+					if (effect_value < 0) {
+						TryTriggerOnCastRequirement();
+					}
 				}
 				break;
 			}
@@ -2652,7 +2654,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				int32 mana_to_use = GetMana() - spell.base[i];
 				if(mana_to_use > -1) {
 					SetMana(GetMana() - spell.base[i]);
-					TryTriggerOnValueAmount(false, true);
+					TryTriggerOnCastRequirement();
 					// we take full dmg(-10 to make the damage the right sign)
 					mana_damage = spell.base[i] / -10 * spell.base2[i];
 					Damage(caster, mana_damage, spell_id, spell.skill, false, i, true);
@@ -2672,7 +2674,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					int32 end_to_use = CastToClient()->GetEndurance() - spell.base[i];
 					if(end_to_use > -1) {
 						CastToClient()->SetEndurance(CastToClient()->GetEndurance() - spell.base[i]);
-						TryTriggerOnValueAmount(false, false, true);
+						TryTriggerOnCastRequirement();
 						// we take full dmg(-10 to make the damage the right sign)
 						end_damage = spell.base[i] / -10 * spell.base2[i];
 						Damage(caster, end_damage, spell_id, spell.skill, false, i, true);
@@ -2754,7 +2756,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					else {
 						dmg = ratio*max_mana/10;
 						caster->SetMana(caster->GetMana() - max_mana);
-						TryTriggerOnValueAmount(false, true);
+						TryTriggerOnCastRequirement();
 					}
 
 					if(IsDetrimentalSpell(spell_id)) {
