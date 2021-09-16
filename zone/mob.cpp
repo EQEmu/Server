@@ -3605,22 +3605,14 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 void Mob::TryTriggerOnCastRequirement()
 {
 	if (spellbonuses.TriggerOnCastRequirement) {
-
 		int buff_count = GetMaxTotalSlots();
-
 		for (int e = 0; e < buff_count; e++) {
-
-			uint32 spell_id = buffs[e].spellid;
-
+			int spell_id = buffs[e].spellid;
 			if (IsValidSpell(spell_id)) {
-
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-
 					if ((spells[spell_id].effectid[i] == SE_TriggerOnReqTarget) || (spells[spell_id].effectid[i] == SE_TriggerOnReqCaster)) {
-						Shout("ID: %i", spells[spell_id].base2[i]);
 						if (PassCastRestriction(spells[spell_id].base2[i])) {
 							SpellFinished(spells[spell_id].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
-							Shout("Success");
 							if (!TryFadeEffect(e)) {
 								BuffFadeBySlot(e);
 							}
