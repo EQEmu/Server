@@ -343,31 +343,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Complete Heal");
 #endif
-				//make sure they are not allready affected by this...
-				//I think that is the point of making this a buff.
-				//this is in the wrong spot, it should be in the immune
-				//section so the buff timer does not get refreshed!
-
-				int i;
-				bool inuse = false;
-				int buff_count = GetMaxTotalSlots();
-				for(i = 0; i < buff_count; i++) {
-					if(buffs[i].spellid == spell_id && i != buffslot) {
-						Message(0, "You must wait before you can be affected by this spell again.");
-						inuse = true;
-						break;
-					}
-				}
-				if(inuse)
-					break;
-
-				int32 val = 0;
-				val = 7500 * effect_value;
-				if (caster)
+				int val = 7500 * effect_value;
+				if (caster) {
 					val = caster->GetActSpellHealing(spell_id, val, this);
-
-				if (val > 0)
+				}
+				if (val > 0) {
 					HealDamage(val, caster);
+				}
 
 				break;
 			}
