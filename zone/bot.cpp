@@ -7922,7 +7922,7 @@ int32 Bot::CalcMaxHP() {
 	int32 bot_hp = 0;
 	uint32 nd = 10000;
 	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	nd += aabonuses.MaxHP;
+	nd += aabonuses.MaxHPChange;
 	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
 	bot_hp += (spellbonuses.HP + aabonuses.HP);
 	bot_hp += GroupLeadershipAAHealthEnhancement();
