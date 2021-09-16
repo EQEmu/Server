@@ -1149,11 +1149,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							!IsEffectInSpell(buffs[slot].spellid, SE_Fear) &&
 							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS &&
 							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS2 &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS3 &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS4 &&
 							buffs[slot].spellid != SPELL_REVIVAL_SICKNESS)
 						{
 							BuffFadeBySlot(slot);
 						}
-						Shout("Try fade %i", i);
 					}
 				}
 				break;
