@@ -20,11 +20,6 @@ int32 Lua_StatBonuses::GetHPRegen() const {
 	return self->HPRegen;
 }
 
-int32 Lua_StatBonuses::GetMaxHP() const {
-	Lua_Safe_Call_Int();
-	return self->MaxHP;
-}
-
 int32 Lua_StatBonuses::GetManaRegen() const {
 	Lua_Safe_Call_Int();
 	return self->ManaRegen;
@@ -1291,7 +1286,6 @@ luabind::scope lua_register_stat_bonuses() {
 		.def("AC", &Lua_StatBonuses::GetAC)
 		.def("HP", &Lua_StatBonuses::GetHP)
 		.def("HPRegen", &Lua_StatBonuses::GetHPRegen)
-		.def("MaxHP", &Lua_StatBonuses::GetMaxHP)
 		.def("ManaRegen", &Lua_StatBonuses::GetManaRegen)
 		.def("EnduranceRegen", &Lua_StatBonuses::GetEnduranceRegen)
 		.def("Mana", &Lua_StatBonuses::GetMana)

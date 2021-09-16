@@ -843,21 +843,13 @@ int32 Merc::CalcHPRegenCap()
 }
 
 int32 Merc::CalcMaxHP() {
-	float nd = 10000;
-	max_hp = (CalcBaseHP() + itembonuses.HP);
-
-	//The AA desc clearly says it only applies to base hp..
-	//but the actual effect sent on live causes the client
-	//to apply it to (basehp + itemhp).. I will oblige to the client's whims over
-	//the aa description
-	nd += aabonuses.MaxHP;  //Natural Durability, Physical Enhancement, Planar Durability
-
-	max_hp = (float)max_hp * (float)nd / (float)10000; //this is to fix the HP-above-495k issue
-	max_hp += spellbonuses.HP + aabonuses.HP;
-
+	int32 base_hp = (CalcBaseHP() + itembonuses.HP);
+	int32 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
+	max_hp = (base_hp * nd / 10000) + base_hp;
 	max_hp += GroupLeadershipAAHealthEnhancement();
-
-	max_hp += max_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f);
+	max_hp += 5;
+	max_hp += GetHeroicSTA() * 10;
+	max_hp += aabonuses.HP + spellbonuses.HP;
 
 	if (current_hp > max_hp)
 		current_hp = max_hp;

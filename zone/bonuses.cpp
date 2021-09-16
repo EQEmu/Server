@@ -760,7 +760,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_IncreaseRange:
 			break;
 		case SE_MaxHPChange:
-			newbon->MaxHP += base1;
+			newbon->MaxHPChange += base1;
 			break;
 		case SE_Packrat:
 			newbon->Packrat += base1;

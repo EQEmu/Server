@@ -28,7 +28,6 @@ public:
 	int32 GetAC() const;
 	int32 GetHP() const;
 	int32 GetHPRegen() const;
-	int32 GetMaxHP() const;
 	int32 GetManaRegen() const;
 	int32 GetEnduranceRegen() const;
 	int32 GetMana() const;

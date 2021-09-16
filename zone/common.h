@@ -339,7 +339,6 @@ struct StatBonuses {
 	int32	AC;
 	int32	HP;
 	int32	HPRegen;
-	int32	MaxHP;
 	int32	ManaRegen;
 	int32	EnduranceRegen;
 	int32	Mana;
