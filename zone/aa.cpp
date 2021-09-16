@@ -998,7 +998,7 @@ void Client::SendAlternateAdvancementPoints() {
 	}
 
 	for(auto &aa : zone->aa_abilities) {
-		if (i >= 300) {
+		if (i >= MAX_PP_AA_ARRAY) {
 			continue;
 		}
 
