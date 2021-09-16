@@ -974,7 +974,7 @@ typedef enum {
 #define SE_SkillAttackProc				288	// implemented[AA] - Chance to proc spell on skill attack usage (ex. Dragon Punch)
 #define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
-#define SE_Purify						291 // implemented - Removes determental effects
+#define SE_Purify						291 // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness  
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
