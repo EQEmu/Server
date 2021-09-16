@@ -9109,8 +9109,8 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npcedit special_abilities - Sets an NPC's Special Abilities");
 		c->Message(Chat::White, "#npcedit aggroradius - Sets an NPC's Aggro Radius");
 		c->Message(Chat::White, "#npcedit assistradius - Sets an NPC's Assist Radius");
-		c->Message(Chat::White, "#npcedit featuresave - Saves the NPc's current facial features to the database");
-		c->Message(Chat::White, "#npcedit armortint_id - Set an NPC's Armor Tint ID");
+		c->Message(Chat::White, "#npcedit featuresave - Saves an NPC's current facial features to the database");
+		c->Message(Chat::White, "#npcedit armortint_id - Sets an NPC's Armor Tint ID");
 		c->Message(Chat::White, "#npcedit color [red] [green] [blue] - Sets an NPC's Red, Green, and Blue armor tint");
 		c->Message(Chat::White, "#npcedit ammoidfile - Sets an NPC's Ammo ID File");
 		c->Message(Chat::White, "#npcedit weapon [primary_model] [secondary_model] - Sets an NPC's Primary and Secondary Weapon Model");
@@ -9146,13 +9146,13 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npcedit atk - Sets an NPC's Attack");
 		c->Message(Chat::White, "#npcedit accuracy - Sets an NPC's Accuracy");
 		c->Message(Chat::White, "#npcedit avoidance - Sets an NPC's Avoidance");
-		c->Message(Chat::White, "#npcedit slow_mitigation - Set an NPC's Slow Mitigation");
-		c->Message(Chat::White, "#npcedit version - Set an NPC's Version");
+		c->Message(Chat::White, "#npcedit slow_mitigation - Sets an NPC's Slow Mitigation");
+		c->Message(Chat::White, "#npcedit version - Sets an NPC's Version");
 		c->Message(Chat::White, "#npcedit maxlevel - Sets an NPC's Maximum Level");
-		c->Message(Chat::White, "#npcedit scalerate - Set an NPC's Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
-		c->Message(Chat::White, "#npcedit spellscale - Set an NPC's Spell Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
-		c->Message(Chat::White, "#npcedit healscale - Set an NPC's Heal Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
-		c->Message(Chat::White, "#npcedit no_target - Set an NPC's No Target Hotkey Flag [0 = Not Targetable with Target Hotkey, 1 = Targetable with Target Hotkey]");
+		c->Message(Chat::White, "#npcedit scalerate - Sets an NPC's Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
+		c->Message(Chat::White, "#npcedit spellscale - Sets an NPC's Spell Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
+		c->Message(Chat::White, "#npcedit healscale - Sets an NPC's Heal Scaling Rate [50 = 50%, 100 = 100%, 200 = 200%]");
+		c->Message(Chat::White, "#npcedit no_target - Sets an NPC's No Target Hotkey Flag [0 = Not Targetable with Target Hotkey, 1 = Targetable with Target Hotkey]");
 		c->Message(Chat::White, "#npcedit raidtarget - Sets an NPC's Raid Target Flag [0 = Not a Raid Target, 1 = Raid Target]");
 		c->Message(Chat::White, "#npcedit armtexture - Sets an NPC's Arm Texture");
 		c->Message(Chat::White, "#npcedit bracertexture - Sets an NPC's Bracer Texture");
@@ -9162,20 +9162,20 @@ void command_npcedit(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "#npcedit walkspeed - Sets an NPC's Walk Speed");
 		c->Message(Chat::White, "#npcedit show_name - Sets an NPC's Show Name Flag [0 = Hidden, 1 = Shown]");
 		c->Message(Chat::White, "#npcedit untargetable - Sets an NPC's Untargetable Flag [0 = Targetable, 1 = Untargetable]");
-		c->Message(Chat::White, "#npcedit charm_ac - Sets an NPC's Charmed Armor Class");
-		c->Message(Chat::White, "#npcedit charm_min_dmg - Sets an NPC's Charmed Minimum damage");
-		c->Message(Chat::White, "#npcedit charm_max_dmg - Sets an NPC's Charmed Max Damage");
-		c->Message(Chat::White, "#npcedit charm_attack_delay - Sets an NPC's Charmed Attack Delay");
-		c->Message(Chat::White, "#npcedit charm_accuracy_rating - Sets an NPC's Charmed Accuracy Rating");
-		c->Message(Chat::White, "#npcedit charm_avoidance_rating - Sets an NPC's Charmed Avoidance Rating");
-		c->Message(Chat::White, "#npcedit charm_atk - Sets an NPC's Charmed Attack");
+		c->Message(Chat::White, "#npcedit charm_ac - Sets an NPC's Armor Class while Charmed");
+		c->Message(Chat::White, "#npcedit charm_min_dmg - Sets an NPC's Minimum Damage while Charmed");
+		c->Message(Chat::White, "#npcedit charm_max_dmg - Sets an NPC's Max Damage while Charmed");
+		c->Message(Chat::White, "#npcedit charm_attack_delay - Sets an NPC's Attack Delay while Charmed");
+		c->Message(Chat::White, "#npcedit charm_accuracy_rating - Sets an NPC's Accuracy Rating while Charmed");
+		c->Message(Chat::White, "#npcedit charm_avoidance_rating - Sets an NPC's Avoidance Rating while Charmed");
+		c->Message(Chat::White, "#npcedit charm_atk - Sets an NPC's Attack while Charmed");
 		c->Message(Chat::White, "#npcedit skip_global_loot - Sets an NPC's Skip Global Loot Flag [0 = Don't Skip, 1 = Skip");
 		c->Message(Chat::White, "#npcedit rarespawn - Sets an NPC's Rare Spawn Flag [0 = Not a Rare Spawn, 1 = Rare Spawn]");
 		c->Message(Chat::White, "#npcedit stuck_behavior - Sets an NPC's Stuck Behavior [0 = Run to Target, 1 = Warp to Target, 2 = Take No Action, 3 = Evade Combat]");
-		c->Message(Chat::White, "#npcedit flymode - Set an NPC's flymode [0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running]");
+		c->Message(Chat::White, "#npcedit flymode - Sets an NPC's flymode [0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running]");
 		c->Message(Chat::White, "#npcedit always_aggro - Sets an NPC's Always Aggro Flag [0 = Does not Always Aggro, 1 = Always Aggro]");
 		c->Message(Chat::White, "#npcedit exp_mod - Sets an NPC's Experience Modifier [50 = 50%, 100 = 100%, 200 = 200%]");
-		c->Message(Chat::White, "#npcedit setanimation - Set an NPC's Animation on Spawn (Stored in spawn2 table)");
+		c->Message(Chat::White, "#npcedit setanimation - Sets an NPC's Animation on Spawn (Stored in spawn2 table)");
 		c->Message(Chat::White, "#npcedit respawntime - Sets an NPC's Respawn Timer in Seconds (Stored in spawn2 table)");
 	}
 
@@ -9771,7 +9771,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "charm_ac") == 0) {
-        c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Charmed Armor Class.", npc_id, atoi(sep->arg[2])).c_str());
+        c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Armor Class while Charmed.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET charm_ac = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
 		content_db.QueryDatabase(query);
 		return;
