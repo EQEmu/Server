@@ -270,6 +270,18 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		}
 	}
 
+	// Placed here to allow silent message or other message to override default for custom values.
+	if (button_one_name != nullptr && button_two_name != nullptr) {
+		c->SetEntityVariable(
+			DIAWIND_RESPONSE_ONE_KEY.c_str(),
+			button_one_name
+		);
+		c->SetEntityVariable(
+			DIAWIND_RESPONSE_TWO_KEY.c_str(),
+			button_two_name
+		);
+	}
+
 	// handle silent prompts from the [> silent syntax
 	std::string silent_message;
 	if (responses.empty() && markdown.find('[') != std::string::npos && markdown.find('>') != std::string::npos) {
@@ -350,14 +362,6 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			button_one_name,
 			button_one_name,
 			button_two_name,
-			button_two_name
-		);
-		c->SetEntityVariable(
-			DIAWIND_RESPONSE_ONE_KEY.c_str(),
-			button_one_name
-		);
-		c->SetEntityVariable(
-			DIAWIND_RESPONSE_TWO_KEY.c_str(),
 			button_two_name
 		);
 	}
