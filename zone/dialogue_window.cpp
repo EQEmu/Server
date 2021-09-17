@@ -182,7 +182,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 			auto second_split = split_string(first_split[1], " ");
 			if (!second_split.empty()) {
 				negativeid = second_split[0];
-				LogDiaWindDetail("Client [{}] Rendering negativeid option popupid [{}]", c->GetCleanName(), negativeid);
+				LogDiaWindDetail("Client [{}] Rendering negativeid option negativeid [{}]", c->GetCleanName(), negativeid);
 			}
 
 			if (first_split[1].length() == 1) {
