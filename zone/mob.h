@@ -801,7 +801,6 @@ public:
 	void TrySympatheticProc(Mob *target, uint32 spell_id);
 	bool TryFadeEffect(int slot);
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
-	int16 GetHealRate(uint16 spell_id, Mob* caster = nullptr);
 	int32 GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining);
 	int32 GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill = false, uint16 skill=0);
 	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);

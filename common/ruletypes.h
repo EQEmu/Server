@@ -380,6 +380,7 @@ RULE_BOOL(Spells, PreventFactionWarOnCharmBreak, false, "Enable spell interupts 
 RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spells on a player that is already invisible")
 RULE_BOOL(Spells, AllowSpellMemorizeFromItem, false, "Allows players to memorize spells by right-clicking spell scrolls")
 RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to be in group.")
+RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate heal focus")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

@@ -3933,20 +3933,6 @@ int32 Mob::GetPositionalDmgTakenAmt(Mob *attacker)
 	return total_amt;
 }
 
-
-int16 Mob::GetHealRate(uint16 spell_id, Mob* caster) {
-
-	int16 heal_rate = 0;
-
-	heal_rate += itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate;
-	heal_rate += GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, caster, spell_id);
-
-	if(heal_rate < -99)
-		heal_rate = -99;
-
-	return heal_rate;
-}
-
 void Mob::SetBottomRampageList()
 {
 	auto &mob_list = entity_list.GetCloseMobList(this);
