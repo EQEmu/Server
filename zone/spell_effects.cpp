@@ -5741,7 +5741,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_FcHealPctCritIncoming:
 				if (type == focusFcHealPctCritIncoming) {
-					value = focus_spell.base[i];
+					value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 				}
 				break;
 
@@ -5759,7 +5759,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_FcHealPctIncoming:
 				if (type == focusFcHealPctIncoming) {
-					value = focus_spell.base[i];
+					value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 				}
 				break;
 
@@ -5923,7 +5923,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 		}
 	}
 
-	// Only use of this focus per AA effect.
+	// Only use one of this focus per AA effect.
 	if (IsClient() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
@@ -6937,43 +6937,45 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 	Example: When your target has a focus limited buff that increases amount of healing on them.
 	*/
 
-	if (!caster)
+	if (!caster) {
 		return 0;
+	}
 
 	int value = 0;
 
 	if (spellbonuses.FocusEffects[type]){
 
-			int32 tmp_focus = 0;
-			int tmp_buffslot = -1;
+		int32 tmp_focus = 0;
+		int tmp_buffslot = -1;
 
-			int buff_count = GetMaxTotalSlots();
-			for(int i = 0; i < buff_count; i++) {
+		int buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++) {
 
-				if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
+			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
 
-					int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
+				int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
 
-					if (!focus)
-						continue;
+				if (!focus) {
+					continue;
+				}
 
-					if (tmp_focus && focus > tmp_focus){
-						tmp_focus = focus;
-						tmp_buffslot = i;
-					}
+				if (tmp_focus && focus > tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
 
-					else if (!tmp_focus){
-						tmp_focus = focus;
-						tmp_buffslot = i;
-					}
+				else if (!tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
 				}
 			}
-
-			value = tmp_focus;
-
-			if (tmp_buffslot >= 0)
-				CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 		}
+
+		value = tmp_focus;
+
+		if (tmp_buffslot >= 0)
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
+	}
 
 
 	return value;
@@ -8496,6 +8498,8 @@ bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 	case focusSpellHateMod:
 	case focusSpellVulnerability:
 	case focusFcSpellDamagePctIncomingPC:
+	case focusFcHealPctIncoming:
+	case focusFcHealPctCritIncoming:
 		return true;
 	}
 

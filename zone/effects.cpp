@@ -316,8 +316,8 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (spells[spell_id].buffduration < 1) {
 
 		if (target) {
-			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id) / 100); //SPA 395 ? Add before critical
-			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctIncoming, this, spell_id) / 100); //SPA 393 Add before critical
+			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, this, spell_id) / 100); //SPA 393 Add before critical
+			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id) / 100); //SPA 395 Add before critical (?)
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
@@ -331,8 +331,6 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 			incoming_heal_mod_percent = std::min(incoming_heal_mod_percent, -100);
 			value += value * incoming_heal_mod_percent / 100;
 		}
-
-		//value += value * target->GetHealRate(spell_id, this) / 100; //SPA 120 modifies value after Focus Applied but before critical
 	
 		/*
 			Apply critical hit modifier
