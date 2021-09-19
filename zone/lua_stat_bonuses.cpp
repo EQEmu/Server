@@ -987,7 +987,7 @@ int32 Lua_StatBonuses::GetShieldEquipDmgMod() const {
 
 bool Lua_StatBonuses::GetTriggerOnValueAmount() const {
 	Lua_Safe_Call_Bool();
-	return self->TriggerOnValueAmount;
+	return self->TriggerOnCastRequirement;
 }
 
 int8 Lua_StatBonuses::GetStunBashChance() const {

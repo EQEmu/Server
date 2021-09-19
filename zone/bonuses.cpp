@@ -3208,7 +3208,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_TriggerOnReqTarget:
 			case SE_TriggerOnReqCaster:
-				new_bonus->TriggerOnValueAmount = true;
+				new_bonus->TriggerOnCastRequirement = true;
 				break;
 
 			case SE_DivineAura:

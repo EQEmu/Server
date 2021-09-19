@@ -2701,8 +2701,9 @@ void Mob::AddToHateList(Mob* other, uint32 hate /*= 0*/, int32 damage /*= 0*/, b
 		}
 	}
 
-	if (other->IsNPC() && (other->IsPet() || other->CastToNPC()->GetSwarmOwner() > 0))
-		TryTriggerOnValueAmount(false, false, false, true);
+	if (other->IsNPC() && (other->IsPet() || other->CastToNPC()->GetSwarmOwner() > 0)) {
+		TryTriggerOnCastRequirement();
+	}
 
 	if (IsClient() && !IsAIControlled())
 		return;
@@ -3343,7 +3344,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		if (GetMana() >= mana_reduced) {
 			damage -= mana_reduced;
 			SetMana(GetMana() - mana_reduced);
-			TryTriggerOnValueAmount(false, true);
+			TryTriggerOnCastRequirement();
 		}
 	}
 
@@ -3356,7 +3357,7 @@ int32 Mob::ReduceAllDamage(int32 damage)
 		if (IsClient() && CastToClient()->GetEndurance() >= endurance_drain) {
 			damage -= damage_reduced;
 			CastToClient()->SetEndurance(CastToClient()->GetEndurance() - endurance_drain);
-			TryTriggerOnValueAmount(false, false, true);
+			TryTriggerOnCastRequirement();
 		}
 	}
 
@@ -3646,7 +3647,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 				TryDeathSave();
 		}
 
-		TryTriggerOnValueAmount(true);
+		TryTriggerOnCastRequirement();
 
 		//fade mez if we are mezzed
 		if (IsMezzed() && attacker) {
