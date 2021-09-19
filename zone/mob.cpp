@@ -2838,10 +2838,17 @@ bool Mob::HateSummon() {
 		if(summon_level == 1) {
 			entity_list.MessageClose(this, true, 500, Chat::Say, "%s says 'You will not evade me, %s!' ", GetCleanName(), target->GetCleanName() );
 
+			auto new_pos = m_Position;
+			float angle = new_pos.w - target->GetHeading();
+			new_pos.w = target->GetHeading();
+
+			// probably should be like half melee range, but we can't get melee range nicely because reasons :)
+			new_pos = target->TryMoveAlong(new_pos, 5.0f, angle);
+
 			if (target->IsClient())
-				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), m_Position.x, m_Position.y, m_Position.z, target->GetHeading(), 0, SummonPC);
+				target->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), new_pos.x, new_pos.y, new_pos.z, new_pos.w, 0, SummonPC);
 			else
-				target->GMMove(m_Position.x, m_Position.y, m_Position.z, target->GetHeading());
+				target->GMMove(new_pos.x, new_pos.y, new_pos.z, new_pos.w);
 
 			return true;
 		} else if(summon_level == 2) {

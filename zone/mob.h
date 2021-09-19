@@ -623,6 +623,7 @@ public:
 	void Teleport(const glm::vec3 &pos);
 	void Teleport(const glm::vec4 &pos);
 	void TryMoveAlong(float distance, float angle, bool send = true);
+	glm::vec4 TryMoveAlong(const glm::vec4 &start, float distance, float angle);
 	void ProcessForcedMovement();
 	inline void IncDeltaX(float in) { m_Delta.x += in; }
 	inline void IncDeltaY(float in) { m_Delta.y += in; }
