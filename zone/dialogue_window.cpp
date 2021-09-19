@@ -101,8 +101,8 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	uint32 popup_id = POPUPID_DIAWIND_ONE;
 	uint32 negative_id = POPUPID_DIAWIND_TWO;
-	const char *button_one_name = nullptr;
-	const char *button_two_name = nullptr;
+	std::string button_one_name;
+	std::string button_two_name;
 	uint32 sound_controls = 0;
 
 	// window type
@@ -172,32 +172,32 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		}
 	}
 
-	// negativeid
-	std::string negativeid;
-	if (markdown.find("negativeid") != std::string::npos) {
-		LogDiaWind("Client [{}] Rendering negativeid option", c->GetCleanName());
+	// secondresponseid
+	std::string secondresponseid;
+	if (markdown.find("secondresponseid") != std::string::npos) {
+		LogDiaWind("Client [{}] Rendering secondresponseid option", c->GetCleanName());
 
-		auto first_split = split_string(output, "negativeid:");
+		auto first_split = split_string(output, "secondresponseid:");
 		if (!first_split.empty()) {
 			auto second_split = split_string(first_split[1], " ");
 			if (!second_split.empty()) {
-				negativeid = second_split[0];
-				LogDiaWindDetail("Client [{}] Rendering negativeid option negativeid [{}]", c->GetCleanName(), negativeid);
+				secondresponseid = second_split[0];
+				LogDiaWindDetail("Client [{}] Rendering secondresponseid option secondresponseid [{}]", c->GetCleanName(), secondresponseid);
 			}
 
 			if (first_split[1].length() == 1) {
-				negativeid = first_split[1];
+				secondresponseid = first_split[1];
 				LogDiaWindDetail(
-					"Client [{}] Rendering negativeid (end) option negativeid [{}]",
+					"Client [{}] Rendering secondresponseid (end) option secondresponseid [{}]",
 					c->GetCleanName(),
-					negativeid
+					secondresponseid
 				);
 			}
 
-			find_replace(output, fmt::format("negativeid:{}", negativeid), "");
+			find_replace(output, fmt::format("secondresponseid:{}", secondresponseid), "");
 
-			if (!negativeid.empty()) {
-				negative_id = (StringIsNumber(negativeid) ? std::atoi(negativeid.c_str()) : 0);
+			if (!secondresponseid.empty()) {
+				negative_id = (StringIsNumber(secondresponseid) ? std::atoi(secondresponseid.c_str()) : 0);
 			}
 		}
 	}
@@ -301,14 +301,14 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	}
 
 	// Placed here to allow silent message or other message to override default for custom values.
-	if (button_one_name != nullptr && button_two_name != nullptr) {
+	if (!button_one_name.empty() && !button_two_name.empty()) {
 		c->SetEntityVariable(
 			DIAWIND_RESPONSE_ONE_KEY.c_str(),
-			button_one_name
+			button_one_name.c_str()
 		);
 		c->SetEntityVariable(
 			DIAWIND_RESPONSE_TWO_KEY.c_str(),
-			button_two_name
+			button_two_name.c_str()
 		);
 	}
 
@@ -385,7 +385,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		);
 	}
 
-	if (button_one_name != nullptr && button_two_name != nullptr) {
+	if (!button_one_name.empty() && !button_two_name.empty()) {
 		click_response = fmt::format(
 			"<c \"#F07F00\">Click [{}] to respond with [{}]...<br>"
 			"Click [{}] to respond with [{}]...</c>",
@@ -439,8 +439,8 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		negative_id,
 		window_type,
 		window_expire_seconds,
-		button_one_name,
-		button_two_name,
+		button_one_name.c_str(),
+		button_two_name.c_str(),
 		sound_controls
 	);
 
