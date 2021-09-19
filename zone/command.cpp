@@ -758,8 +758,9 @@ void command_worldwide(Client *c, const Seperator *sep)
 
 	if (sub_command == "cast") {
 		if (sep->arg[2][0] && Seperator::IsNumber(sep->arg[2])) {
+			uint8 update_type = WWSpellUpdateType_Cast;
 			int spell_id = atoi(sep->arg[2]);
-			quest_manager.WorldWideCastSpell(spell_id, 0, 0);
+			quest_manager.WorldWideSpell(update_type, spell_id);
 			worldserver.SendEmoteMessage(0, 0, 15, fmt::format("<SYSTEMWIDE MESSAGE> A GM has cast [{}] world-wide!", GetSpellName(spell_id)).c_str());
 		}
 		else {
