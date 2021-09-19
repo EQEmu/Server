@@ -1118,13 +1118,23 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 			case SE_Purify:
 			{
-				//Attempt to remove all Deterimental buffs.
-				int buff_count = GetMaxTotalSlots();
-				for(int slot = 0; slot < buff_count; slot++) {
-					if (buffs[slot].spellid != SPELL_UNKNOWN &&
-                            IsDetrimentalSpell(buffs[slot].spellid) && spells[buffs[slot].spellid].dispel_flag == 0)
-					{
-						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+				//Attempt to remove up to base amount of detrimental effects (excluding charm, fear, resurrection, and revival sickness).
+				int purify_count = spells[spell_id].base[i];
+				if (purify_count > GetMaxTotalSlots()) {
+					purify_count = GetMaxTotalSlots();
+				}
+
+				for(int slot = 0; slot < purify_count; slot++) {
+					if (IsValidSpell(buffs[slot].spellid) && IsDetrimentalSpell(buffs[slot].spellid)){
+
+						if (!IsEffectInSpell(buffs[slot].spellid, SE_Charm) &&
+							!IsEffectInSpell(buffs[slot].spellid, SE_Fear) &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS2 &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS3 &&
+							buffs[slot].spellid != SPELL_RESURRECTION_SICKNESS4 &&
+							buffs[slot].spellid != SPELL_REVIVAL_SICKNESS)
+						{
 							BuffFadeBySlot(slot);
 						}
 					}
