@@ -122,6 +122,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_BOT_COMMAND",
 	"EVENT_WARP",
 	"EVENT_TEST_BUFF",
+	"EVENT_COMBINE",
 	"EVENT_CONSIDER",
 	"EVENT_CONSIDER_CORPSE"
 };
@@ -1654,6 +1655,11 @@ void PerlembParser::ExportEventVariables(
     
 		case EVENT_CONSIDER_CORPSE: {
 			ExportVar(package_name.c_str(), "corpse_entity_id", std::stoi(data));
+			break;
+		}
+
+		case EVENT_COMBINE: {
+			ExportVar(package_name.c_str(), "container_slot", std::stoi(data));
 			break;
 		}
 
