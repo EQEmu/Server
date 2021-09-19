@@ -4016,7 +4016,7 @@ XS(XS_Client_Freeze);
 XS(XS_Client_Freeze) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client:Freeze(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::Freeze(THIS)");
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
@@ -4029,7 +4029,7 @@ XS(XS_Client_UnFreeze);
 XS(XS_Client_UnFreeze) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Client:UnFreeze(THIS)");
+		Perl_croak(aTHX_ "Usage: Client::UnFreeze(THIS)");
 	{
 		Client *THIS;
 		VALIDATE_THIS_IS_CLIENT;
