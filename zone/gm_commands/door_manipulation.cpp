@@ -151,7 +151,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_x_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -165,7 +165,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -190,7 +190,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_y_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -204,7 +204,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -229,7 +229,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_z_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -243,7 +243,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -260,7 +260,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -50; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_h_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -283,7 +283,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -100; move_index <= 0; move_index += 10) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						set_size_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
