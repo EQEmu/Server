@@ -4358,7 +4358,7 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 	}
 
 	// set door selected
-	if (IsDevToolsEnabled()) {
+	if (IsDevToolsEnabled() && Admin() >= database.GetCommandAccess("door")) {
 		SetDoorToolEntityId(currentdoor->GetEntityID());
 		DoorManipulation::CommandHeader(this);
 		Message(
