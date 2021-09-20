@@ -1043,6 +1043,27 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Cancel Magic: %d", effect_value);
 #endif
+				if (caster) {
+					if (effect_value > 0) {
+						if (caster) {
+							if (caster->IsClient() && !caster->CastToClient()->GetFeigned()) {
+								AddToHateList(caster, effect_value);
+							}
+							else if (!caster->IsClient())
+								AddToHateList(caster, effect_value);
+						}
+					}
+					else {
+						int32 newhate = GetHateAmount(caster) + effect_value;
+						if (newhate < 1) {
+							SetHateAmountOnEnt(caster, 1);
+						}
+						else {
+							SetHateAmountOnEnt(caster, newhate);
+						}
+					}
+				}
+
 				if(GetSpecialAbility(UNDISPELLABLE)){
 					if (caster)
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
@@ -1055,7 +1076,10 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						spells[buffs[slot].spellid].dispel_flag == 0 &&
 						!IsDiscipline(buffs[slot].spellid))
 					{
-						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+							if (caster && caster->IsClient()){
+								BuffFadeBySlot(slot);
+								slot = buff_count;
+							} else if (caster && TryDispel(caster->GetLevel(), buffs[slot].casterlevel, effect_value)) {
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -3889,7 +3913,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			ROOT has a 70% chance to do a resist check to break.
 			*/
 
-			if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance))) {
+			if (zone->random.Roll(RuleI(Spells, RootBreakCheckChance)) && (IsNPC() || (IsClient() && caster && caster->CastToMob()->IsNPC()))) {
 				float resist_check =
 				    ResistSpell(spells[buff.spellid].resisttype, buff.spellid, caster, 0, 0, 0, 0, true);
 
@@ -7056,7 +7080,8 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 	return resist_chance;
 }
 
-bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
+bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier)
+{
 
 	/*Live 5-20-14 Patch Note: Updated all spells which use Remove Detrimental and
 	Cancel Beneficial spell effects to use a new method. The chances for those spells to

@@ -93,7 +93,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
 				skillinuse = EQ::skills::Skill1HPiercing;
 			else
-				skillinuse = EQ::skills::Skill2HPiercing;
+				skillinuse = EQ::skills::Skill2HPiercing; // Voidd: TODO - Was 2HPiercing in classic and if not what Era? Velious?
 			type = anim2HWeapon;
 			break;
 		case EQ::item::ItemTypeMartial:
@@ -121,7 +121,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = anim1HWeapon;
 			break;
 		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HSlashing; //anim2HWeapon
+			type = anim2HSlashing; //anim2HWeapon Voidd: TODO - Rule for 2HS vs 2HW for Era specific?
 			break;
 		case EQ::skills::Skill2HPiercing: // 2H Piercing
 			type = anim2HWeapon;
@@ -998,11 +998,15 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 				//they don't have a dmg but we should be able to hit magical
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
-			else
-				return 0;
+			if (IsNPC() || HasOwner() && !GetOwner()->IsClient()) {
+				dmg = 1;
+			}
 		}
 		else {
-			if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
+			if (IsNPC() || HasOwner() && !GetOwner()->IsClient()) {
+				dmg = 1;
+			}
+			else if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
 				dmg = GetHandToHandDamage();
 			}
 			else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
@@ -1590,22 +1594,42 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 	if (spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
 
+	//handle EVENT_PVP. Resets after we have not been attacked for 12 seconds
+	if (!pvp_attacked_timer.Check() && other && other->IsClient())
+	{
+	//	LogCombat("Triggering EVENT_PVP due to attack by [{}]", other ? other->GetName() : "nullptr");
+	//	parse->EventPlayer(EVENT_PVP, this, other->GetName(), 0, 0);
+//
+	pvp_attacked_timer.Start(60000);
+	}
+
+
 	// cut all PVP spell damage to 2/3
 	// Blasting ourselfs is considered PvP
 	//Don't do PvP mitigation if the caster is damaging himself
 	//should this be applied to all damage? comments sound like some is for spell DMG
 	//patch notes on PVP reductions only mention archery/throwing ... not normal dmg
-	if (other && other->IsClient() && (other != this) && damage > 0) {
-		int PvPMitigation = 100;
-		if (attack_skill == EQ::skills::SkillArchery || attack_skill == EQ::skills::SkillThrowing)
-			PvPMitigation = 80;
-		else
-			PvPMitigation = 67;
+	if (other && other->IsClient() && (other != this) && damage > 0) // Voidd: TODO - Does this require iBuffTic?
+	{
+		int PvPMitigation = RuleI(World, PVPMeleeMitigation);
+ 		if (attack_skill == EQ::skills::SkillAbjuration ||  //spells
+ 			attack_skill == EQ::skills::SkillAlteration ||
+ 			attack_skill == EQ::skills::SkillDivination ||
+			attack_skill == EQ::skills::SkillConjuration ||
+ 			attack_skill == EQ::skills::SkillEvocation) PvPMitigation = RuleI(World, PVPSpellMitigation);
+ 		if (attack_skill == EQ::skills::SkillArchery ||  //ranged
+ 			attack_skill == EQ::skills::SkillThrowing) PvPMitigation = RuleI(World, PVPRangedMitigation);
+
 		damage = std::max((damage * PvPMitigation) / 100, 1);
 	}
 
 	if (!ClientFinishedLoading())
 		damage = -5;
+	
+	if (other != nullptr && iBuffTic && is_client_moving && !IsRooted() && !IsFeared() && !IsRunning() && !IsBardSong(spell_id)) { //If the target is moving dots only do partial damage
+		damage = (damage * .66);
+	}
+	
 
 	//do a majority of the work...
 	CommonDamage(other, damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special);
@@ -1614,6 +1638,13 @@ void Client::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::Skill
 
 		if (spell_id == SPELL_UNKNOWN)
 			CheckIncreaseSkill(EQ::skills::SkillDefense, other, -15);
+	}
+	if (other && other->IsClient() && (other != this) && damage > 0 && spell_id == SPELL_UNKNOWN) {
+		int breakchance = damage * .2;
+		int breakroll = zone->random.Real(0, 100);
+		if (breakchance >= breakroll) {
+			BuffFadeByEffect(SE_Root);
+		}
 	}
 }
 
@@ -1707,7 +1738,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			killerMob->TrySpellOnKill(killed_level, spell);
 		}
 
-		if (killerMob->IsClient() && (IsDueling() || killerMob->CastToClient()->IsDueling())) {
+		if (killerMob->IsClient() && (IsDueling() || killerMob->CastToClient()->IsDueling())) 
+		{
 			SetDueling(false);
 			SetDuelTarget(0);
 			if (killerMob->IsClient() && killerMob->CastToClient()->IsDueling() && killerMob->CastToClient()->GetDuelTarget() == GetID())
@@ -1728,6 +1760,54 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 					who->CastToClient()->SetDuelTarget(0);
 				}
 			}
+		}
+
+		// check for a pvp kill
+		if (killerMob->IsClient() && killerMob != this) {
+			Client* victim = this;
+			std::vector<EQ::Any> args;
+			args.push_back(victim);
+
+			int pvp_points = CalculatePVPPoints(killerMob->CastToClient(), victim);
+
+			if (killerMob->CastToClient()->isgrouped) {
+				Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+
+			  	if (group != 0)
+			  	{
+					uint8 gcount = group->GroupCount();
+
+					if (gcount > 4) {
+						pvp_points = pvp_points * 1.1;
+					}
+					if (gcount == 5) {	
+						pvp_points = pvp_points * 1.15;
+					}
+					if (gcount == 6) {	
+						pvp_points = pvp_points * 1.2;
+					}
+
+					for (int i = 0; i<6; i++)
+					{
+						if (group->members[i] != nullptr)
+						{
+							database.RegisterPVPKill(group->members[i]->CastToClient(), victim, pvp_points); 
+
+							group->members[i]->CastToClient()->HandlePVPKill(pvp_points);
+						}
+					}
+			  	}
+			} else {
+				database.RegisterPVPKill(killerMob->CastToClient(), victim, pvp_points); 
+
+				killerMob->CastToClient()->HandlePVPKill(pvp_points);
+			}
+
+			this->HandlePVPDeath();
+
+			parse->EventPlayer(EVENT_PVP_SLAY, killerMob->CastToClient(), victim->GetName(), victim->CharacterID(), &args);
+
+			mod_client_death_pvp(killerMob);
 		}
 	}
 
@@ -1773,29 +1853,56 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	{
 		if (killerMob->IsClient())
 		{
-			exploss = 0;
+			LogCombat("killer mob is client [{}]", killerMob->GetName());
+			int pvpleveldifference = 0;
+			//if (RuleI(World, PVPSettings) == 4) 
+				//pvpleveldifference = 5; //Sullon Zek 
+			if (RuleI(World, PVPLoseExperienceLevelDifference) > 0)
+				pvpleveldifference = RuleI(World, PVPLoseExperienceLevelDifference);
+
+			if (pvpleveldifference > 0) {
+				
+ 				int level_difference = 0;
+ 				if (GetLevel() > killerMob->GetLevel()) 
+					level_difference = GetLevel() - killerMob->GetLevel();
+ 				else 
+					level_difference = killerMob->GetLevel() - GetLevel();
+ 				LogCombat("pvpleveldifference is [{}] and level_difference is [{}]", pvpleveldifference, level_difference);
+ 				if (level_difference > pvpleveldifference) 
+					exploss = 0;
+ 			}
+ 			else 
+ 			{
+ 				exploss = 0;
+ 			}
+			LogCombat("exp loss via pvp set to [{}]", exploss);
 		}
 		else if (killerMob->GetOwner() && killerMob->GetOwner()->IsClient())
 		{
 			exploss = 0;
 		}
 	}
-
+	char caster_name[64] = { 0 };
 	if (spell != SPELL_UNKNOWN)
 	{
 		uint32 buff_count = GetMaxTotalSlots();
 		for (uint16 buffIt = 0; buffIt < buff_count; buffIt++)
 		{
-			if (buffs[buffIt].spellid == spell && buffs[buffIt].client)
+			if (buffs[buffIt].spellid == spell)
 			{
-				exploss = 0;	// no exp loss for pvp dot
-				break;
+				strcpy(caster_name, buffs[buffIt].caster_name);
+				if (buffs[buffIt].client) 
+				{
+					exploss = 0;	// no exp loss for pvp dot
+					break;
+				}
 			}
 		}
 	}
 
 	bool LeftCorpse = false;
 
+	LogCombat("exp loss is [{}]", exploss);
 	// now we apply the exp loss, unmem their spells, and make a corpse
 	// unless they're a GM (or less than lvl 10
 	if (!GetGM())
@@ -1827,6 +1934,24 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			// creating the corpse takes the cash/items off the player too
 			auto new_corpse = new Corpse(this, exploss);
 
+			if (killerMob != nullptr && killerMob->IsClient() && RuleB(Character, PVPCanLootCoin)) {
+				if (killerMob->CastToClient()->isgrouped) {
+					Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
+					if (group != 0)
+					{
+						for (int i = 0; i < 6; i++)
+						{
+							if (group->members[i] != nullptr)
+							{
+								new_corpse->AllowPlayerLoot(group->members[i], i);
+							}
+						}
+					}
+				}
+				else {
+					new_corpse->AllowPlayerLoot(killerMob, 0);
+				}
+			}
 			std::string tmp;
 			database.GetVariable("ServerType", tmp);
 			if (tmp[0] == '1' && tmp[1] == '\0' && killerMob != nullptr && killerMob->IsClient()) {
@@ -1856,6 +1981,9 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 							}
 						}
 					}
+				}
+				else {
+					new_corpse->AllowPlayerLoot(killerMob, 0);
 				}
 			}
 
@@ -2105,14 +2233,11 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 
 		other->AddToHateList(this, hate);
 
-		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
-
 		if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
-			//pets do half damage to clients in pvp
-			my_hit.damage_done /= 2;
-			if (my_hit.damage_done < 1)
-				my_hit.damage_done = 1;
+			my_hit.damage_done = std::max(my_hit.damage_done * RuleI(World, PVPPetDamageMitigation) / 100, 0); //set to 0 so that pets dont always hit for 1 -Gangsta
 		}
+
+		LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
 	}
 	else {
 		my_hit.damage_done = DMG_INVULNERABLE;
@@ -2158,6 +2283,10 @@ bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool
 void NPC::Damage(Mob* other, int32 damage, uint16 spell_id, EQ::skills::SkillType attack_skill, bool avoidable, int8 buffslot, bool iBuffTic, eSpecialAttacks special) {
 	if (spell_id == 0)
 		spell_id = SPELL_UNKNOWN;
+
+	if (other != nullptr && iBuffTic && IsMoving() && !IsRooted() && !IsFeared() && !IsRunning() && !IsBardSong(spell_id)) { //If the target is moving dots only do partial damage
+		damage = (damage * .66);
+	}
 
 	//handle EVENT_ATTACK. Resets after we have not been attacked for 12 seconds
 	if (attacked_timer.Check())
@@ -3464,6 +3593,27 @@ bool Mob::CheckDoubleAttack()
 	int per_inc = aabonuses.DoubleAttackChance + spellbonuses.DoubleAttackChance + itembonuses.DoubleAttackChance;
 	if (per_inc)
 		chance += chance * per_inc / 100;
+	
+	// Voidd: TODO - Make rule for when mobs get double attack?
+	
+	//mobs don't double attack until 17
+	if (IsNPC() && GetLevel() < 17) {
+		chance = 0;
+	}
+
+	//Animation pets double attack at 11
+	if (IsPet() && !IsCharmed() && GetRace() == 127) {
+		if (GetLevel() >= 11) {
+			chance += chance * per_inc / 100;
+		}
+	}
+
+	//fire pets don't double attack until 26
+	if (IsPet() && !IsCharmed() && GetRace() == 75 && GetTexture() == 1) {
+		if (GetLevel() < 26) {
+			chance = 0;
+		}
+	}
 
 	return zone->random.Int(1, 500) <= chance;
 }
@@ -5076,6 +5226,12 @@ bool Mob::TryRootFadeByDamage(int buffslot, Mob* attacker) {
 
 	if (IsDetrimentalSpell(spellbonuses.Root[SBIndex::ROOT_BUFFSLOT]) && spellbonuses.Root[SBIndex::ROOT_BUFFSLOT] != buffslot) {
 		int BreakChance = RuleI(Spells, RootBreakFromSpells);
+		if (attacker && attacker->IsClient() && IsClient()) {
+			if (RuleI(World, PVPSettings) > 0) BreakChance = 75; //All PVP servers is default 75% chance for root to break
+				
+			
+			if (RuleI(Spells, PVPRootBreakFromSpells) > 0) BreakChance = RuleI(Spells, PVPRootBreakFromSpells);
+		}
 
 		BreakChance -= BreakChance * buffs[spellbonuses.Root[SBIndex::ROOT_BUFFSLOT]].RootBreakChance / 100;
 		int level_diff = attacker->GetLevel() - GetLevel();

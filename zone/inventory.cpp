@@ -1965,6 +1965,10 @@ bool Client::SwapItem(MoveItem_Struct* move_in) {
 				fail_message = "Your class, deity and/or race may not equip that item.";
 			else if (fail_state == EQ::InventoryProfile::swapLevel)
 				fail_message = "You are not sufficient level to use this item.";
+			else if (fail_state == EQ::InventoryProfile::swapPrimaryInstrument)
+				fail_message = "Cannot equip a primary weapon with instrument in secondary.";
+			else if (fail_state == EQ::InventoryProfile::swapInstrument)
+				fail_message = "Cannot equip an instrument with weapon in primary.";
 
 			if (fail_message)
 				Message(Chat::Red, "%s", fail_message);

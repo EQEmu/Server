@@ -198,6 +198,11 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
+	// Voidd: TODO - Set Rule for max EXP per kill
+	if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) * .11)) { //exp given should not exceed 10%, check #2 after class / race mods -Gangsta
+		in_add_exp = (GetEXPForLevel(GetLevel() + 1) * .11);
+	}
+
 	return in_add_exp;
 }
 
@@ -492,6 +497,12 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 
 	if (RuleB(Character, EnableCharacterEXPMods)) {
 		add_exp *= GetEXPModifier(this->GetZoneID());
+	}
+
+	// Voidd: TODO - Set Rule for max EXP per kill
+	int expcapamount = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())) * .11;
+	if (add_exp > expcapamount) { //exp given should not exceed 11% -Gangsta
+		add_exp = expcapamount;
 	}
 
 	add_exp = GetEXP() + add_exp;
@@ -834,6 +845,13 @@ void Client::SetLevel(uint8 set_level, bool command)
 	}
 	if(set_level > m_pp.level) {
 		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
+
+			if (!this->GetGM() && this->IsClient()) {
+				if (!this->IsLevelFirst(GetBaseRace(), GetClass(), GetLevel())) {
+					this->LevelFirst(GetBaseRace(), GetClass(), GetLevel());
+				}
+			}
+
 		/* QS: PlayerLogLevels */
 		if (RuleB(QueryServ, PlayerLogLevels)){
 			std::string event_desc = StringFormat("Leveled UP :: to Level:%i from Level:%i in zoneid:%i instid:%i", set_level, m_pp.level, this->GetZoneID(), this->GetInstanceID());

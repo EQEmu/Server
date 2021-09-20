@@ -533,22 +533,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
 
-				if	// if both are pvp they can fight
-				(
-					c1->GetPVP() &&
-					c2->GetPVP()
-				)
-					return true;
-				else if	// if they're dueling they can go at it
-				(
-					c1->IsDueling() &&
-					c2->IsDueling() &&
-					c1->GetDuelTarget() == c2->GetID() &&
-					c2->GetDuelTarget() == c1->GetID()
-				)
-					return true;
-				else
-					return false;
+				return c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client vs npc
 			{
@@ -704,18 +689,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
 
-				if(c1->GetPVP() == c2->GetPVP())
-					return true;
-				else if	// if they're dueling they can heal each other too
-				(
-					c1->IsDueling() &&
-					c2->IsDueling() &&
-					c1->GetDuelTarget() == c2->GetID() &&
-					c2->GetDuelTarget() == c1->GetID()
-				)
-					return true;
-				else
-					return false;
+				return !c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client to npc
 			{
@@ -922,6 +896,10 @@ bool Mob::CheckLosFN(Mob *other)
 
 	if (other) {
 		Result = CheckLosFN(other->GetX(), other->GetY(), other->GetZ(), other->GetSize());
+	}
+
+	if (other && other->IsClient() && IsClient() && CastToClient()->CanPvP(other->CastToClient()) && RuleB(Character, PVPIsAutoAttackAlwaysLoS)) {
+		Result = true;
 	}
 
 	SetLastLosState(Result);

@@ -986,7 +986,13 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		return;
 	}
 
-	if (Action == 1)
+	if (pvp_attacked_timer.GetRemainingTime() < 60000) {
+		LogSpells("Accepter has been damaged by PvP recently. Ignoring rezz accept");
+		Message(Chat::Red, "You have recently been attacked and cannot take a rezz.\n");
+		return;
+	}
+
+	if (Action == 1 && pvp_attacked_timer.GetRemainingTime() == -1)
 	{
 		// Mark the corpse as rezzed in the database, just in case the corpse has buried, or the zone the
 		// corpse is in has shutdown since the rez spell was cast.
@@ -1025,8 +1031,10 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		MovePC(ZoneID, InstanceID, x, y, z, GetHeading(), 0, ZoneSolicited);
 		entity_list.RefreshClientXTargets(this);
 	}
-	PendingRezzXP = -1;
-	PendingRezzSpellID = 0;
+	if(pvp_attacked_timer.GetRemainingTime() == -1) {
+		PendingRezzXP = -1;
+		PendingRezzSpellID = 0;
+	}
 }
 
 void Client::OPTGB(const EQApplicationPacket *app)
@@ -2060,7 +2068,13 @@ void Client::HandleRespawnFromHover(uint32 Option)
 
 			CalcBonuses();
 			SetHP(GetMaxHP());
-			SetMana(GetMaxMana());
+			int mana_pct = 100;
+			if (RuleI(World, PVPSettings) > 0) 
+				mana_pct = 0; //All PVP servers spawn you with zero mana
+			if (RuleI(Character, PVPRespawnManaPercent) > 0)  //override mana if it's not 100%
+				mana_pct = RuleI(Character, PVPRespawnManaPercent);
+			
+			SetMana(std::max(GetMaxMana() * mana_pct / 100, 0));
 			SetEndurance(GetMaxEndurance());
 
 			m_Position.x = chosen->x;

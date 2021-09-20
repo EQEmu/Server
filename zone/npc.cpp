@@ -2346,6 +2346,7 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 		if (!IsCharmed())
 		{
 			Client *client = entity_list.GetClientByID(GetOwnerID());
+			// Voidd: TODO - Rule to set clients Pet name for Era
 			if(client)
 			{
 				SetPetOwnerClient(true);

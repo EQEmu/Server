@@ -1062,6 +1062,9 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		"pvp_best_kill_streak,      "
 		"pvp_worst_death_streak,    "
 		"pvp_current_kill_streak,   "
+		"pvp_current_death_streak,  "
+		"pvp_infamy,		    "
+		"pvp_vitality,		    "
 		"aa_points_spent,           "
 		"aa_exp,                    "
 		"aa_points,                 "
@@ -1159,6 +1162,9 @@ bool ZoneDatabase::LoadCharacterData(uint32 character_id, PlayerProfile_Struct* 
 		pp->PVPBestKillStreak = atoi(row[r]); r++;								 // "pvp_best_kill_streak,      "
 		pp->PVPWorstDeathStreak = atoi(row[r]); r++;							 // "pvp_worst_death_streak,    "
 		pp->PVPCurrentKillStreak = atoi(row[r]); r++;							 // "pvp_current_kill_streak,   "
+		pp->PVPCurrentDeathStreak = atoi(row[r]); r++;							 // "pvp_current_death_streak,  "
+		pp->PVPInfamy = atoi(row[r]); r++;								 // "pvp_infamy,  "
+		pp->PVPVitality = atoi(row[r]); r++;								 // "pvp_vitality,  "
 		pp->aapoints_spent = atoi(row[r]); r++;									 // "aa_points_spent,           "
 		pp->expAA = atoi(row[r]); r++;											 // "aa_exp,                    "
 		pp->aapoints = atoi(row[r]); r++;										 // "aa_points,                 "
@@ -1669,6 +1675,9 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		" pvp_best_kill_streak,      "
 		" pvp_worst_death_streak,    "
 		" pvp_current_kill_streak,   "
+		" pvp_current_death_streak,  "
+		" pvp_infamy,		     "
+		" pvp_vitality,		     "
 		" aa_points_spent,           "
 		" aa_exp,                    "
 		" aa_points,                 "
@@ -1766,6 +1775,9 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		"%u,"  // pvp_best_kill_streak		  pp->PVPBestKillStreak,				" pvp_best_kill_streak,      "
 		"%u,"  // pvp_worst_death_streak	  pp->PVPWorstDeathStreak,				" pvp_worst_death_streak,    "
 		"%u,"  // pvp_current_kill_streak	  pp->PVPCurrentKillStreak,				" pvp_current_kill_streak,   "
+		"%u,"  // pvp_current_death_streak	  pp->PVPCurrentDeathStreak,				" pvp_current_death_streak,  "
+		"%u,"  // pvp_infamy                  pp->PVPInfamy,					" pvp_infamy, "
+		"%u,"  // pvp_vitality                pp->PVPVitality,					" pvp_vitality, "
 		"%u,"  // aa_points_spent			  pp->aapoints_spent,					" aa_points_spent,           "
 		"%u,"  // aa_exp					  pp->expAA,							" aa_exp,                    "
 		"%u,"  // aa_points					  pp->aapoints,							" aa_points,                 "
@@ -1862,6 +1874,9 @@ bool ZoneDatabase::SaveCharacterData(uint32 character_id, uint32 account_id, Pla
 		pp->PVPBestKillStreak,			  // " pvp_best_kill_streak,      "
 		pp->PVPWorstDeathStreak,		  // " pvp_worst_death_streak,    "
 		pp->PVPCurrentKillStreak,		  // " pvp_current_kill_streak,   "
+		pp->PVPCurrentDeathStreak,		  // " pvp_current_death_streak,  "
+		pp->PVPInfamy,				  // " pvp_infamy, "
+		pp->PVPVitality,			  // " pvp_vitality, "
 		pp->aapoints_spent,				  // " aa_points_spent,           "
 		pp->expAA,						  // " aa_exp,                    "
 		pp->aapoints,					  // " aa_points,                 "
@@ -4894,6 +4909,174 @@ uint32 ZoneDatabase::SaveSaylinkID(const char* saylink_text)
 		return 0;
 
 	return results.LastInsertedID();
+}
+void ZoneDatabase::GetPVPKillsLast24Hours(Client* killer, PVPStats_Struct* pvps)
+{
+	int count = 1;
+
+	std::string query = StringFormat("SELECT cd.name, cpe.victim_level, cd.race, cd.class, cpe.zone, cpe.timestamp, cpe.points FROM character_pvp_entries cpe INNER JOIN character_data cd ON cd.id = cpe.victim_id WHERE cpe.killer_id = %i AND cpe.timestamp <= TIMESTAMPADD(DAY, 1, NOW()) ORDER BY cpe.timestamp ASC LIMIT 50", killer->CharacterID());
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return;
+	}
+
+	if (results.RowCount() == 0) {
+		LogDebug("ZoneDatabase::GetPVPKillsLast24Hours: No results found.");
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(pvps->KillsLast24Hours[count].Name, row[0]);
+		pvps->KillsLast24Hours[count].Level = atoi(row[1]);
+		pvps->KillsLast24Hours[count].Race = atoi(row[2]);
+		pvps->KillsLast24Hours[count].Class = atoi(row[3]);
+		pvps->KillsLast24Hours[count].Zone = atoi(row[4]);
+		pvps->KillsLast24Hours[count].Time = atoi(row[5]);
+		pvps->KillsLast24Hours[count].Points = atoi(row[6]);
+
+		count++;
+	}
+}
+int ZoneDatabase::GetKillCount24Hours(Client* killer, Client* victim)
+{
+	std::string query = StringFormat("SELECT COUNT(id) FROM character_pvp_entries WHERE killer_id = %i AND victim_id = %i AND timestamp <= TIMESTAMPADD(DAY, 1, NOW())", killer->CharacterID(), victim->CharacterID());
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return 0;
+	}
+
+	auto row = results.begin();
+
+	if (results.RowCount() == 0) {
+		return 1;
+	}
+
+	if (results.RowCount() > 0) {
+		return (atoi(row[0]));
+	}
+}
+void ZoneDatabase::GetPVPLeaderBoardDetails(PVPLeaderBoardDetailsReply_Struct* pvplbdr, const char* name) {
+	std::string query = StringFormat("SELECT cd.id, cd.name, cd.level, cd.race, cd.class, coalesce(gdm.guild_id, 0) as guild, cd.aa_points, cd.pvp_kills, cd.pvp_deaths, cd.pvp_career_points, cd.pvp_infamy FROM character_data cd LEFT JOIN guild_members gdm ON gdm.char_id = cd.id WHERE cd.name = '%s'", name);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(pvplbdr->Name, row[1]);
+		pvplbdr->Level = atoi(row[2]);
+		pvplbdr->Race = atoi(row[3]);
+		pvplbdr->Class = atoi(row[4]);
+		pvplbdr->GuildID = atoi(row[5]);
+		pvplbdr->TotalAA = atoi(row[6]);
+		pvplbdr->Kills = atoi(row[7]);
+		pvplbdr->Deaths = atoi(row[8]);
+		pvplbdr->Infamy = atoi(row[10]);
+		pvplbdr->Points = atoi(row[9]);
+	}
+}
+void ZoneDatabase::GetPVPLeaderBoard(Client* client, PVPLeaderBoard_Struct* pvplb, const char* sort_by)
+{
+	int count = 0;
+
+	std::string query = StringFormat("SELECT id, name, pvp_kills, pvp_deaths, pvp_career_points, pvp_infamy FROM character_data WHERE deleted_at IS NULL AND pvp_kills > 0 or pvp_deaths > 0 ORDER BY %s DESC LIMIT 100", sort_by);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		if (atoi(row[0]) == client->CharacterID()) {
+			pvplb->MyKills = atoi(row[2]);
+			pvplb->MyDeaths = atoi(row[3]);
+			pvplb->MyTotalPoints = atoi(row[4]);
+			pvplb->MyInfamy = atoi(row[5]);
+			pvplb->MyRank = count + 1;
+		}
+		strcpy(pvplb->Entries[count].Name, row[1]);
+		pvplb->Entries[count].Kills = atoi(row[2]);
+		pvplb->Entries[count].Deaths = atoi(row[3]);
+		pvplb->Entries[count].TotalPoints = atoi(row[4]);
+		pvplb->Entries[count].Infamy = atoi(row[5]);
+
+		count++;
+	}
+}
+bool ZoneDatabase::RegisterPVPKill(Client* killer, Client* victim, uint32 points)
+{
+	std::string query = StringFormat("INSERT INTO character_pvp_entries (victim_id, victim_level, killer_id, killer_level, zone, points, timestamp) VALUES (%i,%i,%i,%i,%i,%i,UNIX_TIMESTAMP())", victim->CharacterID(), victim->GetLevel(), killer->CharacterID(), killer->GetLevel(), zone->GetZoneID(), points);
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		return false;
+	}
+
+	return true;
+}
+void ZoneDatabase::GetLastPVPKill(Client* killer, PVPStats_Struct* pvps)
+{
+	std::string query = StringFormat("SELECT cd.name, cpe.victim_level, cd.race, cd.class, cpe.zone, cpe.timestamp, cpe.points FROM character_pvp_entries cpe INNER JOIN character_data cd ON cpe.victim_id = cd.id WHERE cpe.killer_id = %i ORDER BY cpe.timestamp DESC LIMIT 1", killer->CharacterID());
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return;
+	}
+
+	if (results.RowCount() == 0) {
+		LogDebug("ZoneDatabase::GetLastPVPKill: No kills found!");
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(pvps->LastKill.Name, row[0]);
+		pvps->LastKill.Level = atoi(row[1]);
+		pvps->LastKill.Race = atoi(row[2]);
+		pvps->LastKill.Class = atoi(row[3]);
+		pvps->LastKill.Zone = atoi(row[4]);
+		pvps->LastKill.Time = atoi(row[5]);
+		pvps->LastKill.Points = atoi(row[6]);
+	}
+}
+void ZoneDatabase::GetLastPVPDeath(Client* victim, PVPStats_Struct* pvps)
+{
+	std::string query = StringFormat("SELECT cd.name, cpe.victim_level, cd.race, cd.class, cpe.zone, cpe.timestamp, cpe.points FROM character_pvp_entries cpe INNER JOIN character_data cd ON cpe.killer_id = cd.id WHERE cpe.victim_id = %i ORDER BY cpe.timestamp DESC LIMIT 1", victim->CharacterID());
+
+	auto results = QueryDatabase(query);
+
+	if (!results.Success()) {
+		LogError(results.ErrorMessage().c_str());
+		return;
+	}
+
+	if (results.RowCount() == 0) {
+		LogDebug("ZoneDatabase::GetLastPVPDeath: No deaths found!");
+		return;
+	}
+
+	for (auto row = results.begin(); row != results.end(); ++row) {
+		strcpy(pvps->LastDeath.Name, row[0]);
+		pvps->LastDeath.Level = atoi(row[1]);
+		pvps->LastDeath.Race = atoi(row[2]);
+		pvps->LastDeath.Class = atoi(row[3]);
+		pvps->LastDeath.Zone = atoi(row[4]);
+		pvps->LastDeath.Time = atoi(row[5]);
+		pvps->LastDeath.Points = atoi(row[6]);
+	}
 }
 
 double ZoneDatabase::GetAAEXPModifier(uint32 character_id, uint32 zone_id) const {

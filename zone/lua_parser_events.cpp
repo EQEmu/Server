@@ -260,6 +260,14 @@ void handle_player_environmental_damage(QuestInterface *parse, lua_State* L, Cli
 	lua_setfield(L, -2, "env_final_damage");
 }
 
+void handle_pvp_slay(QuestInterface* parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
+				     std::vector<EQ::Any>* extra_pointers) {
+	Lua_Client l_client(EQ::any_cast<Client*>(extra_pointers->at(0)));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+}
+
 void handle_player_death(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 						 std::vector<EQ::Any> *extra_pointers) {
 	Seperator sep(data.c_str());

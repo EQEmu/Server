@@ -100,6 +100,8 @@ public:
 	uint32 GetRequiredAAExperience(Client *self, bool &ignoreDefault);
 	uint32 GetEXPForLevel(Client *self, uint16 level, bool &ignoreDefault);
 	uint32 GetExperienceForKill(Client *self, Mob *against, bool &ignoreDefault);
+	void ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id,  int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault);
+	float PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, bool &ignoreDefault);
 
 private:
 	LuaParser();

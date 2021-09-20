@@ -283,6 +283,7 @@ enum class LootRequestType : uint8 {
 	AllowedPVPAll,
 	AllowedPVPSingle, // can make this 'AllowedPVPVariable' and allow values between 1 and EQ::invtype::POSSESSIONS_SIZE
 	AllowedPVPDefined,
+	AllowedPVPCoin,
 };
 
 namespace Journal {

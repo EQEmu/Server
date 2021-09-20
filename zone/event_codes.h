@@ -7,9 +7,11 @@ typedef enum {
 	EVENT_DEATH,		//being killed
 	EVENT_SPAWN,		//triggered when we first spawn
 	EVENT_ATTACK,		//being attacked (resets after an interval of not being attacked)
+	EVENT_PVP,		//being attacked (resets after an interval of not being attacked)
 	EVENT_COMBAT,		//being attacked or attacking (resets after an interval of not being attacked)
 	EVENT_AGGRO,		//entering combat mode due to a PC attack
 	EVENT_SLAY,			//killing a PC
+	EVENT_PVP_SLAY,     // PC killing a PC
 	EVENT_NPC_SLAY,		//killing an NPC
 	EVENT_WAYPOINT_ARRIVE,	// reaching a waypoint on a grid
 	EVENT_WAYPOINT_DEPART,	// departing a waypoint on a grid
@@ -93,6 +95,7 @@ typedef enum {
 	EVENT_COMBINE,
 	EVENT_CONSIDER,
 	EVENT_CONSIDER_CORPSE,
+	EVENT_SERVERFIRST_LEVEL,
 	_LargestEventID
 } QuestEventID;
 

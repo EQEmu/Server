@@ -1214,6 +1214,13 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 		return;
 	}
 
+	// Voidd: TODO - Add rule to allow/deny SK's to HT themself
+	//Shadowknights can no longer HT themselves -Gangsta
+	//if (rank->id == 7800 && target_id == GetID()) {
+	//	MessageString(Chat::SpellFailure, ABILITY_FAILED);
+	//	return;
+	//}
+
 	//calculate cooldown
 	int cooldown = rank->recast_time - GetAlternateAdvancementCooldownReduction(rank);
 	if(cooldown < 0) {

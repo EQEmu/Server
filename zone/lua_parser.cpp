@@ -53,6 +53,7 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_combat",
 	"event_aggro",
 	"event_slay",
+	"event_pvp_slay",
 	"event_npc_slay",
 	"event_waypoint_arrive",
 	"event_waypoint_depart",
@@ -188,6 +189,7 @@ LuaParser::LuaParser() {
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;
+	PlayerArgumentDispatch[EVENT_PVP_SLAY] = handle_pvp_slay;
 	PlayerArgumentDispatch[EVENT_DEATH] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_DEATH_COMPLETE] = handle_player_death;
 	PlayerArgumentDispatch[EVENT_TIMER] = handle_player_timer;
@@ -1409,6 +1411,21 @@ uint32 LuaParser::GetExperienceForKill(Client *self, Mob *against, bool &ignoreD
 	uint32 retval = 0;
 	for (auto &mod : mods_) {
 		mod.GetExperienceForKill(self, against, retval, ignoreDefault);
+	}
+	return retval;
+}
+
+void LuaParser::ClientDamage(Client *self, Mob *other, int32 &in_damage, uint16 &spell_id,  int &attack_skill, bool &avoidable, int8 &buffslot, bool &iBuffTic, int &special, int32 &out_damage, bool &ignoreDefault)
+{
+	for (auto &mod : mods_) {
+		mod.ClientDamage(self, other, in_damage, spell_id, attack_skill, avoidable, buffslot, iBuffTic, special, out_damage, ignoreDefault);
+	}
+}
+
+float LuaParser::PVPResistSpell(Client* self, uint8 &resist_type, uint16 &spell_id, Client* caster, bool &use_resist_override, int &resist_override, bool &CharismaCheck, bool &CharmTick, bool &IsRoot, int &level_override, bool &ignoreDefault) {
+	float retval = 0;
+	for (auto &mod : mods_) {
+		mod.PVPResistSpell(self, resist_type, spell_id, caster, use_resist_override, resist_override, CharismaCheck, CharmTick, IsRoot, level_override, retval, ignoreDefault);
 	}
 	return retval;
 }

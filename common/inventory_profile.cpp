@@ -338,6 +338,9 @@ bool EQ::InventoryProfile::SwapItem(
 	ItemInstance *source_item_instance      = GetItem(source_slot);
 	ItemInstance *destination_item_instance = GetItem(destination_slot);
 
+	ItemInstance* primary_weapon		    = GetItem(EQ::invslot::slotPrimary);
+	ItemInstance* secondary_weapon			= GetItem(EQ::invslot::slotSecondary);
+
 	if (source_item_instance) {
 		if (!source_item_instance->IsSlotAllowed(destination_slot)) {
 			fail_state = swapNotAllowed;
@@ -360,6 +363,35 @@ bool EQ::InventoryProfile::SwapItem(
 			if (level && source_item->ReqLevel && level < source_item->ReqLevel) {
 				fail_state = swapLevel;
 				return false;
+			}
+			if (destination_slot == EQ::invslot::slotPrimary && secondary_weapon) {
+				uint8 instrument = secondary_weapon->GetItem()->ItemType;
+				if (
+					instrument == EQ::item::ItemTypeWindInstrument ||
+					instrument == EQ::item::ItemTypeStringedInstrument ||
+					instrument == EQ::item::ItemTypeBrassInstrument ||
+					instrument == EQ::item::ItemTypePercussionInstrument
+					) {
+					LogInventory("Cannot equip a primary item with [{}] already in the secondary.", secondary_weapon->GetItem()->Name);
+					fail_state = swapPrimaryInstrument;
+					return false;
+				}
+			}
+
+			if (destination_slot == EQ::invslot::slotSecondary && primary_weapon) {
+				if (source_item_instance) {
+					uint8 instrument = source_item_instance->GetItem()->ItemType;
+					if (
+						instrument == EQ::item::ItemTypeWindInstrument ||
+						instrument == EQ::item::ItemTypeStringedInstrument ||
+						instrument == EQ::item::ItemTypeBrassInstrument ||
+						instrument == EQ::item::ItemTypePercussionInstrument
+						) {
+						LogInventory("Cannot equip an instrument with [{}] already in the primary.", primary_weapon->GetItem()->Name);
+						fail_state = swapInstrument;
+						return false;
+					}
+				}
 			}
 		}
 	}

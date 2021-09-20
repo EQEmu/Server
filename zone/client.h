@@ -741,6 +741,9 @@ public:
 	bool IsDiscovered(uint32 itemid);
 	void DiscoverItem(uint32 itemid);
 
+	bool IsLevelFirst(uint32 p_race, uint32 p_class, uint16 level);
+	void LevelFirst(uint32 p_race, uint32 p_class, uint16 level);
+
 	bool TGB() const { return tgb; }
 
 	void OnDisconnect(bool hard_disconnect);
@@ -774,6 +777,9 @@ public:
 	bool TradeskillExecute(DBTradeskillRecipe_Struct *spec);
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQ::skills::SkillType tradeskill);
 	void InitInnates();
+	bool CanPvP(Client * c);
+ 	int GetAlignment();
+	int GetPVPRaceTeamBySize();
 
 	void GMKill();
 	inline bool IsMedding() const {return medding;}
@@ -1311,7 +1317,14 @@ public:
 	int GetAggroCount();
 	void IncrementAggroCount(bool raid_target = false);
 	void DecrementAggroCount();
+	
+	int CalculatePVPPoints(Client* killer, Client* victim);
+
+	void HandlePVPDeath(void);
+	void HandlePVPKill(uint32 points);
 	void SendPVPStats();
+	void SendPVPLeaderBoard();
+
 	void SendDisciplineTimers();
 	void SendRespawnBinds();
 
@@ -1553,6 +1566,7 @@ public:
 	int32 mod_tribute_item_value(int32 pts, const EQ::ItemInstance* item);
 	void mod_client_death_npc(Mob* killerMob);
 	void mod_client_death_duel(Mob* killerMob);
+	void mod_client_death_pvp(Mob* killerMob);
 	void mod_client_death_env();
 	int32 mod_client_xp(int32 in_exp, NPC *npc);
 	uint32 mod_client_xp_for_level(uint32 xp, uint16 check_level);
@@ -1832,6 +1846,7 @@ private:
 	Timer client_scan_npc_aggro_timer;
 	Timer client_zone_wide_full_position_update_timer;
 	Timer tribute_timer;
+	Timer pvp_attacked_timer;		//running while we are being attacked (damaged)
 
 	Timer proximity_timer;
 	Timer TaskPeriodic_Timer;
@@ -1851,7 +1866,8 @@ private:
 	Timer position_update_timer; /* Timer used when client hasn't updated within a 10 second window */
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
-	Timer task_request_timer;
+
+	Timer vitality_timer; //  For each 5 minutes they are alive, they will gain back two points of vitality
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;

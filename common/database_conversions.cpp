@@ -352,7 +352,10 @@ namespace Convert {
 		/*8204*/	uint32							PVPBestKillStreak;
 		/*8208*/	uint32							PVPWorstDeathStreak;
 		/*8212*/	uint32							PVPCurrentKillStreak;
-		/*8216*/	Convert::PVPStatsEntry_Struct	PVPLastKill;
+		/*8214*/	uint32							PVPCurrentDeathStreak;
+		/*8216*/	uint32							PVPVitality;
+		/*8218*/	uint32							PVPInfamy;
+		/*8220*/	Convert::PVPStatsEntry_Struct	PVPLastKill;
 		/*8304*/	Convert::PVPStatsEntry_Struct	PVPLastDeath;
 		/*8392*/	uint32							PVPNumberOfKillsInLast24Hours;
 		/*8396*/	Convert::PVPStatsEntry_Struct	PVPRecentKills[50];
@@ -1279,6 +1282,9 @@ bool Database::CheckDatabaseConvertPPDeblob(){
 					pp->PVPBestKillStreak,
 					pp->PVPWorstDeathStreak,
 					pp->PVPCurrentKillStreak,
+					pp->PVPCurrentDeathStreak,
+					pp->PVPInfamy,
+					pp->PVPVitality,
 					pp->aapoints_spent,
 					pp->expAA,
 					pp->aapoints,

@@ -39,9 +39,11 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_DEATH",
 	"EVENT_SPAWN",
 	"EVENT_ATTACK",
+	"EVENT_PVP",
 	"EVENT_COMBAT",
 	"EVENT_AGGRO",
 	"EVENT_SLAY",
+	"EVENT_PVP_SLAY",
 	"EVENT_NPC_SLAY",
 	"EVENT_WAYPOINT_ARRIVE",
 	"EVENT_WAYPOINT_DEPART",
@@ -120,6 +122,7 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_USE_SKILL",
 	"EVENT_COMBINE_VALIDATE",
 	"EVENT_BOT_COMMAND",
+	"EVENT_SERVERFIRST_LEVEL",
 	"EVENT_WARP",
 	"EVENT_TEST_BUFF",
 	"EVENT_COMBINE",
@@ -1582,6 +1585,7 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "killer_damage", sep.arg[1]);
 			ExportVar(package_name.c_str(), "killer_spell", sep.arg[2]);
 			ExportVar(package_name.c_str(), "killer_skill", sep.arg[3]);
+			ExportVar(package_name.c_str(), "killer_name", sep.arg[4]);
 			break;
 		}
 		case EVENT_DROP_ITEM: {
@@ -1660,6 +1664,10 @@ void PerlembParser::ExportEventVariables(
 
 		case EVENT_COMBINE: {
 			ExportVar(package_name.c_str(), "container_slot", std::stoi(data));
+			break;
+		}
+
+		case EVENT_SERVERFIRST_LEVEL: {
 			break;
 		}
 

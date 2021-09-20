@@ -139,6 +139,7 @@ Client::Client(EQStreamInterface* ieqs)
   linkdead_timer(RuleI(Zone,ClientLinkdeadMS)),
   dead_timer(2000),
   global_channel_timer(1000),
+  pvp_attacked_timer(60000),
   fishing_timer(8000),
   endupkeep_timer(1000),
   forget_timer(0),
@@ -233,6 +234,7 @@ Client::Client(EQStreamInterface* ieqs)
 	pQueuedSaveWorkID = 0;
 	position_update_same_count = 0;
 	fishing_timer.Disable();
+	pvp_attacked_timer.Disable();
 	dead_timer.Disable();
 	camp_timer.Disable();
 	autosave_timer.Disable();
@@ -263,6 +265,9 @@ Client::Client(EQStreamInterface* ieqs)
 	mercSlot = 0;
 	InitializeMercInfo();
 	SetMerc(0);
+
+	if (RuleI(World, PVPSettings) > 0) SendPVPStats();
+
 	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
 	dynamiczone_removal_timer.Disable();
 
@@ -351,7 +356,7 @@ Client::Client(EQStreamInterface* ieqs)
 	// rate limiter
 	m_list_task_timers_rate_limit.Start(1000);
 
-	// gm
+	// GM
 	SetDisplayMobInfoWindow(true);
 	SetDevToolsEnabled(true);
 
@@ -489,7 +494,8 @@ void Client::SendZoneInPackets()
 	safe_delete(outapp);
 	SetSpawned();
 	if (GetPVP(false))	//force a PVP update until we fix the spawn struct
-		SendAppearancePacket(AT_PVP, GetPVP(false), true, false);
+		SendAppearancePacket(AT_PVP, GetPVP(false), true, false); // Voidd: TODO - Check into this, Darksinga commented it out on 01/28/2021 for what reason?
+	SendPVPStats();
 
 	//Send AA Exp packet:
 	if (GetLevel() >= 51)
@@ -4266,6 +4272,33 @@ void Client::KeyRingList()
 	}
 }
 
+bool Client::IsLevelFirst(uint32 p_race, uint32 p_class, uint16 level) {
+
+	std::string query = StringFormat("SELECT count(*) FROM server_first_levels WHERE level = '%lu' AND race = '%lu' AND class = '%lu'", level, p_race, p_class);
+	auto results = database.QueryDatabase(query);
+	if (!results.Success()) {
+		return false;
+	}
+
+	auto row = results.begin();
+	if (!atoi(row[0]))
+		return false;
+
+	return true;
+}
+
+void Client::LevelFirst(uint32 p_race, uint32 p_class, uint16 level) {
+	if (Admin() <= 0) {
+		std::string query = StringFormat("INSERT INTO server_first_levels "
+							"SET char_name = '%s', race = '%lu', class = '%lu', level = '%lu', "
+							"leveled_date = UNIX_TIMESTAMP(), account_status = %i",
+							GetName(), p_race, p_class, level, Admin());
+		auto results = database.QueryDatabase(query);
+		
+		//parse->EventPlayer(EVENT_SERVERFIRST_LEVEL, this, "", 0);
+	}
+}
+
 bool Client::IsDiscovered(uint32 itemid) {
 
 	std::string query = StringFormat("SELECT count(*) FROM discovered_items WHERE item_id = '%lu'", itemid);
@@ -4794,31 +4827,6 @@ void Client::UpdateRestTimer(uint32 new_timer)
 		}
 	}
 }
-
-void Client::SendPVPStats()
-{
-	// This sends the data to the client to populate the PVP Stats Window.
-	//
-	// When the PVP Stats window is opened, no opcode is sent. Therefore this method should be called
-	// from Client::CompleteConnect, and also when the player makes a PVP kill.
-	//
-	auto outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
-	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
-
-	pvps->Kills = m_pp.PVPKills;
-	pvps->Deaths = m_pp.PVPDeaths;
-	pvps->PVPPointsAvailable = m_pp.PVPCurrentPoints;
-	pvps->TotalPVPPoints = m_pp.PVPCareerPoints;
-	pvps->BestKillStreak = m_pp.PVPBestKillStreak;
-	pvps->WorstDeathStreak = m_pp.PVPWorstDeathStreak;
-	pvps->CurrentKillStreak = m_pp.PVPCurrentKillStreak;
-
-	// TODO: Record and send other PVP Stats
-
-	QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void Client::SendCrystalCounts()
 {
 	auto outapp = new EQApplicationPacket(OP_CrystalCountUpdate, sizeof(CrystalCountUpdate_Struct));
@@ -10035,6 +10043,201 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 		outapp_fling->priority = 6;
 		FastQueuePacket(&outapp_fling);
 	}
+}
+
+
+//CanPvP returns true if provided player can attack this player
+bool Client::CanPvP(Client *c) {
+	if (c == nullptr) 
+		return false;
+
+	//Dueling overrides normal PvP logic
+	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
+		return true;
+	
+	// if both are in a pvp area, or discord, return true
+	//if (GetPVP() && c->GetPVP()) --commented out 2/28/21 to troubleshoot an issue... Darksinga
+	//	return true;
+
+	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
+	int rule_level_diff = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_level_diff = 4; //Sullon Zek rules can attack anyone of opposing deity.
+	if (RuleI(World, PVPLevelDifference) > 0)
+		rule_level_diff = RuleI(World, PVPLevelDifference);
+
+	if (rule_level_diff > 0) {
+		int level_diff = 0;
+		if (c->GetLevel() > GetLevel())
+			level_diff = c->GetLevel() - GetLevel();
+		else 
+			level_diff = GetLevel() - c->GetLevel();
+		if (GetZoneID() == 71 || GetZoneID() == 72 || GetZoneID() == 76 || GetZoneID() == 77 || GetZoneID() == 39 || GetZoneID() == 89 || GetZoneID() == 108 || GetZoneID() == 124 || GetZoneID() == 128 && GetZoneID() == 26) {
+
+		}
+		else {
+			if (level_diff > rule_level_diff && !GetGM())
+				return false;
+		}
+	}
+
+	//players need to be proper level for pvp
+	int rule_min_level = 0;
+	if (RuleI(World, PVPSettings) == 4)
+		rule_min_level = 1;
+	if (RuleI(World, PVPMinLevel) > 0)
+		rule_min_level = RuleI(World, PVPMinLevel);
+
+	if (rule_min_level > 0 && (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level))
+		return false;
+
+	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
+	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment() && !GetZoneID() == 26 && !GetZoneID() == 77)
+		return false;
+	
+	//VZTZ Zek PVP Setting
+	if ((RuleI(World, PVPSettings) == 2 || RuleB(World, PVPUseTeamsBySizeBasedPVP)) && GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
+		return false;
+
+	if (GetAlignment() == c->GetAlignment() && !GetGM())
+		return false;
+		
+	return true;
+}
+
+
+//GetAlignment returns 0 = neutral, 1 = good, 2 = evil, used for pvp sullon zek rules
+int Client::GetAlignment() {
+	if (GetDeity() == EQ::deity::DeityErollisiMarr || 
+		GetDeity() == EQ::deity::DeityMithanielMarr ||
+		GetDeity() == EQ::deity::DeityRodcetNife || 
+		GetDeity() == EQ::deity::DeityQuellious || 
+		GetDeity() == EQ::deity::DeityTunare) return 1; //good
+	if (GetDeity() == EQ::deity::DeityBertoxxulous ||
+		GetDeity() == EQ::deity::DeityCazicThule ||
+		GetDeity() == EQ::deity::DeityInnoruuk || 
+		GetDeity() == EQ::deity::DeityRallosZek) return 2; //evil
+	return 0; //neutral
+}
+
+//GetPVPRaceSize returns based on racial divisions
+int Client::GetPVPRaceTeamBySize() {
+	if (GetRace() == HUMAN || GetRace() == BARBARIAN || GetRace() == ERUDITE || GetRace() == DRAKKIN)
+		return 1;
+	if (GetRace() == GNOME || GetRace() == HALFLING || GetRace() == DWARF || GetRace() == FROGLOK)
+		return 2;
+	if (GetRace() == HIGH_ELF || GetRace() == WOOD_ELF || GetRace() == HALF_ELF || GetRace() == VAHSHIR)
+		return 3;
+	if (GetRace() == DARK_ELF || GetRace() == OGRE || GetRace() == TROLL || GetRace() == IKSAR)
+		return 4;
+	return 1;
+}
+
+
+void Client::SendPVPStats()
+{
+	auto outapp = new EQApplicationPacket(OP_PVPStats, sizeof(PVPStats_Struct));
+	PVPStats_Struct *pvps = (PVPStats_Struct *)outapp->pBuffer;
+
+	pvps->Kills = m_pp.PVPKills;
+	pvps->Deaths = m_pp.PVPDeaths;
+	pvps->PVPPointsAvailable = m_pp.PVPCurrentPoints;
+	pvps->TotalPVPPoints = m_pp.PVPCareerPoints;
+	pvps->BestKillStreak = m_pp.PVPBestKillStreak;
+	pvps->WorstDeathStreak = m_pp.PVPWorstDeathStreak;
+	pvps->CurrentKillStreak = m_pp.PVPCurrentKillStreak;
+	pvps->Vitality = m_pp.PVPVitality;
+	pvps->Infamy = m_pp.PVPInfamy;
+
+	database.GetLastPVPKill(this, pvps);
+	database.GetLastPVPDeath(this, pvps);
+	//database.GetPVPKillsLast24Hours(this, pvps);
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+void Client::SendPVPLeaderBoard() 
+{
+	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardReply, sizeof(PVPLeaderBoard_Struct));
+	PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;
+
+	database.GetPVPLeaderBoard(this, pvplb, "pvp_kills");
+
+	QueuePacket(outapp);
+	safe_delete(outapp);
+}
+int Client::CalculatePVPPoints(Client* killer, Client* victim) 
+{
+	float points;
+	float pvp_points;
+	float level_difference;
+	float scoring_modifier;	
+	float infamy_difference;
+	int divider_modifier;
+	int currentkillerpoints;
+	int vitality = victim->m_pp.PVPVitality;
+
+	level_difference = victim->GetLevel() - killer->GetLevel();
+	
+	infamy_difference = victim->m_pp.PVPInfamy - killer->m_pp.PVPInfamy; 
+		
+	scoring_modifier = ( level_difference + infamy_difference + (vitality*=-1.0) ) * 5.0;
+		
+	divider_modifier = database.GetKillCount24Hours(killer, victim);
+		
+	points = (100 + scoring_modifier);
+
+	currentkillerpoints = killer->m_pp.PVPCurrentPoints;
+	
+        if (divider_modifier > 1) {	
+            for (int i=divider_modifier; i > 0; i--)
+            {		
+                points = points / 2;
+              		  
+                if (points < 1.0) {
+                    pvp_points = (divider_modifier + scoring_modifier) * divider_modifier / 5;
+				} else {
+                    pvp_points = points;
+				}
+            }
+        } else {
+           pvp_points = points;
+        }
+
+		if (pvp_points < 0) {
+			pvp_points = 0;
+		}
+
+	return (int)pvp_points;
+}
+void Client::HandlePVPDeath(void)
+{
+	m_pp.PVPDeaths += 1;
+	m_pp.PVPVitality = 10;	
+	m_pp.PVPCurrentDeathStreak += 1;
+
+	if (m_pp.PVPCurrentDeathStreak > m_pp.PVPWorstDeathStreak)
+		m_pp.PVPWorstDeathStreak = m_pp.PVPCurrentDeathStreak;		
+
+	Save();
+
+	SendPVPStats();
+}
+void Client::HandlePVPKill(uint32 Points)
+{
+	m_pp.PVPCurrentPoints += Points;
+	m_pp.PVPCareerPoints += Points;
+
+	m_pp.PVPKills +=1;
+	m_pp.PVPCurrentKillStreak +=1;
+	m_pp.PVPCurrentDeathStreak = 0;
+
+	if (m_pp.PVPCurrentKillStreak > m_pp.PVPBestKillStreak)	
+		m_pp.PVPBestKillStreak = m_pp.PVPCurrentKillStreak;
+
+	Save();
+
+	SendPVPStats();
 }
 
 std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_level) {

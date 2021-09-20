@@ -1014,6 +1014,18 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		InterruptSpell();
 		return;
 	}
+	if(IsFeared()){ //cannot finish spells while feared.
+		InterruptSpell();
+		return;
+	}
+
+	if (IsDetrimentalSpell(spell_id) && spells[spell_id].range == 300) { //prevents bolt spells (300 range) from nuking the caster if the target zones or dies before spell finish.
+		target = entity_list.GetMob(target_id);
+		if (target == nullptr) {
+			InterruptSpell(spell_id);
+			return;
+		}
+	}
 
 	// prevent rapid recast - this can happen if somehow the spell gems
 	// become desynced and the player casts again.
@@ -4426,6 +4438,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
+		// Voidd: TODO - Add rule to check if fearing clients is allowed.
 		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
 		{
 			LogSpells("Clients cannot fear eachother!");

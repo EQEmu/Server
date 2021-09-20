@@ -4883,9 +4883,28 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		}
 	}
 
-	if (zone->IsPVPZone()) {
-		if (!tmob->IsNPC())
-			con->pvpcon = tmob->CastToClient()->GetPVP();
+
+	if (!tmob->IsNPC()) {
+		uint32 color = 0;
+		if (tmob->CastToClient()->GetAlignment() == 0) {
+			color = 15;
+		}
+		else if (tmob->CastToClient()->GetAlignment() == 1) {
+			color = 2;
+		}
+		else if (tmob->CastToClient()->GetAlignment() == 2) {
+			color = 13;
+		}
+
+		if (GetAlignment() == tmob->CastToClient()->GetAlignment()) {
+			SendColoredText(color, std::string("This character is friendly!"));
+		}
+		else if (GetAlignment() != tmob->CastToClient()->GetAlignment() && (tmob->GetLevel() >= (GetLevel() - 8) && (tmob->GetLevel() <= (GetLevel() + 8)))) {
+			SendColoredText(color, std::string("[PVP] This character is an enemy!"));
+		}
+		else if (GetAlignment() != tmob->CastToClient()->GetAlignment()) {
+			SendColoredText(color, std::string("This character is an enemy!"));
+		}
 	}
 
 	// If we're feigned show NPC as indifferent
@@ -4955,6 +4974,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 			}
 		}
 
+		// Voidd: TODO - When did this message show in Era? Not Classic for sure.
 		SendColoredText(color, std::string("This creature would take an army to defeat!"));
 	}
 
@@ -5300,6 +5320,7 @@ void Client::Handle_OP_Death(const EQApplicationPacket *app)
 	if (GetHP() > 0)
 		return;
 
+	pvp_attacked_timer.Disable();
 	Mob* killer = entity_list.GetMob(ds->killer_id);
 	Death(killer, ds->damage, ds->spell_id, (EQ::skills::SkillType)ds->attack_skill);
 	return;
@@ -7045,6 +7066,10 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	{
 		if (Invitee->IsClient())
 		{
+			if (GetTarget() == this) {
+				Message(Chat::Red, "Cannot use /invite while targeting yourself.");
+				return;
+			}
 			if (Invitee->CastToClient()->MercOnlyOrNoGroup() && !Invitee->IsRaidGrouped())
 			{
 				if (app->GetOpcode() == OP_GroupInvite2)
@@ -7073,6 +7098,10 @@ void Client::Handle_OP_GroupInvite2(const EQApplicationPacket *app)
 	}
 	else
 	{
+		if (!RuleB(Zone, IsCrossZoneInviteAllowed)) {
+			Message(Chat::Red, "Cannot invite across zones.");
+			return;
+		}
 		auto pack = new ServerPacket(ServerOP_GroupInvite, sizeof(GroupInvite_Struct));
 		memcpy(pack->pBuffer, gis, sizeof(GroupInvite_Struct));
 		worldserver.SendPacket(pack);
@@ -10342,6 +10371,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		}
 
+		if (RuleB(Pets, IsLoSRequired) && !CheckLosFN(target) && !mypet->CheckLosFN(target)) {
+			MessageString(Chat::Red, CANT_SEE_TARGET);
+			break;
+		}
+
 		// default range is 200, takes Z into account
 		// really they do something weird where they're added to the aggro list then remove them
 		// and will attack if they come in range -- too lazy, lets remove exploits for now
@@ -10388,6 +10422,11 @@ void Client::Handle_OP_PetCommands(const EQApplicationPacket *app)
 			break;
 		if (GetTarget()->IsMezzed()) {
 			MessageString(Chat::NPCQuestSay, CANNOT_WAKE, mypet->GetCleanName(), GetTarget()->GetCleanName());
+			break;
+		}
+		
+		if (RuleB(Pets, IsLoSRequired) && !CheckLosFN(target) && !mypet->CheckLosFN(target)) {
+			MessageString(Chat::Red,CANT_SEE_TARGET);
 			break;
 		}
 
@@ -11316,10 +11355,12 @@ void Client::Handle_OP_PVPLeaderBoardDetailsRequest(const EQApplicationPacket *a
 		return;
 	}
 
-	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
-	PVPLeaderBoardDetailsReply_Struct *pvplbdrs = (PVPLeaderBoardDetailsReply_Struct *)outapp->pBuffer;
+	PVPLeaderBoardDetailsRequest_Struct* pvplbdr = (PVPLeaderBoardDetailsRequest_Struct*)app->pBuffer;
 
-	// TODO: Record and send this data.
+	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardDetailsReply, sizeof(PVPLeaderBoardDetailsReply_Struct));
+	PVPLeaderBoardDetailsReply_Struct* pvplbdrs = (PVPLeaderBoardDetailsReply_Struct*)outapp->pBuffer;
+
+	database.GetPVPLeaderBoardDetails(pvplbdrs, pvplbdr->Name);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
@@ -11341,13 +11382,23 @@ void Client::Handle_OP_PVPLeaderBoardRequest(const EQApplicationPacket *app)
 
 		return;
 	}
-	/*PVPLeaderBoardRequest_Struct *pvplbrs = (PVPLeaderBoardRequest_Struct *)app->pBuffer;*/	//unused
+
+	PVPLeaderBoardRequest_Struct* pvplbrs = (PVPLeaderBoardRequest_Struct*)app->pBuffer;
 
 	auto outapp = new EQApplicationPacket(OP_PVPLeaderBoardReply, sizeof(PVPLeaderBoard_Struct));
-	/*PVPLeaderBoard_Struct *pvplb = (PVPLeaderBoard_Struct *)outapp->pBuffer;*/	//unused
+	PVPLeaderBoard_Struct* pvplb = (PVPLeaderBoard_Struct*)outapp->pBuffer;
 
-																					// TODO: Record and send this data.
+	if (pvplbrs->SortType == PVPSortByKills) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_kills");
+	}
 
+	if (pvplbrs->SortType == PVPSortByPoints) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_career_points");
+	}
+
+	if (pvplbrs->SortType == PVPSortByInfamy) {
+		database.GetPVPLeaderBoard(this, pvplb, "pvp_infamy");
+	}
 	QueuePacket(outapp);
 	safe_delete(outapp);
 }
@@ -12566,7 +12617,7 @@ void Client::Handle_OP_RezzAnswer(const EQApplicationPacket *app)
 
 	OPRezzAnswer(ra->action, ra->spellid, ra->zone_id, ra->instance_id, ra->x, ra->y, ra->z);
 
-	if (ra->action == 1)
+	if (ra->action == 1 && pvp_attacked_timer.GetRemainingTime() == -1)
 	{
 		EQApplicationPacket* outapp = app->Copy();
 		// Send the OP_RezzComplete to the world server. This finds it's way to the zone that

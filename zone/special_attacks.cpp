@@ -1644,6 +1644,8 @@ void NPC::DoClassAttacks(Mob *target) {
 			break;
 		}
 		case WARRIOR: case WARRIORGM:{
+			// Voidd: TODO - Create Rule to allow NPC Pets to Kick?
+			// if(level >= RuleI(Combat, NPCBashKickLevel) && !IsPet()){
 			if(level >= RuleI(Combat, NPCBashKickLevel)){
 				if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
 					DoAnim(animKick, 0, false);
@@ -1666,6 +1668,36 @@ void NPC::DoClassAttacks(Mob *target) {
 					reuse = (BashReuseTime + 3) * 1000;
 					DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
 					did_attack = true;
+				}
+			}
+			else if (level >= RuleI(Combat, NPCBashKickLevel) && IsPet() && !IsCharmed())
+			{
+				if (GetRace() == 75 && GetTexture() == 1) {
+
+				}
+				else {
+					if(zone->random.Roll(75)) { //tested on live, warrior mobs both kick and bash, kick about 75% of the time, casting doesn't seem to make a difference.
+						DoAnim(animKick, 0, false);
+						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
+
+						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
+
+						reuse = (KickReuseTime + 3) * 1000;
+						DoSpecialAttackDamage(target, EQ::skills::SkillKick, dmg, GetMinDamage(), -1, reuse);
+						did_attack = true;
+					}
+					else {
+						DoAnim(animTailRake, 0, false);
+						int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
+
+						if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+							dmg = DMG_INVULNERABLE;
+
+						reuse = (BashReuseTime + 3) * 1000;
+						DoSpecialAttackDamage(target, EQ::skills::SkillBash, dmg, GetMinDamage(), -1, reuse);
+						did_attack = true;
+					}
 				}
 			}
 			break;
@@ -1952,6 +1984,9 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 			Success = zone->random.Roll(chance_bonus);
 		} else {
 			float tauntchance = 50.0f;
+			
+			if (GetSkill(EQ::skills::SkillTaunt) >= 200)
+				tauntchance = 65.0f;
 
 			if (always_succeed)
 				tauntchance = 101.0f;
@@ -1959,15 +1994,18 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 			else {
 
 				if (level_difference < 0) {
-					tauntchance += static_cast<float>(level_difference) * 3.0f;
+					tauntchance += static_cast<float>(level_difference) * 2.0f;
 					if (tauntchance < 20)
 						tauntchance = 20.0f;
 				}
 
 				else {
 					tauntchance += static_cast<float>(level_difference) * 5.0f;
-					if (tauntchance > 65)
-						tauntchance = 65.0f;
+					if (tauntchance > 85)
+						tauntchance = 85.0f;
+					
+				if ((tauntchance > 95) && (GetSkill(EQ::skills::SkillTaunt) >= 200))
+						tauntchance = 95.0f;
 				}
 			}
 
@@ -1992,7 +2030,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 				who->CastToNPC()->AddToHateList(this, newhate);
 				Success = true;
 			} else {
-				who->CastToNPC()->AddToHateList(this, 12);
+				who->CastToNPC()->AddToHateList(this, (GetSkill(EQ::skills::SkillTaunt) / 10));
 			}
 
 			if (who->CanTalk())
@@ -2012,8 +2050,6 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 }
 
 void Mob::InstillDoubt(Mob *who) {
-	//make sure we can use this skill
-	/*int skill = GetSkill(INTIMIDATION);*/	//unused
 
 	//make sure our target is an NPC
 	if(!who || !who->IsNPC())
@@ -2030,29 +2066,18 @@ void Mob::InstillDoubt(Mob *who) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillIntimidation, who, 10);
 	}
 
-	//I think this formula needs work
-	int value = 0;
-
 	//user's bonus
-	value += GetSkill(EQ::skills::SkillIntimidation) + GetCHA() / 4;
+	int chancetohit = (GetSkill(EQ::skills::SkillIntimidation) / 5) + (GetCHA() / 10) + (GetLevel() / 10);
 
 	//target's counters
-	value -= target->GetLevel()*4 + who->GetWIS()/4;
+	int resistmod = (who->GetLevel() / 2) + (who->GetWIS()/5);
+	int finalchance = chancetohit - resistmod;
+	int trychance = zone->random.Real(1, 100);
 
-	if (zone->random.Roll(value)) {
-		//temporary hack...
-		//cast fear on them... should prolly be a different spell
-		//and should be un-resistable.
-		SpellOnTarget(229, who, false, true, -2000);
-		//is there a success message?
+	if(trychance <= finalchance) {
+		SpellOnTarget(229, who, false, true, 0);
 	} else {
 		MessageString(Chat::LightBlue,NOT_SCARING);
-		//Idea from WR:
-		/* if (target->IsNPC() && zone->random.Int(0,99) < 10 ) {
-			entity_list.MessageClose(target, false, 50, Chat::NPCRampage, "%s lashes out in anger!",target->GetName());
-			//should we actually do this? and the range is completely made up, unconfirmed
-			entity_list.AEAttack(target, 50);
-		}*/
 	}
 }
 
