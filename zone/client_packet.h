@@ -1,5 +1,6 @@
 	/* Connecting OpCode Handlers */
 	void Handle_Connect_0x3e33(const EQApplicationPacket *app);
+	bool HandleChecksumPacket(const EQApplicationPacket* app);
 	void Handle_Connect_OP_ApproveZone(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientError(const EQApplicationPacket *app);
 	void Handle_Connect_OP_ClientReady(const EQApplicationPacket *app);

@@ -85,6 +85,12 @@ Database::~Database()
 {
 }
 
+void Database::SetExeCrcForAccount(uint32 accountid, uint64 checksum)
+{
+	std::string query = StringFormat("UPDATE `account` SET `checksum` = '%lld' WHERE `id` = '%i'", checksum, accountid);
+	auto results = QueryDatabase(query);
+}
+
 /*
 	Check if there is an account with name "name" and password "password"
 	Return the account id or zero if no account matches.
@@ -507,6 +513,9 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"pvp_best_kill_streak,"
 		"pvp_worst_death_streak,"
 		"pvp_current_kill_streak,"
+		"pvp_current_death_streak,"
+		"pvp_infamy,"
+		"pvp_vitality,"
 		"aa_points_spent,"
 		"aa_exp,"
 		"aa_points,"
@@ -597,7 +606,10 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		"%u,"  // pvp_career_points
 		"%u,"  // pvp_best_kill_streak
 		"%u,"  // pvp_worst_death_streak
-		"%u,"  // pvp_current_kill_strea
+		"%u,"  // pvp_current_kill_streak
+		"%u,"  // pvp_current_death_streak
+		"%u,"  // pvp_infamy
+		"%u,"  // pvp_vitality
 		"%u,"  // aa_points_spent
 		"%u,"  // aa_exp
 		"%u,"  // aa_points
@@ -689,6 +701,9 @@ bool Database::SaveCharacterCreate(uint32 character_id, uint32 account_id, Playe
 		pp->PVPBestKillStreak,			  // " pvp_best_kill_streak,      "
 		pp->PVPWorstDeathStreak,		  // " pvp_worst_death_streak,    "
 		pp->PVPCurrentKillStreak,		  // " pvp_current_kill_streak,   "
+		pp->PVPCurrentDeathStreak,		  // " pvp_current_death_streak,  "
+		pp->PVPInfamy,				  // " pvp_infamy,		  "
+		pp->PVPVitality,			  // " pvp_vitality,		  "
 		pp->aapoints_spent,				  // " aa_points_spent,           "
 		pp->expAA,						  // " aa_exp,                    "
 		pp->aapoints,					  // " aa_points,                 "

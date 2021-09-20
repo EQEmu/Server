@@ -109,6 +109,7 @@ private:
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
+	bool HandleChecksumPacket(const EQApplicationPacket* app);
 	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
 	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);

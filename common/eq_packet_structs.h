@@ -914,7 +914,7 @@ sed -e 's/_t//g' -e 's/MAX_AA/MAX_PP_AA_ARRAY/g' \
 
 struct PlayerProfile_Struct
 {
-// /*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
+/*0000*/	uint32				checksum;			// Checksum from CRC32::SetEQChecksum
 /*0004*/	char				name[64];			// Name of player sizes not right
 /*0068*/	char				last_name[32];		// Last name of player sizes not right
 /*0100*/	uint32				gender;				// Player Gender - 0 Male, 1 Female
@@ -1072,6 +1072,9 @@ struct PlayerProfile_Struct
 /*8204*/	uint32				PVPBestKillStreak;
 /*8208*/	uint32				PVPWorstDeathStreak;
 /*8212*/	uint32				PVPCurrentKillStreak;
+/*8212*/	uint32				PVPCurrentDeathStreak;
+/*8214*/	uint32				PVPInfamy;
+/*8213*/	uint32				PVPVitality;
 /*8216*/	PVPStatsEntry_Struct	PVPLastKill;
 /*8304*/	PVPStatsEntry_Struct	PVPLastDeath;
 /*8392*/	uint32				PVPNumberOfKillsInLast24Hours;
@@ -5577,6 +5580,16 @@ struct SayLinkBodyFrame_Struct {
 /*043*/	char OrnamentIcon[5];
 /*048*/	char Hash[8];
 /*056*/
+};
+
+struct Checksum_Struct {
+    uint64_t checksum;
+    uint8_t  data[2048];
+};
+
+struct SimpleChecksum_Struct {
+    uint64_t checksum;
+    uint8_t  data[3];
 };
 
 struct UpdateMovementEntry {
