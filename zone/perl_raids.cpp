@@ -304,7 +304,7 @@ XS(XS_Raid_GetClientByIndex); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_GetClientByIndex) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_indez)"); // @categories Raid
+		Perl_croak(aTHX_ "Usage: Raid::GetClientByIndex(THIS, uint16 raid_index)"); // @categories Raid
 	{
 		Raid   *THIS;
 		Client *RETVAL;

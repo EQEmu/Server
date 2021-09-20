@@ -1589,12 +1589,14 @@ void ClientList::SendCharacterMessage(ClientListEntry* character, int chat_type,
 		return;
 	}
 
-	uint32_t pack_size = sizeof(CZMessagePlayer_Struct);
-	auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessagePlayer, pack_size);
-	auto buf = reinterpret_cast<CZMessagePlayer_Struct*>(pack->pBuffer);
+	uint32_t pack_size = sizeof(CZMessage_Struct);
+	auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessage, pack_size);
+	auto buf = reinterpret_cast<CZMessage_Struct*>(pack->pBuffer);
+	buf->update_type = CZUpdateType_ClientName;
+	buf->update_identifier = 0;
 	buf->type = chat_type;
-	strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
 	strn0cpy(buf->message, message.c_str(), sizeof(buf->message));
+	strn0cpy(buf->client_name, character->name(), sizeof(buf->client_name));
 
 	character->Server()->SendPacket(pack.get());
 }
@@ -1633,7 +1635,7 @@ void ClientList::SendCharacterMessageID(ClientListEntry* character,
 	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 	buf->string_id = eqstr_id;
 	buf->chat_type = chat_type;
-	strn0cpy(buf->character_name, character->name(), sizeof(buf->character_name));
+	strn0cpy(buf->client_name, character->name(), sizeof(buf->client_name));
 	buf->args_size = args_size;
 	memcpy(buf->args, serialized_args.buffer(), serialized_args.size());
 
