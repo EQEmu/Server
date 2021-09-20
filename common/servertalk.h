@@ -227,90 +227,24 @@
 #define ServerOP_HotReloadQuests 0x4011
 #define ServerOP_UpdateSchedulerEvents 0x4012
 
-#define ServerOP_CZCastSpellPlayer 0x4500
-#define ServerOP_CZCastSpellGroup 0x4501
-#define ServerOP_CZCastSpellRaid 0x4502
-#define ServerOP_CZCastSpellGuild 0x4503
-#define ServerOP_CZMarqueePlayer 0x4504
-#define ServerOP_CZMarqueeGroup 0x4505
-#define ServerOP_CZMarqueeRaid 0x4506
-#define ServerOP_CZMarqueeGuild 0x4507
-#define ServerOP_CZMessagePlayer 0x4508
-#define ServerOP_CZMessageGroup 0x4509
-#define ServerOP_CZMessageRaid 0x4510
-#define ServerOP_CZMessageGuild 0x4511
-#define ServerOP_CZMovePlayer 0x4512
-#define ServerOP_CZMoveGroup 0x4513
-#define ServerOP_CZMoveRaid 0x4514
-#define ServerOP_CZMoveGuild 0x4515
-#define ServerOP_CZMoveInstancePlayer 0x4516
-#define ServerOP_CZMoveInstanceGroup 0x4517
-#define ServerOP_CZMoveInstanceRaid 0x4518
-#define ServerOP_CZMoveInstanceGuild 0x4519
-#define ServerOP_CZRemoveSpellPlayer 0x4520
-#define ServerOP_CZRemoveSpellGroup 0x4521
-#define ServerOP_CZRemoveSpellRaid 0x4522
-#define ServerOP_CZRemoveSpellGuild 0x4523
-#define ServerOP_CZSetEntityVariableByClientName 0x4524
-#define ServerOP_CZSetEntityVariableByNPCTypeID 0x4525
-#define ServerOP_CZSetEntityVariableByGroupID 0x4526
-#define ServerOP_CZSetEntityVariableByRaidID 0x4527
-#define ServerOP_CZSetEntityVariableByGuildID 0x4528
-#define ServerOP_CZSignalClient 0x4529
-#define ServerOP_CZSignalClientByName 0x4530
-#define ServerOP_CZSignalNPC 0x4531
-#define ServerOP_CZSignalGroup 0x4532
-#define ServerOP_CZSignalRaid 0x4533
-#define ServerOP_CZSignalGuild 0x4534
-#define ServerOP_CZTaskActivityResetPlayer 0x4535
-#define ServerOP_CZTaskActivityResetGroup 0x4536
-#define ServerOP_CZTaskActivityResetRaid 0x4537
-#define ServerOP_CZTaskActivityResetGuild 0x4538
-#define ServerOP_CZTaskActivityUpdatePlayer 0x4539
-#define ServerOP_CZTaskActivityUpdateGroup 0x4540
-#define ServerOP_CZTaskActivityUpdateRaid 0x4541
-#define ServerOP_CZTaskActivityUpdateGuild 0x4542
-#define ServerOP_CZTaskAssignPlayer 0x4543
-#define ServerOP_CZTaskAssignGroup 0x4544
-#define ServerOP_CZTaskAssignRaid 0x4545
-#define ServerOP_CZTaskAssignGuild 0x4546
-#define ServerOP_CZTaskDisablePlayer 0x4547
-#define ServerOP_CZTaskDisableGroup 0x4548
-#define ServerOP_CZTaskDisableRaid 0x4549
-#define ServerOP_CZTaskDisableGuild 0x4550
-#define ServerOP_CZTaskEnablePlayer 0x4551
-#define ServerOP_CZTaskEnableGroup 0x4552
-#define ServerOP_CZTaskEnableRaid 0x4553
-#define ServerOP_CZTaskEnableGuild 0x4554
-#define ServerOP_CZTaskFailPlayer 0x4555
-#define ServerOP_CZTaskFailGroup 0x4556
-#define ServerOP_CZTaskFailRaid 0x4557
-#define ServerOP_CZTaskFailGuild 0x4558
-#define ServerOP_CZTaskRemovePlayer 0x4559
-#define ServerOP_CZTaskRemoveGroup 0x4560
-#define ServerOP_CZTaskRemoveRaid 0x4561
-#define ServerOP_CZTaskRemoveGuild 0x4562
-#define ServerOP_CZClientMessageString 0x4563
-#define ServerOP_CZLDoNUpdate 0x4564
+#define ServerOP_CZLDoNUpdate 0x4500
+#define ServerOP_CZMarquee 0x4501
+#define ServerOP_CZMessage 0x4502
+#define ServerOP_CZMove 0x4503
+#define ServerOP_CZSetEntityVariable 0x4504
+#define ServerOP_CZSignal 0x4505
+#define ServerOP_CZSpell 0x4506
+#define ServerOP_CZTaskUpdate 0x4507
+#define ServerOP_CZClientMessageString 0x4508
 
-#define ServerOP_WWAssignTask 0x4750
-#define ServerOP_WWCastSpell 0x4751
-#define ServerOP_WWCompleteActivity 0x4752
-#define ServerOP_WWDisableTask 0x4753
-#define ServerOP_WWEnableTask 0x4754
-#define ServerOP_WWFailTask 0x4755
-#define ServerOP_WWMarquee 0x4756
-#define ServerOP_WWMessage 0x4757
-#define ServerOP_WWMove 0x4758
-#define ServerOP_WWMoveInstance 0x4759
-#define ServerOP_WWRemoveSpell 0x4760
-#define ServerOP_WWRemoveTask 0x4761
-#define ServerOP_WWResetActivity 0x4762
-#define ServerOP_WWSetEntityVariableClient 0x4763
-#define ServerOP_WWSetEntityVariableNPC 0x4764
-#define ServerOP_WWSignalClient 0x4765
-#define ServerOP_WWSignalNPC 0x4766
-#define ServerOP_WWUpdateActivity 0x4767
+#define ServerOP_WWLDoNUpdate 0x4750
+#define ServerOP_WWMarquee 0x4751
+#define ServerOP_WWMessage 0x4752
+#define ServerOP_WWMove 0x4753
+#define ServerOP_WWSetEntityVariable 0x4754
+#define ServerOP_WWSignal 0x4755
+#define ServerOP_WWSpell 0x4756
+#define ServerOP_WWTaskUpdate 0x4757
 
 /**
  * QueryServer
@@ -325,17 +259,75 @@
 #define ServerOP_QSPlayerDropItem 0x5007
 
 enum {
-	CZLDoNUpdateType_Character = 0,
-	CZLDoNUpdateType_Group,
-	CZLDoNUpdateType_Raid,
-	CZLDoNUpdateType_Guild,
-	CZLDoNUpdateType_Expedition
+	CZUpdateType_Character,
+	CZUpdateType_Group,
+	CZUpdateType_Raid,
+	CZUpdateType_Guild,
+	CZUpdateType_Expedition,
+	CZUpdateType_ClientName,
+	CZUpdateType_NPC
 };
 
 enum {
-	CZLDoNUpdateSubtype_Win = 0,
 	CZLDoNUpdateSubtype_Loss,
-	CZLDoNUpdateSubtype_Points
+	CZLDoNUpdateSubtype_Points,
+	CZLDoNUpdateSubtype_Win
+};
+
+enum {
+	CZMoveUpdateSubtype_MoveZone,
+	CZMoveUpdateSubtype_MoveZoneInstance
+};
+
+enum {
+	CZSpellUpdateSubtype_Cast,
+	CZSpellUpdateSubtype_Remove
+};
+
+enum {
+	CZTaskUpdateSubtype_ActivityReset,
+	CZTaskUpdateSubtype_ActivityUpdate,
+	CZTaskUpdateSubtype_AssignTask,
+	CZTaskUpdateSubtype_DisableTask,
+	CZTaskUpdateSubtype_EnableTask,
+	CZTaskUpdateSubtype_FailTask,
+	CZTaskUpdateSubtype_RemoveTask
+};
+
+enum {
+	WWLDoNUpdateType_Loss,
+	WWLDoNUpdateType_Points,
+	WWLDoNUpdateType_Win
+};
+
+enum {
+	WWMoveUpdateType_MoveZone,
+	WWMoveUpdateType_MoveZoneInstance
+};
+
+enum {
+	WWSetEntityVariableUpdateType_Character,
+	WWSetEntityVariableUpdateType_NPC
+};
+
+enum {
+	WWSignalUpdateType_Character,
+	WWSignalUpdateType_NPC
+};
+
+enum {
+	WWSpellUpdateType_Cast,
+	WWSpellUpdateType_Remove
+};
+
+enum {
+	WWTaskUpdateType_ActivityReset,
+	WWTaskUpdateType_ActivityUpdate,
+	WWTaskUpdateType_AssignTask,
+	WWTaskUpdateType_DisableTask,
+	WWTaskUpdateType_EnableTask,
+	WWTaskUpdateType_FailTask,
+	WWTaskUpdateType_RemoveTask
 };
 
 /* Query Serv Generic Packet Flag/Type Enumeration */
@@ -1440,489 +1432,94 @@ struct QSGeneralQuery_Struct {
 	char QueryString[0];
 };
 
-struct CZCastSpellPlayer_Struct {
-	int character_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellGroup_Struct {
-	int group_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellRaid_Struct {
-	int raid_id;
-	uint32 spell_id;
-};
-
-struct CZCastSpellGuild_Struct {
-	int guild_id;
-	uint32 spell_id;
-};
-
-struct CZClientSignal_Struct {
-	int character_id;
-	uint32 signal;
-};
-
-struct CZGroupSignal_Struct {
-	int group_id;
-	uint32 signal;
-};
-
-struct CZRaidSignal_Struct {
-	int raid_id;
-	uint32 signal;
-};
-
-struct CZGuildSignal_Struct {
-	int guild_id;
-	uint32 signal;
-};
-
-struct CZNPCSignal_Struct {
-	uint32 npctype_id;
-	uint32 signal;
-};
-
 struct CZClientMessageString_Struct {
 	uint32 string_id;
 	uint16 chat_type;
-	char   character_name[64];
+	char   client_name[64];
 	uint32 args_size;
 	char   args[1]; // null delimited
 };
 
-struct CZClientSignalByName_Struct {
-	char character_name[64];
-	uint32 signal;
-};
-
-struct CZCompleteActivityPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZCompleteActivityGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZMovePlayer_Struct {
-	int character_id;
-	char zone_short_name[32];
-};
-
-struct CZMarqueePlayer_Struct {
-	int character_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeGroup_Struct {
-	int group_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeRaid_Struct {
-	int raid_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMarqueeGuild_Struct {
-	int guild_id;
-	uint32 type;
-	uint32 priority;
-	uint32 fade_in;
-	uint32 fade_out;
-	uint32 duration;
-	char message[512];
-};
-
-struct CZMessagePlayer_Struct {
-	uint32 type;
-	char character_name[64];
-	char message[512];
-};
-
-struct CZMessageGroup_Struct {
-	uint32 type;
-	int group_id;
-	char message[512];
-};
-
-struct CZMessageRaid_Struct {
-	uint32 type;
-	int raid_id;
-	char message[512];
-};
-
-struct CZMessageGuild_Struct {
-	uint32 type;
-	int guild_id;
-	char message[512];
-};
-
-struct CZMoveGroup_Struct {
-	int group_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveRaid_Struct {
-	int raid_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveGuild_Struct {
-	int guild_id;
-	char zone_short_name[32];
-};
-
-struct CZMoveInstancePlayer_Struct {
-	int character_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceGroup_Struct {
-	int group_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceRaid_Struct {
-	int raid_id;
-	uint16 instance_id;
-};
-
-struct CZMoveInstanceGuild_Struct {
-	int guild_id;
-	uint16 instance_id;
-};
-
-struct CZRemoveSpellPlayer_Struct {
-	int character_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveSpellGroup_Struct {
-	int group_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveSpellRaid_Struct {
-	int raid_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveSpellGuild_Struct {
-	int guild_id;
-	uint32 spell_id;
-};
-
-struct CZRemoveTaskPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZRemoveTaskGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZResetActivityPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZResetActivityGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZSetEntVarByNPCTypeID_Struct {
-	uint32 npctype_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByClientName_Struct {
-	char character_name[64];
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByGroupID_Struct {
-	int group_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByRaidID_Struct {
-	int raid_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZSetEntVarByGuildID_Struct {
-	int guild_id;
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct CZTaskActivityResetPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityResetGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-};
-
-struct CZTaskActivityUpdatePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateGroup_Struct {
-	int group_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskActivityUpdateGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
-};
-
-struct CZTaskAssignPlayer_Struct {
-	uint16 npc_entity_id;
-	int character_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignGroup_Struct {
-	uint16 npc_entity_id;
-	int group_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignRaid_Struct {
-	uint16 npc_entity_id;
-	int raid_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskAssignGuild_Struct {
-	uint16 npc_entity_id;
-	int guild_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-};
-
-struct CZTaskDisablePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskDisableGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnablePlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskEnableGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailPlayer_Struct {
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailGroup_Struct {
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailRaid_Struct {
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskFailGuild_Struct {
-	int guild_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemovePlayer_Struct {
-	uint16 npc_entity_id;
-	int character_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveGroup_Struct {
-	uint16 npc_entity_id;
-	int group_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveRaid_Struct {
-	uint16 npc_entity_id;
-	int raid_id;
-	uint32 task_id;
-};
-
-struct CZTaskRemoveGuild_Struct {
-	uint16 npc_entity_id;
-	int guild_id;
-	uint32 task_id;
-};
-
 struct CZLDoNUpdate_Struct {
-	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition
-	uint8 update_subtype; // 0 - Win, 1 - Loss, 2 - Points
-	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Loss, 1 - Points, 2 - Win
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
 	uint32 theme_id;
-	int points; // Always 1, except for when Points are used
+	int points; // Only used in Points Subtype, else 1
+	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
-struct WWAssignTask_Struct {
-	uint16 npc_entity_id;
-	uint32 task_id;
-	bool enforce_level_requirement;
-	uint8 min_status;
-	uint8 max_status;
+struct CZMarquee_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 type;
+	uint32 priority;
+	uint32 fade_in;
+	uint32 fade_out;
+	uint32 duration;
+	char message[512];
+	char client_name[64]; // Only used by Character Name Type, else empty
 };
 
-struct WWCastSpell_Struct {
+struct CZMessage_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 type;
+	char message[512];
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZMove_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Move Zone, 1 - Move Zone Instance
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint16 instance_id; // Only used by Move Zone Instance, else 0
+	char zone_short_name[32]; // Only by with Move Zone, else empty
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZSetEntityVariable_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
+	int update_identifier; // Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
+	char variable_name[256];
+	char variable_value[256];
+	char client_name[64]; // Only used by Character Type, else empty
+};
+
+struct CZSignal_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name, 6 - NPC
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, Expedition ID, or NPC ID based on update type, 0 for Character Name
+	uint32 signal;
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZSpell_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Cast Spell, 1 - Remove Spell
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
 	uint32 spell_id;
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct CZTaskUpdate_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	uint8 update_subtype; // 0 - Activity Reset, 1 - Activity Update, 2 - Assign Task, 3 - Disable Task, 4 - Enable Task, 5 - Fail Task, 6 - Remove Task
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	uint32 task_identifier;
+	int task_subidentifier; // Activity ID for Activity Reset and Activity Update, NPC Entity ID for Assign Task, else -1
+	int update_count; // Only used by Activity Update, else 1
+	bool enforce_level_requirement; // Only used by Assign Task
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct WWLDoNUpdate_Struct {
+	uint8 update_type; // 0 - Loss, 1 - Points, 2 - Win
+	uint32 theme_id;
+	int points; // Only used in Points Subtype, else 1
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWDisableTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWEnableTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWFailTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-};
 struct WWMarquee_Struct {
 	uint32 type;
 	uint32 priority;
@@ -1942,63 +1539,41 @@ struct WWMessage_Struct {
 };
 
 struct WWMove_Struct {
-	char zone_short_name[32];
+	uint8 update_type; // 0 - Move Zone, 1 - Move Zone Instance
+	char zone_short_name[32]; // Used with Move Zone
+	uint16 instance_id; // Used with Move Zone Instance
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWMoveInstance_Struct {
-	uint16 instance_id;
+struct WWSetEntityVariable_Struct {
+	uint8 update_type; // 0 - Character, 1 - NPC
+	char variable_name[256];
+	char variable_value[256];
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWRemoveSpell_Struct {
+struct WWSignal_Struct {
+	uint8 update_type; // 0 - Character, 1 - NPC
+	uint32 signal;
+	uint8 min_status;
+	uint8 max_status;
+};
+
+struct WWSpell_Struct {
+	uint8 update_type; // 0 - Cast Spell, 1 - Remove Spell
 	uint32 spell_id;
 	uint8 min_status;
 	uint8 max_status;
 };
 
-struct WWRemoveTask_Struct {
-	uint32 task_id;
-	uint8 min_status;
-	uint8 max_status;
-
-};
-
-struct WWResetActivity_Struct {
-	uint32 task_id;
-	int activity_id;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSetEntVarClient_Struct {
-	char variable_name[256];
-	char variable_value[256];
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSetEntVarNPC_Struct {
-	char variable_name[256];
-	char variable_value[256];
-};
-
-struct WWSignalClient_Struct {
-	uint32 signal;
-	uint8 min_status;
-	uint8 max_status;
-};
-
-struct WWSignalNPC_Struct {
-	uint32 signal;
-};
-
-struct WWUpdateActivity_Struct {
-	uint32 task_id;
-	int activity_id;
-	int activity_count;
+struct WWTaskUpdate_Struct {
+	uint8 update_type; // 0 - Activity Reset, 1 - Activity Update, 2 - Assign Task, 3 - Disable Task, 4 - Enable Task, 5 - Fail Task, 6 - Remove Task
+	uint32 task_identifier;
+	int task_subidentifier; // Activity ID for Activity Reset and Activity Update, NPC Entity ID for Assign Task, else -1
+	int update_count; // Update Count for Activity Update, else 1
+	bool enforce_level_requirement; // Only used by Assign Task, else false
 	uint8 min_status;
 	uint8 max_status;
 };

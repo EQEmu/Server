@@ -11194,9 +11194,18 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			return;
 			break;
 
-		case POPUPID_DIAWIND:
-			if (EntityVariableExists(DIAWIND_RESPONSE_KEY.c_str())) {
-				response = GetEntityVariable(DIAWIND_RESPONSE_KEY.c_str());
+		case POPUPID_DIAWIND_ONE:
+			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY.c_str())) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str());
+				if (!response.empty()) {
+					ChannelMessageReceived(8, 0, 100, response.c_str());
+				}
+			}
+			break;
+
+		case POPUPID_DIAWIND_TWO:
+			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY.c_str())) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str());
 				if (!response.empty()) {
 					ChannelMessageReceived(8, 0, 100, response.c_str());
 				}

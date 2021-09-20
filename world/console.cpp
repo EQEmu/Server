@@ -825,14 +825,15 @@ void ConsoleSignalCharByName(
 	}
 
 	connection->SendLine(StringFormat("Signal Sent to %s with ID %i", (char *) args[0].c_str(), atoi(args[1].c_str())));
-	uint32                      message_len = strlen((char *) args[0].c_str()) + 1;
-	auto                        pack        = new ServerPacket(
-		ServerOP_CZSignalClientByName,
-		sizeof(CZClientSignalByName_Struct) + message_len
-	);
-	CZClientSignalByName_Struct *CZSC       = (CZClientSignalByName_Struct *) pack->pBuffer;
-	strn0cpy(CZSC->character_name, (char *) args[0].c_str(), 64);
-	CZSC->signal = atoi(args[1].c_str());
+	uint32 message_len = strlen((char *) args[0].c_str()) + 1;
+	auto pack = new ServerPacket(ServerOP_CZSignal, sizeof(CZSignal_Struct) + message_len);
+	CZSignal_Struct* CZS = (CZSignal_Struct*) pack->pBuffer;
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	CZS->update_type = update_type;
+	CZS->update_identifier = update_identifier;
+	CZS->signal = atoi(args[1].c_str());
+	strn0cpy(CZS->client_name, (char *) args[0].c_str(), 64);
 	zoneserver_list.SendPacket(pack);
 	safe_delete(pack);
 }

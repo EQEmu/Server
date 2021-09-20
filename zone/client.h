@@ -203,8 +203,10 @@ enum eInnateSkill {
 	InnateDisabled = 255
 };
 
-const std::string DIAWIND_RESPONSE_KEY           = "diawind_npcresponse";
-const uint32      POPUPID_DIAWIND                = 999;
+const std::string DIAWIND_RESPONSE_ONE_KEY       = "diawind_npc_response_one";
+const std::string DIAWIND_RESPONSE_TWO_KEY       = "diawind_npc_response_two";
+const uint32      POPUPID_DIAWIND_ONE            = 99999;
+const uint32      POPUPID_DIAWIND_TWO            = 100000;
 const uint32      POPUPID_UPDATE_SHOWSTATSWINDOW = 1000000;
 
 struct ClientReward

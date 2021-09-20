@@ -9489,12 +9489,16 @@ void Client::SendCrossZoneMessage(
 	}
 	else if (!character_name.empty() && !message.empty())
 	{
-		uint32_t pack_size = sizeof(CZMessagePlayer_Struct);
-		auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessagePlayer, pack_size);
-		auto buf = reinterpret_cast<CZMessagePlayer_Struct*>(pack->pBuffer);
+		uint32_t pack_size = sizeof(CZMessage_Struct);
+		auto pack = std::make_unique<ServerPacket>(ServerOP_CZMessage, pack_size);
+		auto buf = reinterpret_cast<CZMessage_Struct*>(pack->pBuffer);
+		uint8 update_type = CZUpdateType_Character;
+		int update_identifier = 0;
+		buf->update_type = update_type;
+		buf->update_identifier = update_identifier;
 		buf->type = chat_type;
-		strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
 		strn0cpy(buf->message, message.c_str(), sizeof(buf->message));
+		strn0cpy(buf->client_name, character_name.c_str(), sizeof(buf->client_name));
 
 		worldserver.SendPacket(pack.get());
 	}
@@ -9527,7 +9531,7 @@ void Client::SendCrossZoneMessageString(
 	auto buf = reinterpret_cast<CZClientMessageString_Struct*>(pack->pBuffer);
 	buf->string_id = string_id;
 	buf->chat_type = chat_type;
-	strn0cpy(buf->character_name, character_name.c_str(), sizeof(buf->character_name));
+	strn0cpy(buf->client_name, character_name.c_str(), sizeof(buf->client_name));
 	buf->args_size = args_size;
 	memcpy(buf->args, argument_buffer.buffer(), argument_buffer.size());
 
