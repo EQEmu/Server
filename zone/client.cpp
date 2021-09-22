@@ -9191,7 +9191,7 @@ void Client::SetDisplayMobInfoWindow(bool display_mob_info_window)
 
 bool Client::IsDevToolsEnabled() const
 {
-	return dev_tools_enabled && RuleB(World, EnableDevTools);
+	return dev_tools_enabled && GetGM() && RuleB(World, EnableDevTools);
 }
 
 void Client::SetDevToolsEnabled(bool in_dev_tools_enabled)

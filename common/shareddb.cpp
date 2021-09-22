@@ -2288,24 +2288,3 @@ void SharedDatabase::SaveCharacterInspectMessage(uint32 character_id, const Insp
 	std::string query = StringFormat("REPLACE INTO `character_inspect_messages` (id, inspect_message) VALUES (%u, '%s')", character_id, EscapeString(message->text).c_str());
 	auto results = QueryDatabase(query);
 }
-
-uint8 SharedDatabase::GetCommandAccess(std::string command_name) {
-	if (!command_name.empty()) {
-		std::string query = fmt::format(
-			"SELECT `access`"
-			"FROM `command_settings`"
-			"WHERE `command` = '{}'",
-			command_name
-		);
-		auto results = QueryDatabase(query);
-		
-    	if (!results.Success() || results.RowCount() == 0) {
-			return 0;
-	    }
-
-		auto row = results.begin();
-		uint8 access = atoi(row[0]);
-		return access;
-	}
-	return 0;
-}
