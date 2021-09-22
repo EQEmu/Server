@@ -810,6 +810,14 @@ void Client::SendTradeskillSearchResults(
 				continue;
 			}
 		}
+		
+		//Check if we need to learn it before sending them the recipe.. 
+		DBTradeskillRecipe_Struct spec;
+		if (content_db.GetTradeRecipe(recipe_id, objtype, someid, this->CharacterID(), &spec)) {
+			if ((spec.must_learn & 0xf) && !spec.has_learnt) {
+				continue;
+			}
+		}
 
 		auto               outapp = new EQApplicationPacket(OP_RecipeReply, sizeof(RecipeReply_Struct));
 		RecipeReply_Struct *reply = (RecipeReply_Struct *) outapp->pBuffer;
@@ -1489,7 +1497,7 @@ bool ZoneDatabase::GetTradeRecipe(
 		recipe_id
 	);
 
-	if (character_learned_recipe.made_count > 0) {
+	if (character_learned_recipe.recipe_id) { //If this exists we learned it
 		LogTradeskills("[GetTradeRecipe] made_count [{}]", character_learned_recipe.made_count);
 
 		spec->has_learnt = true;
