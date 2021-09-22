@@ -25,6 +25,7 @@
 #include "lua_parser.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
+#include "../common/data_verification.h"
 
 extern volatile bool is_zone_loaded;
 
@@ -7919,24 +7920,31 @@ uint32 Bot::GetClassHPFactor() {
 }
 
 int32 Bot::CalcMaxHP() {
-	int32 bot_hp = 0;
-	uint32 nd = 10000;
-	bot_hp += (GenerateBaseHitPoints() + itembonuses.HP);
-	nd += aabonuses.MaxHPChange;
-	bot_hp = ((float)bot_hp * (float)nd / (float)10000);
-	bot_hp += (spellbonuses.HP + aabonuses.HP);
-	bot_hp += GroupLeadershipAAHealthEnhancement();
-	bot_hp += (bot_hp * ((spellbonuses.MaxHPChange + itembonuses.MaxHPChange) / 10000.0f));
-	max_hp = bot_hp;
-	if (current_hp > max_hp)
+	int64 base_hp = (CalcBaseHP() + itembonuses.HP);
+	int64 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
+	int64 max_hp = (base_hp * nd / 10000) + base_hp;
+	max_hp += GroupLeadershipAAHealthEnhancement();
+	max_hp += 5;
+	max_hp += GetHeroicSTA() * 10;
+	max_hp += aabonuses.HP + spellbonuses.HP;
+	if (current_hp > max_hp) {
 		current_hp = max_hp;
-
-	int hp_perc_cap = spellbonuses.HPPercCap[0];
-	if(hp_perc_cap) {
-		int curHP_cap = ((max_hp * hp_perc_cap) / 100);
-		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[1] && current_hp > spellbonuses.HPPercCap[1]))
-			current_hp = curHP_cap;
 	}
+	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
+	if (hp_perc_cap) {
+		int curHP_cap = (max_hp * hp_perc_cap) / 100;
+		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
+
+			current_hp = curHP_cap;
+		}
+	}
+
+	this->max_hp = static_cast<int32>(
+		EQ::Clamp(max_hp, 
+			static_cast<int64>(0LL), 
+			static_cast<int64>(std::numeric_limits<int32>::max()))
+		);
+
 	return max_hp;
 }
 

@@ -315,26 +315,55 @@ int32 Client::CalcHPRegenCap()
 
 int32 Client::CalcMaxHP()
 {
-	int32 base_hp = (CalcBaseHP() + itembonuses.HP);
-	int32 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
-	max_hp = (base_hp * nd / 10000) + base_hp;
-	max_hp += GroupLeadershipAAHealthEnhancement();
-	max_hp += 5;
-	max_hp += GetHeroicSTA() * 10;
-	max_hp += aabonuses.HP + spellbonuses.HP;
-	if (current_hp > max_hp) {
-		current_hp = max_hp;
-	}
-	int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
-	if (hp_perc_cap) {
-		int curHP_cap = (max_hp * hp_perc_cap) / 100;
-		if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
-
-			current_hp = curHP_cap;
+	if(RuleB(Character, FixHPCalculationOverflow)) {
+		int64 base_hp = (CalcBaseHP() + itembonuses.HP);
+		int64 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
+		int64 max_hp = (base_hp * nd / 10000) + base_hp;
+		max_hp += GroupLeadershipAAHealthEnhancement();
+		max_hp += 5;
+		max_hp += GetHeroicSTA() * 10;
+		max_hp += aabonuses.HP + spellbonuses.HP;
+		if (current_hp > max_hp) {
+			current_hp = max_hp;
 		}
-	}
+		int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
+		if (hp_perc_cap) {
+			int curHP_cap = (max_hp * hp_perc_cap) / 100;
+			if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
 
-	return max_hp;
+				current_hp = curHP_cap;
+			}
+		}
+
+		this->max_hp = static_cast<int32>(
+			EQ::Clamp(max_hp, 
+				static_cast<int64>(0LL), 
+				static_cast<int64>(std::numeric_limits<int32>::max()))
+			);
+
+		return max_hp;
+	} else {
+		int32 base_hp = (CalcBaseHP() + itembonuses.HP);
+		int32 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
+		max_hp = (base_hp * nd / 10000) + base_hp;
+		max_hp += GroupLeadershipAAHealthEnhancement();
+		max_hp += 5;
+		max_hp += GetHeroicSTA() * 10;
+		max_hp += aabonuses.HP + spellbonuses.HP;
+		if (current_hp > max_hp) {
+			current_hp = max_hp;
+		}
+		int hp_perc_cap = spellbonuses.HPPercCap[SBIndex::RESOURCE_PERCENT_CAP];
+		if (hp_perc_cap) {
+			int curHP_cap = (max_hp * hp_perc_cap) / 100;
+			if (current_hp > curHP_cap || (spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP] && current_hp > spellbonuses.HPPercCap[SBIndex::RESOURCE_AMOUNT_CAP])) {
+
+				current_hp = curHP_cap;
+			}
+		}
+
+		return max_hp;
+	}
 }
 
 uint32 Mob::GetClassLevelFactor()

@@ -966,7 +966,7 @@ void Client::SendPhantomStatsAlternateAdvancementRank() {
 	for (int i = 0; i < 7; ++i) {
 		outapp->WriteSInt32(SE_RaiseStatCap);
 		outapp->WriteSInt32(diff);
-		outapp->WriteSInt32(0);
+		outapp->WriteSInt32(i);
 		outapp->WriteSInt32(i + 1);
 	}
 

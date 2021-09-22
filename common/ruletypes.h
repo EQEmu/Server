@@ -167,6 +167,7 @@ RULE_BOOL(Character, EnableCharacterEXPMods, false, "Enables character zone-base
 RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based assisting against the aggresor in pvp.")
 RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable items")
 RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
+RULE_BOOL(Character, FixHPCalculationOverflow, true, "Fix the HP overflow bug in HP calcs, this is a client bug, if fixed and clients overflow their hp wont match the server's hp but the difference serverside can be significant so it's left as an option.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
