@@ -6932,6 +6932,8 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 
 int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id) {
 
+	//**** This can be removed when bot healing focus code is updated ****
+
 	/*
 	This is a general function for calculating best focus effect values for focus effects that exist on targets but modify incoming spells.
 	Should be used when checking for foci that can exist on clients or npcs ect.

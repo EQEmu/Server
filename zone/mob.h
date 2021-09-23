@@ -803,7 +803,7 @@ public:
 	uint16 GetSpellEffectResistChance(uint16 spell_id);
 	int32 GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining);
 	int32 GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill = false, uint16 skill=0);
-	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id);
+	int32 GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id); //**** This can be removed when bot healing focus code is updated ****
 	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	int32 GetPositionalDmgTaken(Mob *attacker);
 	int32 GetPositionalDmgTakenAmt(Mob *attacker);
