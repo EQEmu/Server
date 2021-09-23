@@ -327,9 +327,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		if (target) {
-			int incoming_heal_mod_percent = target->itembonuses.HealRate + target->spellbonuses.HealRate + target->aabonuses.HealRate; //SPA 120 modifies value after Focus Applied but before critical
-			incoming_heal_mod_percent = std::min(incoming_heal_mod_percent, -100);
-			value += value * incoming_heal_mod_percent / 100;
+			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
 		}
 	
 		/*
