@@ -316,17 +316,8 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (spells[spell_id].buffduration < 1) {
 
 		if (target) {
-			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, this, spell_id) / 100); //SPA 393 Add before critical
-			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id) / 100); //SPA 395 Add before critical (?)
-
-			int test1 = 0;
-			int test2 = 0;
-
-			test1 += target->GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, this, spell_id); //SPA 393 Add before critical
-			test2 = target->GetFocusEffect(focusFcHealPctIncoming, spell_id); //SPA 393 Add before critical
-
-			Shout("Test GetFocusIncomming %i", test1);
-			Shout("Test GetFocusEffect %i", test2);
+			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
+			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id)/100); //SPA 395 Add before critical (?)
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
@@ -350,10 +341,9 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
 
 		if (target) {
-			value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id); //SPA 394 Add after critical
+			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
 		}
-
-
+		
 		if (IsNPC() && CastToNPC()->GetHealScale()) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 		}
