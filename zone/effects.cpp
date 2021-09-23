@@ -318,6 +318,15 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (target) {
 			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, this, spell_id) / 100); //SPA 393 Add before critical
 			value += int(value_BaseEffect + target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id) / 100); //SPA 395 Add before critical (?)
+
+			int test1 = 0;
+			int test2 = 0;
+
+			test1 += target->GetFocusIncoming(focusFcHealPctIncoming, SE_FcHealPctIncoming, this, spell_id); //SPA 393 Add before critical
+			test2 = target->GetFocusEffect(focusFcHealPctIncoming, spell_id); //SPA 393 Add before critical
+
+			Shout("Test GetFocusIncomming %i", test1);
+			Shout("Test GetFocusEffect %i", test2);
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
