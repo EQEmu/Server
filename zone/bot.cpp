@@ -6790,15 +6790,15 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (GetClass() == CLERIC) {
 		value += int(value_BaseEffect*RuleI(Spells, ClericInnateHealFocus) / 100);  //confirmed on live parsing clerics get an innate 5 pct heal focus
 	}
-	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id) / 100);
-	value += int(value_BaseEffect*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
+	value += int(value_BaseEffect*GetBotFocusEffect(focusImprovedHeal, spell_id) / 100);
+	value += int(value_BaseEffect*GetBotFocusEffect(focusFcAmplifyMod, spell_id) / 100);
 
 	// Instant Heals
 	if (spells[spell_id].buffduration < 1) {
 
 		if (target) {
-			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctIncoming, spell_id) / 100); //SPA 393 Add before critical
-			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id) / 100); //SPA 395 Add before critical (?)
+			value += int(value_BaseEffect + target->GetBotFocusEffect(focusFcHealPctIncoming, spell_id) / 100); //SPA 393 Add before critical
+			value += int(value_BaseEffect + target->GetBotFocusEffect(focusFcHealPctCritIncoming, spell_id) / 100); //SPA 395 Add before critical (?)
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
@@ -6818,11 +6818,11 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		*/
 
 		value *= critical_modifier;
-		value += GetFocusEffect(focusFcHealAmt, spell_id); //SPA 392 Add after critical
-		value += GetFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
+		value += GetBotFocusEffect(focusFcHealAmt, spell_id); //SPA 392 Add after critical
+		value += GetBotFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
 
 		if (target) {
-			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
+			value += target->GetBotFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
 		}
 
 		if (critical_modifier > 1) {
@@ -6836,10 +6836,6 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	else {
 		if (critical_chance && zone->random.Roll(critical_chance))
 			value *= critical_modifier;
-	}
-
-	if (IsNPC() && CastToNPC()->GetHealScale()) {
-		value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 	}
 
 	return value;
