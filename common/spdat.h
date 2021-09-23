@@ -1076,9 +1076,9 @@ typedef enum {
 #define SE_FcTimerLockout				390 // implemented, @Fc, On Caster, set a spell to be on recast timer, base: recast duration milliseconds, Note: Applied from casted spells only
 #define SE_LimitManaMax					391	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
 #define SE_FcHealAmt					392 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
-#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received critical chance mod, base: chance pct
+#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
 #define SE_FcHealAmtIncoming			394 // implemented, @Fc, On Target, heal received mod flat amt, base: amt
-#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct
+#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
 #define SE_FcHealAmtCrit				396 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
 #define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets
