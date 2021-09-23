@@ -3401,7 +3401,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].focusproclimit_procamt = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
-	if (level_override > 0) {
+	if (level_override > 0 || buffs[emptyslot].numhits > 0) {
 		buffs[emptyslot].UpdateClient = true;
 	} else {
 		if (buffs[emptyslot].ticsremaining > (1 + CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration)))
