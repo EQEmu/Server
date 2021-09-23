@@ -8525,7 +8525,10 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 
 bool Mob::NegateSpellEffect(uint16 spell_id, int effect_id)
 {
-	//*This works for most effects, anything handled purely by the client will bypass this (ie Gate, Shadowstep)
+	/*
+		This works for most effects, anything handled purely by the client will bypass this (ie Gate, Shadowstep)
+		Seen with resurrection effects, likely blocks the client from accepting a ressurection request. *Not implement at this time.
+	*/
 
 	for (int i = 0; i < GetMaxTotalSlots(); i++) {
 		//Check for any buffs containing NegateEffect
