@@ -525,8 +525,6 @@ public:
 	bool	LoadTributes();
 
 	/* Doors   */
-	bool	DoorIsOpen(uint8 door_id,const char* zone_name);
-	void	SetDoorPlace(uint8 value,uint8 door_id,const char* zone_name);
 	std::vector<DoorsRepository::Doors> LoadDoors(const std::string& zone_name, int16 version);
 	uint32	GetGuildEQID(uint32 guilddbid);
 	void	UpdateDoorGuildID(int doorid, int guild_id);
@@ -595,7 +593,6 @@ protected:
 	std::unordered_set<uint32> npc_spells_loadtried;
 	DBnpcspellseffects_Struct** npc_spellseffects_cache;
 	bool*				npc_spellseffects_loadtried;
-	uint8 door_isopen_array[255];
 };
 
 extern ZoneDatabase database;
