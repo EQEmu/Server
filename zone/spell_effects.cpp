@@ -6930,6 +6930,58 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 	return dmg;
 }
 
+int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id) {
+
+	/*
+	This is a general function for calculating best focus effect values for focus effects that exist on targets but modify incoming spells.
+	Should be used when checking for foci that can exist on clients or npcs ect.
+	Example: When your target has a focus limited buff that increases amount of healing on them.
+	*/
+
+	if (!caster) {
+		return 0;
+	}
+
+	int value = 0;
+
+	if (spellbonuses.FocusEffects[type]){
+
+		int32 tmp_focus = 0;
+		int tmp_buffslot = -1;
+
+		int buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++) {
+
+			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
+
+				int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
+
+				if (!focus) {
+					continue;
+				}
+
+				if (tmp_focus && focus > tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
+
+				else if (!tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
+			}
+		}
+
+		value = tmp_focus;
+
+		if (tmp_buffslot >= 0)
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
+	}
+
+
+	return value;
+}
+
 int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
 
 	// 9-17-12: This is likely causing crashes, disabled till can resolve.
