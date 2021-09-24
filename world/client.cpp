@@ -1149,7 +1149,6 @@ bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
 	// Determine if Checksum Verification is Enabled
 	if(!RuleB(World, EnableChecksumVerification))
 	{
-		cle->SetCanLeaveLoad(true);
 		return true;
 	}
 	
@@ -1191,10 +1190,8 @@ bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
 		{
 			LogDebug( "spells_us.txt checksum is GOOD! [{}]", checksum);
 			database.SetExeCrcForAccount(GetAccountID(), checksum);
-			cle->SetCanLeaveLoad(true);
 		}
 		
-		cle->SetCanLeaveLoad(true);
 		return true;
 	}
 
@@ -1211,12 +1208,10 @@ bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
 		{
 			database.SetSpellCrcForAccount(GetAccountID(), checksum);
 		}
-		cle->SetCanLeaveLoad(true);
 		return true;
 	}
 
 	LogDebug( "Player did not log in using the right checksum and was too low of level to matter. Checksum submitted: [{}]", checksum);
-	cle->SetCanLeaveLoad(false);
 	return true;
 }
 

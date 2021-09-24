@@ -137,7 +137,6 @@ public:
 	uint32  GetGroupIDByCharID(uint32 char_id);
 	uint32  GetRaidIDByCharID(uint32 char_id);
 
-	void    SetExeCrcForAccount(uint32 accid, uint64 checksum);
 	void	GetAccountName(uint32 accountid, char* name, uint32* oLSAccountID = 0);
 	void	GetCharName(uint32 char_id, char* name);
 	std::string GetCharNameByID(uint32 char_id);
