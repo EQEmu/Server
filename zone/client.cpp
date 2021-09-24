@@ -10063,6 +10063,10 @@ bool Client::CanPvP(Client *c) {
 	if (c->GetGM())
 		return false;
 
+	// guildies cant PK each other??
+	if (GuildID() == c->GuildID())
+		return false;
+
 	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
 	if (!zone->IsCity(/*zone->GetZoneID()*/))
 		return true;
