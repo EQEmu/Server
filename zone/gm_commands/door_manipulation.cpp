@@ -129,7 +129,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			std::vector<std::string> move_h_options_negative;
 			std::vector<std::string> set_size_options_positive;
 			std::vector<std::string> set_size_options_negative;
-			for (const auto          &move_option : move_options) {
+			for (const auto &move_option : move_options) {
 				if (move_option == move_x_action) {
 					move_x_options_positive.emplace_back(
 						EQ::SayLinkEngine::GenerateQuestSaylink(
@@ -165,7 +165,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -190,7 +190,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_y_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -204,7 +204,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -229,7 +229,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -15; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_z_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -243,7 +243,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 						EQ::SayLinkEngine::GenerateQuestSaylink(
 							fmt::format("#door edit {} -.25", move_option),
 							false,
-							"-.25"
+							".25"
 						)
 					);
 				}
@@ -260,7 +260,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -50; move_index <= 0; move_index += 5) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						move_h_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -283,7 +283,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 					}
 
 					for (int move_index = -100; move_index <= 0; move_index += 10) {
-						int value = (move_index == 0 ? 1 : move_index);
+						int value = (move_index == 0 ? -1 : move_index);
 						set_size_options_negative.emplace_back(
 							EQ::SayLinkEngine::GenerateQuestSaylink(
 								fmt::format("#door edit {} {}", move_option, value),
@@ -297,26 +297,30 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 			// we're passing a move action here
 			if (!arg3.empty() && StringIsNumber(arg3)) {
-				int x_move   = 0;
-				int y_move   = 0;
-				int z_move   = 0;
-				int h_move   = 0;
-				int set_size = 0;
+				float x_move = 0.0f;
+				float y_move = 0.0f;
+				float z_move = 0.0f;
+				float h_move = 0.0f;
+				float set_size = 0.0f;
 
 				if (arg2 == move_x_action) {
-					x_move = std::atoi(arg3.c_str());
+					x_move = std::atof(arg3.c_str());
 				}
+
 				if (arg2 == move_y_action) {
-					y_move = std::atoi(arg3.c_str());
+					y_move = std::atof(arg3.c_str());
 				}
+
 				if (arg2 == move_z_action) {
-					z_move = std::atoi(arg3.c_str());
+					z_move = std::atof(arg3.c_str());
 				}
+
 				if (arg2 == move_h_action) {
-					h_move = std::atoi(arg3.c_str());
+					h_move = std::atof(arg3.c_str());
 				}
+
 				if (arg2 == set_size_action) {
-					set_size = std::atoi(arg3.c_str());
+					set_size = std::atof(arg3.c_str());
 				}
 
 				door->SetLocation(
