@@ -63,6 +63,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	if (spell.disallow_sit && IsBuffSpell(spell_id) && IsClient() && (CastToClient()->IsSitting() || CastToClient()->GetHorseId() != 0))
 		return false;
 
+	bool CanMemoryBlurFromMez = true;
+	if (IsMezzed()) { //Check for special memory blur behavior when on mez, this needs to be before buff override.
+		CanMemoryBlurFromMez = false;
+	}
+
 	bool c_override = false;
 	if (caster && caster->IsClient() && GetCastedSpellInvSlot() > 0) {
 		const EQ::ItemInstance *inst = caster->CastToClient()->GetInv().GetItem(GetCastedSpellInvSlot());
@@ -1521,16 +1526,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Memory Blur: %d", effect_value);
 #endif
-				int wipechance = spells[spell_id].base[i];
-				int bonus = 0;
-
-				if (caster){
-					bonus = caster->spellbonuses.IncreaseChanceMemwipe +
-						caster->itembonuses.IncreaseChanceMemwipe +
-						caster->aabonuses.IncreaseChanceMemwipe;
+				//Memory blur component of Mez spells is not checked again if Mez is recast on a target that is already mezed
+				if (!CanMemoryBlurFromMez && IsEffectInSpell(spell_id, SE_Mez)) {
+					break;
 				}
-
-				wipechance += wipechance*bonus/100;
+	
+				int wipechance = 0;
+					
+				if (caster) {
+					wipechance = caster->GetMemoryBlurChance(effect_value);
+				}
 
 				if(zone->random.Roll(wipechance))
 				{
@@ -3850,19 +3855,15 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_WipeHateList: {
-			if (IsMezSpell(buff.spellid))
+			if (IsMezSpell(buff.spellid)) {
 				break;
-
-			int wipechance = spells[buff.spellid].base[i];
-			int bonus = 0;
-
-			if (caster) {
-				bonus = caster->spellbonuses.IncreaseChanceMemwipe +
-					caster->itembonuses.IncreaseChanceMemwipe +
-					caster->aabonuses.IncreaseChanceMemwipe;
 			}
 
-			wipechance += wipechance * bonus / 100;
+			int wipechance = 0;
+
+			if (caster) {
+				wipechance = caster->GetMemoryBlurChance(effect_value);
+			}
 
 			if (zone->random.Roll(wipechance)) {
 				if (IsAIControlled()) {
@@ -8512,4 +8513,43 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 	}
 
 	return zone->random.Int(focus_base, focus_base2);
+}
+
+int Mob::GetMemoryBlurChance(int base_chance)
+{
+	/*
+		Memory Blur mechanic for SPA 62
+		Chance formula is effect chance + charisma modifer + caster level modifier
+		Effect chance is base value of spell
+		Charisma modifier is CHA/10 = %, with MAX of 15% (thus 150 cha gives you max bonus)
+		Caster level modifier. +100% if caster < level 17 which scales down to 25% at > 53. **
+		(Yes the above gets worse as you level. Behavior was confirmed on live.)
+		Memory blur is applied to mez on initial cast using same formula. However, recasting on a target that
+		is already mezed will not give a chance to memory blur. The blur is not checked on buff ticks.
+
+		SPA 242 SE_IncreaseChanceMemwipe modifies the final chance after all bonuses are applied.
+		This is also applied to memory blur from mez spells.
+
+		this = caster
+	*/
+	int cha_mod = int(GetCHA() / 10);
+	cha_mod = std::min(cha_mod, 15);
+	
+	int lvl_mod = 0;
+	if (GetLevel() < 17) {
+		lvl_mod = 100;
+	}
+	else if (GetLevel() > 53) {
+		lvl_mod = 25;
+	}
+	else {
+		lvl_mod = 100 + ((GetLevel() - 16)*-2);//Derived from above range of values.**
+	}
+
+	int chance = cha_mod + lvl_mod + base_chance;
+
+	int chance_mod = spellbonuses.IncreaseChanceMemwipe + itembonuses.IncreaseChanceMemwipe + aabonuses.IncreaseChanceMemwipe;
+
+	chance += chance * chance_mod / 100;
+	return chance;
 }
