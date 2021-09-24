@@ -109,7 +109,6 @@ private:
 
 	bool HandlePacket(const EQApplicationPacket *app);
 	bool HandleNameApprovalPacket(const EQApplicationPacket *app);
-	bool HandleChecksumPacket(const EQApplicationPacket* app);
 	bool HandleSendLoginInfoPacket(const EQApplicationPacket *app);
 	bool HandleGenerateRandomNamePacket(const EQApplicationPacket *app);
 	bool HandleCharacterCreateRequestPacket(const EQApplicationPacket *app);
@@ -117,6 +116,7 @@ private:
 	bool HandleEnterWorldPacket(const EQApplicationPacket *app);
 	bool HandleDeleteCharacterPacket(const EQApplicationPacket *app);
 	bool HandleZoneChangePacket(const EQApplicationPacket *app);
+	bool HandleChecksumPacket(const EQApplicationPacket *app);
 
 	EQStreamInterface* eqs;
 };

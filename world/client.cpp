@@ -399,33 +399,6 @@ void Client::SendMembershipSettings() {
 	safe_delete(outapp);
 }
 
-bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
-{
-	SimpleChecksum_Struct* cs = (SimpleChecksum_Struct*)app->pBuffer;
-	uint64 checksum = cs->checksum;
-
-	std::string exechecksum;
-	uint64 execheckint;
-	execheckint = -1;
-
-	if (checksum == execheckint && GetAdmin() < 255) {
-			LogDebug("RoF2 EXE Checksum is GOOD! [{}]", checksum);
-			database.SetExeCrcForAccount(GetAccountID(), checksum);
-			return true;
-	} 
-	if (checksum != execheckint && GetAdmin() < 255) {
-		LogDebug("EXECHECKSUM FAILED");
-		database.SetExeCrcForAccount(GetAccountID(), checksum);
-		return false;
-	}
-	if (GetAdmin() == 255) {
-		LogDebug("RoF2 EXE Checksum overwrited. Account is admin! [{}]", checksum);
-		database.SetExeCrcForAccount(GetAccountID(), checksum);
-		return true;
-	}
-}
-
-
 void Client::SendPostEnterWorld() {
 	auto outapp = new EQApplicationPacket(OP_PostEnterWorld, 1);
 	outapp->size=0;
@@ -1168,6 +1141,83 @@ bool Client::Process() {
 	}
 
 	return ret;
+}
+
+bool Client::HandleChecksumPacket(const EQApplicationPacket *app)
+{
+
+	// Determine if Checksum Verification is Enabled
+	if(!RuleB(World, EnableChecksumVerification))
+	{
+		cle->SetCanLeaveLoad(true);
+		return true;
+	}
+	
+	// Checksum Verification for eqgame.exe and spells_us.txt
+	SimpleChecksum_Struct *cs = (SimpleChecksum_Struct *)app->pBuffer;
+	uint64 checksum = cs->checksum;
+	uint64 execheckint;
+	uint64 spellfilecheckint;
+	execheckint = -1;
+	spellfilecheckint = -1;
+	std::string checksum_eqgame;
+	std::string spellfilechecksum;
+	
+	// Get allowed checksum variables for eqgame.exe and spells_us.txt
+	if (database.GetVariable("checksum_eqgame", checksum_eqgame))
+	{
+		execheckint = atoll(checksum_eqgame.c_str());
+	}
+	if (database.GetVariable("checksum_spells", spellfilechecksum))
+	{
+		spellfilecheckint = atoll(spellfilechecksum.c_str());
+	}	
+
+
+	LogDebug("Checksum! [{}]", checksum);
+
+
+	if (checksum == spellfilecheckint || checksum == execheckint)
+	{
+		// eqgame.exe
+		if (app->GetOpcode() == OP_World_Client_CRC1)
+		{
+			LogDebug( "eqgame.exe checksum is GOOD! [{}]", checksum);
+			database.SetSpellCrcForAccount(GetAccountID(), checksum);
+		}
+		
+		// spells_us.txt
+		if (app->GetOpcode() == OP_World_Client_CRC2)
+		{
+			LogDebug( "spells_us.txt checksum is GOOD! [{}]", checksum);
+			database.SetExeCrcForAccount(GetAccountID(), checksum);
+			cle->SetCanLeaveLoad(true);
+		}
+		
+		cle->SetCanLeaveLoad(true);
+		return true;
+	}
+
+	// Allow account status to bypass verification
+	if (GetAdmin() >= RuleI(GM, MinStatusToBypassCheckSumVerification))
+	{
+		LogInfo("Admin Bypass Checksum Verfication is GOOD! [{}]", checksum);
+		if (app->GetOpcode() == OP_World_Client_CRC2)
+		{
+			database.SetExeCrcForAccount(GetAccountID(), checksum);
+		}
+
+		if (app->GetOpcode() == OP_World_Client_CRC1)
+		{
+			database.SetSpellCrcForAccount(GetAccountID(), checksum);
+		}
+		cle->SetCanLeaveLoad(true);
+		return true;
+	}
+
+	LogDebug( "Player did not log in using the right checksum and was too low of level to matter. Checksum submitted: [{}]", checksum);
+	cle->SetCanLeaveLoad(false);
+	return true;
 }
 
 void Client::EnterWorld(bool TryBootup) {

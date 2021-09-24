@@ -85,12 +85,6 @@ Database::~Database()
 {
 }
 
-void Database::SetExeCrcForAccount(uint32 accountid, uint64 checksum)
-{
-	std::string query = StringFormat("UPDATE `account` SET `checksum` = '%lld' WHERE `id` = '%i'", checksum, accountid);
-	auto results = QueryDatabase(query);
-}
-
 /*
 	Check if there is an account with name "name" and password "password"
 	Return the account id or zero if no account matches.
@@ -1010,6 +1004,42 @@ bool Database::SetVariable(const std::string varname, const std::string &varvalu
 
 	LoadVariables(); // refresh cache
 	return true;
+}
+
+uint64 Database::GetExeCrcForAccount(uint32 accountid)
+{
+	std::string query = StringFormat("SELECT `checksum_exe` FROM `account` WHERE `id` = '%i'", accountid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return 0;
+
+	auto row = results.begin();
+	return atoll(row[0]);
+}
+
+uint64 Database::GetSpellCrcForAccount(uint32 accountid)
+{
+	std::string query = StringFormat("SELECT `checksum_spells` FROM `account` WHERE `id` = '%i'", accountid);
+	auto results = QueryDatabase(query);
+
+	if (!results.Success())
+		return 0;
+
+	auto row = results.begin();
+	return atoll(row[0]);
+}
+
+void Database::SetExeCrcForAccount(uint32 accountid, uint64 checksum)
+{
+	std::string query = StringFormat("UPDATE `account` SET `checksum_exe` = '%lld' WHERE `id` = '%i'", checksum, accountid);
+	auto results = QueryDatabase(query);
+}
+
+void Database::SetSpellCrcForAccount(uint32 accountid, uint64 checksum)
+{
+	std::string query = StringFormat("UPDATE `account` SET `checksum_spells` = '%lld' WHERE `id` = '%i'", checksum, accountid);
+	auto results = QueryDatabase(query);
 }
 
 // Get zone starting points from DB
