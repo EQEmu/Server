@@ -10067,6 +10067,9 @@ bool Client::CanPvP(Client *c) {
 	if (GuildID() == c->GuildID())
 		return false;
 
+	if (GetGroup()->GetID() == c->GetGroup()->GetID())
+		return false;
+
 	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
 	if (!zone->IsCity(/*zone->GetZoneID()*/))
 		return true;
