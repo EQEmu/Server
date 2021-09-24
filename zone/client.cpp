@@ -10074,7 +10074,7 @@ bool Client::CanPvP(Client *c) {
 
 	// check player level range
 	int rule_level_diff = RuleI(World, PVPLevelDifference);
-	if (abs((std::int16_t)c->GetLevel() - (std::int16_t)GetLevel()) > rule_level_diff)
+	if (abs((int16)c->GetLevel() - (int16)GetLevel()) > rule_level_diff)
 		return false;
 		
 	return true;
