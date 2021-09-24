@@ -10064,7 +10064,7 @@ bool Client::CanPvP(Client *c) {
 		return false;
 
 	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
-	if (zone->IsCity(/*zone->GetZoneID()*/))
+	if (!zone->IsCity(/*zone->GetZoneID()*/))
 		return true;
 
 	// players need to be min level for pvp
