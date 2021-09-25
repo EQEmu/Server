@@ -10216,7 +10216,7 @@ void Client::Handle_OP_MoveItem(const EQApplicationPacket *app)
 
 void Client::Handle_OP_MoveMultipleItems(const EQApplicationPacket *app)
 {
-	Kick("Unimplemented move multiple items"); // TODO: lets not desync though
+	//Kick("Unimplemented move multiple items"); // TODO: lets not desync though
 }
 
 void Client::Handle_OP_OpenContainer(const EQApplicationPacket *app)
