@@ -10058,52 +10058,30 @@ bool Client::CanPvP(Client *c) {
 	//Dueling overrides normal PvP logic
 	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
 		return true;
-	
-	// if both are in a pvp area, or discord, return true
-	//if (GetPVP() && c->GetPVP()) --commented out 2/28/21 to troubleshoot an issue... Darksinga
-	//	return true;
 
-	//If PVPLevelDifference is enabled, only allow PVP if players are of proper range
-	int rule_level_diff = 0;
-	if (RuleI(World, PVPSettings) == 4)
-		rule_level_diff = 4; //Sullon Zek rules can attack anyone of opposing deity.
-	if (RuleI(World, PVPLevelDifference) > 0)
-		rule_level_diff = RuleI(World, PVPLevelDifference);
-
-	if (rule_level_diff > 0) {
-		int level_diff = 0;
-		if (c->GetLevel() > GetLevel())
-			level_diff = c->GetLevel() - GetLevel();
-		else 
-			level_diff = GetLevel() - c->GetLevel();
-		if (GetZoneID() == 71 || GetZoneID() == 72 || GetZoneID() == 76 || GetZoneID() == 77 || GetZoneID() == 39 || GetZoneID() == 89 || GetZoneID() == 108 || GetZoneID() == 124 || GetZoneID() == 128 && GetZoneID() == 26) {
-
-		}
-		else {
-			if (level_diff > rule_level_diff && !GetGM())
-				return false;
-		}
-	}
-
-	//players need to be proper level for pvp
-	int rule_min_level = 0;
-	if (RuleI(World, PVPSettings) == 4)
-		rule_min_level = 1;
-	if (RuleI(World, PVPMinLevel) > 0)
-		rule_min_level = RuleI(World, PVPMinLevel);
-
-	if (rule_min_level > 0 && (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level))
+	// protect GMs by default, (this one sided logic should allow GM to smack people tho)
+	if (c->GetGM())
 		return false;
 
-	//is deity pvp rule enabled? If so, if we're same alignment, don't allow pvp
-	if ((RuleI(World, PVPSettings) == 4 || RuleB(World, PVPUseDeityBasedPVP)) && GetAlignment() == c->GetAlignment() && !GetZoneID() == 26 && !GetZoneID() == 77)
-		return false;
-	
-	//VZTZ Zek PVP Setting
-	if ((RuleI(World, PVPSettings) == 2 || RuleB(World, PVPUseTeamsBySizeBasedPVP)) && GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
+	// guildies cant PK each other??
+	if (GuildID() == c->GuildID())
 		return false;
 
-	if (GetAlignment() == c->GetAlignment() && !GetGM())
+	if (GetGroup()->GetID() == c->GetGroup()->GetID())
+		return false;
+
+	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
+	if (!zone->IsCity(/*zone->GetZoneID()*/))
+		return true;
+
+	// players need to be min level for pvp
+	int rule_min_level = RuleI(World, PVPMinLevel);
+	if (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level)
+		return false;
+
+	// check player level range
+	int rule_level_diff = RuleI(World, PVPLevelDifference);
+	if (abs((int16)c->GetLevel() - (int16)GetLevel()) > rule_level_diff)
 		return false;
 		
 	return true;
