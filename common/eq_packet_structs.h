@@ -5583,13 +5583,8 @@ struct SayLinkBodyFrame_Struct {
 };
 
 struct Checksum_Struct {
-    uint64_t checksum;
-    uint8_t  data[2048];
-};
-
-struct SimpleChecksum_Struct {
-    uint64_t checksum;
-    uint8_t  data[3];
+    uint64 checksum;
+    uint8  data[2048];
 };
 
 struct UpdateMovementEntry {

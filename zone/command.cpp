@@ -9981,11 +9981,9 @@ void command_opcode(Client *c, const Seperator *sep) {
 void command_updatechecksum(Client* c, const Seperator* sep) {
 	if (c)
 	{
-		uint64 spellchecksum = database.GetSpellCrcForAccount(c->AccountID());
-		uint64 exechecksum = database.GetExeCrcForAccount(c->AccountID());
-
-		database.SetVariable("spellfilechecksum", std::to_string(spellchecksum));
-		database.SetVariable("exechecksum", std::to_string(exechecksum));
+		database.SetVariable("checksum_crc1_eqgame", std::to_string(database.GetAccountCRC1EQGame(c->AccountID())));
+		database.SetVariable("checksum_crc2_skillcaps", std::to_string(database.GetAccountCRC2SkillCaps(c->AccountID())));
+		database.SetVariable("checksum_crc3_basedata", std::to_string(database.GetAccountCRC3BaseData(c->AccountID())));
 
 		if (c)
 		{

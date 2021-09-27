@@ -637,6 +637,7 @@ luabind::scope lua_register_packet_opcodes() {
 			luabind::value("SendSystemStats", static_cast<int>(OP_SendSystemStats)),
 			luabind::value("World_Client_CRC1", static_cast<int>(OP_World_Client_CRC1)),
 			luabind::value("World_Client_CRC2", static_cast<int>(OP_World_Client_CRC2)),
+			luabind::value("World_Client_CRC2", static_cast<int>(OP_World_Client_CRC3)),
 			luabind::value("SetChatServer", static_cast<int>(OP_SetChatServer)),
 			luabind::value("SetChatServer2", static_cast<int>(OP_SetChatServer2)),
 			luabind::value("ZoneServerInfo", static_cast<int>(OP_ZoneServerInfo)),
