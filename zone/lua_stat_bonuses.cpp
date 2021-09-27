@@ -678,6 +678,7 @@ int Lua_StatBonuses::GetXPRateMod() const {
 bool Lua_StatBonuses::GetBlockNextSpell() const {
 	Lua_Safe_Call_Bool();
 	//return self->BlockNextSpell; bonus no longer used due to effect being a focus
+	return false;
 }
 
 bool Lua_StatBonuses::GetImmuneToFlee() const {
