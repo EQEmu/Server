@@ -7920,7 +7920,7 @@ uint32 Bot::GetClassHPFactor() {
 }
 
 int32 Bot::CalcMaxHP() {
-	int64 base_hp = (CalcBaseHP() + itembonuses.HP);
+	int64 base_hp = (GenerateBaseHitPoints() + itembonuses.HP);
 	int64 nd = aabonuses.MaxHPChange + spellbonuses.MaxHPChange + itembonuses.MaxHPChange;
 	int64 max_hp = (base_hp * nd / 10000) + base_hp;
 	max_hp += GroupLeadershipAAHealthEnhancement();
