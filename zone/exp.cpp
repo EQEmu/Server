@@ -851,7 +851,7 @@ void Client::SetLevel(uint8 set_level, bool command)
 		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
 
 		// Determine if user is first to receive level
-		if ((RuleB(Character, EnableLevelFirst) && !this->GetGM() && this->IsClient())
+		if (RuleB(Character, EnableLevelFirst) && !this->GetGM() && this->IsClient())
 		{
 			if (!this->IsLevelFirst(GetBaseRace(), GetClass(), GetLevel())) {
 				this->LevelFirst(GetBaseRace(), GetClass(), GetLevel());
