@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Zone:ShowSpawnLastNames', 'true', 'Show last names in spawn packets (i.e. pet owners, bankers, guild masters, etc.)');
