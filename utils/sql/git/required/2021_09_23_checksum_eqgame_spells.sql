@@ -4,5 +4,5 @@ INSERT INTO `variables` (`varname`, `value`, `information`, `ts`) VALUES ('check
 
 ALTER TABLE `account`
 	ADD COLUMN `checksum_crc1_eqgame` TEXT NULL AFTER `suspend_reason`,
-	ADD COLUMN `checksum_crc2_skillcaps` TEXT NULL AFTER `checksum_crc1_eqgame`;
+	ADD COLUMN `checksum_crc2_skillcaps` TEXT NULL AFTER `checksum_crc1_eqgame`,
 	ADD COLUMN `checksum_crc3_basedata` TEXT NULL AFTER `checksum_crc2_skillcaps`;
