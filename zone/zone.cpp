@@ -153,7 +153,6 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle(nullptr);
-	zone->GetTimeSync();
 
 	zone->RequestUCSServerStatus();
 
@@ -1818,7 +1817,8 @@ void Zone::Repop(uint32 delay)
 
 void Zone::GetTimeSync()
 {
-	if (worldserver.Connected() && !zone_has_current_time) {
+	if (!zone_has_current_time) {
+		LogInfo("Requesting world time");
 		auto pack = new ServerPacket(ServerOP_GetWorldTime, 1);
 		worldserver.SendPacket(pack);
 		safe_delete(pack);
