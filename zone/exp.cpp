@@ -198,11 +198,13 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 		in_add_exp *= RuleR(Character, FinalExpMultiplier);
 	}
 
-	// Voidd: TODO - Set Rule for max EXP per kill
-	if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) * .11)) { //exp given should not exceed 10%, check #2 after class / race mods -Gangsta
-		in_add_exp = (GetEXPForLevel(GetLevel() + 1) * .11);
+	// Limit the amount of XP per kill if enabled, default disabled
+	if (RuleB(Character, LimitXPPerKill))
+	{
+		if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) * RuleI(Character, MaxXPPerKill)))
+			in_add_exp = (GetEXPForLevel(GetLevel() + 1) * RuleI(Character, MaxXPPerKill));
 	}
-
+	
 	return in_add_exp;
 }
 
@@ -499,12 +501,14 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 		add_exp *= GetEXPModifier(this->GetZoneID());
 	}
 
-	// Voidd: TODO - Set Rule for max EXP per kill
-	int expcapamount = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())) * .11;
-	if (add_exp > expcapamount) { //exp given should not exceed 11% -Gangsta
-		add_exp = expcapamount;
+	// Limit the amount of XP per kill if enabled, default disabled
+	if (RuleB(Character, LimitXPPerKill))
+	{
+		int expcapamount = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())) * RuleI(Character, MaxXPPerKill);
+		if (add_exp > expcapamount)
+			add_exp = expcapamount;
 	}
-
+	
 	add_exp = GetEXP() + add_exp;
 }
 
@@ -846,11 +850,13 @@ void Client::SetLevel(uint8 set_level, bool command)
 	if(set_level > m_pp.level) {
 		parse->EventPlayer(EVENT_LEVEL_UP, this, "", 0);
 
-			if (!this->GetGM() && this->IsClient()) {
-				if (!this->IsLevelFirst(GetBaseRace(), GetClass(), GetLevel())) {
-					this->LevelFirst(GetBaseRace(), GetClass(), GetLevel());
-				}
+		// Determine if user is first to receive level
+		if ((RuleB(Character, EnableLevelFirst)) && (!this->GetGM() && this->IsClient())
+		{
+			if (!this->IsLevelFirst(GetBaseRace(), GetClass(), GetLevel())) {
+				this->LevelFirst(GetBaseRace(), GetClass(), GetLevel());
 			}
+		}
 
 		/* QS: PlayerLogLevels */
 		if (RuleB(QueryServ, PlayerLogLevels)){

@@ -1013,6 +1013,9 @@ uint64 Database::GetAccountCRC1EQGame(uint32 accountid)
 
 	if (!results.Success())
 		return 0;
+	
+	if (results.RowCount() == 0)
+		return 0;
 
 	auto row = results.begin();
 	return atoll(row[0]);
@@ -1024,6 +1027,9 @@ uint64 Database::GetAccountCRC2SkillCaps(uint32 accountid)
 
 	if (!results.Success())
 		return 0;
+	
+	if (results.RowCount() == 0)
+		return 0;
 
 	auto row = results.begin();
 	return atoll(row[0]);
@@ -1034,6 +1040,9 @@ uint64 Database::GetAccountCRC3BaseData(uint32 accountid)
 	auto results = QueryDatabase(query);
 
 	if (!results.Success())
+		return 0;
+	
+	if (results.RowCount() == 0)
 		return 0;
 
 	auto row = results.begin();

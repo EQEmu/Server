@@ -4438,8 +4438,7 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
 			return true;
-		// Voidd: TODO - Add rule to check if fearing clients is allowed.
-		} else if(IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
+		} else if(!RuleI(Character, PVPAllowFear) && IsClient() && caster->IsClient() && (caster->CastToClient()->GetGM() == false))
 		{
 			LogSpells("Clients cannot fear eachother!");
 			caster->MessageString(Chat::Red, IMMUNE_FEAR);	// need to verify message type, not in MQ2Cast for easy look up
