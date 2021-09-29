@@ -10133,7 +10133,7 @@ void Client::SendPVPStats()
 
 	database.GetLastPVPKill(this, pvps);
 	database.GetLastPVPDeath(this, pvps);
-	//database.GetPVPKillsLast24Hours(this, pvps);
+	database.GetPVPKillsLast24Hours(this, pvps);
 
 	QueuePacket(outapp);
 	safe_delete(outapp);
