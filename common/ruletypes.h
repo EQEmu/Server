@@ -291,6 +291,7 @@ RULE_BOOL(Zone, KillProcessOnDynamicShutdown, true, "When process has booted a z
 RULE_INT(Zone, SecondsBeforeIdle, 60, "Seconds before IDLE_WHEN_EMPTY define kicks in")
 RULE_BOOL(Zone, IsCrossZoneInviteAllowed, true, "Disables inviting players across zones")
 RULE_INT(Zone, SpawnEventMin, 3, "When strict is set in spawn_events, specifies the max EQ minutes into the trigger hour a spawn_event will fire. Going below 3 may cause the spawn_event to not fire.")
+RULE_BOOL(Zone, ShowSpawnLastNames, true, "Show last names in spawn packets (i.e. pet owners, bankers, guild masters, etc.)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Map)

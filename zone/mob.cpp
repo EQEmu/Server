@@ -1144,7 +1144,7 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 	int i;
 
 	strcpy(ns->spawn.name, name);
-	if(IsClient()) {
+	if(IsClient() && RuleB(Zone, ShowSpawnLastNames)) {
 		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
 	}
 
@@ -1219,7 +1219,9 @@ void Mob::FillSpawnStruct(NewSpawn_Struct* ns, Mob* ForWho)
 
 	ns->spawn.lastName[0] = '\0';
 
-	strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
+	if (RuleB(Zone, ShowSpawnLastNames)) {
+		strn0cpy(ns->spawn.lastName, lastname, sizeof(ns->spawn.lastName));
+	}
 
 	//for (i = 0; i < _MaterialCount; i++)
 	for (i = 0; i < 9; i++) {
