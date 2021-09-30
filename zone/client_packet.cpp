@@ -12198,7 +12198,8 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 			tr.name,
 			tr.trivial,
 			SUM(tre.componentcount),
-			tr.tradeskill
+			tr.tradeskill,
+			tr.must_learn
 				FROM
 				tradeskill_recipe AS tr
 				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
@@ -12298,7 +12299,8 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 			tr.name,
 			tr.trivial,
 			SUM(tre.componentcount),
-			tr.tradeskill
+			tr.tradeskill,
+			tr.must_learn
 				FROM
 				tradeskill_recipe AS tr
 				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
