@@ -748,7 +748,7 @@ typedef enum {
 //#define SE_TransferItem				60	// not used
 #define SE_Identify						61	// implemented
 //#define SE_ItemID						62	// not used
-#define SE_WipeHateList					63	// implemented
+#define SE_WipeHateList					63	// implemented, @Memblur, chance to wipe hate list of target, base: pct chance, limit: none, max: ? (not implemented), Note: caster level and CHA add to pct chance
 #define SE_SpinTarget					64	// implemented - TO DO: Not sure stun portion is working correctly
 #define SE_InfraVision					65	// implemented
 #define SE_UltraVision					66	// implemented
@@ -927,7 +927,7 @@ typedef enum {
 #define SE_FeignedCastOnChance			239	// implemented - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// implemented - increase the amount of mana returned to you when reclaiming your pet.
-#define SE_IncreaseChanceMemwipe		242	// implemented - increases the chance to wipe hate with memory blurr
+#define SE_IncreaseChanceMemwipe		242	// implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
 #define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest

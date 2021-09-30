@@ -845,6 +845,7 @@ public:
 	bool HarmonySpellLevelCheck(int32 spell_id, Mob* target = nullptr);
 	bool CanFocusUseRandomEffectivenessByType(focusType type);
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
+	int GetMemoryBlurChance(int base_chance);
 
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
@@ -1533,6 +1534,7 @@ protected:
 	bool endur_upkeep;
 	bool degenerating_effects; // true if we have a buff that needs to be recalced every tick
 	bool spawned_in_water;
+
 public:
 	bool GetWasSpawnedInWater() const;
 
