@@ -201,8 +201,8 @@ uint32 Client::CalcEXP(uint8 conlevel) {
 	// Limit the amount of XP per kill if enabled, default disabled
 	if (RuleB(Character, LimitXPPerKill))
 	{
-		if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) * RuleI(Character, MaxXPPerKill)))
-			in_add_exp = (GetEXPForLevel(GetLevel() + 1) * RuleI(Character, MaxXPPerKill));
+		if (in_add_exp > (GetEXPForLevel(GetLevel() + 1) * RuleR(Character, MaxXPPerKill)))
+			in_add_exp = (GetEXPForLevel(GetLevel() + 1) * RuleR(Character, MaxXPPerKill));
 	}
 	
 	return in_add_exp;
