@@ -454,8 +454,8 @@ struct NewZone_Struct {
 /*0864*/	uint32	underworld_teleport_index; // > 0 teleports w/ zone point index, invalid succors, -1 affects some collisions
 /*0868*/	uint32	scriptIDSomething3;
 /*0872*/	uint32	SuspendBuffs;
-/*0876*/	uint32	unknown876;	//seen 50
-/*0880*/	uint32	unknown880;	//seen 10
+/*0876*/	uint32	LavaDamage;	//seen 50
+/*0880*/	uint32	MinLavaDamage;	//seen 10
 /*0884*/	uint8	unknown884;	//seen 1
 /*0885*/	uint8	unknown885;	//seen 0 (POK) or 1 (rujj)
 /*0886*/	uint8	unknown886;	//seen 1
