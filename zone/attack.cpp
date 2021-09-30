@@ -2357,9 +2357,27 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				give_exp_client->GetCleanName(),
 				GetNPCTypeID()
 			);
-			give_exp_client
-				->GetTaskState()
-				->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
+			if (kr) {
+				for (int i = 0; i < MAX_RAID_MEMBERS; i++) {
+					if (kr->members[i].member != nullptr && kr->members[i].member->IsClient()) { // If Group Member is Client
+						Client *c = kr->members[i].member;
+						c->GetTaskState()->HandleUpdateTasksOnKill(c, GetNPCTypeID());
+					}
+				}
+			}
+			else if (give_exp_client->IsGrouped() && kg != nullptr) {
+				for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+					if (kg->members[i] != nullptr && kg->members[i]->IsClient()) { // If Group Member is Client
+						Client *c = kg->members[i]->CastToClient();
+						c->GetTaskState()->HandleUpdateTasksOnKill(c, GetNPCTypeID());
+					}
+				}
+			}
+			else {
+				give_exp_client
+					->GetTaskState()
+					->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
+			}
 		}
 
 		if (kr) {

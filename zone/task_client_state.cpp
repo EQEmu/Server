@@ -2813,33 +2813,15 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 			if (p_task_data->type != TaskType::Shared) {
 				LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
 
-				Raid *raid = entity_list.GetRaidByClient(client);
-				if (raid) {
-					for (auto &e : raid->members) {
-						if (e.member && e.member->IsClient()) {
-							Client *c = e.member->CastToClient();
-							c->UpdateTasksOnKill(npc_type_id);
-						}
-					}
-					return;
-				}
-
-				Group *group = entity_list.GetGroupByClient(client);
-				if (group) {
-					for (auto &m : group->members) {
-						if (m && m->IsClient()) {
-							Client *c = m->CastToClient();
-							c->UpdateTasksOnKill(npc_type_id);
-						}
-					}
-					return;
-				}
+				client->UpdateTasksOnKill(npc_type_id);
 			}
 
 			LogTasksDetail("[HandleUpdateTasksOnKill] Shared update");
-
-			// shared tasks only require one client to receive an update to propagate
-			client->UpdateTasksOnKill(npc_type_id);
+			
+			if (p_task_data->type == TaskType::Shared) {
+				// shared tasks only require one client to receive an update to propagate
+				client->UpdateTasksOnKill(npc_type_id);
+			}
 		}
 	}
 }
