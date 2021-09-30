@@ -1768,11 +1768,11 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 			std::vector<EQ::Any> args;
 			args.push_back(victim);
 
-			int pvp_points = CalculatePVPPoints(killerMob->CastToClient(), victim);
+			int pvp_points = 0; 
 
 			// naez: 0 points for farming your own
-			if (killerMob->CastToClient()->GetIP() == victim->CastToClient()->GetIP()) {
-				pvp_points = 0;
+			if (killerMob->CastToClient()->GetIP() != victim->CastToClient()->GetIP()) {
+				pvp_points = CalculatePVPPoints(killerMob->CastToClient(), victim);;
 			}
 
 			if (killerMob->CastToClient()->isgrouped) {
