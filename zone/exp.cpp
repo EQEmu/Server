@@ -504,7 +504,7 @@ void Client::CalculateExp(uint32 in_add_exp, uint32 &add_exp, uint32 &add_aaxp, 
 	// Limit the amount of XP per kill if enabled, default disabled
 	if (RuleB(Character, LimitXPPerKill))
 	{
-		int expcapamount = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())) * RuleI(Character, MaxXPPerKill);
+		int expcapamount = (GetEXPForLevel(GetLevel() + 1) - GetEXPForLevel(GetLevel())) * RuleR(Character, MaxXPPerKill);
 		if (add_exp > expcapamount)
 			add_exp = expcapamount;
 	}

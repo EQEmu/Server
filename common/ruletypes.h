@@ -108,7 +108,7 @@ RULE_BOOL(Character, UseRaceClassExpBonuses, true, "Setting this to true will en
 RULE_BOOL(Character, UseOldRaceExpPenalties, false, "Setting this to true will enable racial experience penalties for Iksar, Troll, Ogre, and Barbarian, as well as the bonus for Halflings")
 RULE_BOOL(Character, UseOldClassExpPenalties, false, "Setting this to true will enable old class experience penalties for Paladin, SK, Ranger, Bard, Monk, Wizard, Enchanter, Magician, and Necromancer, as well as the bonus for Rogues and Warriors")
 RULE_BOOL(Character, LimitXPPerKill, false, "If true, it will limit the maximum XP per kill, set rule Character:MaxXPPerKill default to 0.11")
-RULE_INT(Character, MaxXPPerKill, 0.11, "Set maximum XP per kill, default 0.11")
+RULE_REAL(Character, MaxXPPerKill, 0.11, "Set maximum XP per kill, default 0.11")
 RULE_BOOL(Character, RespawnFromHover, false, "Setting whether the respawn window should be used")
 RULE_INT(Character, RespawnFromHoverTimer, 300, "Respawn Window countdown timer, in seconds")
 RULE_BOOL(Character, UseNewStatsWindow, true, "Setting whether the new Stats window, which displays all information, should be used")
@@ -174,7 +174,8 @@ RULE_BOOL(Character, EnableCharacterEXPMods, false, "Enables character zone-base
 RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based assisting against the aggresor in pvp.")
 RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable items")
 RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
-RULE_BOOL(Character, PVPAllowFear, false, "if enabled, will allow clients to fear eachother in PVP")
+RULE_BOOL(Character, PVPAllowFear, false, "If enabled, will allow clients to fear eachother in PVP")
+RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
