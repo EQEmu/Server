@@ -1770,6 +1770,11 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 
 			int pvp_points = CalculatePVPPoints(killerMob->CastToClient(), victim);
 
+			// naez: 0 points for farming your own
+			if (killerMob->CastToClient()->GetIP() == victim->CastToClient()->GetIP()) {
+				pvp_points = 0;
+			}
+
 			if (killerMob->CastToClient()->isgrouped) {
 				Group* group = entity_list.GetGroupByClient(killerMob->CastToClient());
 
