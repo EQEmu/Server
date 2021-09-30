@@ -104,7 +104,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// window type
 	std::string wintype;
-	if (markdown.find("wintype") != std::string::npos) {
+	if (markdown.find("wintype:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering wintype option", c->GetCleanName());
 
 		auto first_split = split_string(output, "wintype:");
@@ -135,7 +135,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// popupid
 	std::string popupid;
-	if (markdown.find("popupid") != std::string::npos) {
+	if (markdown.find("popupid:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering popupid option", c->GetCleanName());
 
 		auto first_split = split_string(output, "popupid:");
@@ -171,7 +171,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// secondresponseid
 	std::string secondresponseid;
-	if (markdown.find("secondresponseid") != std::string::npos) {
+	if (markdown.find("secondresponseid:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering secondresponseid option", c->GetCleanName());
 
 		auto first_split = split_string(output, "secondresponseid:");
@@ -203,8 +203,8 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	std::string button_one;
 	std::string button_two;
 	if (
-		markdown.find("button_one") != std::string::npos &&
-		markdown.find("button_two") != std::string::npos
+		markdown.find("button_one:") != std::string::npos &&
+		markdown.find("button_two:") != std::string::npos
 	) {
 		LogDiaWind("Client [{}] Rendering button_one option.", c->GetCleanName());
 
@@ -350,7 +350,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// title
 	std::string popup_title;
-	if (markdown.find("title") != std::string::npos) {
+	if (markdown.find("title:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering title option", c->GetCleanName());
 
 		auto first_split = split_string(output, "title:");
