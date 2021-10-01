@@ -839,7 +839,7 @@ typedef enum {
 #define SE_SuspendPet					151	// implemented, @Pet, allow caster to have an extra suspended pet, base: 0=no buffs/items 1=buffs+items, limit: none, max: none
 #define SE_TemporaryPets				152	// implemented
 #define SE_BalanceHP					153 // implemented
-#define SE_DispelDetrimental			154 // implemented
+#define SE_DispelDetrimental			154 // implemented, @Dispel only beneficial effects on a target, base: pct chance (950=95%), limit:none, max:none
 #define SE_SpellCritDmgIncrease			155 // implemented - no known live spells use this currently
 #define SE_IllusionCopy					156	// implemented - Deception
 #define SE_SpellDamageShield			157	// implemented - Petrad's Protection
@@ -894,7 +894,7 @@ typedef enum {
 #define SE_AETaunt						206	// implemented
 #define SE_FleshToBone					207	// implemented
 //#define SE_PurgePoison				208	// not used
-#define SE_DispelBeneficial				209 // implemented
+#define SE_DispelBeneficial				209 // implemented, @Dispel only beneficial effects on a target, base: pct chance (950=95%), limit:none, max:none
 #define SE_PetShield					210	// implmented, @ShieldAbility, allows pet to 'shield' owner for 50 pct of damage taken for a duration, base: Time multiplier 1=12 seconds, 2=24 ect, limit: mitigation on pet owner override (not on live), max: mitigation on pet overide (not on live) 
 #define SE_AEMelee						211	// implemented TO DO: Implement to allow NPC use (client only atm).
 #define SE_FrenziedDevastation			212	// implemented - increase spell criticals + all DD spells cast 2x mana.

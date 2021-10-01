@@ -7057,15 +7057,6 @@ uint16 Mob::GetSpellEffectResistChance(uint16 spell_id)
 
 bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 
-	/*Live 5-20-14 Patch Note: Updated all spells which use Remove Detrimental and
-	Cancel Beneficial spell effects to use a new method. The chances for those spells to
-	affect their targets have not changed unless otherwise noted.*/
-
-	/*This should provide a somewhat accurate conversion between pre 5/14 base values and post.
-	until more information is avialble - Kayen*/
-	if (level_modifier >= 100)
-		level_modifier = level_modifier/100;
-
 	//Dispels - Check level of caster agianst buffs level (level of the caster who cast the buff)
 	//Effect value of dispels are treated as a level modifier.
 	//Values for scaling were obtain from live parses, best estimates.
@@ -7087,6 +7078,32 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 		dispel_chance = 10;
 
 	if (zone->random.Roll(dispel_chance))
+		return true;
+	else
+		return false;
+}
+
+bool Mob::TryDispelBeneficialOrDetrimental(uint8 caster_level, uint8 buff_level, int chance) {
+
+	/*
+		Used in SPA 154 and SPA 209 to specifically dispel only beneficial or only detrimental spells.
+		Formula derived from live parsing.
+		Baseline chance is 'base' / 10, (ie. 950/10 = 95%)
+		Chance receives a penality of 0.5% per level, for each level the 'caster of the buff/debuff' is above the caster of the dispel.
+		There is no bonus percent chance for trying to dispel buff/debuffs cast by mobs lower level than you.
+
+		Ie. Lv 69 Shaman Casts 'Pure Spirit' which has 95% chance to remove deterimental on a debuff cast by a level 85 raid mob. 85-69= 16, 
+		then 16 x 0.5 = 8% penality, thus actual chance to remove is going to be 95-8 = 87%
+	*/
+
+	int dispel_chance = chance;
+	int level_diff = caster_level - buff_level;
+
+	if (level_diff < 0) {
+		dispel_chance += level_diff * 5;
+	}
+
+	if (zone->random.Int(1,1000) <= dispel_chance)
 		return true;
 	else
 		return false;
