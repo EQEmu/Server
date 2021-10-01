@@ -221,10 +221,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		if (GetSpellPowerDistanceMod())
 			effect_value = effect_value*GetSpellPowerDistanceMod()/100;
 
+		//Prevents effect from being applied
+		if (spellbonuses.NegateEffects) {
+			if (effect != SE_NegateSpellEffect && NegateSpellEffect(spell_id, effect)) {
+				if (caster) {
+					caster->Message(Chat::Red, "Part or all of this spell has lost its effectiveness."); //Placeholder msg, until live one is obtained.
+				}
+				continue;
+			}
+		}
+
 #ifdef SPELL_EFFECT_SPAM
 		effect_desc[0] = 0;
 #endif
-
 		switch(effect)
 		{
 			case SE_CurrentHP:	// nukes, heals; also regen/dot if a buff
@@ -8513,6 +8522,28 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 	}
 
 	return zone->random.Int(focus_base, focus_base2);
+}
+
+bool Mob::NegateSpellEffect(uint16 spell_id, int effect_id)
+{
+	/*
+		This works for most effects, anything handled purely by the client will bypass this (ie Gate, Shadowstep)
+		Seen with resurrection effects, likely blocks the client from accepting a ressurection request. *Not implement at this time.
+	*/
+
+	for (int i = 0; i < GetMaxTotalSlots(); i++) {
+		//Check for any buffs containing NegateEffect
+		if (IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_NegateSpellEffect) && spell_id != buffs[i].spellid) {
+			//Match each of the negate effects with the current spell effect, if found, that effect will not be applied.
+			for (int j = 0; j < EFFECT_COUNT; j++)
+			{
+				if (spells[buffs[i].spellid].base2[j] == effect_id) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 int Mob::GetMemoryBlurChance(int base_chance)
