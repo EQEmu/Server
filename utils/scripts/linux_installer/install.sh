@@ -254,7 +254,7 @@ mkdir $eqemu_server_directory/server/maps
 
 #::: Back to server directory
 cd $eqemu_server_directory/server
-wget https://raw.githubusercontent.com/EQEmu/Server/master/utils/scripts/eqemu_server.pl
+wget https://raw.githubusercontent.com/cybernine186/Server/master/utils/scripts/eqemu_server.pl
 
 #::: Map lowercase to uppercase to avoid issues
 ln -s maps Maps
