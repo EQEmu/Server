@@ -2847,7 +2847,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 				if (p_task_data->type != TaskType::Shared) {
 					LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
 					IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
-					return;
+					continue;
 				}
 
 				LogTasksDetail("[HandleUpdateTasksOnKill] Shared update");
