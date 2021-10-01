@@ -5466,6 +5466,25 @@ XS(XS_Client_DiaWind) {
 		XSRETURN_EMPTY;
 }
 
+XS(XS_Client_UntrainDiscBySpellID); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_UntrainDiscBySpellID) {
+	dXSARGS;
+	if (items < 2 || items > 3)
+		Perl_croak(aTHX_ "Usage: Client::UntrainDiscBySpellID(THIS, uint16 spell_id, [bool update_client = true])"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		uint16 spell_id = (uint16) SvUV(ST(1));
+		bool update_client = true;
+		VALIDATE_THIS_IS_CLIENT;
+		if (items == 3) {
+			update_client = (bool) SvTRUE(ST(2));
+		}
+
+		THIS->UntrainDiscBySpellID(spell_id, update_client);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5770,6 +5789,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UnscribeSpellAll"), XS_Client_UnscribeSpellAll, file, "$;$");
 	newXSproto(strcpy(buf, "UntrainDisc"), XS_Client_UntrainDisc, file, "$$;$");
 	newXSproto(strcpy(buf, "UntrainDiscAll"), XS_Client_UntrainDiscAll, file, "$;$");
+	newXSproto(strcpy(buf, "UntrainDiscBySpellID"), XS_Client_UntrainDiscBySpellID, file, "$$;$");
 	newXSproto(strcpy(buf, "UpdateAdmin"), XS_Client_UpdateAdmin, file, "$;$");
 	newXSproto(strcpy(buf, "SetGMStatus"), XS_Client_SetGMStatus, file, "$$");
 	newXSproto(strcpy(buf, "UpdateGroupAAs"), XS_Client_UpdateGroupAAs, file, "$$$");
