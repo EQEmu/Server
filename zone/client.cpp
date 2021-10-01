@@ -10166,6 +10166,11 @@ int Client::CalculatePVPPoints(Client* killer, Client* victim)
 	scoring_modifier = ( level_difference + infamy_difference + (vitality*=-1.0) ) * 5.0;
 		
 	divider_modifier = database.GetKillCount24Hours(killer, victim);
+
+	// naez: only get points per 24 hour yt
+	if (divider_modifier > 1) { // > 1 cuz if theres 0 the func returns 1
+		return 0;
+	}
 		
 	points = (100 + scoring_modifier);
 
