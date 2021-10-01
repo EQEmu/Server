@@ -1200,6 +1200,52 @@ bool EntityList::IsMobSpawnedByNpcTypeID(uint32 get_id)
 	return false;
 }
 
+bool EntityList::IsNPCSpawned(std::vector<uint32> npc_ids)
+{
+	bool is_spawned = false;
+	if (npc_list.empty() || npc_ids.empty()) {
+		return is_spawned;
+	}
+
+	for (auto current_npc : npc_list) {
+		if (
+			std::find(
+				npc_ids.begin(),
+				npc_ids.end(),
+				current_npc.second->GetNPCTypeID()
+			) != npc_ids.end() && 
+			current_npc.second->GetID() != 0
+			) {
+			is_spawned = true;
+		}
+	}
+
+	return is_spawned;
+}
+
+uint32 EntityList::CountSpawnedNPCs(std::vector<uint32> npc_ids)
+{
+	uint32 npc_count = 0;
+	if (npc_list.empty() || npc_ids.empty()) {
+		return npc_count;
+	}
+
+	for (auto current_npc : npc_list) {
+		if (
+			std::find(
+				npc_ids.begin(),
+				npc_ids.end(),
+				current_npc.second->GetNPCTypeID()
+			) != npc_ids.end() && 
+			current_npc.second->GetID() != 0
+		) {
+			npc_count++;
+		}
+	}
+
+	return npc_count;
+}
+
 Object *EntityList::GetObjectByDBID(uint32 id)
 {
 	if (id == 0 || object_list.empty())

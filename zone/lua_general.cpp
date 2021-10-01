@@ -3121,6 +3121,66 @@ void lua_world_wide_update_activity(uint32 task_id, int activity_id, int activit
 	quest_manager.WorldWideTaskUpdate(update_type, task_id, activity_id, activity_count, enforce_level_requirement, min_status, max_status);
 }
 
+bool lua_is_npc_spawned(luabind::adl::object table) {
+	if(luabind::type(table) != LUA_TTABLE) {
+		return false;
+	}
+
+	std::vector<uint32> npc_ids;
+	int index = 1;
+	while (luabind::type(table[index]) != LUA_TNIL) {
+		auto current_id = table[index];
+		uint32 npc_id = 0;
+		if(luabind::type(current_id) != LUA_TNIL) {
+			try {
+				npc_id = luabind::object_cast<int>(current_id);
+			} catch(luabind::cast_failed &) {
+			}
+		} else {
+			break;
+		}
+
+		npc_ids.push_back(npc_id);
+		++index;
+	}
+
+	if (npc_ids.empty()) {
+		return false;
+	}
+
+	return entity_list.IsNPCSpawned(npc_ids);
+}
+
+uint32 lua_count_spawned_npcs(luabind::adl::object table) {
+	if(luabind::type(table) != LUA_TTABLE) {
+		return 0;
+	}
+
+	std::vector<uint32> npc_ids;
+	int index = 1;
+	while (luabind::type(table[index]) != LUA_TNIL) {
+		auto current_id = table[index];
+		uint32 npc_id = 0;
+		if(luabind::type(current_id) != LUA_TNIL) {
+			try {
+				npc_id = luabind::object_cast<int>(current_id);
+			} catch(luabind::cast_failed &) {
+			}
+		} else {
+			break;
+		}
+
+		npc_ids.push_back(npc_id);
+		++index;
+	}
+
+	if (npc_ids.empty()) {
+		return 0;
+	}
+
+	return entity_list.CountSpawnedNPCs(npc_ids);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3560,6 +3620,8 @@ luabind::scope lua_register_general() {
 		luabind::def("get_item_stat", &lua_get_item_stat),
 		luabind::def("get_spell_stat", (int(*)(uint32,std::string))&lua_get_spell_stat),
 		luabind::def("get_spell_stat", (int(*)(uint32,std::string,uint8))&lua_get_spell_stat),
+		luabind::def("is_npc_spawned", &lua_is_npc_spawned),
+		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
 
 		/*
 			Cross Zone
