@@ -581,17 +581,17 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	return false;
 }
 
-void ClientTaskState::UpdateTasksOnKill(Client *client, int npc_type_id)
+void ClientTaskState::UpdateTasksOnKill(Client *client, int npc_type_id, bool update_shared_tasks)
 {
-	UpdateTasksByNPC(client, TaskActivityType::Kill, npc_type_id);
+	UpdateTasksByNPC(client, TaskActivityType::Kill, npc_type_id, update_shared_tasks);
 }
 
 bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
 {
-	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id);
+	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id, true);
 }
 
-bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id)
+bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity_type, int npc_type_id, bool update_shared_tasks)
 {
 
 	int is_updating = false;
@@ -611,6 +611,15 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 		auto p_task_data = task_manager->m_task_data[current_task->task_id];
 		if (p_task_data == nullptr) {
 			return false;
+		}
+
+		// on npc kill updates group/raid members need to update individually for
+		// solo tasks. to prevent shared tasks from updating multiple times we
+		// explicitly only update those once for the client that killed the npc
+		if (!update_shared_tasks && p_task_data->type == TaskType::Shared)
+		{
+			LogTasksDetail("[UpdateByNPC] [{}] ignoring shared task update for npc [{}]", client->GetName(), npc_type_id);
+			continue;
 		}
 
 		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
@@ -658,6 +667,7 @@ bool ClientTaskState::UpdateTasksByNPC(Client *client, TaskActivityType activity
 					// If METHODQUEST, don't updated the activity_information here
 					continue;
 			}
+
 			// We found an active p_task_data to kill this type of NPC, so increment the done count
 			LogTasksDetail("Calling increment done count ByNPC");
 			IncrementDoneCount(client, p_task_data, current_task->slot, activity_id);
@@ -2737,112 +2747,6 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 	}
 }
 
-void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
-{
-	if (!HasActiveTasks()) {
-		return;
-	}
-
-	// loop over the union of tasks and quests
-	for (auto &active_task : m_active_tasks) {
-		auto current_task = &active_task;
-		if (current_task->task_id == TASKSLOTEMPTY) {
-			continue;
-		}
-
-		// Check if there are any active kill activities for this p_task_data
-		auto p_task_data = task_manager->m_task_data[current_task->task_id];
-		if (p_task_data == nullptr) {
-			return;
-		}
-
-		for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
-			ClientActivityInformation *client_activity = &current_task->activity[activity_id];
-			ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
-
-			// We are not interested in completed or hidden activities
-			if (client_activity->activity_state != ActivityActive) {
-				continue;
-			}
-
-			// We are only interested in Kill activities
-			if (activity_info->activity_type != TaskActivityType::Kill) {
-				continue;
-			}
-
-			// Is there a zone restriction on the activity_information ?
-			if (!activity_info->CheckZone(zone->GetZoneID())) {
-				LogTasks(
-					"[HandleUpdateTasksOnKill] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
-					client->GetName(),
-					current_task->task_id,
-					activity_id,
-					static_cast<int32_t>(TaskActivityType::Kill),
-					npc_type_id
-				);
-				continue;
-			}
-			// Is the activity_information to kill this type of NPC ?
-			switch (activity_info->goal_method) {
-				case METHODSINGLEID:
-					if (activity_info->goal_id != npc_type_id) {
-						LogTasksDetail("[HandleUpdateTasksOnKill] Matched single goal");
-						continue;
-					}
-					break;
-
-				case METHODLIST:
-					if (!task_manager->m_goal_list_manager.IsInList(
-						activity_info->goal_id,
-						(int) npc_type_id
-					)) {
-						LogTasksDetail("[HandleUpdateTasksOnKill] Matched list goal");
-						continue;
-					}
-					break;
-
-				default:
-					// If METHODQUEST, don't updated the activity_information here
-					continue;
-			}
-
-			LogTasksDetail("[HandleUpdateTasksOnKill] passed checks");
-
-			// handle actual update
-			// legacy eqemu task update logic loops through group on kill of npc to update a single task
-			if (p_task_data->type != TaskType::Shared) {
-				LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
-
-				Raid *raid = entity_list.GetRaidByClient(client);
-				if (raid) {
-					for (auto &e : raid->members) {
-						if (e.member && e.member->IsClient()) {
-							Client *c = e.member->CastToClient();
-							c->UpdateTasksOnKill(npc_type_id);
-						}
-					}
-					return;
-				}
-
-				Group *group = entity_list.GetGroupByClient(client);
-				if (group) {
-					for (auto &m : group->members) {
-						if (m && m->IsClient()) {
-							Client *c = m->CastToClient();
-							c->UpdateTasksOnKill(npc_type_id);
-						}
-					}
-					return;
-				}
-			}
-
-			LogTasksDetail("[HandleUpdateTasksOnKill] Shared update");
-
-			// shared tasks only require one client to receive an update to propagate
-			client->UpdateTasksOnKill(npc_type_id);
-		}
-	}
-}
 bool ClientTaskState::HasActiveTasks()
 {
 	if (!task_manager) {

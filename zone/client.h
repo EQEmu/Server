@@ -1093,13 +1093,10 @@ public:
 			);
 		}
 	}
-	inline void UpdateTasksOnKill(int npc_type_id)
+	inline void UpdateTasksOnKill(int npc_type_id, bool update_shared_tasks)
 	{
 		if (task_state) {
-			task_state->UpdateTasksOnKill(
-				this,
-				npc_type_id
-			);
+			task_state->UpdateTasksOnKill(this, npc_type_id, update_shared_tasks);
 		}
 	}
 	inline void UpdateTasksForItem(

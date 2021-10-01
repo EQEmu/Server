@@ -2350,18 +2350,6 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		int32 finalxp = give_exp_client->GetExperienceForKill(this);
 		finalxp = give_exp_client->mod_client_xp(finalxp, this);
 
-		// handle task credit on behalf of the killer
-		if (RuleB(TaskSystem, EnableTaskSystem)) {
-			LogTasksDetail(
-				"[NPC::Death] Triggering HandleUpdateTasksOnKill for [{}] npc [{}]",
-				give_exp_client->GetCleanName(),
-				GetNPCTypeID()
-			);
-			give_exp_client
-				->GetTaskState()
-				->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
-		}
-
 		if (kr) {
 			if (!IsLdonTreasure && MerchantType == 0) {
 				kr->SplitExp((finalxp), this);
@@ -2379,6 +2367,11 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 						c->SetFactionLevel(c->CharacterID(), GetNPCFactionID(), c->GetBaseClass(), c->GetBaseRace(), c->GetDeity());
 
 					mod_npc_killed_merit(kr->members[i].member);
+
+					if (RuleB(TaskSystem, EnableTaskSystem)) {
+						bool update_shared_task = (c == give_exp_client);
+						c->UpdateTasksOnKill(GetNPCTypeID(), update_shared_task);
+					}
 
 					PlayerCount++;
 				}
@@ -2427,6 +2420,11 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 					mod_npc_killed_merit(c);
 
+					if (RuleB(TaskSystem, EnableTaskSystem)) {
+						bool update_shared_task = (c == give_exp_client);
+						c->UpdateTasksOnKill(GetNPCTypeID(), update_shared_task);
+					}
+
 					PlayerCount++;
 				}
 			}
@@ -2474,6 +2472,10 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 					give_exp_client->GetBaseRace(), give_exp_client->GetDeity());
 
 			mod_npc_killed_merit(give_exp_client);
+
+			if (RuleB(TaskSystem, EnableTaskSystem)) {
+				give_exp_client->UpdateTasksOnKill(GetNPCTypeID(), true);
+			}
 
 			// QueryServ Logging - Solo
 			if (RuleB(QueryServ, PlayerLogNPCKills)) {
