@@ -270,6 +270,7 @@ public:
 	uint32 GetRadiantCrystals();
 	uint32 GetEbonCrystals();
 	void QuestReadBook(const char *text, int type);
+	void ReadBookByName(std::string book_name, uint8 book_type);
 	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();

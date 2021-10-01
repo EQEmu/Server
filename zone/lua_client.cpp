@@ -2219,6 +2219,11 @@ void Lua_Client::SetGMStatus(uint32 newStatus) {
 	return self->SetGMStatus(newStatus);
 }
 
+void Lua_Client::ReadBookByName(std::string book_name, uint8 book_type) {
+	Lua_Safe_Call_Void();
+	self->ReadBookByName(book_name, book_type);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2592,7 +2597,8 @@ luabind::scope lua_register_client() {
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
-		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus);
+		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus)
+		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName);
 }
 
 luabind::scope lua_register_inventory_where() {

@@ -5466,6 +5466,21 @@ XS(XS_Client_DiaWind) {
 		XSRETURN_EMPTY;
 }
 
+XS(XS_Client_ReadBookByName);
+XS(XS_Client_ReadBookByName) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::ReadBookByName(THIS, string book_name, uint8 book_type)"); // @categories Script Utility
+	{
+		Client *THIS;
+		std::string book_name(SvPV_nolen(ST(1)));
+		uint8 book_type = (uint8) SvUV(ST(2));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ReadBookByName(book_name, book_type);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5778,6 +5793,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UpdateWho"), XS_Client_UpdateWho, file, "$;$");
 	newXSproto(strcpy(buf, "UseDiscipline"), XS_Client_UseDiscipline, file, "$$$");
 	newXSproto(strcpy(buf, "WorldKick"), XS_Client_WorldKick, file, "$");
+	newXSproto(strcpy(buf, "ReadBookByName"), XS_Client_ReadBookByName, file, "$$$");
 	XSRETURN_YES;
 }
 
