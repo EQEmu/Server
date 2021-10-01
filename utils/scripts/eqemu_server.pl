@@ -1685,7 +1685,7 @@ sub fetch_peq_db_full
 sub map_files_fetch
 {
     print "Fetching Latest Maps\n";
-	my $source_dir = $eqemu_server_directory . '/maps';
+	my $source_dir = '/home/eqemu/server/maps';
 
     if (!-d "$source_dir/.git") {
 		mkdir($source_dir)
@@ -1702,7 +1702,7 @@ sub map_files_fetch
 sub quest_files_fetch
 {
     print "Fetching Latest Quests\n";
-	my $source_dir = $eqemu_server_directory . '/quests';
+	my $source_dir = '/home/eqemu/server/quests';
 
     if (!-d "$source_dir/.git") {
 		mkdir($source_dir)
