@@ -1388,8 +1388,8 @@ namespace SoD
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown800 = -1;
 		eq->unknown844 = 600;
-		eq->unknown880 = 50;
-		eq->unknown884 = 10;
+		OUT(LavaDamage);
+		OUT(MinLavaDamage);
 		eq->unknown888 = 1;
 		eq->unknown889 = 0;
 		eq->unknown890 = 1;

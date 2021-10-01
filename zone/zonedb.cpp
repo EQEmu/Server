@@ -167,7 +167,9 @@ bool ZoneDatabase::GetZoneCFG(
 		"fast_regen_endurance, "		// 59
 		"npc_max_aggro_dist, "			// 60
 		"max_movement_update_range, "	// 61
-		"underworld_teleport_index "	// 62
+		"underworld_teleport_index, "	// 62
+		"lava_damage, "					// 63
+		"min_lava_damage "				// 64
 		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
 		zoneid,
 		instance_id,
@@ -220,6 +222,8 @@ bool ZoneDatabase::GetZoneCFG(
 	zone_data->FastRegenEndurance = atoi(row[59]);
 	zone_data->NPCAggroMaxDist = atoi(row[60]);
 	zone_data->underworld_teleport_index = atoi(row[62]);
+	zone_data->LavaDamage = atoi(row[63]);
+	zone_data->MinLavaDamage = atoi(row[64]);
 
 	int bindable = 0;
 	bindable = atoi(row[31]);
