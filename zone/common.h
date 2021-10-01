@@ -554,6 +554,7 @@ struct StatBonuses {
 	int32	ItemEnduranceRegenCap;				// modify endurance regen cap
 	int32   WeaponStance[WEAPON_STANCE_TYPE_MAX +1];// base = trigger spell id, base2 = 0 is 2h, 1 is shield, 2 is dual wield, [0]spid 2h, [1]spid shield, [2]spid DW
 	bool	ZoneSuspendMinion;					// base 1 allows suspended minions to zone
+	bool	CompleteHealBuffBlocker;			// Use in SPA 101 to prevent recast of complete heal from this effect till blocker buff is removed.
 
 	// AAs
 	uint16  SecondaryForte;						// allow a second skill to be specialized with a cap of this value.
@@ -602,7 +603,7 @@ struct StatBonuses {
 	int32	FinishingBlow[2];					// Chance to do a finishing blow for specified damage amount.
 	uint32	FinishingBlowLvl[2];				// Sets max level an NPC can be affected by FB. (base1 = lv, base2= ???)
 	int32	ShieldEquipDmgMod;					// Increases weapon's base damage by base1 % when shield is equipped (indirectly increasing hate)
-	bool	TriggerOnValueAmount;				// Triggers off various different conditions, bool to check if client has effect.
+	bool	TriggerOnCastRequirement;			// Triggers off various different conditions defined as emum SpellRestrictions
 	int8	StunBashChance;						// chance to stun with bash.
 	int8	IncreaseChanceMemwipe;				// increases chance to memory wipe
 	int8	CriticalMend;						// chance critical monk mend

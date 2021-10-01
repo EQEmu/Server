@@ -110,6 +110,8 @@ public:
 		std::string content_flags;
 		std::string content_flags_disabled;
 		int         underworld_teleport_index;
+		int         lava_damage;
+		int         min_lava_damage;
 	};
 
 	static std::string PrimaryKey()
@@ -212,6 +214,8 @@ public:
 			"content_flags",
 			"content_flags_disabled",
 			"underworld_teleport_index",
+			"lava_damage",
+			"min_lava_damage",
 		};
 	}
 
@@ -339,6 +343,8 @@ public:
 		entry.content_flags             = "";
 		entry.content_flags_disabled    = "";
 		entry.underworld_teleport_index = 0;
+		entry.lava_damage               = 50;
+		entry.min_lava_damage           = 10;
 
 		return entry;
 	}
@@ -466,6 +472,8 @@ public:
 			entry.content_flags             = row[89] ? row[89] : "";
 			entry.content_flags_disabled    = row[90] ? row[90] : "";
 			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			return entry;
 		}
@@ -590,6 +598,8 @@ public:
 		update_values.push_back(columns[89] + " = '" + EscapeString(zone_entry.content_flags) + "'");
 		update_values.push_back(columns[90] + " = '" + EscapeString(zone_entry.content_flags_disabled) + "'");
 		update_values.push_back(columns[91] + " = " + std::to_string(zone_entry.underworld_teleport_index));
+		update_values.push_back(columns[92] + " = " + std::to_string(zone_entry.lava_damage));
+		update_values.push_back(columns[93] + " = " + std::to_string(zone_entry.min_lava_damage));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -703,6 +713,8 @@ public:
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 		insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
 		insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
+		insert_values.push_back(std::to_string(zone_entry.lava_damage));
+		insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -824,6 +836,8 @@ public:
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags) + "'");
 			insert_values.push_back("'" + EscapeString(zone_entry.content_flags_disabled) + "'");
 			insert_values.push_back(std::to_string(zone_entry.underworld_teleport_index));
+			insert_values.push_back(std::to_string(zone_entry.lava_damage));
+			insert_values.push_back(std::to_string(zone_entry.min_lava_damage));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -949,6 +963,8 @@ public:
 			entry.content_flags             = row[89] ? row[89] : "";
 			entry.content_flags_disabled    = row[90] ? row[90] : "";
 			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}
@@ -1065,6 +1081,8 @@ public:
 			entry.content_flags             = row[89] ? row[89] : "";
 			entry.content_flags_disabled    = row[90] ? row[90] : "";
 			entry.underworld_teleport_index = atoi(row[91]);
+			entry.lava_damage               = atoi(row[92]);
+			entry.min_lava_damage           = atoi(row[93]);
 
 			all_entries.push_back(entry);
 		}

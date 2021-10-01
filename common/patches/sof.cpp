@@ -1066,8 +1066,8 @@ namespace SoF
 		/*fill in some unknowns with observed values, hopefully it will help */
 		eq->unknown796 = -1;
 		eq->unknown840 = 600;
-		eq->unknown876 = 50;
-		eq->unknown880 = 10;
+		OUT(LavaDamage);
+		OUT(MinLavaDamage);
 		eq->unknown884 = 1;
 		eq->unknown885 = 0;
 		eq->unknown886 = 1;

@@ -153,8 +153,10 @@
 #define SPELL_ACTING_SPIRIT_I 1921
 #define SPELL_ACTING_SPIRIT_II 1922
 #define SPELL_RESURRECTION_SICKNESS 756
+#define SPELL_RESURRECTION_SICKNESS4 757
 #define SPELL_RESURRECTION_SICKNESS2 5249
 #define SPELL_REVIVAL_SICKNESS 13087
+#define SPELL_RESURRECTION_SICKNESS3 37624
 #define SPELL_PACT_OF_HATE_RECOURSE 40375
 #define SPELL_INCENDIARY_OOZE_BUFF 32513
 
@@ -746,7 +748,7 @@ typedef enum {
 //#define SE_TransferItem				60	// not used
 #define SE_Identify						61	// implemented
 //#define SE_ItemID						62	// not used
-#define SE_WipeHateList					63	// implemented
+#define SE_WipeHateList					63	// implemented, @Memblur, chance to wipe hate list of target, base: pct chance, limit: none, max: ? (not implemented), Note: caster level and CHA add to pct chance
 #define SE_SpinTarget					64	// implemented - TO DO: Not sure stun portion is working correctly
 #define SE_InfraVision					65	// implemented
 #define SE_UltraVision					66	// implemented
@@ -925,7 +927,7 @@ typedef enum {
 #define SE_FeignedCastOnChance			239	// implemented - ability gives you an increasing chance for your feigned deaths to not be revealed by spells cast upon you.
 //#define SE_StringUnbreakable			240	// not used [Likely related to above - you become immune to feign breaking on a resisted spell and have a good chance of feigning through a spell that successfully lands upon you.]
 #define SE_ImprovedReclaimEnergy		241	// implemented - increase the amount of mana returned to you when reclaiming your pet.
-#define SE_IncreaseChanceMemwipe		242	// implemented - increases the chance to wipe hate with memory blurr
+#define SE_IncreaseChanceMemwipe		242	// implemented - @Memblur, increases the chance to wipe hate with memory blurr, base: chance pct, limit: none, max: none, Note: Mods final blur chance after other bonuses added.
 #define SE_CharmBreakChance				243	// implemented - Total Domination
 #define	SE_RootBreakChance				244	// implemented[AA] reduce the chance that your root will break.
 #define SE_TrapCircumvention			245	// *not implemented[AA] - decreases the chance that you will set off a trap when opening a chest
@@ -974,7 +976,7 @@ typedef enum {
 #define SE_SkillAttackProc				288	// implemented[AA] - Chance to proc spell on skill attack usage (ex. Dragon Punch)
 #define SE_CastOnFadeEffect				289 // implemented - Triggers only if fades after natural duration.
 #define SE_IncreaseRunSpeedCap			290	// implemented[AA] - increases run speed over the hard cap
-#define SE_Purify						291 // implemented - Removes determental effects
+#define SE_Purify						291 // implemented, @Dispel, remove up specified amount of detiremental spells, base: amt removed, limit: none, max: none, Note: excluding charm, fear, resurrection, and revival sickness  
 #define SE_StrikeThrough2				292	// implemented[AA] - increasing chance of bypassing an opponent's special defenses, such as dodge, block, parry, and riposte.
 #define SE_FrontalStunResist			293	// implemented[AA] - Reduce chance to be stunned from front. -- live descriptions sounds like this isn't limited to frontal anymore
 #define SE_CriticalSpellChance			294 // implemented - increase chance to critical hit and critical damage modifier.
@@ -1125,8 +1127,8 @@ typedef enum {
 #define SE_Assassinate					439 // implemented[AA] - Assassinate damage
 #define SE_FinishingBlowLvl				440 // implemented[AA] - Sets the level Finishing blow can be triggered on an NPC
 #define SE_DistanceRemoval				441 // implemented - Buff is removed from target when target moves X amount of distance away from where initially hit.
-#define SE_TriggerOnReqTarget			442 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
-#define SE_TriggerOnReqCaster			443 // implemented - triggers a spell which a certain criteria are met (below X amount of hp,mana,end, number of pets on hatelist)
+#define SE_TriggerOnReqTarget			442 // implemented, @SpellTrigger, triggers a spell when Target Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually cast on a target
+#define SE_TriggerOnReqCaster			443 // implemented, @SpellTrigger, triggers a spell when Caster Requirement conditions are met (see enum SpellRestriction for IDs), base: spellid, limit: SpellRestriction ID, max: none, Note: Usually self only
 #define SE_ImprovedTaunt				444 // implemented - Locks Aggro On Caster and Decrease other Players Aggro by X% on NPC targets below level Y
 //#define SE_AddMercSlot				445 // *not implemented[AA] - [Hero's Barracks] Allows you to conscript additional mercs.
 #define SE_AStacker						446 // implementet - bufff stacking blocker (26219 | Qirik's Watch)

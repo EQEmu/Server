@@ -11155,9 +11155,18 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			return;
 			break;
 
-		case POPUPID_DIAWIND:
-			if (EntityVariableExists(DIAWIND_RESPONSE_KEY.c_str())) {
-				response = GetEntityVariable(DIAWIND_RESPONSE_KEY.c_str());
+		case POPUPID_DIAWIND_ONE:
+			if (EntityVariableExists(DIAWIND_RESPONSE_ONE_KEY.c_str())) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_ONE_KEY.c_str());
+				if (!response.empty()) {
+					ChannelMessageReceived(8, 0, 100, response.c_str());
+				}
+			}
+			break;
+
+		case POPUPID_DIAWIND_TWO:
+			if (EntityVariableExists(DIAWIND_RESPONSE_TWO_KEY.c_str())) {
+				response = GetEntityVariable(DIAWIND_RESPONSE_TWO_KEY.c_str());
 				if (!response.empty()) {
 					ChannelMessageReceived(8, 0, 100, response.c_str());
 				}
@@ -12189,7 +12198,8 @@ void Client::Handle_OP_RecipesFavorite(const EQApplicationPacket *app)
 			tr.name,
 			tr.trivial,
 			SUM(tre.componentcount),
-			tr.tradeskill
+			tr.tradeskill,
+			tr.must_learn
 				FROM
 				tradeskill_recipe AS tr
 				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id
@@ -12289,7 +12299,8 @@ void Client::Handle_OP_RecipesSearch(const EQApplicationPacket *app)
 			tr.name,
 			tr.trivial,
 			SUM(tre.componentcount),
-			tr.tradeskill
+			tr.tradeskill,
+			tr.must_learn
 				FROM
 				tradeskill_recipe AS tr
 				LEFT JOIN tradeskill_recipe_entries AS tre ON tr.id = tre.recipe_id

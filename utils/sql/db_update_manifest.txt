@@ -426,6 +426,7 @@
 9170|2021_03_03_instance_safereturns.sql|SHOW TABLES LIKE 'character_instance_safereturns'|empty|
 9171|2021_03_30_remove_dz_is_current_member.sql|SHOW COLUMNS FROM `dynamic_zone_members` LIKE 'is_current_member'|not_empty|
 9172|2021_05_21_shared_tasks.sql|SHOW TABLES LIKE 'shared_tasks'|empty|
+9173|2021_09_14_zone_lava_damage.sql|SHOW COLUMNS FROM `zone` LIKE 'lava_damage'|empty|
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not

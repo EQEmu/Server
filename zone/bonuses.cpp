@@ -1256,8 +1256,11 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		}
 
 		case SE_MitigateDamageShield: {
-			if (base1 < 0)
+			
+			//AA that increase mitigation are set to negative.
+			if (base1 < 0) {
 				base1 = base1 * (-1);
+			}
 
 			newbon->DSMitigationOffHand += base1;
 			break;
@@ -2663,8 +2666,15 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MitigateDamageShield:
 			{
-				if (effect_value < 0)
-					effect_value = effect_value*-1;
+				/*
+				Bard songs have identical negative base value and positive max
+				The effect for the songs should increase mitigation. There are
+				spells that do decrease the mitigation with just negative base values.
+				To be consistent all values that increase mitigation will be set to positives
+				*/
+				if (max > 0 && effect_value < 0) {
+					effect_value = max;
+				}
 
 				new_bonus->DSMitigationOffHand += effect_value;
 				break;
@@ -3198,7 +3208,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_TriggerOnReqTarget:
 			case SE_TriggerOnReqCaster:
-				new_bonus->TriggerOnValueAmount = true;
+				new_bonus->TriggerOnCastRequirement = true;
 				break;
 
 			case SE_DivineAura:
@@ -3659,6 +3669,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_ZoneSuspendMinion:
 				new_bonus->ZoneSuspendMinion = effect_value;
+				break;
+
+			case SE_CompleteHeal:
+				new_bonus->CompleteHealBuffBlocker = true;
 				break;
 
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
