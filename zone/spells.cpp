@@ -5335,6 +5335,16 @@ void Client::UntrainDiscAll(bool update_client)
 	}
 }
 
+void Client::UntrainDiscBySpellID(uint16 spell_id, bool update_client)
+{
+	for (int slot = 0; slot < MAX_PP_DISCIPLINES; slot++) {
+		if (m_pp.disciplines.values[slot] == spell_id) {
+			UntrainDisc(slot, update_client);
+			return;
+		}
+	}
+}
+
 int Client::GetNextAvailableSpellBookSlot(int starting_slot) {
 	for (int i = starting_slot; i < EQ::spells::SPELLBOOK_SIZE; i++) {	//using starting_slot should help speed this up when we're iterating through a bunch of spells
 		if (!IsValidSpell(GetSpellByBookSlot(i)))
