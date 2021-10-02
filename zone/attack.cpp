@@ -2357,9 +2357,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 				give_exp_client->GetCleanName(),
 				GetNPCTypeID()
 			);
-			give_exp_client
-				->GetTaskState()
-				->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
+			task_manager->HandleUpdateTasksOnKill(give_exp_client, GetNPCTypeID());
 		}
 
 		if (kr) {

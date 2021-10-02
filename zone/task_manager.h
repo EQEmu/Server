@@ -72,6 +72,8 @@ public:
 	// shared tasks
 	void SyncClientSharedTaskState(Client *c, ClientTaskState *cts);
 
+	void HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id);
+
 private:
 	TaskGoalListManager  m_goal_list_manager;
 	TaskProximityManager m_proximity_manager;
