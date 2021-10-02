@@ -2649,7 +2649,7 @@ luabind::scope lua_register_client() {
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
 		.def("GetIPExemption", (int(Lua_Client::*)(void))&Lua_Client::GetIPExemption)
 		.def("GetIPString", (std::string(Lua_Client::*)(void))&Lua_Client::GetIPString)
-		.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption);
+		.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
 		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName)
 		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
