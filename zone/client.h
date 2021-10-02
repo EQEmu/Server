@@ -1093,15 +1093,6 @@ public:
 			);
 		}
 	}
-	inline void UpdateTasksOnKill(int npc_type_id)
-	{
-		if (task_state) {
-			task_state->UpdateTasksOnKill(
-				this,
-				npc_type_id
-			);
-		}
-	}
 	inline void UpdateTasksForItem(
 		TaskActivityType activity_type,
 		int item_id,

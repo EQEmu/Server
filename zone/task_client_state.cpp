@@ -581,11 +581,6 @@ bool ClientTaskState::UnlockActivities(int character_id, ClientTaskInformation &
 	return false;
 }
 
-void ClientTaskState::UpdateTasksOnKill(Client *client, int npc_type_id)
-{
-	UpdateTasksByNPC(client, TaskActivityType::Kill, npc_type_id);
-}
-
 bool ClientTaskState::UpdateTasksOnSpeakWith(Client *client, int npc_type_id)
 {
 	return UpdateTasksByNPC(client, TaskActivityType::SpeakWith, npc_type_id);
