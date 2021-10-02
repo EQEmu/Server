@@ -2219,6 +2219,161 @@ void Lua_Client::SetGMStatus(uint32 newStatus) {
 	return self->SetGMStatus(newStatus);
 }
 
+void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table) {
+	Lua_Safe_Call_Void();
+	if (luabind::type(bag_items_table) != LUA_TTABLE) {
+		return;
+	}
+
+	auto bag_items = bag_items_table["bag_items"];
+
+	std::map<uint32,int16> bagged_items;
+	auto item_one_id = bag_items["item_one_id"];
+	auto item_one_charges = bag_items["item_one_charges"];
+	if (luabind::type(item_one_id) != LUA_TNIL && luabind::type(item_one_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_one_id),
+					luabind::object_cast<int16>(item_one_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_two_id = bag_items["item_two_id"];
+	auto item_two_charges = bag_items["item_two_charges"];
+	if (luabind::type(item_two_id) != LUA_TNIL && luabind::type(item_two_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_three_id = bag_items["item_three_id"];
+	auto item_three_charges = bag_items["item_three_charges"];
+	if (luabind::type(item_three_id) != LUA_TNIL && luabind::type(item_three_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_four_id = bag_items["item_four_id"];
+	auto item_four_charges = bag_items["item_four_charges"];
+	if (luabind::type(item_four_id) != LUA_TNIL && luabind::type(item_four_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_five_id = bag_items["item_five_id"];
+	auto item_five_charges = bag_items["item_five_charges"];
+	if (luabind::type(item_five_id) != LUA_TNIL && luabind::type(item_five_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_six_id = bag_items["item_six_id"];
+	auto item_six_charges = bag_items["item_six_charges"];
+	if (luabind::type(item_six_id) != LUA_TNIL && luabind::type(item_six_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_seven_id = bag_items["item_seven_id"];
+	auto item_seven_charges = bag_items["item_seven_charges"];
+	if (luabind::type(item_seven_id) != LUA_TNIL && luabind::type(item_seven_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_eight_id = bag_items["item_eight_id"];
+	auto item_eight_charges = bag_items["item_eight_charges"];
+	if (luabind::type(item_eight_id) != LUA_TNIL && luabind::type(item_eight_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_nine_id = bag_items["item_nine_id"];
+	auto item_nine_charges = bag_items["item_nine_charges"];
+	if (luabind::type(item_nine_id) != LUA_TNIL && luabind::type(item_nine_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_two_id),
+					luabind::object_cast<int16>(item_two_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+	
+	auto item_ten_id = bag_items["item_ten_id"];
+	auto item_ten_charges = bag_items["item_ten_charges"];
+	if (luabind::type(item_ten_id) != LUA_TNIL && luabind::type(item_ten_charges) != LUA_TNIL) {
+		try {
+			bagged_items.insert(
+				std::pair<uint32,int16>(
+					luabind::object_cast<uint32>(item_ten_id),
+					luabind::object_cast<int16>(item_ten_charges)
+				)
+			);
+		} catch (luabind::cast_failed &) {
+		}
+	}
+
+	SummonBaggedItemsStruct summoned_items;
+	summoned_items.bag_item_id = bag_item_id;
+	summoned_items.bagged_items = bagged_items;
+	self->SummonBaggedItems(summoned_items);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2592,7 +2747,8 @@ luabind::scope lua_register_client() {
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
-		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus);
+		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus)
+		.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems);
 }
 
 luabind::scope lua_register_inventory_where() {

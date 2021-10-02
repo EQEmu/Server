@@ -5466,6 +5466,151 @@ XS(XS_Client_DiaWind) {
 		XSRETURN_EMPTY;
 }
 
+XS(XS_Client_SummonBaggedItems); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SummonBaggedItems) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::SummonBaggedItems(THIS, uint32 bag_item_id, HASHREF bag_items_hash)"); // @categories Inventory and Items, Script Utility
+	{
+		Client *THIS;
+		uint32 bag_item_id = (uint32) SvUV(ST(1));
+		SV* bag_items_hash_ref = ST(2);
+		VALIDATE_THIS_IS_CLIENT;
+		if (!bag_items_hash_ref || !SvROK(bag_items_hash_ref)) {
+			Perl_croak(aTHX_ "Client::SummonBaggedItems argument is not a reference type.");
+		}
+
+		HV* bag_items_hash = (HV*)SvRV(bag_items_hash_ref);
+		if (SvTYPE(bag_items_hash) != SVt_PVHV) {			
+			Perl_croak(aTHX_ "Client::SummonBaggedItems reference argument is not to a hash type.");
+		}
+		
+		SV** bag_items_pointer = hv_fetchs(bag_items_hash, "bag_items", false);
+		if (!bag_items_pointer) {
+			Perl_croak(aTHX_ "Client::SummonBaggedItems required 'bag_items' key missing from hash");
+		}
+
+		if (!SvROK(*bag_items_pointer) || SvTYPE(SvRV(*bag_items_pointer)) != SVt_PVHV) {
+			Perl_croak(aTHX_ "Client::SummonBaggedItems 'bag_items' entry must have a hash table value");
+		}
+
+		HV* bagged_items_hash = (HV*)SvRV(*bag_items_pointer);
+		SV** item_one_id_pointer = hv_fetchs(bagged_items_hash, "item_one_id", false);
+		SV** item_one_charges_pointer = hv_fetchs(bagged_items_hash, "item_one_charges", false);
+		if (!item_one_id_pointer || !item_one_charges_pointer) {
+			Perl_croak(aTHX_ "Client::SummonBaggedItems required 'item_one_id' key missing from hash");
+		}
+
+		std::map<uint32,int16> bagged_items;
+
+		if (item_one_id_pointer && item_one_charges_pointer) {
+			SV* bag_item_one_id = *item_one_id_pointer;
+			SV* bag_item_one_charges = *item_one_charges_pointer;
+			uint32 item_one_id = static_cast<uint32>(SvUV(bag_item_one_id));
+			int16 item_one_charges = static_cast<int16>(SvIV(bag_item_one_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_one_id, item_one_charges));
+		}
+
+		SV** item_two_id_pointer = hv_fetchs(bagged_items_hash, "item_two_id", false);
+		SV** item_two_charges_pointer = hv_fetchs(bagged_items_hash, "item_two_charges", false);
+		if (item_two_id_pointer && item_two_charges_pointer) {
+			SV* bag_item_two_id = *item_two_id_pointer;
+			SV* bag_item_two_charges = *item_two_charges_pointer;
+			uint32 item_two_id = static_cast<uint32>(SvUV(bag_item_two_id));
+			int16 item_two_charges = static_cast<int16>(SvIV(bag_item_two_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_two_id, item_two_charges));
+		}
+
+		SV** item_three_id_pointer = hv_fetchs(bagged_items_hash, "item_three_id", false);
+		SV** item_three_charges_pointer = hv_fetchs(bagged_items_hash, "item_three_charges", false);
+		if (item_three_id_pointer && item_three_charges_pointer) {
+			SV* bag_item_three_id = *item_three_id_pointer;
+			SV* bag_item_three_charges = *item_three_charges_pointer;
+			uint32 item_three_id = static_cast<uint32>(SvUV(bag_item_three_id));
+			int16 item_three_charges = static_cast<int16>(SvIV(bag_item_three_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_three_id, item_three_charges));
+		}
+
+		SV** item_four_id_pointer = hv_fetchs(bagged_items_hash, "item_four_id", false);
+		SV** item_four_charges_pointer = hv_fetchs(bagged_items_hash, "item_four_charges", false);
+		if (item_four_id_pointer && item_four_charges_pointer) {
+			SV* bag_item_four_id = *item_four_id_pointer;
+			SV* bag_item_four_charges = *item_four_charges_pointer;
+			uint32 item_four_id = static_cast<uint32>(SvUV(bag_item_four_id));
+			int16 item_four_charges = static_cast<int16>(SvIV(bag_item_four_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_four_id, item_four_charges));
+		}
+
+		SV** item_five_id_pointer = hv_fetchs(bagged_items_hash, "item_five_id", false);
+		SV** item_five_charges_pointer = hv_fetchs(bagged_items_hash, "item_five_charges", false);
+		if (item_five_id_pointer && item_five_charges_pointer) {
+			SV* bag_item_five_id = *item_five_id_pointer;
+			SV* bag_item_five_charges = *item_five_charges_pointer;
+			uint32 item_five_id = static_cast<uint32>(SvUV(bag_item_five_id));
+			int16 item_five_charges = static_cast<int16>(SvIV(bag_item_five_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_five_id, item_five_charges));
+		}
+
+		SV** item_six_id_pointer = hv_fetchs(bagged_items_hash, "item_six_id", false);
+		SV** item_six_charges_pointer = hv_fetchs(bagged_items_hash, "item_six_charges", false);
+		if (item_six_id_pointer && item_six_charges_pointer) {
+			SV* bag_item_six_id = *item_six_id_pointer;
+			SV* bag_item_six_charges = *item_six_charges_pointer;
+			uint32 item_six_id = static_cast<uint32>(SvUV(bag_item_six_id));
+			int16 item_six_charges = static_cast<int16>(SvIV(bag_item_six_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_six_id, item_six_charges));
+		}
+
+		SV** item_seven_id_pointer = hv_fetchs(bagged_items_hash, "item_seven_id", false);
+		SV** item_seven_charges_pointer = hv_fetchs(bagged_items_hash, "item_seven_charges", false);
+		if (item_seven_id_pointer && item_seven_charges_pointer) {
+			SV* bag_item_seven_id = *item_seven_id_pointer;
+			SV* bag_item_seven_charges = *item_seven_charges_pointer;
+			uint32 item_seven_id = static_cast<uint32>(SvUV(bag_item_seven_id));
+			int16 item_seven_charges = static_cast<int16>(SvIV(bag_item_seven_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_seven_id, item_seven_charges));
+		}
+
+		SV** item_eight_id_pointer = hv_fetchs(bagged_items_hash, "item_eight_id", false);
+		SV** item_eight_charges_pointer = hv_fetchs(bagged_items_hash, "item_eight_charges", false);
+		if (item_eight_id_pointer && item_eight_charges_pointer) {
+			SV* bag_item_eight_id = *item_eight_id_pointer;
+			SV* bag_item_eight_charges = *item_eight_charges_pointer;
+			uint32 item_eight_id = static_cast<uint32>(SvUV(bag_item_eight_id));
+			int16 item_eight_charges = static_cast<int16>(SvIV(bag_item_eight_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_eight_id, item_eight_charges));
+		}
+
+		SV** item_nine_id_pointer = hv_fetchs(bagged_items_hash, "item_nine_id", false);
+		SV** item_nine_charges_pointer = hv_fetchs(bagged_items_hash, "item_nine_charges", false);
+		if (item_nine_id_pointer && item_nine_charges_pointer) {
+			SV* bag_item_nine_id = *item_nine_id_pointer;
+			SV* bag_item_nine_charges = *item_nine_charges_pointer;
+			uint32 item_nine_id = static_cast<uint32>(SvUV(bag_item_nine_id));
+			int16 item_nine_charges = static_cast<int16>(SvIV(bag_item_nine_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_nine_id, item_nine_charges));
+		}
+
+		SV** item_ten_id_pointer = hv_fetchs(bagged_items_hash, "item_ten_id", false);
+		SV** item_ten_charges_pointer = hv_fetchs(bagged_items_hash, "item_ten_charges", false);
+		if (item_ten_id_pointer && item_ten_charges_pointer) {
+			SV* bag_item_ten_id = *item_ten_id_pointer;
+			SV* bag_item_ten_charges = *item_ten_charges_pointer;
+			uint32 item_ten_id = static_cast<uint32>(SvUV(bag_item_ten_id));
+			int16 item_ten_charges = static_cast<int16>(SvIV(bag_item_ten_charges));
+			bagged_items.insert(std::pair<uint32,int16>(item_ten_id, item_ten_charges));
+		}
+
+		if (bagged_items.size() > 0) {
+			SummonBaggedItemsStruct summoned_items;
+			summoned_items.bag_item_id = bag_item_id;
+			summoned_items.bagged_items = bagged_items;
+			THIS->SummonBaggedItems(summoned_items);
+		}
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -5754,6 +5899,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
+	newXSproto(strcpy(buf, "SummonBaggedItems"), XS_Client_SummonBaggedItems, file, "$$$");
 	newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
 	newXSproto(strcpy(buf, "TakeMoneyFromPP"), XS_Client_TakeMoneyFromPP, file, "$$;$");
 	newXSproto(strcpy(buf, "TGB"), XS_Client_TGB, file, "$");

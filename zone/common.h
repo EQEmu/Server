@@ -896,5 +896,10 @@ struct ExpeditionInvite
 	std::string swap_remove_name;
 };
 
+struct SummonBaggedItemsStruct {
+	uint32 bag_item_id;
+	std::map<uint32,int16> bagged_items;
+};
+
 #endif
 

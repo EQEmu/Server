@@ -10529,3 +10529,63 @@ void Client::SetDoorToolEntityId(uint16 door_tool_entity_id)
 {
 	Client::m_door_tool_entity_id = door_tool_entity_id;
 }
+
+void Client::SummonBaggedItems(SummonBaggedItemsStruct summoned_items) {
+	if (summoned_items.bagged_items.size() > 0) {
+		const EQ::ItemData *bag_item = database.GetItem(summoned_items.bag_item_id);
+		EQ::ItemInstance* summoned_bag;
+		uint8 open_slot;
+
+		if (!bag_item) {
+			Message(
+				Chat::Red,
+				fmt::format(
+					"Unable to summon item {}. Item not found.",
+					summoned_items.bag_item_id
+				).c_str()
+			);
+		} else {
+			if (CheckLoreConflict(bag_item)) {
+				DuplicateLoreMessage(summoned_items.bag_item_id);
+			} else {
+				int bag_item_charges = (
+					bag_item->Stackable ?
+					bag_item->StackSize :
+					(
+						bag_item->MaxCharges >= 0 ?
+						bag_item->MaxCharges :
+						1
+					)
+				);
+				summoned_bag = database.CreateItem(summoned_items.bag_item_id, bag_item_charges);
+			}
+
+			for (auto bagged_item : summoned_items.bagged_items) {
+				uint32 current_item_id = bagged_item.first;
+				int16 current_item_charges = bagged_item.second;
+				const EQ::ItemData *current_item = database.GetItem(current_item_id);
+				if (!summoned_bag || !summoned_bag->IsClassBag()) {
+					Message(Chat::Red, "Attempting to summon item in to bag, but no bag has been summoned!");
+				} else if ((open_slot = summoned_bag->FirstOpenSlot()) == 0xff) {
+					Message(Chat::Red, "Attempting to summon item in to bag, but there is no room in the summoned bag!");
+				} else {
+					if (CheckLoreConflict(current_item)) {
+						DuplicateLoreMessage(current_item_id);
+					} else {
+						EQ::ItemInstance* summoned_bag_item = database.CreateItem(current_item_id, current_item_charges);
+						if (summoned_bag_item) {
+							summoned_bag->PutItem(open_slot, *summoned_bag_item);
+							safe_delete(summoned_bag_item);
+						}
+					}
+				}
+			}
+		}
+
+		if (summoned_bag) {					
+			PushItemOnCursor(*summoned_bag);
+			SendItemPacket(EQ::invslot::slotCursor, summoned_bag, ItemPacketLimbo);		
+			safe_delete(summoned_bag);
+		}
+	}
+}
