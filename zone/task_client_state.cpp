@@ -2771,7 +2771,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 	}
 
 	for (auto &c: clients_to_update) {
-		if (c->ClientDataLoaded()) {
+		if (!c->ClientDataLoaded()) {
 			continue;
 		}
 
