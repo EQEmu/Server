@@ -215,6 +215,7 @@ public:
 		bool attuned);
 	void SummonItem(uint32 item_id, int charges, uint32 aug1, uint32 aug2, uint32 aug3, uint32 aug4, uint32 aug5,
 		bool attuned, int to_slot);
+	void SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table);
 	void SetStats(int type, int value);
 	void IncStats(int type, int value);
 	void DropItem(int slot_id);
@@ -272,6 +273,7 @@ public:
 	uint32 GetRadiantCrystals();
 	uint32 GetEbonCrystals();
 	void QuestReadBook(const char *text, int type);
+	void ReadBookByName(std::string book_name, uint8 book_type);
 	void UpdateGroupAAs(int points, uint32 type);
 	uint32 GetGroupPoints();
 	uint32 GetRaidPoints();

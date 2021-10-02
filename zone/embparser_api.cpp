@@ -7623,6 +7623,43 @@ XS(XS__worldwideaddldonwin) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__isnpcspawned);
+XS(XS__isnpcspawned) {
+	dXSARGS;
+	if (items < 1)
+		Perl_croak(aTHX_ "Usage: quest::isnpcspawned(npc_id_one, npc_id_two, npc_idthree, npc_id_four, npc_id_five...[no limit])");
+	{
+		std::vector<uint32> npc_ids;
+		bool is_spawned = false;
+		for (int index = 0; index < items; index++) {
+			npc_ids.push_back((uint32)SvUV(ST(index)));
+		}
+		is_spawned = entity_list.IsNPCSpawned(npc_ids);
+		ST(0) = boolSV(is_spawned);
+		sv_2mortal(ST(0));
+		XSRETURN(1);
+	}
+}
+
+XS(XS__countspawnednpcs);
+XS(XS__countspawnednpcs) {
+	dXSARGS;
+	if (items < 1)
+		Perl_croak(aTHX_ "Usage: quest::countspawnednpcs(npc_id_one, npc_id_two, npc_idthree, npc_id_four, npc_id_five...[no limit])");
+	{
+		dXSTARG;
+		std::vector<uint32> npc_ids;
+		uint32 npc_count = 0;
+		for (int index = 0; index < items; index++) {
+			npc_ids.push_back((uint32)SvUV(ST(index)));
+		}
+		npc_count = entity_list.CountSpawnedNPCs(npc_ids);
+		XSprePUSH;
+		PUSHu((UV)npc_count);
+		XSRETURN(1);
+	}
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -7718,6 +7755,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "collectitems"), XS__collectitems, file);
 	newXS(strcpy(buf, "completedtasksinset"), XS__completedtasksinset, file);
 	newXS(strcpy(buf, "countitem"), XS__countitem, file);
+	newXS(strcpy(buf, "countspawnednpcs"), XS__countspawnednpcs, file);
 	newXS(strcpy(buf, "createdoor"), XS__CreateDoor, file);
 	newXS(strcpy(buf, "creategroundobject"), XS__CreateGroundObject, file);
 	newXS(strcpy(buf, "creategroundobjectfrommodel"), XS__CreateGroundObjectFromModel, file);
@@ -7926,6 +7964,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "incstat"), XS__incstat, file);
 	newXS(strcpy(buf, "isdisctome"), XS__isdisctome, file);
 	newXS(strcpy(buf, "isdooropen"), XS__isdooropen, file);
+	newXS(strcpy(buf, "isnpcspawned"), XS__isnpcspawned, file);
 	newXS(strcpy(buf, "istaskactive"), XS__istaskactive, file);
 	newXS(strcpy(buf, "istaskactivityactive"), XS__istaskactivityactive, file);
 	newXS(strcpy(buf, "istaskappropriate"), XS__istaskappropriate, file);

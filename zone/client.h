@@ -731,6 +731,7 @@ public:
 	void Stun(int duration);
 	void UnStun();
 	void ReadBook(BookRequest_Struct *book);
+	void ReadBookByName(std::string book_name, uint8 book_type);
 	void QuestReadBook(const char* text, uint8 type);
 	void SendClientMoneyUpdate(uint8 type,uint32 amount);
 	void SendMoneyUpdate();
@@ -916,6 +917,7 @@ public:
 	void PutLootInInventory(int16 slot_id, const EQ::ItemInstance &inst, ServerLootItem_Struct** bag_item_data = 0);
 	bool AutoPutLootInInventory(EQ::ItemInstance& inst, bool try_worn = false, bool try_cursor = true, ServerLootItem_Struct** bag_item_data = 0);
 	bool SummonItem(uint32 item_id, int16 charges = -1, uint32 aug1 = 0, uint32 aug2 = 0, uint32 aug3 = 0, uint32 aug4 = 0, uint32 aug5 = 0, uint32 aug6 = 0, bool attuned = false, uint16 to_slot = EQ::invslot::slotCursor, uint32 ornament_icon = 0, uint32 ornament_idfile = 0, uint32 ornament_hero_model = 0);
+	void SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootItem_Struct>& bag_items);
 	void SetStats(uint8 type,int16 set_val);
 	void IncStats(uint8 type,int16 increase_val);
 	void DropItem(int16 slot_id, bool recurse = true);
@@ -1043,6 +1045,7 @@ public:
 	void SendTaskRequestCooldownTimerMessage();
 	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
+	inline bool HasTaskState() { if (task_state) { return true; } return false; }
 	inline void CancelTask(int task_index, TaskType task_type)
 	{
 		if (task_state) {
@@ -1094,15 +1097,6 @@ public:
 				this,
 				task_id,
 				activity_id
-			);
-		}
-	}
-	inline void UpdateTasksOnKill(int npc_type_id)
-	{
-		if (task_state) {
-			task_state->UpdateTasksOnKill(
-				this,
-				npc_type_id
 			);
 		}
 	}
@@ -1283,6 +1277,9 @@ public:
 	bool m_requesting_shared_task        = false;
 	bool m_shared_task_update            = false;
 	bool m_requested_shared_task_removal = false;
+
+	std::vector<Client*> GetPartyMembers();
+	void HandleUpdateTasksOnKill(uint32 npc_type_id);
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }

@@ -67,6 +67,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
+#include "client.h"
+
 
 #ifdef BOTS
 #include "bot.h"

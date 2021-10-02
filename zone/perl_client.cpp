@@ -5737,7 +5737,22 @@ XS(XS_Client_SetIPExemption) {
 		int exemption_amount = (int) SvIV(ST(1));
 		dXSTARG;
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->SetIPExemption(exemption_amount);   
+		THIS->SetIPExemption(exemption_amount);
+  }
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_ReadBookByName);
+XS(XS_Client_ReadBookByName) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::ReadBookByName(THIS, string book_name, uint8 book_type)"); // @categories Script Utility
+	{
+		Client *THIS;
+		std::string book_name(SvPV_nolen(ST(1)));
+		uint8 book_type = (uint8) SvUV(ST(2));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->ReadBookByName(book_name, book_type);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5758,6 +5773,57 @@ XS(XS_Client_UntrainDiscBySpellID) {
 
 		THIS->UntrainDiscBySpellID(spell_id, update_client);
 	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_SummonBaggedItems); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SummonBaggedItems) {
+	dXSARGS;
+	if (items != 3) {
+		Perl_croak(aTHX_ "Usage: Client::SummonBaggedItems(THIS, uint32 bag_item_id, ARRAYREF bag_items_array)"); // @categories Inventory and Items, Script Utility
+	}
+
+	Client* THIS;
+	VALIDATE_THIS_IS_CLIENT;
+
+	uint32 bag_item_id = (uint32) SvUV(ST(1));
+
+	// verify we're receiving a reference to an array type
+	SV* bag_items_avref = ST(2);
+	if (!bag_items_avref || !SvROK(bag_items_avref) || SvTYPE(SvRV(bag_items_avref)) != SVt_PVAV)
+	{
+		Perl_croak(aTHX_ "Client::SummonBaggedItems second argument is not a reference to an array");
+	}
+
+	// dereference into the array
+	AV* bag_items_av = (AV*)SvRV(bag_items_avref);
+
+	std::vector<ServerLootItem_Struct> bagged_items;
+
+	auto count = av_len(bag_items_av) + 1;
+	for (int i = 0; i < count; ++i)
+	{
+		SV** element = av_fetch(bag_items_av, i, 0);
+
+		// verify array element is a hash reference containing item details
+		if (element && SvROK(*element) && SvTYPE(SvRV(*element)) == SVt_PVHV)
+		{
+			HV* hash = (HV*)SvRV(*element); // dereference
+
+			SV** item_id_ptr = hv_fetchs(hash, "item_id", false);
+			SV** item_charges_ptr = hv_fetchs(hash, "charges", false);
+			if (item_id_ptr && item_charges_ptr)
+			{
+				ServerLootItem_Struct item{};
+				item.item_id = static_cast<uint32>(SvUV(*item_id_ptr));
+				item.charges = static_cast<int16>(SvIV(*item_charges_ptr));
+				bagged_items.emplace_back(item);
+			}
+		}
+	}
+
+	THIS->SummonBaggedItems(bag_item_id, bagged_items);
+
 	XSRETURN_EMPTY;
 }
 
@@ -6053,6 +6119,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "Sit"), XS_Client_Sit, file, "$");
 	newXSproto(strcpy(buf, "SlotConvert2"), XS_Client_SlotConvert2, file, "$$");
 	newXSproto(strcpy(buf, "Stand"), XS_Client_Stand, file, "$");
+	newXSproto(strcpy(buf, "SummonBaggedItems"), XS_Client_SummonBaggedItems, file, "$$$");
 	newXSproto(strcpy(buf, "SummonItem"), XS_Client_SummonItem, file, "$$;$$$$$$$$");
 	newXSproto(strcpy(buf, "TakeMoneyFromPP"), XS_Client_TakeMoneyFromPP, file, "$$;$");
 	newXSproto(strcpy(buf, "TGB"), XS_Client_TGB, file, "$");
@@ -6078,6 +6145,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UpdateWho"), XS_Client_UpdateWho, file, "$;$");
 	newXSproto(strcpy(buf, "UseDiscipline"), XS_Client_UseDiscipline, file, "$$$");
 	newXSproto(strcpy(buf, "WorldKick"), XS_Client_WorldKick, file, "$");
+	newXSproto(strcpy(buf, "ReadBookByName"), XS_Client_ReadBookByName, file, "$$$");
 	XSRETURN_YES;
 }
 

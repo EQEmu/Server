@@ -2244,6 +2244,36 @@ void Lua_Client::SetIPExemption(int exemption_amount) {
 	self->SetIPExemption(exemption_amount);
 }
 
+void Lua_Client::ReadBookByName(std::string book_name, uint8 book_type) {
+	Lua_Safe_Call_Void();
+	self->ReadBookByName(book_name, book_type);
+}
+
+void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table) {
+	Lua_Safe_Call_Void();
+	if (luabind::type(bag_items_table) != LUA_TTABLE) {
+		return;
+	}
+
+	std::vector<ServerLootItem_Struct> bagged_items;
+
+	luabind::raw_iterator end; // raw_iterator uses lua_rawget
+	for (luabind::raw_iterator it(bag_items_table); it != end; ++it)
+	{
+		// verify array element is a table for item details
+		if (luabind::type(*it) == LUA_TTABLE)
+		{
+			// no need to try/catch, quest lua parser already catches exceptions
+			ServerLootItem_Struct item{};
+			item.item_id = luabind::object_cast<uint32>((*it)["item_id"]);
+			item.charges = luabind::object_cast<int16>((*it)["charges"]);
+			bagged_items.emplace_back(item);
+		}
+	}
+
+	self->SummonBaggedItems(bag_item_id, bagged_items);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2620,9 +2650,11 @@ luabind::scope lua_register_client() {
 		.def("GetIPExemption", (int(Lua_Client::*)(void))&Lua_Client::GetIPExemption)
 		.def("GetIPString", (std::string(Lua_Client::*)(void))&Lua_Client::GetIPString)
 		.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption);
+		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName)
 		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
-		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID);
+		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID)
+		.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems);
 }
 
 luabind::scope lua_register_inventory_where() {
