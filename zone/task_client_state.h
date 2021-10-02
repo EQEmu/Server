@@ -73,8 +73,6 @@ public:
 	const ClientTaskInformation &GetActiveSharedTask() const;
 	bool HasActiveSharedTask();
 
-
-	void HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id);
 private:
 	void AddReplayTimer(Client *client, ClientTaskInformation& client_task, TaskInformation& task);
 
