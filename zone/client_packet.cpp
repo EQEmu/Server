@@ -67,6 +67,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "../common/repositories/criteria/content_filter_criteria.h"
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
+#include "client.h"
+
 
 #ifdef BOTS
 #include "bot.h"
@@ -5001,7 +5003,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
 			return;
 		}
-		
+
 		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds

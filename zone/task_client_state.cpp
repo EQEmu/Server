@@ -2734,38 +2734,7 @@ void ClientTaskState::SyncSharedTaskZoneClientDoneCountState(
 
 void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
 {
-
-	// get clients to update
-	std::vector<Client *> clients_to_update = {};
-
-	// raid
-	Raid *raid = entity_list.GetRaidByClient(client);
-	if (raid) {
-		for (auto &e : raid->members) {
-			if (e.member && e.member->IsClient()) {
-				clients_to_update.push_back(e.member->CastToClient());
-			}
-		}
-	}
-
-	// group
-	if (clients_to_update.empty()) {
-		Group *group = entity_list.GetGroupByClient(client);
-		if (group) {
-			for (auto &m : group->members) {
-				if (m && m->IsClient()) {
-					clients_to_update.push_back(m->CastToClient());
-				}
-			}
-		}
-	}
-
-	// solo
-	if (clients_to_update.empty()) {
-		clients_to_update.push_back(client);
-	}
-
-	for (auto &c: clients_to_update) {
+	for (auto &c: client->GetPartyMembers()) {
 		if (!c->ClientDataLoaded()) {
 			continue;
 		}

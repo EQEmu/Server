@@ -2351,7 +2351,7 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		finalxp = give_exp_client->mod_client_xp(finalxp, this);
 
 		// handle task credit on behalf of the killer
-		if (RuleB(TaskSystem, EnableTaskSystem)) {
+		if (RuleB(TaskSystem, EnableTaskSystem) && give_exp_client->HasTaskState()) {
 			LogTasksDetail(
 				"[NPC::Death] Triggering HandleUpdateTasksOnKill for [{}] npc [{}]",
 				give_exp_client->GetCleanName(),
