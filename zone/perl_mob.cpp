@@ -41,6 +41,7 @@ typedef const char Const_char;
 #include "mob.h"
 #include "client.h"
 #include "../common/spdat.h"
+#include "dialogue_window.h"
 
 #ifdef BOTS
 #include "bot.h"
@@ -2621,8 +2622,11 @@ XS(XS_Mob_Message) {
 		char *message = (char *) SvPV_nolen(ST(2));
 		VALIDATE_THIS_IS_MOB;
 
-		// auto inject saylinks
-		if (RuleB(Chat, AutoInjectSaylinksToClientMessage)) {
+		if (RuleB(Chat, QuestDialogueUsesDialogueWindow) && THIS->IsClient()) {
+			std::string window_markdown = message;
+			DialogueWindow::Render(THIS->CastToClient(), window_markdown);
+		}
+		else if (RuleB(Chat, AutoInjectSaylinksToClientMessage)) {
 			std::string new_message = EQ::SayLinkEngine::InjectSaylinksIfNotExist(message);
 			THIS->Message(type, new_message.c_str());
 		}
@@ -5941,6 +5945,43 @@ XS(XS_Mob_HasPet) {
 	XSRETURN(1);
 }
 
+XS(XS_Mob_RemovePet);
+XS(XS_Mob_RemovePet) {
+	dXSARGS;
+	if (items != 1) {
+		Perl_croak(aTHX_ "Usage: Mob::RemovePet(THIS)"); // @categories Pet
+	}
+
+	Mob* THIS;
+	VALIDATE_THIS_IS_MOB;
+
+	THIS->SetPet(nullptr);
+
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Mob_SetPet);
+XS(XS_Mob_SetPet) {
+	dXSARGS;
+	if (items != 2) {
+		Perl_croak(aTHX_ "Usage: Mob::SetPet(THIS, Mob* new_pet)"); // @categories Pet
+	}
+
+	Mob* THIS;
+	VALIDATE_THIS_IS_MOB;
+
+	Mob* new_pet = nullptr; // passing null or invalid new_pet removes pet
+	if (sv_derived_from(ST(1), "Mob"))
+	{
+		IV tmp = SvIV((SV*)SvRV(ST(1)));
+		new_pet = INT2PTR(Mob*, tmp);
+	}
+
+	THIS->SetPet(new_pet);
+
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_IsSilenced);
 XS(XS_Mob_IsSilenced) {
 	dXSARGS;
@@ -6669,6 +6710,8 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "HasOwner"), XS_Mob_HasOwner, file, "$");
 	newXSproto(strcpy(buf, "IsPet"), XS_Mob_IsPet, file, "$");
 	newXSproto(strcpy(buf, "HasPet"), XS_Mob_HasPet, file, "$");
+	newXSproto(strcpy(buf, "RemovePet"), XS_Mob_RemovePet, file, "$");
+	newXSproto(strcpy(buf, "SetPet"), XS_Mob_SetPet, file, "$$");
 	newXSproto(strcpy(buf, "IsSilenced"), XS_Mob_IsSilenced, file, "$");
 	newXSproto(strcpy(buf, "IsAmnesiad"), XS_Mob_IsAmnesiad, file, "$");
 	newXSproto(strcpy(buf, "GetMeleeMitigation"), XS_Mob_GetMeleeMitigation, file, "$");
