@@ -10530,6 +10530,33 @@ void Client::SetDoorToolEntityId(uint16 door_tool_entity_id)
 	Client::m_door_tool_entity_id = door_tool_entity_id;
 }
 
+void Client::ReadBookByName(std::string book_name, uint8 book_type)
+{
+	int16 book_language = 0;
+	std::string book_text = content_db.GetBook(book_name.c_str(), &book_language);
+	int length = book_text.length();
+
+	if (book_text[0] != '\0') {
+		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, book_text.c_str());
+		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
+		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
+		out->window = 0xFF;
+		out->type = book_type;
+		out->invslot = 0;
+		
+		memcpy(out->booktext, book_text.c_str(), length);
+
+		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
+			if (m_pp.languages[book_language] < 100) {
+				GarbleMessage(out->booktext, (100 - m_pp.languages[book_language]));
+			}
+		}
+
+		QueuePacket(outapp);
+		safe_delete(outapp);
+	}
+}
+
 // this will fetch raid clients if exists
 // fallback to group if raid doesn't exist
 // fallback to self if group doesn't exist

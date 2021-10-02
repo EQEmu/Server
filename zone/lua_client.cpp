@@ -2229,6 +2229,11 @@ void Lua_Client::UntrainDiscBySpellID(uint16 spell_id, bool update_client) {
 	self->UntrainDiscBySpellID(spell_id, update_client);
 }
 
+void Lua_Client::ReadBookByName(std::string book_name, uint8 book_type) {
+	Lua_Safe_Call_Void();
+	self->ReadBookByName(book_name, book_type);
+}
+
 void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_items_table) {
 	Lua_Safe_Call_Void();
 	if (luabind::type(bag_items_table) != LUA_TTABLE) {
@@ -2627,6 +2632,7 @@ luabind::scope lua_register_client() {
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
+		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName)
 		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID)
