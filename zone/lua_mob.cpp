@@ -2194,6 +2194,16 @@ bool Lua_Mob::HasPet() {
 	return self->HasPet();
 }
 
+void Lua_Mob::RemovePet() {
+	Lua_Safe_Call_Void();
+	return self->SetPet(nullptr);
+}
+
+void Lua_Mob::SetPet(Lua_Mob new_pet) {
+	Lua_Safe_Call_Void();
+	return self->SetPet(new_pet);
+}
+
 bool Lua_Mob::IsSilenced() {
 	Lua_Safe_Call_Bool();
 	return self->IsSilenced();
@@ -2769,6 +2779,8 @@ luabind::scope lua_register_mob() {
 		.def("HasOwner", (bool(Lua_Mob::*)(void))&Lua_Mob::HasOwner)
 		.def("IsPet", (bool(Lua_Mob::*)(void))&Lua_Mob::IsPet)
 		.def("HasPet", (bool(Lua_Mob::*)(void))&Lua_Mob::HasPet)
+		.def("RemovePet", &Lua_Mob::RemovePet)
+		.def("SetPet", &Lua_Mob::SetPet)
 		.def("IsSilenced", (bool(Lua_Mob::*)(void))&Lua_Mob::IsSilenced)
 		.def("IsAmnesiad", (bool(Lua_Mob::*)(void))&Lua_Mob::IsAmnesiad)
 		.def("GetMeleeMitigation", (int32(Lua_Mob::*)(void))&Lua_Mob::GetMeleeMitigation)
