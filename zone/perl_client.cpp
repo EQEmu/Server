@@ -5790,8 +5790,7 @@ XS(XS_Client_SummonBaggedItems) {
 
 	// verify we're receiving a reference to an array type
 	SV* bag_items_avref = ST(2);
-	if (!bag_items_avref || !SvROK(bag_items_avref) || SvTYPE(SvRV(bag_items_avref)) != SVt_PVAV)
-	{
+	if (!bag_items_avref || !SvROK(bag_items_avref) || SvTYPE(SvRV(bag_items_avref)) != SVt_PVAV) {
 		Perl_croak(aTHX_ "Client::SummonBaggedItems second argument is not a reference to an array");
 	}
 
@@ -5801,22 +5800,33 @@ XS(XS_Client_SummonBaggedItems) {
 	std::vector<ServerLootItem_Struct> bagged_items;
 
 	auto count = av_len(bag_items_av) + 1;
-	for (int i = 0; i < count; ++i)
-	{
+	for (int i = 0; i < count; ++i) {
 		SV** element = av_fetch(bag_items_av, i, 0);
 
 		// verify array element is a hash reference containing item details
-		if (element && SvROK(*element) && SvTYPE(SvRV(*element)) == SVt_PVHV)
-		{
+		if (element && SvROK(*element) && SvTYPE(SvRV(*element)) == SVt_PVHV) {
 			HV* hash = (HV*)SvRV(*element); // dereference
 
 			SV** item_id_ptr = hv_fetchs(hash, "item_id", false);
 			SV** item_charges_ptr = hv_fetchs(hash, "charges", false);
-			if (item_id_ptr && item_charges_ptr)
-			{
+			SV** attuned_ptr = hv_fetchs(hash, "attuned", false);
+			SV** augment_one_ptr = hv_fetchs(hash, "augment_one", false);
+			SV** augment_two_ptr = hv_fetchs(hash, "augment_two", false);
+			SV** augment_three_ptr = hv_fetchs(hash, "augment_three", false);
+			SV** augment_four_ptr = hv_fetchs(hash, "augment_four", false);
+			SV** augment_five_ptr = hv_fetchs(hash, "augment_five", false);
+			SV** augment_six_ptr = hv_fetchs(hash, "augment_six", false);			
+			if (item_id_ptr && item_charges_ptr) {
 				ServerLootItem_Struct item{};
 				item.item_id = static_cast<uint32>(SvUV(*item_id_ptr));
 				item.charges = static_cast<int16>(SvIV(*item_charges_ptr));
+				item.attuned = attuned_ptr ? static_cast<uint8>(SvUV(*attuned_ptr)) : 0;
+				item.aug_1 = augment_one_ptr ? static_cast<uint32>(SvUV(*augment_one_ptr)) : 0;
+				item.aug_2 = augment_two_ptr ? static_cast<uint32>(SvUV(*augment_two_ptr)) : 0;
+				item.aug_3 = augment_three_ptr ? static_cast<uint32>(SvUV(*augment_three_ptr)) : 0;
+				item.aug_4 = augment_four_ptr ? static_cast<uint32>(SvUV(*augment_four_ptr)) : 0;
+				item.aug_5 = augment_five_ptr ? static_cast<uint32>(SvUV(*augment_five_ptr)) : 0;
+				item.aug_6 = augment_six_ptr ? static_cast<uint32>(SvUV(*augment_six_ptr)) : 0;
 				bagged_items.emplace_back(item);
 			}
 		}
