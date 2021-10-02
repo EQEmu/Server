@@ -1832,7 +1832,7 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
 			}
 
 			// Check if there are any active kill activities for this p_task_data
-			auto p_task_data = task_manager->m_task_data[current_task->task_id];
+			auto p_task_data = m_task_data[current_task->task_id];
 			if (p_task_data == nullptr) {
 				return;
 			}
@@ -1873,7 +1873,7 @@ void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
 						break;
 
 					case METHODLIST:
-						if (!task_manager->m_goal_list_manager.IsInList(
+						if (!m_goal_list_manager.IsInList(
 							activity_info->goal_id,
 							(int) npc_type_id
 						)) {
