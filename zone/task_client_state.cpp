@@ -2668,29 +2668,26 @@ void ClientTaskState::ListTaskTimers(Client* client)
 void ClientTaskState::AddReplayTimer(Client* client, ClientTaskInformation& client_task, TaskInformation& task)
 {
 	// world adds timers for shared tasks and handles messages
-	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0 && client)
+	if (task.type != TaskType::Shared && task.replay_timer_seconds > 0)
 	{
-		int expire_time = client_task.accepted_time + task.replay_timer_seconds;
+		// solo task replay timers are based on completion time
+		auto expire_time = std::time(nullptr) + task.replay_timer_seconds;
 
-		auto seconds = expire_time - std::time(nullptr);
-		if (seconds > 0) // not already expired
-		{
-			auto timer = CharacterTaskTimersRepository::NewEntity();
-			timer.character_id = client->CharacterID();
-			timer.task_id      = client_task.task_id;
-			timer.expire_time  = expire_time;
-			timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
+		auto timer = CharacterTaskTimersRepository::NewEntity();
+		timer.character_id = client->CharacterID();
+		timer.task_id      = client_task.task_id;
+		timer.expire_time  = expire_time;
+		timer.timer_type   = static_cast<int>(TaskTimerType::Replay);
 
-			CharacterTaskTimersRepository::InsertOne(database, timer);
+		CharacterTaskTimersRepository::InsertOne(database, timer);
 
-			client->Message(Chat::Yellow, fmt::format(
-				SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
-				task.title,
-				fmt::format_int(seconds / 86400).c_str(),       // days
-				fmt::format_int((seconds / 3600) % 24).c_str(), // hours
-				fmt::format_int((seconds / 60) % 60).c_str()    // minutes
-			).c_str());
-		}
+		client->Message(Chat::Yellow, fmt::format(
+			SharedTaskMessage::GetEQStr(SharedTaskMessage::RECEIVED_REPLAY_TIMER),
+			task.title,
+			fmt::format_int(task.replay_timer_seconds / 86400).c_str(),       // days
+			fmt::format_int((task.replay_timer_seconds / 3600) % 24).c_str(), // hours
+			fmt::format_int((task.replay_timer_seconds / 60) % 60).c_str()    // minutes
+		).c_str());
 	}
 }
 
