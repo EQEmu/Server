@@ -128,7 +128,7 @@ XS(XS_EntityList_IsMobSpawnedByNpcTypeID); /* prototype pass -Wmissing-prototype
 XS(XS_EntityList_IsMobSpawnedByNpcTypeID) {
 	dXSARGS;
 	if (items != 2)
-		Perl_croak(aTHX_ "Usage: EntityList::ValidMobByNpcTypeID(THIS, get_id)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: EntityList::IsMobSpawnedByNpcTypeID(THIS, get_id)"); // @categories Script Utility
 	{
 		EntityList *THIS;
 		bool       RETVAL;
