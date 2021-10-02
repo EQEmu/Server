@@ -5820,35 +5820,13 @@ XS(XS_Client_SummonBaggedItems) {
 				ServerLootItem_Struct item{};
 				item.item_id = static_cast<uint32>(SvUV(*item_id_ptr));
 				item.charges = static_cast<int16>(SvIV(*item_charges_ptr));
-				
-				if (attuned_ptr) {
-					item.attuned = static_cast<uint8>(SvUV(*attuned_ptr));
-				}
-				
-				if (augment_one_ptr) {
-					item.aug_1 = static_cast<uint32>(SvUV(*augment_one_ptr));
-				}
-				
-				if (augment_two_ptr) {
-					item.aug_2 = static_cast<uint32>(SvUV(*augment_two_ptr));
-				}
-				
-				if (augment_three_ptr) {
-					item.aug_3 = static_cast<uint32>(SvUV(*augment_three_ptr));
-				}
-
-				if (augment_four_ptr) {
-					item.aug_4 = static_cast<uint32>(SvUV(*augment_four_ptr));
-				}
-
-				if (augment_five_ptr) {
-					item.aug_5 = static_cast<uint32>(SvUV(*augment_five_ptr));
-				}
-
-				if (augment_six_ptr) {
-					item.aug_6 = static_cast<uint32>(SvUV(*augment_six_ptr));
-				}
-
+				item.attuned = attuned_ptr ? static_cast<uint8>(SvUV(*attuned_ptr)) : 0;
+				item.aug_1 = augment_one_ptr ? static_cast<uint32>(SvUV(*augment_one_ptr)) : 0;
+				item.aug_2 = augment_two_ptr ? static_cast<uint32>(SvUV(*augment_two_ptr)) : 0;
+				item.aug_3 = augment_three_ptr ? static_cast<uint32>(SvUV(*augment_three_ptr)) : 0;
+				item.aug_4 = augment_four_ptr ? static_cast<uint32>(SvUV(*augment_four_ptr)) : 0;
+				item.aug_5 = augment_five_ptr ? static_cast<uint32>(SvUV(*augment_five_ptr)) : 0;
+				item.aug_6 = augment_six_ptr ? static_cast<uint32>(SvUV(*augment_six_ptr)) : 0;
 				bagged_items.emplace_back(item);
 			}
 		}

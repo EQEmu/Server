@@ -2267,34 +2267,13 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 			ServerLootItem_Struct item{};
 			item.item_id = luabind::object_cast<uint32>((*it)["item_id"]);
 			item.charges = luabind::object_cast<int16>((*it)["charges"]);
-			if (luabind::type((*it)["attuned"]) != LUA_TNIL) {
-				item.attuned = luabind::object_cast<uint8>((*it)["attuned"]);
-			}
-			
-			if (luabind::type((*it)["augment_one"]) != LUA_TNIL) {
-				item.aug_1 = luabind::object_cast<uint32>((*it)["augment_one"]);
-			}
-			
-			if (luabind::type((*it)["augment_two"]) != LUA_TNIL) {
-				item.aug_2 = luabind::object_cast<uint32>((*it)["augment_two"]);
-			}
-
-			if (luabind::type((*it)["augment_three"]) != LUA_TNIL) {
-				item.aug_3 = luabind::object_cast<uint32>((*it)["augment_three"]);
-			}
-
-			if (luabind::type((*it)["augment_four"]) != LUA_TNIL) {
-				item.aug_4 = luabind::object_cast<uint32>((*it)["augment_four"]);
-			}
-
-			if (luabind::type((*it)["augment_five"]) != LUA_TNIL) {
-				item.aug_5 = luabind::object_cast<uint32>((*it)["augment_five"]);
-			}
-
-			if (luabind::type((*it)["augment_six"]) != LUA_TNIL) {
-				item.aug_6 = luabind::object_cast<uint32>((*it)["augment_six"]);
-			}
-
+			item.attuned = luabind::type((*it)["attuned"]) != LUA_TNIL ? luabind::object_cast<uint8>((*it)["attuned"]) : 0;
+			item.aug_1 = luabind::type((*it)["augment_one"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_one"]) : 0;
+			item.aug_2 = luabind::type((*it)["augment_two"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_two"]) : 0;
+			item.aug_3 = luabind::type((*it)["augment_three"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_three"]) : 0;
+			item.aug_4 = luabind::type((*it)["augment_four"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_four"]) : 0;
+			item.aug_5 = luabind::type((*it)["augment_five"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_five"]) : 0;
+			item.aug_6 = luabind::type((*it)["augment_six"]) != LUA_TNIL ? luabind::object_cast<uint32>((*it)["augment_six"]) : 0;
 			bagged_items.emplace_back(item);
 		}
 	}
