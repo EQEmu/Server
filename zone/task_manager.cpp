@@ -1814,3 +1814,96 @@ void TaskManager::SyncClientSharedTaskStateToLocal(
 		}
 	}
 }
+
+void TaskManager::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id)
+{
+	for (auto &c: client->GetPartyMembers()) {
+		if (!c->ClientDataLoaded() || !c->HasTaskState()) {
+			continue;
+		}
+
+		LogTasksDetail("[HandleUpdateTasksOnKill] Looping through client [{}]", c->GetCleanName());
+
+		// loop over the union of tasks and quests
+		for (auto &active_task : c->GetTaskState()->m_active_tasks) {
+			auto current_task = &active_task;
+			if (current_task->task_id == TASKSLOTEMPTY) {
+				continue;
+			}
+
+			// Check if there are any active kill activities for this p_task_data
+			auto p_task_data = m_task_data[current_task->task_id];
+			if (p_task_data == nullptr) {
+				return;
+			}
+
+			for (int activity_id = 0; activity_id < p_task_data->activity_count; activity_id++) {
+				ClientActivityInformation *client_activity = &current_task->activity[activity_id];
+				ActivityInformation       *activity_info   = &p_task_data->activity_information[activity_id];
+
+				// We are not interested in completed or hidden activities
+				if (client_activity->activity_state != ActivityActive) {
+					continue;
+				}
+
+				// We are only interested in Kill activities
+				if (activity_info->activity_type != TaskActivityType::Kill) {
+					continue;
+				}
+
+				// Is there a zone restriction on the activity_information ?
+				if (!activity_info->CheckZone(zone->GetZoneID())) {
+					LogTasks(
+						"[HandleUpdateTasksOnKill] character [{}] task_id [{}] activity_id [{}] activity_type [{}] for NPC [{}] failed zone check",
+						client->GetName(),
+						current_task->task_id,
+						activity_id,
+						static_cast<int32_t>(TaskActivityType::Kill),
+						npc_type_id
+					);
+					continue;
+				}
+				// Is the activity_information to kill this type of NPC ?
+				switch (activity_info->goal_method) {
+					case METHODSINGLEID:
+						if (activity_info->goal_id != npc_type_id) {
+							LogTasksDetail("[HandleUpdateTasksOnKill] Matched single goal");
+							continue;
+						}
+						break;
+
+					case METHODLIST:
+						if (!m_goal_list_manager.IsInList(
+							activity_info->goal_id,
+							(int) npc_type_id
+						)) {
+							LogTasksDetail("[HandleUpdateTasksOnKill] Matched list goal");
+							continue;
+						}
+						break;
+
+					default:
+						// If METHODQUEST, don't updated the activity_information here
+						continue;
+				}
+
+				LogTasksDetail("[HandleUpdateTasksOnKill] passed checks");
+
+				// handle actual update
+				// legacy eqemu task update logic loops through group on kill of npc to update a single task
+				if (p_task_data->type != TaskType::Shared) {
+					LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
+					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
+					continue;
+				}
+
+				LogTasksDetail("[HandleUpdateTasksOnKill] Shared update");
+
+				// shared tasks only require one client to receive an update to propagate
+				if (c == client) {
+					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
+				}
+			}
+		}
+	}
+}

@@ -1041,6 +1041,7 @@ public:
 	void SendTaskRequestCooldownTimerMessage();
 	void StartTaskRequestCooldownTimer();
 	inline ClientTaskState *GetTaskState() const { return task_state; }
+	inline bool HasTaskState() { if (task_state) { return true; } return false; }
 	inline void CancelTask(int task_index, TaskType task_type)
 	{
 		if (task_state) {
@@ -1092,15 +1093,6 @@ public:
 				this,
 				task_id,
 				activity_id
-			);
-		}
-	}
-	inline void UpdateTasksOnKill(int npc_type_id)
-	{
-		if (task_state) {
-			task_state->UpdateTasksOnKill(
-				this,
-				npc_type_id
 			);
 		}
 	}
@@ -1281,6 +1273,9 @@ public:
 	bool m_requesting_shared_task        = false;
 	bool m_shared_task_update            = false;
 	bool m_requested_shared_task_removal = false;
+
+	std::vector<Client*> GetPartyMembers();
+	void HandleUpdateTasksOnKill(uint32 npc_type_id);
 
 	inline const EQ::versions::ClientVersion ClientVersion() const { return m_ClientVersion; }
 	inline const uint32 ClientVersionBit() const { return m_ClientVersionBit; }

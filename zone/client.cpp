@@ -10556,3 +10556,41 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 		safe_delete(outapp);
 	}
 }
+
+// this will fetch raid clients if exists
+// fallback to group if raid doesn't exist
+// fallback to self if group doesn't exist
+std::vector<Client *> Client::GetPartyMembers()
+{
+	// get clients to update
+	std::vector<Client *> clients_to_update = {};
+
+	// raid
+	Raid *raid = entity_list.GetRaidByClient(this);
+	if (raid) {
+		for (auto &e : raid->members) {
+			if (e.member && e.member->IsClient()) {
+				clients_to_update.push_back(e.member->CastToClient());
+			}
+		}
+	}
+
+	// group
+	if (clients_to_update.empty()) {
+		Group *group = entity_list.GetGroupByClient(this);
+		if (group) {
+			for (auto &m : group->members) {
+				if (m && m->IsClient()) {
+					clients_to_update.push_back(m->CastToClient());
+				}
+			}
+		}
+	}
+
+	// solo
+	if (clients_to_update.empty()) {
+		clients_to_update.push_back(this);
+	}
+
+	return clients_to_update;
+}
