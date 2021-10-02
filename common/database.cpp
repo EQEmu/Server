@@ -2271,6 +2271,35 @@ int Database::GetIPExemption(std::string account_ip) {
 	return RuleI(World, MaxClientsPerIP);
 }
 
+void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
+	std::string query = fmt::format(
+		"SELECT `exemption_id` FROM `ip_exemptions` WHERE `exemption_ip` = '{}'",
+		account_ip
+	);
+
+	auto results = QueryDatabase(query);
+	uint32 exemption_id = 0;
+	if (results.Success() && results.RowCount() > 0) {
+		auto row = results.begin();
+		exemption_id = atoi(row[0]);
+	}
+	
+	query = fmt::format(
+		"INSERT INTO `ip_exemptions` (`exemption_ip`, `exemption_amount`) VALUES ('{}', {})",
+		account_ip,
+		exemption_amount
+	);
+
+	if (exemption_id != 0) {
+		query = fmt::format(
+			"UPDATE `ip_exemptions` SET `exemption_amount` = {} WHERE `exemption_ip` = '{}'",
+			exemption_amount,
+			account_ip
+		);
+	}
+	QueryDatabase(query);
+}
+
 int Database::GetInstanceID(uint32 char_id, uint32 zone_id) {
 	std::string query = StringFormat("SELECT instance_list.id FROM instance_list INNER JOIN instance_list_player ON instance_list.id = instance_list_player.id WHERE instance_list.zone = '%i' AND instance_list_player.charid = '%i'", zone_id, char_id);
 	auto results = QueryDatabase(query);

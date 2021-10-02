@@ -2229,6 +2229,21 @@ void Lua_Client::UntrainDiscBySpellID(uint16 spell_id, bool update_client) {
 	self->UntrainDiscBySpellID(spell_id, update_client);
 }
 
+int Lua_Client::GetIPExemption() {
+	Lua_Safe_Call_Int();
+	return self->GetIPExemption();
+}
+
+std::string Lua_Client::GetIPString() {
+	Lua_Safe_Call_String();
+	return self->GetIPString();
+}
+
+void Lua_Client::SetIPExemption(int exemption_amount) {
+	Lua_Safe_Call_Void();
+	self->SetIPExemption(exemption_amount);
+}
+
 void Lua_Client::ReadBookByName(std::string book_name, uint8 book_type) {
 	Lua_Safe_Call_Void();
 	self->ReadBookByName(book_name, book_type);
@@ -2632,6 +2647,9 @@ luabind::scope lua_register_client() {
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
+		.def("GetIPExemption", (int(Lua_Client::*)(void))&Lua_Client::GetIPExemption)
+		.def("GetIPString", (std::string(Lua_Client::*)(void))&Lua_Client::GetIPString)
+		.def("SetIPExemption", (void(Lua_Client::*)(int))&Lua_Client::SetIPExemption)
 		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName)
 		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)

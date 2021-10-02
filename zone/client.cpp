@@ -10530,6 +10530,23 @@ void Client::SetDoorToolEntityId(uint16 door_tool_entity_id)
 	Client::m_door_tool_entity_id = door_tool_entity_id;
 }
 
+int Client::GetIPExemption()
+{
+	return database.GetIPExemption(GetIPString());
+}
+
+std::string Client::GetIPString()
+{
+	in_addr client_ip{};
+	client_ip.s_addr = GetIP();
+	return inet_ntoa(client_ip);
+}
+
+void Client::SetIPExemption(int exemption_amount)
+{
+	database.SetIPExemption(GetIPString(), exemption_amount);
+}
+
 void Client::ReadBookByName(std::string book_name, uint8 book_type)
 {
 	int16 book_language = 0;

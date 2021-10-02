@@ -198,7 +198,8 @@ public:
 	void	GetAccountFromID(uint32 id, char* oAccountName, int16* oStatus);
 	void	SetAgreementFlag(uint32 acctid);
 
-	int		GetIPExemption(std::string account_ip);
+	int  GetIPExemption(std::string account_ip);
+	void SetIPExemption(std::string account_ip, int exemption_amount);
 
 	int		GetInstanceID(uint32 char_id, uint32 zone_id);
 

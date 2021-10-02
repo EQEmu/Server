@@ -5693,6 +5693,55 @@ XS(XS_Client_DiaWind) {
 		XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetIPExemption);
+XS(XS_Client_GetIPExemption) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetIPExemption(THIS)"); // @categories Account and Character
+	{
+		Client* THIS;
+		int exemption_amount = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		exemption_amount = THIS->GetIPExemption();
+		XSprePUSH;
+		PUSHi((IV) exemption_amount);
+	}
+	XSRETURN(1);	
+}
+
+XS(XS_Client_GetIPString);
+XS(XS_Client_GetIPString) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Client::GetIPString(THIS)"); // @categories Account and Character
+	{
+		Client *THIS;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		std::string ip_string = THIS->GetIPString();
+		sv_setpv(TARG, ip_string.c_str());
+		XSprePUSH;
+		PUSHTARG;
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_SetIPExemption); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_SetIPExemption) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::SetIPExemption(THIS, int exemption_amount)"); // @categories Account and Character
+	{
+		Client *THIS;
+		int exemption_amount = (int) SvIV(ST(1));
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->SetIPExemption(exemption_amount);
+  }
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Client_ReadBookByName);
 XS(XS_Client_ReadBookByName) {
 	dXSARGS;
@@ -5905,6 +5954,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "GetInstrumentMod"), XS_Client_GetInstrumentMod, file, "$$");
 	newXSproto(strcpy(buf, "GetInventory"), XS_Client_GetInventory, file, "$");
 	newXSproto(strcpy(buf, "GetIP"), XS_Client_GetIP, file, "$");
+	newXSproto(strcpy(buf, "GetIPExemption"), XS_Client_GetIPExemption, file, "$");
+	newXSproto(strcpy(buf, "GetIPString"), XS_Client_GetIPString, file, "$");
 	newXSproto(strcpy(buf, "GetItemAt"), XS_Client_GetItemAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemIDAt"), XS_Client_GetItemIDAt, file, "$$");
 	newXSproto(strcpy(buf, "GetItemInInventory"), XS_Client_GetItemInInventory, file, "$$");
@@ -6049,6 +6100,7 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "SetHideMe"), XS_Client_SetHideMe, file, "$$");
 	newXSproto(strcpy(buf, "SetHorseId"), XS_Client_SetHorseId, file, "$$");
 	newXSproto(strcpy(buf, "SetHunger"), XS_Client_SetHunger, file, "$$");
+	newXSproto(strcpy(buf, "SetIPExemption"), XS_Client_SetIPExemption, file, "$$");
 	newXSproto(strcpy(buf, "SetLanguageSkill"), XS_Client_SetLanguageSkill, file, "$$$");
 	newXSproto(strcpy(buf, "SetMaterial"), XS_Client_SetMaterial, file, "$$$");
 	newXSproto(strcpy(buf, "SetPrimaryWeaponOrnamentation"), XS_Client_SetPrimaryWeaponOrnamentation, file, "$$");

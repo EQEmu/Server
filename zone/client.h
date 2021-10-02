@@ -340,6 +340,9 @@ public:
 	bool GetRevoked() const { return revoked; }
 	void SetRevoked(bool rev) { revoked = rev; }
 	inline uint32 GetIP() const { return ip; }
+	std::string GetIPString();
+	int GetIPExemption();
+	void SetIPExemption(int exemption_amount);
 	inline bool GetHideMe() const { return gm_hide_me; }
 	void SetHideMe(bool hm);
 	inline uint16 GetPort() const { return port; }
