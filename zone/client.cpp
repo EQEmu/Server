@@ -10053,37 +10053,62 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 //CanPvP returns true if provided player can attack this player
 bool Client::CanPvP(Client *c) {
 	if (c == nullptr) 
+	{
+		LogInfo("Client::CanPvP other was null");
 		return false;
+	}
 
 	//Dueling overrides normal PvP logic
 	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
+	{
+		LogInfo("Client::CanPvP everyone was dueling, FIGHT");
 		return true;
+	}
+
+	LogInfo("Client::CanPvP 2 parties are not dueling, continue on...");
 
 	// protect GMs by default, (this one sided logic should allow GM to smack people tho)
 	if (c->GetGM())
+	{
+		LogInfo("Client::CanPvP other was GM, no fight");
 		return false;
+	}
 
 	// guildies cant PK each other??
 	if (GuildID() != 0 && GuildID() == c->GuildID())
+	{
+		LogInfo("Client::CanPvP same guild, no fight");
 		return false;
+	}
 
 	if (IsGrouped() && GetGroup()->GetID() == c->GetGroup()->GetID())
+	{
+		LogInfo("Client::CanPvP same group, no fight");
 		return false;
-
+	}
 	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
 	if (!zone->IsCity(/*zone->GetZoneID()*/))
+	{
+		LogInfo("Client::CanPvP if not a city, FIGHT");
 		return true;
+	}
 
 	// players need to be min level for pvp
 	int rule_min_level = RuleI(World, PVPMinLevel);
 	if (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level)
+	{
+		LogInfo("Client::CanPvP World:PVPMinLevel check failed");
 		return false;
+	}
 
 	// check player level range
 	int rule_level_diff = RuleI(World, PVPLevelDifference);
 	if (abs((int16)c->GetLevel() - (int16)GetLevel()) > rule_level_diff)
+	{
+		LogInfo("Client::CanPvP World:PVPLevelDifference Failed");
 		return false;
-		
+	}
+
 	return true;
 }
 
