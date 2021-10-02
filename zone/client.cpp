@@ -10660,7 +10660,17 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootI
 		}
 		else
 		{
-			EQ::ItemInstance* summoned_bag_item = database.CreateItem(item.item_id, item.charges);
+			EQ::ItemInstance* summoned_bag_item = database.CreateItem(
+				item.item_id,
+				item.charges,
+				item.aug_1,
+				item.aug_2,
+				item.aug_3,
+				item.aug_4,
+				item.aug_5,
+				item.aug_6,
+				item.attuned
+			);
 			if (summoned_bag_item)
 			{
 				summoned_bag->PutItem(open_slot, *summoned_bag_item);
