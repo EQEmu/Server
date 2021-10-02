@@ -10594,3 +10594,65 @@ std::vector<Client *> Client::GetPartyMembers()
 
 	return clients_to_update;
 }
+
+void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootItem_Struct>& bag_items)
+{
+	if (bag_items.empty())
+	{
+		return;
+	}
+
+	// todo: maybe some common functions for SE_SummonItem and SE_SummonItemIntoBag
+
+	const EQ::ItemData* bag_item = database.GetItem(bag_item_id);
+	if (!bag_item)
+	{
+		Message(Chat::Red, fmt::format("Unable to summon item [{}]. Item not found.", bag_item_id).c_str());
+		return;
+	}
+
+	if (CheckLoreConflict(bag_item))
+	{
+		DuplicateLoreMessage(bag_item_id);
+		return;
+	}
+
+	int bag_item_charges = 1; // just summoning a single bag
+	EQ::ItemInstance* summoned_bag = database.CreateItem(bag_item_id, bag_item_charges);
+	if (!summoned_bag || !summoned_bag->IsClassBag())
+	{
+		Message(Chat::Red, fmt::format("Failed to summon bag item [{}]", bag_item_id).c_str());
+		safe_delete(summoned_bag);
+		return;
+	}
+
+	for (const auto& item : bag_items)
+	{
+		uint8 open_slot = summoned_bag->FirstOpenSlot();
+		if (open_slot == 0xff)
+		{
+			Message(Chat::Red, "Attempting to summon item in to bag, but there is no room in the summoned bag!");
+			break;
+		}
+
+		const EQ::ItemData* current_item = database.GetItem(item.item_id);
+
+		if (CheckLoreConflict(current_item))
+		{
+			DuplicateLoreMessage(item.item_id);
+		}
+		else
+		{
+			EQ::ItemInstance* summoned_bag_item = database.CreateItem(item.item_id, item.charges);
+			if (summoned_bag_item)
+			{
+				summoned_bag->PutItem(open_slot, *summoned_bag_item);
+				safe_delete(summoned_bag_item);
+			}
+		}
+	}
+
+	PushItemOnCursor(*summoned_bag);
+	SendItemPacket(EQ::invslot::slotCursor, summoned_bag, ItemPacketLimbo);
+	safe_delete(summoned_bag);
+}

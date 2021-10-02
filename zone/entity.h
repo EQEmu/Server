@@ -158,6 +158,8 @@ public:
 	Mob *GetMob(const char* name);
 	Mob *GetMobByNpcTypeID(uint32 get_id);
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
+	bool IsNPCSpawned(std::vector<uint32> npc_ids);
+	uint32 CountSpawnedNPCs(std::vector<uint32> npc_ids);
 	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
 	{
