@@ -380,6 +380,7 @@ RULE_BOOL(Spells, PreventFactionWarOnCharmBreak, false, "Enable spell interupts 
 RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spells on a player that is already invisible")
 RULE_BOOL(Spells, AllowSpellMemorizeFromItem, false, "Allows players to memorize spells by right-clicking spell scrolls")
 RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to be in group.")
+RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate heal focus")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -600,6 +601,8 @@ RULE_INT(Chat, KarmaGlobalChatLimit, 72, "Amount of karma you need to be able to
 RULE_INT(Chat, GlobalChatLevelLimit, 8, "Level limit you need to of reached to talk in ooc/auction/chat if your karma is too low")
 RULE_BOOL(Chat, AutoInjectSaylinksToSay, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
 RULE_BOOL(Chat, AutoInjectSaylinksToClientMessage, true, "Automatically injects saylinks into dialogue that has [brackets in them]")
+RULE_BOOL(Chat, QuestDialogueUsesDialogueWindow, false, "Pipes all quest dialogue to dialogue window")
+RULE_BOOL(Chat, DialogueWindowAnimatesNPCsIfNoneSet, true, "If there is no animation specified in the dialogue window markdown then it will choose a random greet animation such as wave or salute")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Merchant)

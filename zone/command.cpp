@@ -11708,8 +11708,6 @@ void command_object(Client *c, const Seperator *sep)
 
 	Object *o = nullptr;
 	Object_Struct od;
-	Door door;
-	Doors *doors;
 	Door_Struct *ds;
 	uint32 id = 0;
 	uint32 itemid = 0;
@@ -12531,32 +12529,34 @@ void command_object(Client *c, const Seperator *sep)
 
 			entity_list.RemoveObject(o->GetID());
 
-			memset(&door, 0, sizeof(door));
+			auto door = DoorsRepository::NewEntity();
 
-			strn0cpy(door.zone_name, zone->GetShortName(), sizeof(door.zone_name));
+			door.zone = zone->GetShortName();
 
-			door.db_id = 1000000000 + id; // Out of range of normal use for doors.id
-			door.door_id = -1;	    // Client doesn't care if these are all the same door_id
-			door.pos_x = od.x;	    // xpos
-			door.pos_y = od.y;	    // ypos
-			door.pos_z = od.z;	    // zpos
-			door.heading = od.heading;    // heading
+			door.id = 1000000000 + id; // Out of range of normal use for doors.id
+			door.doorid = -1; // Client doesn't care if these are all the same door_id
+			door.pos_x = od.x;
+			door.pos_y = od.y;
+			door.pos_z = od.z;
+			door.heading = od.heading;
 
-			strn0cpy(door.door_name, od.object_name, sizeof(door.door_name)); // objectname
+			door.name = od.object_name;
 
 			// Strip trailing "_ACTORDEF" if present. Client won't accept it for doors.
-			uint32 len = strlen(door.door_name);
-			if ((len > 9) && (memcmp(&door.door_name[len - 9], "_ACTORDEF", 10) == 0))
-				door.door_name[len - 9] = '\0';
+			int pos = door.name.size() - strlen("_ACTORDEF");
+			if (pos > 0 && door.name.compare(pos, std::string::npos, "_ACTORDEF") == 0)
+			{
+				door.name.erase(pos);
+			}
 
-			memcpy(door.dest_zone, "NONE", 5);
+			door.dest_zone = "NONE";
 
 			if ((door.size = od.size) == 0) // unknown08 = optional size percentage
 				door.size = 100;
 
-			switch (
-			    door.opentype =
-				od.solidtype) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
+			door.opentype = od.solidtype;
+
+			switch (door.opentype) // unknown10 = optional request_nonsolid (0 or 1 or experimental number)
 			{
 			case 0:
 				door.opentype = 31;
@@ -12570,21 +12570,22 @@ void command_object(Client *c, const Seperator *sep)
 			door.incline = od.unknown020; // unknown20 = optional incline value
 			door.client_version_mask = 0xFFFFFFFF;
 
-			doors = new Doors(&door);
+			Doors* doors = new Doors(door);
+
 			entity_list.AddDoor(doors);
 
 			app = new EQApplicationPacket(OP_SpawnDoor, sizeof(Door_Struct));
 			ds = (Door_Struct *)app->pBuffer;
 
 			memset(ds, 0, sizeof(Door_Struct));
-			memcpy(ds->name, door.door_name, 32);
+			memcpy(ds->name, door.name.c_str(), 32);
 			ds->xPos = door.pos_x;
 			ds->yPos = door.pos_y;
 			ds->zPos = door.pos_z;
 			ds->heading = door.heading;
 			ds->incline = door.incline;
 			ds->size = door.size;
-			ds->doorId = door.door_id;
+			ds->doorId = door.doorid;
 			ds->opentype = door.opentype;
 			ds->unknown0052[9] = 1; // *ptr-1 and *ptr-3 from EntityList::MakeDoorSpawnPacket()
 			ds->unknown0052[11] = 1;

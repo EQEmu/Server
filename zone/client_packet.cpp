@@ -5001,7 +5001,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
 			return;
 		}
-		
+
 		uint32 day, hour, min, sec, ttime;
 		if ((ttime = tcorpse->GetDecayTime()) != 0) {
 			sec = (ttime / 1000) % 60; // Total seconds

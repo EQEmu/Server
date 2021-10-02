@@ -134,7 +134,7 @@ typedef enum {	//focus types
 	focusSwarmPetDuration,				//@Fc, SPA: 398, SE_SwarmPetDuration,				On Caster, swarm pet duration mod, base: milliseconds
 	focusReduceRecastTime,				//@Fc, SPA: 310, SE_ReduceReuseTimer,				On Caster, disc reuse time mod, base: milliseconds
 	focusBlockNextSpell,				//@Fc, SPA: 335, SE_BlockNextSpellFocus,			On Caster, chance to block next spell, base: chance
-	focusFcHealPctIncoming,				//@Fc, SPA: 395, SE_FcHealPctCritIncoming,			On Target, heal received mod pct, base: pct
+	focusFcHealPctIncoming,				//@Fc, SPA: 393, SE_FcHealPctIncoming,   			On Target, heal received mod pct, base: pct
 	focusFcDamageAmtIncoming,			//@Fc, SPA: 297, SE_FcDamageAmtIncoming,			On Target, damage taken flat amt, base: amt
 	focusFcSpellDamageAmtIncomingPC,	//@Fc, SPA: 484, SE_Fc_Spell_Damage_Amt_IncomingPC,	On Target, damage taken flat amt, base: amt	
 	focusFcCastSpellOnLand,				//@Fc, SPA: 481, SE_Fc_Cast_Spell_On_Land,			On Target, cast spell if hit by spell, base: chance pct, limit: spellid
@@ -151,7 +151,7 @@ typedef enum {	//focus types
 	focusFcAmplifyAmt,					//@Fc, SPA: 508, SE_Fc_Amplify_Amt,					On Caster, damage-heal-dot mod flat amt, base: amt
 	focusFcCastTimeMod2,				//@Fc, SPA: 500, SE_Fc_CastTimeMod2,				On Caster, cast time mod pct, base: pct
 	focusFcCastTimeAmt,					//@Fc, SPA: 501, SE_Fc_CastTimeAmt,					On Caster, cast time mod flat amt, base: milliseconds
-	focusFcHealPctCritIncoming,			//@Fc, SPA: 393, SE_FcHealPctCritIncoming,			On Target, heal received critical chance mod, base: chance pct
+	focusFcHealPctCritIncoming,			//@Fc, SPA: 395, SE_FcHealPctCritIncoming,			On Target, spell healing mod pct, base: pct
 	focusFcHealAmt,						//@Fc, SPA: 392, SE_FcHealAmt,						On Caster, spell healing mod flat amt, base: amt
 	focusFcHealAmtCrit,					//@Fc, SPA: 396, SE_FcHealAmtCrit,					On Caster, spell healing mod flat amt, base: amt
 } focusType; //Any new FocusType needs to be added to the Mob::IsFocus function

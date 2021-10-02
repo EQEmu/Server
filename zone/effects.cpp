@@ -267,63 +267,93 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 
 int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
-	if (target == nullptr)
-		target = this;
 
-	if (IsNPC())
-		value += value*CastToNPC()->GetSpellFocusHeal()/100;
+	if (IsNPC()) {
+		value += value * CastToNPC()->GetSpellFocusHeal() / 100;
+	}
 
 	int32 value_BaseEffect = 0;
-	int16 chance = 0;
-	int8 modifier = 1;
-	bool Critical = false;
+	int16 critical_chance = 0;
+	int8  critical_modifier = 1;
 
-	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id)/100);
+	if (spells[spell_id].buffduration < 1) {
+		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
+
+		if (spellbonuses.CriticalHealDecay) {
+			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
+		}
+	}
+	else {
+		critical_chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
+
+		if (spellbonuses.CriticalRegenDecay) {
+			critical_chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
+		}
+	}
+
+	if (critical_chance) {
+
+		if (spells[spell_id].override_crit_chance > 0 && critical_chance > spells[spell_id].override_crit_chance) {
+			critical_chance = spells[spell_id].override_crit_chance;
+		}
+
+		if (zone->random.Roll(critical_chance)) {
+			critical_modifier = 2; //At present time no critical heal amount modifier SPA exists.
+		}
+	}
+
+	value_BaseEffect = value + (value*GetFocusEffect(focusFcBaseEffects, spell_id) / 100);
 
 	value = value_BaseEffect;
 
-	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id)/100);
+	if (GetClass() == CLERIC) {
+		value += int(value_BaseEffect*RuleI(Spells, ClericInnateHealFocus) / 100);  //confirmed on live parsing clerics get an innate 5 pct heal focus
+	}
+	value += int(value_BaseEffect*GetFocusEffect(focusImprovedHeal, spell_id) / 100);
 	value += int(value_BaseEffect*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
 
 	// Instant Heals
-	if(spells[spell_id].buffduration < 1) {
+	if (spells[spell_id].buffduration < 1) {
 
-		chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
-
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
-
-		if (spellbonuses.CriticalHealDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalHealDecay);
-
-		if (spells[spell_id].override_crit_chance > 0 && chance > spells[spell_id].override_crit_chance)
-			chance = spells[spell_id].override_crit_chance;
-
-		if(chance && (zone->random.Roll(chance))) {
-			Critical = true;
-			modifier = 2; //At present time no critical heal amount modifier SPA exists.
+		if (target) {
+			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
+			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id)/100); //SPA 395 Add before critical (?)
 		}
 
-		value *= modifier;
-		value += GetFocusEffect(focusFcHealAmtCrit, spell_id) * modifier;
-		value += GetFocusEffect(focusFcHealAmt, spell_id);
-		value += GetFocusEffect(focusFcAmplifyAmt, spell_id);
-		value += target->GetFocusIncoming(focusFcHealAmtIncoming, SE_FcHealAmtIncoming, this, spell_id);
+		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
+		
+		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value); //Item Heal Amt Add before critical
+		}
 
-		if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass()%17) - 1] >= GetLevel() - 5)
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier;
+		if (target) {
+			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
+		}
+	
+		/*
+			Apply critical hit modifier
+		*/
 
-		value += value*target->GetHealRate(spell_id, this)/100;
+		value *= critical_modifier;
+		value += GetFocusEffect(focusFcHealAmt, spell_id); //SPA 392 Add after critical
+		value += GetFocusEffect(focusFcAmplifyAmt, spell_id); //SPA 508 ? Add after critical
 
-		if (IsNPC() && CastToNPC()->GetHealScale())
+		if (target) {
+			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
+		}
+		
+		if (IsNPC() && CastToNPC()->GetHealScale()) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
+		}
 
-		if (Critical) {
+		if (critical_modifier > 1) {
 			entity_list.MessageCloseString(
 				this, true, 100, Chat::SpellCrit,
 				OTHER_CRIT_HEAL, GetName(), itoa(value));
 
-			if (IsClient())
+			if (IsClient()) {
 				MessageString(Chat::SpellCrit, YOU_CRIT_HEAL, itoa(value));
+			}
 		}
 
 		return value;
@@ -331,20 +361,13 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
-
-		chance = itembonuses.CriticalHealOverTime + spellbonuses.CriticalHealOverTime + aabonuses.CriticalHealOverTime;
-
-		chance += target->GetFocusIncoming(focusFcHealPctCritIncoming, SE_FcHealPctCritIncoming, this, spell_id);
-
-		if (spellbonuses.CriticalRegenDecay)
-			chance += GetDecayEffectValue(spell_id, SE_CriticalRegenDecay);
-
-		if(chance && zone->random.Roll(chance))
-			value *= 2;
+		if (critical_chance && zone->random.Roll(critical_chance))
+			value *= critical_modifier;
 	}
 
-	if (IsNPC() && CastToNPC()->GetHealScale())
+	if (IsNPC() && CastToNPC()->GetHealScale()) {
 		value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
+	}
 
 	return value;
 }

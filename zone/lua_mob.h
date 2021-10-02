@@ -412,6 +412,8 @@ public:
 	bool HasOwner();
 	bool IsPet();
 	bool HasPet();
+	void RemovePet();
+	void SetPet(Lua_Mob new_pet);
 	bool IsSilenced();
 	bool IsAmnesiad();
 	int32 GetMeleeMitigation();

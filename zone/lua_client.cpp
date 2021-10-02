@@ -2206,17 +2206,27 @@ int Lua_Client::CountItem(uint32 item_id) {
 
 void Lua_Client::RemoveItem(uint32 item_id) {
 	Lua_Safe_Call_Void();
-	return self->RemoveItem(item_id);
+	self->RemoveItem(item_id);
 }
 
 void Lua_Client::RemoveItem(uint32 item_id, uint32 quantity) {
 	Lua_Safe_Call_Void();
-	return self->RemoveItem(item_id, quantity);
+	self->RemoveItem(item_id, quantity);
 }
 
 void Lua_Client::SetGMStatus(uint32 newStatus) {
 	Lua_Safe_Call_Void();
-	return self->SetGMStatus(newStatus);
+	self->SetGMStatus(newStatus);
+}
+
+void Lua_Client::UntrainDiscBySpellID(uint16 spell_id) {
+	Lua_Safe_Call_Void();
+	self->UntrainDiscBySpellID(spell_id);
+}
+
+void Lua_Client::UntrainDiscBySpellID(uint16 spell_id, bool update_client) {
+	Lua_Safe_Call_Void();
+	self->UntrainDiscBySpellID(spell_id, update_client);
 }
 
 void Lua_Client::ReadBookByName(std::string book_name, uint8 book_type) {
@@ -2480,7 +2490,7 @@ luabind::scope lua_register_client() {
 		.def("ClearCompassMark",(void(Lua_Client::*)(void))&Lua_Client::ClearCompassMark)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableSpellBookSlot)
 		.def("GetNextAvailableSpellBookSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableSpellBookSlot)
-		.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))& Lua_Client::GetSpellIDByBookSlot)
+		.def("GetSpellIDByBookSlot", (uint32(Lua_Client::*)(int))&Lua_Client::GetSpellIDByBookSlot)
 		.def("FindSpellBookSlotBySpellID", (int(Lua_Client::*)(int))&Lua_Client::FindSpellBookSlotBySpellID)
 		.def("UpdateTaskActivity", (void(Lua_Client::*)(int,int,int))&Lua_Client::UpdateTaskActivity)
 		.def("AssignTask", (void(Lua_Client::*)(int,int))&Lua_Client::AssignTask)
@@ -2585,20 +2595,22 @@ luabind::scope lua_register_client() {
 		.def("AddLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNLoss)
 		.def("AddLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::AddLDoNWin)
 		.def("SetHideMe", (void(Lua_Client::*)(bool))&Lua_Client::SetHideMe)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*))& Lua_Client::Popup)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32))& Lua_Client::Popup)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32))& Lua_Client::Popup)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32))& Lua_Client::Popup)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32))& Lua_Client::Popup)
-		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*))& Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*))&Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32))&Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32))&Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32))&Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32))&Lua_Client::Popup)
+		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*))&Lua_Client::Popup)
 		.def("Popup", (void(Lua_Client::*)(const char*,const char*,uint32,uint32,uint32,uint32,const char*,const char*,uint32))&Lua_Client::Popup)
 		.def("ResetAllDisciplineTimers", (void(Lua_Client::*)(void))&Lua_Client::ResetAllDisciplineTimers)
 		.def("SendToInstance", (void(Lua_Client::*)(std::string,std::string,uint32,float,float,float,float,std::string,uint32))&Lua_Client::SendToInstance)
 		.def("CountItem", (int(Lua_Client::*)(uint32))&Lua_Client::CountItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveItem)
 		.def("RemoveItem", (void(Lua_Client::*)(uint32,uint32))&Lua_Client::RemoveItem)
-		.def("SetGMStatus", (void(Lua_Client::*)(int32))& Lua_Client::SetGMStatus)
 		.def("ReadBookByName", (void(Lua_Client::*)(std::string,uint8))&Lua_Client::ReadBookByName);
+		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
+		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
+		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID);
 }
 
 luabind::scope lua_register_inventory_where() {

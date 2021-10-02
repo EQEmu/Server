@@ -1,6 +1,7 @@
 #ifndef DOORS_H
 #define DOORS_H
 
+#include "../common/repositories/doors_repository.h"
 #include "../common/emu_opcodes.h"
 #include "../common/eq_packet_structs.h"
 #include "../common/linked_list.h"
@@ -19,7 +20,7 @@ public:
 	~Doors();
 
 	Doors(const char *model, const glm::vec4& position, uint8 open_type = 58, uint16 size = 100);
-	Doors(const Door* door);
+	Doors(const DoorsRepository::Doors& door);
 
 	bool GetDisableTimer() { return disable_timer; }
 	bool IsDoor() const { return true; }

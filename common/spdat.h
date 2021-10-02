@@ -1067,7 +1067,7 @@ typedef enum {
 #define SE_ShadowStepDirectional		379 // implemented - handled by client
 #define SE_Knockdown					380 // implemented - small knock back(handled by client)
 //#define SE_KnockTowardCaster			381	// *not implemented (Call of Hither) knocks you back to caster (value) distance units infront
-#define SE_NegateSpellEffect			382 // implemented, @Debuff, negates specific spell effect benefits for the duration of the debuff, base: see NegateSpellEffecttype Enum, limit: SPA id, max: none
+#define SE_NegateSpellEffect			382 // implemented, @Debuff, negates specific spell effect benefits for the duration of the debuff and prevent non-duration spell effect from working, base: see NegateSpellEffecttype Enum, limit: SPA id, max: none
 #define SE_SympatheticProc				383 // implemented, @Fc, On Caster, cast on spell use, base: variable proc chance on cast time, limit: spellid
 #define SE_Leap							384	// implemented - Leap effect, ie stomping leap
 #define SE_LimitSpellGroup				385	// implemented, @Ff, Spell group(s) that a spell focus can require or exclude, base1: spellgroup id, Include: Positive Exclude: Negative
@@ -1078,9 +1078,9 @@ typedef enum {
 #define SE_FcTimerLockout				390 // implemented, @Fc, On Caster, set a spell to be on recast timer, base: recast duration milliseconds, Note: Applied from casted spells only
 #define SE_LimitManaMax					391	// implemented, @Ff, Mininum mana of spell that can be focused, base1: mana amt
 #define SE_FcHealAmt					392 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
-#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received critical chance mod, base: chance pct
+#define SE_FcHealPctIncoming			393 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
 #define SE_FcHealAmtIncoming			394 // implemented, @Fc, On Target, heal received mod flat amt, base: amt
-#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct
+#define SE_FcHealPctCritIncoming		395 // implemented, @Fc, On Target, heal received mod pct, base: pct, limit: random max pct
 #define SE_FcHealAmtCrit				396 // implemented, @Fc, On Caster, spell healing mod flat amt, base: amt
 #define SE_PetMeleeMitigation			397 // implemented[AA] - additional mitigation to your pets. Adds AC
 #define SE_SwarmPetDuration				398 // implemented - Affects the duration of swarm pets

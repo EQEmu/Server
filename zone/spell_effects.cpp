@@ -221,10 +221,19 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		if (GetSpellPowerDistanceMod())
 			effect_value = effect_value*GetSpellPowerDistanceMod()/100;
 
+		//Prevents effect from being applied
+		if (spellbonuses.NegateEffects) {
+			if (effect != SE_NegateSpellEffect && NegateSpellEffect(spell_id, effect)) {
+				if (caster) {
+					caster->Message(Chat::Red, "Part or all of this spell has lost its effectiveness."); //Placeholder msg, until live one is obtained.
+				}
+				continue;
+			}
+		}
+
 #ifdef SPELL_EFFECT_SPAM
 		effect_desc[0] = 0;
 #endif
-
 		switch(effect)
 		{
 			case SE_CurrentHP:	// nukes, heals; also regen/dot if a buff
@@ -5734,7 +5743,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_FcHealPctCritIncoming:
 				if (type == focusFcHealPctCritIncoming) {
-					value = focus_spell.base[i];
+					value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 				}
 				break;
 
@@ -5752,7 +5761,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_FcHealPctIncoming:
 				if (type == focusFcHealPctIncoming) {
-					value = focus_spell.base[i];
+					value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
 				}
 				break;
 
@@ -5916,7 +5925,7 @@ void Mob::TryTriggerOnCastFocusEffect(focusType type, uint16 spell_id)
 		}
 	}
 
-	// Only use of this focus per AA effect.
+	// Only use one of this focus per AA effect.
 	if (IsClient() && aabonuses.FocusEffects[type]) {
 		for (const auto &aa : aa_ranks) {
 			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
@@ -6363,8 +6372,9 @@ int32 NPC::GetFocusEffect(focusType type, uint16 spell_id) {
 
 	//Improved Healing, Damage & Mana Reduction are handled differently in that some are random percentages
 	//In these cases we need to find the most powerful effect, so that each piece of gear wont get its own chance
-	if(RuleB(Spells, LiveLikeFocusEffects) && (type == focusManaCost || type == focusImprovedHeal || type == focusImprovedDamage || type == focusImprovedDamage2))
+	if (RuleB(Spells, LiveLikeFocusEffects) && CanFocusUseRandomEffectivenessByType(type)) {
 		rand_effectiveness = true;
+	}
 
 	if (RuleB(Spells, NPC_UseFocusFromItems) && itembonuses.FocusEffects[type]){
 
@@ -6924,49 +6934,53 @@ int32 Mob::GetFcDamageAmtIncoming(Mob *caster, uint32 spell_id, bool use_skill, 
 
 int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spell_id) {
 
+	//**** This can be removed when bot healing focus code is updated ****
+
 	/*
 	This is a general function for calculating best focus effect values for focus effects that exist on targets but modify incoming spells.
 	Should be used when checking for foci that can exist on clients or npcs ect.
 	Example: When your target has a focus limited buff that increases amount of healing on them.
 	*/
 
-	if (!caster)
+	if (!caster) {
 		return 0;
+	}
 
 	int value = 0;
 
 	if (spellbonuses.FocusEffects[type]){
 
-			int32 tmp_focus = 0;
-			int tmp_buffslot = -1;
+		int32 tmp_focus = 0;
+		int tmp_buffslot = -1;
 
-			int buff_count = GetMaxTotalSlots();
-			for(int i = 0; i < buff_count; i++) {
+		int buff_count = GetMaxTotalSlots();
+		for(int i = 0; i < buff_count; i++) {
 
-				if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
+			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, effect))){
 
-					int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
+				int32 focus = caster->CalcFocusEffect(type, buffs[i].spellid, spell_id);
 
-					if (!focus)
-						continue;
+				if (!focus) {
+					continue;
+				}
 
-					if (tmp_focus && focus > tmp_focus){
-						tmp_focus = focus;
-						tmp_buffslot = i;
-					}
+				if (tmp_focus && focus > tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
+				}
 
-					else if (!tmp_focus){
-						tmp_focus = focus;
-						tmp_buffslot = i;
-					}
+				else if (!tmp_focus){
+					tmp_focus = focus;
+					tmp_buffslot = i;
 				}
 			}
-
-			value = tmp_focus;
-
-			if (tmp_buffslot >= 0)
-				CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 		}
+
+		value = tmp_focus;
+
+		if (tmp_buffslot >= 0)
+			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
+	}
 
 
 	return value;
@@ -8489,6 +8503,8 @@ bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 	case focusSpellHateMod:
 	case focusSpellVulnerability:
 	case focusFcSpellDamagePctIncomingPC:
+	case focusFcHealPctIncoming:
+	case focusFcHealPctCritIncoming:
 		return true;
 	}
 
@@ -8513,6 +8529,28 @@ int Mob::GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool 
 	}
 
 	return zone->random.Int(focus_base, focus_base2);
+}
+
+bool Mob::NegateSpellEffect(uint16 spell_id, int effect_id)
+{
+	/*
+		This works for most effects, anything handled purely by the client will bypass this (ie Gate, Shadowstep)
+		Seen with resurrection effects, likely blocks the client from accepting a ressurection request. *Not implement at this time.
+	*/
+
+	for (int i = 0; i < GetMaxTotalSlots(); i++) {
+		//Check for any buffs containing NegateEffect
+		if (IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_NegateSpellEffect) && spell_id != buffs[i].spellid) {
+			//Match each of the negate effects with the current spell effect, if found, that effect will not be applied.
+			for (int j = 0; j < EFFECT_COUNT; j++)
+			{
+				if (spells[buffs[i].spellid].base2[j] == effect_id) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
 int Mob::GetMemoryBlurChance(int base_chance)

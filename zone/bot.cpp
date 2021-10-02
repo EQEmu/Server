@@ -6776,7 +6776,7 @@ int32 Bot::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if(itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
 			value += (GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value) * modifier);
 
-		value += (value * target->GetHealRate(spell_id, this) / 100);
+		value += (value * target->GetHealRate() / 100);
 		if (Critical)
 			entity_list.MessageClose(this, false, 100, Chat::SpellCrit, "%s performs an exceptional heal! (%d)", GetName(), value);
 
