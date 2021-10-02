@@ -10537,9 +10537,7 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 	int length = book_text.length();
 
 	if (book_text[0] != '\0') {
-#if EQDEBUG >= 6
-		LogInfo("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, book_text.c_str());
-#endif
+		LogDebug("Client::ReadBookByName() Book Name: [{}] Text: [{}]", book_name, book_text.c_str());
 		auto outapp = new EQApplicationPacket(OP_ReadBook, length + sizeof(BookText_Struct));
 		BookText_Struct *out = (BookText_Struct *) outapp->pBuffer;
 		out->window = 0xFF;
