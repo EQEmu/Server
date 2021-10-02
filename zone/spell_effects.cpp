@@ -1077,14 +1077,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-
+				int chance = spells[spell_id].base[i] - 20; //Baseline 2% negative modifer derived from parsing.
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
 						IsDetrimentalSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (zone->random.Int(1, 1000) <= chance){
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -1103,14 +1103,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-
+				int chance = spells[spell_id].base[i] - 20; //Baseline 2% negative modifer derived from parsing.
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
 						IsBeneficialSpell(buffs[slot].spellid) &&
 						spells[buffs[slot].spellid].dispel_flag == 0)
 					{
-						if (caster && TryDispel(caster->GetLevel(),buffs[slot].casterlevel, effect_value)){
+						if (zone->random.Int(1, 1000) <= chance) {
 							BuffFadeBySlot(slot);
 							slot = buff_count;
 						}
@@ -7082,33 +7082,6 @@ bool Mob::TryDispel(uint8 caster_level, uint8 buff_level, int level_modifier){
 	else
 		return false;
 }
-
-bool Mob::TryDispelBeneficialOrDetrimental(uint8 caster_level, uint8 buff_level, int chance) {
-
-	/*
-		Used in SPA 154 and SPA 209 to specifically dispel only beneficial or only detrimental spells.
-		Formula derived from live parsing.
-		Baseline chance is 'base' / 10, (ie. 950/10 = 95%)
-		Chance receives a penality of 0.5% per level, for each level the 'caster of the buff/debuff' is above the caster of the dispel.
-		There is no bonus percent chance for trying to dispel buff/debuffs cast by mobs lower level than you.
-
-		Ie. Lv 69 Shaman Casts 'Pure Spirit' which has 95% chance to remove deterimental on a debuff cast by a level 85 raid mob. 85-69= 16, 
-		then 16 x 0.5 = 8% penality, thus actual chance to remove is going to be 95-8 = 87%
-	*/
-
-	int dispel_chance = chance;
-	int level_diff = caster_level - buff_level;
-
-	if (level_diff < 0) {
-		dispel_chance += level_diff * 5;
-	}
-
-	if (zone->random.Int(1,1000) <= dispel_chance)
-		return true;
-	else
-		return false;
-}
-
 
 bool Mob::ImprovedTaunt(){
 
