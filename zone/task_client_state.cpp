@@ -2754,7 +2754,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 	}
 
 	// group
-	if (!clients_to_update.empty()) {
+	if (clients_to_update.empty()) {
 		Group *group = entity_list.GetGroupByClient(client);
 		if (group) {
 			for (auto &m : group->members) {
@@ -2766,7 +2766,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 	}
 
 	// solo
-	if (!clients_to_update.empty()) {
+	if (clients_to_update.empty()) {
 		clients_to_update.push_back(client);
 	}
 
