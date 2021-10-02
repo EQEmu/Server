@@ -2841,7 +2841,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 				// legacy eqemu task update logic loops through group on kill of npc to update a single task
 				if (p_task_data->type != TaskType::Shared) {
 					LogTasksDetail("[HandleUpdateTasksOnKill] Non-Shared Update");
-					IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
+					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
 					continue;
 				}
 
@@ -2849,7 +2849,7 @@ void ClientTaskState::HandleUpdateTasksOnKill(Client *client, uint32 npc_type_id
 
 				// shared tasks only require one client to receive an update to propagate
 				if (c == client) {
-					IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
+					c->GetTaskState()->IncrementDoneCount(c, p_task_data, current_task->slot, activity_id);
 				}
 			}
 		}
