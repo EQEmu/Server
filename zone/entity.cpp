@@ -1202,25 +1202,7 @@ bool EntityList::IsMobSpawnedByNpcTypeID(uint32 get_id)
 
 bool EntityList::IsNPCSpawned(std::vector<uint32> npc_ids)
 {
-	bool is_spawned = false;
-	if (npc_list.empty() || npc_ids.empty()) {
-		return is_spawned;
-	}
-
-	for (auto current_npc : npc_list) {
-		if (
-			std::find(
-				npc_ids.begin(),
-				npc_ids.end(),
-				current_npc.second->GetNPCTypeID()
-			) != npc_ids.end() && 
-			current_npc.second->GetID() != 0
-			) {
-			is_spawned = true;
-		}
-	}
-
-	return is_spawned;
+	return CountSpawnedNPCs(npc_ids) != 0;
 }
 
 uint32 EntityList::CountSpawnedNPCs(std::vector<uint32> npc_ids)
