@@ -2283,18 +2283,18 @@ void Database::SetIPExemption(std::string account_ip, int exemption_amount) {
 		auto row = results.begin();
 		exemption_id = atoi(row[0]);
 	}
+	
+	query = fmt::format(
+		"INSERT INTO `ip_exemptions` (`exemption_ip`, `exemption_amount`) VALUES ('{}', {})",
+		account_ip,
+		exemption_amount
+	);
 
 	if (exemption_id != 0) {
 		query = fmt::format(
 			"UPDATE `ip_exemptions` SET `exemption_amount` = {} WHERE `exemption_ip` = '{}'",
 			exemption_amount,
 			account_ip
-		);
-	} else {
-		query = fmt::format(
-			"INSERT INTO `ip_exemptions` (`exemption_ip`, `exemption_amount`) VALUES ('{}', {})",
-			account_ip,
-			exemption_amount
 		);
 	}
 	QueryDatabase(query);
