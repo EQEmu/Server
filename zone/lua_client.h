@@ -280,6 +280,9 @@ public:
 	void SetEndurance(int endur);
 	void SendOPTranslocateConfirm(Lua_Mob caster, int spell_id);
 	uint32 GetIP();
+	std::string GetIPString();
+	int GetIPExemption();
+	void SetIPExemption(int exemption_amount);
 	void AddLevelBasedExp(int exp_pct);
 	void AddLevelBasedExp(int exp_pct, int max_level);
 	void AddLevelBasedExp(int exp_pct, int max_level, bool ignore_mods);
