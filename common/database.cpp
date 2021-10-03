@@ -1402,20 +1402,6 @@ bool Database::CheckUsedName(const char* name) {
 	return true;
 }
 
-uint8 Database::GetServerType() {
-	std::string query("SELECT `value` FROM `variables` WHERE `varname` = 'ServerType' LIMIT 1");
-	auto results = QueryDatabase(query);
-	if (!results.Success()) {
-		return 0;
-	}
-
-	if (results.RowCount() != 1)
-		return 0;
-
-	auto row = results.begin();
-	return atoi(row[0]);
-}
-
 bool Database::MoveCharacterToZone(uint32 character_id, uint32 zone_id)
 {
 	std::string query = StringFormat(

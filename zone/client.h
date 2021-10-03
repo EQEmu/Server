@@ -780,6 +780,11 @@ public:
 	void CheckIncreaseTradeskill(int16 bonusstat, int16 stat_modifier, float skillup_modifier, uint16 success_modifier, EQ::skills::SkillType tradeskill);
 	void InitInnates();
 	bool CanPvP(Client * c);
+	bool PVPLevelDifference(Client * c);
+	bool WorldPVPUseGuildBasedPVP(Client * c);
+	bool WorldPVPUseTeamsBySizeBasedPVP(Client * c);
+	bool WorldPVPUseDeityBasedPVP(Client * c);
+	int WorldPVPMinLevel();
  	int GetAlignment();
 	int GetPVPRaceTeamBySize();
 

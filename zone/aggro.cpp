@@ -453,10 +453,13 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	Client *c1 = nullptr, *c2 = nullptr, *becomenpc = nullptr;
 //	NPC *npc1, *npc2;
 	int reverse;
+	
+LogInfo("Mob::IsAttackAllowed Called");
 
 	if(!zone->CanDoCombat())
 		return false;
 
+LogInfo("Mob::IsAttackAllowed candocombat");
 	// some special cases
 	if(!target)
 		return false;
@@ -465,14 +468,19 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return true;
 
 	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
+		LogInfo("Mob::IsAttackAllowed no harm from client");
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
+	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient()) {
+		LogInfo("Mob::IsAttackAllowed immune damage client");
 		return false;
+	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
+	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC()) {
+		LogInfo("Mob::IsAttackAllowed image damage npc");
 		return false;
+	}
 
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
@@ -532,7 +540,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 			{
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
-
+LogInfo("Mob::IsAttackAllowed calling CanPVP");
 				return c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client vs npc

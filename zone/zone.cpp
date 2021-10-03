@@ -979,7 +979,7 @@ Zone::Zone(uint32 in_zoneid, uint32 in_instanceid, const char* in_short_name)
 	pgraveyard_zoneid = 0;
 	pMaxClients = 0;
 	pvpzone = false;
-	if(database.GetServerType() == 1)
+	if(RuleI(World, PVPSettings) >= 1)
 		pvpzone = true;
 	content_db.GetZoneLongName(short_name, &long_name, file_name, &m_SafePoint.x, &m_SafePoint.y, &m_SafePoint.z, &pgraveyard_id, &pMaxClients);
 	if(graveyard_id() > 0)

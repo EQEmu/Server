@@ -1667,7 +1667,7 @@ bool Client::OPCharCreate(char *name, CharCreate_Struct *cc)
 		pp.buffs[i].spellid = 0xFFFF;
 
 	/* If server is PVP by default, make all character set to it. */
-	pp.pvp = database.GetServerType() == 1 ? 1 : 0;
+	pp.pvp = RuleI(World, PVPSettings) >= 1 ? 1 : 0;
 
 	/* If it is an SoF Client and the SoF Start Zone rule is set, send new chars there */
 	if (m_ClientVersionBit & EQ::versions::maskSoFAndLater) {

@@ -268,7 +268,9 @@ Client::Client(EQStreamInterface* ieqs)
 
 	if (RuleI(World, PVPSettings) > 0) SendPVPStats();
 
-	if (RuleI(World, PVPMinLevel) > 0 && level >= RuleI(World, PVPMinLevel) && m_pp.pvp == 0) SetPVP(true, false);
+	if (WorldPVPMinLevel() > 0 && level >= WorldPVPMinLevel() && m_pp.pvp == 0) SetPVP(true, false);
+	
+	
 	dynamiczone_removal_timer.Disable();
 
 	//for good measure:
@@ -10052,66 +10054,173 @@ void Client::Fling(float value, float target_x, float target_y, float target_z, 
 
 //CanPvP returns true if provided player can attack this player
 bool Client::CanPvP(Client *c) {
+	
+	// No Target
 	if (c == nullptr) 
 	{
-		LogInfo("Client::CanPvP other was null");
+		LogDebug("Client::CanPvP other was null");
+		return false;
+	}
+	
+	// protect GMs by default, (this one sided logic should allow GM to smack people tho)
+	if (c->GetGM())
+	{
+		LogDebug("Client::CanPvP other was GM, no fight");
 		return false;
 	}
 
 	//Dueling overrides normal PvP logic
 	if (IsDueling() && c->IsDueling() && GetDuelTarget() == c->GetID() && c->GetDuelTarget() == GetID())
 	{
-		LogInfo("Client::CanPvP everyone was dueling, FIGHT");
+		LogDebug("Client::CanPvP everyone was dueling, FIGHT");
 		return true;
 	}
+	
+	// Is PVP Disabled, otherwise continue with pvp checks
+	if(RuleI(World, PVPSettings) == 0)
+		return false;
 
-	LogInfo("Client::CanPvP 2 parties are not dueling, continue on...");
-
-	// protect GMs by default, (this one sided logic should allow GM to smack people tho)
-	if (c->GetGM())
+	// Is target required level for pvp
+	if(GetLevel() < WorldPVPMinLevel() || c->GetLevel() < WorldPVPMinLevel())
 	{
-		LogInfo("Client::CanPvP other was GM, no fight");
+		LogDebug("Client::CanPvP World:WorldPVPMinLevel Failed, Level [{}], Target Level [{}], Min Level Rule [{}]", GetLevel(), c->GetLevel(), WorldPVPMinLevel());
 		return false;
 	}
-
-	// guildies cant PK each other??
-	if (GuildID() != 0 && GuildID() == c->GuildID())
+	else
 	{
-		LogInfo("Client::CanPvP same guild, no fight");
+		LogDebug("Client::CanPvP World:WorldPVPMinLevel Passed, Level [{}], Target Level [{}], Min Level Rule [{}]", GetLevel(), c->GetLevel(), WorldPVPMinLevel());
+	}
+	
+	// Is VZ/TZ Ruleset turned on and is target on opposing team
+	if(!WorldPVPUseTeamsBySizeBasedPVP(c))
 		return false;
-	}
-
-	if (IsGrouped() && GetGroup()->GetID() == c->GetGroup()->GetID())
-	{
-		LogInfo("Client::CanPvP same group, no fight");
+	
+	// Is SZ Ruleset turned on and is target on opposing deity (Good vs Evil)
+	if(!WorldPVPUseDeityBasedPVP(c))
 		return false;
-	}
-	// pvp always allowed outside of cities (can attacker trainers/pnp trolls)
-	if (!zone->IsCity(/*zone->GetZoneID()*/))
-	{
-		LogInfo("Client::CanPvP if not a city, FIGHT");
-		return true;
-	}
-
-	// players need to be min level for pvp
-	int rule_min_level = RuleI(World, PVPMinLevel);
-	if (GetLevel() < rule_min_level || c->GetLevel() < rule_min_level)
-	{
-		LogInfo("Client::CanPvP World:PVPMinLevel check failed");
+	
+	// Is Guild based ruleset turned on and is target on opposing guild
+	if(!WorldPVPUseGuildBasedPVP(c))
 		return false;
-	}
 
-	// check player level range
-	int rule_level_diff = RuleI(World, PVPLevelDifference);
-	if (abs((int16)c->GetLevel() - (int16)GetLevel()) > rule_level_diff)
-	{
-		LogInfo("Client::CanPvP World:PVPLevelDifference Failed");
+	if(!PVPLevelDifference(c))
 		return false;
-	}
-
+	
 	return true;
 }
 
+bool Client::PVPLevelDifference(Client *c)
+{
+	int rule_level_diff = RuleI(World, PVPLevelDifference);
+	
+	// If rule is set to anything other than 0 its custom
+	if(rule_level_diff == 0) {
+		if(RuleI(World, PVPSettings) == 1) 
+		{
+			rule_level_diff = 4;
+		}
+		// Vallon/Tallon Zek
+		else if(RuleI(World, PVPSettings) == 2)
+		{
+			rule_level_diff = 8; 
+		}
+		// Sullon Zek
+		else if(RuleI(World, PVPSettings) == 4)
+		{
+			LogDebug("Client::CanPvP World:PVPLevelDifference Passed, Sullon Zek Rules any level");
+			return true;
+		}
+	}
+	
+	LogDebug("Client::CanPvP World:PVPLevelDifference Rule Level Diff: [{}], Level: [{}], Other Level: [{}]", rule_level_diff, GetLevel(), c->GetLevel());
+
+	// Compare Levels
+	if (abs(GetLevel() - c->GetLevel()) > rule_level_diff)
+	{
+		LogDebug("Client::CanPvP World:PVPLevelDifference Failed, Failed Difference [{}]", abs(GetLevel() - c->GetLevel()));
+		return false;
+	}
+	
+	LogDebug("Client::CanPvP World:PVPLevelDifference Passed");
+	return true;
+}
+
+bool Client::WorldPVPUseGuildBasedPVP(Client *c)
+{
+	
+	if(!RuleI(World, PVPSettings) == 3)
+		return true;
+	
+	if((GuildID() == c->GuildID()) && (IsInAGuild() && c->IsInAGuild()))
+	{
+		LogDebug("Client::CanPvP World:WorldPVPUseGuildBasedPVP Failed, Client [{}], Other [{}], IsInAGuild [{}], IsInAGuild Other [{}]", GuildID(), c->GuildID(), IsInAGuild(), c->IsInAGuild());
+		return false;
+	}
+	
+	LogDebug("Client::CanPvP World:WorldPVPUseGuildBasedPVP Passed, Client [{}], Other [{}]", GuildID(), c->GuildID());
+	return true;
+}
+
+bool Client::WorldPVPUseTeamsBySizeBasedPVP(Client *c)
+{
+	
+	if(!RuleI(World, PVPSettings) == 2)
+		return true;
+	
+	if(GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
+	{
+		LogDebug("Client::CanPvP World:WorldPVPUseTeamsBySizeBasedPVP Failed, Client [{}], Other [{}]", GetPVPRaceTeamBySize(), c->GetPVPRaceTeamBySize());
+		return false;
+	}
+	
+	LogDebug("Client::CanPvP World:WorldPVPUseTeamsBySizeBasedPVP Passed, Client [{}], Other [{}]", GetPVPRaceTeamBySize(), c->GetPVPRaceTeamBySize());
+	return true;
+}
+
+bool Client::WorldPVPUseDeityBasedPVP(Client *c)
+{
+	
+	if(RuleI(World, PVPSettings) == 4)
+		return true;
+	
+	if(GetAlignment() == c->GetAlignment())
+	{
+		LogDebug("Client::CanPvP World:WorldPVPUseDeityBasedPVP Failed, Client [{}], Other [{}]", GetAlignment(), c->GetAlignment());
+		return false;
+	}
+	
+	LogDebug("Client::CanPvP World:WorldPVPUseDeityBasedPVP Passed, Client [{}], Other [{}]", GetAlignment(), c->GetAlignment());
+	return true;
+}
+
+int Client::WorldPVPMinLevel()
+{
+	int rule_min_level = RuleI(World, PVPMinLevel);
+	
+	// If rule is set to anything other than 0 its custom
+	if(rule_min_level == 0)
+	{
+		switch(RuleI(World, PVPSettings))
+		{
+			case 1: // Rallos Zek
+				rule_min_level = 6;
+			break;
+			
+			case 2: // Vallon/Tallon Zek
+				rule_min_level = 6;
+			break;
+			
+			case 3: // Guild Rulesets (Custom)
+				rule_min_level = 6;
+			break;
+			
+			case 4: // Sullon Zek
+				rule_min_level = 6;
+			break;
+		}
+	}
+	return rule_min_level;
+}
 
 //GetAlignment returns 0 = neutral, 1 = good, 2 = evil, used for pvp sullon zek rules
 int Client::GetAlignment() {
