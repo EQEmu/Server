@@ -430,6 +430,7 @@
 9173|2021_09_23_checksum_eqgame_spells.sql|SHOW COLUMNS FROM `account` LIKE 'checksum_crc1_eqgame'|empty|
 9174|2021_09_29_spawn_last_names.sql
 9175|2021_09_29_enable_disable_bard_melody.sql
+9176|2021_10_03_disable_item_focus_effect.sql
 
 # Upgrade conditions:
 # 	This won't be needed after this system is implemented, but it is used database that are not
