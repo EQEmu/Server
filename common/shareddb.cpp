@@ -968,6 +968,13 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 			disableNoTransfer = true;
 		}
 	}
+	bool DisableItemsFocusEffect = false;
+	if (GetVariable("DisableItemsFocusEffect", ndbuffer)) {
+		if (ndbuffer[0] == '1' && ndbuffer[1] == '\0') {
+			DisableItemsFocusEffect = true;
+		}
+	}
+
 
 	EQ::ItemData item;
 
@@ -1144,8 +1151,8 @@ void SharedDatabase::LoadItems(void *data, uint32 size, int32 items, uint32 max_
 		item.Worn.Type = (uint8)atoul(row[ItemField::worntype]);
 		item.Worn.Level = (uint8)atoul(row[ItemField::wornlevel]);
 		item.Worn.Level2 = (uint8)atoul(row[ItemField::wornlevel2]);
-		item.Focus.Effect = (int32)atoul(row[ItemField::focuseffect]);
-		item.Focus.Type = (uint8)atoul(row[ItemField::focustype]);
+		item.Focus.Effect = DisableItemsFocusEffect ? false : (int32)atoul(row[ItemField::focuseffect]) ? false : true;
+		item.Focus.Type = DisableItemsFocusEffect ? false : (uint8)atoul(row[ItemField::focustype]) ? false : true;
 		item.Focus.Level = (uint8)atoul(row[ItemField::focuslevel]);
 		item.Focus.Level2 = (uint8)atoul(row[ItemField::focuslevel2]);
 		item.Scroll.Effect = (int32)atoul(row[ItemField::scrolleffect]);

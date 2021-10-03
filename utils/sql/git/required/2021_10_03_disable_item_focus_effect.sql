@@ -1,0 +1,1 @@
+INSERT INTO `variables` (`varname`, `value`, `information`, `ts`) VALUES ('DisableItemFocusEffect', '0', 'When set to 1, shared memory will ignore focus effect when loading items', '2021-10-03 19:33:55');
