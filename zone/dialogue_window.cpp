@@ -503,7 +503,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// build the final output string
 	std::string final_output;
-	final_output = fmt::format("{}{}{} <br><br> {}", quote_string, output, quote_string, click_response);
+	final_output = fmt::format("{}{}{} <br><br> {}", quote_string, trim(output), quote_string, click_response);
 
 	// send popup
 	c->SendFullPopup(
