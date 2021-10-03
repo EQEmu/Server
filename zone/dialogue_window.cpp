@@ -26,7 +26,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	find_replace(output, "{gray}", "<c \"#808080\">");
 	find_replace(output, "{tan}", "<c \"#daa520\">");
 	find_replace(output, "{bullet}", "•");
-	find_replace(output, "{name}", "$name");
+	find_replace(output, "{name}", fmt::format("{}", c->GetCleanName()));
 	find_replace(output, "{linebreak}", "--------------------------------------------------------------------");
 	find_replace(output, "{rowpad}", R"(<tr><td>{tdpad}<"td><td>{tdpad}<"td><"tr>)");
 	find_replace(output, "{tdpad}", "----------------------");
@@ -54,6 +54,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		render_nobracket = true;
 		LogDiaWind("Client [{}] Rendering nobracket", c->GetCleanName());
 		find_replace(output, "nobracket", "");
+	}
+
+	bool render_hiddenresponse = false;
+	if (markdown.find("hiddenresponse") != std::string::npos) {		
+		render_hiddenresponse = true;
+		LogDiaWind("Client [{}] Rendering hiddenresponse", c->GetCleanName());
+		find_replace(output, "hiddenresponse", "");
 	}
 
 	// animations
@@ -504,7 +511,9 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	// build the final output string
 	std::string final_output;
 	final_output = fmt::format("{}{}{} <br><br> {}", quote_string, trim(output), quote_string, click_response);
-
+	if (render_hiddenresponse) {
+		final_output = fmt::format("{}{}{}", quote_string, output, quote_string);
+	}
 	// send popup
 	c->SendFullPopup(
 		title.c_str(),
