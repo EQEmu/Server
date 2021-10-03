@@ -56,6 +56,13 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 		find_replace(output, "nobracket", "");
 	}
 
+	bool render_hiddenresponse = false;
+	if (markdown.find("hiddenresponse") != std::string::npos) {		
+		render_hiddenresponse = true;
+		LogDiaWind("Client [{}] Rendering hiddenresponse", c->GetCleanName());
+		find_replace(output, "hiddenresponse", "");
+	}
+
 	// animations
 	std::string animation = get_between(output, "+", "+");
 	if (!animation.empty()) {
@@ -504,6 +511,9 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	// build the final output string
 	std::string final_output;
 	final_output = fmt::format("{}{}{} <br><br> {}", quote_string, output, quote_string, click_response);
+	if (render_hiddenresponse) {
+		final_output = fmt::format("{}{}{}", quote_string, output, quote_string);
+	}
 
 	// send popup
 	c->SendFullPopup(
