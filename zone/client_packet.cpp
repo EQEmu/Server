@@ -1256,11 +1256,8 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	uint32 pplen = 0;
 	EQApplicationPacket* outapp = nullptr;
-	MYSQL_RES* result = nullptr;
 	bool loaditems = 0;
-	uint32 i;
 	std::string query;
-	unsigned long* lengths = nullptr;
 
 	uint32 cid = CharacterID();
 	character_id = cid; /* Global character_id reference */
@@ -1303,7 +1300,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 		m_pp.platinum_shared = database.GetSharedPlatinum(this->AccountID());
 
 	database.ClearOldRecastTimestamps(cid); /* Clear out our old recast timestamps to keep the DB clean */
-	// set to full support in case they're a gm with items in disabled expansion slots..but, have their gm flag off...
+	// set to full support in case they're a gm with items in disabled expansion slots...but, have their gm flag off...
 	// item loss will occur when they use the 'empty' slots, if this is not done
 	m_inv.SetGMInventory(true);
 	loaditems = database.GetInventory(cid, &m_inv); /* Load Character Inventory */
@@ -1733,12 +1730,12 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 	Character Inventory Packet
 	this is not quite where live sends inventory, they do it after tribute
 	*/
-	if (loaditems) { /* Dont load if a length error occurs */
+	if (loaditems) { /* Don't load if a length error occurs */
 		if (admin >= minStatusToBeGM)
 			m_inv.SetGMInventory(true); // set to true to allow expansion-restricted packets through
 
 		BulkSendInventoryItems();
-		/* Send stuff on the cursor which isnt sent in bulk */
+		/* Send stuff on the cursor which isn't sent in bulk */
 		for (auto iter = m_inv.cursor_cbegin(); iter != m_inv.cursor_cend(); ++iter) {
 			/* First item cursor is sent in bulk inventory packet */
 			if (iter == m_inv.cursor_cbegin())
@@ -1805,7 +1802,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 
 	/*
 	Weather Packet
-	This shouldent be moved, this seems to be what the client
+	This shouldn't be moved, this seems to be what the client
 	uses to advance to the next state (sending ReqNewZone)
 	*/
 	outapp = new EQApplicationPacket(OP_Weather, 12);

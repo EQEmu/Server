@@ -224,7 +224,7 @@ EQ::ItemInstance* EQ::InventoryProfile::GetItem(int16 slot_id, uint8 bagidx) con
 	return GetItem(InventoryProfile::CalcSlotId(slot_id, bagidx));
 }
 
-// Put an item snto specified slot
+// Put an item into specified slot
 int16 EQ::InventoryProfile::PutItem(int16 slot_id, const ItemInstance& inst)
 {
 	if (slot_id <= EQ::invslot::POSSESSIONS_END && slot_id >= EQ::invslot::POSSESSIONS_BEGIN) {
