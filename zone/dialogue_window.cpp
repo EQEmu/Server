@@ -514,6 +514,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (render_hiddenresponse) {
 		final_output = fmt::format("{}{}{}", quote_string, output, quote_string);
 	}
+	
 	// send popup
 	c->SendFullPopup(
 		title.c_str(),
