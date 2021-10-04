@@ -454,12 +454,12 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 //	NPC *npc1, *npc2;
 	int reverse;
 	
-LogInfo("Mob::IsAttackAllowed Called");
+	LogDebug("Mob::IsAttackAllowed Called");
 
 	if(!zone->CanDoCombat())
 		return false;
 
-LogInfo("Mob::IsAttackAllowed candocombat");
+	LogDebug("Mob::IsAttackAllowed candocombat");
 	// some special cases
 	if(!target)
 		return false;
@@ -468,17 +468,17 @@ LogInfo("Mob::IsAttackAllowed candocombat");
 		return true;
 
 	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
-		LogInfo("Mob::IsAttackAllowed no harm from client");
+		LogDebug("Mob::IsAttackAllowed no harm from client");
 		return false;
 	}
 
 	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient()) {
-		LogInfo("Mob::IsAttackAllowed immune damage client");
+		LogDebug("Mob::IsAttackAllowed immune damage client");
 		return false;
 	}
 
 	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC()) {
-		LogInfo("Mob::IsAttackAllowed image damage npc");
+		LogDebug("Mob::IsAttackAllowed image damage npc");
 		return false;
 	}
 
@@ -540,7 +540,7 @@ LogInfo("Mob::IsAttackAllowed candocombat");
 			{
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
-LogInfo("Mob::IsAttackAllowed calling CanPVP");
+				LogDebug("Mob::IsAttackAllowed calling CanPVP");
 				return c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client vs npc
