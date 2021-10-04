@@ -1077,7 +1077,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-				int chance = spells[spell_id].base[i] - 20; //Baseline 2% negative modifer derived from parsing.
+				/*
+					TODO: Parsing shows there is no level modifier. However, a consistent -2% modifer was 
+					found on spell with value 950 (95% spells would have 7% failure rates). 
+					Further investigation is needed. ~ Kayen
+				*/
+				int chance = spells[spell_id].base[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
@@ -1103,7 +1108,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-				int chance = spells[spell_id].base[i] - 20; //Baseline 2% negative modifer derived from parsing.
+				
+				int chance = spells[spell_id].base[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
 					if (buffs[slot].spellid != SPELL_UNKNOWN &&
