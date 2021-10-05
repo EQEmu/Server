@@ -2043,7 +2043,7 @@ void Mob::InstillDoubt(Mob *who) {
 		//temporary hack...
 		//cast fear on them... should prolly be a different spell
 		//and should be un-resistable.
-		SpellOnTarget(229, who, false, true, -2000);
+		SpellOnTarget(229, who, 0, true, -2000);
 		//is there a success message?
 	} else {
 		MessageString(Chat::LightBlue,NOT_SCARING);

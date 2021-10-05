@@ -473,7 +473,6 @@ Mob::Mob(
 	npc_assist_cap = 0;
 
 	use_double_melee_round_dmg_bonus = false;
-	reflected_spell_power_mod = 0;
 
 #ifdef BOTS
 	m_manual_follow = false;
@@ -3245,12 +3244,12 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
 		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
-			SpellOnTarget(spell_id, this, false, false, 0, true, level_override);
+			SpellOnTarget(spell_id, this, 0, false, 0, true, level_override);
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
 		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
 		if(twinproc)
-			SpellOnTarget(spell_id, on, false, false, 0, true, level_override);
+			SpellOnTarget(spell_id, on, 0, false, 0, true, level_override);
 	}
 	return;
 }
@@ -4624,28 +4623,6 @@ bool Mob::TryDoubleMeleeRoundEffect() {
 	}
 
 	SetUseDoubleMeleeRoundDmgBonus(false);
-	return false;
-}
-
-bool Mob::TryReflectSpell(uint32 spell_id)
-{
-	if (!spells[spell_id].reflectable)
- 		return false;
-
-	if (spellbonuses.reflect_chance[0] && zone->random.Roll(spellbonuses.reflect_chance[0])) {
-		return true;
-	}
-	
-	
-	int chance = itembonuses.reflect_chance[0] + spellbonuses.reflect_chance[0] + aabonuses.reflect_chance[0];
-
-	
-	
-	
-	if (chance && zone->random.Roll(chance)) {
-		return true;
-	}
-
 	return false;
 }
 

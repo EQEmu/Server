@@ -168,7 +168,7 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 }
 
 int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
-	/* NOTES: !reflect, get rid of bool and change it to effectiveness, pass it into spell effect.
+	/*
 		Reflected spells use the spells base damage before any modifiers or formulas applied.
 		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
 		Default effectiveness is set at 100.
@@ -1038,7 +1038,7 @@ void EntityList::AESpell(
 		}
 
 		current_mob->CalcSpellPowerDistanceMod(spell_id, distance_to_target);
-		caster_mob->SpellOnTarget(spell_id, current_mob, false, true, resist_adjust);
+		caster_mob->SpellOnTarget(spell_id, current_mob, 0, true, resist_adjust);
 
 		/**
 		 * Increment hit count if max targets

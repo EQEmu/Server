@@ -2274,14 +2274,14 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				return(false);
 			}
 			if (isproc) {
-				SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, true, level_override);
+				SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, true, level_override);
 			} else {
 				if (spells[spell_id].targettype == ST_TargetOptional){
 					if (!TrySpellProjectile(spell_target, spell_id))
 						return false;
 				}
 
-				else if(!SpellOnTarget(spell_id, spell_target, false, true, resist_adjust, false, level_override)) {
+				else if(!SpellOnTarget(spell_id, spell_target, 0, true, resist_adjust, false, level_override)) {
 					if(IsBuffSpell(spell_id) && IsBeneficialSpell(spell_id)) {
 						// Prevent mana usage/timers being set for beneficial buffs
 						if(casting_spell_aa_id)
@@ -3513,7 +3513,7 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 // and if you don't want effects just return false. interrupting here will
 // break stuff
 //
-bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_resist_adjust, int16 resist_adjust,
+bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectiveness, bool use_resist_adjust, int16 resist_adjust,
 			bool isproc, int level_override)
 {
 
@@ -3641,7 +3641,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(),temp1, 0);
 	}
 
-	mod_spell_cast(spell_id, spelltar, reflect, use_resist_adjust, resist_adjust, isproc);
+	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
 
 	// now check if the spell is allowed to land
 	if (RuleB(Spells, EnableBlockedBuffs)) {
@@ -3865,9 +3865,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		Effect has three components, base=% Chance to Reflect Limit=Resist Modifier Max=% of base spell damage (this is the base before any formula is applied)
 		On live any type of detrimental spell can be reflected as long as the Reflectable spell field is set, this includes AOE.
 		The 'caster' of the reflected spell is owner of the reflect effect. Caster's focus effects are NOT applied to reflected spell.
+		
+		reflect_effectiveness is applied to damage spells, a value of 100 is no change to base damage. Other values change by percent. (50=50% of damage)
+		we this variable to both check if a spell being applied is from a reflection and for the damage modifier.
+		
 		There are spells in database that are not detrimental that have Reflectable field set, however from testing, they do not actually reflect.
 	*/
-	if(spells[spell_id].reflectable && !reflect && spelltar && this != spelltar && IsDetrimentalSpell(spell_id)) {
+	if(spells[spell_id].reflectable && !reflect_effectiveness && spelltar && this != spelltar && IsDetrimentalSpell(spell_id)) {
 		bool can_spell_reflect = false;
 		switch(RuleI(Spells, ReflectType))
 		{
@@ -3909,29 +3913,23 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		}
 		if (can_spell_reflect) {
 
-			bool reflect_spell = false;
 			int reflect_resist_adjust = 0;
-			int reflected_spell_power = 100;
+			int reflect_effectiveness_mod = 0; //Need value of 100 to do baseline unmodified damage.
 
 			if (spelltar->spellbonuses.reflect_chance[0] && zone->random.Roll(spelltar->spellbonuses.reflect_chance[0])) {
-				reflect_spell = true;
 				reflect_resist_adjust = spelltar->spellbonuses.reflect_chance[1];
-				reflected_spell_power = spelltar->spellbonuses.reflect_chance[2] ? spelltar->spellbonuses.reflect_chance[2] : 100;
-				spelltar->SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
+				reflect_effectiveness_mod = spelltar->spellbonuses.reflect_chance[2] ? spelltar->spellbonuses.reflect_chance[2] : 100;
 			}
 			else if (spelltar->aabonuses.reflect_chance[0] && zone->random.Roll(spelltar->aabonuses.reflect_chance[0])) {
-				reflect_spell = true;
+				reflect_effectiveness_mod = 100;
 				reflect_resist_adjust = spelltar->aabonuses.reflect_chance[1];
-				SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
 			}
 			else if (spelltar->itembonuses.reflect_chance[0] && zone->random.Roll(spelltar->itembonuses.reflect_chance[0])) {
-				reflect_spell = true;
 				reflect_resist_adjust = spelltar->itembonuses.reflect_chance[1];
-				reflected_spell_power = spelltar->itembonuses.reflect_chance[2] ? spelltar->itembonuses.reflect_chance[2] : 100;
-				spelltar->SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
+				reflect_effectiveness_mod = spelltar->itembonuses.reflect_chance[2] ? spelltar->itembonuses.reflect_chance[2] : 100;
 			}
 
-			if (reflect_spell) {
+			if (reflect_effectiveness_mod) {
 
 				if (RuleB(Spells, ReflectMessagesClose)) {
 					entity_list.MessageCloseString(
@@ -3949,7 +3947,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 				}
 
 				CheckNumHitsRemaining(NumHit::ReflectSpell);
-				spelltar->SpellOnTarget(spell_id, this, true, use_resist_adjust, (resist_adjust - reflect_resist_adjust));
+				spelltar->SpellOnTarget(spell_id, this, reflect_effectiveness_mod, use_resist_adjust, (resist_adjust - reflect_resist_adjust));
 				safe_delete(action_packet);
 				return false;
 			}
@@ -4051,7 +4049,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	}
 
 	// cause the effects to the target
-	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override))
+	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, reflect_effectiveness))
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
@@ -6100,7 +6098,7 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 		if (d <= spells[spell_id].aoerange) {
 			if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 				(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-				SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+				SpellOnTarget(spell_id, (*iter), 0, true, resist_adjust);
 				maxtarget_count++;
 			}
 
@@ -6174,7 +6172,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			    (heading_to_target >= 0.0f && heading_to_target <= angle_end)) {
 				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+					SpellOnTarget(spell_id, (*iter), 0, true, resist_adjust);
 					maxtarget_count++;
 				}
 			}
@@ -6182,7 +6180,7 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			if (heading_to_target >= angle_start && heading_to_target <= angle_end) {
 				if (CheckLosFN((*iter)) || spells[spell_id].npc_no_los) {
 					(*iter)->CalcSpellPowerDistanceMod(spell_id, 0, this);
-					SpellOnTarget(spell_id, (*iter), false, true, resist_adjust);
+					SpellOnTarget(spell_id, (*iter), 0, true, resist_adjust);
 					maxtarget_count++;
 				}
 			}
