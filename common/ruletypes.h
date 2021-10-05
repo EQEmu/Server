@@ -319,7 +319,7 @@ RULE_INT(Spells, MaxDiscSlotsNPC, 0, "Maximum number of NPC disc slots. NPC don'
 RULE_INT(Spells, MaxTotalSlotsNPC, 60, "Maximum total of NPC slots. The default value is the limit of the Titanium client")
 RULE_INT(Spells, MaxTotalSlotsPET, 30, "Maximum total of pet slots. The default value is the limit of the Titanium client")
 RULE_BOOL (Spells, EnableBlockedBuffs, true, "Allow blocked spells")
-RULE_INT(Spells, ReflectType, 3, "Reflect type. 0=disabled, 1=single target player spells only, 2=all player spells, 3=all single target spells, 4=all spells")
+RULE_INT(Spells, ReflectType, 4, "Reflect type. 0=disabled, 1=single target player spells only, 2=all player spells, 3=all single target spells, 4=all spells")
 RULE_BOOL(Spells, ReflectMessagesClose, true, "True (Live functionality) is for Reflect messages to show to players within close proximity. False shows just player reflecting")
 RULE_INT(Spells, VirusSpreadDistance, 30, "The distance a viral spell will jump to its next victim")
 RULE_BOOL(Spells, LiveLikeFocusEffects, true, "Determines whether specific healing, dmg and mana reduction focuses are randomized")
