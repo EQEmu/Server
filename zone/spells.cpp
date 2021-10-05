@@ -3869,7 +3869,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		reflect_effectiveness is applied to damage spells, a value of 100 is no change to base damage. Other values change by percent. (50=50% of damage)
 		we this variable to both check if a spell being applied is from a reflection and for the damage modifier.
 		
-		There are spells in database that are not detrimental that have Reflectable field set, however from testing, they do not actually reflect.
+		There are a few spells in database that are not detrimental that have Reflectable field set, however from testing, they do not actually reflect.
 	*/
 	if(spells[spell_id].reflectable && !reflect_effectiveness && spelltar && this != spelltar && IsDetrimentalSpell(spell_id)) {
 		bool can_spell_reflect = false;
@@ -3915,20 +3915,20 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 
 			int reflect_resist_adjust = 0;
 			int reflect_effectiveness_mod = 0; //Need value of 100 to do baseline unmodified damage.
-
-			if (spelltar->spellbonuses.reflect_chance[0] && zone->random.Roll(spelltar->spellbonuses.reflect_chance[0])) {
-				reflect_resist_adjust = spelltar->spellbonuses.reflect_chance[1];
-				reflect_effectiveness_mod = spelltar->spellbonuses.reflect_chance[2] ? spelltar->spellbonuses.reflect_chance[2] : 100;
+			Shout("Chances SP[%i] AA[%i] Item [%i]", spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE], spelltar->aabonuses.reflect[SBIndex::REFLECT_CHANCE], spelltar->itembonuses.reflect[SBIndex::REFLECT_CHANCE]);
+			if (spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE] && zone->random.Roll(spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE])) {
+				reflect_resist_adjust = spelltar->spellbonuses.reflect[SBIndex::REFLECT_RESISTANCE_MOD];
+				reflect_effectiveness_mod = spelltar->spellbonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] ? spelltar->spellbonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] : 100;
 			}
-			else if (spelltar->aabonuses.reflect_chance[0] && zone->random.Roll(spelltar->aabonuses.reflect_chance[0])) {
+			else if (spelltar->aabonuses.reflect[SBIndex::REFLECT_CHANCE] && zone->random.Roll(spelltar->aabonuses.reflect[SBIndex::REFLECT_CHANCE])) {
 				reflect_effectiveness_mod = 100;
-				reflect_resist_adjust = spelltar->aabonuses.reflect_chance[1];
+				reflect_resist_adjust = spelltar->aabonuses.reflect[SBIndex::REFLECT_RESISTANCE_MOD];
 			}
-			else if (spelltar->itembonuses.reflect_chance[0] && zone->random.Roll(spelltar->itembonuses.reflect_chance[0])) {
-				reflect_resist_adjust = spelltar->itembonuses.reflect_chance[1];
-				reflect_effectiveness_mod = spelltar->itembonuses.reflect_chance[2] ? spelltar->itembonuses.reflect_chance[2] : 100;
+			else if (spelltar->itembonuses.reflect[SBIndex::REFLECT_CHANCE] && zone->random.Roll(spelltar->itembonuses.reflect[SBIndex::REFLECT_CHANCE])) {
+				reflect_resist_adjust = spelltar->itembonuses.reflect[SBIndex::REFLECT_RESISTANCE_MOD];
+				reflect_effectiveness_mod = spelltar->itembonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] ? spelltar->itembonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] : 100;
 			}
-
+			Shout("Resist %i Effective %i", reflect_resist_adjust, reflect_effectiveness_mod);
 			if (reflect_effectiveness_mod) {
 
 				if (RuleB(Spells, ReflectMessagesClose)) {

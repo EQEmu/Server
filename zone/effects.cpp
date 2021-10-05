@@ -173,6 +173,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
 		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
 		Default effectiveness is set at 100.
 	*/
+	Shout("1 Reflected DMG [%i] MOD %i", value, effectiveness);
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 
@@ -182,7 +183,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
 	}
 	
 	value = value * effectiveness / 100;
-	
+	Shout("2 Reflected DMG [%i] MOD %i", value, effectiveness);
 	return value;
 }
 
