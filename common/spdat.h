@@ -842,7 +842,7 @@ typedef enum {
 #define SE_DispelDetrimental			154 // implemented
 #define SE_SpellCritDmgIncrease			155 // implemented - no known live spells use this currently
 #define SE_IllusionCopy					156	// implemented - Deception
-#define SE_SpellDamageShield			157	// implemented - Petrad's Protection
+#define SE_SpellDamageShield			157	// implemented, @DS, causes non-melee damage on caster of a spell, base: Amt DS (negative), limit: none, max: unknown (same as base but +)
 #define SE_Reflect						158 // implemented
 #define SE_AllStats						159	// implemented
 //#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
