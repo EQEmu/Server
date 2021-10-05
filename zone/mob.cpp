@@ -473,6 +473,7 @@ Mob::Mob(
 	npc_assist_cap = 0;
 
 	use_double_melee_round_dmg_bonus = false;
+	reflected_spell_power_mod = 0;
 
 #ifdef BOTS
 	m_manual_follow = false;
@@ -4631,10 +4632,19 @@ bool Mob::TryReflectSpell(uint32 spell_id)
 	if (!spells[spell_id].reflectable)
  		return false;
 
-	int chance = itembonuses.reflect_chance + spellbonuses.reflect_chance + aabonuses.reflect_chance;
-
-	if(chance && zone->random.Roll(chance))
+	if (spellbonuses.reflect_chance[0] && zone->random.Roll(spellbonuses.reflect_chance[0])) {
 		return true;
+	}
+	
+	
+	int chance = itembonuses.reflect_chance[0] + spellbonuses.reflect_chance[0] + aabonuses.reflect_chance[0];
+
+	
+	
+	
+	if (chance && zone->random.Roll(chance)) {
+		return true;
+	}
 
 	return false;
 }

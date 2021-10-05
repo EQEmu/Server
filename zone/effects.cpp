@@ -167,6 +167,25 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	return value;
 }
 
+int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
+	/* NOTES: !reflect, get rid of bool and change it to effectiveness, pass it into spell effect.
+		Reflected spells use the spells base damage before any modifiers or formulas applied.
+		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
+		Default effectiveness is set at 100.
+	*/
+	if (IsNPC()) {
+		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
+
+		if (CastToNPC()->GetSpellScale()) {
+			value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
+		}
+	}
+	
+	value = value * effectiveness / 100;
+	
+	return value;
+}
+
 int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (target == nullptr)

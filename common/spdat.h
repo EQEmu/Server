@@ -511,6 +511,15 @@ enum NegateSpellEffectType
 	NEGATE_SPA_SPELLBONUS_AND_AABONUS     = 5,
 	NEGATE_SPA_ITEMBONUS_AND_AABONUS      = 6,
 };
+//Used for rule RuleI(Spells, ReflectType))
+enum ReflectSpellType
+{
+	REFLECT_DISABLED                  = 0,
+	REFLECT_SINGLE_TARGET_SPELLS_ONLY = 1,
+	REFLECT_ALL_PLAYER_SPELLS         = 2,
+	RELFECT_ALL_SINGLE_TARGET_SPELLS  = 3,
+	REFLECT_ALL_SPELLS                = 4,
+};
 
 enum SpellTypes : uint32
 {

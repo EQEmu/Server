@@ -259,7 +259,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					//handles AAs and what not...
 					if(caster) {
-						dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+						if (caster->GetReflectedSpellPowerMod()) {
+							dmg = caster->GetActReflectedSpellDamage((int32)(spells[spell_id].base[i] * partial / 100), caster->GetReflectedSpellPowerMod());
+						}
+						else {
+							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+						}
 						caster->ResourceTap(-dmg, spell_id);
 					}
 

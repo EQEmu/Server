@@ -3860,69 +3860,99 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			}
 		}
 	}
-	// Reflect
-	if(spelltar && spelltar->TryReflectSpell(spell_id) && !reflect && IsDetrimentalSpell(spell_id) && this != spelltar) {
-		int reflect_chance = 0;
+	/*
+		Reflect
+		Effect has three components, base=% Chance to Reflect Limit=Resist Modifier Max=% of base spell damage (this is the base before any formula is applied)
+		On live any type of detrimental spell can be reflected as long as the Reflectable spell field is set, this includes AOE.
+		The 'caster' of the reflected spell is owner of the reflect effect. Caster's focus effects are NOT applied to reflected spell.
+		There are spells in database that are not detrimental that have Reflectable field set, however from testing, they do not actually reflect.
+	*/
+	if(spells[spell_id].reflectable && !reflect && spelltar && this != spelltar && IsDetrimentalSpell(spell_id)) {
+		bool can_spell_reflect = false;
 		switch(RuleI(Spells, ReflectType))
 		{
-			case 0:
+			case REFLECT_DISABLED:
 				break;
 
-			case 1:
+			case REFLECT_SINGLE_TARGET_SPELLS_ONLY:
 			{
 				if(spells[spell_id].targettype == ST_Target) {
 					for(int y = 0; y < 16; y++) {
-						if(spells[spell_id].classes[y] < 255)
-							reflect_chance = 1;
+						if (spells[spell_id].classes[y] < 255) {
+							can_spell_reflect = true;
+						}
 					}
 				}
 				break;
 			}
-			case 2:
+			case REFLECT_ALL_PLAYER_SPELLS:
 			{
 				for(int y = 0; y < 16; y++) {
-					if(spells[spell_id].classes[y] < 255)
-						reflect_chance = 1;
+					if (spells[spell_id].classes[y] < 255) {
+						can_spell_reflect = true;
+					}
 				}
 				break;
 			}
-			case 3:
+			case RELFECT_ALL_SINGLE_TARGET_SPELLS:
 			{
-				if(spells[spell_id].targettype == ST_Target)
-					reflect_chance = 1;
-
+				if (spells[spell_id].targettype == ST_Target) {
+					can_spell_reflect = true;
+				}
 				break;
 			}
-			case 4:
-				reflect_chance = 1;
+			case REFLECT_ALL_SPELLS: //This is live like behavior
+				can_spell_reflect = true;
 
 			default:
 				break;
 		}
-		if (reflect_chance) {
+		if (can_spell_reflect) {
 
-			if (RuleB(Spells, ReflectMessagesClose)) {
-				entity_list.MessageCloseString(
-					this, /* Sender */
-					false, /* Skip Sender */
-					RuleI(Range, SpellMessages), /* Range */
-					Chat::Spells, /* Type */
-					SPELL_REFLECT, /* String ID */
-					GetCleanName(), /* Message 1 */
-					spelltar->GetCleanName() /* Message 2 */
-				);
+			bool reflect_spell = false;
+			int reflect_resist_adjust = 0;
+			int reflected_spell_power = 100;
+
+			if (spelltar->spellbonuses.reflect_chance[0] && zone->random.Roll(spelltar->spellbonuses.reflect_chance[0])) {
+				reflect_spell = true;
+				reflect_resist_adjust = spelltar->spellbonuses.reflect_chance[1];
+				reflected_spell_power = spelltar->spellbonuses.reflect_chance[2] ? spelltar->spellbonuses.reflect_chance[2] : 100;
+				spelltar->SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
 			}
-			else {
-				MessageString(Chat::Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+			else if (spelltar->aabonuses.reflect_chance[0] && zone->random.Roll(spelltar->aabonuses.reflect_chance[0])) {
+				reflect_spell = true;
+				reflect_resist_adjust = spelltar->aabonuses.reflect_chance[1];
+				SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
+			}
+			else if (spelltar->itembonuses.reflect_chance[0] && zone->random.Roll(spelltar->itembonuses.reflect_chance[0])) {
+				reflect_spell = true;
+				reflect_resist_adjust = spelltar->itembonuses.reflect_chance[1];
+				reflected_spell_power = spelltar->itembonuses.reflect_chance[2] ? spelltar->itembonuses.reflect_chance[2] : 100;
+				spelltar->SetReflectedSpellPowerMod(spelltar->spellbonuses.reflect_chance[2]);
 			}
 
-			CheckNumHitsRemaining(NumHit::ReflectSpell);
-			// caster actually appears to change
-			// ex. During OMM fight you click your reflect mask and you get the recourse from the reflected
-			// spell
-			spelltar->SpellOnTarget(spell_id, this, true, use_resist_adjust, resist_adjust);
-			safe_delete(action_packet);
-			return false;
+			if (reflect_spell) {
+
+				if (RuleB(Spells, ReflectMessagesClose)) {
+					entity_list.MessageCloseString(
+						this, /* Sender */
+						false, /* Skip Sender */
+						RuleI(Range, SpellMessages), /* Range */
+						Chat::Spells, /* Type */
+						SPELL_REFLECT, /* String ID */
+						GetCleanName(), /* Message 1 */
+						spelltar->GetCleanName() /* Message 2 */
+					);
+				}
+				else {
+					MessageString(Chat::Spells, SPELL_REFLECT, GetCleanName(), spelltar->GetCleanName());
+				}
+
+				CheckNumHitsRemaining(NumHit::ReflectSpell);
+				spelltar->SpellOnTarget(spell_id, this, true, use_resist_adjust, (resist_adjust - reflect_resist_adjust));
+				safe_delete(action_packet);
+				return false;
+			}
 		}
 	}
 

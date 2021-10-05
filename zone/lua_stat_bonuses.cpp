@@ -342,7 +342,7 @@ int Lua_StatBonuses::Getadjusted_casting_skill() const {
 
 int Lua_StatBonuses::Getreflect_chance() const {
 	Lua_Safe_Call_Int();
-	return self->reflect_chance;
+	return self->reflect_chance[0];
 }
 
 uint32 Lua_StatBonuses::GetsingingMod() const {
