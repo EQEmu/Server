@@ -1302,7 +1302,7 @@ struct SPDat_Spell_Struct
 /* 157 */	int effectdescnum; // eqstr of effect description -- SECONDARY_CATEGORY_1
 /* 158 */	//int secondary_category_2;   //Category Desc ID 3 -- SECONDARY_CATEGORY_2
 /* 159 */	bool npc_no_los; // -- NO_NPC_LOS
-/* 160 */	//bool feedbackable; // -- FEEDBACKABLE
+/* 160 */	bool feedbackable; // -- FEEDBACKABLE
 /* 161 */	bool reflectable; // -- REFLECTABLE
 /* 162 */	int bonushate; // -- HATE_MOD
 /* 163 */	//int resist_per_level; // -- RESIST_PER_LEVEL

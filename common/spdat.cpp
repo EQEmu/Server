@@ -1427,6 +1427,7 @@ int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 	else if (id == "descnum") { return spells[spell_id].descnum; }
 	else if (id == "effectdescnum") { return spells[spell_id].effectdescnum; }
 	else if (id == "npc_no_los") { return spells[spell_id].npc_no_los; }
+	else if (id == "feedbackable") { return spells[spell_id].reflectable; }
 	else if (id == "reflectable") { return spells[spell_id].reflectable; }
 	else if (id == "bonushate") { return spells[spell_id].bonushate; }
 	else if (id == "endurcost") { return spells[spell_id].EndurCost; }
