@@ -1,0 +1,1 @@
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'Combat:PVPHitBoxMod', '0.60', 'PVP Hitbox Modifier size_mod * PVPHitBoxMod');

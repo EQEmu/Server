@@ -1,1 +1,1 @@
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (1, 'Character:EnableBardMelody', 'true', 'Enable Bard /melody by default, to disable change to false for a classic experience.');
+INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'Character:EnableBardMelody', 'true', 'Enable Bard /melody by default, to disable change to false for a classic experience.');

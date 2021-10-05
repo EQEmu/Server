@@ -453,13 +453,10 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 	Client *c1 = nullptr, *c2 = nullptr, *becomenpc = nullptr;
 //	NPC *npc1, *npc2;
 	int reverse;
-	
-	LogDebug("Mob::IsAttackAllowed Called");
 
 	if(!zone->CanDoCombat())
 		return false;
 
-	LogDebug("Mob::IsAttackAllowed candocombat");
 	// some special cases
 	if(!target)
 		return false;
@@ -468,19 +465,14 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 		return true;
 
 	if(target->GetSpecialAbility(NO_HARM_FROM_CLIENT)){
-		LogDebug("Mob::IsAttackAllowed no harm from client");
 		return false;
 	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient()) {
-		LogDebug("Mob::IsAttackAllowed immune damage client");
+	if (target->GetSpecialAbility(IMMUNE_DAMAGE_CLIENT) && IsClient())
 		return false;
-	}
 
-	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC()) {
-		LogDebug("Mob::IsAttackAllowed image damage npc");
+	if (target->GetSpecialAbility(IMMUNE_DAMAGE_NPC) && IsNPC())
 		return false;
-	}
 
 	// can't damage own pet (applies to everthing)
 	Mob *target_owner = target->GetOwner();
@@ -540,7 +532,7 @@ bool Mob::IsAttackAllowed(Mob *target, bool isSpellAttack)
 			{
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
-				LogDebug("Mob::IsAttackAllowed calling CanPVP");
+
 				return c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client vs npc
@@ -655,7 +647,6 @@ type', in which case, the answer is yes.
 	}
 	while( reverse++ == 0 );
 
-	LogDebug("Mob::IsAttackAllowed: don't have a rule for this - [{}] vs [{}]\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -697,7 +688,7 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 				c1 = mob1->CastToClient();
 				c2 = mob2->CastToClient();
 
-				return true; //!c1->CanPvP(c2);
+				return !c1->CanPvP(c2);
 			}
 			else if(_NPC(mob2))				// client to npc
 			{
@@ -784,7 +775,6 @@ bool Mob::IsBeneficialAllowed(Mob *target)
 	}
 	while( reverse++ == 0 );
 
-	LogDebug("Mob::IsBeneficialAllowed: don't have a rule for this - [{}] to [{}]\n", this->GetName(), target->GetName());
 	return false;
 }
 
@@ -830,8 +820,17 @@ bool Mob::CombatRange(Mob* other, float fixed_size_mod, bool aeRampage)
 		size_mod *= 2.25;
 	}
 
+	LogAggro("Range: Race [{}]\n", size_mod);
+
 	size_mod *= RuleR(Combat,HitBoxMod);		// used for testing sizemods on different races.
 	size_mod *= fixed_size_mod;					// used to extend the size_mod
+	
+	LogAggro("Range: Combat:HitBoxMod Size [{}], Mod [{}]\n", size_mod, RuleR(Combat,HitBoxMod));
+
+	if (other->IsClient() && IsClient()) { //hitbox shortening
+		size_mod = size_mod * RuleR(Combat,PVPHitBoxMod);
+		LogAggro("Range: Combat:PVPHitBoxMod Size [{}], Mod [{}]\n", size_mod, RuleR(Combat,PVPHitBoxMod));
+	}
 
 	// Melee chasing fleeing mobs is borked.  The client updates don't
 	// come to the server quickly enough, especially when mob is running

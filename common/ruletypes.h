@@ -490,6 +490,7 @@ RULE_INT(Combat, NPCAssistCapTimer, 6000, "Time a NPC will take to clear assist 
 RULE_BOOL(Combat, UseRevampHandToHand, false, "Use h2h revamped dmg/delays I believe this was implemented during SoF")
 RULE_BOOL(Combat, ClassicMasterWu, false, "Classic Master Wu uses a random special, modern doesn't")
 RULE_REAL(Combat, HitBoxMod, 1.00, "Added to test hit boxes.")
+RULE_REAL(Combat, PVPHitBoxMod, 0.60, "PVP Hitbox Modifier size_mod * PVPHitBoxMod")
 RULE_INT(Combat, LevelToStopDamageCaps, 0, "Level to stop damage caps. 1 will effectively disable them, 20 should give basically same results as old incorrect system")
 RULE_INT(Combat, LevelToStopACTwinkControl, 50, "Level to stop armorclass twink control. 1 will effectively disable it, 50 should give basically same results as current system")
 RULE_BOOL(Combat, ClassicNPCBackstab, false, "True disables NPC facestab - NPC get normal attack if not behind")
