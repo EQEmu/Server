@@ -3862,7 +3862,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 	/*
 		Reflect
-		Effect has three components, base=% Chance to Reflect Limit=Resist Modifier Max=% of base spell damage (this is the base before any formula is applied)
+		base= % Chance to Reflect 
+		Limit= Resist Modifier (+Value for decrease chance to resist) 
+		Max= % of base spell damage (this is the base before any formula or focus is applied)
 		On live any type of detrimental spell can be reflected as long as the Reflectable spell field is set, this includes AOE.
 		The 'caster' of the reflected spell is owner of the reflect effect. Caster's focus effects are NOT applied to reflected spell.
 		
@@ -3915,7 +3917,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 
 			int reflect_resist_adjust = 0;
 			int reflect_effectiveness_mod = 0; //Need value of 100 to do baseline unmodified damage.
-			Shout("Chances SP[%i] AA[%i] Item [%i]", spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE], spelltar->aabonuses.reflect[SBIndex::REFLECT_CHANCE], spelltar->itembonuses.reflect[SBIndex::REFLECT_CHANCE]);
+
 			if (spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE] && zone->random.Roll(spelltar->spellbonuses.reflect[SBIndex::REFLECT_CHANCE])) {
 				reflect_resist_adjust = spelltar->spellbonuses.reflect[SBIndex::REFLECT_RESISTANCE_MOD];
 				reflect_effectiveness_mod = spelltar->spellbonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] ? spelltar->spellbonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] : 100;
@@ -3928,7 +3930,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				reflect_resist_adjust = spelltar->itembonuses.reflect[SBIndex::REFLECT_RESISTANCE_MOD];
 				reflect_effectiveness_mod = spelltar->itembonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] ? spelltar->itembonuses.reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] : 100;
 			}
-			Shout("Resist %i Effective %i", reflect_resist_adjust, reflect_effectiveness_mod);
+
 			if (reflect_effectiveness_mod) {
 
 				if (RuleB(Spells, ReflectMessagesClose)) {
@@ -3947,6 +3949,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 				}
 
 				CheckNumHitsRemaining(NumHit::ReflectSpell);
+
 				spelltar->SpellOnTarget(spell_id, this, reflect_effectiveness_mod, use_resist_adjust, (resist_adjust - reflect_resist_adjust));
 				safe_delete(action_packet);
 				return false;
