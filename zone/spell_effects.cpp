@@ -182,20 +182,17 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(spells[spell_id].viral_targets > 0) {
-		if(!viral_timer.Enabled())
+	/*
+		Apply Virus
+		Add timer to buff that has viral fields.
+	*/
+	if(GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id)) {
+		
+		if (!viral_timer.Enabled()) {
 			viral_timer.Start(1000);
-
-		has_virus = true;
-		for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2)
-		{
-			if(!viral_spells[i])
-			{
-				viral_spells[i] = spell_id;
-				viral_spells[i+1] = caster->GetID();
-				break;
-			}
 		}
+		SetHasVirus(true);
+		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
 	}
 
 

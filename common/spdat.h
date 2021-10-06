@@ -1330,8 +1330,8 @@ struct SPDat_Spell_Struct
 /* 188 */	//int npc_usefulness; // -- NPC_USEFULNESS
 /* 189 */	int MinResist; // -- MIN_RESIST
 /* 190 */	int MaxResist; // -- MAX_RESIST
-/* 191 */	uint8 viral_targets; // -- MIN_SPREAD_TIME
-/* 192 */	uint8 viral_timer; // -- MAX_SPREAD_TIME
+/* 191 */	int viral_targets; // -- MIN_SPREAD_TIME
+/* 192 */	int viral_timer; // -- MAX_SPREAD_TIME
 /* 193 */	int NimbusEffect; // -- DURATION_PARTICLE_EFFECT
 /* 194 */	float directional_start; //Cone Start Angle: -- CONE_START_ANGLE
 /* 195 */	float directional_end; // Cone End Angle: -- CONE_END_ANGLE
@@ -1496,6 +1496,9 @@ bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
 bool IsFocusLimit(int spa);
 bool SpellRequiresTarget(int targettype);
+int GetViralMinSpreadTime(int spell_id);
+int GetViralMaxSpreadTime(int spell_id);
+int GetViralSpreadRange(int spell_id);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);

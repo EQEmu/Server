@@ -330,6 +330,7 @@ struct Buffs_Struct {
 	uint32	instrument_mod;
 	int16   focusproclimit_time;	//timer to limit number of procs from focus effects 
 	int16   focusproclimit_procamt; //amount of procs that can be cast before timer limiter is set
+	int32	virus_spread_time; //time till next attempted viral spread
 	bool	persistant_buff;
 	bool	client; //True if the caster is a client
 	bool	UpdateClient;

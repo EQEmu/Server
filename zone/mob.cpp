@@ -4701,6 +4701,42 @@ void Mob::DoGravityEffect()
 	}
 }
 
+void Mob::VirusEffectProcess()
+{
+	/*
+		1000 ms timer for checking virus effects from buffs
+	*/
+
+	// Only spread in zones without perm buffs
+	if (zone->BuffTimersSuspended()) {
+		viral_timer.Disable();
+		return;
+	}
+
+	bool stop_timer = true;
+	int buff_count = GetMaxTotalSlots();
+	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
+	{
+		if (IsValidSpell(buffs[buffs_i].spellid) && GetViralMinSpreadTime(buffs[buffs_i].spellid) && GetViralMaxSpreadTime(buffs[buffs_i].spellid))
+		{
+			if (buffs[buffs_i].virus_spread_time > 0) {
+				buffs[buffs_i].virus_spread_time -= 1;
+				stop_timer = false;
+			}
+
+			if (buffs[buffs_i].virus_spread_time <= 0) {
+				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs_i), GetViralMaxSpreadTime(buffs_i));
+				SpreadVirus(buffs[buffs_i].spellid, buffs[buffs_i].casterid);
+				stop_timer = false;
+			}
+		}
+	}
+
+	if (stop_timer) {
+		viral_timer.Disable();
+	}
+}
+
 void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 {
 	int num_targs = spells[spell_id].viral_targets;

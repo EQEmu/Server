@@ -1470,3 +1470,13 @@ int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 
 	return 0;
 }
+
+int GetViralMinSpreadTime(int spell_id) {
+	return spells[spell_id].viral_targets;
+}
+int GetViralMaxSpreadTime(int spell_id) {
+	return spells[spell_id].viral_timer;
+}
+int GetViralSpreadRange(int spell_id) {
+	return spells[spell_id].viral_range;
+}

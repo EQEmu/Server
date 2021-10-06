@@ -5220,21 +5220,26 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 
 Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
 {
+	/*
+		Virus spreader does NOT need LOS
+	*/
 	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
 
-	if (range)
+	if (range) {
 		max_spread_range = range;
+	}
 
 	std::vector<Mob *> TargetsInRange;
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
 		Mob *cur = it->second;
+
+		if (!cur) {
+			continue;
+		}
 		// Make sure the target is in range, has los and is not the mob doing the spreading
-		if ((cur->GetID() != spreader->GetID()) &&
-				(cur->CalculateDistance(spreader->GetX(), spreader->GetY(),
-					spreader->GetZ()) <= max_spread_range) &&
-				(spreader->CheckLosFN(cur))) {
+		if ((cur->GetID() != spreader->GetID()) && (cur->CalculateDistance(spreader->GetX(), spreader->GetY(),spreader->GetZ()) <= max_spread_range)) {
 			// If the spreader is an npc it can only spread to other npc controlled mobs
 			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->CastToNPC()->GetSwarmOwner() && cur->IsNPC()) {
 				TargetsInRange.push_back(cur);

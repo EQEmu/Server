@@ -857,6 +857,8 @@ public:
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
 
+	void VirusEffectProcess();
+
 	void ModSkillDmgTaken(EQ::skills::SkillType skill_num, int value);
 	int16 GetModSkillDmgTaken(const EQ::skills::SkillType skill_num);
 	void ModVulnerability(uint8 resist, int16 value);
@@ -1035,6 +1037,7 @@ public:
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
 	inline const bool HasVirus() const { return has_virus; }
+	inline void SetHasVirus(bool nState) { has_virus = nState; }
 	int GetSnaredAmount();
 	inline const bool IsPseudoRooted() const { return pseudo_rooted; }
 	inline void SetPseudoRoot(bool prState) { pseudo_rooted = prState; }
@@ -1118,7 +1121,7 @@ public:
 	void SendItemAnimation(Mob *to, const EQ::ItemData *item, EQ::skills::SkillType skillInUse, float velocity = 4.0);
 	inline int& GetNextIncHPEvent() { return nextinchpevent; }
 	void SetNextIncHPEvent( int inchpevent );
-
+		
 	inline bool DivineAura() const { return spellbonuses.DivineAura; }
  	inline bool Sanctuary() const { return spellbonuses.Sanctuary; }
 
