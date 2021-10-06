@@ -1496,6 +1496,7 @@ bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
 bool IsFocusLimit(int spa);
 bool SpellRequiresTarget(int targettype);
+bool HasVirusEffect(int spell_id);
 int GetViralMinSpreadTime(int spell_id);
 int GetViralMaxSpreadTime(int spell_id);
 int GetViralSpreadRange(int spell_id);

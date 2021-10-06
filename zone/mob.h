@@ -858,6 +858,7 @@ public:
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
 
 	void VirusEffectProcess();
+	void SpreadVirusEffect(int spell_id, uint32 caster_id);
 
 	void ModSkillDmgTaken(EQ::skills::SkillType skill_num, int value);
 	int16 GetModSkillDmgTaken(const EQ::skills::SkillType skill_num);
@@ -927,6 +928,8 @@ public:
 	bool HasPetAffinity() { if (aabonuses.GivePetGroupTarget || itembonuses.GivePetGroupTarget || spellbonuses.GivePetGroupTarget) return true; return false; }
 	inline bool IsPetOwnerClient() const { return pet_owner_client; }
 	inline void SetPetOwnerClient(bool value) { pet_owner_client = value; }
+	inline bool IsPetOwnerNPC() const { return pet_owner_npc; }
+	inline void SetPetOwnerNPC(bool value) { pet_owner_npc = value; }
 	inline bool IsTempPet() const { return _IsTempPet; }
 	inline void SetTempPet(bool value) { _IsTempPet = value; }
 	inline bool IsHorse() { return is_horse; }
@@ -1635,6 +1638,7 @@ protected:
 	bool _IsTempPet;
 	int16 count_TempPet;
 	bool pet_owner_client; //Flags regular and pets as belonging to a client
+	bool pet_owner_npc;    //Flags regular and pets as belonging to a npc
 	uint32 pet_targetlock_id;
 
 	glm::vec3 m_TargetRing;

@@ -367,6 +367,7 @@ Mob::Mob(
 	pet_regroup       = false;
 	_IsTempPet        = false;
 	pet_owner_client  = false;
+	pet_owner_npc     = false;
 	pet_targetlock_id = 0;
 
 	attacked_count = 0;
@@ -4726,7 +4727,7 @@ void Mob::VirusEffectProcess()
 
 			if (buffs[buffs_i].virus_spread_time <= 0) {
 				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs_i), GetViralMaxSpreadTime(buffs_i));
-				SpreadVirus(buffs[buffs_i].spellid, buffs[buffs_i].casterid);
+				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid);
 				stop_timer = false;
 			}
 		}
@@ -4734,6 +4735,28 @@ void Mob::VirusEffectProcess()
 
 	if (stop_timer) {
 		viral_timer.Disable();
+	}
+}
+
+void Mob::SpreadVirusEffect(int spell_id, uint32 caster_id)
+{
+	Mob* caster = entity_list.GetMob(caster_id);
+	std::list<Mob *> targets_in_range;
+	entity_list.GetTargetsForVirusEffect(this, GetViralSpreadRange(spell_id), spells[spell_id].pcnpc_only_flag, targets_in_range);
+	auto iter = targets_in_range.begin();
+
+	while (iter != targets_in_range.end()) {
+		if (!(*iter)) {
+			++iter;
+			continue;
+		}
+
+		if (!(*iter)->FindBuff(spell_id)) {
+			if (caster) {
+				caster->SpellOnTarget(spell_id, (*iter));
+			}
+		}
+		++iter;
 	}
 }
 

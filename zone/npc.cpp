@@ -2339,6 +2339,10 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
 		}
+
+		if (swarmOwner->IsNPC()) {
+			SetPetOwnerNPC(true);
+		}
 	}
 	else if(GetOwnerID())
 	{
@@ -2353,6 +2357,11 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				tmp_lastname += "'s Pet";
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+			}
+
+			Mob *owner = GetOwner();
+			if (owner && owner->IsNPC()) {
+				SetPetOwnerNPC(true);
 			}
 		}
 	}
