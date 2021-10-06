@@ -332,8 +332,8 @@ public:
 		uint32 inventory_slot = 0xFFFFFFFF, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
 	void SendBeginCast(uint16 spell_id, uint32 casttime);
 	virtual bool SpellOnTarget(uint16 spell_id, Mob* spelltar, bool reflect = false,
-		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1);
-	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1);
+		bool use_resist_adjust = false, int16 resist_adjust = 0, bool isproc = false, int level_override = -1, int32 duration_override = 0);
+	virtual bool SpellEffect(Mob* caster, uint16 spell_id, float partial = 100, int level_override = -1, int32 duration_override = 0);
 	virtual bool DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_center,
 		CastAction_type &CastAction, EQ::spells::CastingSlot slot, bool isproc = false);
 	virtual bool CheckFizzle(uint16 spell_id);
@@ -857,8 +857,9 @@ public:
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
 
+	int32 GetVirusBuffDuration(int32 spell_id);
 	void VirusEffectProcess();
-	void SpreadVirusEffect(int spell_id, uint32 caster_id);
+	void SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining);
 
 	void ModSkillDmgTaken(EQ::skills::SkillType skill_num, int value);
 	int16 GetModSkillDmgTaken(const EQ::skills::SkillType skill_num);

@@ -46,7 +46,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int32 duration_override)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	EQ::ItemInstance *SummonedItem=nullptr;
@@ -119,7 +119,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			else
 			{
-				buffslot = AddBuff(caster, spell_id);
+				buffslot = AddBuff(caster, spell_id, duration_override);
 			}
 			if(buffslot == -1)	// stacking failure
 				return false;
@@ -186,13 +186,16 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		Apply Virus
 		Add timer to buff that has viral fields.
 	*/
-	if(GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id)) {
+	if(HasVirusEffect(spell_id)) {
 		
 		if (!viral_timer.Enabled()) {
 			viral_timer.Start(1000);
 		}
-		SetHasVirus(true);
+		SetHasVirus(true);//TODO REMOVE THIS
 		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
+		Shout("Set Virus Timer Start. Spread time is [%i]", buffs[buffslot].virus_spread_time);
+		Shout("Duration Base %i [%i] [%i]", buffs[buffslot].ticsremaining, spells[spell_id].buffduration, duration_override);
+		Shout("Duration New %i", buffs[buffslot].ticsremaining);
 	}
 
 

@@ -1471,7 +1471,7 @@ else if (id == "damageshieldtype") { return spells[spell_id].DamageShieldType; }
 return 0;
 }
 
-bool HasVirusEffect(int spell_id) 
+bool HasVirusEffect(int32 spell_id) 
 {
 	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id)){
 		return true;
@@ -1479,15 +1479,17 @@ bool HasVirusEffect(int spell_id)
 	return false;
 }
 
-int GetViralMinSpreadTime(int spell_id) 
+int32 GetViralMinSpreadTime(int32 spell_id) 
 {
 	return spells[spell_id].viral_targets;
 }
-int GetViralMaxSpreadTime(int spell_id) 
+
+int32 GetViralMaxSpreadTime(int32 spell_id) 
 {
 	return spells[spell_id].viral_timer;
 }
-int GetViralSpreadRange(int spell_id) 
+
+int32 GetViralSpreadRange(int32 spell_id) 
 {
 	return spells[spell_id].viral_range;
 }

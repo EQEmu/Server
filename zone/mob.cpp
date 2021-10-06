@@ -4702,12 +4702,25 @@ void Mob::DoGravityEffect()
 	}
 }
 
+int32 Mob::GetVirusBuffDuration(int32 spell_id)
+{//dont need this anymore
+	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
+	{
+		if (IsValidSpell(buffs[spell_id].spellid) && (spell_id == buffs[spell_id].spellid))
+		{
+			Shout("BUFF TICKS REMAINING %i", buffs[buffs_i].ticsremaining);
+			return buffs[buffs_i].ticsremaining;
+		}
+	}
+	return 0;
+}
+
 void Mob::VirusEffectProcess()
 {
 	/*
 		1000 ms timer for checking virus effects from buffs
 	*/
-
+	//Shout(">>>>>>>>>>>>>>>> Check Virus Timer <<<<<<<<<<<<<<<<<");
 	// Only spread in zones without perm buffs
 	if (zone->BuffTimersSuspended()) {
 		viral_timer.Disable();
@@ -4715,10 +4728,9 @@ void Mob::VirusEffectProcess()
 	}
 
 	bool stop_timer = true;
-	int buff_count = GetMaxTotalSlots();
-	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
+	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
 	{
-		if (IsValidSpell(buffs[buffs_i].spellid) && GetViralMinSpreadTime(buffs[buffs_i].spellid) && GetViralMaxSpreadTime(buffs[buffs_i].spellid))
+		if (IsValidSpell(buffs[buffs_i].spellid) && HasVirusEffect(buffs[buffs_i].spellid))
 		{
 			if (buffs[buffs_i].virus_spread_time > 0) {
 				buffs[buffs_i].virus_spread_time -= 1;
@@ -4726,8 +4738,9 @@ void Mob::VirusEffectProcess()
 			}
 
 			if (buffs[buffs_i].virus_spread_time <= 0) {
-				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs_i), GetViralMaxSpreadTime(buffs_i));
-				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid);
+				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs[buffs_i].spellid), GetViralMaxSpreadTime(buffs[buffs_i].spellid));
+				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].ticsremaining);
+				Shout("Spread Virus %i (%i) [New Time %i]", buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].virus_spread_time);
 				stop_timer = false;
 			}
 		}
@@ -4736,9 +4749,10 @@ void Mob::VirusEffectProcess()
 	if (stop_timer) {
 		viral_timer.Disable();
 	}
+	//Shout(">>>>>>>>>>>>>>>> END <<<<<<<<<<<<<<<<<");
 }
 
-void Mob::SpreadVirusEffect(int spell_id, uint32 caster_id)
+void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
 {
 	Mob* caster = entity_list.GetMob(caster_id);
 	std::list<Mob *> targets_in_range;
@@ -4753,7 +4767,11 @@ void Mob::SpreadVirusEffect(int spell_id, uint32 caster_id)
 
 		if (!(*iter)->FindBuff(spell_id)) {
 			if (caster) {
-				caster->SpellOnTarget(spell_id, (*iter));
+				Shout("BUFF TICKS REMAINING %i", buff_tics_remaining);
+				if (buff_tics_remaining) {
+					Shout("%s GIVES VIRUS (%i) TO %s", GetCleanName(), spell_id, (*iter)->GetCleanName());
+					caster->SpellOnTarget(spell_id, (*iter), 0, false, 0, false, -1, buff_tics_remaining);
+				}
 			}
 		}
 		++iter;
