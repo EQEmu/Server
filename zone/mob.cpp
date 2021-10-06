@@ -4702,25 +4702,12 @@ void Mob::DoGravityEffect()
 	}
 }
 
-int32 Mob::GetVirusBuffDuration(int32 spell_id)
-{//dont need this anymore
-	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
-	{
-		if (IsValidSpell(buffs[spell_id].spellid) && (spell_id == buffs[spell_id].spellid))
-		{
-			Shout("BUFF TICKS REMAINING %i", buffs[buffs_i].ticsremaining);
-			return buffs[buffs_i].ticsremaining;
-		}
-	}
-	return 0;
-}
-
 void Mob::VirusEffectProcess()
 {
 	/*
 		1000 ms timer for checking virus effects from buffs
 	*/
-	//Shout(">>>>>>>>>>>>>>>> Check Virus Timer <<<<<<<<<<<<<<<<<");
+
 	// Only spread in zones without perm buffs
 	if (zone->BuffTimersSuspended()) {
 		viral_timer.Disable();

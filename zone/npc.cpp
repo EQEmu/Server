@@ -1036,7 +1036,6 @@ void NPC::UpdateEquipmentLight()
 }
 
 void NPC::Depop(bool StartSpawnTimer) {
-	Shout("NPC::DEPOP!");
 	uint16 emoteid = this->GetEmoteID();
 	if(emoteid != 0)
 		this->DoNPCEmote(ONDESPAWN,emoteid);
@@ -2348,11 +2347,12 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
-
-			Mob *owner = GetOwner();
-			if (owner && owner->IsNPC()) {
-				SetPetOwnerNPC(true);
-				owner->Shout("I spawned a pet");
+			else 
+			{
+				if (entity_list.GetNPCByID(GetOwnerID())) 
+				{
+					SetPetOwnerNPC(true);
+				}
 			}
 		}
 	}

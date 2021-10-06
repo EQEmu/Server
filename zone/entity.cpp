@@ -5221,6 +5221,7 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, std::list<Mob*> &m_list)
 {
 	/*
+		Live Mechanics
 		Virus spreader does NOT need LOS
 		There is no max target limit
 	*/
@@ -5258,7 +5259,7 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, s
 		// Make sure the target is in range
 		if (ptr->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= spread_range) {
 
-			// If the spreader is an npc and NOT a pet or temppet it can only spread to other npc controlled mobs
+			// If the spreader is an npc and NOT a pet or temppet, then spread to other npc controlled mobs
 			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC()) {
 				m_list.push_back(ptr);
 			}
@@ -5278,11 +5279,18 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, s
 			else if (!spreader->IsNPC() && !ptr->IsNPC()) {
 				m_list.push_back(ptr);
 			}
-			// if its a pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
+			// if spreader is not an NPC, and Target is an NPC, then spread to non-NPC controlled pets
+			else if (!spreader->IsNPC() && ptr->IsNPC() && ((ptr->IsPet() && !ptr->IsPetOwnerNPC()) || (ptr->IsTempPet() && !ptr->IsPetOwnerNPC()))) {
+				m_list.push_back(ptr);
+			}
+
+			// if spreader is a non-NPC controlled pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
 			else if (spreader->IsNPC() && ((spreader->IsPet() && !spreader->IsPetOwnerNPC()) || (spreader->IsTempPet() && !spreader->IsPetOwnerNPC()))) {
+				//Spread to non-NPCs
 				if (!ptr->IsNPC()) {
 					m_list.push_back(ptr);
 				}
+				//Spread to other non-NPC Pets
 				else if (ptr->IsNPC() && ((ptr->IsPet() && !ptr->IsPetOwnerNPC()) || (ptr->IsTempPet() && !ptr->IsPetOwnerNPC()))) {
 					m_list.push_back(ptr);
 				}

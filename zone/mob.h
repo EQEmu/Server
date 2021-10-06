@@ -857,7 +857,6 @@ public:
 	void FocusProcLimitProcess();
 	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
 
-	int32 GetVirusBuffDuration(int32 spell_id);
 	void VirusEffectProcess();
 	void SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining);
 
