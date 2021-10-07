@@ -4701,69 +4701,6 @@ void Mob::DoGravityEffect()
 	}
 }
 
-void Mob::VirusEffectProcess()
-{
-	/*
-		1000 ms timer for checking virus effects from buffs
-	*/
-
-	// Only spread in zones without perm buffs
-	if (zone->BuffTimersSuspended()) {
-		viral_timer.Disable();
-		return;
-	}
-
-	bool stop_timer = true;
-	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
-	{
-		if (IsValidSpell(buffs[buffs_i].spellid) && HasVirusEffect(buffs[buffs_i].spellid))
-		{
-			if (buffs[buffs_i].virus_spread_time > 0) {
-				buffs[buffs_i].virus_spread_time -= 1;
-				stop_timer = false;
-			}
-
-			if (buffs[buffs_i].virus_spread_time <= 0) {
-				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs[buffs_i].spellid), GetViralMaxSpreadTime(buffs[buffs_i].spellid));
-				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].ticsremaining);
-				Shout("Spread Virus %i (%i) [New Time %i]", buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].virus_spread_time);
-				stop_timer = false;
-			}
-		}
-	}
-
-	if (stop_timer) {
-		viral_timer.Disable();
-		Shout("<<<<<<<<<<<<<<<<<<<<<STOP TIMER>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-	}
-}
-
-void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
-{
-	Mob* caster = entity_list.GetMob(caster_id);
-	std::list<Mob *> targets_in_range;
-	entity_list.GetTargetsForVirusEffect(this, caster, GetViralSpreadRange(spell_id), spells[spell_id].pcnpc_only_flag, spell_id, targets_in_range);
-	auto iter = targets_in_range.begin();
-
-	while (iter != targets_in_range.end()) {
-		if (!(*iter)) {
-			++iter;
-			continue;
-		}
-
-		if (!(*iter)->FindBuff(spell_id)) {
-			if (caster) {
-				if (buff_tics_remaining) {
-					Shout("%s GIVES VIRUS (%i) TO %s", GetCleanName(), spell_id, (*iter)->GetCleanName());
-					//When virus is spread, the buff on new target is applied with the amount of time remaining on the spreaders buff.
-					caster->SpellOnTarget(spell_id, (*iter), 0, false, 0, false, -1, buff_tics_remaining);
-				}
-			}
-		}
-		++iter;
-	}
-}
-
 void Mob::AddNimbusEffect(int effectid)
 {
 	SetNimbusEffect(effectid);

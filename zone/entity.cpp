@@ -5229,12 +5229,6 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 		return;
 	}
 
-	int spread_range = RuleI(Spells, VirusSpreadDistance); //Default distance if range field is zero
-
-	if (range) {
-		spread_range = range;
-	}
-
 	bool is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
 	auto it = mob_list.begin();
@@ -5264,7 +5258,7 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 		}
 
 		// Make sure the target is in range
-		if (ptr->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= spread_range) {
+		if (ptr->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= range) {
 
 			//Do not allow detrimental spread to anything the original caster couldn't normally attack.
 			if (is_detrimental_spell && !original_caster->IsAttackAllowed(ptr, true)) {

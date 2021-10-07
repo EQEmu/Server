@@ -1473,7 +1473,7 @@ return 0;
 
 bool HasVirusEffect(int32 spell_id) 
 {
-	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id)){
+	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id) && GetViralSpreadRange(spell_id)){
 		return true;
 	}
 	return false;
