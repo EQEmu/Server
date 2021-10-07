@@ -4735,15 +4735,15 @@ void Mob::VirusEffectProcess()
 
 	if (stop_timer) {
 		viral_timer.Disable();
+		Shout("<<<<<<<<<<<<<<<<<<<<<STOP TIMER>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
 	}
-	//Shout(">>>>>>>>>>>>>>>> END <<<<<<<<<<<<<<<<<");
 }
 
 void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
 {
 	Mob* caster = entity_list.GetMob(caster_id);
 	std::list<Mob *> targets_in_range;
-	entity_list.GetTargetsForVirusEffect(this, GetViralSpreadRange(spell_id), spells[spell_id].pcnpc_only_flag, targets_in_range);
+	entity_list.GetTargetsForVirusEffect(this, caster, GetViralSpreadRange(spell_id), spells[spell_id].pcnpc_only_flag, spell_id, targets_in_range);
 	auto iter = targets_in_range.begin();
 
 	while (iter != targets_in_range.end()) {

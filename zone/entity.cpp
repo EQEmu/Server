@@ -5218,7 +5218,7 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 	return nullptr;
 }
 
-void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, std::list<Mob*> &m_list)
+void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, int range, int pcnpc, int32 spell_id, std::list<Mob*> &m_list)
 {
 	/*
 		Live Mechanics
@@ -5234,6 +5234,8 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, s
 	if (range) {
 		spread_range = range;
 	}
+
+	bool is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
 	auto it = mob_list.begin();
 	while (it != mob_list.end()) {
@@ -5251,6 +5253,11 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, s
 			++it;
 			continue;
 		}
+		if (ptr->IsClient() && !ptr->CastToClient()->ClientFinishedLoading()) {
+			++it;
+			continue;
+		}
+
 		if (ptr->IsAura() || ptr->IsTrap()) {
 			++it;
 			continue;
@@ -5259,8 +5266,22 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, int range, int pcnpc, s
 		// Make sure the target is in range
 		if (ptr->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= spread_range) {
 
-			// If the spreader is an npc and NOT a pet or temppet, then spread to other npc controlled mobs
-			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC()) {
+			//Do not allow detrimental spread to anything the original caster couldn't normally attack.
+			if (is_detrimental_spell && !original_caster->IsAttackAllowed(ptr, true)) {
+				++it;
+				ptr->Shout("Can not attack!");
+				continue;
+			}
+
+			//For non-NPCs, do not allow beneficial spread to anything the original caster could normally attack.
+			if (!is_detrimental_spell && !original_caster->IsNPC() && original_caster->IsAttackAllowed(ptr, true)) {
+				++it;
+				ptr->Shout("Can attack!");
+				continue;
+			}
+
+			// If the spreader is an npc and NOT a PET, then spread to other npc controlled mobs that are NOT client PETS
+			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && !ptr->IsPet() && !ptr->IsTempPet()) {
 				m_list.push_back(ptr);
 			}
 			// If the spreader is an npc controlled pet OR swarmpet it can spread to any other npc or an npc controlled pet

@@ -2360,7 +2360,6 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 	{
 		ns->spawn.is_pet = 0;
 	}
-	Shout("Pet has spawned and Owner is NPC [%i] OR Client [%i]", IsPetOwnerNPC(), IsPetOwnerClient());//KAYENDEBUG
 }
 
 void NPC::SetLevel(uint8 in_level, bool command)
