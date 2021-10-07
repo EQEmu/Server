@@ -478,7 +478,6 @@ Json::Value ApiGetMobListDetail(EQ::Net::WebsocketServerConnection *connection, 
 		row["has_temp_pets_active"]       = mob->HasTempPetsActive();
 		row["has_two_hand_blunt_equiped"] = mob->HasTwoHandBluntEquiped();
 		row["has_two_hander_equipped"]    = mob->HasTwoHanderEquipped();
-		row["has_virus"]                  = mob->HasVirus();
 		row["hate_summon"]                = mob->HateSummon();
 		row["helm_texture"]               = mob->GetHelmTexture();
 		row["hp"]                         = mob->GetHP();

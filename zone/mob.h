@@ -406,7 +406,6 @@ public:
 	inline void SetMGB(bool val) { has_MGB = val; }
 	bool HasProjectIllusion() const { return has_ProjectIllusion ; }
 	inline void SetProjectIllusion(bool val) { has_ProjectIllusion  = val; }
-	void SpreadVirus(uint16 spell_id, uint16 casterID);
 	bool IsNimbusEffectActive(uint32 nimbus_effect);
 	void SetNimbusEffect(uint32 nimbus_effect);
 	inline virtual uint32 GetNimbusEffect1() const { return nimbus_effect1; }
@@ -1039,8 +1038,6 @@ public:
 	inline const bool IsRoamer() const { return roamer; }
 	inline const int GetWanderType() const { return wandertype; }
 	inline const bool IsRooted() const { return rooted || permarooted; }
-	inline const bool HasVirus() const { return has_virus; }
-	inline void SetHasVirus(bool nState) { has_virus = nState; }
 	int GetSnaredAmount();
 	inline const bool IsPseudoRooted() const { return pseudo_rooted; }
 	inline void SetPseudoRoot(bool prState) { pseudo_rooted = prState; }
@@ -1524,7 +1521,6 @@ protected:
 	bool silenced;
 	bool amnesiad;
 	bool inWater; // Set to true or false by Water Detection code if enabled by rules
-	bool has_virus; // whether this mob has a viral spell on them
 	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
 	bool offhand;
 	bool has_shieldequiped;

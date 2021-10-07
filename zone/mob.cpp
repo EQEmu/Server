@@ -406,7 +406,6 @@ Mob::Mob(
 	roamer = false;
 	rooted = false;
 	charmed = false;
-	has_virus = false;
 	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
 		viral_spells[i] = 0;
 	}
@@ -4754,36 +4753,14 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 
 		if (!(*iter)->FindBuff(spell_id)) {
 			if (caster) {
-				Shout("BUFF TICKS REMAINING %i", buff_tics_remaining);
 				if (buff_tics_remaining) {
 					Shout("%s GIVES VIRUS (%i) TO %s", GetCleanName(), spell_id, (*iter)->GetCleanName());
+					//When virus is spread, the buff on new target is applied with the amount of time remaining on the spreaders buff.
 					caster->SpellOnTarget(spell_id, (*iter), 0, false, 0, false, -1, buff_tics_remaining);
 				}
 			}
 		}
 		++iter;
-	}
-}
-
-void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
-{
-	int num_targs = spells[spell_id].viral_targets;
-
-	Mob* caster = entity_list.GetMob(casterID);
-	Mob* target = nullptr;
-	// Only spread in zones without perm buffs
-	if(!zone->BuffTimersSuspended()) {
-		for(int i = 0; i < num_targs; i++) {
-			target = entity_list.GetTargetForVirus(this, spells[spell_id].viral_range);
-			if(target) {
-				// Only spreads to the uninfected
-				if(!target->FindBuff(spell_id)) {
-					if(caster)
-						caster->SpellOnTarget(spell_id, target);
-
-				}
-			}
-		}
 	}
 }
 

@@ -182,16 +182,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	/*
-		Apply Virus
-		Add timer to buff that has viral fields.
-	*/
 	if(HasVirusEffect(spell_id)) {
 		
 		if (!viral_timer.Enabled()) {
 			viral_timer.Start(1000);
 		}
-		SetHasVirus(true);//TODO REMOVE THIS
 		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
 		Shout("Set Virus Timer Start. Spread time is [%i]", buffs[buffslot].virus_spread_time);
 		Shout("Duration Base %i [%i] [%i]", buffs[buffslot].ticsremaining, spells[spell_id].buffduration, duration_override);
@@ -4086,23 +4081,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CastToClient()->MakeBuffFadePacket(buffs[slot].spellid, slot);
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
-
-	if(spells[buffs[slot].spellid].viral_targets > 0) {
-		bool last_virus = true;
-		for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2)
-		{
-			if(viral_spells[i] && viral_spells[i] != buffs[slot].spellid)
-			{
-				// If we have a virus that doesn't match this one then don't stop the viral timer
-				last_virus = false;
-			}
-		}
-		// This is the last virus on us so lets stop timer
-		if(last_virus) {
-			viral_timer.Disable();
-			has_virus = false;
-		}
-	}
 
 	if(IsClient()) {
 		std::vector<EQ::Any> args;

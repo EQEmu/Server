@@ -160,7 +160,6 @@ public:
 	bool IsMobSpawnedByNpcTypeID(uint32 get_id);
 	bool IsNPCSpawned(std::vector<uint32> npc_ids);
 	uint32 CountSpawnedNPCs(std::vector<uint32> npc_ids);
-	Mob *GetTargetForVirus(Mob* spreader, int range);
 	inline NPC *GetNPCByID(uint16 id)
 	{
 		auto it = npc_list.find(id);

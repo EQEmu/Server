@@ -5229,7 +5229,7 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 		return;
 	}
 
-	int spread_range = RuleI(Spells, VirusSpreadDistance); //Default distance if range is 0
+	int spread_range = RuleI(Spells, VirusSpreadDistance); //Default distance if range field is zero
 
 	if (range) {
 		spread_range = range;
@@ -5269,14 +5269,12 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 			//Do not allow detrimental spread to anything the original caster couldn't normally attack.
 			if (is_detrimental_spell && !original_caster->IsAttackAllowed(ptr, true)) {
 				++it;
-				ptr->Shout("Can not attack!");
 				continue;
 			}
 
 			//For non-NPCs, do not allow beneficial spread to anything the original caster could normally attack.
 			if (!is_detrimental_spell && !original_caster->IsNPC() && original_caster->IsAttackAllowed(ptr, true)) {
 				++it;
-				ptr->Shout("Can attack!");
 				continue;
 			}
 
@@ -5320,65 +5318,6 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 		}
 		++it;
 	}
-}
-
-
-Mob *EntityList::GetTargetForVirus(Mob *spreader, int range)
-{
-
-	int max_spread_range = RuleI(Spells, VirusSpreadDistance);
-
-	if (range) {
-		max_spread_range = range;
-	}
-
-	std::vector<Mob *> TargetsInRange;
-
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *cur = it->second;
-
-		if (!cur) {
-			continue;
-		}
-		// Make sure the target is in range, has los and is not the mob doing the spreading
-		if ((cur->GetID() != spreader->GetID()) && (cur->CalculateDistance(spreader->GetX(), spreader->GetY(),spreader->GetZ()) <= max_spread_range)) {
-			// If the spreader is an npc it can only spread to other npc controlled mobs
-			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->CastToNPC()->GetSwarmOwner() && cur->IsNPC()) {
-				TargetsInRange.push_back(cur);
-			}
-			// If the spreader is an npc controlled pet it can spread to any other npc or an npc controlled pet
-			else if (spreader->IsNPC() && spreader->IsPet() && spreader->GetOwner()->IsNPC()) {
-				if (cur->IsNPC() && !cur->IsPet()) {
-					TargetsInRange.push_back(cur);
-				} else if (cur->IsNPC() && cur->IsPet() && cur->GetOwner()->IsNPC()) {
-					TargetsInRange.push_back(cur);
-				}
-				else if (cur->IsNPC() && cur->CastToNPC()->GetSwarmOwner() && cur->GetOwner()->IsNPC()) {
-					TargetsInRange.push_back(cur);
-				}
-			}
-			// if the spreader is anything else(bot, pet, etc) then it should spread to everything but non client controlled npcs
-			else if (!spreader->IsNPC() && !cur->IsNPC()) {
-				TargetsInRange.push_back(cur);
-			}
-			// if its a pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
-			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->CastToNPC()->GetSwarmOwner()) && !spreader->GetOwner()->IsNPC()) {
-				if (!cur->IsNPC()) {
-					TargetsInRange.push_back(cur);
-				}
-				else if (cur->IsNPC() && (cur->IsPet() || cur->CastToNPC()->GetSwarmOwner()) && !cur->GetOwner()->IsNPC()) {
-					TargetsInRange.push_back(cur);
-				}
-			}
-		}
-		++it;
-	}
-
-	if(TargetsInRange.empty())
-		return nullptr;
-
-	return TargetsInRange[zone->random.Int(0, TargetsInRange.size() - 1)];
 }
 
 void EntityList::StopMobAI()
