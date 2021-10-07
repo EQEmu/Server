@@ -5285,7 +5285,7 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 				m_list.push_back(ptr);
 			}
 			// If the spreader is an npc and NOT a PET, then spread to npc controlled pet
-			else if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && ptr->IsPet() && ptr->IsTempPet() && ptr->IsPetOwnerNPC()) {
+			else if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && ptr->IsPetOwnerNPC()) {
 				m_list.push_back(ptr);
 			}
 			// If the spreader is an npc controlled PET it can spread to any other npc or an npc controlled pet
