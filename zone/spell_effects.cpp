@@ -8577,7 +8577,7 @@ void Mob::VirusEffectProcess()
 		viral_range   = SPREAD_RADIUS
 		Once a buff with a viral effect is applied, a 1000 ms timer will begin. 
 		The time at which the virus will attempt to spread is determined by a random value between MIN_SPREAD_TIME and MAX_SPREAD_TIME
-		Each time the virus attempts to spread the next time interval will be choosen at random again.
+		Each time the virus attempts to spread the next time interval will be chosen at random again.
 		If a spreader finds a target for viral buff, when the viral buff spreads the duration on the new target will be the time remaining on the spreaders buff.
 		Spreaders DOES NOT need LOS to spread. There is no max amount of targets the virus can spread to.
 		When the spreader no longer has any viral buffs the timer stops.
