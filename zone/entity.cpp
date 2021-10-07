@@ -5280,19 +5280,20 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 				continue;
 			}
 
-			// If the spreader is an npc and NOT a PET, then spread to other npc controlled mobs that are NOT client PETS
+			// If the spreader is an npc and NOT a PET, then spread to other npc controlled mobs that are not pets
 			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && !ptr->IsPet() && !ptr->IsTempPet()) {
 				m_list.push_back(ptr);
 			}
-			// If the spreader is an npc controlled pet OR swarmpet it can spread to any other npc or an npc controlled pet
+			// If the spreader is an npc and NOT a PET, then spread to npc controlled pet
+			else if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && ptr->IsPet() && ptr->IsTempPet() && ptr->IsPetOwnerNPC()) {
+				m_list.push_back(ptr);
+			}
+			// If the spreader is an npc controlled PET it can spread to any other npc or an npc controlled pet
 			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->IsTempPet()) && spreader->IsPetOwnerNPC()) {
 				if (ptr->IsNPC() && (!ptr->IsPet() || !ptr->IsTempPet())) {
 					m_list.push_back(ptr);
 				}
-				else if (ptr->IsNPC() && ptr->IsPet() && ptr->IsPetOwnerNPC()) {
-					m_list.push_back(ptr);
-				}
-				else if (ptr->IsNPC() && ptr->IsTempPet() && ptr->IsPetOwnerNPC()) {
+				else if (ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && ptr->IsPetOwnerNPC()) {
 					m_list.push_back(ptr);
 				}
 			}
@@ -5301,18 +5302,18 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 				m_list.push_back(ptr);
 			}
 			// if spreader is not an NPC, and Target is an NPC, then spread to non-NPC controlled pets
-			else if (!spreader->IsNPC() && ptr->IsNPC() && ((ptr->IsPet() && !ptr->IsPetOwnerNPC()) || (ptr->IsTempPet() && !ptr->IsPetOwnerNPC()))) {
+			else if (!spreader->IsNPC() && ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && !ptr->IsPetOwnerNPC()) {
 				m_list.push_back(ptr);
 			}
 
 			// if spreader is a non-NPC controlled pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
-			else if (spreader->IsNPC() && ((spreader->IsPet() && !spreader->IsPetOwnerNPC()) || (spreader->IsTempPet() && !spreader->IsPetOwnerNPC()))) {
+			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->IsTempPet()) && !spreader->IsPetOwnerNPC()) {
 				//Spread to non-NPCs
 				if (!ptr->IsNPC()) {
 					m_list.push_back(ptr);
 				}
 				//Spread to other non-NPC Pets
-				else if (ptr->IsNPC() && ((ptr->IsPet() && !ptr->IsPetOwnerNPC()) || (ptr->IsTempPet() && !ptr->IsPetOwnerNPC()))) {
+				else if (ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && !ptr->IsPetOwnerNPC()) {
 					m_list.push_back(ptr);
 				}
 			}
