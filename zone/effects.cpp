@@ -259,10 +259,11 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	 else
 		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000;
 
-		if(extra_spell_amt*2 < base_spell_dmg)
-			return 0;
+	if (extra_spell_amt * 2 > abs(base_spell_dmg)) {
+		return 0;
+	}
 
-		return extra_spell_amt;
+	return extra_spell_amt;
 }
 
 int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
