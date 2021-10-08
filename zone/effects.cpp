@@ -317,8 +317,8 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	if (spells[spell_id].buffduration < 1) {
 
 		if (target) {
-			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
-			value += int(value_BaseEffect + target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id)/100); //SPA 395 Add before critical (?)
+			value += int(value_BaseEffect * target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
+			value += int(value_BaseEffect * target->GetFocusEffect(focusFcHealPctCritIncoming, spell_id)/100); //SPA 395 Add before critical (?)
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
