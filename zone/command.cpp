@@ -8344,11 +8344,46 @@ void command_itemsearch(Client *c, const Seperator *sep)
 			item = database.GetItem(atoi(search_criteria));
 			if (item) {
 				linker.SetItemData(item);
+				std::string item_id = std::to_string(item->ID);
+				std::string saylink_commands =
+				"[" +
+					EQ::SayLinkEngine::GenerateQuestSaylink(
+						"#si " + item_id,
+						false,
+						"X"
+					) +
+				"] ";
 
-				c->Message(Chat::White, "%u: %s",  item->ID, linker.GenerateLink().c_str());
+				if (item->Stackable && item->StackSize > 1) {
+					std::string stack_size = std::to_string(item->StackSize);
+					saylink_commands +=
+					"[" +
+						EQ::SayLinkEngine::GenerateQuestSaylink(
+							"#si " + item_id + " " + stack_size,
+							false,
+							stack_size
+						) +
+					"]";
+				}
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						" Summon {} [{}] [{}]",
+						saylink_commands,
+						linker.GenerateLink(),
+						item->ID
+					).c_str()
+				);
 			}
 			else {
-				c->Message(Chat::White, "Item #%s not found",  search_criteria);
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Item {} not found",
+						search_criteria
+					).c_str()
+				);
 			}
 
 			return;
@@ -8370,21 +8405,21 @@ void command_itemsearch(Client *c, const Seperator *sep)
 				std::string item_id = std::to_string(item->ID);
 				std::string saylink_commands =
 					"[" +
-					EQ::SayLinkEngine::GenerateQuestSaylink(
-						"#si " + item_id,
-						false,
-						"X"
-					) +
+						EQ::SayLinkEngine::GenerateQuestSaylink(
+							"#si " + item_id,
+							false,
+							"X"
+						) +
 					"] ";
 				if (item->Stackable && item->StackSize > 1) {
 					std::string stack_size = std::to_string(item->StackSize);
 					saylink_commands +=
 					"[" +
-					EQ::SayLinkEngine::GenerateQuestSaylink(
-						"#si " + item_id + " " + stack_size,
-						false,
-						stack_size
-					) +
+						EQ::SayLinkEngine::GenerateQuestSaylink(
+							"#si " + item_id + " " + stack_size,
+							false,
+							stack_size
+						) +
 					"]";
 				}
 
