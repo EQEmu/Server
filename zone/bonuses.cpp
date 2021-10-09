@@ -1672,6 +1672,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ZoneSuspendMinion = base1;
 			break;
 
+
 		case SE_Reflect:
 
 			if (newbon->reflect[SBIndex::REFLECT_CHANCE] < base1) {
@@ -1680,6 +1681,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			if (newbon->reflect[SBIndex::REFLECT_RESISTANCE_MOD] < base2) {
 				newbon->reflect[SBIndex::REFLECT_RESISTANCE_MOD] = base2;
 			}
+			break;
+
+		case SE_SpellDamageShield:
+			newbon->SpellDamageShield += base1;
 			break;
 
 		// to do
@@ -3746,7 +3751,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 					newbon->DamageShield += cur->DamageShield;
 				}
 				if(cur->SpellShield > 0) {
-					newbon->SpellDamageShield += cur->SpellShield;
+					newbon->SpellShield += cur->SpellShield;
 				}
 				if(cur->Shielding > 0) {
 					newbon->MeleeMitigation += cur->Shielding;
