@@ -176,6 +176,8 @@ RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable ite
 RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
 RULE_BOOL(Character, PVPAllowFear, false, "If enabled, will allow clients to fear eachother in PVP")
 RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

@@ -3403,8 +3403,15 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+	
 	bool *af = (bool*)app->pBuffer;
-	auto_fire = *af;
+	if(RuleB(Character, EnableRangerAutoFire))
+	{
+		auto_fire = *af;
+	} else {
+		auto_fire = false;
+	}
+	
 	auto_attack = false;
 	SetAttackTimer();
 }
