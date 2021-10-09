@@ -288,7 +288,7 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 
 	//Confirmed with parsing 10/9/21 ~Kayen
 	if (extra_spell_amt * 2 > abs(base_spell_dmg)) {
-		return extra_spell_amt; 
+		extra_spell_amt = abs(base_spell_dmg) / 2;
 	}
 
 	return extra_spell_amt;
