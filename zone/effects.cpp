@@ -117,10 +117,10 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 			value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
 			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio / 100;
+				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value_BaseEffect)*ratio / 100;
 
 			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
-				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value)*ratio/100;
+				value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value_BaseEffect)*ratio/100;
 
 			else if (IsNPC() && CastToNPC()->GetSpellScale())
 				value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
@@ -156,10 +156,10 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	value -= GetFocusEffect(focusFcAmplifyAmt, spell_id);
 
 	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg)
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value_BaseEffect);
 
 	else if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5)
-		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+		 value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value_BaseEffect);
 
 	if (IsNPC() && CastToNPC()->GetSpellScale())
 		value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
@@ -167,11 +167,13 @@ int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 	return value;
 }
 
-int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
+int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effectiveness) {
 	/*
 		Reflected spells use the spells base damage before any modifiers or formulas applied.
 		That value can then be modifier by the reflect spells 'max' value, defined here as effectiveness
 		Default effectiveness is set at 100.
+		Extra Spell Damage stat from the with the reflect effect will be applied to reflected damage
+		with no level limitation, this was confirmed with extensive parsing ~Kayen
 	*/
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
@@ -181,7 +183,14 @@ int32 Mob::GetActReflectedSpellDamage(int32 value, int effectiveness) {
 		}
 	}
 	
+	int32 base_spell_dmg = value;
+
 	value = value * effectiveness / 100;
+
+	if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_spell_dmg);
+	}
+
 	return value;
 }
 
@@ -277,10 +286,12 @@ int32 Mob::GetExtraSpellAmt(uint16 spell_id, int32 extra_spell_amt, int32 base_s
 	 else
 		 extra_spell_amt = extra_spell_amt * total_cast_time / 7000;
 
-		if(extra_spell_amt*2 < base_spell_dmg)
-			return 0;
+	//Confirmed with parsing 10/9/21
+	if (extra_spell_amt * 2 > abs(base_spell_dmg)) {
+		return extra_spell_amt; 
+	}
 
-		return extra_spell_amt;
+	return extra_spell_amt;
 }
 
 int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
@@ -341,7 +352,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
 		
 		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value); //Item Heal Amt Add before critical
+			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value_BaseEffect); //Item Heal Amt Add before critical
 		}
 
 		if (target) {
