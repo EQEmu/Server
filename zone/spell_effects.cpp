@@ -182,7 +182,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(HasVirusEffect(spell_id)) {
+	if(IsVirusSpell(spell_id)) {
 		
 		if (!viral_timer.Enabled()) {
 			viral_timer.Start(1000);
@@ -8589,7 +8589,7 @@ void Mob::VirusEffectProcess()
 	bool stop_timer = true;
 	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
 	{
-		if (IsValidSpell(buffs[buffs_i].spellid) && HasVirusEffect(buffs[buffs_i].spellid))
+		if (IsValidSpell(buffs[buffs_i].spellid) && IsVirusSpell(buffs[buffs_i].spellid))
 		{
 			if (buffs[buffs_i].virus_spread_time > 0) {
 				buffs[buffs_i].virus_spread_time -= 1;

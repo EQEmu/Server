@@ -1471,7 +1471,7 @@ else if (id == "damageshieldtype") { return spells[spell_id].DamageShieldType; }
 return 0;
 }
 
-bool HasVirusEffect(int32 spell_id) 
+bool IsVirusSpell(int32 spell_id) 
 {
 	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id) && GetViralSpreadRange(spell_id)){
 		return true;
