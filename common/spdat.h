@@ -842,7 +842,7 @@ typedef enum {
 #define SE_DispelDetrimental			154 // implemented, @Dispel, removes only detrimental effects on a target, base: pct chance (950=95%), limit: none, max: none
 #define SE_SpellCritDmgIncrease			155 // implemented - no known live spells use this currently
 #define SE_IllusionCopy					156	// implemented - Deception
-#define SE_SpellDamageShield			157	// implemented - Petrad's Protection
+#define SE_SpellDamageShield			157	// implemented, @DS, causes non-melee damage on caster of a spell, base: Amt DS (negative), limit: none, max: unknown (same as base but +)
 #define SE_Reflect						158 // implemented
 #define SE_AllStats						159	// implemented
 //#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
@@ -1302,7 +1302,7 @@ struct SPDat_Spell_Struct
 /* 157 */	int effectdescnum; // eqstr of effect description -- SECONDARY_CATEGORY_1
 /* 158 */	//int secondary_category_2;   //Category Desc ID 3 -- SECONDARY_CATEGORY_2
 /* 159 */	bool npc_no_los; // -- NO_NPC_LOS
-/* 160 */	//bool feedbackable; // -- FEEDBACKABLE
+/* 160 */	bool feedbackable; // -- FEEDBACKABLE
 /* 161 */	bool reflectable; // -- REFLECTABLE
 /* 162 */	int bonushate; // -- HATE_MOD
 /* 163 */	//int resist_per_level; // -- RESIST_PER_LEVEL

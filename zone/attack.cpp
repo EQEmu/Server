@@ -2875,10 +2875,15 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 			spellid = spellbonuses.DamageShieldSpellID;
 	}
 	else {
-		DS = spellbonuses.SpellDamageShield;
+		DS = spellbonuses.SpellDamageShield + itembonuses.SpellDamageShield + aabonuses.SpellDamageShield;
 		rev_ds = 0;
 		// This ID returns "you are burned", seemed most appropriate for spell DS
 		spellid = 2166;
+		/*
+			Live Message - not yet used on emu
+			Feedback onto you "YOUR mind burns from TARGETS NAME's feedback for %i points of non-melee damage."
+			Feedback onto other "TARGETS NAME's mind burns from YOUR feedback for %i points of non-melee damage."
+		*/
 	}
 
 	if (DS == 0 && rev_ds == 0)
@@ -2912,6 +2917,7 @@ void Mob::DamageShield(Mob* attacker, bool spell_ds) {
 
 			DS -= DS * ds_mitigation / 100;
 		}
+
 		attacker->Damage(this, -DS, spellid, EQ::skills::SkillAbjuration/*hackish*/, false);
 		//we can assume there is a spell now
 		auto outapp = new EQApplicationPacket(OP_Damage, sizeof(CombatDamage_Struct));

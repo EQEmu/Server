@@ -1672,6 +1672,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ZoneSuspendMinion = base1;
 			break;
 
+		case SE_SpellDamageShield:
+			newbon->SpellDamageShield += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3727,7 +3731,7 @@ void NPC::CalcItemBonuses(StatBonuses *newbon)
 					newbon->DamageShield += cur->DamageShield;
 				}
 				if(cur->SpellShield > 0) {
-					newbon->SpellDamageShield += cur->SpellShield;
+					newbon->SpellShield += cur->SpellShield;
 				}
 				if(cur->Shielding > 0) {
 					newbon->MeleeMitigation += cur->Shielding;
