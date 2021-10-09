@@ -1370,20 +1370,18 @@ void Mob::SendHPUpdate(bool force_update_all)
 				last_hp
 			);
 
-			if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-				auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-				auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
+			auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+			auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
 
-				hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
-				hp_packet_client->spawn_id = GetID();
-				hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
+			hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
+			hp_packet_client->spawn_id = GetID();
+			hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
 
-				CastToClient()->QueuePacket(client_packet);
+			CastToClient()->QueuePacket(client_packet);
 
-				safe_delete(client_packet);
+			safe_delete(client_packet);
 
-				ResetHPUpdateTimer();
-			}
+			ResetHPUpdateTimer();
 
 			// Used to check if HP has changed to update self next round
 			last_hp = current_hp;
