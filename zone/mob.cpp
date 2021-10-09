@@ -1370,20 +1370,18 @@ void Mob::SendHPUpdate(bool force_update_all)
 				last_hp
 			);
 
-			if (CastToClient()->ClientVersion() >= EQ::versions::ClientVersion::SoD) {
-				auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
-				auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
+			auto client_packet     = new EQApplicationPacket(OP_HPUpdate, sizeof(SpawnHPUpdate_Struct));
+			auto *hp_packet_client = (SpawnHPUpdate_Struct *) client_packet->pBuffer;
 
-				hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
-				hp_packet_client->spawn_id = GetID();
-				hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
+			hp_packet_client->cur_hp   = static_cast<uint32>(CastToClient()->GetHP() - itembonuses.HP);
+			hp_packet_client->spawn_id = GetID();
+			hp_packet_client->max_hp   = CastToClient()->GetMaxHP() - itembonuses.HP;
 
-				CastToClient()->QueuePacket(client_packet);
+			CastToClient()->QueuePacket(client_packet);
 
-				safe_delete(client_packet);
+			safe_delete(client_packet);
 
-				ResetHPUpdateTimer();
-			}
+			ResetHPUpdateTimer();
 
 			// Used to check if HP has changed to update self next round
 			last_hp = current_hp;
@@ -1766,21 +1764,21 @@ void Mob::SendIllusionPacket(
 
 	race = in_race;
 	if (race == 0) {
-		race = (use_model) ? use_model : GetBaseRace();
+		race = use_model ? use_model : GetBaseRace();
 	}
 
 	if (in_gender != 0xFF) {
 		gender = in_gender;
 	}
 	else {
-		gender = (in_race) ? GetDefaultGender(race, gender) : GetBaseGender();
+		gender = in_race ? GetDefaultGender(race, gender) : GetBaseGender();
 	}
 
-	if (in_texture == 0xFF && !IsPlayerRace(in_race)) {
+	if (in_texture == 0xFF && !IsPlayerRace(race)) {
 		new_texture = GetTexture();
 	}
 
-	if (in_helmtexture == 0xFF && !IsPlayerRace(in_race)) {
+	if (in_helmtexture == 0xFF && !IsPlayerRace(race)) {
 		new_helmtexture = GetHelmTexture();
 	}
 
@@ -1813,38 +1811,10 @@ void Mob::SendIllusionPacket(
 		new_drakkin_heritage = drakkin_heritage = CastToClient()->GetBaseHeritage();
 		new_drakkin_tattoo   = drakkin_tattoo   = CastToClient()->GetBaseTattoo();
 		new_drakkin_details  = drakkin_details  = CastToClient()->GetBaseDetails();
-		switch (race) {
-			case OGRE:
-				size = 9;
-				break;
-			case TROLL:
-				size = 8;
-				break;
-			case VAHSHIR:
-			case BARBARIAN:
-				size = 7;
-				break;
-			case HALF_ELF:
-			case WOOD_ELF:
-			case DARK_ELF:
-			case FROGLOK:
-				size = 5;
-				break;
-			case DWARF:
-				size = 4;
-				break;
-			case HALFLING:
-			case GNOME:
-				size = 3;
-				break;
-			default:
-				size = 6;
-				break;
-		}
 	}
 
 	// update internal values for mob
-	size             = (in_size <= 0.0f) ? GetSize() : in_size;
+	size             = (in_size <= 0.0f) ? GetRaceGenderDefaultHeight(race, gender) : in_size;
 	texture          = new_texture;
 	helmtexture      = new_helmtexture;
 	haircolor        = new_haircolor;
