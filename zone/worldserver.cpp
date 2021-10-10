@@ -1893,7 +1893,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		CZDialogueWindow_Struct* CZDW = (CZDialogueWindow_Struct*) pack->pBuffer;
 		uint8 update_type = CZDW->update_type;
 		int update_identifier = CZDW->update_identifier;
-		const char* message = CZDW->message;
+		std::string message = CZDW->message;
 		const char* client_name = CZDW->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);
