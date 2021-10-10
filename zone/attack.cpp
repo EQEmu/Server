@@ -90,10 +90,10 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = RuleB(Combat, Classic2HBAnimation) ? anim2HWeapon : anim2HSlashing;
 			break;
 		case EQ::item::ItemType2HPiercing: // 2H Piercing
-			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+			//if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
 				skillinuse = EQ::skills::Skill1HPiercing;
-			else
-				skillinuse = EQ::skills::Skill2HPiercing; // Voidd: TODO - Was 2HPiercing in classic and if not what Era? Velious?
+			//else
+				//skillinuse = EQ::skills::Skill2HPiercing; // Voidd: TODO - Was 2HPiercing in classic and if not what Era? Velious?
 			type = anim2HWeapon;
 			break;
 		case EQ::item::ItemTypeMartial:
@@ -121,7 +121,8 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 			type = anim1HWeapon;
 			break;
 		case EQ::skills::Skill2HBlunt: // 2H Blunt
-			type = anim2HSlashing; //anim2HWeapon Voidd: TODO - Rule for 2HS vs 2HW for Era specific?
+			//type = anim2HSlashing; //anim2HWeapon Voidd: TODO - Rule for 2HS vs 2HW for Era specific?
+			type = anim2HWeapon;
 			break;
 		case EQ::skills::Skill2HPiercing: // 2H Piercing
 			type = anim2HWeapon;
@@ -395,6 +396,12 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 		counter_parry = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
 		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
 	}
+
+	// If sitting you cannot avoid damage
+	if (defender->CastToClient()->IsSitting()) {
+		return false;
+	}
+
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
@@ -1659,8 +1666,8 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (!spell)
 		spell = SPELL_UNKNOWN;
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	char buffer[64] = { 0 };
+	snprintf(buffer, 63, "%d %d %d %d %s", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), killerMob ? killerMob->GetName() : "");
 	if (parse->EventPlayer(EVENT_DEATH, this, buffer, 0) != 0) {
 		if (GetHP() < 0) {
 			SetHP(0);
@@ -2058,7 +2065,11 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		std::string event_desc = StringFormat("Died in zoneid:%i instid:%i by '%s', spellid:%i, damage:%i", this->GetZoneID(), this->GetInstanceID(), killer_name, spell, damage);
 		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
 	}
-
+	
+	if (killerMob && strlen(caster_name) > 0 && strcmp(killerMob->GetName(), caster_name) == -1)
+	{
+		snprintf(buffer, 63, "%d %d %d %d %s", 0, damage, spell, static_cast<int>(attack_skill), caster_name);
+	}
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);
 	return true;
 }
@@ -2763,8 +2774,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	char buffer[64] = { 0 };
+	snprintf(buffer, 63, "%d %d %d %d %s", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), killer_mob ? killer_mob->GetName() : "");
 	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer, 0);
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
