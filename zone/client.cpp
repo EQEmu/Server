@@ -10095,12 +10095,12 @@ bool Client::CanPvP(Client *c) {
 	if(!WorldPVPUseTeamsBySizeBasedPVP(c))
 		return false;
 	
-	// Is SZ Ruleset turned on and is target on opposing deity (Good vs Evil)
-	if(!WorldPVPUseDeityBasedPVP(c))
-		return false;
-	
 	// Is Guild based ruleset turned on and is target on opposing guild
 	if(!WorldPVPUseGuildBasedPVP(c))
+		return false;
+	
+	// Is SZ Ruleset turned on and is target on opposing deity (Good vs Evil)
+	if(!WorldPVPUseDeityBasedPVP(c))
 		return false;
 
 	if(!PVPLevelDifference(c))
@@ -10148,7 +10148,7 @@ bool Client::PVPLevelDifference(Client *c)
 bool Client::WorldPVPUseGuildBasedPVP(Client *c)
 {
 	
-	if(!RuleI(World, PVPSettings) == 3)
+	if(RuleI(World, PVPSettings) != 3)
 		return true;
 	
 	if((GuildID() == c->GuildID()) && (IsInAGuild() && c->IsInAGuild()))
@@ -10164,7 +10164,7 @@ bool Client::WorldPVPUseGuildBasedPVP(Client *c)
 bool Client::WorldPVPUseTeamsBySizeBasedPVP(Client *c)
 {
 	
-	if(!RuleI(World, PVPSettings) == 2)
+	if(RuleI(World, PVPSettings) != 2)
 		return true;
 	
 	if(GetPVPRaceTeamBySize() == c->GetPVPRaceTeamBySize())
@@ -10180,7 +10180,7 @@ bool Client::WorldPVPUseTeamsBySizeBasedPVP(Client *c)
 bool Client::WorldPVPUseDeityBasedPVP(Client *c)
 {
 	
-	if(RuleI(World, PVPSettings) == 4)
+	if(RuleI(World, PVPSettings) != 4)
 		return true;
 	
 	if(GetAlignment() == c->GetAlignment())
@@ -10206,11 +10206,11 @@ int Client::WorldPVPMinLevel()
 				rule_min_level = 6;
 			break;
 			
-			case 2: // Vallon/Tallon Zek
+			case 2: // Vallon/Tallon Zek (Size)
 				rule_min_level = 6;
 			break;
 			
-			case 3: // Guild Rulesets (Custom)
+			case 3: // Vallon/Tallon Zek (Guild)
 				rule_min_level = 6;
 			break;
 			

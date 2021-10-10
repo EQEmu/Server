@@ -150,7 +150,30 @@ void Client::SendLogServer()
 	if(RuleB(Chat, EnableVoiceMacros))
 		l->enablevoicemacros = 1;
 
-	l->enable_pvp = (RuleI(World, PVPSettings));
+	switch(RuleI(World, PVPSettings)) 
+	{
+		case 1: // Rallos Zek
+			l->enable_pvp = 1;
+		break;
+		
+		case 2: // Tallon/Vallon Zek (Size)
+		case 3: // Tallon/Vallon Zek (Guild)
+			// Client has to think enable_pvp is set to 2 for Guild based to work using the PVPSettings
+			l->enable_pvp = 2;
+		break;
+		
+		case 4: // Sullon Zek
+			l->enable_pvp = 4;
+		break;
+				
+		case 6: // Discord
+			l->enable_pvp = 6;
+		break;
+		
+		default:
+			l->enable_pvp = RuleI(World, PVPSettings);
+		break;
+	}
 
 	if(RuleB(World, IsGMPetitionWindowEnabled))
 		l->enable_petition_wnd = 1;
