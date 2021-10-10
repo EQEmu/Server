@@ -2533,7 +2533,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				database.UpdateItemRecastTimestamps(
 				    CastToClient()->CharacterID(),
 					recast_type,
-			    	CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+					CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
 				);
 			}
 			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
