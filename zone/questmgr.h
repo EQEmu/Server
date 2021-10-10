@@ -290,6 +290,7 @@ public:
     static std::string GetZoneLongName(std::string zone_short_name);
     static std::string GetZoneLongNameByID(uint32 zone_id);
 	static std::string GetZoneShortName(uint32 zone_id);
+	void CrossZoneDialogueWindow(uint8 update_type, int update_identifier, const char* message, const char* client_name = "");
 	void CrossZoneLDoNUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 theme_id, int points = 1, const char* client_name = "");
 	void CrossZoneMarquee(uint8 update_type, int update_identifier, uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, const char* client_name = "");
 	void CrossZoneMessage(uint8 update_type, int update_identifier, uint32 type, const char* message, const char* client_name = "");
@@ -298,7 +299,8 @@ public:
 	void CrossZoneSignal(uint8 update_type, int update_identifier, uint32 signal, const char* client_name = "");
 	void CrossZoneSpell(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 spell_id, const char* client_name = "");
 	void CrossZoneTaskUpdate(uint8 update_type, uint8 update_subtype, int update_identifier, uint32 task_identifier, int task_subidentifier = -1, int update_count = 1, bool enforce_level_requirement = false, const char* client_name = "");
-	void WorldWideLDoNUpdate(uint8 update_type, uint32 theme_id, int points = 1, uint8 min_status = 0, uint8 max_status = 0);	
+	void WorldWideDialogueWindow(const char* message, uint8 min_status = 0, uint8 max_status = 0);
+	void WorldWideLDoNUpdate(uint8 update_type, uint32 theme_id, int points = 1, uint8 min_status = 0, uint8 max_status = 0);
 	void WorldWideMarquee(uint32 type, uint32 priority, uint32 fade_in, uint32 fade_out, uint32 duration, const char* message, uint8 min_status = 0, uint8 max_status = 0);
 	void WorldWideMessage(uint32 type, const char* message, uint8 min_status = 0, uint8 max_status = 0);
 	void WorldWideMove(uint8 update_type, const char* zone_short_name, uint16 instance_id = 0, uint8 min_status = 0, uint8 max_status = 0);

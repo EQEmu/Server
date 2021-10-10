@@ -227,24 +227,26 @@
 #define ServerOP_HotReloadQuests 0x4011
 #define ServerOP_UpdateSchedulerEvents 0x4012
 
-#define ServerOP_CZLDoNUpdate 0x4500
-#define ServerOP_CZMarquee 0x4501
-#define ServerOP_CZMessage 0x4502
-#define ServerOP_CZMove 0x4503
-#define ServerOP_CZSetEntityVariable 0x4504
-#define ServerOP_CZSignal 0x4505
-#define ServerOP_CZSpell 0x4506
-#define ServerOP_CZTaskUpdate 0x4507
-#define ServerOP_CZClientMessageString 0x4508
+#define ServerOP_CZDialogueWindow 0x4500
+#define ServerOP_CZLDoNUpdate 0x4501
+#define ServerOP_CZMarquee 0x4502
+#define ServerOP_CZMessage 0x4503
+#define ServerOP_CZMove 0x4504
+#define ServerOP_CZSetEntityVariable 0x4505
+#define ServerOP_CZSignal 0x4506
+#define ServerOP_CZSpell 0x4507
+#define ServerOP_CZTaskUpdate 0x4508
+#define ServerOP_CZClientMessageString 0x4509
 
-#define ServerOP_WWLDoNUpdate 0x4750
-#define ServerOP_WWMarquee 0x4751
-#define ServerOP_WWMessage 0x4752
-#define ServerOP_WWMove 0x4753
-#define ServerOP_WWSetEntityVariable 0x4754
-#define ServerOP_WWSignal 0x4755
-#define ServerOP_WWSpell 0x4756
-#define ServerOP_WWTaskUpdate 0x4757
+#define ServerOP_WWDialogueWindow 0x4750
+#define ServerOP_WWLDoNUpdate 0x4751
+#define ServerOP_WWMarquee 0x4752
+#define ServerOP_WWMessage 0x4753
+#define ServerOP_WWMove 0x4754
+#define ServerOP_WWSetEntityVariable 0x4755
+#define ServerOP_WWSignal 0x4756
+#define ServerOP_WWSpell 0x4757
+#define ServerOP_WWTaskUpdate 0x4758
 
 /**
  * QueryServer
@@ -1440,6 +1442,13 @@ struct CZClientMessageString_Struct {
 	char   args[1]; // null delimited
 };
 
+struct CZDialogueWindow_Struct {
+	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
+	int update_identifier; // Character ID, Group ID, Raid ID, Guild ID, or Expedition ID based on update type, 0 for Character Name
+	char message[4096];
+	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
 struct CZLDoNUpdate_Struct {
 	uint8 update_type; // 0 - Character, 1 - Group, 2 - Raid, 3 - Guild, 4 - Expedition, 5 - Character Name
 	uint8 update_subtype; // 0 - Loss, 1 - Points, 2 - Win
@@ -1510,6 +1519,12 @@ struct CZTaskUpdate_Struct {
 	int update_count; // Only used by Activity Update, else 1
 	bool enforce_level_requirement; // Only used by Assign Task
 	char client_name[64]; // Only used by Character Name Type, else empty
+};
+
+struct WWDialogueWindow_Struct {
+	char message[4096];
+	uint8 min_status;
+	uint8 max_status;
 };
 
 struct WWLDoNUpdate_Struct {
