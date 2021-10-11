@@ -1239,7 +1239,8 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	{
 		QSLink.SendPacket(pack);
 		break;
-	}	
+	}
+	case ServerOP_CZDialogueWindow:
 	case ServerOP_CZLDoNUpdate:
 	case ServerOP_CZMarquee:
 	case ServerOP_CZMessage:
@@ -1248,6 +1249,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_CZSignal:
 	case ServerOP_CZSpell:
 	case ServerOP_CZTaskUpdate:
+	case ServerOP_WWDialogueWindow:
 	case ServerOP_WWLDoNUpdate:
 	case ServerOP_WWMarquee:
 	case ServerOP_WWMessage:

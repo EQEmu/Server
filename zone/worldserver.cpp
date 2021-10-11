@@ -56,6 +56,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "zone_reload.h"
 #include "../common/shared_tasks.h"
 #include "shared_task_zone_messaging.h"
+#include "dialogue_window.h"
 
 extern EntityList entity_list;
 extern Zone* zone;
@@ -1887,25 +1888,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		break;
 	}
-	case ServerOP_CZSpell:
+	case ServerOP_CZDialogueWindow:
 	{
-		CZSpell_Struct* CZS = (CZSpell_Struct*) pack->pBuffer;
-		uint8 update_type = CZS->update_type;
-		uint8 update_subtype = CZS->update_subtype;
-		int update_identifier = CZS->update_identifier;
-		uint32 spell_id = CZS->spell_id;
-		const char* client_name = CZS->client_name;
+		CZDialogueWindow_Struct* CZDW = (CZDialogueWindow_Struct*) pack->pBuffer;
+		uint8 update_type = CZDW->update_type;
+		int update_identifier = CZDW->update_identifier;
+		std::string message = CZDW->message;
+		const char* client_name = CZDW->client_name;
 		if (update_type == CZUpdateType_Character) {
 			auto client = entity_list.GetClientByCharID(update_identifier);
 			if (client) {
-				switch (update_subtype) {
-					case CZSpellUpdateSubtype_Cast:
-						client->SpellFinished(spell_id, client);
-						break;
-					case CZSpellUpdateSubtype_Remove:
-						client->BuffFadeBySpellID(spell_id);
-						break;
-				}
+				DialogueWindow::Render(client, message);
 			}
 		} else if (update_type == CZUpdateType_Group) {
 			auto client_group = entity_list.GetGroupByID(update_identifier);
@@ -1913,143 +1906,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
 					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 						auto group_member = client_group->members[member_index]->CastToClient();
-						switch (update_subtype) {
-							case CZSpellUpdateSubtype_Cast:
-								group_member->SpellFinished(spell_id, group_member);
-								break;
-							case CZSpellUpdateSubtype_Remove:
-								group_member->BuffFadeBySpellID(spell_id);
-								break;
-						}
-					}
-				}
-			}
-		} else if (update_type == CZUpdateType_Raid) {
-			auto client_raid = entity_list.GetRaidByID(update_identifier);
-			if (client_raid) {
-				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
-						auto raid_member = client_raid->members[member_index].member->CastToClient();						
-						switch (update_subtype) {
-							case CZSpellUpdateSubtype_Cast:
-								raid_member->SpellFinished(spell_id, raid_member);
-								break;
-							case CZSpellUpdateSubtype_Remove:
-								raid_member->BuffFadeBySpellID(spell_id);
-								break;
-						}
-					}
-				}
-			}
-		} else if (update_type == CZUpdateType_Guild) {
-			for (auto &client: entity_list.GetClientList()) {
-				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
-					switch (update_subtype) {
-						case CZSpellUpdateSubtype_Cast:
-							client.second->SpellFinished(spell_id, client.second);
-							break;
-						case CZSpellUpdateSubtype_Remove:
-							client.second->BuffFadeBySpellID(spell_id);
-							break;
-					}
-				}
-			}
-		} else if (update_type == CZUpdateType_Expedition) {
-			for (auto &client: entity_list.GetClientList()) {			
-				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
-					switch (update_subtype) {
-						case CZSpellUpdateSubtype_Cast:
-							client.second->SpellFinished(spell_id, client.second);
-							break;
-						case CZSpellUpdateSubtype_Remove:
-							client.second->BuffFadeBySpellID(spell_id);
-							break;
-					}
-				}
-			}
-		} else if (update_type == CZUpdateType_ClientName) {
-			auto client = entity_list.GetClientByName(client_name);
-			if (client) {
-				switch (update_subtype) {
-					case CZSpellUpdateSubtype_Cast:
-						client->SpellFinished(spell_id, client);
-						break;
-					case CZSpellUpdateSubtype_Remove:
-						client->BuffFadeBySpellID(spell_id);
-						break;
-				}
-			}
-		}
-		break;
-	}
-	case ServerOP_CZTaskUpdate:
-	{
-		CZTaskUpdate_Struct* CZTU = (CZTaskUpdate_Struct*) pack->pBuffer;
-		uint8 update_type = CZTU->update_type;
-		uint8 update_subtype = CZTU->update_subtype;
-		int update_identifier = CZTU->update_identifier;
-		uint32 task_identifier = CZTU->task_identifier;
-		int task_subidentifier = CZTU->task_subidentifier;
-		int update_count = CZTU->update_count;
-		bool enforce_level_requirement = CZTU->enforce_level_requirement;
-		const char* client_name = CZTU->client_name;
-		if (update_type == CZUpdateType_Character) {
-			auto client = entity_list.GetClientByCharID(update_identifier);
-			if (client) {
-				switch (update_subtype) {
-					case CZTaskUpdateSubtype_ActivityReset:
-						client->ResetTaskActivity(task_identifier, task_subidentifier);
-						break;
-					case CZTaskUpdateSubtype_ActivityUpdate:
-						client->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-						break;
-					case CZTaskUpdateSubtype_AssignTask:
-						client->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-						break;
-					case CZTaskUpdateSubtype_DisableTask:
-						client->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-						break;
-					case CZTaskUpdateSubtype_EnableTask:
-						client->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-						break;
-					case CZTaskUpdateSubtype_FailTask:
-						client->FailTask(task_identifier);
-						break;
-					case CZTaskUpdateSubtype_RemoveTask:
-						client->RemoveTaskByTaskID(task_identifier);
-						break;
-				}
-			}
-			break;
-		} else if (update_type == CZUpdateType_Group) {
-			auto client_group = entity_list.GetGroupByID(update_identifier);
-			if (client_group) {
-				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
-					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
-						auto group_member = client_group->members[member_index]->CastToClient();
-						switch (update_subtype) {
-							case CZTaskUpdateSubtype_ActivityReset:
-								group_member->ResetTaskActivity(task_identifier, task_subidentifier);
-								break;
-							case CZTaskUpdateSubtype_ActivityUpdate:
-								group_member->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-								break;
-							case CZTaskUpdateSubtype_AssignTask:
-								group_member->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-								break;
-							case CZTaskUpdateSubtype_DisableTask:
-								group_member->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-								break;
-							case CZTaskUpdateSubtype_EnableTask:
-								group_member->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-								break;
-							case CZTaskUpdateSubtype_FailTask:
-								group_member->FailTask(task_identifier);
-								break;
-							case CZTaskUpdateSubtype_RemoveTask:
-								group_member->RemoveTaskByTaskID(task_identifier);
-								break;
-						}
+						DialogueWindow::Render(group_member, message);
 					}
 				}
 			}
@@ -2059,114 +1916,26 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
 					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
 						auto raid_member = client_raid->members[member_index].member->CastToClient();
-						switch (update_subtype) {
-							case CZTaskUpdateSubtype_ActivityReset:
-								raid_member->ResetTaskActivity(task_identifier, task_subidentifier);
-								break;
-							case CZTaskUpdateSubtype_ActivityUpdate:
-								raid_member->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-								break;
-							case CZTaskUpdateSubtype_AssignTask:
-								raid_member->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-								break;
-							case CZTaskUpdateSubtype_DisableTask:
-								raid_member->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-								break;
-							case CZTaskUpdateSubtype_EnableTask:
-								raid_member->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-								break;
-							case CZTaskUpdateSubtype_FailTask:
-								raid_member->FailTask(task_identifier);
-								break;
-							case CZTaskUpdateSubtype_RemoveTask:
-								raid_member->RemoveTaskByTaskID(task_identifier);
-								break;
-						}
+						DialogueWindow::Render(raid_member, message);
 					}
 				}
 			}
 		} else if (update_type == CZUpdateType_Guild) {
 			for (auto &client: entity_list.GetClientList()) {
 				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
-					switch (update_subtype) {
-						case CZTaskUpdateSubtype_ActivityReset:
-							client.second->ResetTaskActivity(task_identifier, task_subidentifier);
-							break;
-						case CZTaskUpdateSubtype_ActivityUpdate:
-							client.second->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-							break;
-						case CZTaskUpdateSubtype_AssignTask:
-							client.second->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-							break;
-						case CZTaskUpdateSubtype_DisableTask:
-							client.second->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-							break;
-						case CZTaskUpdateSubtype_EnableTask:
-							client.second->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-							break;
-						case CZTaskUpdateSubtype_FailTask:
-							client.second->FailTask(task_identifier);
-							break;
-						case CZTaskUpdateSubtype_RemoveTask:
-							client.second->RemoveTaskByTaskID(task_identifier);
-							break;
-					}
+					DialogueWindow::Render(client.second, message);
 				}
-			}			
+			}
 		} else if (update_type == CZUpdateType_Expedition) {
 			for (auto &client: entity_list.GetClientList()) {			
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
-					switch (update_subtype) {
-						case CZTaskUpdateSubtype_ActivityReset:
-							client.second->ResetTaskActivity(task_identifier, task_subidentifier);
-							break;
-						case CZTaskUpdateSubtype_ActivityUpdate:
-							client.second->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-							break;
-						case CZTaskUpdateSubtype_AssignTask:
-							client.second->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-							break;
-						case CZTaskUpdateSubtype_DisableTask:
-							client.second->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-							break;
-						case CZTaskUpdateSubtype_EnableTask:
-							client.second->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-							break;
-						case CZTaskUpdateSubtype_FailTask:
-							client.second->FailTask(task_identifier);
-							break;
-						case CZTaskUpdateSubtype_RemoveTask:
-							client.second->RemoveTaskByTaskID(task_identifier);
-							break;
-					}
+					DialogueWindow::Render(client.second, message);
 				}
 			}
 		} else if (update_type == CZUpdateType_ClientName) {
 			auto client = entity_list.GetClientByName(client_name);
 			if (client) {
-				switch (update_subtype) {
-					case CZTaskUpdateSubtype_ActivityReset:
-						client->ResetTaskActivity(task_identifier, task_subidentifier);
-						break;
-					case CZTaskUpdateSubtype_ActivityUpdate:
-						client->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
-						break;
-					case CZTaskUpdateSubtype_AssignTask:
-						client->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
-						break;
-					case CZTaskUpdateSubtype_DisableTask:
-						client->DisableTask(1, reinterpret_cast<int *>(task_identifier));
-						break;
-					case CZTaskUpdateSubtype_EnableTask:
-						client->EnableTask(1, reinterpret_cast<int *>(task_identifier));
-						break;
-					case CZTaskUpdateSubtype_FailTask:
-						client->FailTask(task_identifier);
-						break;
-					case CZTaskUpdateSubtype_RemoveTask:
-						client->RemoveTaskByTaskID(task_identifier);
-						break;
-				}
+				DialogueWindow::Render(client, message);
 			}
 		}
 		break;
@@ -2616,6 +2385,303 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto npc = entity_list.GetNPCByNPCTypeID(update_identifier);
 			if (npc) {
 				npc->SignalNPC(signal);
+			}
+		}
+		break;
+	}
+	case ServerOP_CZSpell:
+	{
+		CZSpell_Struct* CZS = (CZSpell_Struct*) pack->pBuffer;
+		uint8 update_type = CZS->update_type;
+		uint8 update_subtype = CZS->update_subtype;
+		int update_identifier = CZS->update_identifier;
+		uint32 spell_id = CZS->spell_id;
+		const char* client_name = CZS->client_name;
+		if (update_type == CZUpdateType_Character) {
+			auto client = entity_list.GetClientByCharID(update_identifier);
+			if (client) {
+				switch (update_subtype) {
+					case CZSpellUpdateSubtype_Cast:
+						client->SpellFinished(spell_id, client);
+						break;
+					case CZSpellUpdateSubtype_Remove:
+						client->BuffFadeBySpellID(spell_id);
+						break;
+				}
+			}
+		} else if (update_type == CZUpdateType_Group) {
+			auto client_group = entity_list.GetGroupByID(update_identifier);
+			if (client_group) {
+				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+						auto group_member = client_group->members[member_index]->CastToClient();
+						switch (update_subtype) {
+							case CZSpellUpdateSubtype_Cast:
+								group_member->SpellFinished(spell_id, group_member);
+								break;
+							case CZSpellUpdateSubtype_Remove:
+								group_member->BuffFadeBySpellID(spell_id);
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_Raid) {
+			auto client_raid = entity_list.GetRaidByID(update_identifier);
+			if (client_raid) {
+				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+						auto raid_member = client_raid->members[member_index].member->CastToClient();						
+						switch (update_subtype) {
+							case CZSpellUpdateSubtype_Cast:
+								raid_member->SpellFinished(spell_id, raid_member);
+								break;
+							case CZSpellUpdateSubtype_Remove:
+								raid_member->BuffFadeBySpellID(spell_id);
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_Guild) {
+			for (auto &client: entity_list.GetClientList()) {
+				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
+					switch (update_subtype) {
+						case CZSpellUpdateSubtype_Cast:
+							client.second->SpellFinished(spell_id, client.second);
+							break;
+						case CZSpellUpdateSubtype_Remove:
+							client.second->BuffFadeBySpellID(spell_id);
+							break;
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_Expedition) {
+			for (auto &client: entity_list.GetClientList()) {			
+				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
+					switch (update_subtype) {
+						case CZSpellUpdateSubtype_Cast:
+							client.second->SpellFinished(spell_id, client.second);
+							break;
+						case CZSpellUpdateSubtype_Remove:
+							client.second->BuffFadeBySpellID(spell_id);
+							break;
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_ClientName) {
+			auto client = entity_list.GetClientByName(client_name);
+			if (client) {
+				switch (update_subtype) {
+					case CZSpellUpdateSubtype_Cast:
+						client->SpellFinished(spell_id, client);
+						break;
+					case CZSpellUpdateSubtype_Remove:
+						client->BuffFadeBySpellID(spell_id);
+						break;
+				}
+			}
+		}
+		break;
+	}
+	case ServerOP_CZTaskUpdate:
+	{
+		CZTaskUpdate_Struct* CZTU = (CZTaskUpdate_Struct*) pack->pBuffer;
+		uint8 update_type = CZTU->update_type;
+		uint8 update_subtype = CZTU->update_subtype;
+		int update_identifier = CZTU->update_identifier;
+		uint32 task_identifier = CZTU->task_identifier;
+		int task_subidentifier = CZTU->task_subidentifier;
+		int update_count = CZTU->update_count;
+		bool enforce_level_requirement = CZTU->enforce_level_requirement;
+		const char* client_name = CZTU->client_name;
+		if (update_type == CZUpdateType_Character) {
+			auto client = entity_list.GetClientByCharID(update_identifier);
+			if (client) {
+				switch (update_subtype) {
+					case CZTaskUpdateSubtype_ActivityReset:
+						client->ResetTaskActivity(task_identifier, task_subidentifier);
+						break;
+					case CZTaskUpdateSubtype_ActivityUpdate:
+						client->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+						break;
+					case CZTaskUpdateSubtype_AssignTask:
+						client->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+						break;
+					case CZTaskUpdateSubtype_DisableTask:
+						client->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+						break;
+					case CZTaskUpdateSubtype_EnableTask:
+						client->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+						break;
+					case CZTaskUpdateSubtype_FailTask:
+						client->FailTask(task_identifier);
+						break;
+					case CZTaskUpdateSubtype_RemoveTask:
+						client->RemoveTaskByTaskID(task_identifier);
+						break;
+				}
+			}
+			break;
+		} else if (update_type == CZUpdateType_Group) {
+			auto client_group = entity_list.GetGroupByID(update_identifier);
+			if (client_group) {
+				for (int member_index = 0; member_index < MAX_GROUP_MEMBERS; member_index++) {
+					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
+						auto group_member = client_group->members[member_index]->CastToClient();
+						switch (update_subtype) {
+							case CZTaskUpdateSubtype_ActivityReset:
+								group_member->ResetTaskActivity(task_identifier, task_subidentifier);
+								break;
+							case CZTaskUpdateSubtype_ActivityUpdate:
+								group_member->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+								break;
+							case CZTaskUpdateSubtype_AssignTask:
+								group_member->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+								break;
+							case CZTaskUpdateSubtype_DisableTask:
+								group_member->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+								break;
+							case CZTaskUpdateSubtype_EnableTask:
+								group_member->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+								break;
+							case CZTaskUpdateSubtype_FailTask:
+								group_member->FailTask(task_identifier);
+								break;
+							case CZTaskUpdateSubtype_RemoveTask:
+								group_member->RemoveTaskByTaskID(task_identifier);
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_Raid) {
+			auto client_raid = entity_list.GetRaidByID(update_identifier);
+			if (client_raid) {
+				for (int member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
+					if (client_raid->members[member_index].member && client_raid->members[member_index].member->IsClient()) {
+						auto raid_member = client_raid->members[member_index].member->CastToClient();
+						switch (update_subtype) {
+							case CZTaskUpdateSubtype_ActivityReset:
+								raid_member->ResetTaskActivity(task_identifier, task_subidentifier);
+								break;
+							case CZTaskUpdateSubtype_ActivityUpdate:
+								raid_member->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+								break;
+							case CZTaskUpdateSubtype_AssignTask:
+								raid_member->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+								break;
+							case CZTaskUpdateSubtype_DisableTask:
+								raid_member->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+								break;
+							case CZTaskUpdateSubtype_EnableTask:
+								raid_member->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+								break;
+							case CZTaskUpdateSubtype_FailTask:
+								raid_member->FailTask(task_identifier);
+								break;
+							case CZTaskUpdateSubtype_RemoveTask:
+								raid_member->RemoveTaskByTaskID(task_identifier);
+								break;
+						}
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_Guild) {
+			for (auto &client: entity_list.GetClientList()) {
+				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
+					switch (update_subtype) {
+						case CZTaskUpdateSubtype_ActivityReset:
+							client.second->ResetTaskActivity(task_identifier, task_subidentifier);
+							break;
+						case CZTaskUpdateSubtype_ActivityUpdate:
+							client.second->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+							break;
+						case CZTaskUpdateSubtype_AssignTask:
+							client.second->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+							break;
+						case CZTaskUpdateSubtype_DisableTask:
+							client.second->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+							break;
+						case CZTaskUpdateSubtype_EnableTask:
+							client.second->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+							break;
+						case CZTaskUpdateSubtype_FailTask:
+							client.second->FailTask(task_identifier);
+							break;
+						case CZTaskUpdateSubtype_RemoveTask:
+							client.second->RemoveTaskByTaskID(task_identifier);
+							break;
+					}
+				}
+			}			
+		} else if (update_type == CZUpdateType_Expedition) {
+			for (auto &client: entity_list.GetClientList()) {			
+				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
+					switch (update_subtype) {
+						case CZTaskUpdateSubtype_ActivityReset:
+							client.second->ResetTaskActivity(task_identifier, task_subidentifier);
+							break;
+						case CZTaskUpdateSubtype_ActivityUpdate:
+							client.second->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+							break;
+						case CZTaskUpdateSubtype_AssignTask:
+							client.second->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+							break;
+						case CZTaskUpdateSubtype_DisableTask:
+							client.second->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+							break;
+						case CZTaskUpdateSubtype_EnableTask:
+							client.second->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+							break;
+						case CZTaskUpdateSubtype_FailTask:
+							client.second->FailTask(task_identifier);
+							break;
+						case CZTaskUpdateSubtype_RemoveTask:
+							client.second->RemoveTaskByTaskID(task_identifier);
+							break;
+					}
+				}
+			}
+		} else if (update_type == CZUpdateType_ClientName) {
+			auto client = entity_list.GetClientByName(client_name);
+			if (client) {
+				switch (update_subtype) {
+					case CZTaskUpdateSubtype_ActivityReset:
+						client->ResetTaskActivity(task_identifier, task_subidentifier);
+						break;
+					case CZTaskUpdateSubtype_ActivityUpdate:
+						client->UpdateTaskActivity(task_identifier, task_subidentifier, update_count);
+						break;
+					case CZTaskUpdateSubtype_AssignTask:
+						client->AssignTask(task_identifier, task_subidentifier, enforce_level_requirement);
+						break;
+					case CZTaskUpdateSubtype_DisableTask:
+						client->DisableTask(1, reinterpret_cast<int *>(task_identifier));
+						break;
+					case CZTaskUpdateSubtype_EnableTask:
+						client->EnableTask(1, reinterpret_cast<int *>(task_identifier));
+						break;
+					case CZTaskUpdateSubtype_FailTask:
+						client->FailTask(task_identifier);
+						break;
+					case CZTaskUpdateSubtype_RemoveTask:
+						client->RemoveTaskByTaskID(task_identifier);
+						break;
+				}
+			}
+		}
+		break;
+	}
+	case ServerOP_WWDialogueWindow:
+	{
+		WWDialogueWindow_Struct* WWDW = (WWDialogueWindow_Struct*) pack->pBuffer;
+		std::string message = WWDW->message;
+		uint8 min_status = WWDW->min_status;
+		uint8 max_status = WWDW->max_status;
+		for (auto &client : entity_list.GetClientList()) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+				DialogueWindow::Render(client.second, message);
 			}
 		}
 		break;
