@@ -1685,10 +1685,16 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
+
+	Mob* m_pet = GetPet();
 	SetPet(0);
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
+
+	if (m_pet && m_pet->IsCharmed()) {
+		m_pet->BuffFadeByEffect(SE_Charm);
+	}
 
 	if (GetMerc()) {
 		GetMerc()->Suspend();
