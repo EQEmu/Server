@@ -2179,6 +2179,37 @@ void lua_cross_zone_cast_spell_by_client_name(const char* client_name, uint32 sp
 	quest_manager.CrossZoneSpell(update_type, update_subtype, update_identifier, spell_id, client_name);
 }
 
+void lua_cross_zone_dialogue_window_by_char_id(int character_id, const char* message) {
+	uint8 update_type = CZUpdateType_Character;
+	quest_manager.CrossZoneDialogueWindow(update_type, character_id, message);
+}
+
+void lua_cross_zone_dialogue_window_by_group_id(int group_id, const char* message) {
+	uint8 update_type = CZUpdateType_Group;
+	quest_manager.CrossZoneDialogueWindow(update_type, group_id, message);
+}
+
+void lua_cross_zone_dialogue_window_by_raid_id(int raid_id, const char* message) {
+	uint8 update_type = CZUpdateType_Raid;
+	quest_manager.CrossZoneDialogueWindow(update_type, raid_id, message);
+}
+
+void lua_cross_zone_dialogue_window_by_guild_id(int guild_id, const char* message) {
+	uint8 update_type = CZUpdateType_Guild;
+	quest_manager.CrossZoneDialogueWindow(update_type, guild_id, message);
+}
+
+void lua_cross_zone_dialogue_window_by_expedition_id(uint32 expedition_id, const char* message) {
+	uint8 update_type = CZUpdateType_Expedition;
+	quest_manager.CrossZoneDialogueWindow(update_type, expedition_id, message);
+}
+
+void lua_cross_zone_dialogue_window_by_client_name(const char* client_name, const char* message) {
+	uint8 update_type = CZUpdateType_ClientName;
+	int update_identifier = 0;
+	quest_manager.CrossZoneDialogueWindow(update_type, update_identifier, message, client_name);
+}
+
 void lua_cross_zone_disable_task_by_char_id(int character_id, uint32 task_id) {
 	uint8 update_type = CZUpdateType_Character;
 	uint8 update_subtype = CZTaskUpdateSubtype_DisableTask;
@@ -2880,6 +2911,18 @@ void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status) {
 void lua_world_wide_cast_spell(uint32 spell_id, uint8 min_status, uint8 max_status) {
 	uint8 update_type = WWSpellUpdateType_Cast;
 	quest_manager.WorldWideSpell(update_type, spell_id, min_status, max_status);
+}
+
+void lua_world_wide_dialogue_window(const char* message) {
+	quest_manager.WorldWideDialogueWindow(message);
+}
+
+void lua_world_wide_dialogue_window(const char* message, uint8 min_status) {
+	quest_manager.WorldWideDialogueWindow(message, min_status);
+}
+
+void lua_world_wide_dialogue_window(const char* message, uint8 min_status, uint8 max_status) {
+	quest_manager.WorldWideDialogueWindow(message, min_status, max_status);
 }
 
 void lua_world_wide_disable_task(uint32 task_id) {
@@ -3662,6 +3705,12 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_cast_spell_by_guild_id", &lua_cross_zone_cast_spell_by_guild_id),
 		luabind::def("cross_zone_cast_spell_by_expedition_id", &lua_cross_zone_cast_spell_by_expedition_id),
 		luabind::def("cross_zone_cast_spell_by_client_name", &lua_cross_zone_cast_spell_by_client_name),
+		luabind::def("cross_zone_dialogue_window_by_char_id", &lua_cross_zone_dialogue_window_by_char_id),
+		luabind::def("cross_zone_dialogue_window_by_group_id", &lua_cross_zone_dialogue_window_by_group_id),
+		luabind::def("cross_zone_dialogue_window_by_raid_id", &lua_cross_zone_dialogue_window_by_raid_id),
+		luabind::def("cross_zone_dialogue_window_by_guild_id", &lua_cross_zone_dialogue_window_by_guild_id),
+		luabind::def("cross_zone_dialogue_window_by_expedition_id", &lua_cross_zone_dialogue_window_by_expedition_id),
+		luabind::def("cross_zone_dialogue_window_by_client_name", &lua_cross_zone_dialogue_window_by_client_name),
 		luabind::def("cross_zone_disable_task_by_char_id", &lua_cross_zone_disable_task_by_char_id),
 		luabind::def("cross_zone_disable_task_by_group_id", &lua_cross_zone_disable_task_by_group_id),
 		luabind::def("cross_zone_disable_task_by_raid_id", &lua_cross_zone_disable_task_by_raid_id),
@@ -3767,6 +3816,9 @@ luabind::scope lua_register_general() {
 		luabind::def("world_wide_cast_spell", (void(*)(uint32))&lua_world_wide_cast_spell),
 		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8))&lua_world_wide_cast_spell),
 		luabind::def("world_wide_cast_spell", (void(*)(uint32,uint8,uint8))&lua_world_wide_cast_spell),
+		luabind::def("world_wide_dialogue_window", (void(*)(const char*))&lua_world_wide_dialogue_window),
+		luabind::def("world_wide_dialogue_window", (void(*)(const char*,uint8))&lua_world_wide_dialogue_window),
+		luabind::def("world_wide_dialogue_window", (void(*)(const char*,uint8,uint8))&lua_world_wide_dialogue_window),
 		luabind::def("world_wide_disable_task", (void(*)(uint32))&lua_world_wide_disable_task),
 		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8))&lua_world_wide_disable_task),
 		luabind::def("world_wide_disable_task", (void(*)(uint32,uint8,uint8))&lua_world_wide_disable_task),

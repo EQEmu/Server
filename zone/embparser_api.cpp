@@ -5806,6 +5806,91 @@ XS(XS__crosszonecastspellbyclientname) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__crosszonedialoguewindowbycharid);
+XS(XS__crosszonedialoguewindowbycharid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbycharid(int character_id, string message)");
+	{
+		uint8 update_type = CZUpdateType_Character;
+		int character_id = (int) SvIV(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, character_id, message);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonedialoguewindowbygroupid);
+XS(XS__crosszonedialoguewindowbygroupid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbygroupid(int group_id, string message)");
+	{
+		uint8 update_type = CZUpdateType_Group;
+		int group_id = (int) SvIV(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, group_id, message);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonedialoguewindowbyraidid);
+XS(XS__crosszonedialoguewindowbyraidid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyraidid(int raid_id, string message)");
+	{
+		uint8 update_type = CZUpdateType_Raid;
+		int raid_id = (int) SvIV(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, raid_id, message);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonedialoguewindowbyguildid);
+XS(XS__crosszonedialoguewindowbyguildid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyguildid(int guild_id, string message)");
+	{
+		uint8 update_type = CZUpdateType_Guild;
+		int guild_id = (int) SvIV(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, guild_id, message);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonedialoguewindowbyexpeditionid);
+XS(XS__crosszonedialoguewindowbyexpeditionid) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyexpeditionid(uint32 expedition_id, string message)");
+	{
+		uint8 update_type = CZUpdateType_Expedition;
+		uint32 expedition_id = (uint32) SvUV(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, expedition_id, message);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS__crosszonedialoguewindowbyclientname);
+XS(XS__crosszonedialoguewindowbyclientname) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: quest::crosszonedialoguewindowbyclientname(const char* client_name, string message)");
+	{
+		uint8 update_type = CZUpdateType_ClientName;
+		int update_identifier = 0;
+		const char* client_name = (const char*) SvPV_nolen(ST(0));
+		const char* message = (const char*) SvPV_nolen(ST(1));
+		quest_manager.CrossZoneDialogueWindow(update_type, update_identifier, message, client_name);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS__crosszonedisabletaskbycharid);
 XS(XS__crosszonedisabletaskbycharid) {
 	dXSARGS;
@@ -7225,6 +7310,26 @@ XS(XS__worldwidecastspell) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS__worldwidedialoguewindow);
+XS(XS__worldwidedialoguewindow) {
+	dXSARGS;
+	if (items < 1 || items > 3)
+		Perl_croak(aTHX_ "Usage: quest::worldwidedialoguewindow(string message, [uint8 min_status = 0, uint8 max_status = 0])");
+	{
+		const char* message = (const char*) SvPV_nolen(ST(0));
+		uint8 min_status = 0;
+		uint8 max_status = 0;
+		if (items == 2)
+			min_status = (uint8)SvUV(ST(1));
+
+		if (items == 3)
+			max_status = (uint8)SvUV(ST(2));
+
+		quest_manager.WorldWideDialogueWindow(message, min_status, max_status);
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS__worldwidedisabletask);
 XS(XS__worldwidedisabletask) {
 	dXSARGS;
@@ -7791,6 +7896,12 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "crosszonecastspellbyguildid"), XS__crosszonecastspellbyguildid, file);
 	newXS(strcpy(buf, "crosszonecastspellbyexpeditionid"), XS__crosszonecastspellbyexpeditionid, file);
 	newXS(strcpy(buf, "crosszonecastspellbyclientname"), XS__crosszonecastspellbyclientname, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbycharid"), XS__crosszonedialoguewindowbycharid, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbygroupid"), XS__crosszonedialoguewindowbygroupid, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbyraidid"), XS__crosszonedialoguewindowbyraidid, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbyguildid"), XS__crosszonedialoguewindowbyguildid, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbyexpeditionid"), XS__crosszonedialoguewindowbyexpeditionid, file);
+	newXS(strcpy(buf, "crosszonedialoguewindowbyclientname"), XS__crosszonedialoguewindowbyclientname, file);
 	newXS(strcpy(buf, "crosszonedisabletaskbycharid"), XS__crosszonedisabletaskbycharid, file);
 	newXS(strcpy(buf, "crosszonedisabletaskbygroupid"), XS__crosszonedisabletaskbygroupid, file);
 	newXS(strcpy(buf, "crosszonedisabletaskbyraidid"), XS__crosszonedisabletaskbyraidid, file);
@@ -7875,6 +7986,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "worldwideaddldonpoints"), XS__worldwideaddldonpoints, file);
 	newXS(strcpy(buf, "worldwideaddldonwin"), XS__worldwideaddldonwin, file);
 	newXS(strcpy(buf, "worldwidecastspell"), XS__worldwidecastspell, file);
+	newXS(strcpy(buf, "worldwidedialoguewindow"), XS__worldwidedialoguewindow, file);
 	newXS(strcpy(buf, "worldwidedisabletask"), XS__worldwidedisabletask, file);
 	newXS(strcpy(buf, "worldwideenabletask"), XS__worldwideenabletask, file);
 	newXS(strcpy(buf, "worldwidefailtask"), XS__worldwidefailtask, file);
