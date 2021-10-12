@@ -406,9 +406,6 @@ Mob::Mob(
 	roamer = false;
 	rooted = false;
 	charmed = false;
-	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
-		viral_spells[i] = 0;
-	}
 
 	weaponstance.enabled = false;
 	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied

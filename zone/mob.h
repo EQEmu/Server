@@ -1520,7 +1520,6 @@ protected:
 	bool silenced;
 	bool amnesiad;
 	bool inWater; // Set to true or false by Water Detection code if enabled by rules
-	uint16 viral_spells[MAX_SPELL_TRIGGER*2]; // Stores the spell ids of the viruses on target and caster ids
 	bool offhand;
 	bool has_shieldequiped;
 	bool has_twohandbluntequiped;
