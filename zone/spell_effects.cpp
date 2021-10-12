@@ -46,7 +46,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int32 duration_override)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	EQ::ItemInstance *SummonedItem=nullptr;
@@ -251,7 +251,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 					//handles AAs and what not...
 					if(caster) {
-						dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+						if (reflect_effectiveness) {
+							dmg = caster->GetActReflectedSpellDamage(spell_id, (int32)(spells[spell_id].base[i] * partial / 100), reflect_effectiveness);
+						}
+						else {
+							dmg = caster->GetActSpellDamage(spell_id, dmg, this);
+						}
 						caster->ResourceTap(-dmg, spell_id);
 					}
 

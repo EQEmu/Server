@@ -1672,6 +1672,17 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->ZoneSuspendMinion = base1;
 			break;
 
+
+		case SE_Reflect:
+
+			if (newbon->reflect[SBIndex::REFLECT_CHANCE] < base1) {
+				newbon->reflect[SBIndex::REFLECT_CHANCE] = base1;
+			}
+			if (newbon->reflect[SBIndex::REFLECT_RESISTANCE_MOD] < base2) {
+				newbon->reflect[SBIndex::REFLECT_RESISTANCE_MOD] = base2;
+			}
+			break;
+
 		case SE_SpellDamageShield:
 			newbon->SpellDamageShield += base1;
 			break;
@@ -2152,7 +2163,16 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			}
 
 			case SE_Reflect:
-				new_bonus->reflect_chance += effect_value;
+
+				if (AdditiveWornBonus) {
+					new_bonus->reflect[SBIndex::REFLECT_CHANCE] += effect_value;
+				}
+
+				else if (new_bonus->reflect[SBIndex::REFLECT_CHANCE] < effect_value) {
+					new_bonus->reflect[SBIndex::REFLECT_CHANCE] = effect_value;
+					new_bonus->reflect[SBIndex::REFLECT_RESISTANCE_MOD] = base2;
+					new_bonus->reflect[SBIndex::REFLECT_DMG_EFFECTIVENESS] = max;
+				}
 				break;
 
 			case SE_Amplification:
@@ -4381,9 +4401,9 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					break;
 
 				case SE_Reflect:
-					if (negate_spellbonus) { spellbonuses.reflect_chance = effect_value; }
-					if (negate_aabonus) { aabonuses.reflect_chance = effect_value; }
-					if (negate_itembonus) { itembonuses.reflect_chance = effect_value; }
+					if (negate_spellbonus) { spellbonuses.reflect[SBIndex::REFLECT_CHANCE] = effect_value; }
+					if (negate_aabonus) { aabonuses.reflect[SBIndex::REFLECT_CHANCE] = effect_value; }
+					if (negate_itembonus) { itembonuses.reflect[SBIndex::REFLECT_CHANCE] = effect_value; }
 					break;
 
 				case SE_Amplification:
