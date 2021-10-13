@@ -4340,7 +4340,8 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 					if (owner) {
 						AddToHateList(owner, 1, 0);
 					}
-					else{//If owner dead, briefly setting Immmune Aggro while hatelists wipe for both pet and targets is needed to ensure no reaggroing. 
+					//If owner dead, briefly setting Immmune Aggro while hatelists wipe for both pet and targets is needed to ensure no reaggroing.
+					else if (IsNPC()){
 						bool immune_aggro = GetSpecialAbility(IMMUNE_AGGRO); //check if already immune aggro
 						SetSpecialAbility(IMMUNE_AGGRO, 1);
 						WipeHateList();
