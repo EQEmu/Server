@@ -4347,13 +4347,14 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						if (IsCasting()) {
 							InterruptSpell(CastingSpellID());
 						}
-						
 						entity_list.RemoveFromHateLists(this);
+						//If NPC targeting charmed pet are in process of casting on it after it is removed from hatelist, stop the cast to prevent reaggroing.
+						Mob *current_npc = nullptr;
+						for (auto &it : entity_list.GetNPCList()) {
+							current_npc = it.second;
 
-						for (auto mob : hate_list.GetHateList()) {
-							auto tar = mob->entity_on_hatelist;
-							if (tar && tar->IsCasting() && tar->GetTarget() == this) {
-								tar->InterruptSpell(tar->CastingSpellID());
+							if (current_npc && current_npc->IsCasting() && current_npc->GetTarget() == this) {
+								current_npc->InterruptSpell(current_npc->CastingSpellID());
 							}
 						}
 
