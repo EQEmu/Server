@@ -5163,6 +5163,11 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 		if (CurrentMob->GetBodyType() != BodyType)
 			continue;
 
+		// Do not detect client pets
+		if (CurrentMob->IsPet() && CurrentMob->GetOwner() &&
+			CurrentMob->GetOwner()->IsClient())
+			continue;
+
 		CurrentDistance = ((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
 					((CurrentMob->GetX() - sender->GetX()) * (CurrentMob->GetX() - sender->GetX()));
 
