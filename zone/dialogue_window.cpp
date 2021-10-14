@@ -402,33 +402,11 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	}
 
 	// title
-	std::string popup_title;
-	if (markdown.find("title:") != std::string::npos) {
-		LogDiaWind("Client [{}] Rendering title option", c->GetCleanName());
-
-		auto first_split = split_string(output, "title:");
-		if (!first_split.empty()) {
-			auto second_split = split_string(first_split[1], " ");
-			if (!second_split.empty()) {
-				popup_title = second_split[0];
-				LogDiaWindDetail("Client [{}] Rendering title option title [{}]", c->GetCleanName(), popup_title);
-			}
-
-			if (first_split[1].length() == 1) {
-				popup_title = first_split[1];
-				LogDiaWindDetail(
-					"Client [{}] Rendering title (end) option title [{}]",
-					c->GetCleanName(),
-					popup_title
-				);
-			}
-
-			find_replace(output, fmt::format("title:{}", popup_title), "");
-
-			if (!popup_title.empty()) {
-				title = popup_title;
-			}
-		}
+	std::string popup_title = get_between(output, "*", "*");
+	if (!popup_title.empty()) {
+		LogDiaWind("Client [{}] Title is not empty, contents are [{}]", c->GetCleanName(), popup_title);
+		find_replace(output, fmt::format("*{}*", popup_title), "");
+		title = popup_title;
 	}
 
 	if (title.empty()) {
