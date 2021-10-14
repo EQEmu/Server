@@ -854,7 +854,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							MessageID = SENSE_ANIMAL;
 						}
 
-						Mob *ClosestMob = entity_list.GetClosestMobByBodyType(this, bt);
+						Mob *ClosestMob = entity_list.GetClosestMobByBodyType(this, bt, true);
 
 						if(ClosestMob)
 						{

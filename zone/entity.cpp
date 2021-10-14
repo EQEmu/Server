@@ -5146,7 +5146,7 @@ void EntityList::ExpeditionWarning(uint32 minutes_left)
 	safe_delete(outapp);
 }
 
-Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
+Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType, bool skip_client_pets)
 {
 
 	if (!sender)
@@ -5161,6 +5161,10 @@ Mob *EntityList::GetClosestMobByBodyType(Mob *sender, bodyType BodyType)
 		++it;
 
 		if (CurrentMob->GetBodyType() != BodyType)
+			continue;
+
+		// Do not detect client pets
+		if (skip_client_pets && CurrentMob->IsPet() && CurrentMob->IsPetOwnerClient())
 			continue;
 
 		CurrentDistance = ((CurrentMob->GetY() - sender->GetY()) * (CurrentMob->GetY() - sender->GetY())) +
