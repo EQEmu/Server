@@ -150,9 +150,18 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	}
 
 	LogInfo("---- Zone server [{}], listening on port:[{}] ----", zonename, ZoneConfig::get()->ZonePort);
-	LogInfo("Zone Bootup: [{}] ([{}]: [{}])", zonename, iZoneID, iInstanceID);
+	LogInfo("Zone Bootup: [{}] [{}] ([{}]: [{}])",
+		(iStaticZone) ? "Static" : "Dynamic", zonename, iZoneID, iInstanceID);
 	parse->Init();
 	UpdateWindowTitle(nullptr);
+
+	// Dynamic zones need to Sync here.
+	// Static zones sync when they connect in worldserver.cpp.
+	// Static zones cannot sync here as request is ignored by worldserver.
+	if (!iStaticZone)
+	{
+		zone->GetTimeSync();
+	}
 
 	zone->RequestUCSServerStatus();
 
