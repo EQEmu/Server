@@ -4048,11 +4048,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			}
 		}
 		
-		if (spelltar->IsEngaged()) {
-			entity_list.AddHealAggro(
-				spelltar, this,
-				CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
-		}
+		entity_list.AddHealAggro(
+			spelltar, this,
+			CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
 	}
 
 	// make sure spelltar is high enough level for the buff
