@@ -4372,7 +4372,7 @@ bool Mob::TrySpellOnDeath()
 			}
 		}
 
-	BuffFadeAll();
+	BuffFadeNonPersistDeath();
 	return false;
 	//You should not be able to use this effect and survive (ALWAYS return false),
 	//attempting to place a heal in these effects will still result
