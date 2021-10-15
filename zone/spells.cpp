@@ -4036,11 +4036,23 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
 		}
 	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
-		if (this != spelltar && spelltar->IsClient() && IsClient())
-			CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
-		entity_list.AddHealAggro(
-		    spelltar, this,
-		    CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
+		if (this != spelltar && IsClient()){
+			if (spelltar->IsClient()) {
+				CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
+			}
+			else if (spelltar->IsPet()) {
+				Mob *owner = spelltar->GetOwner();
+				if (owner && owner != this && owner->IsClient()) {
+					CastToClient()->UpdateRestTimer(owner->CastToClient()->GetRestTimer());
+				}
+			}
+		}
+		
+		if (spelltar->IsEngaged()) {
+			entity_list.AddHealAggro(
+				spelltar, this,
+				CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
+		}
 	}
 
 	// make sure spelltar is high enough level for the buff
