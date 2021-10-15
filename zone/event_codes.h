@@ -93,6 +93,7 @@ typedef enum {
 	EVENT_COMBINE,
 	EVENT_CONSIDER,
 	EVENT_CONSIDER_CORPSE,
+	EVENT_LOOT_ZONE,
 	_LargestEventID
 } QuestEventID;
 

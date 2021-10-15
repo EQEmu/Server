@@ -1292,6 +1292,19 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		std::vector<EQ::Any> args;
 		args.push_back(inst);
 		args.push_back(this);
+		if (RuleB(Zone, UseZoneController)) {
+			if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)){
+				if (parse->EventNPC(EVENT_LOOT_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), client, buf, 0, &args) != 0) {
+					lootitem->auto_loot = -1;
+					client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
+					client->QueuePacket(app);
+					delete inst;
+					return;
+				}
+			}
+		}
+		
+		
 		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
 			lootitem->auto_loot = -1;
 			client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);

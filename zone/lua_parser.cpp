@@ -135,7 +135,8 @@ const char *LuaEvents[_LargestEventID] = {
 	"event_test_buff",
 	"event_combine",
 	"event_consider",
-	"event_consider_corpse"
+	"event_consider_corpse",
+	"event_loot_zone"
 };
 
 extern Zone *zone;
