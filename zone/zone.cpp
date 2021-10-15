@@ -158,7 +158,7 @@ bool Zone::Bootup(uint32 iZoneID, uint32 iInstanceID, bool iStaticZone) {
 	// Dynamic zones need to Sync here.
 	// Static zones sync when they connect in worldserver.cpp.
 	// Static zones cannot sync here as request is ignored by worldserver.
-	if (zone->IsStaticZone() == false)
+	if (!iStaticZone)
 	{
 		zone->GetTimeSync();
 	}
