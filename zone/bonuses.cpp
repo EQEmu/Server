@@ -1687,6 +1687,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->SpellDamageShield += base1;
 			break;
 
+		case SE_Amplification:
+			newbon->Amplification += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;

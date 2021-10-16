@@ -1294,7 +1294,7 @@ bool IsFocusLimit(int spa)
 	}
 }
 
-bool IsBaseEffectAppliedToBardSong(int32 spell_id, int effect) {
+bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect) {
 
 	//Allow instant heal/mana/endurance to be modified
 	if (spells[spell_id].buffduration == 0 && spells[spell_id].goodEffect != 0 && 

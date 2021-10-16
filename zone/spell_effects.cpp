@@ -3364,8 +3364,11 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
-	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) && 
+		IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
+	    
+		/*
+		spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
 	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
 	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
 	    spells[spell_id].effectid[effect_id] != SE_Lull &&
@@ -3374,18 +3377,17 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	    spells[spell_id].effectid[effect_id] != SE_CurrentMana &&
 	    spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2 &&
 		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
+		*/
 
-		int oval = effect_value;
-		//int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
+		int oval = effect_value; //should we use base value or formula value?
 		int mod = instrument_mod;
-		int  base_effects_mod = 0;
 		effect_value = effect_value * mod / 10;
 
 		//effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 
-		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i BMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, base_effects_mod, effect_value); //KAYEN 10 baseline
+		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);

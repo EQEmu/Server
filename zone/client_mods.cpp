@@ -1658,10 +1658,11 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Bard Spell Effects
 
 		Mod uses the highest bonus from either of these for each instrument
-		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline) TO DO FIX CALCULATION
+		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline) TO DO FIX CALCULATION, FIX spire
 		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
+			-Example usage: From AA a value of 4 = 40%
 
-		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus TO DO ADD AA BONUS [2603] Amplification
+		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus TO DO ADD AA BONUS [2603] Amplification ? IS CALC CORRECT
 		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
 		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
 
@@ -1672,10 +1673,11 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Need to recode songs to recast when duration ends.
 
 		Formula Live Bards:
-		mod = (10 + aabonus.____Mod/10 + SE_FcBaseEffects/10)/10
+		mod = (10 + aabonus.____Mod + SE_FcBaseEffects/10)/10
 
 	*/
-
+	entity_list.Message(0, 15, "GetInstrumentMod:: SINGING ITEM %i SPELL %i AA %i", itembonuses.singingMod, spellbonuses.singingMod, aabonuses.singingMod);
+	entity_list.Message(0, 15, "GetInstrumentMod:: STRING ITEM %i SPELL %i AA %i", itembonuses.stringedMod, spellbonuses.stringedMod, aabonuses.stringedMod);
 	switch (spells[spell_id].skill) {
 	case EQ::skills::SkillPercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
@@ -1733,7 +1735,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification; //SPA 118 SE_Amplification
+			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SE_Amplification
 		break;
 	default:
 		effectmod = 10;
@@ -1741,7 +1743,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	}
 
 	base_effect_mod = GetFocusEffect(focusFcBaseEffects, spell_id)/10;
-
+	entity_list.Message(0, 15, "GetInstrumentMod:: BaseEffect %i", base_effect_mod);
 	effectmod += base_effect_mod;
 
 	if (!RuleB(Character, UseSpellFileSongCap)) {
@@ -1754,7 +1756,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		effectmod = effectmodcap;
 	}
 
-	entity_list.Message(0,15 ,"GetInstrumentMod:: Effect Mod [%i] Cap [%i] Spell [%i] [RAW CAP %i]", effectmod, effectmodcap, spell_id, spells[spell_id].songcap); //KAYEN 10 baseline
+	entity_list.Message(0,15 ,"GetInstrumentMod::Spell [%i] Effect Mod [%i] Cap [%i] ", spell_id, effectmod, effectmodcap); //KAYEN 10 baseline
 	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
