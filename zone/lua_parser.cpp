@@ -186,6 +186,7 @@ LuaParser::LuaParser() {
 	NPCArgumentDispatch[EVENT_FEIGN_DEATH] = handle_npc_single_client;
 	NPCArgumentDispatch[EVENT_ENTER_AREA] = handle_npc_area;
 	NPCArgumentDispatch[EVENT_LEAVE_AREA] = handle_npc_area;
+	NPCArgumentDispatch[EVENT_LOOT_ZONE] = handle_npc_loot_zone;
 
 	PlayerArgumentDispatch[EVENT_SAY] = handle_player_say;
 	PlayerArgumentDispatch[EVENT_ENVIRONMENTAL_DAMAGE] = handle_player_environmental_damage;

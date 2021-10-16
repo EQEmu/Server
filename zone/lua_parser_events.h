@@ -41,6 +41,8 @@ void handle_npc_area(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 						  std::vector<EQ::Any> *extra_pointers);
 void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
 						  std::vector<EQ::Any> *extra_pointers);
+void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						  std::vector<EQ::Any> *extra_pointers);
 
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
