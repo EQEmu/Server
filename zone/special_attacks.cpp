@@ -156,7 +156,7 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (my_hit.base_damage == 0)
 		my_hit.base_damage = GetBaseSkillDamage(my_hit.skill);
 
-	if (base_damage = DMG_INVULNERABLE)
+	if (base_damage == DMG_INVULNERABLE)
 		my_hit.damage_done = DMG_INVULNERABLE;
 
 	if (who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
