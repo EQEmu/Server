@@ -1539,11 +1539,15 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 
 		Mod uses the highest bonus from either of these for each instrument
 		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods
-		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods.
+		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
 
 		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus
 		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
 		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+
+		Issues 10-15-21:
+		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues.
+		Need to recode songs to recast when duration ends.
 	*/
 	switch (spells[spell_id].skill) {
 	case EQ::skills::SkillPercussionInstruments:

@@ -3376,12 +3376,19 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
 
 		int oval = effect_value;
-		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
+		//int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
+		int mod = instrument_mod;
+		int base_effects_mod = 0;
+
+		if (caster) {
+			base_effects_mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+		}
+
 		effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 
-		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{MOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
+		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i BMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, base_effects_mod, effect_value); //KAYEN 10 baseline
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
@@ -7000,6 +7007,36 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 
 
 	return value;
+}
+
+uint32 Mob::GetBardSongCap(int32 spell_id) 
+{
+	int effectmodcap = 0;
+	bool nocap = false;
+	if (RuleB(Character, UseSpellFileSongCap)) {
+		
+		effectmodcap = spells[spell_id].songcap / 10;
+		// this looks a bit weird, but easiest way I could think to keep both systems working
+		if (effectmodcap == 0) {
+			nocap = true;
+		}
+		else {
+			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
+		}
+	}
+	else {
+		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
+	}
+
+	return effectmodcap;
+}
+
+int32 Mob::GetBardBaseEffectsMod(int spell_id)
+{
+
+
+	int32 mod = GetFocusEffect(focusFcBaseEffects, spell_id);
+	return mod;
 }
 
 int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
