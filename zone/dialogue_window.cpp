@@ -57,7 +57,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	}
 
 	bool render_hiddenresponse = false;
-	if (markdown.find("hiddenresponse") != std::string::npos) {		
+	if (markdown.find("hiddenresponse") != std::string::npos) {
 		render_hiddenresponse = true;
 		LogDiaWind("Client [{}] Rendering hiddenresponse", c->GetCleanName());
 		find_replace(output, "hiddenresponse", "");
@@ -229,14 +229,14 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	std::string button_one;
 	std::string button_two;
 	if (
-		markdown.find("button_one:") != std::string::npos &&
-		markdown.find("button_two:") != std::string::npos
+		markdown.find("{button_one:") != std::string::npos &&
+		markdown.find("{button_two:") != std::string::npos
 	) {
 		LogDiaWind("Client [{}] Rendering button_one option.", c->GetCleanName());
 
-		auto one_first_split = split_string(output, "button_one:");
+		auto one_first_split = split_string(output, "{button_one:");
 		if (!one_first_split.empty()) {
-			auto one_second_split = split_string(one_first_split[1], " ");
+			auto one_second_split = split_string(one_first_split[1], "}");
 			if (!one_second_split.empty()) {
 				button_one = one_second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering button_one option button_one [{}]", c->GetCleanName(), button_one);
@@ -251,18 +251,18 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("button_one:{}", button_one), "");
+			find_replace(output, fmt::format("{{button_one:{}}}", button_one), "");
 
 			if (!button_one.empty()) {
-				button_one_name = button_one.c_str();
+				button_one_name = trim(button_one).c_str();
 			}
 		}
 
 		LogDiaWind("Client [{}] Rendering button_two option.", c->GetCleanName());
 
-		auto two_first_split = split_string(output, "button_two:");
+		auto two_first_split = split_string(output, "{button_two:");
 		if (!two_first_split.empty()) {
-			auto two_second_split = split_string(two_first_split[1], " ");
+			auto two_second_split = split_string(two_first_split[1], "}");
 			if (!two_second_split.empty()) {
 				button_two = two_second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering button_two option button_two [{}]", c->GetCleanName(), button_two);
@@ -277,10 +277,10 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("button_two:{}", button_two), "");
+			find_replace(output, fmt::format("{{button_two:{}}}", button_two), "");
 
 			if (!button_two.empty()) {
-				button_two_name = button_two.c_str();
+				button_two_name = trim(button_two).c_str();
 			}
 		}
 	}
@@ -403,12 +403,12 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 
 	// title
 	std::string popup_title;
-	if (markdown.find("title:") != std::string::npos) {
+	if (markdown.find("{title:") != std::string::npos) {
 		LogDiaWind("Client [{}] Rendering title option", c->GetCleanName());
 
-		auto first_split = split_string(output, "title:");
+		auto first_split = split_string(output, "{title:");
 		if (!first_split.empty()) {
-			auto second_split = split_string(first_split[1], " ");
+			auto second_split = split_string(first_split[1], "}");
 			if (!second_split.empty()) {
 				popup_title = second_split[0];
 				LogDiaWindDetail("Client [{}] Rendering title option title [{}]", c->GetCleanName(), popup_title);
@@ -423,10 +423,10 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 				);
 			}
 
-			find_replace(output, fmt::format("title:{}", popup_title), "");
+			find_replace(output, fmt::format("{{title:{}}}", popup_title), "");
 
 			if (!popup_title.empty()) {
-				title = popup_title;
+				title = trim(popup_title);
 			}
 		}
 	}
@@ -514,7 +514,7 @@ void DialogueWindow::Render(Client *c, std::string markdown)
 	if (render_hiddenresponse) {
 		final_output = fmt::format("{}{}{}", quote_string, trim(output), quote_string);
 	}
-	
+
 	// send popup
 	c->SendFullPopup(
 		title.c_str(),
