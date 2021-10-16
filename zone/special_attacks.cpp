@@ -156,6 +156,9 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (my_hit.base_damage == 0)
 		my_hit.base_damage = GetBaseSkillDamage(my_hit.skill);
 
+	if (base_damage = DMG_INVULNERABLE)
+		my_hit.damage_done = DMG_INVULNERABLE;
+
 	if (who->GetInvul() || who->GetSpecialAbility(IMMUNE_MELEE))
 		my_hit.damage_done = DMG_INVULNERABLE;
 
@@ -1649,8 +1652,9 @@ void NPC::DoClassAttacks(Mob *target) {
 					DoAnim(animKick, 0, false);
 					int32 dmg = GetBaseSkillDamage(EQ::skills::SkillKick);
 
-					if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
+					if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0) {
 						dmg = DMG_INVULNERABLE;
+					}
 
 					reuse = (KickReuseTime + 3) * 1000;
 					DoSpecialAttackDamage(target, EQ::skills::SkillKick, dmg, GetMinDamage(), -1, reuse);
