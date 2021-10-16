@@ -1296,7 +1296,6 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)){
 				if (parse->EventNPC(EVENT_LOOT_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), client, buf, 0, &args) != 0) {
 					lootitem->auto_loot = -1;
-					client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 					client->QueuePacket(app);
 					delete inst;
 					return;
@@ -1304,10 +1303,8 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 		
-		
 		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
 			lootitem->auto_loot = -1;
-			client->MessageString(Chat::Red, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
 			client->QueuePacket(app);
 			delete inst;
 			return;
