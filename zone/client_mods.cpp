@@ -1519,10 +1519,12 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	if (RuleB(Character, UseSpellFileSongCap)) {
 		effectmodcap = spells[spell_id].songcap / 10;
 		// this looks a bit weird, but easiest way I could think to keep both systems working
-		if (effectmodcap == 0)
+		if (effectmodcap == 0) {
 			nocap = true;
-		else
-			effectmodcap += 10;
+		}
+		else {
+			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
+		}
 	} else {
 		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
 	}
@@ -1532,6 +1534,17 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	// item mods are in 10ths of percent increases
 	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
 	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
+	/*
+		Bard Spell Effects
+
+		Mod uses the highest bonus from either of these for each instrument
+		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods
+		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods.
+
+		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus
+		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
+		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+	*/
 	switch (spells[spell_id].skill) {
 	case EQ::skills::SkillPercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
@@ -1589,19 +1602,23 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
+			effectmod += aabonuses.singingMod + spellbonuses.Amplification; //SPA 118 SE_Amplification
 		break;
 	default:
 		effectmod = 10;
 		return effectmod;
 	}
-	if (!RuleB(Character, UseSpellFileSongCap))
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
-	if (effectmod < 10)
+	if (!RuleB(Character, UseSpellFileSongCap)) {
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap
+	}
+	if (effectmod < 10) {
 		effectmod = 10;
-	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
+	}
+	if (!nocap && effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
 		effectmod = effectmodcap;
+	}
 
+	entity_list.Message(0,15 ,"GetInstrumentMod:: Effect Mod [%i] Cap [%i] Spell [%i] [RAW CAP %i]", effectmod, effectmodcap, spell_id, spells[spell_id].songcap); //KAYEN 10 baseline
 	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;

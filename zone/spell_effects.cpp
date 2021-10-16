@@ -206,6 +206,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
+	
+	entity_list.Message(0, 15, "SpellEffect :: [%i] Apply instrument mod %i [BUFF SLOT MOD %i]", spell_id, instrument_mod, buffs[buffslot].instrument_mod); //KAYEN
+																			 
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -3377,10 +3380,12 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
+
+		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{MOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
-
+	
 	return effect_value;
 }
 
