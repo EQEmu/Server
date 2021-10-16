@@ -1338,7 +1338,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		bool fromaug = false;
 		EQ::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
-		uint32 recasttype = 0;
+		int recasttype = 0;
 
 		while (true) {
 			if (item == nullptr)
@@ -1378,8 +1378,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			{
 				//Can we start the timer here?  I don't see why not.
 				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-				database.UpdateItemRecastTimestamps(CastToClient()->CharacterID(), recasttype,
-								CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp());
+				if (recasttype != -1) {
+					database.UpdateItemRecastTimestamps(
+						CastToClient()->CharacterID(),
+						recasttype,
+						CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp()
+					);
+				}
 			}
 		}
 
@@ -2539,9 +2544,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
-			database.UpdateItemRecastTimestamps(
-			    CastToClient()->CharacterID(), recast_type,
-			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
+			if (recast_type != -1) {
+				database.UpdateItemRecastTimestamps(
+				    CastToClient()->CharacterID(),
+					recast_type,
+					CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+				);
+			}
 			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
