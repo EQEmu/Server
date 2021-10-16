@@ -3378,13 +3378,10 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		int oval = effect_value;
 		//int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
 		int mod = instrument_mod;
-		int base_effects_mod = 0;
-
-		if (caster) {
-			base_effects_mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-		}
-
+		int  base_effects_mod = 0;
 		effect_value = effect_value * mod / 10;
+
+		//effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 
@@ -7012,15 +7009,9 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 uint32 Mob::GetBardSongCap(int32 spell_id) 
 {
 	int effectmodcap = 0;
-	bool nocap = false;
 	if (RuleB(Character, UseSpellFileSongCap)) {
-		
 		effectmodcap = spells[spell_id].songcap / 10;
-		// this looks a bit weird, but easiest way I could think to keep both systems working
-		if (effectmodcap == 0) {
-			nocap = true;
-		}
-		else {
+		if (effectmodcap) {
 			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
 		}
 	}
@@ -7029,14 +7020,6 @@ uint32 Mob::GetBardSongCap(int32 spell_id)
 	}
 
 	return effectmodcap;
-}
-
-int32 Mob::GetBardBaseEffectsMod(int spell_id)
-{
-
-
-	int32 mod = GetFocusEffect(focusFcBaseEffects, spell_id);
-	return mod;
 }
 
 int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
