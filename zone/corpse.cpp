@@ -1291,8 +1291,9 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		args.push_back(this);
 		bool prevent_loot = false;
 		if (RuleB(Zone, UseZoneController)) {
-			if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)){
-				if (parse->EventNPC(EVENT_LOOT_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), client, buf.c_str(), 0, &args) != 0) {
+			auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
+			if (controller){
+				if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, buf.c_str(), 0, &args) != 0) {
 					prevent_loot = true;
 				}
 			}
