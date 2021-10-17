@@ -1979,136 +1979,127 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 	const EQ::ItemData* item = nullptr;
 	bool found = false;
-	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
-	std::list<MerchantList>::const_iterator itr;
-
-	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
-		MerchantList ml = *itr;
-		if (GetLevel() < ml.level_required) {
+	std::list<MerchantList> merchantlists = zone->merchanttable[merchantid];
+	for (auto merchantlist : merchantlists) {
+		if (GetLevel() < merchantlist.level_required) {
 			continue;
 		}
 
-		int32 fac = tmp->GetPrimaryFaction();
-		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+		int faction_id = tmp->GetPrimaryFaction();
+		if (faction_id != 0 && GetModCharacterFactionLevel(faction_id) < merchantlist.faction_required) {
 			continue;
 		}
 
-		item = database.GetItem(ml.item);
-		if (!item)
+		item = database.GetItem(merchantlist.item);
+		if (!item) {
 			continue;
+		}
+
 		if (item->ID == aps->itemid) { //This check to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
 			found = true;
 			break;
 		}
 	}
+
 	if (!item || !found) {
 		Message(Chat::Red, "Error: The item you purchased does not exist!");
 		return;
 	}
 
-	if (aps->Type == LDoNMerchant)
-	{
-		if (m_pp.ldon_points_available < int32(item->LDoNPrice)) {
+	auto item_cost = item->LDoNPrice;
+	bool cannot_afford = false;
+	std::string merchant_type;
+	if (item_cost < 0) {
+		Message(Chat::Red, "This item cannot be bought.");
+		return;
+	}
+
+	if (aps->Type == LDoNMerchant) {
+		if (m_pp.ldon_points_available < item_cost) {
 			Message(Chat::Red, "You cannot afford that item.");
 			return;
 		}
 
-		if (item->LDoNTheme <= 16)
-		{
-			if (item->LDoNTheme & 16)
-			{
-				if (m_pp.ldon_points_tak < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in tak to purchase this item.", int32(item->LDoNPrice));
-					return;
+		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
+			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+				if (m_pp.ldon_points_tak < item_cost) {
+					cannot_afford = true;
+					merchant_type = "Deepest Guk";
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				if (m_pp.ldon_points_ruj < item_cost) {
+					cannot_afford = true;
+					merchant_type = "Miragul's Menagerie";
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+				if (m_pp.ldon_points_mmc < item_cost) {
+					cannot_afford = true;
+					merchant_type = "Mistmoore Catacombs";
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
+				if (m_pp.ldon_points_mir < item_cost) {
+					cannot_afford = true;
+					merchant_type = "Rujarkian Hills";
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+				if (m_pp.ldon_points_guk < item_cost) {
+					cannot_afford = true;
+					merchant_type = "Takish-Hiz";
 				}
 			}
-			else if (item->LDoNTheme & 8)
-			{
-				if (m_pp.ldon_points_ruj < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in ruj to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 4)
-			{
-				if (m_pp.ldon_points_mmc < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in mmc to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 2)
-			{
-				if (m_pp.ldon_points_mir < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in mir to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 1)
-			{
-				if (m_pp.ldon_points_guk < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in guk to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
+
+			
+		}
+	} else if (aps->Type == DiscordMerchant) {
+		if (GetPVPPoints() < item_cost) {
+			cannot_afford = true;
+			merchant_type = "PVP Points";
+		}
+	} else if (aps->Type == NorrathsKeepersMerchant) {
+		if (GetRadiantCrystals() < item_cost) {
+			cannot_afford = true;
+			merchant_type = "Radiant Crystals";
+		}
+	} else if (aps->Type == DarkReignMerchant) {
+		if (GetEbonCrystals() < item_cost) {
+			cannot_afford = true;
+			merchant_type = "Ebon Crystals";
+		}
+	} else {
+		Message(Chat::Red, "Unknown Adventure Merchant Type.");
+		return;
+	}
+
+	if (cannot_afford && !merchant_type.empty()) {
+		Message(
+			Chat::Red,
+			"You need at least {} {} Points to purchase this item.",
+			item_cost,
+			merchant_type
+		);
+	}
+
+
+	if (CheckLoreConflict(item)) {
+		Message(Chat::Yellow, "You already have a lore {} ({}) in your inventory.", item->Name, item->ID);
+		return;
+	}
+
+	if (aps->Type == LDoNMerchant) {
+		int required_points = item_cost * -1;
+
+		if (!UpdateLDoNPoints(6, required_points)) {
+			return;
 		}
 	}
 	else if (aps->Type == DiscordMerchant)
 	{
-		if (GetPVPPoints() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u PVP points to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else if (aps->Type == NorrathsKeepersMerchant)
-	{
-		if (GetRadiantCrystals() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u Radiant Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else if (aps->Type == DarkReignMerchant)
-	{
-		if (GetEbonCrystals() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u Ebon Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else
-	{
-		Message(Chat::Red, "Unknown Adventure Merchant type.");
-		return;
-	}
-
-
-	if (CheckLoreConflict(item))
-	{
-		Message(Chat::Yellow, "You can only have one of a lore item.");
-		return;
-	}
-
-	if (aps->Type == LDoNMerchant)
-	{
-		int32 requiredpts = (int32)item->LDoNPrice*-1;
-
-		if (!UpdateLDoNPoints(6, requiredpts))
-			return;
-	}
-	else if (aps->Type == DiscordMerchant)
-	{
-		SetPVPPoints(GetPVPPoints() - (int32)item->LDoNPrice);
+		SetPVPPoints(GetPVPPoints() - item_cost);
 		SendPVPStats();
 	}
 	else if (aps->Type == NorrathsKeepersMerchant)
 	{
-		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
+		SetRadiantCrystals(GetRadiantCrystals() - item_cost);
 	}
 	else if (aps->Type == DarkReignMerchant)
 	{
@@ -2165,36 +2156,20 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 		}
 
 		item = database.GetItem(ml.item);
-		if (item)
-		{
-			uint32 theme;
-			if (item->LDoNTheme > 16)
-			{
-				theme = 0;
-			}
-			else if (item->LDoNTheme & 16)
-			{
-				theme = 5;
-			}
-			else if (item->LDoNTheme & 8)
-			{
-				theme = 4;
-			}
-			else if (item->LDoNTheme & 4)
-			{
-				theme = 3;
-			}
-			else if (item->LDoNTheme & 2)
-			{
-				theme = 2;
-			}
-			else if (item->LDoNTheme & 1)
-			{
-				theme = 1;
-			}
-			else
-			{
-				theme = 0;
+		if (item) {
+			uint32 theme = LDoNThemes::Unused;
+			if (item->LDoNTheme > LDoNThemeBits::TAKBit) {
+				theme = LDoNThemes::Unused;
+			} else if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+				theme = LDoNThemes::TAK;
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				theme = LDoNThemes::RUJ;
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+				theme = LDoNThemes::MMC;
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				theme = LDoNThemes::MIR;
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+				theme = LDoNThemes::GUK;
 			}
 			ss << "^" << item->Name << "|";
 			ss << item->ID << "|";

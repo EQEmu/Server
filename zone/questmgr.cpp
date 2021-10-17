@@ -1761,14 +1761,30 @@ void QuestManager::addldonpoints(uint32 theme_id, int points) {
 
 void QuestManager::addldonloss(uint32 theme_id) {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->AddLDoNLoss(theme_id);
+	if(initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id);
+	}
 }
 
 void QuestManager::addldonwin(uint32 theme_id) {
 	QuestManagerCurrentQuestVars();
-	if(initiator)
-		initiator->AddLDoNWin(theme_id);
+	if(initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, true);
+	}
+}
+
+void QuestManager::removeldonloss(uint32 theme_id) {
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, false, true);
+	}
+}
+
+void QuestManager::removeldonwin(uint32 theme_id) {
+	QuestManagerCurrentQuestVars();
+	if(initiator) {
+		initiator->UpdateLDoNWinLoss(theme_id, true, true);
+	}
 }
 
 void QuestManager::setnexthpevent(int at) {

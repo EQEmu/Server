@@ -1953,14 +1953,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto client = entity_list.GetClientByCharID(update_identifier);
 			if (client) {
 				switch (update_subtype) {
-					case CZLDoNUpdateSubtype_Loss:
-						client->AddLDoNLoss(theme_id);
+					case CZLDoNUpdateSubtype_AddLoss:
+						client->UpdateLDoNWinLoss(theme_id, false);
 						break;
-					case CZLDoNUpdateSubtype_Points:
+					case CZLDoNUpdateSubtype_AddPoints:
 						client->UpdateLDoNPoints(theme_id, points);
 						break;
-					case CZLDoNUpdateSubtype_Win:
-						client->AddLDoNWin(theme_id);
+					case CZLDoNUpdateSubtype_AddWin:
+						client->UpdateLDoNWinLoss(theme_id, true);
+						break;
+					case CZLDoNUpdateSubtype_RemoveLoss:
+						client->UpdateLDoNWinLoss(theme_id, false, true);
+						break;
+					case CZLDoNUpdateSubtype_RemoveWin:
+						client->UpdateLDoNWinLoss(theme_id, true, true);
 						break;
 					default:
 						break;
@@ -1974,14 +1980,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					if (client_group->members[member_index] && client_group->members[member_index]->IsClient()) {
 						auto client_group_member = client_group->members[member_index]->CastToClient();
 						switch (update_subtype) {
-							case CZLDoNUpdateSubtype_Loss:
-								client_group_member->AddLDoNLoss(theme_id);
+							case CZLDoNUpdateSubtype_AddLoss:
+								client_group_member->UpdateLDoNWinLoss(theme_id, false);
 								break;
-							case CZLDoNUpdateSubtype_Points:
+							case CZLDoNUpdateSubtype_AddPoints:
 								client_group_member->UpdateLDoNPoints(theme_id, points);
 								break;
-							case CZLDoNUpdateSubtype_Win:
-								client_group_member->AddLDoNWin(theme_id);
+							case CZLDoNUpdateSubtype_AddWin:
+								client_group_member->UpdateLDoNWinLoss(theme_id, true);
+								break;
+							case CZLDoNUpdateSubtype_RemoveLoss:
+								client_group_member->UpdateLDoNWinLoss(theme_id, false, true);
+								break;
+							case CZLDoNUpdateSubtype_RemoveWin:
+								client_group_member->UpdateLDoNWinLoss(theme_id, true, true);
 								break;
 							default:
 								break;
@@ -1996,14 +2008,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 					auto client_raid_member = client_raid->members[member_index].member;
 					if (client_raid_member && client_raid_member->IsClient()) {
 						switch (update_subtype) {
-							case CZLDoNUpdateSubtype_Loss:
-								client_raid_member->AddLDoNLoss(theme_id);
+							case CZLDoNUpdateSubtype_AddLoss:
+								client_raid_member->UpdateLDoNWinLoss(theme_id, false);
 								break;
-							case CZLDoNUpdateSubtype_Points:
+							case CZLDoNUpdateSubtype_AddPoints:
 								client_raid_member->UpdateLDoNPoints(theme_id, points);
 								break;
-							case CZLDoNUpdateSubtype_Win:
-								client_raid_member->AddLDoNWin(theme_id);
+							case CZLDoNUpdateSubtype_AddWin:
+								client_raid_member->UpdateLDoNWinLoss(theme_id, true);
+								break;
+							case CZLDoNUpdateSubtype_RemoveLoss:
+								client_raid_member->UpdateLDoNWinLoss(theme_id, false, true);
+								break;
+							case CZLDoNUpdateSubtype_RemoveWin:
+								client_raid_member->UpdateLDoNWinLoss(theme_id, true, true);
 								break;
 							default:
 								break;
@@ -2015,14 +2033,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->GuildID() > 0 && client.second->GuildID() == update_identifier) {
 					switch (update_subtype) {
-						case CZLDoNUpdateSubtype_Loss:
-							client.second->AddLDoNLoss(theme_id);
+						case CZLDoNUpdateSubtype_AddLoss:
+							client.second->UpdateLDoNWinLoss(theme_id, false);
 							break;
-						case CZLDoNUpdateSubtype_Points:
+						case CZLDoNUpdateSubtype_AddPoints:
 							client.second->UpdateLDoNPoints(theme_id, points);
 							break;
-						case CZLDoNUpdateSubtype_Win:
-							client.second->AddLDoNWin(theme_id);
+						case CZLDoNUpdateSubtype_AddWin:
+							client.second->UpdateLDoNWinLoss(theme_id, true);
+							break;
+						case CZLDoNUpdateSubtype_RemoveLoss:
+							client.second->UpdateLDoNWinLoss(theme_id, false, true);
+							break;
+						case CZLDoNUpdateSubtype_RemoveWin:
+							client.second->UpdateLDoNWinLoss(theme_id, true, true);
 							break;
 						default:
 							break;
@@ -2033,14 +2057,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			for (auto &client : entity_list.GetClientList()) {
 				if (client.second->GetExpedition() && client.second->GetExpedition()->GetID() == update_identifier) {
 					switch (update_subtype) {
-						case CZLDoNUpdateSubtype_Loss:
-							client.second->AddLDoNLoss(theme_id);
+						case CZLDoNUpdateSubtype_AddLoss:
+							client.second->UpdateLDoNWinLoss(theme_id, false);
 							break;
-						case CZLDoNUpdateSubtype_Points:
+						case CZLDoNUpdateSubtype_AddPoints:
 							client.second->UpdateLDoNPoints(theme_id, points);
 							break;
-						case CZLDoNUpdateSubtype_Win:
-							client.second->AddLDoNWin(theme_id);
+						case CZLDoNUpdateSubtype_AddWin:
+							client.second->UpdateLDoNWinLoss(theme_id, true);
+							break;
+						case CZLDoNUpdateSubtype_RemoveLoss:
+							client.second->UpdateLDoNWinLoss(theme_id, false, true);
+							break;
+						case CZLDoNUpdateSubtype_RemoveWin:
+							client.second->UpdateLDoNWinLoss(theme_id, true, true);
 							break;
 						default:
 							break;
@@ -2051,14 +2081,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			auto client = entity_list.GetClientByName(client_name);
 			if (client) {
 				switch (update_subtype) {
-					case CZLDoNUpdateSubtype_Loss:
-						client->AddLDoNLoss(theme_id);
+					case CZLDoNUpdateSubtype_AddLoss:
+						client->UpdateLDoNWinLoss(theme_id, false);
 						break;
-					case CZLDoNUpdateSubtype_Points:
+					case CZLDoNUpdateSubtype_AddPoints:
 						client->UpdateLDoNPoints(theme_id, points);
 						break;
-					case CZLDoNUpdateSubtype_Win:
-						client->AddLDoNWin(theme_id);
+					case CZLDoNUpdateSubtype_AddWin:
+						client->UpdateLDoNWinLoss(theme_id, true);
+						break;
+					case CZLDoNUpdateSubtype_RemoveLoss:
+						client->UpdateLDoNWinLoss(theme_id, false, true);
+						break;
+					case CZLDoNUpdateSubtype_RemoveWin:
+						client->UpdateLDoNWinLoss(theme_id, true, true);
 						break;
 					default:
 						break;
@@ -2696,19 +2732,29 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWLU->max_status;
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
-				case WWLDoNUpdateType_Loss:
+				case WWLDoNUpdateType_AddLoss:
 					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
-						client.second->AddLDoNLoss(theme_id);
+						client.second->UpdateLDoNWinLoss(theme_id, false);
 					}
 					break;
-				case WWLDoNUpdateType_Points:
+				case WWLDoNUpdateType_AddPoints:
 					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
 						client.second->UpdateLDoNPoints(theme_id, points);
 					}
 					break;
-				case WWLDoNUpdateType_Win:
+				case WWLDoNUpdateType_AddWin:
 					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
-						client.second->AddLDoNWin(theme_id);
+						client.second->UpdateLDoNWinLoss(theme_id, true);
+					}
+					break;
+				case WWLDoNUpdateType_RemoveLoss:
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+						client.second->UpdateLDoNWinLoss(theme_id, false, true);
+					}
+					break;
+				case WWLDoNUpdateType_RemoveWin:
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+						client.second->UpdateLDoNWinLoss(theme_id, true, true);
 					}
 					break;
 			}

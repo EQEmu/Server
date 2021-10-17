@@ -5555,7 +5555,7 @@ XS(XS_Client_AddLDoNLoss) {
 		Client* THIS;
 		uint32 theme_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddLDoNLoss(theme_id);
+		THIS->UpdateLDoNWinLoss(theme_id);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5569,7 +5569,7 @@ XS(XS_Client_AddLDoNWin) {
 		Client* THIS;
 		uint32 theme_id = (uint32) SvUV(ST(1));
 		VALIDATE_THIS_IS_CLIENT;
-		THIS->AddLDoNWin(theme_id);
+		THIS->UpdateLDoNWinLoss(theme_id, true);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5837,6 +5837,34 @@ XS(XS_Client_SummonBaggedItems) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_RemoveLDoNLoss);
+XS(XS_Client_RemoveLDoNLoss) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNLoss(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->UpdateLDoNWinLoss(theme_id, false, true);
+	}
+	XSRETURN_EMPTY;
+}
+
+XS(XS_Client_RemoveLDoNWin);
+XS(XS_Client_RemoveLDoNWin) {
+	dXSARGS;
+	if (items != 2)
+		Perl_croak(aTHX_ "Usage: Client::RemoveLDoNWin(THIS, uint32 theme_id)");
+	{
+		Client* THIS;
+		uint32 theme_id = (uint32) SvUV(ST(1));
+		VALIDATE_THIS_IS_CLIENT;
+		THIS->UpdateLDoNWinLoss(theme_id, true, true);
+	}
+	XSRETURN_EMPTY;
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6062,6 +6090,8 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "RemoveAllExpeditionLockouts"), XS_Client_RemoveAllExpeditionLockouts, file, "$;$");
 	newXSproto(strcpy(buf, "RemoveExpeditionLockout"), XS_Client_RemoveExpeditionLockout, file, "$$$");
 	newXSproto(strcpy(buf, "RemoveItem"), XS_Client_RemoveItem, file, "$$;$");
+	newXSproto(strcpy(buf, "RemoveLDoNLoss"), XS_Client_RemoveLDoNLoss, file, "$$");
+	newXSproto(strcpy(buf, "RemoveLDoNWin"), XS_Client_RemoveLDoNWin, file, "$$");
 	newXSproto(strcpy(buf, "RemoveNoRent"), XS_Client_RemoveNoRent, file, "$");
 	newXSproto(strcpy(buf, "ResetAA"), XS_Client_ResetAA, file, "$");
 	newXSproto(strcpy(buf, "ResetAllDisciplineTimers"), XS_Client_ResetAllDisciplineTimers, file, "$");
