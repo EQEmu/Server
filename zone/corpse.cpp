@@ -1283,31 +1283,23 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		char buf[88];
 		char q_corpse_name[64];
 		strcpy(q_corpse_name, corpse_name);
-		snprintf(buf, 87, "%d %d %s", inst->GetItem()->ID, inst->GetCharges(),
-			EntityList::RemoveNumbers(q_corpse_name));
-		buf[87] = '\0';
+		std::string buf = fmt::format("{} {} {} {}", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(q_corpse_name), GetID());
 		std::vector<EQ::Any> args;
 		args.push_back(inst);
 		args.push_back(this);
+		bool prevent_loot = false;
 		if (RuleB(Zone, UseZoneController)) {
 			if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)){
-				if (parse->EventNPC(EVENT_LOOT_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), client, buf, 0, &args) != 0) {
-					lootitem->auto_loot = -1;
-					client->QueuePacket(app);
-					delete inst;
-					return;
+				if (parse->EventNPC(EVENT_LOOT_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), client, buf.c_str(), 0, &args) != 0) {
+					prevent_loot = true;
 				}
 			}
 		}
 		
-		if (parse->EventPlayer(EVENT_LOOT, client, buf, 0, &args) != 0) {
-			lootitem->auto_loot = -1;
-			client->QueuePacket(app);
-			delete inst;
-			return;
+		if (parse->EventPlayer(EVENT_LOOT, client, buf.c_str(), 0, &args) != 0) {
+			prevent_loot = true;
 		}
 
 		if (!IsPlayerCorpse())
@@ -1316,17 +1308,24 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			auto dz = zone->GetDynamicZone();
 			if (dz && !dz->CanClientLootCorpse(client, GetNPCTypeID(), GetID()))
 			{
+				prevent_loot = true;
 				// note on live this message is only sent once on the first loot attempt of an open corpse
 				client->MessageString(Chat::Loot, LOOT_NOT_ALLOWED, inst->GetItem()->Name);
-				lootitem->auto_loot = -1; // generates client eqstr 1370 "You may not loot that item from this corpse."
-				client->QueuePacket(app);
-				delete inst;
-				return;
 			}
 		}
 
-		// do we want this to have a fail option too?
-		parse->EventItem(EVENT_LOOT, client, inst, this, buf, 0);
+		// do we want this to have a fail option too? Sure?
+		if (parse->EventItem(EVENT_LOOT, client, inst, this, buf.c_str(), 0) != 0) {
+			prevent_loot = true;
+		}
+		
+		if (prevent_loot) {
+			lootitem->auto_loot = -1;
+			client->QueuePacket(app);
+			safe_delete(inst);
+			return;
+		}
+		
 
 		// safe to ACK now
 		client->QueuePacket(app);
