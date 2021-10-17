@@ -2058,7 +2058,7 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	} else if (aps->Type == NorrathsKeepersMerchant) {
 		if (GetRadiantCrystals() < item_cost) {
 			cannot_afford = true;
-			merchant_type =  database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID));
+			merchant_type = database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID));
 		}
 	} else if (aps->Type == DarkReignMerchant) {
 		if (GetEbonCrystals() < item_cost) {
