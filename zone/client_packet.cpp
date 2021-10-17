@@ -2024,27 +2024,27 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
 				if (m_pp.ldon_points_tak < item_cost) {
 					cannot_afford = true;
-					merchant_type = "Deepest Guk";
+					merchant_type = fmt::format("Deepest Guk Point{}", item_cost != 1 ? "s" : "");
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
-					merchant_type = "Miragul's Menagerie";
+					merchant_type = fmt::format("Miragul's Menagerie Point{}", item_cost != 1 ? "s" : "");
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
-					merchant_type = "Mistmoore Catacombs";
+					merchant_type = fmt::format("Mistmoore Catacombs Point{}", item_cost != 1 ? "s" : "");
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
-					merchant_type = "Rujarkian Hills";
+					merchant_type = fmt::format("Rujarkian Hills Point{}", item_cost != 1 ? "s" : "");
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
-					merchant_type = "Takish-Hiz";
+					merchant_type = fmt::format("Takish-Hiz Point{}", item_cost != 1 ? "s" : "");
 				}
 			}
 
@@ -2053,17 +2053,17 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	} else if (aps->Type == DiscordMerchant) {
 		if (GetPVPPoints() < item_cost) {
 			cannot_afford = true;
-			merchant_type = "PVP Points";
+			merchant_type = fmt::format("PVP Point{}", item_cost != 1 ? "s" : "");
 		}
 	} else if (aps->Type == NorrathsKeepersMerchant) {
 		if (GetRadiantCrystals() < item_cost) {
 			cannot_afford = true;
-			merchant_type = "Radiant Crystals";
+			merchant_type =  database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID));
 		}
 	} else if (aps->Type == DarkReignMerchant) {
 		if (GetEbonCrystals() < item_cost) {
 			cannot_afford = true;
-			merchant_type = "Ebon Crystals";
+			merchant_type = database.CreateItemLink(RuleI(Zone, EbonCrystalItemID));
 		}
 	} else {
 		Message(Chat::Red, "Unknown Adventure Merchant Type.");
@@ -2073,15 +2073,24 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	if (cannot_afford && !merchant_type.empty()) {
 		Message(
 			Chat::Red,
-			"You need at least {} {} Points to purchase this item.",
-			item_cost,
-			merchant_type
+			fmt::format(
+				"You need at least {} {} to purchase this item.",
+				item_cost,
+				merchant_type
+			).c_str()
 		);
 	}
 
 
 	if (CheckLoreConflict(item)) {
-		Message(Chat::Yellow, "You already have a lore {} ({}) in your inventory.", item->Name, item->ID);
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You already have a lore {} ({}) in your inventory.",
+				database.CreateItemLink(item->ID),
+				item->ID
+			).c_str()
+		);
 		return;
 	}
 
