@@ -289,14 +289,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if(IsClient()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0) != 0)
+		std::string buf = fmt::format("{}", spell_id);
+		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), buf.c_str(), 0) != 0)
 			return false;
 	} else if(IsNPC()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, buf.c_str(), 0);
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -1440,13 +1438,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	//
 
 	if(IsClient()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventPlayer(EVENT_CAST, CastToClient(), buf.c_str(), 0);
 	} else if(IsNPC()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, buf.c_str(), 0);
 	}
 
 	if(bard_song_mode)
@@ -3654,15 +3650,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
 	{
-		char temp1[100];
-		sprintf(temp1, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, buf.c_str(), 0);
 	}
 	else if (spelltar->IsClient())
 	{
-		char temp1[100];
-		sprintf(temp1, "%d", spell_id);
-		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(),temp1, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), buf.c_str(), 0);
 	}
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);

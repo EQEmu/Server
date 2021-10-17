@@ -1334,11 +1334,9 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp < GetNextHPEvent())
 		{
-			char buf[10];
-			snprintf(buf, 9, "%i", GetNextHPEvent());
-			buf[9] = '\0';
+			std::string buf = fmt::format("{}", GetNextHPEvent());
 			SetNextHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 0);
+			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf.c_str(), 0);
 		}
 	}
 
@@ -1346,11 +1344,9 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp > GetNextIncHPEvent())
 		{
-			char buf[10];
-			snprintf(buf, 9, "%i", GetNextIncHPEvent());
-			buf[9] = '\0';
+			std::string buf = fmt::format("{}", GetNextIncHPEvent());
 			SetNextIncHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 1);
+			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf.c_str(), 1);
 		}
 	}
 }
