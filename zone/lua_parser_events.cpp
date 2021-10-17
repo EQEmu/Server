@@ -237,6 +237,24 @@ void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 						  std::vector<EQ::Any> *extra_pointers) {
 }
 
+void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						std::vector<EQ::Any> *extra_pointers) {
+	Lua_Client l_client(reinterpret_cast<Client*>(init));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+	
+	Lua_ItemInst l_item(EQ::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+	
+	Lua_Corpse l_corpse(EQ::any_cast<Corpse*>(extra_pointers->at(1)));
+	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
+	l_corpse_o.push(L);
+	lua_setfield(L, -2, "corpse");
+}
+
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 					   std::vector<EQ::Any> *extra_pointers) {
