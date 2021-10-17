@@ -2633,8 +2633,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {
 		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
-		if (controller && this->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
-			std::string data_pass = fmt::format("{} {} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), this->GetNPCTypeID());
+		if (controller && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
+			std::string data_pass = fmt::format("{} {} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), GetNPCTypeID());
 			parse->EventNPC(EVENT_DEATH_ZONE, controller, nullptr, data_pass.c_str(), 0);
 		}
 	}
