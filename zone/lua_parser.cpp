@@ -258,7 +258,7 @@ LuaParser::~LuaParser() {
 	lua_encounters.clear();
 	lua_encounter_events_registered.clear();
 	lua_encounters_loaded.clear();
-	if(L) {	
+	if(L) {
 		lua_close(L);
 	}
 }
