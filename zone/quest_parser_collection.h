@@ -78,7 +78,7 @@ public:
 		std::vector<EQ::Any> *extra_pointers = nullptr);
 	int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers = nullptr);
-	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+	int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers = nullptr);
 	int EventEncounter(QuestEventID evt, std::string encounter_name, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers = nullptr);
@@ -131,7 +131,7 @@ private:
 		std::vector<EQ::Any> *extra_pointers);
 	int DispatchEventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
-	int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+	int DispatchEventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
 
 	std::map<uint32, QuestInterface*> _interfaces;

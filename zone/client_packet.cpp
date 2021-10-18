@@ -14778,38 +14778,45 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 {
-
 	if (app->size != sizeof(Translocate_Struct)) {
 		LogDebug("Size mismatch in OP_Translocate expected [{}] got [{}]", sizeof(Translocate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
+
 	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
-	if (!PendingTranslocate)
+	if (!PendingTranslocate) {
 		return;
+	}
 
-	if ((RuleI(Spells, TranslocateTimeLimit) > 0) && (time(nullptr) > (TranslocateTime + RuleI(Spells, TranslocateTimeLimit)))) {
+	auto translocate_time_limit = RuleI(Spells, TranslocateTimeLimit);
+	if (
+		translocate_time_limit &&
+		time(nullptr) > (TranslocateTime + translocate_time_limit)
+	) {
 		Message(Chat::Red, "You did not accept the Translocate within the required time limit.");
 		PendingTranslocate = false;
 		return;
 	}
 
 	if (its->Complete == 1) {
+		uint32 spell_id = PendingTranslocateData.spell_id;
+		bool in_translocate_zone = (
+			zone->GetZoneID() == PendingTranslocateData.zone_id &&
+			zone->GetInstanceID() == PendingTranslocateData.instance_id
+		);
+		int event_parsed = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0);
 
-		int SpellID = PendingTranslocateData.spell_id;
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
-
-		if (i == 0)
-		{
+		if (!event_parsed) {		
 			// If the spell has a translocate to bind effect, AND we are already in the zone the client
 			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
 			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
-			if (((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) &&
-				(zone->GetZoneID() == PendingTranslocateData.zone_id &&
-					zone->GetInstanceID() == PendingTranslocateData.instance_id))
-			{
+			if (
+				IsTranslocateSpell(spell_id) &&
+				in_translocate_zone
+			) {
 				PendingTranslocate = false;
 				GoToBind();
 				return;
@@ -14817,9 +14824,16 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 			////Was sending the packet back to initiate client zone...
 			////but that could be abusable, so lets go through proper channels
-			MovePC(PendingTranslocateData.zone_id, PendingTranslocateData.instance_id,
-				PendingTranslocateData.x, PendingTranslocateData.y,
-				PendingTranslocateData.z, PendingTranslocateData.heading, 0, ZoneSolicited);
+			MovePC(
+				PendingTranslocateData.zone_id,
+				PendingTranslocateData.instance_id,
+				PendingTranslocateData.x,
+				PendingTranslocateData.y,
+				PendingTranslocateData.z,
+				PendingTranslocateData.heading,
+				0,
+				ZoneSolicited
+			);
 		}
 	}
 
