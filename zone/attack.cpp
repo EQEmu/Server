@@ -987,24 +987,36 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 	if (against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)) {
 		return 0;
 	}
-
+	
 	//check to see if our weapons or fists are magical.
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
+		Shout("OwnerID %i (Level %i vs Rule %i) [NPC %i] [Immune %i] ", GetOwnerID(), GetLevel(), RuleI(Combat, PetAttackMagicLevel), IsNPC(), against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL));
 		if (GetSpecialAbility(SPECATK_MAGICAL)) {
 			dmg = 1;
 		}
 		//On live this occurs for pets and charmed pet >= level 10
-		else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
-			//pets wouldn't actually use this but...
-			//it gives us an idea if we can hit due to the dual nature of this function
+		else if (GetOwnerID() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
+			Shout("Pet Atk %i", GetID());
+			dmg = 1;//This isn't actual damage, just indiciates if we can hit
+		}
+		//On live this occurs for NPC's >= 10, (split from pet check to allow more options or retain old behavior)
+		else if (!GetOwnerID() && IsNPC() && GetLevel() >= RuleI(Combat, NPCAttackMagicLevel)) {
+			Shout("NPC Atk %i", GetID());
 			dmg = 1;
 		}
 		else if (weapon_item) {
+			Shout("Weapoin? %s [%i] D [%i] 1H [%i] 2H [%i]", weapon_item->Name, weapon_item->Magic, weapon_item->Damage, weapon_item->IsType1HWeapon(), weapon_item->IsType2HWeapon());
 			if (weapon_item->Magic) {
-				dmg = weapon_item->Damage;
+				
+				if (weapon_item->Damage) {
+					dmg = weapon_item->Damage;
+				}
+				else if (weapon_item->ItemType == EQ::item::ItemTypeArmor) {
+					dmg = 1;
+				}
 				//this is more for non weapon items, ex: boots for kick
 				//they don't have a dmg but we should be able to hit magical
-				dmg = dmg <= 0 ? 1 : dmg;
+				//dmg = dmg <= 0 ? 1 : dmg;
 			}
 			else {
 				return 0;
@@ -1014,6 +1026,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 			dmg = GetHandToHandDamage();
 		}
 		else {
+			Shout("Fail %i", GetID());
 			return 0;
 		}
 	}
