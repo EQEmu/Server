@@ -1010,13 +1010,20 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 				else if (weapon_item->ItemType == EQ::item::ItemTypeArmor) {
 					dmg = 1;
 				}
+				else {
+					return 0;
+				}
+			}
+			else {
+				return 0;
 			}
 		}
 		else if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
 			dmg = GetHandToHandDamage();
 		}
-
-		return 0;
+		else {
+			return 0;
+		}
 	}
 	else {
 		if (weapon_item) {
