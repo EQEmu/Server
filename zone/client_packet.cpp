@@ -14806,9 +14806,8 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 			zone->GetZoneID() == PendingTranslocateData.zone_id &&
 			zone->GetInstanceID() == PendingTranslocateData.instance_id
 		);
-		int event_parsed = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0);
-
-		if (!event_parsed) {		
+		
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0) == 0) {		
 			// If the spell has a translocate to bind effect, AND we are already in the zone the client
 			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
