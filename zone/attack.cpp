@@ -1010,6 +1010,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 				else if (weapon_item->ItemType == EQ::item::ItemTypeArmor) {
 					dmg = 1;
 				}
+				return 0;
 			}
 			else {
 				return 0;
