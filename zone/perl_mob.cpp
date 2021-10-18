@@ -6357,6 +6357,38 @@ XS(XS_Mob_ShieldAbility) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_GetHateRandomClient); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHateRandomClient) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetHateRandomClient(THIS)"); // @categories Hate and Aggro
+	{
+		Mob* THIS;
+		Client* RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetHateRandomClient();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Client", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetHateRandomNPC); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHateRandomNPC) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetHateRandomNPC(THIS)"); // @categories Hate and Aggro
+	{
+		Mob* THIS;
+		NPC* RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetHateRandomNPC();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "NPC", (void *) RETVAL);
+	}
+	XSRETURN(1);
+}
+
 #ifdef BOTS
 XS(XS_Mob_CastToBot); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_CastToBot)
@@ -6371,6 +6403,22 @@ XS(XS_Mob_CastToBot)
 		RETVAL = THIS->CastToBot();
 		ST(0) = sv_newmortal();
 		sv_setref_pv(ST(0), "Bot", (void*)RETVAL);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Mob_GetHateRandomBot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_GetHateRandomBot) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::GetHateRandomBot(THIS)"); // @categories Hate and Aggro
+	{
+		Mob* THIS;
+		Bot* RETVAL;
+		VALIDATE_THIS_IS_MOB;
+		RETVAL = THIS->GetHateRandomBot();
+		ST(0) = sv_newmortal();
+		sv_setref_pv(ST(0), "Bot", (void *) RETVAL);
 	}
 	XSRETURN(1);
 }
@@ -6729,8 +6777,11 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "RemoveAllNimbusEffects"), XS_Mob_RemoveAllNimbusEffects, file, "$");
 	newXSproto(strcpy(buf, "AddNimbusEffect"), XS_Mob_AddNimbusEffect, file, "$$");
 	newXSproto(strcpy(buf, "ShieldAbility"), XS_Mob_ShieldAbility, file, "$$$$$$$$");
+	newXSproto(strcpy(buf, "GetHateRandomClient"), XS_Mob_GetHateRandomClient, file, "$");
+	newXSproto(strcpy(buf, "GetHateRandomNPC"), XS_Mob_GetHateRandomNPC, file, "$");
 #ifdef BOTS
 	newXSproto(strcpy(buf, "CastToBot"), XS_Mob_CastToBot, file, "$");
+	newXSproto(strcpy(buf, "GetHateRandomBot"), XS_Mob_GetHateRandomBot, file, "$");
 #endif
 	XSRETURN_YES;
 }

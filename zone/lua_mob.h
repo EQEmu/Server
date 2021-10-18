@@ -9,6 +9,11 @@ struct Lua_HateList;
 class Lua_Item;
 class Lua_ItemInst;
 class Lua_StatBonuses;
+#ifdef BOTS
+class Lua_Bot;
+#endif
+class Lua_NPC;
+class Lua_Client;
 
 namespace luabind {
 	struct scope;
@@ -205,6 +210,11 @@ public:
 	Lua_Mob GetHateTop();
 	Lua_Mob GetHateDamageTop(Lua_Mob other);
 	Lua_Mob GetHateRandom();
+#ifdef BOTS
+	Lua_Bot GetHateRandomBot();
+#endif
+	Lua_Client GetHateRandomClient();
+	Lua_NPC GetHateRandomNPC();
 	Lua_Mob GetHateClosest();
 	void AddToHateList(Lua_Mob other);
 	void AddToHateList(Lua_Mob other, int hate);
