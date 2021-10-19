@@ -102,13 +102,13 @@ const std::string &EQ::SayLinkEngine::GenerateLink()
 		m_Link  = "<LINKER ERROR>";
 		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
 		LogError(">> LinkType: {}, Lengths: [link: {}({}), body: {}({}), text: {}({})]",
-			m_LinkType,
-			m_Link.length(),
-			EQ::constants::SAY_LINK_MAXIMUM_SIZE,
-			m_LinkBody.length(),
-			EQ::constants::SAY_LINK_BODY_SIZE,
-			m_LinkText.length(),
-			EQ::constants::SAY_LINK_TEXT_SIZE
+				 m_LinkType,
+				 m_Link.length(),
+				 EQ::constants::SAY_LINK_MAXIMUM_SIZE,
+				 m_LinkBody.length(),
+				 EQ::constants::SAY_LINK_BODY_SIZE,
+				 m_LinkText.length(),
+				 EQ::constants::SAY_LINK_TEXT_SIZE
 		);
 		LogError(">> LinkBody: {}", m_LinkBody.c_str());
 		LogError(">> LinkText: {}", m_LinkText.c_str());
@@ -345,8 +345,26 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 {
 	std::string new_message = message;
 
-	int link_index = 0;
-	std::vector<std::string> links = {};
+	int                      link_index    = 0;
+	int                      saylink_index = 0;
+	std::vector<std::string> links         = {};
+	std::vector<std::string> saylinks      = {};
+
+	// first pass - strip existing saylinks
+	for (auto &saylink: split_string(new_message, "\u0012")) {
+		if (!saylink.empty() && saylink.length() > 50 && saylink.find("000") != std::string::npos) {
+			saylinks.emplace_back(saylink);
+
+			// replace with anchor
+			find_replace(
+				new_message,
+				fmt::format("{}", saylink),
+				fmt::format("<saylink:{}>", saylink_index)
+			);
+
+			saylink_index++;
+		}
+	}
 
 	// loop through brackets until none exist
 	while (new_message.find('[') != std::string::npos && new_message.find(']') != std::string::npos) {
@@ -354,7 +372,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 		// already a saylink
 		// todo: improve this later
-		if (!bracket_message.empty() && bracket_message.length() > 50) {
+		if (!bracket_message.empty() && (bracket_message.length() > 50 || bracket_message.find("\u0012") != std::string::npos)) {
 			links.emplace_back(bracket_message);
 		}
 		else {
@@ -365,7 +383,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 		find_replace(
 			new_message,
 			fmt::format("[{}]", bracket_message),
-			fmt::format("<link:{}>", link_index)
+			fmt::format("<prelink:{}>", link_index)
 		);
 
 		link_index++;
@@ -376,10 +394,21 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	for (auto &link: links) {
 		find_replace(
 			new_message,
-			fmt::format("<link:{}>", link_index),
+			fmt::format("<prelink:{}>", link_index),
 			fmt::format("[{}]", link)
 		);
 		link_index++;
+	}
+
+	// pop links onto anchors
+	saylink_index = 0;
+	for (auto &link: saylinks) {
+		find_replace(
+			new_message,
+			fmt::format("<saylink:{}>", saylink_index),
+			fmt::format("{}\u0012", link)
+		);
+		saylink_index++;
 	}
 
 	return new_message;
