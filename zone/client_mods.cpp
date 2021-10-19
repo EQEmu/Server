@@ -1632,7 +1632,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	if (GetClass() != BARD || spells[spell_id].IsDisciplineBuff) { // Puretone is Singing but doesn't get any mod (This should probably just check for the spell effect)
+	if (GetClass() != BARD) {
 		return 10;
 	}
 
@@ -1686,8 +1686,8 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		modified_base_value = (base_effects_focus_slope x effectmod)(base_value) + (base_effects_focus_offset)
 
 	*/
-	entity_list.Message(0, 15, "GetInstrumentMod:: SINGING ITEM %i SPELL %i AA %i", itembonuses.singingMod, spellbonuses.singingMod, aabonuses.singingMod);
-	entity_list.Message(0, 15, "GetInstrumentMod:: STRING ITEM %i SPELL %i AA %i", itembonuses.stringedMod, spellbonuses.stringedMod, aabonuses.stringedMod);
+	//entity_list.Message(0, 15, "GetInstrumentMod:: SINGING ITEM %i SPELL %i AA %i", itembonuses.singingMod, spellbonuses.singingMod, aabonuses.singingMod);
+	//entity_list.Message(0, 15, "GetInstrumentMod:: STRING ITEM %i SPELL %i AA %i", itembonuses.stringedMod, spellbonuses.stringedMod, aabonuses.stringedMod);
 	switch (spells[spell_id].skill) {
 	case EQ::skills::SkillPercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
@@ -1753,7 +1753,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	}
 
 	base_effect_mod = GetFocusEffect(focusFcBaseEffects, spell_id)/10;
-	entity_list.Message(0, 15, "GetInstrumentMod:: BaseEffect %i", base_effect_mod);
+	//entity_list.Message(0, 15, "GetInstrumentMod:: BaseEffect %i", base_effect_mod);
 	effectmod += base_effect_mod;
 
 	if (!RuleB(Character, UseSpellFileSongCap)) {
@@ -1766,7 +1766,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		effectmod = effectmodcap;
 	}
 
-	entity_list.Message(0,15 ,"GetInstrumentMod::Spell [%i] Effect Mod [%i] Cap [%i] ", spell_id, effectmod, effectmodcap); //KAYEN 10 baseline
+	//entity_list.Message(0,15 ,"GetInstrumentMod::Spell [%i] Effect Mod [%i] Cap [%i] ", spell_id, effectmod, effectmodcap); //KAYEN 10 baseline
 	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;

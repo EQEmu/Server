@@ -206,8 +206,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
-	
-	entity_list.Message(0, 15, "SpellEffect :: [%i] Apply instrument mod %i [BUFF SLOT MOD %i]", spell_id, instrument_mod, buffs[buffslot].instrument_mod); //KAYEN
 																			 
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
@@ -3347,7 +3345,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 }
 
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
-			      int ticsremaining, uint16 caster_id)
+	int ticsremaining, uint16 caster_id)
 {
 	int formula, base, max, effect_value;
 
@@ -3361,32 +3359,35 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	if (IsBlankSpellEffect(spell_id, effect_id))
 		return 0;
 
+	//entity_list.Message(0, 15, "CalcSpellEffectValue START::::: (%s) %i VALUE %i [%i]", GetCleanName(), GetID(), effect_value, spells[spell_id].id);
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
-
+	
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) && 
-		IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
-	    
-		/*
-		spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
-	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
-	    spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
-	    spells[spell_id].effectid[effect_id] != SE_Lull &&
-	    spells[spell_id].effectid[effect_id] != SE_ChangeFrenzyRad &&
-	    spells[spell_id].effectid[effect_id] != SE_Harmony &&
-	    spells[spell_id].effectid[effect_id] != SE_CurrentMana &&
-	    spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2 &&
-		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
-		*/
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)){ 
+		
+		if (IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])) {
 
-		int oval = effect_value;
-		effect_value = effect_value * instrument_mod / 10;
+			int oval = effect_value;
+			effect_value = effect_value * instrument_mod / 10;
 
-		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
-			oval, instrument_mod, effect_value);
+			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+				oval, instrument_mod, effect_value);
 
-		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value); //KAYEN 10 baseline
+			entity_list.Message(0, 15, "CalcSpellEffectValue BARD::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] [%s :: %s] ", 
+				spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value, caster->GetCleanName(), spells[spell_id].name); //KAYEN 10 baseline
+		}
 	}
+	else {
+		if (caster) {
+			int oval = effect_value;
+			int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+			effect_value += effect_value * caster->GetFocusEffect(focusFcBaseEffects, spell_id)/100;
+			entity_list.Message(0, 15, "CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
+		}
+		
+	}
+	//entity_list.Message(0, 15, "CalcSpellEffectValue END::::: (%s) %i VALUE %i [%i] (%s)", GetCleanName(), GetID(), effect_value, spells[spell_id].id, spells[spell_id].name);
+	
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
 	

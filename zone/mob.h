@@ -847,6 +847,7 @@ public:
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
 	int GetHealRate() const { return itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; }
 	int GetMemoryBlurChance(int base_chance);
+	inline bool HasBaseEffectFocus() const { return (spellbonuses.FocusEffects[focusFcBaseEffects] || aabonuses.FocusEffects[focusFcBaseEffects] || itembonuses.FocusEffects[focusFcBaseEffects]); }
 
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
