@@ -1294,24 +1294,88 @@ bool IsFocusLimit(int spa)
 	}
 }
 
-bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect) {
+bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
+{
 
-	//Allow instant heal/mana/endurance to be modified
-	if (spells[spell_id].buffduration == 0 && spells[spell_id].goodEffect != 0 && 
-		(effect == SE_CurrentMana || effect == SE_CurrentEndurance || SE_CurrentHP)) {
-		return true;
+	//Effects modifiable by bard instrument mods.
+	switch (effect) {
+
+		//Only modify beneficial movement speeds, does not apply to movement slows.
+		case SE_MovementSpeed: {
+			if (spells[spell_id].goodEffect) {
+				return true;
+			}
+			return false;
+		}
+		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
+		case SE_CurrentEndurance:
+		case SE_CurrentMana: {
+			if (spells[spell_id].buffduration == 0) {
+				return true;
+			}
+			//Mana regen is not modified.
+			return false;
+		}
+
+		case SE_CurrentHP: {
+			//Modify heal over time and instant heals
+			if (spells[spell_id].goodEffect) {
+				return true;
+			}
+			// Modify damage over time spells
+			else if (spells[spell_id].buffduration > 0) {
+					return true;
+			}
+			//Modify direct damage detrimental from instruments, unless it is singing skill.
+			else if (!spells[spell_id].goodEffect && spells[spell_id].skill != EQ::skills::SkillSinging){
+				return true;
+			}
+			//Only weapon procs with Song modifiers get focused, excepted those with singing mods.
+			return false;
+		}
+
+		case SE_ArmorClass:
+		case SE_ACv2:
+		case SE_ATK:
+		case SE_STR:							
+		case SE_DEX:							
+		case SE_AGI:							
+		case SE_STA:							
+		case SE_INT:							
+		case SE_WIS:							
+		case SE_CHA:
+		case SE_AllStats:
+		case SE_ResistFire:	
+		case SE_ResistCold:					
+		case SE_ResistPoison:					
+		case SE_ResistDisease:				
+		case SE_ResistMagic:
+		case SE_ResistAll:
+		case SE_ResistCorruption:
+		case SE_Rune:
+		case SE_AbsorbMagicAtt:
+		case SE_DamageShield:
+		case SE_MitigateDamageShield:
+		case SE_TripleAttackChance:
+		case SE_Flurry:
+		case SE_DamageModifier:
+		case SE_DamageModifier2: // ?
+		case SE_MinDamageModifier: // ? 
+			return true;
+		default:
+			return false;
 	}
 
 	//NOT modifiable by bard singing mods.
 	switch (effect) {
-	case SE_AttackSpeed: 
+	case SE_AttackSpeed: //(Haste AND Slow not modifiable)
 	case SE_AttackSpeed2:
 	case SE_AttackSpeed3:
 	case SE_Lull:
 	case SE_ChangeFrenzyRad:
 	case SE_Harmony:
 	case SE_CurrentMana: // duration only
-	case SE_ManaRegen_v2: 
+	case SE_ManaRegen_v2:
 	case SE_AddFaction:
 	case SE_CurrentEndurance: // duration only
 	case SE_ImprovedDamage:
@@ -1326,53 +1390,33 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect) {
 	case SE_TriggerOnCast:
 	case SE_Mez:
 	case SE_PersistentEffect:
+	case SE_WeaponProc:
+	case SE_Stun:
 		return false;
 	}
-
-	//Modifiable by bard singing mods. (? In some spells decrease resist partial modifable?)
-	switch (effect) {
-	case SE_CurrentHP:
-	case SE_ArmorClass:
-	case SE_MovementSpeed: //Increase only?
-	case SE_ATK:
-	case SE_STR:							
-	case SE_DEX:							
-	case SE_AGI:							
-	case SE_STA:							
-	case SE_INT:							
-	case SE_WIS:							
-	case SE_CHA:
-	case SE_ResistFire:	
-	case SE_ResistCold:					
-	case SE_ResistPoison:					
-	case SE_ResistDisease:				
-	case SE_ResistMagic:
-	case SE_ResistAll:
-	case SE_ResistCorruption:
-	case SE_DamageShield:
-	case SE_TripleAttackChance:
-	case SE_Flurry:
-	case SE_DamageModifier:
-	case SE_DamageModifier2:
-	case SE_MinDamageModifier: // ? 
-		return true;
-	default:
-		return false;
-	}
-
+	
 	/* UNKNOWN
 		Increase Pet Chance to Flurry by %
 		Increase Min Hit Damage by %
-		Decrease Movement Speed(snare)
-		Decrease Melee Haste(slow)
-		Absorb Spell Damage
 		Memory Blur
-		Decrease Damage Shield Taken by #
 		Increase Chance to Resist Spell by %
 		Stun NPC for # seconds
+
+		77 locate corpse
+		115 ressist hunger
+		27 dispel
+		85 add melee proc
+		329 absorb damage to mana
+		180 resists spell % does not get moded
+		158 reflection chance not changed
+		161
+		162 no changes
+		
 	*/
 
-	
+	//Does amplify amplfy itself?  2603	Amplification - yes
+	//haromize?
+
 	/* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE (is this percent modifier of focus)
 	/* 226 */	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120) Is this the amount it decreases focus? like flat)
 
