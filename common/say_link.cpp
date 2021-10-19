@@ -102,13 +102,13 @@ const std::string &EQ::SayLinkEngine::GenerateLink()
 		m_Link  = "<LINKER ERROR>";
 		LogError("SayLinkEngine::GenerateLink() failed to generate a useable say link");
 		LogError(">> LinkType: {}, Lengths: [link: {}({}), body: {}({}), text: {}({})]",
-			m_LinkType,
-			m_Link.length(),
-			EQ::constants::SAY_LINK_MAXIMUM_SIZE,
-			m_LinkBody.length(),
-			EQ::constants::SAY_LINK_BODY_SIZE,
-			m_LinkText.length(),
-			EQ::constants::SAY_LINK_TEXT_SIZE
+				 m_LinkType,
+				 m_Link.length(),
+				 EQ::constants::SAY_LINK_MAXIMUM_SIZE,
+				 m_LinkBody.length(),
+				 EQ::constants::SAY_LINK_BODY_SIZE,
+				 m_LinkText.length(),
+				 EQ::constants::SAY_LINK_TEXT_SIZE
 		);
 		LogError(">> LinkBody: {}", m_LinkBody.c_str());
 		LogError(">> LinkText: {}", m_LinkText.c_str());
@@ -345,30 +345,40 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 {
 	std::string new_message = message;
 
-	int link_index = 0;
-	std::vector<std::string> links = {};
+	int                      link_index = 0;
+	std::vector<std::string> links      = {};
 
 	// loop through brackets until none exist
-	while (new_message.find('[') != std::string::npos && new_message.find(']') != std::string::npos) {
-		std::string bracket_message = get_between(new_message, "[", "]");
+	auto words = split_string(new_message, " ");
+	for (auto &word: words) {
 
-		// already a saylink
-		// todo: improve this later
-		if (!bracket_message.empty() && bracket_message.length() > 50) {
-			links.emplace_back(bracket_message);
-		}
-		else {
-			links.emplace_back(EQ::SayLinkEngine::GenerateQuestSaylink(bracket_message, false, bracket_message));
+		// ignore strings over 50 likely a saylink
+		if (word.empty() && word.length() > 50) {
+			continue;
 		}
 
-		// replace with anchor
-		find_replace(
-			new_message,
-			fmt::format("[{}]", bracket_message),
-			fmt::format("<link:{}>", link_index)
-		);
+		// grep for bracketed phrases
+		if (word.find('[') != std::string::npos && word.find(']') != std::string::npos) {
+			std::string bracket_message = get_between(word, "[", "]");
 
-		link_index++;
+			// already a saylink
+			// todo: improve this later
+			if (!bracket_message.empty() && bracket_message.length() > 50) {
+				links.emplace_back(bracket_message);
+			}
+			else {
+				links.emplace_back(EQ::SayLinkEngine::GenerateQuestSaylink(bracket_message, false, bracket_message));
+			}
+
+			// replace with anchor
+			find_replace(
+				new_message,
+				fmt::format("[{}]", bracket_message),
+				fmt::format("<link:{}>", link_index)
+			);
+
+			link_index++;
+		}
 	}
 
 	// pop links onto anchors
