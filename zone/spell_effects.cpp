@@ -3379,15 +3379,13 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
 		*/
 
-		int oval = effect_value; //should we use base value or formula value?
-		int mod = instrument_mod;
-		effect_value = effect_value * mod / 10;
+		int oval = effect_value;
+		effect_value = effect_value * instrument_mod / 10;
 
-		//effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
-			oval, mod, effect_value);
+			oval, instrument_mod, effect_value);
 
-		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
+		entity_list.Message(0, 15, "CalcSpellEffectValue ::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value); //KAYEN 10 baseline
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);

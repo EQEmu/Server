@@ -1356,6 +1356,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_AbsorbMagicAtt:
 		case SE_DamageShield:
 		case SE_MitigateDamageShield:
+		case SE_Amplification: //On live Amplification is modified by singing mods, including itself.
 		case SE_TripleAttackChance:
 		case SE_Flurry:
 		case SE_DamageModifier:
@@ -1419,7 +1420,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 
 	/* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE (is this percent modifier of focus)
 	/* 226 */	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120) Is this the amount it decreases focus? like flat)
-
+	// y = mx + b                 base_value = (base_effects_focus_slope x total_mod)(base) + (OFFSET)
 }
 
 uint32 GetNimbusEffect(uint16 spell_id)
