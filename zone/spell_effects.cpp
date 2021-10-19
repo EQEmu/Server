@@ -4302,7 +4302,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				}
 
 				SendAppearancePacket(AT_Pet, 0, true, true);
-				Mob* tempmob = GetOwner();
+				Mob* owner = GetOwner();
 				SetOwnerID(0);
 				SetPetType(petNone);
 				SetHeld(false);
@@ -4311,25 +4311,27 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 				SetFocused(false);
 				SetPetStop(false);
 				SetPetRegroup(false);
-				if(tempmob)
+				if(owner)
 				{
-					tempmob->SetPet(0);
+					owner->SetPet(0);
 				}
 				if (IsAIControlled())
 				{
-					// clear the hate list of the mobs
+					//Remove damage over time effects on charmed pet and those applied by charmed pet.
 					if (RuleB(Spells, PreventFactionWarOnCharmBreak)) {
 						for (auto mob : hate_list.GetHateList()) {
 							auto tar = mob->entity_on_hatelist;
-							if (tar->IsCasting()) {
-								tar->InterruptSpell(tar->CastingSpellID());
-							}
-							uint32 buff_count = tar->GetMaxTotalSlots();
-							for (unsigned int j = 0; j < buff_count; j++) {
-								if (tar->GetBuffs()[j].spellid != SPELL_UNKNOWN) {
-									auto spell = spells[tar->GetBuffs()[j].spellid];
-									if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
-										tar->BuffFadeBySpellID(spell.id);
+							if (tar) {
+								if (tar->IsCasting()) {
+									tar->InterruptSpell(tar->CastingSpellID());
+								}
+								uint32 buff_count = tar->GetMaxTotalSlots();
+								for (unsigned int j = 0; j < buff_count; j++) {
+									if (IsValidSpell(tar->GetBuffs()[j].spellid)) {
+										auto spell = spells[tar->GetBuffs()[j].spellid];
+										if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP) && tar->GetBuffs()[j].casterid == GetID()) {
+											tar->BuffFadeBySpellID(spell.id);
+										}
 									}
 								}
 							}
@@ -4339,7 +4341,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 						}
 						uint32 buff_count = GetMaxTotalSlots();
 						for (unsigned int j = 0; j < buff_count; j++) {
-							if (GetBuffs()[j].spellid != SPELL_UNKNOWN) {
+							if (IsValidSpell(GetBuffs()[j].spellid )) {
 								auto spell = spells[this->GetBuffs()[j].spellid];
 								if (spell.goodEffect == 0 && IsEffectInSpell(spell.id, SE_CurrentHP)) {
 									BuffFadeBySpellID(spell.id);
@@ -4347,17 +4349,43 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 							}
 						}
 					}
-					entity_list.ReplaceWithTarget(this, tempmob);
+
+					// clear the hate list of the mobs
+					entity_list.ReplaceWithTarget(this, owner);
 					WipeHateList();
-					if(tempmob)
-						AddToHateList(tempmob, 1, 0);
+					if (owner) {
+						AddToHateList(owner, 1, 0);
+					}
+					//If owner dead, briefly setting Immmune Aggro while hatelists wipe for both pet and targets is needed to ensure no reaggroing.
+					else if (IsNPC()){
+						bool immune_aggro = GetSpecialAbility(IMMUNE_AGGRO); //check if already immune aggro
+						SetSpecialAbility(IMMUNE_AGGRO, 1);
+						WipeHateList();
+						if (IsCasting()) {
+							InterruptSpell(CastingSpellID());
+						}
+						entity_list.RemoveFromHateLists(this);
+						//If NPC targeting charmed pet are in process of casting on it after it is removed from hatelist, stop the cast to prevent reaggroing.
+						Mob *current_npc = nullptr;
+						for (auto &it : entity_list.GetNPCList()) {
+							current_npc = it.second;
+
+							if (current_npc && current_npc->IsCasting() && current_npc->GetTarget() == this) {
+								current_npc->InterruptSpell(current_npc->CastingSpellID());
+							}
+						}
+
+						if (!immune_aggro) {
+							SetSpecialAbility(IMMUNE_AGGRO, 0);
+						}
+					}
 					SendAppearancePacket(AT_Anim, ANIM_STAND);
 				}
-				if(tempmob && tempmob->IsClient())
+				if(owner && owner->IsClient())
 				{
 					auto app = new EQApplicationPacket(OP_Charm, sizeof(Charm_Struct));
 					Charm_Struct *ps = (Charm_Struct*)app->pBuffer;
-					ps->owner_id = tempmob->GetID();
+					ps->owner_id = owner->GetID();
 					ps->pet_id = GetID();
 					ps->command = 0;
 					entity_list.QueueClients(this, app);

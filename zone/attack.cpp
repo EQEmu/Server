@@ -990,32 +990,31 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 
 	//check to see if our weapons or fists are magical.
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
-		if (weapon_item) {
+		if (GetSpecialAbility(SPECATK_MAGICAL)) {
+			dmg = 1;
+		}
+		//On live this occurs for pets and charmed pet >= level 10
+		else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
+			//pets wouldn't actually use this but...
+			//it gives us an idea if we can hit due to the dual nature of this function
+			dmg = 1;
+		}
+		else if (weapon_item) {
 			if (weapon_item->Magic) {
 				dmg = weapon_item->Damage;
-
 				//this is more for non weapon items, ex: boots for kick
 				//they don't have a dmg but we should be able to hit magical
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
-			else
+			else {
 				return 0;
+			}
+		}
+		else if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
+			dmg = GetHandToHandDamage();
 		}
 		else {
-			if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
-				dmg = GetHandToHandDamage();
-			}
-			else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
-				//pets wouldn't actually use this but...
-				//it gives us an idea if we can hit due to the dual nature of this function
-				dmg = 1;
-			}
-			else if (GetSpecialAbility(SPECATK_MAGICAL))
-			{
-				dmg = 1;
-			}
-			else
-				return 0;
+			return 0;
 		}
 	}
 	else {
@@ -1685,10 +1684,16 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
+
+	Mob* m_pet = GetPet();
 	SetPet(0);
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
+
+	if (m_pet && m_pet->IsCharmed()) {
+		m_pet->BuffFadeByEffect(SE_Charm);
+	}
 
 	if (GetMerc()) {
 		GetMerc()->Suspend();

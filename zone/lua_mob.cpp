@@ -5,9 +5,13 @@
 
 #include "client.h"
 #include "npc.h"
+#ifdef BOTS
+#include "lua_bot.h"
+#endif
 #include "lua_item.h"
 #include "lua_iteminst.h"
 #include "lua_mob.h"
+#include "lua_npc.h"
 #include "lua_hate_list.h"
 #include "lua_client.h"
 #include "lua_stat_bonuses.h"
@@ -2402,6 +2406,23 @@ void Lua_Mob::RemoveAllNimbusEffects() {
 	self->RemoveAllNimbusEffects();
 }
 
+#ifdef BOTS
+Lua_Bot Lua_Mob::GetHateRandomBot() {
+	Lua_Safe_Call_Class(Lua_Bot);
+	return Lua_Bot(self->GetHateRandomBot());
+}
+#endif
+
+Lua_Client Lua_Mob::GetHateRandomClient() {
+	Lua_Safe_Call_Class(Lua_Client);
+	return Lua_Client(self->GetHateRandomClient());
+}
+
+Lua_NPC Lua_Mob::GetHateRandomNPC() {
+	Lua_Safe_Call_Class(Lua_NPC);
+	return Lua_NPC(self->GetHateRandomNPC());
+}
+
 luabind::scope lua_register_mob() {
 	return luabind::class_<Lua_Mob, Lua_Entity>("Mob")
 		.def(luabind::constructor<>())
@@ -2810,7 +2831,12 @@ luabind::scope lua_register_mob() {
 		.def("GetLastName", &Lua_Mob::GetLastName)
 		.def("CanClassEquipItem", &Lua_Mob::CanClassEquipItem)
 		.def("CanRaceEquipItem", &Lua_Mob::CanRaceEquipItem)
-		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects);
+		.def("RemoveAllNimbusEffects", &Lua_Mob::RemoveAllNimbusEffects)
+#ifdef BOTS
+		.def("GetHateRandomBot", (Lua_Bot(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomBot)
+#endif
+		.def("GetHateRandomClient", (Lua_Client(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomClient)
+		.def("GetHateRandomNPC", (Lua_NPC(Lua_Mob::*)(void))&Lua_Mob::GetHateRandomNPC);
 }
 
 luabind::scope lua_register_special_abilities() {

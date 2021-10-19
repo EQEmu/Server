@@ -649,6 +649,11 @@ public:
 	Mob* GetSecondaryHate(Mob *skip) { return hate_list.GetEntWithMostHateOnList(this, skip); }
 	Mob* GetHateDamageTop(Mob* other) { return hate_list.GetDamageTopOnHateList(other);}
 	Mob* GetHateRandom() { return hate_list.GetRandomEntOnHateList();}
+	Client* GetHateRandomClient() { return hate_list.GetRandomClientOnHateList(); }
+	NPC* GetHateRandomNPC() { return hate_list.GetRandomNPCOnHateList(); }
+#ifdef BOTS
+	Bot* GetHateRandomBot() { return hate_list.GetRandomBotOnHateList(); }
+#endif
 	Mob* GetHateMost() { return hate_list.GetEntWithMostHateOnList();}
 	Mob* GetHateClosest() { return hate_list.GetClosestEntOnHateList(this); }
 	bool IsEngaged() { return(!hate_list.IsHateListEmpty()); }

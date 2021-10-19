@@ -432,22 +432,37 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	casting_spell_targetid = target_id;
 
 	if (RuleB(Spells, InvisRequiresGroup) && IsInvisSpell(spell_id)) {
-		if (GetTarget() && GetTarget()->IsClient()) {
-			Client *spell_target = entity_list.GetClientByID(target_id);
+		if (IsClient() && GetTarget() && GetTarget()->IsClient()) {
+			Client* spell_caster = this->CastToClient();
+			Client* spell_target = entity_list.GetClientByID(target_id);
 			if (spell_target && spell_target->GetID() != GetID()) {
-				if (!spell_target->IsGrouped()) {
-					InterruptSpell(spell_id);
-					Message(Chat::Red, "You cannot invis someone who is not in your group.");
-					return false;
-				}
-				else if (spell_target->IsGrouped()) {
+				bool cast_failed = true;
+				if (spell_target->IsGrouped()) {
 					Group *target_group = spell_target->GetGroup();
-					Group *my_group     = GetGroup();
-					if (target_group && my_group && (target_group->GetID() != my_group->GetID())) {
-						InterruptSpell(spell_id);
-						Message(Chat::Red, "You cannot invis someone who is not in your group.");
-						return false;
+					Group *my_group = GetGroup();
+					if (
+						target_group &&
+						my_group &&
+						(target_group->GetID() == my_group->GetID())
+					) {
+						cast_failed = false;
 					}
+				} else if (spell_target->IsRaidGrouped()) {					
+					Raid *target_raid = spell_target->GetRaid();
+					Raid *my_raid = GetRaid();
+					if (
+						target_raid &&
+						my_raid &&
+						(target_raid->GetGroup(spell_target) == my_raid->GetGroup(spell_caster))
+					) {
+						cast_failed = false;
+					}
+				}
+
+				if (cast_failed) {
+					InterruptSpell(spell_id);
+					MessageString(Chat::Red, TARGET_GROUP_MEMBER);
+					return false;
 				}
 			}
 		}
@@ -1323,7 +1338,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		bool fromaug = false;
 		EQ::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
-		uint32 recasttype = 0;
+		int recasttype = 0;
 
 		while (true) {
 			if (item == nullptr)
@@ -1363,8 +1378,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			{
 				//Can we start the timer here?  I don't see why not.
 				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-				database.UpdateItemRecastTimestamps(CastToClient()->CharacterID(), recasttype,
-								CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp());
+				if (recasttype != -1) {
+					database.UpdateItemRecastTimestamps(
+						CastToClient()->CharacterID(),
+						recasttype,
+						CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp()
+					);
+				}
 			}
 		}
 
@@ -2524,9 +2544,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
-			database.UpdateItemRecastTimestamps(
-			    CastToClient()->CharacterID(), recast_type,
-			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
+			if (recast_type != -1) {
+				database.UpdateItemRecastTimestamps(
+				    CastToClient()->CharacterID(),
+					recast_type,
+					CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+				);
+			}
 			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
