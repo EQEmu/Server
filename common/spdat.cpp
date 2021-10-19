@@ -1300,13 +1300,6 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 	//Effects modifiable by bard instrument mods.
 	switch (effect) {
 
-		//Only modify beneficial movement speeds, does not apply to movement slows.
-		case SE_MovementSpeed: {
-			if (spells[spell_id].goodEffect) {
-				return true;
-			}
-			return false;
-		}
 		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
 		case SE_CurrentEndurance:
 		case SE_CurrentMana: {
@@ -1336,6 +1329,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 
 		case SE_ArmorClass:
 		case SE_ACv2:
+		case SE_MovementSpeed:
 		case SE_ATK:
 		case SE_STR:							
 		case SE_DEX:							
@@ -1360,7 +1354,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_TripleAttackChance:
 		case SE_Flurry:
 		case SE_DamageModifier:
-		case SE_DamageModifier2: // ?
+		case SE_DamageModifier2:
 		case SE_MinDamageModifier: // ? 
 			return true;
 		default:
@@ -1414,9 +1408,6 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		162 no changes
 		
 	*/
-
-	//Does amplify amplfy itself?  2603	Amplification - yes
-	//haromize?
 
 	/* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE (is this percent modifier of focus)
 	/* 226 */	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120) Is this the amount it decreases focus? like flat)

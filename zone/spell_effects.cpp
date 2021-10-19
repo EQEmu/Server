@@ -3530,7 +3530,8 @@ snare has both of them negative, yet their range should work the same:
 			break;
 
 		case 119:	// confirmed 2/6/04
-			result = ubase + (caster_level / 8); break;
+			result = ubase + (caster_level / 8); 
+			break;
 		case 120:
 		{
 			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
@@ -7004,22 +7005,6 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 
 
 	return value;
-}
-
-uint32 Mob::GetBardSongCap(int32 spell_id) 
-{
-	int effectmodcap = 0;
-	if (RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap = spells[spell_id].songcap / 10;
-		if (effectmodcap) {
-			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
-		}
-	}
-	else {
-		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
-	}
-
-	return effectmodcap;
 }
 
 int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {

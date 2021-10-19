@@ -1654,26 +1654,36 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	// item mods are in 10ths of percent increases
 	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
 	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
-	/*
+	
+	/*Mechanics: updated 10/19/21 ~Kayen
 		Bard Spell Effects
 
 		Mod uses the highest bonus from either of these for each instrument
-		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline) TO DO FIX CALCULATION, FIX spire
+		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
 		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
 			-Example usage: From AA a value of 4 = 40%
 
-		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus TO DO ADD AA BONUS [2603] Amplification ? IS CALC CORRECT
+		SPA 118 SE_Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
+			- Live Behavior: Amplifcation can be modified by singing mods and amplification itself, thus on the second cast of Amplification you will recieve
+			  the mod from the first cast, this continues until you reach the song mod cap.
+
 		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
 		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
 
 		SPA 413 SE_FcBaseEffects focus effect that replaced item instrument mods
 
 		Issues 10-15-21:
-		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues.
-		Need to recode songs to recast when duration ends.
+		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues. -> Need to recode songs to recast when duration ends.
 
 		Formula Live Bards:
-		mod = (10 + aabonus.____Mod + SE_FcBaseEffects/10)/10
+		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
+
+		Spell Table Fields that need to be implemented
+		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE 
+		Field 226	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120)
+		Based on description likely works as a way to quickly balance instrument mods to a song.
+		Using a standard slope formula: y = mx + b
+		modified_base_value = (base_effects_focus_slope x effectmod)(base_value) + (base_effects_focus_offset)
 
 	*/
 	entity_list.Message(0, 15, "GetInstrumentMod:: SINGING ITEM %i SPELL %i AA %i", itembonuses.singingMod, spellbonuses.singingMod, aabonuses.singingMod);
