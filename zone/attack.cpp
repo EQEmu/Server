@@ -987,7 +987,7 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 	if (against->GetInvul() || against->GetSpecialAbility(IMMUNE_MELEE)) {
 		return 0;
 	}
-	
+
 	//check to see if our weapons or fists are magical.
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
 		if (GetSpecialAbility(SPECATK_MAGICAL)) {
