@@ -300,8 +300,8 @@ enum {
 
 enum {
 	WWLDoNUpdateType_AddLoss,
-	WWLDoNUpdateType_AddWin,
 	WWLDoNUpdateType_AddPoints,
+	WWLDoNUpdateType_AddWin,
 	WWLDoNUpdateType_RemoveLoss,
 	WWLDoNUpdateType_RemoveWin
 };
