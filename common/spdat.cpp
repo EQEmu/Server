@@ -1358,6 +1358,108 @@ bool SpellRequiresTarget(int spell_id)
 	return true;
 }
 
+bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
+{
+
+	//Effects modifiable by bard instrument mods.
+	switch (effect) {
+
+		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
+	case SE_CurrentEndurance:
+	case SE_CurrentMana: {
+		if (spells[spell_id].buffduration == 0) {
+			return true;
+		}
+		//Mana regen is not modified.
+		return false;
+	}
+
+	case SE_CurrentHP: {
+		//Modify heal over time and instant heals
+		if (spells[spell_id].goodEffect) {
+			return true;
+		}
+		// Modify damage over time spells
+		else if (spells[spell_id].buffduration > 0) {
+			return true;
+		}
+		//Modify direct damage detrimental from instruments, unless it is singing skill.
+		else if (!spells[spell_id].goodEffect && spells[spell_id].skill != EQ::skills::SkillSinging) {
+			return true;
+		}
+		//Only weapon procs with Song modifiers get focused, excepted those with singing mods.
+		return false;
+	}
+
+	case SE_ArmorClass:
+	case SE_ACv2:
+	case SE_MovementSpeed:
+	case SE_ATK:
+	case SE_STR:
+	case SE_DEX:
+	case SE_AGI:
+	case SE_STA:
+	case SE_INT:
+	case SE_WIS:
+	case SE_CHA:
+	case SE_AllStats:
+	case SE_ResistFire:
+	case SE_ResistCold:
+	case SE_ResistPoison:
+	case SE_ResistDisease:
+	case SE_ResistMagic:
+	case SE_ResistAll:
+	case SE_ResistCorruption:
+	case SE_Rune:
+	case SE_AbsorbMagicAtt:
+	case SE_DamageShield:
+	case SE_MitigateDamageShield:
+	case SE_Amplification: //On live Amplification is modified by singing mods, including itself.
+	case SE_TripleAttackChance:
+	case SE_Flurry:
+	case SE_DamageModifier:
+	case SE_DamageModifier2:
+	case SE_MinDamageModifier: // ? Need verified 
+	case SE_PetFlurry: // ? Need verified
+		return true;
+	default:
+		return false;
+	}
+
+	/*
+		The following are NOT modifiable by bard singing mods.
+		- Focus Effects
+		- Proc Effects, Cast on Triggers
+
+		case SE_AttackSpeed: //(Haste AND Slow not modifiable)
+		case SE_AttackSpeed2:
+		case SE_AttackSpeed3:
+		case SE_Lull:
+		case SE_ChangeFrenzyRad:
+		case SE_Harmony:
+		case SE_AddFaction:
+		case SE_CurrentMana: // duration only
+		case SE_ManaRegen_v2:
+		case SE_CurrentEndurance: // duration only
+		case SE_PersistentEffect:
+		case SE_ReduceReuseTimer:
+		case SE_Stun:
+		case SE_CancelMagic:
+		case SE_ManaAbsorbPercentDamage:
+		case SE_ResistSpellChance:
+		case SE_Reflect
+		case SE_MitigateSpellDamage
+		case SE_MitigateMeleeDamage
+
+	}
+
+	/* UNKNOWN
+		Increase Pet Chance to Flurry by %
+		Increase Min Hit Damage by %
+		Memory Blur
+	*/
+}
+
 int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 {
 	if (!IsValidSpell(spell_id))
