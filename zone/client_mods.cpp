@@ -1758,14 +1758,17 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	//entity_list.Message(0, 15, "GetInstrumentMod:: BaseEffect %i", base_effect_mod);
 	effectmod += base_effect_mod;
 
-	if (!RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap
-	}
 	if (effectmod < 10) {
 		effectmod = 10;
 	}
-	if (effectmodcap && effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
-		effectmod = effectmodcap;
+
+	if (effectmodcap) {
+
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
+
+		if (effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
+			effectmod = effectmodcap;
+		}
 	}
 
 	//entity_list.Message(0,15 ,"GetInstrumentMod::Spell [%i] Effect Mod [%i] Cap [%i] ", spell_id, effectmod, effectmodcap); //KAYEN 10 baseline
