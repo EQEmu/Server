@@ -3368,6 +3368,10 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 				oval, instrument_mod, effect_value);
 		}
 	}
+	/*
+		If spell is being cast on someone else, check casters BaseEffects focus. (This is checked from Mob::SpellEffects)
+		If it's a buff from yourself, check your own BaseEffects focus. (This is checked from Mob::ApplySpellBonuses)//This shoudl be like from instrumentmod on buffs, or other buff var.
+	*/
 	else {
 		if (caster && caster->HasBaseEffectFocus()) {
 			int oval = effect_value;

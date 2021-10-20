@@ -1635,6 +1635,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	if (GetClass() != BARD) {
 		return 10;
 	}
+	//Other classes can get a base effects mod using SPA 413
+	//else if (HasBaseEffectFocus()) {
+	//	return (10 + GetFocusEffect(focusFcBaseEffects, spell_id));//TODO, we need likely send packet for buff effects to display on client properly.
+	//}
 
 	uint32 effectmod = 10;
 	int32 base_effect_mod = 0;
