@@ -4126,7 +4126,7 @@ luabind::scope lua_register_events() {
 			luabind::value("target_change", static_cast<int>(EVENT_TARGET_CHANGE)),
 			luabind::value("hate_list", static_cast<int>(EVENT_HATE_LIST)),
 			luabind::value("spell_effect", static_cast<int>(EVENT_SPELL_EFFECT_CLIENT)),
-			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_BUFF_TIC_CLIENT)),
+			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT)),
 			luabind::value("spell_fade", static_cast<int>(EVENT_SPELL_FADE)),
 			luabind::value("spell_effect_translocate_complete", static_cast<int>(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)),
 			luabind::value("combine_success ", static_cast<int>(EVENT_COMBINE_SUCCESS )),

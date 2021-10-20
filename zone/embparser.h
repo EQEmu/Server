@@ -58,7 +58,7 @@ public:
 		std::vector<EQ::Any> *extra_pointers);
 	virtual int EventItem(QuestEventID evt, Client *client, EQ::ItemInstance *item, Mob *mob, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
-	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, uint32 extra_data,
+	virtual int EventSpell(QuestEventID evt, NPC* npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 		std::vector<EQ::Any> *extra_pointers);
 
 	virtual bool HasQuestSub(uint32 npcid, QuestEventID evt);
