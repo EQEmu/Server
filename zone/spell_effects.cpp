@@ -2368,7 +2368,11 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (!caster)
 					break;
 
+				
+
 				focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+
+				Shout("effect_value %i :: base_value %i, FOCUS %i", effect_value, spells[spell_id].base[i], focus);
 
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
