@@ -3357,16 +3357,22 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)){ 
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
+		spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
+		spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
+		spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
+		spells[spell_id].effectid[effect_id] != SE_Lull &&
+		spells[spell_id].effectid[effect_id] != SE_ChangeFrenzyRad &&
+		spells[spell_id].effectid[effect_id] != SE_Harmony &&
+		spells[spell_id].effectid[effect_id] != SE_CurrentMana &&
+		spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2 &&
+		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
 		
-		if (IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])) {
+		oval = effect_value;
+		effect_value = effect_value * instrument_mod / 10;
 
-			oval = effect_value;
-			effect_value = effect_value * instrument_mod / 10;
-
-			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
-				oval, instrument_mod, effect_value);
-		}
+		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+			oval, instrument_mod, effect_value);
 	}
 	/*
 		SPA 413 SE_FcBaseEffects, modifies base value of a spell effect after formula calcultion, but before other focuses.
