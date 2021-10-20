@@ -3355,7 +3355,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		return 0;
 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
-	
+	Shout("CalcSpellEffectValue :: CASTER ID %i Instrument Mod: %i", caster_id, instrument_mod);
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)){ 
 		
@@ -3369,16 +3369,25 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		}
 	}
 	/*
-		If spell is being cast on someone else, check casters BaseEffects focus. (This is checked from Mob::SpellEffects)
+		
 		If it's a buff from yourself, check your own BaseEffects focus. (This is checked from Mob::ApplySpellBonuses)//This shoudl be like from instrumentmod on buffs, or other buff var.
 	*/
-	else {
+	else if (!caster_id){
+		//If spell is being cast on someone else, check casters BaseEffects focus. (This is checked from Mob::SpellEffects)
 		if (caster && caster->HasBaseEffectFocus()) {
 			int oval = effect_value;
 			int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 			effect_value += effect_value * caster->GetFocusEffect(focusFcBaseEffects, spell_id)/100;
-			entity_list.Message(0, 15, "CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]", 
+			Shout("CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]",
 				spells[spell_id].skill, spell_id, oval, mod, effect_value, caster->GetCleanName(), spells[spell_id].name, caster->HasBaseEffectFocus()); //KAYEN 10 baseline
+		}
+	}
+	else {
+		if (instrument_mod > 10) {
+			int oval = effect_value;
+			effect_value = effect_value * instrument_mod / 10;
+			Shout("CalcSpellEffectValue FROM BONUS::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]",
+				spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value,GetCleanName(), spells[spell_id].name, HasBaseEffectFocus()); //KAYEN 10 baseline
 		}
 	}
 

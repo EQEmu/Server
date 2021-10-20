@@ -1632,16 +1632,17 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
+	Shout("GetInstrumentMod:: HasBaseEffectFocus() %i,", HasBaseEffectFocus());
 	if (GetClass() != BARD) {
+		//Other classes can get a base effects mod using SPA 413
+		if (HasBaseEffectFocus()) {
+			Shout("GetInstrumentMod:: %i", (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10));
+			return (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10);//TODO, we need likely send packet for buff effects to display on client properly.
+		}
 		return 10;
 	}
-	//Other classes can get a base effects mod using SPA 413
-	//else if (HasBaseEffectFocus()) {
-	//	return (10 + GetFocusEffect(focusFcBaseEffects, spell_id));//TODO, we need likely send packet for buff effects to display on client properly.
-	//}
-
+		
 	uint32 effectmod = 10;
-	int32 base_effect_mod = 0;
 	int effectmodcap = 0;
 	if (RuleB(Character, UseSpellFileSongCap)) {
 		effectmodcap = spells[spell_id].songcap / 10;
@@ -1756,10 +1757,8 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	}
 
 	if (HasBaseEffectFocus()) {
-		base_effect_mod = GetFocusEffect(focusFcBaseEffects, spell_id) / 10;
+		effectmod = GetFocusEffect(focusFcBaseEffects, spell_id) / 10;
 	}
-
-	effectmod += base_effect_mod;
 
 	if (effectmod < 10) {
 		effectmod = 10;
@@ -1769,10 +1768,16 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 
 		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
 
+		//Incase a negative modifier is used.
+		if (effectmodcap <= 0) {
+			effectmodcap = 10;
+		}
+
 		if (effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
 			effectmod = effectmodcap;
 		}
 	}
+
 	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 
 	return effectmod;
