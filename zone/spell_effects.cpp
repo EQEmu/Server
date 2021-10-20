@@ -3354,7 +3354,6 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	if (IsBlankSpellEffect(spell_id, effect_id))
 		return 0;
 
-	//entity_list.Message(0, 15, "CalcSpellEffectValue START::::: (%s) %i VALUE %i [%i]", GetCleanName(), GetID(), effect_value, spells[spell_id].id);
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 	
 	// this doesn't actually need to be a song to get mods, just the right skill
@@ -3367,9 +3366,6 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 
 			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
-
-			entity_list.Message(0, 15, "CalcSpellEffectValue BARD::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] [%s :: %s] ", 
-				spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value, caster->GetCleanName(), spells[spell_id].name); //KAYEN 10 baseline
 		}
 	}
 	else {
@@ -3381,8 +3377,6 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 				spells[spell_id].skill, spell_id, oval, mod, effect_value, caster->GetCleanName(), spells[spell_id].name, caster->HasBaseEffectFocus()); //KAYEN 10 baseline
 		}
 	}
-	//entity_list.Message(0, 15, "CalcSpellEffectValue END::::: (%s) %i VALUE %i [%i] (%s)", GetCleanName(), GetID(), effect_value, spells[spell_id].id, spells[spell_id].name);
-	
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
 	
