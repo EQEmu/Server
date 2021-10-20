@@ -343,18 +343,21 @@ std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bo
 
 std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 {
-	std::string new_message = message;
-
-	int                      link_index    = 0;
-	int                      saylink_index = 0;
-	std::vector<std::string> links         = {};
-	std::vector<std::string> saylinks      = {};
+	std::string              new_message       = message;
+	int                      link_index        = 0;
+	int                      saylink_index     = 0;
+	std::vector<std::string> links             = {};
+	std::vector<std::string> saylinks          = {};
+	int                      saylink_length    = 50;
+	std::string              saylink_separator = "\u0012";
+	std::string              saylink_partial   = "000";
 
 	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
 
-	// first pass - strip existing saylinks
-	for (auto &saylink: split_string(new_message, "\u0012")) {
-		if (!saylink.empty() && saylink.length() > 50 && saylink.find("000") != std::string::npos) {
+	// first pass - strip existing saylinks by putting placeholder anchors on them
+	for (auto &saylink: split_string(new_message, saylink_separator)) {
+		if (!saylink.empty() && saylink.length() > saylink_length &&
+			saylink.find(saylink_partial) != std::string::npos) {
 			saylinks.emplace_back(saylink);
 
 			LogSaylinkDetail("Found saylink [{}]", saylink);
@@ -381,7 +384,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 					std::string bracket_message = trim(right_split[0]);
 
 					// we shouldn't see a saylink fragment here, ignore this bracket
-					if (bracket_message.find("000") != std::string::npos) {
+					if (bracket_message.find(saylink_partial) != std::string::npos) {
 						continue;
 					}
 
@@ -392,7 +395,8 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 						// already a saylink
 						// todo: improve this later
 						if (!bracket_message.empty() &&
-							(bracket_message.length() > 50 || bracket_message.find('\u0012') != std::string::npos)) {
+							(bracket_message.length() > saylink_length ||
+							 bracket_message.find(saylink_separator) != std::string::npos)) {
 							links.emplace_back(bracket_message);
 						}
 						else {
@@ -422,14 +426,14 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message post pass 2 (post brackets) [{}]", new_message);
 
 	// strip any current delimiters of saylinks
-	find_replace(new_message, "\u0012", "");
+	find_replace(new_message, saylink_separator, "");
 
 	// pop links onto anchors
 	link_index = 0;
 	for (auto &link: links) {
 
 		// strip any current delimiters of saylinks
-		find_replace(link, "\u0012", "");
+		find_replace(link, saylink_separator, "");
 
 		find_replace(
 			new_message,
@@ -445,7 +449,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	saylink_index = 0;
 	for (auto &link: saylinks) {
 		// strip any current delimiters of saylinks
-		find_replace(link, "\u0012", "");
+		find_replace(link, saylink_separator, "");
 
 		// check to see if we did a double anchor pass (existing saylink that was also inside brackets)
 		// this means we found a saylink and we're checking to see if we're already encoded before double encoding
