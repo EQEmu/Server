@@ -993,12 +993,8 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		if (GetSpecialAbility(SPECATK_MAGICAL)) {
 			dmg = 1;
 		}
-		//On live this occurs for pets and charmed pet >= level 10
-		else if ((GetOwnerID() || IsTempPet()) && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
-			dmg = 1;//This isn't actual damage, just indiciates if we can hit
-		}
-		//On live this occurs for NPC's >= 10, (split from pet check to allow more options or retain old behavior)
-		else if ((!GetOwnerID() && !IsTempPet()) && IsNPC() && GetLevel() >= RuleI(Combat, NPCAttackMagicLevel)) {
+		//On live this occurs for ALL NPC's >= 10
+		else if (IsNPC() && GetLevel() >= RuleI(Combat, NPCAttackMagicLevel)) {
 			dmg = 1;
 		}
 		else if (weapon_item) {
