@@ -1335,9 +1335,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
-				if (caster)
-					effect_value = caster->ApplySpellEffectiveness(spell_id, effect_value);
-
 				buffs[buffslot].melee_rune = effect_value;
 				break;
 			}
@@ -3378,13 +3375,13 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		}
 	}
 	else {
-		if (caster) {
+		if (caster && caster->HasBaseEffectFocus()) {
 			int oval = effect_value;
 			int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
 			effect_value += effect_value * caster->GetFocusEffect(focusFcBaseEffects, spell_id)/100;
-			entity_list.Message(0, 15, "CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] ", spells[spell_id].skill, spell_id, oval, mod, effect_value); //KAYEN 10 baseline
+			entity_list.Message(0, 15, "CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]", 
+				spells[spell_id].skill, spell_id, oval, mod, effect_value, caster->GetCleanName(), spells[spell_id].name, caster->HasBaseEffectFocus()); //KAYEN 10 baseline
 		}
-		
 	}
 	//entity_list.Message(0, 15, "CalcSpellEffectValue END::::: (%s) %i VALUE %i [%i] (%s)", GetCleanName(), GetID(), effect_value, spells[spell_id].id, spells[spell_id].name);
 	
@@ -7032,30 +7029,6 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
 
-
-	return value;
-}
-
-int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
-
-	// 9-17-12: This is likely causing crashes, disabled till can resolve.
-	if (IsBard)
-		return value;
-
-	Mob* caster = this;
-
-	if (caster_id && caster_id != GetID())//Make sure we are checking the casters focus
-		caster = entity_list.GetMob(caster_id);
-
-	if (!caster)
-		return value;
-
-	int16 focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-
-	if (IsBard)
-		value += focus;
-	else
-		value += value*focus/100;
 
 	return value;
 }

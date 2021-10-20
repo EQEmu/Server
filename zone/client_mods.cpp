@@ -1654,7 +1654,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	// item mods are in 10ths of percent increases
 	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
 	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
-	
+
 	/*Mechanics: updated 10/19/21 ~Kayen
 		Bard Spell Effects
 
@@ -1679,7 +1679,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
 
 		Spell Table Fields that need to be implemented
-		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE 
+		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
 		Field 226	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120)
 		Based on description likely works as a way to quickly balance instrument mods to a song.
 		Using a standard slope formula: y = mx + b
@@ -1752,7 +1752,9 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		return effectmod;
 	}
 
-	base_effect_mod = GetFocusEffect(focusFcBaseEffects, spell_id)/10;
+	if (HasBaseEffectFocus()) {
+		base_effect_mod = GetFocusEffect(focusFcBaseEffects, spell_id) / 10;
+	}
 	//entity_list.Message(0, 15, "GetInstrumentMod:: BaseEffect %i", base_effect_mod);
 	effectmod += base_effect_mod;
 
