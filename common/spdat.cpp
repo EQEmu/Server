@@ -1355,63 +1355,45 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_Flurry:
 		case SE_DamageModifier:
 		case SE_DamageModifier2:
-		case SE_MinDamageModifier: // ? 
+		case SE_MinDamageModifier: // ? Need verified 
+		case SE_PetFlurry: // ? Need verified
 			return true;
 		default:
 			return false;
 	}
 
-	//NOT modifiable by bard singing mods.
-	switch (effect) {
-	case SE_AttackSpeed: //(Haste AND Slow not modifiable)
-	case SE_AttackSpeed2:
-	case SE_AttackSpeed3:
-	case SE_Lull:
-	case SE_ChangeFrenzyRad:
-	case SE_Harmony:
-	case SE_CurrentMana: // duration only
-	case SE_ManaRegen_v2:
-	case SE_AddFaction:
-	case SE_CurrentEndurance: // duration only
-	case SE_ImprovedDamage:
-	case SE_ImprovedDamage2:
-	case SE_FcSpellVulnerability:
-	case SE_FcDamageAmtIncoming:
-	case SE_Fc_Spell_Damage_Pct_IncomingPC:
-	case SE_Fc_Spell_Damage_Amt_IncomingPC:
-	case SE_SkillProc:
-	case SE_SkillProcSuccess:
-	case SE_ReduceReuseTimer:
-	case SE_TriggerOnCast:
-	case SE_Mez:
-	case SE_PersistentEffect:
-	case SE_WeaponProc:
-	case SE_Stun:
-		return false;
+	/*
+		The following are NOT modifiable by bard singing mods.
+		- Focus Effects
+		- Proc Effects, Cast on Triggers
+	
+		case SE_AttackSpeed: //(Haste AND Slow not modifiable)
+		case SE_AttackSpeed2:
+		case SE_AttackSpeed3:
+		case SE_Lull:
+		case SE_ChangeFrenzyRad:
+		case SE_Harmony:
+		case SE_AddFaction:
+		case SE_CurrentMana: // duration only
+		case SE_ManaRegen_v2:
+		case SE_CurrentEndurance: // duration only
+		case SE_PersistentEffect:
+		case SE_ReduceReuseTimer:
+		case SE_Stun:
+		case SE_CancelMagic:
+		case SE_ManaAbsorbPercentDamage:
+		case SE_ResistSpellChance:
+		case SE_Reflect
+		case SE_MitigateSpellDamage
+		case SE_MitigateMeleeDamage
+
 	}
 	
 	/* UNKNOWN
 		Increase Pet Chance to Flurry by %
 		Increase Min Hit Damage by %
 		Memory Blur
-		Increase Chance to Resist Spell by %
-		Stun NPC for # seconds
-
-		77 locate corpse
-		115 ressist hunger
-		27 dispel
-		85 add melee proc
-		329 absorb damage to mana
-		180 resists spell % does not get moded
-		158 reflection chance not changed
-		161
-		162 no changes
-		
 	*/
-
-	/* 225 */	//float base_effects_focus_slope; // -- BASE_EFFECTS_FOCUS_SLOPE (is this percent modifier of focus)
-	/* 226 */	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120) Is this the amount it decreases focus? like flat)
-	// y = mx + b                 base_value = (base_effects_focus_slope x total_mod)(base) + (OFFSET)
 }
 
 uint32 GetNimbusEffect(uint16 spell_id)
