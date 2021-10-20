@@ -1365,14 +1365,14 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 	switch (effect) {
 
 		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
-	case SE_CurrentEndurance:
-	case SE_CurrentMana: {
-		if (spells[spell_id].buffduration == 0) {
-			return true;
+		case SE_CurrentEndurance:
+		case SE_CurrentMana: {
+			if (spells[spell_id].buffduration == 0) {
+				return true;
+			}
+			//Mana regen is not modified.
+			return false;
 		}
-		//Mana regen is not modified.
-		return false;
-	}
 
 	case SE_CurrentHP: {
 		//Modify heal over time and instant heals
@@ -1391,39 +1391,39 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		return false;
 	}
 
-	case SE_ArmorClass:
-	case SE_ACv2:
-	case SE_MovementSpeed:
-	case SE_ATK:
-	case SE_STR:
-	case SE_DEX:
-	case SE_AGI:
-	case SE_STA:
-	case SE_INT:
-	case SE_WIS:
-	case SE_CHA:
-	case SE_AllStats:
-	case SE_ResistFire:
-	case SE_ResistCold:
-	case SE_ResistPoison:
-	case SE_ResistDisease:
-	case SE_ResistMagic:
-	case SE_ResistAll:
-	case SE_ResistCorruption:
-	case SE_Rune:
-	case SE_AbsorbMagicAtt:
-	case SE_DamageShield:
-	case SE_MitigateDamageShield:
-	case SE_Amplification: //On live Amplification is modified by singing mods, including itself.
-	case SE_TripleAttackChance:
-	case SE_Flurry:
-	case SE_DamageModifier:
-	case SE_DamageModifier2:
-	case SE_MinDamageModifier: // ? Need verified 
-	case SE_PetFlurry: // ? Need verified
-		return true;
-	default:
-		return false;
+		case SE_ArmorClass:
+		case SE_ACv2:
+		case SE_MovementSpeed:
+		case SE_ATK:
+		case SE_STR:
+		case SE_DEX:
+		case SE_AGI:
+		case SE_STA:
+		case SE_INT:
+		case SE_WIS:
+		case SE_CHA:
+		case SE_AllStats:
+		case SE_ResistFire:
+		case SE_ResistCold:
+		case SE_ResistPoison:
+		case SE_ResistDisease:
+		case SE_ResistMagic:
+		case SE_ResistAll:
+		case SE_ResistCorruption:
+		case SE_Rune:
+		case SE_AbsorbMagicAtt:
+		case SE_DamageShield:
+		case SE_MitigateDamageShield:
+		case SE_Amplification: //On live Amplification is modified by singing mods, including itself.
+		case SE_TripleAttackChance:
+		case SE_Flurry:
+		case SE_DamageModifier:
+		case SE_DamageModifier2:
+		case SE_MinDamageModifier: // ? Need verified 
+		case SE_PetFlurry: // ? Need verified
+			return true;
+		default:
+			return false;
 	}
 
 	/*
