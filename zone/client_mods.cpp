@@ -1507,135 +1507,13 @@ int32 Client::CalcATK()
 	ATK = itembonuses.ATK + spellbonuses.ATK + aabonuses.ATK + GroupLeadershipAAOffenseEnhancement();
 	return (ATK);
 }
-/*
-uint32 Mob::GetInstrumentMod(uint16 spell_id) const
-{
-	if (GetClass() != BARD || spells[spell_id].IsDisciplineBuff) // Puretone is Singing but doesn't get any mod
-		return 10;
-
-	uint32 effectmod = 10;
-	int effectmodcap = 0;
-	bool nocap = false;
-	if (RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap = spells[spell_id].songcap / 10;
-		// this looks a bit weird, but easiest way I could think to keep both systems working
-		if (effectmodcap == 0) {
-			nocap = true;
-		}
-		else {
-			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
-		}
-	} else {
-		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
-	}
-	// this should never use spell modifiers...
-	// if a spell grants better modifers, they are copied into the item mods
-	// because the spells are supposed to act just like having the intrument.
-	// item mods are in 10ths of percent increases
-	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
-	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
-	/*
-		Bard Spell Effects
-
-		Mod uses the highest bonus from either of these for each instrument
-		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods
-		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
-
-		SPA 118 SE_Amplification is a stackable singing mod, only calculated from spellbonus
-		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
-		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
-
-		Issues 10-15-21:
-		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues.
-		Need to recode songs to recast when duration ends.
-	
-
-	switch (spells[spell_id].skill) {
-	case EQ::skills::SkillPercussionInstruments:
-		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
-			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillPercussionInstruments) == 0)
-			effectmod = 10;
-		else if (itembonuses.percussionMod > spellbonuses.percussionMod)
-			effectmod = itembonuses.percussionMod;
-		else
-			effectmod = spellbonuses.percussionMod;
-		if (IsBardSong(spell_id))
-			effectmod += aabonuses.percussionMod;
-		break;
-	case EQ::skills::SkillStringedInstruments:
-		if (itembonuses.stringedMod == 0 && spellbonuses.stringedMod == 0)
-			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillStringedInstruments) == 0)
-			effectmod = 10;
-		else if (itembonuses.stringedMod > spellbonuses.stringedMod)
-			effectmod = itembonuses.stringedMod;
-		else
-			effectmod = spellbonuses.stringedMod;
-		if (IsBardSong(spell_id))
-			effectmod += aabonuses.stringedMod;
-		break;
-	case EQ::skills::SkillWindInstruments:
-		if (itembonuses.windMod == 0 && spellbonuses.windMod == 0)
-			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillWindInstruments) == 0)
-			effectmod = 10;
-		else if (itembonuses.windMod > spellbonuses.windMod)
-			effectmod = itembonuses.windMod;
-		else
-			effectmod = spellbonuses.windMod;
-		if (IsBardSong(spell_id))
-			effectmod += aabonuses.windMod;
-		break;
-	case EQ::skills::SkillBrassInstruments:
-		if (itembonuses.brassMod == 0 && spellbonuses.brassMod == 0)
-			effectmod = 10;
-		else if (GetSkill(EQ::skills::SkillBrassInstruments) == 0)
-			effectmod = 10;
-		else if (itembonuses.brassMod > spellbonuses.brassMod)
-			effectmod = itembonuses.brassMod;
-		else
-			effectmod = spellbonuses.brassMod;
-		if (IsBardSong(spell_id))
-			effectmod += aabonuses.brassMod;
-		break;
-	case EQ::skills::SkillSinging:
-		if (itembonuses.singingMod == 0 && spellbonuses.singingMod == 0)
-			effectmod = 10;
-		else if (itembonuses.singingMod > spellbonuses.singingMod)
-			effectmod = itembonuses.singingMod;
-		else
-			effectmod = spellbonuses.singingMod;
-		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification; //SPA 118 SE_Amplification
-		break;
-	default:
-		effectmod = 10;
-		return effectmod;
-	}
-	if (!RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap
-	}
-	if (effectmod < 10) {
-		effectmod = 10;
-	}
-	if (!nocap && effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
-		effectmod = effectmodcap;
-	}
-
-	entity_list.Message(0,15 ,"GetInstrumentMod:: Effect Mod [%i] Cap [%i] Spell [%i] [RAW CAP %i]", effectmod, effectmodcap, spell_id, spells[spell_id].songcap); //KAYEN 10 baseline
-	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
-
-	return effectmod;
-}
-*/
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
 	if (GetClass() != BARD) {
 		//Other classes can get a base effects mod using SPA 413
 		if (HasBaseEffectFocus()) {
-			return (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10);//TODO: change action->instrument mod to float to support < 10% focus values
+			return (10 + (GetFocusEffect(focusFcBaseEffects, spell_id) / 10));//TODO: change action->instrument mod to float to support < 10% focus values
 		}
 		return 10;
 	}
@@ -1755,7 +1633,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	}
 
 	if (HasBaseEffectFocus()) {
-		effectmod = GetFocusEffect(focusFcBaseEffects, spell_id) / 10;
+		effectmod += (GetFocusEffect(focusFcBaseEffects, spell_id) / 10);
 	}
 
 	if (effectmod < 10) {
