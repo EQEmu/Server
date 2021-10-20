@@ -133,7 +133,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 			int      charges = loot_drop->Entries[i].multiplier;
 			for (int j       = 0; j < charges; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
-					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
+					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 					const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
 					npc->AddLootDrop(
 						database_item,
@@ -158,7 +158,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool        active_item_list = false;
 	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
+		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 			roll_t += loot_drop->Entries[i].chance;
 			active_item_list = true;
 		}
@@ -254,31 +254,27 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
 }
 
-bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose)
+bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
 {
 	if (loot_drop.npc_min_level > 0 && GetLevel() < loot_drop.npc_min_level) {
-		if (verbose) {
-			LogLootDetail(
-				"NPC [{}] does not meet loot_drop level requirements (min_level) level [{}] current [{}] for item [{}]",
-				GetCleanName(),
-				loot_drop.npc_min_level,
-				GetLevel(),
-				database.CreateItemLink(loot_drop.item_id)
+		LogLootDetail(
+			"NPC [{}] does not meet loot_drop level requirements (min_level) level [{}] current [{}] for item [{}]",
+			GetCleanName(),
+			loot_drop.npc_min_level,
+			GetLevel(),
+			database.CreateItemLink(loot_drop.item_id)
 			);
-		}
 		return false;
 	}
 
 	if (loot_drop.npc_max_level > 0 && GetLevel() > loot_drop.npc_max_level) {
-		if (verbose) {
-			LogLootDetail(
-				"NPC [{}] does not meet loot_drop level requirements (max_level) level [{}] current [{}] for item [{}]",
-				GetCleanName(),
-				loot_drop.npc_max_level,
-				GetLevel(),
-				database.CreateItemLink(loot_drop.item_id)
+		LogLootDetail(
+			"NPC [{}] does not meet loot_drop level requirements (max_level) level [{}] current [{}] for item [{}]",
+			GetCleanName(),
+			loot_drop.npc_max_level,
+			GetLevel(),
+			database.CreateItemLink(loot_drop.item_id)
 			);
-		}
 		return false;
 	}
 
