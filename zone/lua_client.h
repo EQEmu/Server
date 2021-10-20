@@ -81,6 +81,8 @@ public:
 	uint32 GetTotalSecondsPlayed();
 	void AddLDoNLoss(uint32 theme_id);
 	void AddLDoNWin(uint32 theme_id);
+	void RemoveLDoNLoss(uint32 theme_id);
+	void RemoveLDoNWin(uint32 theme_id);
 	void UpdateLDoNPoints(uint32 theme_id, int points);
 	void SetDeity(int v);
 	void AddEXP(uint32 add_exp);
