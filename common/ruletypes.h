@@ -509,6 +509,7 @@ RULE_BOOL(NPC, NPCHealOnGate, true, "Will the NPC Heal on Gate")
 RULE_BOOL(NPC, UseMeditateBasedManaRegen, false, "Based NPC ooc regen on Meditate skill")
 RULE_REAL(NPC, NPCHealOnGateAmount, 25, "How much the NPC will heal on gate if enabled")
 RULE_BOOL(NPC, AnimalsOpenDoors, true, "Determines or not whether animals open doors or not when they approach them")
+RULE_INT(NPC, MaxRaceID, 724, "Maximum Race ID, RoF2 by default supports up to 724")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Aggro)
