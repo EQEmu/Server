@@ -263,7 +263,7 @@ bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
 			loot_drop.npc_min_level,
 			GetLevel(),
 			database.CreateItemLink(loot_drop.item_id)
-			);
+		);
 		return false;
 	}
 
@@ -274,7 +274,7 @@ bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
 			loot_drop.npc_max_level,
 			GetLevel(),
 			database.CreateItemLink(loot_drop.item_id)
-			);
+		);
 		return false;
 	}
 
