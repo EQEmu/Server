@@ -838,9 +838,9 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		return;
 	}
 
-	// unsure when this should happen
-	if (focus) // From FcBaseEffects
+	if (focus) {
 		WDmg += WDmg * focus / 100;
+	}
 
 	if (WDmg > 0 || ADmg > 0) {
 		if (WDmg < 0)
@@ -2158,8 +2158,9 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 		hate = weapon_damage;
 
 	if (weapon_damage > 0) {
-		if (focus) // From FcBaseEffects
+		if (focus) {
 			weapon_damage += weapon_damage * focus / 100;
+		}
 
 		if (skillinuse == EQ::skills::SkillBash) {
 			if (IsClient()) {
