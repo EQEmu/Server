@@ -3342,7 +3342,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
 	int ticsremaining, uint16 caster_id)
 {
-	int formula, base, max, effect_value;
+	int formula, base, max, effect_value, oval;
 
 	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
 		return 0;
@@ -3355,13 +3355,13 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		return 0;
 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
-	Shout("CalcSpellEffectValue :: CASTER ID %i Instrument Mod: %i", caster_id, instrument_mod);
+
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)){ 
 		
 		if (IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])) {
 
-			int oval = effect_value;
+			oval = effect_value;
 			effect_value = effect_value * instrument_mod / 10;
 
 			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
@@ -3369,25 +3369,33 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		}
 	}
 	/*
+		SPA 413 SE_FcBaseEffects, modifies base value of a spell effect after formula calcultion, but before other focuses.
+		Like bard modifiers, this is sent in the action_struct using action->instrument_mod (which is a base effect modifier)
 		
-		If it's a buff from yourself, check your own BaseEffects focus. (This is checked from Mob::ApplySpellBonuses)//This shoudl be like from instrumentmod on buffs, or other buff var.
+		Issue: value sent with action->instrument_mod needs to be 10 or higher. Therefore lowest possible percent chance would be 11 (calculated to 10%)
+		there are modern spells that use less than 10% but we send as a uint where lowest value has to be 10, where it should be a float for current clients. 
+		Though not ideal, at the moment for spells that are instant effects, the action packet doesn't matter and we will calculate the actual percent here correctly.
+		Logic here is, caster_id is only sent from ApplySpellBonuses. Thus if it is a buff a long as the base effects is set to over 10% and at +10% intervals
+		it will focus the base value correctly.
+		
 	*/
-	else if (!caster_id){
-		//If spell is being cast on someone else, check casters BaseEffects focus. (This is checked from Mob::SpellEffects)
-		if (caster && caster->HasBaseEffectFocus()) {
-			int oval = effect_value;
-			int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-			effect_value += effect_value * caster->GetFocusEffect(focusFcBaseEffects, spell_id)/100;
-			Shout("CalcSpellEffectValue OTHER::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]",
-				spells[spell_id].skill, spell_id, oval, mod, effect_value, caster->GetCleanName(), spells[spell_id].name, caster->HasBaseEffectFocus()); //KAYEN 10 baseline
-		}
+	else if (caster_id && instrument_mod > 10) {
+		//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
+		oval = effect_value;
+		effect_value = effect_value * instrument_mod / 10;
+
+		LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+			oval, instrument_mod, effect_value);
 	}
-	else {
-		if (instrument_mod > 10) {
-			int oval = effect_value;
-			effect_value = effect_value * instrument_mod / 10;
-			Shout("CalcSpellEffectValue FROM BONUS::[SKILL %i] [SPELL %i] effect val [%i] ->{IMOD %i]->[%i] :: [%s :: %s] Has FOCUS [%i]",
-				spells[spell_id].skill, spell_id, oval, instrument_mod, effect_value,GetCleanName(), spells[spell_id].name, HasBaseEffectFocus()); //KAYEN 10 baseline
+	else if (!caster_id){
+		//This is checked from Mob::SpellEffects and applied to instant spells and runes.
+		if (caster && caster->HasBaseEffectFocus()) {
+			oval = effect_value;
+			int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+			effect_value += effect_value * mod /100;
+
+			LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+				oval, mod, effect_value);
 		}
 	}
 

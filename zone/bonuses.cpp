@@ -1783,7 +1783,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 {
 	int i, effect_value, base2, max, effectid;
 	bool AdditiveWornBonus = false;
-	Shout("Spell BONUSES %i [%s]", spell_id, spells[spell_id].name);
+
 	if(!IsAISpellEffect && !IsValidSpell(spell_id))
 		return;
 
@@ -1817,8 +1817,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, nullptr, ticsremaining, casterId);
 			base2 = spells[spell_id].base2[i];
 			max = spells[spell_id].max[i];
-
-			Shout("Effect_value %i :: %i [%s]", effect_value,spell_id, spells[spell_id].name);
 		}
 		//Use AISpellEffects
 		else {

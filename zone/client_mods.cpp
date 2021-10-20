@@ -1632,12 +1632,10 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 
 uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	Shout("GetInstrumentMod:: HasBaseEffectFocus() %i,", HasBaseEffectFocus());
 	if (GetClass() != BARD) {
 		//Other classes can get a base effects mod using SPA 413
 		if (HasBaseEffectFocus()) {
-			Shout("GetInstrumentMod:: %i", (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10));
-			return (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10);//TODO, we need likely send packet for buff effects to display on client properly.
+			return (10 + GetFocusEffect(focusFcBaseEffects, spell_id) / 10);//TODO: change action->instrument mod to float to support < 10% focus values
 		}
 		return 10;
 	}
@@ -1683,7 +1681,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 		Formula Live Bards:
 		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
 
-		Spell Table Fields that need to be implemented
+		TODO: Spell Table Fields that need to be implemented
 		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
 		Field 226	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120)
 		Based on description possibly works as a way to quickly balance instrument mods to a song.
