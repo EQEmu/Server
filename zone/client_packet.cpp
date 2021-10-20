@@ -11164,14 +11164,13 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	char buf[16];
-	sprintf(buf, "%d", popup_response->popupid);
+	std::string buf = fmt::format("{}", popup_response->popupid);
 
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf.c_str(), 0);
 
 	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
+		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf.c_str(), 0);
 	}
 }
 

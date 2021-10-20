@@ -1766,9 +1766,8 @@ void NPC::AI_DoMovement() {
 					}
 
 					//kick off event_waypoint arrive
-					char temp[16];
-					sprintf(temp, "%d", cur_wp);
-					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, temp, 0);
+					std::string buf = fmt::format("{}", cur_wp);
+					parse->EventNPC(EVENT_WAYPOINT_ARRIVE, CastToNPC(), nullptr, buf.c_str(), 0);
 					// No need to move as we are there.  Next loop will
 					// take care of normal grids, even at pause 0.
 					// We do need to call and setup a wp if we're cur_wp=-2
@@ -1885,9 +1884,8 @@ void NPC::AI_SetupNextWaypoint() {
 
 		if (!DistractedFromGrid) {
 			//kick off event_waypoint depart
-			char temp[16];
-			sprintf(temp, "%d", cur_wp);
-			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, temp, 0);
+			std::string buf = fmt::format("{}", cur_wp);
+			parse->EventNPC(EVENT_WAYPOINT_DEPART, CastToNPC(), nullptr, buf.c_str(), 0);
 
 			//setup our next waypoint, if we are still on our normal grid
 			//remember that the quest event above could have done anything it wanted with our grid
@@ -2470,10 +2468,8 @@ void NPC::CheckSignal() {
 	if (!signal_q.empty()) {
 		int signal_id = signal_q.front();
 		signal_q.pop_front();
-		char buf[32];
-		snprintf(buf, 31, "%d", signal_id);
-		buf[31] = '\0';
-		parse->EventNPC(EVENT_SIGNAL, this, nullptr, buf, 0);
+		std::string buf = fmt::format("{}", signal_id);
+		parse->EventNPC(EVENT_SIGNAL, this, nullptr, buf.c_str(), 0);
 	}
 }
 
