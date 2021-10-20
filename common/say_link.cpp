@@ -373,29 +373,50 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message post pass 1 [{}]", new_message);
 
 	// loop through brackets until none exist
-	while (new_message.find('[') != std::string::npos && new_message.find(']') != std::string::npos) {
-		std::string bracket_message = get_between(new_message, "[", "]");
+	if (new_message.find('[') != std::string::npos) {
+		for (auto &b: split_string(new_message, "[")) {
+			if (!b.empty() && b.find(']') != std::string::npos) {
+				std::vector<std::string> right_split = split_string(b, "]");
+				if (!right_split.empty()) {
+					std::string bracket_message = trim(right_split[0]);
 
-		LogSaylinkDetail("Found bracket_message [{}]", bracket_message);
+					// we shouldn't see a saylink fragment here, ignore this bracket
+					if (bracket_message.find("000") != std::string::npos) {
+						continue;
+					}
 
-		// already a saylink
-		// todo: improve this later
-		if (!bracket_message.empty() &&
-			(bracket_message.length() > 50 || bracket_message.find('\u0012') != std::string::npos)) {
-			links.emplace_back(bracket_message);
+					// if non empty bracket contents
+					if (!bracket_message.empty()) {
+						LogSaylinkDetail("Found bracket_message [{}]", bracket_message);
+
+						// already a saylink
+						// todo: improve this later
+						if (!bracket_message.empty() &&
+							(bracket_message.length() > 50 || bracket_message.find('\u0012') != std::string::npos)) {
+							links.emplace_back(bracket_message);
+						}
+						else {
+							links.emplace_back(
+								EQ::SayLinkEngine::GenerateQuestSaylink(
+									bracket_message,
+									false,
+									bracket_message
+								)
+							);
+						}
+
+						// replace with anchor
+						find_replace(
+							new_message,
+							fmt::format("[{}]", bracket_message),
+							fmt::format("<prelink:{}>", link_index)
+						);
+
+						link_index++;
+					}
+				}
+			}
 		}
-		else {
-			links.emplace_back(EQ::SayLinkEngine::GenerateQuestSaylink(bracket_message, false, bracket_message));
-		}
-
-		// replace with anchor
-		find_replace(
-			new_message,
-			fmt::format("[{}]", bracket_message),
-			fmt::format("<prelink:{}>", link_index)
-		);
-
-		link_index++;
 	}
 
 	LogSaylinkDetail("new_message post pass 2 (post brackets) [{}]", new_message);
