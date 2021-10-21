@@ -158,7 +158,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	bool        active_item_list = false;
 	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
-		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
+		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 			roll_t += loot_drop->Entries[i].chance;
 			active_item_list = true;
 		}
