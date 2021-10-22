@@ -1238,11 +1238,11 @@ XS(XS_Spell_GetNotFocusable) {
 	XSRETURN(1);
 }
 
-XS(XS_Spell_GetNpcNoLos);
-XS(XS_Spell_GetNpcNoLos) {
+XS(XS_Spell_GetNPCNoLOS);
+XS(XS_Spell_GetNPCNoLOS) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Spell::GetNpcNoLos(THIS)");
+		Perl_croak(aTHX_ "Usage: Spell::GetNPCNoLOS(THIS)");
 	{
 		SPDat_Spell_Struct* THIS;
 		bool npc_no_los;
@@ -1293,11 +1293,11 @@ XS(XS_Spell_GetOverrideCritChance) {
 	XSRETURN(1);
 }
 
-XS(XS_Spell_GetPcnpcOnlyFlag);
-XS(XS_Spell_GetPcnpcOnlyFlag) {
+XS(XS_Spell_GetPCNPCOnlyFlag);
+XS(XS_Spell_GetPCNPCOnlyFlag) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Spell::GetPcnpcOnlyFlag(THIS)");
+		Perl_croak(aTHX_ "Usage: Spell::GetPCNPCOnlyFlag(THIS)");
 	{
 		SPDat_Spell_Struct* THIS;
 		int pcnpc_only_flag;
@@ -2115,10 +2115,10 @@ XS(boot_Spell) {
 	newXSproto(strcpy(buf, "GetNoRemove"), XS_Spell_GetNoRemove, file, "$");
 	newXSproto(strcpy(buf, "GetNoResist"), XS_Spell_GetNoResist, file, "$");
 	newXSproto(strcpy(buf, "GetNotFocusable"), XS_Spell_GetNotFocusable, file, "$");
-	newXSproto(strcpy(buf, "GetNpcNoLos"), XS_Spell_GetNpcNoLos, file, "$");
+	newXSproto(strcpy(buf, "GetNPCNoLOS"), XS_Spell_GetNPCNoLOS, file, "$");
 	newXSproto(strcpy(buf, "GetOtherCasts"), XS_Spell_GetOtherCasts, file, "$");
 	newXSproto(strcpy(buf, "GetOverrideCritChance"), XS_Spell_GetOverrideCritChance, file, "$");
-	newXSproto(strcpy(buf, "GetPcnpcOnlyFlag"), XS_Spell_GetPcnpcOnlyFlag, file, "$");
+	newXSproto(strcpy(buf, "GetPCNPCOnlyFlag"), XS_Spell_GetPCNPCOnlyFlag, file, "$");
 	newXSproto(strcpy(buf, "GetPersistDeath"), XS_Spell_GetPersistDeath, file, "$");
 	newXSproto(strcpy(buf, "GetPlayer_1"), XS_Spell_GetPlayer_1, file, "$");
 	newXSproto(strcpy(buf, "GetPushBack"), XS_Spell_GetPushBack, file, "$");
