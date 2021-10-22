@@ -163,9 +163,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	std::string buf = fmt::format(
 		"{} {} {} {}",
-		caster->GetID(),
+		caster ? caster->GetID() : 0,
 		buffs[buffslot].ticsremaining,
-		caster->GetLevel(),
+		caster ? caster->GetLevel() : 0,
 		buffslot
 	);
 	
@@ -3751,9 +3751,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	std::string buf = fmt::format(
 		"{} {} {} {}",
-		caster->GetID(),
+		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
-		caster->GetLevel(),
+		caster ? caster->GetLevel() : 0,
 		slot
 	);
 
