@@ -164,7 +164,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 	std::string buf = fmt::format(
 		"{} {} {} {}",
 		caster ? caster->GetID() : 0,
-		buffs[buffslot].ticsremaining,
+		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
 		caster ? caster->GetLevel() : 0,
 		buffslot
 	);
