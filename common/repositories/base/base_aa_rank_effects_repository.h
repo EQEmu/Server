@@ -21,8 +21,8 @@ public:
 		int rank_id;
 		int slot;
 		int effect_id;
-		int base1;
-		int base2;
+		int base_value;
+		int limit_value;
 	};
 
 	static std::string PrimaryKey()
@@ -76,8 +76,8 @@ public:
 		entry.rank_id   = 0;
 		entry.slot      = 1;
 		entry.effect_id = 0;
-		entry.base1     = 0;
-		entry.base2     = 0;
+		entry.base_value     = 0;
+		entry.limit_value     = 0;
 
 		return entry;
 	}
@@ -116,8 +116,8 @@ public:
 			entry.rank_id   = atoi(row[0]);
 			entry.slot      = atoi(row[1]);
 			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			entry.base_value     = atoi(row[3]);
+			entry.limit_value     = atoi(row[4]);
 
 			return entry;
 		}
@@ -154,8 +154,8 @@ public:
 		update_values.push_back(columns[0] + " = " + std::to_string(aa_rank_effects_entry.rank_id));
 		update_values.push_back(columns[1] + " = " + std::to_string(aa_rank_effects_entry.slot));
 		update_values.push_back(columns[2] + " = " + std::to_string(aa_rank_effects_entry.effect_id));
-		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_entry.base1));
-		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_entry.base2));
+		update_values.push_back(columns[3] + " = " + std::to_string(aa_rank_effects_entry.base_value));
+		update_values.push_back(columns[4] + " = " + std::to_string(aa_rank_effects_entry.limit_value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -180,8 +180,8 @@ public:
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
 		insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
-		insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
+		insert_values.push_back(std::to_string(aa_rank_effects_entry.base_value));
+		insert_values.push_back(std::to_string(aa_rank_effects_entry.limit_value));
 
 		auto results = db.QueryDatabase(
 			fmt::format(
@@ -214,8 +214,8 @@ public:
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.rank_id));
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.slot));
 			insert_values.push_back(std::to_string(aa_rank_effects_entry.effect_id));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.base1));
-			insert_values.push_back(std::to_string(aa_rank_effects_entry.base2));
+			insert_values.push_back(std::to_string(aa_rank_effects_entry.base_value));
+			insert_values.push_back(std::to_string(aa_rank_effects_entry.limit_value));
 
 			insert_chunks.push_back("(" + implode(",", insert_values) + ")");
 		}
@@ -252,8 +252,8 @@ public:
 			entry.rank_id   = atoi(row[0]);
 			entry.slot      = atoi(row[1]);
 			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			entry.base_value     = atoi(row[3]);
+			entry.limit_value     = atoi(row[4]);
 
 			all_entries.push_back(entry);
 		}
@@ -281,8 +281,8 @@ public:
 			entry.rank_id   = atoi(row[0]);
 			entry.slot      = atoi(row[1]);
 			entry.effect_id = atoi(row[2]);
-			entry.base1     = atoi(row[3]);
-			entry.base2     = atoi(row[4]);
+			entry.base_value     = atoi(row[3]);
+			entry.limit_value     = atoi(row[4]);
 
 			all_entries.push_back(entry);
 		}

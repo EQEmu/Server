@@ -4342,8 +4342,8 @@ struct AARankPrereq_Struct
 struct AARankEffect_Struct
 {
 	int32 effect_id;
-	int32 base1;
-	int32 base2;
+	int32 base_value;
+	int32 limit_value;
 	int32 slot;
 };
 
@@ -4351,8 +4351,8 @@ struct AARankEffect_Struct
 
 struct AA_Ability {
 /*00*/	uint32 skill_id;
-/*04*/	uint32 base1;
-/*08*/	uint32 base2;
+/*04*/	uint32 base_value;
+/*08*/	uint32 limit_value;
 /*12*/	uint32 slot;
 };
 

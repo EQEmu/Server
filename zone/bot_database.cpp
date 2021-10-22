@@ -766,7 +766,7 @@ bool BotDatabase::LoadBuffs(Bot* bot_inst)
 		else if (CalculateCorruptionCounters(bot_buffs[buff_count].spellid) > 0)
 			bot_buffs[buff_count].counters = atoi(row[7]);
 
-		bot_buffs[buff_count].numhits = atoi(row[8]);
+		bot_buffs[buff_count].hit_number = atoi(row[8]);
 		bot_buffs[buff_count].melee_rune = atoi(row[9]);
 		bot_buffs[buff_count].magic_rune = atoi(row[10]);
 		bot_buffs[buff_count].dot_rune = atoi(row[11]);
@@ -843,13 +843,13 @@ bool BotDatabase::SaveBuffs(Bot* bot_inst)
 			bot_inst->GetBotID(),
 			bot_buffs[buff_index].spellid,
 			bot_buffs[buff_index].casterlevel,
-			spells[bot_buffs[buff_index].spellid].buffdurationformula,
+			spells[bot_buffs[buff_index].spellid].buff_duration_formula,
 			bot_buffs[buff_index].ticsremaining,
 			((CalculatePoisonCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateDiseaseCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateCurseCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
 			((CalculateCorruptionCounters(bot_buffs[buff_index].spellid) > 0) ? (bot_buffs[buff_index].counters) : (0)),
-			bot_buffs[buff_index].numhits,
+			bot_buffs[buff_index].hit_number,
 			bot_buffs[buff_index].melee_rune,
 			bot_buffs[buff_index].magic_rune,
 			bot_buffs[buff_index].dot_rune,

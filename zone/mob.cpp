@@ -1671,7 +1671,7 @@ void Mob::ShowBuffs(Client* client) {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i=0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
-			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
+			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
 				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
@@ -1705,7 +1705,7 @@ void Mob::ShowBuffList(Client* client) {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
-			if (spells[buffs[i].spellid].buffdurationformula == DF_Permanent)
+			if (spells[buffs[i].spellid].buff_duration_formula == DF_Permanent)
 				client->Message(Chat::White, "  %i: %s: Permanent", i, spells[buffs[i].spellid].name);
 			else
 				client->Message(Chat::White, "  %i: %s: %i tics left", i, spells[buffs[i].spellid].name, buffs[i].ticsremaining);
@@ -2282,11 +2282,11 @@ void Mob::CameraEffect(uint32 duration, uint32 intensity, Client *c, bool global
 	safe_delete(outapp);
 }
 
-void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, Client *c) {
+void Mob::SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide, uint32 unk020, bool perm_effect, Client *c) {
 
 	auto outapp = new EQApplicationPacket(OP_SpellEffect, sizeof(SpellEffect_Struct));
 	SpellEffect_Struct* se = (SpellEffect_Struct*) outapp->pBuffer;
-	se->EffectID = effectid;	// ID of the Particle Effect
+	se->EffectID = effect_id;	// ID of the Particle Effect
 	se->EntityID = GetID();
 	se->EntityID2 = GetID();	// EntityID again
 	se->Duration = duration;	// In Milliseconds
@@ -2306,8 +2306,8 @@ void Mob::SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay,
 	safe_delete(outapp);
 
 	if (perm_effect) {
-		if(!IsNimbusEffectActive(effectid)) {
-			SetNimbusEffect(effectid);
+		if(!IsNimbusEffectActive(effect_id)) {
+			SetNimbusEffect(effect_id);
 		}
 	}
 
@@ -3148,7 +3148,7 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 	int32 cast_reducer_amt = GetFocusEffect(focusFcCastTimeAmt, spell_id);
 	int32 cast_reducer_no_limit = GetFocusEffect(focusFcCastTimeMod2, spell_id);
 
-	if (level > 50 && casttime >= 3000 && !spells[spell_id].goodEffect &&
+	if (level > 50 && casttime >= 3000 && !spells[spell_id].good_effect &&
 	    (GetClass() == RANGER || GetClass() == SHADOWKNIGHT || GetClass() == PALADIN || GetClass() == BEASTLORD)) {
 		int level_mod = std::min(15, GetLevel() - 50);
 		cast_reducer += level_mod * 3;
@@ -3208,12 +3208,12 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 		twinproc = true;
 
 	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
-		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
 		if(twinproc)
 			SpellOnTarget(spell_id, this, 0, false, 0, true, level_override);
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
-		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
 		if(twinproc)
 			SpellOnTarget(spell_id, on, 0, false, 0, true, level_override);
 	}
@@ -3383,10 +3383,10 @@ int Mob::CountDispellableBuffs()
 		if(buffs[x].counters)
 			continue;
 
-		if(spells[buffs[x].spellid].goodEffect == 0)
+		if(spells[buffs[x].spellid].good_effect == 0)
 			continue;
 
-		if(buffs[x].spellid != SPELL_UNKNOWN &&	spells[buffs[x].spellid].buffdurationformula != DF_Permanent)
+		if(buffs[x].spellid != SPELL_UNKNOWN &&	spells[buffs[x].spellid].buff_duration_formula != DF_Permanent)
 			val++;
 	}
 	return val;
@@ -3405,9 +3405,9 @@ int Mob::GetSnaredAmount()
 
 		for(int j = 0; j < EFFECT_COUNT; j++)
 		{
-			if (spells[buffs[i].spellid].effectid[j] == SE_MovementSpeed)
+			if (spells[buffs[i].spellid].effect_id[j] == SE_MovementSpeed)
 			{
-				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base[j], spells[buffs[i].spellid].max[j], buffs[i].casterlevel, buffs[i].spellid);
+				int val = CalcSpellEffectValue_formula(spells[buffs[i].spellid].formula[j], spells[buffs[i].spellid].base_value[j], spells[buffs[i].spellid].max_value[j], buffs[i].casterlevel, buffs[i].spellid);
 				//int effect = CalcSpellEffectValue(buffs[i].spellid, spells[buffs[i].spellid].effectid[j], buffs[i].casterlevel);
 				if (val < 0 && std::abs(val) > worst_snare)
 					worst_snare = std::abs(val);
@@ -3544,8 +3544,8 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 
 	for (int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_SpellTrigger || spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)
-			total_chance += spells[spell_id].base[i];
+		if (spells[spell_id].effect_id[i] == SE_SpellTrigger || spells[spell_id].effect_id[i] == SE_Chance_Best_in_Spell_Grp)
+			total_chance += spells[spell_id].base_value[i];
 	}
 
 	if (total_chance == 100)
@@ -3555,9 +3555,9 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 
 		for (int i = 0; i < EFFECT_COUNT; i++){
 			//Find spells with SPA 340 and add the cummulative percent chances to the roll array
-			if ((spells[spell_id].effectid[i] == SE_SpellTrigger) || (spells[spell_id].effectid[i] == SE_Chance_Best_in_Spell_Grp)){
+			if ((spells[spell_id].effect_id[i] == SE_SpellTrigger) || (spells[spell_id].effect_id[i] == SE_Chance_Best_in_Spell_Grp)){
 
-				cummulative_chance = current_chance + spells[spell_id].base[i];
+				cummulative_chance = current_chance + spells[spell_id].base_value[i];
 				chance_array[i] = cummulative_chance;
 				current_chance = cummulative_chance;
 			}
@@ -3574,19 +3574,19 @@ bool Mob::TrySpellTrigger(Mob *target, uint32 spell_id, int effect)
 	}
 
 	//If the chances don't add to 100, then each effect gets a chance to fire, chance for no trigger as well.
-	else if (zone->random.Roll(spells[spell_id].base[effect])) {
+	else if (zone->random.Roll(spells[spell_id].base_value[effect])) {
 			CastSpell = true; //In this case effect_slot is what was passed into function.
 	}
 
 	if (CastSpell) {
-		if (spells[spell_id].effectid[effect_slot] == SE_SpellTrigger && IsValidSpell(spells[spell_id].base2[effect_slot])) {
-			SpellFinished(spells[spell_id].base2[effect_slot], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[effect_slot]].ResistDiff);
+		if (spells[spell_id].effect_id[effect_slot] == SE_SpellTrigger && IsValidSpell(spells[spell_id].limit_value[effect_slot])) {
+			SpellFinished(spells[spell_id].limit_value[effect_slot], target, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].limit_value[effect_slot]].resist_difficulty);
 			return true;
 		}
-		else if (IsClient() & spells[spell_id].effectid[effect_slot] == SE_Chance_Best_in_Spell_Grp) {
-			uint32 best_spell_id = CastToClient()->GetHighestScribedSpellinSpellGroup(spells[spell_id].base2[effect_slot]);
+		else if (IsClient() & spells[spell_id].effect_id[effect_slot] == SE_Chance_Best_in_Spell_Grp) {
+			uint32 best_spell_id = CastToClient()->GetHighestScribedSpellinSpellGroup(spells[spell_id].limit_value[effect_slot]);
 			if (IsValidSpell(best_spell_id)) {
-				SpellFinished(best_spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[best_spell_id].ResistDiff);
+				SpellFinished(best_spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[best_spell_id].resist_difficulty);
 			}
 			return true;//Do nothing if you don't have the any spell in spell group scribed.
 		}
@@ -3603,9 +3603,9 @@ void Mob::TryTriggerOnCastRequirement()
 			int spell_id = buffs[e].spellid;
 			if (IsValidSpell(spell_id)) {
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-					if ((spells[spell_id].effectid[i] == SE_TriggerOnReqTarget) || (spells[spell_id].effectid[i] == SE_TriggerOnReqCaster)) {
-						if (PassCastRestriction(spells[spell_id].base2[i])) {
-							SpellFinished(spells[spell_id].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+					if ((spells[spell_id].effect_id[i] == SE_TriggerOnReqTarget) || (spells[spell_id].effect_id[i] == SE_TriggerOnReqCaster)) {
+						if (PassCastRestriction(spells[spell_id].limit_value[i])) {
+							SpellFinished(spells[spell_id].base_value[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 							if (!TryFadeEffect(e)) {
 								BuffFadeBySlot(e);
 							}
@@ -3632,7 +3632,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 			if(zone->random.Roll(focus))
 			{
 				Message(Chat::Spells,"You twincast %s!", spells[spell_id].name);
-				SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+				SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 			}
 		}
 	}
@@ -3650,7 +3650,7 @@ void Mob::TryTwincast(Mob *caster, Mob *target, uint32 spell_id)
 				{
 					if(zone->random.Roll(focus))
 					{
-						SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+						SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 					}
 				}
 			}
@@ -3671,9 +3671,9 @@ void Mob::TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id)
 	if (IsEffectInSpell(spell_id, SE_Health_Transfer)){
 		for (int i = 0; i < EFFECT_COUNT; i++) {
 
-			if (spells[spell_id].effectid[i] == SE_Health_Transfer) {
+			if (spells[spell_id].effect_id[i] == SE_Health_Transfer) {
 				int new_hp = GetMaxHP();
-				new_hp -= GetMaxHP()  * spells[spell_id].base[i] / 1000;
+				new_hp -= GetMaxHP()  * spells[spell_id].base_value[i] / 1000;
 
 				if (new_hp > 0)
 					SetHP(new_hp);
@@ -3929,13 +3929,13 @@ bool Mob::TryFadeEffect(int slot)
 		for(int i = 0; i < EFFECT_COUNT; i++)
 		{
 
-			if (!spells[buffs[slot].spellid].effectid[i])
+			if (!spells[buffs[slot].spellid].effect_id[i])
 				continue;
 
-			if (spells[buffs[slot].spellid].effectid[i] == SE_CastOnFadeEffectAlways ||
-				spells[buffs[slot].spellid].effectid[i] == SE_CastOnRuneFadeEffect)
+			if (spells[buffs[slot].spellid].effect_id[i] == SE_CastOnFadeEffectAlways ||
+				spells[buffs[slot].spellid].effect_id[i] == SE_CastOnRuneFadeEffect)
 			{
-				uint16 spell_id = spells[buffs[slot].spellid].base[i];
+				uint16 spell_id = spells[buffs[slot].spellid].base_value[i];
 				BuffFadeBySlot(slot);
 
 				if(spell_id)
@@ -3947,10 +3947,10 @@ bool Mob::TryFadeEffect(int slot)
 					if(IsValidSpell(spell_id))
 					{
 						if (IsBeneficialSpell(spell_id)) {
-							SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+							SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 						}
 						else if(!(IsClient() && CastToClient()->dead)) {
-							SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+							SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 						}
 						return true;
 					}
@@ -3984,7 +3984,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 			SpellFinished(focus_trigger, target);
 
 		else
-			SpellFinished(focus_trigger, this, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
+			SpellFinished(focus_trigger, this, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
 	}
 	// For detrimental spells, if the triggered spell is beneficial, then it will land on the caster
 	// if the triggered spell is also detrimental, then it will land on the target
@@ -3994,7 +3994,7 @@ void Mob::TrySympatheticProc(Mob *target, uint32 spell_id)
 			SpellFinished(focus_trigger, this);
 
 		else
-			SpellFinished(focus_trigger, target, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].ResistDiff);
+			SpellFinished(focus_trigger, target, EQ::spells::CastingSlot::Item, 0, -1, spells[focus_trigger].resist_difficulty);
 	}
 
 	CheckNumHitsRemaining(NumHit::MatchingSpells, -1, focus_spell);
@@ -4259,7 +4259,7 @@ int Mob::QGVarDuration(const char *fmt)
 	return duration;
 }
 
-void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
+void Mob::DoKnockback(Mob *caster, uint32 push_back, uint32 push_up)
 {
 	if(IsClient())
 	{
@@ -4274,8 +4274,8 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 			look_heading -= 360;
 
 		//x and y are crossed mkay
-		double new_x = pushback * sin(double(look_heading * 3.141592 / 180.0));
-		double new_y = pushback * cos(double(look_heading * 3.141592 / 180.0));
+		double new_x = push_back * sin(double(look_heading * 3.141592 / 180.0));
+		double new_y = push_back * cos(double(look_heading * 3.141592 / 180.0));
 
 		spu->spawn_id	= GetID();
 		spu->x_pos		= FloatToEQ19(GetX());
@@ -4283,7 +4283,7 @@ void Mob::DoKnockback(Mob *caster, uint32 pushback, uint32 pushup)
 		spu->z_pos		= FloatToEQ19(GetZ());
 		spu->delta_x	= FloatToEQ13(static_cast<float>(new_x));
 		spu->delta_y	= FloatToEQ13(static_cast<float>(new_y));
-		spu->delta_z	= FloatToEQ13(static_cast<float>(pushup));
+		spu->delta_z	= FloatToEQ13(static_cast<float>(push_up));
 		spu->heading	= FloatToEQ12(GetHeading());
 		// for ref: these were not passed on to other 5 clients while on Titanium standard (change to RoF2 standard: 11/16/2019)
 		//eq->padding0002 = 0;
@@ -4304,12 +4304,12 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 	{
 		if(IsEffectInSpell(spell_id, SE_ProcOnSpellKillShot)) {
 			for (int i = 0; i < EFFECT_COUNT; i++) {
-				if (spells[spell_id].effectid[i] == SE_ProcOnSpellKillShot)
+				if (spells[spell_id].effect_id[i] == SE_ProcOnSpellKillShot)
 				{
-					if (IsValidSpell(spells[spell_id].base2[i]) && spells[spell_id].max[i] <= level)
+					if (IsValidSpell(spells[spell_id].limit_value[i]) && spells[spell_id].max_value[i] <= level)
 					{
-						if(zone->random.Roll(spells[spell_id].base[i]))
-							SpellFinished(spells[spell_id].base2[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].base2[i]].ResistDiff);
+						if(zone->random.Roll(spells[spell_id].base_value[i]))
+							SpellFinished(spells[spell_id].limit_value[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[spell_id].limit_value[i]].resist_difficulty);
 					}
 				}
 			}
@@ -4324,17 +4324,17 @@ void Mob::TrySpellOnKill(uint8 level, uint16 spell_id)
 
 		if(aabonuses.SpellOnKill[i] && IsValidSpell(aabonuses.SpellOnKill[i]) && (level >= aabonuses.SpellOnKill[i + 2])) {
 			if(zone->random.Roll(static_cast<int>(aabonuses.SpellOnKill[i + 1])))
-				SpellFinished(aabonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(aabonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].resist_difficulty);
 		}
 
 		if(itembonuses.SpellOnKill[i] && IsValidSpell(itembonuses.SpellOnKill[i]) && (level >= itembonuses.SpellOnKill[i + 2])){
 			if(zone->random.Roll(static_cast<int>(itembonuses.SpellOnKill[i + 1])))
-				SpellFinished(itembonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(itembonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].resist_difficulty);
 		}
 
 		if(spellbonuses.SpellOnKill[i] && IsValidSpell(spellbonuses.SpellOnKill[i]) && (level >= spellbonuses.SpellOnKill[i + 2])) {
 			if(zone->random.Roll(static_cast<int>(spellbonuses.SpellOnKill[i + 1])))
-				SpellFinished(spellbonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].ResistDiff);
+				SpellFinished(spellbonuses.SpellOnKill[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnKill[i]].resist_difficulty);
 		}
 
 	}
@@ -4351,19 +4351,19 @@ bool Mob::TrySpellOnDeath()
 	for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
 		if(IsClient() && aabonuses.SpellOnDeath[i] && IsValidSpell(aabonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(aabonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(aabonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(aabonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[aabonuses.SpellOnDeath[i]].resist_difficulty);
 			}
 		}
 
 		if(itembonuses.SpellOnDeath[i] && IsValidSpell(itembonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(itembonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(itembonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[itembonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(itembonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[itembonuses.SpellOnDeath[i]].resist_difficulty);
 			}
 		}
 
 		if(spellbonuses.SpellOnDeath[i] && IsValidSpell(spellbonuses.SpellOnDeath[i])) {
 			if(zone->random.Roll(static_cast<int>(spellbonuses.SpellOnDeath[i + 1]))) {
-				SpellFinished(spellbonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SpellOnDeath[i]].ResistDiff);
+				SpellFinished(spellbonuses.SpellOnDeath[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spellbonuses.SpellOnDeath[i]].resist_difficulty);
 				}
 			}
 		}
@@ -4610,7 +4610,7 @@ void Mob::DoGravityEffect()
 		{
 			for (int i = 0; i < EFFECT_COUNT; i++)
 			{
-				if(spells[buffs[slot].spellid].effectid[i] == SE_GravityEffect) {
+				if(spells[buffs[slot].spellid].effect_id[i] == SE_GravityEffect) {
 
 					int casterId = buffs[slot].casterid;
 					if(casterId)
@@ -4622,7 +4622,7 @@ void Mob::DoGravityEffect()
 					caster_x = caster->GetX();
 					caster_y = caster->GetY();
 
-					value = static_cast<float>(spells[buffs[slot].spellid].base[i]);
+					value = static_cast<float>(spells[buffs[slot].spellid].base_value[i]);
 					if(value == 0)
 						continue;
 
@@ -4704,33 +4704,33 @@ void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
 	}
 }
 
-void Mob::AddNimbusEffect(int effectid)
+void Mob::AddNimbusEffect(int effect_id)
 {
-	SetNimbusEffect(effectid);
+	SetNimbusEffect(effect_id);
 
 	auto outapp = new EQApplicationPacket(OP_AddNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
 	auto ane = (RemoveNimbusEffect_Struct *)outapp->pBuffer;
 	ane->spawnid = GetID();
-	ane->nimbus_effect = effectid;
+	ane->nimbus_effect = effect_id;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 }
 
-void Mob::RemoveNimbusEffect(int effectid)
+void Mob::RemoveNimbusEffect(int effect_id)
 {
-	if (effectid == nimbus_effect1)
+	if (effect_id == nimbus_effect1)
 		nimbus_effect1 = 0;
 
-	else if (effectid == nimbus_effect2)
+	else if (effect_id == nimbus_effect2)
 		nimbus_effect2 = 0;
 
-	else if (effectid == nimbus_effect3)
+	else if (effect_id == nimbus_effect3)
 		nimbus_effect3 = 0;
 
 	auto outapp = new EQApplicationPacket(OP_RemoveNimbusEffect, sizeof(RemoveNimbusEffect_Struct));
 	RemoveNimbusEffect_Struct* rne = (RemoveNimbusEffect_Struct*)outapp->pBuffer;
 	rne->spawnid = GetID();
-	rne->nimbus_effect = effectid;
+	rne->nimbus_effect = effect_id;
 	entity_list.QueueClients(this, outapp);
 	safe_delete(outapp);
 }
@@ -4839,11 +4839,11 @@ void Mob::CastOnCurer(uint32 spell_id)
 {
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_CastOnCurer)
+		if (spells[spell_id].effect_id[i] == SE_CastOnCurer)
 		{
-			if(IsValidSpell(spells[spell_id].base[i]))
+			if(IsValidSpell(spells[spell_id].base_value[i]))
 			{
-				SpellFinished(spells[spell_id].base[i], this);
+				SpellFinished(spells[spell_id].base_value[i], this);
 			}
 		}
 	}
@@ -4853,11 +4853,11 @@ void Mob::CastOnCure(uint32 spell_id)
 {
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_CastOnCure)
+		if (spells[spell_id].effect_id[i] == SE_CastOnCure)
 		{
-			if(IsValidSpell(spells[spell_id].base[i]))
+			if(IsValidSpell(spells[spell_id].base_value[i]))
 			{
-				SpellFinished(spells[spell_id].base[i], this);
+				SpellFinished(spells[spell_id].base_value[i], this);
 			}
 		}
 	}
@@ -4870,11 +4870,11 @@ void Mob::CastOnNumHitFade(uint32 spell_id)
 
 	for(int i = 0; i < EFFECT_COUNT; i++)
 	{
-		if (spells[spell_id].effectid[i] == SE_CastonNumHitFade)
+		if (spells[spell_id].effect_id[i] == SE_CastonNumHitFade)
 		{
-			if(IsValidSpell(spells[spell_id].base[i]))
+			if(IsValidSpell(spells[spell_id].base_value[i]))
 			{
-				SpellFinished(spells[spell_id].base[i], this);
+				SpellFinished(spells[spell_id].base_value[i], this);
 			}
 		}
 	}
@@ -4961,8 +4961,8 @@ bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
 		return false;
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spells[spell_id].effectid[i] == SE_LimitToSkill){
-			if (spells[spell_id].base[i] == skill){
+		if (spells[spell_id].effect_id[i] == SE_LimitToSkill){
+			if (spells[spell_id].base_value[i] == skill){
 				return true;
 			}
 		}
@@ -5005,11 +5005,11 @@ int8 Mob::GetDecayEffectValue(uint16 spell_id, uint16 spelleffect) {
 	for (int slot = 0; slot < buff_count; slot++){
 		if (IsValidSpell(buffs[slot].spellid)){
 			for (int i = 0; i < EFFECT_COUNT; i++){
-				if(spells[buffs[slot].spellid].effectid[i] == spelleffect) {
+				if(spells[buffs[slot].spellid].effect_id[i] == spelleffect) {
 
-					int critchance = spells[buffs[slot].spellid].base[i];
-					int decay = spells[buffs[slot].spellid].base2[i];
-					int lvldiff = spell_level - spells[buffs[slot].spellid].max[i];
+					int critchance = spells[buffs[slot].spellid].base_value[i];
+					int decay = spells[buffs[slot].spellid].limit_value[i];
+					int lvldiff = spell_level - spells[buffs[slot].spellid].max_value[i];
 
 					if(lvldiff > 0 && decay > 0)
 					{
@@ -5213,7 +5213,7 @@ FACTION_VALUE Mob::GetSpecialFactionCon(Mob* iOther) {
 	}
 }
 
-bool Mob::HasSpellEffect(int effectid)
+bool Mob::HasSpellEffect(int effect_id)
 {
     int i;
 
@@ -5222,7 +5222,7 @@ bool Mob::HasSpellEffect(int effectid)
     {
         if(buffs[i].spellid == SPELL_UNKNOWN) { continue; }
 
-        if(IsEffectInSpell(buffs[i].spellid, effectid))
+        if(IsEffectInSpell(buffs[i].spellid, effect_id))
         {
             return(1);
         }

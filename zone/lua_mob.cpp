@@ -1891,9 +1891,9 @@ void Lua_Mob::WearChange(int material_slot, int texture, uint32 color) {
 	self->WearChange(material_slot, texture, color);
 }
 
-void Lua_Mob::DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup) {
+void Lua_Mob::DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up) {
 	Lua_Safe_Call_Void();
-	self->DoKnockback(caster, pushback, pushup);
+	self->DoKnockback(caster, push_back, push_up);
 }
 
 void Lua_Mob::AddNimbusEffect(int effect_id) {

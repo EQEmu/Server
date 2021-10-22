@@ -318,7 +318,7 @@ struct Buffs_Struct {
 	char	caster_name[64];
 	int32	ticsremaining;
 	uint32	counters;
-	uint32	numhits; //the number of physical hits this buff can take before it fades away, lots of druid armor spells take advantage of this mixed with powerful effects
+	uint32	hit_number; //the number of physical hits this buff can take before it fades away, lots of druid armor spells take advantage of this mixed with powerful effects
 	uint32	melee_rune;
 	uint32	magic_rune;
 	uint32	dot_rune;

@@ -651,30 +651,30 @@ void Client::CompleteConnect()
 		}
 
 		for (int x1 = 0; x1 < EFFECT_COUNT; x1++) {
-			switch (spell.effectid[x1]) {
+			switch (spell.effect_id[x1]) {
 			case SE_IllusionCopy:
 			case SE_Illusion: {
-				if (spell.base[x1] == -1) {
+				if (spell.base_value[x1] == -1) {
 					if (gender == 1)
 						gender = 0;
 					else if (gender == 0)
 						gender = 1;
 					SendIllusionPacket(GetRace(), gender, 0xFF, 0xFF);
 				}
-				else if (spell.base[x1] == -2) // WTF IS THIS
+				else if (spell.base_value[x1] == -2) // WTF IS THIS
 				{
 					if (GetRace() == 128 || GetRace() == 130 || GetRace() <= 12)
-						SendIllusionPacket(GetRace(), GetGender(), spell.base2[x1], spell.max[x1]);
+						SendIllusionPacket(GetRace(), GetGender(), spell.limit_value[x1], spell.max_value[x1]);
 				}
-				else if (spell.max[x1] > 0)
+				else if (spell.max_value[x1] > 0)
 				{
-					SendIllusionPacket(spell.base[x1], 0xFF, spell.base2[x1], spell.max[x1]);
+					SendIllusionPacket(spell.base_value[x1], 0xFF, spell.limit_value[x1], spell.max_value[x1]);
 				}
 				else
 				{
-					SendIllusionPacket(spell.base[x1], 0xFF, 0xFF, 0xFF);
+					SendIllusionPacket(spell.base_value[x1], 0xFF, 0xFF, 0xFF);
 				}
-				switch (spell.base[x1]) {
+				switch (spell.base_value[x1]) {
 				case OGRE:
 					SendAppearancePacket(AT_Size, 9);
 					break;
@@ -761,17 +761,17 @@ void Client::CompleteConnect()
 			case SE_AddMeleeProc:
 			case SE_WeaponProc:
 			{
-				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid, buffs[j1].casterlevel);
+				AddProcToWeapon(GetProcID(buffs[j1].spellid, x1), false, 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid, buffs[j1].casterlevel);
 				break;
 			}
 			case SE_DefensiveProc:
 			{
-				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
+				AddDefensiveProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid);
 				break;
 			}
 			case SE_RangedProc:
 			{
-				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].base2[x1], buffs[j1].spellid);
+				AddRangedProc(GetProcID(buffs[j1].spellid, x1), 100 + spells[buffs[j1].spellid].limit_value[x1], buffs[j1].spellid);
 				break;
 			}
 			}
@@ -1510,7 +1510,7 @@ void Client::Handle_Connect_OP_ZoneEntry(const EQApplicationPacket *app)
 				m_pp.buffs[i].unknown003 = 0;
 				m_pp.buffs[i].duration = buffs[i].ticsremaining;
 				m_pp.buffs[i].counters = buffs[i].counters;
-				m_pp.buffs[i].num_hits = buffs[i].numhits;
+				m_pp.buffs[i].num_hits = buffs[i].hit_number;
 			}
 			else {
 				m_pp.buffs[i].spellid = SPELLBOOK_UNKNOWN;
@@ -3956,7 +3956,7 @@ void Client::Handle_OP_Buff(const EQApplicationPacket *app)
 	//something about IsDetrimentalSpell() crashes this portion of code..
 	//tbh we shouldn't use it anyway since this is a simple red vs blue buff check and
 	//isdetrimentalspell() is much more complex
-	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].goodEffect == 0)))
+	if (spid == 0xFFFF || (IsValidSpell(spid) && (spells[spid].good_effect == 0)))
 		QueuePacket(app);
 	else
 		BuffFadeBySpellID(spid);
@@ -8875,7 +8875,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				IsFeared() ||
 				IsMezzed() ||
 				DivineAura() ||
-				(spells[spell_id].targettype == ST_Ring) ||
+				(spells[spell_id].target_type == ST_Ring) ||
 				(IsSilenced() && !IsDiscipline(spell_id)) ||
 				(IsAmnesiad() && IsDiscipline(spell_id)) ||
 				(IsDetrimentalSpell(spell_id) && !zone->CanDoCombat()) ||
@@ -8888,7 +8888,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 	}
 
 	// Modern clients don't require pet targeted for item clicks that are ST_Pet
-	if (spell_id > 0 && (spells[spell_id].targettype == ST_Pet || spells[spell_id].targettype == ST_SummonedPet))
+	if (spell_id > 0 && (spells[spell_id].target_type == ST_Pet || spells[spell_id].target_type == ST_SummonedPet))
 		target_id = GetPetID();
 
 	LogDebug("OP ItemVerifyRequest: spell=[{}], target=[{}], inv=[{}]", spell_id, target_id, slot_id);

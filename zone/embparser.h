@@ -90,9 +90,9 @@ private:
 	void ExportVar(const char *pkgprefix, const char *varname, float value);
 	void ExportVarComplex(const char *pkgprefix, const char *varname, const char *value);
 
-	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, EQ::ItemInstance* item_inst, Mob* mob, 
+	int EventCommon(QuestEventID event, uint32 objid, const char * data, NPC* npcmob, EQ::ItemInstance* item_inst, const SPDat_Spell_Struct* spell, Mob* mob, 
 		uint32 extradata, bool global, std::vector<EQ::Any> *extra_pointers);
-	int SendCommands(const char *pkgprefix, const char *event, uint32 npcid, Mob* other, Mob* mob, EQ::ItemInstance *item_inst);
+	int SendCommands(const char *pkgprefix, const char *event, uint32 spell_id, Mob* other, Mob* mob, EQ::ItemInstance *item_inst, const SPDat_Spell_Struct *spell);
 	void MapFunctions();
 
 	void GetQuestTypes(bool &isPlayerQuest, bool &isGlobalPlayerQuest, bool &isGlobalNPC, bool &isItemQuest, 

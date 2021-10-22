@@ -26,7 +26,7 @@ public:
 		std::string castername;
 		int         ticsremaining;
 		int         counters;
-		int         numhits;
+		int         hit_number;
 		int         rune;
 		int         instrument_mod;
 	};
@@ -93,7 +93,7 @@ public:
 		entry.castername     = "";
 		entry.ticsremaining  = 0;
 		entry.counters       = 0;
-		entry.numhits        = 0;
+		entry.hit_number        = 0;
 		entry.rune           = 0;
 		entry.instrument_mod = 10;
 
@@ -139,7 +139,7 @@ public:
 			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
+			entry.hit_number        = atoi(row[8]);
 			entry.rune           = atoi(row[9]);
 			entry.instrument_mod = atoi(row[10]);
 
@@ -183,7 +183,7 @@ public:
 		update_values.push_back(columns[5] + " = '" + EscapeString(character_pet_buffs_entry.castername) + "'");
 		update_values.push_back(columns[6] + " = " + std::to_string(character_pet_buffs_entry.ticsremaining));
 		update_values.push_back(columns[7] + " = " + std::to_string(character_pet_buffs_entry.counters));
-		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_buffs_entry.numhits));
+		update_values.push_back(columns[8] + " = " + std::to_string(character_pet_buffs_entry.hit_number));
 		update_values.push_back(columns[9] + " = " + std::to_string(character_pet_buffs_entry.rune));
 		update_values.push_back(columns[10] + " = " + std::to_string(character_pet_buffs_entry.instrument_mod));
 
@@ -215,7 +215,7 @@ public:
 		insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
+		insert_values.push_back(std::to_string(character_pet_buffs_entry.hit_number));
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
 		insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
 
@@ -255,7 +255,7 @@ public:
 			insert_values.push_back("'" + EscapeString(character_pet_buffs_entry.castername) + "'");
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.ticsremaining));
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_pet_buffs_entry.numhits));
+			insert_values.push_back(std::to_string(character_pet_buffs_entry.hit_number));
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.rune));
 			insert_values.push_back(std::to_string(character_pet_buffs_entry.instrument_mod));
 
@@ -299,7 +299,7 @@ public:
 			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
+			entry.hit_number        = atoi(row[8]);
 			entry.rune           = atoi(row[9]);
 			entry.instrument_mod = atoi(row[10]);
 
@@ -334,7 +334,7 @@ public:
 			entry.castername     = row[5] ? row[5] : "";
 			entry.ticsremaining  = atoi(row[6]);
 			entry.counters       = atoi(row[7]);
-			entry.numhits        = atoi(row[8]);
+			entry.hit_number        = atoi(row[8]);
 			entry.rune           = atoi(row[9]);
 			entry.instrument_mod = atoi(row[10]);
 

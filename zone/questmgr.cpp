@@ -57,6 +57,7 @@ QuestManager quest_manager;
 	Mob *owner = nullptr; \
 	Client *initiator = nullptr; \
 	EQ::ItemInstance* questitem = nullptr; \
+	const SPDat_Spell_Struct* questspell = nullptr; \
 	bool depop_npc = false; \
 	std::string encounter; \
 	do { \
@@ -65,6 +66,7 @@ QuestManager quest_manager;
 			owner = e.owner; \
 			initiator = e.initiator; \
 			questitem = e.questitem; \
+			questspell = e.questspell; \
 			depop_npc = e.depop_npc; \
 			encounter = e.encounter; \
 		} \
@@ -118,11 +120,12 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, std::string encounter) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, const SPDat_Spell_Struct* _questspell, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
 	run.questitem = _questitem;
+	run.questspell = _questspell;
 	run.depop_npc = false;
 	run.encounter = encounter;
 	quests_running_.push(run);
@@ -372,14 +375,14 @@ void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
 		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 	}
 }
 
 void QuestManager::selfcast(int spell_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 }
 
 void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
@@ -3310,6 +3313,15 @@ EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	return nullptr;
 }
 
+const SPDat_Spell_Struct *QuestManager::GetQuestSpell() {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return e.questspell;
+	}
+
+	return nullptr;
+}
+
 std::string QuestManager::GetEncounter() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -3701,4 +3713,11 @@ void QuestManager::WorldWideTaskUpdate(uint8 update_type, uint32 task_identifier
 	WWTU->max_status = max_status;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+const SPDat_Spell_Struct* QuestManager::getspell(uint32 spell_id) {
+    if (spells[spell_id].id) {
+        return &spells[spell_id];
+    }
+    return nullptr;
 }
