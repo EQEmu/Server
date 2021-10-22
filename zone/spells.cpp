@@ -306,10 +306,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 
 	if(resist_adjust)
 	{
+		LogSpells("true resist_adjust");
 		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, *resist_adjust, aa_id));
 	}
 	else
 	{
+		LogSpells("fail resist_adjust");
 		return(DoCastSpell(spell_id, target_id, slot, cast_time, mana_cost, oSpellWillFinish, item_slot, timer, timer_duration, spells[spell_id].ResistDiff, aa_id));
 	}
 }
@@ -2074,8 +2076,7 @@ bool Mob::DetermineSpellTargets(uint16 spell_id, Mob *&spell_target, Mob *&ae_ce
 // only used from CastedSpellFinished, and procs
 // we can't interrupt in this, or anything called from this!
 // if you need to abort the casting, return false
-bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used,
-						uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
+bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, uint16 mana_used, uint32 inventory_slot, int16 resist_adjust, bool isproc, int level_override)
 {
 	//EQApplicationPacket *outapp = nullptr;
 	Mob *ae_center = nullptr;
@@ -2813,9 +2814,8 @@ void Mob::BardPulse(uint16 spell_id, Mob *caster) {
 // even be created depending on the types of mobs involved
 //
 // right now this is just an outline, working on this..
-int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caster_level_override)
+int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caster_level_override, bool pvp)
 {
-	int formula, duration;
 
 	if(!IsValidSpell(spell_id) || (!caster && !target))
 		return 0;
@@ -2830,19 +2830,21 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 		target = caster;
 
 	// PVP duration
-	if (IsDetrimentalSpell(spell_id) && target->IsClient() && caster->IsClient()) {
-		formula = spells[spell_id].pvp_duration;
+	int duration = 0;
+	//if (caster != target && IsDetrimentalSpell(spell_id) && target->IsClient() && caster->IsClient()) {
+	if (pvp) {
 		duration = spells[spell_id].pvp_duration_cap;
+		LogSpells("CalcBuffDuration(): pvp_duration_cap [{}]", duration);
 	} else {
-		formula = spells[spell_id].buffdurationformula;
 		duration = spells[spell_id].buffduration;
+		LogSpells("CalcBuffDuration(): buffduration [{}]", duration);
 	}
 
 	int castlevel = caster->GetCasterLevel(spell_id);
 	if(caster_level_override > 0)
 		castlevel = caster_level_override;
 
-	int res = CalcBuffDuration_formula(castlevel, formula, duration);
+	int res = CalcBuffDuration_formula(castlevel, spells[spell_id].buffdurationformula, duration);
 	if (caster == target && (target->aabonuses.IllusionPersistence || target->spellbonuses.IllusionPersistence ||
 				 target->itembonuses.IllusionPersistence) &&
 	    spell_id != 287 && spell_id != 601 && IsEffectInSpell(spell_id, SE_Illusion))
@@ -2851,8 +2853,7 @@ int Mob::CalcBuffDuration(Mob *caster, Mob *target, uint16 spell_id, int32 caste
 
 	res = mod_buff_duration(res, caster, target, spell_id);
 
-	LogSpells("Spell [{}]: Casting level [{}], formula [{}], base_duration [{}]: result [{}]",
-		spell_id, castlevel, formula, duration, res);
+	LogSpells("Spell [{}]: Casting level [{}], formula [{}], base_duration [{}]: result [{}]", spell_id, castlevel, spells[spell_id].buffdurationformula, duration, res);
 
 	return res;
 }
@@ -3164,6 +3165,7 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 			continue;
 		}
 
+		LogSpells("Mob::CheckStackConflict");
 		sp1_value = CalcSpellEffectValue(spellid1, i, caster_level1);
 		sp2_value = CalcSpellEffectValue(spellid2, i, caster_level2);
 
@@ -3284,8 +3286,14 @@ bool Mob::HasDiscBuff()
 // stacking problems, and -2 if this is not a buff
 // if caster is null, the buff will be added with the caster level being
 // the level of the mob
-int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override)
+int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_override, bool pvp)
 {
+	
+	LogSpells("---------------------------");
+	LogSpells("---------------------------");
+	LogSpells("------Mob::AddBuff---------");
+	LogSpells("---------------------------");
+	LogSpells("AddBuff(): pvp [{}]", pvp);
 
 	int buffslot, ret, caster_level, emptyslot = -1;
 	bool will_overwrite = false;
@@ -3297,7 +3305,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 		caster_level = caster ? caster->GetCasterLevel(spell_id) : GetCasterLevel(spell_id);
 
 	if (duration == 0) {
-		duration = CalcBuffDuration(caster, this, spell_id);
+		duration = CalcBuffDuration(caster, this, spell_id, -1, pvp);
 
 		if (caster && duration > 0) // negatives are perma buffs
 			duration = caster->GetActSpellDuration(spell_id, duration);
@@ -3419,9 +3427,18 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].focusproclimit_procamt = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
-	if (level_override > 0) {
+	//if (IsClient() && caster && caster->IsClient() && IsDetrimentalSpell(spell_id))
+	if(pvp)
+	{
+		LogSpells("AddBuff(): pvp_duration_cap [{}]", spells[spell_id].pvp_duration_cap);
+		if (buffs[emptyslot].ticsremaining > (1 + CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].pvp_duration_cap)))
+			buffs[emptyslot].UpdateClient = true;
+	}
+	else if (level_override > 0)
+	{
 		buffs[emptyslot].UpdateClient = true;
 	} else {
+		LogSpells("AddBuff(): buffduration [{}]", spells[spell_id].buffduration);
 		if (buffs[emptyslot].ticsremaining > (1 + CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration)))
 			buffs[emptyslot].UpdateClient = true;
 	}
@@ -3530,6 +3547,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 			bool isproc, int level_override)
 {
 
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("Mob::SpellOnTarget");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	
+	
 	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
 
 	// well we can't cast a spell on target without a target
@@ -3946,6 +3972,8 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 	{
 		spelltar->BreakInvisibleSpells(); //Any detrimental spell cast on you will drop invisible (can be AOE, non damage ect).
 
+		LogSpells("SpellOnTarget(): ResistSpell() Called: resisttype [{}], use_resist_adjust [{}], resist_adjust [{}], level_override [{}]", spells[spell_id].resisttype, use_resist_adjust, resist_adjust, level_override);
+
 		if (IsCharmSpell(spell_id) || IsMezSpell(spell_id) || IsFearSpell(spell_id))
 			spell_effectiveness = spelltar->ResistSpell(spells[spell_id].resisttype, spell_id, this, use_resist_adjust, resist_adjust, true, false, false, level_override);
 		else
@@ -4033,8 +4061,15 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, bool reflect, bool use_r
 		return false;
 	}
 
+	// Determine if this is PVP 
+	bool pvp = false;
+	if (IsDetrimentalSpell(spell_id) && IsClient() && spelltar->IsClient())
+		pvp = true;
+	
+	LogSpells("SpellOnTarget(): pvp", pvp);
+
 	// cause the effects to the target
-	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override))
+	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, pvp))
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.
@@ -4584,9 +4619,9 @@ int Mob::GetResist(uint8 resist_type)
 // it landed, and anything else means it was resisted; however there are some
 // spells that can be partially effective, and this value can be used there.
 // TODO: we need to figure out how the following pvp values work and implement them
-// pvp_resist_base
-// pvp_resist_calc
-// pvp_resist_cap
+// pvpresistbase
+// pvpresistcalc
+// pvpresistcap
 float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use_resist_override, int resist_override, bool CharismaCheck, bool CharmTick, bool IsRoot, int level_override)
 {
 
@@ -4600,6 +4635,8 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		return 0;
 	}
 
+	LogSpells("ResistSpell(): Called");
+
 	if(GetSpecialAbility(IMMUNE_CASTING_FROM_RANGE))
 	{
 		if(!caster->CombatRange(this))
@@ -4610,34 +4647,42 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if(GetSpecialAbility(IMMUNE_MAGIC))
 	{
-		LogSpells("We are immune to magic, so we fully resist the spell [{}]", spell_id);
+		LogSpells("ResistSpell(): We are immune to magic, so we fully resist the spell [{}]", spell_id);
 		return(0);
 	}
 
-	//Get resist modifier and adjust it based on focus 2 resist about eq to 1% resist chance
+	// Determine base resist modifier
 	int resist_modifier = 0;
-	if (use_resist_override) {
+	if (caster != nullptr && IsDetrimentalSpell(spell_id) && IsClient() && caster->IsClient())
+	{
+		resist_modifier = spells[spell_id].pvpresistbase;
+	}
+	else if(use_resist_override)
+	{
 		resist_modifier = resist_override;
-	} else {
-		// PVP, we don't have the normal per_level or cap stuff implemented ... so ahh do that
-		// and make sure the PVP versions are also handled.
-		if (IsClient() && caster->IsClient()) {
-			resist_modifier = spells[spell_id].pvpresistbase;
-		} else {
-			resist_modifier = spells[spell_id].ResistDiff;
-		}
+	}
+	else {
+		resist_modifier = spells[spell_id].ResistDiff;
 	}
 
-	if(caster->GetSpecialAbility(CASTING_RESIST_DIFF))
+	LogSpells("ResistSpell(): base resist_modifier: [{}]", resist_modifier);
+
+	if (caster->GetSpecialAbility(CASTING_RESIST_DIFF))
+	{
 		resist_modifier += caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0);
+		LogSpells("ResistSpell(): GetSpecialAbility [{}], resist_modifier: [{}]", caster->GetSpecialAbilityParam(CASTING_RESIST_DIFF, 0), resist_modifier);
+	}
 
 	int focus_resist = caster->GetFocusEffect(focusResistRate, spell_id);
 
 	resist_modifier -= 2 * focus_resist;
+	LogSpells("ResistSpell(): focusResistRate [{}], calc [{}], resist_modifier: [{}]", focus_resist, 2 * focus_resist, resist_modifier);
+
 
 	int focus_incoming_resist = GetFocusEffect(focusFcResistIncoming, spell_id);
 
 	resist_modifier -= focus_incoming_resist;
+	LogSpells("ResistSpell(): focusFcResistIncoming [{}], resist_modifier: [{}]", focus_incoming_resist, resist_modifier);
 
 	//Check for fear resist
 	bool IsFear = false;
@@ -4647,7 +4692,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		int fear_resist_bonuses = CalcFearResistChance();
 		if(zone->random.Roll(fear_resist_bonuses))
 		{
-			LogSpells("Resisted spell in fear resistance, had [{}] chance to resist", fear_resist_bonuses);
+			LogSpells("ResistSpell(): Resisted spell in fear resistance, had [{}] chance to resist", fear_resist_bonuses);
 			return 0;
 		}
 	}
@@ -4665,7 +4710,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 		int resist_bonuses = CalcResistChanceBonus();
 		if(resist_bonuses && zone->random.Roll(resist_bonuses))
 		{
-			LogSpells("Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
+			LogSpells("ResistSpell(): Resisted spell in sanctification, had [{}] chance to resist", resist_bonuses);
 			return 0;
 		}
 	}
@@ -4673,7 +4718,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	//Get the resist chance for the target
 	if(resist_type == RESIST_NONE || spells[spell_id].no_resist)
 	{
-		LogSpells("Spell was unresistable");
+		LogSpells("ResistSpell(): Spell was unresistable");
 		return 100;
 	}
 
@@ -4760,6 +4805,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	if (CharismaCheck)
 	{
+		LogSpells("ResistSpell(): CharismaCheck");
 		/*
 		Charisma ONLY effects the initial resist check when charm is cast with 10 CHA = -1 Resist mod up to 255 CHA (min ~ 75 cha)
 		Charisma less than ~ 75 gives a postive modifier to resist checks at approximate ratio of -10 CHA = +6 Resist.
@@ -4788,13 +4834,29 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 					charisma = RuleI(Spells, CharismaEffectivenessCap);
 
 				resist_modifier -= (charisma - 75)/RuleI(Spells, CharismaEffectiveness);
+				LogSpells("ResistSpell(): charisma >= 75: calc [{}], resist_modifier [{}]", (charisma - 75) / RuleI(Spells, CharismaEffectiveness), resist_modifier);
 			}
-			else
-				resist_modifier += ((75 - charisma)/10) * 6; //Increase Resist Chance
+			else {
+				resist_modifier += ((75 - charisma) / 10) * 6; //Increase Resist Chance
+				LogSpells("ResistSpell(): charisma else: calc [{}], resist_modifier [{}]", ((75 - charisma) / 10) * 6, resist_modifier);
+			}
 		}
-
 	}
 
+	// Check PVP Resist Cap
+	if (IsClient() && caster->IsClient())
+	{
+		if (resist_modifier > spells[spell_id].pvpresistcap && spells[spell_id].pvpresistcap > 0)
+		{
+			LogSpells("ResistSpell(): pvpresistcap positive [{}], max [{}]", resist_modifier, spells[spell_id].pvpresistcap);
+			resist_modifier = spells[spell_id].pvpresistcap;
+		}
+		else if (resist_modifier < spells[spell_id].pvpresistcap && spells[spell_id].pvpresistcap < 0)
+		{
+			LogSpells("ResistSpell(): pvpresistcap negative [{}], max [{}]", resist_modifier, spells[spell_id].pvpresistcap);
+			resist_modifier = spells[spell_id].pvpresistcap;
+		}
+	}
 
 	//Lull spells DO NOT use regular resists on initial cast, instead they use a flat +15 modifier. Live parses confirm this.
 	//Regular resists are used when checking if mob will aggro off of a lull resist.
@@ -4806,17 +4868,20 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 	resist_chance += resist_modifier;
 	resist_chance += target_resist;
 
-	resist_chance = mod_spell_resist(resist_chance, level_mod, resist_modifier, target_resist, resist_type, spell_id, caster);
+	//resist_chance = mod_spell_resist(resist_chance, level_mod, resist_modifier, target_resist, resist_type, spell_id, caster);
+	LogSpells("ResistSpell(): level_mod [{}], resist_modifier [{}], target_resist [{}], Sum resist_chance: [{}]", level_mod, resist_modifier, target_resist, resist_chance);
 
 	//Do our min and max resist checks.
 	if(resist_chance > spells[spell_id].MaxResist && spells[spell_id].MaxResist != 0)
 	{
 		resist_chance = spells[spell_id].MaxResist;
+		LogSpells("ResistSpell(): Max resist_chance [{}]", resist_chance);
 	}
 
 	if(resist_chance < spells[spell_id].MinResist && spells[spell_id].MinResist != 0)
 	{
 		resist_chance = spells[spell_id].MinResist;
+		LogSpells("ResistSpell(): Min resist_chance [{}]", resist_chance);
 	}
 
 	//Average charm duration agianst mobs with 0% chance to resist on LIVE is ~ 68 ticks.
@@ -4840,6 +4905,7 @@ float Mob::ResistSpell(uint8 resist_type, uint16 spell_id, Mob *caster, bool use
 
 	//Finally our roll
 	int roll = zone->random.Int(0, 200);
+	LogSpells("ResistSpell(): resist_chance [{}], roll [{}]", resist_chance, roll);
 	if(roll > resist_chance)
 	{
 		return 100;
@@ -5533,6 +5599,15 @@ uint16 Mob::GetSpellIDFromSlot(uint8 slot)
 }
 
 bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
+	
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("Mob::FindType");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	LogSpells("---------------------------------");
+	
 	int buff_count = GetMaxTotalSlots();
 	for (int i = 0; i < buff_count; i++) {
 		if (buffs[i].spellid != SPELL_UNKNOWN) {
@@ -5541,24 +5616,22 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 				// adjustments necessary for offensive npc casting behavior
 				if (bOffensive) {
 					if (spells[buffs[i].spellid].effectid[j] == type) {
-						int16 value =
-								CalcSpellEffectValue_formula(spells[buffs[i].spellid].buffdurationformula,
-											spells[buffs[i].spellid].base[j],
-											spells[buffs[i].spellid].max[j],
-											buffs[i].casterlevel, buffs[i].spellid);
-						Log(Logs::General, Logs::Normal,
-								"FindType: type = %d; value = %d; threshold = %d",
-								type, value, threshold);
+						int16 value = CalcSpellEffectValue_formula(spells[buffs[i].spellid].buffdurationformula, spells[buffs[i].spellid].base[j], spells[buffs[i].spellid].max[j], buffs[i].casterlevel, buffs[i].spellid, spells[buffs[i].spellid].buffduration);
+						LogSpells("FindType: offensive: type [{}], value [{}], threshold [{}]", type, value, threshold);
 						if (value < threshold)
 							return true;
 					}
 				} else {
 					if (spells[buffs[i].spellid].effectid[j] == type )
+					{
+						LogSpells("Mob::FindType: return true type [{}]", type);
 						return true;
+					}
 				}
 			}
 		}
 	}
+	LogSpells("Mob::FindType: return false");
 	return false;
 }
 

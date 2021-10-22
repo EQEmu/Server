@@ -1157,8 +1157,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 				break;
 			}
 			// hate based on base healing power of the spell
-			int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o],
-							 spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id);
+			int val = CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id);
 			if (val > 0) {
 				if (heal_possible < val)
 					val = heal_possible; // capped to amount healed
@@ -1173,8 +1172,7 @@ int32 Mob::CheckHealAggroAmount(uint16 spell_id, Mob *target, uint32 heal_possib
 			break;
 		}
 		case SE_Rune:
-			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o],
-							 spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id) * 2;
+			AggroAmount += CalcSpellEffectValue_formula(spells[spell_id].formula[o], spells[spell_id].base[o], spells[spell_id].max[o], GetLevel(), spell_id) * 2;
 			ignore_default_buff = true;
 			break;
 		case SE_HealOverTime:

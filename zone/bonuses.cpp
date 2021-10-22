@@ -1794,6 +1794,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				AdditiveWornBonus = true;
 
 			effectid = spells[spell_id].effectid[i];
+			LogSpells("ApplySpellsBonuses(): calling CalcSpellEffectValue");
 			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, nullptr, ticsremaining, casterId);
 			base2 = spells[spell_id].base2[i];
 			max = spells[spell_id].max[i];
