@@ -993,18 +993,22 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 		if (GetSpecialAbility(SPECATK_MAGICAL)) {
 			dmg = 1;
 		}
-		//On live this occurs for pets and charmed pet >= level 10
-		else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
-			//pets wouldn't actually use this but...
-			//it gives us an idea if we can hit due to the dual nature of this function
+		//On live this occurs for ALL NPC's >= 10
+		else if (IsNPC() && GetLevel() >= RuleI(Combat, NPCAttackMagicLevel)) {
 			dmg = 1;
 		}
 		else if (weapon_item) {
 			if (weapon_item->Magic) {
-				dmg = weapon_item->Damage;
-				//this is more for non weapon items, ex: boots for kick
-				//they don't have a dmg but we should be able to hit magical
-				dmg = dmg <= 0 ? 1 : dmg;
+				if (weapon_item->Damage && (weapon_item->IsType1HWeapon() || weapon_item->IsType2HWeapon())) {
+					dmg = weapon_item->Damage;
+				}
+				//Non weapon items, ie. boots for kick.
+				else if (weapon_item->ItemType == EQ::item::ItemTypeArmor) {
+					dmg = 1;
+				}
+				else {
+					return 0;
+				}
 			}
 			else {
 				return 0;
