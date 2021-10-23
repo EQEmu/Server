@@ -2042,62 +2042,64 @@ void Database::ClearRaidLeader(uint32 gid, uint32 rid)
 	QueryDatabase(query);
 }
 
-void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win)
+void Database::UpdateAdventureStatsEntry(uint32 char_id, uint8 theme, bool win, bool remove)
 {
-
 	std::string field;
-
-	switch(theme)
-	{
-		case 1:
-		{
+	switch(theme) {
+		case LDoNThemes::GUK: {
 			field = "guk_";
 			break;
 		}
-		case 2:
-		{
+		case LDoNThemes::MIR: {
 			field = "mir_";
 			break;
 		}
-		case 3:
-		{
+		case LDoNThemes::MMC: {
 			field = "mmc_";
 			break;
 		}
-		case 4:
-		{
+		case LDoNThemes::RUJ: {
 			field = "ruj_";
 			break;
 		}
-		case 5:
-		{
+		case LDoNThemes::TAK: {
 			field = "tak_";
 			break;
 		}
-		default:
-		{
+		default: {
 			return;
 		}
 	}
 
-	if (win)
-		field += "wins";
-	else
-		field += "losses";
+	field += win ? "wins" : "losses";
+	std::string field_operation = remove ? "-" : "+";
 
-	std::string query = StringFormat("UPDATE `adventure_stats` SET %s=%s+1 WHERE player_id=%u",field.c_str(), field.c_str(), char_id);
+	std::string query = fmt::format(
+		"UPDATE `adventure_stats` SET {} = {} {} 1 WHERE player_id = {}",
+		field,
+		field,
+		field_operation,
+		char_id
+	);
 	auto results = QueryDatabase(query);
 
-	if (results.RowsAffected() != 0)
+	if (results.RowsAffected() != 0) {
 		return;
+	}
 
-	query = StringFormat("INSERT INTO `adventure_stats` SET %s=1, player_id=%u", field.c_str(), char_id);
-	QueryDatabase(query);
+	if (!remove) {
+		query = fmt::format(
+			"INSERT INTO `adventure_stats` SET {} = 1, player_id = {}",
+			field,
+			char_id
+		);
+		QueryDatabase(query);
+	}
 }
 
 bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 {
-	std::string query = StringFormat(
+	std::string query = fmt::format(
 		"SELECT "
 		"`guk_wins`, "
 		"`mir_wins`, "
@@ -2112,7 +2114,7 @@ bool Database::GetAdventureStats(uint32 char_id, AdventureStats_Struct *as)
 		"FROM "
 		"`adventure_stats` "
 		"WHERE "
-		"player_id = %u ",
+		"player_id = {}",
 		char_id
 	);
 	auto results = QueryDatabase(query);

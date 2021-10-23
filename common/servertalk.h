@@ -271,9 +271,11 @@ enum {
 };
 
 enum {
-	CZLDoNUpdateSubtype_Loss,
-	CZLDoNUpdateSubtype_Points,
-	CZLDoNUpdateSubtype_Win
+	CZLDoNUpdateSubtype_AddLoss,
+	CZLDoNUpdateSubtype_AddPoints,
+	CZLDoNUpdateSubtype_AddWin,
+	CZLDoNUpdateSubtype_RemoveLoss,
+	CZLDoNUpdateSubtype_RemoveWin,
 };
 
 enum {
@@ -297,9 +299,11 @@ enum {
 };
 
 enum {
-	WWLDoNUpdateType_Loss,
-	WWLDoNUpdateType_Points,
-	WWLDoNUpdateType_Win
+	WWLDoNUpdateType_AddLoss,
+	WWLDoNUpdateType_AddPoints,
+	WWLDoNUpdateType_AddWin,
+	WWLDoNUpdateType_RemoveLoss,
+	WWLDoNUpdateType_RemoveWin
 };
 
 enum {
