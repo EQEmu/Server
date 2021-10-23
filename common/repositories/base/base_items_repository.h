@@ -717,7 +717,7 @@ public:
 		entry.itemclass           = 0;
 		entry.itemtype            = 0;
 		entry.ldonprice           = 0;
-		entry.ldontheme           = 0;
+		entry.ldontheme           = LDoNThemes::Unused;
 		entry.ldonsold            = 0;
 		entry.light               = 0;
 		entry.lore                = "";

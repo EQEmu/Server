@@ -2141,12 +2141,12 @@ void Lua_Client::SetEXPModifier(uint32 zone_id, double exp_modifier) {
 
 void Lua_Client::AddLDoNLoss(uint32 theme_id) {
 	Lua_Safe_Call_Void();
-	self->AddLDoNLoss(theme_id);
+	self->UpdateLDoNWinLoss(theme_id);
 }
 
 void Lua_Client::AddLDoNWin(uint32 theme_id) {
 	Lua_Safe_Call_Void();
-	self->AddLDoNWin(theme_id);
+	self->UpdateLDoNWinLoss(theme_id, true);
 }
 
 void Lua_Client::SetHideMe(bool hide_me_state) {
@@ -2279,6 +2279,16 @@ void Lua_Client::SummonBaggedItems(uint32 bag_item_id, luabind::adl::object bag_
 	}
 
 	self->SummonBaggedItems(bag_item_id, bagged_items);
+}
+
+void Lua_Client::RemoveLDoNLoss(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->UpdateLDoNWinLoss(theme_id, false, true);
+}
+
+void Lua_Client::RemoveLDoNWin(uint32 theme_id) {
+	Lua_Safe_Call_Void();
+	self->UpdateLDoNWinLoss(theme_id, true, true);
 }
 
 luabind::scope lua_register_client() {
@@ -2661,7 +2671,9 @@ luabind::scope lua_register_client() {
 		.def("SetGMStatus", (void(Lua_Client::*)(int32))&Lua_Client::SetGMStatus)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16))&Lua_Client::UntrainDiscBySpellID)
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID)
-		.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems);
+		.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems)
+		.def("RemoveLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNLoss)
+		.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin);
 }
 
 luabind::scope lua_register_inventory_where() {

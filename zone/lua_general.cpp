@@ -1889,6 +1889,14 @@ void lua_add_ldon_win(uint32 theme_id) {
 	quest_manager.addldonwin(theme_id);
 }
 
+void lua_remove_ldon_loss(uint32 theme_id) {
+	quest_manager.removeldonloss(theme_id);
+}
+
+void lua_remove_ldon_win(uint32 theme_id) {
+	quest_manager.addldonwin(theme_id);
+}
+
 std::string lua_get_clean_npc_name_by_id(uint32 npc_id) {
 	return quest_manager.getcleannpcnamebyid(npc_id);
 }
@@ -1927,37 +1935,37 @@ int lua_get_spell_stat(uint32 spell_id, std::string stat_identifier, uint8 slot)
 
 void lua_cross_zone_add_ldon_loss_by_char_id(int character_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_loss_by_group_id(int group_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_loss_by_raid_id(int raid_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_loss_by_guild_id(int guild_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_loss_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_loss_by_client_name(const char* client_name, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_ClientName;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Loss;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddLoss;
 	int update_identifier = 0;
 	int points = 1;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
@@ -1965,74 +1973,74 @@ void lua_cross_zone_add_ldon_loss_by_client_name(const char* client_name, uint32
 
 void lua_cross_zone_add_ldon_points_by_char_id(int character_id, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id, points);
 }
 
 void lua_cross_zone_add_ldon_points_by_group_id(int group_id, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id, points);
 }
 
 void lua_cross_zone_add_ldon_points_by_raid_id(int raid_id, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id, points);
 }
 
 void lua_cross_zone_add_ldon_points_by_guild_id(int guild_id, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id, points);
 }
 
 void lua_cross_zone_add_ldon_points_by_expedition_id(uint32 expedition_id, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id, points);
 }
 
 void lua_cross_zone_add_ldon_points_by_client_name(const char* client_name, uint32 theme_id, int points) {
 	uint8 update_type = CZUpdateType_ClientName;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Points;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddPoints;
 	int update_identifier = 0;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
 }
 
 void lua_cross_zone_add_ldon_win_by_char_id(int character_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Character;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_win_by_group_id(int group_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Group;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_win_by_raid_id(int raid_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Raid;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_win_by_guild_id(int guild_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Guild;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_win_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_Expedition;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
 }
 
 void lua_cross_zone_add_ldon_win_by_client_name(const char* client_name, uint32 theme_id) {
 	uint8 update_type = CZUpdateType_ClientName;
-	uint8 update_subtype = CZLDoNUpdateSubtype_Win;
+	uint8 update_subtype = CZLDoNUpdateSubtype_AddWin;
 	int update_identifier = 0;
 	int points = 1;
 	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
@@ -2523,6 +2531,82 @@ void lua_cross_zone_move_instance_by_client_name(const char* client_name, uint16
 	quest_manager.CrossZoneMove(update_type, update_subtype, update_identifier, zone_short_name, instance_id, client_name);
 }
 
+void lua_cross_zone_remove_ldon_loss_by_char_id(int character_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_loss_by_group_id(int group_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_loss_by_raid_id(int raid_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_loss_by_guild_id(int guild_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_loss_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_loss_by_client_name(const char* client_name, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveLoss;
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
+}
+
+void lua_cross_zone_remove_ldon_win_by_char_id(int character_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Character;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, character_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_win_by_group_id(int group_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Group;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, group_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_win_by_raid_id(int raid_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Raid;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, raid_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_win_by_guild_id(int guild_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Guild;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, guild_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_win_by_expedition_id(uint32 expedition_id, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_Expedition;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, expedition_id, theme_id);
+}
+
+void lua_cross_zone_remove_ldon_win_by_client_name(const char* client_name, uint32 theme_id) {
+	uint8 update_type = CZUpdateType_ClientName;
+	uint8 update_subtype = CZLDoNUpdateSubtype_RemoveWin;
+	int update_identifier = 0;
+	int points = 1;
+	quest_manager.CrossZoneLDoNUpdate(update_type, update_subtype, update_identifier, theme_id, points, client_name);
+}
+
 void lua_cross_zone_remove_spell_by_char_id(int character_id, uint32 spell_id) {
 	uint8 update_type = CZUpdateType_Character;
 	uint8 update_subtype = CZSpellUpdateSubtype_Remove;
@@ -2824,50 +2908,50 @@ void lua_cross_zone_update_activity_by_client_name(const char* client_name, uint
 }
 
 void lua_world_wide_add_ldon_loss(uint32 theme_id) {
-	uint8 update_type = WWLDoNUpdateType_Loss;
+	uint8 update_type = WWLDoNUpdateType_AddLoss;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
 }
 
 void lua_world_wide_add_ldon_loss(uint32 theme_id, uint8 min_status) {
-	uint8 update_type = WWLDoNUpdateType_Loss;
+	uint8 update_type = WWLDoNUpdateType_AddLoss;
 	int points = 1;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
 }
 
 void lua_world_wide_add_ldon_loss(uint32 theme_id, uint8 min_status, uint8 max_status) {
-	uint8 update_type = WWLDoNUpdateType_Loss;
+	uint8 update_type = WWLDoNUpdateType_AddLoss;
 	int points = 1;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
 }
 
 void lua_world_wide_add_ldon_points(uint32 theme_id, int points) {
-	uint8 update_type = WWLDoNUpdateType_Points;
+	uint8 update_type = WWLDoNUpdateType_AddPoints;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points);
 }
 
 void lua_world_wide_add_ldon_points(uint32 theme_id, int points, uint8 min_status) {
-	uint8 update_type = WWLDoNUpdateType_Points;
+	uint8 update_type = WWLDoNUpdateType_AddPoints;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
 }
 
 void lua_world_wide_add_ldon_points(uint32 theme_id, int points, uint8 min_status, uint8 max_status) {
-	uint8 update_type = WWLDoNUpdateType_Points;
+	uint8 update_type = WWLDoNUpdateType_AddPoints;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
 }
 
 void lua_world_wide_add_ldon_win(uint32 theme_id) {
-	uint8 update_type = WWLDoNUpdateType_Win;
+	uint8 update_type = WWLDoNUpdateType_AddWin;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
 }
 
 void lua_world_wide_add_ldon_win(uint32 theme_id, uint8 min_status) {
-	uint8 update_type = WWLDoNUpdateType_Win;
+	uint8 update_type = WWLDoNUpdateType_AddWin;
 	int points = 1;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
 }
 
 void lua_world_wide_add_ldon_win(uint32 theme_id, uint8 min_status, uint8 max_status) {
-	uint8 update_type = WWLDoNUpdateType_Win;
+	uint8 update_type = WWLDoNUpdateType_AddWin;
 	int points = 1;
 	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
 }
@@ -3045,6 +3129,40 @@ void lua_world_wide_move_instance(uint16 instance_id, uint8 min_status, uint8 ma
 	uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
 	const char* zone_short_name = "";
 	quest_manager.WorldWideMove(update_type, zone_short_name, instance_id, min_status, max_status);
+}
+
+void lua_world_wide_remove_ldon_loss(uint32 theme_id) {
+	uint8 update_type = WWLDoNUpdateType_RemoveLoss;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
+}
+
+void lua_world_wide_remove_ldon_loss(uint32 theme_id, uint8 min_status) {
+	uint8 update_type = WWLDoNUpdateType_RemoveLoss;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
+}
+
+void lua_world_wide_remove_ldon_loss(uint32 theme_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWLDoNUpdateType_RemoveLoss;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
+}
+
+void lua_world_wide_remove_ldon_win(uint32 theme_id) {
+	uint8 update_type = WWLDoNUpdateType_RemoveWin;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id);
+}
+
+void lua_world_wide_remove_ldon_win(uint32 theme_id, uint8 min_status) {
+	uint8 update_type = WWLDoNUpdateType_RemoveWin;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status);
+}
+
+void lua_world_wide_remove_ldon_win(uint32 theme_id, uint8 min_status, uint8 max_status) {
+	uint8 update_type = WWLDoNUpdateType_RemoveWin;
+	int points = 1;
+	quest_manager.WorldWideLDoNUpdate(update_type, theme_id, points, min_status, max_status);
 }
 
 void lua_world_wide_remove_spell(uint32 spell_id) {
@@ -3753,6 +3871,18 @@ luabind::scope lua_register_general() {
 		luabind::def("cross_zone_move_instance_by_guild_id", &lua_cross_zone_move_instance_by_guild_id),
 		luabind::def("cross_zone_move_instance_by_expedition_id", &lua_cross_zone_move_instance_by_expedition_id),
 		luabind::def("cross_zone_move_instance_by_client_name", &lua_cross_zone_move_instance_by_client_name),
+		luabind::def("cross_zone_remove_ldon_loss_by_char_id", &lua_cross_zone_remove_ldon_loss_by_char_id),
+		luabind::def("cross_zone_remove_ldon_loss_by_group_id", &lua_cross_zone_remove_ldon_loss_by_group_id),
+		luabind::def("cross_zone_remove_ldon_loss_by_raid_id", &lua_cross_zone_remove_ldon_loss_by_raid_id),
+		luabind::def("cross_zone_remove_ldon_loss_by_guild_id", &lua_cross_zone_remove_ldon_loss_by_guild_id),
+		luabind::def("cross_zone_remove_ldon_loss_by_expedition_id", &lua_cross_zone_remove_ldon_loss_by_expedition_id),
+		luabind::def("cross_zone_remove_ldon_loss_by_client_name", &lua_cross_zone_remove_ldon_loss_by_client_name),
+		luabind::def("cross_zone_remove_ldon_win_by_char_id", &lua_cross_zone_remove_ldon_win_by_char_id),
+		luabind::def("cross_zone_remove_ldon_win_by_group_id", &lua_cross_zone_remove_ldon_win_by_group_id),
+		luabind::def("cross_zone_remove_ldon_win_by_raid_id", &lua_cross_zone_remove_ldon_win_by_raid_id),
+		luabind::def("cross_zone_remove_ldon_win_by_guild_id", &lua_cross_zone_remove_ldon_win_by_guild_id),
+		luabind::def("cross_zone_remove_ldon_win_by_expedition_id", &lua_cross_zone_remove_ldon_win_by_expedition_id),
+		luabind::def("cross_zone_remove_ldon_win_by_client_name", &lua_cross_zone_remove_ldon_win_by_client_name),
 		luabind::def("cross_zone_remove_spell_by_char_id", &lua_cross_zone_remove_spell_by_char_id),
 		luabind::def("cross_zone_remove_spell_by_group_id", &lua_cross_zone_remove_spell_by_group_id),
 		luabind::def("cross_zone_remove_spell_by_raid_id", &lua_cross_zone_remove_spell_by_raid_id),
@@ -3996,7 +4126,7 @@ luabind::scope lua_register_events() {
 			luabind::value("target_change", static_cast<int>(EVENT_TARGET_CHANGE)),
 			luabind::value("hate_list", static_cast<int>(EVENT_HATE_LIST)),
 			luabind::value("spell_effect", static_cast<int>(EVENT_SPELL_EFFECT_CLIENT)),
-			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_BUFF_TIC_CLIENT)),
+			luabind::value("spell_buff_tic", static_cast<int>(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT)),
 			luabind::value("spell_fade", static_cast<int>(EVENT_SPELL_FADE)),
 			luabind::value("spell_effect_translocate_complete", static_cast<int>(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE)),
 			luabind::value("combine_success ", static_cast<int>(EVENT_COMBINE_SUCCESS )),
@@ -4040,7 +4170,8 @@ luabind::scope lua_register_events() {
 			luabind::value("warp", static_cast<int>(EVENT_WARP)),
 			luabind::value("test_buff", static_cast<int>(EVENT_TEST_BUFF)),
 			luabind::value("consider", static_cast<int>(EVENT_CONSIDER)),
-			luabind::value("consider_corpse", static_cast<int>(EVENT_CONSIDER_CORPSE))
+			luabind::value("consider_corpse", static_cast<int>(EVENT_CONSIDER_CORPSE)),
+			luabind::value("loot_zone", static_cast<int>(EVENT_LOOT_ZONE))
 		];
 }
 

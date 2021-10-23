@@ -289,14 +289,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if(IsClient()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), temp, 0) != 0)
+		std::string buf = fmt::format("{}", spell_id);
+		if (parse->EventPlayer(EVENT_CAST_BEGIN, CastToClient(), buf.c_str(), 0) != 0)
 			return false;
 	} else if(IsNPC()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST_BEGIN, CastToNPC(), nullptr, buf.c_str(), 0);
 	}
 
 	//To prevent NPC ghosting when spells are cast from scripts
@@ -432,22 +430,37 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	casting_spell_targetid = target_id;
 
 	if (RuleB(Spells, InvisRequiresGroup) && IsInvisSpell(spell_id)) {
-		if (GetTarget() && GetTarget()->IsClient()) {
-			Client *spell_target = entity_list.GetClientByID(target_id);
+		if (IsClient() && GetTarget() && GetTarget()->IsClient()) {
+			Client* spell_caster = this->CastToClient();
+			Client* spell_target = entity_list.GetClientByID(target_id);
 			if (spell_target && spell_target->GetID() != GetID()) {
-				if (!spell_target->IsGrouped()) {
-					InterruptSpell(spell_id);
-					Message(Chat::Red, "You cannot invis someone who is not in your group.");
-					return false;
-				}
-				else if (spell_target->IsGrouped()) {
+				bool cast_failed = true;
+				if (spell_target->IsGrouped()) {
 					Group *target_group = spell_target->GetGroup();
-					Group *my_group     = GetGroup();
-					if (target_group && my_group && (target_group->GetID() != my_group->GetID())) {
-						InterruptSpell(spell_id);
-						Message(Chat::Red, "You cannot invis someone who is not in your group.");
-						return false;
+					Group *my_group = GetGroup();
+					if (
+						target_group &&
+						my_group &&
+						(target_group->GetID() == my_group->GetID())
+					) {
+						cast_failed = false;
 					}
+				} else if (spell_target->IsRaidGrouped()) {					
+					Raid *target_raid = spell_target->GetRaid();
+					Raid *my_raid = GetRaid();
+					if (
+						target_raid &&
+						my_raid &&
+						(target_raid->GetGroup(spell_target) == my_raid->GetGroup(spell_caster))
+					) {
+						cast_failed = false;
+					}
+				}
+
+				if (cast_failed) {
+					InterruptSpell(spell_id);
+					MessageString(Chat::Red, TARGET_GROUP_MEMBER);
+					return false;
 				}
 			}
 		}
@@ -1323,7 +1336,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		bool fromaug = false;
 		EQ::ItemData* augitem = nullptr;
 		uint32 recastdelay = 0;
-		uint32 recasttype = 0;
+		int recasttype = 0;
 
 		while (true) {
 			if (item == nullptr)
@@ -1363,8 +1376,13 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			{
 				//Can we start the timer here?  I don't see why not.
 				CastToClient()->GetPTimers().Start((pTimerItemStart + recasttype), recastdelay);
-				database.UpdateItemRecastTimestamps(CastToClient()->CharacterID(), recasttype,
-								CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp());
+				if (recasttype != -1) {
+					database.UpdateItemRecastTimestamps(
+						CastToClient()->CharacterID(),
+						recasttype,
+						CastToClient()->GetPTimers().Get(pTimerItemStart + recasttype)->GetReadyTimestamp()
+					);
+				}
 			}
 		}
 
@@ -1420,13 +1438,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	//
 
 	if(IsClient()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventPlayer(EVENT_CAST, CastToClient(), temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventPlayer(EVENT_CAST, CastToClient(), buf.c_str(), 0);
 	} else if(IsNPC()) {
-		char temp[64];
-		sprintf(temp, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, temp, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST, CastToNPC(), nullptr, buf.c_str(), 0);
 	}
 
 	if(bard_song_mode)
@@ -2524,9 +2540,13 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
-			database.UpdateItemRecastTimestamps(
-			    CastToClient()->CharacterID(), recast_type,
-			    CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp());
+			if (recast_type != -1) {
+				database.UpdateItemRecastTimestamps(
+				    CastToClient()->CharacterID(),
+					recast_type,
+					CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+				);
+			}
 			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
 			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
 			ird->recast_delay = itm->GetItem()->RecastDelay;
@@ -3630,15 +3650,13 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	/* Send the EVENT_CAST_ON event */
 	if(spelltar->IsNPC())
 	{
-		char temp1[100];
-		sprintf(temp1, "%d", spell_id);
-		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, temp1, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventNPC(EVENT_CAST_ON, spelltar->CastToNPC(), this, buf.c_str(), 0);
 	}
 	else if (spelltar->IsClient())
 	{
-		char temp1[100];
-		sprintf(temp1, "%d", spell_id);
-		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(),temp1, 0);
+		std::string buf = fmt::format("{}", spell_id);
+		parse->EventPlayer(EVENT_CAST_ON, spelltar->CastToClient(), buf.c_str(), 0);
 	}
 
 	mod_spell_cast(spell_id, spelltar, reflect_effectiveness, use_resist_adjust, resist_adjust, isproc);
@@ -4036,11 +4054,21 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 			spelltar->SetHateAmountOnEnt(this, std::max(newhate, 1));
 		}
 	} else if (IsBeneficialSpell(spell_id) && !IsSummonPCSpell(spell_id)) {
-		if (this != spelltar && spelltar->IsClient() && IsClient())
-			CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
+		if (this != spelltar && IsClient()){
+			if (spelltar->IsClient()) {
+				CastToClient()->UpdateRestTimer(spelltar->CastToClient()->GetRestTimer());
+			}
+			else if (spelltar->IsPet()) {
+				Mob *owner = spelltar->GetOwner();
+				if (owner && owner != this && owner->IsClient()) {
+					CastToClient()->UpdateRestTimer(owner->CastToClient()->GetRestTimer());
+				}
+			}
+		}
+		
 		entity_list.AddHealAggro(
-		    spelltar, this,
-		    CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
+			spelltar, this,
+			CheckHealAggroAmount(spell_id, spelltar, (spelltar->GetMaxHP() - spelltar->GetHP())));
 	}
 
 	// make sure spelltar is high enough level for the buff

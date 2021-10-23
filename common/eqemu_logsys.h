@@ -126,6 +126,7 @@ namespace Logs {
 		ClientList,
 		DiaWind,
 		HTTP,
+		Saylink,
 		MaxCategoryID /* Don't Remove this */
 	};
 
@@ -210,6 +211,7 @@ namespace Logs {
 		"ClientList",
 		"DialogueWindow",
 		"HTTP",
+		"Saylink",
 	};
 }
 

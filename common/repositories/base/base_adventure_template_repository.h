@@ -148,7 +148,7 @@ public:
 		entry.zone_in_time      = 1800;
 		entry.win_points        = 0;
 		entry.lose_points       = 0;
-		entry.theme             = 1;
+		entry.theme             = LDoNThemes::GUK;
 		entry.zone_in_zone_id   = 0;
 		entry.zone_in_x         = 0;
 		entry.zone_in_y         = 0;

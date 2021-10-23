@@ -1331,11 +1331,9 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp < GetNextHPEvent())
 		{
-			char buf[10];
-			snprintf(buf, 9, "%i", GetNextHPEvent());
-			buf[9] = '\0';
+			std::string buf = fmt::format("{}", GetNextHPEvent());
 			SetNextHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 0);
+			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf.c_str(), 0);
 		}
 	}
 
@@ -1343,11 +1341,9 @@ void Mob::CreateHPPacket(EQApplicationPacket* app)
 	{
 		if (ds->hp > GetNextIncHPEvent())
 		{
-			char buf[10];
-			snprintf(buf, 9, "%i", GetNextIncHPEvent());
-			buf[9] = '\0';
+			std::string buf = fmt::format("{}", GetNextIncHPEvent());
 			SetNextIncHPEvent(-1);
-			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf, 1);
+			parse->EventNPC(EVENT_HP, CastToNPC(), nullptr, buf.c_str(), 1);
 		}
 	}
 }
@@ -4369,7 +4365,7 @@ bool Mob::TrySpellOnDeath()
 			}
 		}
 
-	BuffFadeAll();
+	BuffFadeNonPersistDeath();
 	return false;
 	//You should not be able to use this effect and survive (ALWAYS return false),
 	//attempting to place a heal in these effects will still result

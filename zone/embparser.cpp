@@ -124,7 +124,8 @@ const char *QuestEventSubroutines[_LargestEventID] = {
 	"EVENT_TEST_BUFF",
 	"EVENT_COMBINE",
 	"EVENT_CONSIDER",
-	"EVENT_CONSIDER_CORPSE"
+	"EVENT_CONSIDER_CORPSE",
+	"EVENT_LOOT_ZONE"
 };
 
 PerlembParser::PerlembParser() : perl(nullptr)
@@ -252,19 +253,15 @@ int PerlembParser::EventCommon(
 
 	if (isPlayerQuest || isGlobalPlayerQuest) {
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
-	}
-	else if (isItemQuest) {
+	} else if (isItemQuest) {
 		return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, item_inst);
-	}
-	else if (isSpellQuest) {
+	} else if (isSpellQuest) {
 		if (mob) {
 			return SendCommands(package_name.c_str(), sub_name, 0, mob, mob, nullptr);
-		}
-		else {
+		} else {
 			return SendCommands(package_name.c_str(), sub_name, 0, npcmob, mob, nullptr);
 		}
-	}
-	else {
+	} else {
 		return SendCommands(package_name.c_str(), sub_name, objid, npcmob, mob, nullptr);
 	}
 }
@@ -311,11 +308,11 @@ int PerlembParser::EventItem(
 }
 
 int PerlembParser::EventSpell(
-	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, uint32 extra_data,
+	QuestEventID evt, NPC *npc, Client *client, uint32 spell_id, std::string data, uint32 extra_data,
 	std::vector<EQ::Any> *extra_pointers
 )
 {
-	return EventCommon(evt, 0, itoa(spell_id), npc, nullptr, client, extra_data, false, extra_pointers);
+	return EventCommon(evt, spell_id, data.c_str(), npc, nullptr, client, extra_data, false, extra_pointers);
 }
 
 bool PerlembParser::HasQuestSub(uint32 npcid, QuestEventID evt)
@@ -1003,8 +1000,8 @@ void PerlembParser::GetQuestTypes(
 {
 	if (event == EVENT_SPELL_EFFECT_CLIENT ||
 		event == EVENT_SPELL_EFFECT_NPC ||
-		event == EVENT_SPELL_BUFF_TIC_CLIENT ||
-		event == EVENT_SPELL_BUFF_TIC_NPC ||
+		event == EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT ||
+		event == EVENT_SPELL_EFFECT_BUFF_TIC_NPC ||
 		event == EVENT_SPELL_FADE ||
 		event == EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE) {
 		isSpellQuest = true;
@@ -1041,31 +1038,31 @@ void PerlembParser::GetQuestPackageName(
 	bool global
 )
 {
-	if (!isPlayerQuest && !isGlobalPlayerQuest && !isItemQuest && !isSpellQuest) {
+	if (
+		!isPlayerQuest &&
+		!isGlobalPlayerQuest &&
+		!isItemQuest &&
+		!isSpellQuest
+	) {
 		if (global) {
 			isGlobalNPC  = true;
 			package_name = "qst_global_npc";
-		}
-		else {
+		} else {
 			package_name = "qst_npc_";
-			package_name += itoa(npcmob->GetNPCTypeID());
+			package_name += std::to_string(npcmob->GetNPCTypeID());
 		}
-	}
-	else if (isItemQuest) {
+	} else if (isItemQuest) {
 		// need a valid EQ::ItemInstance pointer check here..unsure how to cancel this process
 		const EQ::ItemData *item = item_inst->GetItem();
 		package_name = "qst_item_";
-		package_name += itoa(item->ID);
-	}
-	else if (isPlayerQuest) {
+		package_name += std::to_string(item->ID);
+	} else if (isPlayerQuest) {
 		package_name = "qst_player";
-	}
-	else if (isGlobalPlayerQuest) {
+	} else if (isGlobalPlayerQuest) {
 		package_name = "qst_global_player";
-	}
-	else {
+	} else {
 		package_name = "qst_spell_";
-		package_name += data;
+		package_name += std::to_string(objid);
 	}
 }
 
@@ -1411,12 +1408,14 @@ void PerlembParser::ExportEventVariables(
 			ExportVar(package_name.c_str(), "version", zone->GetInstanceVersion());
 			break;
 		}
-
+		
+		case EVENT_LOOT_ZONE:
 		case EVENT_LOOT: {
 			Seperator sep(data);
 			ExportVar(package_name.c_str(), "looted_id", sep.arg[0]);
 			ExportVar(package_name.c_str(), "looted_charges", sep.arg[1]);
 			ExportVar(package_name.c_str(), "corpse", sep.arg[2]);
+			ExportVar(package_name.c_str(), "corpse_id", sep.arg[3]);
 			break;
 		}
 
@@ -1522,11 +1521,17 @@ void PerlembParser::ExportEventVariables(
 			break;
 		}
 
+		case EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT:
+		case EVENT_SPELL_EFFECT_BUFF_TIC_NPC:
 		case EVENT_SPELL_EFFECT_CLIENT:
 		case EVENT_SPELL_EFFECT_NPC:
-		case EVENT_SPELL_BUFF_TIC_CLIENT:
-		case EVENT_SPELL_BUFF_TIC_NPC: {
-			ExportVar(package_name.c_str(), "caster_id", extradata);
+		case EVENT_SPELL_FADE: {
+			Seperator sep(data);
+			ExportVar(package_name.c_str(), "spell_id", objid);
+			ExportVar(package_name.c_str(), "caster_id", sep.arg[0]);
+			ExportVar(package_name.c_str(), "tics_remaining", sep.arg[1]);
+			ExportVar(package_name.c_str(), "caster_level", sep.arg[2]);
+			ExportVar(package_name.c_str(), "buff_slot", sep.arg[3]);
 			break;
 		}
 

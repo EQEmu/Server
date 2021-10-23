@@ -237,6 +237,24 @@ void handle_npc_null(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, s
 						  std::vector<EQ::Any> *extra_pointers) {
 }
 
+void handle_npc_loot_zone(QuestInterface *parse, lua_State* L, NPC* npc, Mob *init, std::string data, uint32 extra_data,
+						std::vector<EQ::Any> *extra_pointers) {
+	Lua_Client l_client(reinterpret_cast<Client*>(init));
+	luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
+	l_client_o.push(L);
+	lua_setfield(L, -2, "other");
+	
+	Lua_ItemInst l_item(EQ::any_cast<EQ::ItemInstance*>(extra_pointers->at(0)));
+	luabind::adl::object l_item_o = luabind::adl::object(L, l_item);
+	l_item_o.push(L);
+	lua_setfield(L, -2, "item");
+	
+	Lua_Corpse l_corpse(EQ::any_cast<Corpse*>(extra_pointers->at(1)));
+	luabind::adl::object l_corpse_o = luabind::adl::object(L, l_corpse);
+	l_corpse_o.push(L);
+	lua_setfield(L, -2, "corpse");
+}
+
 //Player
 void handle_player_say(QuestInterface *parse, lua_State* L, Client* client, std::string data, uint32 extra_data,
 					   std::vector<EQ::Any> *extra_pointers) {
@@ -684,8 +702,7 @@ void handle_item_null(QuestInterface *parse, lua_State* L, Client* client, EQ::I
 }
 
 //Spell
-void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-						 std::vector<EQ::Any> *extra_pointers) {
+void handle_spell_event(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data, std::vector<EQ::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -702,71 +719,30 @@ void handle_spell_effect(QuestInterface *parse, lua_State* L, NPC* npc, Client* 
 
 	lua_setfield(L, -2, "target");
 
-	lua_pushinteger(L, *EQ::any_cast<int*>(extra_pointers->at(0)));
-	lua_setfield(L, -2, "buff_slot");
+	lua_pushinteger(L, spell_id);
+	lua_setfield(L, -2, "spell_id");
 
-	lua_pushinteger(L, extra_data);
+	Seperator sep(data.c_str());
+
+	lua_pushinteger(L, std::stoi(sep.arg[0]));
 	lua_setfield(L, -2, "caster_id");
-}
 
-void handle_spell_tic(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-						 std::vector<EQ::Any> *extra_pointers) {
-	if(npc) {
-		Lua_Mob l_npc(npc);
-		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
-		l_npc_o.push(L);
-	} else if(client) {
-		Lua_Mob l_client(client);
-		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
-		l_client_o.push(L);
-	} else {
-		Lua_Mob l_mob(nullptr);
-		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
-		l_mob_o.push(L);
-	}
-
-	lua_setfield(L, -2, "target");
-
-	lua_pushinteger(L, *EQ::any_cast<int*>(extra_pointers->at(0)));
+	lua_pushinteger(L, std::stoi(sep.arg[1]));
 	lua_setfield(L, -2, "tics_remaining");
 
-	lua_pushinteger(L, *EQ::any_cast<uint8*>(extra_pointers->at(1)));
+	lua_pushinteger(L, std::stoi(sep.arg[2]));
 	lua_setfield(L, -2, "caster_level");
 
-	lua_pushinteger(L, *EQ::any_cast<int*>(extra_pointers->at(2)));
+	lua_pushinteger(L, std::stoi(sep.arg[3]));
 	lua_setfield(L, -2, "buff_slot");
-
-	lua_pushinteger(L, extra_data);
-	lua_setfield(L, -2, "caster_id");
+	
+	Lua_Spell l_spell(spell_id);
+	luabind::adl::object l_spell_o = luabind::adl::object(L, l_spell);
+	l_spell_o.push(L);
+	lua_setfield(L, -2, "spell");
 }
 
-void handle_spell_fade(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<EQ::Any> *extra_pointers) {
-	if(npc) {
-		Lua_Mob l_npc(npc);
-		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
-		l_npc_o.push(L);
-	} else if(client) {
-		Lua_Mob l_client(client);
-		luabind::adl::object l_client_o = luabind::adl::object(L, l_client);
-		l_client_o.push(L);
-	} else {
-		Lua_Mob l_mob(nullptr);
-		luabind::adl::object l_mob_o = luabind::adl::object(L, l_mob);
-		l_mob_o.push(L);
-	}
-
-	lua_setfield(L, -2, "target");
-
-	lua_pushinteger(L, extra_data);
-	lua_setfield(L, -2, "buff_slot");
-
-	lua_pushinteger(L, *EQ::any_cast<uint16*>(extra_pointers->at(0)));
-	lua_setfield(L, -2, "caster_id");
-}
-
-void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<EQ::Any> *extra_pointers) {
+void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data, std::vector<EQ::Any> *extra_pointers) {
 	if(npc) {
 		Lua_Mob l_npc(npc);
 		luabind::adl::object l_npc_o = luabind::adl::object(L, l_npc);
@@ -784,9 +760,7 @@ void handle_translocate_finish(QuestInterface *parse, lua_State* L, NPC* npc, Cl
 	lua_setfield(L, -2, "target");
 }
 
-void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, uint32 extra_data,
-					   std::vector<EQ::Any> *extra_pointers) {
-}
+void handle_spell_null(QuestInterface *parse, lua_State* L, NPC* npc, Client* client, uint32 spell_id, std::string data, uint32 extra_data, std::vector<EQ::Any> *extra_pointers) { }
 
 void handle_encounter_timer(QuestInterface *parse, lua_State* L, Encounter* encounter, std::string data, uint32 extra_data,
 							std::vector<EQ::Any> *extra_pointers) {

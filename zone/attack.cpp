@@ -990,32 +990,31 @@ int Mob::GetWeaponDamage(Mob *against, const EQ::ItemData *weapon_item) {
 
 	//check to see if our weapons or fists are magical.
 	if (against->GetSpecialAbility(IMMUNE_MELEE_NONMAGICAL)) {
-		if (weapon_item) {
+		if (GetSpecialAbility(SPECATK_MAGICAL)) {
+			dmg = 1;
+		}
+		//On live this occurs for pets and charmed pet >= level 10
+		else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
+			//pets wouldn't actually use this but...
+			//it gives us an idea if we can hit due to the dual nature of this function
+			dmg = 1;
+		}
+		else if (weapon_item) {
 			if (weapon_item->Magic) {
 				dmg = weapon_item->Damage;
-
 				//this is more for non weapon items, ex: boots for kick
 				//they don't have a dmg but we should be able to hit magical
 				dmg = dmg <= 0 ? 1 : dmg;
 			}
-			else
+			else {
 				return 0;
+			}
+		}
+		else if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
+			dmg = GetHandToHandDamage();
 		}
 		else {
-			if ((GetClass() == MONK || GetClass() == BEASTLORD) && GetLevel() >= 30) {
-				dmg = GetHandToHandDamage();
-			}
-			else if (GetOwner() && GetLevel() >= RuleI(Combat, PetAttackMagicLevel)) {
-				//pets wouldn't actually use this but...
-				//it gives us an idea if we can hit due to the dual nature of this function
-				dmg = 1;
-			}
-			else if (GetSpecialAbility(SPECATK_MAGICAL))
-			{
-				dmg = 1;
-			}
-			else
-				return 0;
+			return 0;
 		}
 	}
 	else {
@@ -1685,10 +1684,16 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	// #2: figure out things that affect the player dying and mark them dead
 
 	InterruptSpell();
+
+	Mob* m_pet = GetPet();
 	SetPet(0);
 	SetHorseId(0);
 	ShieldAbilityClearVariables();
 	dead = true;
+
+	if (m_pet && m_pet->IsCharmed()) {
+		m_pet->BuffFadeByEffect(SE_Charm);
+	}
 
 	if (GetMerc()) {
 		GetMerc()->Suspend();
@@ -2206,11 +2211,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 	Mob *oos = nullptr;
 	if (killer_mob) {
 		oos = killer_mob->GetOwnerOrSelf();
-
-		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", killer_mob->GetID(), damage, spell, static_cast<int>(attack_skill));
-
-		if (parse->EventNPC(EVENT_DEATH, this, oos, buffer, 0) != 0) {
+		std::string buffer = fmt::format("{} {} {} {}", killer_mob->GetID(), damage, spell, static_cast<int>(attack_skill));
+		if (parse->EventNPC(EVENT_DEATH, this, oos, buffer.c_str(), 0) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2233,10 +2235,8 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 		}
 	}
 	else {
-		char buffer[48] = { 0 };
-		snprintf(buffer, 47, "%d %d %d %d", 0, damage, spell, static_cast<int>(attack_skill));
-
-		if (parse->EventNPC(EVENT_DEATH, this, nullptr, buffer, 0) != 0) {
+		std::string buffer = fmt::format("{} {} {} {}", 0, damage, spell, static_cast<int>(attack_skill));
+		if (parse->EventNPC(EVENT_DEATH, this, nullptr, buffer.c_str(), 0) != 0) {
 			if (GetHP() < 0) {
 				SetHP(0);
 			}
@@ -2627,16 +2627,15 @@ bool NPC::Death(Mob* killer_mob, int32 damage, uint16 spell, EQ::skills::SkillTy
 
 	entity_list.UpdateFindableNPCState(this, true);
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
-	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer, 0);
+	std::string buffer = fmt::format("{} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
+	parse->EventNPC(EVENT_DEATH_COMPLETE, this, oos, buffer.c_str(), 0);
 
 	/* Zone controller process EVENT_DEATH_ZONE (Death events) */
 	if (RuleB(Zone, UseZoneController)) {
-		if (entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID) && this->GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
-			char data_pass[100] = { 0 };
-			snprintf(data_pass, 99, "%d %d %d %d %d", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), this->GetNPCTypeID());
-			parse->EventNPC(EVENT_DEATH_ZONE, entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID)->CastToNPC(), nullptr, data_pass, 0);
+		auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
+		if (controller && GetNPCTypeID() != ZONE_CONTROLLER_NPC_ID) {
+			std::string data_pass = fmt::format("{} {} {} {} {}", killer_mob ? killer_mob->GetID() : 0, damage, spell, static_cast<int>(attack_skill), GetNPCTypeID());
+			parse->EventNPC(EVENT_DEATH_ZONE, controller, nullptr, data_pass.c_str(), 0);
 		}
 	}
 

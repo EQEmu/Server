@@ -833,6 +833,14 @@ bool IsTeleportSpell(uint16 spell_id)
 	return false;
 }
 
+bool IsTranslocateSpell(uint16 spell_id)
+{
+	if (IsEffectInSpell(spell_id, SE_Translocate))
+		return true;
+
+	return false;
+}
+
 bool IsGateSpell(uint16 spell_id)
 {
 	if (IsEffectInSpell(spell_id, SE_Gate))
