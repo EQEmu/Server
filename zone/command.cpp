@@ -3130,11 +3130,11 @@ void command_race(Client *c, const Seperator *sep)
 			target->SendIllusionPacket(race);
 		}
 		else {
-			c->Message(Chat::White, "Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID));
+			c->Message(Chat::White, fmt::format("Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID)).c_str());
 		}
 	}
 	else {
-		c->Message(Chat::White, "Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID));
+		c->Message(Chat::White, fmt::format("Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID)).c_str());
 	}
 }
 
