@@ -4354,12 +4354,10 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		);
 	}
 
-	char buf[20];
-	snprintf(buf, 19, "%u", cd->doorid);
-	buf[19] = '\0';
+	std::string export_string = fmt::format("{}", cd->doorid);
 	std::vector<EQ::Any> args;
 	args.push_back(currentdoor);
-	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0, &args);
+	parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args);
 
 	currentdoor->HandleClick(this, 0);
 	return;
@@ -4383,10 +4381,8 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		std::vector<EQ::Any> args;
 		args.push_back(object);
 
-		char buf[10];
-		snprintf(buf, 9, "%u", click_object->drop_id);
-		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, GetID(), &args);
+		std::string export_string = fmt::format("{}", click_object->drop_id);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, export_string, GetID(), &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
@@ -4837,7 +4833,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob == 0)
 		return;
 
-	if (parse->EventPlayer(EVENT_CONSIDER, this, fmt::format("{}", conin->targetid), 0) == 1) {
+	std::string export_string = fmt::format("{}", conin->targetid);
+	if (parse->EventPlayer(EVENT_CONSIDER, this, export_string, 0) == 1) {
 		return;
 	}
 
@@ -4963,8 +4960,9 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 	}
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
 	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
+	std::string export_string = fmt::format("{}", conin->targetid);
 	if (tcorpse && tcorpse->IsNPCCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
+		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
 			return;
 		}
 
@@ -4981,7 +4979,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
+		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
 			return;
 		}
 
@@ -5928,9 +5926,13 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
 		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
-		char buf[24];
-		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage);
-		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, buf, 0);
+		std::string export_string = fmt::format(
+			"{} {} {}",
+			ed->damage,
+			ed->dmgtype,
+			final_damage
+		);
+		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, export_string, 0);
 	}
 
 	if (GetHP() <= 0) {
@@ -8539,18 +8541,18 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if (GetTarget() && GetTarget()->IsNPC()) {
 				if (silentsaylink) {
-					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
+					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response, 0);
 
 					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
 					}
 #ifdef BOTS
 					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
 					}
 #endif
 					else {
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_SAY, this, response, 0);
 					}
 				}
 				else {
@@ -8562,15 +8564,15 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			else {
 				if (silentsaylink) {
 					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
 					}
 #ifdef BOTS
 					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
 					}
 #endif
 					else {
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_SAY, this, response, 0);
 					}
 				}
 				else {
@@ -11164,13 +11166,13 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	std::string buf = fmt::format("{}", popup_response->popupid);
+	std::string export_string = fmt::format("{}", popup_response->popupid);
 
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf.c_str(), 0);
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, export_string, 0);
 
 	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf.c_str(), 0);
+		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, export_string, 0);
 	}
 }
 
