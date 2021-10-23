@@ -1374,23 +1374,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 			return false;
 		}
 
-	case SE_CurrentHP: {
-		//Modify heal over time and instant heals
-		if (spells[spell_id].goodEffect) {
-			return true;
-		}
-		// Modify damage over time spells
-		else if (spells[spell_id].buffduration > 0) {
-			return true;
-		}
-		//Modify direct damage detrimental from instruments, unless it is singing skill.
-		else if (!spells[spell_id].goodEffect && spells[spell_id].skill != EQ::skills::SkillSinging) {
-			return true;
-		}
-		//Only weapon procs with Song modifiers get focused, excepted those with singing mods.
-		return false;
-	}
-
+		case SE_CurrentHP:
 		case SE_ArmorClass:
 		case SE_ACv2:
 		case SE_MovementSpeed:
