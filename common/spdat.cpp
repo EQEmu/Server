@@ -1369,7 +1369,7 @@ bool SpellRequiresTarget(int spell_id)
 bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 {
 
-	//Effects modifiable by bard instrument mods.
+	//Effects that are verified modifiable by bard instrument/singing mods, or highly likely due to similiar type of effect.
 	switch (effect) {
 
 		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
@@ -1413,15 +1413,19 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_DamageModifier2:
 		case SE_MinDamageModifier: // ? Need verified 
 		case SE_PetFlurry: // ? Need verified
+		case SE_DiseaseCounter:			
+		case SE_PoisonCounter: 
+		case SE_CurseCounter:
+		case SE_CorruptionCounter:
 			return true;
-		default:
-			return false;
 	}
 
 	/*
-		The following are NOT modifiable by bard singing mods.
-		- Focus Effects
-		- Proc Effects, Cast on Triggers
+		Following are confirmed NOT modifiable by instrument/singing mods.
+		Focus Effects, Proc Effects, Spell Triggers are not modified but are not neccessary to checked here.
+	*/
+	
+	switch (effect) {
 
 		case SE_AttackSpeed: //(Haste AND Slow not modifiable)
 		case SE_AttackSpeed2:
@@ -1436,20 +1440,23 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_PersistentEffect:
 		case SE_ReduceReuseTimer:
 		case SE_Stun:
+		case SE_Mez:
+		case SE_WipeHateList: //?
 		case SE_CancelMagic:
 		case SE_ManaAbsorbPercentDamage:
 		case SE_ResistSpellChance:
-		case SE_Reflect
-		case SE_MitigateSpellDamage
-		case SE_MitigateMeleeDamage
-
+		case SE_Reflect:
+		case SE_MitigateSpellDamage:
+		case SE_MitigateMeleeDamage:
+		case SE_AllInstrumentMod:
+		case SE_AddSingingMod:
+		case SE_SongModCap:
+		case SE_BardSongRange:
+			return false;
 	}
 
-	/* UNKNOWN
-		Increase Pet Chance to Flurry by %
-		Increase Min Hit Damage by %
-		Memory Blur
-	*/
+	//Allowing anything not confirmed to be restricted/allowed to receive modifiers, as to not inhbit anyone making custom bard songs.
+	return true;
 }
 
 int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
