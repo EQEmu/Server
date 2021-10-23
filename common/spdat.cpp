@@ -1411,7 +1411,8 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_Flurry:
 		case SE_DamageModifier:
 		case SE_DamageModifier2:
-		case SE_MinDamageModifier: // ? Need verified 
+		case SE_MinDamageModifier:
+		case SE_ProcChance:
 		case SE_PetFlurry: // ? Need verified
 		case SE_DiseaseCounter:			
 		case SE_PoisonCounter: 
@@ -1422,7 +1423,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 
 	/*
 		Following are confirmed NOT modifiable by instrument/singing mods.
-		Focus Effects, Proc Effects, Spell Triggers are not modified but are not neccessary to checked here.
+		Focus Effects, Proc Effects, Spell Triggers are not modified but handled elsewhere, not neccessary to checked here.
 	*/
 	
 	switch (effect) {
