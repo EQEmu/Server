@@ -1453,6 +1453,8 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_AddSingingMod:
 		case SE_SongModCap:
 		case SE_BardSongRange:
+		case SE_TemporaryPets:
+		case SE_SpellOnDeath:
 			return false;
 	}
 
