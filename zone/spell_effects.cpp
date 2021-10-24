@@ -3358,7 +3358,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		return 0;
 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
-
+	Shout("Mod %i Spell %s EFFECT %i", IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id]), spells[spell_id].name, spells[spell_id].effectid[effect_id]);
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) 
 		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){

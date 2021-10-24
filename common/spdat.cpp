@@ -1419,14 +1419,11 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_CurseCounter:
 		case SE_CorruptionCounter:
 			return true;
-	}
 
-	/*
-		Following are confirmed NOT modifiable by instrument/singing mods.
-		Focus Effects, Proc Effects, Spell Triggers are not modified but handled elsewhere, not neccessary to checked here.
-	*/
-	
-	switch (effect) {
+		/*
+			Following are confirmed NOT modifiable by instrument/singing mods.
+			Focus Effects, Proc Effects, Spell Triggers are not modified but handled elsewhere, not neccessary to checked here.
+		*/
 
 		case SE_AttackSpeed: //(Haste AND Slow not modifiable)
 		case SE_AttackSpeed2:
@@ -1435,9 +1432,9 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_ChangeFrenzyRad:
 		case SE_Harmony:
 		case SE_AddFaction:
-		case SE_CurrentMana: // duration only
+		//case SE_CurrentMana: // duration only
 		case SE_ManaRegen_v2:
-		case SE_CurrentEndurance: // duration only
+		//case SE_CurrentEndurance: // duration only
 		case SE_PersistentEffect:
 		case SE_ReduceReuseTimer:
 		case SE_Stun:
@@ -1456,10 +1453,10 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_TemporaryPets:
 		case SE_SpellOnDeath:
 			return false;
+		default:
+			return true;
 	}
-
-	//Allowing anything not confirmed to be restricted/allowed to receive modifiers, as to not inhbit anyone making custom bard songs.
-	return true;
+	//Allowing anything not confirmed to be restricted / allowed to receive modifiers, as to not inhbit anyone making custom bard songs.
 }
 
 int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
