@@ -133,7 +133,7 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 			int      charges = loot_drop->Entries[i].multiplier;
 			for (int j       = 0; j < charges; ++j) {
 				if (zone->random.Real(0.0, 100.0) <= loot_drop->Entries[i].chance &&
-					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
+					npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i], true)) {
 					const EQ::ItemData *database_item = GetItem(loot_drop->Entries[i].item_id);
 					npc->AddLootDrop(
 						database_item,
@@ -155,29 +155,29 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	}
 
 	float       roll_t           = 0.0f;
-	float       roll_t_min       = 0.0f;
 	bool        active_item_list = false;
 	for (uint32 i                = 0; i < loot_drop->NumEntries; ++i) {
 		const EQ::ItemData *db_item = GetItem(loot_drop->Entries[i].item_id);
-		if (db_item) {
+		if (db_item && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[i])) {
 			roll_t += loot_drop->Entries[i].chance;
 			active_item_list = true;
 		}
 	}
-
-	roll_t_min = roll_t;
-	roll_t     = EQ::ClampLower(roll_t, 100.0f);
 
 	if (!active_item_list) {
 		return;
 	}
 
 	for (int i = 0; i < mindrop; ++i) {
-		float       roll = (float) zone->random.Real(0.0, roll_t_min);
+		float       roll = (float) zone->random.Real(0.0, roll_t);
 		for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
 			const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
 			if (db_item) {
-				if (roll < loot_drop->Entries[j].chance && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+				// if it doesn't meet the requirements do nothing
+				if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]))
+					continue;
+
+				if (roll < loot_drop->Entries[j].chance) {
 					npc->AddLootDrop(
 						db_item,
 						item_list,
@@ -213,7 +213,11 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 		for (uint32 j    = 0; j < loot_drop->NumEntries; ++j) {
 			const EQ::ItemData *db_item = GetItem(loot_drop->Entries[j].item_id);
 			if (db_item) {
-				if (roll < loot_drop->Entries[j].chance && npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j])) {
+				// if it doesn't meet the requirements do nothing
+				if (!npc->MeetsLootDropLevelRequirements(loot_drop->Entries[j]))
+					continue;
+
+				if (roll < loot_drop->Entries[j].chance) {
 					npc->AddLootDrop(
 						db_item,
 						item_list,
@@ -250,27 +254,31 @@ void ZoneDatabase::AddLootDropToNPC(NPC *npc, uint32 lootdrop_id, ItemList *item
 	//	npc->SendAppearancePacket(AT_Light, npc->GetActiveLightValue());
 }
 
-bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop)
+bool NPC::MeetsLootDropLevelRequirements(LootDropEntries_Struct loot_drop, bool verbose)
 {
 	if (loot_drop.npc_min_level > 0 && GetLevel() < loot_drop.npc_min_level) {
-		LogLootDetail(
-			"NPC [{}] does not meet loot_drop level requirements (min_level) level [{}] current [{}] for item [{}]",
-			GetCleanName(),
-			loot_drop.npc_min_level,
-			GetLevel(),
-			database.CreateItemLink(loot_drop.item_id)
-		);
+		if (verbose) {
+			LogLootDetail(
+				"NPC [{}] does not meet loot_drop level requirements (min_level) level [{}] current [{}] for item [{}]",
+				GetCleanName(),
+				loot_drop.npc_min_level,
+				GetLevel(),
+				database.CreateItemLink(loot_drop.item_id)
+			);
+		}
 		return false;
 	}
 
 	if (loot_drop.npc_max_level > 0 && GetLevel() > loot_drop.npc_max_level) {
-		LogLootDetail(
-			"NPC [{}] does not meet loot_drop level requirements (max_level) level [{}] current [{}] for item [{}]",
-			GetCleanName(),
-			loot_drop.npc_max_level,
-			GetLevel(),
-			database.CreateItemLink(loot_drop.item_id)
-		);
+		if (verbose) {
+			LogLootDetail(
+				"NPC [{}] does not meet loot_drop level requirements (max_level) level [{}] current [{}] for item [{}]",
+				GetCleanName(),
+				loot_drop.npc_max_level,
+				GetLevel(),
+				database.CreateItemLink(loot_drop.item_id)
+			);
+		}
 		return false;
 	}
 
