@@ -928,19 +928,8 @@ bool NPC::Process()
 		SendHPUpdate();
 	}
 
-	if(HasVirus()) {
-		if(viral_timer.Check()) {
-			viral_timer_counter++;
-			for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2) {
-				if(viral_spells[i] && spells[viral_spells[i]].viral_timer > 0)	{
-					if(viral_timer_counter % spells[viral_spells[i]].viral_timer == 0) {
-						SpreadVirus(viral_spells[i], viral_spells[i+1]);
-					}
-				}
-			}
-		}
-		if(viral_timer_counter > 999)
-			viral_timer_counter = 0;
+	if (viral_timer.Check()) {
+		VirusEffectProcess();
 	}
 
 	if(spellbonuses.GravityEffect == 1) {
@@ -2339,6 +2328,10 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
 			}
 		}
+
+		if (swarmOwner->IsNPC()) {
+			SetPetOwnerNPC(true);
+		}
 	}
 	else if(GetOwnerID())
 	{
@@ -2353,6 +2346,13 @@ void NPC::PetOnSpawn(NewSpawn_Struct* ns)
 				tmp_lastname += "'s Pet";
 				if (tmp_lastname.size() < sizeof(ns->spawn.lastName))
 					strn0cpy(ns->spawn.lastName, tmp_lastname.c_str(), sizeof(ns->spawn.lastName));
+			}
+			else 
+			{
+				if (entity_list.GetNPCByID(GetOwnerID())) 
+				{
+					SetPetOwnerNPC(true);
+				}
 			}
 		}
 	}

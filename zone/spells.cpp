@@ -3423,6 +3423,7 @@ int Mob::AddBuff(Mob *caster, uint16 spell_id, int duration, int32 level_overrid
 	buffs[emptyslot].RootBreakChance = 0;
 	buffs[emptyslot].focusproclimit_time = 0;
 	buffs[emptyslot].focusproclimit_procamt = 0;
+	buffs[emptyslot].virus_spread_time = 0;
 	buffs[emptyslot].instrument_mod = caster ? caster->GetInstrumentMod(spell_id) : 10;
 
 	if (level_override > 0 || buffs[emptyslot].numhits > 0) {
@@ -3533,9 +3534,8 @@ int Mob::CanBuffStack(uint16 spellid, uint8 caster_level, bool iFailIfOverwrite)
 // break stuff
 //
 bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectiveness, bool use_resist_adjust, int16 resist_adjust,
-			bool isproc, int level_override)
+			bool isproc, int level_override, int32 duration_override)
 {
-
 	bool is_damage_or_lifetap_spell = IsDamageSpell(spell_id) || IsLifetapSpell(spell_id);
 
 	// well we can't cast a spell on target without a target
@@ -4078,7 +4078,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	}
 
 	// cause the effects to the target
-	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, reflect_effectiveness))
+	if(!spelltar->SpellEffect(this, spell_id, spell_effectiveness, level_override, reflect_effectiveness, duration_override))
 	{
 		// if SpellEffect returned false there's a problem applying the
 		// spell. It's most likely a buff that can't stack.

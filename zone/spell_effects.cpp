@@ -46,7 +46,7 @@ extern WorldServer worldserver;
 
 // the spell can still fail here, if the buff can't stack
 // in this case false will be returned, true otherwise
-bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness)
+bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_override, int reflect_effectiveness, int32 duration_override)
 {
 	int caster_level, buffslot, effect, effect_value, i;
 	EQ::ItemInstance *SummonedItem=nullptr;
@@ -119,7 +119,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			}
 			else
 			{
-				buffslot = AddBuff(caster, spell_id);
+				buffslot = AddBuff(caster, spell_id, duration_override);
 			}
 			if(buffslot == -1)	// stacking failure
 				return false;
@@ -168,7 +168,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		caster ? caster->GetLevel() : 0,
 		buffslot
 	);
-	
+
 	if (IsClient()) {
 		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, buf, 0) != 0) {
 			CalcBonuses();
@@ -181,20 +181,12 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(spells[spell_id].viral_targets > 0) {
-		if(!viral_timer.Enabled())
-			viral_timer.Start(1000);
+	if(IsVirusSpell(spell_id)) {
 
-		has_virus = true;
-		for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2)
-		{
-			if(!viral_spells[i])
-			{
-				viral_spells[i] = spell_id;
-				viral_spells[i+1] = caster->GetID();
-				break;
-			}
+		if (!viral_timer.Enabled()) {
+			viral_timer.Start(1000);
 		}
+		buffs[buffslot].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(spell_id), GetViralMaxSpreadTime(spell_id));
 	}
 
 
@@ -1091,8 +1083,8 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 				}
 				/*
-					TODO: Parsing shows there is no level modifier. However, a consistent -2% modifer was 
-					found on spell with value 950 (95% spells would have 7% failure rates). 
+					TODO: Parsing shows there is no level modifier. However, a consistent -2% modifer was
+					found on spell with value 950 (95% spells would have 7% failure rates).
 					Further investigation is needed. ~ Kayen
 				*/
 				int chance = spells[spell_id].base[i];
@@ -1121,7 +1113,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						caster->MessageString(Chat::SpellFailure, SPELL_NO_EFFECT, spells[spell_id].name);
 					break;
 				}
-				
+
 				int chance = spells[spell_id].base[i];
 				int buff_count = GetMaxTotalSlots();
 				for(int slot = 0; slot < buff_count; slot++) {
@@ -1473,7 +1465,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						spell.base[i],
 						gender_id
 					);
-					
+
 					if (spell.max[i] > 0) {
 						if (spell.base2[i] == 0) {
 							SendIllusionPacket(
@@ -1505,7 +1497,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 							spell.max[i]
 						);
 					}
-					SendAppearancePacket(AT_Size, race_size);					
+					SendAppearancePacket(AT_Size, race_size);
 				}
 
 				for (int x = EQ::textures::textureBegin; x <= EQ::textures::LastTintableTexture; x++) {
@@ -1549,9 +1541,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (!CanMemoryBlurFromMez && IsEffectInSpell(spell_id, SE_Mez)) {
 					break;
 				}
-	
+
 				int wipechance = 0;
-					
+
 				if (caster) {
 					wipechance = caster->GetMemoryBlurChance(effect_value);
 				}
@@ -3360,7 +3352,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) 
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)
 		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
 
 
@@ -3770,7 +3762,7 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 		switch (effect) {
 		case SE_CurrentHP: {
-			
+
 			if (spells[buff.spellid].base2[i] && !PassCastRestriction(spells[buff.spellid].base2[i])) {
 				break;
 			}
@@ -4085,23 +4077,6 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		CastToClient()->MakeBuffFadePacket(buffs[slot].spellid, slot);
 
 	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
-
-	if(spells[buffs[slot].spellid].viral_targets > 0) {
-		bool last_virus = true;
-		for(int i = 0; i < MAX_SPELL_TRIGGER*2; i+=2)
-		{
-			if(viral_spells[i] && viral_spells[i] != buffs[slot].spellid)
-			{
-				// If we have a virus that doesn't match this one then don't stop the viral timer
-				last_virus = false;
-			}
-		}
-		// This is the last virus on us so lets stop timer
-		if(last_virus) {
-			viral_timer.Disable();
-			has_virus = false;
-		}
-	}
 
 	std::string buf = fmt::format(
 		"{} {} {} {}",
@@ -7168,7 +7143,7 @@ bool Mob::PassCastRestriction(int value)
 
 		Note: (ID 221 - 249) For effect seen in mage spell 'Shock of Many' which increases damage based on number of pets on targets hatelist. The way it is implemented
 		works for how our ROF2 spell file handles the effect where each slot fires individually, while on live it only takes the highest
-		value. In the future the way check is done will need to be adjusted to check a defined range instead of just great than. 
+		value. In the future the way check is done will need to be adjusted to check a defined range instead of just great than.
 	*/
 
 	if (value <= 0) {
@@ -7202,8 +7177,8 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_BODY_TYPE_MISC:
-			if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) || 
-				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)|| 
+			if ((GetBodyType() == BT_Humanoid)  || (GetBodyType() == BT_Lycanthrope) || (GetBodyType() == BT_Giant) ||
+				(GetBodyType() == BT_RaidGiant) || (GetBodyType() == BT_RaidColdain) || (GetBodyType() == BT_Animal)||
 				(GetBodyType() == BT_Construct) || (GetBodyType() == BT_Dragon)		 || (GetBodyType() == BT_Insect)||
 				(GetBodyType() == BT_VeliousDragon) || (GetBodyType() == BT_Muramite) || (GetBodyType() == BT_Magical))
 				return true;
@@ -7342,7 +7317,7 @@ bool Mob::PassCastRestriction(int value)
 			if (IsHybridClass(GetClass()))
 				return true;
 			break;
-			
+
 		case IS_CLASS_WARRIOR:
 			if (GetClass() == WARRIOR)
 				return true;
@@ -7449,7 +7424,7 @@ bool Mob::PassCastRestriction(int value)
 				return true;
 			break;
 
-		case FRENZIED_BURNOUT_NOT_ACTIVE: 
+		case FRENZIED_BURNOUT_NOT_ACTIVE:
 			if (!HasBuffWithSpellGroup(SPELLGROUP_FRENZIED_BURNOUT))
 				return true;
 			break;
@@ -7458,7 +7433,7 @@ bool Mob::PassCastRestriction(int value)
 			if (GetHPRatio() > 75)
 				return true;
 			break;
-			
+
 		case IS_HP_LESS_THAN_20_PCT:
 			if (GetHPRatio() <= 20)
 				return true;
@@ -7605,27 +7580,27 @@ bool Mob::PassCastRestriction(int value)
 			if (GetHPRatio() > 25 && GetHPRatio() <= 35)
 				return true;
 			break;
-			
+
 		case IS_HP_BETWEEN_35_AND_45_PCT:
 			if (GetHPRatio() > 35 && GetHPRatio() <= 45)
 				return true;
 			break;
-			
+
 		case IS_HP_BETWEEN_45_AND_55_PCT:
 			if (GetHPRatio() > 45 && GetHPRatio() <= 55)
 				return true;
 			break;
-			
+
 		case IS_HP_BETWEEN_55_AND_65_PCT:
 			if (GetHPRatio() > 55 && GetHPRatio() <= 65)
 				return true;
 			break;
-			
+
 		case IS_HP_BETWEEN_65_AND_75_PCT:
 			if (GetHPRatio() > 65 && GetHPRatio() <= 75)
 				return true;
 			break;
-			
+
 		case IS_HP_BETWEEN_75_AND_85_PCT:
 			if (GetHPRatio() > 75 && GetHPRatio() <= 85)
 				return true;
@@ -7635,7 +7610,7 @@ bool Mob::PassCastRestriction(int value)
 			if (GetHPRatio() > 85 && GetHPRatio() <= 95)
 				return true;
 			break;
-			
+
 		case IS_HP_ABOVE_45_PCT:
 			if (GetHPRatio() > 45)
 				return true;
@@ -7675,7 +7650,7 @@ bool Mob::PassCastRestriction(int value)
 			if (GetBodyType() != BT_Plant)
 				return true;
 			break;
-			
+
 		case IS_NOT_CLIENT:
 			if (!IsClient())
 				return true;
@@ -7689,8 +7664,8 @@ bool Mob::PassCastRestriction(int value)
 		case IS_LEVEL_ABOVE_42_AND_IS_CLIENT:
 			if (IsClient() && GetLevel() > 42)
 				return true;
-			break;		
-			
+			break;
+
 		case IS_TREANT:
 			if (GetRace() == RT_TREANT || GetRace() == RT_TREANT_2 || GetRace() == RT_TREANT_3)
 				return true;
@@ -7878,7 +7853,7 @@ bool Mob::PassCastRestriction(int value)
 			}
 			break;
 		}
-			
+
 		case IS_CLIENT_AND_MALE_PLATE_USER:
 			if (IsClient() && GetGender() == MALE && IsPlateClass(GetClass()))
 				return true;
@@ -7890,7 +7865,7 @@ bool Mob::PassCastRestriction(int value)
 			break;
 
 		case IS_CLIENT_AND_MALE_BEASTLORD_BERSERKER_MONK_RANGER_OR_ROGUE:
-			if (IsClient() && GetGender() == MALE && 
+			if (IsClient() && GetGender() == MALE &&
 				(GetClass() == BEASTLORD || GetClass() == BERSERKER || GetClass() == MONK || GetClass() == RANGER || GetClass() == ROGUE))
 				return true;
 			break;
@@ -7967,7 +7942,7 @@ bool Mob::PassCastRestriction(int value)
 			}
 			break;
 		}
-			
+
 		case IS_NOT_CLASS_BARD:
 			if (GetClass() != BARD)
 				return true;
@@ -8012,7 +7987,7 @@ bool Mob::PassCastRestriction(int value)
 			if (FindBuff(SPELL_INCENDIARY_OOZE_BUFF))
 				return true;
 			break;
-				
+
 		//Not handled, just allow them to pass for now.
 		case UNKNOWN_3:
 		case HAS_CRYSTALLIZED_FLAME_BUFF:
@@ -8595,7 +8570,7 @@ int Mob::GetMemoryBlurChance(int base_chance)
 	*/
 	int cha_mod = int(GetCHA() / 10);
 	cha_mod = std::min(cha_mod, 15);
-	
+
 	int lvl_mod = 0;
 	if (GetLevel() < 17) {
 		lvl_mod = 100;
@@ -8613,4 +8588,77 @@ int Mob::GetMemoryBlurChance(int base_chance)
 
 	chance += chance * chance_mod / 100;
 	return chance;
+}
+
+void Mob::VirusEffectProcess()
+{
+	/*
+		Virus Mechanics
+		To qualify as a virus effect buff, all of the following spell table need to be set. (At some point will correct names)
+		viral_targets = MIN_SPREAD_TIME
+		viral_timer   = MAX_SPREAD_TIME
+		viral_range   = SPREAD_RADIUS
+		Once a buff with a viral effect is applied, a 1000 ms timer will begin.
+		The time at which the virus will attempt to spread is determined by a random value between MIN_SPREAD_TIME and MAX_SPREAD_TIME
+		Each time the virus attempts to spread the next time interval will be chosen at random again.
+		If a spreader finds a target for viral buff, when the viral buff spreads the duration on the new target will be the time remaining on the spreaders buff.
+		Spreaders DOES NOT need LOS to spread. There is no max amount of targets the virus can spread to.
+		When the spreader no longer has any viral buffs the timer stops.
+		The current code supports spreading for both detrimental and beneficial spells.
+	*/
+
+	// Only spread in zones without perm buffs
+	if (zone->BuffTimersSuspended()) {
+		viral_timer.Disable();
+		return;
+	}
+
+	bool stop_timer = true;
+	for (int buffs_i = 0; buffs_i < GetMaxTotalSlots(); ++buffs_i)
+	{
+		if (IsValidSpell(buffs[buffs_i].spellid) && IsVirusSpell(buffs[buffs_i].spellid))
+		{
+			if (buffs[buffs_i].virus_spread_time > 0) {
+				buffs[buffs_i].virus_spread_time -= 1;
+				stop_timer = false;
+			}
+
+			if (buffs[buffs_i].virus_spread_time <= 0) {
+				buffs[buffs_i].virus_spread_time = zone->random.Int(GetViralMinSpreadTime(buffs[buffs_i].spellid), GetViralMaxSpreadTime(buffs[buffs_i].spellid));
+				SpreadVirusEffect(buffs[buffs_i].spellid, buffs[buffs_i].casterid, buffs[buffs_i].ticsremaining);
+				stop_timer = false;
+			}
+		}
+	}
+
+	if (stop_timer) {
+		viral_timer.Disable();
+	}
+}
+
+void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
+{
+	Mob *caster = entity_list.GetMob(caster_id);
+	std::vector<Mob *> targets_in_range = entity_list.GetTargetsForVirusEffect(
+		this,
+		caster,
+		GetViralSpreadRange(spell_id),
+		spells[spell_id].pcnpc_only_flag,
+		spell_id
+	);
+
+	for (auto &mob: targets_in_range) {
+		if (!mob) {
+			continue;
+		}
+
+		if (!mob->FindBuff(spell_id)) {
+			if (caster) {
+				if (buff_tics_remaining) {
+					//When virus is spread, the buff on new target is applied with the amount of time remaining on the spreaders buff.
+					caster->SpellOnTarget(spell_id, mob, 0, false, 0, false, -1, buff_tics_remaining);
+				}
+			}
+		}
+	}
 }

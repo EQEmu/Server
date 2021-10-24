@@ -1572,3 +1572,26 @@ int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 
 	return 0;
 }
+
+bool IsVirusSpell(int32 spell_id) 
+{
+	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id) && GetViralSpreadRange(spell_id)){
+		return true;
+	}
+	return false;
+}
+
+int32 GetViralMinSpreadTime(int32 spell_id) 
+{
+	return spells[spell_id].viral_targets;
+}
+
+int32 GetViralMaxSpreadTime(int32 spell_id) 
+{
+	return spells[spell_id].viral_timer;
+}
+
+int32 GetViralSpreadRange(int32 spell_id) 
+{
+	return spells[spell_id].viral_range;
+}

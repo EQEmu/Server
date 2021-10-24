@@ -367,6 +367,7 @@ Mob::Mob(
 	pet_regroup       = false;
 	_IsTempPet        = false;
 	pet_owner_client  = false;
+	pet_owner_npc     = false;
 	pet_targetlock_id = 0;
 
 	attacked_count = 0;
@@ -405,10 +406,6 @@ Mob::Mob(
 	roamer = false;
 	rooted = false;
 	charmed = false;
-	has_virus = false;
-	for (int i = 0; i < MAX_SPELL_TRIGGER * 2; i++) {
-		viral_spells[i] = 0;
-	}
 
 	weaponstance.enabled = false;
 	weaponstance.spellbonus_enabled = false;	//Set when bonus is applied
@@ -4679,28 +4676,6 @@ void Mob::DoGravityEffect()
 			this->CastToClient()->MovePC(zone->GetZoneID(), zone->GetInstanceID(), cur_x, cur_y, new_ground, GetHeading());
 		else
 			this->GMMove(cur_x, cur_y, new_ground, GetHeading());
-	}
-}
-
-void Mob::SpreadVirus(uint16 spell_id, uint16 casterID)
-{
-	int num_targs = spells[spell_id].viral_targets;
-
-	Mob* caster = entity_list.GetMob(casterID);
-	Mob* target = nullptr;
-	// Only spread in zones without perm buffs
-	if(!zone->BuffTimersSuspended()) {
-		for(int i = 0; i < num_targs; i++) {
-			target = entity_list.GetTargetForVirus(this, spells[spell_id].viral_range);
-			if(target) {
-				// Only spreads to the uninfected
-				if(!target->FindBuff(spell_id)) {
-					if(caster)
-						caster->SpellOnTarget(spell_id, target);
-
-				}
-			}
-		}
 	}
 }
 
