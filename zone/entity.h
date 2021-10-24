@@ -511,7 +511,7 @@ public:
 	void GetDoorsList(std::list<Doors*> &d_list);
 	void GetSpawnList(std::list<Spawn2*> &d_list);
 	void GetTargetsForConeArea(Mob *start, float min_radius, float radius, float height, int pcnpc, std::list<Mob*> &m_list);
-	void GetTargetsForVirusEffect(Mob *spreader, Mob *orginal_caster, int range, int pcnpc, int32 spell_id, std::list<Mob*> &m_list);
+	std::vector<Mob*> GetTargetsForVirusEffect(Mob *spreader, Mob *orginal_caster, int range, int pcnpc, int32 spell_id);
 
 	inline const std::unordered_map<uint16, Mob *> &GetMobList() { return mob_list; }
 	inline const std::unordered_map<uint16, NPC *> &GetNPCList() { return npc_list; }

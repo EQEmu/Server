@@ -1219,7 +1219,7 @@ uint32 EntityList::CountSpawnedNPCs(std::vector<uint32> npc_ids)
 				npc_ids.begin(),
 				npc_ids.end(),
 				current_npc.second->GetNPCTypeID()
-			) != npc_ids.end() && 
+			) != npc_ids.end() &&
 			current_npc.second->GetID() != 0
 		) {
 			npc_count++;
@@ -5222,7 +5222,7 @@ Client *EntityList::FindCorpseDragger(uint16 CorpseID)
 	return nullptr;
 }
 
-void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, int range, int pcnpc, int32 spell_id, std::list<Mob*> &m_list)
+std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, int range, int pcnpc, int32 spell_id)
 {
 	/*
 		Live Mechanics
@@ -5230,92 +5230,87 @@ void EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *original_caster, i
 		There is no max target limit
 	*/
 	if (!spreader) {
-		return;
+		return {};
 	}
+
+	std::vector<Mob*> spreader_list = {};
 
 	bool is_detrimental_spell = IsDetrimentalSpell(spell_id);
 
-	auto it = mob_list.begin();
-	while (it != mob_list.end()) {
-		Mob *ptr = it->second;
-		if (ptr == spreader) {
-			++it;
+	for (auto &it :  entity_list.GetCloseMobList(spreader, range)) {
+		Mob *mob = it.second;
+		if (mob == spreader) {
 			continue;
 		}
 		// check PC/NPC only flag 1 = PCs, 2 = NPCs
-		if (pcnpc == 1 && !ptr->IsClient() && !ptr->IsMerc() && !ptr->IsBot()) {
-			++it;
+		if (pcnpc == 1 && !mob->IsClient() && !mob->IsMerc() && !mob->IsBot()) {
 			continue;
 		}
-		else if (pcnpc == 2 && (ptr->IsClient() || ptr->IsMerc() || ptr->IsBot())) {
-			++it;
+		else if (pcnpc == 2 && (mob->IsClient() || mob->IsMerc() || mob->IsBot())) {
 			continue;
 		}
-		if (ptr->IsClient() && !ptr->CastToClient()->ClientFinishedLoading()) {
-			++it;
+		if (mob->IsClient() && !mob->CastToClient()->ClientFinishedLoading()) {
 			continue;
 		}
 
-		if (ptr->IsAura() || ptr->IsTrap()) {
-			++it;
+		if (mob->IsAura() || mob->IsTrap()) {
 			continue;
 		}
 
 		// Make sure the target is in range
-		if (ptr->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= range) {
+		if (mob->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= range) {
 
 			//Do not allow detrimental spread to anything the original caster couldn't normally attack.
-			if (is_detrimental_spell && !original_caster->IsAttackAllowed(ptr, true)) {
-				++it;
+			if (is_detrimental_spell && !original_caster->IsAttackAllowed(mob, true)) {
 				continue;
 			}
 
 			//For non-NPCs, do not allow beneficial spread to anything the original caster could normally attack.
-			if (!is_detrimental_spell && !original_caster->IsNPC() && original_caster->IsAttackAllowed(ptr, true)) {
-				++it;
+			if (!is_detrimental_spell && !original_caster->IsNPC() && original_caster->IsAttackAllowed(mob, true)) {
 				continue;
 			}
 
 			// If the spreader is an npc and NOT a PET, then spread to other npc controlled mobs that are not pets
-			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && !ptr->IsPet() && !ptr->IsTempPet()) {
-				m_list.push_back(ptr);
+			if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && mob->IsNPC() && !mob->IsPet() && !mob->IsTempPet()) {
+				spreader_list.push_back(mob);
 			}
 			// If the spreader is an npc and NOT a PET, then spread to npc controlled pet
-			else if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && ptr->IsPetOwnerNPC()) {
-				m_list.push_back(ptr);
+			else if (spreader->IsNPC() && !spreader->IsPet() && !spreader->IsTempPet() && mob->IsNPC() && (mob->IsPet() || mob->IsTempPet()) && mob->IsPetOwnerNPC()) {
+				spreader_list.push_back(mob);
 			}
 			// If the spreader is an npc controlled PET it can spread to any other npc or an npc controlled pet
 			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->IsTempPet()) && spreader->IsPetOwnerNPC()) {
-				if (ptr->IsNPC() && (!ptr->IsPet() || !ptr->IsTempPet())) {
-					m_list.push_back(ptr);
+				if (mob->IsNPC() && (!mob->IsPet() || !mob->IsTempPet())) {
+					spreader_list.push_back(mob);
 				}
-				else if (ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && ptr->IsPetOwnerNPC()) {
-					m_list.push_back(ptr);
+				else if (mob->IsNPC() && (mob->IsPet() || mob->IsTempPet()) && mob->IsPetOwnerNPC()) {
+					spreader_list.push_back(mob);
 				}
 			}
 			// if the spreader is anything else(bot, pet, etc) then it should spread to everything but non client controlled npcs
-			else if (!spreader->IsNPC() && !ptr->IsNPC()) {
-				m_list.push_back(ptr);
+			else if (!spreader->IsNPC() && !mob->IsNPC()) {
+				spreader_list.push_back(mob);
 			}
 			// if spreader is not an NPC, and Target is an NPC, then spread to non-NPC controlled pets
-			else if (!spreader->IsNPC() && ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && !ptr->IsPetOwnerNPC()) {
-				m_list.push_back(ptr);
+			else if (!spreader->IsNPC() && mob->IsNPC() && (mob->IsPet() || mob->IsTempPet()) && !mob->IsPetOwnerNPC()) {
+				spreader_list.push_back(mob);
 			}
 
 			// if spreader is a non-NPC controlled pet we need to determine appropriate targets(pet to client, pet to pet, pet to bot, etc)
 			else if (spreader->IsNPC() && (spreader->IsPet() || spreader->IsTempPet()) && !spreader->IsPetOwnerNPC()) {
 				//Spread to non-NPCs
-				if (!ptr->IsNPC()) {
-					m_list.push_back(ptr);
+				if (!mob->IsNPC()) {
+					spreader_list.push_back(mob);
 				}
 				//Spread to other non-NPC Pets
-				else if (ptr->IsNPC() && (ptr->IsPet() || ptr->IsTempPet()) && !ptr->IsPetOwnerNPC()) {
-					m_list.push_back(ptr);
+				else if (mob->IsNPC() && (mob->IsPet() || mob->IsTempPet()) && !mob->IsPetOwnerNPC()) {
+					spreader_list.push_back(mob);
 				}
 			}
 		}
-		++it;
 	}
+
+	return spreader_list;
 }
 
 void EntityList::StopMobAI()
