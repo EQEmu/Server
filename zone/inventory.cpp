@@ -385,12 +385,14 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 				if(item->AugSlotVisible[iter] == 0) {
 					Message(
 						Chat::Red,
-						"{} ({}) has not evolved enough to accept {} ({}) in Augment Slot {}.",
-						database.CreateItemLink(item->ID),
-						item->ID,
-						database.CreateItemLink(augments[iter]),
-						augments[iter],
-						augment_slot
+						fmt::format(
+							"{} ({}) has not evolved enough to accept {} ({}) in Augment Slot {}.",
+							database.CreateItemLink(item->ID),
+							item->ID,
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
 					);
 					LogInventory(
 						"Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n"
