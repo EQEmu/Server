@@ -5233,15 +5233,14 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 		return {};
 	}
 
-	std::vector<Mob*> spreader_list = {};
-
-	bool is_detrimental_spell = IsDetrimentalSpell(spell_id);
-
-	for (auto &it :  entity_list.GetCloseMobList(spreader, range)) {
+	std::vector<Mob *> spreader_list        = {};
+	bool               is_detrimental_spell = IsDetrimentalSpell(spell_id);
+	for (auto          &it : entity_list.GetCloseMobList(spreader, range)) {
 		Mob *mob = it.second;
 		if (mob == spreader) {
 			continue;
 		}
+
 		// check PC/NPC only flag 1 = PCs, 2 = NPCs
 		if (pcnpc == 1 && !mob->IsClient() && !mob->IsMerc() && !mob->IsBot()) {
 			continue;
