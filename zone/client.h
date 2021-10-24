@@ -1323,8 +1323,7 @@ public:
 	uint32 GetLDoNWinsTheme(uint32 t);
 	uint32 GetLDoNLossesTheme(uint32 t);
 	uint32 GetLDoNPointsTheme(uint32 t);
-	void AddLDoNWin(uint32 theme_id);
-	void AddLDoNLoss(uint32 theme_id);
+	void UpdateLDoNWinLoss(uint32 theme_id, bool win = false, bool remove = false);
 	void CheckLDoNHail(Mob *target);
 	void CheckEmoteHail(Mob *target, const char* message);
 

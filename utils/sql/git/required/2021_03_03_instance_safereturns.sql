@@ -10,4 +10,4 @@ CREATE TABLE `character_instance_safereturns` (
   `safe_heading` float NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `character_id` (`character_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;

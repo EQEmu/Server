@@ -129,6 +129,8 @@
 #define SPELL_SPIRITUAL_ECHO 1248
 #define SPELL_BRISTLING_ARMAMENT 1249
 #define SPELL_WATON_DESTRUCTION 1250
+#define SPELL_TRANSLOCATE_GROUP 1334
+#define SPELL_TRANSLOCATE 1422
 #define SPELL_ACTING_MAGIC_RESIST_I 1900
 #define SPELL_ACTING_FIRE_RESIST_I 1901
 #define SPELL_ACTING_COLD_RESIST_I 1902
@@ -154,6 +156,7 @@
 #define SPELL_ACTING_SPIRIT_II 1922
 #define SPELL_RESURRECTION_SICKNESS 756
 #define SPELL_RESURRECTION_SICKNESS4 757
+#define SPELL_TELEPORT 3243
 #define SPELL_RESURRECTION_SICKNESS2 5249
 #define SPELL_REVIVAL_SICKNESS 13087
 #define SPELL_RESURRECTION_SICKNESS3 37624
@@ -1472,6 +1475,7 @@ bool IsPartialDeathSaveSpell(uint16 spell_id);
 bool IsShadowStepSpell(uint16 spell_id);
 bool IsSuccorSpell(uint16 spell_id);
 bool IsTeleportSpell(uint16 spell_id);
+bool IsTranslocateSpell(uint16 spell_id);
 bool IsGateSpell(uint16 spell_id);
 bool IsPlayerIllusionSpell(uint16 spell_id); // seveian 2008-09-23
 bool IsLDoNObjectSpell(uint16 spell_id);

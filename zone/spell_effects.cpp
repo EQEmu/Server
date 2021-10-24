@@ -161,22 +161,21 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 		}
 	}
 
-	if(IsNPC())
-	{
-		std::vector<EQ::Any> args;
-		args.push_back(&buffslot);
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, caster ? caster->GetID() : 0, &args);
-		if(i != 0){
+	std::string buf = fmt::format(
+		"{} {} {} {}",
+		caster ? caster->GetID() : 0,
+		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+		caster ? caster->GetLevel() : 0,
+		buffslot
+	);
+	
+	if (IsClient()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, buf, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
-	}
-	else if(IsClient())
-	{
-		std::vector<EQ::Any> args;
-		args.push_back(&buffslot);
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_CLIENT, nullptr, CastToClient(), spell_id, caster ? caster->GetID() : 0, &args);
-		if(i != 0){
+	} else if (IsNPC()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_NPC, CastToNPC(), nullptr, spell_id, buf, 0) != 0) {
 			CalcBonuses();
 			return true;
 		}
@@ -3357,17 +3356,9 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
-		spells[spell_id].effectid[effect_id] != SE_AttackSpeed &&
-		spells[spell_id].effectid[effect_id] != SE_AttackSpeed2 &&
-		spells[spell_id].effectid[effect_id] != SE_AttackSpeed3 &&
-		spells[spell_id].effectid[effect_id] != SE_Lull &&
-		spells[spell_id].effectid[effect_id] != SE_ChangeFrenzyRad &&
-		spells[spell_id].effectid[effect_id] != SE_Harmony &&
-		spells[spell_id].effectid[effect_id] != SE_CurrentMana &&
-		spells[spell_id].effectid[effect_id] != SE_ManaRegen_v2 &&
-		spells[spell_id].effectid[effect_id] != SE_AddFaction) {
-		
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) 
+		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
+
 		oval = effect_value;
 		effect_value = effect_value * instrument_mod / 10;
 
@@ -3781,24 +3772,20 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	const SPDat_Spell_Struct &spell = spells[buff.spellid];
 
-	if (IsNPC()) {
-		std::vector<EQ::Any> args;
-		args.push_back(&buff.ticsremaining);
-		args.push_back(&buff.casterlevel);
-		args.push_back(&slot);
-		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid,
-					  caster ? caster->GetID() : 0, &args);
-		if (i != 0) {
+	std::string buf = fmt::format(
+		"{} {} {} {}",
+		caster ? caster->GetID() : 0,
+		buffs[slot].ticsremaining,
+		caster ? caster->GetLevel() : 0,
+		slot
+	);
+
+	if (IsClient()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid, buf, 0) != 0) {
 			return;
 		}
-	} else {
-		std::vector<EQ::Any> args;
-		args.push_back(&buff.ticsremaining);
-		args.push_back(&buff.casterlevel);
-		args.push_back(&slot);
-		int i = parse->EventSpell(EVENT_SPELL_BUFF_TIC_CLIENT, nullptr, CastToClient(), buff.spellid,
-					  caster ? caster->GetID() : 0, &args);
-		if (i != 0) {
+	} else if (IsNPC()) {
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_BUFF_TIC_NPC, CastToNPC(), nullptr, buff.spellid, buf, 0) != 0) {
 			return;
 		}
 	}
@@ -4146,16 +4133,22 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 		}
 	}
 
-	if(IsClient()) {
-		std::vector<EQ::Any> args;
-		args.push_back(&buffs[slot].casterid);
+	std::string buf = fmt::format(
+		"{} {} {} {}",
+		buffs[slot].casterid,
+		buffs[slot].ticsremaining,
+		buffs[slot].casterlevel,
+		slot
+	);
 
-		parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, slot, &args);
-	} else if(IsNPC()) {
-		std::vector<EQ::Any> args;
-		args.push_back(&buffs[slot].casterid);
-
-		parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, slot, &args);
+	if (IsClient()) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, nullptr, CastToClient(), buffs[slot].spellid, buf, 0) != 0) {
+			return;
+		}
+	} else if (IsNPC()) {
+		if (parse->EventSpell(EVENT_SPELL_FADE, CastToNPC(), nullptr, buffs[slot].spellid, buf, 0) != 0) {
+			return;
+		}
 	}
 
 	for (int i=0; i < EFFECT_COUNT; i++)

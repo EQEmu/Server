@@ -1283,9 +1283,13 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 			}
 		}
 
-		char q_corpse_name[64];
-		strcpy(q_corpse_name, corpse_name);
-		std::string buf = fmt::format("{} {} {} {}", inst->GetItem()->ID, inst->GetCharges(), EntityList::RemoveNumbers(q_corpse_name), GetID());
+		std::string export_string = fmt::format(
+			"{} {} {} {}",
+			inst->GetItem()->ID,
+			inst->GetCharges(),
+			EntityList::RemoveNumbers(corpse_name),
+			GetID()
+		);
 		std::vector<EQ::Any> args;
 		args.push_back(inst);
 		args.push_back(this);
@@ -1293,13 +1297,13 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		if (RuleB(Zone, UseZoneController)) {
 			auto controller = entity_list.GetNPCByNPCTypeID(ZONE_CONTROLLER_NPC_ID);
 			if (controller){
-				if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, buf.c_str(), 0, &args) != 0) {
+				if (parse->EventNPC(EVENT_LOOT_ZONE, controller, client, export_string, 0, &args) != 0) {
 					prevent_loot = true;
 				}
 			}
 		}
 		
-		if (parse->EventPlayer(EVENT_LOOT, client, buf.c_str(), 0, &args) != 0) {
+		if (parse->EventPlayer(EVENT_LOOT, client, export_string, 0, &args) != 0) {
 			prevent_loot = true;
 		}
 
@@ -1316,7 +1320,7 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 		}
 
 		// do we want this to have a fail option too? Sure?
-		if (parse->EventItem(EVENT_LOOT, client, inst, this, buf.c_str(), 0) != 0) {
+		if (parse->EventItem(EVENT_LOOT, client, inst, this, export_string, 0) != 0) {
 			prevent_loot = true;
 		}
 		

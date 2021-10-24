@@ -1979,136 +1979,136 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 
 	const EQ::ItemData* item = nullptr;
 	bool found = false;
-	std::list<MerchantList> merlist = zone->merchanttable[merchantid];
-	std::list<MerchantList>::const_iterator itr;
-
-	for (itr = merlist.begin(); itr != merlist.end(); ++itr) {
-		MerchantList ml = *itr;
-		if (GetLevel() < ml.level_required) {
+	std::list<MerchantList> merchantlists = zone->merchanttable[merchantid];
+	for (auto merchantlist : merchantlists) {
+		if (GetLevel() < merchantlist.level_required) {
 			continue;
 		}
 
-		int32 fac = tmp->GetPrimaryFaction();
-		if (fac != 0 && GetModCharacterFactionLevel(fac) < ml.faction_required) {
+		int faction_id = tmp->GetPrimaryFaction();
+		if (faction_id != 0 && GetModCharacterFactionLevel(faction_id) < merchantlist.faction_required) {
 			continue;
 		}
 
-		item = database.GetItem(ml.item);
-		if (!item)
+		item = database.GetItem(merchantlist.item);
+		if (!item) {
 			continue;
+		}
+
 		if (item->ID == aps->itemid) { //This check to make sure that the item is actually on the NPC, people attempt to inject packets to get items summoned...
 			found = true;
 			break;
 		}
 	}
+
 	if (!item || !found) {
 		Message(Chat::Red, "Error: The item you purchased does not exist!");
 		return;
 	}
 
-	if (aps->Type == LDoNMerchant)
-	{
-		if (m_pp.ldon_points_available < int32(item->LDoNPrice)) {
+	auto item_cost = item->LDoNPrice;
+	bool cannot_afford = false;
+	std::string merchant_type;
+	if (item_cost < 0) {
+		Message(Chat::Red, "This item cannot be bought.");
+		return;
+	}
+
+	if (aps->Type == LDoNMerchant) {
+		if (m_pp.ldon_points_available < item_cost) {
 			Message(Chat::Red, "You cannot afford that item.");
 			return;
 		}
 
-		if (item->LDoNTheme <= 16)
-		{
-			if (item->LDoNTheme & 16)
-			{
-				if (m_pp.ldon_points_tak < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in tak to purchase this item.", int32(item->LDoNPrice));
-					return;
+		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
+			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+				if (m_pp.ldon_points_tak < item_cost) {
+					cannot_afford = true;
+					merchant_type = fmt::format("Deepest Guk Point{}", item_cost != 1 ? "s" : "");
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				if (m_pp.ldon_points_ruj < item_cost) {
+					cannot_afford = true;
+					merchant_type = fmt::format("Miragul's Menagerie Point{}", item_cost != 1 ? "s" : "");
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+				if (m_pp.ldon_points_mmc < item_cost) {
+					cannot_afford = true;
+					merchant_type = fmt::format("Mistmoore Catacombs Point{}", item_cost != 1 ? "s" : "");
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
+				if (m_pp.ldon_points_mir < item_cost) {
+					cannot_afford = true;
+					merchant_type = fmt::format("Rujarkian Hills Point{}", item_cost != 1 ? "s" : "");
+				}
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+				if (m_pp.ldon_points_guk < item_cost) {
+					cannot_afford = true;
+					merchant_type = fmt::format("Takish-Hiz Point{}", item_cost != 1 ? "s" : "");
 				}
 			}
-			else if (item->LDoNTheme & 8)
-			{
-				if (m_pp.ldon_points_ruj < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in ruj to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 4)
-			{
-				if (m_pp.ldon_points_mmc < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in mmc to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 2)
-			{
-				if (m_pp.ldon_points_mir < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in mir to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
-			else if (item->LDoNTheme & 1)
-			{
-				if (m_pp.ldon_points_guk < int32(item->LDoNPrice))
-				{
-					Message(Chat::Red, "You need at least %u points in guk to purchase this item.", int32(item->LDoNPrice));
-					return;
-				}
-			}
+
+			
+		}
+	} else if (aps->Type == DiscordMerchant) {
+		if (GetPVPPoints() < item_cost) {
+			cannot_afford = true;
+			merchant_type = fmt::format("PVP Point{}", item_cost != 1 ? "s" : "");
+		}
+	} else if (aps->Type == NorrathsKeepersMerchant) {
+		if (GetRadiantCrystals() < item_cost) {
+			cannot_afford = true;
+			merchant_type = database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID));
+		}
+	} else if (aps->Type == DarkReignMerchant) {
+		if (GetEbonCrystals() < item_cost) {
+			cannot_afford = true;
+			merchant_type = database.CreateItemLink(RuleI(Zone, EbonCrystalItemID));
+		}
+	} else {
+		Message(Chat::Red, "Unknown Adventure Merchant Type.");
+		return;
+	}
+
+	if (cannot_afford && !merchant_type.empty()) {
+		Message(
+			Chat::Red,
+			fmt::format(
+				"You need at least {} {} to purchase this item.",
+				item_cost,
+				merchant_type
+			).c_str()
+		);
+	}
+
+
+	if (CheckLoreConflict(item)) {
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"You already have a lore {} ({}) in your inventory.",
+				database.CreateItemLink(item->ID),
+				item->ID
+			).c_str()
+		);
+		return;
+	}
+
+	if (aps->Type == LDoNMerchant) {
+		int required_points = item_cost * -1;
+
+		if (!UpdateLDoNPoints(6, required_points)) {
+			return;
 		}
 	}
 	else if (aps->Type == DiscordMerchant)
 	{
-		if (GetPVPPoints() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u PVP points to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else if (aps->Type == NorrathsKeepersMerchant)
-	{
-		if (GetRadiantCrystals() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u Radiant Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else if (aps->Type == DarkReignMerchant)
-	{
-		if (GetEbonCrystals() < item->LDoNPrice)
-		{
-			Message(Chat::Red, "You need at least %u Ebon Crystals to purchase this item.", int32(item->LDoNPrice));
-			return;
-		}
-	}
-	else
-	{
-		Message(Chat::Red, "Unknown Adventure Merchant type.");
-		return;
-	}
-
-
-	if (CheckLoreConflict(item))
-	{
-		Message(Chat::Yellow, "You can only have one of a lore item.");
-		return;
-	}
-
-	if (aps->Type == LDoNMerchant)
-	{
-		int32 requiredpts = (int32)item->LDoNPrice*-1;
-
-		if (!UpdateLDoNPoints(6, requiredpts))
-			return;
-	}
-	else if (aps->Type == DiscordMerchant)
-	{
-		SetPVPPoints(GetPVPPoints() - (int32)item->LDoNPrice);
+		SetPVPPoints(GetPVPPoints() - item_cost);
 		SendPVPStats();
 	}
 	else if (aps->Type == NorrathsKeepersMerchant)
 	{
-		SetRadiantCrystals(GetRadiantCrystals() - (int32)item->LDoNPrice);
+		SetRadiantCrystals(GetRadiantCrystals() - item_cost);
 	}
 	else if (aps->Type == DarkReignMerchant)
 	{
@@ -2165,36 +2165,20 @@ void Client::Handle_OP_AdventureMerchantRequest(const EQApplicationPacket *app)
 		}
 
 		item = database.GetItem(ml.item);
-		if (item)
-		{
-			uint32 theme;
-			if (item->LDoNTheme > 16)
-			{
-				theme = 0;
-			}
-			else if (item->LDoNTheme & 16)
-			{
-				theme = 5;
-			}
-			else if (item->LDoNTheme & 8)
-			{
-				theme = 4;
-			}
-			else if (item->LDoNTheme & 4)
-			{
-				theme = 3;
-			}
-			else if (item->LDoNTheme & 2)
-			{
-				theme = 2;
-			}
-			else if (item->LDoNTheme & 1)
-			{
-				theme = 1;
-			}
-			else
-			{
-				theme = 0;
+		if (item) {
+			uint32 theme = LDoNThemes::Unused;
+			if (item->LDoNTheme > LDoNThemeBits::TAKBit) {
+				theme = LDoNThemes::Unused;
+			} else if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
+				theme = LDoNThemes::TAK;
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				theme = LDoNThemes::RUJ;
+			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
+				theme = LDoNThemes::MMC;
+			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
+				theme = LDoNThemes::MIR;
+			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
+				theme = LDoNThemes::GUK;
 			}
 			ss << "^" << item->Name << "|";
 			ss << item->ID << "|";
@@ -4370,12 +4354,10 @@ void Client::Handle_OP_ClickDoor(const EQApplicationPacket *app)
 		);
 	}
 
-	char buf[20];
-	snprintf(buf, 19, "%u", cd->doorid);
-	buf[19] = '\0';
+	std::string export_string = fmt::format("{}", cd->doorid);
 	std::vector<EQ::Any> args;
 	args.push_back(currentdoor);
-	parse->EventPlayer(EVENT_CLICK_DOOR, this, buf, 0, &args);
+	parse->EventPlayer(EVENT_CLICK_DOOR, this, export_string, 0, &args);
 
 	currentdoor->HandleClick(this, 0);
 	return;
@@ -4399,10 +4381,8 @@ void Client::Handle_OP_ClickObject(const EQApplicationPacket *app)
 		std::vector<EQ::Any> args;
 		args.push_back(object);
 
-		char buf[10];
-		snprintf(buf, 9, "%u", click_object->drop_id);
-		buf[9] = '\0';
-		parse->EventPlayer(EVENT_CLICK_OBJECT, this, buf, GetID(), &args);
+		std::string export_string = fmt::format("{}", click_object->drop_id);
+		parse->EventPlayer(EVENT_CLICK_OBJECT, this, export_string, GetID(), &args);
 	}
 
 	// Observed in RoF after OP_ClickObjectAction:
@@ -4853,7 +4833,8 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob == 0)
 		return;
 
-	if (parse->EventPlayer(EVENT_CONSIDER, this, fmt::format("{}", conin->targetid), 0) == 1) {
+	std::string export_string = fmt::format("{}", conin->targetid);
+	if (parse->EventPlayer(EVENT_CONSIDER, this, export_string, 0) == 1) {
 		return;
 	}
 
@@ -4979,8 +4960,9 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 	}
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
 	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
+	std::string export_string = fmt::format("{}", conin->targetid);
 	if (tcorpse && tcorpse->IsNPCCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
+		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
 			return;
 		}
 
@@ -4997,7 +4979,7 @@ void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 		}
 	}
 	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, fmt::format("{}", conin->targetid), 0) == 1) {
+		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
 			return;
 		}
 
@@ -5944,9 +5926,13 @@ void Client::Handle_OP_EnvDamage(const EQApplicationPacket *app)
 
 		/* EVENT_ENVIRONMENTAL_DAMAGE */
 		int final_damage = (damage * RuleR(Character, EnvironmentDamageMulipliter));
-		char buf[24];
-		snprintf(buf, 23, "%u %u %i", ed->damage, ed->dmgtype, final_damage);
-		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, buf, 0);
+		std::string export_string = fmt::format(
+			"{} {} {}",
+			ed->damage,
+			ed->dmgtype,
+			final_damage
+		);
+		parse->EventPlayer(EVENT_ENVIRONMENTAL_DAMAGE, this, export_string, 0);
 	}
 
 	if (GetHP() <= 0) {
@@ -8555,18 +8541,18 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 
 			if (GetTarget() && GetTarget()->IsNPC()) {
 				if (silentsaylink) {
-					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response.c_str(), 0);
+					parse->EventNPC(EVENT_SAY, GetTarget()->CastToNPC(), this, response, 0);
 
 					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
 					}
 #ifdef BOTS
 					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
 					}
 #endif
 					else {
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_SAY, this, response, 0);
 					}
 				}
 				else {
@@ -8578,15 +8564,15 @@ void Client::Handle_OP_ItemLinkClick(const EQApplicationPacket *app)
 			else {
 				if (silentsaylink) {
 					if (response[0] == '#' && parse->PlayerHasQuestSub(EVENT_COMMAND)) {
-						parse->EventPlayer(EVENT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_COMMAND, this, response, 0);
 					}
 #ifdef BOTS
 					else if (response[0] == '^' && parse->PlayerHasQuestSub(EVENT_BOT_COMMAND)) {
-						parse->EventPlayer(EVENT_BOT_COMMAND, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_BOT_COMMAND, this, response, 0);
 					}
 #endif
 					else {
-						parse->EventPlayer(EVENT_SAY, this, response.c_str(), 0);
+						parse->EventPlayer(EVENT_SAY, this, response, 0);
 					}
 				}
 				else {
@@ -11180,14 +11166,13 @@ void Client::Handle_OP_PopupResponse(const EQApplicationPacket *app)
 			break;
 	}
 
-	char buf[16];
-	sprintf(buf, "%d", popup_response->popupid);
+	std::string export_string = fmt::format("{}", popup_response->popupid);
 
-	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, buf, 0);
+	parse->EventPlayer(EVENT_POPUP_RESPONSE, this, export_string, 0);
 
 	Mob *Target = GetTarget();
 	if (Target && Target->IsNPC()) {
-		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, buf, 0);
+		parse->EventNPC(EVENT_POPUP_RESPONSE, Target->CastToNPC(), this, export_string, 0);
 	}
 }
 
@@ -14778,38 +14763,44 @@ void Client::Handle_OP_TradeSkillCombine(const EQApplicationPacket *app)
 
 void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 {
-
 	if (app->size != sizeof(Translocate_Struct)) {
 		LogDebug("Size mismatch in OP_Translocate expected [{}] got [{}]", sizeof(Translocate_Struct), app->size);
 		DumpPacket(app);
 		return;
 	}
+
 	Translocate_Struct *its = (Translocate_Struct*)app->pBuffer;
 
-	if (!PendingTranslocate)
+	if (!PendingTranslocate) {
 		return;
+	}
 
-	if ((RuleI(Spells, TranslocateTimeLimit) > 0) && (time(nullptr) > (TranslocateTime + RuleI(Spells, TranslocateTimeLimit)))) {
+	auto translocate_time_limit = RuleI(Spells, TranslocateTimeLimit);
+	if (
+		translocate_time_limit &&
+		time(nullptr) > (TranslocateTime + translocate_time_limit)
+	) {
 		Message(Chat::Red, "You did not accept the Translocate within the required time limit.");
 		PendingTranslocate = false;
 		return;
 	}
 
 	if (its->Complete == 1) {
-
-		int SpellID = PendingTranslocateData.spell_id;
-		int i = parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, SpellID, 0);
-
-		if (i == 0)
-		{
+		uint32 spell_id = PendingTranslocateData.spell_id;
+		bool in_translocate_zone = (
+			zone->GetZoneID() == PendingTranslocateData.zone_id &&
+			zone->GetInstanceID() == PendingTranslocateData.instance_id
+		);
+		
+		if (parse->EventSpell(EVENT_SPELL_EFFECT_TRANSLOCATE_COMPLETE, nullptr, this, spell_id, "", 0) == 0) {		
 			// If the spell has a translocate to bind effect, AND we are already in the zone the client
 			// is bound in, use the GoToBind method. If we send OP_Translocate in this case, the client moves itself
 			// to the bind coords it has from the PlayerProfile, but with the X and Y reversed. I suspect they are
 			// reversed in the pp, and since spells like Gate are handled serverside, this has not mattered before.
-			if (((SpellID == 1422) || (SpellID == 1334) || (SpellID == 3243)) &&
-				(zone->GetZoneID() == PendingTranslocateData.zone_id &&
-					zone->GetInstanceID() == PendingTranslocateData.instance_id))
-			{
+			if (
+				IsTranslocateSpell(spell_id) &&
+				in_translocate_zone
+			) {
 				PendingTranslocate = false;
 				GoToBind();
 				return;
@@ -14817,9 +14808,16 @@ void Client::Handle_OP_Translocate(const EQApplicationPacket *app)
 
 			////Was sending the packet back to initiate client zone...
 			////but that could be abusable, so lets go through proper channels
-			MovePC(PendingTranslocateData.zone_id, PendingTranslocateData.instance_id,
-				PendingTranslocateData.x, PendingTranslocateData.y,
-				PendingTranslocateData.z, PendingTranslocateData.heading, 0, ZoneSolicited);
+			MovePC(
+				PendingTranslocateData.zone_id,
+				PendingTranslocateData.instance_id,
+				PendingTranslocateData.x,
+				PendingTranslocateData.y,
+				PendingTranslocateData.z,
+				PendingTranslocateData.heading,
+				0,
+				ZoneSolicited
+			);
 		}
 	}
 

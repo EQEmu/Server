@@ -186,25 +186,57 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// make sure the item exists
 	if(item == nullptr) {
-		Message(Chat::Red, "Item %u does not exist.", item_id);
-		LogInventory("Player [{}] on account [{}] attempted to create an item with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item_id, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"Item {} does not exist.",
+				item_id
+			).c_str()
+		);
+		LogInventory(
+			"Player [{}] on account [{}] attempted to create an item with an invalid id.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item_id,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 	// check that there is not a lore conflict between base item and existing inventory
 	else if(CheckLoreConflict(item)) {
 		// DuplicateLoreMessage(item_id);
-		Message(Chat::Red, "You already have a lore %s (%i) in your inventory.", item->Name, item_id);
-
+		Message(
+			Chat::Red,
+			fmt::format(
+				"You already have a lore {} ({}) in your inventory.",
+				database.CreateItemLink(item_id),
+				item_id
+			).c_str()
+		);
 		return false;
 	}
 	// check to make sure we are augmenting an augmentable item
 	else if (((!item->IsClassCommon()) || (item->AugType > 0)) && (aug1 | aug2 | aug3 | aug4 | aug5 | aug6)) {
 		Message(Chat::Red, "You can not augment an augment or a non-common class item.");
-		LogInventory("Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+		LogInventory(
+			"Player [{}] on account [{}] attempted to augment an augment or a non-common class item.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug5: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 		return false;
 	}
 
@@ -216,7 +248,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	/*
 	else if(item->MinStatus && ((this->Admin() < item->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 		Message(Chat::Red, "You are not a GM or do not have the status to summon this item.");
-		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
+		LogInventory("Player [{}] on account [{}] attempted to create a GM-only item with a status of [{}].\n"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}], MinStatus: [{}])\n",
 			GetName(), account_name, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 		return false;
@@ -224,23 +256,39 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	*/
 
 	uint32 augments[EQ::invaug::SOCKET_COUNT] = { aug1, aug2, aug3, aug4, aug5, aug6 };
-
-	uint32 classes	= item->Classes;
-	uint32 races	= item->Races;
-	uint32 slots	= item->Slots;
-
-	bool enforcewear	= RuleB(Inventory, EnforceAugmentWear);
-	bool enforcerestr	= RuleB(Inventory, EnforceAugmentRestriction);
-	bool enforceusable	= RuleB(Inventory, EnforceAugmentUsability);
-
+	uint32 classes = item->Classes;
+	uint32 races = item->Races;
+	uint32 slots = item->Slots;
+	bool enforce_wearable = RuleB(Inventory, EnforceAugmentWear);
+	bool enforce_restrictions = RuleB(Inventory, EnforceAugmentRestriction);
+	bool enforce_usable = RuleB(Inventory, EnforceAugmentUsability);
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
+		int augment_slot = iter + 1;
 		const EQ::ItemData* augtest = database.GetItem(augments[iter]);
-
 		if(augtest == nullptr) {
 			if(augments[iter]) {
-				Message(Chat::Red, "Augment %u (Aug%i) does not exist.", augments[iter], iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Augment {} in Augment Slot {} does not exist.",
+						augments[iter],
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to create an augment (Aug[{}]) with an invalid id.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					augment_slot,
+					item->ID,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -249,15 +297,42 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			// check that there is not a lore conflict between augment and existing inventory
 			if(CheckLoreConflict(augtest)) {
 				// DuplicateLoreMessage(augtest->ID);
-				Message(Chat::Red, "You already have a lore %s (%u) in your inventory.", augtest->Name, augtest->ID);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"You already have a lore {} ({}) in your inventory.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID
+					).c_str()
+				);
 
 				return false;
 			}
 			// check that augment is an actual augment
 			else if(augtest->AugType == 0) {
-				Message(Chat::Red, "%s (%u) (Aug%i) is not an actual augment.", augtest->Name, augtest->ID, iter + 1);
-				LogInventory("Player [{}] on account [{}] attempted to use a non-augment item (Aug[{}]) as an augment.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-					GetName(), account_name, item->ID, (iter + 1), aug1, aug2, aug3, aug4, aug5, aug6);
+				Message(
+					Chat::Red,
+					fmt::format(
+						"{} ({}) in Augment Slot {} is not an actual augment.",
+						database.CreateItemLink(augtest->ID),
+						augtest->ID,
+						augment_slot
+					).c_str()
+				);
+				LogInventory(
+					"Player [{}] on account [{}] attempted to use a non-augment item (Augment Slot [{}]) as an augment.\n"
+					"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+					GetName(),
+					account_name,
+					item->ID,
+					augment_slot,
+					aug1,
+					aug2,
+					aug3,
+					aug4,
+					aug5,
+					aug6
+				);
 
 				return false;
 			}
@@ -269,232 +344,354 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 			else if(augtest->MinStatus && ((this->Admin() < augtest->MinStatus) || (this->Admin() < RuleI(GM, MinStatusToSummonItem)))) {
 				Message(Chat::Red, "You are not a GM or do not have the status to summon this augment.");
 				LogInventory("Player [{}] on account [{}] attempted to create a GM-only augment (Aug[{}]) with a status of [{}].\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], MinStatus: [{}])\n",
-					GetName(), account_name, (iter + 1), this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
+					GetName(), account_name, augment_slot, this->Admin(), item->ID, aug1, aug2, aug3, aug4, aug5, aug6, item->MinStatus);
 
 				return false;
 			}
 			*/
 
 			// check for augment type allowance
-			if(enforcewear) {
+			if(enforce_wearable) {
 				if ((item->AugSlotType[iter] == EQ::item::AugTypeNone) || !(((uint32)1 << (item->AugSlotType[iter] - 1)) & augtest->AugType)) {
-					Message(Chat::Red, "Augment %u (Aug%i) is not acceptable wear on Item %u.", augments[iter], iter + 1, item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"Augment {} ({}) in Augment Slot {} is not capable of being socketed in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with an unacceptable augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				if(item->AugSlotVisible[iter] == 0) {
-					Message(Chat::Red, "Item %u has not evolved enough to accept Augment %u (Aug%i).", item->ID, augments[iter], iter + 1);
-					LogInventory("Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) has not evolved enough to accept {} ({}) in Augment Slot {}.",
+							database.CreateItemLink(item->ID),
+							item->ID,
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an unevolved item with augment type (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
 			// check for augment to item restriction
-			if(enforcerestr) {
-				bool restrictfail = false;
-				uint8 it = item->ItemType;
-
-				switch(augtest->AugRestrict) {
-				case EQ::item::AugRestrictionAny:
-					break;
-				case EQ::item::AugRestrictionArmor:
-					switch(it) {
-					case EQ::item::ItemTypeArmor:
+			if(enforce_restrictions) {
+				bool is_restricted = false;
+				uint8 item_type = item->ItemType;
+				switch (augtest->AugRestrict) {
+					case EQ::item::AugRestrictionAny:
 						break;
+					case EQ::item::AugRestrictionArmor:
+						switch (item_type) {
+							case EQ::item::ItemTypeArmor:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemType1HPiercing:
+							case EQ::item::ItemTypeMartial:
+							case EQ::item::ItemType2HSlash:
+							case EQ::item::ItemType2HBlunt:
+							case EQ::item::ItemType2HPiercing:
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemType1HPiercing:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HWeapons:
+						switch (item_type) {
+							case EQ::item::ItemType2HSlash:
+							case EQ::item::ItemType2HBlunt:
+							case EQ::item::ItemType2HPiercing:
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HSlash:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HBlunt:
+						switch (item_type) {
+							case EQ::item::ItemType1HBlunt:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionPiercing:
+						switch (item_type) {
+							case EQ::item::ItemType1HPiercing:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionHandToHand:
+						switch (item_type) {
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HSlash:
+						switch (item_type) {
+							case EQ::item::ItemType2HSlash:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HBlunt:
+						switch (item_type) {
+							case EQ::item::ItemType2HBlunt:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction2HPierce:
+						switch (item_type) {
+							case EQ::item::ItemType2HPiercing:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionBows:
+						switch (item_type) {
+							case EQ::item::ItemTypeBow:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestrictionShields:
+						switch (item_type) {
+							case EQ::item::ItemTypeShield:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
+						switch (item_type) {
+							case EQ::item::ItemType1HSlash:
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					case EQ::item::AugRestriction1HBluntOrHandToHand:
+							switch (item_type) {
+							case EQ::item::ItemType1HBlunt:
+							case EQ::item::ItemTypeMartial:
+								break;
+							default:
+								is_restricted = true;
+								break;
+						}
+						break;
+					// These 3 are in-work
+					case EQ::item::AugRestrictionUnknown1:
+					case EQ::item::AugRestrictionUnknown2:
+					case EQ::item::AugRestrictionUnknown3:
 					default:
-						restrictfail = true;
+						is_restricted = true;
 						break;
-					}
-					break;
-				case EQ::item::AugRestrictionWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HWeapons:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemType1HPiercing:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HWeapons:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-					case EQ::item::ItemType2HBlunt:
-					case EQ::item::ItemType2HPiercing:
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBlunt:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionPiercing:
-					switch(it) {
-					case EQ::item::ItemType1HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionHandToHand:
-					switch(it) {
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HSlash:
-					switch(it) {
-					case EQ::item::ItemType2HSlash:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HBlunt:
-					switch(it) {
-					case EQ::item::ItemType2HBlunt:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction2HPierce:
-					switch(it) {
-					case EQ::item::ItemType2HPiercing:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionBows:
-					switch(it) {
-					case EQ::item::ItemTypeBow:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestrictionShields:
-					switch(it) {
-					case EQ::item::ItemTypeShield:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HSlash1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HSlash:
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				case EQ::item::AugRestriction1HBluntOrHandToHand:
-					switch(it) {
-					case EQ::item::ItemType1HBlunt:
-					case EQ::item::ItemTypeMartial:
-						break;
-					default:
-						restrictfail = true;
-						break;
-					}
-					break;
-				// These 3 are in-work
-				case EQ::item::AugRestrictionUnknown1:
-				case EQ::item::AugRestrictionUnknown2:
-				case EQ::item::AugRestrictionUnknown3:
-				default:
-					restrictfail = true;
-					break;
 				}
 
-				if(restrictfail) {
-					Message(Chat::Red, "Augment %u (Aug%i) is restricted from wear on Item %u.", augments[iter], (iter + 1), item->ID);
-					LogInventory("Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, (iter + 1), item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+				if(is_restricted) {
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} is restricted from being augmented in to {} ({}).",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot,
+							database.CreateItemLink(item->ID),
+							item->ID
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to augment an item with a restricted augment (Aug[{}]).\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						augment_slot,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 			}
 
-			if(enforceusable) {
+			if(enforce_usable) {
 				// check for class usability
 				if(item->Classes && !(classes &= augtest->Classes)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any class.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any class.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any class.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any class.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for race usability
 				if(item->Races && !(races &= augtest->Races)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable by any race.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable by any race.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable by any race.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable by any race.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
 
 				// check for slot usability
 				if(item->Slots && !(slots &= augtest->Slots)) {
-					Message(Chat::Red, "Augment %u (Aug%i) will result in an item not usable in any slot.", augments[iter], (iter + 1));
-					LogInventory("Player [{}] on account [{}] attempted to create an item unusable in any slot.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-						GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+					Message(
+						Chat::Red,
+						fmt::format(
+							"{} ({}) in Augment Slot {} will result in an item unusable in any slot.",
+							database.CreateItemLink(augments[iter]),
+							augments[iter],
+							augment_slot
+						).c_str()
+					);
+					LogInventory(
+						"Player [{}] on account [{}] attempted to create an item unusable in any slot.\n"
+						"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+						GetName(),
+						account_name,
+						item->ID,
+						aug1,
+						aug2,
+						aug3,
+						aug4,
+						aug5,
+						aug6
+					);
 
 					return false;
 				}
@@ -506,12 +703,11 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// if the item is stackable and the charge amount is -1 or 0 then set to 1 charge.
 	// removed && item->MaxCharges == 0 if -1 or 0 was passed max charges is irrelevant
-	if(charges <= 0 && item->Stackable)
+	if(charges <= 0 && item->Stackable) {
 		charges = 1;
-
-	// if the charges is -1, then no charge value was passed in set to max charges
-	else if(charges == -1)
+	} else if(charges == -1) { // if the charges is -1, then no charge value was passed in set to max charges
 		charges = item->MaxCharges;
+	}
 
 	// in any other situation just use charges as passed
 
@@ -520,35 +716,67 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if(inst == nullptr) {
 		Message(Chat::Red, "An unknown server error has occurred and your item was not created.");
 		// this goes to logfile since this is a major error
-		LogError("Player [{}] on account [{}] encountered an unknown item creation error.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-			GetName(), account_name, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
+		LogError(
+			"Player [{}] on account [{}] encountered an unknown item creation error.\n"
+			"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+			GetName(),
+			account_name,
+			item->ID,
+			aug1,
+			aug2,
+			aug3,
+			aug4,
+			aug5,
+			aug6
+		);
 
 		return false;
 	}
 
 	// add any validated augments
 	for (int iter = EQ::invaug::SOCKET_BEGIN; iter <= EQ::invaug::SOCKET_END; ++iter) {
-		if(augments[iter])
+		if(augments[iter]) {
 			inst->PutAugment(&database, iter, augments[iter]);
+		}
 	}
 
 	// attune item
-	if(attuned && inst->GetItem()->Attuneable)
+	if(attuned && inst->GetItem()->Attuneable) {
 		inst->SetAttuned(true);
+	}
 
 	inst->SetOrnamentIcon(ornament_icon);
 	inst->SetOrnamentationIDFile(ornament_idfile);
 	inst->SetOrnamentHeroModel(ornament_hero_model);
 
 	// check to see if item is usable in requested slot
-	if (enforceusable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
+	if (enforce_usable && (to_slot >= EQ::invslot::EQUIPMENT_BEGIN && to_slot <= EQ::invslot::EQUIPMENT_END)) {
 		uint32 slottest = to_slot;
-
 		if(!(slots & ((uint32)1 << slottest))) {
-			Message(0, "This item is not equipable at slot %u - moving to cursor.", to_slot);
-			LogInventory("Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n(Item: [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
-				GetName(), account_name, to_slot, item->ID, aug1, aug2, aug3, aug4, aug5, aug6);
-
+			Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) cannot be equipped in {} ({}), moving to cursor.",
+					database.CreateItemLink(item->ID),
+					item->ID,
+					EQ::invslot::GetInvPossessionsSlotName(to_slot),
+					to_slot
+				).c_str()
+			);
+			LogInventory(
+				"Player [{}] on account [{}] attempted to equip an item unusable in slot [{}] - moved to cursor.\n"
+				"Item [{}], Aug1: [{}], Aug2: [{}], Aug3: [{}], Aug4: [{}], Aug5: [{}], Aug6: [{}])\n",
+				GetName(),
+				account_name,
+				to_slot,
+				item->ID,
+				aug1,
+				aug2,
+				aug3,
+				aug4,
+				aug5,
+				aug6
+			);
 			to_slot = EQ::invslot::slotCursor;
 		}
 	}
@@ -557,8 +785,7 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 	if (to_slot == EQ::invslot::slotCursor) {
 		PushItemOnCursor(*inst);
 		SendItemPacket(EQ::invslot::slotCursor, inst, ItemPacketLimbo);
-	}
-	else {
+	} else {
 		PutItemInInventory(to_slot, *inst, true);
 	}
 
@@ -566,8 +793,9 @@ bool Client::SummonItem(uint32 item_id, int16 charges, uint32 aug1, uint32 aug2,
 
 	// discover item and any augments
 	if((RuleB(Character, EnableDiscoveredItems)) && !GetGM()) {
-		if(!IsDiscovered(item_id))
+		if(!IsDiscovered(item_id)) {
 			DiscoverItem(item_id);
+		}
 		/*
 		// Augments should have been discovered prior to being placed on an item.
 		for (int iter = AUG_BEGIN; iter < EQ::constants::ITEM_COMMON_SIZE; ++iter) {
@@ -2522,7 +2750,7 @@ void Client::DisenchantSummonedBags(bool client_update)
 {
 	for (auto slot_id = EQ::invslot::GENERAL_BEGIN; slot_id <= EQ::invslot::GENERAL_END; ++slot_id) {
 		if (((uint64)1 << slot_id) & GetInv().GetLookup()->PossessionsBitmask == 0)
-			continue; // not useable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
+			continue; // not usable this session - will be disenchanted once player logs in on client that doesn't exclude affected slots
 
 		auto inst = m_inv[slot_id];
 		if (!inst) { continue; }
