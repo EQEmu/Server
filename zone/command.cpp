@@ -6097,7 +6097,7 @@ void command_push(Client *c, const Seperator *sep)
 
 void command_proximity(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget() && !c->GetTarget()->IsNPC()) {
+	if (!c->GetTarget() || (c->GetTarget() && !c->GetTarget()->IsNPC())) {
 		c->Message(Chat::White, "You must target an NPC");
 		return;
 	}
