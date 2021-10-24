@@ -1375,7 +1375,7 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		//Only modify instant endurance or mana effects (Ie. Mana drain, Crescendo line)
 		case SE_CurrentEndurance:
 		case SE_CurrentMana: {
-			if (spells[spell_id].buffduration == 0) {
+			if (spells[spell_id].buff_duration == 0) {
 				return true;
 			}
 			//Mana regen is not modified.
