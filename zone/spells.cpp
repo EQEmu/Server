@@ -3859,6 +3859,7 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 	//Need this to account for special AOE cases.
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, spelltar)) {
 		MessageString(Chat::SpellFailure, SPELL_NO_EFFECT);
+		safe_delete(action_packet);
 		return false;
 	}
 
