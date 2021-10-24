@@ -208,7 +208,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			continue;
 
 		effect = spell.effectid[i];
-		LogSpells("SpellEffect() : CalcSpellEffectValue() pvp[{}], caster [{}]", pvp, caster ? caster->GetName() : this->GetName());
+		LogSpells("Mob::SpellEffect()->CalcSpellEffectValue(): pvp[{}], caster [{}]", pvp, caster ? caster->GetName() : this->GetName());
 		effect_value = CalcSpellEffectValue(spell_id, i, caster_level, instrument_mod, caster ? caster : this, 0, 0, pvp);
 
 		if(spell_id == SPELL_LAY_ON_HANDS && caster && caster->GetAA(aaImprovedLayOnHands))
@@ -1729,7 +1729,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (IsCorpse() && CastToCorpse()->IsPlayerCorpse()) {
 
 					if(caster)
-						LogSpells(" corpse being rezzed using spell [{}] by [{}]",
+						LogSpells("Mob::SpellEffect(): corpse being rezzed using spell [{}] by [{}]",
 							spell_id, caster->GetName());
 
 					CastToCorpse()->CastRezz(spell_id, caster);
@@ -3345,39 +3345,33 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster, int ticsremaining, uint16 caster_id, bool pvp)
 {
-	int formula, base, max, effect_value, duration = 0;
+	int formula, base, max, durationformula, effect_value, duration = 0;
 
 	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
 		return 0;
 	
-	LogSpells("---------------------------------");
-	LogSpells("---------------------------------");
-	LogSpells("---------------------------------");
-	LogSpells("---Mob::CalcSpellEffectValue()---");
-	LogSpells("---------------------------------");
-	LogSpells("---------------------------------");
-	LogSpells("CalcSpellEffectValue(): pvp [{}]", pvp);
+	formula = spells[spell_id].formula[effect_id];
+	base = spells[spell_id].base[effect_id];
+	max = spells[spell_id].max[effect_id];
 
 	if (pvp)
 	{
 		formula = spells[spell_id].pvpresistcalc;
-		base = spells[spell_id].pvpresistbase;
-		max = spells[spell_id].pvpresistcap;
+		durationformula = spells[spell_id].pvp_duration;
 		duration = spells[spell_id].pvp_duration_cap;
-		LogSpells("CalcSpellEffectValue PVP, formula [{}], base [{}], max [{}], caster_level [{}], spell_id [{}], duration [{}], ticsremaining [{}]", formula, base, max, caster_level, spell_id, duration, ticsremaining);
 	}
 	else {
-		formula = spells[spell_id].formula[effect_id];
-		base = spells[spell_id].base[effect_id];
-		max = spells[spell_id].max[effect_id];
+		durationformula = spells[spell_id].buffdurationformula;
 		duration = spells[spell_id].buffduration;
-		LogSpells("CalcSpellEffectValue PVE, formula [{}], base [{}], max [{}], caster_level [{}], spell_id [{}], duration [{}], ticsremaining [{}]", formula, base, max, caster_level, spell_id, duration, ticsremaining);
 	}
+
+	LogSpells("Mob::CalcSpellEffectValue():  PVP [{}], formula [{}], base [{}], max [{}], caster_level [{}], spell_id [{}], duration [{}], ticsremaining [{}]", pvp, formula, base, max, caster_level, spell_id, duration, ticsremaining);
+
 
 	if (IsBlankSpellEffect(spell_id, effect_id))
 		return 0;
 
-	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, duration, ticsremaining);
+	effect_value = CalcSpellEffectValue_formula(formula, base, max, caster_level, spell_id, duration, durationformula, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
@@ -3394,7 +3388,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		int oval = effect_value;
 		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
 		effect_value = effect_value * mod / 10;
-		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+		LogSpells("Mob::CalcSpellEffectValue(): Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 			oval, mod, effect_value);
 	}
 
@@ -3404,7 +3398,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 }
 
 // generic formula calculations
-int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int duration, int ticsremaining)
+int Mob::CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int duration, int durationformula, int ticsremaining)
 {
 /*
 i need those formulas checked!!!!
@@ -3457,8 +3451,11 @@ snare has both of them negative, yet their range should work the same:
 		updownsign = 1;
 	}
 
-	LogSpells("CSEV: spell [{}], formula [{}], base [{}], max [{}], lvl [{}]. Up/Down [{}]",
-		spell_id, formula, base, max, caster_level, updownsign);
+	if (durationformula < 0)
+		durationformula = spells[spell_id].buffdurationformula;
+
+	LogSpells("Mob::CalcSpellEffectValue_formula(): spell [{}], formula [{}], base [{}], max [{}], lvl [{}], durationformula [{}], duration [{}], Up/Down [{}]",
+		spell_id, formula, base, max, caster_level, durationformula, duration, updownsign);
 
 	switch(formula)
 	{
@@ -3481,7 +3478,7 @@ snare has both of them negative, yet their range should work the same:
 
 		case 107:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, duration) - std::max((ticsremaining - 1), 0);
+			int ticdif = CalcBuffDuration_formula(caster_level, durationformula, duration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - ticdif);
@@ -3490,7 +3487,7 @@ snare has both of them negative, yet their range should work the same:
 		}
 		case 108:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, duration) - std::max((ticsremaining - 1), 0);
+			int ticdif = CalcBuffDuration_formula(caster_level, durationformula, duration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - (2 * ticdif));
@@ -3543,7 +3540,7 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 8); break;
 		case 120:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, duration) - std::max((ticsremaining - 1), 0);
+			int ticdif = CalcBuffDuration_formula(caster_level, durationformula, duration) - std::max((ticsremaining - 1), 0);
 			if (ticdif < 0)
 				ticdif = 0;
 			result = updownsign * (ubase - (5 * ticdif));
@@ -3554,7 +3551,7 @@ snare has both of them negative, yet their range should work the same:
 			result = ubase + (caster_level / 3); break;
 		case 122:
 		{
-			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, duration) - std::max((ticsremaining - 1), 0);
+			int ticdif = CalcBuffDuration_formula(caster_level, durationformula, duration) - std::max((ticsremaining - 1), 0);
 			if(ticdif < 0)
 				ticdif = 0;
 
@@ -3619,6 +3616,33 @@ snare has both of them negative, yet their range should work the same:
 			if (caster_level > 50)
 				result += updownsign * 25 * (caster_level - 50);
 			break;
+		
+		// Voidd: Need formulas verified from 133-136, these are specific for PVP
+		// Continued the formula method from 124-132 as it seemed logical for these missing formulas
+		case 133:	// check sign
+			result = ubase;
+			if (caster_level > 50)
+				result += updownsign * 30 * (caster_level - 50);
+			break;
+						
+		case 134:	// check sign
+			result = ubase;
+			if (caster_level > 50)
+				result += updownsign * 35 * (caster_level - 50);
+			break;
+									
+		case 135:	// check sign
+			result = ubase;
+			if (caster_level > 50)
+				result += updownsign * 40 * (caster_level - 50);
+			break;
+									
+		case 136:	// check sign
+			result = ubase;
+			if (caster_level > 50)
+				result += updownsign * 45 * (caster_level - 50);
+			break;
+		// End of Need formulas verified
 
 		case 137:	// used in berserker AA desperation
 			result = ubase - static_cast<int>((ubase * (GetHPRatio() / 100.0f)));
@@ -3666,7 +3690,7 @@ snare has both of them negative, yet their range should work the same:
 			{
 				// These work like splurt, accept instead of being hard coded to 12, it is formula - 1000.
 				// Formula 1999 seems to have a slightly different effect, so is not included here
-				int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, duration) - std::max((ticsremaining - 1), 0);
+				int ticdif = CalcBuffDuration_formula(caster_level, durationformula, duration) - std::max((ticsremaining - 1), 0);
 				if(ticdif < 0)
 					ticdif = 0;
 
@@ -3679,7 +3703,7 @@ snare has both of them negative, yet their range should work the same:
 				result = ubase * (caster_level * (formula - 2000) + 1);
 			}
 			else
-				LogDebug("Unknown spell effect value forumula [{}]", formula);
+				LogDebug("Mob::CalcSpellEffectValue_formula(): Unknown spell effect value forumula [{}]", formula);
 		}
 	}
 
@@ -3704,7 +3728,7 @@ snare has both of them negative, yet their range should work the same:
 	if (base < 0 && result > 0)
 		result *= -1;
 
-	LogSpells("Result: [{}] (orig [{}]), cap [{}] [{}]", result, oresult, max, (base < 0 && result > 0)?"Inverted due to negative base":"");
+	LogSpells("Mob::CalcSpellEffectValue_formula(): Result: [{}] (orig [{}]), cap [{}] [{}]", result, oresult, max, (base < 0 && result > 0)?"Inverted due to negative base":"");
 
 	return result;
 }
@@ -3731,12 +3755,12 @@ void Mob::BuffProcess()
 					--buffs[buffs_i].ticsremaining;
 
 					if (buffs[buffs_i].ticsremaining < 0) {
-						LogSpells("Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
+						LogSpells("Mob::BuffProcess(): Buff [{}] in slot [{}] has expired. Fading", buffs[buffs_i].spellid, buffs_i);
 						BuffFadeBySlot(buffs_i);
 					}
 					else
 					{
-						LogSpells("Buff [{}] in slot [{}] has [{}] tics remaining", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
+						LogSpells("Mob::BuffProcess(): Buff [{}] in slot [{}] has [{}] tics remaining", buffs[buffs_i].spellid, buffs_i, buffs[buffs_i].ticsremaining);
 					}
 				}
 				else if (IsClient() && !(CastToClient()->ClientVersionBit() & EQ::versions::maskSoFAndLater))
@@ -3799,6 +3823,11 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		// I copied the calculation into each case which needed it instead of
 		// doing it every time up here, since most buff effects dont need it
 
+		// PVP
+		bool pvp = false;
+		if (IsDetrimentalSpell(buff.spellid) && buff.client && IsClient())
+			pvp = true;
+
 		switch (effect) {
 		case SE_CurrentHP: {
 			
@@ -3806,8 +3835,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 				break;
 			}
 
-			LogSpells("DoBuffTic, SE_CurrentHP");
-			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, caster, buff.ticsremaining, 0);
+			LogSpells("Mob::DoBuffTic(): SE_CurrentHP");
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, caster, buff.ticsremaining, 0, pvp);
 			// Handle client cast DOTs here.
 			if (caster && effect_value < 0) {
 
@@ -3832,8 +3861,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 			break;
 		}
 		case SE_HealOverTime: {
-			LogSpells("DoBuffTic, SE_HealOverTime");
-			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, nullptr, 0, 0);
+			LogSpells("Mob::DoBuffTic(): SE_HealOverTime");
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, nullptr, 0, 0, pvp);
 			if (caster)
 				effect_value = caster->GetActSpellHealing(buff.spellid, effect_value);
 
@@ -3848,8 +3877,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_BardAEDot: {
-			LogSpells("DoBuffTic, SE_BardAEDot");
-			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, caster, 0, 0);
+			LogSpells("Mob::DoBuffTic(): SE_BardAEDot");
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, caster, 0, 0, pvp);
 
 			if ((!RuleB(Spells, PreNerfBardAEDoT) && IsMoving()) || invulnerable ||
 			    /*effect_value > 0 ||*/ DivineAura())
@@ -3873,8 +3902,8 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		}
 
 		case SE_Hate: {
-			LogSpells("DoBuffTic, SE_Hate");
-			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, nullptr, 0, 0);
+			LogSpells("Mob::DoBuffTic(): SE_Hate");
+			effect_value = CalcSpellEffectValue(buff.spellid, i, buff.casterlevel, buff.instrument_mod, nullptr, 0, 0, pvp);
 			if (caster) {
 				if (effect_value > 0) {
 					if (caster) {
@@ -4004,7 +4033,10 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 		case SE_CastOnFadeEffectNPC:
 		case SE_CastOnFadeEffectAlways: {
 			if (buff.ticsremaining == 0) {
-				SpellFinished(spells[buff.spellid].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[buff.spellid].base[i]].ResistDiff);
+				if(pvp)
+					SpellFinished(spells[buff.spellid].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[buff.spellid].base[i]].pvpresistbase);
+				else
+					SpellFinished(spells[buff.spellid].base[i], this, EQ::spells::CastingSlot::Item, 0, -1, spells[spells[buff.spellid].base[i]].ResistDiff);
 			}
 			break;
 		}
@@ -4121,7 +4153,7 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 	if (IsClient() && !CastToClient()->IsDead())
 		CastToClient()->MakeBuffFadePacket(buffs[slot].spellid, slot);
 
-	LogSpells("Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
+	LogSpells("Mob::BuffFadeBySlot(): Fading buff [{}] from slot [{}]", buffs[slot].spellid, slot);
 
 	if(spells[buffs[slot].spellid].viral_targets > 0) {
 		bool last_virus = true;
