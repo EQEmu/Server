@@ -1508,22 +1508,25 @@ int32 Client::CalcATK()
 	return (ATK);
 }
 
-uint32 Mob::GetInstrumentMod(uint16 spell_id) const
+uint32 Mob::GetInstrumentMod(uint16 spell_id)
 {
-	if (GetClass() != BARD || spells[spell_id].IsDisciplineBuff) // Puretone is Singing but doesn't get any mod
+	if (GetClass() != BARD) {
+		//Other classes can get a base effects mod using SPA 413
+		if (HasBaseEffectFocus()) {
+			return (10 + (GetFocusEffect(focusFcBaseEffects, spell_id) / 10));//TODO: change action->instrument mod to float to support < 10% focus values
+		}
 		return 10;
-
+	}
+		
 	uint32 effectmod = 10;
 	int effectmodcap = 0;
-	bool nocap = false;
 	if (RuleB(Character, UseSpellFileSongCap)) {
 		effectmodcap = spells[spell_id].songcap / 10;
-		// this looks a bit weird, but easiest way I could think to keep both systems working
-		if (effectmodcap == 0)
-			nocap = true;
-		else
-			effectmodcap += 10;
-	} else {
+		if (effectmodcap) {
+			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
+		}
+	}
+	else {
 		effectmodcap = RuleI(Character, BaseInstrumentSoftCap);
 	}
 	// this should never use spell modifiers...
@@ -1532,6 +1535,39 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 	// item mods are in 10ths of percent increases
 	// clickies (Symphony of Battle) that have a song skill don't get AA bonus for some reason
 	// but clickies that are songs (selo's on Composers Greaves) do get AA mod as well
+
+	/*Mechanics: updated 10/19/21 ~Kayen
+		Bard Spell Effects
+
+		Mod uses the highest bonus from either of these for each instrument
+		SPA 179 SE_AllInstrumentMod is used for instrument spellbonus.______Mod. This applies to ALL instrument mods (Puretones Discipline)
+		SPA 260 SE_AddSingingMod is used for instrument spellbonus.______Mod. This applies to indiviual instrument mods. (Instrument mastery AA)
+			-Example usage: From AA a value of 4 = 40%
+
+		SPA 118 SE_Amplification is a stackable singing mod, on live it exists as both spell and AA bonus (stackable)
+			- Live Behavior: Amplifcation can be modified by singing mods and amplification itself, thus on the second cast of Amplification you will recieve
+			  the mod from the first cast, this continues until you reach the song mod cap.
+
+		SPA 261 SE_SongModCap raises song focus cap (No longer used on live)
+		SPA 270 SE_BardSongRange increase range of beneficial bard songs (Sionachie's Crescendo)
+
+		SPA 413 SE_FcBaseEffects focus effect that replaced item instrument mods
+
+		Issues 10-15-21:
+		Bonuses are not applied, unless song is stopped and restarted due to pulse keeping it continues. -> Need to recode songs to recast when duration ends.
+
+		Formula Live Bards:
+		mod = (10 + (aabonus.____Mod [SPA 260 AA Instrument Mastery]) + (SE_FcBaseEffect[SPA 413])/10 + (spellbonus.______Mod [SPA 179 Puretone Disc]) + (Amplication [SPA 118])/10
+
+		TODO: Spell Table Fields that need to be implemented
+		Field 225	//float base_effects_focus_slope;  // -- BASE_EFFECTS_FOCUS_SLOPE
+		Field 226	//float base_effects_focus_offset; // -- BASE_EFFECTS_FOCUS_OFFSET (35161	Ruaabri's Reckless Renewal -120)
+		Based on description possibly works as a way to quickly balance instrument mods to a song.
+		Using a standard slope formula: y = mx + b
+		modified_base_value = (base_effects_focus_slope x effectmod)(base_value) + (base_effects_focus_offset)
+		Will need to confirm on live before implementing.
+	*/
+
 	switch (spells[spell_id].skill) {
 	case EQ::skills::SkillPercussionInstruments:
 		if (itembonuses.percussionMod == 0 && spellbonuses.percussionMod == 0)
@@ -1589,18 +1625,34 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id) const
 		else
 			effectmod = spellbonuses.singingMod;
 		if (IsBardSong(spell_id))
-			effectmod += aabonuses.singingMod + spellbonuses.Amplification;
+			effectmod += aabonuses.singingMod + (spellbonuses.Amplification + itembonuses.Amplification + aabonuses.Amplification); //SPA 118 SE_Amplification
 		break;
 	default:
 		effectmod = 10;
 		return effectmod;
 	}
-	if (!RuleB(Character, UseSpellFileSongCap))
-		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap;
-	if (effectmod < 10)
+
+	if (HasBaseEffectFocus()) {
+		effectmod += (GetFocusEffect(focusFcBaseEffects, spell_id) / 10);
+	}
+
+	if (effectmod < 10) {
 		effectmod = 10;
-	if (!nocap && effectmod > effectmodcap) // if the cap is calculated to be 0 using new rules, no cap.
-		effectmod = effectmodcap;
+	}
+
+	if (effectmodcap) {
+
+		effectmodcap += aabonuses.songModCap + spellbonuses.songModCap + itembonuses.songModCap; //SPA 261 SE_SongModCap (not used on live)
+
+		//Incase a negative modifier is used.
+		if (effectmodcap <= 0) {
+			effectmodcap = 10;
+		}
+
+		if (effectmod > effectmodcap) { // if the cap is calculated to be 0 using new rules, no cap.
+			effectmod = effectmodcap;
+		}
+	}
 
 	LogSpells("[{}]::GetInstrumentMod() spell=[{}] mod=[{}] modcap=[{}]\n", GetName(), spell_id, effectmod, effectmodcap);
 

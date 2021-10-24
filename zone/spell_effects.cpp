@@ -197,6 +197,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
+																			 
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -1325,9 +1326,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Melee Absorb Rune: %+i", effect_value);
 #endif
-				if (caster)
-					effect_value = caster->ApplySpellEffectiveness(spell_id, effect_value);
-
 				buffs[buffslot].melee_rune = effect_value;
 				break;
 			}
@@ -2356,22 +2354,20 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				???? = spells[spell_id].max[i] - MOST of the effects have this value.
 				*Max is lower value then Weapon base, possibly min hit vs Weapon Damage range ie. MakeRandInt(max,base)
 				*/
-				int16 focus = 0;
 				int ReuseTime = spells[spell_id].recast_time + spells[spell_id].recovery_time;
-				if (!caster)
+				if (!caster) {
 					break;
-
-				focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-
+				}
+				
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
-					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i], focus,  ReuseTime);
+					caster->DoThrowingAttackDmg(this, nullptr, nullptr, effect_value,spells[spell_id].base2[i], 0, ReuseTime);
 					break;
 				case EQ::skills::SkillArchery:
-					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base[i],spells[spell_id].base2[i],focus,  ReuseTime);
+					caster->DoArcheryAttackDmg(this, nullptr, nullptr, effect_value,spells[spell_id].base2[i], 0, ReuseTime);
 					break;
 				default:
-					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base[i], spells[spell_id].skill, spells[spell_id].base2[i], focus, false, ReuseTime);
+					caster->DoMeleeSkillAttackDmg(this, effect_value, spells[spell_id].skill, spells[spell_id].base2[i], 0, false, ReuseTime);
 					break;
 				}
 				break;
@@ -3335,9 +3331,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 }
 
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
-			      int ticsremaining, uint16 caster_id)
+	int ticsremaining, uint16 caster_id)
 {
-	int formula, base, max, effect_value;
+	int formula, base, max, effect_value, oval;
 
 	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
 		return 0;
@@ -3355,16 +3351,49 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)
 		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
 
+		oval = effect_value;
+		effect_value = effect_value * instrument_mod / 10;
 
-		int oval = effect_value;
-		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
-		effect_value = effect_value * mod / 10;
 		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
-			oval, mod, effect_value);
+			oval, instrument_mod, effect_value);
+	}
+	/*
+		SPA 413 SE_FcBaseEffects, modifies base value of a spell effect after formula calcultion, but before other focuses.
+		This is applied to non-Bards in Mob::GetInstrumentMod
+		Like bard modifiers, this is sent in the action_struct using action->instrument_mod (which is a base effect modifier)
+		
+		Issue: value sent with action->instrument_mod needs to be 10 or higher. Therefore lowest possible percent chance would be 11 (calculated to 10%)
+		there are modern spells that use less than 10% but we send as a uint where lowest value has to be 10, where it should be a float for current clients. 
+		Though not ideal, at the moment for spells that are instant effects, the action packet doesn't matter and we will calculate the actual percent here correctly.
+		Logic here is, caster_id is only sent from ApplySpellBonuses. Thus if it is a buff a long as the base effects is set to over 10% and at +10% intervals
+		it will focus the base value correctly.
+		
+	*/
+	if (GetClass() != BARD) {
+		
+		if (caster_id && instrument_mod > 10) {
+			//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
+			oval = effect_value;
+			effect_value = effect_value * instrument_mod / 10;
+
+			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+				oval, instrument_mod, effect_value);
+		}
+		else if (!caster_id) {
+			//This is checked from Mob::SpellEffects and applied to instant spells and runes.
+			if (caster && caster->HasBaseEffectFocus()) {
+				oval = effect_value;
+				int mod = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
+				effect_value += effect_value * mod / 100;
+
+				LogSpells("Instant Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
+					oval, mod, effect_value);
+			}
+		}
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
-
+	
 	return effect_value;
 }
 
@@ -3505,7 +3534,8 @@ snare has both of them negative, yet their range should work the same:
 			break;
 
 		case 119:	// confirmed 2/6/04
-			result = ubase + (caster_level / 8); break;
+			result = ubase + (caster_level / 8); 
+			break;
 		case 120:
 		{
 			int ticdif = CalcBuffDuration_formula(caster_level, spells[spell_id].buffdurationformula, spells[spell_id].buffduration) - std::max((ticsremaining - 1), 0);
@@ -6990,30 +7020,6 @@ int32 Mob::GetFocusIncoming(focusType type, int effect, Mob *caster, uint32 spel
 			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
 	}
 
-
-	return value;
-}
-
-int32 Mob::ApplySpellEffectiveness(int16 spell_id, int32 value, bool IsBard, uint16 caster_id) {
-
-	// 9-17-12: This is likely causing crashes, disabled till can resolve.
-	if (IsBard)
-		return value;
-
-	Mob* caster = this;
-
-	if (caster_id && caster_id != GetID())//Make sure we are checking the casters focus
-		caster = entity_list.GetMob(caster_id);
-
-	if (!caster)
-		return value;
-
-	int16 focus = caster->GetFocusEffect(focusFcBaseEffects, spell_id);
-
-	if (IsBard)
-		value += focus;
-	else
-		value += value*focus/100;
 
 	return value;
 }
