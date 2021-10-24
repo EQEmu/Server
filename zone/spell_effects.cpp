@@ -163,9 +163,9 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	std::string buf = fmt::format(
 		"{} {} {} {}",
-		caster->GetID(),
-		buffs[buffslot].ticsremaining,
-		caster->GetLevel(),
+		caster ? caster->GetID() : 0,
+		buffslot >= 0 ? buffs[buffslot].ticsremaining : 0,
+		caster ? caster->GetLevel() : 0,
 		buffslot
 	);
 	
@@ -3360,17 +3360,8 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	effect_value = CalcSpellEffectValue_formula(formula, base_value, max_value, caster_level, spell_id, ticsremaining);
 
 	// this doesn't actually need to be a song to get mods, just the right skill
-	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) &&
-	    spells[spell_id].effect_id[effect_id] != SE_AttackSpeed &&
-	    spells[spell_id].effect_id[effect_id] != SE_AttackSpeed2 &&
-	    spells[spell_id].effect_id[effect_id] != SE_AttackSpeed3 &&
-	    spells[spell_id].effect_id[effect_id] != SE_Lull &&
-	    spells[spell_id].effect_id[effect_id] != SE_ChangeFrenzyRad &&
-	    spells[spell_id].effect_id[effect_id] != SE_Harmony &&
-	    spells[spell_id].effect_id[effect_id] != SE_CurrentMana &&
-	    spells[spell_id].effect_id[effect_id] != SE_ManaRegen_v2 &&
-		spells[spell_id].effect_id[effect_id] != SE_AddFaction) {
-
+	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill) 
+		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effect_id[effect_id])){
 		int oval = effect_value;
 		int mod = ApplySpellEffectiveness(spell_id, instrument_mod, true, caster_id);
 		effect_value = effect_value * mod / 10;
@@ -3751,9 +3742,9 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 
 	std::string buf = fmt::format(
 		"{} {} {} {}",
-		caster->GetID(),
+		caster ? caster->GetID() : 0,
 		buffs[slot].ticsremaining,
-		caster->GetLevel(),
+		caster ? caster->GetLevel() : 0,
 		slot
 	);
 

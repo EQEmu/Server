@@ -504,11 +504,11 @@ void Object::HandleCombine(Client* user, const NewCombine_Struct* in_combine, Ob
 			user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 		}
 	}
+
 	if (success) {
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name.c_str(), spec.recipe_id);
-	}
-	else {
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
+		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+	} else {
+		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
 	}
 }
 
@@ -672,10 +672,12 @@ void Object::HandleAutoCombine(Client* user, const RecipeAutoCombine_Struct* rac
 	if(success && spec.replace_container) {
 //		user->DeleteItemInInventory(in_combine->container_slot, 0, true);
 	}
-	if (success)
-		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name.c_str(), spec.recipe_id);
-	else
-		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name.c_str(), spec.recipe_id);
+
+	if (success) {
+		parse->EventPlayer(EVENT_COMBINE_SUCCESS, user, spec.name, spec.recipe_id);
+	} else {
+		parse->EventPlayer(EVENT_COMBINE_FAILURE, user, spec.name, spec.recipe_id);
+	}
 }
 
 EQ::skills::SkillType Object::TypeToSkill(uint32 type)

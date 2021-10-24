@@ -3123,18 +3123,18 @@ void command_race(Client *c, const Seperator *sep)
 
 	if (sep->IsNumber(1)) {
 		auto race = atoi(sep->arg[1]);
-		if ((race >= 0 && race <= 732) || (race >= 2253 && race <= 2259)) {
+		if ((race >= 0 && race <= RuleI(NPC, MaxRaceID)) || (race >= 2253 && race <= 2259)) {
 			if ((c->GetTarget()) && c->Admin() >= commandRaceOthers) {
 				target = c->GetTarget();
 			}
 			target->SendIllusionPacket(race);
 		}
 		else {
-			c->Message(Chat::White, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
+			c->Message(Chat::White, fmt::format("Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID)).c_str());
 		}
 	}
 	else {
-		c->Message(Chat::White, "Usage: #race [0-732, 2253-2259] (0 for back to normal)");
+		c->Message(Chat::White, fmt::format("Usage: #race [0-{}, 2253-2259] (0 for back to normal)", RuleI(NPC, MaxRaceID)).c_str());
 	}
 }
 
@@ -5223,8 +5223,8 @@ void command_fixmob(Client *c, const Seperator *sep)
 		if (strcasecmp(command, "race") == 0)
 		{
 			if (Race == 1 && codeMove == 'p')
-				Race = 724;
-			else if (Race >= 724 && codeMove != 'p')
+				Race = RuleI(NPC, MaxRaceID);
+			else if (Race >= RuleI(NPC, MaxRaceID) && codeMove != 'p')
 				Race = 1;
 			else
 				Race += Adjustment;

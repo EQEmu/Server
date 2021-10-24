@@ -2415,9 +2415,12 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 		return false;
 	int skillval = GetRawSkill(skillid);
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
-	char buffer[24] = { 0 };
-	snprintf(buffer, 23, "%d %d", skillid, skillval);
-	parse->EventPlayer(EVENT_USE_SKILL, this, buffer, 0);
+	std::string export_string = fmt::format(
+		"{} {}",
+		skillid,
+		skillval
+	);
+	parse->EventPlayer(EVENT_USE_SKILL, this, export_string, 0);
 	if (against_who) {
 		if (
 			against_who->GetSpecialAbility(IMMUNE_AGGRO) ||
@@ -5343,10 +5346,8 @@ void Client::ShowSkillsWindow()
 
 void Client::Signal(uint32 data)
 {
-	char buf[32];
-	snprintf(buf, 31, "%d", data);
-	buf[31] = '\0';
-	parse->EventPlayer(EVENT_SIGNAL, this, buf, 0);
+	std::string export_string = fmt::format("{}", data);
+	parse->EventPlayer(EVENT_SIGNAL, this, export_string, 0);
 }
 
 void Client::SendRewards()
