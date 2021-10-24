@@ -4065,7 +4065,6 @@ void Mob::DoBuffTic(const Buffs_Struct &buff, int slot, Mob *caster)
 }
 
 // removes the buff in the buff slot 'slot'
-// removes the buff in the buff slot 'slot'
 void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 {
 	if(slot < 0 || slot > GetMaxTotalSlots())
