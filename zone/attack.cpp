@@ -1631,9 +1631,14 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	if (!spell)
 		spell = SPELL_UNKNOWN;
 
-	char buffer[48] = { 0 };
-	snprintf(buffer, 47, "%d %d %d %d", killerMob ? killerMob->GetID() : 0, damage, spell, static_cast<int>(attack_skill));
-	if (parse->EventPlayer(EVENT_DEATH, this, buffer, 0) != 0) {
+	std::string export_string = fmt::format(
+		"{} {} {} {}",
+		killerMob ? killerMob->GetID() : 0,
+		damage,
+		spell,
+		static_cast<int>(attack_skill)
+	);
+	if (parse->EventPlayer(EVENT_DEATH, this, export_string, 0) != 0) {
 		if (GetHP() < 0) {
 			SetHP(0);
 		}
@@ -1935,7 +1940,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 		QServ->PlayerLogEvent(Player_Log_Deaths, this->CharacterID(), event_desc);
 	}
 
-	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, buffer, 0);
+	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, export_string, 0);
 	return true;
 }
 

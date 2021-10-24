@@ -97,10 +97,8 @@ void Client::SendTaskActivityComplete(
 void Client::SendTaskFailed(int task_id, int task_index, TaskType task_type)
 {
 	// 0x54eb
-	char buf[24];
-	snprintf(buf, 23, "%d", task_id);
-	buf[23] = '\0';
-	parse->EventPlayer(EVENT_TASK_FAIL, this, buf, 0);
+	std::string export_string = fmt::format("{}", task_id);
+	parse->EventPlayer(EVENT_TASK_FAIL, this, export_string, 0);
 
 	TaskActivityComplete_Struct *task_activity_complete;
 
