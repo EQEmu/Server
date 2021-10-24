@@ -1513,6 +1513,7 @@ bool IsVirusSpell(int32 spell_id);
 int GetViralMinSpreadTime(int32 spell_id);
 int GetViralMaxSpreadTime(int32 spell_id);
 int GetViralSpreadRange(int32 spell_id);
+bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);
 int GetSpellEffectDescNum(uint16 spell_id);

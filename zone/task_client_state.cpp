@@ -1154,17 +1154,13 @@ void ClientTaskState::IncrementDoneCount(
 	}
 
 	if (!ignore_quest_update) {
-		char buf[24];
-		snprintf(
-			buf,
-			23,
-			"%d %d %d",
+		std::string export_string = fmt::format(
+			"{} {} {}",
 			info->activity[activity_id].done_count,
 			info->activity[activity_id].activity_id,
 			info->task_id
 		);
-		buf[23] = '\0';
-		parse->EventPlayer(EVENT_TASK_UPDATE, client, buf, 0);
+		parse->EventPlayer(EVENT_TASK_UPDATE, client, export_string, 0);
 	}
 
 	info->activity[activity_id].updated = true;
@@ -1189,10 +1185,12 @@ void ClientTaskState::IncrementDoneCount(
 		client->MessageString(Chat::White, TASK_UPDATED, task_information->title.c_str());
 
 		if (!ignore_quest_update) {
-			char buf[24];
-			snprintf(buf, 23, "%d %d", info->task_id, info->activity[activity_id].activity_id);
-			buf[23] = '\0';
-			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, buf, 0);
+			std::string export_string = fmt::format(
+				"{} {}",
+				info->task_id,
+				info->activity[activity_id].activity_id
+			);
+			parse->EventPlayer(EVENT_TASK_STAGE_COMPLETE, client, export_string, 0);
 		}
 		/* QS: PlayerLogTaskUpdates :: Update */
 		if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
@@ -1210,17 +1208,13 @@ void ClientTaskState::IncrementDoneCount(
 		// updated in UnlockActivities. Send the completed task list to the
 		// client. This is the same sequence the packets are sent on live.
 		if (task_complete) {
-			char buf[24];
-			snprintf(
-				buf,
-				23,
-				"%d %d %d",
+			std::string export_string = fmt::format(
+				"{} {} {}",
 				info->activity[activity_id].done_count,
 				info->activity[activity_id].activity_id,
 				info->task_id
 			);
-			buf[23] = '\0';
-			parse->EventPlayer(EVENT_TASK_COMPLETE, client, buf, 0);
+			parse->EventPlayer(EVENT_TASK_COMPLETE, client, export_string, 0);
 
 			/* QS: PlayerLogTaskUpdates :: Complete */
 			if (RuleB(QueryServ, PlayerLogTaskUpdates)) {
