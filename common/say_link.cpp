@@ -350,7 +350,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	std::vector<std::string> saylinks          = {};
 	int                      saylink_length    = 50;
 	std::string              saylink_separator = "\u0012";
-	std::string              saylink_partial   = "000";
+	std::string              saylink_partial   = "00000";
 
 	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
 
@@ -374,6 +374,8 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	}
 
 	LogSaylinkDetail("new_message post pass 1 [{}]", new_message);
+
+	LogSaylinkDetail("saylink separator count [{}]", std::count(new_message.begin(), new_message.end(), '\u0012'));
 
 	// loop through brackets until none exist
 	if (new_message.find('[') != std::string::npos) {
