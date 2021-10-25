@@ -624,7 +624,7 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 			auto next_slot = GetNextAvailableSpellBookSlot();
 			if (next_slot != -1) {
 				// defer persisting one at a time and bulk save at the end
-				ScribeSpell(spell_id, next_slot, true, true);
+				ScribeSpell(spell_id, next_slot);
 				return true;
 			}
 			else {
@@ -644,9 +644,6 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 			return false;
 		}
 	}
-
-	// bulk insert spells
-	SaveSpells();
 
 	Message(Chat::Red, "You have learned too many spells and can learn no more.");
 	return false;
