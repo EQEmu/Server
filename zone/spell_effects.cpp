@@ -4563,8 +4563,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	int32  base1       = 0;
 	int32  base2       = 0;
 	uint32 slot        = 0;
-
+	
 	int index_id = -1;
+	uint32 proc_limit_timer = 0;
 
 	bool LimitFailure                  = false;
 	bool LimitInclude[MaxLimitInclude] = {false};
@@ -4912,6 +4913,15 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				}
 				break;
 
+			case SE_Ff_FocusTimerMin:
+				if (HasFocusProcLimitTimer(-rank.id)) {
+					LimitFailure = true;
+				}
+				else {
+					proc_limit_timer = base2;
+				}
+				break;
+
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 				case SE_Ff_Same_Caster:
@@ -5210,6 +5220,10 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 
 	if (not_focusable) {
 		return 0;
+	}
+
+	if (proc_limit_timer) {
+		SetFocusProcLimitTimer(-rank.id, proc_limit_timer);
 	}
 
 	return (value * lvlModifier / 100);
@@ -5577,11 +5591,9 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_Ff_FocusTimerMin:
 				if (HasFocusProcLimitTimer(focus_spell.id)) {
-					Shout("Limit Timer FAIL");
 					return 0;
 				}
 				else {
-					Shout("Limter found TIME %i", focus_spell.base2[i]);
 					proc_limit_timer = focus_spell.base2[i];
 				}
 				break;
@@ -8602,21 +8614,26 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 
 bool Mob::HasFocusProcLimitTimer(int32 focus_spell_id) {
 
+	/*
+		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
+		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
+		have the fire spells received a very high special focused once every 30 seconds.
+		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
+		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
+	*/
+
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
 		
 		if (focusproclimit_spellid[i] == focus_spell_id) {
-			Shout("HasFocus %i Enabled %i Time Remaining %i [I = %i]", focusproclimit_spellid[i], focusproclimit_timer[i].Enabled(), focusproclimit_timer[i].GetRemainingTime(), i);
+			
 			if (focusproclimit_timer[i].Enabled()) {
 
 				if (focusproclimit_timer[i].GetRemainingTime() > 0) {
-
-					Shout("Enabled %i [I = %i]", focusproclimit_timer[i].GetRemainingTime(), i);
 					return true;
 				}
 				else {
 					focusproclimit_timer[i].Disable();
 					focusproclimit_spellid[i] = 0;
-					Shout("Disable");
 				}
 			}
 		}
@@ -8627,7 +8644,6 @@ bool Mob::HasFocusProcLimitTimer(int32 focus_spell_id) {
 void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 	
 	bool is_set = false;
-	Shout("SetFocusProcLimitTimer:: %i, %i", focus_spell_id, time_limit);
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
 
@@ -8637,13 +8653,11 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 			//focusproclimit_timer[i].Start(time_limit, false);
 			focusproclimit_timer[i].SetTimer(time_limit);
 			is_set = true;
-			Shout("Set timer %i [I = %i]", focus_spell_id, i);
 		}
 		//Remove old temporary focus if was from a buff you no longer have.
 		else if (focusproclimit_spellid[i] && !FindBuff(focus_spell_id)) {
 			focusproclimit_spellid[i] = 0;
 			focusproclimit_timer[i].Disable();
-			Shout("Clear timer");
 		}
 	}
 }

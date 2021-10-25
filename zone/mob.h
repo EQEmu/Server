@@ -1465,8 +1465,8 @@ protected:
 	Timer tic_timer;
 	Timer mana_timer;
 
-	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS]; //SPA 411
-	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS]; //SPA 411
+	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
+	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;
