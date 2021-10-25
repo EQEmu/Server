@@ -5376,30 +5376,34 @@ void Client::UnscribeSpellAll(bool update_client)
 	SaveSpells();
 }
 
-void Client::UntrainDisc(int slot, bool update_client)
+void Client::UntrainDisc(int slot, bool update_client, bool defer_save)
 {
-	if(slot >= MAX_PP_DISCIPLINES || slot < 0)
+	if (slot >= MAX_PP_DISCIPLINES || slot < 0) {
 		return;
+	}
 
 	LogSpells("Discipline [{}] untrained from slot [{}]", m_pp.disciplines.values[slot], slot);
 	m_pp.disciplines.values[slot] = 0;
-	database.DeleteCharacterDisc(this->CharacterID(), slot);
 
-	if(update_client)
-	{
+	if (!defer_save) {
+		database.DeleteCharacterDisc(this->CharacterID(), slot);
+	}
+
+	if (update_client) {
 		SendDisciplineUpdate();
 	}
 }
 
 void Client::UntrainDiscAll(bool update_client)
 {
-	int i;
-
-	for(i = 0; i < MAX_PP_DISCIPLINES; i++)
-	{
-		if(m_pp.disciplines.values[i] != 0)
-			UntrainDisc(i, update_client);
+	for (int i = 0; i < MAX_PP_DISCIPLINES; i++) {
+		if (m_pp.disciplines.values[i] != 0) {
+			UntrainDisc(i, update_client, true);
+		}
 	}
+
+	// bulk delete / save
+	SaveDisciplines();
 }
 
 void Client::UntrainDiscBySpellID(uint16 spell_id, bool update_client)

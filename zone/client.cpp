@@ -64,6 +64,7 @@ extern volatile bool RunLoops;
 #include "cheat_manager.h"
 
 #include "../common/repositories/character_spells_repository.h"
+#include "../common/repositories/character_disciplines_repository.h"
 
 
 extern QueryServ* QServ;
@@ -10695,5 +10696,26 @@ void Client::SaveSpells()
 
 	if (!character_spells.empty()) {
 		CharacterSpellsRepository::InsertMany(database, character_spells);
+	}
+}
+
+void Client::SaveDisciplines()
+{
+	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> character_discs = {};
+
+	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
+		if (IsValidSpell(m_pp.disciplines.values[index])) {
+			auto discipline = CharacterDisciplinesRepository::NewEntity();
+			discipline.id      = CharacterID();
+			discipline.slot_id = index;
+			discipline.disc_id = m_pp.disciplines.values[index];
+			character_discs.emplace_back(discipline);
+		}
+	}
+
+	CharacterDisciplinesRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
+
+	if (!character_discs.empty()) {
+		CharacterDisciplinesRepository::InsertMany(database, character_discs);
 	}
 }

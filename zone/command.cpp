@@ -8062,6 +8062,7 @@ void command_untraindiscs(Client *c, const Seperator *sep) {
 		t = c->GetTarget()->CastToClient();
 
 	t->UntrainDiscAll();
+	t->Message(Chat::Yellow, "All disciplines removed");
 }
 
 void command_wpinfo(Client *c, const Seperator *sep)
@@ -11003,7 +11004,6 @@ void command_traindisc(Client *c, const Seperator *sep)
 				}
 				else if (t->GetPP().disciplines.values[r] == 0) {
 					t->GetPP().disciplines.values[r] = spell_id_;
-					database.SaveCharacterDisc(t->CharacterID(), r, spell_id_);
 					change = true;
 					t->Message(Chat::White, "You have learned a new discipline!");
 					++count; // success counter
@@ -11015,17 +11015,22 @@ void command_traindisc(Client *c, const Seperator *sep)
 		}
 	}
 
-	if (change)
+	if (change) {
 		t->SendDisciplineUpdate();
+		t->SaveDisciplines();
+	}
 
 	if (count > 0) {
-		t->Message(Chat::White, "Successfully trained %u disciplines.",  count);
-		if (t != c)
-			c->Message(Chat::White, "Successfully trained %u disciplines for %s.",  count, t->GetName());
-	} else {
+		t->Message(Chat::White, "Successfully trained %u disciplines.", count);
+		if (t != c) {
+			c->Message(Chat::White, "Successfully trained %u disciplines for %s.", count, t->GetName());
+		}
+	}
+	else {
 		t->Message(Chat::White, "No disciplines trained.");
-		if (t != c)
-			c->Message(Chat::White, "No disciplines trained for %s.",  t->GetName());
+		if (t != c) {
+			c->Message(Chat::White, "No disciplines trained for %s.", t->GetName());
+		}
 	}
 }
 
