@@ -857,8 +857,9 @@ public:
 	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }
 
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
-	void FocusProcLimitProcess();
-	bool ApplyFocusProcLimiter(int32 spell_id, int buffslot = -1);
+
+	bool HasFocusProcLimitTimer(int32 focus_spell_id);
+	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit);
 
 	void VirusEffectProcess();
 	void SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining);
@@ -1463,7 +1464,9 @@ protected:
 	int16 slow_mitigation; // Allows for a slow mitigation (100 = 100%, 50% = 50%)
 	Timer tic_timer;
 	Timer mana_timer;
-	Timer focus_proc_limit_timer;
+
+	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS]; //SPA 411
+	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS]; //SPA 411
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;
@@ -1560,7 +1563,6 @@ protected:
 	Timer bardsong_timer;
 	Timer gravity_timer;
 	Timer viral_timer;
-	uint8 viral_timer_counter;
 
 	// MobAI stuff
 	eStandingPetOrder pStandingPetOrder;

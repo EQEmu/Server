@@ -1255,6 +1255,7 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_Ff_ReuseTimeMax:
 	case SE_Ff_Value_Min:
 	case SE_Ff_Value_Max:
+	case SE_Ff_FocusTimerMin:
 		return true;
 	default:
 		return false;
@@ -1296,6 +1297,7 @@ bool IsFocusLimit(int spa)
 	case SE_Ff_ReuseTimeMax:
 	case SE_Ff_Value_Min:
 	case SE_Ff_Value_Max:
+	case SE_Ff_FocusTimerMin:
 		return true;
 	default:
 		return false;

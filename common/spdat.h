@@ -180,7 +180,7 @@
 #define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 #define MAX_SKILL_PROCS 4 //Number of spells to check skill procs from. (This is arbitrary) [Single spell can have multiple proc checks]
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
-
+#define MAX_FOCUS_PROC_LIMIT_TIMERS 20
 
 
 const int Z_AGGRO=10;
@@ -1208,8 +1208,8 @@ typedef enum {
 #define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
 #define SE_Fc_ResistIncoming			510 // implemented, @Fc, On Target, resist modifier, base: amt
-//#define SE_Ff_FocusTimerMin			511 //
-#define SE_Proc_Timer_Modifier 			512 // implemented - spell trigger limiter used currently with SPA 481, ie. limit to 1 proc every 1.5 seconds (base=1 base2=1500).
+#define SE_Ff_FocusTimerMin				511 // implemented, @Ff, focus spell trigger per amount of time limiter, can used with SPA 481 and 339, base: 1, limit: time ms, Note:  ie. limit to 1 trigger every 1.5 seconds 
+#define SE_Proc_Timer_Modifier 			512 // implemented - spell trigger limiter used currently with SPA 481, (base=1 base2=1500).
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
