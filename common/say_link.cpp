@@ -467,7 +467,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 void EQ::SayLinkEngine::LoadCachedSaylinks()
 {
-	auto saylinks = SaylinkRepository::All(database);
+	auto saylinks = SaylinkRepository::GetWhere(database, "phrase not like '%#%'");
 	LogSaylink("Loaded [{}] saylinks into cache", saylinks.size());
 	g_cached_saylinks = saylinks;
 }
