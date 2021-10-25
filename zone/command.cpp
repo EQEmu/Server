@@ -7928,7 +7928,7 @@ void command_scribespells(Client *c, const Seperator *sep)
 			}
 
 			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(spell_id_, book_slot);
+				t->ScribeSpell(spell_id_, book_slot, true, true);
 				++count;
 			}
 
@@ -7939,14 +7939,18 @@ void command_scribespells(Client *c, const Seperator *sep)
 	}
 
 	if (count > 0) {
-		t->Message(Chat::White, "Successfully scribed %i spells.",  count);
-		if (t != c)
-			c->Message(Chat::White, "Successfully scribed %i spells for %s.",  count, t->GetName());
+		t->Message(Chat::White, "Successfully scribed %i spells.", count);
+		if (t != c) {
+			c->Message(Chat::White, "Successfully scribed %i spells for %s.", count, t->GetName());
+		}
+
+		t->SaveSpells();
 	}
 	else {
 		t->Message(Chat::White, "No spells scribed.");
-		if (t != c)
-			c->Message(Chat::White, "No spells scribed for %s.",  t->GetName());
+		if (t != c) {
+			c->Message(Chat::White, "No spells scribed for %s.", t->GetName());
+		}
 	}
 }
 
@@ -9275,7 +9279,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "gender") == 0) {
-		auto gender_id = atoi(sep->arg[2]);		
+		auto gender_id = atoi(sep->arg[2]);
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now a {} ({}).", npc_id, gender_id, GetGenderName(gender_id)).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET gender = {} WHERE id = {}", gender_id, npc_id);
 		content_db.QueryDatabase(query);
@@ -9461,7 +9465,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		std::string query = fmt::format("UPDATE npc_types SET ammo_idfile = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
 		content_db.QueryDatabase(query);
 		return;
-	}	
+	}
 
 	if (strcasecmp(sep->arg[1], "weapon") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} will have Model {} set to their Primary and Model {} set to their Secondary on repop.", npc_id, atoi(sep->arg[2]), atoi(sep->arg[3])).c_str());
@@ -9679,7 +9683,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "accuracy") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Accuracy.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET accuracy = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9749,7 +9753,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "armtexture") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now using Arm Texture {}.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET armtexture = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9934,7 +9938,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				animation = 1;
 				animation_name = "Sitting";
 			} else if(strcasecmp(sep->arg[2], "crouch") == 0 || atoi(sep->arg[2]) == 2) { // Crouch
-				animation = 2;				
+				animation = 2;
 				animation_name = "Crouching";
 			} else if(strcasecmp(sep->arg[2], "dead") == 0 || atoi(sep->arg[2]) == 3) { // Dead
 				animation = 3;
@@ -14880,7 +14884,7 @@ void command_dye(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		return;
 	}
-	
+
 	uint8 slot = 0;
 	uint8 red = 255;
 	uint8 green = 255;
@@ -14902,7 +14906,7 @@ void command_dye(Client *c, const Seperator *sep)
 		std::vector<std::string> slot_messages;
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
-		
+
 		for (const auto& slot : dye_slots) {
 			slot_messages.push_back(fmt::format("({}) {}", slot_id, slot));
 			slot_id++;

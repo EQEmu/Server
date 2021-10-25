@@ -180,7 +180,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effective
 			value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 		}
 	}
-	
+
 	int32 base_spell_dmg = value;
 
 	value = value * effectiveness / 100;
@@ -343,7 +343,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
-		
+
 		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value); //Item Heal Amt Add before critical
 		}
@@ -351,7 +351,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (target) {
 			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
 		}
-	
+
 		/*
 			Apply critical hit modifier
 		*/
@@ -363,7 +363,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (target) {
 			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
 		}
-		
+
 		if (IsNPC() && CastToNPC()->GetHealScale()) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 		}
@@ -619,13 +619,15 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 		return false;
 	}
 
-	for(int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+	for (int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
 		if (!HasSpellScribed(spell_id)) {
 			auto next_slot = GetNextAvailableSpellBookSlot();
 			if (next_slot != -1) {
-				ScribeSpell(spell_id, next_slot);
+				// defer persisting one at a time and bulk save at the end
+				ScribeSpell(spell_id, next_slot, true, true);
 				return true;
-			} else {
+			}
+			else {
 				Message(
 					Chat::Red,
 					"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
@@ -635,12 +637,17 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 				SummonItem(item_id);
 				return false;
 			}
-		} else {
+		}
+		else {
 			Message(Chat::Red, "You already know this spell.");
 			SummonItem(item_id);
 			return false;
 		}
 	}
+
+	// bulk insert spells
+	SaveSpells();
+
 	Message(Chat::Red, "You have learned too many spells and can learn no more.");
 	return false;
 }

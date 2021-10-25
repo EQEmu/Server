@@ -1130,7 +1130,8 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 			if (initiator->HasSpellScribed(spell_id))
 				continue;
 
-			initiator->ScribeSpell(spell_id, book_slot);
+			// defer saving per spell and bulk save at the end
+			initiator->ScribeSpell(spell_id, book_slot, true, true);
 			book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
 			spells_learned++;
 		}
@@ -1139,6 +1140,9 @@ uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	if (spells_learned > 0) {
 		std::string spell_message = (spells_learned == 1 ? "a new spell" : fmt::format("{} new spells", spells_learned));
 		initiator->Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
+
+		// bulk insert spells
+		initiator->SaveSpells();
 	}
 	return spells_learned;
 }
