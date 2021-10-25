@@ -1208,7 +1208,7 @@ typedef enum {
 #define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
 #define SE_Fc_ResistIncoming			510 // implemented, @Fc, On Target, resist modifier, base: amt
-#define SE_Ff_FocusTimerMin				511 // implemented, @Ff, focus spell trigger per amount of time limiter, can used with SPA 481 and 339, base: 1, limit: time ms, Note:  ie. limit to 1 trigger every 1.5 seconds 
+#define SE_Ff_FocusTimerMin				511 // implemented, @Ff, sets a recast time until focus can be used again, base: 1, limit: time ms, Note:  ie. limit to 1 trigger every 1.5 seconds 
 #define SE_Proc_Timer_Modifier 			512 // not implemented - limits procs per amount of a time based on timer value (ie limit to 1 proc every 55 seconds)
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
