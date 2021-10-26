@@ -4915,7 +4915,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				break;
 
 			case SE_Ff_FocusTimerMin:
-				if (HasFocusProcLimitTimer(-rank.id)) {
+				if (IsFocusProcLimitTimerActive(-rank.id)) {
 					LimitFailure = true;
 				}
 				else {
@@ -5591,7 +5591,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				break;
 
 			case SE_Ff_FocusTimerMin:
-				if (HasFocusProcLimitTimer(focus_spell.id)) {
+				if (IsFocusProcLimitTimerActive(focus_spell.id)) {
 					return 0;
 				}
 				else {
@@ -8613,7 +8613,7 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 	}
 }
 
-bool Mob::HasFocusProcLimitTimer(int32 focus_spell_id) {
+bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 	/*
 		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
@@ -8648,7 +8648,7 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 			is_set = true;
 		}
 		//Remove old temporary focus if was from a buff you no longer have.
-		else if (focusproclimit_spellid[i] && !FindBuff(focus_spell_id)) {
+		else if (focusproclimit_spellid[i] > 0 && !FindBuff(focus_spell_id)) {
 			focusproclimit_spellid[i] = 0;
 			focusproclimit_timer[i].Disable();
 		}

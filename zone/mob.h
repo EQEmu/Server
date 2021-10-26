@@ -858,7 +858,7 @@ public:
 
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
 
-	bool HasFocusProcLimitTimer(int32 focus_spell_id);
+	bool IsFocusProcLimitTimerActive(int32 focus_spell_id);
 	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit);
 
 	void VirusEffectProcess();
