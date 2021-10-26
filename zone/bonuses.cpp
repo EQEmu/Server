@@ -1071,6 +1071,39 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			}
 			break;
 
+		case SE_WeaponProc:
+		case SE_AddMeleeProc:
+			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+				if (!newbon->SpellProc[i]) {
+					newbon->SpellProc[i] = rank.id;   //aa rank id
+					newbon->SpellProc[i + 1] = base1; //proc spell id
+					newbon->SpellProc[i + 2] = base2; //proc rate modifer
+					break;
+				}
+			}
+			break;
+
+		case SE_RangedProc:
+			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+				if (!newbon->RangedProc[i]) {
+					newbon->RangedProc[i] = rank.id;   //aa rank id
+					newbon->RangedProc[i + 1] = base1; //proc spell id
+					newbon->RangedProc[i + 2] = base2; //proc rate modifer
+					break;
+				}
+			}
+			break;
+
+		case SE_DefensiveProc:
+			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+				if (!newbon->DefensiveProc[i]) {
+					newbon->DefensiveProc[i] = rank.id;   //aa rank id
+					newbon->DefensiveProc[i + 1] = base1; //proc spell id
+					newbon->DefensiveProc[i + 2] = base2; //proc rate modifer
+					break;
+				}
+			}
+			break;
 
 		case SE_CriticalHitChance: {
 			// Bad data or unsupported new skill

@@ -3380,17 +3380,37 @@ int32 Mob::ReduceAllDamage(int32 damage)
 
 bool Mob::HasProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++)
-		if (PermaProcs[i].spellID != SPELL_UNKNOWN || SpellProcs[i].spellID != SPELL_UNKNOWN)
+	for (int i = 0; i < MAX_PROCS; i++) {
+		if (PermaProcs[i].spellID != SPELL_UNKNOWN || SpellProcs[i].spellID != SPELL_UNKNOWN) {
 			return true;
+		}
+	}
+
+	if (IsClient()) {
+		for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			if (aabonuses.SpellProc[i]) {
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
 bool Mob::HasDefensiveProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++)
-		if (DefensiveProcs[i].spellID != SPELL_UNKNOWN)
+	for (int i = 0; i < MAX_PROCS; i++) {
+		if (DefensiveProcs[i].spellID != SPELL_UNKNOWN) {
 			return true;
+		}
+	}
+
+	if (IsClient()) {
+		for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			if (aabonuses.DefensiveProc[i]) {
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -3415,9 +3435,19 @@ bool Mob::HasSkillProcSuccess() const
 
 bool Mob::HasRangedProcs() const
 {
-	for (int i = 0; i < MAX_PROCS; i++)
-		if (RangedProcs[i].spellID != SPELL_UNKNOWN)
+	for (int i = 0; i < MAX_PROCS; i++){
+		if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
 			return true;
+		}
+	}
+
+	if (IsClient()) {
+		for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			if (aabonuses.RangedProc[i]) {
+				return true;
+			}
+		}
+	}
 	return false;
 }
 
@@ -4051,33 +4081,52 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		return;
 	}
 
-	if (!HasDefensiveProcs())
+	if (!HasDefensiveProcs()) {
 		return;
+	}
 
 	if (!on->HasDied() && on->GetHP() > 0) {
 
 		float ProcChance, ProcBonus;
 		on->GetDefensiveProcChances(ProcBonus, ProcChance, hand, this);
 
-		if (hand != EQ::invslot::slotPrimary)
+		if (hand != EQ::invslot::slotPrimary) {
 			ProcChance /= 2;
+		}
 
 		int level_penalty = 0;
 		int level_diff = GetLevel() - on->GetLevel();
-		if (level_diff > 6)//10% penalty per level if > 6 levels over target.
+		if (level_diff > 6) {//10% penalty per level if > 6 levels over target.
 			level_penalty = (level_diff - 6) * 10;
+		}
 
 		ProcChance -= ProcChance*level_penalty / 100;
 
-		if (ProcChance < 0)
+		if (ProcChance < 0) {
 			return;
+		}
 
+		//Spell Procs and Quest added procs
 		for (int i = 0; i < MAX_PROCS; i++) {
 			if (IsValidSpell(DefensiveProcs[i].spellID)) {
 				float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance) / 100.0f);
 				if (zone->random.Roll(chance)) {
 					ExecWeaponProc(nullptr, DefensiveProcs[i].spellID, on);
 					CheckNumHitsRemaining(NumHit::DefensiveSpellProcs, 0, DefensiveProcs[i].base_spellID);
+				}
+			}
+		}
+
+		//AA Procs
+		for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+
+			int32 aa_rank_id = aabonuses.DefensiveProc[i];
+			int32 aa_spell_id = aabonuses.DefensiveProc[i + 1];
+			int32 aa_proc_chance = 100 + aabonuses.DefensiveProc[i + 2];
+			if (aa_rank_id) {
+				float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
+				if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
+					ExecWeaponProc(nullptr, aa_spell_id, on);
 				}
 			}
 		}
@@ -4239,7 +4288,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 
 		// Not ranged
 		if (!rangedattk) {
-			// Perma procs (AAs)
+			// Perma procs (Not used for AA)
 			if (PermaProcs[i].spellID != SPELL_UNKNOWN) {
 				if (zone->random.Roll(PermaProcs[i].chance)) { // TODO: Do these get spell bonus?
 					LogCombat("Permanent proc [{}] procing spell [{}] ([{}] percent chance)", i, PermaProcs[i].spellID, PermaProcs[i].chance);
@@ -4283,6 +4332,37 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 				else {
 					LogCombat("Ranged proc [{}] failed to proc [{}] ([{}] percent chance)", i, RangedProcs[i].spellID, chance);
 				}
+			}
+		}
+	}
+
+	//AA Procs
+	for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+
+		int32 aa_rank_id = 0;
+		int32 aa_spell_id = SPELL_UNKNOWN;
+		int32 aa_proc_chance = 100;
+
+		if (!rangedattk) {
+
+			aa_rank_id = aabonuses.SpellProc[i];
+			aa_spell_id = aabonuses.SpellProc[i + 1];
+			aa_proc_chance += aabonuses.SpellProc[i + 2];
+		}
+		else {
+			aa_rank_id = aabonuses.RangedProc[i];
+			aa_spell_id = aabonuses.RangedProc[i + 1];
+			aa_proc_chance += aabonuses.RangedProc[i + 2];
+		}
+
+		if (aa_rank_id) {
+			float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
+			if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
+				LogCombat("AA proc [{}] procing spell [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
+				ExecWeaponProc(nullptr, aa_spell_id, on);
+			}
+			else {
+				LogCombat("AA proc [{}] failed to proc [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
 			}
 		}
 	}

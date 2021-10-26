@@ -179,6 +179,7 @@
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
 #define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 #define MAX_SKILL_PROCS 4 //Number of spells to check skill procs from. (This is arbitrary) [Single spell can have multiple proc checks]
+#define MAX_AA_PROCS 4 //Number of spells to check AA procs from. (This is arbitrary)
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of proc limiting timers that can be going at same time (This is arbitrary)
 
