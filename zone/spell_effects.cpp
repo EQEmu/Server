@@ -8687,7 +8687,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
-						Shout("Def Proc Timer remaining %i %i", proc_spell_id, def_proclimit_timer[i].GetRemainingTime());
+						Shout("Def Proc Timer remaining %i %i", base_spell_id, def_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
