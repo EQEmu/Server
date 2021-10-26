@@ -859,7 +859,7 @@ public:
 	void CastSpellOnLand(Mob* caster, int32 spell_id);
 
 	bool IsFocusProcLimitTimerActive(int32 focus_spell_id);
-	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit);
+	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time);
 	bool IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, int proc_type);
 	void SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int proc_type);
 
