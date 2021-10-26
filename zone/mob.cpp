@@ -3202,21 +3202,25 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	if(IsClient())
+	if (IsClient()) {
 		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+	}
 
-	if(twinproc_chance && zone->random.Roll(twinproc_chance))
+	if (twinproc_chance && zone->random.Roll(twinproc_chance)) {
 		twinproc = true;
+	}
 
 	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
 		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
-		if(twinproc)
-			SpellOnTarget(spell_id, this, 0, false, 0, true, level_override);
+		if (twinproc) {
+			SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		}
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
 		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
-		if(twinproc)
-			SpellOnTarget(spell_id, on, 0, false, 0, true, level_override);
+		if (twinproc && (!(on->IsClient() && on->CastToClient()->dead))) {
+			SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff, true, level_override);
+		}
 	}
 	return;
 }
