@@ -1915,11 +1915,27 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
+				AddProcToWeapon(procid, false, 100 + spells[spell_id].base2[i], spell_id, caster_level);
+				break;
+			}
 
-				if(spells[spell_id].base2[i] == 0)
-					AddProcToWeapon(procid, false, 100, spell_id, caster_level);
-				else
-					AddProcToWeapon(procid, false, spells[spell_id].base2[i]+100, spell_id, caster_level);
+			case SE_RangedProc:
+			{
+				uint16 procid = GetProcID(spell_id, i);
+#ifdef SPELL_EFFECT_SPAM
+				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
+#endif
+				AddRangedProc(procid, 100 + spells[spell_id].base2[i], spell_id);
+				break;
+			}
+
+			case SE_DefensiveProc:
+			{
+				uint16 procid = GetProcID(spell_id, i);
+#ifdef SPELL_EFFECT_SPAM
+				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
+#endif
+				AddDefensiveProc(procid, 100 + spells[spell_id].base2[i], spell_id);
 				break;
 			}
 
@@ -2291,20 +2307,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_RangedProc:
-			{
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
-#endif
-				uint16 procid = GetProcID(spell_id, i);
-
-				if(spells[spell_id].base2[i] == 0)
-					AddRangedProc(procid, 100, spell_id);
-				else
-					AddRangedProc(procid, spells[spell_id].base2[i]+100, spell_id);
-				break;
-			}
-
 			case SE_Rampage:
 			{
 #ifdef SPELL_EFFECT_SPAM
@@ -2398,21 +2400,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					int pet_duration = spells[spell_id].max[i];
 					caster->CastToClient()->Doppelganger(spell_id, this, pet_name, pet_count, pet_duration);
 				}
-				break;
-			}
-
-			case SE_DefensiveProc:
-			{
-				uint16 procid = GetProcID(spell_id, i);
-#ifdef SPELL_EFFECT_SPAM
-				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
-#endif
-				if(spells[spell_id].base2[i] == 0)
-					AddDefensiveProc(procid, 100,spell_id);
-				else
-					AddDefensiveProc(procid, spells[spell_id].base2[i]+100,spell_id);
-				break;
-
 				break;
 			}
 
@@ -8655,7 +8642,7 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 	}
 }
 
-bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int proc_type) {
+bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, int proc_type) {
 	/*
 		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
@@ -8663,17 +8650,17 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
 		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
 	*/
-	if (!time_limit) {
+	if (!proc_reuse_time) {
 		return false;
 	}
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 		
 		if (proc_type == SE_WeaponProc) {
-			if (spell_proclimit_spellid[i] == proc_spell_id) {
+			if (spell_proclimit_spellid[i] == base_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
-						Shout("Spell Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
+						Shout("Spell Proc Timer remaining %i %i", base_spell_id, spell_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
@@ -8684,7 +8671,7 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 			}
 		}
 		else if (proc_type == SE_RangedProc) {
-			if (ranged_proclimit_spellid[i] == proc_spell_id) {
+			if (ranged_proclimit_spellid[i] == base_spell_id) {
 				if (ranged_proclimit_timer[i].Enabled()) {
 					if (ranged_proclimit_timer[i].GetRemainingTime() > 0) {
 						return true;
@@ -8697,7 +8684,7 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 			}
 		}
 		else if (proc_type == SE_DefensiveProc) {
-			if (def_proclimit_spellid[i] == proc_spell_id) {
+			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
 						Shout("Def Proc Timer remaining %i %i", proc_spell_id, def_proclimit_timer[i].GetRemainingTime());
@@ -8714,9 +8701,9 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 	return false;
 }
 
-void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_type) {
+void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int proc_type) {
 
-	if (!time_limit) {
+	if (!proc_reuse_time) {
 		return;
 	}
 
@@ -8726,11 +8713,11 @@ void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_typ
 
 		if (proc_type == SE_WeaponProc) {
 			if (!spell_proclimit_spellid[i] && !is_set) {
-				spell_proclimit_spellid[i] = proc_spell_id;
-				spell_proclimit_timer[i].SetTimer(time_limit);
+				spell_proclimit_spellid[i] = base_spell_id;
+				spell_proclimit_timer[i].SetTimer(proc_reuse_time);
 				is_set = true;
 			}
-			else if (spell_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+			else if (spell_proclimit_spellid[i] > 0 && !FindBuff(base_spell_id)) {
 				spell_proclimit_spellid[i] = 0;
 				spell_proclimit_timer[i].Disable();
 			}
@@ -8738,11 +8725,11 @@ void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_typ
 
 		if (proc_type == SE_RangedProc) {
 			if (!ranged_proclimit_spellid[i] && !is_set) {
-				ranged_proclimit_spellid[i] = proc_spell_id;
-				ranged_proclimit_timer[i].SetTimer(time_limit);
+				ranged_proclimit_spellid[i] = base_spell_id;
+				ranged_proclimit_timer[i].SetTimer(proc_reuse_time);
 				is_set = true;
 			}
-			else if (ranged_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+			else if (ranged_proclimit_spellid[i] > 0 && !FindBuff(base_spell_id)) {
 				ranged_proclimit_spellid[i] = 0;
 				ranged_proclimit_timer[i].Disable();
 			}
@@ -8750,11 +8737,11 @@ void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_typ
 
 		if (proc_type == SE_DefensiveProc) {
 			if (!def_proclimit_spellid[i] && !is_set) {
-				def_proclimit_spellid[i] = proc_spell_id;
-				def_proclimit_timer[i].SetTimer(time_limit);
+				def_proclimit_spellid[i] = base_spell_id;
+				def_proclimit_timer[i].SetTimer(proc_reuse_time);
 				is_set = true;
 			}
-			else if (def_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+			else if (def_proclimit_spellid[i] > 0 && !FindBuff(base_spell_id)) {
 				def_proclimit_spellid[i] = 0;
 				def_proclimit_timer[i].Disable();
 			}

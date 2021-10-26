@@ -1597,3 +1597,38 @@ int32 GetViralSpreadRange(int32 spell_id)
 {
 	return spells[spell_id].viral_range;
 }
+
+uint32 GetProcLimitTimer(int32 spell_id, int proc_type) {
+
+	//This allows for support for effects that may have multiple different proc types and timers.
+	if (!IsValidSpell(spell_id)) {
+		return 0;
+	}
+		
+	bool use_next_timer = false;
+	for (int i = 0; i < EFFECT_COUNT; ++i) {
+
+		if (proc_type == SE_WeaponProc) {
+			if (spells[spell_id].effectid[i] == SE_WeaponProc || SE_AddMeleeProc) {
+				use_next_timer = true;
+			}
+		}
+
+		if (proc_type == SE_RangedProc) {
+			if (spells[spell_id].effectid[i] == SE_RangedProc) {
+				use_next_timer = true;
+			}
+		}
+
+		if (proc_type == SE_DefensiveProc) {
+			if (spells[spell_id].effectid[i] == SE_DefensiveProc) {
+				use_next_timer = true;
+			}
+		}
+
+		if (use_next_timer && spells[spell_id].effectid[i] == SE_Proc_Timer_Modifier) {
+			return spells[spell_id].base2[i];
+		}
+	}
+	return 0;
+}

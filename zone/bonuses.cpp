@@ -1120,21 +1120,21 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (newbon->SpellProc[i] == rank.id) {
 					if (!newbon->SpellProc[i + 3]) {
-						newbon->SpellProc[i + 3] = base1;//Lock out Timer
+						newbon->SpellProc[i + 3] = base2;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->RangedProc[i] == rank.id) {
 					if (!newbon->RangedProc[i + 3]) {
-						newbon->RangedProc[i + 3] = base1;//Lock out Timer
+						newbon->RangedProc[i + 3] = base2;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->DefensiveProc[i] == rank.id) {
 					if (!newbon->DefensiveProc[i + 3]) {
-						newbon->DefensiveProc[i + 3] = base1;//Lock out Timer
+						newbon->DefensiveProc[i + 3] = base2;//Lock out Timer
 						break;
 					}
 				}
