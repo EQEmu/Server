@@ -8614,7 +8614,6 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 }
 
 bool Mob::HasFocusProcLimitTimer(int32 focus_spell_id) {
-
 	/*
 		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
@@ -8622,13 +8621,9 @@ bool Mob::HasFocusProcLimitTimer(int32 focus_spell_id) {
 		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
 		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
 	*/
-
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
-		
 		if (focusproclimit_spellid[i] == focus_spell_id) {
-			
 			if (focusproclimit_timer[i].Enabled()) {
-
 				if (focusproclimit_timer[i].GetRemainingTime() > 0) {
 					return true;
 				}
@@ -8647,11 +8642,8 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 	bool is_set = false;
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
-
 		if (!focusproclimit_spellid[i] && !is_set) {
-
 			focusproclimit_spellid[i] = focus_spell_id;
-			//focusproclimit_timer[i].Start(time_limit, false);
 			focusproclimit_timer[i].SetTimer(time_limit);
 			is_set = true;
 		}
