@@ -354,6 +354,11 @@ Mob::Mob(
 		focusproclimit_timer[i].Disable();
 	}
 
+	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
+		proclimit_spellid[i] = 0;
+		proclimit_timer[i].Disable();
+	}
+
 	memset(&itembonuses, 0, sizeof(StatBonuses));
 	memset(&spellbonuses, 0, sizeof(StatBonuses));
 	memset(&aabonuses, 0, sizeof(StatBonuses));
