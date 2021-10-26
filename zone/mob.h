@@ -860,7 +860,7 @@ public:
 
 	bool HasFocusProcLimitTimer(int32 focus_spell_id);
 	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit);
-	bool HasProcLimitTimer(int32 proc_spell_id);
+	bool IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit);
 	void SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit);
 
 	void VirusEffectProcess();
@@ -1470,8 +1470,12 @@ protected:
 	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 
-	Timer proclimit_timer[MAX_PROC_LIMIT_TIMERS];	//SPA 512
-	int32 proclimit_spellid[MAX_PROC_LIMIT_TIMERS];	//SPA 512
+	Timer spell_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
+	int32 spell_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	Timer ranged_proclimit_timer[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	int32 ranged_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	Timer def_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
+	int32 def_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];			//SPA 512
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;

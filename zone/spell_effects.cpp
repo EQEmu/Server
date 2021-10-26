@@ -8654,3 +8654,54 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 		}
 	}
 }
+
+bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit) {
+	/*
+		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
+		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
+		have the fire spells received a very high special focused once every 30 seconds.
+		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
+		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
+	*/
+	if (!time_limit) {
+		return false;
+	}
+
+	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
+		if (spell_proclimit_spellid[i] == proc_spell_id) {
+			if (spell_proclimit_timer[i].Enabled()) {
+				if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
+					Shout("Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
+					return true;
+				}
+				else {
+					spell_proclimit_timer[i].Disable();
+					spell_proclimit_spellid[i] = 0;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit) {
+
+	if (!time_limit) {
+		return;
+	}
+
+	bool is_set = false;
+
+	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
+		if (!spell_proclimit_spellid[i] && !is_set) {
+			spell_proclimit_spellid[i] = proc_spell_id;
+			spell_proclimit_timer[i].SetTimer(time_limit);
+			is_set = true;
+		}
+		//Remove old temporary focus if was from a buff you no longer have.
+		else if (spell_proclimit_spellid[i] && !FindBuff(proc_spell_id)) {
+			spell_proclimit_spellid[i] = 0;
+			spell_proclimit_timer[i].Disable();
+		}
+	}
+}

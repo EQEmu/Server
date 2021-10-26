@@ -1073,37 +1073,74 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 		case SE_WeaponProc:
 		case SE_AddMeleeProc:
-			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->SpellProc[i]) {
 					newbon->SpellProc[i] = rank.id;   //aa rank id
 					newbon->SpellProc[i + 1] = base1; //proc spell id
 					newbon->SpellProc[i + 2] = base2; //proc rate modifer
+					newbon->SpellProc[i + 3] = 0;	  //Lock out Timer
 					break;
 				}
 			}
 			break;
 
 		case SE_RangedProc:
-			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->RangedProc[i]) {
 					newbon->RangedProc[i] = rank.id;   //aa rank id
 					newbon->RangedProc[i + 1] = base1; //proc spell id
 					newbon->RangedProc[i + 2] = base2; //proc rate modifer
+					newbon->RangedProc[i + 3] = 0;	   //Lock out Timer
 					break;
 				}
 			}
 			break;
 
 		case SE_DefensiveProc:
-			for (int i = 0; i < MAX_AA_PROCS * 3; i += 3) {
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->DefensiveProc[i]) {
 					newbon->DefensiveProc[i] = rank.id;   //aa rank id
 					newbon->DefensiveProc[i + 1] = base1; //proc spell id
 					newbon->DefensiveProc[i + 2] = base2; //proc rate modifer
+					newbon->DefensiveProc[i + 3] = 0;	  //Lock out Timer
 					break;
 				}
 			}
 			break;
+
+		case SE_Proc_Timer_Modifier: {
+			/*
+				AA can multiples of this in a single effect, proc should use the timer 
+				that comes after the respective proc spell effect, thus rank.id will be already set
+				when this is checked.
+			*/
+
+			newbon->Proc_Timer_Modifier = true;
+
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
+				if (newbon->SpellProc[i] == rank.id) {
+					if (!newbon->SpellProc[i + 3]) {
+						newbon->SpellProc[i + 3] = base1;//Lock out Timer
+						break;
+					}
+				}
+
+				if (newbon->RangedProc[i] == rank.id) {
+					if (!newbon->RangedProc[i + 3]) {
+						newbon->RangedProc[i + 3] = base1;//Lock out Timer
+						break;
+					}
+				}
+
+				if (newbon->DefensiveProc[i] == rank.id) {
+					if (!newbon->DefensiveProc[i + 3]) {
+						newbon->DefensiveProc[i + 3] = base1;//Lock out Timer
+						break;
+					}
+				}
+			}
+			break;
+		}
 
 		case SE_CriticalHitChance: {
 			// Bad data or unsupported new skill

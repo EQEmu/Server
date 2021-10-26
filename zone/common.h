@@ -535,9 +535,10 @@ struct StatBonuses {
 	bool	LimitToSkill[EQ::skills::HIGHEST_SKILL + 2];		// Determines if we need to search for a skill proc.
 	uint32  SkillProc[MAX_SKILL_PROCS];			// Max number of spells containing skill_procs.
 	uint32  SkillProcSuccess[MAX_SKILL_PROCS];	// Max number of spells containing skill_procs_success.
-	int32   SpellProc[MAX_AA_PROCS * 3];		// Max number of spells containing melee spell procs.
-	int32   RangedProc[MAX_AA_PROCS * 3];	    // Max number of spells containing ranged spell procs.
-	int32   DefensiveProc[MAX_AA_PROCS * 3];	// Max number of spells containing defensive spell procs.
+	int32   SpellProc[MAX_AA_PROCS];		// Max number of spells containing melee spell procs.
+	int32   RangedProc[MAX_AA_PROCS];	    // Max number of spells containing ranged spell procs.
+	int32   DefensiveProc[MAX_AA_PROCS];	// Max number of spells containing defensive spell procs.
+	bool	Proc_Timer_Modifier;				// Used to check if this exists, to avoid any further unnncessary checks.
 	uint32  PC_Pet_Rampage[2];					// 0= % chance to rampage, 1=damage modifier
 	uint32  PC_Pet_AE_Rampage[2];				// 0= % chance to AE rampage, 1=damage modifier
 	uint32  PC_Pet_Flurry;						// Percent chance flurry from double attack
