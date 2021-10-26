@@ -8655,7 +8655,7 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
 	}
 }
 
-bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit) {
+bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int proc_type) {
 	/*
 		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
@@ -8668,15 +8668,44 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit) {
 	}
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
-		if (spell_proclimit_spellid[i] == proc_spell_id) {
-			if (spell_proclimit_timer[i].Enabled()) {
-				if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
-					Shout("Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
-					return true;
+		
+		if (proc_type == SE_WeaponProc) {
+			if (spell_proclimit_spellid[i] == proc_spell_id) {
+				if (spell_proclimit_timer[i].Enabled()) {
+					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
+						Shout("Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
+						return true;
+					}
+					else {
+						spell_proclimit_timer[i].Disable();
+						spell_proclimit_spellid[i] = 0;
+					}
 				}
-				else {
-					spell_proclimit_timer[i].Disable();
-					spell_proclimit_spellid[i] = 0;
+			}
+		}
+		else if (proc_type == SE_RangedProc) {
+			if (ranged_proclimit_spellid[i] == proc_spell_id) {
+				if (ranged_proclimit_timer[i].Enabled()) {
+					if (ranged_proclimit_timer[i].GetRemainingTime() > 0) {
+						return true;
+					}
+					else {
+						ranged_proclimit_timer[i].Disable();
+						ranged_proclimit_spellid[i] = 0;
+					}
+				}
+			}
+		}
+		else if (proc_type == SE_DefensiveProc) {
+			if (def_proclimit_spellid[i] == proc_spell_id) {
+				if (def_proclimit_timer[i].Enabled()) {
+					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
+						return true;
+					}
+					else {
+						def_proclimit_timer[i].Disable();
+						def_proclimit_spellid[i] = 0;
+					}
 				}
 			}
 		}
@@ -8684,7 +8713,7 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit) {
 	return false;
 }
 
-void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit) {
+void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_type) {
 
 	if (!time_limit) {
 		return;
@@ -8693,15 +8722,41 @@ void Mob::SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit) {
 	bool is_set = false;
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
-		if (!spell_proclimit_spellid[i] && !is_set) {
-			spell_proclimit_spellid[i] = proc_spell_id;
-			spell_proclimit_timer[i].SetTimer(time_limit);
-			is_set = true;
+
+		if (proc_type == SE_WeaponProc) {
+			if (!spell_proclimit_spellid[i] && !is_set) {
+				spell_proclimit_spellid[i] = proc_spell_id;
+				spell_proclimit_timer[i].SetTimer(time_limit);
+				is_set = true;
+			}
+			else if (spell_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+				spell_proclimit_spellid[i] = 0;
+				spell_proclimit_timer[i].Disable();
+			}
 		}
-		//Remove old temporary focus if was from a buff you no longer have.
-		else if (spell_proclimit_spellid[i] && !FindBuff(proc_spell_id)) {
-			spell_proclimit_spellid[i] = 0;
-			spell_proclimit_timer[i].Disable();
+
+		if (proc_type == SE_RangedProc) {
+			if (!ranged_proclimit_spellid[i] && !is_set) {
+				ranged_proclimit_spellid[i] = proc_spell_id;
+				ranged_proclimit_timer[i].SetTimer(time_limit);
+				is_set = true;
+			}
+			else if (ranged_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+				ranged_proclimit_spellid[i] = 0;
+				ranged_proclimit_timer[i].Disable();
+			}
+		}
+
+		if (proc_type == SE_DefensiveProc) {
+			if (!def_proclimit_spellid[i] && !is_set) {
+				def_proclimit_spellid[i] = proc_spell_id;
+				def_proclimit_timer[i].SetTimer(time_limit);
+				is_set = true;
+			}
+			else if (def_proclimit_spellid[i] > 0 && !FindBuff(proc_spell_id)) {
+				def_proclimit_spellid[i] = 0;
+				def_proclimit_timer[i].Disable();
+			}
 		}
 	}
 }

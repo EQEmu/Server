@@ -860,8 +860,8 @@ public:
 
 	bool HasFocusProcLimitTimer(int32 focus_spell_id);
 	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit);
-	bool IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit);
-	void SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit);
+	bool IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int proc_type);
+	void SetProcLimitTimer(int32 proc_spell_id, uint32 time_limit, int proc_type);
 
 	void VirusEffectProcess();
 	void SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining);

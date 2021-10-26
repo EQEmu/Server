@@ -4127,12 +4127,12 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 				
 				if (aa_rank_id) {
 					Shout("Def test %i %i %i %i [Has 512 %i]", aa_rank_id, aa_spell_id, aa_proc_chance, aa_timer_lockout, aabonuses.Proc_Timer_Modifier);
-					if (!IsProcLimitTimerActive(-aa_rank_id, aa_timer_lockout)) {
+					if (!IsProcLimitTimerActive(-aa_rank_id, aa_timer_lockout, SE_DefensiveProc)) {
 						float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
 						Shout("Def Chance %i %i", aa_rank_id, static_cast<int>(chance));
 						if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
 							ExecWeaponProc(nullptr, aa_spell_id, on);
-							SetProcLimitTimer(-aa_rank_id, aa_timer_lockout);
+							SetProcLimitTimer(-aa_rank_id, aa_timer_lockout, SE_DefensiveProc);
 						}
 					}
 				}
@@ -4352,6 +4352,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			int32 aa_spell_id = SPELL_UNKNOWN;
 			int32 aa_proc_chance = 100;
 			uint32 aa_timer_lockout = 0;
+			int proc_type = 0;
 
 			if (!rangedattk) {
 
@@ -4359,22 +4360,24 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 				aa_spell_id = aabonuses.SpellProc[i + 1];
 				aa_proc_chance += aabonuses.SpellProc[i + 2];
 				aa_timer_lockout = aabonuses.SpellProc[i + 3];
+				proc_type = SE_WeaponProc;
 			}
 			else {
 				aa_rank_id = aabonuses.RangedProc[i];
 				aa_spell_id = aabonuses.RangedProc[i + 1];
 				aa_proc_chance += aabonuses.RangedProc[i + 2];
 				aa_timer_lockout = aabonuses.RangedProc[i + 3];
+				proc_type = SE_RangedProc;
 			}
 			
 			if (aa_rank_id) {
 				Shout("Spell test %i %i %i %i [Has 512 %i]", aa_rank_id, aa_spell_id, aa_proc_chance, aa_timer_lockout, aabonuses.Proc_Timer_Modifier);
-				if (!IsProcLimitTimerActive(-aa_rank_id, aa_timer_lockout)) {
+				if (!IsProcLimitTimerActive(-aa_rank_id, aa_timer_lockout, proc_type)) {
 					float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
 					if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
 						LogCombat("AA proc [{}] procing spell [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
 						ExecWeaponProc(nullptr, aa_spell_id, on);
-						SetProcLimitTimer(-aa_rank_id, aa_timer_lockout);
+						SetProcLimitTimer(-aa_rank_id, aa_timer_lockout, proc_type);
 					}
 					else {
 						LogCombat("AA proc [{}] failed to proc [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);
