@@ -5636,7 +5636,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 	return false;
 }
 
-bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id, int level_override) {
+bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 base_spell_id, int level_override, uint32 proc_reuse_time) {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
 
@@ -5648,6 +5648,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				PermaProcs[i].chance = iChance;
 				PermaProcs[i].base_spellID = base_spell_id;
 				PermaProcs[i].level_override = level_override;
+				PermaProcs[i].proc_reuse_time = proc_reuse_time;
 				LogSpells("Added permanent proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
 
 				return true;
@@ -5663,6 +5664,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 					SpellProcs[i].spellID = spell_id;
 					SpellProcs[i].chance = iChance;
 					SpellProcs[i].level_override = level_override;
+					SpellProcs[i].proc_reuse_time = proc_reuse_time;
 					Log(Logs::Detail, Logs::Spells, "Replaced poison-granted proc spell %d with chance %d to slot %d", spell_id, iChance, i);
 					return true;
 				}
@@ -5679,6 +5681,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				SpellProcs[i].chance = iChance;
 				SpellProcs[i].base_spellID = base_spell_id;;
 				SpellProcs[i].level_override = level_override;
+				SpellProcs[i].proc_reuse_time = proc_reuse_time;
 				LogSpells("Added [{}]-granted proc spell [{}] with chance [{}] to slot [{}]", (base_spell_id == POISON_PROC) ? "poison" : "spell", spell_id, iChance, i);
 				return true;
 			}
@@ -5695,13 +5698,14 @@ bool Mob::RemoveProcFromWeapon(uint16 spell_id, bool bAll) {
 			SpellProcs[i].chance = 0;
 			SpellProcs[i].base_spellID = SPELL_UNKNOWN;
 			SpellProcs[i].level_override = -1;
+			SpellProcs[i].proc_reuse_time = 0;
 			LogSpells("Removed proc [{}] from slot [{}]", spell_id, i);
 		}
 	}
 	return true;
 }
 
-bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
+bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id, uint32 proc_reuse_time)
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
@@ -5712,6 +5716,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 			DefensiveProcs[i].spellID = spell_id;
 			DefensiveProcs[i].chance = iChance;
 			DefensiveProcs[i].base_spellID = base_spell_id;
+			DefensiveProcs[i].proc_reuse_time = proc_reuse_time;
 			LogSpells("Added spell-granted defensive proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
 			return true;
 		}
@@ -5727,13 +5732,14 @@ bool Mob::RemoveDefensiveProc(uint16 spell_id, bool bAll)
 			DefensiveProcs[i].spellID = SPELL_UNKNOWN;
 			DefensiveProcs[i].chance = 0;
 			DefensiveProcs[i].base_spellID = SPELL_UNKNOWN;
+			DefensiveProcs[i].proc_reuse_time = 0;
 			LogSpells("Removed defensive proc [{}] from slot [{}]", spell_id, i);
 		}
 	}
 	return true;
 }
 
-bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
+bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id, uint32 proc_reuse_time)
 {
 	if(spell_id == SPELL_UNKNOWN)
 		return(false);
@@ -5744,6 +5750,7 @@ bool Mob::AddRangedProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id)
 			RangedProcs[i].spellID = spell_id;
 			RangedProcs[i].chance = iChance;
 			RangedProcs[i].base_spellID = base_spell_id;
+			RangedProcs[i].proc_reuse_time = proc_reuse_time;
 			LogSpells("Added spell-granted ranged proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
 			return true;
 		}
@@ -5758,7 +5765,8 @@ bool Mob::RemoveRangedProc(uint16 spell_id, bool bAll)
 		if (bAll || RangedProcs[i].spellID == spell_id) {
 			RangedProcs[i].spellID = SPELL_UNKNOWN;
 			RangedProcs[i].chance = 0;
-			RangedProcs[i].base_spellID = SPELL_UNKNOWN;;
+			RangedProcs[i].base_spellID = SPELL_UNKNOWN;
+			RangedProcs[i].proc_reuse_time = 0;
 			LogSpells("Removed ranged proc [{}] from slot [{}]", spell_id, i);
 		}
 	}

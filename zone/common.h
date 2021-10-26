@@ -695,6 +695,7 @@ typedef struct
 	uint16 chance;
 	uint16 base_spellID;
 	int level_override;
+	uint32 proc_reuse_time;
 } tProc;
 
 

@@ -284,22 +284,26 @@ Mob::Mob(
 
 	// clear the proc arrays
 	for (int j = 0; j < MAX_PROCS; j++) {
-		PermaProcs[j].spellID            = SPELL_UNKNOWN;
-		PermaProcs[j].chance             = 0;
-		PermaProcs[j].base_spellID       = SPELL_UNKNOWN;
-		PermaProcs[j].level_override     = -1;
-		SpellProcs[j].spellID            = SPELL_UNKNOWN;
-		SpellProcs[j].chance             = 0;
-		SpellProcs[j].base_spellID       = SPELL_UNKNOWN;
-		SpellProcs[j].level_override     = -1;
-		DefensiveProcs[j].spellID        = SPELL_UNKNOWN;
-		DefensiveProcs[j].chance         = 0;
-		DefensiveProcs[j].base_spellID   = SPELL_UNKNOWN;
-		DefensiveProcs[j].level_override = -1;
-		RangedProcs[j].spellID           = SPELL_UNKNOWN;
-		RangedProcs[j].chance            = 0;
-		RangedProcs[j].base_spellID      = SPELL_UNKNOWN;
-		RangedProcs[j].level_override    = -1;
+		PermaProcs[j].spellID             = SPELL_UNKNOWN;
+		PermaProcs[j].chance              = 0;
+		PermaProcs[j].base_spellID        = SPELL_UNKNOWN;
+		PermaProcs[j].level_override      = -1;
+		PermaProcs[j].proc_reuse_time     = 0;
+		SpellProcs[j].spellID             = SPELL_UNKNOWN;
+		SpellProcs[j].chance              = 0;
+		SpellProcs[j].base_spellID        = SPELL_UNKNOWN;
+		SpellProcs[j].proc_reuse_time     = 0;
+		SpellProcs[j].level_override      = -1;
+		DefensiveProcs[j].spellID         = SPELL_UNKNOWN;
+		DefensiveProcs[j].chance          = 0;
+		DefensiveProcs[j].base_spellID    = SPELL_UNKNOWN;
+		DefensiveProcs[j].level_override  = -1;
+		DefensiveProcs[j].proc_reuse_time = 0;
+		RangedProcs[j].spellID            = SPELL_UNKNOWN;
+		RangedProcs[j].chance             = 0;
+		RangedProcs[j].base_spellID       = SPELL_UNKNOWN;
+		RangedProcs[j].level_override     = -1;
+		RangedProcs[j].proc_reuse_time    = 0;
 	}
 
 	for (int i = EQ::textures::textureBegin; i < EQ::textures::materialCount; i++) {
