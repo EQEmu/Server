@@ -182,7 +182,7 @@
 #define MAX_AA_PROCS 16 //(Actual Proc Amount is MAX_AA_PROCS/4) Number of spells to check AA procs from. (This is arbitrary)
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
 #define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of focus recast timers that can be going at same time (This is arbitrary)
-#define MAX_PROC_LIMIT_TIMERS 20 //Number of proc delay timers that can be going at same time (This is arbitrary)
+#define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 
 
 const int Z_AGGRO=10;

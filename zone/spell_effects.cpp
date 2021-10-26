@@ -8673,7 +8673,7 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 			if (spell_proclimit_spellid[i] == proc_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
-						Shout("Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
+						Shout("Spell Proc Timer remaining %i %i", proc_spell_id, spell_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
@@ -8700,6 +8700,7 @@ bool Mob::IsProcLimitTimerActive(int32 proc_spell_id, uint32 time_limit, int pro
 			if (def_proclimit_spellid[i] == proc_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
+						Shout("Def Proc Timer remaining %i %i", proc_spell_id, def_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
