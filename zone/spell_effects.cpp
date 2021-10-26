@@ -4566,7 +4566,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	uint32 slot        = 0;
 	
 	int index_id = -1;
-	uint32 proc_limit_timer = 0;
+	uint32 focus_reuse_time = 0;
 
 	bool LimitFailure                  = false;
 	bool LimitInclude[MaxLimitInclude] = {false};
@@ -4919,7 +4919,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 				}
 				else {
-					proc_limit_timer = base2;
+					focus_reuse_time = base2;
 				}
 				break;
 
@@ -5223,8 +5223,8 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 		return 0;
 	}
 
-	if (proc_limit_timer) {
-		SetFocusProcLimitTimer(-rank.id, proc_limit_timer);
+	if (focus_reuse_time) {
+		SetFocusProcLimitTimer(-rank.id, focus_reuse_time);
 	}
 
 	return (value * lvlModifier / 100);
@@ -5257,7 +5257,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	int    lvldiff         = 0;
 	uint32 Caston_spell_id = 0;
 	int    index_id        = -1;
-	uint32 proc_limit_timer = 0; //If this is set and all limits pass, start timer at end of script.
+	uint32 focus_reuse_time = 0; //If this is set and all limits pass, start timer at end of script.
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Determined by limits being negative or positive
@@ -5595,7 +5595,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					return 0;
 				}
 				else {
-					proc_limit_timer = focus_spell.base2[i];
+					focus_reuse_time = focus_spell.base2[i];
 				}
 				break;
 
@@ -5902,8 +5902,8 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		}
 	}
 
-	if (proc_limit_timer) {
-		SetFocusProcLimitTimer(focus_spell.id, proc_limit_timer);
+	if (focus_reuse_time) {
+		SetFocusProcLimitTimer(focus_spell.id, focus_reuse_time);
 	}
 
 	return (value * lvlModifier / 100);
@@ -8637,14 +8637,14 @@ bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 	return false;
 }
 
-void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 time_limit) {
+void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time) {
 	
 	bool is_set = false;
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
 		if (!focusproclimit_spellid[i] && !is_set) {
 			focusproclimit_spellid[i] = focus_spell_id;
-			focusproclimit_timer[i].SetTimer(time_limit);
+			focusproclimit_timer[i].SetTimer(focus_reuse_time);
 			is_set = true;
 		}
 		//Remove old temporary focus if was from a buff you no longer have.
