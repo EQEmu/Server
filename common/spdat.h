@@ -185,6 +185,7 @@
 #define MAX_PROC_LIMIT_TIMERS 8 //Number of proc delay timers that can be going at same time, different proc types get their own timer array. (This is arbitrary)
 
 
+
 const int Z_AGGRO=10;
 
 const uint32 MobAISpellRange=100; // max range of buffs

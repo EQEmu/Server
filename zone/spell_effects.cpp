@@ -8748,3 +8748,4 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 		}
 	}
 }
+
