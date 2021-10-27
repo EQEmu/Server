@@ -4109,7 +4109,6 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		//Spell Procs and Quest added procs
 		for (int i = 0; i < MAX_PROCS; i++) {
 			if (IsValidSpell(DefensiveProcs[i].spellID)) {
-				Shout("Def test %i %i  ", DefensiveProcs[i].base_spellID, DefensiveProcs[i].proc_reuse_time);
 				if (!IsProcLimitTimerActive(DefensiveProcs[i].base_spellID, DefensiveProcs[i].proc_reuse_time, SE_DefensiveProc)) {
 					float chance = ProcChance * (static_cast<float>(DefensiveProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
