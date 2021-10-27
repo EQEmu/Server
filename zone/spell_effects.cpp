@@ -8603,7 +8603,7 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 
 bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 	/*
-		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
+		Used with SPA 511 SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
 		have the fire spells received a very high special focused once every 30 seconds.
 		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
@@ -8645,11 +8645,12 @@ void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time) 
 
 bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, int proc_type) {
 	/*
-		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
-		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
-		have the fire spells received a very high special focused once every 30 seconds.
-		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
-		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
+		Used with SPA 512 SE_Proc_Timer_Modifier to limit how often a proc can be cast.
+		If this effect exists it will prevent the next proc from firing until the timer
+		defined in SPA 512 is finished. Ie. 1 proc every 55 seconds.
+		Spell, Ranged, and Defensive procs all have their own timer array, therefore
+		you can stack multiple different types of effects in the same spell. Make sure
+		SPA 512 goes directly after each proc you want to have the timer.
 	*/
 	if (!proc_reuse_time) {
 		return false;
@@ -8661,7 +8662,6 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 			if (spell_proclimit_spellid[i] == base_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
-						Shout("Spell Proc Timer remaining %i %i", base_spell_id, spell_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
@@ -8688,7 +8688,6 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
-						Shout("Def Proc Timer remaining %i %i", base_spell_id, def_proclimit_timer[i].GetRemainingTime());
 						return true;
 					}
 					else {
