@@ -1688,7 +1688,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 
 		case SE_Amplification:
-			newbon->Amplification += base1;
+			newbon->Amplification += base_value;
 			break;
 
 		// to do
