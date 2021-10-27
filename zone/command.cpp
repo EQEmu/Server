@@ -6469,21 +6469,27 @@ void command_npcspawn(Client *c, const Seperator *sep)
 }
 
 void command_spawnfix(Client *c, const Seperator *sep) {
-	Mob *targetMob = c->GetTarget();
-	if (!targetMob || !targetMob->IsNPC()) {
+	Mob *target_mob = c->GetTarget();
+	if (!target_mob || !target_mob->IsNPC()) {
 		c->Message(Chat::White, "Error: #spawnfix: Need an NPC target.");
 		return;
     }
 
-    Spawn2* s2 = targetMob->CastToNPC()->respawn2;
+    Spawn2* s2 = target_mob->CastToNPC()->respawn2;
 
     if(!s2) {
         c->Message(Chat::White, "#spawnfix FAILED -- cannot determine which spawn entry in the database this mob came from.");
         return;
     }
 
-    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
-                                    c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
+	std::string query = StringFormat(
+		"UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
+		c->GetX(),
+		c->GetY(),
+		target_mob->GetFixedZ(target_mob->GetPosition()),
+		c->GetHeading(),
+		s2->GetID()
+	);
     auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
@@ -6492,7 +6498,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
     }
 
     c->Message(Chat::White, "Updating coordinates successful.");
-    targetMob->Depop(false);
+    target_mob->Depop(false);
 }
 
 void command_loc(Client *c, const Seperator *sep)
@@ -9275,7 +9281,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "gender") == 0) {
-		auto gender_id = atoi(sep->arg[2]);		
+		auto gender_id = atoi(sep->arg[2]);
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now a {} ({}).", npc_id, gender_id, GetGenderName(gender_id)).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET gender = {} WHERE id = {}", gender_id, npc_id);
 		content_db.QueryDatabase(query);
@@ -9461,7 +9467,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		std::string query = fmt::format("UPDATE npc_types SET ammo_idfile = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
 		content_db.QueryDatabase(query);
 		return;
-	}	
+	}
 
 	if (strcasecmp(sep->arg[1], "weapon") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} will have Model {} set to their Primary and Model {} set to their Secondary on repop.", npc_id, atoi(sep->arg[2]), atoi(sep->arg[3])).c_str());
@@ -9679,7 +9685,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "accuracy") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Accuracy.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET accuracy = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9749,7 +9755,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "armtexture") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now using Arm Texture {}.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET armtexture = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9934,7 +9940,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				animation = 1;
 				animation_name = "Sitting";
 			} else if(strcasecmp(sep->arg[2], "crouch") == 0 || atoi(sep->arg[2]) == 2) { // Crouch
-				animation = 2;				
+				animation = 2;
 				animation_name = "Crouching";
 			} else if(strcasecmp(sep->arg[2], "dead") == 0 || atoi(sep->arg[2]) == 3) { // Dead
 				animation = 3;
@@ -14880,7 +14886,7 @@ void command_dye(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		return;
 	}
-	
+
 	uint8 slot = 0;
 	uint8 red = 255;
 	uint8 green = 255;
@@ -14902,7 +14908,7 @@ void command_dye(Client *c, const Seperator *sep)
 		std::vector<std::string> slot_messages;
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
-		
+
 		for (const auto& slot : dye_slots) {
 			slot_messages.push_back(fmt::format("({}) {}", slot_id, slot));
 			slot_id++;
