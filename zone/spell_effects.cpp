@@ -2361,13 +2361,13 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
-					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], focus,  ReuseTime);
+					caster->DoThrowingAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime);
 					break;
 				case EQ::skills::SkillArchery:
-					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i],focus,  ReuseTime);
+					caster->DoArcheryAttackDmg(this, nullptr, nullptr, spells[spell_id].base_value[i],spells[spell_id].limit_value[i], 0, ReuseTime);
 					break;
 				default:
-					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], focus, false, ReuseTime);
+					caster->DoMeleeSkillAttackDmg(this, spells[spell_id].base_value[i], spells[spell_id].skill, spells[spell_id].limit_value[i], 0, false, ReuseTime);
 					break;
 				}
 				break;
@@ -3389,7 +3389,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		}
 	}
 
-	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
+	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effect_id[effect_id], caster, caster_id);
 	
 	return effect_value;
 }
@@ -4919,7 +4919,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 				}
 				else {
-					focus_reuse_time = base2;
+					focus_reuse_time = limit_value;
 				}
 				break;
 
@@ -5595,7 +5595,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					return 0;
 				}
 				else {
-					focus_reuse_time = focus_spell.base2[i];
+					focus_reuse_time = focus_spell.limit_value[i];
 				}
 				break;
 
@@ -8319,13 +8319,13 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 
 					//Step 3: Cast spells
 					if (IsBeneficialSpell(trigger_spell_id)) {
-						SpellFinished(trigger_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
+						SpellFinished(trigger_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].resist_difficulty);
 					}
 					else {
 						Mob* current_target = GetTarget();
 						//For now don't let players cast detrimental effects on themselves if they are targeting themselves. Need to confirm behavior.
 						if (current_target && current_target->GetID() != GetID())
-							SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
+							SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].resist_difficulty);
 					}
 				}
 				if (i >= 0)
