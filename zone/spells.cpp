@@ -5683,6 +5683,7 @@ bool Mob::AddProcToWeapon(uint16 spell_id, bool bPerma, uint16 iChance, uint16 b
 				SpellProcs[i].level_override = level_override;
 				SpellProcs[i].proc_reuse_time = proc_reuse_time;
 				LogSpells("Added [{}]-granted proc spell [{}] with chance [{}] to slot [{}]", (base_spell_id == POISON_PROC) ? "poison" : "spell", spell_id, iChance, i);
+				Shout("Spell ID %i Reuse %i", SpellProcs[i].spellID, SpellProcs[i].proc_reuse_time);
 				return true;
 			}
 		}
@@ -5718,6 +5719,7 @@ bool Mob::AddDefensiveProc(uint16 spell_id, uint16 iChance, uint16 base_spell_id
 			DefensiveProcs[i].base_spellID = base_spell_id;
 			DefensiveProcs[i].proc_reuse_time = proc_reuse_time;
 			LogSpells("Added spell-granted defensive proc spell [{}] with chance [{}] to slot [{}]", spell_id, iChance, i);
+			Shout("DPROC ID %i Reuse %i", DefensiveProcs[i].spellID, DefensiveProcs[i].proc_reuse_time);
 			return true;
 		}
 	}

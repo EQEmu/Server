@@ -1915,7 +1915,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Weapon Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddProcToWeapon(procid, false, 100 + spells[spell_id].base2[i], spell_id, caster_level);
+				AddProcToWeapon(procid, false, 100 + spells[spell_id].base2[i], spell_id, caster_level, GetProcLimitTimer(spell_id, SE_WeaponProc));
 				break;
 			}
 
@@ -1925,7 +1925,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
-				AddRangedProc(procid, 100 + spells[spell_id].base2[i], spell_id);
+				AddRangedProc(procid, 100 + spells[spell_id].base2[i], spell_id, GetProcLimitTimer(spell_id, SE_RangedProc));
 				break;
 			}
 
@@ -1935,7 +1935,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Defensive Proc: %s (id %d)", spells[effect_value].name, procid);
 #endif
-				AddDefensiveProc(procid, 100 + spells[spell_id].base2[i], spell_id);
+				AddDefensiveProc(procid, 100 + spells[spell_id].base2[i], spell_id, GetProcLimitTimer(spell_id, SE_DefensiveProc));
 				break;
 			}
 
@@ -3283,6 +3283,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Worn_Endurance_Regen_Cap:
 			case SE_Buy_AA_Rank:
 			case SE_Ff_FocusTimerMin:
+			case SE_Proc_Timer_Modifier:
 			{
 				break;
 			}
