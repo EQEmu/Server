@@ -623,7 +623,6 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 		if (!HasSpellScribed(spell_id)) {
 			auto next_slot = GetNextAvailableSpellBookSlot();
 			if (next_slot != -1) {
-				// defer persisting one at a time and bulk save at the end
 				ScribeSpell(spell_id, next_slot);
 				return true;
 			}

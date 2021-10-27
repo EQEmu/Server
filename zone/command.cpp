@@ -8062,7 +8062,7 @@ void command_untraindiscs(Client *c, const Seperator *sep) {
 		t = c->GetTarget()->CastToClient();
 
 	t->UntrainDiscAll();
-	t->Message(Chat::Yellow, "All disciplines removed");
+	t->Message(Chat::Yellow, "All disciplines removed.");
 }
 
 void command_wpinfo(Client *c, const Seperator *sep)
