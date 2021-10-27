@@ -25,7 +25,7 @@ public:
 		std::string caster_name;
 		int         ticsremaining;
 		int         counters;
-		int         hit_number;
+		int         numhits;
 		int         melee_rune;
 		int         magic_rune;
 		int         persistent;
@@ -104,7 +104,7 @@ public:
 		entry.caster_name    = "";
 		entry.ticsremaining  = 0;
 		entry.counters       = 0;
-		entry.hit_number        = 0;
+		entry.numhits        = 0;
 		entry.melee_rune     = 0;
 		entry.magic_rune     = 0;
 		entry.persistent     = 0;
@@ -156,7 +156,7 @@ public:
 			entry.caster_name    = row[4] ? row[4] : "";
 			entry.ticsremaining  = atoi(row[5]);
 			entry.counters       = atoi(row[6]);
-			entry.hit_number        = atoi(row[7]);
+			entry.numhits        = atoi(row[7]);
 			entry.melee_rune     = atoi(row[8]);
 			entry.magic_rune     = atoi(row[9]);
 			entry.persistent     = atoi(row[10]);
@@ -206,7 +206,7 @@ public:
 		update_values.push_back(columns[4] + " = '" + EscapeString(character_buffs_entry.caster_name) + "'");
 		update_values.push_back(columns[5] + " = " + std::to_string(character_buffs_entry.ticsremaining));
 		update_values.push_back(columns[6] + " = " + std::to_string(character_buffs_entry.counters));
-		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_entry.hit_number));
+		update_values.push_back(columns[7] + " = " + std::to_string(character_buffs_entry.numhits));
 		update_values.push_back(columns[8] + " = " + std::to_string(character_buffs_entry.melee_rune));
 		update_values.push_back(columns[9] + " = " + std::to_string(character_buffs_entry.magic_rune));
 		update_values.push_back(columns[10] + " = " + std::to_string(character_buffs_entry.persistent));
@@ -244,7 +244,7 @@ public:
 		insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
 		insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
 		insert_values.push_back(std::to_string(character_buffs_entry.counters));
-		insert_values.push_back(std::to_string(character_buffs_entry.hit_number));
+		insert_values.push_back(std::to_string(character_buffs_entry.numhits));
 		insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
 		insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
 		insert_values.push_back(std::to_string(character_buffs_entry.persistent));
@@ -290,7 +290,7 @@ public:
 			insert_values.push_back("'" + EscapeString(character_buffs_entry.caster_name) + "'");
 			insert_values.push_back(std::to_string(character_buffs_entry.ticsremaining));
 			insert_values.push_back(std::to_string(character_buffs_entry.counters));
-			insert_values.push_back(std::to_string(character_buffs_entry.hit_number));
+			insert_values.push_back(std::to_string(character_buffs_entry.numhits));
 			insert_values.push_back(std::to_string(character_buffs_entry.melee_rune));
 			insert_values.push_back(std::to_string(character_buffs_entry.magic_rune));
 			insert_values.push_back(std::to_string(character_buffs_entry.persistent));
@@ -340,7 +340,7 @@ public:
 			entry.caster_name    = row[4] ? row[4] : "";
 			entry.ticsremaining  = atoi(row[5]);
 			entry.counters       = atoi(row[6]);
-			entry.hit_number        = atoi(row[7]);
+			entry.numhits        = atoi(row[7]);
 			entry.melee_rune     = atoi(row[8]);
 			entry.magic_rune     = atoi(row[9]);
 			entry.persistent     = atoi(row[10]);
@@ -381,7 +381,7 @@ public:
 			entry.caster_name    = row[4] ? row[4] : "";
 			entry.ticsremaining  = atoi(row[5]);
 			entry.counters       = atoi(row[6]);
-			entry.hit_number        = atoi(row[7]);
+			entry.numhits        = atoi(row[7]);
 			entry.melee_rune     = atoi(row[8]);
 			entry.magic_rune     = atoi(row[9]);
 			entry.persistent     = atoi(row[10]);
