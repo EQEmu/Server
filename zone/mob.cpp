@@ -361,6 +361,10 @@ Mob::Mob(
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 		spell_proclimit_spellid[i] = 0;
 		spell_proclimit_timer[i].Disable();
+		ranged_proclimit_spellid[i] = 0;
+		ranged_proclimit_timer[i].Disable();
+		def_proclimit_spellid[i] = 0;
+		def_proclimit_timer[i].Disable();
 	}
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));
