@@ -1687,6 +1687,10 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->SpellDamageShield += base_value;
 			break;
 
+		case SE_Amplification:
+			newbon->Amplification += base1;
+			break;
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -1795,18 +1799,19 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 			if (focus)
 			{
 				if (WornType){
-					if (RuleB(Spells, UseAdditiveFocusFromWornSlot))
+					if (RuleB(Spells, UseAdditiveFocusFromWornSlot)) {
 						new_bonus->FocusEffectsWorn[focus] += spells[spell_id].base_value[i];
+					}
 				}
-
-				else
+				else {
 					new_bonus->FocusEffects[focus] = static_cast<uint8>(spells[spell_id].effect_id[i]);
-
+				}
 				continue;
 			}
 
-			if (WornType && (RuleI(Spells, AdditiveBonusWornType) == WornType))
+			if (WornType && (RuleI(Spells, AdditiveBonusWornType) == WornType)) {
 				AdditiveWornBonus = true;
+			}
 
 			spell_effect_id = spells[spell_id].effect_id[i];
 			effect_value = CalcSpellEffectValue(spell_id, i, casterlevel, instrument_mod, nullptr, ticsremaining, casterId);

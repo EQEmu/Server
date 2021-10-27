@@ -180,7 +180,7 @@
 #define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 #define MAX_SKILL_PROCS 4 //Number of spells to check skill procs from. (This is arbitrary) [Single spell can have multiple proc checks]
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
-
+#define MAX_FOCUS_PROC_LIMIT_TIMERS 20 //Number of proc limiting timers that can be going at same time (This is arbitrary)
 
 
 const int Z_AGGRO=10;
@@ -815,7 +815,7 @@ typedef enum {
 #define SE_Hunger						115	// implemented - Song of Sustenance
 #define SE_CurseCounter					116	// implemented
 #define SE_MagicWeapon					117	// implemented - makes weapon magical
-#define SE_Amplification				118	// implemented - Harmonize/Amplification (stacks with other singing mods)
+#define SE_Amplification				118	// implemented, @Song, stackable singing mod, base: mod%, limit: none, max: none, Note: Can focus itself.
 #define SE_AttackSpeed3					119	// implemented
 #define SE_HealRate						120	// implemented - reduces healing by a %
 #define SE_ReverseDS					121 // implemented
@@ -876,7 +876,7 @@ typedef enum {
 #define SE_DualWieldChance				176	// implemented
 #define SE_DoubleAttackChance			177	// implemented
 #define SE_MeleeLifetap					178	// implemented
-#define SE_AllInstrumentMod				179	// implemented
+#define SE_AllInstrumentMod				179	// implemented, @Song, set mod for ALL instrument/singing skills that will be used if higher then item mods, base: mod%, limit: none, max: none
 #define SE_ResistSpellChance			180	// implemented
 #define SE_ResistFearChance				181	// implemented
 #define SE_HundredHands					182	// implemented
@@ -957,8 +957,8 @@ typedef enum {
 #define SE_PetDiscipline				257 // not implemented as bonus - /pet hold - official name is GivePetHold
 #define SE_TripleBackstab				258 // implemented[AA] - chance to perform a triple backstab
 #define SE_CombatStability				259 // implemented[AA] - damage mitigation
-#define SE_AddSingingMod				260 // implemented[AA] - Instrument/Singing Mastery, base1 is the mod, base2 is the ItemType
-#define SE_SongModCap					261	// implemented[AA] - Song Mod cap increase (no longer used on live)
+#define SE_AddSingingMod				260 // implemented, @Song, set mod for specific instrument/singing skills that will be used if higher then item mods, base: mod%, limit: ItemType ID, max: none
+#define SE_SongModCap					261	// implemented, @Song, raise max song modifier cap, base: amt, limit: none, max: none, Note: No longer used on live
 #define SE_RaiseStatCap					262 // implemented
 #define SE_TradeSkillMastery			263	// implemented - lets you raise more than one tradeskill above master.
 #define SE_HastenedAASkill			    264 // implemented
@@ -967,7 +967,7 @@ typedef enum {
 #define SE_AddPetCommand				267 // implemented - sets command base2 to base1
 #define SE_ReduceTradeskillFail			268 // implemented - reduces chance to fail with given tradeskill by a percent chance
 #define SE_MaxBindWound					269	// implemented[AA] - Increase max HP you can bind wound.
-#define SE_BardSongRange				270	// implemented[AA] - increase range of beneficial bard songs (Sionachie's Crescendo)
+#define SE_BardSongRange				270	// implemented, @Song, increase range of beneficial bard songs, base: mod%, limit: none, max: none , Note: example Sionachie's Crescendo
 #define SE_BaseMovementSpeed			271 // implemented[AA] - mods basemove speed, doesn't stack with other move mods
 #define SE_CastingLevel2				272 // implemented
 #define SE_CriticalDoTChance			273	// implemented
@@ -1208,8 +1208,8 @@ typedef enum {
 #define SE_Fc_Amplify_Amt				508 // implemented, @Fc, On Caster, damage-heal-dot mod flat amt, base: amt
 #define SE_Health_Transfer				509 // implemented - exchange health for damage or healing on a target. ie Lifeburn/Act of Valor
 #define SE_Fc_ResistIncoming			510 // implemented, @Fc, On Target, resist modifier, base: amt
-//#define SE_Ff_FocusTimerMin			511 //
-#define SE_Proc_Timer_Modifier 			512 // implemented - spell trigger limiter used currently with SPA 481, ie. limit to 1 proc every 1.5 seconds (base=1 base2=1500).
+#define SE_Ff_FocusTimerMin				511 // implemented, @Ff, sets a recast time until focus can be used again, base: 1, limit: time ms, Note:  ie. limit to 1 trigger every 1.5 seconds 
+#define SE_Proc_Timer_Modifier 			512 // not implemented - limits procs per amount of a time based on timer value (ie limit to 1 proc every 55 seconds)
 //#define SE_Mana_Max_Percent			513 //
 //#define SE_Endurance_Max_Percent		514 //
 #define SE_AC_Avoidance_Max_Percent		515 // implemented - stackable avoidance modifier
@@ -1509,6 +1509,10 @@ bool IsCastWhileInvis(uint16 spell_id);
 bool IsEffectIgnoredInStacking(int spa);
 bool IsFocusLimit(int spa);
 bool SpellRequiresTarget(int target_type);
+bool IsVirusSpell(int32 spell_id);
+int GetViralMinSpreadTime(int32 spell_id);
+int GetViralMaxSpreadTime(int32 spell_id);
+int GetViralSpreadRange(int32 spell_id);
 bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect);
 
 int CalcPetHp(int levelb, int classb, int STA = 75);

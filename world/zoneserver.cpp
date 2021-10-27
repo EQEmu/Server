@@ -40,6 +40,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "expedition_message.h"
 #include "shared_task_world_messaging.h"
 #include "../common/shared_tasks.h"
+#include "shared_task_manager.h"
 
 extern ClientList client_list;
 extern GroupLFPList LFPGroupList;
@@ -50,6 +51,8 @@ extern volatile bool UCSServerAvailable_;
 extern AdventureManager adventure_manager;
 extern UCSConnection UCSLink;
 extern QueryServConnection QSLink;
+extern SharedTaskManager shared_task_manager;
+
 void CatchSignal(int sig_num);
 
 ZoneServer::ZoneServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> connection, EQ::Net::ConsoleServer *console)
@@ -1262,10 +1265,17 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_DepopPlayerCorpse:
 	case ServerOP_ReloadTitles:
 	case ServerOP_SpawnStatusChange:
-	case ServerOP_ReloadTasks:
 	case ServerOP_ReloadWorld:
 	case ServerOP_UpdateSpawn:
 	{
+		zoneserver_list.SendPacket(pack);
+		break;
+	}
+	case ServerOP_ReloadTasks:
+	{
+		// world needs to update its copy of task data as well
+		shared_task_manager.LoadTaskData();
+
 		zoneserver_list.SendPacket(pack);
 		break;
 	}

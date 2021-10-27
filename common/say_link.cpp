@@ -24,7 +24,7 @@
 #include "item_instance.h"
 #include "item_data.h"
 #include "../zone/zonedb.h"
-
+#include <algorithm>
 
 bool EQ::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
 {
@@ -350,7 +350,7 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	std::vector<std::string> saylinks          = {};
 	int                      saylink_length    = 50;
 	std::string              saylink_separator = "\u0012";
-	std::string              saylink_partial   = "000";
+	std::string              saylink_partial   = "00000";
 
 	LogSaylinkDetail("new_message pre pass 1 [{}]", new_message);
 
@@ -375,6 +375,8 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 	LogSaylinkDetail("new_message post pass 1 [{}]", new_message);
 
+	LogSaylinkDetail("saylink separator count [{}]", std::count(new_message.begin(), new_message.end(), '\u0012'));
+
 	// loop through brackets until none exist
 	if (new_message.find('[') != std::string::npos) {
 		for (auto &b: split_string(new_message, "[")) {
@@ -385,6 +387,12 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 
 					// we shouldn't see a saylink fragment here, ignore this bracket
 					if (bracket_message.find(saylink_partial) != std::string::npos) {
+						continue;
+					}
+
+					// skip where multiple saylinks are within brackets
+					if (bracket_message.find(saylink_separator) != std::string::npos &&
+						std::count(bracket_message.begin(), bracket_message.end(), '\u0012') > 1) {
 						continue;
 					}
 

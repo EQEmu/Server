@@ -1255,6 +1255,7 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_Ff_ReuseTimeMax:
 	case SE_Ff_Value_Min:
 	case SE_Ff_Value_Max:
+	case SE_Ff_FocusTimerMin:
 		return true;
 	default:
 		return false;
@@ -1296,6 +1297,7 @@ bool IsFocusLimit(int spa)
 	case SE_Ff_ReuseTimeMax:
 	case SE_Ff_Value_Min:
 	case SE_Ff_Value_Max:
+	case SE_Ff_FocusTimerMin:
 		return true;
 	default:
 		return false;
@@ -1571,4 +1573,27 @@ int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 	else if (id == "damageshieldtype") { return spells[spell_id].damage_shield_type; }
 
 	return 0;
+}
+
+bool IsVirusSpell(int32 spell_id) 
+{
+	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id) && GetViralSpreadRange(spell_id)){
+		return true;
+	}
+	return false;
+}
+
+int32 GetViralMinSpreadTime(int32 spell_id) 
+{
+	return spells[spell_id].viral_targets;
+}
+
+int32 GetViralMaxSpreadTime(int32 spell_id) 
+{
+	return spells[spell_id].viral_timer;
+}
+
+int32 GetViralSpreadRange(int32 spell_id) 
+{
+	return spells[spell_id].viral_range;
 }
