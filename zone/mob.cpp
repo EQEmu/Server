@@ -103,7 +103,6 @@ Mob::Mob(
 	ranged_timer(2000),
 	tic_timer(6000),
 	mana_timer(2000),
-	focus_proc_limit_timer(250),
 	spellend_timer(0),
 	rewind_timer(30000),
 	bindwound_timer(10000),
@@ -348,6 +347,11 @@ Mob::Mob(
 		ProjectileAtk[i].ammo_slot     = 0;
 		ProjectileAtk[i].skill         = 0;
 		ProjectileAtk[i].speed_mod     = 0.0f;
+	}
+
+	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
+		focusproclimit_spellid[i] = 0;
+		focusproclimit_timer[i].Disable();
 	}
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));

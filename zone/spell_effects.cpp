@@ -2992,11 +2992,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				break;
 			}
 
-			case SE_Proc_Timer_Modifier:{
-				buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i]; //Set max amount of procs before lockout timer
-				break;
-			}
-
 			case SE_PetShield: {
 				if (IsPet()) {
 					Mob* petowner = GetOwner();
@@ -3300,6 +3295,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Skill_Base_Damage_Mod:
 			case SE_Worn_Endurance_Regen_Cap:
 			case SE_Buy_AA_Rank:
+			case SE_Ff_FocusTimerMin:
 			{
 				break;
 			}
@@ -4568,8 +4564,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	int32  base1       = 0;
 	int32  base2       = 0;
 	uint32 slot        = 0;
-
+	
 	int index_id = -1;
+	uint32 focus_reuse_time = 0;
 
 	bool LimitFailure                  = false;
 	bool LimitInclude[MaxLimitInclude] = {false};
@@ -4917,6 +4914,15 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				}
 				break;
 
+			case SE_Ff_FocusTimerMin:
+				if (IsFocusProcLimitTimerActive(-rank.id)) {
+					LimitFailure = true;
+				}
+				else {
+					focus_reuse_time = base2;
+				}
+				break;
+
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 				case SE_Ff_Same_Caster:
@@ -5217,6 +5223,10 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 		return 0;
 	}
 
+	if (focus_reuse_time) {
+		SetFocusProcLimitTimer(-rank.id, focus_reuse_time);
+	}
+
 	return (value * lvlModifier / 100);
 }
 
@@ -5247,6 +5257,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	int    lvldiff         = 0;
 	uint32 Caston_spell_id = 0;
 	int    index_id        = -1;
+	uint32 focus_reuse_time = 0; //If this is set and all limits pass, start timer at end of script.
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Determined by limits being negative or positive
@@ -5579,7 +5590,16 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 				break;
 
-				// handle effects
+			case SE_Ff_FocusTimerMin:
+				if (IsFocusProcLimitTimerActive(focus_spell.id)) {
+					return 0;
+				}
+				else {
+					focus_reuse_time = focus_spell.base2[i];
+				}
+				break;
+
+			// handle effects
 			case SE_ImprovedDamage:
 				if (type == focusImprovedDamage) {
 					value = GetFocusRandomEffectivenessValue(focus_spell.base[i], focus_spell.base2[i], best_focus);
@@ -5880,6 +5900,10 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				spells[Caston_spell_id].ResistDiff
 			);
 		}
+	}
+
+	if (focus_reuse_time) {
+		SetFocusProcLimitTimer(focus_spell.id, focus_reuse_time);
 	}
 
 	return (value * lvlModifier / 100);
@@ -8293,101 +8317,21 @@ void Mob::CastSpellOnLand(Mob* caster, int32 spell_id)
 
 				if (IsValidSpell(trigger_spell_id) && (trigger_spell_id != spell_id)) {
 
-					//Step 3: Check if SE_Proc_Time_Modifier is present and if so apply it.
-					if (ApplyFocusProcLimiter(buffs[i].spellid, i)) {
-						//Step 4: Cast spells
-						if (IsBeneficialSpell(trigger_spell_id)) {
-							SpellFinished(trigger_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
-						}
-						else {
-							Mob* current_target = GetTarget();
-							//For now don't let players cast detrimental effects on themselves if they are targeting themselves. Need to confirm behavior.
-							if (current_target && current_target->GetID() != GetID())
-								SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
-						}
+					//Step 3: Cast spells
+					if (IsBeneficialSpell(trigger_spell_id)) {
+						SpellFinished(trigger_spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
 					}
-
-					if (i >= 0)
-						CheckNumHitsRemaining(NumHit::MatchingSpells, i);
-				}
-			}
-		}
-	}
-}
-
-bool Mob::ApplyFocusProcLimiter(int32 spell_id, int buffslot)
-{
-	if (buffslot < 0)
-		return false;
-
-	//Do not allow spell cast if timer is active.
-	if (buffs[buffslot].focusproclimit_time > 0)
-		return false;
-
-	/*
-	SE_Proc_Timer_Modifier
-	base1= amount of total procs allowed until lock out timer is triggered, should be set to at least 1 in any spell for the effect to function.
-	base2= lock out timer, which prevents any more procs set in ms 1500 = 1.5 seconds
-	This system allows easy scaling for multiple different buffs with same effects each having seperate active individual timer checks. Ie.
-	*/
-
-	if (IsValidSpell(spell_id)) {
-
-		for (int i = 0; i < EFFECT_COUNT; i++) {
-
-			//Step 1: Find which slot the spell effect is in.
-			if (spells[spell_id].effectid[i] == SE_Proc_Timer_Modifier) {
-
-				//Step 2: Check if you still have procs left to trigger, and if so reduce available procs
-				if (buffs[buffslot].focusproclimit_procamt > 0) {
-					--buffs[buffslot].focusproclimit_procamt; //Reduce total amount of triggers possible.
-				}
-
-				//Step 3: If you used all the procs in the time frame then set proc amount back to max
-				if (buffs[buffslot].focusproclimit_procamt == 0 && spells[spell_id].base[i] > 0) {
-					buffs[buffslot].focusproclimit_procamt = spells[spell_id].base[i];//reset to max
-
-					//Step 4: Check if timer exists on this spell, and then set it, and activiate global timer if not active
-					if (buffs[buffslot].focusproclimit_time ==0 && spells[spell_id].base2[i] > 0) {
-						buffs[buffslot].focusproclimit_time = spells[spell_id].base2[i];//set time
-
-						//Step 5: If timer is not already running, then start it.
-						if (!focus_proc_limit_timer.Enabled()) {
-							focus_proc_limit_timer.Start(250);
-						}
-
-						return true;
+					else {
+						Mob* current_target = GetTarget();
+						//For now don't let players cast detrimental effects on themselves if they are targeting themselves. Need to confirm behavior.
+						if (current_target && current_target->GetID() != GetID())
+							SpellFinished(trigger_spell_id, current_target, EQ::spells::CastingSlot::Item, 0, -1, spells[trigger_spell_id].ResistDiff);
 					}
 				}
+				if (i >= 0)
+					CheckNumHitsRemaining(NumHit::MatchingSpells, i);
 			}
 		}
-	}
-	return true;
-}
-
-void Mob::FocusProcLimitProcess()
-{
-	/*
-	Fast 250 ms uinversal timer for checking Focus effects that have a proc rate limiter set in actual time.
-	*/
-	bool stop_timer = true;
-	int buff_count = GetMaxTotalSlots();
-	for (int buffs_i = 0; buffs_i < buff_count; ++buffs_i)
-	{
-		if (IsValidSpell(buffs[buffs_i].spellid))
-		{
-			if (buffs[buffs_i].focusproclimit_time > 0) {
-				buffs[buffs_i].focusproclimit_time -= 250;
-				stop_timer = false;
-			}
-
-			if (buffs[buffs_i].focusproclimit_time < 0)
-				buffs[buffs_i].focusproclimit_time = 0;
-		}
-	}
-
-	if (stop_timer) {
-		focus_proc_limit_timer.Disable();
 	}
 }
 
@@ -8665,6 +8609,48 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 					caster->SpellOnTarget(spell_id, mob, 0, false, 0, false, -1, buff_tics_remaining);
 				}
 			}
+		}
+	}
+}
+
+bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
+	/*
+		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
+		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
+		have the fire spells received a very high special focused once every 30 seconds.
+		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
+		is saved as the the negative value of the rank.id (to avoid conflicting with spell_ids)
+	*/
+	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
+		if (focusproclimit_spellid[i] == focus_spell_id) {
+			if (focusproclimit_timer[i].Enabled()) {
+				if (focusproclimit_timer[i].GetRemainingTime() > 0) {
+					return true;
+				}
+				else {
+					focusproclimit_timer[i].Disable();
+					focusproclimit_spellid[i] = 0;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time) {
+	
+	bool is_set = false;
+
+	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
+		if (!focusproclimit_spellid[i] && !is_set) {
+			focusproclimit_spellid[i] = focus_spell_id;
+			focusproclimit_timer[i].SetTimer(focus_reuse_time);
+			is_set = true;
+		}
+		//Remove old temporary focus if was from a buff you no longer have.
+		else if (focusproclimit_spellid[i] > 0 && !FindBuff(focus_spell_id)) {
+			focusproclimit_spellid[i] = 0;
+			focusproclimit_timer[i].Disable();
 		}
 	}
 }
