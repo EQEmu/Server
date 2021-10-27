@@ -6486,7 +6486,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 		"UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
 		c->GetX(),
 		c->GetY(),
-		target_mob->GetFixedZ(target_mob->GetPosition()),
+		target_mob->GetFixedZ(c->GetPosition()),
 		c->GetHeading(),
 		s2->GetID()
 	);
