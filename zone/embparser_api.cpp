@@ -8015,7 +8015,7 @@ XS(XS__getspell) {
         Perl_croak(aTHX_ "Usage: quest::getspell(uint32 spell_id)");
     {
         dXSTARG;
-        uint32 spell_id = (int) SvIV(ST(0));
+        uint32 spell_id = (uint32) SvUV(ST(0));
         const SPDat_Spell_Struct* spell = quest_manager.getspell(spell_id);
         ST(0) = sv_newmortal();
         sv_setref_pv(ST(0), "Spell", (void *) spell);
