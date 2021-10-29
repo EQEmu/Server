@@ -1230,6 +1230,22 @@ public:
 	void Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoid_override, int Msg = 0);
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
+	void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
+	/**/
+	int Mob::Tune_ClientGetMeanDamage(Mob* other, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
+	int Mob::Tune_ClientGetMaxDamage(Mob* other);
+	int Mob::Tune_ClientGetMinDamage(Mob* other, int max_hit);
+	int Mob::Tune_GetACMitigationPct(Mob* other);
+	/**/
+	int Mob::Tune_ClientAttack(Mob* other, bool no_avoid = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
+	EQ::skills::SkillType Tune_AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
+	void Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr, bool no_avoid = true, int ac_override = 0, int add_ac = 0);
+	void Mob::Tune_MeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override, int add_ac);
+	int Mob::tune_offense(EQ::skills::SkillType skill, int atk_override = 0, int add_atk = 0);
+	int Mob::Tune_ACSum(bool skip_caps=false, int ac_override = 0, int add_ac = 0);
+
+
+
 	//aa new
 	uint32 GetAA(uint32 rank_id, uint32 *charges = nullptr) const;
 	uint32 GetAAByAAID(uint32 aa_id, uint32 *charges = nullptr) const;

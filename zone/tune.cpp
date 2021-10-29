@@ -27,16 +27,23 @@
 #include "../common/skills.h"
 #include "../common/spdat.h"
 #include "../common/string_util.h"
+#include "../common/data_verification.h"
+#include "../common/misc_functions.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
 #include "string_ids.h"
 #include "water_map.h"
 #include "worldserver.h"
 #include "zone.h"
+#include "lua_parser.h"
+#include "fastmath.h"
+#include "mob.h"
+#include "npc.h"
 
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <boost/concept_check.hpp>
 
 #ifdef BOTS
 #include "bot.h"
@@ -44,6 +51,7 @@
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
+extern FastMath g_Math;
 
 #ifdef _WINDOWS
 #define snprintf	_snprintf
@@ -53,6 +61,7 @@ extern WorldServer worldserver;
 
 extern EntityList entity_list;
 extern Zone* zone;
+
 
 void Mob::Tune_FindATKByPctMitigation(Mob* defender,Mob *attacker, float pct_mitigation, int interval, int max_loop, int ac_override, int Msg)
 {
@@ -1085,4 +1094,524 @@ float Mob::Tune_CheckHitChance(Mob* defender, Mob* attacker, EQ::skills::SkillTy
 	}
 
 	return(chancetohit);
+}
+
+
+void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval, int max_loop, int atk_override, int Msg)
+{
+
+	/*
+		Find the amount of AC stat that has to be added/subtracted from TARGET to reach a specific average mitigation value based on ATTACKER's statistics.
+		Can use ac_override to find the value verse a hypothetical amount of worn AC 
+	*/
+
+	int add_ac = 0;
+	uint32 total_damage = 0;
+	int32 damage = 0;
+	uint32 minhit = 0;
+	
+	
+	int end = 0;
+
+	int max_damage = 0;
+	int min_damage = 0;
+	int mean_dmg = 0;
+	float tmp_pct_mitigated = 0.0f;
+	int loop_add_ac = 0;
+
+	if (attacker->IsNPC())
+	{
+		damage = static_cast<int32>(attacker->CastToNPC()->GetMaxDMG());
+		minhit = attacker->CastToNPC()->GetMinDMG();
+	}
+	else if (attacker->IsClient())
+	{
+		max_damage = attacker->Tune_ClientGetMaxDamage(defender);
+		min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
+		Shout("Min %i Max %i", min_damage, max_damage);
+	}
+
+	if (!max_damage)
+	{
+		Message(0, "#Tune - Processing... Abort! Damage not found! [MaxDMG %i MinDMG %i]", damage, minhit);
+		return;
+	}
+
+	//Obtain baseline mitigation for current stats
+	mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
+	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+	Message(0, "#Tune - Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
+	Message(0, "#Tune - Processing... Find AC for defender Mitigation (%.0f) pct from attacker [MaxDMG %i MinDMG %i Current Mitigation %.2f]", pct_mitigation, damage, minhit, tmp_pct_mitigated);
+
+	//Set to decrease AC till you reach goal
+	if (tmp_pct_mitigated > pct_mitigation) {
+		interval = interval * -1; //Interval is how much AC is modified each round. Larger the interval less accurate result is potentially.
+	}
+
+	for (int j = 0; j < max_loop; j++)
+	{
+		mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, 0,0, loop_add_ac);
+		tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+		Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_ac, mean_dmg, tmp_pct_mitigated);
+
+		if (Msg >= 3) {
+			Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_ac, mean_dmg, tmp_pct_mitigated);
+		}
+
+		if (interval > 0 && tmp_pct_mitigated >= pct_mitigation) {
+			end = 1;
+		}
+
+		else if (interval < 0 && tmp_pct_mitigated <= pct_mitigation) {
+			end = 1;
+		}
+
+		else if (interval < 0 && mean_dmg == minhit) {
+			end = 2;
+		}
+
+		if (end >= 1) {
+
+			defender->Tune_MeleeMitigation(this, attacker, damage, minhit, nullptr, Msg, 0, atk_override, loop_add_ac, 0);//?Prob for message
+
+			if (end == 2) {
+				Message(0, "#Tune - [WARNING] Mitigation can not be further decreased due to minium hit value (%i).", minhit);
+			}
+
+			if (defender->IsNPC()) {
+				Message(Chat::LightGray, "#Tune - Recommended NPC AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(0, "#SET: [NPC Attack STAT] = [%i]", loop_add_ac + defender->CastToNPC()->GetRawAC());
+			}
+			if (defender->IsClient()) {
+				Message(Chat::LightGray, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(0, "#Modify (+/-): [Client AC STAT/SE_AC(1)] [%i]", loop_add_ac);
+			}
+
+			return;
+		}
+
+		loop_add_ac = loop_add_ac + interval;
+	}
+
+	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", pct_mitigation, interval, max_loop);
+	Message(0, "#Tune - Parse ended at AC ADJUSTMENT ( %i ) at average mitigation of (%.0f) / (%.0f) pct.", loop_add_ac, tmp_pct_mitigated / pct_mitigation);
+	return;
+}
+
+/*
+	Tune support functions
+*/
+
+
+int Mob::Tune_ClientGetMeanDamage(Mob* other, int ac_override, int atk_override, int add_ac, int add_atk)
+{
+	uint32 total_damage = 0;
+	int loop_max = 1000;
+
+	for (int i = 0; i < loop_max; i++)
+	{
+		total_damage += Tune_ClientAttack(other, true, 10000, ac_override, atk_override, add_ac, add_atk);
+	}
+
+	return(total_damage / loop_max);
+}
+
+int Mob::Tune_ClientGetMaxDamage(Mob* other)
+{
+	uint32 max_hit = 0;
+	uint32 current_hit = 0;
+	int loop_max = 1000;
+
+	for (int i = 0; i < loop_max; i++)
+	{
+		current_hit = Tune_ClientAttack(other, true, 10000, 1, 10000);
+		if (current_hit > max_hit) {
+			max_hit = current_hit;
+		}
+	}
+	return(max_hit);
+}
+
+int Mob::Tune_ClientGetMinDamage(Mob* other, int max_hit)
+{
+	uint32 min_hit = max_hit;
+	uint32 current_hit = 0;
+	int loop_max = 1000;
+
+	for (int i = 0; i < loop_max; i++)
+	{
+		current_hit = Tune_ClientAttack(other, true, 10000, 10000, 1);
+		if (current_hit < min_hit) {
+			min_hit = current_hit;
+		}
+	}
+	return(min_hit);
+}
+
+int Mob::Tune_GetACMitigationPct(Mob* other) {
+
+	int mean_damage = Tune_ClientGetMeanDamage(other);
+	return 0;
+
+}
+
+
+/*
+	Calculate from modified attack.cpp functions.
+*/
+
+int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk)
+{
+	if (!IsClient()) {
+		Message(Chat::Red, "#Tune Failure:  A null NON CLIENT object was passed to Tune_ClientAttack() for evaluation!");
+		return false;
+	}
+
+	if (!other) {
+		Message(Chat::Red, "#Tune Failure:  A null Mob object was passed to Tune_ClientAttack() for evaluation!");
+		return false;
+	}
+
+	int Hand = EQ::invslot::slotPrimary;
+
+	EQ::ItemInstance* weapon = nullptr;
+	weapon = CastToClient()->GetInv().GetItem(EQ::invslot::slotPrimary);
+	OffHandAtk(false);
+
+	if (weapon != nullptr) {
+		if (!weapon->IsWeapon()) {
+			Message(Chat::Red, "#Tune Failure: Attack cancelled, Item %s is not a weapon!", weapon->GetItem()->Name);
+			return(false);
+		}
+	}
+
+	DamageHitInfo my_hit;
+	my_hit.skill = Tune_AttackAnimation(Hand, weapon);
+
+	// Now figure out damage
+	my_hit.damage_done = 1;
+	my_hit.min_damage = 0;
+	uint8 mylevel = GetLevel() ? GetLevel() : 1;
+	uint32 hate = 0;
+	if (weapon)
+		hate = (weapon->GetItem()->Damage + weapon->GetItem()->ElemDmgAmt);
+
+	my_hit.base_damage = GetWeaponDamage(other, weapon, &hate);
+	if (hate == 0 && my_hit.base_damage > 1)
+		hate = my_hit.base_damage;
+
+	//if weapon damage > 0 then we know we can hit the target with this weapon
+	//otherwise we cannot and we set the damage to -5 later on
+	if (my_hit.base_damage > 0) {
+		// if we revamp this function be more general, we will have to make sure this isn't
+		// executed for anything BUT normal melee damage weapons from auto attack
+		if (Hand == EQ::invslot::slotPrimary || Hand == EQ::invslot::slotSecondary)
+			my_hit.base_damage = CastToClient()->DoDamageCaps(my_hit.base_damage);
+		auto shield_inc = spellbonuses.ShieldEquipDmgMod + itembonuses.ShieldEquipDmgMod + aabonuses.ShieldEquipDmgMod;
+		if (shield_inc > 0 && HasShieldEquiped() && Hand == EQ::invslot::slotPrimary) {
+			my_hit.base_damage = my_hit.base_damage * (100 + shield_inc) / 100;
+			hate = hate * (100 + shield_inc) / 100;
+		}
+
+		// ***************************************************************
+		// *** Calculate the damage bonus, if applicable, for this hit ***
+		// ***************************************************************
+
+		int ucDamageBonus = 0;
+
+		if (Hand == EQ::invslot::slotPrimary && GetLevel() >= 28 && IsWarriorClass())
+		{
+			// Damage bonuses apply only to hits from the main hand (Hand == MainPrimary) by characters level 28 and above
+			// who belong to a melee class. If we're here, then all of these conditions apply.
+
+			ucDamageBonus = GetWeaponDamageBonus(weapon ? weapon->GetItem() : (const EQ::ItemData*) nullptr);
+
+			my_hit.min_damage = ucDamageBonus;
+			hate += ucDamageBonus;
+		}
+
+		my_hit.offense = tune_offense(my_hit.skill, atk_override, add_atk); // we need this a few times
+		my_hit.hand = Hand;
+		
+		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
+		Tune_DoAttack(other, my_hit, nullptr, no_avoid, ac_override, add_ac);
+	}
+	else {
+		my_hit.damage_done = DMG_INVULNERABLE;
+	}
+
+	///////////////////////////////////////////////////////////
+	////// Send Attack Damage
+	///////////////////////////////////////////////////////////
+
+	//other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
+
+	return my_hit.damage_done;
+}
+
+void Mob::Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool no_avoid, int ac_override, int add_ac)
+{
+	if (!other)
+		return;
+	LogCombat("[{}]::DoAttack vs [{}] base [{}] min [{}] offense [{}] tohit [{}] skill [{}]", GetName(),
+		other->GetName(), hit.base_damage, hit.min_damage, hit.offense, hit.tohit, hit.skill);
+
+	// check to see if we hit..
+	if (no_avoid || (!no_avoid && other->AvoidDamage(this, hit))) {
+		int strike_through = itembonuses.StrikeThrough + spellbonuses.StrikeThrough + aabonuses.StrikeThrough;
+		if (strike_through && zone->random.Roll(strike_through)) {
+			MessageString(Chat::StrikeThrough,
+				STRIKETHROUGH_STRING); // You strike through your opponents defenses!
+			hit.damage_done = 1;			// set to one, we will check this to continue
+		}
+		// I'm pretty sure you can riposte a riposte
+		if (hit.damage_done == DMG_RIPOSTED) {
+			//DoRiposte(other); //Disabled for TUNE
+			//if (IsDead())
+			return;
+		}
+		LogCombat("Avoided/strikethrough damage with code [{}]", hit.damage_done);
+	}
+
+	if (hit.damage_done >= 0) {
+		if (no_avoid || (!no_avoid && other->CheckHitChance(this, hit))) {
+			other->Tune_MeleeMitigation(this, hit, ac_override, add_ac);
+			if (hit.damage_done > 0) {
+				ApplyDamageTable(hit);
+				CommonOutgoingHitSuccess(other, hit, opts);
+			}
+			LogCombat("Final damage after all reductions: [{}]", hit.damage_done);
+		}
+		else {
+			LogCombat("Attack missed. Damage set to 0");
+			hit.damage_done = 0;
+		}
+	}
+}
+
+void Mob::Tune_MeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override, int add_ac)
+{
+	if (hit.damage_done < 0 || hit.base_damage == 0)
+		return;
+
+	Mob* defender = this;
+	//auto mitigation = defender->GetMitigationAC();
+	auto mitigation = defender->Tune_ACSum(false, ac_override, add_ac);
+	if (IsClient() && attacker->IsClient())
+		mitigation = mitigation * 80 / 100; // 2004 PvP changes
+
+	auto roll = RollD20(hit.offense, mitigation);
+
+	// +0.5 for rounding, min to 1 dmg
+	hit.damage_done = std::max(static_cast<int>(roll * static_cast<double>(hit.base_damage) + 0.5), 1);
+
+	//Shout("mitigation %d vs offense %d. base %d rolled %f damage %d", mitigation, hit.offense, hit.base_damage, roll, hit.damage_done);
+}
+
+int Mob::Tune_ACSum(bool skip_caps, int ac_override, int add_ac)
+{
+	int ac = 0; // this should be base AC whenever shrouds come around
+	ac += itembonuses.AC; // items + food + tribute
+
+	if (IsClient() && ac_override) {
+		ac = ac_override;
+		ac += add_ac;
+	}
+
+	int shield_ac = 0;
+	if (HasShieldEquiped() && IsClient()) {
+		auto client = CastToClient();
+		auto inst = client->GetInv().GetItem(EQ::invslot::slotSecondary);
+		if (inst) {
+			if (inst->GetItemRecommendedLevel(true) <= GetLevel())
+				shield_ac = inst->GetItemArmorClass(true);
+			else
+				shield_ac = client->CalcRecommendedLevelBonus(GetLevel(), inst->GetItemRecommendedLevel(true), inst->GetItemArmorClass(true));
+		}
+		shield_ac += client->GetHeroicSTR() / 10;
+	}
+	// EQ math
+	ac = (ac * 4) / 3;
+	// anti-twink
+	if (!skip_caps && IsClient() && GetLevel() < RuleI(Combat, LevelToStopACTwinkControl))
+		ac = std::min(ac, 25 + 6 * GetLevel());
+	ac = std::max(0, ac + GetClassRaceACBonus());
+	if (IsNPC()) {
+		// This is the developer tweaked number
+		// for the VAST amount of NPCs in EQ this number didn't exceed 600 until recently (PoWar)
+		// According to the guild hall Combat Dummies, a level 50 classic EQ mob it should be ~115
+		// For a 60 PoP mob ~120, 70 OoW ~120
+		
+
+		if (ac_override) {
+			ac += ac_override;
+		}
+		else {
+			ac += GetAC();
+		}
+		ac += add_ac;
+
+		ac += GetPetACBonusFromOwner();
+		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
+		ac += GetSkill(EQ::skills::SkillDefense) / 5;
+		if (EQ::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+			ac += spell_aa_ac / 3;
+		else
+			ac += spell_aa_ac / 4;
+	}
+	else { // TODO: so we can't set NPC skills ... so the skill bonus ends up being HUGE so lets nerf them a bit
+		auto spell_aa_ac = aabonuses.AC + spellbonuses.AC;
+		if (EQ::ValueWithin(static_cast<int>(GetClass()), NECROMANCER, ENCHANTER))
+			ac += GetSkill(EQ::skills::SkillDefense) / 2 + spell_aa_ac / 3;
+		else
+			ac += GetSkill(EQ::skills::SkillDefense) / 3 + spell_aa_ac / 4;
+	}
+
+	if (GetAGI() > 70)
+		ac += GetAGI() / 20;
+	if (ac < 0)
+		ac = 0;
+
+	if (!skip_caps && (IsClient())) {
+		auto softcap = GetACSoftcap();
+		auto returns = GetSoftcapReturns();
+		int total_aclimitmod = aabonuses.CombatStability + itembonuses.CombatStability + spellbonuses.CombatStability;
+		if (total_aclimitmod)
+			softcap = (softcap * (100 + total_aclimitmod)) / 100;
+		softcap += shield_ac;
+		if (ac > softcap) {
+			auto over_cap = ac - softcap;
+			ac = softcap + (over_cap * returns);
+		}
+		LogCombatDetail("ACSum ac [{}] softcap [{}] returns [{}]", ac, softcap, returns);
+	}
+	else {
+		LogCombatDetail("ACSum ac [{}]", ac);
+	}
+	
+	return ac;
+}
+
+int Mob::tune_offense(EQ::skills::SkillType skill, int atk_override, int add_atk)
+{
+	int offense = GetSkill(skill);
+	int stat_bonus = GetSTR();
+
+	switch (skill) {
+	case EQ::skills::SkillArchery:
+	case EQ::skills::SkillThrowing:
+		stat_bonus = GetDEX();
+		break;
+
+		// Mobs with no weapons default to H2H.
+		// Since H2H is capped at 100 for many many classes,
+		// lets not handicap mobs based on not spawning with a
+		// weapon.
+		//
+		// Maybe we tweak this if Disarm is actually implemented.
+
+	case EQ::skills::SkillHandtoHand:
+		offense = GetBestMeleeSkill();
+		break;
+	}
+
+	if (stat_bonus >= 75)
+		offense += (2 * stat_bonus - 150) / 3;
+
+	int32 tune_atk = GetATK();
+	if (atk_override) {
+		tune_atk = atk_override;
+	}
+
+	tune_atk += add_atk;
+
+	offense += tune_atk + GetPetATKBonusFromOwner();
+	return offense;
+}
+
+EQ::skills::SkillType Mob::Tune_AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse)
+{
+	// Determine animation
+	int type = 0;
+	if (weapon && weapon->IsClassCommon()) {
+		const EQ::ItemData* item = weapon->GetItem();
+
+		switch (item->ItemType) {
+		case EQ::item::ItemType1HSlash: // 1H Slashing
+			skillinuse = EQ::skills::Skill1HSlashing;
+			type = anim1HWeapon;
+			break;
+		case EQ::item::ItemType2HSlash: // 2H Slashing
+			skillinuse = EQ::skills::Skill2HSlashing;
+			type = anim2HSlashing;
+			break;
+		case EQ::item::ItemType1HPiercing: // Piercing
+			skillinuse = EQ::skills::Skill1HPiercing;
+			type = anim1HPiercing;
+			break;
+		case EQ::item::ItemType1HBlunt: // 1H Blunt
+			skillinuse = EQ::skills::Skill1HBlunt;
+			type = anim1HWeapon;
+			break;
+		case EQ::item::ItemType2HBlunt: // 2H Blunt
+			skillinuse = EQ::skills::Skill2HBlunt;
+			type = RuleB(Combat, Classic2HBAnimation) ? anim2HWeapon : anim2HSlashing;
+			break;
+		case EQ::item::ItemType2HPiercing: // 2H Piercing
+			if (IsClient() && CastToClient()->ClientVersion() < EQ::versions::ClientVersion::RoF2)
+				skillinuse = EQ::skills::Skill1HPiercing;
+			else
+				skillinuse = EQ::skills::Skill2HPiercing;
+			type = anim2HWeapon;
+			break;
+		case EQ::item::ItemTypeMartial:
+			skillinuse = EQ::skills::SkillHandtoHand;
+			type = animHand2Hand;
+			break;
+		default:
+			skillinuse = EQ::skills::SkillHandtoHand;
+			type = animHand2Hand;
+			break;
+		}// switch
+	}
+	else if (IsNPC()) {
+		switch (skillinuse) {
+		case EQ::skills::Skill1HSlashing: // 1H Slashing
+			type = anim1HWeapon;
+			break;
+		case EQ::skills::Skill2HSlashing: // 2H Slashing
+			type = anim2HSlashing;
+			break;
+		case EQ::skills::Skill1HPiercing: // Piercing
+			type = anim1HPiercing;
+			break;
+		case EQ::skills::Skill1HBlunt: // 1H Blunt
+			type = anim1HWeapon;
+			break;
+		case EQ::skills::Skill2HBlunt: // 2H Blunt
+			type = anim2HSlashing; //anim2HWeapon
+			break;
+		case EQ::skills::Skill2HPiercing: // 2H Piercing
+			type = anim2HWeapon;
+			break;
+		case EQ::skills::SkillHandtoHand:
+			type = animHand2Hand;
+			break;
+		default:
+			type = animHand2Hand;
+			break;
+		}// switch
+	}
+	else {
+		skillinuse = EQ::skills::SkillHandtoHand;
+		type = animHand2Hand;
+	}
+
+	// If we're attacking with the secondary hand, play the dual wield anim
+	if (Hand == EQ::invslot::slotSecondary)	// DW anim
+		type = animDualWield;
+
+	return skillinuse;
 }
