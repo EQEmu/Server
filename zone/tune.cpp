@@ -1101,8 +1101,8 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 {
 
 	/*
-		Find the amount of AC stat that has to be added/subtracted from TARGET to reach a specific average mitigation value based on ATTACKER's statistics.
-		Can use ac_override to find the value verse a hypothetical amount of worn AC 
+		Find the amount of AC stat that has to be added/subtracted from DEFENDER to reach a specific average mitigation value based on ATTACKER's offense statistics.
+		Can use atk_override to find the value verse a hypothetical amount of worn ATK
 	*/
 
 	int max_damage = 0;
@@ -1111,6 +1111,8 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 	float tmp_pct_mitigated = 0.0f;
 	int loop_add_ac = 0;
 	int end = 0;
+
+	int offense_rating = attacker->Tune_ClientAttack(defender, true, 0, 0, 0, 0, 0, true);
 
 	if (attacker->IsNPC())
 	{
@@ -1134,10 +1136,10 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 	mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
 	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
-	Message(0, "########################################################");
+	Message(0, "<########################################################>");
 	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
 	Message(0, "[#Tune] Defender [%s] [AC Mitigation pct %i] [Total AC %i]", attacker->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
-	Message(0, "[#Tune] Attacker [%s] [Max Damage %i Min Damage %i] [Total Offense: %i]", attacker->GetCleanName(), max_damage, min_damage,0);
+	Message(0, "[#Tune] Attacker [%s] [Max Damage %i Min Damage %i] [Total Offense: %i]", attacker->GetCleanName(), max_damage, min_damage, offense_rating);
 	Message(0, "[#Tune] Processing... Find AC for defender to have Mitigation of (%.0f) pct agianst this attacker.", pct_mitigation);
 	
 
@@ -1185,9 +1187,9 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 
 			if (defender->IsNPC()) 
 			{
-				Message(Chat::LightGray, "[#Tune] Recommended NPC AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
-				Message(0, "[#Tune] SET NPC 'ATK' value = [%i]", loop_add_ac + defender->CastToNPC()->GetRawAC());
-				Message(0, "########################################################");
+				Message(Chat::LightGray, "[#Tune] Recommended NPC AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(0, "[#Tune] SET NPC 'AC' stat value = [%i]", loop_add_ac + defender->CastToNPC()->GetRawAC());
+				Message(0, ">########################################################<");
 			}
 			if (defender->IsClient()) 
 			{
@@ -1204,6 +1206,115 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 
 	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", pct_mitigation, interval, max_loop);
 	Message(0, "#Tune - Parse ended at AC ADJUSTMENT ( %i ) at average mitigation of (%.0f) pct.", loop_add_ac, (tmp_pct_mitigated / pct_mitigation));
+	return;
+}
+
+void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval, int max_loop, int atk_override, int Msg)
+{
+
+	/*
+		Find the amount of ATK stat that has to be added/subtracted from ATTACKER to reach a specific average mitigation value based on DEFENDERS's mitigation statistics.
+		Can use ac_override to find the value verse a hypothetical amount of worn AC
+	*/
+
+
+	int max_damage = 0;
+	int min_damage = 0;
+	int mean_dmg = 0;
+	float tmp_pct_mitigated = 0.0f;
+	int loop_add_atk = 0;
+	int end = 0;
+
+	int offense_rating = attacker->Tune_ClientAttack(defender, true, 0, 0, 0, 0, 0, true);
+
+	if (attacker->IsNPC())
+	{
+		max_damage = static_cast<int32>(attacker->CastToNPC()->GetMaxDMG());
+		min_damage = attacker->CastToNPC()->GetMinDMG();
+	}
+	else if (attacker->IsClient())
+	{
+		max_damage = attacker->Tune_ClientGetMaxDamage(defender);
+		min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
+		Shout("Min %i Max %i", min_damage, max_damage);
+	}
+
+	if (!max_damage)
+	{
+		Message(0, "#Tune - Processing... Abort! Damage not found! [MaxDMG %i MinDMG %i]", max_damage, min_damage);
+		return;
+	}
+
+	//Obtain baseline mitigation for current stats
+	mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
+	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+	Message(0, "<########################################################>");
+	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
+	Message(0, "[#Tune] Defender [%s] [AC Mitigation pct %i] [Total AC %i]", attacker->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
+	Message(0, "[#Tune] Attacker [%s] [Max Damage %i Min Damage %i] [Total Offense: %i]", attacker->GetCleanName(), max_damage, min_damage, offense_rating);
+	Message(0, "[#Tune] Processing... Find ATK on attacker for defender to have Mitigation of (%.0f) pct agianst this attacker.", pct_mitigation);
+
+
+	//Set to decrease AC till you reach goal
+	if (tmp_pct_mitigated > pct_mitigation)
+	{
+		interval = interval * -1; //Interval is how much AC is modified each round. Larger the interval less accurate result is potentially.
+	}
+
+	for (int j = 0; j < max_loop; j++)
+	{
+		mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, 0, 0, loop_add_atk);
+		tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+		Message(0, "#Tune - Processing... [%i] [ATK %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_atk, mean_dmg, tmp_pct_mitigated);
+
+		if (Msg >= 3)
+		{
+			Message(0, "#Tune - Processing... [%i] [ATK %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_atk, mean_dmg, tmp_pct_mitigated);
+		}
+
+		if (interval > 0 && tmp_pct_mitigated >= pct_mitigation)
+		{
+			end = 1;
+		}
+
+		else if (interval < 0 && tmp_pct_mitigated <= pct_mitigation)
+		{
+			end = 1;
+		}
+
+		else if (interval < 0 && mean_dmg == min_damage)
+		{
+			end = 2;
+		}
+
+		if (end >= 1) {
+
+			//defender->Tune_MeleeMitigation(this, attacker, damage, minhit, nullptr, Msg, 0, atk_override, loop_add_atk, 0);//?Prob for message
+
+			if (end == 2)
+			{
+				Message(0, "#Tune - [WARNING] Mitigation can not be further decreased due to minium hit value (%i).", min_damage);
+			}
+
+			if (attacker->IsNPC()) {
+				Message(0, "#Tune - Recommended NPC ATK ADJUSTMENT ( %i ) on ' %s ' average mitigation of (%.0f) pct verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), pct_mitigation, defender->GetCleanName());
+				Message(0, "#SET: [NPC Attack STAT] = [%i]", loop_add_atk + defender->CastToNPC()->ATK);
+			}
+			if (attacker->IsClient()) {
+				Message(0, "#Tune - Recommended CLIENT ATK ADJUSTMENT ( %i ) on ' %s ' average mitigation of (%.0f) pct verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), pct_mitigation, defender->GetCleanName());
+				Message(0, "#Modify (+/-): [Client Attack STAT/SE_ATK(2)] [%i]", loop_add_atk);
+			}
+
+			return;
+		}
+
+		loop_add_atk = loop_add_atk + interval;
+	}
+
+	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", pct_mitigation, interval, max_loop);
+	Message(0, "#Tune - Parse ended at ATK ADJUSTMENT ( %i ) average target mitigation of (%.0f) pct.", loop_add_atk, tmp_pct_mitigated);
 	return;
 }
 
@@ -1257,19 +1368,52 @@ int Mob::Tune_ClientGetMinDamage(Mob* other, int max_hit)
 	return(min_hit);
 }
 
-int Mob::Tune_GetACMitigationPct(Mob* other) {
+float Mob::Tune_GetACMitigationPct(Mob* defender, Mob *attacker) {
 
-	int mean_damage = Tune_ClientGetMeanDamage(other);
-	return 0;
+	int max_damage = 0;
+	int min_damage = 0;
 
+	if (attacker->IsNPC())
+	{
+		max_damage = static_cast<int32>(attacker->CastToNPC()->GetMaxDMG());
+		min_damage = attacker->CastToNPC()->GetMinDMG();
+	}
+	else if (attacker->IsClient())
+	{
+		max_damage = attacker->Tune_ClientGetMaxDamage(defender);
+		min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
+	}
+
+	if (!max_damage)
+	{
+		Message(0, "[#Tune] Calculation Failure. Error: [Mob::Tune_GetACMitigationPct] No max damage found");
+		return max_damage;
+	}
+
+	//Obtain baseline mitigation for current stats
+	int mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
+	float tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+	return tmp_pct_mitigated;
 }
 
+int Mob::Tune_GetAccuracy(Mob* defender, Mob *attacker)
+{
+	int accuracy = attacker->Tune_ClientAttack(defender, true, 0, 0, 0, 0, 0, false, true);
+	return accuracy;
+}
+
+int Mob::Tune_GetAvoidance(Mob* defender, Mob *attacker)
+{
+	return defender->GetTotalDefense();
+}
 
 /*
 	Calculate from modified attack.cpp functions.
 */
 
-int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk)
+int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
+	int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
 {
 	if (!IsClient()) {
 		Message(Chat::Red, "#Tune Failure:  A null NON CLIENT object was passed to Tune_ClientAttack() for evaluation!");
@@ -1339,10 +1483,16 @@ int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, int hit_chance_bonus, int 
 			hate += ucDamageBonus;
 		}
 
-		my_hit.offense = tune_offense(my_hit.skill, atk_override, add_atk); // we need this a few times
+		my_hit.offense = Tune_offense(my_hit.skill, atk_override, add_atk); // we need this a few times
+		if (get_offense) {
+			return my_hit.offense;
+		}
 		my_hit.hand = Hand;
 		
 		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
+		if (get_accuracy) {
+			return my_hit.tohit;
+		}
 		Tune_DoAttack(other, my_hit, nullptr, no_avoid, ac_override, add_ac);
 	}
 	else {
@@ -1358,7 +1508,8 @@ int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, int hit_chance_bonus, int 
 	return my_hit.damage_done;
 }
 
-void Mob::Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool no_avoid, int ac_override, int add_ac)
+void Mob::Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts, bool no_avoid, int ac_override, int add_ac,
+	int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
 {
 	if (!other)
 		return;
@@ -1501,7 +1652,7 @@ int Mob::Tune_ACSum(bool skip_caps, int ac_override, int add_ac)
 	return ac;
 }
 
-int Mob::tune_offense(EQ::skills::SkillType skill, int atk_override, int add_atk)
+int Mob::Tune_offense(EQ::skills::SkillType skill, int atk_override, int add_atk)
 {
 	int offense = GetSkill(skill);
 	int stat_bonus = GetSTR();
@@ -1621,4 +1772,151 @@ EQ::skills::SkillType Mob::Tune_AttackAnimation(int Hand, const EQ::ItemInstance
 		type = animDualWield;
 
 	return skillinuse;
+}
+
+int Mob::Tune_compute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override, int add_accuracy)
+{
+	int tohit = GetSkill(EQ::skills::SkillOffense) + 7;
+	tohit += GetSkill(skillinuse);
+	if (IsNPC()) {
+		if (accuracy_override) {
+			tohit += accuracy_override;
+		}
+		else {
+			tohit += CastToNPC()->GetAccuracyRating();
+		}
+		tohit += add_accuracy;
+	}
+	if (IsClient()) {
+		double reduction = CastToClient()->m_pp.intoxication / 2.0;
+		if (reduction > 20.0) {
+			reduction = std::min((110 - reduction) / 100.0, 1.0);
+			tohit = reduction * static_cast<double>(tohit);
+		}
+		else if (IsBerserk()) {
+			tohit += (GetLevel() * 2) / 5;
+		}
+	}
+	return std::max(tohit, 1);
+}
+
+// return -1 in cases that always hit
+int Mob::Tune_GetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override, int add_accuracy)
+{
+	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
+		return -1;
+
+	// calculate attacker's accuracy
+	auto accuracy = Tune_compute_tohit(skill, accuracy_override, add_accuracy) + 10; // add 10 in case the NPC's stats are fucked
+	if (chance_mod > 0) // multiplier
+		accuracy *= chance_mod;
+
+	// Torven parsed an apparent constant of 1.2 somewhere in here * 6 / 5 looks eqmathy to me!
+	// new test clients have 121 / 100
+	accuracy = (accuracy * 121) / 100;
+
+	// unsure on the stacking order of these effects, rather hard to parse
+	// item mod2 accuracy isn't applied to range? Theory crafting and parses back it up I guess
+	// mod2 accuracy -- flat bonus
+	if (skill != EQ::skills::SkillArchery && skill != EQ::skills::SkillThrowing)
+		accuracy += itembonuses.HitChance;
+
+	//518 Increase ATK accuracy by percentage, stackable
+	auto atkhit_bonus = itembonuses.Attack_Accuracy_Max_Percent + aabonuses.Attack_Accuracy_Max_Percent + spellbonuses.Attack_Accuracy_Max_Percent;
+	if (atkhit_bonus)
+		accuracy += round(static_cast<double>(accuracy) * static_cast<double>(atkhit_bonus) * 0.0001);
+
+	// 216 Melee Accuracy Amt aka SE_Accuracy -- flat bonus
+	accuracy += itembonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
+		aabonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
+		spellbonuses.Accuracy[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.Accuracy[skill] +
+		aabonuses.Accuracy[skill] +
+		spellbonuses.Accuracy[skill];
+
+	// auto hit discs (and looks like there are some autohit AAs)
+	if (spellbonuses.HitChanceEffect[skill] >= 10000 || aabonuses.HitChanceEffect[skill] >= 10000)
+		return -1;
+
+	if (spellbonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] >= 10000)
+		return -1;
+
+	// 184 Accuracy % aka SE_HitChance -- percentage increase
+	auto hit_bonus = itembonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] +
+		aabonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] +
+		spellbonuses.HitChanceEffect[EQ::skills::HIGHEST_SKILL + 1] +
+		itembonuses.HitChanceEffect[skill] +
+		aabonuses.HitChanceEffect[skill] +
+		spellbonuses.HitChanceEffect[skill];
+
+	accuracy = (accuracy * (100 + hit_bonus)) / 100;
+
+	// TODO: April 2003 added an archery/throwing PVP accuracy penalty while moving, should be in here some where,
+	// but PVP is less important so I haven't tried parsing it at all
+
+	// There is also 110 Ranger Archery Accuracy % which should probably be in here some where, but it's not in any spells/aas
+	// Name implies it's a percentage increase, if one wishes to implement, do it like the hit_bonus above but limited to ranger archery
+
+	// There is also 183 UNUSED - Skill Increase Chance which devs say isn't used at all in code, but some spells reference it
+	// I do not recommend implementing this once since there are spells that use it which would make this not live-like with default spell files
+	return accuracy;
+}
+
+// return -1 in cases that always miss
+int Mob::Tune_GetTotalDefense()
+{
+	auto avoidance = compute_defense() + 10; // add 10 in case the NPC's stats are fucked
+	auto evasion_bonus = spellbonuses.AvoidMeleeChanceEffect; // we check this first since it has a special case
+	if (evasion_bonus >= 10000)
+		return -1;
+
+	// 515 SE_AC_Avoidance_Max_Percent
+	auto ac_aviodance_bonus = itembonuses.AC_Avoidance_Max_Percent + aabonuses.AC_Avoidance_Max_Percent + spellbonuses.AC_Avoidance_Max_Percent;
+	if (ac_aviodance_bonus)
+		avoidance += round(static_cast<double>(avoidance) * static_cast<double>(ac_aviodance_bonus) * 0.0001);
+
+	// 172 Evasion aka SE_AvoidMeleeChance
+	evasion_bonus += itembonuses.AvoidMeleeChanceEffect + aabonuses.AvoidMeleeChanceEffect; // item bonus here isn't mod2 avoidance
+
+	// 215 Pet Avoidance % aka SE_PetAvoidance
+	evasion_bonus += GetPetAvoidanceBonusFromOwner();
+
+	// Evasion is a percentage bonus according to AA descriptions
+	if (evasion_bonus)
+		avoidance = (avoidance * (100 + evasion_bonus)) / 100;
+
+	return avoidance;
+}
+
+// called when a mob is attacked, does the checks to see if it's a hit
+// and does other mitigation checks. 'this' is the mob being attacked.
+bool Mob::Tune_CheckHitChance(Mob* other, DamageHitInfo &hit)
+{
+
+	Mob *attacker = other;
+	Mob *defender = this;
+	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
+
+	if (defender->IsClient() && defender->CastToClient()->IsSitting())
+		return true;
+
+	auto avoidance = defender->GetTotalDefense();
+	if (avoidance == -1) // some sort of auto avoid disc
+		return false;
+
+	auto accuracy = hit.tohit;
+	if (accuracy == -1)
+		return true;
+
+	// so now we roll!
+	// relevant dev quote:
+	// Then your chance to simply avoid the attack is checked (defender's avoidance roll beat the attacker's accuracy roll.)
+	int tohit_roll = zone->random.Roll0(accuracy);
+	int avoid_roll = zone->random.Roll0(avoidance);
+	Log(Logs::Detail, Logs::Attack, "CheckHitChance accuracy(%d => %d) avoidance(%d => %d)", accuracy, tohit_roll, avoidance, avoid_roll);
+
+	// tie breaker? Don't want to be biased any one way
+	if (tohit_roll == avoid_roll)
+		return zone->random.Roll(50);
+	return tohit_roll > avoid_roll;
 }
