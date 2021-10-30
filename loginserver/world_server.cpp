@@ -52,7 +52,11 @@ WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> wo
 		std::bind(&WorldServer::ProcessLSAccountUpdate, this, std::placeholders::_1, std::placeholders::_2)
 	);
 
-	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(
+		1000,
+		true,
+		std::bind(&WorldServer::OnKeepAlive, this, std::placeholders::_1)
+	);
 }
 
 WorldServer::~WorldServer() = default;
@@ -60,9 +64,9 @@ WorldServer::~WorldServer() = default;
 void WorldServer::Reset()
 {
 	m_server_id;
-	m_zones_booted   = 0;
-	m_players_online    = 0;
-	m_server_status       = 0;
+	m_zones_booted         = 0;
+	m_players_online       = 0;
+	m_server_status        = 0;
 	m_server_list_type_id  = 0;
 	m_server_process_type  = 0;
 	m_is_server_authorized = false;
@@ -711,8 +715,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 			SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 			LogWarning(
-			"Remote address was null, defaulting to stream address [{0}]",
-			m_remote_ip_address
+				"Remote address was null, defaulting to stream address [{0}]",
+				m_remote_ip_address
 			);
 		}
 		else {
@@ -723,8 +727,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 		LogWarning(
-		"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
-		m_remote_ip_address
+			"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
+			m_remote_ip_address
 		);
 	}
 
