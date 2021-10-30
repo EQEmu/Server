@@ -654,6 +654,15 @@ void WorldServer::SendClientAuth(
 	}
 }
 
+constexpr static int MAX_ACCOUNT_NAME_LENGTH          = 30;
+constexpr static int MAX_ACCOUNT_PASSWORD_LENGTH      = 30;
+constexpr static int MAX_SERVER_LONG_NAME_LENGTH      = 200;
+constexpr static int MAX_SERVER_SHORT_NAME_LENGTH     = 50;
+constexpr static int MAX_SERVER_LOCAL_ADDRESS_LENGTH  = 125;
+constexpr static int MAX_SERVER_REMOTE_ADDRESS_LENGTH = 125;
+constexpr static int MAX_SERVER_VERSION_LENGTH        = 64;
+constexpr static int MAX_SERVER_PROTOCOL_VERSION      = 25;
+
 /**
  * @param new_world_server_info_packet
  * @return
@@ -662,41 +671,32 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 	ServerNewLSInfo_Struct *new_world_server_info_packet
 )
 {
-	const int max_account_name_length          = 30;
-	const int max_account_password_length      = 30;
-	const int max_server_long_name_length      = 200;
-	const int max_server_short_name_length     = 50;
-	const int max_server_local_address_length  = 125;
-	const int max_server_remote_address_length = 125;
-	const int max_server_version_length        = 64;
-	const int max_server_protocol_version      = 25;
-
-	if (strlen(new_world_server_info_packet->account_name) >= max_account_name_length) {
-		LogError("Handle_NewLSInfo error [account_name] was too long | max [{0}]", max_account_name_length);
+	if (strlen(new_world_server_info_packet->account_name) >= MAX_ACCOUNT_NAME_LENGTH) {
+		LogError("Handle_NewLSInfo error [account_name] was too long | max [{0}]", MAX_ACCOUNT_NAME_LENGTH);
 		return false;
 	}
-	else if (strlen(new_world_server_info_packet->account_password) >= max_account_password_length) {
-		LogError("Handle_NewLSInfo error [account_password] was too long | max [{0}]", max_account_password_length);
+	else if (strlen(new_world_server_info_packet->account_password) >= MAX_ACCOUNT_PASSWORD_LENGTH) {
+		LogError("Handle_NewLSInfo error [account_password] was too long | max [{0}]", MAX_ACCOUNT_PASSWORD_LENGTH);
 		return false;
 	}
-	else if (strlen(new_world_server_info_packet->server_long_name) >= max_server_long_name_length) {
-		LogError("Handle_NewLSInfo error [server_long_name] was too long | max [{0}]", max_server_long_name_length);
+	else if (strlen(new_world_server_info_packet->server_long_name) >= MAX_SERVER_LONG_NAME_LENGTH) {
+		LogError("Handle_NewLSInfo error [server_long_name] was too long | max [{0}]", MAX_SERVER_LONG_NAME_LENGTH);
 		return false;
 	}
-	else if (strlen(new_world_server_info_packet->server_short_name) >= max_server_short_name_length) {
-		LogError("Handle_NewLSInfo error [server_short_name] was too long | max [{0}]", max_server_short_name_length);
+	else if (strlen(new_world_server_info_packet->server_short_name) >= MAX_SERVER_SHORT_NAME_LENGTH) {
+		LogError("Handle_NewLSInfo error [server_short_name] was too long | max [{0}]", MAX_SERVER_SHORT_NAME_LENGTH);
 		return false;
 	}
-	else if (strlen(new_world_server_info_packet->server_version) >= max_server_short_name_length) {
-		LogError("Handle_NewLSInfo error [server_version] was too long | max [{0}]", max_server_version_length);
+	else if (strlen(new_world_server_info_packet->server_version) >= MAX_SERVER_SHORT_NAME_LENGTH) {
+		LogError("Handle_NewLSInfo error [server_version] was too long | max [{0}]", MAX_SERVER_VERSION_LENGTH);
 		return false;
 	}
-	else if (strlen(new_world_server_info_packet->protocol_version) >= max_server_protocol_version) {
-		LogError("Handle_NewLSInfo error [protocol_version] was too long | max [{0}]", max_server_protocol_version);
+	else if (strlen(new_world_server_info_packet->protocol_version) >= MAX_SERVER_PROTOCOL_VERSION) {
+		LogError("Handle_NewLSInfo error [protocol_version] was too long | max [{0}]", MAX_SERVER_PROTOCOL_VERSION);
 		return false;
 	}
 
-	if (strlen(new_world_server_info_packet->local_ip_address) <= max_server_local_address_length) {
+	if (strlen(new_world_server_info_packet->local_ip_address) <= MAX_SERVER_LOCAL_ADDRESS_LENGTH) {
 		if (strlen(new_world_server_info_packet->local_ip_address) == 0) {
 			LogError("Handle_NewLSInfo error, local address was null, defaulting to localhost");
 			SetLocalIp("127.0.0.1");
@@ -706,11 +706,11 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		}
 	}
 	else {
-		LogError("Handle_NewLSInfo error, local address was too long | max [{0}]", max_server_local_address_length);
+		LogError("Handle_NewLSInfo error, local address was too long | max [{0}]", MAX_SERVER_LOCAL_ADDRESS_LENGTH);
 		return false;
 	}
 
-	if (strlen(new_world_server_info_packet->remote_ip_address) <= max_server_remote_address_length) {
+	if (strlen(new_world_server_info_packet->remote_ip_address) <= MAX_SERVER_REMOTE_ADDRESS_LENGTH) {
 		if (strlen(new_world_server_info_packet->remote_ip_address) == 0) {
 			SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
