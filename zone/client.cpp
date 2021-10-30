@@ -63,6 +63,10 @@ extern volatile bool RunLoops;
 #include "../common/expedition_lockout_timer.h"
 #include "cheat_manager.h"
 
+#include "../common/repositories/character_spells_repository.h"
+#include "../common/repositories/character_disciplines_repository.h"
+
+
 extern QueryServ* QServ;
 extern EntityList entity_list;
 extern Zone* zone;
@@ -5587,7 +5591,7 @@ void Client::UpdateLDoNWinLoss(uint32 theme_id, bool win, bool remove) {
 			break;
 		default:
 			return;
-	}	
+	}
 	database.UpdateAdventureStatsEntry(CharacterID(), theme_id, win, remove);
 }
 
@@ -10550,7 +10554,7 @@ void Client::ReadBookByName(std::string book_name, uint8 book_type)
 		out->window = 0xFF;
 		out->type = book_type;
 		out->invslot = 0;
-		
+
 		memcpy(out->booktext, book_text.c_str(), length);
 
 		if (book_language > 0 && book_language < MAX_PP_LANGUAGE) {
@@ -10672,4 +10676,46 @@ void Client::SummonBaggedItems(uint32 bag_item_id, const std::vector<ServerLootI
 	PushItemOnCursor(*summoned_bag);
 	SendItemPacket(EQ::invslot::slotCursor, summoned_bag, ItemPacketLimbo);
 	safe_delete(summoned_bag);
+}
+
+void Client::SaveSpells()
+{
+	std::vector<CharacterSpellsRepository::CharacterSpells> character_spells = {};
+
+	for (int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+		if (IsValidSpell(m_pp.spell_book[index])) {
+			auto spell = CharacterSpellsRepository::NewEntity();
+			spell.id       = CharacterID();
+			spell.slot_id  = index;
+			spell.spell_id = m_pp.spell_book[index];
+			character_spells.emplace_back(spell);
+		}
+	}
+
+	CharacterSpellsRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
+
+	if (!character_spells.empty()) {
+		CharacterSpellsRepository::InsertMany(database, character_spells);
+	}
+}
+
+void Client::SaveDisciplines()
+{
+	std::vector<CharacterDisciplinesRepository::CharacterDisciplines> character_discs = {};
+
+	for (int index = 0; index < MAX_PP_DISCIPLINES; index++) {
+		if (IsValidSpell(m_pp.disciplines.values[index])) {
+			auto discipline = CharacterDisciplinesRepository::NewEntity();
+			discipline.id      = CharacterID();
+			discipline.slot_id = index;
+			discipline.disc_id = m_pp.disciplines.values[index];
+			character_discs.emplace_back(discipline);
+		}
+	}
+
+	CharacterDisciplinesRepository::DeleteWhere(database, fmt::format("id = {}", CharacterID()));
+
+	if (!character_discs.empty()) {
+		CharacterDisciplinesRepository::InsertMany(database, character_discs);
+	}
 }

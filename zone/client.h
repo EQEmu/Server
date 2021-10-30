@@ -799,10 +799,15 @@ public:
 	std::vector<int> GetMemmedSpells();
 	std::vector<int> GetScribeableSpells(uint8 min_level = 1, uint8 max_level = 0);
 	std::vector<int> GetScribedSpells();
-	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true);
-	void UnscribeSpell(int slot, bool update_client = true);
+	// defer save used when bulk saving
+	void ScribeSpell(uint16 spell_id, int slot, bool update_client = true, bool defer_save = false);
+	void SaveSpells();
+	void SaveDisciplines();
+
+	// defer save used when bulk saving
+	void UnscribeSpell(int slot, bool update_client = true, bool defer_save = false);
 	void UnscribeSpellAll(bool update_client = true);
-	void UntrainDisc(int slot, bool update_client = true);
+	void UntrainDisc(int slot, bool update_client = true, bool defer_save = false);
 	void UntrainDiscAll(bool update_client = true);
 	void UntrainDiscBySpellID(uint16 spell_id, bool update_client = true);
 	bool SpellGlobalCheck(uint16 spell_id, uint32 char_id);
