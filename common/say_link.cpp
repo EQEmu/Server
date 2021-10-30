@@ -26,6 +26,9 @@
 #include "../zone/zonedb.h"
 #include <algorithm>
 
+// static bucket global
+std::vector<SaylinkRepository::Saylink> g_cached_saylinks = {};
+
 bool EQ::saylink::DegenerateLinkBody(SayLinkBody_Struct &say_link_body_struct, const std::string &say_link_body)
 {
 	memset(&say_link_body_struct, 0, sizeof(say_link_body_struct));
@@ -295,33 +298,9 @@ std::string EQ::SayLinkEngine::GenerateQuestSaylink(std::string saylink_text, bo
 {
 	uint32 saylink_id = 0;
 
-	/**
-	 * Query for an existing phrase and id in the saylink table
-	 */
-	std::string query = StringFormat(
-		"SELECT `id` FROM `saylink` WHERE `phrase` = '%s' LIMIT 1",
-		EscapeString(saylink_text).c_str());
-
-	auto results = database.QueryDatabase(query);
-
-	if (results.Success()) {
-		if (results.RowCount() >= 1) {
-			for (auto row = results.begin(); row != results.end(); ++row)
-				saylink_id = static_cast<uint32>(atoi(row[0]));
-		}
-		else {
-			std::string insert_query = StringFormat(
-				"INSERT INTO `saylink` (`phrase`) VALUES ('%s')",
-				EscapeString(saylink_text).c_str());
-
-			results = database.QueryDatabase(insert_query);
-			if (!results.Success()) {
-				LogError("Error in saylink phrase queries {}", results.ErrorMessage().c_str());
-			}
-			else {
-				saylink_id = results.LastInsertedID();
-			}
-		}
+	SaylinkRepository::Saylink saylink = GetOrSaveSaylink(saylink_text);
+	if (saylink.id > 0) {
+		saylink_id = saylink.id;
 	}
 
 	/**
@@ -484,4 +463,48 @@ std::string EQ::SayLinkEngine::InjectSaylinksIfNotExist(const char *message)
 	LogSaylinkDetail("new_message post pass 4 (post saylink anchor pop) [{}]", new_message);
 
 	return new_message;
+}
+
+void EQ::SayLinkEngine::LoadCachedSaylinks()
+{
+	auto saylinks = SaylinkRepository::GetWhere(database, "phrase not like '%#%'");
+	LogSaylink("Loaded [{}] saylinks into cache", saylinks.size());
+	g_cached_saylinks = saylinks;
+}
+
+SaylinkRepository::Saylink EQ::SayLinkEngine::GetOrSaveSaylink(std::string saylink_text)
+{
+	// return cached saylink if exist
+	if (!g_cached_saylinks.empty()) {
+		for (auto &s: g_cached_saylinks) {
+			if (s.phrase == saylink_text) {
+				return s;
+			}
+		}
+	}
+
+	auto saylinks = SaylinkRepository::GetWhere(
+		database,
+		fmt::format("phrase = '{}'", EscapeString(saylink_text))
+	);
+
+	// return if found from the database
+	if (!saylinks.empty()) {
+		return saylinks[0];
+	}
+
+	// if not found in database - save
+	if (saylinks.empty()) {
+		auto new_saylink = SaylinkRepository::NewEntity();
+		new_saylink.phrase = saylink_text;
+
+		// persist to database
+		auto link = SaylinkRepository::InsertOne(database, new_saylink);
+		if (link.id > 0) {
+			g_cached_saylinks.emplace_back(link);
+			return link;
+		}
+	}
+
+	return {};
 }
