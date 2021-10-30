@@ -25,6 +25,7 @@ extern LoginServer server;
 extern bool        run_server;
 
 #include "../common/eqemu_logsys.h"
+#include "../common/misc.h"
 
 ClientManager::ClientManager()
 {
@@ -53,7 +54,7 @@ ClientManager::ClientManager()
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
 				"New Titanium client connection from {0}:{1}",
-				stream->GetRemoteIP(),
+				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
@@ -87,13 +88,13 @@ ClientManager::ClientManager()
 	sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New SoD client connection from {0}:{1}",
-				stream->GetRemoteIP(),
+				"New SoD+ client connection from {0}:{1}",
+				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
 			stream->SetOpcodeManager(&sod_ops);
-			Client *c = new Client(stream, cv_sod);
+			auto *c = new Client(stream, cv_sod);
 			clients.push_back(c);
 		}
 	);
