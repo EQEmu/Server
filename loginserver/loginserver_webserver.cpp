@@ -28,17 +28,18 @@ namespace LoginserverWebserver {
 				}
 
 				Json::Value response;
-				auto        iter = server.server_manager->getWorldServers().begin();
+				auto iter = server.server_manager->getWorldServers().begin();
 				while (iter != server.server_manager->getWorldServers().end()) {
 					Json::Value row;
-					row["server_long_name"]  = (*iter)->GetServerLongName();
-					row["server_short_name"] = (*iter)->GetServerLongName();
-					row["server_list_id"]    = (*iter)->GetServerListID();
-					row["server_status"]     = (*iter)->GetStatus();
-					row["zones_booted"]      = (*iter)->GetZonesBooted();
-					row["local_ip"]          = (*iter)->GetLocalIP();
-					row["remote_ip"]         = (*iter)->GetRemoteIP();
-					row["players_online"]    = (*iter)->GetPlayersOnline();
+					row["server_long_name"]    = (*iter)->GetServerLongName();
+					row["server_short_name"]   = (*iter)->GetServerShortName();
+					row["server_list_type_id"] = (*iter)->GetServerListID();
+					row["server_status"]       = (*iter)->GetStatus();
+					row["zones_booted"]        = (*iter)->GetZonesBooted();
+					row["local_ip"]            = (*iter)->GetLocalIP();
+					row["remote_ip"]           = (*iter)->GetRemoteIP();
+					row["players_online"]      = (*iter)->GetPlayersOnline();
+					row["world_id"]            = (*iter)->GetServerId();
 					response.append(row);
 					++iter;
 				}
