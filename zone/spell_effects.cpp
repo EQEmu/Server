@@ -3333,8 +3333,8 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		return 0;
 
 	int formula = spells[spell_id].formula[effect_id];
-	int base = spells[spell_id].base_value[effect_id];
-	int max = spells[spell_id].max_value[effect_id];
+	int base_value = spells[spell_id].base_value[effect_id];
+	int max_value = spells[spell_id].max_value[effect_id];
 	int effect_value = 0;
 	int oval = 0;
 
