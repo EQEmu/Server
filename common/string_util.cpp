@@ -608,7 +608,7 @@ std::string FormatName(const std::string& char_name)
 
 bool IsAllowedWorldServerCharacterList(char c)
 {
-	const char *valid_characters = "[](){}.!@#$%^&*-=+<>/\\|'\"";
+	const char *valid_characters = ":[](){}.!@#$%^&*-=+<>/\\|'\"";
 	if (strchr(valid_characters, c)) {
 		return true;
 	}
