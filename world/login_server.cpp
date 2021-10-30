@@ -566,38 +566,41 @@ void LoginServer::SendInfo()
 	pack->size    = sizeof(ServerNewLSInfo_Struct);
 	pack->pBuffer = new uchar[pack->size];
 	memset(pack->pBuffer, 0, pack->size);
-	ServerNewLSInfo_Struct *lsi = (ServerNewLSInfo_Struct *) pack->pBuffer;
-	strcpy(lsi->protocol_version, EQEMU_PROTOCOL_VERSION);
-	strcpy(lsi->server_version, LOGIN_VERSION);
-	strcpy(lsi->server_long_name, Config->LongName.c_str());
-	strcpy(lsi->server_short_name, Config->ShortName.c_str());
-	strn0cpy(lsi->account_name, LoginAccount.c_str(), 30);
-	strn0cpy(lsi->account_password, LoginPassword.c_str(), 30);
 
-	// use config first if it is present
-	if (!Config->WorldAddress.empty()) {
-		strcpy(lsi->remote_ip_address, Config->WorldAddress.c_str());
+	auto *l = (ServerNewLSInfo_Struct *) pack->pBuffer;
+	strcpy(l->protocol_version, EQEMU_PROTOCOL_VERSION);
+	strcpy(l->server_version, LOGIN_VERSION);
+	strcpy(l->server_long_name, Config->LongName.c_str());
+	strcpy(l->server_short_name, Config->ShortName.c_str());
+	strn0cpy(l->account_name, LoginAccount.c_str(), 30);
+	strn0cpy(l->account_password, LoginPassword.c_str(), 30);
+	if (Config->WorldAddress.length()) {
+		strcpy(l->remote_ip_address, Config->WorldAddress.c_str());
 	}
-	// fallback to pulling the address off of the connection
+	if (Config->LocalAddress.length()) {
+		strcpy(l->local_ip_address, Config->LocalAddress.c_str());
+	}
 	else {
 		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
-		strcpy(lsi->remote_ip_address, local_addr.c_str());
+		strcpy(l->local_ip_address, local_addr.c_str());
+		WorldConfig::SetLocalAddress(l->local_ip_address);
 	}
 
-	// use config first if it is present
-	if (!Config->LocalAddress.empty()) {
-		strcpy(lsi->local_ip_address, Config->LocalAddress.c_str());
-	}
-	// fallback to pulling the address off of the connection
-	else {
-		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
-		strcpy(lsi->local_ip_address, local_addr.c_str());
-		WorldConfig::SetLocalAddress(lsi->local_ip_address);
-	}
+	LogInfo(
+		"[LoginServer::SendInfo] protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
+		l->protocol_version,
+		l->server_version,
+		l->server_long_name,
+		l->server_short_name,
+		l->account_name,
+		l->remote_ip_address,
+		l->local_ip_address
+	);
 
 	SendPacket(pack);
 	delete pack;
 }
+
 
 void LoginServer::SendStatus()
 {
