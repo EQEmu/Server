@@ -23,6 +23,7 @@
 #include "login_structures.h"
 #include "../common/eqemu_logsys.h"
 #include "../common/ip_util.h"
+#include "../common/string_util.h"
 
 extern LoginServer server;
 
@@ -491,6 +492,8 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		LogError("WorldServer::Handle_NewLSInfo failed validation rules");
 		return;
 	}
+
+	SanitizeWorldServerName(new_world_server_info_packet->server_long_name);
 
 	SetAccountPassword(new_world_server_info_packet->account_password)
 		->SetLongName(new_world_server_info_packet->server_long_name)

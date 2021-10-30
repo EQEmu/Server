@@ -383,6 +383,8 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
+	LogInfo("[AttemptLoginAccountCreation] user [{}] loginserver [{}]", user, loginserver);
+
 #ifdef LSPX
 	if (loginserver == "eqemu") {
 		LogInfo("Attempting login account creation via '{0}'", loginserver);

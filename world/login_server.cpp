@@ -586,6 +586,8 @@ void LoginServer::SendInfo()
 		WorldConfig::SetLocalAddress(l->local_ip_address);
 	}
 
+	SanitizeWorldServerName(l->server_long_name);
+
 	LogInfo(
 		"[LoginServer::SendInfo] protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",
 		l->protocol_version,
