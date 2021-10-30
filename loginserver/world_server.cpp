@@ -1,27 +1,6 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "world_server.h"
 #include "login_server.h"
 #include "login_structures.h"
-#include "../common/eqemu_logsys.h"
 #include "../common/ip_util.h"
 #include "../common/string_util.h"
 
@@ -32,16 +11,16 @@ extern LoginServer server;
  */
 WorldServer::WorldServer(std::shared_ptr<EQ::Net::ServertalkServerConnection> worldserver_connection)
 {
-	connection           = worldserver_connection;
-	zones_booted         = 0;
-	players_online       = 0;
-	server_status        = 0;
-	server_id            = 0;
-	server_list_type_id  = 0;
-	server_process_type  = 0;
-	is_server_authorized = false;
-	is_server_trusted    = false;
-	is_server_logged_in  = false;
+	m_connection           = worldserver_connection;
+	m_zones_booted         = 0;
+	m_players_online       = 0;
+	m_server_status        = 0;
+	m_server_id            = 0;
+	m_server_list_type_id  = 0;
+	m_server_process_type  = 0;
+	m_is_server_authorized = false;
+	m_is_server_trusted    = false;
+	m_is_server_logged_in  = false;
 
 	worldserver_connection->OnMessage(
 		ServerOP_NewLSInfo,
@@ -80,14 +59,14 @@ WorldServer::~WorldServer() = default;
 
 void WorldServer::Reset()
 {
-	server_id;
-	zones_booted         = 0;
-	players_online       = 0;
-	server_status        = 0;
-	server_list_type_id  = 0;
-	server_process_type  = 0;
-	is_server_authorized = false;
-	is_server_logged_in  = false;
+	m_server_id;
+	m_zones_booted   = 0;
+	m_players_online    = 0;
+	m_server_status       = 0;
+	m_server_list_type_id  = 0;
+	m_server_process_type  = 0;
+	m_is_server_authorized = false;
+	m_is_server_logged_in  = false;
 }
 
 /**
@@ -450,7 +429,7 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 	}
 
 	if (server.options.IsWorldTraceOn()) {
-		LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", short_name);
+		LogDebug("ServerOP_LSAccountUpdate packet received from [{0}]", m_short_name);
 	}
 
 	auto *loginserver_update = (ServerLSAccountUpdate_Struct *) packet.Data();
@@ -515,8 +494,8 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	else {
 		if (server.server_manager->ServerExists(GetServerLongName(), GetServerShortName(), this)) {
 			LogInfo("World tried to login but there already exists a server that has that name, destroying [{}]",
-					long_name);
-			server.server_manager->DestroyServerByName(long_name, short_name, this);
+					m_long_name);
+			server.server_manager->DestroyServerByName(m_long_name, m_short_name, this);
 		}
 	}
 
@@ -628,7 +607,7 @@ void WorldServer::SendClientAuth(
 	strncpy(client_auth.loginserver_name, &loginserver_name[0], 64);
 
 	const std::string &client_address(ip);
-	std::string       world_address(connection->Handle()->RemoteIP());
+	std::string       world_address(m_connection->Handle()->RemoteIP());
 
 	if (client_address == world_address) {
 		client_auth.is_client_from_local_network = 1;
@@ -664,7 +643,7 @@ void WorldServer::SendClientAuth(
 	);
 
 	outapp.PutSerialize(0, client_auth);
-	connection->Send(ServerOP_LSClientAuth, outapp);
+	m_connection->Send(ServerOP_LSClientAuth, outapp);
 
 	if (server.options.IsDumpInPacketsOn()) {
 		DumpPacket(ServerOP_LSClientAuth, outapp);
@@ -732,8 +711,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 			SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 			LogWarning(
-				"Remote address was null, defaulting to stream address [{0}]",
-				remote_ip_address
+			"Remote address was null, defaulting to stream address [{0}]",
+			m_remote_ip_address
 			);
 		}
 		else {
@@ -744,8 +723,8 @@ bool WorldServer::HandleNewLoginserverInfoValidation(
 		SetRemoteIp(GetConnection()->Handle()->RemoteIP());
 
 		LogWarning(
-			"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
-			remote_ip_address
+		"Handle_NewLSInfo remote address was too long, defaulting to stream address [{0}]",
+		m_remote_ip_address
 		);
 	}
 
@@ -805,7 +784,7 @@ bool WorldServer::HandleNewLoginserverRegisteredOnly(
 				if (IsServerTrusted()) {
 					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
 					EQ::Net::DynamicPacket outapp;
-					connection->Send(ServerOP_LSAccountUpdate, outapp);
+					m_connection->Send(ServerOP_LSAccountUpdate, outapp);
 				}
 			}
 			else {
@@ -886,7 +865,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 				if (IsServerTrusted()) {
 					LogDebug("WorldServer::HandleNewLoginserverRegisteredOnly | ServerOP_LSAccountUpdate sent to world");
 					EQ::Net::DynamicPacket outapp;
-					connection->Send(ServerOP_LSAccountUpdate, outapp);
+					m_connection->Send(ServerOP_LSAccountUpdate, outapp);
 				}
 			}
 			else {
@@ -949,7 +928,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			GetServerLongName(),
 			GetServerShortName(),
 			GetRemoteIp(),
-			server_id,
+			m_server_id,
 			server_admin_id
 		)) {
 			return false;
@@ -1047,7 +1026,7 @@ bool WorldServer::ValidateWorldServerAdminLogin(
  */
 WorldServer *WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
 {
-	server_list_type_id = in_server_list_id;
+	m_server_list_type_id = in_server_list_id;
 
 	return this;
 }
@@ -1057,7 +1036,7 @@ WorldServer *WorldServer::SetServerListTypeId(unsigned int in_server_list_id)
  */
 const std::string &WorldServer::GetServerDescription() const
 {
-	return server_description;
+	return m_server_description;
 }
 
 /**
@@ -1065,7 +1044,7 @@ const std::string &WorldServer::GetServerDescription() const
  */
 WorldServer *WorldServer::SetServerDescription(const std::string &in_server_description)
 {
-	WorldServer::server_description = in_server_description;
+	WorldServer::m_server_description = in_server_description;
 
 	return this;
 }
@@ -1075,7 +1054,7 @@ WorldServer *WorldServer::SetServerDescription(const std::string &in_server_desc
  */
 bool WorldServer::IsServerAuthorized() const
 {
-	return is_server_authorized;
+	return m_is_server_authorized;
 }
 
 /**
@@ -1083,7 +1062,7 @@ bool WorldServer::IsServerAuthorized() const
  */
 WorldServer *WorldServer::SetIsServerAuthorized(bool in_is_server_authorized)
 {
-	WorldServer::is_server_authorized = in_is_server_authorized;
+	WorldServer::m_is_server_authorized = in_is_server_authorized;
 
 	return this;
 }
@@ -1093,7 +1072,7 @@ WorldServer *WorldServer::SetIsServerAuthorized(bool in_is_server_authorized)
  */
 bool WorldServer::IsServerLoggedIn() const
 {
-	return is_server_logged_in;
+	return m_is_server_logged_in;
 }
 
 /**
@@ -1101,7 +1080,7 @@ bool WorldServer::IsServerLoggedIn() const
  */
 WorldServer *WorldServer::SetIsServerLoggedIn(bool in_is_server_logged_in)
 {
-	WorldServer::is_server_logged_in = in_is_server_logged_in;
+	WorldServer::m_is_server_logged_in = in_is_server_logged_in;
 
 	return this;
 }
@@ -1111,7 +1090,7 @@ WorldServer *WorldServer::SetIsServerLoggedIn(bool in_is_server_logged_in)
  */
 bool WorldServer::IsServerTrusted() const
 {
-	return is_server_trusted;
+	return m_is_server_trusted;
 }
 
 /**
@@ -1119,7 +1098,7 @@ bool WorldServer::IsServerTrusted() const
  */
 WorldServer *WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
 {
-	WorldServer::is_server_trusted = in_is_server_trusted;
+	WorldServer::m_is_server_trusted = in_is_server_trusted;
 
 	return this;
 }
@@ -1129,7 +1108,7 @@ WorldServer *WorldServer::SetIsServerTrusted(bool in_is_server_trusted)
  */
 WorldServer *WorldServer::SetZonesBooted(unsigned int in_zones_booted)
 {
-	WorldServer::zones_booted = in_zones_booted;
+	WorldServer::m_zones_booted = in_zones_booted;
 
 	return this;
 }
@@ -1139,7 +1118,7 @@ WorldServer *WorldServer::SetZonesBooted(unsigned int in_zones_booted)
  */
 WorldServer *WorldServer::SetPlayersOnline(unsigned int in_players_online)
 {
-	WorldServer::players_online = in_players_online;
+	WorldServer::m_players_online = in_players_online;
 
 	return this;
 }
@@ -1149,7 +1128,7 @@ WorldServer *WorldServer::SetPlayersOnline(unsigned int in_players_online)
  */
 WorldServer *WorldServer::SetServerStatus(int in_server_status)
 {
-	WorldServer::server_status = in_server_status;
+	WorldServer::m_server_status = in_server_status;
 
 	return this;
 }
@@ -1159,7 +1138,7 @@ WorldServer *WorldServer::SetServerStatus(int in_server_status)
  */
 WorldServer *WorldServer::SetServerProcessType(unsigned int in_server_process_type)
 {
-	WorldServer::server_process_type = in_server_process_type;
+	WorldServer::m_server_process_type = in_server_process_type;
 
 	return this;
 }
@@ -1169,7 +1148,7 @@ WorldServer *WorldServer::SetServerProcessType(unsigned int in_server_process_ty
  */
 WorldServer *WorldServer::SetLongName(const std::string &in_long_name)
 {
-	WorldServer::long_name = in_long_name;
+	WorldServer::m_long_name = in_long_name;
 
 	return this;
 }
@@ -1179,7 +1158,7 @@ WorldServer *WorldServer::SetLongName(const std::string &in_long_name)
  */
 WorldServer *WorldServer::SetShortName(const std::string &in_short_name)
 {
-	WorldServer::short_name = in_short_name;
+	WorldServer::m_short_name = in_short_name;
 
 	return this;
 }
@@ -1189,7 +1168,7 @@ WorldServer *WorldServer::SetShortName(const std::string &in_short_name)
  */
 WorldServer *WorldServer::SetAccountName(const std::string &in_account_name)
 {
-	WorldServer::account_name = in_account_name;
+	WorldServer::m_account_name = in_account_name;
 
 	return this;
 }
@@ -1199,7 +1178,7 @@ WorldServer *WorldServer::SetAccountName(const std::string &in_account_name)
  */
 WorldServer *WorldServer::SetAccountPassword(const std::string &in_account_password)
 {
-	WorldServer::account_password = in_account_password;
+	WorldServer::m_account_password = in_account_password;
 
 	return this;
 }
@@ -1209,7 +1188,7 @@ WorldServer *WorldServer::SetAccountPassword(const std::string &in_account_passw
  */
 WorldServer *WorldServer::SetRemoteIp(const std::string &in_remote_ip)
 {
-	WorldServer::remote_ip_address = in_remote_ip;
+	WorldServer::m_remote_ip_address = in_remote_ip;
 
 	return this;
 }
@@ -1219,7 +1198,7 @@ WorldServer *WorldServer::SetRemoteIp(const std::string &in_remote_ip)
  */
 WorldServer *WorldServer::SetLocalIp(const std::string &in_local_ip)
 {
-	WorldServer::local_ip = in_local_ip;
+	WorldServer::m_local_ip = in_local_ip;
 
 	return this;
 }
@@ -1229,7 +1208,7 @@ WorldServer *WorldServer::SetLocalIp(const std::string &in_local_ip)
  */
 WorldServer *WorldServer::SetProtocol(const std::string &in_protocol)
 {
-	WorldServer::protocol = in_protocol;
+	WorldServer::m_protocol = in_protocol;
 
 	return this;
 }
@@ -1239,7 +1218,7 @@ WorldServer *WorldServer::SetProtocol(const std::string &in_protocol)
  */
 WorldServer *WorldServer::SetVersion(const std::string &in_version)
 {
-	WorldServer::version = in_version;
+	WorldServer::m_version = in_version;
 
 	return this;
 }
@@ -1249,7 +1228,7 @@ WorldServer *WorldServer::SetVersion(const std::string &in_version)
  */
 int WorldServer::GetServerStatus() const
 {
-	return server_status;
+	return m_server_status;
 }
 
 /**
@@ -1257,7 +1236,7 @@ int WorldServer::GetServerStatus() const
  */
 unsigned int WorldServer::GetServerListTypeId() const
 {
-	return server_list_type_id;
+	return m_server_list_type_id;
 }
 
 /**
@@ -1265,7 +1244,7 @@ unsigned int WorldServer::GetServerListTypeId() const
  */
 unsigned int WorldServer::GetServerProcessType() const
 {
-	return server_process_type;
+	return m_server_process_type;
 }
 
 /**
@@ -1273,7 +1252,7 @@ unsigned int WorldServer::GetServerProcessType() const
  */
 const std::string &WorldServer::GetAccountName() const
 {
-	return account_name;
+	return m_account_name;
 }
 
 /**
@@ -1281,7 +1260,7 @@ const std::string &WorldServer::GetAccountName() const
  */
 const std::string &WorldServer::GetAccountPassword() const
 {
-	return account_password;
+	return m_account_password;
 }
 
 /**
@@ -1289,7 +1268,7 @@ const std::string &WorldServer::GetAccountPassword() const
  */
 const std::string &WorldServer::GetRemoteIp() const
 {
-	return remote_ip_address;
+	return m_remote_ip_address;
 }
 
 /**
@@ -1297,7 +1276,7 @@ const std::string &WorldServer::GetRemoteIp() const
  */
 const std::string &WorldServer::GetLocalIp() const
 {
-	return local_ip;
+	return m_local_ip;
 }
 
 /**
@@ -1305,7 +1284,7 @@ const std::string &WorldServer::GetLocalIp() const
  */
 const std::string &WorldServer::GetProtocol() const
 {
-	return protocol;
+	return m_protocol;
 }
 
 /**
@@ -1313,11 +1292,11 @@ const std::string &WorldServer::GetProtocol() const
  */
 const std::string &WorldServer::GetVersion() const
 {
-	return version;
+	return m_version;
 }
 
 void WorldServer::OnKeepAlive(EQ::Timer *t)
 {
 	ServerPacket pack(ServerOP_KeepAlive, 0);
-	connection->SendPacket(&pack);
+	m_connection->SendPacket(&pack);
 }
