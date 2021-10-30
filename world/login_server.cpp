@@ -47,8 +47,8 @@ extern volatile bool RunLoops;
 LoginServer::LoginServer(const char *iAddress, uint16 iPort, const char *Account, const char *Password, bool legacy)
 {
 	strn0cpy(m_loginserver_address, iAddress, 256);
-	m_loginserver_port = iPort;
-	m_login_account  = Account;
+	m_loginserver_port   = iPort;
+	m_login_account      = Account;
 	m_login_password     = Password;
 	m_can_account_update = false;
 	m_is_legacy          = legacy;
@@ -93,7 +93,10 @@ void LoginServer::ProcessUsertoWorldReqLeg(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (Config->Locked) {
 		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
-			LogDebug("[ProcessUsertoWorldReqLeg] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
+			LogDebug(
+				"[ProcessUsertoWorldReqLeg] Server locked and status is not high enough for account_id [{0}]",
+				utwr->lsaccountid
+			);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
 			return;
@@ -171,7 +174,10 @@ void LoginServer::ProcessUsertoWorldReq(uint16_t opcode, EQ::Net::Packet &p)
 
 	if (Config->Locked == true) {
 		if (status < (RuleI(GM, MinStatusToBypassLockedServer))) {
-			LogDebug("[ProcessUsertoWorldReq] Server locked and status is not high enough for account_id [{0}]", utwr->lsaccountid);
+			LogDebug(
+				"[ProcessUsertoWorldReq] Server locked and status is not high enough for account_id [{0}]",
+				utwr->lsaccountid
+			);
 			utwrs->response = UserToWorldStatusWorldUnavail;
 			SendPacket(&outpack);
 			return;
@@ -342,7 +348,11 @@ bool LoginServer::Connect()
 	}
 
 	if (m_is_legacy) {
-		m_legacy_client = std::make_unique<EQ::Net::ServertalkLegacyClient>(m_loginserver_address, m_loginserver_port, false);
+		m_legacy_client = std::make_unique<EQ::Net::ServertalkLegacyClient>(
+			m_loginserver_address,
+			m_loginserver_port,
+			false
+		);
 		m_legacy_client->OnConnect(
 			[this](EQ::Net::ServertalkLegacyClient *client) {
 				if (client) {
@@ -357,18 +367,16 @@ bool LoginServer::Connect()
 					zoneserver_list.SendLSZones();
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
-
-							LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
-								SendStatus();
-							}
-
+						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+							SendStatus();
+						}
 					);
 				}
 				else {
 					LogInfo(
-					"Could not connect to Legacy Loginserver: [{0}:{1}]",
-					m_loginserver_address,
-					m_loginserver_port
+						"Could not connect to Legacy Loginserver: [{0}:{1}]",
+						m_loginserver_address,
+						m_loginserver_port
 					);
 				}
 			}
@@ -448,7 +456,13 @@ bool LoginServer::Connect()
 		);
 	}
 	else {
-		m_client = std::make_unique<EQ::Net::ServertalkClient>(m_loginserver_address, m_loginserver_port, false, "World", "");
+		m_client = std::make_unique<EQ::Net::ServertalkClient>(
+			m_loginserver_address,
+			m_loginserver_port,
+			false,
+			"World",
+			""
+		);
 		m_client->OnConnect(
 			[this](EQ::Net::ServertalkClient *client) {
 				if (client) {
@@ -463,16 +477,16 @@ bool LoginServer::Connect()
 
 					m_statusupdate_timer = std::make_unique<EQ::Timer>(
 
-							LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
-								SendStatus();
-							}
-						);
+						LoginServer_StatusUpdateInterval, true, [this](EQ::Timer *t) {
+							SendStatus();
+						}
+					);
 				}
 				else {
 					LogInfo(
-					"Could not connect to Loginserver: [{0}:{1}]",
-					m_loginserver_address,
-					m_loginserver_port
+						"Could not connect to Loginserver: [{0}:{1}]",
+						m_loginserver_address,
+						m_loginserver_port
 					);
 				}
 			}
@@ -552,7 +566,10 @@ bool LoginServer::Connect()
 		);
 	}
 
-	m_keepalive = std::make_unique<EQ::Timer>(1000, true, std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
+	m_keepalive = std::make_unique<EQ::Timer>(
+		1000,
+		true,
+		std::bind(&LoginServer::OnKeepAlive, this, std::placeholders::_1));
 
 	return true;
 }
@@ -651,9 +668,9 @@ void LoginServer::SendAccountUpdate(ServerPacket *pack)
 	auto *ls_account_update = (ServerLSAccountUpdate_Struct *) pack->pBuffer;
 	if (CanUpdate()) {
 		LogInfo(
-		"Sending ServerOP_LSAccountUpdate packet to loginserver: [{0}]:[{1}]",
-		m_loginserver_address,
-		m_loginserver_port
+			"Sending ServerOP_LSAccountUpdate packet to loginserver: [{0}]:[{1}]",
+			m_loginserver_address,
+			m_loginserver_port
 		);
 		strn0cpy(ls_account_update->worldaccount, m_login_account.c_str(), 30);
 		strn0cpy(ls_account_update->worldpassword, m_login_password.c_str(), 30);
