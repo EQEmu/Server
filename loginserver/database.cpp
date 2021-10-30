@@ -25,10 +25,10 @@ Database::Database(
 	std::string name
 )
 {
-	this->user = user;
-	this->pass = pass;
-	this->host = host;
-	this->name = name;
+	user = user;
+	pass = pass;
+	host = host;
+	name = name;
 
 	uint32 errnum = 0;
 	char   errbuf[MYSQL_ERRMSG_SIZE];

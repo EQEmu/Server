@@ -303,7 +303,7 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	this->m_play_server_id = (unsigned int) play->ServerNumber;
+	m_play_server_id = (unsigned int) play->ServerNumber;
 	m_play_sequence_id = sequence_in;
 	m_play_server_id   = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
