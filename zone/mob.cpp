@@ -2875,7 +2875,7 @@ bool Mob::RemoveFromHateList(Mob* mob)
 				ResetAssistCap();
 		}
 	}
-	if(GetTarget() == mob)
+	if(IsAIControlled() && GetTarget() == mob)
 	{
 		SetTarget(hate_list.GetEntWithMostHateOnList(this));
 	}

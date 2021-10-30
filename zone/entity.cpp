@@ -1514,7 +1514,9 @@ void EntityList::RemoveFromTargets(Mob *mob, bool RemoveFromXTargets)
 				mob->CastToClient()->RemoveXTarget(m, false);
 		}
 
-		m->RemoveFromHateList(mob);
+		if (m->IsAIControlled()) {
+			m->RemoveFromHateList(mob);
+		}
 	}
 }
 
