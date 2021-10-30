@@ -25,11 +25,6 @@ Database::Database(
 	std::string name
 )
 {
-	user = user;
-	pass = pass;
-	host = host;
-	name = name;
-
 	uint32 errnum = 0;
 	char   errbuf[MYSQL_ERRMSG_SIZE];
 	if (!Open(
@@ -55,8 +50,8 @@ Database::Database(
  */
 Database::~Database()
 {
-	if (database) {
-		mysql_close(database);
+	if (m_database) {
+		mysql_close(m_database);
 	}
 }
 
