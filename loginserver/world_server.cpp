@@ -543,6 +543,7 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 	Database::DbWorldRegistration
 		world_registration = server.db->GetWorldRegistration(
 		GetServerShortName(),
+		GetServerLongName(),
 		world_server_admin_id
 	);
 

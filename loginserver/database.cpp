@@ -335,11 +335,13 @@ void Database::UpdateLoginserverAccountPasswordHash(
 
 /**
  * @param short_name
+ * @param long_name
  * @param login_world_server_admin_id
  * @return
  */
 Database::DbWorldRegistration Database::GetWorldRegistration(
 	const std::string &short_name,
+	const std::string &long_name,
 	uint32 login_world_server_admin_id
 )
 {
@@ -355,8 +357,9 @@ Database::DbWorldRegistration Database::GetWorldRegistration(
 		"  login_world_servers AS WSR\n"
 		"  JOIN login_server_list_types AS SLT ON WSR.login_server_list_type_id = SLT.id\n"
 		"WHERE\n"
-		"  WSR.short_name = '{0}' AND WSR.login_server_admin_id = {1} LIMIT 1",
+		"  WSR.short_name = '{}' AND WSR.long_name = '{}' AND WSR.login_server_admin_id = {} LIMIT 1",
 		EscapeString(short_name),
+		EscapeString(long_name),
 		login_world_server_admin_id
 	);
 

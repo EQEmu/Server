@@ -138,11 +138,13 @@ public:
 	 * Returns true if the record was found, false otherwise
 	 *
 	 * @param short_name
+	 * @param long_name
 	 * @param login_world_server_admin_id
 	 * @return
 	 */
 	Database::DbWorldRegistration GetWorldRegistration(
 		const std::string &short_name,
+		const std::string &long_name,
 		uint32 login_world_server_admin_id
 	);
 

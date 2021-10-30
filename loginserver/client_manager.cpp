@@ -33,7 +33,7 @@ ClientManager::ClientManager()
 	titanium_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Titanium client connection from {0}:{1}",
+				"New Titanium client connection from [{0}:{1}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
@@ -68,7 +68,7 @@ ClientManager::ClientManager()
 	sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New SoD+ client connection from {0}:{1}",
+				"New SoD+ client connection from [{0}:{1}]",
 				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
