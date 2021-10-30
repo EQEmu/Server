@@ -3347,10 +3347,8 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)) {
 
 		if (IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])) {
-			Shout("1 effect_value %i %i %i", effect_value, oval, instrument_mod);
 			oval = effect_value;
-			effect_value = effect_value * instrument_mod / 10;
-			Shout("2 effect_value %i %i", effect_value, oval);
+			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
 		}
@@ -3372,7 +3370,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 		if (caster_id && instrument_mod > 10) {
 			//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
 			oval = effect_value;
-			effect_value = effect_value * instrument_mod / 10;
+			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
 			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
