@@ -116,8 +116,14 @@ void WorldServer::ProcessNewLSInfo(uint16_t opcode, const EQ::Net::Packet &packe
 		return;
 	}
 
-
 	auto *info = (ServerNewLSInfo_Struct *) packet.Data();
+
+	// if for whatever reason the world server is not sending an address, use the local address it sends
+	std::string remote_ip_addr = info->remote_ip_address;
+	std::string local_ip_addr  = info->local_ip_address;
+	if (remote_ip_addr.empty() && !local_ip_addr.empty() && local_ip_addr != "127.0.0.1") {
+		strcpy(info->remote_ip_address, local_ip_addr.c_str());
+	}
 
 	LogInfo(
 		"New World Server Info | name [{0}] shortname [{1}] remote_address [{2}] local_address [{3}] account [{4}] password [{5}] server_type [{6}]",
@@ -847,6 +853,8 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			->SetIsServerTrusted(world_registration.is_server_trusted)
 			->SetServerListTypeId(world_registration.server_list_type);
 
+		SetIsServerAuthorized(true);
+
 		bool does_world_server_pass_authentication_check = (
 			world_registration.server_admin_account_name == GetAccountName() &&
 			WorldServer::ValidateWorldServerAdminLogin(
@@ -864,7 +872,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 
 		if (does_world_server_have_non_empty_credentials) {
 			if (does_world_server_pass_authentication_check) {
-				SetIsServerAuthorized(true);
+				SetIsServerLoggedIn(true);
 
 				LogInfo(
 					"Server long_name [{0}] short_name [{1}] successfully logged in",
@@ -879,12 +887,9 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 				}
 			}
 			else {
-
-				/**
-				 * this is the first of two cases where we should deny access even if unregistered is allowed
-				 */
+				// server is authorized to be on the loginserver list but didn't pass login check
 				LogInfo(
-					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not match the entry in the database.",
+					"Server long_name [{0}] short_name [{1}] attempted to log in but account and password did not match the entry in the database. Unregistered still allowed",
 					GetServerLongName(),
 					GetServerShortName()
 				);
@@ -892,9 +897,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 		}
 		else {
 
-			/**
-			 * this is the second of two cases where we should deny access even if unregistered is allowed
-			 */
+			// server is authorized to be on the loginserver list but didn't pass login check
 			if (!GetAccountName().empty() || !GetAccountPassword().empty()) {
 				LogInfo(
 					"Server [{0}] [{1}] did not login but this server required a password to login",
@@ -903,7 +906,6 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 				);
 			}
 			else {
-				SetIsServerAuthorized(true);
 				LogInfo(
 					"Server [{0}] [{1}] did not login but unregistered servers are allowed",
 					GetServerLongName(),
@@ -939,9 +941,7 @@ bool WorldServer::HandleNewLoginserverInfoUnregisteredAllowed(
 			}
 		}
 
-		/**
-		 * Auto create a registration
-		 */
+		// Auto create a registration
 		if (!server.db->CreateWorldRegistration(
 			GetServerLongName(),
 			GetServerShortName(),

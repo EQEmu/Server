@@ -573,17 +573,28 @@ void LoginServer::SendInfo()
 	strcpy(lsi->server_short_name, Config->ShortName.c_str());
 	strn0cpy(lsi->account_name, LoginAccount.c_str(), 30);
 	strn0cpy(lsi->account_password, LoginPassword.c_str(), 30);
-	if (Config->WorldAddress.length()) {
+
+	// use config first if it is present
+	if (!Config->WorldAddress.empty()) {
 		strcpy(lsi->remote_ip_address, Config->WorldAddress.c_str());
 	}
-	if (Config->LocalAddress.length()) {
+	// fallback to pulling the address off of the connection
+	else {
+		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
+		strcpy(lsi->remote_ip_address, local_addr.c_str());
+	}
+
+	// use config first if it is present
+	if (!Config->LocalAddress.empty()) {
 		strcpy(lsi->local_ip_address, Config->LocalAddress.c_str());
 	}
+	// fallback to pulling the address off of the connection
 	else {
 		auto local_addr = IsLegacy ? legacy_client->Handle()->LocalIP() : client->Handle()->LocalIP();
 		strcpy(lsi->local_ip_address, local_addr.c_str());
 		WorldConfig::SetLocalAddress(lsi->local_ip_address);
 	}
+
 	SendPacket(pack);
 	delete pack;
 }
