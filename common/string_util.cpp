@@ -16,6 +16,7 @@
 
 #include "string_util.h"
 #include <algorithm>
+#include <cctype>
 
 #ifdef _WINDOWS
 	#include <windows.h>
