@@ -7899,10 +7899,10 @@ void command_scribespells(Client *c, const Seperator *sep)
 			scribed_spells > 0 ?
 			(
 				scribed_spells == 1 ? 
-				"a new spell" :
-				fmt::format("{} new spells", scribed_spells)
+				"A new spell" :
+				fmt::format("{} New spells", scribed_spells)
 			) :
-			"no new spells"
+			"No new spells"
 		);
 		c->Message(
 			Chat::White,
@@ -10942,10 +10942,10 @@ void command_traindisc(Client *c, const Seperator *sep)
 			learned_disciplines > 0 ?
 			(
 				learned_disciplines == 1 ? 
-				"a new discipline" :
-				fmt::format("{} new disciplines", learned_disciplines)
+				"A new discipline" :
+				fmt::format("{} New disciplines", learned_disciplines)
 			) :
-			"no new disciplines"
+			"No new disciplines"
 		);
 		c->Message(
 			Chat::White,
