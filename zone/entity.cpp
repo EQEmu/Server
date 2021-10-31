@@ -5237,6 +5237,11 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 	bool               is_detrimental_spell = IsDetrimentalSpell(spell_id);
 	for (auto          &it : entity_list.GetCloseMobList(spreader, range)) {
 		Mob *mob = it.second;
+
+		if (!mob) { 
+			continue; 
+		}
+
 		if (mob == spreader) {
 			continue;
 		}
@@ -5258,6 +5263,10 @@ std::vector<Mob*> EntityList::GetTargetsForVirusEffect(Mob *spreader, Mob *origi
 
 		// Make sure the target is in range
 		if (mob->CalculateDistance(spreader->GetX(), spreader->GetY(), spreader->GetZ()) <= range) {
+
+			if (!original_caster) {
+				continue;
+			}
 
 			//Do not allow detrimental spread to anything the original caster couldn't normally attack.
 			if (is_detrimental_spell && !original_caster->IsAttackAllowed(mob, true)) {
