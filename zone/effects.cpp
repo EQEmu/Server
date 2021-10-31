@@ -196,6 +196,14 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (target == nullptr)
 		return value;
+	
+	//These values calculated first
+	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && RuleB(Spells, DOTsScaleWithSpellDmg)) {
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+	}
+	else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5 && RuleB(Spells, DOTsScaleWithSpellDmg)) {
+		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+	}
 
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
@@ -383,6 +391,14 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
+		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
+		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.Healamt && RuleB(Spells, HOTsScaleWithHealAmt)) {
+			value += GetExtraSpellAmt(spell_id, itembonuses.Healamt, value);
+		}
+		else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.Healamt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5 && RuleB(Spells, HOTsScaleWithHealAmt)) {
+			value += GetExtraSpellAmt(spell_id, itembonuses.Healamt, value);
+		}
+		
 		if (critical_chance && zone->random.Roll(critical_chance))
 			value *= critical_modifier;
 	}
