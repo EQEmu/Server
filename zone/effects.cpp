@@ -198,11 +198,13 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 		return value;
 	
 	//These values calculated first
-	if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && RuleB(Spells, DOTsScaleWithSpellDmg)) {
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
-	}
-	else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5 && RuleB(Spells, DOTsScaleWithSpellDmg)) {
-		value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+	if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
+		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
+			value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+		}
+		else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+			value -= GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, value);
+		}
 	}
 
 	if (IsNPC()) {
@@ -392,11 +394,13 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
 		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
-		if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && RuleB(Spells, HOTsScaleWithHealAmt)) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
-		}
-		else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5 && RuleB(Spells, HOTsScaleWithHealAmt)) {
-			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
+		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
+				value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
+			}
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, value);
+			}
 		}
 		
 		if (critical_chance && zone->random.Roll(critical_chance))
