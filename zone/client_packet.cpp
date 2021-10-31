@@ -959,7 +959,7 @@ void Client::CompleteConnect()
 	}
 
 	// shared tasks memberlist
-	if (GetTaskState()->HasActiveSharedTask()) {
+	if (RuleB(TaskSystem, EnableTaskSystem) && GetTaskState()->HasActiveSharedTask()) {
 
 		// struct
 		auto p = new ServerPacket(
