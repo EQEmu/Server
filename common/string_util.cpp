@@ -605,3 +605,31 @@ std::string FormatName(const std::string& char_name)
 	}
 	return formatted;
 }
+
+bool IsAllowedWorldServerCharacterList(char c)
+{
+	const char *valid_characters = ":[](){}.!@#$%^&*-=+<>/\\|'\"";
+	if (strchr(valid_characters, c)) {
+		return true;
+	}
+
+	return false;
+}
+
+void SanitizeWorldServerName(char *name)
+{
+	std::string server_long_name = name;
+	server_long_name.erase(
+		std::remove_if(
+			server_long_name.begin(),
+			server_long_name.end(),
+			[](char c) {
+				return !(std::isalpha(c) || std::isalnum(c) || std::isspace(c) || IsAllowedWorldServerCharacterList(c));
+			}
+		), server_long_name.end()
+	);
+
+	server_long_name = trim(server_long_name);
+
+	strcpy(name, server_long_name.c_str());
+}

@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "client.h"
 #include "login_server.h"
 #include "../common/misc_functions.h"
@@ -33,17 +13,17 @@ extern LoginServer server;
  */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
-	connection       = c;
-	version          = v;
-	status           = cs_not_sent_session_ready;
-	account_id       = 0;
-	play_server_id   = 0;
-	play_sequence_id = 0;
+	m_connection     = c;
+	m_client_version = v;
+	m_client_status  = cs_not_sent_session_ready;
+	m_account_id     = 0;
+	m_play_server_id   = 0;
+	m_play_sequence_id = 0;
 }
 
 bool Client::Process()
 {
-	EQApplicationPacket *app = connection->PopPacket();
+	EQApplicationPacket *app = m_connection->PopPacket();
 	while (app) {
 		if (server.options.IsTraceOn()) {
 			LogDebug("Application packet received from client (size {0})", app->Size());
@@ -53,9 +33,9 @@ bool Client::Process()
 			DumpPacket(app);
 		}
 
-		if (status == cs_failed_to_login) {
+		if (m_client_status == cs_failed_to_login) {
 			delete app;
-			app = connection->PopPacket();
+			app = m_connection->PopPacket();
 			continue;
 		}
 
@@ -112,7 +92,7 @@ bool Client::Process()
 		}
 
 		delete app;
-		app = connection->PopPacket();
+		app = m_connection->PopPacket();
 	}
 
 	return true;
@@ -126,7 +106,7 @@ bool Client::Process()
  */
 void Client::Handle_SessionReady(const char *data, unsigned int size)
 {
-	if (status != cs_not_sent_session_ready) {
+	if (m_client_status != cs_not_sent_session_ready) {
 		LogError("Session ready received again after already being received");
 		return;
 	}
@@ -136,12 +116,12 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 		return;
 	}
 
-	status = cs_waiting_for_login;
+	m_client_status = cs_waiting_for_login;
 
 	/**
 	 * The packets are mostly the same but slightly different between the two versions
 	 */
-	if (version == cv_sod) {
+	if (m_client_version == cv_sod) {
 		auto *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
 		outapp->pBuffer[0]  = 0x02;
 		outapp->pBuffer[10] = 0x01;
@@ -151,7 +131,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 			DumpPacket(outapp);
 		}
 
-		connection->QueuePacket(outapp);
+		m_connection->QueuePacket(outapp);
 		delete outapp;
 	}
 	else {
@@ -166,7 +146,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 			DumpPacket(outapp);
 		}
 
-		connection->QueuePacket(outapp);
+		m_connection->QueuePacket(outapp);
 		delete outapp;
 	}
 }
@@ -179,7 +159,7 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
  */
 void Client::Handle_Login(const char *data, unsigned int size)
 {
-	if (status != cs_waiting_for_login) {
+	if (m_client_status != cs_waiting_for_login) {
 		LogError("Login received after already having logged in");
 		return;
 	}
@@ -228,7 +208,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	memcpy(&llrs, data, sizeof(LoginLoginRequest_Struct));
+	memcpy(&m_llrs, data, sizeof(LoginLoginRequest_Struct));
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
@@ -236,7 +216,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 			cred   = (&outbuffer[2 + user.length()]);
 			result = server.db->GetLoginTokenDataFromToken(
 				cred,
-				connection->GetRemoteAddr(),
+				m_connection->GetRemoteAddr(),
 				db_account_id,
 				db_loginserver,
 				user
@@ -267,7 +247,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				LogDebug("[VerifyLoginHash] Success [{0}]", (result ? "true" : "false"));
 			}
 			else {
-				status = cs_creating_account;
+				m_client_status = cs_creating_account;
 				AttemptLoginAccountCreation(user, cred, db_loginserver);
 
 				return;
@@ -305,7 +285,7 @@ void Client::Handle_Login(const char *data, unsigned int size)
  */
 void Client::Handle_Play(const char *data)
 {
-	if (status != cs_logged_in) {
+	if (m_client_status != cs_logged_in) {
 		LogError("Client sent a play request when they were not logged in, discarding");
 		return;
 	}
@@ -323,10 +303,10 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	this->play_server_id = (unsigned int) play->ServerNumber;
-	play_sequence_id = sequence_in;
-	play_server_id   = server_id_in;
-	server.server_manager->SendUserToWorldRequest(server_id_in, account_id, loginserver_name);
+	m_play_server_id = (unsigned int) play->ServerNumber;
+	m_play_sequence_id = sequence_in;
+	m_play_server_id   = server_id_in;
+	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
 }
 
 /**
@@ -340,7 +320,7 @@ void Client::SendServerListPacket(uint32 seq)
 		DumpPacket(outapp);
 	}
 
-	connection->QueuePacket(outapp);
+	m_connection->QueuePacket(outapp);
 	delete outapp;
 }
 
@@ -350,12 +330,12 @@ void Client::SendPlayResponse(EQApplicationPacket *outapp)
 		LogDebug("Sending play response for {0}", GetAccountName());
 		// server_log->LogPacket(log_network_trace, (const char*)outapp->pBuffer, outapp->size);
 	}
-	connection->QueuePacket(outapp);
+	m_connection->QueuePacket(outapp);
 }
 
 void Client::GenerateKey()
 {
-	key.clear();
+	m_key.clear();
 	int count = 0;
 	while (count < 10) {
 		static const char key_selection[] =
@@ -367,7 +347,7 @@ void Client::GenerateKey()
 								  '6', '7', '8', '9'
 							  };
 
-		key.append((const char *) &key_selection[random.Int(0, 35)], 1);
+		m_key.append((const char *) &key_selection[m_random.Int(0, 35)], 1);
 		count++;
 	}
 }
@@ -383,6 +363,8 @@ void Client::AttemptLoginAccountCreation(
 	const std::string &loginserver
 )
 {
+	LogInfo("[AttemptLoginAccountCreation] user [{}] loginserver [{}]", user, loginserver);
+
 #ifdef LSPX
 	if (loginserver == "eqemu") {
 		LogInfo("Attempting login account creation via '{0}'", loginserver);
@@ -404,8 +386,8 @@ void Client::AttemptLoginAccountCreation(
 			return;
 		}
 
-		stored_user = user;
-		stored_pass = pass;
+		m_stored_user = user;
+		m_stored_pass = pass;
 
 		auto address = addr_components[0];
 		auto port    = std::stoi(addr_components[1]);
@@ -416,15 +398,15 @@ void Client::AttemptLoginAccountCreation(
 					return;
 				}
 
-				login_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
-				login_connection_manager->OnNewConnection(
+				m_login_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
+				m_login_connection_manager->OnNewConnection(
 					std::bind(
 						&Client::LoginOnNewConnection,
 						this,
 						std::placeholders::_1
 					)
 				);
-				login_connection_manager->OnConnectionStateChange(
+				m_login_connection_manager->OnConnectionStateChange(
 					std::bind(
 						&Client::LoginOnStatusChange,
 						this,
@@ -433,7 +415,7 @@ void Client::AttemptLoginAccountCreation(
 						std::placeholders::_3
 					)
 				);
-				login_connection_manager->OnPacketRecv(
+				m_login_connection_manager->OnPacketRecv(
 					std::bind(
 						&Client::LoginOnPacketRecv,
 						this,
@@ -442,7 +424,7 @@ void Client::AttemptLoginAccountCreation(
 					)
 				);
 
-				login_connection_manager->Connect(addr, port);
+				m_login_connection_manager->Connect(addr, port);
 			}
 		);
 
@@ -461,17 +443,17 @@ void Client::AttemptLoginAccountCreation(
 
 void Client::DoFailedLogin()
 {
-	stored_user.clear();
-	stored_pass.clear();
+	m_stored_user.clear();
+	m_stored_pass.clear();
 
 	EQApplicationPacket outapp(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
 	auto                *login_failed = (LoginLoginFailed_Struct *) outapp.pBuffer;
 
-	login_failed->unknown1 = llrs.unknown1;
-	login_failed->unknown2 = llrs.unknown2;
-	login_failed->unknown3 = llrs.unknown3;
-	login_failed->unknown4 = llrs.unknown4;
-	login_failed->unknown5 = llrs.unknown5;
+	login_failed->unknown1 = m_llrs.unknown1;
+	login_failed->unknown2 = m_llrs.unknown2;
+	login_failed->unknown3 = m_llrs.unknown3;
+	login_failed->unknown4 = m_llrs.unknown4;
+	login_failed->unknown5 = m_llrs.unknown5;
 
 	memcpy(login_failed->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
 
@@ -479,8 +461,8 @@ void Client::DoFailedLogin()
 		DumpPacket(&outapp);
 	}
 
-	connection->QueuePacket(&outapp);
-	status = cs_failed_to_login;
+	m_connection->QueuePacket(&outapp);
+	m_client_status = cs_failed_to_login;
 }
 
 /**
@@ -576,28 +558,28 @@ void Client::DoSuccessfulLogin(
 	const std::string &db_loginserver
 )
 {
-	stored_user.clear();
-	stored_pass.clear();
+	m_stored_user.clear();
+	m_stored_pass.clear();
 
 	server.client_manager->RemoveExistingClient(db_account_id, db_loginserver);
 
 	in_addr in{};
-	in.s_addr = connection->GetRemoteIP();
+	in.s_addr = m_connection->GetRemoteIP();
 
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
 	GenerateKey();
 
-	account_id       = db_account_id;
-	account_name     = in_account_name;
-	loginserver_name = db_loginserver;
+	m_account_id   = db_account_id;
+	m_account_name     = in_account_name;
+	m_loginserver_name = db_loginserver;
 
 	auto *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
 	auto *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
-	login_accepted->unknown1 = llrs.unknown1;
-	login_accepted->unknown2 = llrs.unknown2;
-	login_accepted->unknown3 = llrs.unknown3;
-	login_accepted->unknown4 = llrs.unknown4;
-	login_accepted->unknown5 = llrs.unknown5;
+	login_accepted->unknown1 = m_llrs.unknown1;
+	login_accepted->unknown2 = m_llrs.unknown2;
+	login_accepted->unknown3 = m_llrs.unknown3;
+	login_accepted->unknown4 = m_llrs.unknown4;
+	login_accepted->unknown5 = m_llrs.unknown5;
 
 	auto *login_failed_attempts = new LoginFailedAttempts_Struct;
 	memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
@@ -620,7 +602,7 @@ void Client::DoSuccessfulLogin(
 	login_failed_attempts->unknown9[1]  = 0x03;
 	login_failed_attempts->unknown11[0] = 0x63;
 	login_failed_attempts->unknown12[0] = 0x01;
-	memcpy(login_failed_attempts->key, key.c_str(), key.size());
+	memcpy(login_failed_attempts->key, m_key.c_str(), m_key.size());
 
 	char encrypted_buffer[80] = {0};
 	auto rc                   = eqcrypt_block((const char *) login_failed_attempts, 75, encrypted_buffer, 1);
@@ -634,10 +616,10 @@ void Client::DoSuccessfulLogin(
 		DumpPacket(outapp);
 	}
 
-	connection->QueuePacket(outapp);
+	m_connection->QueuePacket(outapp);
 	delete outapp;
 
-	status = cs_logged_in;
+	m_client_status = cs_logged_in;
 }
 
 /**
@@ -689,7 +671,7 @@ void Client::CreateEQEmuAccount(
  */
 void Client::LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection)
 {
-	login_connection = connection;
+	m_login_connection = connection;
 }
 
 /**
@@ -751,16 +733,16 @@ void Client::LoginSendSessionReady()
 	p.PutUInt16(0, 1); //OP_SessionReady
 	p.PutUInt32(2, 2);
 
-	login_connection->QueuePacket(p);
+	m_login_connection->QueuePacket(p);
 }
 
 void Client::LoginSendLogin()
 {
-	size_t                  buffer_len = stored_user.length() + stored_pass.length() + 2;
+	size_t                  buffer_len = m_stored_user.length() + m_stored_pass.length() + 2;
 	std::unique_ptr<char[]> buffer(new char[buffer_len]);
 
-	strcpy(&buffer[0], stored_user.c_str());
-	strcpy(&buffer[stored_user.length() + 1], stored_pass.c_str());
+	strcpy(&buffer[0], m_stored_user.c_str());
+	strcpy(&buffer[m_stored_user.length() + 1], m_stored_pass.c_str());
 
 	size_t encrypted_len = buffer_len;
 
@@ -775,7 +757,7 @@ void Client::LoginSendLogin()
 
 	eqcrypt_block(&buffer[0], buffer_len, (char *) p.Data() + 12, true);
 
-	login_connection->QueuePacket(p);
+	m_login_connection->QueuePacket(p);
 }
 
 /**
@@ -796,7 +778,7 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
 	auto                  response_error = sp.GetUInt16(1);
 
-	login_connection_manager->OnConnectionStateChange(
+	m_login_connection_manager->OnConnectionStateChange(
 		std::bind(
 			&Client::LoginOnStatusChangeIgnored,
 			this,
@@ -809,18 +791,18 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	if (response_error > 101) {
 		LogDebug("response [{0}] failed login", response_error);
 		DoFailedLogin();
-		login_connection->Close();
+		m_login_connection->Close();
 	}
 	else {
 		LogDebug(
-			"response [{0}] login succeeded user [{1}]",
-			response_error,
-			stored_user
+		"response [{0}] login succeeded user [{1}]",
+		response_error,
+		m_stored_user
 		);
 
 		auto m_dbid = sp.GetUInt32(8);
 
-		CreateEQEmuAccount(stored_user, stored_pass, m_dbid);
-		login_connection->Close();
+		CreateEQEmuAccount(m_stored_user, m_stored_pass, m_dbid);
+		m_login_connection->Close();
 	}
 }
