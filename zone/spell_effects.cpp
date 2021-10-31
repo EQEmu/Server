@@ -197,7 +197,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
-																			 
+
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -728,35 +728,38 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Charm: %+i (up to lvl %d)", effect_value, spell.max[i]);
 #endif
 
-				if (!caster)	// can't be someone's pet unless we know who that someone is
+				if (!caster) {    // can't be someone's pet unless we know who that someone is
 					break;
+				}
 
-				if(IsNPC())
-				{
+				if (IsClient() && caster->IsClient()) {
+					caster->Message(Chat::White, "Unable to cast charm on a fellow player.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (IsCorpse()) {
+					caster->Message(Chat::White, "Unable to cast charm on a corpse.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (caster->GetPet() != nullptr && caster->IsClient()) {
+					caster->Message(Chat::White, "You cannot charm something when you already have a pet.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (GetOwner()) {
+					caster->Message(Chat::White, "You cannot charm someone else's pet!");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+
+				if (IsNPC()) {
 					CastToNPC()->SaveGuardSpotCharm();
 				}
 				InterruptSpell();
 				entity_list.RemoveDebuffs(this);
 				entity_list.RemoveFromTargets(this);
 				WipeHateList();
-
-				if (IsClient() && caster->IsClient()) {
-					caster->Message(Chat::White, "Unable to cast charm on a fellow player.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(IsCorpse()) {
-					caster->Message(Chat::White, "Unable to cast charm on a corpse.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(caster->GetPet() != nullptr && caster->IsClient()) {
-					caster->Message(Chat::White, "You cannot charm something when you already have a pet.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(GetOwner()) {
-					caster->Message(Chat::White, "You cannot charm someone else's pet!");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
 
 				Mob *my_pet = GetPet();
 				if(my_pet)
@@ -2358,7 +2361,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (!caster) {
 					break;
 				}
-				
+
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
 					caster->DoThrowingAttackDmg(this, nullptr, nullptr, effect_value,spells[spell_id].base2[i], 0, ReuseTime);
@@ -3529,7 +3532,7 @@ snare has both of them negative, yet their range should work the same:
 			break;
 
 		case 119:	// confirmed 2/6/04
-			result = ubase + (caster_level / 8); 
+			result = ubase + (caster_level / 8);
 			break;
 		case 120:
 		{
@@ -4563,7 +4566,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	int32  base1       = 0;
 	int32  base2       = 0;
 	uint32 slot        = 0;
-	
+
 	int index_id = -1;
 	uint32 focus_reuse_time = 0;
 
@@ -8614,7 +8617,7 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 
 bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 	/*
-		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
+		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
 		have the fire spells received a very high special focused once every 30 seconds.
 		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
@@ -8637,7 +8640,7 @@ bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 }
 
 void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time) {
-	
+
 	bool is_set = false;
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
