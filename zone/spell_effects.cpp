@@ -8591,6 +8591,11 @@ void Mob::VirusEffectProcess()
 void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
 {
 	Mob *caster = entity_list.GetMob(caster_id);
+
+	if (!caster) {
+		return;
+	}
+
 	std::vector<Mob *> targets_in_range = entity_list.GetTargetsForVirusEffect(
 		this,
 		caster,
