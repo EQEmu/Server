@@ -176,11 +176,13 @@ public:
 	luabind::object GetScribeableSpells(lua_State* L, uint8 min_level, uint8 max_level);
 	void ScribeSpell(int spell_id, int slot);
 	void ScribeSpell(int spell_id, int slot, bool update_client);
+	uint16 ScribeSpells(uint8 min_level, uint8 max_level);
 	void UnscribeSpell(int slot);
 	void UnscribeSpell(int slot, bool update_client);
 	void UnscribeSpellAll();
 	void UnscribeSpellAll(bool update_client);
 	void TrainDisc(int itemid);
+	uint16 LearnDisciplines(uint8 min_level, uint8 max_level);
 	void TrainDiscBySpellID(int32 spell_id);
 	int GetDiscSlotBySpellID(int32 spell_id);
 	void UntrainDisc(int slot);
@@ -300,6 +302,8 @@ public:
 	void ClearCompassMark();
 	int GetNextAvailableSpellBookSlot();
 	int GetNextAvailableSpellBookSlot(int start);
+	int GetNextAvailableDisciplineSlot();
+	int GetNextAvailableDisciplineSlot(int starting_slot);
 	uint32 GetSpellIDByBookSlot(int book_slot);
 	int FindSpellBookSlotBySpellID(int spell_id);
 	void UpdateTaskActivity(int task, int activity, int count);

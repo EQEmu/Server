@@ -7854,109 +7854,64 @@ void command_beardcolor(Client *c, const Seperator *sep)
 
 void command_scribespells(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t = c->GetTarget()->CastToClient();
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
 	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "FORMAT: #scribespells <max level> <min level>");
 		return;
 	}
 
-	uint8 max_level = (uint8)atol(sep->arg[1]);
-	if (!c->GetGM() && max_level > (uint8)RuleI(Character, MaxLevel))
-		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
+	uint8 max_level = (uint8) std::stoi(sep->arg[1]);
+	uint8 min_level = (
+		sep->IsNumber(2) ?
+		(uint8)
+		std::stoi(sep->arg[2]) :
+		1
+	); // Default to Level 1 if there isn't a 2nd argument
 
-	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
-		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	if (!c->GetGM()) { // Default to Character:MaxLevel if we're not a GM and Level is higher than the max level
+		if (max_level > rule_max_level) {
+			max_level = rule_max_level;
+		}
+
+		if (min_level > rule_max_level) {
+			min_level = rule_max_level;
+		}
+	}
 
 	if(max_level < 1 || min_level < 1) {
-		c->Message(Chat::White, "ERROR: Level must be greater than 1.");
+		c->Message(Chat::White, "ERROR: Level must be greater than or equal to 1.");
 		return;
 	}
+
 	if (min_level > max_level) {
-		c->Message(Chat::White, "ERROR: Min Level must be less than or equal to Max Level.");
+		c->Message(Chat::White, "ERROR: Minimum Level must be less than or equal to Maximum Level.");
 		return;
 	}
 
-	t->Message(Chat::White, "Scribing spells to spellbook.");
-	if(t != c)
-		c->Message(Chat::White, "Scribing spells for %s.",  t->GetName());
-	LogInfo("Scribe spells request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
-
-	int book_slot = t->GetNextAvailableSpellBookSlot();
-	int spell_id = 0;
-	int count = 0;
-
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
-		if (book_slot == -1) {
-			t->Message(
-				13,
-				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
-				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-				spell_id
-			);
-			if (t != c)
-				c->Message(
-					13,
-					"Error scribing spells: %s ran out of spell book slots on spell %s (%i)",
-					t->GetName(),
-					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-					spell_id
-				);
-
-			break;
-		}
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			c->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return;
-		}
-		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
-			c->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
-			return;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				c->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return;
-			}
-
-			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(spell_id_, book_slot, true, true);
-				++count;
-			}
-
-			break;
-		}
-
-		book_slot = t->GetNextAvailableSpellBookSlot(book_slot);
-	}
-
-	if (count > 0) {
-		t->Message(Chat::White, "Successfully scribed %i spells.", count);
-		if (t != c) {
-			c->Message(Chat::White, "Successfully scribed %i spells for %s.", count, t->GetName());
-		}
-
-		t->SaveSpells();
-	}
-	else {
-		t->Message(Chat::White, "No spells scribed.");
-		if (t != c) {
-			c->Message(Chat::White, "No spells scribed for %s.", t->GetName());
-		}
+	uint16 scribed_spells = target->ScribeSpells(min_level, max_level);
+	if (target != c) {
+		std::string spell_message = (
+			scribed_spells > 0 ?
+			(
+				scribed_spells == 1 ? 
+				"a new spell" :
+				fmt::format("{} new spells", scribed_spells)
+			) :
+			"no new spells"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} scribed for {}.",
+				spell_message,
+				target->GetCleanName()
+			).c_str()
+		);
 	}
 }
 
@@ -10942,101 +10897,64 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 void command_traindisc(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t = c->GetTarget()->CastToClient();
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (sep->argnum < 1 || !sep->IsNumber(1)) {
+	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "FORMAT: #traindisc <max level> <min level>");
 		return;
 	}
 
-	uint8 max_level = (uint8)atol(sep->arg[1]);
-	if (!c->GetGM() && max_level >(uint8)RuleI(Character, MaxLevel))
-		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
+	uint8 max_level = (uint8) std::stoi(sep->arg[1]);
+	uint8 min_level = (
+		sep->IsNumber(2) ?
+		(uint8)
+		std::stoi(sep->arg[2]) :
+		1
+	); // Default to Level 1 if there isn't a 2nd argument
 
-	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
-		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	if (!c->GetGM()) { // Default to Character:MaxLevel if we're not a GM and Level is higher than the max level
+		if (max_level > rule_max_level) {
+			max_level = rule_max_level;
+		}
+
+		if (min_level > rule_max_level) {
+			min_level = rule_max_level;
+		}
+	}
 
 	if(max_level < 1 || min_level < 1) {
-		c->Message(Chat::White, "ERROR: Level must be greater than 1.");
+		c->Message(Chat::White, "ERROR: Level must be greater than or equal to 1.");
 		return;
 	}
+
 	if (min_level > max_level) {
-		c->Message(Chat::White, "Error: Min Level must be less than or equal to Max Level.");
+		c->Message(Chat::White, "ERROR: Minimum Level must be less than or equal to Maximum Level.");
 		return;
 	}
 
-	t->Message(Chat::White, "Training disciplines");
-	if(t != c)
-		c->Message(Chat::White, "Training disciplines for %s.",  t->GetName());
-	LogInfo("Train disciplines request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
-
-	int spell_id = 0;
-	int count = 0;
-
-	bool change = false;
-
-	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			c->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				c->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return;
-			}
-
-			if (!IsDiscipline(spell_id_))
-				break;
-
-			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; ++r) {
-				if (t->GetPP().disciplines.values[r] == spell_id_) {
-					t->Message(Chat::Red, "You already know this discipline.");
-					break; // continue the 1st loop
-				}
-				else if (t->GetPP().disciplines.values[r] == 0) {
-					t->GetPP().disciplines.values[r] = spell_id_;
-					change = true;
-					t->Message(Chat::White, "You have learned a new discipline!");
-					++count; // success counter
-					break; // continue the 1st loop
-				} // if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
-			}
-
-			break;
-		}
-	}
-
-	if (change) {
-		t->SendDisciplineUpdate();
-		t->SaveDisciplines();
-	}
-
-	if (count > 0) {
-		t->Message(Chat::White, "Successfully trained %u disciplines.", count);
-		if (t != c) {
-			c->Message(Chat::White, "Successfully trained %u disciplines for %s.", count, t->GetName());
-		}
-	}
-	else {
-		t->Message(Chat::White, "No disciplines trained.");
-		if (t != c) {
-			c->Message(Chat::White, "No disciplines trained for %s.", t->GetName());
-		}
+	uint16 learned_disciplines = target->LearnDisciplines(min_level, max_level);
+	if (target != c) {
+		std::string discipline_message = (
+			learned_disciplines > 0 ?
+			(
+				learned_disciplines == 1 ? 
+				"a new discipline" :
+				fmt::format("{} new disciplines", learned_disciplines)
+			) :
+			"no new disciplines"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} learned for {}.",
+				discipline_message,
+				target->GetCleanName()
+			).c_str()
+		);
 	}
 }
 
