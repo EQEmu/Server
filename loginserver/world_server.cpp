@@ -201,7 +201,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
 	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
-	Client *client = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
+	Client *client = server.client_manager->GetClient(user_to_world_response->lsaccountid, "local");
 	if (client) {
 
 		LogDebug(

@@ -24,6 +24,48 @@ void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet 
 		if (!m_connection)
 			return;
 
+		if (opcode == ServerOP_UsertoWorldReq) {
+			auto req_in = (UsertoWorldRequest_Struct*)p.Data();
+
+			EQ::Net::DynamicPacket req;
+			size_t i = 0;
+			req.PutUInt32(i, req_in->lsaccountid); i += 4;
+			req.PutUInt32(i, req_in->worldid); i += 4;
+			req.PutUInt32(i, req_in->FromID); i += 4;
+			req.PutUInt32(i, req_in->ToID); i += 4;
+			req.PutData(i, req_in->IPAddr, 64); i += 64;
+
+			EQ::Net::DynamicPacket out;
+			out.PutUInt16(0, ServerOP_UsertoWorldReqLeg);
+			out.PutUInt16(2, req.Length() + 4);
+			out.PutPacket(4, req);
+
+			m_connection->Write((const char*)out.Data(), out.Length());
+			return;
+		}
+
+		if (opcode == ServerOP_LSClientAuth) {
+			auto req_in = (ClientAuth_Struct*)p.Data();
+
+			EQ::Net::DynamicPacket req;
+			size_t i = 0;
+			req.PutUInt32(i, req_in->loginserver_account_id); i += 4;
+			req.PutData(i, req_in->account_name, 30); i += 30;
+			req.PutData(i, req_in->key, 30); i += 30;
+			req.PutUInt8(i, req_in->lsadmin); i += 1;
+			req.PutUInt16(i, req_in->is_world_admin); i += 2;
+			req.PutUInt32(i, req_in->ip); i += 4;
+			req.PutUInt8(i, req_in->is_client_from_local_network); i += 1;
+
+			EQ::Net::DynamicPacket out;
+			out.PutUInt16(0, ServerOP_LSClientAuthLeg);
+			out.PutUInt16(2, req.Length() + 4);
+			out.PutPacket(4, req);
+
+			m_connection->Write((const char*)out.Data(), out.Length());
+			return;
+		}
+
 		EQ::Net::DynamicPacket out;
 		out.PutUInt16(0, opcode);
 		out.PutUInt16(2, p.Length() + 4);
