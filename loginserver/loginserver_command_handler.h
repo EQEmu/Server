@@ -14,6 +14,7 @@ namespace LoginserverCommandHandler {
 	void UpdateLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void CheckExternalLoginserverUserCredentials(int argc, char **argv, argh::parser &cmd, std::string &description);
 	void UpdateLoginserverWorldAdminAccountPassword(int argc, char **argv, argh::parser &cmd, std::string &description);
+	void HealthCheckLogin(int argc, char **argv, argh::parser &cmd, std::string &description);
 };
 
 
