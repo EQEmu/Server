@@ -229,6 +229,26 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
+	if (IsEffectInSpell(spell_id, SE_Charm)) {
+		Mob* charm_target = entity_list.GetMobID(target_id);
+		if (charm_target->IsClient() && IsClient()) {
+			InterruptSpell(CANNOT_AFFECT_PC, 0x121, spell_id);
+			return false;
+		}
+		else if (charm_target->IsCorpse()) {
+			InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
+			return false;
+		}
+		else if (GetPet() && IsClient()) {
+			InterruptSpell(ONLY_ONE_PET, 0x121, spell_id);
+			return false;
+		}
+		else if (charm_target->GetOwner()) {
+			InterruptSpell(CANNOT_CHARM, 0x121, spell_id);
+			return false;
+		}
+	}
+
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
 		//Note: this does NOT tell the client
