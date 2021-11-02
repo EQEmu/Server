@@ -139,6 +139,7 @@ RULE_INT(Character, TradeskillUpMakePoison, 2, "Make Poison skillup rate adjustm
 RULE_INT(Character, TradeskillUpPottery, 4, "Pottery skillup rate adjustment. Lower is faster")
 RULE_INT(Character, TradeskillUpResearch, 1, "Research skillup rate adjustment. Lower is faster")
 RULE_INT(Character, TradeskillUpTinkering, 2, "Tinkering skillup rate adjustment. Lower is faster")
+RULE_INT(Character, TradeskillUpTailoring, 2, "Tailoring skillup rate adjustment. Lower is faster")
 RULE_BOOL(Character, MarqueeHPUpdates, false, "Will show health percentage in center of screen if health lesser than 100%")
 RULE_INT(Character, IksarCommonTongue, 95, "Starting value for Common Tongue for Iksars")
 RULE_INT(Character, OgreCommonTongue, 95, "Starting value for Common Tongue for Ogres")
@@ -381,6 +382,8 @@ RULE_BOOL(Spells, AllowDoubleInvis, false, "Allows you to cast invisibility spel
 RULE_BOOL(Spells, AllowSpellMemorizeFromItem, false, "Allows players to memorize spells by right-clicking spell scrolls")
 RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to be in group.")
 RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate heal focus")
+RULE_BOOL(Spells, DOTsScaleWithSpellDmg, false, "Allow SpellDmg stat to affect DoT spells")
+RULE_BOOL(Spells, HOTsScaleWithHealAmt, false, "Allow HealAmt stat to affect HoT spells")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)

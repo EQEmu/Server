@@ -4205,9 +4205,9 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	rezz->zone_id = zone->GetZoneID();
 	rezz->instance_id = zone->GetInstanceID();
 	rezz->spellid = spellid;
-	rezz->x = this->m_Position.x;
-	rezz->y = this->m_Position.y;
-	rezz->z = this->m_Position.z;
+	rezz->x = m_Position.x;
+	rezz->y = m_Position.y;
+	rezz->z = GetFixedZ(m_Position);
 	rezz->unknown000 = 0x00000000;
 	rezz->unknown020 = 0x00000000;
 	rezz->unknown088 = 0x00000000;

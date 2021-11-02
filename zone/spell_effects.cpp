@@ -197,7 +197,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 
 	// if buff slot, use instrument mod there, otherwise calc it
 	uint32 instrument_mod = buffslot > -1 ? buffs[buffslot].instrument_mod : caster ? caster->GetInstrumentMod(spell_id) : 10;
-																			 
+
 	// iterate through the effects in the spell
 	for (i = 0; i < EFFECT_COUNT; i++)
 	{
@@ -728,35 +728,38 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				snprintf(effect_desc, _EDLEN, "Charm: %+i (up to lvl %d)", effect_value, spell.max[i]);
 #endif
 
-				if (!caster)	// can't be someone's pet unless we know who that someone is
+				if (!caster) {    // can't be someone's pet unless we know who that someone is
 					break;
+				}
 
-				if(IsNPC())
-				{
+				if (IsClient() && caster->IsClient()) {
+					caster->Message(Chat::White, "Unable to cast charm on a fellow player.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (IsCorpse()) {
+					caster->Message(Chat::White, "Unable to cast charm on a corpse.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (caster->GetPet() != nullptr && caster->IsClient()) {
+					caster->Message(Chat::White, "You cannot charm something when you already have a pet.");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+				else if (GetOwner()) {
+					caster->Message(Chat::White, "You cannot charm someone else's pet!");
+					BuffFadeByEffect(SE_Charm);
+					break;
+				}
+
+				if (IsNPC()) {
 					CastToNPC()->SaveGuardSpotCharm();
 				}
 				InterruptSpell();
 				entity_list.RemoveDebuffs(this);
 				entity_list.RemoveFromTargets(this);
 				WipeHateList();
-
-				if (IsClient() && caster->IsClient()) {
-					caster->Message(Chat::White, "Unable to cast charm on a fellow player.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(IsCorpse()) {
-					caster->Message(Chat::White, "Unable to cast charm on a corpse.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(caster->GetPet() != nullptr && caster->IsClient()) {
-					caster->Message(Chat::White, "You cannot charm something when you already have a pet.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				} else if(GetOwner()) {
-					caster->Message(Chat::White, "You cannot charm someone else's pet!");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
 
 				Mob *my_pet = GetPet();
 				if(my_pet)
@@ -2358,7 +2361,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if (!caster) {
 					break;
 				}
-				
+
 				switch(spells[spell_id].skill) {
 				case EQ::skills::SkillThrowing:
 					caster->DoThrowingAttackDmg(this, nullptr, nullptr, effect_value,spells[spell_id].base2[i], 0, ReuseTime);
@@ -3329,14 +3332,14 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, uint32 instrument_mod, Mob *caster,
 	int ticsremaining, uint16 caster_id)
 {
-	int formula, base, max, effect_value, oval;
-
 	if (!IsValidSpell(spell_id) || effect_id < 0 || effect_id >= EFFECT_COUNT)
 		return 0;
 
-	formula = spells[spell_id].formula[effect_id];
-	base = spells[spell_id].base[effect_id];
-	max = spells[spell_id].max[effect_id];
+	int formula = spells[spell_id].formula[effect_id];
+	int base = spells[spell_id].base[effect_id];
+	int max = spells[spell_id].max[effect_id];
+	int effect_value = 0;
+	int oval = 0;
 
 	if (IsBlankSpellEffect(spell_id, effect_id))
 		return 0;
@@ -3345,32 +3348,31 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 
 	// this doesn't actually need to be a song to get mods, just the right skill
 	if (EQ::skills::IsBardInstrumentSkill(spells[spell_id].skill)
-		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])){
+		&& IsInstrumentModAppliedToSpellEffect(spell_id, spells[spell_id].effectid[effect_id])) {
 
-		oval = effect_value;
-		effect_value = effect_value * instrument_mod / 10;
-
-		LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
-			oval, instrument_mod, effect_value);
+			oval = effect_value;
+			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
+			LogSpells("Effect value [{}] altered with bard modifier of [{}] to yeild [{}]",
+				oval, instrument_mod, effect_value);
 	}
 	/*
 		SPA 413 SE_FcBaseEffects, modifies base value of a spell effect after formula calcultion, but before other focuses.
 		This is applied to non-Bards in Mob::GetInstrumentMod
 		Like bard modifiers, this is sent in the action_struct using action->instrument_mod (which is a base effect modifier)
-		
+
 		Issue: value sent with action->instrument_mod needs to be 10 or higher. Therefore lowest possible percent chance would be 11 (calculated to 10%)
-		there are modern spells that use less than 10% but we send as a uint where lowest value has to be 10, where it should be a float for current clients. 
+		there are modern spells that use less than 10% but we send as a uint where lowest value has to be 10, where it should be a float for current clients.
 		Though not ideal, at the moment for spells that are instant effects, the action packet doesn't matter and we will calculate the actual percent here correctly.
 		Logic here is, caster_id is only sent from ApplySpellBonuses. Thus if it is a buff a long as the base effects is set to over 10% and at +10% intervals
 		it will focus the base value correctly.
-		
+
 	*/
 	if (GetClass() != BARD) {
-		
+
 		if (caster_id && instrument_mod > 10) {
 			//This is checked from Mob::ApplySpellBonuses, applied to buffs that receive bonuses. See above, must be in 10% intervals to work.
 			oval = effect_value;
-			effect_value = effect_value * instrument_mod / 10;
+			effect_value = effect_value * static_cast<int>(instrument_mod) / 10;
 
 			LogSpells("Bonus Effect value [{}] altered with base effects modifier of [{}] to yeild [{}]",
 				oval, instrument_mod, effect_value);
@@ -3389,7 +3391,7 @@ int Mob::CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level, 
 	}
 
 	effect_value = mod_effect_value(effect_value, spell_id, spells[spell_id].effectid[effect_id], caster, caster_id);
-	
+
 	return effect_value;
 }
 
@@ -3530,7 +3532,7 @@ snare has both of them negative, yet their range should work the same:
 			break;
 
 		case 119:	// confirmed 2/6/04
-			result = ubase + (caster_level / 8); 
+			result = ubase + (caster_level / 8);
 			break;
 		case 120:
 		{
@@ -4564,7 +4566,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	int32  base1       = 0;
 	int32  base2       = 0;
 	uint32 slot        = 0;
-	
+
 	int index_id = -1;
 	uint32 focus_reuse_time = 0;
 
@@ -8589,6 +8591,11 @@ void Mob::VirusEffectProcess()
 void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining)
 {
 	Mob *caster = entity_list.GetMob(caster_id);
+
+	if (!caster) {
+		return;
+	}
+
 	std::vector<Mob *> targets_in_range = entity_list.GetTargetsForVirusEffect(
 		this,
 		caster,
@@ -8615,7 +8622,7 @@ void Mob::SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_re
 
 bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 	/*
-		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied. 
+		Used with SPA SE_Ff_FocusTimerMin to limit how often a focus effect can be applied.
 		Ie. Can only have a spell trigger once every 15 seconds, or to be more creative can only
 		have the fire spells received a very high special focused once every 30 seconds.
 		Note, this stores timers for both spell, item and AA related focuses For AA the focus_spell_id
@@ -8638,7 +8645,7 @@ bool Mob::IsFocusProcLimitTimerActive(int32 focus_spell_id) {
 }
 
 void Mob::SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time) {
-	
+
 	bool is_set = false;
 
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {

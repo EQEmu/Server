@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "account_management.h"
 #include "login_server.h"
 #include "../common/event/task_scheduler.h"
@@ -300,6 +280,8 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordById(
 	return updated_account;
 }
 
+constexpr int REQUEST_TIMEOUT_MS = 1500;
+
 /**
  * @param in_account_username
  * @param in_account_password
@@ -406,8 +388,16 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
 			auto &loop = EQ::EventLoop::Get();
 			while (running) {
+				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > REQUEST_TIMEOUT_MS) {
+					LogInfo("[CheckExternalLoginserverUserCredentials] Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
+					running = false;
+				}
+
 				loop.Process();
 			}
 
