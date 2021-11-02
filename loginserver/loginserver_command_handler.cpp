@@ -300,8 +300,6 @@ namespace LoginserverCommandHandler {
 			return;
 		}
 
-//		EQEmuCommand::ValidateCmdInput(arguments, options, cmd, argc, argv);
-
-		AccountManagement::HealthCheckUserLogin();
+		LogInfo("[CLI] [HealthCheck] Response code [{}]", AccountManagement::HealthCheckUserLogin());
 	}
 }

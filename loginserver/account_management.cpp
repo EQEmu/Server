@@ -3,6 +3,7 @@
 #include "../common/event/task_scheduler.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
+#include "../common/string_util.h"
 
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
@@ -377,16 +378,22 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
-			EQ::Net::DNSLookup(
-				"login.eqemulator.net", 5999, false, [&](const std::string &addr) {
-					if (addr.empty()) {
-						ret     = 0;
-						running = false;
-					}
+			auto s = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
+			if (s.size() == 2) {
+				auto address = s[0];
+				auto port    = std::stoi(s[1]);
 
-					mgr.Connect(addr, 5999);
-				}
-			);
+				EQ::Net::DNSLookup(
+					address, port, false, [&](const std::string &addr) {
+						if (addr.empty()) {
+							ret     = 0;
+							running = false;
+						}
+
+						mgr.Connect(addr, port);
+					}
+				);
+			}
 
 			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -486,10 +493,10 @@ uint32 AccountManagement::HealthCheckUserLogin()
 
 							EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
 							auto                  response_error = sp.GetUInt16(1);
-							auto                  m_dbid         = sp.GetUInt32(8);
 
 							{
-								ret     = (response_error <= 101 ? m_dbid : 0);
+								// we only care to see the response code
+								ret     = response_error;
 								running = false;
 							}
 							break;
@@ -498,19 +505,17 @@ uint32 AccountManagement::HealthCheckUserLogin()
 				}
 			);
 
-			EQ::Net::DNSLookup(
-				"localhost", 5999, false, [&](const std::string &addr) {
-					if (addr.empty()) {
-						ret     = 0;
-						running = false;
-					}
+			mgr.Connect("127.0.0.1", 5999);
 
-					mgr.Connect(addr, 5999);
-				}
-			);
-
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 			auto &loop = EQ::EventLoop::Get();
 			while (running) {
+				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > 2000) {
+					ret = 0;
+					running = false;
+				}
+
 				loop.Process();
 			}
 

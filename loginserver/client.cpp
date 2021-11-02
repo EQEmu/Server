@@ -233,11 +233,16 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				user           = components[1];
 			}
 
+			// health checks
+			if (ProcessHealthCheck(user)) {
+				DoFailedLogin();
+				return;
+			}
+
 			LogInfo(
-				"Attempting password based login [{0}] login [{1}] user [{2}]",
+				"Attempting password based login [{0}] login [{1}]",
 				user,
-				db_loginserver,
-				user
+				db_loginserver
 			);
 
 			ParseAccountString(user, user, db_loginserver);
@@ -375,6 +380,7 @@ void Client::AttemptLoginAccountCreation(
 			DoFailedLogin();
 			return;
 		}
+
 
 		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
 			user,
@@ -765,4 +771,12 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 		CreateEQEmuAccount(m_stored_user, m_stored_pass, m_dbid);
 		m_login_connection->Close();
 	}
+}
+bool Client::ProcessHealthCheck(std::string username)
+{
+	if (username == "healthcheckuser") {
+		return true;
+	}
+
+	return false;
 }

@@ -28,7 +28,7 @@ namespace LoginserverWebserver {
 				}
 
 				Json::Value response;
-				auto iter = server.server_manager->getWorldServers().begin();
+				auto        iter = server.server_manager->getWorldServers().begin();
 				while (iter != server.server_manager->getWorldServers().end()) {
 					Json::Value row;
 					row["server_long_name"]    = (*iter)->GetServerLongName();
@@ -295,6 +295,24 @@ namespace LoginserverWebserver {
 				}
 
 				LoginserverWebserver::SendResponse(response, res);
+			}
+		);
+
+		api.Get(
+			"/probes/healthcheck", [](const httplib::Request &request, httplib::Response &res) {
+				Json::Value response;
+				uint32 login_response = AccountManagement::HealthCheckUserLogin();
+
+				response["status"] = login_response;
+				if (login_response == 0) {
+					response["message"] = "Process unresponsive, exiting...";
+					LogInfo("Probes healthcheck unresponsive, exiting...");
+				}
+
+				LoginserverWebserver::SendResponse(response, res);
+				if (login_response == 0) {
+					std::exit(0);
+				}
 			}
 		);
 	}
