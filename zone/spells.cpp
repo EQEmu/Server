@@ -230,10 +230,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(entity_list.GetMobID(target_id))) {
-		if (IsClient())
+		if (IsClient()) {
 			CastToClient()->SendSpellBarEnable(spell_id);
-		if (casting_spell_id && IsNPC())
+		}
+		if (casting_spell_id && IsNPC()) {
 			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		}
 		return false;
 	}
 
