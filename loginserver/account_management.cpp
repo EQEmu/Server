@@ -280,6 +280,8 @@ bool AccountManagement::UpdateLoginserverWorldAdminAccountPasswordById(
 	return updated_account;
 }
 
+constexpr int REQUEST_TIMEOUT_MS = 1500;
+
 /**
  * @param in_account_username
  * @param in_account_password
@@ -386,8 +388,16 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+
 			auto &loop = EQ::EventLoop::Get();
 			while (running) {
+				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > REQUEST_TIMEOUT_MS) {
+					LogInfo("[CheckExternalLoginserverUserCredentials] Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
+					running = false;
+				}
+
 				loop.Process();
 			}
 
