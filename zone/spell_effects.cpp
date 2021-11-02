@@ -758,7 +758,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				}
 				InterruptSpell();
 				entity_list.RemoveDebuffs(this);
-				entity_list.RemoveFromTargets(this);
+				entity_list.RemoveFromHateLists(this);
 				WipeHateList();
 
 				Mob *my_pet = GetPet();
