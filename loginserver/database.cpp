@@ -423,7 +423,7 @@ void Database::UpdateLSAccountInfo(
 )
 {
 	auto query = fmt::format(
-		"REPLACE login_accounts SET id = {0}, account_name = '{1}', account_password = sha('{2}'), "
+		"REPLACE login_accounts SET id = {0}, account_name = '{1}', account_password = '{2}', "
 		"account_email = '{3}', last_ip_address = '0.0.0.0', last_login_date = now()",
 		id,
 		EscapeString(name),

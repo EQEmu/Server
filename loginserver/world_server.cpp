@@ -450,10 +450,13 @@ void WorldServer::ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet 
 			email.assign(loginserver_update->user_email);
 		}
 
+		auto mode = server.options.GetEncryptionMode();
+		auto hash = eqcrypt_hash(name, password, mode);
+
 		server.db->UpdateLSAccountInfo(
 			loginserver_update->useraccountid,
 			name,
-			password,
+			hash,
 			email
 		);
 	}
