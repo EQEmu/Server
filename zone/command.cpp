@@ -13970,23 +13970,33 @@ void command_tune2(Client *c, const Seperator *sep)
 		defender = ttarget;
 	}
 
+	if (!strcasecmp(sep->arg[1], "stats"))
+	{
+		c->Message(Chat::Red, "#Tune - stats");
+		Mob* mytarget = c->GetTarget();
+		if (mytarget) {
+			c->Message(Chat::Red, "#Tune - target %s", mytarget->GetCleanName());
+
+			c->Tune_GetStats(mytarget, c);
+		}
+		return;
+	}
+
 	if (!strcasecmp(sep->arg[1], "GetDMG"))
 	{
 		c->Message(Chat::Red, "#Tune - New Test Run");
 
 		int interval = 50;
 		int max_loop = 100;
-		int damage = 0;
 
 		Mob* mytarget = c->GetTarget();
 		if (mytarget) {
 			c->Message(Chat::Red, "#Tune - target %s", mytarget->GetCleanName());
 			
 			c->Tune_GetACByPctMitigation(mytarget, c, 40);
-			c->Message(Chat::Red, "#Tune - Damage %i", damage);
 		}
 		else {
-			c->Message(Chat::Red, "#Tune2 - FAIL %i", damage);
+			c->Message(Chat::Red, "#Tune2 - FAIL");
 		}
 		return;
 	}

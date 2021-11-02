@@ -1230,6 +1230,7 @@ public:
 	void Tune_FindAccuaryByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoid_override, int Msg = 0);
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
+	void Tune_GetStats(Mob* defender, Mob *attacker);
 	void Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
 	void Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int ac_override = 0, int Msg = 0);
 	/**/
@@ -1239,10 +1240,11 @@ public:
 	float Tune_GetACMitigationPct(Mob* defender, Mob *attacker);
 	int Tune_GetAccuracy(Mob* defender, Mob *attacker);
 	int Tune_GetAvoidance(Mob* defender, Mob *attacker);
+	int Tune_GetHitChance(Mob* defender, Mob *attacker);
 	/**/
-	int Tune_ClientAttack(Mob* other, bool no_avoid = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
+	int Tune_ClientAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
-	void Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr, bool no_avoid = true, int ac_override = 0, int add_ac = 0,
+	void Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr, bool no_avoid = true, bool no_hit_chance = true, int ac_override = 0, int add_ac = 0,
 		int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	void Tune_MeleeMitigation(Mob *attacker, DamageHitInfo &hit, int ac_override, int add_ac);
 	int Tune_offense(EQ::skills::SkillType skill, int atk_override = 0, int add_atk = 0);
