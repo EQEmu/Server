@@ -846,6 +846,7 @@ public:
 	inline void SetSpellPowerDistanceMod(int16 value) { SpellPowerDistanceMod = value; };
 	int32 GetSpellStat(uint32 spell_id, const char *identifier, uint8 slot = 0);
 	bool HarmonySpellLevelCheck(int32 spell_id, Mob* target = nullptr);
+	bool PassCharmTargetRestriction(Mob *target);
 	bool CanFocusUseRandomEffectivenessByType(focusType type);
 	int GetFocusRandomEffectivenessValue(int focus_base, int focus_base2, bool best_focus = 0);
 	int GetHealRate() const { return itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; }

@@ -8419,6 +8419,31 @@ bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 	return true;
 }
 
+bool Mob::PassCharmTargetRestriction(Mob *target) {
+	
+	//Level restriction check should not go here.
+	if (!target) {
+		return false;
+	}
+	
+	if (target->IsClient() && IsClient()) {
+		MessageString(Chat::Red, CANNOT_AFFECT_PC);
+		return false;
+	}
+	else if (target->IsCorpse()) {
+		return false;
+	}
+	else if (GetPet() && IsClient()) {
+		MessageString(Chat::Red, ONLY_ONE_PET);
+		return false;
+	}
+	else if (target->GetOwner()) {
+		MessageString(Chat::Red, CANNOT_CHARM);
+		return false;
+	}
+	return true;
+}
+
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 {
 	switch (type) {

@@ -229,24 +229,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
-	if (IsEffectInSpell(spell_id, SE_Charm)) {
-		Mob* charm_target = entity_list.GetMobID(target_id);
-		if (charm_target->IsClient() && IsClient()) {
-			InterruptSpell(CANNOT_AFFECT_PC, 0x121, spell_id);
-			return false;
-		}
-		else if (charm_target->IsCorpse()) {
-			InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
-			return false;
-		}
-		else if (GetPet() && IsClient()) {
-			InterruptSpell(ONLY_ONE_PET, 0x121, spell_id);
-			return false;
-		}
-		else if (charm_target->GetOwner()) {
-			InterruptSpell(CANNOT_CHARM, 0x121, spell_id);
-			return false;
-		}
+	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(entity_list.GetMobID(target_id))) {
+		if (IsClient())
+			CastToClient()->SendSpellBarEnable(spell_id);
+		if (casting_spell_id && IsNPC())
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		return false;
 	}
 
 	if (HasActiveSong() && IsBardSong(spell_id)) {
