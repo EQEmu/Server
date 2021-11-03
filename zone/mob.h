@@ -1240,8 +1240,10 @@ public:
 	float Tune_GetACMitigationPct(Mob* defender, Mob *attacker);
 	int Tune_GetAccuracy(Mob* defender, Mob *attacker);
 	int Tune_GetAvoidance(Mob* defender, Mob *attacker);
-	int Tune_GetHitChance(Mob* defender, Mob *attacker);
+	float Tune_GetHitChance(Mob* defender, Mob *attacker);
+	float Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
 	/**/
+	int Tune_NCPAttack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell);
 	int Tune_ClientAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	void Tune_DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts = nullptr, bool no_avoid = true, bool no_hit_chance = true, int ac_override = 0, int add_ac = 0,

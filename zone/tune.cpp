@@ -1107,6 +1107,7 @@ void Mob::Tune_GetStats(Mob* defender, Mob *attacker)
 	int min_damage = 0;
 	int mean_dmg = 0;
 	float tmp_pct_mitigated = 0.0f;
+	float hit_chance = 0.0f;
 
 	int offense_rating = attacker->Tune_ClientAttack(defender, true, true, 0, 0, 0, 0, 0, true);
 
@@ -1119,7 +1120,6 @@ void Mob::Tune_GetStats(Mob* defender, Mob *attacker)
 	{
 		max_damage = attacker->Tune_ClientGetMaxDamage(defender);
 		min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
-		Shout("Min %i Max %i", min_damage, max_damage);
 	}
 
 	if (!max_damage)
@@ -1130,22 +1130,28 @@ void Mob::Tune_GetStats(Mob* defender, Mob *attacker)
 	mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
 	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
+	hit_chance = Tune_GetHitChance(defender, attacker);
+	
 	Message(0, "###################START######################");
 	Message(0, "[#Tune] Defender Statistics vs Attacker");
 	Message(0, "[#Tune] Name: %s", defender->GetCleanName());
-	Message(0, "[#Tune] AC Mitigation pct:   %.2f % ", tmp_pct_mitigated);
+	Message(0, "[#Tune] AC Mitigation pct:   %.0f pct ", round(tmp_pct_mitigated));
 	Message(0, "[#Tune] Total AC: %i ", defender->Tune_ACSum());
-	Message(0, "[#Tune] Chance to be missed:  %i", 0);
+	Message(0, "[#Tune] Chance to be missed:  %.0f pct", (100.0f - round(hit_chance)));
 	Message(0, "[#Tune] Avoidance: %i ", Tune_GetAvoidance(defender, attacker));
+	Message(0, "[#Tune] Riposte Chance: %.0f pct ", round(Tune_GetAvoidMeleeChance(defender, attacker, DMG_RIPOSTED)));
+	Message(0, "[#Tune] Block Chance: %.0f pct ", round(Tune_GetAvoidMeleeChance(defender, attacker, DMG_BLOCKED)));
+	Message(0, "[#Tune] Parry Chance: %.0f pct ", round(Tune_GetAvoidMeleeChance(defender, attacker, DMG_PARRIED)));
+	Message(0, "[#Tune] Dodge Chance: %.0f pct ", round(Tune_GetAvoidMeleeChance(defender, attacker, DMG_DODGED)));
+
 	Message(0, "#############################################");
 	Message(0, "[#Tune] Attacker Statistics vs Defender");
 	Message(0, "[#Tune] Name: %s", attacker->GetCleanName());
 	
 	if (max_damage > 0) {
 		Message(0, "[#Tune] Max Damage %i Min Damage %i", max_damage, min_damage);
-		Message(0, "[#Tune] Max Damage %i Min Damage %i", max_damage, min_damage);
 		Message(0, "[#Tune] Total Offense: %i ", offense_rating);
-		Message(0, "[#Tune] Chance to be hit:  %.2f %", Tune_GetHitChance(defender, attacker));
+		Message(0, "[#Tune] Chance to hit:  %.0f pct", round(hit_chance));
 		Message(0, "[#Tune] Accuracy: %i ", Tune_GetAccuracy( defender,attacker));
 		
 	}
@@ -1480,32 +1486,134 @@ int Mob::Tune_GetAvoidance(Mob* defender, Mob *attacker)
 	return defender->Tune_GetTotalDefense();
 }
 
-int Mob::Tune_GetHitChance(Mob* defender, Mob *attacker)
+float Mob::Tune_GetHitChance(Mob* defender, Mob *attacker)
 {
-	uint32 hit_cout = 0;
+	uint32 hit_count = 0;
 	uint32 current_hit = 0;
 
-	int loop_max = 1000;
+	int loop_max = 2000;
 
 	for (int i = 0; i < loop_max; i++)
 	{
-		current_hit = attacker->Tune_ClientAttack(defender, true, false);
-		Shout("Current hit %i", i);
+		current_hit = attacker->Tune_ClientAttack(defender, true, false, 0);
 		if (current_hit > 0) {
-			hit_cout++;
-		}
-		if (current_hit < 0) {
-			Shout("ERRROR");
+			hit_count++;
 		}
 	}
-	float chance = (static_cast<float>(current_hit) / 1000.0f) * 100.0f;
-	Shout("Total hits %i [ %.2f pct]", current_hit, chance);
+	float chance = (static_cast<float>(hit_count) / 2000.0f) * 100.0f;
+	return chance;
+}
+
+float Mob::Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type)
+{
+	uint32 current_hit = 0;
+	uint32 hit_count = 0;
+
+	/*
+		-1 - block
+		-2 - parry
+		-3 - riposte
+		-4 - dodge
+	*/
+	int loop_max = 3000;
+
+	for (int i = 0; i < loop_max; i++)
+	{
+		current_hit = attacker->Tune_ClientAttack(defender, false, true, 0);
+		if (current_hit == type) {
+			hit_count++;
+		}
+	}
+	float chance = (static_cast<float>(hit_count) / 3000.0f) * 100.0f;
 	return chance;
 }
 
 /*
 	Calculate from modified attack.cpp functions.
 */
+
+int Mob::Tune_NCPAttack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell)
+{
+	if (!IsNPC()) {
+		return false;
+	}
+
+	if (!other) {
+		SetTarget(nullptr);
+		LogError("A null Mob object was passed to NPC::Attack() for evaluation!");
+		return false;
+	}
+
+	if (DivineAura())
+		return(false);
+
+	if (!GetTarget())
+		SetTarget(other);
+
+	//Check that we can attack before we calc heading and face our target
+	if (!IsAttackAllowed(other)) {
+		if (this->GetOwnerID())
+			this->SayString(NOT_LEGAL_TARGET);
+		if (other) {
+			if (other->IsClient())
+				other->CastToClient()->RemoveXTarget(this, false);
+			RemoveFromHateList(other);
+			LogCombat("I am not allowed to attack [{}]", other->GetName());
+		}
+		return false;
+	}
+
+	FaceTarget(GetTarget());
+
+	DamageHitInfo my_hit;
+	my_hit.skill = EQ::skills::SkillHandtoHand;
+	my_hit.hand = Hand;
+	my_hit.damage_done = 1;
+	if (Hand == EQ::invslot::slotPrimary) {
+		my_hit.skill = static_cast<EQ::skills::SkillType>(CastToNPC()->GetPrimSkill());
+		OffHandAtk(false);
+	}
+	if (Hand == EQ::invslot::slotSecondary) {
+		my_hit.skill = static_cast<EQ::skills::SkillType>(CastToNPC()->GetSecSkill());
+		OffHandAtk(true);
+	}
+
+	//do attack animation regardless of whether or not we can hit below
+
+
+	uint8 otherlevel = other->GetLevel();
+	uint8 mylevel = this->GetLevel();
+
+	otherlevel = otherlevel ? otherlevel : 1;
+	mylevel = mylevel ? mylevel : 1;
+
+	//damage = mod_npc_damage(damage, skillinuse, Hand, weapon, other);
+	my_hit.base_damage = CastToNPC()->GetBaseDamage();
+	my_hit.min_damage = CastToNPC()->GetMinDamage();
+	int32 hate = my_hit.base_damage + my_hit.min_damage;
+
+	int hit_chance_bonus = 0;
+
+	my_hit.offense = offense(my_hit.skill);
+	my_hit.tohit = Tune_GetTotalToHit(my_hit.skill, hit_chance_bonus);
+
+	Tune_DoAttack(other, my_hit, nullptr);
+
+	
+	LogCombat("Final damage against [{}]: [{}]", other->GetName(), my_hit.damage_done);
+	if (other->IsClient() && IsPet() && GetOwner()->IsClient()) {
+		//pets do half damage to clients in pvp
+		my_hit.damage_done /= 2;
+		if (my_hit.damage_done < 1)
+			my_hit.damage_done = 1;
+	}
+
+
+	if (my_hit.damage_done > 0)
+		return true;
+	else
+		return false;
+}
 
 int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hit_chance_bonus, int ac_override, int atk_override, int add_ac, int add_atk, bool get_offense, bool get_accuracy,
 	int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
@@ -1584,7 +1692,7 @@ int Mob::Tune_ClientAttack(Mob* other, bool no_avoid, bool no_hit_chance, int hi
 		}
 		my_hit.hand = Hand;
 		
-		my_hit.tohit = GetTotalToHit(my_hit.skill, hit_chance_bonus);
+		my_hit.tohit = Tune_GetTotalToHit(my_hit.skill, hit_chance_bonus, accuracy_override, add_accuracy);
 		if (get_accuracy) {
 			return my_hit.tohit;
 		}
@@ -1945,15 +2053,6 @@ int Mob::Tune_GetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int acc
 		spellbonuses.HitChanceEffect[skill];
 
 	accuracy = (accuracy * (100 + hit_bonus)) / 100;
-
-	// TODO: April 2003 added an archery/throwing PVP accuracy penalty while moving, should be in here some where,
-	// but PVP is less important so I haven't tried parsing it at all
-
-	// There is also 110 Ranger Archery Accuracy % which should probably be in here some where, but it's not in any spells/aas
-	// Name implies it's a percentage increase, if one wishes to implement, do it like the hit_bonus above but limited to ranger archery
-
-	// There is also 183 UNUSED - Skill Increase Chance which devs say isn't used at all in code, but some spells reference it
-	// I do not recommend implementing this once since there are spells that use it which would make this not live-like with default spell files
 	return accuracy;
 }
 
@@ -1990,7 +2089,7 @@ bool Mob::Tune_CheckHitChance(Mob* other, DamageHitInfo &hit)
 
 	Mob *attacker = other;
 	Mob *defender = this;
-	Log(Logs::Detail, Logs::Attack, "CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
+	//Shout("CheckHitChance(%s) attacked by %s", defender->GetName(), attacker->GetName());
 
 	if (defender->IsClient() && defender->CastToClient()->IsSitting())
 		return true;
@@ -2008,7 +2107,7 @@ bool Mob::Tune_CheckHitChance(Mob* other, DamageHitInfo &hit)
 	// Then your chance to simply avoid the attack is checked (defender's avoidance roll beat the attacker's accuracy roll.)
 	int tohit_roll = zone->random.Roll0(accuracy);
 	int avoid_roll = zone->random.Roll0(avoidance);
-	Log(Logs::Detail, Logs::Attack, "CheckHitChance accuracy(%d => %d) avoidance(%d => %d)", accuracy, tohit_roll, avoidance, avoid_roll);
+	//Shout("CheckHitChance accuracy(%d => %d) avoidance(%d => %d)", accuracy, tohit_roll, avoidance, avoid_roll);
 
 	// tie breaker? Don't want to be biased any one way
 	if (tohit_roll == avoid_roll)
