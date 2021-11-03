@@ -230,8 +230,12 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	}
 
 	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(entity_list.GetMobID(target_id))) {
-		if ((item_slot != -1 && cast_time > 0) || !aa_id) {
-			Shout("Pass");
+		bool can_send_spellbar_enable = true;
+		if ((item_slot != -1 && cast_time == 0) || aa_id) {
+			can_send_spellbar_enable = false;
+		}
+
+		if (can_send_spellbar_enable) {
 			SendSpellBarEnable(spell_id);
 		}
 		if (casting_spell_id && IsNPC()) {
@@ -4531,11 +4535,6 @@ bool Mob::IsImmuneToSpell(uint16 spell_id, Mob *caster)
 			} else {
 				AddToHateList(caster, 1,0,true,false,false,spell_id);
 			}
-			return true;
-		}
-
-		//Item and AA charms are checked here due to potential issue with GCD.
-		if (!caster->PassCharmTargetRestriction(this)) {
 			return true;
 		}
 
