@@ -290,7 +290,7 @@ public:
 	void BardPulse(uint16 spell_id, Mob *caster);
 
 	//Spell
-	void SendSpellEffect(uint32 effectid, uint32 duration, uint32 finish_delay, bool zone_wide,
+	void SendSpellEffect(uint32 effect_id, uint32 duration, uint32 finish_delay, bool zone_wide,
 		uint32 unk020, bool perm_effect = false, Client *c = nullptr);
 	bool IsBeneficialAllowed(Mob *target);
 	virtual int GetCasterLevel(uint16 spell_id);
@@ -361,7 +361,7 @@ public:
 	virtual void DoBuffTic(const Buffs_Struct &buff, int slot, Mob* caster = nullptr);
 	void BuffFadeBySpellID(uint16 spell_id);
 	void BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id);
-	void BuffFadeByEffect(int effectid, int skipslot = -1);
+	void BuffFadeByEffect(int effect_id, int skipslot = -1);
 	void BuffFadeAll();
 	void BuffFadeNonPersistDeath();
 	void BuffFadeDetrimental();
@@ -412,8 +412,8 @@ public:
 	inline virtual uint32 GetNimbusEffect1() const { return nimbus_effect1; }
 	inline virtual uint32 GetNimbusEffect2() const { return nimbus_effect2; }
 	inline virtual uint32 GetNimbusEffect3() const { return nimbus_effect3; }
-	void AddNimbusEffect(int effectid);
-	void RemoveNimbusEffect(int effectid);
+	void AddNimbusEffect(int effect_id);
+	void RemoveNimbusEffect(int effect_id);
 	void RemoveAllNimbusEffects();
 	inline const glm::vec3& GetTargetRingLocation() const { return m_TargetRing; }
 	inline float GetTargetRingX() const { return m_TargetRing.x; }
@@ -814,7 +814,7 @@ public:
 	int32 GetSkillDmgTaken(const EQ::skills::SkillType skill_used, ExtraAttackOptions *opts = nullptr);
 	int32 GetPositionalDmgTaken(Mob *attacker);
 	int32 GetPositionalDmgTakenAmt(Mob *attacker);
-	void DoKnockback(Mob *caster, uint32 pushback, uint32 pushup);
+	void DoKnockback(Mob *caster, uint32 push_back, uint32 push_up);
 	int16 CalcResistChanceBonus();
 	int16 CalcFearResistChance();
 	void TrySpellOnKill(uint8 level, uint16 spell_id);
@@ -1117,7 +1117,7 @@ public:
 	//uint32 GetInstrumentMod(uint16 spell_id) const;
 	uint32 GetInstrumentMod(uint16 spell_id);
 	int CalcSpellEffectValue(uint16 spell_id, int effect_id, int caster_level = 1, uint32 instrument_mod = 10, Mob *caster = nullptr, int ticsremaining = 0,uint16 casterid=0);
-	int CalcSpellEffectValue_formula(int formula, int base, int max, int caster_level, uint16 spell_id, int ticsremaining = 0);
+	int CalcSpellEffectValue_formula(int formula, int base_value, int max_value, int caster_level, uint16 spell_id, int ticsremaining = 0);
 	virtual int CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1 = nullptr, Mob* caster2 = nullptr, int buffslot = -1);
 	uint32 GetCastedSpellInvSlot() const { return casting_spell_inventory_slot; }
 
@@ -1194,7 +1194,7 @@ public:
 	inline void SetEmoteID(uint16 emote) { emoteid = emote; }
 	inline uint16 GetEmoteID() { return emoteid; }
 
-	bool 	HasSpellEffect(int effectid);
+	bool 	HasSpellEffect(int effect_id);
 	int 	mod_effect_value(int effect_value, uint16 spell_id, int effect_type, Mob* caster, uint16 caster_id);
 	float 	mod_hit_chance(float chancetohit, EQ::skills::SkillType skillinuse, Mob* attacker);
 	float 	mod_riposte_chance(float ripostchance, Mob* attacker);

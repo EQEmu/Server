@@ -19,6 +19,7 @@
 #include "lua_npc.h"
 #include "lua_entity_list.h"
 #include "lua_expedition.h"
+#include "lua_spell.h"
 #include "quest_parser_collection.h"
 #include "questmgr.h"
 #include "qglobals.h"
@@ -1450,6 +1451,10 @@ Lua_Mob lua_get_owner() {
 
 Lua_ItemInst lua_get_quest_item() {
 	return quest_manager.GetQuestItem();
+}
+
+Lua_Spell lua_get_quest_spell() {
+	return quest_manager.GetQuestSpell();
 }
 
 std::string lua_get_encounter() {
@@ -3342,6 +3347,10 @@ uint32 lua_count_spawned_npcs(luabind::adl::object table) {
 	return entity_list.CountSpawnedNPCs(npc_ids);
 }
 
+Lua_Spell lua_get_spell(uint32 spell_id) {
+	return Lua_Spell(spell_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3750,6 +3759,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_initiator", &lua_get_initiator),
 		luabind::def("get_owner", &lua_get_owner),
 		luabind::def("get_quest_item", &lua_get_quest_item),
+		luabind::def("get_quest_spell", &lua_get_quest_spell),
 		luabind::def("get_encounter", &lua_get_encounter),
 		luabind::def("map_opcodes", &lua_map_opcodes),
 		luabind::def("clear_opcode", &lua_clear_opcode),
@@ -3783,6 +3793,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_spell_stat", (int(*)(uint32,std::string,uint8))&lua_get_spell_stat),
 		luabind::def("is_npc_spawned", &lua_is_npc_spawned),
 		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
+		luabind::def("get_spell", &lua_get_spell),
 
 		/*
 			Cross Zone

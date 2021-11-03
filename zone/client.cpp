@@ -4005,9 +4005,9 @@ void Client::SendOPTranslocateConfirm(Mob *Caster, uint16 SpellID) {
 	else {
 		PendingTranslocateData.zone_id = ts->ZoneID = ZoneID(Spell.teleport_zone);
 		PendingTranslocateData.instance_id = 0;
-		PendingTranslocateData.y = ts->y = Spell.base[0];
-		PendingTranslocateData.x = ts->x = Spell.base[1];
-		PendingTranslocateData.z = ts->z = Spell.base[2];
+		PendingTranslocateData.y = ts->y = Spell.base_value[0];
+		PendingTranslocateData.x = ts->x = Spell.base_value[1];
+		PendingTranslocateData.z = ts->z = Spell.base_value[2];
 		PendingTranslocateData.heading = 0.0;
 	}
 
@@ -4965,7 +4965,7 @@ void Client::HandleLDoNOpen(NPC *target)
 			if(target->GetLDoNTrapSpellID() != 0)
 			{
 				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -5087,7 +5087,7 @@ void Client::HandleLDoNDisarm(NPC *target, uint16 skill, uint8 type)
 				break;
 			case -1:
 				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -5106,7 +5106,7 @@ void Client::HandleLDoNPickLock(NPC *target, uint16 skill, uint8 type)
 			if(target->IsLDoNTrapped())
 			{
 				MessageString(Chat::Red, LDON_ACCIDENT_SETOFF2);
-				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].ResistDiff);
+				target->SpellFinished(target->GetLDoNTrapSpellID(), this, EQ::spells::CastingSlot::Item, 0, -1, spells[target->GetLDoNTrapSpellID()].resist_difficulty);
 				target->SetLDoNTrapSpellID(0);
 				target->SetLDoNTrapped(false);
 				target->SetLDoNTrapDetected(false);
@@ -8577,8 +8577,8 @@ void Client::ShowNumHits()
 	uint32 buffcount = GetMaxTotalSlots();
 	for (uint32 buffslot = 0; buffslot < buffcount; buffslot++) {
 		const Buffs_Struct &curbuff = buffs[buffslot];
-		if (curbuff.spellid != SPELL_UNKNOWN && curbuff.numhits)
-			Message(0, "You have %d hits left on %s", curbuff.numhits, GetSpellName(curbuff.spellid));
+		if (curbuff.spellid != SPELL_UNKNOWN && curbuff.hit_number)
+			Message(0, "You have %d hits left on %s", curbuff.hit_number, GetSpellName(curbuff.spellid));
 	}
 	return;
 }
@@ -10055,7 +10055,7 @@ std::vector<int> Client::GetLearnableDisciplines(uint8 min_level, uint8 max_leve
 			continue;
 		if (spells[spell_id].skill == 52)
 			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
 			continue;
 		if (HasDisciplineLearned(spell_id))
 			continue;
@@ -10121,7 +10121,7 @@ std::vector<int> Client::GetScribeableSpells(uint8 min_level, uint8 max_level) {
 			continue;
 		if (spells[spell_id].skill == 52)
 			continue;
-		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effectid[EFFECT_COUNT - 1] == 10)
+		if (RuleB(Spells, UseCHAScribeHack) && spells[spell_id].effect_id[EFFECT_COUNT - 1] == 10)
 			continue;
 		if (HasSpellScribed(spell_id))
 			continue;

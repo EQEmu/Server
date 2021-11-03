@@ -42,7 +42,7 @@ float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 
 int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
-	if (spells[spell_id].targettype == ST_Self)
+	if (spells[spell_id].target_type == ST_Self)
 		return value;
 
 	if (IsNPC())
@@ -320,7 +320,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int16 critical_chance = 0;
 	int8  critical_modifier = 1;
 
-	if (spells[spell_id].buffduration < 1) {
+	if (spells[spell_id].buff_duration < 1) {
 		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
 		if (spellbonuses.CriticalHealDecay) {
@@ -353,7 +353,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
 
 	// Instant Heals
-	if (spells[spell_id].buffduration < 1) {
+	if (spells[spell_id].buff_duration < 1) {
 
 		if (target) {
 			value += int(base_value * target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
@@ -756,7 +756,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return(false);
 	}
 
-	if(GetEndurance() < spell.EndurCost) {
+	if(GetEndurance() < spell.endurance_cost) {
 		Message(11, "You are too fatigued to use this skill right now.");
 		return(false);
 	}
@@ -768,11 +768,11 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 
 	// the client does this check before calling CastSpell, should prevent discs being eaten
-	if (spell.buffdurationformula != 0 && spell.targettype == ST_Self && HasDiscBuff())
+	if (spell.buff_duration_formula != 0 && spell.target_type == ST_Self && HasDiscBuff())
 		return false;
 
 	//Check the disc timer
-	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.EndurTimerIndex;
+	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
@@ -805,7 +805,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			return true;
 		}
 
-		SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);
+		SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
 	}
 	else
 	{
@@ -924,7 +924,7 @@ void EntityList::AESpell(
 )
 {
 	const auto &cast_target_position =
-				   spells[spell_id].targettype == ST_Ring ?
+				   spells[spell_id].target_type == ST_Ring ?
 					   caster_mob->GetTargetRingLocation() :
 					   static_cast<glm::vec3>(center_mob->GetPosition());
 
@@ -951,8 +951,8 @@ void EntityList::AESpell(
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
 	}
-	else if (spells[spell_id].aemaxtargets) {
-		max_targets_allowed = spells[spell_id].aemaxtargets;
+	else if (spells[spell_id].aoe_max_targets) {
+		max_targets_allowed = spells[spell_id].aoe_max_targets;
 	}
 	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc && !IsEffectInSpell(spell_id, SE_Lull) && !IsEffectInSpell(spell_id, SE_Mez)) {
 		max_targets_allowed = 4;
@@ -984,15 +984,15 @@ void EntityList::AESpell(
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
+		if (spells[spell_id].target_type == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_AreaClientOnly && !current_mob->IsClient()) {
+		if (spells[spell_id].target_type == ST_AreaClientOnly && !current_mob->IsClient()) {
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_AreaNPCOnly && !current_mob->IsNPC()) {
+		if (spells[spell_id].target_type == ST_AreaNPCOnly && !current_mob->IsNPC()) {
 			continue;
 		}
 
@@ -1026,7 +1026,7 @@ void EntityList::AESpell(
 		}
 
 		if (is_npc && current_mob->IsNPC() &&
-			spells[spell_id].targettype != ST_AreaNPCOnly) {    //check npc->npc casting
+			spells[spell_id].target_type != ST_AreaNPCOnly) {    //check npc->npc casting
 			FACTION_VALUE faction_value = current_mob->GetReverseFactionCon(caster_mob);
 			if (is_detrimental_spell) {
 				//affect mobs that are on our hate list, or
