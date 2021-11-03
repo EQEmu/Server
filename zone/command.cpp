@@ -13954,30 +13954,39 @@ void command_tune2(Client *c, const Seperator *sep)
 
 		return;
 	}
-	//Default is category A for attacker/defender settings, which then are swapped under category B.
-	Mob* defender = c;
-	Mob* attacker = c->GetTarget();
+	/*
+		Category A: YOU are the attacker and your target is the defender
+		Category D: YOU are the defender and your target is the attacker
+	*/
 
-	if (!attacker)
+	Mob* attacker = c;
+	Mob* defender = c->GetTarget();
+
+	if (!defender)
 	{
 		c->Message(Chat::White, "#Tune - Error no target selected. [#Tune help]");
 		return;
 	}
 
+	/*
 	Mob* ttarget = attacker->GetTarget();
 
 	if (ttarget) {
 		defender = ttarget;
 	}
+	*/
 
 	if (!strcasecmp(sep->arg[1], "stats"))
 	{
-		c->Message(Chat::Red, "#Tune - stats");
-		Mob* mytarget = c->GetTarget();
-		if (mytarget) {
-			c->Message(Chat::Red, "#Tune - target %s", mytarget->GetCleanName());
 
-			c->Tune_GetStats(mytarget, c);
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->Tune_GetStats(defender, attacker);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")){
+			c->Tune_GetStats(attacker, defender);
+		}
+		else {
+			c->Tune_GetStats(defender, attacker);
 		}
 		return;
 	}
@@ -14000,7 +14009,7 @@ void command_tune2(Client *c, const Seperator *sep)
 		}
 		return;
 	}
-	return;
+
 	if (!strcasecmp(sep->arg[1], "FindATK"))
 	{
 		float pct_mitigation = atof(sep->arg[3]);
@@ -14015,19 +14024,25 @@ void command_tune2(Client *c, const Seperator *sep)
 			return;
 		}
 
-		if (!interval)
+		if (!interval) {
 			interval = 50;
-		if (!max_loop)
+		}
+		if (!max_loop) {
 			max_loop = 100;
-		if (!ac_override)
+		}
+		if (!ac_override) {
 			ac_override = 0;
-		if (!info_level)
+		}
+		if (!info_level) {
 			info_level = 1;
+		}
 
-		if (!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, ac_override, info_level);
-		else if (!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindATKByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, ac_override, info_level);
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->Tune_GetATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, ac_override, info_level);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")) {
+			c->Tune_GetATKByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, ac_override, info_level);
+		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "Usage #tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level] ");
@@ -14050,19 +14065,26 @@ void command_tune2(Client *c, const Seperator *sep)
 			return;
 		}
 
-		if (!interval)
-			interval = 50;
-		if (!max_loop)
-			max_loop = 100;
-		if (!atk_override)
+		if (!interval) {
+			interval = 10;
+		}
+		if (!max_loop) {
+			max_loop = 1000;
+		}
+		if (!atk_override) {
 			atk_override = 0;
-		if (!info_level)
+		}
+		if (!info_level) {
 			info_level = 1;
+		}
 
-		if (!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
-		else if (!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, atk_override, info_level);
+
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->Tune_GetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")) {
+			c->Tune_GetACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, atk_override, info_level);
+		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "Usage #tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
