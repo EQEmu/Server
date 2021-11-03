@@ -38,6 +38,7 @@ namespace LoginserverCommandHandler {
 		function_map["web-api-token:list"]                    = &LoginserverCommandHandler::ListLoginserverApiTokens;
 		function_map["world-admin:create"]                    = &LoginserverCommandHandler::CreateLoginserverWorldAdminAccount;
 		function_map["world-admin:update"]                    = &LoginserverCommandHandler::UpdateLoginserverWorldAdminAccountPassword;
+		function_map["health:check-login"]                    = &LoginserverCommandHandler::HealthCheckLogin;
 
 		EQEmuCommand::HandleMenu(function_map, cmd, argc, argv);
 	}
@@ -280,5 +281,25 @@ namespace LoginserverCommandHandler {
 			cmd(2).str(),
 			cmd(3).str()
 		);
+	}
+
+	/**
+	 * @param argc
+	 * @param argv
+	 * @param cmd
+	 * @param description
+	 */
+	void HealthCheckLogin(int argc, char **argv, argh::parser &cmd, std::string &description)
+	{
+		description = "Checks login health using a test user";
+
+		std::vector<std::string> arguments = {};
+		std::vector<std::string> options   = {};
+
+		if (cmd[{"-h", "--help"}]) {
+			return;
+		}
+
+		LogInfo("[CLI] [HealthCheck] Response code [{}]", AccountManagement::HealthCheckUserLogin());
 	}
 }

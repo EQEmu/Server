@@ -3,6 +3,7 @@
 #include "../common/event/task_scheduler.h"
 #include "../common/event/event_loop.h"
 #include "../common/net/dns.h"
+#include "../common/string_util.h"
 
 extern LoginServer       server;
 EQ::Event::TaskScheduler task_runner;
@@ -377,16 +378,22 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				}
 			);
 
-			EQ::Net::DNSLookup(
-				"login.eqemulator.net", 5999, false, [&](const std::string &addr) {
-					if (addr.empty()) {
-						ret     = 0;
-						running = false;
-					}
+			auto s = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
+			if (s.size() == 2) {
+				auto address = s[0];
+				auto port    = std::stoi(s[1]);
 
-					mgr.Connect(addr, 5999);
-				}
-			);
+				EQ::Net::DNSLookup(
+					address, port, false, [&](const std::string &addr) {
+						if (addr.empty()) {
+							ret     = 0;
+							running = false;
+						}
+
+						mgr.Connect(addr, port);
+					}
+				);
+			}
 
 			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
 
@@ -395,6 +402,117 @@ uint32 AccountManagement::CheckExternalLoginserverUserCredentials(
 				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > REQUEST_TIMEOUT_MS) {
 					LogInfo("[CheckExternalLoginserverUserCredentials] Deadline exceeded [{}]", REQUEST_TIMEOUT_MS);
+					running = false;
+				}
+
+				loop.Process();
+			}
+
+			return ret;
+		}
+	);
+
+	return res.get();
+}
+
+uint32 AccountManagement::HealthCheckUserLogin()
+{
+	std::string in_account_username = "healthcheckuser";
+	std::string in_account_password = "healthcheckpassword";
+
+	auto res = task_runner.Enqueue(
+		[&]() -> uint32 {
+			bool   running = true;
+			uint32 ret     = 0;
+
+			EQ::Net::DaybreakConnectionManager           mgr;
+			std::shared_ptr<EQ::Net::DaybreakConnection> c;
+
+			mgr.OnNewConnection(
+				[&](std::shared_ptr<EQ::Net::DaybreakConnection> connection) {
+					c = connection;
+				}
+			);
+
+			mgr.OnConnectionStateChange(
+				[&](
+					std::shared_ptr<EQ::Net::DaybreakConnection> conn,
+					EQ::Net::DbProtocolStatus from,
+					EQ::Net::DbProtocolStatus to
+				) {
+					if (EQ::Net::StatusConnected == to) {
+						EQ::Net::DynamicPacket p;
+						p.PutUInt16(0, 1); //OP_SessionReady
+						p.PutUInt32(2, 2);
+						c->QueuePacket(p);
+					}
+					else if (EQ::Net::StatusDisconnected == to) {
+						running = false;
+					}
+				}
+			);
+
+			mgr.OnPacketRecv(
+				[&](std::shared_ptr<EQ::Net::DaybreakConnection> conn, const EQ::Net::Packet &p) {
+					auto opcode = p.GetUInt16(0);
+					switch (opcode) {
+						case 0x0017: //OP_ChatMessage
+						{
+							size_t buffer_len =
+									   in_account_username.length() + in_account_password.length() + 2;
+
+							std::unique_ptr<char[]> buffer(new char[buffer_len]);
+
+							strcpy(&buffer[0], in_account_username.c_str());
+							strcpy(&buffer[in_account_username.length() + 1], in_account_password.c_str());
+
+							size_t encrypted_len = buffer_len;
+
+							if (encrypted_len % 8 > 0) {
+								encrypted_len = ((encrypted_len / 8) + 1) * 8;
+							}
+
+							EQ::Net::DynamicPacket p;
+							p.Resize(12 + encrypted_len);
+							p.PutUInt16(0, 2); //OP_Login
+							p.PutUInt32(2, 3);
+
+							eqcrypt_block(&buffer[0], buffer_len, (char *) p.Data() + 12, true);
+							c->QueuePacket(p);
+							break;
+						}
+						case 0x0018: {
+							auto encrypt_size                    = p.Length() - 12;
+							if (encrypt_size % 8 > 0) {
+								encrypt_size = (encrypt_size / 8) * 8;
+							}
+
+							std::unique_ptr<char[]> decrypted(new char[encrypt_size]);
+
+							eqcrypt_block((char *) p.Data() + 12, encrypt_size, &decrypted[0], false);
+
+							EQ::Net::StaticPacket sp(&decrypted[0], encrypt_size);
+							auto                  response_error = sp.GetUInt16(1);
+
+							{
+								// we only care to see the response code
+								ret     = response_error;
+								running = false;
+							}
+							break;
+						}
+					}
+				}
+			);
+
+			mgr.Connect("127.0.0.1", 5999);
+
+			std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+			auto &loop = EQ::EventLoop::Get();
+			while (running) {
+				std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::milliseconds>(end - begin).count() > 2000) {
+					ret = 0;
 					running = false;
 				}
 
