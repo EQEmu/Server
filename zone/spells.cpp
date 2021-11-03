@@ -6257,5 +6257,12 @@ bool Client::IsLinkedSpellReuseTimerReady(uint32 timer_id)
 	return GetPTimers().Expired(&database, pTimerLinkedSpellReuseStart + timer_id, false);
 }
 
+int Client::GetNextAvailableDisciplineSlot(int starting_slot) {
+	for (uint32 index = starting_slot; index < MAX_PP_DISCIPLINES; index++) {
+		if (!IsValidSpell(GetPP().disciplines.values[index])) {
+			return index;
+		}
+	}
 
-
+	return -1; // Return -1 if No Slots open
+}

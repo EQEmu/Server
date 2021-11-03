@@ -5865,6 +5865,68 @@ XS(XS_Client_RemoveLDoNWin) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Client_GetFreeDisciplineSlot); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_GetFreeDisciplineSlot) {
+	dXSARGS;
+	if (items != 1 || items != 2)
+		Perl_croak(aTHX_ "Usage: Client::GetFreeDisciplineSlot(THIS, [int starting_slot = 0])"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		int free_discipline_slot;
+		int starting_slot = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+		if (items == 2) {
+			starting_slot = SvIV(ST(1));
+		}
+
+		free_discipline_slot = THIS->GetNextAvailableDisciplineSlot(starting_slot);
+		XSprePUSH;
+		PUSHi((IV) free_discipline_slot);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_ScribeSpells); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_ScribeSpells) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::ScribeSpells(THIS, uint8 min_level, uint8 max_level)"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		uint8 min_level = (uint8) SvUV(ST(1));
+		uint8 max_level = (uint8) SvUV(ST(2));
+		uint16 scribed_spells = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+
+		scribed_spells = THIS->ScribeSpells(min_level, max_level);
+		XSprePUSH;
+		PUSHu((UV) scribed_spells);
+	}
+	XSRETURN(1);
+}
+
+XS(XS_Client_LearnDisciplines); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Client_LearnDisciplines) {
+	dXSARGS;
+	if (items != 3)
+		Perl_croak(aTHX_ "Usage: Client::LearnDisciplines(THIS, uint8 min_level, uint8 max_level)"); // @categories Spells and Disciplines
+	{
+		Client *THIS;
+		uint8 min_level = (uint8) SvUV(ST(1));
+		uint8 max_level = (uint8) SvUV(ST(2));
+		uint16 learned_disciplines = 0;
+		dXSTARG;
+		VALIDATE_THIS_IS_CLIENT;
+
+		learned_disciplines = THIS->LearnDisciplines(min_level, max_level);
+		XSprePUSH;
+		PUSHu((UV) learned_disciplines);
+	}
+	XSRETURN(1);
+}
+
 #ifdef __cplusplus
 extern "C"
 #endif
@@ -6186,6 +6248,9 @@ XS(boot_Client) {
 	newXSproto(strcpy(buf, "UseDiscipline"), XS_Client_UseDiscipline, file, "$$$");
 	newXSproto(strcpy(buf, "WorldKick"), XS_Client_WorldKick, file, "$");
 	newXSproto(strcpy(buf, "ReadBookByName"), XS_Client_ReadBookByName, file, "$$$");
+	newXSproto(strcpy(buf, "GetFreeDisciplineSlot"), XS_Client_GetFreeDisciplineSlot, file, "$;$");
+	newXSproto(strcpy(buf, "ScribeSpells"), XS_Client_ScribeSpells, file, "$$$");
+	newXSproto(strcpy(buf, "LearnDisciplines"), XS_Client_LearnDisciplines, file, "$$$");
 	XSRETURN_YES;
 }
 

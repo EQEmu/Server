@@ -10719,3 +10719,93 @@ void Client::SaveDisciplines()
 		CharacterDisciplinesRepository::InsertMany(database, character_discs);
 	}
 }
+
+uint16 Client::ScribeSpells(uint8 min_level, uint8 max_level)
+{
+	int available_book_slot = GetNextAvailableSpellBookSlot();
+	std::vector<int> spell_ids = GetScribeableSpells(min_level, max_level);
+	uint16 spell_count = spell_ids.size();
+	uint16 scribed_spells = 0;
+	if (spell_count > 0) {
+		for (auto spell_id : spell_ids) {
+			if (available_book_slot == -1) {
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Unable to scribe {} ({}) to Spell Book because your Spell Book is full.",
+						spells[spell_id].name,
+						spell_id
+					).c_str()
+				);
+				break;
+			}
+
+			if (HasSpellScribed(spell_id)) {
+				continue;
+			}
+
+			// defer saving per spell and bulk save at the end
+			ScribeSpell(spell_id, available_book_slot, true, true);
+			available_book_slot = GetNextAvailableSpellBookSlot(available_book_slot);
+			scribed_spells++;
+		}
+	}
+
+	if (scribed_spells > 0) {
+		std::string spell_message = (
+			scribed_spells == 1 ?
+			"a new spell" :
+			fmt::format("{} new spells", scribed_spells)
+		);
+		Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
+
+		// bulk insert spells
+		SaveSpells();
+	}
+	return scribed_spells;
+}
+
+uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
+{
+	int available_discipline_slot = GetNextAvailableDisciplineSlot();
+	int character_id = CharacterID();
+	std::vector<int> spell_ids = GetLearnableDisciplines(min_level, max_level);
+	uint16 discipline_count = spell_ids.size();
+	uint16 learned_disciplines = 0;
+	if (discipline_count > 0) {
+		for (auto spell_id : spell_ids) {
+			if (available_discipline_slot == -1) {
+				Message(
+					Chat::Red,
+					fmt::format(
+						"Unable to learn {} ({}) because your Discipline slots are full.",
+						spells[spell_id].name,
+						spell_id
+					).c_str()
+				);
+				break;
+			}
+			
+			if (HasDisciplineLearned(spell_id)) {
+				continue;
+			}
+
+			GetPP().disciplines.values[available_discipline_slot] = spell_id;
+			available_discipline_slot = GetNextAvailableDisciplineSlot(available_discipline_slot);
+			learned_disciplines++;
+		}
+	}
+
+	if (learned_disciplines > 0) {
+		std::string discipline_message = (
+			learned_disciplines == 1 ?
+			"a new discipline" :
+			fmt::format("{} new disciplines", learned_disciplines)
+		);
+		Message(Chat::White, fmt::format("You have learned {}!", discipline_message).c_str());
+		SendDisciplineUpdate();
+		SaveDisciplines();
+	}
+
+	return learned_disciplines;
+}

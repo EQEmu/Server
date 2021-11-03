@@ -804,6 +804,10 @@ public:
 	void SaveSpells();
 	void SaveDisciplines();
 
+	// Bulk Scribe/Learn
+	uint16 ScribeSpells(uint8 min_level, uint8 max_level);
+	uint16 LearnDisciplines(uint8 min_level, uint8 max_level);
+
 	// defer save used when bulk saving
 	void UnscribeSpell(int slot, bool update_client = true, bool defer_save = false);
 	void UnscribeSpellAll(bool update_client = true);
@@ -1026,6 +1030,7 @@ public:
 	int FindSpellBookSlotBySpellID(uint16 spellid);
 	uint32 GetSpellIDByBookSlot(int book_slot);
 	int GetNextAvailableSpellBookSlot(int starting_slot = 0);
+	int GetNextAvailableDisciplineSlot(int starting_slot = 0);
 	inline uint32 GetSpellByBookSlot(int book_slot) { return m_pp.spell_book[book_slot]; }
 	inline bool HasSpellScribed(int spellid) { return FindSpellBookSlotBySpellID(spellid) != -1; }
 	uint32 GetHighestScribedSpellinSpellGroup(uint32 spell_group);
