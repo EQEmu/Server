@@ -208,6 +208,7 @@ private:
 	void LoginSendSessionReady();
 	void LoginSendLogin();
 	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
+	static bool ProcessHealthCheck(std::string username);
 };
 
 #endif

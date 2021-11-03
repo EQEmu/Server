@@ -89,6 +89,8 @@ public:
 		uint32 in_account_id,
 		const std::string &in_account_password_hash
 	);
+
+	static uint32 HealthCheckUserLogin();
 };
 
 

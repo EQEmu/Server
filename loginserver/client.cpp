@@ -4,6 +4,7 @@
 #include "../common/eqemu_logsys.h"
 #include "../common/string_util.h"
 #include "encryption.h"
+#include "account_management.h"
 
 extern LoginServer server;
 
@@ -13,10 +14,10 @@ extern LoginServer server;
  */
 Client::Client(std::shared_ptr<EQStreamInterface> c, LSClientVersion v)
 {
-	m_connection     = c;
-	m_client_version = v;
-	m_client_status  = cs_not_sent_session_ready;
-	m_account_id     = 0;
+	m_connection       = c;
+	m_client_version   = v;
+	m_client_status    = cs_not_sent_session_ready;
+	m_account_id       = 0;
 	m_play_server_id   = 0;
 	m_play_sequence_id = 0;
 }
@@ -232,11 +233,16 @@ void Client::Handle_Login(const char *data, unsigned int size)
 				user           = components[1];
 			}
 
+			// health checks
+			if (ProcessHealthCheck(user)) {
+				DoFailedLogin();
+				return;
+			}
+
 			LogInfo(
-				"Attempting password based login [{0}] login [{1}] user [{2}]",
+				"Attempting password based login [{0}] login [{1}]",
 				user,
-				db_loginserver,
-				user
+				db_loginserver
 			);
 
 			ParseAccountString(user, user, db_loginserver);
@@ -303,7 +309,7 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	m_play_server_id = (unsigned int) play->ServerNumber;
+	m_play_server_id   = (unsigned int) play->ServerNumber;
 	m_play_sequence_id = sequence_in;
 	m_play_server_id   = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
@@ -375,59 +381,19 @@ void Client::AttemptLoginAccountCreation(
 			return;
 		}
 
-		if (server.options.GetEQEmuLoginServerAddress().length() == 0) {
-			DoFailedLogin();
-			return;
-		}
 
-		auto addr_components = SplitString(server.options.GetEQEmuLoginServerAddress(), ':');
-		if (addr_components.size() != 2) {
-			DoFailedLogin();
-			return;
-		}
-
-		m_stored_user = user;
-		m_stored_pass = pass;
-
-		auto address = addr_components[0];
-		auto port    = std::stoi(addr_components[1]);
-		EQ::Net::DNSLookup(
-			address, port, false, [=](const std::string &addr) {
-				if (addr.empty()) {
-					DoFailedLogin();
-					return;
-				}
-
-				m_login_connection_manager.reset(new EQ::Net::DaybreakConnectionManager());
-				m_login_connection_manager->OnNewConnection(
-					std::bind(
-						&Client::LoginOnNewConnection,
-						this,
-						std::placeholders::_1
-					)
-				);
-				m_login_connection_manager->OnConnectionStateChange(
-					std::bind(
-						&Client::LoginOnStatusChange,
-						this,
-						std::placeholders::_1,
-						std::placeholders::_2,
-						std::placeholders::_3
-					)
-				);
-				m_login_connection_manager->OnPacketRecv(
-					std::bind(
-						&Client::LoginOnPacketRecv,
-						this,
-						std::placeholders::_1,
-						std::placeholders::_2
-					)
-				);
-
-				m_login_connection_manager->Connect(addr, port);
-			}
+		uint32 account_id = AccountManagement::CheckExternalLoginserverUserCredentials(
+			user,
+			pass
 		);
 
+		if (account_id > 0) {
+			LogInfo("[AttemptLoginAccountCreation] Found and creating eqemu account [{}]", account_id);
+			CreateEQEmuAccount(user, pass, account_id);
+			return;
+		}
+
+		DoFailedLogin();
 		return;
 	}
 #endif
@@ -569,7 +535,7 @@ void Client::DoSuccessfulLogin(
 	server.db->UpdateLSAccountData(db_account_id, std::string(inet_ntoa(in)));
 	GenerateKey();
 
-	m_account_id   = db_account_id;
+	m_account_id       = db_account_id;
 	m_account_name     = in_account_name;
 	m_loginserver_name = db_loginserver;
 
@@ -795,9 +761,9 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 	}
 	else {
 		LogDebug(
-		"response [{0}] login succeeded user [{1}]",
-		response_error,
-		m_stored_user
+			"response [{0}] login succeeded user [{1}]",
+			response_error,
+			m_stored_user
 		);
 
 		auto m_dbid = sp.GetUInt32(8);
@@ -805,4 +771,12 @@ void Client::LoginProcessLoginResponse(const EQ::Net::Packet &p)
 		CreateEQEmuAccount(m_stored_user, m_stored_pass, m_dbid);
 		m_login_connection->Close();
 	}
+}
+bool Client::ProcessHealthCheck(std::string username)
+{
+	if (username == "healthcheckuser") {
+		return true;
+	}
+
+	return false;
 }
