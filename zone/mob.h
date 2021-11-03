@@ -1231,6 +1231,7 @@ public:
 	void Tune_FindAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg = 0);
 
 	void Tune_GetStats(Mob* defender, Mob *attacker);
+	void Tune_GetStatByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, bool get_ac = false, bool get_atk = false, int interval = 10, int max_loop = 1000, int atk_override = 0, int ac_override = 0, int Msg = 0);
 	void Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
 	void Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int ac_override = 0, int Msg = 0);
 	/**/

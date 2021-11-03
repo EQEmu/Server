@@ -1155,6 +1155,152 @@ void Mob::Tune_GetStats(Mob* defender, Mob *attacker)
 	Message(0, "#STATS#############COMPLETE###################");
 	return;
 }
+
+void Mob::Tune_GetStatByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, bool get_ac, bool get_atk, int interval, int max_loop , int atk_override, int ac_override, int Msg)
+{
+	/*
+		Find the amount of AC stat that has to be added/subtracted from DEFENDER to reach a specific average mitigation value based on ATTACKER's offense statistics.
+		Can use atk_override to find the value verse a hypothetical amount of worn ATK
+	*/
+
+	if (!defender) {
+		Message(0, "#Tune - Processing... Abort! No Defender found.");
+		return;
+	}
+	if (!attacker) {
+		Message(0, "#Tune - Processing... Abort! No Attacker found.");
+		return;
+	}
+	if (defender->GetID() == attacker->GetID()) {
+		Message(0, "#Tune - Processing... Abort! Error Attacker can not be the Defender.");
+		return;
+	}
+
+	int max_damage = 0;
+	int min_damage = 0;
+	int mean_dmg = 0;
+	float tmp_pct_mitigated = 0.0f;
+	float base_pct_mitigation = pct_mitigation;
+	int loop_add_stat = 0;
+	int end = 0;
+	int value = 0;
+
+
+	max_damage = attacker->Tune_ClientGetMaxDamage(defender);
+	min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
+
+	if (!max_damage)
+	{
+		Message(0, "#Tune - Processing... Abort! Damage not found! [MaxDMG %i MinDMG %i]", max_damage, min_damage);
+		return;
+	}
+
+	//Obtain baseline mitigation for current stats
+	mean_dmg = attacker->Tune_ClientGetMeanDamage(defender);
+	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+	Message(0, "###################START###################");
+	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
+	Message(0, "[#Tune] Defender [%s] [AC Mitigation pct  %.2f %] [Total AC %i]", defender->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
+	Message(0, "[#Tune] Attacker [%s] [Max Damage %i Min Damage %i] [Total Offense: %i]", attacker->GetCleanName(), max_damage, min_damage, Tune_GetOffense(defender, attacker));
+	Message(0, "[#Tune] Processing... Find AC for defender to have Mitigation of (%.0f pct) agianst this attacker.", pct_mitigation);
+
+
+	//Set to decrease AC till you reach goal
+	if (tmp_pct_mitigated > pct_mitigation)
+	{
+		interval = interval * -1; //Interval is how much AC/ATK is modified each round. Larger the interval less accurate result is potentially.
+	}
+
+	for (int j = 0; j < max_loop; j++)
+	{
+		if (get_ac) {
+			mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, 0, 0, loop_add_stat, 0);
+		}
+		else if (get_atk) {
+			mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, 0, 0, 0, loop_add_stat);
+		}
+
+		tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
+
+		Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_stat, mean_dmg, tmp_pct_mitigated);
+
+		if (Msg >= 3)
+		{
+			Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_stat, mean_dmg, tmp_pct_mitigated);
+		}
+
+		if (interval > 0 && tmp_pct_mitigated >= pct_mitigation)
+		{
+			end = 1;
+		}
+
+		else if (interval < 0 && tmp_pct_mitigated <= pct_mitigation)
+		{
+			end = 1;
+		}
+
+		//If decreasing, stop at zero
+		if (get_ac && loop_add_stat < 0) {
+			if (defender->IsNPC()) {
+				value = loop_add_stat + defender->CastToNPC()->GetRawAC();
+				if (value <= 0) {
+					end = 1;
+					base_pct_mitigation = tmp_pct_mitigated;
+					Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to AC reaching zero. Minium mitigation ( %.0f ) pct", tmp_pct_mitigated);
+				}
+			}
+
+			if (defender->IsClient()) {
+				value = loop_add_stat + defender->Tune_ACSum();
+				if (value <= 0) {
+					end = 1;
+					base_pct_mitigation = tmp_pct_mitigated;
+					Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to AC reaching zero. Minium mitigation ( %.0f ) pct", tmp_pct_mitigated);
+				}
+			}
+		}
+
+		else if (interval < 0 && mean_dmg == min_damage)
+		{
+			Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to minium hit value (%i). Minium mitigation ( %.0f ) pct", min_damage, tmp_pct_mitigated);
+			end = 1;
+		}
+
+		if (end >= 1) {
+
+			//defender->Tune_MeleeMitigation(this, attacker, damage, minhit, nullptr, Msg, 0, atk_override, loop_add_stat, 0);//?Prob for message
+			if (get_ac) {
+				
+				if (defender->IsNPC())
+				{
+					value = loop_add_stat + defender->CastToNPC()->GetRawAC();
+					if (value <= 0) {
+						value = 0;
+					}
+
+					Message(0, "[#Tune] Recommended NPC RAW AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_stat, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
+					Message(0, "[#Tune] SET NPC 'AC' stat value = [%i]", value);
+					Message(0, "###################COMPLETE###################");
+				}
+				if (defender->IsClient())
+				{
+					Message(0, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_stat, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
+					Message(0, "[#Tune] Modify [Client Item AC or Spell Effect AC]", loop_add_stat);
+					Message(0, "###################COMPLETE###################");
+				}
+				return;
+			}
+		}
+
+		loop_add_stat = loop_add_stat + interval;
+	}
+
+	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", pct_mitigation, interval, max_loop);
+	Message(0, "#Tune - Parse ended at AC ADJUSTMENT ( %i ) at average mitigation of (%.0f) pct.", loop_add_stat, (tmp_pct_mitigated / pct_mitigation));
+	return;
+}
+
 void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval, int max_loop, int atk_override, int Msg)
 {
 
@@ -1179,8 +1325,11 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 	int min_damage = 0;
 	int mean_dmg = 0;
 	float tmp_pct_mitigated = 0.0f;
+	float base_pct_mitigation = pct_mitigation;
 	int loop_add_ac = 0;
 	int end = 0;
+	int value = 0;
+	
 
 	max_damage = attacker->Tune_ClientGetMaxDamage(defender);
 	min_damage = attacker->Tune_ClientGetMinDamage(defender, max_damage);
@@ -1233,53 +1382,47 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 		//If decreasing, stop at zero
 		if (loop_add_ac < 0){
 			if (defender->IsNPC()) {
-				int floor_value = loop_add_ac + defender->CastToNPC()->GetRawAC();
-				if (floor_value <= 0) {
+				value = loop_add_ac + defender->CastToNPC()->GetRawAC();
+				if (value <= 0) {
 					end = 1;
+					base_pct_mitigation = tmp_pct_mitigated;
 					Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to AC reaching zero. Minium mitigation ( %.0f ) pct", tmp_pct_mitigated);
-					Message(0, "[#Tune] Recommended NPC RAW AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), tmp_pct_mitigated, attacker->GetCleanName());
-					Message(0, "[#Tune] SET NPC 'AC' stat value = 0");
-					Message(0, "###################COMPLETE###################");
-					return;
 				}
 			}
 
 			if (defender->IsClient()) {
-				int floor_value = loop_add_ac + defender->Tune_ACSum();
-				if (floor_value <= 0) {
+				value = loop_add_ac + defender->Tune_ACSum();
+				if (value <= 0) {
 					end = 1;
+					base_pct_mitigation = tmp_pct_mitigated;
 					Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to AC reaching zero. Minium mitigation ( %.0f ) pct", tmp_pct_mitigated);
-					Message(0, "[#Tune] Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), tmp_pct_mitigated, attacker->GetCleanName());
-					Message(0, "[#Tune] Modify [Client Item AC or Spell Effect AC] by [%i]", loop_add_ac);
-					Message(0, "###################COMPLETE###################");
-					return;
 				}
 			}
 		}
 
 		else if (interval < 0 && mean_dmg == min_damage) 
 		{
-			end = 2;
+			Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to minium hit value (%i). Minium mitigation ( %.0f ) pct", min_damage, tmp_pct_mitigated);
+			end = 1;
 		}
 
 		if (end >= 1) {
 
 			//defender->Tune_MeleeMitigation(this, attacker, damage, minhit, nullptr, Msg, 0, atk_override, loop_add_ac, 0);//?Prob for message
-
-			if (end == 2) 
-			{
-				Message(0, "#Tune - [WARNING] Mitigation can not be further decreased due to minium hit value (%i).", min_damage);
-			}
-
 			if (defender->IsNPC()) 
 			{
-				Message(0, "[#Tune] Recommended NPC RAW AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
-				Message(0, "[#Tune] SET NPC 'AC' stat value = [%i]", loop_add_ac + defender->CastToNPC()->GetRawAC());
+				value = loop_add_ac + defender->CastToNPC()->GetRawAC();
+				if (value <= 0) {
+					value = 0;
+				}
+
+				Message(0, "[#Tune] Recommended NPC RAW AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
+				Message(0, "[#Tune] SET NPC 'AC' stat value = [%i]", value);
 				Message(0, "###################COMPLETE###################");
 			}
 			if (defender->IsClient()) 
 			{
-				Message(0, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), pct_mitigation, attacker->GetCleanName());
+				Message(0, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
 				Message(0, "[#Tune] Modify [Client Item AC or Spell Effect AC]", loop_add_ac);
 				Message(0, "###################COMPLETE###################");
 			}
@@ -1407,7 +1550,6 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 /*
 	Tune support functions
 */
-
 
 int Mob::Tune_ClientGetMeanDamage(Mob* other, int ac_override, int atk_override, int add_ac, int add_atk)
 {
