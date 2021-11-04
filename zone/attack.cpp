@@ -138,17 +138,23 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 		skillinuse = EQ::skills::SkillHandtoHand;
 		type = animHand2Hand;
 	}
-
+	Shout("PRE Hand %i Type %i", Hand, type);
 	// If we're attacking with the secondary hand, play the dual wield anim
 	if (Hand == EQ::invslot::slotSecondary) {// DW anim
 		type = animDualWield;
+
+		//allow animation chance to fire to be similar to your dw chance
+		if (GetDualWieldingSameDelayWeapons() == 2) {
+			SetDualWieldingSameDelayWeapons(3);
+		}
 	}
 	
 	//If both weapons have same delay this allows a chance for DW animation
 	if (GetDualWieldingSameDelayWeapons() && Hand == EQ::invslot::slotPrimary) {
-		
-		if (GetDualWieldingSameDelayWeapons() == 2 && zone->random.Roll(50)) {
+
+		if (GetDualWieldingSameDelayWeapons() == 3 && zone->random.Roll(50)) {
 			type = animDualWield;
+			SetDualWieldingSameDelayWeapons(2);//Don't roll again till you do another dw attack.
 		}
 		SetDualWieldingSameDelayWeapons(2);//Ensures first attack is always primary.
 	}
