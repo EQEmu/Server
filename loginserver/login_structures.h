@@ -61,15 +61,6 @@ struct PlayerLoginReply_Struct
 	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
 };
 
-struct LoginLoginFailed_Struct {
-	short unknown1;
-	short unknown2;
-	short unknown3;
-	short unknown4;
-	short unknown5;
-	char  unknown6[74];
-};
-
 struct ServerListHeader_Struct {
 
 	uint32 Unknown1;
@@ -93,12 +84,6 @@ struct PlayEverquestResponse_Struct {
 	uint16 Message;
 	uint8  Unknown2[3];
 	uint32 ServerNumber;
-};
-
-static const unsigned char FailedLoginResponseData[] = {
-	0xf6, 0x85, 0x9c, 0x23, 0x57, 0x7e, 0x3e, 0x55, 0xb3, 0x4c, 0xf8, 0xc8, 0xcb, 0x77, 0xd5, 0x16,
-	0x09, 0x7a, 0x63, 0xdc, 0x57, 0x7e, 0x3e, 0x55, 0xb3, 0x4c, 0xf8, 0xc8, 0xcb, 0x77, 0xd5, 0x16,
-	0x09, 0x7a, 0x63, 0xdc, 0x57, 0x7e, 0x3e, 0x55, 0xb3
 };
 
 

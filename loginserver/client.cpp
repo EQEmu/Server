@@ -412,16 +412,26 @@ void Client::DoFailedLogin()
 	m_stored_user.clear();
 	m_stored_pass.clear();
 
-	EQApplicationPacket outapp(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
-	auto                *login_failed = (LoginLoginFailed_Struct *) outapp.pBuffer;
+	// unencrypted
+	LoginBaseMessage_Struct base_header{};
+	base_header.sequence     = m_llrs.unknown1; // login (3)
+	base_header.encrypt_mode = m_llrs.unknown3 >> 8; // encrypt flag?
 
-	login_failed->unknown1 = m_llrs.unknown1;
-	login_failed->unknown2 = m_llrs.unknown2;
-	login_failed->unknown3 = m_llrs.unknown3;
-	login_failed->unknown4 = m_llrs.unknown4;
-	login_failed->unknown5 = m_llrs.unknown5;
+	// encrypted
+	PlayerLoginReply_Struct login_reply{};
+	login_reply.base_reply.success      = false;
+	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
-	memcpy(login_failed->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
+	char encrypted_buffer[80] = {0};
+	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	if (rc == nullptr) {
+		LogDebug("Failed to encrypt eqcrypt block for failed login");
+	}
+
+	constexpr int outside = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	EQApplicationPacket outapp(OP_LoginAccepted, outside);
+	outapp.WriteData(&base_header, sizeof(base_header));
+	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	if (server.options.IsDumpOutPacketsOn()) {
 		DumpPacket(&outapp);
