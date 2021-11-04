@@ -69,10 +69,10 @@ void Mob::TemporaryPets(uint16 spell_id, Mob *targ, const char *name_override, u
 
 	for (int x = 0; x < MAX_SWARM_PETS; x++)
 	{
-		if (spells[spell_id].effectid[x] == SE_TemporaryPets)
+		if (spells[spell_id].effect_id[x] == SE_TemporaryPets)
 		{
-			pet.count = spells[spell_id].base[x];
-			pet.duration = spells[spell_id].max[x];
+			pet.count = spells[spell_id].base_value[x];
+			pet.duration = spells[spell_id].max_value[x];
 		}
 	}
 
@@ -764,7 +764,7 @@ void Client::InspectBuffs(Client* Inspector, int Rank)
 			continue;
 		ib->spell_id[packet_index] = buffs[i].spellid;
 		if (Rank > 1)
-			ib->tics_remaining[packet_index] = spells[buffs[i].spellid].buffdurationformula == DF_Permanent ? 0xFFFFFFFF : buffs[i].ticsremaining;
+			ib->tics_remaining[packet_index] = spells[buffs[i].spellid].buff_duration_formula == DF_Permanent ? 0xFFFFFFFF : buffs[i].ticsremaining;
 		packet_index++;
 	}
 
@@ -904,8 +904,8 @@ void Client::SendAlternateAdvancementRank(int aa_id, int level) {
 	outapp->SetWritePosition(sizeof(AARankInfo_Struct));
 	for(auto &effect : rank->effects) {
 		outapp->WriteSInt32(effect.effect_id);
-		outapp->WriteSInt32(effect.base1);
-		outapp->WriteSInt32(effect.base2);
+		outapp->WriteSInt32(effect.base_value);
+		outapp->WriteSInt32(effect.limit_value);
 		outapp->WriteSInt32(effect.slot);
 	}
 
@@ -1229,7 +1229,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	}
 	//
 	// Modern clients don't require pet targeted for AA casts that are ST_Pet
-	if (spells[rank->spell].targettype == ST_Pet || spells[rank->spell].targettype == ST_SummonedPet)
+	if (spells[rank->spell].target_type == ST_Pet || spells[rank->spell].target_type == ST_SummonedPet)
 		target_id = GetPetID();
 
 	// extra handling for cast_not_standing spells
@@ -1249,7 +1249,7 @@ void Client::ActivateAlternateAdvancementAbility(int rank_id, int target_id) {
 	else {
 		// Bards can cast instant cast AAs while they are casting another song
 		if (spells[rank->spell].cast_time == 0 && GetClass() == BARD && IsBardSong(casting_spell_id)) {
-			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].ResistDiff, false)) {
+			if (!SpellFinished(rank->spell, entity_list.GetMob(target_id), EQ::spells::CastingSlot::AltAbility, spells[rank->spell].mana, -1, spells[rank->spell].resist_difficulty, false)) {
 				return;
 			}
 			ExpendAlternateAdvancementCharge(ability->id);
@@ -1285,8 +1285,8 @@ int Mob::GetAlternateAdvancementCooldownReduction(AA::Rank *rank_in) {
 		}
 
 		for(auto &effect : rank->effects) {
-			if(effect.effect_id == SE_HastenedAASkill && effect.base2 == ability_in->id) {
-				return effect.base1;
+			if(effect.effect_id == SE_HastenedAASkill && effect.limit_value == ability_in->id) {
+				return effect.base_value;
 			}
 		}
 	}
@@ -1744,8 +1744,8 @@ bool ZoneDatabase::LoadAlternateAdvancementAbilities(std::unordered_map<int, std
 			int rank_id = atoi(row[0]);
 			effect.slot = atoi(row[1]);
 			effect.effect_id = atoi(row[2]);
-			effect.base1 = atoi(row[3]);
-			effect.base2 = atoi(row[4]);
+			effect.base_value = atoi(row[3]);
+			effect.limit_value = atoi(row[4]);
 
 			if(effect.slot < 1)
 				continue;

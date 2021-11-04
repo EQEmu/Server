@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_CLIENT_H
 #define EQEMU_CLIENT_H
 
@@ -116,49 +96,49 @@ public:
 	 *
 	 * @return
 	 */
-	unsigned int GetAccountID() const { return account_id; }
+	unsigned int GetAccountID() const { return m_account_id; }
 
 	/**
 	 * Gets the loginserver name of this client
 	 *
 	 * @return
 	 */
-	std::string GetLoginServerName() const { return loginserver_name; }
+	std::string GetLoginServerName() const { return m_loginserver_name; }
 
 	/**
 	 * Gets the account name of this client
 	 *
 	 * @return
 	 */
-	std::string GetAccountName() const { return account_name; }
+	std::string GetAccountName() const { return m_account_name; }
 
 	/**
 	 * Gets the key generated at login for this client
 	 *
 	 * @return
 	 */
-	std::string GetKey() const { return key; }
+	std::string GetKey() const { return m_key; }
 
 	/**
 	 * Gets the server selected to be played on for this client
 	 *
 	 * @return
 	 */
-	unsigned int GetPlayServerID() const { return play_server_id; }
+	unsigned int GetPlayServerID() const { return m_play_server_id; }
 
 	/**
 	 * Gets the play sequence state for this client
 	 *
 	 * @return
 	 */
-	unsigned int GetPlaySequence() const { return play_sequence_id; }
+	unsigned int GetPlaySequence() const { return m_play_sequence_id; }
 
 	/**
 	 * Gets the connection for this client
 	 *
 	 * @return
 	 */
-	std::shared_ptr<EQStreamInterface> GetConnection() { return connection; }
+	std::shared_ptr<EQStreamInterface> GetConnection() { return m_connection; }
 
 	/**
 	 * Attempts to create a login account
@@ -195,24 +175,24 @@ public:
 	void CreateEQEmuAccount(const std::string &in_account_name, const std::string &in_account_password, unsigned int loginserver_account_id);
 
 private:
-	EQ::Random                      random;
-	std::shared_ptr<EQStreamInterface> connection;
-	LSClientVersion                    version;
-	LSClientStatus                     status;
+	EQ::Random                         m_random;
+	std::shared_ptr<EQStreamInterface> m_connection;
+	LSClientVersion                    m_client_version;
+	LSClientStatus                     m_client_status;
 
-	std::string  account_name;
-	unsigned int account_id;
-	std::string  loginserver_name;
-	unsigned int play_server_id;
-	unsigned int play_sequence_id;
-	std::string  key;
+	std::string  m_account_name;
+	unsigned int m_account_id;
+	std::string  m_loginserver_name;
+	unsigned int m_play_server_id;
+	unsigned int m_play_sequence_id;
+	std::string  m_key;
 
-	std::unique_ptr<EQ::Net::DaybreakConnectionManager> login_connection_manager;
-	std::shared_ptr<EQ::Net::DaybreakConnection>        login_connection;
-	LoginLoginRequest_Struct                            llrs;
+	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
+	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
+	LoginLoginRequest_Struct                            m_llrs;
 
-	std::string stored_user;
-	std::string stored_pass;
+	std::string m_stored_user;
+	std::string m_stored_pass;
 	void LoginOnNewConnection(std::shared_ptr<EQ::Net::DaybreakConnection> connection);
 	void LoginOnStatusChange(
 		std::shared_ptr<EQ::Net::DaybreakConnection> conn,
@@ -228,6 +208,7 @@ private:
 	void LoginSendSessionReady();
 	void LoginSendLogin();
 	void LoginProcessLoginResponse(const EQ::Net::Packet &p);
+	static bool ProcessHealthCheck(std::string username);
 };
 
 #endif

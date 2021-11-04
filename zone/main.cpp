@@ -392,6 +392,8 @@ int main(int argc, char** argv) {
 
 	event_scheduler.SetDatabase(&database)->LoadScheduledEvents();
 
+	EQ::SayLinkEngine::LoadCachedSaylinks();
+
 #ifdef BOTS
 	LogInfo("Loading bot commands");
 	int botretval = bot_command_init();

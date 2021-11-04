@@ -57,6 +57,7 @@ QuestManager quest_manager;
 	Mob *owner = nullptr; \
 	Client *initiator = nullptr; \
 	EQ::ItemInstance* questitem = nullptr; \
+	const SPDat_Spell_Struct* questspell = nullptr; \
 	bool depop_npc = false; \
 	std::string encounter; \
 	do { \
@@ -65,6 +66,7 @@ QuestManager quest_manager;
 			owner = e.owner; \
 			initiator = e.initiator; \
 			questitem = e.questitem; \
+			questspell = e.questspell; \
 			depop_npc = e.depop_npc; \
 			encounter = e.encounter; \
 		} \
@@ -118,11 +120,12 @@ void QuestManager::Process() {
 	}
 }
 
-void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, std::string encounter) {
+void QuestManager::StartQuest(Mob *_owner, Client *_initiator, EQ::ItemInstance* _questitem, const SPDat_Spell_Struct* _questspell, std::string encounter) {
 	running_quest run;
 	run.owner = _owner;
 	run.initiator = _initiator;
 	run.questitem = _questitem;
+	run.questspell = _questspell;
 	run.depop_npc = false;
 	run.encounter = encounter;
 	quests_running_.push(run);
@@ -372,14 +375,14 @@ void QuestManager::castspell(int spell_id, int target_id) {
 	if (owner) {
 		Mob *tgt = entity_list.GetMob(target_id);
 		if(tgt != nullptr)
-			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+			owner->SpellFinished(spell_id, tgt, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 	}
 }
 
 void QuestManager::selfcast(int spell_id) {
 	QuestManagerCurrentQuestVars();
 	if (initiator)
-		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].ResistDiff);
+		initiator->SpellFinished(spell_id, initiator, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
 }
 
 void QuestManager::addloot(int item_id, int charges, bool equipitem, int aug1, int aug2, int aug3, int aug4, int aug5, int aug6) {
@@ -1113,65 +1116,12 @@ void QuestManager::permagender(int gender_id) {
 
 uint16 QuestManager::scribespells(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
-	int book_slot = initiator->GetNextAvailableSpellBookSlot();
-	std::vector<int> spell_ids = initiator->GetScribeableSpells(min_level, max_level);
-	int spell_count = spell_ids.size();
-	int spells_learned = 0;
-	if (spell_count > 0) {
-		for (auto spell_id : spell_ids) {
-			if (book_slot == -1) {
-				initiator->Message(
-					Chat::Red,
-					"Unable to scribe spell %s (%i) to Spell Book: Spell Book is Full.", spells[spell_id].name, spell_id
-				);
-				break;
-			}
-
-			if (initiator->HasSpellScribed(spell_id))
-				continue;
-
-			initiator->ScribeSpell(spell_id, book_slot);
-			book_slot = initiator->GetNextAvailableSpellBookSlot(book_slot);
-			spells_learned++;
-		}
-	}
-
-	if (spells_learned > 0) {
-		std::string spell_message = (spells_learned == 1 ? "a new spell" : fmt::format("{} new spells", spells_learned));
-		initiator->Message(Chat::White, fmt::format("You have learned {}!", spell_message).c_str());
-	}
-	return spells_learned;
+	return initiator->ScribeSpells(min_level, max_level);
 }
 
 uint16 QuestManager::traindiscs(uint8 max_level, uint8 min_level) {
 	QuestManagerCurrentQuestVars();
-	int character_id = initiator->CharacterID();
-	std::vector<int> spell_ids = initiator->GetLearnableDisciplines(min_level, max_level);
-	int discipline_count = spell_ids.size();
-	int disciplines_learned = 0;
-	if (discipline_count > 0) {
-		for (auto spell_id : spell_ids) {
-			if (initiator->HasDisciplineLearned(spell_id))
-				continue;
-
-			for (uint32 index = 0; index < MAX_PP_DISCIPLINES; index++) {
-				if (initiator->GetPP().disciplines.values[index] == 0) {
-					initiator->GetPP().disciplines.values[index] = spell_id;
-					database.SaveCharacterDisc(character_id, index, spell_id);
-					disciplines_learned++;
-					break;
-				}
-			}
-		}
-	}
-
-	if (disciplines_learned > 0) {
-		std::string discipline_message = (disciplines_learned == 1 ? "a new discipline" : fmt::format("{} new disciplines", disciplines_learned));
-		initiator->SendDisciplineUpdate();
-		initiator->Message(Chat::White, fmt::format("You have learned {}!", discipline_message).c_str());
-	}
-
-	return disciplines_learned;
+	return initiator->LearnDisciplines(min_level, max_level);
 }
 
 void QuestManager::unscribespells() {
@@ -3310,6 +3260,15 @@ EQ::ItemInstance *QuestManager::GetQuestItem() const {
 	return nullptr;
 }
 
+const SPDat_Spell_Struct *QuestManager::GetQuestSpell() {
+	if(!quests_running_.empty()) {
+		running_quest e = quests_running_.top();
+		return e.questspell;
+	}
+
+	return nullptr;
+}
+
 std::string QuestManager::GetEncounter() const {
 	if(!quests_running_.empty()) {
 		running_quest e = quests_running_.top();
@@ -3701,4 +3660,11 @@ void QuestManager::WorldWideTaskUpdate(uint8 update_type, uint32 task_identifier
 	WWTU->max_status = max_status;
 	worldserver.SendPacket(pack);
 	safe_delete(pack);
+}
+
+const SPDat_Spell_Struct* QuestManager::getspell(uint32 spell_id) {
+    if (spells[spell_id].id) {
+        return &spells[spell_id];
+    }
+    return nullptr;
 }

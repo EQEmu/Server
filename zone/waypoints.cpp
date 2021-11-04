@@ -947,10 +947,6 @@ glm::vec4 Mob::TryMoveAlong(const glm::vec4 &start, float distance, float angle)
 	new_pos.z += GetZOffset();
 
 	if (zone->HasMap()) {
-		auto new_z = zone->zonemap->FindClosestZ(new_pos, nullptr);
-		if (new_z != BEST_Z_INVALID)
-			new_pos.z = new_z;
-
 		if (zone->zonemap->LineIntersectsZone(start, new_pos, 0.0f, &tmp_pos))
 			new_pos = tmp_pos;
 	}

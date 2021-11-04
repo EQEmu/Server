@@ -2291,6 +2291,26 @@ void Lua_Client::RemoveLDoNWin(uint32 theme_id) {
 	self->UpdateLDoNWinLoss(theme_id, true, true);
 }
 
+uint16 Lua_Client::ScribeSpells(uint8 min_level, uint8 max_level) {
+	Lua_Safe_Call_Int();
+	return self->ScribeSpells(min_level, max_level);
+}
+
+uint16 Lua_Client::LearnDisciplines(uint8 min_level, uint8 max_level) {
+	Lua_Safe_Call_Int();
+	return self->LearnDisciplines(min_level, max_level);
+}
+
+int Lua_Client::GetNextAvailableDisciplineSlot() {
+	Lua_Safe_Call_Int();
+	return self->GetNextAvailableDisciplineSlot();
+}
+
+int Lua_Client::GetNextAvailableDisciplineSlot(int starting_slot) {
+	Lua_Safe_Call_Int();
+	return self->GetNextAvailableDisciplineSlot(starting_slot);
+}
+
 luabind::scope lua_register_client() {
 	return luabind::class_<Lua_Client, Lua_Mob>("Client")
 		.def(luabind::constructor<>())
@@ -2673,7 +2693,11 @@ luabind::scope lua_register_client() {
 		.def("UntrainDiscBySpellID", (void(Lua_Client::*)(uint16,bool))&Lua_Client::UntrainDiscBySpellID)
 		.def("SummonBaggedItems", (void(Lua_Client::*)(uint32,luabind::adl::object))&Lua_Client::SummonBaggedItems)
 		.def("RemoveLDoNLoss", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNLoss)
-		.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin);
+		.def("RemoveLDoNWin", (void(Lua_Client::*)(uint32))&Lua_Client::RemoveLDoNWin)
+		.def("ScribeSpells", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::ScribeSpells)
+		.def("LearnDisciplines", (uint16(Lua_Client::*)(uint8,uint8))&Lua_Client::LearnDisciplines)
+		.def("GetNextAvailableDisciplineSlot", (int(Lua_Client::*)(void))&Lua_Client::GetNextAvailableDisciplineSlot)
+		.def("GetNextAvailableDisciplineSlot", (int(Lua_Client::*)(int))&Lua_Client::GetNextAvailableDisciplineSlot);
 }
 
 luabind::scope lua_register_inventory_where() {

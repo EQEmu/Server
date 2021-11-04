@@ -2800,7 +2800,7 @@ XS(XS_Mob_SpellFinished) {
 		if (items > 4) {
 			resist_diff = (int16) SvUV(ST(4));
 		} else {
-			resist_diff = spells[spell_id].ResistDiff;
+			resist_diff = spells[spell_id].resist_difficulty;
 		}
 
 		THIS->SpellFinished(spell_id, spell_target, EQ::spells::CastingSlot::Item, mana_cost, -1, resist_diff);
@@ -2855,7 +2855,7 @@ XS(XS_Mob_BuffFadeByEffect) {
 		Perl_croak(aTHX_ "Usage: Mob::BuffFadeByEffect(THIS, int effect_id, int skip_slot = -1)"); // @categories Script Utility, Spells and Disciplines
 	{
 		Mob *THIS;
-		int effectid = (int) SvIV(ST(1));
+		int effect_id = (int) SvIV(ST(1));
 		int skipslot;
 		VALIDATE_THIS_IS_MOB;
 		if (items < 3)
@@ -2864,7 +2864,7 @@ XS(XS_Mob_BuffFadeByEffect) {
 			skipslot = (int) SvIV(ST(2));
 		}
 
-		THIS->BuffFadeByEffect(effectid, skipslot);
+		THIS->BuffFadeByEffect(effect_id, skipslot);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5093,8 +5093,8 @@ XS(XS_Mob_DoKnockback) {
 	{
 		Mob *THIS;
 		Mob *caster;
-		uint32 pushback = (uint16) SvUV(ST(2));
-		uint32 pushup   = (uint16) SvUV(ST(2));
+		uint32 push_back = (uint16) SvUV(ST(2));
+		uint32 push_up   = (uint16) SvUV(ST(2));
 		VALIDATE_THIS_IS_MOB;
 		if (sv_derived_from(ST(1), "Mob")) {
 			IV tmp = SvIV((SV *) SvRV(ST(1)));
@@ -5104,7 +5104,7 @@ XS(XS_Mob_DoKnockback) {
 		if (caster == nullptr)
 			Perl_croak(aTHX_ "caster is nullptr, avoiding crash.");
 
-		THIS->DoKnockback(caster, pushback, pushup);
+		THIS->DoKnockback(caster, push_back, push_up);
 	}
 	XSRETURN_EMPTY;
 }
@@ -5116,9 +5116,9 @@ XS(XS_Mob_RemoveNimbusEffect) {
 		Perl_croak(aTHX_ "Usage: Mob::RemoveNimbusEffect(THIS, int32 effect_id)"); // @categories Script Utility
 	{
 		Mob *THIS;
-		int32 effectid = (int32) SvIV(ST(1));
+		int32 effect_id = (int32) SvIV(ST(1));
 		VALIDATE_THIS_IS_MOB;
-		THIS->RemoveNimbusEffect(effectid);
+		THIS->RemoveNimbusEffect(effect_id);
 	}
 	XSRETURN_EMPTY;
 }

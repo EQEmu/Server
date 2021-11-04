@@ -208,6 +208,7 @@ void RemoveApostrophes(std::string &s);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
 std::string FormatName(const std::string& char_name);
+void SanitizeWorldServerName(char *name);
 
 template<typename InputIterator, typename OutputIterator>
 auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)

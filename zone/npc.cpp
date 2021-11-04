@@ -1052,7 +1052,7 @@ void NPC::Depop(bool StartSpawnTimer) {
 
 bool NPC::DatabaseCastAccepted(int spell_id) {
 	for (int i=0; i < EFFECT_COUNT; i++) {
-		switch(spells[spell_id].effectid[i]) {
+		switch(spells[spell_id].effect_id[i]) {
 		case SE_Stamina: {
 			if(IsEngaged() && GetHPRatio() < 100)
 				return true;
@@ -1062,7 +1062,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 		}
 		case SE_CurrentHPOnce:
 		case SE_CurrentHP: {
-			if(this->GetHPRatio() < 100 && spells[spell_id].buffduration == 0)
+			if(this->GetHPRatio() < 100 && spells[spell_id].buff_duration == 0)
 				return true;
 			else
 				return false;
@@ -1095,7 +1095,7 @@ bool NPC::DatabaseCastAccepted(int spell_id) {
 			break;
 		}
 		default:
-			if(spells[spell_id].goodEffect == 1 && !(spells[spell_id].buffduration == 0 && this->GetHPRatio() == 100) && !IsEngaged())
+			if(spells[spell_id].good_effect == 1 && !(spells[spell_id].buff_duration == 0 && this->GetHPRatio() == 100) && !IsEngaged())
 				return true;
 			return false;
 		}

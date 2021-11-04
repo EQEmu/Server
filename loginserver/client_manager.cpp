@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #include "client_manager.h"
 #include "login_server.h"
 
@@ -25,6 +5,7 @@ extern LoginServer server;
 extern bool        run_server;
 
 #include "../common/eqemu_logsys.h"
+#include "../common/misc.h"
 
 ClientManager::ClientManager()
 {
@@ -52,8 +33,8 @@ ClientManager::ClientManager()
 	titanium_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New Titanium client connection from {0}:{1}",
-				stream->GetRemoteIP(),
+				"New Titanium client connection from [{0}:{1}]",
+				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
@@ -87,13 +68,13 @@ ClientManager::ClientManager()
 	sod_stream->OnNewConnection(
 		[this](std::shared_ptr<EQ::Net::EQStream> stream) {
 			LogInfo(
-				"New SoD client connection from {0}:{1}",
-				stream->GetRemoteIP(),
+				"New SoD+ client connection from [{0}:{1}]",
+				long2ip(stream->GetRemoteIP()),
 				stream->GetRemotePort()
 			);
 
 			stream->SetOpcodeManager(&sod_ops);
-			Client *c = new Client(stream, cv_sod);
+			auto *c = new Client(stream, cv_sod);
 			clients.push_back(c);
 		}
 	);

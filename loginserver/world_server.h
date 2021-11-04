@@ -1,23 +1,3 @@
-/**
- * EQEmulator: Everquest Server Emulator
- * Copyright (C) 2001-2019 EQEmulator Development Team (https://github.com/EQEmu/Server)
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; version 2 of the License.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY except by those people which sell it, which
- * are required to give you total support for your newly bought product;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- * A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- */
-
 #ifndef EQEMU_WORLDSERVER_H
 #define EQEMU_WORLDSERVER_H
 
@@ -50,44 +30,44 @@ public:
 	/**
 	* Accesses connection, it is intentional that this is not const (trust me).
 	*/
-	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return connection; }
-	void SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> c) { connection = c; }
+	std::shared_ptr<EQ::Net::ServertalkServerConnection> GetConnection() { return m_connection; }
+	void SetConnection(std::shared_ptr<EQ::Net::ServertalkServerConnection> c) { m_connection = c; }
 
 	/**
 	 * @return
 	 */
-	unsigned int GetServerId() const { return server_id; }
+	unsigned int GetServerId() const { return m_server_id; }
 	WorldServer *SetServerId(unsigned int id)
 	{
-		server_id = id;
+		m_server_id = id;
 		return this;
 	}
 
 	/**
 	 * @return
 	 */
-	std::string GetServerLongName() const { return long_name; }
-	std::string GetServerShortName() const { return short_name; }
+	std::string GetServerLongName() const { return m_long_name; }
+	std::string GetServerShortName() const { return m_short_name; }
 
 	/**
 	 * Gets whether the server is authorized to show up on the server list or not
 	 * @return
 	 */
-	bool IsAuthorized() const { return is_server_authorized; }
-	std::string GetLocalIP() const { return local_ip; }
-	std::string GetRemoteIP() const { return remote_ip_address; }
+	bool IsAuthorized() const { return m_is_server_authorized; }
+	std::string GetLocalIP() const { return m_local_ip; }
+	std::string GetRemoteIP() const { return m_remote_ip_address; }
 
 	/**
 	 * Gets what kind of server this server is (legends, preferred, normal)
 	 *
 	 * @return
 	 */
-	unsigned int GetServerListID() const { return server_list_type_id; }
+	unsigned int GetServerListID() const { return m_server_list_type_id; }
 	WorldServer *SetServerListTypeId(unsigned int in_server_list_id);
 
-	int GetStatus() const { return server_status; }
-	unsigned int GetZonesBooted() const { return zones_booted; }
-	unsigned int GetPlayersOnline() const { return players_online; }
+	int GetStatus() const { return m_server_status; }
+	unsigned int GetZonesBooted() const { return m_zones_booted; }
+	unsigned int GetPlayersOnline() const { return m_players_online; }
 
 	/**
 	 * Takes the info struct we received from world and processes it
@@ -184,27 +164,26 @@ private:
 	void ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Packet &packet);
 	void ProcessLSAccountUpdate(uint16_t opcode, const EQ::Net::Packet &packet);
 
-	std::shared_ptr<EQ::Net::ServertalkServerConnection> connection;
+	std::shared_ptr<EQ::Net::ServertalkServerConnection> m_connection;
 
-	unsigned int zones_booted;
-	unsigned int players_online;
-	int          server_status;
-	unsigned int server_id;
-	unsigned int server_list_type_id;
-	unsigned int server_process_type;
-	std::string  server_description;
-	std::string  long_name;
-	std::string  short_name;
-	std::string  account_name;
-	std::string  account_password;
-	std::string  remote_ip_address;
-	std::string  local_ip;
-	std::string  protocol;
-	std::string  version;
-
-	bool                       is_server_authorized;
-	bool                       is_server_logged_in;
-	bool                       is_server_trusted;
+	unsigned int m_zones_booted;
+	unsigned int m_players_online;
+	int          m_server_status;
+	unsigned int m_server_id;
+	unsigned int m_server_list_type_id;
+	unsigned int m_server_process_type;
+	std::string  m_server_description;
+	std::string  m_long_name;
+	std::string  m_short_name;
+	std::string  m_account_name;
+	std::string  m_account_password;
+	std::string  m_remote_ip_address;
+	std::string  m_local_ip;
+	std::string  m_protocol;
+	std::string  m_version;
+	bool         m_is_server_authorized;
+	bool         m_is_server_logged_in;
+	bool         m_is_server_trusted;
 
 	/**
 	 * Keepalive

@@ -995,6 +995,9 @@ bool Client::TradeskillExecute(DBTradeskillRecipe_Struct *spec) {
 	case EQ::skills::SkillTinkering:
 		skillup_modifier = RuleI(Character, TradeskillUpTinkering);
 		break;
+	case EQ::skills::SkillTailoring:
+		skillup_modifier = RuleI(Character, TradeskillUpTailoring);
+		break;
 	default:
 		skillup_modifier = 2;
 		break;

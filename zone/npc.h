@@ -70,9 +70,9 @@ struct AISpells_Struct {
 
 struct AISpellsEffects_Struct {
 	uint16	spelleffectid;
-	int32	base;
+	int32	base_value;
 	int32	limit;
-	int32	max;
+	int32	max_value;
 };
 
 struct AISpellsVar_Struct {
@@ -445,7 +445,7 @@ public:
 
 	uint32 GetAdventureTemplate() const { return adventure_template_id; }
 	void AddSpellToNPCList(int16 iPriority, uint16 iSpellID, uint32 iType, int16 iManaCost, int32 iRecastDelay, int16 iResistAdjust, int8 min_hp, int8 max_hp);
-	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
+	void AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value);
 	void RemoveSpellFromNPCList(uint16 spell_id);
 	Timer *GetRefaceTimer() const { return reface_timer; }
 	const uint32 GetAltCurrencyType() const { return NPCTypedata->alt_currency_type; }

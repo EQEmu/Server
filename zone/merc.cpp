@@ -1117,7 +1117,7 @@ void Merc::DoEnduranceUpkeep() {
 	uint32 buff_count = GetMaxTotalSlots();
 	for (buffs_i = 0; buffs_i < buff_count; buffs_i++) {
 		if (buffs[buffs_i].spellid != SPELL_UNKNOWN) {
-			int upkeep = spells[buffs[buffs_i].spellid].EndurUpkeep;
+			int upkeep = spells[buffs[buffs_i].spellid].endurance_upkeep;
 			if(upkeep > 0) {
 				has_effect = true;
 				if(cost_redux > 0) {
@@ -1982,11 +1982,11 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	} else
 		dist2 = DistanceSquared(m_Position, tar->GetPosition());
 
-	if (((((spells[spellid].targettype==ST_GroupTeleport && mercSpell.type==SpellType_Heal)
-		|| spells[spellid].targettype==ST_AECaster
-		|| spells[spellid].targettype==ST_Group
-		|| spells[spellid].targettype==ST_AEBard)
-		&& dist2 <= spells[spellid].aoerange*spells[spellid].aoerange)
+	if (((((spells[spellid].target_type==ST_GroupTeleport && mercSpell.type==SpellType_Heal)
+		|| spells[spellid].target_type==ST_AECaster
+		|| spells[spellid].target_type==ST_Group
+		|| spells[spellid].target_type==ST_AEBard)
+		&& dist2 <= spells[spellid].aoe_range*spells[spellid].aoe_range)
 		|| dist2 <= GetActSpellRange(spellid, spells[spellid].range)*GetActSpellRange(spellid, spells[spellid].range)) && (mana_cost <= GetMana() || GetMana() == GetMaxMana()))
 	{
 		SetRunAnimSpeed(0);
@@ -2007,8 +2007,8 @@ bool Merc::AIDoSpellCast(uint16 spellid, Mob* tar, int32 mana_cost, uint32* oDon
 	else { //handle spell recast and recast timers
 		SetSpellTimeCanCast(mercSpell.spellid, spells[spellid].recast_time);
 
-		if(spells[spellid].EndurTimerIndex > 0) {
-			SetSpellRecastTimer(spells[spellid].EndurTimerIndex, spellid, spells[spellid].recast_time);
+		if(spells[spellid].timer_id > 0) {
+			SetSpellRecastTimer(spells[spellid].timer_id, spellid, spells[spellid].recast_time);
 		}
 	}
 
@@ -2177,13 +2177,13 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 								     itr != buffSpellList.end(); ++itr) {
 									MercSpell selectedMercSpell = *itr;
 
-									if(!((spells[selectedMercSpell.spellid].targettype == ST_Target || spells[selectedMercSpell.spellid].targettype == ST_Pet ||
-										spells[selectedMercSpell.spellid].targettype == ST_Group || spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ||
-										spells[selectedMercSpell.spellid].targettype == ST_Self))) {
+									if(!((spells[selectedMercSpell.spellid].target_type == ST_Target || spells[selectedMercSpell.spellid].target_type == ST_Pet ||
+										spells[selectedMercSpell.spellid].target_type == ST_Group || spells[selectedMercSpell.spellid].target_type == ST_GroupTeleport ||
+										spells[selectedMercSpell.spellid].target_type == ST_Self))) {
 											continue;
 									}
 
-									if(spells[selectedMercSpell.spellid].targettype == ST_Self) {
+									if(spells[selectedMercSpell.spellid].target_type == ST_Self) {
 										if( !this->IsImmuneToSpell(selectedMercSpell.spellid, this)
 											&& (this->CanBuffStack(selectedMercSpell.spellid, mercLevel, true) >= 0)) {
 
@@ -2237,8 +2237,8 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 
 													//don't cast group spells on pets
 													if(IsGroupSpell(selectedMercSpell.spellid)
-														|| spells[selectedMercSpell.spellid].targettype == ST_Group
-														|| spells[selectedMercSpell.spellid].targettype == ST_GroupTeleport ) {
+														|| spells[selectedMercSpell.spellid].target_type == ST_Group
+														|| spells[selectedMercSpell.spellid].target_type == ST_GroupTeleport ) {
 															continue;
 													}
 
@@ -2337,11 +2337,11 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 								     itr != buffSpellList.end(); ++itr) {
 									MercSpell selectedMercSpell = *itr;
 
-									if(!(spells[selectedMercSpell.spellid].targettype == ST_Self)) {
+									if(!(spells[selectedMercSpell.spellid].target_type == ST_Self)) {
 										continue;
 									}
 
-									if (spells[selectedMercSpell.spellid].skill == EQ::skills::SkillBackstab && spells[selectedMercSpell.spellid].targettype == ST_Self) {
+									if (spells[selectedMercSpell.spellid].skill == EQ::skills::SkillBackstab && spells[selectedMercSpell.spellid].target_type == ST_Self) {
 										if(!hidden) {
 											continue;
 										}
@@ -2535,7 +2535,7 @@ bool Merc::CheckAENuke(Merc* caster, Mob* tar, uint16 spell_id, uint8 &numTarget
 	for (auto itr = npc_list.begin(); itr != npc_list.end(); ++itr) {
 		NPC* npc = *itr;
 
-		if(DistanceSquaredNoZ(npc->GetPosition(), tar->GetPosition()) <= spells[spell_id].aoerange * spells[spell_id].aoerange) {
+		if(DistanceSquaredNoZ(npc->GetPosition(), tar->GetPosition()) <= spells[spell_id].aoe_range * spells[spell_id].aoe_range) {
 			if(!npc->IsMezzed()) {
 				numTargets++;
 			}
@@ -2667,7 +2667,7 @@ int32 Merc::GetFocusEffect(focusType type, uint16 spell_id) {
 			realTotal2 = CalcFocusEffect(type, focusspell_tracker, spell_id);
 
 		// For effects like gift of mana that only fire once, save the spellid into an array that consists of all available buff slots.
-		if(buff_tracker >= 0 && buffs[buff_tracker].numhits > 0) {
+		if(buff_tracker >= 0 && buffs[buff_tracker].hit_number > 0) {
 			m_spellHitsLeft[buff_tracker] = focusspell_tracker;
 		}
 	}
@@ -3047,7 +3047,7 @@ std::list<MercSpell> Merc::GetMercSpellsForSpellEffectAndTargetType(Merc* caster
 			}
 
 			if(IsEffectInSpell(mercSpellList[i].spellid, spellEffect) && caster->CheckStance(mercSpellList[i].stance)) {
-				if(spells[mercSpellList[i].spellid].targettype == targetType) {
+				if(spells[mercSpellList[i].spellid].target_type == targetType) {
 					MercSpell MercSpell;
 					MercSpell.spellid = mercSpellList[i].spellid;
 					MercSpell.stance = mercSpellList[i].stance;
@@ -3395,9 +3395,9 @@ MercSpell Merc::GetBestMercSpellForAETaunt(Merc* caster) {
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if((spells[mercSpellListItr->spellid].targettype == ST_AECaster
-				|| spells[mercSpellListItr->spellid].targettype == ST_AETarget
-				|| spells[mercSpellListItr->spellid].targettype == ST_UndeadAE)
+			if((spells[mercSpellListItr->spellid].target_type == ST_AECaster
+				|| spells[mercSpellListItr->spellid].target_type == ST_AETarget
+				|| spells[mercSpellListItr->spellid].target_type == ST_UndeadAE)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 					result.spellid = mercSpellListItr->spellid;
 					result.stance = mercSpellListItr->stance;
@@ -3430,7 +3430,7 @@ MercSpell Merc::GetBestMercSpellForTaunt(Merc* caster) {
 		for (auto mercSpellListItr = mercSpellList.begin(); mercSpellListItr != mercSpellList.end();
 		     ++mercSpellListItr) {
 			// Assuming all the spells have been loaded into this list by level and in descending order
-			if((spells[mercSpellListItr->spellid].targettype == ST_Target)
+			if((spells[mercSpellListItr->spellid].target_type == ST_Target)
 				&& CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
 					result.spellid = mercSpellListItr->spellid;
 					result.stance = mercSpellListItr->stance;
@@ -3900,22 +3900,22 @@ MercSpell Merc::GetBestMercSpellForNukeByTargetResists(Merc* caster, Mob* target
 			// Assuming all the spells have been loaded into this list by level and in descending order
 
 			if(IsPureNukeSpell(mercSpellListItr->spellid) && !IsAENukeSpell(mercSpellListItr->spellid) && CheckSpellRecastTimers(caster, mercSpellListItr->spellid)) {
-				if(selectLureNuke && (spells[mercSpellListItr->spellid].ResistDiff < lureResisValue)) {
+				if(selectLureNuke && (spells[mercSpellListItr->spellid].resist_difficulty < lureResisValue)) {
 					spellSelected = true;
 				}
 				else {
 					if(((target->GetMR() < target->GetCR()) || (target->GetMR() < target->GetFR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_MAGIC)
-						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+						&& (spells[mercSpellListItr->spellid].resist_difficulty > lureResisValue))
 					{
 						spellSelected = true;
 					}
 					else if(((target->GetCR() < target->GetMR()) || (target->GetCR() < target->GetFR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_COLD)
-						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+						&& (spells[mercSpellListItr->spellid].resist_difficulty > lureResisValue))
 					{
 						spellSelected = true;
 					}
 					else if(((target->GetFR() < target->GetCR()) || (target->GetFR() < target->GetMR())) && (GetSpellResistType(mercSpellListItr->spellid) == RESIST_FIRE)
-						&& (spells[mercSpellListItr->spellid].ResistDiff > lureResisValue))
+						&& (spells[mercSpellListItr->spellid].resist_difficulty > lureResisValue))
 					{
 						spellSelected = true;
 					}
@@ -4003,9 +4003,9 @@ bool Merc::UseDiscipline(int32 spell_id, int32 target) {
 
 	if(spell.recast_time > 0)
 	{
-		if(CheckDisciplineRecastTimers(this, spell_id, spells[spell_id].EndurTimerIndex)) {
-			if(spells[spell_id].EndurTimerIndex > 0) {
-				SetDisciplineRecastTimer(spells[spell_id].EndurTimerIndex, spell_id, spell.recast_time);
+		if(CheckDisciplineRecastTimers(this, spell_id, spells[spell_id].timer_id)) {
+			if(spells[spell_id].timer_id > 0) {
+				SetDisciplineRecastTimer(spells[spell_id].timer_id, spell_id, spell.recast_time);
 			}
 
 			SetSpellTimeCanCast(spell_id, spells[spell_id].recast_time);
@@ -4015,8 +4015,8 @@ bool Merc::UseDiscipline(int32 spell_id, int32 target) {
 		}
 	}
 
-	if(GetEndurance() > spell.EndurCost) {
-		SetEndurance(GetEndurance() - spell.EndurCost);
+	if(GetEndurance() > spell.endurance_cost) {
+		SetEndurance(GetEndurance() - spell.endurance_cost);
 	} else {
 		//too fatigued to use this skill right now.
 		return(false);
@@ -4055,7 +4055,7 @@ bool Merc::CheckSpellRecastTimers(Merc *caster, uint16 spell_id) {
 	if(caster) {
 		MercSpell mercSpell = GetMercSpellBySpellID(caster, spell_id);
 		if(mercSpell.spellid > 0 && mercSpell.time_cancast < Timer::GetCurrentTime()) { //checks spell recast
-			if(GetSpellRecastTimer(caster, spells[spell_id].EndurTimerIndex) < Timer::GetCurrentTime()) { //checks for spells on the same timer
+			if(GetSpellRecastTimer(caster, spells[spell_id].timer_id) < Timer::GetCurrentTime()) { //checks for spells on the same timer
 				return true; //can cast spell
 			}
 		}

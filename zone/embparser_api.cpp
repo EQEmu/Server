@@ -138,6 +138,21 @@ XS(XS_QuestItem_new) {
 	XSRETURN(1);
 }
 
+//Any creation of new Spells gets the current Spell
+XS(XS_Spell_new);
+XS(XS_Spell_new) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::Spell::new()");
+
+	const SPDat_Spell_Struct* spell = quest_manager.GetQuestSpell();
+	ST(0) = sv_newmortal();
+	if (spell)
+		sv_setref_pv(ST(0), "Spell", (void *) spell);
+
+	XSRETURN(1);
+}
+
 //Any creation of new quest items gets the current quest item
 XS(XS_MobList_new);
 XS(XS_MobList_new) {
@@ -7993,6 +8008,21 @@ XS(XS__countspawnednpcs) {
 	}
 }
 
+XS(XS__getspell);
+XS(XS__getspell) {
+    dXSARGS;
+    if (items != 1)
+        Perl_croak(aTHX_ "Usage: quest::getspell(uint32 spell_id)");
+    {
+        dXSTARG;
+        uint32 spell_id = (uint32) SvUV(ST(0));
+        const SPDat_Spell_Struct* spell = quest_manager.getspell(spell_id);
+        ST(0) = sv_newmortal();
+        sv_setref_pv(ST(0), "Spell", (void *) spell);
+        XSRETURN(1);
+    }
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8301,6 +8331,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getinventoryslotname"), XS__getinventoryslotname, file);
 	newXS(strcpy(buf, "getraididbycharid"), XS__getraididbycharid, file);
 	newXS(strcpy(buf, "getracename"), XS__getracename, file);
+	newXS(strcpy(buf, "getspell"), XS__getspell, file);
 	newXS(strcpy(buf, "getspellname"), XS__getspellname, file);
 	newXS(strcpy(buf, "get_spell_level"), XS__get_spell_level, file);
 	newXS(strcpy(buf, "getspellstat"), XS__getspellstat, file);

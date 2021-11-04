@@ -72,9 +72,9 @@ struct DBnpcspellseffects_entries_Struct {
 	int16	spelleffectid;
 	uint8	minlevel;
 	uint8	maxlevel;
-	int32	base;
+	int32	base_value;
 	int32	limit;
-	int32	max;
+	int32	max_value;
 };
 #pragma pack()
 

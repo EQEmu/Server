@@ -42,7 +42,7 @@ float Mob::GetActSpellRange(uint16 spell_id, float range, bool IsBard)
 
 int32 Mob::GetActSpellDamage(uint16 spell_id, int32 value, Mob* target) {
 
-	if (spells[spell_id].targettype == ST_Self)
+	if (spells[spell_id].target_type == ST_Self)
 		return value;
 
 	if (IsNPC())
@@ -180,7 +180,7 @@ int32 Mob::GetActReflectedSpellDamage(int32 spell_id, int32 value, int effective
 			value = int(static_cast<float>(value) * CastToNPC()->GetSpellScale() / 100.0f);
 		}
 	}
-	
+
 	int32 base_spell_dmg = value;
 
 	value = value * effectiveness / 100;
@@ -196,7 +196,7 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 
 	if (target == nullptr)
 		return value;
-
+	
 	if (IsNPC()) {
 		value += value * CastToNPC()->GetSpellFocusDMG() / 100;
 	}
@@ -226,9 +226,18 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					GetFocusEffect(focusFcDamageAmt, spell_id) +
 					GetFocusEffect(focusFcDamageAmt2, spell_id) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id);
+					
+		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
+				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
+			}
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value)*ratio/100;
+			}
+		}
 
 		if (extra_dmg) {
-			int duration = CalcBuffDuration(this, this, spell_id);
+			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0)
 				extra_dmg /= duration;
 		}
@@ -248,9 +257,18 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 					GetFocusEffect(focusFcDamageAmt, spell_id) +
 					GetFocusEffect(focusFcDamageAmt2, spell_id) +
 					GetFocusEffect(focusFcAmplifyAmt, spell_id);
+					
+		if (RuleB(Spells, DOTsScaleWithSpellDmg)) {
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg) {
+				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+			}
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.SpellDmg && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				extra_dmg += GetExtraSpellAmt(spell_id, itembonuses.SpellDmg, base_value);
+			}
+		}
 
 		if (extra_dmg) {
-			int duration = CalcBuffDuration(this, this, spell_id);
+			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0)
 				extra_dmg /= duration;
 		}
@@ -302,7 +320,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	int16 critical_chance = 0;
 	int8  critical_modifier = 1;
 
-	if (spells[spell_id].buffduration < 1) {
+	if (spells[spell_id].buff_duration < 1) {
 		critical_chance += itembonuses.CriticalHealChance + spellbonuses.CriticalHealChance + aabonuses.CriticalHealChance;
 
 		if (spellbonuses.CriticalHealDecay) {
@@ -335,7 +353,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 	value += int(base_value*GetFocusEffect(focusFcAmplifyMod, spell_id) / 100);
 
 	// Instant Heals
-	if (spells[spell_id].buffduration < 1) {
+	if (spells[spell_id].buff_duration < 1) {
 
 		if (target) {
 			value += int(base_value * target->GetFocusEffect(focusFcHealPctIncoming, spell_id)/100); //SPA 393 Add before critical
@@ -343,7 +361,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		}
 
 		value += GetFocusEffect(focusFcHealAmtCrit, spell_id); //SPA 396 Add before critical
-		
+
 		if (!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
 			value += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value); //Item Heal Amt Add before critical
 		}
@@ -351,7 +369,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (target) {
 			value += value * target->GetHealRate() / 100;  //SPA 120 modifies value after Focus Applied but before critical
 		}
-	
+
 		/*
 			Apply critical hit modifier
 		*/
@@ -363,7 +381,7 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 		if (target) {
 			value += target->GetFocusEffect(focusFcHealAmtIncoming, spell_id); //SPA 394 Add after critical
 		}
-		
+
 		if (IsNPC() && CastToNPC()->GetHealScale()) {
 			value = int(static_cast<float>(value) * CastToNPC()->GetHealScale() / 100.0f);
 		}
@@ -383,6 +401,25 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 
 	//Heal over time spells. [Heal Rate and Additional Healing effects do not increase this value]
 	else {
+		//Using IgnoreSpellDmgLvlRestriction to also allow healing to scale
+		int32 extra_heal = 0;
+		if (RuleB(Spells, HOTsScaleWithHealAmt)) {
+			if (RuleB(Spells, IgnoreSpellDmgLvlRestriction) && !spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt) {
+				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
+			}
+			else if(!spells[spell_id].no_heal_damage_item_mod && itembonuses.HealAmt && spells[spell_id].classes[(GetClass() % 17) - 1] >= GetLevel() - 5) {
+				extra_heal += GetExtraSpellAmt(spell_id, itembonuses.HealAmt, base_value);
+			}
+		}
+		
+		if (extra_heal) {
+			int duration = CalcBuffDuration(this, target, spell_id);
+			if (duration > 0) {
+				extra_heal /= duration;
+				value += extra_heal;
+			}
+		}
+
 		if (critical_chance && zone->random.Roll(critical_chance))
 			value *= critical_modifier;
 	}
@@ -619,13 +656,14 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 		return false;
 	}
 
-	for(int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
+	for (int index = 0; index < EQ::spells::SPELLBOOK_SIZE; index++) {
 		if (!HasSpellScribed(spell_id)) {
 			auto next_slot = GetNextAvailableSpellBookSlot();
 			if (next_slot != -1) {
 				ScribeSpell(spell_id, next_slot);
 				return true;
-			} else {
+			}
+			else {
 				Message(
 					Chat::Red,
 					"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
@@ -635,12 +673,14 @@ bool Client::MemorizeSpellFromItem(uint32 item_id) {
 				SummonItem(item_id);
 				return false;
 			}
-		} else {
+		}
+		else {
 			Message(Chat::Red, "You already know this spell.");
 			SummonItem(item_id);
 			return false;
 		}
 	}
+
 	Message(Chat::Red, "You have learned too many spells and can learn no more.");
 	return false;
 }
@@ -716,7 +756,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 		return(false);
 	}
 
-	if(GetEndurance() < spell.EndurCost) {
+	if(GetEndurance() < spell.endurance_cost) {
 		Message(11, "You are too fatigued to use this skill right now.");
 		return(false);
 	}
@@ -728,11 +768,11 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	}
 
 	// the client does this check before calling CastSpell, should prevent discs being eaten
-	if (spell.buffdurationformula != 0 && spell.targettype == ST_Self && HasDiscBuff())
+	if (spell.buff_duration_formula != 0 && spell.target_type == ST_Self && HasDiscBuff())
 		return false;
 
 	//Check the disc timer
-	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.EndurTimerIndex;
+	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
 		/*char val1[20]={0};*/	//unused
 		/*char val2[20]={0};*/	//unused
@@ -765,7 +805,7 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 			return true;
 		}
 
-		SendDisciplineTimer(spells[spell_id].EndurTimerIndex, reduced_recast);
+		SendDisciplineTimer(spells[spell_id].timer_id, reduced_recast);
 	}
 	else
 	{
@@ -884,7 +924,7 @@ void EntityList::AESpell(
 )
 {
 	const auto &cast_target_position =
-				   spells[spell_id].targettype == ST_Ring ?
+				   spells[spell_id].target_type == ST_Ring ?
 					   caster_mob->GetTargetRingLocation() :
 					   static_cast<glm::vec3>(center_mob->GetPosition());
 
@@ -911,8 +951,8 @@ void EntityList::AESpell(
 	if (max_targets) { // rains pass this in since they need to preserve the count through waves
 		max_targets_allowed = *max_targets;
 	}
-	else if (spells[spell_id].aemaxtargets) {
-		max_targets_allowed = spells[spell_id].aemaxtargets;
+	else if (spells[spell_id].aoe_max_targets) {
+		max_targets_allowed = spells[spell_id].aoe_max_targets;
 	}
 	else if (IsTargetableAESpell(spell_id) && is_detrimental_spell && !is_npc && !IsEffectInSpell(spell_id, SE_Lull) && !IsEffectInSpell(spell_id, SE_Mez)) {
 		max_targets_allowed = 4;
@@ -944,15 +984,15 @@ void EntityList::AESpell(
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
+		if (spells[spell_id].target_type == ST_TargetAENoPlayersPets && current_mob->IsPetOwnerClient()) {
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_AreaClientOnly && !current_mob->IsClient()) {
+		if (spells[spell_id].target_type == ST_AreaClientOnly && !current_mob->IsClient()) {
 			continue;
 		}
 
-		if (spells[spell_id].targettype == ST_AreaNPCOnly && !current_mob->IsNPC()) {
+		if (spells[spell_id].target_type == ST_AreaNPCOnly && !current_mob->IsNPC()) {
 			continue;
 		}
 
@@ -986,7 +1026,7 @@ void EntityList::AESpell(
 		}
 
 		if (is_npc && current_mob->IsNPC() &&
-			spells[spell_id].targettype != ST_AreaNPCOnly) {    //check npc->npc casting
+			spells[spell_id].target_type != ST_AreaNPCOnly) {    //check npc->npc casting
 			FACTION_VALUE faction_value = current_mob->GetReverseFactionCon(caster_mob);
 			if (is_detrimental_spell) {
 				//affect mobs that are on our hate list, or

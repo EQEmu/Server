@@ -1521,7 +1521,7 @@ uint32 Mob::GetInstrumentMod(uint16 spell_id)
 	uint32 effectmod = 10;
 	int effectmodcap = 0;
 	if (RuleB(Character, UseSpellFileSongCap)) {
-		effectmodcap = spells[spell_id].songcap / 10;
+		effectmodcap = spells[spell_id].song_cap / 10;
 		if (effectmodcap) {
 			effectmodcap += 10; //Actual calculated cap is 100 greater than songcap value.
 		}

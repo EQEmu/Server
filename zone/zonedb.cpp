@@ -3113,12 +3113,12 @@ void ZoneDatabase::SaveMercBuffs(Merc *merc) {
                             "caston_x, Persistent, caston_y, caston_z, ExtraDIChance) "
                             "VALUES (%u, %u, %u, %u, %u, %d, %u, %u, %u, %u, %u, %u, %u, %i, %u, %i, %i, %i);",
                             merc->GetMercID(), buffs[buffCount].spellid, buffs[buffCount].casterlevel,
-                            spells[buffs[buffCount].spellid].buffdurationformula, buffs[buffCount].ticsremaining,
+                            spells[buffs[buffCount].spellid].buff_duration_formula, buffs[buffCount].ticsremaining,
                             CalculatePoisonCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
                             CalculateDiseaseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
                             CalculateCurseCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
                             CalculateCorruptionCounters(buffs[buffCount].spellid) > 0 ? buffs[buffCount].counters : 0,
-                            buffs[buffCount].numhits, buffs[buffCount].melee_rune, buffs[buffCount].magic_rune,
+                            buffs[buffCount].hit_number, buffs[buffCount].melee_rune, buffs[buffCount].magic_rune,
                             buffs[buffCount].dot_rune, buffs[buffCount].caston_x, IsPersistent, buffs[buffCount].caston_y,
                             buffs[buffCount].caston_z, buffs[buffCount].ExtraDIChance);
         results = database.QueryDatabase(query);
@@ -3167,7 +3167,7 @@ void ZoneDatabase::LoadMercBuffs(Merc *merc) {
 		if(CalculateCorruptionCounters(buffs[buffCount].spellid) > 0)
             buffs[buffCount].counters = atoi(row[7]);
 
-        buffs[buffCount].numhits = atoi(row[8]);
+        buffs[buffCount].hit_number = atoi(row[8]);
 		buffs[buffCount].melee_rune = atoi(row[9]);
 		buffs[buffCount].magic_rune = atoi(row[10]);
 		buffs[buffCount].dot_rune = atoi(row[11]);
@@ -3594,7 +3594,7 @@ void ZoneDatabase::SaveBuffs(Client *client) {
                             "VALUES('%u', '%u', '%u', '%u', '%s', '%d', '%u', '%u', '%u', '%u', '%u', '%u', "
                             "'%i', '%i', '%i', '%i', '%i')", client->CharacterID(), index, buffs[index].spellid,
                             buffs[index].casterlevel, buffs[index].caster_name, buffs[index].ticsremaining,
-                            buffs[index].counters, buffs[index].numhits, buffs[index].melee_rune,
+                            buffs[index].counters, buffs[index].hit_number, buffs[index].melee_rune,
                             buffs[index].magic_rune, buffs[index].persistant_buff, buffs[index].dot_rune,
                             buffs[index].caston_x, buffs[index].caston_y, buffs[index].caston_z,
                             buffs[index].ExtraDIChance, buffs[index].instrument_mod);
@@ -3634,7 +3634,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 		uint32 caster_level = atoi(row[2]);
 		int32 ticsremaining = atoi(row[4]);
 		uint32 counters = atoul(row[5]);
-		uint32 numhits = atoul(row[6]);
+		uint32 hit_number = atoul(row[6]);
 		uint32 melee_rune = atoul(row[7]);
 		uint32 magic_rune = atoul(row[8]);
 		uint8 persistent = atoul(row[9]);
@@ -3660,7 +3660,7 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 		buffs[slot_id].ticsremaining = ticsremaining;
 		buffs[slot_id].counters = counters;
-		buffs[slot_id].numhits = numhits;
+		buffs[slot_id].hit_number = hit_number;
 		buffs[slot_id].melee_rune = melee_rune;
 		buffs[slot_id].magic_rune = magic_rune;
 		buffs[slot_id].persistant_buff = persistent ? true : false;
@@ -3683,12 +3683,12 @@ void ZoneDatabase::LoadBuffs(Client *client)
 
 		for (int effectIndex = 0; effectIndex < EFFECT_COUNT; ++effectIndex) {
 
-			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Charm) {
+			if (spells[buffs[index].spellid].effect_id[effectIndex] == SE_Charm) {
 				buffs[index].spellid = SPELL_UNKNOWN;
 				break;
 			}
 
-			if (spells[buffs[index].spellid].effectid[effectIndex] == SE_Illusion) {
+			if (spells[buffs[index].spellid].effect_id[effectIndex] == SE_Illusion) {
 				if (buffs[index].persistant_buff)
 					break;
 

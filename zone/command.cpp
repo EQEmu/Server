@@ -2998,12 +2998,12 @@ void command_castspell(Client *c, const Seperator *sep)
 		else
 			if (c->GetTarget() == 0)
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, 0, EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].resist_difficulty);
 				else
 					c->CastSpell(spellid, 0, EQ::spells::CastingSlot::Item, 0);
 			else
 				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].ResistDiff);
+					c->SpellFinished(spellid, c->GetTarget(), EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].resist_difficulty);
 				else
 					c->CastSpell(spellid, c->GetTarget()->GetID(), EQ::spells::CastingSlot::Item, 0);
 	}
@@ -5608,40 +5608,40 @@ void command_spellinfo(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "  cast_on_you: %s",  s->cast_on_you);
 		c->Message(Chat::White, "  spell_fades: %s",  s->spell_fades);
 		c->Message(Chat::White, "  range: %f",  s->range);
-		c->Message(Chat::White, "  aoerange: %f",  s->aoerange);
-		c->Message(Chat::White, "  pushback: %f",  s->pushback);
-		c->Message(Chat::White, "  pushup: %f",  s->pushup);
+		c->Message(Chat::White, "  aoe_range: %f",  s->aoe_range);
+		c->Message(Chat::White, "  push_back: %f",  s->push_back);
+		c->Message(Chat::White, "  push_up: %f",  s->push_up);
 		c->Message(Chat::White, "  cast_time: %d",  s->cast_time);
 		c->Message(Chat::White, "  recovery_time: %d",  s->recovery_time);
 		c->Message(Chat::White, "  recast_time: %d",  s->recast_time);
-		c->Message(Chat::White, "  buffdurationformula: %d",  s->buffdurationformula);
-		c->Message(Chat::White, "  buffduration: %d",  s->buffduration);
-		c->Message(Chat::White, "  AEDuration: %d",  s->AEDuration);
+		c->Message(Chat::White, "  buff_duration_formula: %d",  s->buff_duration_formula);
+		c->Message(Chat::White, "  buff_duration: %d",  s->buff_duration);
+		c->Message(Chat::White, "  AEDuration: %d",  s->aoe_duration);
 		c->Message(Chat::White, "  mana: %d",  s->mana);
-		c->Message(Chat::White, "  base[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->base[0], s->base[1], s->base[2], s->base[3], s->base[4], s->base[5], s->base[6], s->base[7], s->base[8], s->base[9], s->base[10], s->base[11]);
-		c->Message(Chat::White, "  base22[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->base2[0], s->base2[1], s->base2[2], s->base2[3], s->base2[4], s->base2[5], s->base2[6], s->base2[7], s->base2[8], s->base2[9], s->base2[10], s->base2[11]);
-		c->Message(Chat::White, "  max[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->max[0], s->max[1], s->max[2], s->max[3], s->max[4], s->max[5], s->max[6], s->max[7], s->max[8], s->max[9], s->max[10], s->max[11]);
-		c->Message(Chat::White, "  components[4]: %d, %d, %d, %d",  s->components[0], s->components[1], s->components[2], s->components[3]);
-		c->Message(Chat::White, "  component_counts[4]: %d, %d, %d, %d",  s->component_counts[0], s->component_counts[1], s->component_counts[2], s->component_counts[3]);
-		c->Message(Chat::White, "  NoexpendReagent[4]: %d, %d, %d, %d",  s->NoexpendReagent[0], s->NoexpendReagent[1], s->NoexpendReagent[2], s->NoexpendReagent[3]);
+		c->Message(Chat::White, "  base[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->base_value[0], s->base_value[1], s->base_value[2], s->base_value[3], s->base_value[4], s->base_value[5], s->base_value[6], s->base_value[7], s->base_value[8], s->base_value[9], s->base_value[10], s->base_value[11]);
+		c->Message(Chat::White, "  base22[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->limit_value[0], s->limit_value[1], s->limit_value[2], s->limit_value[3], s->limit_value[4], s->limit_value[5], s->limit_value[6], s->limit_value[7], s->limit_value[8], s->limit_value[9], s->limit_value[10], s->limit_value[11]);
+		c->Message(Chat::White, "  max[12]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",  s->max_value[0], s->max_value[1], s->max_value[2], s->max_value[3], s->max_value[4], s->max_value[5], s->max_value[6], s->max_value[7], s->max_value[8], s->max_value[9], s->max_value[10], s->max_value[11]);
+		c->Message(Chat::White, "  components[4]: %d, %d, %d, %d",  s->component[0], s->component[1], s->component[2], s->component[3]);
+		c->Message(Chat::White, "  component_counts[4]: %d, %d, %d, %d",  s->component_count[0], s->component_count[1], s->component_count[2], s->component_count[3]);
+		c->Message(Chat::White, "  NoexpendReagent[4]: %d, %d, %d, %d",  s->no_expend_reagent[0], s->no_expend_reagent[1], s->no_expend_reagent[2], s->no_expend_reagent[3]);
 		c->Message(Chat::White, "  formula[12]: 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x",  s->formula[0], s->formula[1], s->formula[2], s->formula[3], s->formula[4], s->formula[5], s->formula[6], s->formula[7], s->formula[8], s->formula[9], s->formula[10], s->formula[11]);
-		c->Message(Chat::White, "  goodEffect: %d",  s->goodEffect);
-		c->Message(Chat::White, "  Activated: %d",  s->Activated);
-		c->Message(Chat::White, "  resisttype: %d",  s->resisttype);
-		c->Message(Chat::White, "  effectid[12]: 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x",  s->effectid[0], s->effectid[1], s->effectid[2], s->effectid[3], s->effectid[4], s->effectid[5], s->effectid[6], s->effectid[7], s->effectid[8], s->effectid[9], s->effectid[10], s->effectid[11]);
-		c->Message(Chat::White, "  targettype: %d",  s->targettype);
-		c->Message(Chat::White, "  basediff: %d",  s->basediff);
+		c->Message(Chat::White, "  goodEffect: %d",  s->good_effect);
+		c->Message(Chat::White, "  Activated: %d",  s->activated);
+		c->Message(Chat::White, "  resisttype: %d",  s->resist_type);
+		c->Message(Chat::White, "  effectid[12]: 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x",  s->effect_id[0], s->effect_id[1], s->effect_id[2], s->effect_id[3], s->effect_id[4], s->effect_id[5], s->effect_id[6], s->effect_id[7], s->effect_id[8], s->effect_id[9], s->effect_id[10], s->effect_id[11]);
+		c->Message(Chat::White, "  targettype: %d",  s->target_type);
+		c->Message(Chat::White, "  basediff: %d",  s->base_difficulty);
 		c->Message(Chat::White, "  skill: %d",  s->skill);
-		c->Message(Chat::White, "  zonetype: %d",  s->zonetype);
-		c->Message(Chat::White, "  EnvironmentType: %d",  s->EnvironmentType);
-		c->Message(Chat::White, "  TimeOfDay: %d",  s->TimeOfDay);
+		c->Message(Chat::White, "  zonetype: %d",  s->zone_type);
+		c->Message(Chat::White, "  EnvironmentType: %d",  s->environment_type);
+		c->Message(Chat::White, "  TimeOfDay: %d",  s->time_of_day);
 		c->Message(Chat::White, "  classes[15]: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
 			s->classes[0], s->classes[1], s->classes[2], s->classes[3], s->classes[4],
 			s->classes[5], s->classes[6], s->classes[7], s->classes[8], s->classes[9],
 			s->classes[10], s->classes[11], s->classes[12], s->classes[13], s->classes[14]);
-		c->Message(Chat::White, "  CastingAnim: %d",  s->CastingAnim);
-		c->Message(Chat::White, "  SpellAffectIndex: %d",  s->SpellAffectIndex);
-		c->Message(Chat::White, " RecourseLink: %d",  s->RecourseLink);
+		c->Message(Chat::White, "  CastingAnim: %d",  s->casting_animation);
+		c->Message(Chat::White, "  SpellAffectIndex: %d",  s->spell_affect_index);
+		c->Message(Chat::White, " RecourseLink: %d",  s->recourse_link);
 	}
 }
 
@@ -6469,21 +6469,27 @@ void command_npcspawn(Client *c, const Seperator *sep)
 }
 
 void command_spawnfix(Client *c, const Seperator *sep) {
-	Mob *targetMob = c->GetTarget();
-	if (!targetMob || !targetMob->IsNPC()) {
+	Mob *target_mob = c->GetTarget();
+	if (!target_mob || !target_mob->IsNPC()) {
 		c->Message(Chat::White, "Error: #spawnfix: Need an NPC target.");
 		return;
     }
 
-    Spawn2* s2 = targetMob->CastToNPC()->respawn2;
+    Spawn2* s2 = target_mob->CastToNPC()->respawn2;
 
     if(!s2) {
         c->Message(Chat::White, "#spawnfix FAILED -- cannot determine which spawn entry in the database this mob came from.");
         return;
     }
 
-    std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
-                                    c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
+	std::string query = StringFormat(
+		"UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' WHERE id = '%i'",
+		c->GetX(),
+		c->GetY(),
+		target_mob->GetFixedZ(c->GetPosition()),
+		c->GetHeading(),
+		s2->GetID()
+	);
     auto results = content_db.QueryDatabase(query);
     if (!results.Success()) {
         c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
@@ -6492,7 +6498,7 @@ void command_spawnfix(Client *c, const Seperator *sep) {
     }
 
     c->Message(Chat::White, "Updating coordinates successful.");
-    targetMob->Depop(false);
+    target_mob->Depop(false);
 }
 
 void command_loc(Client *c, const Seperator *sep)
@@ -7848,105 +7854,64 @@ void command_beardcolor(Client *c, const Seperator *sep)
 
 void command_scribespells(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t = c->GetTarget()->CastToClient();
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
 	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "FORMAT: #scribespells <max level> <min level>");
 		return;
 	}
 
-	uint8 max_level = (uint8)atol(sep->arg[1]);
-	if (!c->GetGM() && max_level > (uint8)RuleI(Character, MaxLevel))
-		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
+	uint8 max_level = (uint8) std::stoi(sep->arg[1]);
+	uint8 min_level = (
+		sep->IsNumber(2) ?
+		(uint8)
+		std::stoi(sep->arg[2]) :
+		1
+	); // Default to Level 1 if there isn't a 2nd argument
 
-	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
-		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	if (!c->GetGM()) { // Default to Character:MaxLevel if we're not a GM and Level is higher than the max level
+		if (max_level > rule_max_level) {
+			max_level = rule_max_level;
+		}
+
+		if (min_level > rule_max_level) {
+			min_level = rule_max_level;
+		}
+	}
 
 	if(max_level < 1 || min_level < 1) {
-		c->Message(Chat::White, "ERROR: Level must be greater than 1.");
+		c->Message(Chat::White, "ERROR: Level must be greater than or equal to 1.");
 		return;
 	}
+
 	if (min_level > max_level) {
-		c->Message(Chat::White, "ERROR: Min Level must be less than or equal to Max Level.");
+		c->Message(Chat::White, "ERROR: Minimum Level must be less than or equal to Maximum Level.");
 		return;
 	}
 
-	t->Message(Chat::White, "Scribing spells to spellbook.");
-	if(t != c)
-		c->Message(Chat::White, "Scribing spells for %s.",  t->GetName());
-	LogInfo("Scribe spells request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
-
-	int book_slot = t->GetNextAvailableSpellBookSlot();
-	int spell_id = 0;
-	int count = 0;
-
-	for ( ; spell_id < SPDAT_RECORDS && book_slot < EQ::spells::SPELLBOOK_SIZE; ++spell_id) {
-		if (book_slot == -1) {
-			t->Message(
-				13,
-				"Unable to scribe spell %s (%i) to spellbook: no more spell book slots available.",
-				((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-				spell_id
-			);
-			if (t != c)
-				c->Message(
-					13,
-					"Error scribing spells: %s ran out of spell book slots on spell %s (%i)",
-					t->GetName(),
-					((spell_id >= 0 && spell_id < SPDAT_RECORDS) ? spells[spell_id].name : "Out-of-range"),
-					spell_id
-				);
-
-			break;
-		}
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			c->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return;
-		}
-		if (book_slot < 0 || book_slot >= EQ::spells::SPELLBOOK_SIZE) {
-			c->Message(Chat::Red, "FATAL ERROR: Book slot out-of-range (slot: %i, min: 0, max: %i)", book_slot, EQ::spells::SPELLBOOK_SIZE);
-			return;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				c->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return;
-			}
-
-			if (!IsDiscipline(spell_id_) && !t->HasSpellScribed(spell_id)) { // isn't a discipline & we don't already have it scribed
-				t->ScribeSpell(spell_id_, book_slot);
-				++count;
-			}
-
-			break;
-		}
-
-		book_slot = t->GetNextAvailableSpellBookSlot(book_slot);
-	}
-
-	if (count > 0) {
-		t->Message(Chat::White, "Successfully scribed %i spells.",  count);
-		if (t != c)
-			c->Message(Chat::White, "Successfully scribed %i spells for %s.",  count, t->GetName());
-	}
-	else {
-		t->Message(Chat::White, "No spells scribed.");
-		if (t != c)
-			c->Message(Chat::White, "No spells scribed for %s.",  t->GetName());
+	uint16 scribed_spells = target->ScribeSpells(min_level, max_level);
+	if (target != c) {
+		std::string spell_message = (
+			scribed_spells > 0 ?
+			(
+				scribed_spells == 1 ? 
+				"A new spell" :
+				fmt::format("{} New spells", scribed_spells)
+			) :
+			"No new spells"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} scribed for {}.",
+				spell_message,
+				target->GetCleanName()
+			).c_str()
+		);
 	}
 }
 
@@ -8058,6 +8023,7 @@ void command_untraindiscs(Client *c, const Seperator *sep) {
 		t = c->GetTarget()->CastToClient();
 
 	t->UntrainDiscAll();
+	t->Message(Chat::Yellow, "All disciplines removed.");
 }
 
 void command_wpinfo(Client *c, const Seperator *sep)
@@ -9275,7 +9241,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "gender") == 0) {
-		auto gender_id = atoi(sep->arg[2]);		
+		auto gender_id = atoi(sep->arg[2]);
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now a {} ({}).", npc_id, gender_id, GetGenderName(gender_id)).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET gender = {} WHERE id = {}", gender_id, npc_id);
 		content_db.QueryDatabase(query);
@@ -9461,7 +9427,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		std::string query = fmt::format("UPDATE npc_types SET ammo_idfile = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
 		content_db.QueryDatabase(query);
 		return;
-	}	
+	}
 
 	if (strcasecmp(sep->arg[1], "weapon") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} will have Model {} set to their Primary and Model {} set to their Secondary on repop.", npc_id, atoi(sep->arg[2]), atoi(sep->arg[3])).c_str());
@@ -9679,7 +9645,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "accuracy") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} now has {} Accuracy.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET accuracy = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9749,7 +9715,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		content_db.QueryDatabase(query);
 		return;
 	}
-	
+
 	if (strcasecmp(sep->arg[1], "armtexture") == 0) {
 		c->Message(Chat::Yellow, fmt::format("NPC ID {} is now using Arm Texture {}.", npc_id, atoi(sep->arg[2])).c_str());
 		std::string query = fmt::format("UPDATE npc_types SET armtexture = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
@@ -9934,7 +9900,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 				animation = 1;
 				animation_name = "Sitting";
 			} else if(strcasecmp(sep->arg[2], "crouch") == 0 || atoi(sep->arg[2]) == 2) { // Crouch
-				animation = 2;				
+				animation = 2;
 				animation_name = "Crouching";
 			} else if(strcasecmp(sep->arg[2], "dead") == 0 || atoi(sep->arg[2]) == 3) { // Dead
 				animation = 3;
@@ -10931,97 +10897,64 @@ void command_reloadtitles(Client *c, const Seperator *sep)
 
 void command_traindisc(Client *c, const Seperator *sep)
 {
-	Client *t = c;
-	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM())
-		t = c->GetTarget()->CastToClient();
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (sep->argnum < 1 || !sep->IsNumber(1)) {
+	if(sep->argnum < 1 || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "FORMAT: #traindisc <max level> <min level>");
 		return;
 	}
 
-	uint8 max_level = (uint8)atol(sep->arg[1]);
-	if (!c->GetGM() && max_level >(uint8)RuleI(Character, MaxLevel))
-		max_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
+	uint8 max_level = (uint8) std::stoi(sep->arg[1]);
+	uint8 min_level = (
+		sep->IsNumber(2) ?
+		(uint8)
+		std::stoi(sep->arg[2]) :
+		1
+	); // Default to Level 1 if there isn't a 2nd argument
 
-	uint8 min_level = (sep->IsNumber(2) ? (uint8)atol(sep->arg[2]) : 1); // default to 1 if there isn't a 2nd argument
-	if (!c->GetGM() && min_level > (uint8)RuleI(Character, MaxLevel))
-		min_level = (uint8)RuleI(Character, MaxLevel); // default to Character:MaxLevel if we're not a GM & it's higher than the max level
+	if (!c->GetGM()) { // Default to Character:MaxLevel if we're not a GM and Level is higher than the max level
+		if (max_level > rule_max_level) {
+			max_level = rule_max_level;
+		}
+
+		if (min_level > rule_max_level) {
+			min_level = rule_max_level;
+		}
+	}
 
 	if(max_level < 1 || min_level < 1) {
-		c->Message(Chat::White, "ERROR: Level must be greater than 1.");
+		c->Message(Chat::White, "ERROR: Level must be greater than or equal to 1.");
 		return;
 	}
+
 	if (min_level > max_level) {
-		c->Message(Chat::White, "Error: Min Level must be less than or equal to Max Level.");
+		c->Message(Chat::White, "ERROR: Minimum Level must be less than or equal to Maximum Level.");
 		return;
 	}
 
-	t->Message(Chat::White, "Training disciplines");
-	if(t != c)
-		c->Message(Chat::White, "Training disciplines for %s.",  t->GetName());
-	LogInfo("Train disciplines request for [{}] from [{}], levels: [{}] -> [{}]",  t->GetName(), c->GetName(), min_level, max_level);
-
-	int spell_id = 0;
-	int count = 0;
-
-	bool change = false;
-
-	for( ; spell_id < SPDAT_RECORDS; ++spell_id) {
-		if (spell_id < 0 || spell_id >= SPDAT_RECORDS) {
-			c->Message(Chat::Red, "FATAL ERROR: Spell id out-of-range (id: %i, min: 0, max: %i)", spell_id, SPDAT_RECORDS);
-			return;
-		}
-
-		while (true) {
-			if (spells[spell_id].classes[WARRIOR] == 0) // check if spell exists
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] > max_level) // maximum level
-				break;
-			if (spells[spell_id].classes[t->GetPP().class_ - 1] < min_level) // minimum level
-				break;
-			if (spells[spell_id].skill == 52)
-				break;
-
-			uint16 spell_id_ = (uint16)spell_id;
-			if ((spell_id_ != spell_id) || (spell_id != spell_id_)) {
-				c->Message(Chat::Red, "FATAL ERROR: Type conversion data loss with spell_id (%i != %u)", spell_id, spell_id_);
-				return;
-			}
-
-			if (!IsDiscipline(spell_id_))
-				break;
-
-			for (uint32 r = 0; r < MAX_PP_DISCIPLINES; ++r) {
-				if (t->GetPP().disciplines.values[r] == spell_id_) {
-					t->Message(Chat::Red, "You already know this discipline.");
-					break; // continue the 1st loop
-				}
-				else if (t->GetPP().disciplines.values[r] == 0) {
-					t->GetPP().disciplines.values[r] = spell_id_;
-					database.SaveCharacterDisc(t->CharacterID(), r, spell_id_);
-					change = true;
-					t->Message(Chat::White, "You have learned a new discipline!");
-					++count; // success counter
-					break; // continue the 1st loop
-				} // if we get to this point, there's already a discipline in this slot, so we continue onto the next slot
-			}
-
-			break;
-		}
-	}
-
-	if (change)
-		t->SendDisciplineUpdate();
-
-	if (count > 0) {
-		t->Message(Chat::White, "Successfully trained %u disciplines.",  count);
-		if (t != c)
-			c->Message(Chat::White, "Successfully trained %u disciplines for %s.",  count, t->GetName());
-	} else {
-		t->Message(Chat::White, "No disciplines trained.");
-		if (t != c)
-			c->Message(Chat::White, "No disciplines trained for %s.",  t->GetName());
+	uint16 learned_disciplines = target->LearnDisciplines(min_level, max_level);
+	if (target != c) {
+		std::string discipline_message = (
+			learned_disciplines > 0 ?
+			(
+				learned_disciplines == 1 ? 
+				"A new discipline" :
+				fmt::format("{} New disciplines", learned_disciplines)
+			) :
+			"No new disciplines"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} learned for {}.",
+				discipline_message,
+				target->GetCleanName()
+			).c_str()
+		);
 	}
 }
 
@@ -14880,7 +14813,7 @@ void command_dye(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		return;
 	}
-	
+
 	uint8 slot = 0;
 	uint8 red = 255;
 	uint8 green = 255;
@@ -14902,7 +14835,7 @@ void command_dye(Client *c, const Seperator *sep)
 		std::vector<std::string> slot_messages;
 		c->Message(Chat::White, "Command Syntax: #dye help | #dye [slot] [red] [green] [blue] [use_tint]");
 		c->Message(Chat::White, "Red, Green, and Blue go from 0 to 255.");
-		
+
 		for (const auto& slot : dye_slots) {
 			slot_messages.push_back(fmt::format("({}) {}", slot_id, slot));
 			slot_id++;

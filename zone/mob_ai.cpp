@@ -115,11 +115,11 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 			// should probably match that eventually. This should be good enough for now I guess ....
 			if (
 				(
-				 (spells[AIspells[i].spellid].targettype == ST_HateList || spells[AIspells[i].spellid].targettype == ST_AETargetHateList) ||
+				 (spells[AIspells[i].spellid].target_type == ST_HateList || spells[AIspells[i].spellid].target_type == ST_AETargetHateList) ||
 				 (
 				  // note: I think this check is actually wrong and we should be checking range instead in all cases, BUT if range is 0, range check is skipped? Works for now
-				  (spells[AIspells[i].spellid].targettype==ST_AECaster || spells[AIspells[i].spellid].targettype==ST_AEBard || spells[AIspells[i].spellid].targettype==ST_AEClientV1)
-				  && dist2 <= spells[AIspells[i].spellid].aoerange*spells[AIspells[i].spellid].aoerange
+				  (spells[AIspells[i].spellid].target_type==ST_AECaster || spells[AIspells[i].spellid].target_type==ST_AEBard || spells[AIspells[i].spellid].target_type==ST_AEClientV1)
+				  && dist2 <= spells[AIspells[i].spellid].aoe_range*spells[AIspells[i].spellid].aoe_range
 				 ) ||
 				 dist2 <= spells[AIspells[i].spellid].range*spells[AIspells[i].spellid].range
 				 )
@@ -135,7 +135,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 				switch (AIspells[i].type) {
 					case SpellType_Heal: {
 						if (
-							(spells[AIspells[i].spellid].targettype == ST_Target || tar == this)
+							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontHealMeBefore() < Timer::GetCurrentTime()
 							&& !(tar->IsPet() && tar->GetOwner()->IsClient())	//no buffing PC's pets
 							) {
@@ -174,7 +174,7 @@ bool NPC::AICastSpell(Mob* tar, uint8 iChance, uint32 iSpellTypes, bool bInnates
 					}
 					case SpellType_Buff: {
 						if (
-							(spells[AIspells[i].spellid].targettype == ST_Target || tar == this)
+							(spells[AIspells[i].spellid].target_type == ST_Target || tar == this)
 							&& tar->DontBuffMeBefore() < Timer::GetCurrentTime()
 							&& !tar->IsImmuneToSpell(AIspells[i].spellid, this)
 							&& tar->CanBuffStack(AIspells[i].spellid, GetLevel(), true) >= 0
@@ -2497,7 +2497,7 @@ create table npc_spells_entries (
 */
 
 bool IsSpellInList(DBnpcspells_Struct* spell_list, uint16 iSpellID);
-bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max);
+bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value);
 
 bool NPC::AI_AddNPCSpells(uint32 iDBSpellsID) {
 	// ok, this function should load the list, and the parent list then shove them into the struct and sort
@@ -2708,12 +2708,12 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	if (parentlist) {
 		for (i=0; i<parentlist->numentries; i++) {
 			if (GetLevel() >= parentlist->entries[i].minlevel && GetLevel() <= parentlist->entries[i].maxlevel && parentlist->entries[i].spelleffectid > 0) {
-				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base,
-					parentlist->entries[i].limit, parentlist->entries[i].max))
+				if (!IsSpellEffectInList(spell_effects_list, parentlist->entries[i].spelleffectid, parentlist->entries[i].base_value,
+					parentlist->entries[i].limit, parentlist->entries[i].max_value))
 				{
 				AddSpellEffectToNPCList(parentlist->entries[i].spelleffectid,
-						parentlist->entries[i].base, parentlist->entries[i].limit,
-						parentlist->entries[i].max);
+						parentlist->entries[i].base_value, parentlist->entries[i].limit,
+						parentlist->entries[i].max_value);
 				}
 			}
 		}
@@ -2722,8 +2722,8 @@ bool NPC::AI_AddNPCSpellsEffects(uint32 iDBSpellsEffectsID) {
 	for (i=0; i<spell_effects_list->numentries; i++) {
 		if (GetLevel() >= spell_effects_list->entries[i].minlevel && GetLevel() <= spell_effects_list->entries[i].maxlevel && spell_effects_list->entries[i].spelleffectid > 0) {
 			AddSpellEffectToNPCList(spell_effects_list->entries[i].spelleffectid,
-				spell_effects_list->entries[i].base, spell_effects_list->entries[i].limit,
-				spell_effects_list->entries[i].max);
+				spell_effects_list->entries[i].base_value, spell_effects_list->entries[i].limit,
+				spell_effects_list->entries[i].max_value);
 		}
 	}
 
@@ -2737,13 +2737,13 @@ void NPC::ApplyAISpellEffects(StatBonuses* newbon)
 
 	for (int i = 0; i < AIspellsEffects.size(); i++)
 		ApplySpellsBonuses(0, 0, newbon, 0, 0, 0, -1, 10, true, AIspellsEffects[i].spelleffectid,
-				   AIspellsEffects[i].base, AIspellsEffects[i].limit, AIspellsEffects[i].max);
+				   AIspellsEffects[i].base_value, AIspellsEffects[i].limit, AIspellsEffects[i].max_value);
 
 	return;
 }
 
 // adds a spell to the list, taking into account priority and resorting list as needed.
-void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit, int32 max)
+void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value)
 {
 
 	if(!iSpellEffectID)
@@ -2753,16 +2753,16 @@ void NPC::AddSpellEffectToNPCList(uint16 iSpellEffectID, int32 base, int32 limit
 	AISpellsEffects_Struct t;
 
 	t.spelleffectid = iSpellEffectID;
-	t.base = base;
+	t.base_value = base_value;
 	t.limit = limit;
-	t.max = max;
+	t.max_value = max_value;
 	AIspellsEffects.push_back(t);
 }
 
-bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base, int32 limit, int32 max) {
+bool IsSpellEffectInList(DBnpcspellseffects_Struct* spelleffect_list, uint16 iSpellEffectID, int32 base_value, int32 limit, int32 max_value) {
 	for (uint32 i=0; i < spelleffect_list->numentries; i++) {
-		if (spelleffect_list->entries[i].spelleffectid == iSpellEffectID &&  spelleffect_list->entries[i].base == base
-			&& spelleffect_list->entries[i].limit == limit && spelleffect_list->entries[i].max == max)
+		if (spelleffect_list->entries[i].spelleffectid == iSpellEffectID &&  spelleffect_list->entries[i].base_value == base_value
+			&& spelleffect_list->entries[i].limit == limit && spelleffect_list->entries[i].max_value == max_value)
 			return true;
 	}
 	return false;
@@ -2922,7 +2922,7 @@ DBnpcspells_Struct *ZoneDatabase::GetNPCSpells(uint32 iDBSpellsID)
 			if (row[9])
 				entry.resist_adjust = atoi(row[9]);
 			else if (IsValidSpell(spell_id))
-				entry.resist_adjust = spells[spell_id].ResistDiff;
+				entry.resist_adjust = spells[spell_id].resist_difficulty;
 
 			spell_set.entries.push_back(entry);
 		}
@@ -3015,9 +3015,9 @@ DBnpcspellseffects_Struct *ZoneDatabase::GetNPCSpellsEffects(uint32 iDBSpellsEff
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].spelleffectid = spell_effect_id;
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].minlevel = atoi(row[1]);
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].maxlevel = atoi(row[2]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base = atoi(row[3]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].base_value = atoi(row[3]);
 		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].limit = atoi(row[4]);
-		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max = atoi(row[5]);
+		npc_spellseffects_cache[iDBSpellsEffectsID]->entries[entryIndex].max_value = atoi(row[5]);
 	}
 
 	return npc_spellseffects_cache[iDBSpellsEffectsID];

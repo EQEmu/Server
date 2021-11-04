@@ -23,7 +23,7 @@
 #include "types.h"
 
 #include <string>
-
+#include "repositories/saylink_repository.h"
 
 struct ServerLootItem_Struct;
 
@@ -106,6 +106,7 @@ namespace EQ
 		void Reset();
 
 		static std::string InjectSaylinksIfNotExist(const char *message);
+		static void LoadCachedSaylinks();
 	private:
 		void generate_body();
 		void generate_text();
@@ -121,6 +122,7 @@ namespace EQ
 		std::string m_LinkBody;
 		std::string m_LinkText;
 		bool m_Error;
+		static SaylinkRepository::Saylink GetOrSaveSaylink(std::string saylink_text);
 	};
 
 } /*EQEmu*/

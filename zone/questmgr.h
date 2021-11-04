@@ -38,6 +38,7 @@ class QuestManager {
 		Mob *owner;
 		Client *initiator;
 		EQ::ItemInstance* questitem;
+		const SPDat_Spell_Struct* questspell;
 		bool depop_npc;
 		std::string encounter;
 	};
@@ -51,7 +52,7 @@ public:
 	QuestManager();
 	virtual ~QuestManager();
 
-	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, std::string encounter = "");
+	void StartQuest(Mob *_owner, Client *_initiator = nullptr, EQ::ItemInstance* _questitem = nullptr, const SPDat_Spell_Struct* _questspell = nullptr, std::string encounter = "");
 	void EndQuest();
 	bool QuestsRunning() { return !quests_running_.empty(); }
 
@@ -325,12 +326,14 @@ public:
 	std::string getinventoryslotname(int16 slot_id);
 	int getitemstat(uint32 item_id, std::string stat_identifier);
 	int getspellstat(uint32 spell_id, std::string stat_identifier, uint8 slot = 0);
+	const SPDat_Spell_Struct *getspell(uint32 spell_id);	
 
 	Client *GetInitiator() const;
 	NPC *GetNPC() const;
 	Mob *GetOwner() const;
 	EQ::InventoryProfile* GetInventory() const;
 	EQ::ItemInstance *GetQuestItem() const;
+	const SPDat_Spell_Struct *GetQuestSpell();
 	std::string GetEncounter() const;
 	inline bool ProximitySayInUse() { return HaveProximitySays; }
 

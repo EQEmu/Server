@@ -362,7 +362,7 @@ public:
 	void DelGlobal(const char *varname);
 	void SetSlotTint(int material_slot, int red_tint, int green_tint, int blue_tint);
 	void WearChange(int material_slot, int texture, uint32 color);
-	void DoKnockback(Lua_Mob caster, uint32 pushback, uint32 pushup);
+	void DoKnockback(Lua_Mob caster, uint32 push_back, uint32 push_up);
 	void AddNimbusEffect(int effect_id);
 	void RemoveNimbusEffect(int effect_id);
 	void RemoveAllNimbusEffects();

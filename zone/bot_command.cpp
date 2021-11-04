@@ -130,11 +130,11 @@ public:
 		for (int spell_id = 2; spell_id < SPDAT_RECORDS; ++spell_id) {
 			if (spells[spell_id].player_1[0] == '\0')
 				continue;
-			if (spells[spell_id].targettype != ST_Target && spells[spell_id].CastRestriction != 0) // watch
+			if (spells[spell_id].target_type != ST_Target && spells[spell_id].cast_restriction != 0) // watch
 				continue;
 
 			auto target_type = BCEnum::TT_None;
-			switch (spells[spell_id].targettype) {
+			switch (spells[spell_id].target_type) {
 			case ST_GroupTeleport:
 				target_type = BCEnum::TT_GroupV1;
 				break;
@@ -147,7 +147,7 @@ public:
 				//target_type = BCEnum::TT_AEBard;
 				break;
 			case ST_Target:
-				switch (spells[spell_id].CastRestriction) {
+				switch (spells[spell_id].cast_restriction) {
 				case 0:
 					target_type = BCEnum::TT_Single;
 					break;
@@ -213,15 +213,15 @@ public:
 
 			STBaseEntry* entry_prototype = nullptr;
 			while (true) {
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(1)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(1)]) {
 				case SE_BindAffinity:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_BindAffinity);
 					break;
 				case SE_Charm:
-					if (spells[spell_id].SpellAffectIndex != 12)
+					if (spells[spell_id].spell_affect_index != 12)
 						break;
 					entry_prototype = new STCharmEntry();
-					if (spells[spell_id].ResistDiff <= -1000)
+					if (spells[spell_id].resist_difficulty <= -1000)
 						entry_prototype->SafeCastToCharm()->dire = true;
 					break;
 				case SE_Teleport:
@@ -248,11 +248,11 @@ public:
 					}
 					break;
 				case SE_ModelSize:
-					if (spells[spell_id].base[EFFECTIDTOINDEX(1)] > 100) {
+					if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 100) {
 						entry_prototype = new STSizeEntry;
 						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Enlarge;
 					}
-					else if (spells[spell_id].base[EFFECTIDTOINDEX(1)] > 0 && spells[spell_id].base[EFFECTIDTOINDEX(1)] < 100) {
+					else if (spells[spell_id].base_value[EFFECTIDTOINDEX(1)] > 0 && spells[spell_id].base_value[EFFECTIDTOINDEX(1)] < 100) {
 						entry_prototype = new STSizeEntry;
 						entry_prototype->SafeCastToSize()->size_type = BCEnum::SzT_Reduce;
 					}
@@ -261,42 +261,42 @@ public:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Identify);
 					break;
 				case SE_Invisibility:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Living;
 					break;
 				case SE_SeeInvis:
-					if (spells[spell_id].SpellAffectIndex != 5)
+					if (spells[spell_id].spell_affect_index != 5)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_See;
 					break;
 				case SE_InvisVsUndead:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Undead;
 					break;
 				case SE_InvisVsAnimals:
-					if (spells[spell_id].SpellAffectIndex != 9)
+					if (spells[spell_id].spell_affect_index != 9)
 						break;
 					entry_prototype = new STInvisibilityEntry;
 					entry_prototype->SafeCastToInvisibility()->invis_type = BCEnum::IT_Animal;
 					break;
 				case SE_Mez:
-					if (spells[spell_id].SpellAffectIndex != 12)
+					if (spells[spell_id].spell_affect_index != 12)
 						break;
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Mesmerize);
 					break;
 				case SE_Revive:
-					if (spells[spell_id].SpellAffectIndex != 1)
+					if (spells[spell_id].spell_affect_index != 1)
 						break;
 					entry_prototype = new STResurrectEntry();
 					entry_prototype->SafeCastToResurrect()->aoe = BCSpells::IsCasterCentered(target_type);
 					break;
 				case SE_Rune:
-					if (spells[spell_id].SpellAffectIndex != 2)
+					if (spells[spell_id].spell_affect_index != 2)
 						break;
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Rune);
 					break;
@@ -312,7 +312,7 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(2)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(2)]) {
 				case SE_Succor:
 					entry_prototype = new STEscapeEntry;
 					std::string is_lesser = spells[spell_id].name;
@@ -323,7 +323,7 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].effectid[EFFECTIDTOINDEX(3)]) {
+				switch (spells[spell_id].effect_id[EFFECTIDTOINDEX(3)]) {
 				case SE_Lull:
 					entry_prototype = new STBaseEntry(BCEnum::SpT_Lull);
 					break;
@@ -336,8 +336,8 @@ public:
 				if (entry_prototype)
 					break;
 
-				while (spells[spell_id].typedescnum == 27) {
-					if (!spells[spell_id].goodEffect)
+				while (spells[spell_id].type_description_id == 27) {
+					if (!spells[spell_id].good_effect)
 						break;
 					if (spells[spell_id].skill != EQ::skills::SkillOffense && spells[spell_id].skill != EQ::skills::SkillDefense)
 						break;
@@ -353,38 +353,38 @@ public:
 				if (entry_prototype)
 					break;
 
-				switch (spells[spell_id].SpellAffectIndex) {
+				switch (spells[spell_id].spell_affect_index) {
 				case 1: {
 					bool valid_spell = false;
 					entry_prototype = new STCureEntry;
 
 					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
 						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].effectid[effect_index] != SE_Blind && spells[spell_id].base[effect_index] >= 0)
+						if (spells[spell_id].effect_id[effect_index] != SE_Blind && spells[spell_id].base_value[effect_index] >= 0)
 							continue;
-						else if (spells[spell_id].effectid[effect_index] == SE_Blind && !spells[spell_id].goodEffect)
+						else if (spells[spell_id].effect_id[effect_index] == SE_Blind && !spells[spell_id].good_effect)
 							continue;
 
-						switch (spells[spell_id].effectid[effect_index]) {
+						switch (spells[spell_id].effect_id[effect_index]) {
 						case SE_Blind:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Blindness)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Blindness)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_DiseaseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Disease)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Disease)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_PoisonCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Poison)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Poison)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_CurseCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Curse)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Curse)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_CorruptionCounter:
-							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Corruption)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToCure()->cure_value[AILMENTIDTOINDEX(BCEnum::AT_Corruption)] += spells[spell_id].base_value[effect_index];
 							break;
 						default:
 							continue;
 						}
-						entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base[effect_index];
+						entry_prototype->SafeCastToCure()->cure_total += spells[spell_id].base_value[effect_index];
 						valid_spell = true;
 					}
 					if (!valid_spell) {
@@ -400,32 +400,32 @@ public:
 
 					for (int i = EffectIDFirst; i <= EffectIDLast; ++i) {
 						int effect_index = EFFECTIDTOINDEX(i);
-						if (spells[spell_id].base[effect_index] <= 0)
+						if (spells[spell_id].base_value[effect_index] <= 0)
 							continue;
 
-						switch (spells[spell_id].effectid[effect_index]) {
+						switch (spells[spell_id].effect_id[effect_index]) {
 						case SE_ResistFire:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Fire)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Fire)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistCold:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Cold)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Cold)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistPoison:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Poison)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Poison)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistDisease:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Disease)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Disease)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistMagic:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Magic)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Magic)] += spells[spell_id].base_value[effect_index];
 							break;
 						case SE_ResistCorruption:
-							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Corruption)] += spells[spell_id].base[effect_index];
+							entry_prototype->SafeCastToResistance()->resist_value[RESISTANCEIDTOINDEX(BCEnum::RT_Corruption)] += spells[spell_id].base_value[effect_index];
 							break;
 						default:
 							continue;
 						}
-						entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base[effect_index];
+						entry_prototype->SafeCastToResistance()->resist_total += spells[spell_id].base_value[effect_index];
 						valid_spell = true;
 					}
 					if (!valid_spell) {
@@ -437,7 +437,7 @@ public:
 				}
 				case 7:
 				case 10:
-					if (spells[spell_id].effectdescnum != 65)
+					if (spells[spell_id].effect_description_id != 65)
 						break;
 					if (IsEffectInSpell(spell_id, SE_NegateIfCombat))
 						break;
@@ -622,18 +622,18 @@ private:
 
 			if (RuleI(Bots, CommandSpellRank) == 1) {
 				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spellgroup < spells[r->spell_id].spellgroup)
+					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class < r->caster_class)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank)
 						return true;
 
 					return false;
 				});
 				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
 					std::string r_name = spells[r->spell_id].name;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank) {
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank < spells[r->spell_id].rank) {
 						removed_spells_list->push_back(r);
 						return true;
 					}
@@ -673,18 +673,18 @@ private:
 			// needs rework
 			if (RuleI(Bots, CommandSpellRank) == 2 || RuleI(Bots, CommandSpellRank) == 3) {
 				spells_list->sort([](STBaseEntry* l, STBaseEntry* r) {
-					if (spells[l->spell_id].spellgroup < spells[r->spell_id].spellgroup)
+					if (spells[l->spell_id].spell_group < spells[r->spell_id].spell_group)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class < r->caster_class)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class < r->caster_class)
 						return true;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank)
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank)
 						return true;
 
 					return false;
 				});
 				spells_list->unique([removed_spells_list](STBaseEntry* l, STBaseEntry* r) {
 					std::string l_name = spells[l->spell_id].name;
-					if (spells[l->spell_id].spellgroup == spells[r->spell_id].spellgroup && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank) {
+					if (spells[l->spell_id].spell_group == spells[r->spell_id].spell_group && l->caster_class == r->caster_class && spells[l->spell_id].rank > spells[r->spell_id].rank) {
 						removed_spells_list->push_back(r);
 						return true;
 					}
@@ -786,15 +786,15 @@ private:
 				continue;
 			case BCEnum::SpT_Charm:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, ResistDiff))
+					if (LT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -883,11 +883,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, zonetype))
+					if (EQ_STBASE(l, r, target_type) && LT_SPELLS(l, r, zone_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zonetype) && GT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && GT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zonetype) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS(l, r, zone_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -895,15 +895,15 @@ private:
 				continue;
 			case BCEnum::SpT_Lull:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (LT_SPELLS(l, r, ResistDiff))
+					if (LT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 3))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 3))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 3) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 3) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 3) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -911,15 +911,15 @@ private:
 				continue;
 			case BCEnum::SpT_Mesmerize:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS(l, r, ResistDiff))
+					if (GT_SPELLS(l, r, resist_difficulty))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS(l, r, resist_difficulty) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && GT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && GT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS(l, r, ResistDiff) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS(l, r, resist_difficulty) && EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -929,11 +929,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base, 2))
+					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 2))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 2) && LT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 2) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 2) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -951,13 +951,13 @@ private:
 				continue;
 			case BCEnum::SpT_Resurrect:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base, 1))
+					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && LT_STBASE(l, r, target_type))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, target_type) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -967,11 +967,11 @@ private:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
 					if (LT_STBASE(l, r, target_type))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max, 1))
+					if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, max_value, 1))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+					if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, max_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -999,19 +999,19 @@ private:
 					if (l_size_type < r_size_type)
 						return true;
 					if (l_size_type == BCEnum::SzT_Enlarge && r_size_type == BCEnum::SzT_Enlarge) {
-						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 					if (l_size_type == BCEnum::SzT_Reduce && r_size_type == BCEnum::SzT_Reduce) {
-						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base, 1))
+						if (EQ_STBASE(l, r, target_type) && LT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && GT_STBASE(l, r, spell_level))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && GT_STBASE(l, r, spell_level))
 							return true;
-						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
+						if (EQ_STBASE(l, r, target_type) && EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && LT_STBASE(l, r, caster_class))
 							return true;
 					}
 
@@ -1028,11 +1028,11 @@ private:
 				continue;
 			case BCEnum::SpT_SummonCorpse:
 				spell_list->sort([](const STBaseEntry* l, const STBaseEntry* r) {
-					if (GT_SPELLS_EFFECT_ID(l, r, base, 1))
+					if (GT_SPELLS_EFFECT_ID(l, r, base_value, 1))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && LT_STBASE(l, r, spell_level))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && LT_STBASE(l, r, spell_level))
 						return true;
-					if (EQ_SPELLS_EFFECT_ID(l, r, base, 1) && EQ_STBASE(l, r, spell_level) && EQ_STBASE(l, r, caster_class))
+					if (EQ_SPELLS_EFFECT_ID(l, r, base_value, 1) && EQ_STBASE(l, r, spell_level) && EQ_STBASE(l, r, caster_class))
 						return true;
 
 					return false;
@@ -1167,18 +1167,18 @@ private:
 
 				spell_dump << StringFormat(" /mn:%05u/RD:%06i/zt:%02i/d#:%06i/td#:%05i/ed#:%05i/SAI:%03u",
 					spells[spell_id].mana,
-					spells[spell_id].ResistDiff,
-					spells[spell_id].zonetype,
-					spells[spell_id].descnum,
-					spells[spell_id].typedescnum,
-					spells[spell_id].effectdescnum,
-					spells[spell_id].SpellAffectIndex
+					spells[spell_id].resist_difficulty,
+					spells[spell_id].zone_type,
+					spells[spell_id].description_id,
+					spells[spell_id].type_description_id,
+					spells[spell_id].effect_description_id,
+					spells[spell_id].spell_affect_index
 				);
 
 				for (int i = EffectIDFirst; i <= 3/*EffectIDLast*/; ++i) {
 					int effect_index = EFFECTIDTOINDEX(i);
 					spell_dump << StringFormat(" /e%02i:%04i/b%02i:%06i/m%02i:%06i",
-						i, spells[spell_id].effectid[effect_index], i, spells[spell_id].base[effect_index], i, spells[spell_id].max[effect_index]);
+						i, spells[spell_id].effect_id[effect_index], i, spells[spell_id].base_value[effect_index], i, spells[spell_id].max_value[effect_index]);
 				}
 
 				switch (list_entry->BCST()) {
@@ -2935,7 +2935,7 @@ void bot_command_charm(Client *c, const Seperator *sep)
 			return;
 		}
 
-		if (spells[local_entry->spell_id].max[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].max_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob, true);
@@ -3790,7 +3790,7 @@ void bot_command_mesmerize(Client *c, const Seperator *sep)
 		if (!target_mob)
 			continue;
 
-		if (spells[local_entry->spell_id].max[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].max_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob);
@@ -4705,7 +4705,7 @@ void bot_command_summon_corpse(Client *c, const Seperator *sep)
 		if (!target_mob)
 			continue;
 
-		if (spells[local_entry->spell_id].base[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
+		if (spells[local_entry->spell_id].base_value[EFFECTIDTOINDEX(1)] < target_mob->GetLevel())
 			continue;
 
 		my_bot = ActionableBots::Select_ByMinLevelAndClass(c, local_entry->target_type, sbl, local_entry->spell_level, local_entry->caster_class, target_mob);
@@ -9029,7 +9029,7 @@ bool helper_spell_check_fail(STBaseEntry* local_entry)
 {
 	if (!local_entry)
 		return true;
-	if (spells[local_entry->spell_id].zonetype && zone->GetZoneType() && !(spells[local_entry->spell_id].zonetype & zone->GetZoneType()))
+	if (spells[local_entry->spell_id].zone_type && zone->GetZoneType() && !(spells[local_entry->spell_id].zone_type & zone->GetZoneType()))
 		return true;
 
 	return false;
