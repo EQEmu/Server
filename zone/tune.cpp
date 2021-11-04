@@ -1163,6 +1163,11 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 		Find the amount of AC stat that has to be added/subtracted from DEFENDER to reach a specific average mitigation value based on ATTACKER's offense statistics.
 		Can use atk_override to find the value verse a hypothetical amount of worn ATK
 	*/
+
+	if (pct_mitigation > 100 || pct_mitigation < 0) {
+		Message(0, "[#Tune] - Processing... Abort! Mitigation value out of range ( %.0f ) pct. Must be between 0-100.", pct_mitigation);
+		return;
+	}
 	if (!defender) {
 		Message(0, "[#Tune] - Processing... Abort! No Defender found.");
 		return;
@@ -1272,13 +1277,13 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 				}
 
 				Message(0, "[#Tune] Recommended NPC RAW AC ADJUSTMENT ( %i ) on ' %s ' to achieve an average mitigation of ( %.0f ) pct agianst attacker ' %s '.", loop_add_ac, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
-				Message(0, "[#Tune] SET NPC 'AC' stat value = [%i]", value);
+				Message(0, "[#Tune] SET NPC 'AC' stat value = [ %i ]", value);
 				Message(0, "###################COMPLETE###################");
 			}
 			if (defender->IsClient()) 
 			{
-				Message(0, "#Tune - Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
-				Message(0, "[#Tune] Modify [Client Item AC or Spell Effect AC]", loop_add_ac);
+				Message(0, "[#Tune] Recommended CLIENT AC ADJUSTMENT ( %i ) on ' %s ' for an average mitigation of (+ %.0f) pct from attacker ' %s '.", loop_add_ac, defender->GetCleanName(), base_pct_mitigation, attacker->GetCleanName());
+				Message(0, "[#Tune] MODIFY (+/-) Client Item AC or Spell Effect AC by [ %i ]", loop_add_ac);
 				Message(0, "###################COMPLETE###################");
 			}
 
@@ -1300,6 +1305,10 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 		Find the amount of ATK stat that has to be added/subtracted from ATTACKER to reach a specific average mitigation value based on DEFENDERS's mitigation statistics.
 		Can use ac_override to find the value verse a hypothetical amount of worn AC
 	*/
+	if (pct_mitigation > 100 || pct_mitigation < 0) {
+		Message(0, "[#Tune] - Processing... Abort! Mitigation value out of range ( %.0f ) pct. Must be between 0-100.", pct_mitigation);
+		return;
+	}
 	if (!defender) {
 		Message(0, "[#Tune] - Processing... Abort! No Defender found.");
 		return;
@@ -1338,14 +1347,15 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 
 	Message(0, "###################START###################");
 	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
-	Message(0, "[#Tune] Defender [%s] [AC Mitigation pct  %.2f %] [Total AC %i]", defender->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
-	Message(0, "[#Tune] Attacker [%s] [Max Damage %i Min Damage %i] [Total Offense: %i]", attacker->GetCleanName(), max_damage, min_damage, Tune_GetOffense(defender, attacker));
-	Message(0, "[#Tune] Processing... Find ATK on attacker for defender to have Mitigation of (%.0f) pct agianst this attacker.", pct_mitigation);
-
-
-	if (tmp_pct_mitigated < pct_mitigation) { //Interval is how much ATK is modified each round. Larger the interval less accurate result is potentially.
+	Message(0, "[#Tune] DEFENDER ' %s ' AC Mitigation: ( %.0f pct ) Total AC: ( %i )", defender->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
+	Message(0, "[#Tune] ATTACKER ' %s ' Max Damage: ( %i ) Min Damage: ( %i ) Total Offense: ( %i )", attacker->GetCleanName(), max_damage, min_damage, Tune_GetOffense(defender, attacker));
+	
+	if (tmp_pct_mitigated < pct_mitigation) {
 		interval = interval * -1;
+		Message(0, "[#Tune] NOTE: Attackers 'ATK' must be LOWERED due to defenders AC Mitigation ( %.0f pct ) being less than the desired ( %.0f pct )", tmp_pct_mitigated, pct_mitigation);
 	}
+
+	Message(0, "[#Tune] Processing... Find ATK on attacker for defender to have Mitigation of ( %.0f pct ) agianst this attacker.", pct_mitigation);
 
 	for (int j = 0; j < max_loop; j++)
 	{
@@ -1368,7 +1378,8 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 
 		else if (interval < 0 && mean_dmg == min_damage)
 		{
-			Message(0, "[#Tune][WARNING] Mitigation can not be further decreased due to minium hit value (%i). Minium mitigation ( %.0f ) pct", min_damage, tmp_pct_mitigated);
+			Message(0, "[#Tune] [WARNING] Mitigation can not be further decreased due to minium hit value ( %i ). Minium mitigation ( %.0f pct )", min_damage, tmp_pct_mitigated);
+			base_pct_mitigation = tmp_pct_mitigated;
 			end = 1;
 		}
 
@@ -1377,12 +1388,20 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 			//defender->Tune_MeleeMitigation(this, attacker, damage, minhit, nullptr, Msg, 0, atk_override, loop_add_atk, 0);//?Prob for message
 
 			if (attacker->IsNPC()) {
-				Message(0, "#Tune - Recommended NPC ATK ADJUSTMENT ( %i ) on ' %s ' average mitigation of (%.0f) pct verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), pct_mitigation, defender->GetCleanName());
-				Message(0, "#SET: [NPC Attack STAT] = [%i]", loop_add_atk + defender->CastToNPC()->ATK);
+				Message(0, "[#Tune] Recommended NPC ATK ADJUSTMENT ( %i ) on ' %s ' so that their hits on average are mitigiated ( %.0f pct ) verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), base_pct_mitigation, defender->GetCleanName());
+				Message(0, "[#Tune] SET NPC 'ATK' stat value = [ %i ]", loop_add_atk + defender->CastToNPC()->ATK);
+				Message(0, "###################COMPLETE###################");
 			}
 			if (attacker->IsClient()) {
-				Message(0, "#Tune - Recommended CLIENT ATK ADJUSTMENT ( %i ) on ' %s ' so that their hits on average are mitigiated (%.0f) pct verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), pct_mitigation, defender->GetCleanName());
-				Message(0, "[#Tune] Modify [Client Attack STAT or Spell Effect ATK] by [%i]", loop_add_atk);
+				Message(0, "[#Tune] Recommended CLIENT ATK ADJUSTMENT ( %i ) on ' %s ' so that their hits on average are mitigiated ( %.0f pct ) verse ' %s '. ", loop_add_atk, attacker->GetCleanName(), base_pct_mitigation, defender->GetCleanName());
+				
+				if (loop_add_atk >= 0) {
+					Message(0, "[#Tune] MODIFY Client Item ATK or Spell Effect ATK by [+ %i ]", loop_add_atk);
+				}
+				else {
+					Message(0, "[#Tune] MODIFY Client Item ATK or Spell Effect ATK by [ %i ]", loop_add_atk);
+				}
+				
 				Message(0, "###################COMPLETE###################");
 			}
 
@@ -1392,8 +1411,10 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 		loop_add_atk = loop_add_atk + interval;
 	}
 
-	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", pct_mitigation, interval, max_loop);
-	Message(0, "#Tune - Parse ended at ATK ADJUSTMENT ( %i ) average target mitigation of (%.0f) pct.", loop_add_atk, tmp_pct_mitigated);
+	Message(0, "###################ABORT#######################");
+	Message(0, "[#Tune] - Error: Unable to find desired result for ( %.0f pct ) - Increase interval ( %i ) AND/OR max loop value ( %i ) and run again.", pct_mitigation, interval, max_loop);
+	Message(0, "[#Tune] - Parse ended at an ATK ADJUSTMENT of ( %i ) on ' %s ' so that their hits on average are mitigiated ( %.0f pct ) verse ' %s", loop_add_atk, attacker->GetCleanName(), tmp_pct_mitigated, defender->GetCleanName());
+	Message(0, "###################COMPLETE###################");
 	return;
 }
 
