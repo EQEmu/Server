@@ -474,6 +474,7 @@ Mob::Mob(
 	npc_assist_cap = 0;
 
 	use_double_melee_round_dmg_bonus = false;
+	dw_same_delay = 0;
 
 #ifdef BOTS
 	m_manual_follow = false;
