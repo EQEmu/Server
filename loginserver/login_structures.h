@@ -3,6 +3,22 @@
 
 #pragma pack(1)
 
+// unencrypted base message header in all packets
+struct LoginBaseMessage_Struct
+{
+	int32_t sequence;     // request type/login sequence (2: handshake, 3: login, 4: serverlist, ...)
+	int8_t  unk1;
+	int8_t  encrypt_mode; // possibly an encrypt flag? (2 for encrypted player logins)
+	int32_t unk3;
+};
+
+struct LoginBaseReplyMessage_Struct
+{
+	bool    success;      // 0: failure (shows error string) 1: success
+	int32_t error_str_id; // last error eqlsstr id, default: 101 (no error)
+	char    str[1];       // variable length, unknown (may be unused, this struct is a common pattern elsewhere)
+};
+
 struct LoginChatMessage_Struct {
 	short  Unknown0;
 	uint32 Unknown1;
@@ -12,7 +28,7 @@ struct LoginChatMessage_Struct {
 	char   ChatMessage[1];
 };
 
-struct LoginLoginRequest_Struct {
+struct LoginLoginRequest_Struct { // todo: PlayerLogin_Struct
 	short unknown1;
 	short unknown2;
 	short unknown3;
@@ -21,33 +37,28 @@ struct LoginLoginRequest_Struct {
 	char  unknown6[16];
 };
 
-struct LoginAccepted_Struct {
-	short unknown1;
-	short unknown2;
-	short unknown3;
-	short unknown4;
-	short unknown5;
-	char  encrypt[80];
-};
+// variable length, can use directly if not serializing strings
+struct PlayerLoginReply_Struct
+{
+	// base header excluded to make struct data easier to encrypt
+	//LoginBaseMessage_Struct base_header;
+	LoginBaseReplyMessage_Struct base_reply;
 
-struct LoginFailedAttempts_Struct {
-	char   message; //0x01
-	char   unknown2[7]; //0x00
-	uint32 lsid;
-	char   key[11]; //10 char + null term;
-	uint32 failed_attempts;
-	char   unknown3[4];    //0x00, 0x00, 0x00, 0x03
-	char   unknown4[4];    //0x00, 0x00, 0x00, 0x02
-	char   unknown5[4];    //0xe7, 0x03, 0x00, 0x00
-	char   unknown6[4];    //0xff, 0xff, 0xff, 0xff
-	char   unknown7[4];    //0xa0, 0x05, 0x00, 0x00
-	char   unknown8[4];    //0x00, 0x00, 0x00, 0x02
-	char   unknown9[4];    //0xff, 0x03, 0x00, 0x00
-	char   unknown10[4];    //0x00, 0x00, 0x00, 0x00
-	char   unknown11[4];    //0x63, 0x00, 0x00, 0x00
-	char   unknown12[4];    //0x01, 0x00, 0x00, 0x00
-	char   unknown13[4];    //0x00, 0x00, 0x00, 0x00
-	char   unknown14[4];    //0x00, 0x00, 0x00, 0x00
+	int8_t  unk1;                       // (default: 0)
+	int8_t  unk2;                       // (default: 0)
+	int32_t lsid;                       // (default: -1)
+	char    key[11];                    // client reads until null (variable length)
+	int32_t failed_attempts;
+	bool    show_player_count;          // admin flag, enables admin button and shows server player counts (default: false)
+	int32_t offer_min_days;             // guess, needs more investigation, maybe expansion offers (default: 99)
+	int32_t offer_min_views;            // guess (default: -1)
+	int32_t offer_cooldown_minutes;     // guess (default: 0)
+	int32_t web_offer_number;           // web order view number, 0 nothing (default: 0)
+	int32_t web_offer_min_days;         // number of days to show offer (based on first offer time in client eqls ini) (default: 99)
+	int32_t web_offer_min_views;        // mininum views, -1 for no minimum, 0 for never shows (based on client eqls ini) (default: -1)
+	int32_t web_offer_cooldown_minutes; // minimum minutes between offers (based on last offer time in client eqls ini) (default: 0)
+	char    username[1];                // variable length, if not empty client attempts to re-login to server select when quitting from char select and sends this in a struct
+	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
 };
 
 struct LoginLoginFailed_Struct {

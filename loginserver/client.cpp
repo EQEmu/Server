@@ -539,51 +539,47 @@ void Client::DoSuccessfulLogin(
 	m_account_name     = in_account_name;
 	m_loginserver_name = db_loginserver;
 
-	auto *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
-	auto *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
-	login_accepted->unknown1 = m_llrs.unknown1;
-	login_accepted->unknown2 = m_llrs.unknown2;
-	login_accepted->unknown3 = m_llrs.unknown3;
-	login_accepted->unknown4 = m_llrs.unknown4;
-	login_accepted->unknown5 = m_llrs.unknown5;
+	// unencrypted
+	LoginBaseMessage_Struct base_header{};
+	base_header.sequence     = m_llrs.unknown1;
+	base_header.unk1         = 0;
+	base_header.encrypt_mode = m_llrs.unknown3 >> 8;
+	base_header.unk3         = 0;
 
-	auto *login_failed_attempts = new LoginFailedAttempts_Struct;
-	memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
-
-	login_failed_attempts->failed_attempts = 0;
-	login_failed_attempts->message         = 0x01;
-	login_failed_attempts->lsid            = db_account_id;
-	login_failed_attempts->unknown3[3]  = 0x03;
-	login_failed_attempts->unknown4[3]  = 0x02;
-	login_failed_attempts->unknown5[0]  = 0xe7;
-	login_failed_attempts->unknown5[1]  = 0x03;
-	login_failed_attempts->unknown6[0]  = 0xff;
-	login_failed_attempts->unknown6[1]  = 0xff;
-	login_failed_attempts->unknown6[2]  = 0xff;
-	login_failed_attempts->unknown6[3]  = 0xff;
-	login_failed_attempts->unknown7[0]  = 0xa0;
-	login_failed_attempts->unknown7[1]  = 0x05;
-	login_failed_attempts->unknown8[3]  = 0x02;
-	login_failed_attempts->unknown9[0]  = 0xff;
-	login_failed_attempts->unknown9[1]  = 0x03;
-	login_failed_attempts->unknown11[0] = 0x63;
-	login_failed_attempts->unknown12[0] = 0x01;
-	memcpy(login_failed_attempts->key, m_key.c_str(), m_key.size());
+	// not serializing any of the variable length strings so just use struct directly
+	PlayerLoginReply_Struct login_reply{};
+	login_reply.base_reply.success         = true;
+	login_reply.base_reply.error_str_id    = 101; // No Error
+	login_reply.unk1                       = 0;
+	login_reply.unk2                       = 0;
+	login_reply.lsid                       = db_account_id;
+	login_reply.failed_attempts            = 0;
+	login_reply.show_player_count          = false; // todo: config option
+	login_reply.offer_min_days             = 99;
+	login_reply.offer_min_views            = -1;
+	login_reply.offer_cooldown_minutes     = 0;
+	login_reply.web_offer_number           = 0;
+	login_reply.web_offer_min_days         = 99;
+	login_reply.web_offer_min_views        = -1;
+	login_reply.web_offer_cooldown_minutes = 0;
+	memcpy(login_reply.key, m_key.c_str(), m_key.size());
 
 	char encrypted_buffer[80] = {0};
-	auto rc                   = eqcrypt_block((const char *) login_failed_attempts, 75, encrypted_buffer, 1);
+	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
-	memcpy(login_accepted->encrypt, encrypted_buffer, 80);
+	int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+	outapp->WriteData(&base_header, sizeof(base_header));
+	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
+		DumpPacket(outapp.get());
 	}
 
-	m_connection->QueuePacket(outapp);
-	delete outapp;
+	m_connection->QueuePacket(outapp.get());
 
 	m_client_status = cs_logged_in;
 }
