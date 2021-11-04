@@ -1233,15 +1233,16 @@ public:
 	void Tune_GetStats(Mob* defender, Mob *attacker);
 	void Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
 	void Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int ac_override = 0, int Msg = 0);
+	void Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg);
 	/**/
 	int Tune_ClientGetMeanDamage(Mob* other, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
 	int Tune_ClientGetMaxDamage(Mob* other);
 	int Tune_ClientGetMinDamage(Mob* other, int max_hit);
 	float Tune_GetACMitigationPct(Mob* defender, Mob *attacker);
-	int Tune_GetOffense(Mob* defender, Mob *attacker);
+	int Tune_GetOffense(Mob* defender, Mob *attacker, int atk_override = 0);
 	int Tune_GetAccuracy(Mob* defender, Mob *attacker);
 	int Tune_GetAvoidance(Mob* defender, Mob *attacker);
-	float Tune_GetHitChance(Mob* defender, Mob *attacker);
+	float Tune_GetHitChance(Mob* defender, Mob *attacker, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	float Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
 	/**/
 	int Tune_NPCAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
@@ -1255,8 +1256,9 @@ public:
 	int Tune_ACSum(bool skip_caps=false, int ac_override = 0, int add_ac = 0);
 	int Tune_GetTotalToHit(EQ::skills::SkillType skill, int chance_mod, int accuracy_override = 0, int add_accurracy = 0); // compute_tohit + spell bonuses
 	int Tune_compute_tohit(EQ::skills::SkillType skillinuse, int accuracy_override = 0, int add_accuracy = 0);
-	int Tune_GetTotalDefense();
-	bool Tune_CheckHitChance(Mob* other, DamageHitInfo &hit);
+	int Tune_GetTotalDefense(int avoidance_override = 0, int add_avoidance = 0);
+	int Tune_compute_defense(int avoidance_override = 0, int add_avoidance = 0);
+	bool Tune_CheckHitChance(Mob* other, DamageHitInfo &hit, int avoidance_override = 0, int add_avoidance = 0);
 	EQ::skills::SkillType Tune_AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse = EQ::skills::Skill1HBlunt);
 
 

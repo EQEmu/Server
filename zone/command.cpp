@@ -14058,7 +14058,7 @@ void command_tune2(Client *c, const Seperator *sep)
 		if (!info_level) {
 			info_level = 1;
 		}
-
+		
 		if (!strcasecmp(sep->arg[2], "A")) {
 			c->Tune_GetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
 		}
@@ -14105,7 +14105,7 @@ void command_tune2(Client *c, const Seperator *sep)
 
 		if (!strcasecmp(sep->arg[2], "A"))
 			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop, avoid_override, info_level);
-		else if (!strcasecmp(sep->arg[2], "B"))
+		else if (!strcasecmp(sep->arg[2], "D"))
 			c->Tune_FindAccuaryByHitChance(attacker, defender, hit_chance, interval, max_loop, avoid_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
@@ -14139,16 +14139,10 @@ void command_tune2(Client *c, const Seperator *sep)
 		if (!info_level)
 			info_level = 1;
 
-		if (hit_chance > RuleR(Combat, MaxChancetoHit) || hit_chance < RuleR(Combat, MinChancetoHit))
-		{
-			c->Message(Chat::NPCQuestSay, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]", RuleR(Combat, MaxChancetoHit), RuleR(Combat, MinChancetoHit));
-			return;
-		}
-
 		if (!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
-		else if (!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop, acc_override, info_level);
+			c->Tune_GetAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
+		else if (!strcasecmp(sep->arg[2], "D"))
+			c->Tune_GetAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop, acc_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "Usage #tune FindAvoidance [A/B] [hit chance] [interval][loop_max][Accuracy Overwride][Info Level]");
