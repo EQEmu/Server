@@ -8493,8 +8493,13 @@ bool Mob::NegateSpellEffect(uint16 spell_id, int effect_id)
 			//Match each of the negate effects with the current spell effect, if found, that effect will not be applied.
 			for (int j = 0; j < EFFECT_COUNT; j++)
 			{
-				if (spells[buffs[i].spellid].limit_value[j] == effect_id) {
-					return true;
+				if (spells[buffs[i].spellid].effect_id[j] == SE_NegateSpellEffect &&
+					spells[buffs[i].spellid].limit_value[j] == effect_id &&
+					(spells[buffs[i].spellid].base_value[j] == NEGATE_SPA_ALL_BONUSES ||
+					 spells[buffs[i].spellid].base_value[j] == NEGATE_SPA_SPELLBONUS ||
+					 spells[buffs[i].spellid].base_value[j] == NEGATE_SPA_SPELLBONUS_AND_ITEMBONUS ||
+					 spells[buffs[i].spellid].base_value[j] == NEGATE_SPA_SPELLBONUS_AND_AABONUS)) {
+						return true;
 				}
 			}
 		}
