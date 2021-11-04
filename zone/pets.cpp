@@ -575,7 +575,7 @@ void NPC::SetPetState(SpellBuff_Struct *pet_buffs, uint32 *items) {
 	for (int j1=0; j1 < GetPetMaxTotalSlots(); j1++) {
 		if (buffs[j1].spellid <= (uint32)SPDAT_RECORDS) {
 			for (int x1=0; x1 < EFFECT_COUNT; x1++) {
-				switch (spells[buffs[j1].spellid].effectid[x1]) {
+				switch (spells[buffs[j1].spellid].effect_id[x1]) {
 					case SE_AddMeleeProc:
 					case SE_WeaponProc:
 						// We need to reapply buff based procs

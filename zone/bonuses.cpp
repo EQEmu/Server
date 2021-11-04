@@ -1076,8 +1076,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->SpellProc[i]) {
 					newbon->SpellProc[i] = rank.id;   //aa rank id
-					newbon->SpellProc[i + 1] = base1; //proc spell id
-					newbon->SpellProc[i + 2] = base2; //proc rate modifer
+					newbon->SpellProc[i + 1] = base_value; //proc spell id
+					newbon->SpellProc[i + 2] = limit_value; //proc rate modifer
 					newbon->SpellProc[i + 3] = 0;	  //Lock out Timer
 					break;
 				}
@@ -1088,8 +1088,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->RangedProc[i]) {
 					newbon->RangedProc[i] = rank.id;   //aa rank id
-					newbon->RangedProc[i + 1] = base1; //proc spell id
-					newbon->RangedProc[i + 2] = base2; //proc rate modifer
+					newbon->RangedProc[i + 1] = base_value; //proc spell id
+					newbon->RangedProc[i + 2] = limit_value; //proc rate modifer
 					newbon->RangedProc[i + 3] = 0;	   //Lock out Timer
 					break;
 				}
@@ -1100,8 +1100,8 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (!newbon->DefensiveProc[i]) {
 					newbon->DefensiveProc[i] = rank.id;   //aa rank id
-					newbon->DefensiveProc[i + 1] = base1; //proc spell id
-					newbon->DefensiveProc[i + 2] = base2; //proc rate modifer
+					newbon->DefensiveProc[i + 1] = base_value; //proc spell id
+					newbon->DefensiveProc[i + 2] = limit_value; //proc rate modifer
 					newbon->DefensiveProc[i + 3] = 0;	  //Lock out Timer
 					break;
 				}
@@ -1120,21 +1120,21 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (newbon->SpellProc[i] == rank.id) {
 					if (!newbon->SpellProc[i + 3]) {
-						newbon->SpellProc[i + 3] = base2;//Lock out Timer
+						newbon->SpellProc[i + 3] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->RangedProc[i] == rank.id) {
 					if (!newbon->RangedProc[i + 3]) {
-						newbon->RangedProc[i + 3] = base2;//Lock out Timer
+						newbon->RangedProc[i + 3] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->DefensiveProc[i] == rank.id) {
 					if (!newbon->DefensiveProc[i + 3]) {
-						newbon->DefensiveProc[i + 3] = base2;//Lock out Timer
+						newbon->DefensiveProc[i + 3] = limit_value;//Lock out Timer
 						break;
 					}
 				}
