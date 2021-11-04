@@ -138,7 +138,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 		skillinuse = EQ::skills::SkillHandtoHand;
 		type = animHand2Hand;
 	}
-	Shout("PRE Hand %i Type %i", Hand, type);
+
 	// If we're attacking with the secondary hand, play the dual wield anim
 	if (Hand == EQ::invslot::slotSecondary) {// DW anim
 		type = animDualWield;
