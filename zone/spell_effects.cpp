@@ -8428,17 +8428,21 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	
 	if (target->IsClient() && IsClient()) {
 		MessageString(Chat::Red, CANNOT_AFFECT_PC);
+		LogSpells("Spell casting canceled: Can not cast charm on a client.");
 		return false;
 	}
 	else if (target->IsCorpse()) {
+		LogSpells("Spell casting canceled: Can not cast charm on a corpse.");
 		return false;
 	}
 	else if (GetPet() && IsClient()) {
 		MessageString(Chat::Red, ONLY_ONE_PET);
+		LogSpells("Spell casting canceled: Can not cast charm if you have a pet.");
 		return false;
 	}
 	else if (target->GetOwner()) {
 		MessageString(Chat::Red, CANNOT_CHARM);
+		LogSpells("Spell casting canceled: Can not cast charm on a pet.");
 		return false;
 	}
 	return true;
