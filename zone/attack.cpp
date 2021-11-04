@@ -145,12 +145,12 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 	}
 	
 	//If both weapons have same delay this allows a chance for DW animation
-	if (GetDualWeildingSameDelayWeapons() && Hand == EQ::invslot::slotPrimary) {
+	if (GetDualWieldingSameDelayWeapons() && Hand == EQ::invslot::slotPrimary) {
 		
-		if (GetDualWeildingSameDelayWeapons() == 2 && zone->random.Roll(50)) {
+		if (GetDualWieldingSameDelayWeapons() == 2 && zone->random.Roll(50)) {
 			type = animDualWield;
 		}
-		SetDualWeildingSameDelayWeapons(2);//Ensures first attack is always primary.
+		SetDualWieldingSameDelayWeapons(2);//Ensures first attack is always primary.
 	}
 
 	DoAnim(type, 0, false);
@@ -5500,10 +5500,10 @@ void Client::SetAttackTimer()
 
 	//To allow for duel wield animation to display correctly if both weapons have same delay
 	if (primary_speed == secondary_speed) {
-		SetDualWeildingSameDelayWeapons(1);
+		SetDualWieldingSameDelayWeapons(1);
 	}
 	else {
-		SetDualWeildingSameDelayWeapons(0);
+		SetDualWieldingSameDelayWeapons(0);
 	}
 }
 

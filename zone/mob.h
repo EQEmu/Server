@@ -851,8 +851,8 @@ public:
 	int GetHealRate() const { return itembonuses.HealRate + spellbonuses.HealRate + aabonuses.HealRate; }
 	int GetMemoryBlurChance(int base_chance);
 	inline bool HasBaseEffectFocus() const { return (spellbonuses.FocusEffects[focusFcBaseEffects] || aabonuses.FocusEffects[focusFcBaseEffects] || itembonuses.FocusEffects[focusFcBaseEffects]); }
-	int32 GetDualWeildingSameDelayWeapons() const { return dw_same_delay; }
-	inline void SetDualWeildingSameDelayWeapons(int32 val) { dw_same_delay = val; }
+	int32 GetDualWieldingSameDelayWeapons() const { return dw_same_delay; }
+	inline void SetDualWieldingSameDelayWeapons(int32 val) { dw_same_delay = val; }
 
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
