@@ -326,14 +326,13 @@ void Client::Handle_Play(const char *data)
  */
 void Client::SendServerListPacket(uint32 seq)
 {
-	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this, seq);
+	auto outapp = server.server_manager->CreateServerListPacket(this, seq);
 
 	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
+		DumpPacket(outapp.get());
 	}
 
-	m_connection->QueuePacket(outapp);
-	delete outapp;
+	m_connection->QueuePacket(outapp.get());
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)

@@ -1025,6 +1025,49 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	return false;
 }
 
+void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip) const
+{
+	// see LoginClientServerData_Struct
+	if (use_local_ip) {
+		out.WriteString(GetLocalIP());
+	} else {
+		out.WriteString(GetRemoteIP());
+	}
+
+	switch (GetServerListID())
+	{
+		case 1:
+			out.WriteInt32(LS::ServerTypeFlags::Legends);
+			break;
+		case 2:
+			out.WriteInt32(LS::ServerTypeFlags::Preferred);
+			break;
+		default:
+			out.WriteInt32(LS::ServerTypeFlags::Standard);
+			break;
+	}
+
+	out.WriteUInt32(GetServerId());
+	out.WriteString(GetServerLongName());
+	out.WriteString("us"); // country code
+	out.WriteString("en"); // language code
+
+	// 0 = Up, 1 = Down, 2 = Up, 3 = down, 4 = locked, 5 = locked(down)
+	if (GetStatus() < 0) {
+		if (GetZonesBooted() == 0) {
+			out.WriteInt32(LS::ServerStatusFlags::Down);
+		}
+		else {
+			out.WriteInt32(LS::ServerStatusFlags::Locked);
+		}
+	}
+	else {
+		out.WriteInt32(LS::ServerStatusFlags::Up);
+	}
+
+	out.WriteUInt32(GetPlayersOnline());
+}
+
 /**
  * @param in_server_list_id
  * @return

@@ -60,13 +60,27 @@ struct PlayerLoginReply_Struct
 	char    unknown[1];                 // variable length, password unlikely? client doesn't send this on re-login from char select
 };
 
-struct ServerListHeader_Struct {
+// variable length, for reference
+struct LoginClientServerData_Struct
+{
+	char    ip[1];
+	int32_t server_type;      // legends, preferred, standard
+	int32_t server_id;
+	char    server_name[1];
+	char    country_code[1];  // if doesn't match client locale then server is colored dark grey in list and joining is prevented (to block for "us" use one of "kr", "tw", "jp", "de", "fr", or "cn") (ISO 3166-1 alpha-2)
+	char    language_code[1];
+	int32_t server_status;    // see ServerStatusFlags
+	int32_t player_count;
+};
 
-	uint32 Unknown1;
-	uint32 Unknown2;
-	uint32 Unknown3;
-	uint32 Unknown4;
-	uint32 NumberOfServers;
+// variable length, for reference
+struct ServerListReply_Struct
+{
+	LoginBaseMessage_Struct base_header;
+	LoginBaseReplyMessage_Struct base_reply;
+
+	int32_t server_count;
+	LoginClientServerData_Struct servers[0];
 };
 
 struct PlayEverquestRequest_Struct {
