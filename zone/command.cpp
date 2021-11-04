@@ -13991,25 +13991,6 @@ void command_tune2(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (!strcasecmp(sep->arg[1], "GetDMG"))
-	{
-		c->Message(Chat::Red, "#Tune - New Test Run");
-
-		int interval = 50;
-		int max_loop = 100;
-
-		Mob* mytarget = c->GetTarget();
-		if (mytarget) {
-			c->Message(Chat::Red, "#Tune - target %s", mytarget->GetCleanName());
-			
-			c->Tune_GetACByPctMitigation(mytarget, c, 40);
-		}
-		else {
-			c->Message(Chat::Red, "#Tune2 - FAIL");
-		}
-		return;
-	}
-
 	if (!strcasecmp(sep->arg[1], "FindATK"))
 	{
 		float pct_mitigation = atof(sep->arg[3]);
@@ -14025,10 +14006,10 @@ void command_tune2(Client *c, const Seperator *sep)
 		}
 
 		if (!interval) {
-			interval = 50;
+			interval = 10;
 		}
 		if (!max_loop) {
-			max_loop = 100;
+			max_loop = 1000;
 		}
 		if (!ac_override) {
 			ac_override = 0;
@@ -14077,7 +14058,6 @@ void command_tune2(Client *c, const Seperator *sep)
 		if (!info_level) {
 			info_level = 1;
 		}
-
 
 		if (!strcasecmp(sep->arg[2], "A")) {
 			c->Tune_GetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
