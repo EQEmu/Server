@@ -192,11 +192,9 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 		mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, 0, atk_override, loop_add_ac,0);
 		tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
-		//Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_ac, mean_dmg, tmp_pct_mitigated);
-
-		if (Msg >= 3) 
+		if (Msg >= 1) 
 		{
-			Message(0, "#Tune - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_ac, mean_dmg, tmp_pct_mitigated);
+			Message(0, "[#Tune] - Processing... [%i] [AC %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_ac, mean_dmg, tmp_pct_mitigated);
 		}
 
 		if (interval > 0 && tmp_pct_mitigated >= pct_mitigation) 
@@ -327,11 +325,9 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 		mean_dmg = attacker->Tune_ClientGetMeanDamage(defender, ac_override, 0, 0, loop_add_atk);
 		tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
-		//Message(0, "#Tune - Processing... [%i] [ATK %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_atk, mean_dmg, tmp_pct_mitigated);
-
 		if (Msg >= 3)
 		{
-			Message(0, "#Tune - Processing... [%i] [ATK %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_atk, mean_dmg, tmp_pct_mitigated);
+			Message(0, "[#Tune] - Processing... [%i] [ATK %i] Average Melee Hit  %i | Pct Mitigated %.2f ", j, loop_add_atk, mean_dmg, tmp_pct_mitigated);
 		}
 
 		if (interval > 0 && tmp_pct_mitigated <= pct_mitigation) {
@@ -435,16 +431,17 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 	{
 		tmp_hit_chance = Tune_GetHitChance(defender, attacker,0, accuracy_override, loop_add_avoid,0);
 
-		//Message(0, "[#Tune] - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
-
 		if (Msg >= 3)
-			Message(0, "#Tune - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
-
-		if (interval > 0 && tmp_hit_chance <= hit_chance) {
-			end = true;
+		{
+			Message(0, "[#Tune] - Processing... [%i] AVOIDANCE %i | Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
 		}
 
-		else if (interval < 0 && tmp_hit_chance >= hit_chance) {
+		if (interval > 0 && tmp_hit_chance <= hit_chance) 
+		{
+			end = true;
+		}
+		else if (interval < 0 && tmp_hit_chance >= hit_chance) 
+		{
 			end = true;
 		}
 
@@ -538,18 +535,19 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	for (int j = 0; j < max_loop; j++)
 	{
-		//tmp_hit_chance = Tune_GetHitChance(defender, attacker, avoidance_override, 0, 0, loop_add_accuracy);
 
-		Message(0, "[#Tune] - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
+		if (Msg >= 3) 
+		{
+			Message(0, "[#Tune] - Processing... [%i] ACCURACY %i | Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
+		}
 
-		if (Msg >= 3)
-			Message(0, "#Tune - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
-
-		if (interval > 0 && tmp_hit_chance >= hit_chance) {
+		if (interval > 0 && tmp_hit_chance >= hit_chance) 
+		{
 			end = true;
 		}
 
-		else if (interval < 0 && tmp_hit_chance <= hit_chance) {
+		else if (interval < 0 && tmp_hit_chance <= hit_chance) 
+		{
 			end = true;
 		}
 
