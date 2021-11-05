@@ -2903,6 +2903,11 @@ void command_findskill(Client *c, const Seperator *sep)
 					break;
 				}
 			}
+		} else {
+			fmt::format(
+				"Skill ID {} was not found.",
+				skill_id
+			).c_str()
 		}
 	} else {
 		std::string search_criteria = str_tolower(sep->argplus[1]);
