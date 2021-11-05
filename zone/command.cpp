@@ -13770,7 +13770,7 @@ void command_tune(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "-- Warning: The calculations done in this process are intense and can potentially cause zone crashes depending on parameters set, use with caution!");
 		c->Message(Chat::White, "-- Below are OPTIONAL parameters.");
 		c->Message(Chat::White, "-- Note: [interval] Determines how much the stat being checked increases/decreases till it finds the best result. Lower is more accurate. Default=10");
-		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Hight is more accurate. Default=1000");
+		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Higher is more accurate. Default=1000");
 		c->Message(Chat::White, "-- Note: [Stat Override] Will override that stat on mob being checked with the specified value. Default=0");
 		c->Message(Chat::White, "-- Example: If as the attacker you want to find the ATK value you would need if your target had an AC of 1000. [#tune FindATK A 50 0 0 1000]");
 		c->Message(Chat::White, "-- Note: [Info Level] How much parsing detail is displayed[0 - 1]. Default: [0] ");
