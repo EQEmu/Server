@@ -732,27 +732,6 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 					break;
 				}
 
-				if (IsClient() && caster->IsClient()) {
-					caster->Message(Chat::White, "Unable to cast charm on a fellow player.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
-				else if (IsCorpse()) {
-					caster->Message(Chat::White, "Unable to cast charm on a corpse.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
-				else if (caster->GetPet() != nullptr && caster->IsClient()) {
-					caster->Message(Chat::White, "You cannot charm something when you already have a pet.");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
-				else if (GetOwner()) {
-					caster->Message(Chat::White, "You cannot charm someone else's pet!");
-					BuffFadeByEffect(SE_Charm);
-					break;
-				}
-
 				if (IsNPC()) {
 					CastToNPC()->SaveGuardSpotCharm();
 				}
@@ -8435,6 +8414,35 @@ bool Mob::HarmonySpellLevelCheck(int32 spell_id, Mob *target)
 				return false;
 			}
 		}
+	}
+	return true;
+}
+
+bool Mob::PassCharmTargetRestriction(Mob *target) {
+	
+	//Level restriction check should not go here.
+	if (!target) {
+		return false;
+	}
+	
+	if (target->IsClient() && IsClient()) {
+		MessageString(Chat::Red, CANNOT_AFFECT_PC);
+		LogSpells("Spell casting canceled: Can not cast charm on a client.");
+		return false;
+	}
+	else if (target->IsCorpse()) {
+		LogSpells("Spell casting canceled: Can not cast charm on a corpse.");
+		return false;
+	}
+	else if (GetPet() && IsClient()) {
+		MessageString(Chat::Red, ONLY_ONE_PET);
+		LogSpells("Spell casting canceled: Can not cast charm if you have a pet.");
+		return false;
+	}
+	else if (target->GetOwner()) {
+		MessageString(Chat::Red, CANNOT_CHARM);
+		LogSpells("Spell casting canceled: Can not cast charm on a pet.");
+		return false;
 	}
 	return true;
 }

@@ -229,6 +229,21 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return false;
 	}
 
+	if (IsEffectInSpell(spell_id, SE_Charm) && !PassCharmTargetRestriction(entity_list.GetMobID(target_id))) {
+		bool can_send_spellbar_enable = true;
+		if ((item_slot != -1 && cast_time == 0) || aa_id) {
+			can_send_spellbar_enable = false;
+		}
+
+		if (can_send_spellbar_enable) {
+			SendSpellBarEnable(spell_id);
+		}
+		if (casting_spell_id && IsNPC()) {
+			CastToNPC()->AI_Event_SpellCastFinished(false, static_cast<uint16>(casting_spell_slot));
+		}
+		return false;
+	}
+
 	if (HasActiveSong() && IsBardSong(spell_id)) {
 		LogSpells("Casting a new song while singing a song. Killing old song [{}]", bardsong);
 		//Note: this does NOT tell the client
