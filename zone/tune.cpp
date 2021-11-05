@@ -1561,9 +1561,9 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	for (int j = 0; j < max_loop; j++)
 	{
-		tmp_hit_chance = Tune_GetHitChance(defender, attacker, 0, 0, loop_add_accuracy, 0);
+		tmp_hit_chance = Tune_GetHitChance(defender, attacker, 0, 0, 0, loop_add_accuracy);
 
-		Message(0, "#Tune - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
+		Message(0, "[#Tune] - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
 
 		if (Msg >= 3)
 			Message(0, "#Tune - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);

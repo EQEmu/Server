@@ -13940,10 +13940,10 @@ void command_tune2(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "...### Category A ### Target = ATTACKER ### YOU or Target's Target = DEFENDER ###");
 		c->Message(Chat::White, "...### Category B ### Target = DEFENDER ### YOU or Target's Target = ATTACKER ###");
 		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended ATK adjustment +/- on ATTACKER that will result in an average mitigation pct on DEFENDER. ");
+		c->Message(Chat::White, "...#Returns recommended ATK adjustment +/- on ATTACKER that will result in an average AC mitigation pct on DEFENDER. ");
 		c->Message(Chat::White, "...tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level]");
 		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended AC adjustment +/- on DEFENDER for an average mitigation pct from ATTACKER. ");
+		c->Message(Chat::White, "...#Returns recommended AC adjustment +/- on DEFENDER for an average AC mitigation pct from ATTACKER. ");
 		c->Message(Chat::White, "...tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
 		c->Message(Chat::White, "... ");
 		c->Message(Chat::White, "...#Returns recommended Accuracy adjustment +/- on ATTACKER that will result in a hit chance pct on DEFENDER. ");
