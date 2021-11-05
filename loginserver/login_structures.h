@@ -19,13 +19,11 @@ struct LoginBaseReplyMessage_Struct
 	char    str[1];       // variable length, unknown (may be unused, this struct is a common pattern elsewhere)
 };
 
-struct LoginChatMessage_Struct {
-	short  Unknown0;
-	uint32 Unknown1;
-	uint32 Unknown2;
-	uint32 Unknown3;
-	uint8  Unknown4;
-	char   ChatMessage[1];
+struct LoginHandShakeReply_Struct
+{
+	LoginBaseMessage_Struct base_header;
+	LoginBaseReplyMessage_Struct base_reply;
+	char unknown[1]; // variable length string
 };
 
 // for reference, login buffer is variable (minimum size 8 due to encryption)

@@ -120,36 +120,20 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	m_client_status = cs_waiting_for_login;
 
 	/**
-	 * The packets are mostly the same but slightly different between the two versions
+	 * The packets are identical between the two versions
 	 */
-	if (m_client_version == cv_sod) {
-		auto *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
-		outapp->pBuffer[0]  = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
+	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
+	auto buf = reinterpret_cast<LoginHandShakeReply_Struct*>(outapp->pBuffer);
+	buf->base_header.sequence    = 0x02;
+	buf->base_reply.success      = true;
+	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
 
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
-
-		m_connection->QueuePacket(outapp);
-		delete outapp;
+	if (server.options.IsDumpOutPacketsOn()) {
+		DumpPacket(outapp);
 	}
-	else {
-		const char *msg    = "ChatMessage";
-		auto       *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
-		outapp->pBuffer[0]  = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
-		strcpy((char *) (outapp->pBuffer + 15), msg);
 
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
-
-		m_connection->QueuePacket(outapp);
-		delete outapp;
-	}
+	m_connection->QueuePacket(outapp);
+	delete outapp;
 }
 
 /**
