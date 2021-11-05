@@ -1210,10 +1210,14 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
 	Message(0, "###################START###################");
+	Message(0, "[#Tune] DFENDER Name: %s", defender->GetCleanName());
+	Message(0, "[#Tune] DEFENDER AC Mitigation pct:   %.0f pct ", round(tmp_pct_mitigated));
+	Message(0, "[#Tune] DEFENDER Total AC: %i ", defender->Tune_ACSum());
+	Message(0, "[#Tune] ATTACKER Name: %s", attacker->GetCleanName());
+	Message(0, "[#Tune] ATTACKER Max Damage %i Min Damage %i", max_damage, min_damage);
+	Message(0, "[#Tune] ATTACKER Total Offense: %i ", Tune_GetOffense(defender, attacker, atk_override));
+	Message(0, "##########################################");
 	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
-	Message(0, "[#Tune] DEFENDER ' %s ' AC Mitigation: ( %.0f pct ) Total AC: ( %i )", defender->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum());
-	Message(0, "[#Tune] ATTACKER ' %s ' Max Damage: ( %i ) Min Damage: ( %i ) Total Offense: ( %i )", attacker->GetCleanName(), max_damage, min_damage, Tune_GetOffense(defender, attacker, atk_override));
-	
 
 	if (tmp_pct_mitigated > pct_mitigation)
 	{
@@ -1256,7 +1260,7 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 		if (end >= 1) {
 
 			if (atk_override) {
-				Message(0, "[#Tune] ATK STAT OVERRRIDE. This is the amout of AC adjustment needed agianst an attacker with ( %i ) raw ATK stat", atk_override);
+				Message(0, "[#Tune] ATK STAT OVERRRIDE. This is the amount of AC adjustment needed agianst an attacker with ( %i ) raw ATK stat", atk_override);
 			}
 
 			if (defender->IsNPC()) 
@@ -1341,9 +1345,14 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 	tmp_pct_mitigated = 100.0f - (static_cast<float>(mean_dmg) * 100.0f / static_cast<float>(max_damage));
 
 	Message(0, "###################START###################");
+	Message(0, "[#Tune] DFENDER Name: %s", defender->GetCleanName());
+	Message(0, "[#Tune] DEFENDER AC Mitigation pct:   %.0f pct ", round(tmp_pct_mitigated));
+	Message(0, "[#Tune] DEFENDER Total AC: %i ", defender->Tune_ACSum(false, ac_override));
+	Message(0, "[#Tune] ATTACKER Name: %s", attacker->GetCleanName());
+	Message(0, "[#Tune] ATTACKER Max Damage %i Min Damage %i", max_damage, min_damage);
+	Message(0, "[#Tune] ATTACKER Total Offense: %i ", Tune_GetOffense(defender, attacker));
+	Message(0, "##########################################");
 	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
-	Message(0, "[#Tune] DEFENDER ' %s ' AC Mitigation: ( %.0f pct ) Total AC: ( %i )", defender->GetCleanName(), tmp_pct_mitigated, defender->Tune_ACSum(false, ac_override));
-	Message(0, "[#Tune] ATTACKER ' %s ' Max Damage: ( %i ) Min Damage: ( %i ) Total Offense: ( %i )", attacker->GetCleanName(), max_damage, min_damage, Tune_GetOffense(defender, attacker));
 	
 	if (tmp_pct_mitigated < pct_mitigation) {
 		interval = interval * -1;
@@ -1381,7 +1390,7 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 		if (end >= 1) {
 
 			if (ac_override) {
-				Message(0, "[#Tune] AC STAT OVERRRIDE. This is the amout of ATK adjustment needed agianst an defender with ( %i ) raw AC stat", ac_override);
+				Message(0, "[#Tune] AC STAT OVERRRIDE. This is the amount of ATK adjustment needed agianst an defender with ( %i ) raw AC stat", ac_override);
 			}
 
 			if (attacker->IsNPC()) {
@@ -1477,7 +1486,11 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 		}
 
 		if (end) {
-			
+
+			if (accuracy_override) {
+				Message(0, "[#Tune] ACCURACY STAT OVERRRIDE. This is the amount of AVOIDANCE adjustment needed agianst an attacker with ( %i ) raw ACCURACY stat", accuracy_override);
+			}
+						
 			if (defender->IsNPC()) {
 				Message(0, "[#Tune] Recommended NPC AVOIDANCE ADJUSTMENT of ( %i ) on ' %s ' will result in ' %s ' having a ( %.0f pct) hit chance.", loop_add_avoid, defender->GetCleanName(), attacker->GetCleanName(), hit_chance);
 				Message(0, "[#Tune] SET NPC 'AVOIDANCE' stat value = [ %i ]", loop_add_avoid + defender->CastToNPC()->GetAvoidanceRating());
@@ -1578,13 +1591,17 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 		if (end) {
 
+			if (avoidance_override) {
+				Message(0, "[#Tune] AVOIDANCE STAT OVERRRIDE. This is the amount of ACCURACY adjustment needed agianst a defender with ( %i ) raw AVOIDANCE stat", avoidance_override);
+			}
+
 			if (defender->IsNPC()) {
-				Message(0, "[#Tune] Recommended NPC ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+				Message(0, "[#Tune] Recommended NPC ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
 				Message(0, "[#Tune] SET NPC 'ACCURACY' stat value = [ %i ]", loop_add_accuracy + defender->CastToNPC()->GetAccuracyRating());
 				Message(0, "###################COMPLETE###################");
 			}
 			else if (defender->IsClient()) {
-				Message(0, "[#Tune] Recommended CLIENT AVOIDANCE ADJUSTMENT of ( %i ) on  %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+				Message(0, "[#Tune] Recommended CLIENT AVOIDANCE ADJUSTMENT of ( %i ) on  %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
 
 				if (loop_add_accuracy >= 0) {
 					Message(0, "[#Tune] OPTION1: MODIFY Client Avoidance Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [+ %i ]", loop_add_accuracy);
@@ -1605,11 +1622,9 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	Message(0, "###################ABORT#######################");
 	Message(0, "[#Tune] Error: Unable to find desired result for ( %.0f pct) - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
-	Message(0, "[#Tune] Parse ended at ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+	Message(0, "[#Tune] Parse ended at ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct ) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
 	Message(0, "###################COMPLETE###################");
 }
-
-
 
 /*
 	Tune support functions
