@@ -1260,7 +1260,7 @@ void Mob::Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_miti
 		if (end >= 1) {
 
 			if (atk_override) {
-				Message(0, "[#Tune] ATK STAT OVERRRIDE. This is the amount of AC adjustment needed agianst an attacker with ( %i ) raw ATK stat", atk_override);
+				Message(0, "[#Tune] ATK STAT OVERRRIDE. This is the amount of AC adjustment needed if this attacker had ( %i ) raw ATK stat", atk_override);
 			}
 
 			if (defender->IsNPC()) 
@@ -1390,7 +1390,7 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 		if (end >= 1) {
 
 			if (ac_override) {
-				Message(0, "[#Tune] AC STAT OVERRRIDE. This is the amount of ATK adjustment needed agianst an defender with ( %i ) raw AC stat", ac_override);
+				Message(0, "[#Tune] AC STAT OVERRRIDE. This is the amount of ATK adjustment needed if this defender had ( %i ) raw AC stat", ac_override);
 			}
 
 			if (attacker->IsNPC()) {
@@ -1449,7 +1449,7 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 	bool end = false;
 	int base_avoidance = Tune_GetAvoidance(defender, attacker);
 
-	tmp_hit_chance = Tune_GetHitChance(defender, attacker);
+	tmp_hit_chance = Tune_GetHitChance(defender, attacker, 0, accuracy_override);
 
 	Message(0, "###################START###################");
 	Message(0, "[#Tune] DEFENDER Name: %s", defender->GetCleanName());
@@ -1457,7 +1457,7 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 	Message(0, "[#Tune] DEFENDER Avoidance: %i ", Tune_GetAvoidance(defender, attacker));
 	Message(0, "[#Tune] ATTACKER Name: %s", attacker->GetCleanName());
 	Message(0, "[#Tune] ATTACKER Chance to hit:  %.0f pct", round(tmp_hit_chance));
-	Message(0, "[#Tune] ATTACKER Accuracy: %i ", Tune_GetAccuracy(defender, attacker));
+	Message(0, "[#Tune] ATTACKER Accuracy: %i ", Tune_GetAccuracy(defender, attacker, accuracy_override));
 	Message(0, "##########################################");
 	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
 
@@ -1470,7 +1470,7 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 
 	for (int j = 0; j < max_loop; j++)
 	{
-		tmp_hit_chance = Tune_GetHitChance(defender, attacker,0,0, loop_add_avoid,0);
+		tmp_hit_chance = Tune_GetHitChance(defender, attacker,0, accuracy_override, loop_add_avoid,0);
 
 		Message(0, "[#Tune] - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
 
@@ -1488,7 +1488,7 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 		if (end) {
 
 			if (accuracy_override) {
-				Message(0, "[#Tune] ACCURACY STAT OVERRRIDE. This is the amount of AVOIDANCE adjustment needed agianst an attacker with ( %i ) raw ACCURACY stat", accuracy_override);
+				Message(0, "[#Tune] ACCURACY STAT OVERRRIDE. This is the amount of AVOIDANCE adjustment needed if this attacker had ( %i ) raw ACCURACY stat", accuracy_override);
 			}
 						
 			if (defender->IsNPC()) {
@@ -1550,14 +1550,13 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 	int loop_add_accuracy = 0;
 	float tmp_hit_chance = 0.0f;
 	bool end = false;
-	int base_avoidance = Tune_GetAvoidance(defender, attacker);
 
-	tmp_hit_chance = Tune_GetHitChance(defender, attacker);
+	tmp_hit_chance = Tune_GetHitChance(defender, attacker, avoidance_override);
 
 	Message(0, "###################START###################");
 	Message(0, "[#Tune] DEFENDER Name: %s", defender->GetCleanName());
 	Message(0, "[#Tune] DEFENDER Chance to be missed:  %.0f pct", (100.0f - round(tmp_hit_chance)));
-	Message(0, "[#Tune] DEFENDER Avoidance: %i ", Tune_GetAvoidance(defender, attacker));
+	Message(0, "[#Tune] DEFENDER Avoidance: %i ", Tune_GetAvoidance(defender, attacker, avoidance_override));
 	Message(0, "[#Tune] ATTACKER Name: %s", attacker->GetCleanName());
 	Message(0, "[#Tune] ATTACKER Chance to hit:  %.0f pct", round(tmp_hit_chance));
 	Message(0, "[#Tune] ATTACKER Accuracy: %i ", Tune_GetAccuracy(defender, attacker));
@@ -1574,7 +1573,7 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 
 	for (int j = 0; j < max_loop; j++)
 	{
-		tmp_hit_chance = Tune_GetHitChance(defender, attacker, 0, 0, 0, loop_add_accuracy);
+		tmp_hit_chance = Tune_GetHitChance(defender, attacker, avoidance_override, 0, 0, loop_add_accuracy);
 
 		Message(0, "[#Tune] - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
 
@@ -1592,7 +1591,7 @@ void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_ch
 		if (end) {
 
 			if (avoidance_override) {
-				Message(0, "[#Tune] AVOIDANCE STAT OVERRRIDE. This is the amount of ACCURACY adjustment needed agianst a defender with ( %i ) raw AVOIDANCE stat", avoidance_override);
+				Message(0, "[#Tune] AVOIDANCE STAT OVERRRIDE. This is the amount of ACCURACY adjustment needed if this defender had ( %i ) raw AVOIDANCE stat", avoidance_override);
 			}
 
 			if (defender->IsNPC()) {
@@ -1724,14 +1723,14 @@ int Mob::Tune_GetOffense(Mob* defender, Mob *attacker, int atk_override)
 	return offense_rating;
 }
 
-int Mob::Tune_GetAccuracy(Mob* defender, Mob *attacker)
+int Mob::Tune_GetAccuracy(Mob* defender, Mob *attacker, int accuracy_override, int add_accuracy)
 {
 	int accuracy = 0;
 	if (attacker->IsClient()) {
-		accuracy = attacker->Tune_ClientAttack(defender, true, true, 0, 0, 0, 0, 0, false, true);
+		accuracy = attacker->Tune_ClientAttack(defender, true, true, 0, 0, 0, 0, 0, false, true,0,accuracy_override,0,add_accuracy);
 	}
 	else {
-		accuracy = attacker->Tune_NPCAttack(defender, true, true, 0, 0, 0, 0, 0, false, true);
+		accuracy = attacker->Tune_NPCAttack(defender, true, true, 0, 0, 0, 0, 0, false, true, 0, accuracy_override, 0, add_accuracy);
 	}
 	return accuracy;
 }

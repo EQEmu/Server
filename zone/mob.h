@@ -1241,7 +1241,7 @@ public:
 	int Tune_ClientGetMinDamage(Mob* other, int max_hit);
 	float Tune_GetACMitigationPct(Mob* defender, Mob *attacker);
 	int Tune_GetOffense(Mob* defender, Mob *attacker, int atk_override = 0);
-	int Tune_GetAccuracy(Mob* defender, Mob *attacker);
+	int Tune_GetAccuracy(Mob* defender, Mob *attacker, int accuracy_override = 0, int add_accuracy = 0);
 	int Tune_GetAvoidance(Mob* defender, Mob *attacker, int avoidance_override = 0, int add_avoidance = 0);
 	float Tune_GetHitChance(Mob* defender, Mob *attacker, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	float Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
