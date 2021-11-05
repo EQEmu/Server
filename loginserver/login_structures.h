@@ -28,13 +28,12 @@ struct LoginChatMessage_Struct {
 	char   ChatMessage[1];
 };
 
-struct LoginLoginRequest_Struct { // todo: PlayerLogin_Struct
-	short unknown1;
-	short unknown2;
-	short unknown3;
-	short unknown4;
-	short unknown5;
-	char  unknown6[16];
+// for reference, login buffer is variable (minimum size 8 due to encryption)
+struct PlayerLogin_Struct
+{
+	LoginBaseMessage_Struct base_header;
+	char username[1];
+	char password[1];
 };
 
 // variable length, can use directly if not serializing strings

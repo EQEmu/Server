@@ -165,14 +165,18 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	if ((size - 12) % 8 != 0) {
-		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+	// login user/pass are variable length after unencrypted opcode and base message header (size includes opcode)
+	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage_Struct);
+	int data_size = size - header_size;
+
+	if (size <= header_size) {
+		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
 
-	if (size < sizeof(LoginLoginRequest_Struct)) {
-		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
+	if (data_size % 8 != 0) {
+		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
 
 		return;
 	}
@@ -189,13 +193,14 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	std::string db_account_password_hash;
 
 	std::string outbuffer;
-	outbuffer.resize(size - 12);
+	outbuffer.resize(data_size);
 	if (outbuffer.length() == 0) {
 		LogError("Corrupt buffer sent to server, no length");
 		return;
 	}
 
-	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
+	// data starts at base message header (opcode not included)
+	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage_Struct), data_size, &outbuffer[0], 0);
 	if (r == nullptr) {
 		LogError("Failed to decrypt eqcrypt block");
 		return;
@@ -209,7 +214,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	memcpy(&m_llrs, data, sizeof(LoginLoginRequest_Struct));
+	// only need to copy the base header for reply options, ignore login info
+	memcpy(&m_llrs, data, sizeof(LoginBaseMessage_Struct));
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
@@ -414,8 +420,8 @@ void Client::DoFailedLogin()
 
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.unknown1; // login (3)
-	base_header.encrypt_mode = m_llrs.unknown3 >> 8; // encrypt flag?
+	base_header.sequence     = m_llrs.sequence; // login (3)
+	base_header.encrypt_mode = m_llrs.encrypt_mode; // encrypt flag?
 
 	// encrypted
 	PlayerLoginReply_Struct login_reply{};
@@ -551,10 +557,10 @@ void Client::DoSuccessfulLogin(
 
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
-	base_header.sequence     = m_llrs.unknown1;
-	base_header.unk1         = 0;
-	base_header.encrypt_mode = m_llrs.unknown3 >> 8;
-	base_header.unk3         = 0;
+	base_header.sequence     = m_llrs.sequence;
+	base_header.unk1         = m_llrs.unk1;
+	base_header.encrypt_mode = m_llrs.encrypt_mode;
+	base_header.unk3         = m_llrs.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
 	PlayerLoginReply_Struct login_reply{};

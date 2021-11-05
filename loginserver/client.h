@@ -189,7 +189,7 @@ private:
 
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
 	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
-	LoginLoginRequest_Struct                            m_llrs;
+	LoginBaseMessage_Struct                             m_llrs;
 
 	std::string m_stored_user;
 	std::string m_stored_pass;
