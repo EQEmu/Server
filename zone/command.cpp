@@ -428,7 +428,7 @@ int command_init(void)
 		command_add("titlesuffix", "[text] [1 = create title table row] - Set your or your player target's title suffix", 50, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", 150, command_traindisc) ||
 		command_add("trapinfo", "- Gets infomation about the traps currently spawned in the zone.", 81, command_trapinfo) ||
-		command_add("tune",  "Calculate statical values related to combat.",  100, command_tune) ||
+		command_add("tune",  "Calculate statistical values related to combat.",  100, command_tune) ||
 		command_add("ucs", "- Attempts to reconnect to the UCS server", 0, command_ucs) ||
 		command_add("undyeme", "- Remove dye from all of your armor slots", 0, command_undyeme) ||
 		command_add("unfreeze", "- Unfreeze your target", 80, command_unfreeze) ||
