@@ -284,22 +284,26 @@ Mob::Mob(
 
 	// clear the proc arrays
 	for (int j = 0; j < MAX_PROCS; j++) {
-		PermaProcs[j].spellID            = SPELL_UNKNOWN;
-		PermaProcs[j].chance             = 0;
-		PermaProcs[j].base_spellID       = SPELL_UNKNOWN;
-		PermaProcs[j].level_override     = -1;
-		SpellProcs[j].spellID            = SPELL_UNKNOWN;
-		SpellProcs[j].chance             = 0;
-		SpellProcs[j].base_spellID       = SPELL_UNKNOWN;
-		SpellProcs[j].level_override     = -1;
-		DefensiveProcs[j].spellID        = SPELL_UNKNOWN;
-		DefensiveProcs[j].chance         = 0;
-		DefensiveProcs[j].base_spellID   = SPELL_UNKNOWN;
-		DefensiveProcs[j].level_override = -1;
-		RangedProcs[j].spellID           = SPELL_UNKNOWN;
-		RangedProcs[j].chance            = 0;
-		RangedProcs[j].base_spellID      = SPELL_UNKNOWN;
-		RangedProcs[j].level_override    = -1;
+		PermaProcs[j].spellID             = SPELL_UNKNOWN;
+		PermaProcs[j].chance              = 0;
+		PermaProcs[j].base_spellID        = SPELL_UNKNOWN;
+		PermaProcs[j].level_override      = -1;
+		PermaProcs[j].proc_reuse_time     = 0;
+		SpellProcs[j].spellID             = SPELL_UNKNOWN;
+		SpellProcs[j].chance              = 0;
+		SpellProcs[j].base_spellID        = SPELL_UNKNOWN;
+		SpellProcs[j].proc_reuse_time     = 0;
+		SpellProcs[j].level_override      = -1;
+		DefensiveProcs[j].spellID         = SPELL_UNKNOWN;
+		DefensiveProcs[j].chance          = 0;
+		DefensiveProcs[j].base_spellID    = SPELL_UNKNOWN;
+		DefensiveProcs[j].level_override  = -1;
+		DefensiveProcs[j].proc_reuse_time = 0;
+		RangedProcs[j].spellID            = SPELL_UNKNOWN;
+		RangedProcs[j].chance             = 0;
+		RangedProcs[j].base_spellID       = SPELL_UNKNOWN;
+		RangedProcs[j].level_override     = -1;
+		RangedProcs[j].proc_reuse_time    = 0;
 	}
 
 	for (int i = EQ::textures::textureBegin; i < EQ::textures::materialCount; i++) {
@@ -352,6 +356,15 @@ Mob::Mob(
 	for (int i = 0; i < MAX_FOCUS_PROC_LIMIT_TIMERS; i++) {
 		focusproclimit_spellid[i] = 0;
 		focusproclimit_timer[i].Disable();
+	}
+
+	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
+		spell_proclimit_spellid[i] = 0;
+		spell_proclimit_timer[i].Disable();
+		ranged_proclimit_spellid[i] = 0;
+		ranged_proclimit_timer[i].Disable();
+		def_proclimit_spellid[i] = 0;
+		def_proclimit_timer[i].Disable();
 	}
 
 	memset(&itembonuses, 0, sizeof(StatBonuses));
@@ -3167,6 +3180,10 @@ int32 Mob::GetActSpellCasttime(uint16 spell_id, int32 casttime)
 void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on, int level_override) {
 	// Changed proc targets to look up based on the spells goodEffect flag.
 	// This should work for the majority of weapons.
+	if (!on) {
+		return;
+	}
+
 	if(spell_id == SPELL_UNKNOWN || on->GetSpecialAbility(NO_HARM_FROM_CLIENT)) {
 		//This is so 65535 doesn't get passed to the client message and to logs because it is not relavant information for debugging.
 		return;
@@ -3202,21 +3219,25 @@ void Mob::ExecWeaponProc(const EQ::ItemInstance *inst, uint16 spell_id, Mob *on,
 	bool twinproc = false;
 	int32 twinproc_chance = 0;
 
-	if(IsClient())
+	if (IsClient()) {
 		twinproc_chance = CastToClient()->GetFocusEffect(focusTwincast, spell_id);
+	}
 
-	if(twinproc_chance && zone->random.Roll(twinproc_chance))
+	if (twinproc_chance && zone->random.Roll(twinproc_chance)) {
 		twinproc = true;
+	}
 
 	if (IsBeneficialSpell(spell_id) && (!IsNPC() || (IsNPC() && CastToNPC()->GetInnateProcSpellID() != spell_id))) { // NPC innate procs don't take this path ever
 		SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
-		if(twinproc)
-			SpellOnTarget(spell_id, this, 0, false, 0, true, level_override);
+		if (twinproc) {
+			SpellFinished(spell_id, this, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
+		}
 	}
 	else if(!(on->IsClient() && on->CastToClient()->dead)) { //dont proc on dead clients
 		SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
-		if(twinproc)
-			SpellOnTarget(spell_id, on, 0, false, 0, true, level_override);
+		if (twinproc && (!(on->IsClient() && on->CastToClient()->dead))) {
+			SpellFinished(spell_id, on, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty, true, level_override);
+		}
 	}
 	return;
 }

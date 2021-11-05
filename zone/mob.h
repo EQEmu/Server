@@ -726,15 +726,15 @@ public:
 
 	//Procs
 	void TriggerDefensiveProcs(Mob *on, uint16 hand = EQ::invslot::slotPrimary, bool FromSkillProc = false, int damage = 0);
-	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
+	bool AddRangedProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, uint32 proc_reuse_time = 0);
 	bool RemoveRangedProc(uint16 spell_id, bool bAll = false);
 	bool HasRangedProcs() const;
-	bool AddDefensiveProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN);
+	bool AddDefensiveProc(uint16 spell_id, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, uint32 proc_reuse_time = 0);
 	bool RemoveDefensiveProc(uint16 spell_id, bool bAll = false);
 	bool HasDefensiveProcs() const;
 	bool HasSkillProcs() const;
 	bool HasSkillProcSuccess() const;
-	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, int level_override = -1);
+	bool AddProcToWeapon(uint16 spell_id, bool bPerma = false, uint16 iChance = 3, uint16 base_spell_id = SPELL_UNKNOWN, int level_override = -1, uint32 proc_reuse_time = 0);
 	bool RemoveProcFromWeapon(uint16 spell_id, bool bAll = false);
 	bool HasProcs() const;
 	bool IsCombatProc(uint16 spell_id);
@@ -861,6 +861,8 @@ public:
 
 	bool IsFocusProcLimitTimerActive(int32 focus_spell_id);
 	void SetFocusProcLimitTimer(int32 focus_spell_id, uint32 focus_reuse_time);
+	bool IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, int proc_type);
+	void SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int proc_type);
 
 	void VirusEffectProcess();
 	void SpreadVirusEffect(int32 spell_id, uint32 caster_id, int32 buff_tics_remaining);
@@ -1468,6 +1470,13 @@ protected:
 
 	Timer focusproclimit_timer[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
 	int32 focusproclimit_spellid[MAX_FOCUS_PROC_LIMIT_TIMERS];	//SPA 511
+
+	Timer spell_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
+	int32 spell_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	Timer ranged_proclimit_timer[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	int32 ranged_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];		//SPA 512
+	Timer def_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
+	int32 def_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];			//SPA 512
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;
