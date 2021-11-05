@@ -1237,7 +1237,7 @@ public:
 	float Tune_GetHitChance(Mob* defender, Mob *attacker, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	float Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
 	int Tune_CalcEvasionBonus(int final_avoidance, int base_avoidance);
-	/*modified combat code*/
+	/*modified combat code - These SYNC to attack.cpp, relevant changes to these functions in attack.cpp should be changed to the below as well*/
 	int Tune_NPCAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	int Tune_ClientAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,

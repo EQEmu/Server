@@ -59,6 +59,7 @@ extern FastMath g_Math;
 extern EntityList entity_list;
 extern Zone* zone;
 
+//SYNC WITH: tune.cpp, mob.h Tune_AttackAnimation  
 EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* weapon, EQ::skills::SkillType skillinuse)
 {
 	// Determine animation
@@ -147,7 +148,7 @@ EQ::skills::SkillType Mob::AttackAnimation(int Hand, const EQ::ItemInstance* wea
 
 	return skillinuse;
 }
-
+//SYNC WITH: tune.cpp, mob.h Tune_compute_tohit  
 int Mob::compute_tohit(EQ::skills::SkillType skillinuse)
 {
 	int tohit = GetSkill(EQ::skills::SkillOffense) + 7;
@@ -168,6 +169,7 @@ int Mob::compute_tohit(EQ::skills::SkillType skillinuse)
 }
 
 // return -1 in cases that always hit
+//SYNC WITH: tune.cpp, mob.h Tune_GetTotalToHit  
 int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 {
 	if (chance_mod >= 10000) // override for stuff like SE_SkillAttack
@@ -231,6 +233,7 @@ int Mob::GetTotalToHit(EQ::skills::SkillType skill, int chance_mod)
 
 // based on dev quotes
 // the AGI bonus has actually drastically changed from classic
+//SYNC WITH: tune.cpp, mob.h Tune_compute_defense  
 int Mob::compute_defense()
 {
 	int defense = GetSkill(EQ::skills::SkillDefense) * 400 / 225;
@@ -259,6 +262,7 @@ int Mob::compute_defense()
 }
 
 // return -1 in cases that always miss
+// SYNC WITH : tune.cpp, mob.h Tune_GetTotalDefense()
 int Mob::GetTotalDefense()
 {
 	auto avoidance = compute_defense() + 10; // add 10 in case the NPC's stats are fucked
@@ -286,6 +290,7 @@ int Mob::GetTotalDefense()
 
 // called when a mob is attacked, does the checks to see if it's a hit
 // and does other mitigation checks. 'this' is the mob being attacked.
+// SYNC WITH : tune.cpp, mob.h Tune_CheckHitChance()
 bool Mob::CheckHitChance(Mob* other, DamageHitInfo &hit)
 {
 #ifdef LUA_EQEMU
@@ -788,7 +793,7 @@ int Mob::GetClassRaceACBonus()
 
 	return ac_bonus;
 }
-
+//SYNC WITH: tune.cpp, mob.h Tune_ACSum 
 int Mob::ACSum(bool skip_caps)
 {
 	int ac = 0; // this should be base AC whenever shrouds come around
@@ -863,7 +868,7 @@ int Mob::ACSum(bool skip_caps)
 }
 
 int Mob::GetBestMeleeSkill()
-	{
+{
 	int bestSkill=0;
 
 	EQ::skills::SkillType meleeSkills[]=
@@ -885,8 +890,8 @@ int Mob::GetBestMeleeSkill()
 	}
 
 	return bestSkill;
-	}
-
+}
+//SYNC WITH: tune.cpp, mob.h Tune_offense 
 int Mob::offense(EQ::skills::SkillType skill)
 {
 	int offense = GetSkill(skill);
@@ -941,7 +946,7 @@ double Mob::RollD20(int offense, int mitigation)
 
 	return mods[index];
 }
-
+//SYNC WITH: tune.cpp, mob.h Tune_MeleeMitigation
 void Mob::MeleeMitigation(Mob *attacker, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 #ifdef LUA_EQEMU
@@ -1317,6 +1322,7 @@ int Client::DoDamageCaps(int base_damage)
 }
 
 // other is the defender, this is the attacker
+//SYNC WITH: tune.cpp, mob.h Tune_DoAttack 
 void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 {
 	if (!other)
@@ -1374,6 +1380,7 @@ void Mob::DoAttack(Mob *other, DamageHitInfo &hit, ExtraAttackOptions *opts)
 //note: throughout this method, setting `damage` to a negative is a way to
 //stop the attack calculations
 // IsFromSpell added to allow spell effects to use Attack. (Mainly for the Rampage AA right now.)
+//SYNC WITH: tune.cpp, mob.h Tune_ClientAttack  
 bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	if (!other) {
@@ -1943,7 +1950,7 @@ bool Client::Death(Mob* killerMob, int32 damage, uint16 spell, EQ::skills::Skill
 	parse->EventPlayer(EVENT_DEATH_COMPLETE, this, export_string, 0);
 	return true;
 }
-
+//SYNC WITH: tune.cpp, mob.h Tune_NPCAttack 
 bool NPC::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, bool IsFromSpell, ExtraAttackOptions *opts)
 {
 	if (!other) {
