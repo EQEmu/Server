@@ -168,6 +168,9 @@ RULE_BOOL(Character, EnableCharacterEXPMods, false, "Enables character zone-base
 RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based assisting against the aggresor in pvp.")
 RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable items")
 RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
+RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)

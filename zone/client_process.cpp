@@ -1019,6 +1019,11 @@ void Client::OPTGB(const EQApplicationPacket *app)
 {
 	if(!app) return;
 	if(!app->pBuffer) return;
+	
+	if(!RuleB(Character, EnableTGB))
+	{
+		return;
+	}
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
