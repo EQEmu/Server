@@ -13716,8 +13716,40 @@ void command_tune(Client *c, const Seperator *sep)
 	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(Chat::White, "Syntax: #tune [subcommand].");
 		c->Message(Chat::White, "-- Tune System Commands --");
-		c->Message(Chat::White, "-- Usage: Returning recommended combat statistical values based on a desired outcome.");
-		c->Message(Chat::White, "-- Note: If targeted mob does not have a target (ie not engaged in combat), YOU will be considered the target.");
+		c->Message(Chat::White, "-- Usage: Returns recommended combat statistical values based on a desired outcome through simulated combat.");
+		c->Message(Chat::White, "-- This commmand can answer the following difficult questions.");
+		c->Message(Chat::White, "-- Question: What is the average damage mitigation my AC provides against a specific targets attacks?");
+		c->Message(Chat::White, "-- Question: What is amount of AC would I need to add to acheive a specific average damage mitigation agianst specific targets attacks?");
+		c->Message(Chat::White, "-- Question: What is amount of AC would I need to add to my target to acheive a specific average damage mitigation from my attacks?");
+		c->Message(Chat::White, "-- Question: What is my targets average AC damage mitigation based on my ATK stat?");
+		c->Message(Chat::White, "-- Question: What is amount of ATK would I need to add to myself to acheive a specific average damage mitigation on my target?");
+		c->Message(Chat::White, "-- Question: What is amount of ATK would I need to add to my target to acheive a specific average AC damage mitigation on myself?");
+		c->Message(Chat::White, "-- Question: What is my hit chance against a target?");
+		c->Message(Chat::White, "-- Question: What is the amount of avoidance I need to add to my target to achieve a specific hit chance?");
+		c->Message(Chat::White, "-- Question: What is the amount of accuracy I need to add to my target to achieve a specific chance of hitting me?");
+		c->Message(Chat::White, "-- Question: ... and many more...");
+		
+		c->Message(Chat::White, "-- ");
+
+		c->Message(Chat::White, "...Returns recommended ATK adjustment +/- on ATTACKER that will result in an average AC mitigation pct on DEFENDER. ");
+		c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval][loop_max][AC Overwride][Info Level]");
+		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...Returns recommended AC adjustment +/- on DEFENDER for an average AC mitigation pct from ATTACKER. ");
+		c->Message(Chat::White, "...#tune FindAC [A/D] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
+		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...Returns recommended Accuracy adjustment +/- on ATTACKER that will result in a hit chance pct on DEFENDER. ");
+		c->Message(Chat::White, "...#tune FindAccuracy [A/D] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
+		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...Returns recommended Avoidance adjustment +/- on DEFENDER for in a hit chance pct from ATTACKER. ");
+		c->Message(Chat::White, "...#tune FindAvoidance [A/D] [pct mitigation] [interval][loop_max][Accuracy Overwride][Info Level] ");
+		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...### Usage: [A/D] You must input either A or D.");
+		c->Message(Chat::White, "...### Category A ### YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+		c->Message(Chat::White, "...### Category D ### YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+		c->Message(Chat::White, "...### If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+
+		c->Message(Chat::White, "-- ");
+
 		c->Message(Chat::White, "-- Warning: The calculations done in this process are intense and can potentially cause zone crashes depending on parameters set, use with caution!");
 		c->Message(Chat::White, "-- Below are OPTIONAL parameters.");
 		c->Message(Chat::White, "-- Note: [interval] Determines how fast the stat being checked increases/decreases till it finds the best result. Default [ATK/AC 50][Acc/Avoid 10] ");
@@ -13725,22 +13757,7 @@ void command_tune(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "-- Note: [Stat Override] Will override that stat on mob being checkd with the specified value. Default=0");
 		c->Message(Chat::White, "-- Note: [Info Level] How much statistical detail is displayed[0 - 3]. Default=0 ");
 		c->Message(Chat::White, "-- Note: Results are only approximations usually accurate to +/- 2 intervals.");
-
 		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...### Category A ### Target = ATTACKER ### YOU or Target's Target = DEFENDER ###");
-		c->Message(Chat::White, "...### Category B ### Target = DEFENDER ### YOU or Target's Target = ATTACKER ###");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended ATK adjustment +/- on ATTACKER that will result in an average AC mitigation pct on DEFENDER. ");
-		c->Message(Chat::White, "...tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level]");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended AC adjustment +/- on DEFENDER for an average AC mitigation pct from ATTACKER. ");
-		c->Message(Chat::White, "...tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended Accuracy adjustment +/- on ATTACKER that will result in a hit chance pct on DEFENDER. ");
-		c->Message(Chat::White, "...tune FindAccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended Avoidance adjustment +/- on DEFENDER for in a hit chance pct from ATTACKER. ");
-		c->Message(Chat::White, "...tune FindAvoidance [A/B] [pct mitigation] [interval][loop_max][Accuracy Overwride][Info Level] ");
 
 		return;
 	}
@@ -13758,13 +13775,11 @@ void command_tune(Client *c, const Seperator *sep)
 		return;
 	}
 
-	/*
+	//Use if checkings on engaged targets.
 	Mob* ttarget = attacker->GetTarget();
-
 	if (ttarget) {
 		defender = ttarget;
 	}
-	*/
 
 	if (!strcasecmp(sep->arg[1], "stats"))
 	{
