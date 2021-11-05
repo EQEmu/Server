@@ -221,6 +221,7 @@ int command_init(void)
 		command_add("findclass", "[search criteria] - Search for a class", 50, command_findclass) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) ||
+		command_add("findskill", "[search criteria] - Search for a skill", 50, command_findskill) ||
 		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", 80, command_fixmob) ||
@@ -2875,6 +2876,77 @@ void command_findrace(Client *c, const Seperator *sep)
 				fmt::format(
 					"{} Race(s) found.",
 					found_count
+				).c_str()
+			);
+		}
+	}
+}
+
+void command_findskill(Client *c, const Seperator *sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #findskill [search criteria]");
+	} else if (Seperator::IsNumber(sep->argplus[1])) {
+		int skill_id = atoi(sep->argplus[1]);
+		if (skill_id >= EQ::skills::Skill1HBlunt && skill_id < EQ::skills::SkillCount) {
+			std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
+			for (auto skills_iter : Skills) {
+				if (skill_id == skills_iter.first) {
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{}: {}",
+							skills_iter.first,
+							skills_iter.second
+						).c_str()
+					);
+					break;
+				}
+			}
+		}
+	} else {
+		std::string search_criteria = str_tolower(sep->argplus[1]);
+		int found_count = 0;
+		std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
+		for (auto skills_iter : Skills) {
+			std::string skill_name_lower = str_tolower(skills_iter.second);
+			if (!search_criteria.empty() && skill_name_lower.find(search_criteria) == std::string::npos) {
+				continue;
+			}
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{}: {}",
+					skills_iter.first,
+					skills_iter.second
+				).c_str()
+			);			
+			found_count++;
+
+			if (found_count == 20) {
+				break;
+			}
+		}
+
+		if (found_count == 20) {
+			c->Message(Chat::White, "20 Skills were found, max reached.");
+		} else {
+			auto skill_message = (
+				found_count > 0 ? 
+				(
+					found_count == 1 ?
+					"A skill was" :
+					fmt::format("{} skills were", found_count)
+				) :
+				"No skills were"
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} found.",
+					skill_message
 				).c_str()
 			);
 		}
