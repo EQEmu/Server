@@ -110,6 +110,7 @@ void command_findclass(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findrace(Client *c, const Seperator *sep);
 void command_findspell(Client *c, const Seperator *sep);
+void command_findtask(Client *c, const Seperator *sep);
 void command_findzone(Client *c, const Seperator *sep);
 void command_fixmob(Client *c, const Seperator *sep);
 void command_flag(Client *c, const Seperator *sep);
