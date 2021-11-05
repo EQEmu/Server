@@ -4892,6 +4892,29 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				}
 				break;
 
+			case SE_FFItemClass:
+				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
+					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
+						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
+						//ItemType
+						if (item && item->GetItem()) {
+							if (base_value >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
+								if (base_value != item->GetItem()->ItemType) {//this can be zero
+									LimitFailure = true;
+								}
+							}
+							//SubType
+							if (limit_value) { //this should not be zero
+								if (limit_value != item->GetItem()->SubType) {
+									LimitFailure = true;
+								}
+							}
+						}
+					}
+				}
+				break;
+
+
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 				case SE_Ff_Same_Caster:
