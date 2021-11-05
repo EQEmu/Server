@@ -13728,46 +13728,49 @@ void command_tune(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "-- Question: What is the amount of avoidance I need to add to my target to achieve a specific hit chance?");
 		c->Message(Chat::White, "-- Question: What is the amount of accuracy I need to add to my target to achieve a specific chance of hitting me?");
 		c->Message(Chat::White, "-- Question: ... and many more...");
-		
-		c->Message(Chat::White, "-- ");
-		c->Message(Chat::White, "-- ");
-
-		c->Message(Chat::White, "-- Returns combat statistics, including AC mitigation pct, hit chance, and avoid melee chance for attacker and defender.");
+		c->Message(Chat::White, " ");
 		c->Message(Chat::White, "...#tune stats [A/D]");
-		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval] [loop_max] [AC override] [Info Level]");
+		c->Message(Chat::White, "...#tune FindAC  [A/D] [pct mitigation] [interval] [loop_max] [ATK override] [Info Level] ");
+		c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval] [loop_max] [Avoidance override] [Info Level]");
+		c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval] [loop_max] [Accuracy override] [Info Level] ");
+		c->Message(Chat::White, " ");
+		c->Message(Chat::White, "-- DETAILS AND EXAMPLES ON USAGE");
+		c->Message(Chat::White, " ");
+		c->Message(Chat::White, "...Returns combat statistics, including AC mitigation pct, hit chance, and avoid melee chance for attacker and defender.");
+		c->Message(Chat::White, "...#tune stats [A/D]");
 		c->Message(Chat::White, "...");
 		c->Message(Chat::White, "...Returns recommended ATK adjustment (+/-) on ATTACKER that will result in a specific average AC mitigation pct on DEFENDER. ");
 		c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval][loop_max][AC override][Info Level]");
-		c->Message(Chat::White, "...Example: Find the amount of ATK stat I need to add to the targeted NPC so that it hits me for 50 pct damage on average. [#tune FindATK D 50]");
-		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Example: Find the amount of ATK stat I need to add to the targeted NPC so that it hits me for 50 pct damage on average.");
+		c->Message(Chat::White, "...Example: #tune FindATK D 50");
 		c->Message(Chat::White, "...");
 		c->Message(Chat::White, "...Returns recommended AC adjustment(+/-) on DEFENDER for a specific average AC mitigation pct from ATTACKER. ");
 		c->Message(Chat::White, "...#tune FindAC  [A/D] [pct mitigation] [interval][loop_max][ATK override][Info Level] ");
-		c->Message(Chat::White, "...Example: Find the amount of AC stat I need to add to the targeted NPC so that I hit it for 70 pct damage on average. [#tune FindAC D 70]");
-		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Example: Find the amount of AC stat I need to add to the targeted NPC so that I hit it for 70 pct damage on average.");
+		c->Message(Chat::White, "...Example: #tune FindAC D 70");
 		c->Message(Chat::White, "...");
 		c->Message(Chat::White, "...Returns recommended Accuracy adjustment (+/-) on ATTACKER that will result in a specific hit chance pct on DEFENDER. ");
 		c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
-		c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me. [#tune FindAccuracy D 60]");
-		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me.");
+		c->Message(Chat::White, "...Example: #tune FindAccuracy D 60");
 		c->Message(Chat::White, "...");
 		c->Message(Chat::White, "...Returns recommended Avoidance adjustment (+/-) on DEFENDER for in a specific hit chance pct from ATTACKER. ");
 		c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval][loop_max][Accuracy override][Info Level] ");
-		c->Message(Chat::White, "...Example: Find the amount of Avoidance stat I need to add to the targeted NPC so that I have a 30 pct hit chance against it. [#tune FindAvoidance D 30]");
-		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...Example: Find the amount of Avoidance stat I need to add to the targeted NPC so that I have a 30 pct hit chance against it.");
+		c->Message(Chat::White, "...Example: #tune FindAvoidance D 30");
 		c->Message(Chat::White, "... ");
 		c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
 		c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
 		c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
 		c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
 
-		c->Message(Chat::White, "-- ");
-		c->Message(Chat::White, "-- ");
+		c->Message(Chat::White, " ");
 
 		c->Message(Chat::White, "-- Warning: The calculations done in this process are intense and can potentially cause zone crashes depending on parameters set, use with caution!");
 		c->Message(Chat::White, "-- Below are OPTIONAL parameters.");
-		c->Message(Chat::White, "-- Note: [interval] Determines how much the stat being checked increases/decreases till it finds the best result. Lower is more accurate. Default: [10]");
-		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Hight is more accurate. Default: [1000]");
+		c->Message(Chat::White, "-- Note: [interval] Determines how much the stat being checked increases/decreases till it finds the best result. Lower is more accurate. Default=10");
+		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Hight is more accurate. Default=1000");
 		c->Message(Chat::White, "-- Note: [Stat Override] Will override that stat on mob being checked with the specified value. Default=0");
 		c->Message(Chat::White, "-- Example: If as the attacker you want to find the ATK value you would need if your target had an AC of 1000. [#tune FindATK A 50 0 0 1000]");
 		c->Message(Chat::White, "-- Note: [Info Level] How much parsing detail is displayed[0 - 1]. Default: [0] ");
@@ -13838,7 +13841,7 @@ void command_tune(Client *c, const Seperator *sep)
 			ac_override = 0;
 		}
 		if (!info_level) {
-			info_level = 1;
+			info_level = 0;
 		}
 
 		if (!strcasecmp(sep->arg[2], "A")) {
@@ -13889,7 +13892,7 @@ void command_tune(Client *c, const Seperator *sep)
 			atk_override = 0;
 		}
 		if (!info_level) {
-			info_level = 1;
+			info_level = 0;
 		}
 		
 		if (!strcasecmp(sep->arg[2], "A")) {
@@ -13926,19 +13929,23 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender.");
 			c->Message(Chat::White, "...Returns recommended Accuracy adjustment (+/-) on ATTACKER that will result in a specific hit chance pct on DEFENDER. ");
 			c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
-			c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me. [#tune FindAccuracy D 60]");
+			c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me.");
 			c->Message(Chat::White, "...Example: #tune FindAccuracy D 60");
 			return;
 		}
 
-		if (!interval)
+		if (!interval) {
 			interval = 10;
-		if (!max_loop)
+		}
+		if (!max_loop) {
 			max_loop = 1000;
-		if (!avoid_override)
+		}
+		if (!avoid_override) {
 			avoid_override = 0;
-		if (!info_level)
-			info_level = 1;
+		}
+		if (!info_level) {
+			info_level = 0;
+		}
 
 		if (!strcasecmp(sep->arg[2], "A"))
 			c->Tune_GetAccuracyByHitChance(defender, attacker, hit_chance, interval, max_loop, avoid_override, info_level);
@@ -13976,15 +13983,18 @@ void command_tune(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "...Example: #tune FindAvoidance D 30");
 			return;
 		}
-
-		if (!interval)
+		if (!interval) {
 			interval = 10;
-		if (!max_loop)
+		}
+		if (!max_loop) {
 			max_loop = 1000;
-		if (!acc_override)
+		}
+		if (!acc_override) {
 			acc_override = 0;
-		if (!info_level)
-			info_level = 1;
+		}
+		if (!info_level) {
+			info_level = 0;
+		}
 
 		if (!strcasecmp(sep->arg[2], "A"))
 			c->Tune_GetAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
