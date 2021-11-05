@@ -287,8 +287,8 @@ void Client::Handle_Play(const char *data)
 	}
 
 	const auto *play        = (const PlayEverquestRequest_Struct *) data;
-	auto       server_id_in = (unsigned int) play->ServerNumber;
-	auto       sequence_in  = (unsigned int) play->Sequence;
+	auto       server_id_in = (unsigned int) play->server_number;
+	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
 	if (server.options.IsTraceOn()) {
 		LogInfo(
@@ -299,7 +299,7 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	m_play_server_id   = (unsigned int) play->ServerNumber;
+	m_play_server_id   = (unsigned int) play->server_number;
 	m_play_sequence_id = sequence_in;
 	m_play_server_id   = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
