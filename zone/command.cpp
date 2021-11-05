@@ -2884,13 +2884,18 @@ void command_findrace(Client *c, const Seperator *sep)
 
 void command_findskill(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #findskill [search criteria]");
-	} else if (Seperator::IsNumber(sep->argplus[1])) {
+	int arguments = sep->argnum;
+
+	if (arguments == 0) {
+		c->Message(Chat::White, "Command Syntax: #findskill [search criteria]");
+		return;
+	}
+	
+	std::map<EQ::skills::SkillType, std::string> skills = EQ::skills::GetSkillTypeMap();
+	if (sep->IsNumber(1)) {
 		int skill_id = atoi(sep->argplus[1]);
 		if (skill_id >= EQ::skills::Skill1HBlunt && skill_id < EQ::skills::SkillCount) {
-			std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
-			for (auto skills_iter : Skills) {
+			for (auto skills_iter : skills) {
 				if (skill_id == skills_iter.first) {
 					c->Message(
 						Chat::White,
@@ -2915,8 +2920,7 @@ void command_findskill(Client *c, const Seperator *sep)
 	} else {
 		std::string search_criteria = str_tolower(sep->argplus[1]);
 		int found_count = 0;
-		std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
-		for (auto skills_iter : Skills) {
+		for (auto skills_iter : skills) {
 			std::string skill_name_lower = str_tolower(skills_iter.second);
 			if (!search_criteria.empty() && skill_name_lower.find(search_criteria) == std::string::npos) {
 				continue;
