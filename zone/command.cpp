@@ -437,6 +437,7 @@ int command_init(void)
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", 180, command_unscribespells) ||
 		command_add("untraindisc", "[spellid] - Untrain specified discipline from your target.", 180, command_untraindisc) ||
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", 180, command_untraindiscs) ||
+		command_add("updatechecksum", "gm only", 250, command_updatechecksum) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", 10, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
 		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
@@ -9977,6 +9978,24 @@ void command_opcode(Client *c, const Seperator *sep) {
 		c->Message(Chat::White, "Opcodes for all patches have been reloaded");
 	}
 }
+
+void command_updatechecksum(Client* c, const Seperator* sep) {
+	if (c)
+	{
+		database.SetVariable("checksum_crc1_eqgame", std::to_string(database.GetAccountCRC1EQGame(c->AccountID())));
+		database.SetVariable("checksum_crc2_skillcaps", std::to_string(database.GetAccountCRC2SkillCaps(c->AccountID())));
+		database.SetVariable("checksum_crc3_basedata", std::to_string(database.GetAccountCRC3BaseData(c->AccountID())));
+
+		if (c)
+		{
+			auto pack = new ServerPacket(ServerOP_ReloadRulesWorld, 0);
+			worldserver.SendPacket(pack);
+			c->Message(Chat::Red, "Successfully sent the packet to world to reload rules. (only world)");
+			safe_delete(pack);
+		}
+	}
+}
+
 
 void command_qglobal(Client *c, const Seperator *sep) {
 	//In-game switch for qglobal column

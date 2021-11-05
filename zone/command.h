@@ -339,6 +339,7 @@ void command_unscribespells(Client *c, const Seperator *sep);
 void command_untraindisc(Client *c, const Seperator *sep);
 void command_untraindiscs(Client *c, const Seperator *sep);
 void command_uptime(Client *c, const Seperator *sep);
+void command_updatechecksum(Client* c, const Seperator* sep);
 void command_version(Client *c, const Seperator *sep);
 void command_viewnpctype(Client *c, const Seperator *sep);
 void command_viewpetition(Client *c, const Seperator *sep);
