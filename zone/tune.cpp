@@ -1103,6 +1103,13 @@ void Mob::Tune_GetStats(Mob* defender, Mob *attacker)
 		return;
 	}
 
+	int eb = Tune_CalcEvasionBonus(300, 200);
+	Shout("1 FINAL: eb %i", eb);
+	eb = Tune_CalcEvasionBonus(-300, 200);
+	Shout("2 FINAL: eb %i", eb);
+	eb = Tune_CalcEvasionBonus(100, 200);
+	Shout("3 FINAL: eb %i", eb);
+
 	int max_damage = 0;
 	int min_damage = 0;
 	int mean_dmg = 0;
@@ -1408,12 +1415,31 @@ void Mob::Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mit
 	return;
 }
 
-void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg)
+void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int accuracy_override, int Msg)
 {
+
+	if (hit_chance > 100 || hit_chance < 0) {
+		Message(0, "[#Tune] - Processing... Abort! Hit Chance value out of range ( %.0f ) pct. Must be between 0-100.", hit_chance);
+		return;
+	}
+	if (!defender) {
+		Message(0, "[#Tune] - Processing... Abort! No Defender found.");
+		return;
+	}
+	if (!attacker) {
+		Message(0, "[#Tune] - Processing... Abort! No Attacker found.");
+		return;
+	}
+	if (defender->GetID() == attacker->GetID()) {
+		Message(0, "[#Tune] - Processing... Abort! Error Attacker can not be the Defender.");
+		return;
+	}
+
 	int loop_add_avoid = 0;
 	float tmp_hit_chance = 0.0f;
 	bool end = false;
-	Shout("TEST %.2f ", hit_chance);
+	int base_avoidance = Tune_GetAvoidance(defender, attacker);
+
 	tmp_hit_chance = Tune_GetHitChance(defender, attacker);
 
 	Message(0, "###################START###################");
@@ -1428,42 +1454,52 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 
 	if (tmp_hit_chance < hit_chance) {
 		interval = interval * -1;
-		Message(0, "[#Tune] NOTE: Defenders 'AVOIDANCE' must be LOWERED due to defenders chance to be hit( %.0f pct ) being less than the desired ( %.0f pct )", tmp_hit_chance, hit_chance);
+		Message(0, "[#Tune] NOTE: Defenders 'AVOIDANCE' must be LOWERED due to defenders ( %.0f pct ) chance to be hit being less than the desired ( %.0f pct )", tmp_hit_chance, hit_chance);
 	}
 
-	Message(0, "#Tune - Processing... Find Avoidance for hit chance on defender of (%.0f) pct from attacker. [Current Hit Chance %.2f]", hit_chance, tmp_hit_chance);
+	Message(0, "[#Tune] - Processing... Find Avoidance needed on defender for a ( %.0f pct ) hit chance from attacker. Base attacker hit chance ( %.0f pct ). ", hit_chance, tmp_hit_chance);
 
 	for (int j = 0; j < max_loop; j++)
 	{
 		tmp_hit_chance = Tune_GetHitChance(defender, attacker,0,0, loop_add_avoid,0);
 
-		Message(0, "#Tune - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
+		Message(0, "[#Tune] - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
 
 		if (Msg >= 3)
 			Message(0, "#Tune - Processing... [%i] [AVOIDANCE %i] Hit Chance %.2f ", j, loop_add_avoid, tmp_hit_chance);
 
 		if (interval > 0 && tmp_hit_chance <= hit_chance) {
-			Shout("end 1");
 			end = true;
 		}
 
 		else if (interval < 0 && tmp_hit_chance >= hit_chance) {
-			Shout("end 2");
 			end = true;
 		}
 
 		if (end) {
-
-			Message(0, " ");
-
+			
 			if (defender->IsNPC()) {
-				Message(0, "#Recommended NPC Avoidance Statistic adjustment of ( %i ) on ' %s ' for a hit chance of ( %.0f) pct from ' %s '. ", loop_add_avoid, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
-				Message(0, "#SET: [NPC Avoidance] = [%i]", loop_add_avoid + defender->CastToNPC()->GetAvoidanceRating());
+				Message(0, "[#Tune] Recommended NPC AVOIDANCE ADJUSTMENT of ( %i ) on ' %s ' will result in ' %s ' having a ( %.0f pct) hit chance.", loop_add_avoid, defender->GetCleanName(), attacker->GetCleanName(), hit_chance);
+				Message(0, "[#Tune] SET NPC 'AVOIDANCE' stat value = [ %i ]", loop_add_avoid + defender->CastToNPC()->GetAvoidanceRating());
+				Message(0, "###################COMPLETE###################");
 			}
 			else if (defender->IsClient()) {
-				Message(0, "#Recommended Client Avoidance Bonus adjustment of ( %i ) on ' %s ' for a hit chance of ( %.0f) pct from ' %s '. ", loop_add_avoid, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
-				Message(0, "#Modify (+/-): [Item Mod2 Avoidance] [%i]", loop_add_avoid);
-				Message(0, "#Modify (+/-): [SE_AvoidMeleeChance(172)]  [%i]", loop_add_avoid / 10);
+				Message(0, "[#Tune] Recommended CLIENT AVOIDANCE ADJUSTMENT of ( %i ) on ' %s ' will result in ' %s ' having a ( %.0f pct) hit chance.", loop_add_avoid, defender->GetCleanName(), attacker->GetCleanName(), hit_chance);
+
+				int final_avoidance = Tune_GetAvoidance(defender, attacker, 0, loop_add_avoid);
+				int evasion_bonus = Tune_CalcEvasionBonus(final_avoidance, base_avoidance);
+
+				if (loop_add_avoid >= 0) {
+					Message(0, "[#Tune] OPTION1: MODIFY Client Heroic AGI or Avoidance Mod2 stat by [+ %i ]", loop_add_avoid);
+					Message(0, "[#Tune] OPTION2: Give CLIENT an evasion bonus using SPA 172 Evasion SE_AvoidMeleeChance from (spells/items/aa) of [+ %i pct ]", evasion_bonus);
+					
+				}
+				else {
+					Message(0, "[#Tune] OPTION1: MODIFY Client Heroic AGI or Avoidance Mod2 stat by [ %i ]", loop_add_avoid);
+					Message(0, "[#Tune] OPTION2: Give CLIENT an evasion bonus using SPA 172 Evasion SE_AvoidMeleeChance from (spells/items/aa) of [ %i pct ]", evasion_bonus);
+				}
+				
+				Message(0, "###################COMPLETE###################");
 			}
 
 			return;
@@ -1472,8 +1508,105 @@ void Mob::Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_c
 		loop_add_avoid = loop_add_avoid + interval;
 	}
 
-	Message(0, "#Tune - Error: Unable to find desired result for (%.0f) pct - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
-	Message(0, "#Tune - Parse ended at AVOIDANCE ADJUSTMENT ( %i ) at hit chance of (%.0f) / (%.0f) pct.", loop_add_avoid, tmp_hit_chance , hit_chance);
+	Message(0, "###################ABORT#######################");
+	Message(0, "[#Tune] Error: Unable to find desired result for ( %.0f pct) - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
+	Message(0, "[#Tune] Parse ended at AVOIDANCE ADJUSTMENT ( %i ) on ' %s ' will result in ' %s ' having a ( %.0f pct) hit chance.", loop_add_avoid, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+	Message(0, "###################COMPLETE###################");
+}
+
+void Mob::Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoidance_override, int Msg)
+{
+
+	if (hit_chance > 100 || hit_chance < 0) {
+		Message(0, "[#Tune] - Processing... Abort! Hit Chance value out of range ( %.0f ) pct. Must be between 0-100.", hit_chance);
+		return;
+	}
+	if (!defender) {
+		Message(0, "[#Tune] - Processing... Abort! No Defender found.");
+		return;
+	}
+	if (!attacker) {
+		Message(0, "[#Tune] - Processing... Abort! No Attacker found.");
+		return;
+	}
+	if (defender->GetID() == attacker->GetID()) {
+		Message(0, "[#Tune] - Processing... Abort! Error Attacker can not be the Defender.");
+		return;
+	}
+
+	int loop_add_accuracy = 0;
+	float tmp_hit_chance = 0.0f;
+	bool end = false;
+	int base_avoidance = Tune_GetAvoidance(defender, attacker);
+
+	tmp_hit_chance = Tune_GetHitChance(defender, attacker);
+
+	Message(0, "###################START###################");
+	Message(0, "[#Tune] DEFENDER Name: %s", defender->GetCleanName());
+	Message(0, "[#Tune] DEFENDER Chance to be missed:  %.0f pct", (100.0f - round(tmp_hit_chance)));
+	Message(0, "[#Tune] DEFENDER Avoidance: %i ", Tune_GetAvoidance(defender, attacker));
+	Message(0, "[#Tune] ATTACKER Name: %s", attacker->GetCleanName());
+	Message(0, "[#Tune] ATTACKER Chance to hit:  %.0f pct", round(tmp_hit_chance));
+	Message(0, "[#Tune] ATTACKER Accuracy: %i ", Tune_GetAccuracy(defender, attacker));
+	Message(0, "##########################################");
+	Message(0, "[#Tune] Begin Parse [Interval %i Max Loop Iterations %i]", interval, max_loop);
+
+
+	if (tmp_hit_chance > hit_chance) {
+		interval = interval * -1;
+		Message(0, "[#Tune] NOTE: Attackers 'ACCURACY' must be LOWERED due to attackers ( %.0f pct ) chance to hit being less than the desired ( %.0f pct )", tmp_hit_chance, hit_chance);
+	}
+
+	Message(0, "[#Tune] - Processing... Find Accuracy needed on attacker for a ( %.0f pct ) hit chance on defender. Base attacker hit chance ( %.0f pct ). ", hit_chance, tmp_hit_chance);
+
+	for (int j = 0; j < max_loop; j++)
+	{
+		tmp_hit_chance = Tune_GetHitChance(defender, attacker, 0, 0, loop_add_accuracy, 0);
+
+		Message(0, "#Tune - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
+
+		if (Msg >= 3)
+			Message(0, "#Tune - Processing... [%i] ACCURACY %i] Hit Chance %.2f ", j, loop_add_accuracy, tmp_hit_chance);
+
+		if (interval > 0 && tmp_hit_chance >= hit_chance) {
+			end = true;
+		}
+
+		else if (interval < 0 && tmp_hit_chance <= hit_chance) {
+			end = true;
+		}
+
+		if (end) {
+
+			if (defender->IsNPC()) {
+				Message(0, "[#Tune] Recommended NPC ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+				Message(0, "[#Tune] SET NPC 'ACCURACY' stat value = [ %i ]", loop_add_accuracy + defender->CastToNPC()->GetAccuracyRating());
+				Message(0, "###################COMPLETE###################");
+			}
+			else if (defender->IsClient()) {
+				Message(0, "[#Tune] Recommended CLIENT AVOIDANCE ADJUSTMENT of ( %i ) on  %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+
+				if (loop_add_accuracy >= 0) {
+					Message(0, "[#Tune] OPTION1: MODIFY Client Avoidance Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [+ %i ]", loop_add_accuracy);
+
+				}
+				else {
+					Message(0, "[#Tune] OPTION1: MODIFY Client Avoidance Mod2 stat or SPA 216 Melee Accuracy (spells/items/aa) [ %i ]", loop_add_accuracy);
+				}
+
+				Message(0, "###################COMPLETE###################");
+			}
+
+			return;
+		}
+
+		loop_add_accuracy = loop_add_accuracy + interval;
+	}
+
+	Message(0, "###################ABORT#######################");
+	Message(0, "[#Tune] Error: Unable to find desired result for ( %.0f pct) - Increase interval (%i) AND/OR max loop value (%i) and run again.", hit_chance, interval, max_loop);
+	Message(0, "[#Tune] Parse ended at ACCURACY ADJUSTMENT of ( %i ) on ' %s ' will result in ( %.0f pct) chance to hit ' %s '.", loop_add_accuracy, defender->GetCleanName(), hit_chance, attacker->GetCleanName());
+	Message(0, "###################COMPLETE###################");
 }
 
 
@@ -1588,9 +1721,9 @@ int Mob::Tune_GetAccuracy(Mob* defender, Mob *attacker)
 	return accuracy;
 }
 
-int Mob::Tune_GetAvoidance(Mob* defender, Mob *attacker)
+int Mob::Tune_GetAvoidance(Mob* defender, Mob *attacker, int avoidance_override, int add_avoidance)
 {
-	return defender->Tune_GetTotalDefense();
+	return defender->Tune_GetTotalDefense(avoidance_override, add_avoidance);
 }
 
 float Mob::Tune_GetHitChance(Mob* defender, Mob *attacker, int avoidance_override, int accuracy_override, int add_avoidance, int add_accuracy)
@@ -1645,6 +1778,46 @@ float Mob::Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type)
 	}
 	float chance = (static_cast<float>(hit_count) / 3000.0f) * 100.0f;
 	return chance;
+}
+
+int Mob::Tune_CalcEvasionBonus(int final_avoidance, int base_avoidance) {
+
+	/*
+	float eb = static_cast<float>(final_avoidance) / static_cast<float>(base_avoidance);
+	Shout(" eb %.2f ", eb);
+	eb = eb * 100.f;
+	Shout(" eb %.2f ", eb);
+	eb = eb - 100.0f;
+	Shout(" eb %.2f ", eb);
+	return eb;
+	*/
+
+	int loop_max = 3000;
+	int evasion_bonus = 10;
+	int current_avoidance = 0;
+
+	int interval = 5;
+
+	if (base_avoidance > final_avoidance)
+	{
+		interval = interval * -1;
+	}
+
+	for (int i = 0; i < loop_max; i++)
+	{
+		current_avoidance = (base_avoidance * (100 + evasion_bonus)) / 100;
+
+		if (interval > 0 && current_avoidance >= final_avoidance)
+		{
+			return evasion_bonus;
+		}
+		else if (interval < 0 && current_avoidance <= final_avoidance)
+		{
+			return evasion_bonus;
+		}
+		evasion_bonus = evasion_bonus + interval;
+	}
+	return 0;
 }
 
 /*

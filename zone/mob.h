@@ -1233,7 +1233,8 @@ public:
 	void Tune_GetStats(Mob* defender, Mob *attacker);
 	void Tune_GetACByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int atk_override = 0, int Msg = 0);
 	void Tune_GetATKByPctMitigation(Mob* defender, Mob *attacker, float pct_mitigation, int interval = 10, int max_loop = 1000, int ac_override = 0, int Msg = 0);
-	void Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int acc_override, int Msg);
+	void Tune_GetAvoidanceByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int accuracy_override, int Msg);
+	void Tune_GetAccuracyByHitChance(Mob* defender, Mob *attacker, float hit_chance, int interval, int max_loop, int avoidance_override, int Msg);
 	/**/
 	int Tune_ClientGetMeanDamage(Mob* other, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0);
 	int Tune_ClientGetMaxDamage(Mob* other);
@@ -1241,9 +1242,10 @@ public:
 	float Tune_GetACMitigationPct(Mob* defender, Mob *attacker);
 	int Tune_GetOffense(Mob* defender, Mob *attacker, int atk_override = 0);
 	int Tune_GetAccuracy(Mob* defender, Mob *attacker);
-	int Tune_GetAvoidance(Mob* defender, Mob *attacker);
+	int Tune_GetAvoidance(Mob* defender, Mob *attacker, int avoidance_override = 0, int add_avoidance = 0);
 	float Tune_GetHitChance(Mob* defender, Mob *attacker, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
 	float Tune_GetAvoidMeleeChance(Mob* defender, Mob *attacker, int type);
+	int Tune_CalcEvasionBonus(int final_avoidance, int base_avoidance);
 	/**/
 	int Tune_NPCAttack(Mob* other, bool no_avoid = true, bool no_hit_chance = true, int hit_chance_bonus = 10000, int ac_override = 0, int atk_override = 0, int add_ac = 0, int add_atk = 0,
 		bool get_offense = false, bool get_accuracy = false, int avoidance_override = 0, int accuracy_override = 0, int add_avoidance = 0, int add_accuracy = 0);
