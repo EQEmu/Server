@@ -2919,48 +2919,50 @@ void command_findskill(Client *c, const Seperator *sep)
 		}
 	} else {
 		std::string search_criteria = str_tolower(sep->argplus[1]);
-		int found_count = 0;
-		for (auto skills_iter : skills) {
-			std::string skill_name_lower = str_tolower(skills_iter.second);
-			if (!search_criteria.empty() && skill_name_lower.find(search_criteria) == std::string::npos) {
-				continue;
-			}
+		if (!search_criteria.empty()) {
+			int found_count = 0;
+			for (auto skills_iter : skills) {
+				std::string skill_name_lower = str_tolower(skills_iter.second);
+				if (skill_name_lower.find(search_criteria) == std::string::npos) {
+					continue;
+				}
 
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"{}: {}",
-					skills_iter.first,
-					skills_iter.second
-				).c_str()
-			);			
-			found_count++;
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{}: {}",
+						skills_iter.first,
+						skills_iter.second
+					).c_str()
+				);			
+				found_count++;
+
+				if (found_count == 20) {
+					break;
+				}
+			}
 
 			if (found_count == 20) {
-				break;
+				c->Message(Chat::White, "20 Skills were found, max reached.");
+			} else {
+				auto skill_message = (
+					found_count > 0 ? 
+					(
+						found_count == 1 ?
+						"A skill was" :
+						fmt::format("{} skills were", found_count)
+					) :
+					"No skills were"
+				);
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} found.",
+						skill_message
+					).c_str()
+				);
 			}
-		}
-
-		if (found_count == 20) {
-			c->Message(Chat::White, "20 Skills were found, max reached.");
-		} else {
-			auto skill_message = (
-				found_count > 0 ? 
-				(
-					found_count == 1 ?
-					"A skill was" :
-					fmt::format("{} skills were", found_count)
-				) :
-				"No skills were"
-			);
-
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"{} found.",
-					skill_message
-				).c_str()
-			);
 		}
 	}
 }
