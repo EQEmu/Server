@@ -1230,7 +1230,7 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_LimitClass:
 	case SE_LimitRace:
 	case SE_FcBaseEffects:
-	case 415:
+	case SE_FFItemClass:
 	case SE_SkillDamageAmount2:
 	case SE_FcLimitUse:
 	case SE_FcIncreaseNumHits:
@@ -1298,6 +1298,7 @@ bool IsFocusLimit(int spa)
 	case SE_Ff_Value_Min:
 	case SE_Ff_Value_Max:
 	case SE_Ff_FocusTimerMin:
+	case SE_FFItemClass:
 		return true;
 	default:
 		return false;

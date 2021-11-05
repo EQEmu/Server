@@ -1115,7 +1115,7 @@ typedef enum {
 #define SE_LimitRace					412 // implemented, @Ff, Race that can use the spell focus, base1: race, Note: not used in any known live spells. Use only single race at a time.
 #define SE_FcBaseEffects				413 // implemented, @Fc, On Caster, base spell effectiveness mod pct, base: pct
 #define SE_LimitCastingSkill			414 // implemented, @Ff, Spell and singing skills(s) that a spell focus can require or exclude, base1: skill id, Include: Positive Exclude: Negative
-//#define SE_FFItemClass				415 // not used - base1 matches ItemType, base2 matches SubType, -1 ignored, max is bitmask of valid slots
+#define SE_FFItemClass					415 // not used - base1 matches ItemType, base2 matches SubType, -1 ignored, max is bitmask of valid slots
 #define SE_ACv2							416 // implemented - New AC spell effect
 #define SE_ManaRegen_v2					417 // implemented - New mana regen effect
 #define SE_SkillDamageAmount2			418 // implemented - adds skill damage directly to certain attacks

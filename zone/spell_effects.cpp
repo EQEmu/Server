@@ -3266,6 +3266,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_Buy_AA_Rank:
 			case SE_Ff_FocusTimerMin:
 			case SE_Proc_Timer_Modifier:
+			case SE_FFItemClass:
 			{
 				break;
 			}
@@ -5564,6 +5565,45 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 				else {
 					focus_reuse_time = focus_spell.limit_value[i];
+				}
+				break;
+
+			case SE_FFItemClass: 
+				Shout("Check ITEM slot %i", casting_spell_inventory_slot);
+				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1){
+					Shout("Check ITEM slot %i ivnentory slot %i", casting_spell_inventory_slot, casting_spell_inventory_slot);
+					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
+						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
+											   
+						if (item && item->GetItem()) {
+							Shout("FOUND ITEM TYPE %i SUB %i SLOTS %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
+							Shout("Focus TYPE %i SUB %i SLOTS %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
+							
+							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
+								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
+									Shout("Fail base");
+									return 0;
+								}
+							}
+							if (focus_spell.limit_value[i]) { //this should not be zero
+								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+									Shout("Fail limit");
+									return 0;
+								}
+							}
+							//item slot bitmask
+							if (focus_spell.max_value[i]) {
+								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
+									Shout("Fail Max");
+									return 0;
+								}
+							}
+							Shout("Item Passes");
+						}
+						else {
+							Shout("FAIL to find item.");
+						}
+					}
 				}
 				break;
 
