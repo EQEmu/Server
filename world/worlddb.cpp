@@ -645,9 +645,9 @@ bool WorldDatabase::GetStartZone(
 }
 
 void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc){
-	int SoFStartID= RuleI(World, SoFStartZoneID);
-	if (SoFStartID > 0) {
-			in_pp->zone_id = SoFStartID;
+	int sof_start_zone_id = RuleI(World, SoFStartZoneID);
+	if (sof_start_zone_id > 0) {
+			in_pp->zone_id = sof_start_zone_id;
 			in_cc->start_zone = in_pp->zone_id;
 	}
 	else if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
@@ -664,10 +664,10 @@ void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCrea
 
 void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
-	int TitaniumStartID = RuleI(World, TitaniumStartZoneID);
-	if (TitaniumStartID > 0) {
-		in_pp->zone_id = TitaniumStartID;
-		in_pp->binds[0].zone_id = TitaniumStartID;
+	int titanium_start_zone_id = RuleI(World, TitaniumStartZoneID);
+	if (titanium_start_zone_id > 0) {
+		in_pp->zone_id = titanium_start_zone_id;
+		in_pp->binds[0].zone_id = titanium_start_zone_id;
 	} else {
 		switch (in_cc->start_zone)
 		{
