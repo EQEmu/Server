@@ -8959,6 +8959,14 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if (GetLevel() >= item->Click.Level2)
 				{
+					if (item && item->RecastDelay > 0)
+					{
+						if (!GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
+							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+							return;
+						}
+					}
+
 					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, p_inst, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if (!inst)
@@ -8988,6 +8996,14 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if (GetLevel() >= augitem->Click.Level2)
 				{
+					if (item && item->RecastDelay > 0)
+					{
+						if (!GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
+							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+							return;
+						}
+					}
+
 					int i = parse->EventItem(EVENT_ITEM_CLICK_CAST, this, clickaug, nullptr, "", slot_id);
 					inst = m_inv[slot_id];
 					if (!inst)
