@@ -100,6 +100,7 @@ void command_editmassrespawn(Client* c, const Seperator* sep);
 void command_emote(Client *c, const Seperator *sep);
 void command_emotesearch(Client* c, const Seperator *sep);
 void command_emoteview(Client* c, const Seperator *sep);
+void command_emptyinventory(Client *c, const Seperator *sep);
 void command_enablerecipe(Client *c, const Seperator *sep);
 void command_endurance(Client *c, const Seperator *sep);
 void command_equipitem(Client *c, const Seperator *sep);

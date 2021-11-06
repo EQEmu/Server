@@ -212,6 +212,7 @@ int command_init(void)
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", 80, command_emoteview) ||
+		command_add("emptyinventory", "- Clears you or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", 250, command_emptyinventory) ||
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
 		command_add("endurance", "Restores you or your target's endurance.", 50, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
@@ -14887,6 +14888,72 @@ void command_dye(Client *c, const Seperator *sep)
 	}
 
 	c->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
+void command_emptyinventory(Client *c, const Seperator *sep)
+{
+	Client *target = c;
+	if (c->GetGM() && c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	EQ::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	int removed_count = 0;
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = target->GetInv().GetItem(slot_id);
+			if (item) {
+				int stack_size = item->IsStackable() ? item->GetCharges() : 0;
+				int real_stack_size = stack_size ? stack_size : 1;
+				removed_count += real_stack_size;
+				target->DeleteItemInInventory(slot_id, stack_size, true);
+			}
+		}
+	}
+
+	if (c != target) {
+		auto target_name = target->GetCleanName();
+		if (removed_count) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Inventory cleared for {}, {} items deleted.",
+					target_name,
+					removed_count
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} has no items to delete.",
+					target_name
+				).c_str()
+			);
+		}
+	} else {
+		if (removed_count) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Your inventory has been cleared, {} items deleted.",
+					removed_count
+				).c_str()
+			);
+		} else {
+			c->Message(Chat::White, "You have no items to delete.");
+		}
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
