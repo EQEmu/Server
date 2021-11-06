@@ -413,6 +413,7 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 			return true;
 		}
 		int chance = GetSkill(EQ::skills::SkillRiposte) + 100;
+		Shout("Chance %i", chance);
 		chance += (chance * (aabonuses.RiposteChance + spellbonuses.RiposteChance + itembonuses.RiposteChance)) / 100;
 		chance /= 50;
 		chance += itembonuses.HeroicDEX / 25; // live has "heroic strickthrough" here to counter
