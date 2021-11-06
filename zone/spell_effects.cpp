@@ -4896,15 +4896,19 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
-						//ItemType
 						if (item && item->GetItem()) {
+							//ItemType (if set to -1, ignore and allow any ItemType)
 							if (base_value >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
 								if (base_value != item->GetItem()->ItemType) {//this can be zero
 									LimitFailure = true;
 								}
 							}
-							//SubType
-							if (limit_value) { //this should not be zero
+							//If ItemType set to -2, then do not let any spells from item click apply this focus.
+							else if (base_value == -2) {
+								LimitFailure = true;
+							}
+							//SubType (if set to -1, ignore and allow any SubType)
+							if (limit_value >= 0) { //this should not be zero
 								if (limit_value != item->GetItem()->SubType) {
 									LimitFailure = true;
 								}
@@ -4913,8 +4917,6 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					}
 				}
 				break;
-
-
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 				case SE_Ff_Same_Caster:
@@ -5591,28 +5593,46 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 				break;
 
-			case SE_FFItemClass: 
-				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1){
+			case SE_FFItemClass:
+				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
-						//ItemType
 						if (item && item->GetItem()) {
+							//ItemType (if set to -1, ignore and allow any ItemType)
 							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
 								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
 									return 0;
 								}
 							}
-							//SubType
-							if (focus_spell.limit_value[i]) { //this should not be zero
+							//SubType (if set to -1, ignore and allow any SubType)
+							if (focus_spell.limit_value[i] >= 0) { //this should not be zero
 								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
 									return 0;
 								}
 							}
-							//item slot bitmask
-							if (focus_spell.max_value[i]) {
+							//item slot bitmask (if set to -1, ignore and allow any slot)
+							if (focus_spell.max_value[i] >= 0) {
 								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
 									return 0;
 								}
+							}
+
+							//If ItemType set to -2, then we will exclude either all items, or specific items by SubType or Slot.
+							if (focus_spell.base_value[i] == -2) {
+								
+								//SubType (if set to -1, ignore and exclude all SubTypes)
+								if (focus_spell.limit_value[i] >= 0) { //this should not be zero
+									if (focus_spell.limit_value[i] == item->GetItem()->SubType) {
+										return 0;
+									}
+								}
+								//item slot bitmask (if set to -1, ignore and exclude all SubTypes)
+								if (focus_spell.max_value[i] >= 0) {
+									if (focus_spell.limit_value[i] == item->GetItem()->Slots) {
+										return 0;
+									}
+								}
+								return 0;
 							}
 						}
 					}
