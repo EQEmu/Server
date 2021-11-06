@@ -5250,6 +5250,14 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	uint32 Caston_spell_id = 0;
 	int    index_id        = -1;
 	uint32 focus_reuse_time = 0; //If this is set and all limits pass, start timer at end of script.
+	
+	bool   is_from_item_click      = false;
+	bool   try_apply_to_item_click = false;
+	bool   has_item_limit_check   = false;
+	
+	if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
+		is_from_item_click = true;
+	}
 
 	bool LimitInclude[MaxLimitInclude] = {false};
 	/* Certain limits require only one of several Include conditions to be true. Determined by limits being negative or positive
@@ -5590,7 +5598,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					focus_reuse_time = focus_spell.limit_value[i];
 				}
 				break;
-
+			/*
 			case SE_FFItemClass: 
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1){
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
@@ -5614,6 +5622,47 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 									return 0;
 								}
 							}
+							pass_item_limit_check = true;
+						}
+					}
+				}
+				break;
+				*/
+			case SE_FFItemClass:
+				Shout("Check ITEM slot %i", casting_spell_inventory_slot);
+				has_item_limit_check = true;
+				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
+					Shout("Check ITEM slot %i ivnentory slot %i", casting_spell_inventory_slot, casting_spell_inventory_slot);
+					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
+						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
+
+						if (item && item->GetItem()) {
+							Shout("FOUND ITEM TYPE %i SUB %i SLOTS %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
+							Shout("Focus TYPE %i SUB %i SLOTS %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
+
+							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
+								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
+									Shout("Fail base");
+									return 0;
+								}
+							}
+							if (focus_spell.limit_value[i]) { //this should not be zero
+								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+									Shout("Fail limit");
+									return 0;
+								}
+							}
+							//item slot bitmask
+							if (focus_spell.max_value[i]) {
+								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
+									Shout("Fail Max");
+									return 0;
+								}
+							}
+							Shout("Item Passes");
+						}
+						else {
+							Shout("FAIL to find item.");
 						}
 					}
 				}
@@ -5652,19 +5701,23 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_IncreaseSpellHaste:
 				if (type == focusSpellHaste && focus_spell.base_value[i] > value) {
+					Shout("From item click %i", is_from_item_click);
 					value = focus_spell.base_value[i];
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
 			case SE_Fc_CastTimeMod2:
 				if (type == focusFcCastTimeMod2 && focus_spell.base_value[i] > value) {
 					value = focus_spell.base_value[i];
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
 			case SE_Fc_CastTimeAmt:
 				if (type == focusFcCastTimeAmt && focus_spell.base_value[i] > value) {
 					value = focus_spell.base_value[i];
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
@@ -5725,6 +5778,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 			case SE_ReduceReuseTimer:
 				if (type == focusReduceRecastTime) {
 					value = focus_spell.base_value[i] / 1000;
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
@@ -5907,6 +5961,16 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		if (LimitInclude[e] && !LimitInclude[e + 1]) {
 			return 0;
 		}
+	}
+	
+	/*
+		For item click cast/recast focus modifiers. Only use if SPA 415 exists.
+		This is an item click but does not have SPA 415 limiter. Fail here.
+	*/
+	Shout("Fina check: %i %i", try_apply_to_item_click, !has_item_limit_check);
+	if (try_apply_to_item_click && !has_item_limit_check) {
+		Shout("FAIL HERE");
+		return 0;
 	}
 
 	if (Caston_spell_id) {
