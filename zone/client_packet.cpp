@@ -8959,7 +8959,7 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if (GetLevel() >= item->Click.Level2)
 				{
-					if (item && item->RecastDelay > 0)
+					if (item->RecastDelay > 0)
 					{
 						if (!GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
 							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
@@ -8996,10 +8996,11 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 				}
 				if (GetLevel() >= augitem->Click.Level2)
 				{
-					if (item && item->RecastDelay > 0)
+					if (augitem->RecastDelay > 0)
 					{
-						if (!GetPTimers().Expired(&database, (pTimerItemStart + item->RecastType), false)) {
-							LogSpells("Casting of [{}] canceled: item spell reuse timer not expired", spell_id);
+						if (!GetPTimers().Expired(&database, (pTimerItemStart + augitem->RecastType), false)) {
+							LogSpells("Casting of [{}] canceled: item spell reuse timer from augment not expired", spell_id);
+							MessageString(Chat::Red, SPELL_RECAST);
 							return;
 						}
 					}
