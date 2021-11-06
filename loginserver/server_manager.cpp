@@ -152,7 +152,7 @@ std::unique_ptr<EQApplicationPacket> ServerManager::CreateServerListPacket(Clien
 			client->GetAccountName(),
 			client_ip,
 			world_server->GetServerLongName(),
-			world_server->GetLocalIP(),
+			use_local_ip ? world_server->GetLocalIP() : world_server->GetRemoteIP(),
 			use_local_ip ? "Local" : "Remote"
 		);
 
