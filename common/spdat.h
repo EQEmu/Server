@@ -177,7 +177,7 @@
 #define EFFECT_COUNT 12
 #define MAX_SPELL_TRIGGER 12	// One for each slot(only 6 for AA since AA use 2)
 #define MAX_RESISTABLE_EFFECTS 12	// Number of effects that are typcially checked agianst resists.
-#define MaxLimitInclude 16 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
+#define MaxLimitInclude 18 //Number(x 0.5) of focus Limiters that have inclusive checks used when calcing focus effects
 #define MAX_SKILL_PROCS 4 //Number of spells to check skill procs from. (This is arbitrary) [Single spell can have multiple proc checks]
 #define MAX_AA_PROCS 16 //(Actual Proc Amount is MAX_AA_PROCS/4) Number of spells to check AA procs from. (This is arbitrary)
 #define MAX_SYMPATHETIC_PROCS 10 // Number of sympathetic procs a client can have (This is arbitrary)
@@ -206,7 +206,9 @@ enum FocusLimitIncludes {
 	IncludeExistsSELimitSpellClass    = 12,
 	IncludeFoundSELimitSpellClass     = 13,
 	IncludeExistsSELimitSpellSubclass = 14,
-	IncludeFoundSELimitSpellSubclass  = 15
+	IncludeFoundSELimitSpellSubclass  = 15,
+	IncludeExistsSEFFItemClass        = 16,
+	IncludeFoundSEFFItemClass         = 17
 };
 /*
 	The id's correspond to 'type' 39 in live(2021) dbstr_us gives the message for target and caster restricted effects. These are not present in the ROF2 dbstr_us.
