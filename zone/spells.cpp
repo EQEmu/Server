@@ -2564,9 +2564,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
-			
 			uint32 recast_delay = itm->GetItem()->RecastDelay;
-			
 			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only, using SPA 415
 			Shout("reduce %i", reduction);
 			if (reduction) {
