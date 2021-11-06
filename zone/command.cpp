@@ -222,6 +222,7 @@ int command_init(void)
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) ||
 		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
+		command_add("findtask", "[search criteria] - Search for a task", 50, command_findtask) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", 80, command_fixmob) ||
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", 0, command_flag) ||
@@ -14887,6 +14888,90 @@ void command_dye(Client *c, const Seperator *sep)
 	}
 
 	c->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
+void command_findtask(Client *c, const Seperator *sep)
+{
+	if (RuleB(TaskSystem, EnableTaskSystem)) {
+		int arguments = sep->argnum;
+
+		if (arguments == 0) {
+			c->Message(Chat::White, "Command Syntax: #findtask [search criteria]");
+			return;
+		}
+
+		if (sep->IsNumber(1)) {
+			auto task_id = atoul(sep->argplus[1]);		
+			auto task_name = task_manager->GetTaskName(task_id);
+			auto task_message = (
+				!task_name.empty() ?
+				fmt::format(
+					"{}: {}",
+					task_id,
+					task_name
+				).c_str() :
+				fmt::format(
+					"Task ID {} was not found.",
+					task_id
+				).c_str()
+			);
+
+			c->Message(
+				Chat::White,
+				task_message
+			);
+		} else {
+			std::string search_criteria = str_tolower(sep->argplus[1]);
+			if (!search_criteria.empty()) {
+				int found_count = 0;
+				for (uint32 task_id = 1; task_id <= MAXTASKS; task_id++) {
+					auto task_name = task_manager->GetTaskName(task_id);
+					std::string task_name_lower = str_tolower(task_name);
+					if (task_name_lower.find(search_criteria) == std::string::npos) {
+						continue;
+					}
+
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{}: {}",
+							task_id,
+							task_name
+						).c_str()
+					);			
+					found_count++;
+
+					if (found_count == 20) {
+						break;
+					}
+				}
+
+				if (found_count == 20) {
+					c->Message(Chat::White, "20 Tasks were found, max reached.");
+				} else {
+					auto task_message = (
+						found_count > 0 ? 
+						(
+							found_count == 1 ?
+							"A Task was" :
+							fmt::format("{} Tasks were", found_count)
+						) :
+						"No Tasks were"
+					);
+
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{} found.",
+							task_message
+						).c_str()
+					);
+				}
+			}
+		}
+	} else {
+		c->Message(Chat::White, "This command cannot be used while the Task system is disabled.");
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
