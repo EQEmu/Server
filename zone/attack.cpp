@@ -382,32 +382,32 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 	ultimately end up being more useful as fields in npc_types.
 	*/
 
-	int counter_all = 0;
+	int counter_all     = 0;
 	int counter_riposte = 0;
-	int counter_block = 0;
-	int counter_parry = 0;
-	int counter_dodge = 0;
+	int counter_block   = 0;
+	int counter_parry   = 0;
+	int counter_dodge   = 0;
 
 	if (attacker->GetSpecialAbility(COUNTER_AVOID_DAMAGE)) {
-		counter_all = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
+		counter_all     = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 0);
 		counter_riposte = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 1);
-		counter_block = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
-		counter_parry = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
-		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
+		counter_block   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 2);
+		counter_parry   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 3);
+		counter_dodge   = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
 	}
 
-	int modify_all = 0;
+	int modify_all     = 0;
 	int modify_riposte = 0;
-	int modify_block = 0;
-	int modify_parry = 0;
-	int modify_dodge = 0;
+	int modify_block   = 0;
+	int modify_parry   = 0;
+	int modify_dodge   = 0;
 
-	if (attacker->GetSpecialAbility(MODIFY_AVOID_DAMAGE)) {
-		counter_all = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 0);
-		counter_riposte = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 1);
-		counter_block = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 2);
-		counter_parry = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 3);
-		counter_dodge = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 4);
+	if (GetSpecialAbility(MODIFY_AVOID_DAMAGE)) {
+		modify_all     = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 0);
+		modify_riposte = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 1);
+		modify_block   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 2);
+		modify_parry   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 3);
+		modify_dodge   = GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 4);
 	}
 
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
@@ -427,13 +427,16 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 			return true;
 		}
 		int chance = GetSkill(EQ::skills::SkillRiposte) + 100;
-		Shout("Chance %i", chance);
 		chance += (chance * (aabonuses.RiposteChance + spellbonuses.RiposteChance + itembonuses.RiposteChance)) / 100;
 		chance /= 50;
 		chance += itembonuses.HeroicDEX / 25; // live has "heroic strickthrough" here to counter
 		if (counter_riposte || counter_all) {
 			float counter = (counter_riposte + counter_all) / 100.0f;
 			chance -= chance * counter;
+		}
+		if (modify_riposte || modify_all) {
+			float npc_modifier = (modify_riposte + modify_all) / 100.0f;
+			chance += chance * npc_modifier;
 		}
 		// AA Slippery Attacks
 		if (hit.hand == EQ::invslot::slotSecondary) {
@@ -474,6 +477,10 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 			float counter = (counter_block + counter_all) / 100.0f;
 			chance -= chance * counter;
 		}
+		if (modify_block || modify_all) {
+			float npc_modifier = (modify_block + modify_all) / 100.0f;
+			chance += chance * npc_modifier;
+		}
 		if (zone->random.Roll(chance)) {
 			hit.damage_done = DMG_BLOCKED;
 			return true;
@@ -497,6 +504,10 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 			float counter = (counter_parry + counter_all) / 100.0f;
 			chance -= chance * counter;
 		}
+		if (modify_parry || modify_all) {
+			float npc_modifier = (modify_parry + modify_all) / 100.0f;
+			chance += chance * npc_modifier;
+		}
 		if (zone->random.Roll(chance)) {
 			hit.damage_done = DMG_PARRIED;
 			return true;
@@ -519,6 +530,10 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 		if (counter_dodge || counter_all) {
 			float counter = (counter_dodge + counter_all) / 100.0f;
 			chance -= chance * counter;
+		}
+		if (modify_dodge || modify_all) {
+			float npc_modifier = (modify_dodge + modify_all) / 100.0f;
+			chance += chance * npc_modifier;
 		}
 		if (zone->random.Roll(chance)) {
 			hit.damage_done = DMG_DODGED;
