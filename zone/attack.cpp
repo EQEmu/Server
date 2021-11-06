@@ -396,6 +396,20 @@ bool Mob::AvoidDamage(Mob *other, DamageHitInfo &hit)
 		counter_dodge = attacker->GetSpecialAbilityParam(COUNTER_AVOID_DAMAGE, 4);
 	}
 
+	int modify_all = 0;
+	int modify_riposte = 0;
+	int modify_block = 0;
+	int modify_parry = 0;
+	int modify_dodge = 0;
+
+	if (attacker->GetSpecialAbility(MODIFY_AVOID_DAMAGE)) {
+		counter_all = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 0);
+		counter_riposte = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 1);
+		counter_block = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 2);
+		counter_parry = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 3);
+		counter_dodge = attacker->GetSpecialAbilityParam(MODIFY_AVOID_DAMAGE, 4);
+	}
+
 	// riposte -- it may seem crazy, but if the attacker has SPA 173 on them, they are immune to Ripo
 	bool ImmuneRipo = attacker->aabonuses.RiposteChance || attacker->spellbonuses.RiposteChance || attacker->itembonuses.RiposteChance || attacker->IsEnraged();
 	// Need to check if we have something in MainHand to actually attack with (or fists)
