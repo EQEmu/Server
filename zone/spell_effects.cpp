@@ -5598,41 +5598,55 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
 						if (item && item->GetItem()) {
-							//ItemType (if set to -1, ignore and allow any ItemType)
-							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
-								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
-									return 0;
-								}
-							}
-							//SubType (if set to -1, ignore and allow any SubType)
-							if (focus_spell.limit_value[i] >= 0) { //this should not be zero
-								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
-									return 0;
-								}
-							}
-							//item slot bitmask (if set to -1, ignore and allow any slot)
-							if (focus_spell.max_value[i] >= 0) {
-								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
-									return 0;
-								}
-							}
-
+							
 							//If ItemType set to -2, then we will exclude either all items, or specific items by SubType or Slot.
-							if (focus_spell.base_value[i] == -2) {
-								
+							if (focus_spell.base_value[i] == -2) { //Excludes
+								bool exclude_this_item = true;
 								//SubType (if set to -1, ignore and exclude all SubTypes)
 								if (focus_spell.limit_value[i] >= 0) { //this should not be zero
-									if (focus_spell.limit_value[i] == item->GetItem()->SubType) {
-										return 0;
+									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+										exclude_this_item = false;
 									}
 								}
 								//item slot bitmask (if set to -1, ignore and exclude all SubTypes)
 								if (focus_spell.max_value[i] >= 0) {
-									if (focus_spell.limit_value[i] == item->GetItem()->Slots) {
-										return 0;
+									if (focus_spell.max_value[i] != item->GetItem()->Slots) {
+										exclude_this_item = false;
 									}
 								}
-								return 0;
+								
+								if (exclude_this_item) {
+									return 0;
+								}
+							}
+							else {//Includes
+								LimitInclude[IncludeExistsSEFFItemClass] = true;
+								bool include_this_item = true;
+								//ItemType (if set to -1, ignore and include any ItemType)
+								if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
+									if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
+										include_this_item = false;
+									}
+								}
+								//SubType (if set to -1, ignore and include any SubType)
+								if (focus_spell.limit_value[i] >= 0) { //this should not be zero
+									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+										include_this_item = false;
+									}
+								}
+								//item slot bitmask (if set to -1, ignore and include any slot)
+								if (focus_spell.max_value[i] >= 0) {
+									if (focus_spell.max_value[i] != item->GetItem()->Slots) {
+										include_this_item = false;
+									}
+								}
+
+								if (!include_this_item) {
+									return 0;
+								}
+								else {
+									LimitInclude[IncludeFoundSEFFItemClass] = true;
+								}
 							}
 						}
 					}
