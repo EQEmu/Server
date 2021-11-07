@@ -643,35 +643,67 @@ void NPC::ClearItemList() {
 
 void NPC::QueryLoot(Client* to)
 {
-	to->Message(Chat::White, "| # Current Loot (%s) LootTableID: %i", GetName(), GetLoottableID());
-
-	int item_count = 0;
-	for (auto cur  = itemlist.begin(); cur != itemlist.end(); ++cur, ++item_count) {
-		if (!(*cur)) {
-			LogError("NPC::QueryLoot() - ItemList error, null item");
-			continue;
-		}
-		if (!(*cur)->item_id || !database.GetItem((*cur)->item_id)) {
-			LogError("NPC::QueryLoot() - Database error, invalid item");
-			continue;
-		}
-
-		EQ::SayLinkEngine linker;
-		linker.SetLinkType(EQ::saylink::SayLinkLootItem);
-		linker.SetLootData(*cur);
-
+	if (itemlist.size() > 0) {
 		to->Message(
-			0,
-			"| -- Item %i: %s ID: %u min_level: %u max_level: %u",
-			item_count,
-			linker.GenerateLink().c_str(),
-			(*cur)->item_id,
-			(*cur)->trivial_min_level,
-			(*cur)->trivial_max_level
+			Chat::White,
+			fmt::format(
+				"Loot | Name: {} ID: {} Loottable ID: {}",
+				GetName(),
+				GetNPCTypeID(),
+				GetLoottableID()
+			).c_str()
 		);
+
+		int item_count = 0;
+		for (auto current_item : itemlist) {
+			int item_number = (item_count + 1);
+			if (!current_item) {
+				LogError("NPC::QueryLoot() - ItemList error, null item.");
+				continue;
+			}
+
+			if (!current_item->item_id || !database.GetItem(current_item->item_id)) {
+				LogError("NPC::QueryLoot() - Database error, invalid item.");
+				continue;
+			}
+
+			EQ::SayLinkEngine linker;
+			linker.SetLinkType(EQ::saylink::SayLinkLootItem);
+			linker.SetLootData(current_item);
+
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Item {} | Name: {} ID: {} Min Level: {} Max Level: {}",
+					item_number,
+					linker.GenerateLink().c_str(),
+					current_item->item_id,
+					current_item->trivial_min_level,
+					current_item->trivial_max_level
+				).c_str()
+			);
+			item_count++;
+		}
 	}
 
-	to->Message(Chat::White, "| %i Platinum %i Gold %i Silver %i Copper", platinum, gold, silver, copper);
+	bool has_money = (
+		platinum > 0 ||
+		gold > 0 ||
+		silver > 0 ||
+		copper > 0
+	);
+	if (has_money) {
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"Money | Platinum: {} Gold: {} Silver: {} Copper: {}",
+				platinum,
+				gold,
+				silver,
+				copper
+			).c_str()
+		);
+	}
 }
 
 bool NPC::HasItem(uint32 item_id) {

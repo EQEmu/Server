@@ -497,6 +497,25 @@ public:
 	uint32 GetRoamboxDelay() const;
 	uint32 GetRoamboxMinDelay() const;
 
+	inline uint8 GetArmTexture() { return armtexture; }
+	inline uint8 GetBracerTexture() { return bracertexture; }
+	inline uint8 GetHandTexture() { return handtexture; }
+	inline uint8 GetFeetTexture() { return feettexture; }
+	inline uint8 GetLegTexture() { return legtexture; }
+
+	inline int GetCharmedAccuracy() { return charm_accuracy_rating; }
+	inline int GetCharmedArmorClass() { return charm_ac; }
+	inline int GetCharmedAttack() { return charm_atk; }
+	inline int GetCharmedAttackDelay() { return charm_attack_delay; }
+	inline int GetCharmedAvoidance() { return charm_avoidance_rating; }
+	inline int GetCharmedMaxDamage() { return charm_max_dmg; }
+	inline int GetCharmedMinDamage() { return charm_min_dmg; }
+
+	inline bool GetAlwaysAggro() { return always_aggro; }
+	inline bool GetNPCAggro() { return npc_aggro; }
+	inline bool GetIgnoreDespawn() { return ignore_despawn; }
+	inline bool GetSkipGlobalLoot() { return skip_global_loot; }
+
 	std::unique_ptr<Timer> AIautocastspell_timer;
 
 	virtual int GetStuckBehavior() const { return NPCTypedata_ours ? NPCTypedata_ours->stuck_behavior : NPCTypedata->stuck_behavior; }

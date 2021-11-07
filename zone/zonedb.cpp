@@ -3981,6 +3981,22 @@ bool ZoneDatabase::GetFactionName(int32 faction_id, char* name, uint32 buflen) {
 
 }
 
+std::string ZoneDatabase::GetFactionName(int32 faction_id)
+{
+	std::string faction_name;
+	if (
+		faction_id <= 0 ||
+		 faction_id > static_cast<int>(max_faction) ||
+		 !faction_array[faction_id]
+	) {
+		return faction_name;
+	}
+
+	faction_name = faction_array[faction_id]->name;
+
+	return faction_name;
+}
+
 //o--------------------------------------------------------------
 //| Name: GetNPCFactionList; Dec. 16, 2001
 //o--------------------------------------------------------------
