@@ -5634,11 +5634,11 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					To exclude a specific ItemType we have to do some math. The exclude value will be the negative value of (ItemType + 100).
 					If ItemType = 10, then SET ItemType= -110 to exclude. If its ItemType 0, then SET ItemType= -100 to exclude ect. Not ideal but it works.
 					
-					Usage example: Only focus spell if from click cast and is a 'defense armor' item type=10 [base= 10, limit= -1, max= -1]
-					Usage example: Only focus spell if from click cast and is from helmet slot' slots= 4     [base= -1, limit= -1, max= 4]
-					Usage example: Do not focus spell if it is from an item click. [base= -1000, limit= -1, max= -1]
-					Usage example: Do not focus spell if it is from an item click from a helmet slot. [base= -1000, limit= -1, max= 4]
-					Usage example: Do not focus spell if it is from an item click and is a 'defense armor' item type=10. [base= -110, limit= -1, max= -1]
+					Usage example: [INCLUDE] Only focus spell if from click cast and is a 'defense armor' item type=10 [base= 10, limit= -1, max= -1]
+					Usage example: [INCLUDE] Only focus spell if from click cast and is from helmet slot' slots= 4     [base= -1, limit= -1, max= 4]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click. [base= -1000, limit= -1, max= -1]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click from a helmet slot. [base= -1000, limit= -1, max= 4]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click and is a 'defense armor' item type=10. [base= -110, limit= -1, max= -1]
 
 					Note: You can apply multiple includes or excludes to a single focus spell,  using multiple SPA 415 limits in the spell. Ie. Check for clicks from ItemType 10 or 11.
 				
