@@ -169,6 +169,8 @@ RULE_BOOL(Character, PVPEnableGuardFactionAssist, true, "Enables faction based a
 RULE_BOOL(Character, SkillUpFromItems, true, "Allow Skill ups from clickable items")
 RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
 RULE_BOOL(Character, UseResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
+RULE_INT(Character, OldResurrectionSicknessSpellID, 757, "757 is Default Old Resurrection Sickness Spell ID")
+RULE_INT(Character, ResurrectionSicknessSpellID, 756, "756 is Default Resurrection Sickness Spell ID")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -589,6 +591,8 @@ RULE_BOOL(Bots, AllowApplyPotionCommand, true, "Allows the use of the bot comman
 RULE_BOOL(Bots, RestrictApplyPotionToRogue, true, "Restricts the bot command 'applypotion' to rogue-usable potions (i.e., poisons)")
 RULE_BOOL(Bots, OldRaceRezEffects, false, "Older clients had ID 757 for races with high starting STR, but it doesn't seem used anymore")
 RULE_BOOL(Bots, ResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
+RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrection Sickness Spell")
+RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sickness Spell")
 RULE_CATEGORY_END()
 #endif
 

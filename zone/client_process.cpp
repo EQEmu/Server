@@ -995,8 +995,8 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 					GetRace() == TROLL ||
 					GetRace() == OGRE
 				) ? 
-				SPELL_RESURRECTION_SICKNESS4 :
-				SPELL_RESURRECTION_SICKNESS
+				RuleI(Character, OldResurrectionSicknessSpellID) :
+				RuleI(Character, ResurrectionSicknessSpellID)
 			);
 			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		}

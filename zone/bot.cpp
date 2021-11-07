@@ -406,8 +406,8 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 				GetRace() == TROLL ||
 				GetRace() == OGRE
 			) ? 
-			SPELL_RESURRECTION_SICKNESS4 :
-			SPELL_RESURRECTION_SICKNESS
+			RuleI(Bots, OldResurrectionSicknessSpell) :
+			RuleI(Bots, ResurrectionSicknessSpell)
 		);
 		SetMana(0);
 		SetHP(max_hp / 5);
