@@ -4549,6 +4549,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	10/11 SE_LimitCastingSkill:
 	12/13 SE_LimitSpellClass:
 	14/15 SE_LimitSpellSubClass:
+	16/17 SE_FFItemCLass:
 	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
 	*/
 
@@ -4896,25 +4897,50 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
-						//ItemType
 						if (item && item->GetItem()) {
-							if (base_value >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
-								if (base_value != item->GetItem()->ItemType) {//this can be zero
+							//If ItemType set to < -1, then we will exclude either all Subtypes (-1000), or specific items by ItemType, SubType or Slot. See above for rules.
+							if (base_value < -1) { //Excludes
+								bool exclude_this_item = true;
+								int tmp_itemtype = (item->GetItem()->ItemType + 100) * -1;
+								//ItemType (if set to -1000, ignore and exclude any ItemType)
+								if (base_value < -1 && base_value != -1000) {
+									if (base_value != tmp_itemtype) {
+										exclude_this_item = false;
+									}
+								}
+								//SubType (if set to -1, ignore and exclude all SubTypes)
+								if (limit_value >= 0) {
+									if (limit_value != item->GetItem()->SubType) {
+										exclude_this_item = false;
+									}
+								}
+								if (exclude_this_item) {
 									LimitFailure = true;
 								}
 							}
-							//SubType
-							if (limit_value) { //this should not be zero
-								if (limit_value != item->GetItem()->SubType) {
-									LimitFailure = true;
+							else {//Includes
+								LimitInclude[IncludeExistsSEFFItemClass] = true;
+								bool include_this_item = true;
+								//ItemType (if set to -1, ignore and include any ItemType)
+								if (base_value >= 0) {
+									if (base_value != item->GetItem()->ItemType) {
+										include_this_item = false;
+									}
+								}
+								//SubType (if set to -1, ignore and include any SubType)
+								if (base_value >= 0) {
+									if (limit_value != item->GetItem()->SubType) {
+										include_this_item = false;
+									}
+								}
+								if (include_this_item) {
+									LimitInclude[IncludeFoundSEFFItemClass] = true;
 								}
 							}
 						}
 					}
 				}
 				break;
-
-
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
 				case SE_Ff_Same_Caster:
@@ -5271,13 +5297,14 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	10/11 SE_LimitCastingSkill:
 	12/13 SE_LimitSpellClass:
 	14/15 SE_LimitSpellSubClass:
+	16/17 SE_FFItemCLass:
 	Remember: Update MaxLimitInclude in spdat.h if adding new limits that require Includes
 	*/
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 
 		switch (focus_spell.effect_id[i]) {
-
+			
 			case SE_Blank:
 				break;
 
@@ -5598,75 +5625,92 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					focus_reuse_time = focus_spell.limit_value[i];
 				}
 				break;
-			/*
-			case SE_FFItemClass: 
-				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1){
-					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
-						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
-						//ItemType
-						if (item && item->GetItem()) {
-							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
-								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
-									return 0;
-								}
-							}
-							//SubType
-							if (focus_spell.limit_value[i]) { //this should not be zero
-								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
-									return 0;
-								}
-							}
-							//item slot bitmask
-							if (focus_spell.max_value[i]) {
-								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
-									return 0;
-								}
-							}
-							pass_item_limit_check = true;
-						}
-					}
-				}
-				break;
-				*/
+
 			case SE_FFItemClass:
-				Shout("Check ITEM slot %i", casting_spell_inventory_slot);
-				has_item_limit_check = true;
+
+				/*
+					Limits focuses to check if cast from item clicks. Can be used to INCLUDE or EXCLUDE items by ItemType and/or SubType and/or Slots
+					Not used on live, going on information we have plus implemented as broadly as possible to allow all possible options.
+					base = item table field 'ItemType' Limit = item table field 'SubType' Max = item table field 'Slots' (this is slot bitmask)
+
+					When including: Setting base, limit, max respectively to -1 will cause it to ignore that check, letting any type or slot ect be used.
+
+					Special rules for excluding. base value needs to be negative < -1, if excluding all ItemTypes set to -1000.
+					For SubType and Slots set using same rules above as for includes. Ie. -1 for all, positive for specifics
+					To exclude a specific ItemType we have to do some math. The exclude value will be the negative value of (ItemType + 100).
+					If ItemType = 10, then SET ItemType= -110 to exclude. If its ItemType 0, then SET ItemType= -100 to exclude ect. Not ideal but it works.
+
+					Usage example: [INCLUDE] Only focus spell if from click cast and is a 'defense armor' item type=10 [base= 10, limit= -1, max= -1]
+					Usage example: [INCLUDE] Only focus spell if from click cast and is from helmet slot' slots= 4     [base= -1, limit= -1, max= 4]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click. [base= -1000, limit= -1, max= -1]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click from a helmet slot. [base= -1000, limit= -1, max= 4]
+					Usage example: [EXCLUDE] Do not focus spell if it is from an item click and is a 'defense armor' item type=10. [base= -110, limit= -1, max= -1]
+
+					Note: You can apply multiple includes or excludes to a single focus spell,  using multiple SPA 415 limits in the spell. Ie. Check for clicks from ItemType 10 or 11.
+
+				*/
+
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
-					Shout("Check ITEM slot %i ivnentory slot %i", casting_spell_inventory_slot, casting_spell_inventory_slot);
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
-
 						if (item && item->GetItem()) {
-							Shout("FOUND ITEM TYPE %i SUB %i SLOTS %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
-							Shout("Focus TYPE %i SUB %i SLOTS %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
+							//If ItemType set to < -1, then we will exclude either all Subtypes (-1000), or specific items by ItemType, SubType or Slot. See above for rules.
+							if (focus_spell.base_value[i] < -1) { //Excludes
+								bool exclude_this_item = true;
+								int tmp_itemtype = (item->GetItem()->ItemType + 100) * -1;
+								//ItemType (if set to -1000, ignore and exclude any ItemType)
+								if (focus_spell.base_value[i] < -1 && focus_spell.base_value[i] != -1000) {
+									if (focus_spell.base_value[i] != tmp_itemtype) {
+										exclude_this_item = false;
+									}
+								}
+								//SubType (if set to -1, ignore and exclude all SubTypes)
+								if (focus_spell.limit_value[i] >= 0) {
+									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+										exclude_this_item = false;
+									}
+								}
+								//item slot bitmask (if set to -1, ignore and exclude all SubTypes)
+								if (focus_spell.max_value[i] >= 0) {
+									if (focus_spell.max_value[i] != item->GetItem()->Slots) {
+										exclude_this_item = false;
+									}
+								}
+								if (exclude_this_item) {
+									return 0;
+								}
+							}
+							else {//Includes
+								LimitInclude[IncludeExistsSEFFItemClass] = true;
+								bool include_this_item = true;
+								//ItemType (if set to -1, ignore and include any ItemType)
+								if (focus_spell.base_value[i] >= 0) {
+									if (focus_spell.base_value[i] != item->GetItem()->ItemType) {
+										include_this_item = false;
+									}
+								}
+								//SubType (if set to -1, ignore and include any SubType)
+								if (focus_spell.limit_value[i] >= 0) {
+									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
+										include_this_item = false;
+									}
+								}
+								//item slot bitmask (if set to -1, ignore and include any slot)
+								if (focus_spell.max_value[i] >= 0) {
+									if (focus_spell.max_value[i] != item->GetItem()->Slots) {
+										include_this_item = false;
+									}
+								}
 
-							if (focus_spell.base_value[i] >= 0) {//if this is set to a negative value (ie -1) allow any ItemType
-								if (focus_spell.base_value[i] != item->GetItem()->ItemType) {//this can be zero
-									Shout("Fail base");
-									return 0;
+								if (include_this_item) {
+									LimitInclude[IncludeFoundSEFFItemClass] = true;
 								}
 							}
-							if (focus_spell.limit_value[i]) { //this should not be zero
-								if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
-									Shout("Fail limit");
-									return 0;
-								}
-							}
-							//item slot bitmask
-							if (focus_spell.max_value[i]) {
-								if (focus_spell.limit_value[i] != item->GetItem()->Slots) {
-									Shout("Fail Max");
-									return 0;
-								}
-							}
-							Shout("Item Passes");
-						}
-						else {
-							Shout("FAIL to find item.");
 						}
 					}
 				}
 				break;
+
 
 			// handle effects
 			case SE_ImprovedDamage:
