@@ -201,14 +201,14 @@ enum {
 	ALLOW_TO_TANK = 41,
 	IGNORE_ROOT_AGGRO_RULES = 42,
 	CASTING_RESIST_DIFF = 43,
-	COUNTER_AVOID_DAMAGE = 44,                   //Modify by percent NPC's opponents chance to riposte, block, parry or dodge indivually, or for all skills
+	COUNTER_AVOID_DAMAGE = 44,                   //Modify by percent NPC's opponents chance to riposte, block, parry or dodge individually, or for all skills
 	PROX_AGGRO = 45,
 	IMMUNE_RANGED_ATTACKS = 46,
 	IMMUNE_DAMAGE_CLIENT = 47,
 	IMMUNE_DAMAGE_NPC = 48,
 	IMMUNE_AGGRO_CLIENT = 49,
 	IMMUNE_AGGRO_NPC = 50,
-	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge indivually, or for all skills
+	MODIFY_AVOID_DAMAGE = 51,                    //Modify by percent the NPCs chance to riposte, block, parry or dodge individually, or for all skills
 	MAX_SPECIAL_ATTACK = 52
 };
 
