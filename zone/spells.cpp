@@ -425,15 +425,12 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 			cast_time = GetActSpellCasttime(spell_id, cast_time);
 		}
 	}
+	//must use SPA 415 with focus (SPA 127/500/501) to reduce item recast
 	else if (cast_time && IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
-		Shout("From Items %i", cast_time);
 		orgcasttime = cast_time;
-		Shout("Cast time %i", cast_time);
-		// if there's a cast time, check if they have a modifier for it
 		if (cast_time) {
-			cast_time = GetActSpellCasttime(spell_id, cast_time);
+			cast_time = GetActSpellCasttime(spell_id, cast_time); 
 		}
-		Shout("Cast time %i", cast_time);
 	}
 	else
 		orgcasttime = cast_time;
@@ -2568,7 +2565,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			int recast_delay = itm->GetItem()->RecastDelay;
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//requires useing SPA 415
+			//must use SPA 415 with focus (SPA 310) to reduce item recast
+			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
 			if (reduction) {
 				recast_delay -= reduction;
 			}
