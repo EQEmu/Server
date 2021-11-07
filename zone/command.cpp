@@ -212,6 +212,7 @@ int command_init(void)
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", 80, command_emoteview) ||
+		command_add("emptyinventory", "- Clears you or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", 250, command_emptyinventory) ||
 		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.",  80, command_enablerecipe) ||
 		command_add("endurance", "Restores you or your target's endurance.", 50, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", 50, command_equipitem) ||
@@ -221,7 +222,9 @@ int command_init(void)
 		command_add("findclass", "[search criteria] - Search for a class", 50, command_findclass) ||
 		command_add("findnpctype", "[search criteria] - Search database NPC types", 100, command_findnpctype) ||
 		command_add("findrace", "[search criteria] - Search for a race", 50, command_findrace) ||
+		command_add("findskill", "[search criteria] - Search for a skill", 50, command_findskill) ||
 		command_add("findspell", "[search criteria] - Search for a spell", 50, command_findspell) ||
+		command_add("findtask", "[search criteria] - Search for a task", 50, command_findtask) ||
 		command_add("findzone", "[search criteria] - Search database zones", 100, command_findzone) ||
 		command_add("fixmob", "[race|gender|texture|helm|face|hair|haircolor|beard|beardcolor|heritage|tattoo|detail] [next|prev] - Manipulate appearance of your target", 80, command_fixmob) ||
 		command_add("flag", "[status] [acctname] - Refresh your admin status, or set an account's admin status if arguments provided", 0, command_flag) ||
@@ -2877,6 +2880,91 @@ void command_findrace(Client *c, const Seperator *sep)
 					found_count
 				).c_str()
 			);
+		}
+	}
+}
+
+void command_findskill(Client *c, const Seperator *sep)
+{
+	int arguments = sep->argnum;
+
+	if (arguments == 0) {
+		c->Message(Chat::White, "Command Syntax: #findskill [search criteria]");
+		return;
+	}
+	
+	std::map<EQ::skills::SkillType, std::string> skills = EQ::skills::GetSkillTypeMap();
+	if (sep->IsNumber(1)) {
+		int skill_id = atoi(sep->argplus[1]);
+		if (skill_id >= EQ::skills::Skill1HBlunt && skill_id < EQ::skills::SkillCount) {
+			for (auto skills_iter : skills) {
+				if (skill_id == skills_iter.first) {
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{}: {}",
+							skills_iter.first,
+							skills_iter.second
+						).c_str()
+					);
+					break;
+				}
+			}
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Skill ID {} was not found.",
+					skill_id
+				).c_str()
+			);
+		}
+	} else {
+		std::string search_criteria = str_tolower(sep->argplus[1]);
+		if (!search_criteria.empty()) {
+			int found_count = 0;
+			for (auto skills_iter : skills) {
+				std::string skill_name_lower = str_tolower(skills_iter.second);
+				if (skill_name_lower.find(search_criteria) == std::string::npos) {
+					continue;
+				}
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{}: {}",
+						skills_iter.first,
+						skills_iter.second
+					).c_str()
+				);			
+				found_count++;
+
+				if (found_count == 20) {
+					break;
+				}
+			}
+
+			if (found_count == 20) {
+				c->Message(Chat::White, "20 Skills were found, max reached.");
+			} else {
+				auto skill_message = (
+					found_count > 0 ? 
+					(
+						found_count == 1 ?
+						"A skill was" :
+						fmt::format("{} skills were", found_count)
+					) :
+					"No skills were"
+				);
+
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"{} found.",
+						skill_message
+					).c_str()
+				);
+			}
 		}
 	}
 }
@@ -14887,6 +14975,155 @@ void command_dye(Client *c, const Seperator *sep)
 	}
 
 	c->DyeArmorBySlot(slot, red, green, blue, use_tint);
+}
+
+void command_findtask(Client *c, const Seperator *sep)
+{
+	if (RuleB(TaskSystem, EnableTaskSystem)) {
+		int arguments = sep->argnum;
+
+		if (arguments == 0) {
+			c->Message(Chat::White, "Command Syntax: #findtask [search criteria]");
+			return;
+		}
+
+		if (sep->IsNumber(1)) {
+			auto task_id = atoul(sep->argplus[1]);		
+			auto task_name = task_manager->GetTaskName(task_id);
+			auto task_message = (
+				!task_name.empty() ?
+				fmt::format(
+					"{}: {}",
+					task_id,
+					task_name
+				).c_str() :
+				fmt::format(
+					"Task ID {} was not found.",
+					task_id
+				).c_str()
+			);
+
+			c->Message(
+				Chat::White,
+				task_message
+			);
+		} else {
+			std::string search_criteria = str_tolower(sep->argplus[1]);
+			if (!search_criteria.empty()) {
+				int found_count = 0;
+				for (uint32 task_id = 1; task_id <= MAXTASKS; task_id++) {
+					auto task_name = task_manager->GetTaskName(task_id);
+					std::string task_name_lower = str_tolower(task_name);
+					if (task_name_lower.find(search_criteria) == std::string::npos) {
+						continue;
+					}
+
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{}: {}",
+							task_id,
+							task_name
+						).c_str()
+					);			
+					found_count++;
+
+					if (found_count == 20) {
+						break;
+					}
+				}
+
+				if (found_count == 20) {
+					c->Message(Chat::White, "20 Tasks were found, max reached.");
+				} else {
+					auto task_message = (
+						found_count > 0 ? 
+						(
+							found_count == 1 ?
+							"A Task was" :
+							fmt::format("{} Tasks were", found_count)
+						) :
+						"No Tasks were"
+					);
+
+					c->Message(
+						Chat::White,
+						fmt::format(
+							"{} found.",
+							task_message
+						).c_str()
+					);
+				}
+			}
+		}
+	} else {
+		c->Message(Chat::White, "This command cannot be used while the Task system is disabled.");
+	}
+}
+
+void command_emptyinventory(Client *c, const Seperator *sep)
+{
+	Client *target = c;
+	if (c->GetGM() && c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	EQ::ItemInstance *item = nullptr;
+	static const int16 slots[][2] = {
+		{ EQ::invslot::POSSESSIONS_BEGIN, EQ::invslot::POSSESSIONS_END },
+		{ EQ::invbag::GENERAL_BAGS_BEGIN, EQ::invbag::GENERAL_BAGS_END },
+		{ EQ::invbag::CURSOR_BAG_BEGIN, EQ::invbag::CURSOR_BAG_END},
+		{ EQ::invslot::BANK_BEGIN, EQ::invslot::BANK_END },
+		{ EQ::invbag::BANK_BAGS_BEGIN, EQ::invbag::BANK_BAGS_END },
+		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
+		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
+	};
+	int removed_count = 0;
+	const size_t size = sizeof(slots) / sizeof(slots[0]);
+	for (int slot_index = 0; slot_index < size; ++slot_index) {
+		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
+			item = target->GetInv().GetItem(slot_id);
+			if (item) {
+				int stack_size = std::max(static_cast<int>(item->GetCharges()), 1);
+				removed_count += stack_size;
+				target->DeleteItemInInventory(slot_id, 0, true);
+			}
+		}
+	}
+
+	if (c != target) {
+		auto target_name = target->GetCleanName();
+		if (removed_count) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Inventory cleared for {}, {} items deleted.",
+					target_name,
+					removed_count
+				).c_str()
+			);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} has no items to delete.",
+					target_name
+				).c_str()
+			);
+		}
+	} else {
+		if (removed_count) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Your inventory has been cleared, {} items deleted.",
+					removed_count
+				).c_str()
+			);
+		} else {
+			c->Message(Chat::White, "You have no items to delete.");
+		}
+  }
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.

@@ -10276,10 +10276,11 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 
 			item = GetInv().GetItem(slot_id);
 			if (item && item->GetID() == item_id) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 1;
+				int charges = item->IsStackable() ? item->GetCharges() : 0;
+				int stack_size = std::max(charges, 1);
 				if ((removed_count + stack_size) <= quantity) {
 					removed_count += stack_size;
-					DeleteItemInInventory(slot_id, stack_size, true);
+					DeleteItemInInventory(slot_id, charges, true);
 				} else {
 					int amount_left = (quantity - removed_count);
 					if (amount_left > 0 && stack_size >= amount_left) {

@@ -645,7 +645,12 @@ bool WorldDatabase::GetStartZone(
 }
 
 void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc){
-	if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
+	int sof_start_zone_id = RuleI(World, SoFStartZoneID);
+	if (sof_start_zone_id > 0) {
+			in_pp->zone_id = sof_start_zone_id;
+			in_cc->start_zone = in_pp->zone_id;
+	}
+	else if (in_cc->start_zone == RuleI(World, TutorialZoneID)) {
 		in_pp->zone_id = in_cc->start_zone;
 	}
 	else {
@@ -653,105 +658,111 @@ void WorldDatabase::SetSoFDefaultStartZone(PlayerProfile_Struct* in_pp, CharCrea
 		in_pp->y = in_pp->binds[0].y = -20.0f;
 		in_pp->z = in_pp->binds[0].z = 0.79f;
 		in_pp->heading = in_pp->binds[0].heading = 0.0f;
-		in_pp->zone_id = in_pp->binds[0].zone_id = 394; // Crescent Reach.
+		in_pp->zone_id = in_pp->binds[0].zone_id = Zones::CRESCENT; // Crescent Reach.
 	}
 }
 
 void WorldDatabase::SetTitaniumDefaultStartZone(PlayerProfile_Struct* in_pp, CharCreate_Struct* in_cc)
 {
-	switch (in_cc->start_zone)
-	{
-		case 0:
+	int titanium_start_zone_id = RuleI(World, TitaniumStartZoneID);
+	if (titanium_start_zone_id > 0) {
+		in_pp->zone_id = titanium_start_zone_id;
+		in_pp->binds[0].zone_id = titanium_start_zone_id;
+	} else {
+		switch (in_cc->start_zone)
 		{
-			if (in_cc->deity == 203) // Cazic-Thule Erudites go to Paineel
+			case StartZoneIndex::Odus:
 			{
-				in_pp->zone_id = 75; // paineel
-				in_pp->binds[0].zone_id = 75;
+				if (in_cc->deity == EQ::deity::DeityCazicThule) // Cazic-Thule Erudites go to Paineel
+				{
+					in_pp->zone_id = Zones::PAINEEL; // paineel
+					in_pp->binds[0].zone_id = Zones::PAINEEL;
+				}
+				else
+				{
+					in_pp->zone_id = Zones::ERUDNEXT;	// erudnext
+					in_pp->binds[0].zone_id = Zones::TOX;	// tox
+				}
+				break;
 			}
-			else
+			case StartZoneIndex::Qeynos:
 			{
-				in_pp->zone_id = 24;	// erudnext
-				in_pp->binds[0].zone_id = 38;	// tox
+				in_pp->zone_id = Zones::QEYNOS2;	// qeynos2
+				in_pp->binds[0].zone_id = Zones::QEYNOS2;	// qeynos2
+				break;
 			}
-			break;
-		}
-		case 1:
-		{
-			in_pp->zone_id = 2;	// qeynos2
-			in_pp->binds[0].zone_id = 2;	// qeynos2
-			break;
-		}
-		case 2:
-		{
-			in_pp->zone_id = 29;	// halas
-			in_pp->binds[0].zone_id = 30;	// everfrost
-			break;
-		}
-		case 3:
-		{
-			in_pp->zone_id = 19;	// rivervale
-			in_pp->binds[0].zone_id = 20;	// kithicor
-			break;
-		}
-		case 4:
-		{
-			in_pp->zone_id = 9;	// freportw
-			in_pp->binds[0].zone_id = 9;	// freportw
-			break;
-		}
-		case 5:
-		{
-			in_pp->zone_id = 40;	// neriaka
-			in_pp->binds[0].zone_id = 25;	// nektulos
-			break;
-		}
-		case 6:
-		{
-			in_pp->zone_id = 52;	// gukta
-			in_pp->binds[0].zone_id = 46;	// innothule
-			break;
-		}
-		case 7:
-		{
-			in_pp->zone_id = 49;	// oggok
-			in_pp->binds[0].zone_id = 47;	// feerrott
-			break;
-		}
-		case 8:
-		{
-			in_pp->zone_id = 60;	// kaladima
-			in_pp->binds[0].zone_id = 68;	// butcher
-			break;
-		}
-		case 9:
-		{
-			in_pp->zone_id = 54;	// gfaydark
-			in_pp->binds[0].zone_id = 54;	// gfaydark
-			break;
-		}
-		case 10:
-		{
-			in_pp->zone_id = 61;	// felwithea
-			in_pp->binds[0].zone_id = 54;	// gfaydark
-			break;
-		}
-		case 11:
-		{
-			in_pp->zone_id = 55;	// akanon
-			in_pp->binds[0].zone_id = 56;	// steamfont
-			break;
-		}
-		case 12:
-		{
-			in_pp->zone_id = 82;	// cabwest
-			in_pp->binds[0].zone_id = 78;	// fieldofbone
-			break;
-		}
-		case 13:
-		{
-			in_pp->zone_id = 155;	// sharvahl
-			in_pp->binds[0].zone_id = 155;	// sharvahl
-			break;
+			case StartZoneIndex::Halas:
+			{
+				in_pp->zone_id = Zones::HALAS;	// halas
+				in_pp->binds[0].zone_id = Zones::EVERFROST;	// everfrost
+				break;
+			}
+			case StartZoneIndex::Rivervale:
+			{
+				in_pp->zone_id = Zones::RIVERVALE;	// rivervale
+				in_pp->binds[0].zone_id = Zones::KITHICOR;	// kithicor
+				break;
+			}
+			case StartZoneIndex::Freeport:
+			{
+				in_pp->zone_id = Zones::FREPORTW;	// freportw
+				in_pp->binds[0].zone_id = Zones::FREPORTW;	// freportw
+				break;
+			}
+			case StartZoneIndex::Neriak:
+			{
+				in_pp->zone_id = Zones::NERIAKA;	// neriaka
+				in_pp->binds[0].zone_id = Zones::NEKTULOS;	// nektulos
+				break;
+			}
+			case StartZoneIndex::Grobb:
+			{
+				in_pp->zone_id = Zones::GROBB;	// grobb
+				in_pp->binds[0].zone_id = Zones::INNOTHULE;	// innothule
+				break;
+			}
+			case StartZoneIndex::Oggok:
+			{
+				in_pp->zone_id = Zones::OGGOK;	// oggok
+				in_pp->binds[0].zone_id = Zones::FEERROTT;	// feerrott
+				break;
+			}
+			case StartZoneIndex::Kaladim:
+			{
+				in_pp->zone_id = Zones::KALADIMA;	// kaladima
+				in_pp->binds[0].zone_id = Zones::BUTCHER;	// butcher
+				break;
+			}
+			case StartZoneIndex::GreaterFaydark:
+			{
+				in_pp->zone_id = Zones::GFAYDARK;	// gfaydark
+				in_pp->binds[0].zone_id = Zones::GFAYDARK;	// gfaydark
+				break;
+			}
+			case StartZoneIndex::Felwithe:
+			{
+				in_pp->zone_id = Zones::FELWITHEA;	// felwithea
+				in_pp->binds[0].zone_id = Zones::GFAYDARK;	// gfaydark
+				break;
+			}
+			case StartZoneIndex::Akanon:
+			{
+				in_pp->zone_id = Zones::AKANON;	// akanon
+				in_pp->binds[0].zone_id = Zones::STEAMFONT;	// steamfont
+				break;
+			}
+			case StartZoneIndex::Cabilis:
+			{
+				in_pp->zone_id = Zones::CABWEST;	// cabwest
+				in_pp->binds[0].zone_id = Zones::FIELDOFBONE;	// fieldofbone
+				break;
+			}
+			case StartZoneIndex::SharVahl:
+			{
+				in_pp->zone_id = Zones::SHARVAHL;	// sharvahl
+				in_pp->binds[0].zone_id = Zones::SHARVAHL;	// sharvahl
+				break;
+			}
 		}
 	}
 }
