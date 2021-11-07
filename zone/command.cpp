@@ -278,7 +278,6 @@ int command_init(void)
 		command_add("killallnpcs", " [npc_name] Kills all npcs by search name, leave blank for all attackable NPC's", 200, command_killallnpcs) ||
 		command_add("lastname", "[new lastname] - Set your or your player target's lastname", 50, command_lastname) ||
 		command_add("level", "[level] - Set your or your target's level", 10, command_level) ||
-		command_add("listnpcs", "[name/range] - Search NPCs", 20, command_listnpcs) ||
 		command_add("list", "[npcs|players|corpses|doors|objects] [search] - Search entities", 20, command_list) ||
 		command_add("listpetition", "- List petitions", 50, command_listpetition) ||
 		command_add("load_shared_memory", "[shared_memory_name] - Reloads shared memory and uses the input as output", 250, command_load_shared_memory) ||
@@ -1663,11 +1662,6 @@ void command_delpetition(Client *c, const Seperator *sep)
 
     LogInfo("Delete petition request from [{}], petition number:",  c->GetName(), atoi(sep->argplus[1]) );
 
-}
-
-void command_listnpcs(Client *c, const Seperator *sep)
-{
-	c->Message(Chat::White, "Deprecated, use the #list command (#list npcs <search>)");
 }
 
 void command_list(Client *c, const Seperator *sep)
