@@ -1012,15 +1012,7 @@ std::string QuestManager::getspellname(uint32 spell_id) {
 }
 
 std::string QuestManager::getskillname(int skill_id) {
-	if (skill_id >= 0 && skill_id < EQ::skills::SkillCount) {
-		std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
-		for (auto skills_iter : Skills) {
-			if (skill_id == skills_iter.first) {
-				return skills_iter.second;
-			}
-		}
-	}
-	return std::string();
+	return EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
 void QuestManager::safemove() {
