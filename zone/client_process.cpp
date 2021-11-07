@@ -984,14 +984,21 @@ void Client::OPRezzAnswer(uint32 Action, uint32 SpellID, uint16 ZoneID, uint16 I
 		this->BuffFadeNonPersistDeath();
 		int SpellEffectDescNum = GetSpellEffectDescNum(SpellID);
 		// Rez spells with Rez effects have this DescNum (first is Titanium, second is 6.2 Client)
-		if((SpellEffectDescNum == 82) || (SpellEffectDescNum == 39067)) {
+		if(RuleB(Character, UseResurrectionSickness) && SpellEffectDescNum == 82 || SpellEffectDescNum == 39067) {
 			SetMana(0);
-			SetHP(GetMaxHP()/5);
-			int rez_eff = 756;
-			if (RuleB(Character, UseOldRaceRezEffects) &&
-			    (GetRace() == BARBARIAN || GetRace() == DWARF || GetRace() == TROLL || GetRace() == OGRE))
-				rez_eff = 757;
-			SpellOnTarget(rez_eff, this); // Rezz effects
+			SetHP(GetMaxHP() / 5);
+			int resurrection_sickness_spell_id = (
+				RuleB(Character, UseOldRaceRezEffects) &&
+			    (
+					GetRace() == BARBARIAN ||
+					GetRace() == DWARF ||
+					GetRace() == TROLL ||
+					GetRace() == OGRE
+				) ? 
+				SPELL_RESURRECTION_SICKNESS4 :
+				SPELL_RESURRECTION_SICKNESS
+			);
+			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
 		}
 		else {
 			SetMana(GetMaxMana());
