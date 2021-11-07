@@ -110,7 +110,16 @@ void ZSList::Process() {
 	}
 
 	if (reminder && reminder->Check() && shutdowntimer) {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now. World will shut down in %i minutes...", ((shutdowntimer->GetRemainingTime() / 1000) / 60));
+		SendEmoteMessage(
+			0,
+			0,
+			0,
+			Chat::Yellow,
+			fmt::format(
+				"[SYSTEM] World will be shutting down in {} minutes.",
+				((shutdowntimer->GetRemainingTime() / 1000) / 60)
+			).c_str()
+		);
 	}
 }
 
@@ -677,7 +686,16 @@ void ZSList::UpdateUCSServerAvailable(bool ucss_available) {
 void ZSList::WorldShutDown(uint32 time, uint32 interval)
 {
 	if (time > 0) {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down in %i minutes, everyone log out before this time.", (time / 60));
+		SendEmoteMessage(
+			0,
+			0,
+			0,
+			Chat::Yellow,
+			fmt::format(
+				"[SYSTEM] World will be shutting down in {} minutes.",
+				(time / 60)
+			).c_str()
+		);
 
 		time *= 1000;
 		interval *= 1000;
@@ -690,7 +708,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		reminder->Start();
 	}
 	else {
-		SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World coming down, everyone log out now.");
+		SendEmoteMessage(0, 0, 0, 15, "[SYSTEM] World is shutting down.");
 		auto pack = new ServerPacket;
 		pack->opcode = ServerOP_ShutdownAll;
 		pack->size = 0;

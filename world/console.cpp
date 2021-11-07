@@ -778,8 +778,14 @@ void ConsoleWorldShutdown(
 			zoneserver_list.WorldShutDown(0, 0);
 		}
 		else if (strcasecmp(args[0].c_str(), "disable") == 0) {
-			connection->SendLine("<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
-			zoneserver_list.SendEmoteMessage(0, 0, 0, 15, "<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
+			connection->SendLine("[SYSTEM] World shutdown has been aborted.");
+			zoneserver_list.SendEmoteMessage(
+				0,
+				0,
+				0,
+				Chat::Yellow,
+				"[SYSTEM] World shutdown has been aborted."
+			);
 			zoneserver_list.shutdowntimer->Disable();
 			zoneserver_list.reminder->Disable();
 		}
