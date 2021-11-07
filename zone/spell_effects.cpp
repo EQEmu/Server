@@ -4954,7 +4954,6 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 					LimitFailure = true;
 				}
 				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
-
 				break;
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
@@ -5738,7 +5737,6 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				}
 				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
 				break;
-
 
 			// handle effects
 			case SE_ImprovedDamage:
