@@ -5295,8 +5295,6 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 
-		Shout("Check SPA %i", focus_spell.effect_id[i]);
-
 		switch (focus_spell.effect_id[i]) {
 			
 			case SE_Blank:
