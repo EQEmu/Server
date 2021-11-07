@@ -1,3 +1,0 @@
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'Character:EnableRangerAutoFire', 'true', 'Enable Ranger /autofire by default, to disable change to false for a classic experience.');
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'Character:EnableTGB', 'true', 'Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.');
-INSERT INTO `rule_values` (`ruleset_id`, `rule_name`, `rule_value`, `notes`) VALUES (0, 'Character:EnableBardMelody', 'true', 'Enable Bard /melody by default, to disable change to false for a classic experience.');
