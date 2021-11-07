@@ -1446,35 +1446,44 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 						gender_id
 					);
 					
-					if (spell.max_value[i] > 0) {
-						if (spell.limit_value[i] == 0) {
-							SendIllusionPacket(
-								spell.base_value[i],
-								gender_id
-							);
-						} else {
-							if (spell.max_value[i] != 3) {
+					if (spell.base_value[i] != RACE_ELEMENTAL_75) {
+						if (spell.max_value[i] > 0) {
+							if (spell.limit_value[i] == 0) {
 								SendIllusionPacket(
 									spell.base_value[i],
-									gender_id,
-									spell.limit_value[i],
-									spell.max_value[i]
+									gender_id
 								);
 							} else {
-								SendIllusionPacket(
-									spell.base_value[i],
-									gender_id,
-									spell.limit_value[i],
-									spell.limit_value[i]
-								);
+								if (spell.max_value[i] != 3) {
+									SendIllusionPacket(
+										spell.base_value[i],
+										gender_id,
+										spell.limit_value[i],
+										spell.max_value[i]
+									);
+								} else {
+									SendIllusionPacket(
+										spell.base_value[i],
+										gender_id,
+										spell.limit_value[i],
+										spell.limit_value[i]
+									);
+								}
 							}
+						} else {
+							SendIllusionPacket(
+								spell.base_value[i],
+								gender_id,
+								spell.limit_value[i],
+								spell.max_value[i]
+							);
 						}
+						
 					} else {
 						SendIllusionPacket(
 							spell.base_value[i],
 							gender_id,
-							spell.limit_value[i],
-							spell.max_value[i]
+							spell.limit_value[i]
 						);
 					}
 					SendAppearancePacket(AT_Size, race_size);
