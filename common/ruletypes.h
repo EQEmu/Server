@@ -384,6 +384,7 @@ RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to b
 RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate heal focus")
 RULE_BOOL(Spells, DOTsScaleWithSpellDmg, false, "Allow SpellDmg stat to affect DoT spells")
 RULE_BOOL(Spells, HOTsScaleWithHealAmt, false, "Allow HealAmt stat to affect HoT spells")
+RULE_BOOL(Spells, CompoundLifetapHeals, true, "True: Lifetap heals calculate damage bonuses and then heal bonuses.  False:  Lifetaps heal using the amount damaged to mob.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
