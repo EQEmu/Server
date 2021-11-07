@@ -2568,7 +2568,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
 			uint32 recast_delay = itm->GetItem()->RecastDelay;
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only, using SPA 415
+			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//requires useing SPA 415
 			Shout("reduce %i", reduction);
 			if (reduction) {
 				recast_delay -= reduction;

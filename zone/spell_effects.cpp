@@ -4530,12 +4530,20 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 	int    spell_level = 0;
 	int    lvldiff     = 0;
 	uint32 effect      = 0;
-	int32  base_value       = 0;
-	int32  limit_value       = 0;
+	int32  base_value  = 0;
+	int32  limit_value = 0;
 	uint32 slot        = 0;
 
 	int index_id = -1;
 	uint32 focus_reuse_time = 0;
+
+	bool   is_from_item_click      = false;
+	bool   try_apply_to_item_click = false;
+	bool   has_item_limit_check    = false;
+
+	if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
+		is_from_item_click = true;
+	}
 
 	bool LimitFailure                  = false;
 	bool LimitInclude[MaxLimitInclude] = {false};
@@ -4894,6 +4902,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 				break;
 
 			case SE_FFItemClass:
+				has_item_limit_check = true;
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
@@ -4981,18 +4990,21 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			case SE_IncreaseSpellHaste:
 				if (type == focusSpellHaste && base_value > value) {
 					value = base_value;
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
 			case SE_Fc_CastTimeMod2:
 				if (type == focusFcCastTimeMod2 && base_value > value) {
 					value = base_value;
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
 			case SE_Fc_CastTimeAmt:
 				if (type == focusFcCastTimeAmt && base_value > value) {
 					value = base_value;
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
@@ -5067,6 +5079,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			case SE_ReduceReuseTimer:
 				if (type == focusReduceRecastTime) {
 					value = base_value / 1000;
+					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
 				break;
 
@@ -5233,6 +5246,10 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 		}
 	}
 
+	if (try_apply_to_item_click && !has_item_limit_check) {
+		return 0;
+	}
+
 	if (LimitFailure) {
 		return 0;
 	}
@@ -5279,7 +5296,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	
 	bool   is_from_item_click      = false;
 	bool   try_apply_to_item_click = false;
-	bool   has_item_limit_check   = false;
+	bool   has_item_limit_check    = false;
 	
 	if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 		is_from_item_click = true;
@@ -5649,7 +5666,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					Note: You can apply multiple includes or excludes to a single focus spell,  using multiple SPA 415 limits in the spell. Ie. Check for clicks from ItemType 10 or 11.
 
 				*/
-
+				has_item_limit_check = true;
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
