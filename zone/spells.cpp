@@ -2556,6 +2556,8 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			if(reduction)
 				recast -= reduction;
 
+			Shout("Reduction from spells RECAST Red %i %i %i", spell_id, recast, spells[spell_id].recast_time);
+
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
 			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
 		}
@@ -2573,7 +2575,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			if (reduction) {
 				recast_delay -= reduction;
 			}
-			recast_delay = std::max(recast_delay, 0); //setting to zero can cause client to lock up.
+			recast_delay = std::max(recast_delay, 0);
 			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), recast_delay);
 			if (recast_type != -1) {
 				database.UpdateItemRecastTimestamps(
