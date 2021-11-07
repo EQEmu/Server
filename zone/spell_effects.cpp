@@ -4928,7 +4928,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 									}
 								}
 								//SubType (if set to -1, ignore and include any SubType)
-								if (base_value >= 0) {
+								if (limit_value >= 0) {
 									if (limit_value != item->GetItem()->SubType) {
 										include_this_item = false;
 									}
