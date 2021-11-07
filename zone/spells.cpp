@@ -1030,7 +1030,10 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			return;
 		}
 	}
-
+	/*
+		Titanium client will prevent item recast on its own. This is only used to enforce. Titanium items are cast from Handle_OP_CastSpell.
+		SOF+ client does not prevent item recast on its own. We enforce this in Handle_OP_ItemVerifyRequest where items are cast from.
+	*/
 	if(IsClient() && (slot == CastingSlot::Item || slot == CastingSlot::PotionBelt))
 	{
 		IsFromItem = true;

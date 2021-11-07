@@ -992,4 +992,21 @@ enum LDoNThemeBits {
 	TAKBit = 16
 };
 
+enum StartZoneIndex {
+    Odus = 0,
+    Qeynos,
+    Halas,
+    Rivervale,
+    Freeport,
+    Neriak,
+    Grobb,
+    Oggok,
+    Kaladim,
+    GreaterFaydark,
+    Felwithe,
+    Akanon,
+    Cabilis,
+    SharVahl
+};
+
 #endif /*COMMON_EQ_CONSTANTS_H*/
