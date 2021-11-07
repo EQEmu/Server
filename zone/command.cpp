@@ -15084,10 +15084,9 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
 			item = target->GetInv().GetItem(slot_id);
 			if (item) {
-				int stack_size = item->IsStackable() ? item->GetCharges() : 0;
-				int real_stack_size = stack_size ? stack_size : 1;
-				removed_count += real_stack_size;
-				target->DeleteItemInInventory(slot_id, stack_size, true);
+				int stack_size = std::max(static_cast<int>(item->GetCharges()), 1);
+				removed_count += stack_size;
+				target->DeleteItemInInventory(slot_id, 0, true);
 			}
 		}
 	}
