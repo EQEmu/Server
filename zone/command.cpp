@@ -410,8 +410,6 @@ int command_init(void)
 		command_add("spawnfix", "- Find targeted NPC in database based on its X/Y/heading and update the database to make it spawn at your current location/heading.", 170, command_spawnfix) ||
 		command_add("spawnstatus", "- Show respawn timer status", 100, command_spawnstatus) ||
 		command_add("spellinfo", "[spellid] - Get detailed info about a spell", 10, command_spellinfo) ||
-		command_add("spoff", "- Sends OP_ManaChange", 80, command_spoff) ||
-		command_add("spon", "- Sends OP_MemorizeSpell", 80, command_spon) ||
 		command_add("stun", "[duration] - Stuns you or your target for duration", 100, command_stun) ||
 		command_add("summon", "[charname] - Summons your player/npc/corpse target, or charname if specified", 80, command_summon) ||
 		command_add("summonburiedplayercorpse", "- Summons the target's oldest buried corpse, if any exist.",  100, command_summonburiedplayercorpse) ||
@@ -421,7 +419,6 @@ int command_init(void)
 		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", 80, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", 100, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", 100, command_petname) ||
-		command_add("test", "Test command", 200, command_test) ||
 		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", 10, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", 90, command_time) ||
 		command_add("timers", "- Display persistent timers for target", 200, command_timers) ||
@@ -2219,19 +2216,6 @@ void command_zcolor(Client *c, const Seperator *sep)
 	}
 }
 
-void command_spon(Client *c, const Seperator *sep)
-{
-	c->MemorizeSpell(0, SPELLBAR_UNLOCK, memSpellSpellbar);
-}
-
-void command_spoff(Client *c, const Seperator *sep)
-{
-	auto outapp = new EQApplicationPacket(OP_ManaChange, 0);
-	outapp->priority = 5;
-	c->QueuePacket(outapp);
-	safe_delete(outapp);
-}
-
 void command_gassign(Client *c, const Seperator *sep)
 {
 	if (sep->IsNumber(1) && c->GetTarget() && c->GetTarget()->IsNPC() && c->GetTarget()->CastToNPC()->GetSpawnPointID() > 0) {
@@ -3602,18 +3586,6 @@ void command_spawn(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Format: #spawn name race level material hp gender class priweapon secweapon merchantid bodytype - spawns a npc those parameters.");
 		c->Message(Chat::White, "Name Format: NPCFirstname_NPCLastname - All numbers in a name are stripped and \"_\" characters become a space.");
 		c->Message(Chat::White, "Note: Using \"-\" for gender will autoselect the gender for the race. Using \"-\" for HP will use the calculated maximum HP.");
-	}
-}
-
-void command_test(Client *c, const Seperator *sep)
-{
-	c->Message(Chat::Yellow, "Triggering test command");
-
-	if (sep->arg[1]) {
-		c->SetPrimaryWeaponOrnamentation(atoi(sep->arg[1]));
-	}
-	if (sep->arg[2]) {
-		c->SetSecondaryWeaponOrnamentation(atoi(sep->arg[2]));
 	}
 }
 
