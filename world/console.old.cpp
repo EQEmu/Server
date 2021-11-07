@@ -750,8 +750,20 @@ void Console::ProcessCommand(const char* command) {
 					zoneserver_list.WorldShutDown(0, 0);
 				}
 				else if(strcasecmp(sep.arg[1], "disable") == 0) {
-        			SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
-					zoneserver_list.SendEmoteMessage(0,0,0,15,"<SYSTEMWIDE MESSAGE>:SYSTEM MSG:World shutdown aborted.");
+        			SendEmoteMessage(
+						0,
+						0,
+						0,
+						Chat::Yellow,
+						"[SYSTEM] World shutdown has been aborted."
+					);
+					zoneserver_list.SendEmoteMessage(
+						0,
+						0,
+						0,
+						Chat::Yellow,
+						"[SYSTEM] World shutdown has been aborted."
+					);
         			zoneserver_list.shutdowntimer->Disable();
 			        zoneserver_list.reminder->Disable();
 				}
