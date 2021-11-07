@@ -4939,6 +4939,9 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 							}
 						}
 					}
+					else {
+						LimitFailure = true;
+					}
 				}
 				break;
 
@@ -5699,6 +5702,9 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 								}
 							}
 						}
+					}
+					else {
+						return 0;
 					}
 				}
 				break;
