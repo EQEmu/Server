@@ -1973,7 +1973,7 @@ bool ZoneDatabase::DeleteCharacterLeadershipAAs(uint32 character_id){
 }
 
 bool ZoneDatabase::DeleteCharacterAAs(uint32 character_id){
-	std::string query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u", character_id);
+	std::string query = StringFormat("DELETE FROM `character_alternate_abilities` WHERE `id` = %u AND `aa_id` NOT IN(SELECT a.first_rank_id FROM aa_ability a WHERE a.grant_only != 0)", character_id);
 	QueryDatabase(query);
 	return true;
 }
