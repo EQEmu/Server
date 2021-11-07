@@ -4949,6 +4949,10 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 						}
 					}
 				}
+				else {
+					LimitFailure = true; //not from an item
+				}
+
 				break;
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
@@ -5245,7 +5249,7 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 			return 0;
 		}
 	}
-
+	Shout("AA Final check: %i %i", try_apply_to_item_click, has_item_limit_check);
 	if (try_apply_to_item_click && !has_item_limit_check) {
 		return 0;
 	}
@@ -5726,6 +5730,9 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						}
 					}
 				}
+				else{
+					return 0; //not cast from an item.
+				}
 				break;
 
 
@@ -5762,7 +5769,6 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_IncreaseSpellHaste:
 				if (type == focusSpellHaste && focus_spell.base_value[i] > value) {
-					Shout("From item click %i", is_from_item_click);
 					value = focus_spell.base_value[i];
 					try_apply_to_item_click = is_from_item_click ? true : false;
 				}
@@ -5838,8 +5844,10 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 			case SE_ReduceReuseTimer:
 				if (type == focusReduceRecastTime) {
+					Shout("SE_ReduceReuseTimer From item click %i", is_from_item_click);
 					value = focus_spell.base_value[i] / 1000;
 					try_apply_to_item_click = is_from_item_click ? true : false;
+					Shout("SE_ReduceReuseTimer try_apply_to_item_click %i", try_apply_to_item_click);
 				}
 				break;
 
@@ -6028,7 +6036,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 		For item click cast/recast focus modifiers. Only use if SPA 415 exists.
 		This is an item click but does not have SPA 415 limiter. Fail here.
 	*/
-	Shout("Fina check: %i %i", try_apply_to_item_click, !has_item_limit_check);
+	Shout("Spell Final check: %i %i", try_apply_to_item_click, has_item_limit_check);
 	if (try_apply_to_item_click && !has_item_limit_check) {
 		Shout("FAIL HERE");
 		return 0;

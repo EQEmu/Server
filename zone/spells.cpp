@@ -2553,13 +2553,18 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				recast -= GetAA(aaTouchoftheWicked) * 420;
 			}
 			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only
+			Shout("Reduction %i recast %i", reduction, recast);
 			if(reduction)
 				recast -= reduction;
 
-			Shout("Reduction from spells RECAST Red %i %i %i", spell_id, recast, spells[spell_id].recast_time);
-
+			Shout("1 Reduction from spells RECAST Red %i %i %i", spell_id, recast, spells[spell_id].recast_time);
+			recast = std::max(recast, 0);
+			Shout("2 Reduction from spells RECAST Red %i %i %i", spell_id, recast, spells[spell_id].recast_time);
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
-			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			
+			if (recast > 1) {
+				CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			}
 		}
 	}
 
