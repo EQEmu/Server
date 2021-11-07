@@ -5609,7 +5609,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					For SubType and Slots set using same rules above as for includes. Ie. -1 for all, positive for specifics
 					To exclude a specific ItemType we have to do some math. The exclude value will be the negative value of (ItemType + 100).
 					If ItemType = 10, then SET ItemType= -110 to exclude. If its ItemType 0, then SET ItemType= -100 to exclude ect. Not ideal but it works.
-
+					
 					Usage example: Only focus spell if from click cast and is a 'defense armor' item type=10 [base= 10, limit= -1, max= -1]
 					Usage example: Only focus spell if from click cast and is from helmet slot' slots= 4     [base= -1, limit= -1, max= 4]
 					Usage example: Do not focus spell if it is from an item click. [base= -1000, limit= -1, max= -1]
@@ -5624,32 +5624,36 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
 						if (item && item->GetItem()) {
-							Shout("DEBUG Limit Check ItemClass FROM ITEM %i %i %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
-							Shout("DEBUG  Limit Check ItemClass FROM FOCUS %i %i %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
+							Shout("DEBUG Limit Check ItemClass FROM FOCUS %i %i %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
+							Shout("DEBUG  Limit Check ItemClass FROM item %i %i %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
 							//If ItemType set to < -1, then we will exclude either all Subtypes (-1000), or specific items by ItemType, SubType or Slot. See above for rules.
 							if (focus_spell.base_value[i] < -1) { //Excludes
 								bool exclude_this_item = true;
 								int tmp_itemtype = (item->GetItem()->ItemType + 100) * -1;
+								Shout("tmp item type = %i", tmp_itemtype);
 								//ItemType (if set to -1000, ignore and exclude any ItemType)
-								if (focus_spell.base_value[i] >= 0) {
+								if (focus_spell.base_value[i] < -1 && focus_spell.base_value[i] != -1000) {
 									if (focus_spell.base_value[i] != tmp_itemtype) {
 										exclude_this_item = false;
+										Shout("fail 1");
 									}
 								}
 								//SubType (if set to -1, ignore and exclude all SubTypes)
 								if (focus_spell.limit_value[i] >= 0) { //this should not be zero
 									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
 										exclude_this_item = false;
+										Shout("fail 2");
 									}
 								}
 								//item slot bitmask (if set to -1, ignore and exclude all SubTypes)
 								if (focus_spell.max_value[i] >= 0) {
 									if (focus_spell.max_value[i] != item->GetItem()->Slots) {
 										exclude_this_item = false;
+										Shout("fail 3  don't exclude because item is not one we are matching to");
 									}
 								}
 								if (exclude_this_item) {
-									Shout("Excluded Fail");
+									Shout("Excluded Fail DO NOT USE THIS");
 									return 0;
 								}
 							}
