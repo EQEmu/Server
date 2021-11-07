@@ -4940,9 +4940,11 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 						}
 					}
 				}
-				else {
+				//If this is checking that focus can only be cast from an item, then if its not cast from item fail.
+				else if (base_value >= -1) {
 					LimitFailure = true;
 				}
+				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
 				break;
 
 				/* These are not applicable to AA's because there is never a 'caster' of the 'buff' with the focus effect.
@@ -5644,7 +5646,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 					Note: You can apply multiple includes or excludes to a single focus spell,  using multiple SPA 415 limits in the spell. Ie. Check for clicks from ItemType 10 or 11.
 				
 				*/
-							
+		
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
@@ -5704,9 +5706,11 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						}
 					}
 				}
-				else {
+				//If this is checking that focus can only be cast from an item, then if its not cast from item fail.
+				else if (focus_spell.base_value[i] >= -1) {
 					return 0;
 				}
+				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
 				break;
 
 			// handle effects
