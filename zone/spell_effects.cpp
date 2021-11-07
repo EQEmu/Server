@@ -5270,8 +5270,10 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 
 	for (int i = 0; i < EFFECT_COUNT; i++) {
 
-		switch (focus_spell.effect_id[i]) {
+		Shout("Check SPA %i", focus_spell.effect_id[i]);
 
+		switch (focus_spell.effect_id[i]) {
+			
 			case SE_Blank:
 				break;
 
@@ -5594,11 +5596,13 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 				break;
 
 			case SE_FFItemClass:
+				Shout("1 Limit Check ItemClass");
 				if (casting_spell_inventory_slot && casting_spell_inventory_slot != -1) {
 					if (IsClient() && casting_spell_slot == EQ::spells::CastingSlot::Item && casting_spell_inventory_slot != 0xFFFFFFFF) {
 						auto item = CastToClient()->GetInv().GetItem(casting_spell_inventory_slot);
 						if (item && item->GetItem()) {
-							
+							Shout("2 Limit Check ItemClass FROM ITEM %i %i %i", focus_spell.base_value[i], focus_spell.limit_value[i], focus_spell.max_value[i]);
+							Shout("2 Limit Check ItemClass FROM FOCUS %i %i %i", item->GetItem()->ItemType, item->GetItem()->SubType, item->GetItem()->Slots);
 							//If ItemType set to -2, then we will exclude either all items, or specific items by SubType or Slot.
 							if (focus_spell.base_value[i] == -2) { //Excludes
 								bool exclude_this_item = true;
@@ -5614,8 +5618,8 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 										exclude_this_item = false;
 									}
 								}
-								
 								if (exclude_this_item) {
+									Shout("Excluded Fail");
 									return 0;
 								}
 							}
@@ -5629,7 +5633,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 									}
 								}
 								//SubType (if set to -1, ignore and include any SubType)
-								if (focus_spell.limit_value[i] >= 0) { //this should not be zero
+								if (focus_spell.limit_value[i] >= 0) {
 									if (focus_spell.limit_value[i] != item->GetItem()->SubType) {
 										include_this_item = false;
 									}
@@ -5641,11 +5645,9 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 									}
 								}
 
-								if (!include_this_item) {
-									return 0;
-								}
-								else {
+								if (include_this_item) {
 									LimitInclude[IncludeFoundSEFFItemClass] = true;
+									Shout("Found and Included");
 								}
 							}
 						}
@@ -5959,7 +5961,7 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 	if (focus_reuse_time) {
 		SetFocusProcLimitTimer(focus_spell.id, focus_reuse_time);
 	}
-
+	Shout("[Focus Spell ID %i] Focus Passed value %i", focus_spell.id, value);
 	return (value * lvlModifier / 100);
 }
 
