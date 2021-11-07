@@ -397,22 +397,27 @@ Bot::Bot(uint32 botID, uint32 botOwnerCharacterID, uint32 botSpellsID, double to
 	if(current_hp > max_hp)
 		current_hp = max_hp;
 
-	if(RuleB(Bots, ResurrectionSickness) && current_hp <= 0) {
-		int resurrection_sickness_spell_id = (
-			RuleB(Bots, OldRaceRezEffects) &&
-		    (
-				GetRace() == BARBARIAN ||
-				GetRace() == DWARF ||
-				GetRace() == TROLL ||
-				GetRace() == OGRE
-			) ? 
-			RuleI(Bots, OldResurrectionSicknessSpell) :
-			RuleI(Bots, ResurrectionSicknessSpell)
-		);
-		SetMana(0);
-		SetHP(max_hp / 5);
+	if(current_hp <= 0) {
 		BuffFadeNonPersistDeath();
-		SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
+		if (RuleB(Bots, ResurrectionSickness)) {
+			int resurrection_sickness_spell_id = (
+				RuleB(Bots, OldRaceRezEffects) &&
+				(
+					GetRace() == BARBARIAN ||
+					GetRace() == DWARF ||
+					GetRace() == TROLL ||
+					GetRace() == OGRE
+				) ? 
+				RuleI(Bots, OldResurrectionSicknessSpell) :
+				RuleI(Bots, ResurrectionSicknessSpell)
+			);
+			SetHP(max_hp / 5);
+			SetMana(0);
+			SpellOnTarget(resurrection_sickness_spell_id, this); // Rezz effects
+		} else {
+			SetHP(GetMaxHP());
+			SetMana(GetMaxMana());
+		}
 	}
 
 	if(current_mana > max_mana)
