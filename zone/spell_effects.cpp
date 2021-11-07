@@ -4949,9 +4949,11 @@ int32 Client::CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id)
 						}
 					}
 				}
-				else {
-					LimitFailure = true; //not from an item
+				//If this is checking that focus can only be cast from an item, then if its not cast from item fail.
+				else if (base_value >= -1) {
+					LimitFailure = true;
 				}
+				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
 
 				break;
 
@@ -5730,9 +5732,11 @@ int32 Mob::CalcFocusEffect(focusType type, uint16 focus_id, uint16 spell_id, boo
 						}
 					}
 				}
-				else{
-					return 0; //not cast from an item.
+				//If this is checking that focus can only be cast from an item, then if its not cast from item fail.
+				else if (focus_spell.base_value[i] >= -1) {
+					return 0;
 				}
+				//If we are checking to exclude items from a focus then do not fail unless the above check fails.
 				break;
 
 
