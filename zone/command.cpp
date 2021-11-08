@@ -13744,19 +13744,11 @@ void command_object(Client *c, const Seperator *sep)
 void command_showspellslist(Client *c, const Seperator *sep)
 {
 	Mob *target = c->GetTarget();
-
-	if (!target) {
-		c->Message(Chat::White, "Must target an NPC.");
+	if (!target || !target->IsNPC()) {		
+		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}
-
-	if (!target->IsNPC()) {
-		c->Message(Chat::White, "%s is not an NPC.",  target->GetName());
-		return;
-	}
-
 	target->CastToNPC()->AISpellsList(c);
-
 	return;
 }
 
