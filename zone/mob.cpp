@@ -1606,42 +1606,635 @@ void Mob::ShowStats(Client* client)
 {
 	if (IsClient()) {
 		CastToClient()->SendStatsWindow(client, RuleB(Character, UseNewStatsWindow));
-	}
-	else if (IsCorpse()) {
+	} else if (IsCorpse()) {
 		if (IsPlayerCorpse()) {
-			client->Message(Chat::White, "  CharID: %i  PlayerCorpse: %i", CastToCorpse()->GetCharID(), CastToCorpse()->GetCorpseDBID());
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Player Corpse | Character ID: {}  ID: {}",
+					CastToCorpse()->GetCharID(),
+					CastToCorpse()->GetCorpseDBID()
+				).c_str()
+			);
+		} else {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"NPC Corpse | ID: {}",
+					GetID()
+				).c_str()
+			);
 		}
-		else {
-			client->Message(Chat::White, "  NPCCorpse", GetID());
-		}
-	}
-	else {
-		client->Message(Chat::White, "  Level: %i  AC: %i  Class: %i  Size: %1.1f  Haste: %i", GetLevel(), ACSum(), GetClass(), GetSize(), GetHaste());
-		client->Message(Chat::White, "  HP: %i  Max HP: %i",GetHP(), GetMaxHP());
-		client->Message(Chat::White, "  Mana: %i  Max Mana: %i", GetMana(), GetMaxMana());
-		client->Message(Chat::White, "  Total ATK: %i  Worn/Spell ATK (Cap %i): %i", GetATK(), RuleI(Character, ItemATKCap), GetATKBonus());
-		client->Message(Chat::White, "  STR: %i  STA: %i  DEX: %i  AGI: %i  INT: %i  WIS: %i  CHA: %i", GetSTR(), GetSTA(), GetDEX(), GetAGI(), GetINT(), GetWIS(), GetCHA());
-		client->Message(Chat::White, "  MR: %i  PR: %i  FR: %i  CR: %i  DR: %i Corruption: %i PhR: %i", GetMR(), GetPR(), GetFR(), GetCR(), GetDR(), GetCorrup(), GetPhR());
-		client->Message(Chat::White, "  Race: %i  BaseRace: %i  Texture: %i  HelmTexture: %i  Gender: %i  BaseGender: %i", GetRace(), GetBaseRace(), GetTexture(), GetHelmTexture(), GetGender(), GetBaseGender());
-		if (client->Admin() >= 100)
-			client->Message(Chat::White, "  EntityID: %i  PetID: %i  OwnerID: %i AIControlled: %i Targetted: %i", GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
+	} else {
+		NPC* target = CastToNPC();
+		std::string target_name = target->GetCleanName();
+		std::string target_last_name = target->GetLastName();
+		bool has_charmed_stats = (
+			target->GetCharmedAccuracy() != 0 ||
+			target->GetCharmedArmorClass() != 0 ||
+			target->GetCharmedAttack() != 0 ||
+			target->GetCharmedAttackDelay() != 0 ||
+			target->GetCharmedAvoidance() != 0 ||
+			target->GetCharmedMaxDamage() != 0 ||
+			target->GetCharmedMinDamage() != 0
+		);
 
-		if (IsNPC()) {
-			NPC *n = CastToNPC();
-			uint32 spawngroupid = 0;
-			if(n->respawn2 != 0)
-				spawngroupid = n->respawn2->SpawnGroupID();
-			client->Message(Chat::White, "  NPCID: %u  SpawnGroupID: %u Grid: %i LootTable: %u FactionID: %i SpellsID: %u ", GetNPCTypeID(),spawngroupid, n->GetGrid(), n->GetLoottableID(), n->GetNPCFactionID(), n->GetNPCSpellsID());
-			client->Message(Chat::White, "  Accuracy: %i MerchantID: %i EmoteID: %i Runspeed: %.3f Walkspeed: %.3f", n->GetAccuracyRating(), n->MerchantType, n->GetEmoteID(), static_cast<float>(0.025f * n->GetRunspeed()), static_cast<float>(0.025f * n->GetWalkspeed()));
-			n->QueryLoot(client);
-		}
-		if (IsAIControlled()) {
-			client->Message(Chat::White, "  AggroRange: %1.0f  AssistRange: %1.0f", GetAggroRange(), GetAssistRange());
+		// Spawn Data
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Group: {} Point: {} Grid: {}",
+				target->GetSpawnGroupId(),
+				target->GetSpawnPointID(),
+				target->GetGrid()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Raid: {} Rare: {}",
+				target->IsRaidTarget() ? "Yes" : "No",
+				target->IsRareSpawn() ? "Yes" : "No",
+				target->GetSkipGlobalLoot() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Skip Global Loot: {} Ignore Despawn: {}",
+				target->GetSkipGlobalLoot() ? "Yes" : "No",
+				target->GetIgnoreDespawn() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Findable: {} Trackable: {} Underwater: {}",
+				target->IsFindable() ? "Yes" : "No",
+				target->IsTrackable() ? "Yes" : "No",
+				target->IsUnderwaterOnly() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Stuck Behavior: {} Fly Mode: {}",
+				target->GetStuckBehavior(),
+				static_cast<int>(target->GetFlyMode())
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn | Aggro NPCs: {} Always Aggro: {}",
+				target->GetNPCAggro() ? "Yes" : "No",
+				target->GetAlwaysAggro() ? "Yes" : "No"
+			).c_str()
+		);
+
+		// NPC
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"NPC | ID: {} Name: {}{} Level: {}",
+				target->GetNPCTypeID(),
+				target_name,
+				(
+					!target_last_name.empty() ?
+					fmt::format(" ({})", target_last_name) : 
+					""
+				),
+				target->GetLevel()
+			).c_str()
+		);
+		
+		// Race / Class / Gender
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Race: {} ({}) Class: {} ({}) Gender: {} ({})",
+				GetRaceIDName(target->GetRace()),
+				target->GetRace(),
+				GetClassIDName(target->GetClass()),
+				target->GetClass(),
+				GetGenderName(target->GetGender()),
+				target->GetGender()
+			).c_str()
+		);
+
+		// Faction
+		if (target->GetNPCFactionID()) {
+			auto faction_id = target->GetNPCFactionID();
+			auto faction_name = content_db.GetFactionName(faction_id);
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Faction: {} ({})",
+					faction_name,
+					faction_id
+				).c_str()
+			);
 		}
 
-		client->Message(Chat::White, "  compute_tohit: %i TotalToHit: %i", compute_tohit(EQ::skills::SkillHandtoHand), GetTotalToHit(EQ::skills::SkillHandtoHand, 0));
-		client->Message(Chat::White, "  compute_defense: %i TotalDefense: %i", compute_defense(), GetTotalDefense());
-		client->Message(Chat::White, "  offense: %i mitigation ac: %i", offense(EQ::skills::SkillHandtoHand), GetMitigationAC());
+		// Adventure Template
+		if (target->GetAdventureTemplate()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Adventure Template: {}",
+					target->GetAdventureTemplate()
+				).c_str()
+			);
+		}
+
+		// Body
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Body | Size: {:.2f} Type: {}",
+				target->GetSize(),
+				target->GetBodyType()
+			).c_str()
+		);
+
+		// Face
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Features | Face: {} Eye One: {} Eye Two: {}",
+				target->GetLuclinFace(),
+				target->GetEyeColor1(),
+				target->GetEyeColor2()
+			).c_str()
+		);
+
+		// Hair
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Features | Hair: {} Hair Color: {}",
+				target->GetHairStyle(),
+				target->GetHairColor()
+			).c_str()
+		);
+		
+		// Beard
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Features | Beard: {} Beard Color: {}",
+				target->GetBeard(),
+				target->GetBeardColor()
+			).c_str()
+		);
+
+		// Drakkin Features
+		if (target->GetRace() == RACE_DRAKKIN_522) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Drakkin Features | Heritage: {} Tattoo: {} Details: {}",
+					target->GetDrakkinHeritage(),
+					target->GetDrakkinTattoo(),
+					target->GetDrakkinDetails()
+				).c_str()
+			);
+		}
+
+		// Textures
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Textures | Armor: {} Helmet: {}",
+				target->GetTexture(),
+				target->GetHelmTexture()
+			).c_str()
+		);
+		
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Textures | Arms: {} Bracers: {} Hands: {}",
+				target->GetArmTexture(),
+				target->GetBracerTexture(),
+				target->GetHandTexture()
+			).c_str()
+		);
+		
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Textures | Legs: {} Feet: {}",
+				target->GetLegTexture(),
+				target->GetFeetTexture()
+			).c_str()
+		);
+
+		// Hero's Forge
+		if (target->GetHeroForgeModel()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Hero's Forge: {}",
+					target->GetHeroForgeModel()
+				).c_str()
+			);
+		}
+
+		// Owner Data
+		if (target->GetOwner()) {
+			auto owner_name = target->GetOwner()->GetCleanName();
+			auto owner_type = (
+				target->GetOwner()->IsNPC() ?
+				"NPC" :
+				(
+					target->GetOwner()->IsClient() ?
+					"Client" :
+					"Other"
+				)
+			);
+			auto owner_id = target->GetOwnerID();
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Owner | Name: {} ({}) Type: {}",
+					owner_name,
+					owner_id,
+					owner_type
+				).c_str()
+			);
+		}
+
+		// Pet Data
+		if (target->GetPet()) {
+			auto pet_name = target->GetPet()->GetCleanName();
+			auto pet_id = target->GetPetID();
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Pet | Name: {} ({})",
+					pet_name,
+					pet_id
+				).c_str()
+			);
+		}
+
+		// Merchant Data
+		if (target->MerchantType) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Merchant | ID: {} Currency Type: {}",
+					target->MerchantType,
+					target->GetAltCurrencyType()
+				).c_str()
+			);
+		}
+
+		// Spell Data
+		if (target->AI_HasSpells() || target->AI_HasSpellsEffects()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spells | ID: {} Effects ID: {}",
+					target->GetNPCSpellsID(),
+					target->GetNPCSpellsEffectsID()
+				).c_str()
+			);
+		}
+
+		// Health
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Health: {}/{} ({:.2f}%) Regen: {}",
+				target->GetHP(),
+				target->GetMaxHP(),
+				target->GetHPRatio(),
+				target->GetHPRegen()
+			).c_str()
+		);
+
+		// Mana
+		if (target->GetMaxMana() > 0) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Mana: {}/{} ({:.2f}%) Regen: {}",
+					target->GetMana(),
+					target->GetMaxMana(),
+					target->GetManaRatio(),
+					target->GetManaRegen()
+				).c_str()
+			);
+		}
+
+		// Damage
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Damage | Min: {} Max: {}",
+				target->GetMinDMG(),
+				target->GetMaxDMG()
+			).c_str()
+		);
+
+		// Attack Count / Delay
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Attack | Count: {} Delay: {}",
+				target->GetNumberOfAttacks(),
+				target->GetAttackDelay()
+			).c_str()
+		);
+
+		// Weapon Textures
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Weapon Textures | Primary: {} Secondary: {} Ammo: {}",
+				target->GetEquipmentMaterial(EQ::textures::weaponPrimary),
+				target->GetEquipmentMaterial(EQ::textures::weaponSecondary),
+				target->GetAmmoIDfile()
+			).c_str()
+		);
+
+		// Weapon Types
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Weapon Types | Primary: {} ({}) Secondary: {} ({})",
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetPrimSkill())),
+				target->GetPrimSkill(),
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetSecSkill())),
+				target->GetSecSkill()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Weapon Types | Ranged: {} ({})",
+				EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(target->GetRangedSkill())),
+				target->GetRangedSkill()
+			).c_str()
+		);
+
+		// Combat Stats
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | Accuracy: {} Armor Class: {} Attack: {}",
+				target->GetAccuracyRating(),
+				target->GetAC(),
+				target->GetATK()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | Avoidance: {} Slow Mitigation: {}",
+				target->GetAvoidanceRating(),
+				target->GetSlowMitigation()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | To Hit: {} Total To Hit: {}",
+				compute_tohit(EQ::skills::SkillHandtoHand),
+				GetTotalToHit(EQ::skills::SkillHandtoHand, 0)
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | Defense: {} Total Defense: {}",
+				compute_defense(),
+				GetTotalDefense()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Combat Stats | Offense: {} Mitigation Armor Class: {}",
+				offense(EQ::skills::SkillHandtoHand),
+				GetMitigationAC()
+			).c_str()
+		);
+
+		// Stats
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Stats | Agility: {} Charisma: {} Dexterity: {} Intelligence: {}",
+				target->GetAGI(),
+				target->GetCHA(),
+				target->GetDEX(),
+				target->GetINT()
+			).c_str()
+		);
+		
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Stats | Stamina: {} Strength: {} Wisdom: {}",
+				target->GetSTA(),
+				target->GetSTR(),
+				target->GetWIS()
+			).c_str()
+		);
+
+		// Charmed Stats
+		if (has_charmed_stats) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Charmed Stats | Attack: {} Attack Delay: {}",
+					target->GetCharmedAttack(),
+					target->GetCharmedAttackDelay()
+				).c_str()
+			);
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Charmed Stats | Accuracy: {} Avoidance: {}",
+					target->GetCharmedAccuracy(),
+					target->GetCharmedAvoidance()
+				).c_str()
+			);
+			
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Charmed Stats | Min Damage: {} Max Damage: {}",
+					target->GetCharmedMinDamage(),
+					target->GetCharmedMaxDamage()
+				).c_str()
+			);
+		}
+
+		// Resists
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Resists | Cold: {} Disease: {} Fire: {} Magic: {}",
+				target->GetCR(),
+				target->GetDR(),
+				target->GetFR(),
+				target->GetMR()
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Resists | Poison: {} Corruption: {} Physical: {}",
+				target->GetPR(),
+				target->GetCorrup(),
+				target->GetPhR()
+			).c_str()
+		);
+
+		// Scaling
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Scaling | Heal: {} Spell: {}",
+				target->GetHealScale(),
+				target->GetSpellScale()
+			).c_str()
+		);
+
+		// See Invisible / Invisible vs. Undead / Hide / Improved Hide
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Can See | Invisible: {} Invisible vs. Undead: {}",
+				target->SeeInvisible() ? "Yes" : "No",
+				target->SeeInvisibleUndead() ? "Yes" : "No"
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Can See | Hide: {} Improved Hide: {}",
+				target->SeeHide() ? "Yes" : "No",
+				target->SeeImprovedHide() ? "Yes" : "No"
+			).c_str()
+		);
+
+		// Aggro / Assist Radius
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Radius | Aggro: {} Assist: {}",
+				target->GetAggroRange(),
+				target->GetAssistRange()
+			).c_str()
+		);
+
+		// Emote		
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Emote: {}",
+				target->GetEmoteID()
+			).c_str()
+		);
+
+		// Run/Walk Speed
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Speed | Run: {} Walk: {}",
+				target->GetRunspeed(),
+				target->GetWalkspeed()
+			).c_str()
+		);
+
+		// Position
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Position | {}, {}, {}, {}",
+				target->GetX(),
+				target->GetY(),
+				target->GetZ(),
+				target->GetHeading()
+			).c_str()
+		);
+
+		// Experience Modifier
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Experience Modifier: {}",
+				target->GetKillExpMod()
+			).c_str()
+		);
+
+		// Quest Globals
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Quest Globals: {}",
+				target->qglobal ? "Enabled" : "Disabled"
+			).c_str()
+		);
+
+		// Proximity
+		if (target->IsProximitySet()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Proximity | Say: {}",
+					target->proximity->say ? "Enabled" : "Disabled"
+				).c_str()
+			);
+
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Proximity X | Min: {} Max: {} Range: {}",
+					target->GetProximityMinX(),
+					target->GetProximityMinX(),
+					(target->GetProximityMinX() - target->GetProximityMinX())
+				).c_str()
+			);
+			
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Proximity Y | Min: {} Max: {} Range: {}",
+					target->GetProximityMinY(),
+					target->GetProximityMaxY(),
+					(target->GetProximityMaxY() - target->GetProximityMinY())
+				).c_str()
+			);
+			
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Proximity Z | Min: {} Max: {} Range: {}",
+					target->GetProximityMinZ(),
+					target->GetProximityMaxZ(),
+					(target->GetProximityMaxZ() - target->GetProximityMinZ())
+				).c_str()
+			);
+		}
 	}
 }
 
