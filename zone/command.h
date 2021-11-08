@@ -108,6 +108,7 @@ void command_face(Client *c, const Seperator *sep);
 void command_faction(Client *c, const Seperator *sep);
 void command_findaliases(Client *c, const Seperator *sep);
 void command_findclass(Client *c, const Seperator *sep);
+void command_findfaction(Client *c, const Seperator *sep);
 void command_findnpctype(Client *c, const Seperator *sep);
 void command_findrace(Client *c, const Seperator *sep);
 void command_findskill(Client *c, const Seperator *sep);
