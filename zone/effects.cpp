@@ -242,7 +242,10 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 				extra_dmg /= duration;
 		}
 		else if (extra_dmg && !RuleB(Spells, EnableDOTDurationBonusSpread)) {
-			extra_dmg *= RuleR(Spells, DOTBonusPerTickMultiplier);
+			int min_multiplier = RuleI(Spells, DOTBonusPerTickPctMinimum) <= RuleI(Spells, DOTBonusPerTickPctMaximum) ? RuleI(Spells, DOTBonusPerTickPctMinimum) : RuleI(Spells, DOTBonusPerTickPctMaximum);
+			int max_multiplier = RuleI(Spells, DOTBonusPerTickPctMaximum);
+			int act_multiplier = zone->random.Int(min_multiplier, max_multiplier);
+			extra_dmg *= act_multiplier / 100.0f;
 		}
 
 		value -= extra_dmg;
@@ -276,7 +279,10 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 				extra_dmg /= duration;
 		}
 		else if (extra_dmg && !RuleB(Spells, EnableDOTDurationBonusSpread)) {
-			extra_dmg *= RuleR(Spells, DOTBonusPerTickMultiplier);
+			int min_multiplier = RuleI(Spells, DOTBonusPerTickPctMinimum) <= RuleI(Spells, DOTBonusPerTickPctMaximum) ? RuleI(Spells, DOTBonusPerTickPctMinimum) : RuleI(Spells, DOTBonusPerTickPctMaximum);
+			int max_multiplier = RuleI(Spells, DOTBonusPerTickPctMaximum);
+			int act_multiplier = zone->random.Int(min_multiplier, max_multiplier);
+			extra_dmg *= act_multiplier / 100.0f;
 		}
 
 		value -= extra_dmg;
@@ -424,8 +430,11 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 				extra_heal /= duration;				
 			}
 		}
-		else if (extra_heal && !RuleB(Spells, EnableHOTDurationBonusSpread)) {
-			extra_heal *= RuleR(Spells, HOTBonusPerTickMultiplier);
+		else if (extra_heal && !RuleB(Spells, EnableHOTDurationBonusSpread)) {			
+			int min_multiplier = RuleI(Spells, HOTBonusPerTickPctMinimum) <= RuleI(Spells, HOTBonusPerTickPctMaximum) ? RuleI(Spells, HOTBonusPerTickPctMinimum) : RuleI(Spells, HOTBonusPerTickPctMaximum);
+			int max_multiplier = RuleI(Spells, HOTBonusPerTickPctMaximum);
+			int act_multiplier = zone->random.Int(min_multiplier, max_multiplier);
+			extra_heal *= act_multiplier / 100.0f;
 		}
 
 		value += extra_heal;
