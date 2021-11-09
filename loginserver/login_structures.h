@@ -7,9 +7,9 @@
 struct LoginBaseMessage_Struct
 {
 	int32_t sequence;     // request type/login sequence (2: handshake, 3: login, 4: serverlist, ...)
-	int8_t  unk1;
-	int8_t  encrypt_mode; // possibly an encrypt flag? (2 for encrypted player logins)
-	int32_t unk3;
+	bool    compressed;   // true: deflated
+	int8_t  encrypt_type; // 1: invert (unused) 2: des (2 for encrypted player logins and order expansions) (client uses what it sent, ignores in reply)
+	int32_t unk3;         // unused?
 };
 
 struct LoginBaseReplyMessage_Struct

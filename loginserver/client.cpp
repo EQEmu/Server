@@ -404,7 +404,7 @@ void Client::DoFailedLogin()
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
 	base_header.sequence     = m_llrs.sequence; // login (3)
-	base_header.encrypt_mode = m_llrs.encrypt_mode; // encrypt flag?
+	base_header.encrypt_type = m_llrs.encrypt_type;
 
 	// encrypted
 	PlayerLoginReply_Struct login_reply{};
@@ -417,8 +417,8 @@ void Client::DoFailedLogin()
 		LogDebug("Failed to encrypt eqcrypt block for failed login");
 	}
 
-	constexpr int outside = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
-	EQApplicationPacket outapp(OP_LoginAccepted, outside);
+	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
 	outapp.WriteData(&base_header, sizeof(base_header));
 	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
@@ -541,8 +541,8 @@ void Client::DoSuccessfulLogin(
 	// unencrypted
 	LoginBaseMessage_Struct base_header{};
 	base_header.sequence     = m_llrs.sequence;
-	base_header.unk1         = m_llrs.unk1;
-	base_header.encrypt_mode = m_llrs.encrypt_mode;
+	base_header.compressed   = false;
+	base_header.encrypt_type = m_llrs.encrypt_type;
 	base_header.unk3         = m_llrs.unk3;
 
 	// not serializing any of the variable length strings so just use struct directly
@@ -569,7 +569,7 @@ void Client::DoSuccessfulLogin(
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
-	int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
 	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
 	outapp->WriteData(&base_header, sizeof(base_header));
 	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
