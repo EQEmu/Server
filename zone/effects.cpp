@@ -236,10 +236,13 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 			}
 		}
 
-		if (extra_dmg) {
+		if (extra_dmg && RuleB(Spells, EnableDOTDurationBonusSpread)) {
 			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0)
 				extra_dmg /= duration;
+		}
+		else if (extra_dmg && !RuleB(Spells, EnableDOTDurationBonusSpread)) {
+			extra_dmg *= RuleR(Spells, DOTBonusPerTickMultiplier);
 		}
 
 		value -= extra_dmg;
@@ -267,10 +270,13 @@ int32 Mob::GetActDoTDamage(uint16 spell_id, int32 value, Mob* target) {
 			}
 		}
 
-		if (extra_dmg) {
+		if (extra_dmg && RuleB(Spells, EnableDOTDurationBonusSpread)) {
 			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0)
 				extra_dmg /= duration;
+		}
+		else if (extra_dmg && !RuleB(Spells, EnableDOTDurationBonusSpread)) {
+			extra_dmg *= RuleR(Spells, DOTBonusPerTickMultiplier);
 		}
 
 		value -= extra_dmg;
@@ -412,13 +418,17 @@ int32 Mob::GetActSpellHealing(uint16 spell_id, int32 value, Mob* target) {
 			}
 		}
 		
-		if (extra_heal) {
+		if (extra_heal && RuleB(Spells, EnableHOTDurationBonusSpread)) {
 			int duration = CalcBuffDuration(this, target, spell_id);
 			if (duration > 0) {
-				extra_heal /= duration;
-				value += extra_heal;
+				extra_heal /= duration;				
 			}
 		}
+		else if (extra_heal && !RuleB(Spells, EnableHOTDurationBonusSpread)) {
+			extra_heal *= RuleR(Spells, HOTBonusPerTickMultiplier);
+		}
+
+		value += extra_heal;
 
 		if (critical_chance && zone->random.Roll(critical_chance))
 			value *= critical_modifier;
