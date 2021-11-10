@@ -15898,10 +15898,12 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 		);
 		return;
 	}
+
 	for (auto npc_entity : npc_list) {
 		auto current_npc_item_list = npc_entity.second->GetItemList();
 		zone_loot_list.insert({ npc_entity.second->GetID(), current_npc_item_list });
 	}
+	
 	for (auto loot_item : zone_loot_list) {
 		uint32 current_entity_id = loot_item.first;
 		auto current_item_list = loot_item.second;
@@ -15963,6 +15965,7 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 			) :
 			"not dropping"
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
@@ -15976,13 +15979,13 @@ void command_viewzoneloot(Client *c, const Seperator *sep)
 		std::string drop_string = (
 			loot_amount > 0 ?
 			fmt::format(
-				"{} {} {}",
+				"{} {} dropping",
 				(loot_amount > 1 ? "items" : "item"),
-				(loot_amount > 1 ? "are" : "is"),
-				(loot_amount > 1 ? "dropping" : "not dropping")
+				(loot_amount > 1 ? "are" : "is")
 			) :
 			"items are dropping"
 		);
+
 		c->Message(
 			Chat::White,
 			fmt::format(
