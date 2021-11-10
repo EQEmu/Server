@@ -2027,13 +2027,41 @@ void command_emote(Client *c, const Seperator *sep)
 
 void command_fov(Client *c, const Seperator *sep)
 {
-	if(c->GetTarget())
-		if(c->BehindMob(c->GetTarget(), c->GetX(), c->GetY()))
-			c->Message(Chat::White, "You are behind mob %s, it is looking to %d",  c->GetTarget()->GetName(), c->GetTarget()->GetHeading());
-		else
-			c->Message(Chat::White, "You are NOT behind mob %s, it is looking to %d",  c->GetTarget()->GetName(), c->GetTarget()->GetHeading());
-	else
-		c->Message(Chat::White, "I Need a target!");
+	if (c->GetTarget()) {
+		auto target = c->GetTarget();
+		std::string behind_message = (
+			c->BehindMob(
+				target,
+				c->GetX(),
+				c->GetY()
+			) ?
+			"behind" :
+			"not behind"
+		);
+		std::string gender_message = (
+			target->GetGender() == MALE ?
+			"he" :
+			(
+				target->GetGender() == FEMALE ?
+				"she" :
+				"it"
+			)
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You are {} {} ({}), {} has a heading of {}.",
+				behind_message,
+				target->GetCleanName(),
+				target->GetID(),
+				gender_message,
+				target->GetHeading()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "You must have a target to use this command.");
+	}
 }
 
 void command_npcstats(Client *c, const Seperator *sep)
