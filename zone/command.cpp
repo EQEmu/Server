@@ -3637,28 +3637,56 @@ inline bool CastRestrictedSpell(int spellid)
 
 void command_castspell(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(1))
-		c->Message(Chat::White, "Usage: #CastSpell spellid");
-	else {
-		uint16 spellid = atoi(sep->arg[1]);
-		/*
-		Spell restrictions.
-		*/
-		if (CastRestrictedSpell(spellid) && c->Admin() < commandCastSpecials)
+	if (SPDAT_RECORDS <= 0) {
+		c->Message(Chat::White, "Spells not loaded.");
+		return;
+	}
+
+	Client *target = c;	
+	if(c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	if (!sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #castspell [Spell ID]");
+	} else {
+		uint16 spell_id = std::stoul(sep->arg[1]);
+		if (CastRestrictedSpell(spell_id) && c->Admin() < commandCastSpecials) {
 			c->Message(Chat::Red, "Unable to cast spell.");
-		else if (spellid >= SPDAT_RECORDS)
-			c->Message(Chat::White, "Error: #CastSpell: Argument out of range");
-		else
-			if (c->GetTarget() == 0)
-				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, 0, EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].resist_difficulty);
-				else
-					c->CastSpell(spellid, 0, EQ::spells::CastingSlot::Item, 0);
-			else
-				if(c->Admin() >= commandInstacast)
-					c->SpellFinished(spellid, c->GetTarget(), EQ::spells::CastingSlot::Item, 0, -1, spells[spellid].resist_difficulty);
-				else
-					c->CastSpell(spellid, c->GetTarget()->GetID(), EQ::spells::CastingSlot::Item, 0);
+		} else if (spell_id >= SPDAT_RECORDS) {
+			c->Message(Chat::White, "Invalid Spell ID.");
+		} else {
+			bool instant_cast = false;
+			if (c->Admin() >= commandInstacast) {
+				c->SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
+				instant_cast = true;
+			} else {
+				c->CastSpell(spell_id, target->GetID(), EQ::spells::CastingSlot::Item, 0);
+			}
+
+			if (c != target) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Cast {} ({}) on {}{}.",
+						GetSpellName(spell_id),
+						spell_id,
+						target->GetCleanName(),
+						instant_cast ? " instantly" : ""
+					).c_str()
+				);
+			} else {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Cast {} ({}) on yourself{}.",
+						GetSpellName(spell_id),
+						spell_id,
+						instant_cast ? " instantly" : ""
+					).c_str()
+				);
+			}
+		}
 	}
 }
 
