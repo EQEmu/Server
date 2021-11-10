@@ -263,12 +263,8 @@ const std::map<EQ::skills::SkillType, std::string>& EQ::skills::GetSkillTypeMap(
 std::string EQ::skills::GetSkillName(SkillType skill)
 {
 	if (skill >= Skill1HBlunt && skill <= Skill2HPiercing) {
-		std::map<SkillType, std::string> skills = GetSkillTypeMap();
-		for (auto current_skill : skills) {
-			if (skill == current_skill.first) {
-				return current_skill.second;
-			}
-		}
+		auto skills = GetSkillTypeMap();
+		return skills[skill];
 	}
 	return std::string();
 }
