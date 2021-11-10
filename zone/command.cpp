@@ -3632,6 +3632,12 @@ void command_showskills(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
+	bool show_all = false;
+
+	if (!strcasecmp("all", sep->arg[1])) {
+		show_all = true;
+	}
+
 	c->Message(
 		Chat::White,
 		fmt::format(
@@ -3645,7 +3651,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		skill_type <= EQ::skills::HIGHEST_SKILL;
 		skill_type = (EQ::skills::SkillType)(skill_type + 1)
 	) {
-		if (c->CanHaveSkill(skill_type) && c->MaxSkill(skill_type)) {
+		if (show_all ||	(c->CanHaveSkill(skill_type) &&	c->MaxSkill(skill_type))) {
 			c->Message(
 				Chat::White,
 				fmt::format(
