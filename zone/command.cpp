@@ -3651,7 +3651,7 @@ void command_showskills(Client *c, const Seperator *sep)
 		skill_type <= EQ::skills::HIGHEST_SKILL;
 		skill_type = (EQ::skills::SkillType)(skill_type + 1)
 	) {
-		if (show_all || (c->CanHaveSkill(skill_type) && c->MaxSkill(skill_type))) {
+		if (show_all || (target->CanHaveSkill(skill_type) && target->MaxSkill(skill_type))) {
 			c->Message(
 				Chat::White,
 				fmt::format(
