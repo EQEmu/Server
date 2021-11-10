@@ -2818,12 +2818,90 @@ void NPC::RemoveSpellFromNPCList(uint16 spell_id)
 
 void NPC::AISpellsList(Client *c)
 {
-	if (!c)
+	if (!c) {
 		return;
+	}
 
-	for (auto it = AIspells.begin(); it != AIspells.end(); ++it)
-		c->Message(Chat::White, "%s (%d): Type %d, Priority %d, Recast Delay %d, Resist Adjust %d, Min HP %d, Max HP %d",
-				spells[it->spellid].name, it->spellid, it->type, it->priority, it->recast_delay, it->resist_adjust, it->min_hp, it->max_hp);
+	if (AIspells.size() > 0) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has {} AI spells.",
+				GetCleanName(),
+				AIspells.size()
+			).c_str()
+		);
+
+		int spell_slot = 1;
+		for (const auto& ai_spell : AIspells) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Spell {} | Name: {} ({}) Type: {} Mana Cost: {}",
+					spell_slot,
+					GetSpellName(ai_spell.spellid),
+					ai_spell.spellid,
+					ai_spell.type,
+					ai_spell.manacost
+				).c_str()
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Spell {} | Priority: {} Recast Delay: {}",
+					spell_slot,
+					ai_spell.priority,
+					ai_spell.recast_delay
+				).c_str()
+			);
+
+			if (ai_spell.time_cancast) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Time Can Cast : {}",
+						spell_slot,
+						ai_spell.time_cancast
+					).c_str()
+				);
+			}
+
+			if (ai_spell.resist_adjust) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Resist Adjust : {}",
+						spell_slot,
+						ai_spell.resist_adjust
+					).c_str()
+				);
+			}
+
+			if (ai_spell.min_hp || ai_spell.max_hp) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Spell {} | Min HP: {} Max HP: {}",
+						spell_slot,
+						ai_spell.min_hp,
+						ai_spell.max_hp
+					).c_str()
+				);
+			}
+
+			spell_slot++;
+		}
+	}
+	else {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} has no AI spells.",
+				GetCleanName()
+			).c_str()
+		);
+	}
 
 	return;
 }
