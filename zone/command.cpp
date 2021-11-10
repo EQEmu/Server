@@ -3640,18 +3640,16 @@ void command_setlanguage(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	
-	std::map<int, std::string> language_map = EQ::constants::GetLanguageMap();
 	auto language_id = sep->IsNumber(1) ? std::stoi(sep->arg[1]) : -1;
 	auto language_value = sep->IsNumber(2) ? std::stoi(sep->arg[2]) : -1;
 	if (!strcasecmp(sep->arg[1], "list" )) {
-		for (const auto& language : language_map) {
+		for (int language = LANG_COMMON_TONGUE; language <= LANG_UNKNOWN; language++) {
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"Language {}: {}",
-					language.first,
-					language.second
+					language,
+					EQ::constants::GetLanguageName(language)
 				).c_str()
 			);
 		}
@@ -3681,7 +3679,7 @@ void command_setlanguage(Client *c, const Seperator *sep)
 				Chat::White,
 				fmt::format(
 					"Set {} ({}) to {} for {}.",
-					language_map[language_id],
+					EQ::constants::GetLanguageName(language_id),
 					language_id,
 					language_value,
 					target->GetCleanName()

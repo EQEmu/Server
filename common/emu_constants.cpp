@@ -191,11 +191,9 @@ const std::map<int, std::string>& EQ::constants::GetLanguageMap()
 
 std::string EQ::constants::GetLanguageName(int language_id)
 {
-	std::map<int, std::string> languages = EQ::constants::GetLanguageMap();
-	for (const auto& language : languages) {
-		if (language.first == language_id) {
-			return language.second;
-		}
+	if (language_id >= LANG_COMMON_TONGUE && language_id <= LANG_UNKNOWN) {
+		auto languages = EQ::constants::GetLanguageMap();
+		return languages[language_id];
 	}
 	return std::string();
 }
