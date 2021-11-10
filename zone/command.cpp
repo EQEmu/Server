@@ -3144,14 +3144,44 @@ void command_flymode(Client *c, const Seperator *sep)
 
 void command_showskills(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	bool show_all = false;
 
-	c->Message(Chat::White, "Skills for %s",  t->GetName());
-	for (EQ::skills::SkillType i = EQ::skills::Skill1HBlunt; i <= EQ::skills::HIGHEST_SKILL; i = (EQ::skills::SkillType)(i + 1))
-		c->Message(Chat::White, "Skill [%d] is at [%d] - %u",  i, t->GetSkill(i), t->GetRawSkill(i));
+	if (!strcasecmp("all", sep->arg[1])) {
+		show_all = true;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Skills | Name: {}",
+			target->GetCleanName()
+		).c_str()
+	);
+
+	for (
+		EQ::skills::SkillType skill_type = EQ::skills::Skill1HBlunt;
+		skill_type <= EQ::skills::HIGHEST_SKILL;
+		skill_type = (EQ::skills::SkillType)(skill_type + 1)
+	) {
+		if (show_all || (target->CanHaveSkill(skill_type) && target->MaxSkill(skill_type))) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) | Current: {} Max: {} Raw: {}",
+					EQ::skills::GetSkillName(skill_type),
+					skill_type,
+					target->GetSkill(skill_type),
+					target->MaxSkill(skill_type),
+					target->GetRawSkill(skill_type)
+				).c_str()
+			);
+		}
+	}
 }
 
 void command_findclass(Client *c, const Seperator *sep)
