@@ -79,6 +79,7 @@
 #include "../common/http/httplib.h"
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
+#include "../common/languages.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -3634,60 +3635,59 @@ void command_castspell(Client *c, const Seperator *sep)
 
 void command_setlanguage(Client *c, const Seperator *sep)
 {
-	if (strcasecmp(sep->arg[1], "list" ) == 0 )
-	{
-		c->Message(Chat::White, "Languages:");
-		c->Message(Chat::White, "(0) Common Tongue");
-		c->Message(Chat::White, "(1) Barbarian");
-		c->Message(Chat::White, "(2) Erudian");
-		c->Message(Chat::White, "(3) Elvish");
-		c->Message(Chat::White, "(4) Dark Elvish");
-		c->Message(Chat::White, "(5) Dwarvish");
-		c->Message(Chat::White, "(6) Troll");
-		c->Message(Chat::White, "(7) Ogre");
-		c->Message(Chat::White, "(8) Gnomish");
-		c->Message(Chat::White, "(9) Halfling");
-		c->Message(Chat::White, "(10) Thieves Cant");
-		c->Message(Chat::White, "(11) Old Erudian");
-		c->Message(Chat::White, "(12) Elder Elvish");
-		c->Message(Chat::White, "(13) Froglok");
-		c->Message(Chat::White, "(14) Goblin");
-		c->Message(Chat::White, "(15) Gnoll");
-		c->Message(Chat::White, "(16) Combine Tongue");
-		c->Message(Chat::White, "(17) Elder Teir`Dal");
-		c->Message(Chat::White, "(18) Lizardman");
-		c->Message(Chat::White, "(19) Orcish");
-		c->Message(Chat::White, "(20) Faerie");
-		c->Message(Chat::White, "(21) Dragon");
-		c->Message(Chat::White, "(22) Elder Dragon");
-		c->Message(Chat::White, "(23) Dark Speech");
-		c->Message(Chat::White, "(24) Vah Shir");
-		c->Message(Chat::White, "(25) Alaran");
-		c->Message(Chat::White, "(26) Hadal");
-		c->Message(Chat::White, "(27) Unknown1");
+	Client* target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
 	}
-	else if( c->GetTarget() == 0 )
-	{
-		c->Message(Chat::White, "Error: #setlanguage: No target.");
-	}
-	else if( !c->GetTarget()->IsClient() )
-	{
-		c->Message(Chat::White, "Error: Target must be a player.");
-	}
-	else if (
-				!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > 27 ||
-				!sep->IsNumber(2) || atoi(sep->arg[2]) < 0 || atoi(sep->arg[2]) > 100
-			)
-	{
-		c->Message(Chat::White, "Usage: #setlanguage [language ID] [value] (0-27, 0-100)");
-		c->Message(Chat::White, "Try #setlanguage list for a list of language IDs");
-	}
-	else
-	{
-		LogInfo("Set language request from [{}], target:[{}] lang_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
-		uint8 langid = (uint8)atoi(sep->arg[1]);
-		uint8 value = (uint8)atoi(sep->arg[2]);
-		c->GetTarget()->CastToClient()->SetLanguageSkill( langid, value );
+
+	
+	std::map<int, std::string> language_map = EQ::constants::GetLanguageMap();
+	auto language_id = sep->IsNumber(1) ? std::stoi(sep->arg[1]) : -1;
+	auto language_value = sep->IsNumber(2) ? std::stoi(sep->arg[2]) : -1;
+	if (!strcasecmp(sep->arg[1], "list" )) {
+		for (const auto& language : language_map) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Language {}: {}",
+					language.first,
+					language.second
+				).c_str()
+			);
+		}
+	} else if (
+		language_id < LANG_COMMON_TONGUE ||
+		language_id > LANG_UNKNOWN ||
+		language_value < 0 ||
+		language_value > 100
+	) {
+		c->Message(Chat::White, "Usage: #setlanguage [Language ID] [Language Value]");
+		c->Message(Chat::White, "Usage: #setlanguage [List]");
+		c->Message(Chat::White, "Language ID = 0 to 27", LANG_UNKNOWN);
+		c->Message(Chat::White, "Language Value = 0 to 100", HIGHEST_CAN_SET_SKILL);
+	} else {
+		LogInfo(
+			"Set language request from [{}], Target: [{}] Language ID: [{}] Language Value: [{}]",
+			c->GetCleanName(),
+			target->GetCleanName(),
+			language_id,
+			language_value
+		);
+
+		target->SetLanguageSkill(language_id, language_value);
+
+		if (c != target) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Set {} ({}) to {} for {}.",
+					language_map[language_id],
+					language_id,
+					language_value,
+					target->GetCleanName()
+				).c_str()
+			);
+		}
 	}
 }
 
