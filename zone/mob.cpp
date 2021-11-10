@@ -2210,8 +2210,8 @@ void Mob::ShowStats(Client* client)
 				fmt::format(
 					"Proximity X | Min: {} Max: {} Range: {}",
 					target->GetProximityMinX(),
-					target->GetProximityMinX(),
-					(target->GetProximityMinX() - target->GetProximityMinX())
+					target->GetProximityMaxX(),
+					(target->GetProximityMaxX() - target->GetProximityMinX())
 				).c_str()
 			);
 			
