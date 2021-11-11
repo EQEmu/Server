@@ -5177,13 +5177,9 @@ void command_findnpctype(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "20 NPCs were found, max reached.");
 	} else {
 		auto npc_message = (
-			found_count > 0 ? 
-			(
-				found_count == 1 ?
-				"An NPC was" :
-				fmt::format("{} NPCs were", found_count)
-			) :
-			"No NPCs were"
+			found_count == 1 ?
+			"An NPC was" :
+			fmt::format("{} NPCs were", found_count)
 		);
 
 		c->Message(
