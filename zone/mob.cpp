@@ -1840,8 +1840,8 @@ void Mob::ShowStats(Client* client)
 		}
 		
 		if (
-			target->GetLegTexture() ||
-			target->GetFeetTexture()
+			target->GetFeetTexture() ||
+			target->GetLegTexture()
 		) {
 			client->Message(
 				Chat::White,
