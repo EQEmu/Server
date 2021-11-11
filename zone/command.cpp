@@ -5166,8 +5166,8 @@ void command_findnpctype(Client *c, const Seperator *sep)
 			fmt::format(
 				"NPC {} | {} ({})",
 				found_number,
-				row[0],
-				row[1]
+				row[1],
+				row[0]
 			).c_str()
 		);
 		found_count++;
