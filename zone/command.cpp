@@ -181,7 +181,7 @@ int command_init(void)
 #endif
 
 		command_add("camerashake",  "Shakes the camera on everyone's screen globally.",  80, command_camerashake) ||
-		command_add("castspell", "[Spell ID] [Use Cast Time (0 = No, 1 = Yes, Default is 0 if unused)] - Cast a spell", 50, command_castspell) ||
+		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", 50, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", 200, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] Copies character to destination account", 250, command_copycharacter) ||
