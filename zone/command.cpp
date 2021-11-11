@@ -181,7 +181,7 @@ int command_init(void)
 #endif
 
 		command_add("camerashake",  "Shakes the camera on everyone's screen globally.",  80, command_camerashake) ||
-		command_add("castspell", "[spellid] - Cast a spell", 50, command_castspell) ||
+		command_add("castspell", "[Spell ID] [Use Cast Time (0 = No, 1 = Yes, Default is 0 if unused)] - Cast a spell", 50, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", 200, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", 50, command_checklos) ||
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] Copies character to destination account", 250, command_copycharacter) ||
@@ -3642,26 +3642,31 @@ void command_castspell(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Client *target = c;	
-	if(c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
+	Mob *target = c;
+	if(c->GetTarget()) {
+		target = c->GetTarget();
 	}
 
 	if (!sep->IsNumber(1)) {
-		c->Message(Chat::White, "Usage: #castspell [Spell ID]");
+		c->Message(Chat::White, "Usage: #castspell [Spell ID]  [Instant (0 = False, 1 = True, Default is 1 if Unused)]");
 	} else {
 		uint16 spell_id = std::stoul(sep->arg[1]);
+
 		if (CastRestrictedSpell(spell_id) && c->Admin() < commandCastSpecials) {
 			c->Message(Chat::Red, "Unable to cast spell.");
 		} else if (spell_id >= SPDAT_RECORDS) {
 			c->Message(Chat::White, "Invalid Spell ID.");
 		} else {
-			bool instant_cast = false;
-			if (c->Admin() >= commandInstacast) {
+			bool instant_cast = (c->Admin() >= commandInstacast ? true : false);
+			if (instant_cast && sep->IsNumber(2)) {
+				instant_cast = std::stoi(sep->arg[2]) ? true : false;
+				c->Message(Chat::White, fmt::format("{}", std::stoi(sep->arg[2])).c_str());
+			}
+
+			if (c->Admin() >= commandInstacast && instant_cast) {
 				c->SpellFinished(spell_id, target, EQ::spells::CastingSlot::Item, 0, -1, spells[spell_id].resist_difficulty);
-				instant_cast = true;
 			} else {
-				c->CastSpell(spell_id, target->GetID(), EQ::spells::CastingSlot::Item, 0);
+				c->CastSpell(spell_id, target->GetID(), EQ::spells::CastingSlot::Item, spells[spell_id].cast_time);
 			}
 
 			if (c != target) {
