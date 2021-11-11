@@ -1355,9 +1355,9 @@ void ClientList::SendClientVersionSummary(const char *Name)
 
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
 	Iterator.Reset();
-	while(Iterator.MoreElements()) {
+	while (Iterator.MoreElements()) {
 		ClientListEntry* CLE = Iterator.GetData();
-		if(CLE && CLE->zone()) {
+		if (CLE && CLE->zone()) {
 			auto client_version = CLE->GetClientVersion();
 			if (
 				client_version >= (uint8) EQ::versions::ClientVersion::Titanium &&
