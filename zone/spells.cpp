@@ -417,12 +417,19 @@ bool Mob::DoCastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		target_id = GetID();
 	}
 
-	if(cast_time <= -1) {
+	if (cast_time <= -1) {
 		// save the non-reduced cast time to use in the packet
 		cast_time = orgcasttime = spell.cast_time;
 		// if there's a cast time, check if they have a modifier for it
-		if(cast_time) {
+		if (cast_time) {
 			cast_time = GetActSpellCasttime(spell_id, cast_time);
+		}
+	}
+	//must use SPA 415 with focus (SPA 127/500/501) to reduce item recast
+	else if (cast_time && IsClient() && slot == CastingSlot::Item && item_slot != 0xFFFFFFFF) {
+		orgcasttime = cast_time;
+		if (cast_time) {
+			cast_time = GetActSpellCasttime(spell_id, cast_time); 
 		}
 	}
 	else
@@ -2543,6 +2550,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 				recast -= GetAA(aaTouchoftheWicked) * 420;
 			}
 			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only
+
 			if(reduction)
 				recast -= reduction;
 
@@ -2556,20 +2564,32 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 		EQ::ItemInstance *itm = CastToClient()->GetInv().GetItem(inventory_slot);
 		if(itm && itm->GetItem()->RecastDelay > 0){
 			auto recast_type = itm->GetItem()->RecastType;
-			CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), itm->GetItem()->RecastDelay);
-			if (recast_type != -1) {
-				database.UpdateItemRecastTimestamps(
-				    CastToClient()->CharacterID(),
-					recast_type,
-					CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
-				);
+			int recast_delay = itm->GetItem()->RecastDelay;
+			//must use SPA 415 with focus (SPA 310) to reduce item recast
+			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
+			if (reduction) {
+				recast_delay -= reduction;
 			}
-			auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
-			ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
-			ird->recast_delay = itm->GetItem()->RecastDelay;
-			ird->recast_type = recast_type;
-			CastToClient()->QueuePacket(outapp);
-			safe_delete(outapp);
+			recast_delay = std::max(recast_delay, 0);
+
+			if (recast_delay > 0) {
+
+				CastToClient()->GetPTimers().Start((pTimerItemStart + recast_type), recast_delay);
+				if (recast_type != -1) {
+					database.UpdateItemRecastTimestamps(
+						CastToClient()->CharacterID(),
+						recast_type,
+						CastToClient()->GetPTimers().Get(pTimerItemStart + recast_type)->GetReadyTimestamp()
+					);
+				}
+
+				auto outapp = new EQApplicationPacket(OP_ItemRecastDelay, sizeof(ItemRecastDelay_Struct));
+				ItemRecastDelay_Struct *ird = (ItemRecastDelay_Struct *)outapp->pBuffer;
+				ird->recast_delay = static_cast<uint32>(recast_delay);
+				ird->recast_type = recast_type;
+				CastToClient()->QueuePacket(outapp);
+				safe_delete(outapp);
+			}
 		}
 	}
 
