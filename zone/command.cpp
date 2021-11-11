@@ -3721,29 +3721,56 @@ void command_setlanguage(Client *c, const Seperator *sep)
 	}
 }
 
-void command_setskill(Client *c, const Seperator *sep)
+void command_setskill(Client* c, const Seperator* sep)
 {
-	if (c->GetTarget() == nullptr) {
-		c->Message(Chat::White, "Error: #setskill: No target.");
+	Client* target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
 	}
-	else if (!c->GetTarget()->IsClient()) {
-		c->Message(Chat::White, "Error: #setskill: Target must be a client.");
-	}
-	else if (
-		!sep->IsNumber(1) || atoi(sep->arg[1]) < 0 || atoi(sep->arg[1]) > EQ::skills::HIGHEST_SKILL ||
-						!sep->IsNumber(2) || atoi(sep->arg[2]) < 0 || atoi(sep->arg[2]) > HIGHEST_CAN_SET_SKILL
-					)
-	{
-		c->Message(Chat::White, "Usage: #setskill skill x ");
-		c->Message(Chat::White, "       skill = 0 to %d", EQ::skills::HIGHEST_SKILL);
-		c->Message(Chat::White, "       x = 0 to %d",  HIGHEST_CAN_SET_SKILL);
+
+	auto skill_id = sep->IsNumber(1) ? std::stoi(sep->arg[1]) : -1;
+	auto skill_value = sep->IsNumber(2) ? std::stoi(sep->arg[2]) : -1;
+	if (
+		skill_id < 0 ||
+		skill_id > EQ::skills::HIGHEST_SKILL ||
+		skill_value < 0 ||
+		skill_value > HIGHEST_CAN_SET_SKILL
+	) {
+		c->Message(Chat::White, "Usage: #setskill [Skill ID] [Skill Value]");
+		c->Message(Chat::White, fmt::format("Skill ID = 0 to {}", EQ::skills::HIGHEST_SKILL).c_str());
+		c->Message(Chat::White, fmt::format("Skill Value = 0 to {}", HIGHEST_CAN_SET_SKILL).c_str());
 	}
 	else {
-		LogInfo("Set skill request from [{}], target:[{}] skill_id:[{}] value:[{}]",  c->GetName(), c->GetTarget()->GetName(), atoi(sep->arg[1]), atoi(sep->arg[2]) );
-		int skill_num = atoi(sep->arg[1]);
-		uint16 skill_value = atoi(sep->arg[2]);
-		if (skill_num <= EQ::skills::HIGHEST_SKILL)
-			c->GetTarget()->CastToClient()->SetSkill((EQ::skills::SkillType)skill_num, skill_value);
+		LogInfo(
+			"Set skill request from [{}], Target: [{}] Skill ID: [{}] Skill Value: [{}]",
+			c->GetCleanName(),
+			target->GetCleanName(),
+			skill_id,
+			skill_value
+		);
+
+		if (
+			skill_id >= EQ::skills::Skill1HBlunt &&
+			skill_id <= EQ::skills::HIGHEST_SKILL
+			) {
+			target->SetSkill(
+				(EQ::skills::SkillType)skill_id,
+				skill_value
+			);
+
+			if (c != target) {
+				c->Message(
+					Chat::White,
+					fmt::format(
+						"Set {} ({}) to {} for {}.",
+						EQ::skills::GetSkillName((EQ::skills::SkillType)skill_id),
+						skill_id,
+						skill_value,
+						target->GetCleanName()
+					).c_str()
+				);
+			}
+		}
 	}
 }
 
