@@ -5637,37 +5637,46 @@ void command_zonelock(Client *c, const Seperator *sep)
 	auto pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
 	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
 	strn0cpy(s->adminname, c->GetName(), sizeof(s->adminname));
-	if (strcasecmp(sep->arg[1], "list") == 0) {
-		s->op = 0;
+	bool is_list = !strcasecmp(sep->arg[1], "list");
+	bool is_lock = !strcasecmp(sep->arg[1], "lock");
+	bool is_unlock = !strcasecmp(sep->arg[1], "unlock");
+	if (is_list) {
+		s->op = EQ::constants::ServerLockType::List;
 		worldserver.SendPacket(pack);
-	}
-	else if (strcasecmp(sep->arg[1], "lock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = ZoneID(sep->arg[2]);
-		if (tmp) {
-			s->op = 1;
-			s->zoneID = tmp;
+	} else if (
+		(
+			is_lock ||
+			is_unlock
+		) &&
+		c->Admin() >= commandLockZones
+	) {
+		auto zone_id = (
+			sep->IsNumber(2) ?
+			std::stoul(sep->arg[2]) :
+			ZoneID(sep->arg[2])
+		);
+
+		if (zone_id && ZoneName(zone_id, true) != "UNKNOWN") {
+			s->op = is_lock ? EQ::constants::ServerLockType::Lock : EQ::constants::ServerLockType::Unlock;
+			s->zoneID = static_cast<uint16>(zone_id);
 			worldserver.SendPacket(pack);
+		} else {
+			auto fail_message = (
+				is_lock ?
+				"Usage: #zonelock lock [Zone ID] or #zonelock lock [Zone Short Name]" :
+				(
+					is_unlock ?
+					"Usage: #zonelock unlock [Zone ID] or #zonelock unlock [Zone Short Name]" :
+					""
+				)
+			);
+			c->Message(Chat::White, fail_message);
 		}
-		else
-			c->Message(Chat::White, "Usage: #zonelock lock [zonename]");
-	}
-	else if (strcasecmp(sep->arg[1], "unlock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = ZoneID(sep->arg[2]);
-		if (tmp) {
-			s->op = 2;
-			s->zoneID = tmp;
-			worldserver.SendPacket(pack);
-		}
-		else
-			c->Message(Chat::White, "Usage: #zonelock unlock [zonename]");
-	}
-	else {
-		c->Message(Chat::White, "#zonelock sub-commands");
-		c->Message(Chat::White, "  list");
-		if(c->Admin() >= commandLockZones)
-		{
-			c->Message(Chat::White, "  lock [zonename]");
-			c->Message(Chat::White, "  unlock [zonename]");
+	} else {
+		c->Message(Chat::White, "Usage: #zonelock [List] - Lists zone locks.");
+		if (c->Admin() >= commandLockZones) {
+			c->Message(Chat::White, "Usage: #zonelock lock [Zone ID] or #zonelock lock [Zone Short Name] ");
+			c->Message(Chat::White, "Usage: #zonelock unlock [Zone ID] or #zonelock unlock [Zone Short Name]");
 		}
 	}
 	safe_delete(pack);

@@ -230,6 +230,11 @@ namespace EQ
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
 
+		enum ServerLockType : int {
+			List,
+			Lock,
+			Unlock
+		};
 	} /*constants*/
 
 	namespace profile {

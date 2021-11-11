@@ -40,7 +40,7 @@ public:
 	std::string GetZoneName(uint32 zone_id);
 	std::string GetZoneLongName(uint32 zone_id);
 	const char *GetZoneName(uint32 zone_id, bool error_unknown = false);
-
+	const char *GetZoneLongName(uint32 zone_id, bool error_unknown = false);
 };
 
 extern WorldStore world_store;
@@ -57,7 +57,13 @@ inline const char *ZoneName(uint32 zone_id, bool error_unknown = false)
 		error_unknown
 	);
 }
-inline const char *ZoneLongName(uint32 zone_id) { return world_store.GetZoneLongName(zone_id).c_str(); }
+inline const char *ZoneLongName(uint32 zone_id, bool error_unknown = false)
+{
+	return world_store.GetZoneLongName(
+		zone_id,
+		error_unknown
+	);
+}
 inline ZoneRepository::Zone GetZone(uint32 zone_id, int version = 0) { return world_store.GetZone(zone_id, version); };
 inline ZoneRepository::Zone GetZone(const char *in_zone_name) { return world_store.GetZone(in_zone_name); };
 
