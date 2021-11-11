@@ -1343,71 +1343,67 @@ void ClientList::GetClients(const char *zone_name, std::vector<ClientListEntry *
 
 void ClientList::SendClientVersionSummary(const char *Name)
 {
-	uint32 ClientTitaniumCount = 0;
-	uint32 ClientSoFCount = 0;
-	uint32 ClientSoDCount = 0;
-	uint32 ClientUnderfootCount = 0;
-	uint32 ClientRoFCount = 0;
-	uint32 ClientRoF2Count = 0;
-
+	std::vector<uint32> unique_ips;
+	std::map<EQ::versions::ClientVersion,int> client_count = {
+		{ EQ::versions::ClientVersion::Titanium, 0 },
+		{ EQ::versions::ClientVersion::SoF, 0 },
+		{ EQ::versions::ClientVersion::SoD, 0 },
+		{ EQ::versions::ClientVersion::UF, 0 },
+		{ EQ::versions::ClientVersion::RoF, 0 },
+		{ EQ::versions::ClientVersion::RoF2, 0 }
+	};
 
 	LinkedListIterator<ClientListEntry*> Iterator(clientlist);
-
 	Iterator.Reset();
-
-	while(Iterator.MoreElements())
-	{
+	while (Iterator.MoreElements()) {
 		ClientListEntry* CLE = Iterator.GetData();
+		if (CLE && CLE->zone()) {
+			auto client_version = CLE->GetClientVersion();
+			if (
+				client_version >= (uint8) EQ::versions::ClientVersion::Titanium &&
+				client_version <= (uint8) EQ::versions::ClientVersion::RoF2
+			) {
+				client_count[(EQ::versions::ClientVersion)client_version]++;
+			}
 
-		if(CLE && CLE->zone())
-		{
-			switch(CLE->GetClientVersion())
-			{
-				case 1:
-				{
-					break;
-				}
-				case 2:
-				{
-					++ClientTitaniumCount;
-					break;
-				}
-				case 3:
-				{
-					++ClientSoFCount;
-					break;
-				}
-				case 4:
-				{
-					++ClientSoDCount;
-					break;
-				}
-				case 5:
-				{
-					++ClientUnderfootCount;
-					break;
-				}
-				case 6:
-				{
-					++ClientRoFCount;
-					break;
-				}
-				case 7:
-				{
-					++ClientRoF2Count;
-					break;
-				}
-				default:
-					break;
+			if (std::find(unique_ips.begin(), unique_ips.begin(), CLE->GetIP()) == unique_ips.end()) {
+				unique_ips.push_back(CLE->GetIP());
 			}
 		}
 
 		Iterator.Advance();
-
 	}
 
-	zoneserver_list.SendEmoteMessage(Name, 0, 0, 13, "There are %i Titanium, %i SoF, %i SoD, %i UF, %i RoF, %i RoF2 clients currently connected.",
-		ClientTitaniumCount, ClientSoFCount, ClientSoDCount, ClientUnderfootCount, ClientRoFCount, ClientRoF2Count);
+	uint32 total_clients = (
+		client_count[EQ::versions::ClientVersion::Titanium] +
+		client_count[EQ::versions::ClientVersion::SoF] +
+		client_count[EQ::versions::ClientVersion::SoD] +
+		client_count[EQ::versions::ClientVersion::UF] +
+		client_count[EQ::versions::ClientVersion::RoF] +
+		client_count[EQ::versions::ClientVersion::RoF2]
+	);
+
+	zoneserver_list.SendEmoteMessage(
+		Name,
+		0,
+		0,
+		Chat::White,
+		fmt::format(
+			"There {} {} Titanium, {} SoF, {} SoD, {} UF, {} RoF, and {} RoF2 Client{} currently connected for a total of {} Client{} and {} Unique IP{} connected.",
+			(total_clients != 1 ? "are" : "is"),		
+			client_count[EQ::versions::ClientVersion::Titanium],
+			client_count[EQ::versions::ClientVersion::SoF],
+			client_count[EQ::versions::ClientVersion::SoD],
+			client_count[EQ::versions::ClientVersion::UF],
+			client_count[EQ::versions::ClientVersion::RoF],
+			client_count[EQ::versions::ClientVersion::RoF2],
+			(total_clients != 1 ? "s" : ""),
+			total_clients,
+			(total_clients != 1 ? "s" : ""),
+			unique_ips.size(),
+			(unique_ips.size() != 1 ? "s" : "")
+		).c_str()
+	);
 }
 
 void ClientList::OnTick(EQ::Timer *t)

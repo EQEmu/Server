@@ -13778,20 +13778,14 @@ void command_door(Client *c, const Seperator *sep) {
 
 void command_cvs(Client *c, const Seperator *sep)
 {
-	if(c)
-	{
-		auto pack =
-		    new ServerPacket(ServerOP_ClientVersionSummary, sizeof(ServerRequestClientVersionSummary_Struct));
-
-		ServerRequestClientVersionSummary_Struct *srcvss = (ServerRequestClientVersionSummary_Struct*)pack->pBuffer;
-
-		strn0cpy(srcvss->Name, c->GetName(), sizeof(srcvss->Name));
-
-		worldserver.SendPacket(pack);
-
-		safe_delete(pack);
-
-	}
+	auto pack = new ServerPacket(
+		ServerOP_ClientVersionSummary,
+		sizeof(ServerRequestClientVersionSummary_Struct)
+	);
+	auto srcvss = (ServerRequestClientVersionSummary_Struct*)pack->pBuffer;
+	strn0cpy(srcvss->Name, c->GetName(), sizeof(srcvss->Name));
+	worldserver.SendPacket(pack);
+	safe_delete(pack);
 }
 
 void command_max_all_skills(Client *c, const Seperator *sep)
