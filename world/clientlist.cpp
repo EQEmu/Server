@@ -1361,7 +1361,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 			auto client_version = CLE->GetClientVersion();
 			if (
 				client_version >= (uint8) EQ::versions::ClientVersion::Titanium &&
-				client_version <= (uint8)EQ::versions::ClientVersion::RoF2
+				client_version <= (uint8) EQ::versions::ClientVersion::RoF2
 			) {
 				client_count[(EQ::versions::ClientVersion)client_version]++;
 			}
