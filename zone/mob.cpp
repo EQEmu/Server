@@ -1641,15 +1641,21 @@ void Mob::ShowStats(Client* client)
 		);
 
 		// Spawn Data
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Group: {} Point: {} Grid: {}",
-				target->GetSpawnGroupId(),
-				target->GetSpawnPointID(),
-				target->GetGrid()
-			).c_str()
-		);
+		if (
+			target->GetGrid() ||
+			target->GetSpawnGroupId() ||
+			target->GetSpawnPointID()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn | Group: {} Point: {} Grid: {}",
+					target->GetSpawnGroupId(),
+					target->GetSpawnPointID(),
+					target->GetGrid()
+				).c_str()
+			);
+		}
 
 		client->Message(
 			Chat::White,
@@ -1817,24 +1823,35 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Textures | Arms: {} Bracers: {} Hands: {}",
-				target->GetArmTexture(),
-				target->GetBracerTexture(),
-				target->GetHandTexture()
-			).c_str()
-		);
+		if (
+			target->GetArmTexture() ||
+			target->GetBracerTexture() ||
+			target->GetHandTexture()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Textures | Arms: {} Bracers: {} Hands: {}",
+					target->GetArmTexture(),
+					target->GetBracerTexture(),
+					target->GetHandTexture()
+				).c_str()
+			);
+		}
 		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Textures | Legs: {} Feet: {}",
-				target->GetLegTexture(),
-				target->GetFeetTexture()
-			).c_str()
-		);
+		if (
+			target->GetLegTexture() ||
+			target->GetFeetTexture()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Textures | Legs: {} Feet: {}",
+					target->GetLegTexture(),
+					target->GetFeetTexture()
+				).c_str()
+			);
+		}
 
 		// Hero's Forge
 		if (target->GetHeroForgeModel()) {
@@ -2147,14 +2164,16 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 
-		// Emote		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Emote: {}",
-				target->GetEmoteID()
-			).c_str()
-		);
+		// Emote
+		if (target->GetEmoteID()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Emote: {}",
+					target->GetEmoteID()
+				).c_str()
+			);
+		}
 
 		// Run/Walk Speed
 		client->Message(
