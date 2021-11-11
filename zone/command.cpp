@@ -5151,6 +5151,7 @@ void command_findnpctype(Client *c, const Seperator *sep)
 				search_criteria
 			).c_str()
 		);
+		return;
 	}
 
 	int found_count = 0;
