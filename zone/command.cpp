@@ -440,7 +440,7 @@ int command_init(void)
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", 180, command_untraindiscs) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", 10, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
-		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
+		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", 100, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", 20, command_viewpetition) ||
 		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", 80, command_viewzoneloot) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", 200, command_wc) ||
@@ -5375,28 +5375,28 @@ void command_findzone(Client *c, const Seperator *sep)
 
 void command_viewnpctype(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(1))
-		c->Message(Chat::White, "Usage: #viewnpctype [npctype id]");
-	else
-	{
-		uint32 npctypeid=atoi(sep->arg[1]);
-		const NPCType* npct = content_db.LoadNPCTypesData(npctypeid);
-		if (npct) {
-			c->Message(Chat::White, " NPCType Info, ");
-			c->Message(Chat::White, "  NPCTypeID: %u",  npct->npc_id);
-			c->Message(Chat::White, "  Name: %s",  npct->name);
-			c->Message(Chat::White, "  Level: %i",  npct->level);
-			c->Message(Chat::White, "  Race: %i",  npct->race);
-			c->Message(Chat::White, "  Class: %i",  npct->class_);
-			c->Message(Chat::White, "  MinDmg: %i",  npct->min_dmg);
-			c->Message(Chat::White, "  MaxDmg: %i",  npct->max_dmg);
-			c->Message(Chat::White, "  Special Abilities: %s",  npct->special_abilities);
-			c->Message(Chat::White, "  Spells: %i",  npct->npc_spells_id);
-			c->Message(Chat::White, "  Loot Table: %i",  npct->loottable_id);
-			c->Message(Chat::White, "  NPCFactionID: %i",  npct->npc_faction_id);
+	if (sep->IsNumber(1)) {
+		uint32 npc_id = std::stoul(sep->arg[1]);
+		const NPCType* npc_type_data = content_db.LoadNPCTypesData(npc_id);
+		if (npc_type_data) {
+			auto npc = new NPC(
+				npc_type_data,
+				nullptr,
+				c->GetPosition(),
+				GravityBehavior::Water
+			);
+			npc->ShowStats(c);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"NPC ID {} was not found.",
+					npc_id
+				).c_str()
+			);
 		}
-		else
-			c->Message(Chat::White, "NPC #%d not found",  npctypeid);
+	} else {
+		c->Message(Chat::White, "Usage: #viewnpctype [NPC ID]");
 	}
 }
 
