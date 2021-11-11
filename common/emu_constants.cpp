@@ -18,6 +18,7 @@
 */
 
 #include "emu_constants.h"
+#include "languages.h"
 
 
 int16 EQ::invtype::GetInvTypeSize(int16 inv_type) {
@@ -151,4 +152,48 @@ int EQ::constants::ConvertStanceTypeToIndex(StanceType stance_type) {
 		return (stance_type - EQ::constants::stancePassive);
 
 	return 0;
+}
+
+const std::map<int, std::string>& EQ::constants::GetLanguageMap()
+{
+	static const std::map<int, std::string> language_map = {
+		{ LANG_COMMON_TONGUE, "Common Tongue" },
+		{ LANG_BARBARIAN, "Barbarian" },
+		{ LANG_ERUDIAN, "Erudian" },
+		{ LANG_ELVISH, "Elvish" },
+		{ LANG_DARK_ELVISH, "Dark Elvish" },
+		{ LANG_DWARVISH, "Dwarvish" },
+		{ LANG_TROLL, "Troll" },
+		{ LANG_OGRE, "Ogre" },
+		{ LANG_GNOMISH, "Gnomish" },
+		{ LANG_HALFLING, "Halfling" },
+		{ LANG_THIEVES_CANT, "Thieves Cant" },
+		{ LANG_OLD_ERUDIAN, "Old Erudian" },
+		{ LANG_ELDER_ELVISH, "Elder Elvish" },
+		{ LANG_FROGLOK, "Froglok" },
+		{ LANG_GOBLIN, "Goblin" },
+		{ LANG_GNOLL, "Gnoll" },
+		{ LANG_COMBINE_TONGUE, "Combine Tongue" },
+		{ LANG_ELDER_TEIRDAL, "Elder Teirdal" },
+		{ LANG_LIZARDMAN, "Lizardman" },
+		{ LANG_ORCISH, "Orcish" },
+		{ LANG_FAERIE, "Faerie" },
+		{ LANG_DRAGON, "Dragon" },
+		{ LANG_ELDER_DRAGON, "Elder Dragon" },
+		{ LANG_DARK_SPEECH, "Dark Speech" },
+		{ LANG_VAH_SHIR, "Vah Shir" },
+		{ LANG_ALARAN, "Alaran" },
+		{ LANG_HADAL, "Hadal" },
+		{ LANG_UNKNOWN, "Unknown" }
+	};
+	return language_map;
+}
+
+std::string EQ::constants::GetLanguageName(int language_id)
+{
+	if (language_id >= LANG_COMMON_TONGUE && language_id <= LANG_UNKNOWN) {
+		auto languages = EQ::constants::GetLanguageMap();
+		return languages[language_id];
+	}
+	return std::string();
 }
