@@ -286,7 +286,6 @@ int command_init(void)
 		command_add("loc", "- Print out your or your target's current location and heading", 0, command_loc) ||
 		command_add("lock", "- Lock the worldserver", 150, command_lock) ||
 		command_add("logs",  "Manage anything to do with logs",  250, command_logs) ||
-		command_add("logtest",  "Performs log performance testing.",  250, command_logtest) ||
 		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", 50, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", 50, command_mana) ||
 		command_add("maxskills", "Maxes skills for you.", 200, command_max_all_skills) ||
@@ -14531,18 +14530,6 @@ void command_tune(Client *c, const Seperator *sep)
 
 
 	return;
-}
-
-void command_logtest(Client *c, const Seperator *sep){
-	clock_t t = std::clock(); /* Function timer start */
-	if (sep->IsNumber(1)){
-		uint32 i = 0;
-		t = std::clock();
-		for (i = 0; i < atoi(sep->arg[1]); i++){
-			LogDebug("[[{}]] Test #2 Took [{}] seconds", i, ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
-		}
-
-	}
 }
 
 void command_crashtest(Client *c, const Seperator *sep)
