@@ -614,7 +614,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 		if (sci->local_address[0]) {
 			strn0cpy(client_local_address, sci->local_address, 250);
-			LogInfo("Zone specified local address [{}]", sci->address);
+			LogInfo("Zone specified local address [{}]", sci->local_address);
 		}
 
 		if (sci->process_id) {
