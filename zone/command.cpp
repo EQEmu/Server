@@ -5393,19 +5393,22 @@ void command_viewnpctype(Client *c, const Seperator *sep)
 
 void command_reloadqst(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
-	{
-		c->Message(Chat::White, "Clearing quest memory cache.");
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-	}
-	else
-	{
-		c->Message(Chat::White, "Clearing quest memory cache and stopping timers.");
-		entity_list.ClearAreas();
-		parse->ReloadQuests(true);
+	bool stop_timers = false;
+
+	if (sep->IsNumber(1)) {
+		stop_timers = std::stoi(sep->arg[1]) != 0 ? true : false;
 	}
 
+	std::string stop_timers_message = stop_timers ? " and stopping timers" : "";
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Clearing quest memory cache{}.",
+			stop_timers_message
+		).c_str()
+	);
+	entity_list.ClearAreas();
+	parse->ReloadQuests(stop_timers);
 }
 
 void command_corpsefix(Client *c, const Seperator *sep)
