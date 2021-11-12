@@ -69,7 +69,6 @@ void command_camerashake(Client *c, const Seperator *sep);
 void command_castspell(Client *c, const Seperator *sep);
 void command_chat(Client *c, const Seperator *sep);
 void command_checklos(Client *c, const Seperator *sep);
-void command_clearinvsnapshots(Client *c, const Seperator *sep);
 void command_connectworldserver(Client *c, const Seperator *sep);
 void command_copycharacter(Client *c, const Seperator *sep);
 void command_corpse(Client *c, const Seperator *sep);
