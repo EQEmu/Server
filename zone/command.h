@@ -269,7 +269,6 @@ void command_save(Client *c, const Seperator *sep);
 void command_scale(Client *c, const Seperator *sep);
 void command_scribespell(Client *c, const Seperator *sep);
 void command_scribespells(Client *c, const Seperator *sep);
-void command_sendop(Client *c, const Seperator *sep);
 void command_sendzonespawns(Client *c, const Seperator *sep);
 void command_sensetrap(Client *c, const Seperator *sep);
 void command_serverinfo(Client *c, const Seperator *sep);
