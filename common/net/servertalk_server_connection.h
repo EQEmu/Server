@@ -27,11 +27,13 @@ namespace EQ
 		private:
 			void OnRead(TCPConnection* c, const unsigned char* data, size_t sz);
 			void ProcessReadBuffer();
+			void ProcessOldReadBuffer();
 			void OnDisconnect(TCPConnection* c);
 			void SendHello();
 			void InternalSend(ServertalkPacketType type, EQ::Net::Packet &p);
 			void ProcessHandshake(EQ::Net::Packet &p);
 			void ProcessMessage(EQ::Net::Packet &p);
+			void ProcessMessageOld(uint16_t opcode, EQ::Net::Packet &p);
 
 			std::shared_ptr<EQ::Net::TCPConnection> m_connection;
 			ServertalkServer *m_parent;
@@ -41,6 +43,7 @@ namespace EQ
 			std::function<void(uint16_t, EQ::Net::Packet&)> m_message_callback;
 			std::string m_identifier;
 			std::string m_uuid;
+			bool m_legacy_mode;
 		};
 	}
 }

@@ -45,7 +45,7 @@ public:
 	 * @param sequence
 	 * @return
 	 */
-	EQApplicationPacket *CreateServerListPacket(Client *client, uint32 sequence);
+	std::unique_ptr<EQApplicationPacket> CreateServerListPacket(Client *client, uint32 sequence);
 
 	/**
 	 * Checks to see if there is a server exists with this name, ignoring option

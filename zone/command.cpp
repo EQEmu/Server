@@ -188,7 +188,6 @@ int command_init(void)
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] Copies character to destination account", 250, command_copycharacter) ||
 		command_add("corpse", "- Manipulate corpses, use with no arguments for help", 50, command_corpse) ||
 		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", 0, command_corpsefix) ||
-		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
 		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", 80, command_databuckets) ||
@@ -297,7 +296,6 @@ int command_init(void)
 		command_add("movechar", "[charname] [zonename] - Move charname to zonename", 50, command_movechar) ||
 		command_add("movement", "Various movement commands", 200, command_movement) ||
 		command_add("myskills", "- Show details about your current skill levels", 0, command_myskills) ||
-		command_add("mysqltest", "Akkadius MySQL Bench Test", 250, command_mysqltest) ||
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
 		command_add("mystats", "- Show details about you or your pet", 50, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", 150, command_name) ||
@@ -428,7 +426,7 @@ int command_init(void)
 		command_add("titlesuffix", "[text] [1 = create title table row] - Set your or your player target's title suffix", 50, command_titlesuffix) ||
 		command_add("traindisc", "[level] - Trains all the disciplines usable by the target, up to level specified. (may freeze client for a few seconds)", 150, command_traindisc) ||
 		command_add("trapinfo", "- Gets infomation about the traps currently spawned in the zone.", 81, command_trapinfo) ||
-		command_add("tune",  "Calculate ideal statical values related to combat.",  100, command_tune) ||
+		command_add("tune",  "Calculate statistical values related to combat.",  100, command_tune) ||
 		command_add("ucs", "- Attempts to reconnect to the UCS server", 0, command_ucs) ||
 		command_add("undyeme", "- Remove dye from all of your armor slots", 0, command_undyeme) ||
 		command_add("unfreeze", "- Unfreeze your target", 80, command_unfreeze) ||
@@ -439,7 +437,7 @@ int command_init(void)
 		command_add("untraindiscs", "- Untrains all disciplines from your target.", 180, command_untraindiscs) ||
 		command_add("uptime", "[zone server id] - Get uptime of worldserver, or zone server if argument provided", 10, command_uptime) ||
 		command_add("version", "- Display current version of EQEmu server", 0, command_version) ||
-		command_add("viewnpctype", "[npctype id] - Show info about an npctype", 100, command_viewnpctype) ||
+		command_add("viewnpctype", "[NPC ID] - Show stats for an NPC by NPC ID", 100, command_viewnpctype) ||
 		command_add("viewpetition", "[petition number] - View a petition", 20, command_viewpetition) ||
 		command_add("viewzoneloot", "[item id] - Allows you to search a zone's loot for a specific item ID. (0 shows all loot in the zone)", 80, command_viewzoneloot) ||
 		command_add("wc", "[wear slot] [material] - Sends an OP_WearChange for your target", 200, command_wc) ||
@@ -884,19 +882,30 @@ void command_worldwide(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #worldwide moveinstance [Instance ID]");
 	}
 }
+
 void command_endurance(Client *c, const Seperator *sep)
 {
-	Mob *t;
+	auto target = c->GetTarget() ? c->GetTarget() : c;
+	if (target->IsClient()) {
+		target->CastToClient()->SetEndurance(target->CastToClient()->GetMaxEndurance());
+	} else {
+		target->SetEndurance(target->GetMaxEndurance());
+	}
 
-	t = c->GetTarget() ? c->GetTarget() : c;
-
-	if (t->IsClient())
-		t->CastToClient()->SetEndurance(t->CastToClient()->GetMaxEndurance());
-	else
-		t->SetEndurance(t->GetMaxEndurance());
-
-	t->Message(Chat::White, "Your endurance has been refilled.");
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Set {} ({}) to full Endurance.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Restored your Endurance to full.");
+	}
 }
+
 void command_setstat(Client* c, const Seperator* sep){
 	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
 		c->GetTarget()->CastToClient()->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
@@ -982,14 +991,6 @@ void command_setfaction(Client *c, const Seperator *sep)
     std::string query = StringFormat("UPDATE npc_types SET npc_faction_id = %i WHERE id = %i",
                                     atoi(sep->argplus[1]), npcTypeID);
     content_db.QueryDatabase(query);
-}
-
-void command_serversidename(Client *c, const Seperator *sep)
-{
-	if(c->GetTarget())
-		c->Message(Chat::White, c->GetTarget()->GetName());
-	else
-		c->Message(Chat::White, "Error: no target");
 }
 
 void command_wc(Client *c, const Seperator *sep)
@@ -3095,14 +3096,25 @@ void command_size(Client *c, const Seperator *sep)
 
 void command_mana(Client *c, const Seperator *sep)
 {
-	Mob *t;
+	auto target = c->GetTarget() ? c->GetTarget() : c;	
+	if(target->IsClient()) {
+		target->CastToClient()->SetMana(target->CastToClient()->CalcMaxMana());
+	} else {
+		target->SetMana(target->CalcMaxMana());
+	}
 
-	t = c->GetTarget() ? c->GetTarget() : c;
-
-	if(t->IsClient())
-		t->CastToClient()->SetMana(t->CastToClient()->CalcMaxMana());
-	else
-		t->SetMana(t->CalcMaxMana());
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Set {} ({}) to full Mana.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Restored your Mana to full.");
+	}
 }
 
 void command_flymode(Client *c, const Seperator *sep)
@@ -4374,10 +4386,20 @@ void command_nudge(Client* c, const Seperator* sep)
 
 void command_heal(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget()==0)
-		c->Message(Chat::White, "Error: #Heal: No Target.");
-	else
-		c->GetTarget()->Heal();
+	auto target = c->GetTarget() ? c->GetTarget() : c;
+	target->Heal();
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Healed {} ({}) to full.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Healed yourself to full.");
+	}
 }
 
 void command_appearance(Client *c, const Seperator *sep)
@@ -5121,47 +5143,75 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 
 void command_findnpctype(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #findnpctype [search criteria]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #findnpctype [Search Criteria]");
 		return;
     }
 
 	std::string query;
-
-	int id = atoi((const char *)sep->arg[1]);
-	if (id == 0) // If id evaluates to 0, then search as if user entered a string.
-		query = StringFormat("SELECT id, name FROM npc_types WHERE name LIKE '%%%s%%'",  sep->arg[1]);
-	else // Otherwise, look for just that npc id.
-		query = StringFormat("SELECT id, name FROM npc_types WHERE id = %i",  id);
+	std::string search_criteria = sep->arg[1];
+	if (sep->IsNumber(1)) {
+		query = fmt::format(
+			"SELECT id, name FROM npc_types WHERE id = {}",
+			search_criteria
+		);
+	} else {
+		query = fmt::format(
+			"SELECT id, name FROM npc_types WHERE name LIKE '%%{}%%'",
+			search_criteria
+		);
+	}
 
     auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-        c->Message (0, "Error querying database.");
-		c->Message (0, query.c_str());
-    }
+	if (!results.Success() || !results.RowCount()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"No matches found for '{}'.",
+				search_criteria
+			).c_str()
+		);
+		return;
+	}
 
-    if (results.RowCount() == 0) // No matches found.
-        c->Message (0, "No matches found for %s.",  sep->arg[1]);
+	int found_count = 0;
 
-    // If query runs successfully.
-	int count = 0;
-    const int maxrows = 20;
+	for (auto row : results) {
+		int found_number = (found_count + 1);
+		if (found_count == 20) {
+			break;
+		}
 
-    // Process each row returned.
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		// Limit to returning maxrows rows.
-        if (++count > maxrows) {
-            c->Message (0, "%i npc types shown. Too many results.",  maxrows);
-            break;
-        }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"NPC {} | {} ({})",
+				found_number,
+				row[1],
+				row[0]
+			).c_str()
+		);
+		found_count++;
+	}
 
-        c->Message (0, "  %s: %s",  row[0], row[1]);
-    }
+	if (found_count == 20) {
+		c->Message(Chat::White, "20 NPCs were found, max reached.");
+	} else {
+		auto npc_message = (
+			found_count == 1 ?
+			"An NPC was" :
+			fmt::format("{} NPCs were", found_count)
+		);
 
-    // If we did not hit the maxrows limit.
-    if (count <= maxrows)
-        c->Message (0, "Query complete. %i rows shown.",  count);
-
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} found.",
+				npc_message
+			).c_str()
+		);
+	}
 }
 
 void command_faction(Client *c, const Seperator *sep)
@@ -5374,46 +5424,49 @@ void command_findzone(Client *c, const Seperator *sep)
 
 void command_viewnpctype(Client *c, const Seperator *sep)
 {
-	if (!sep->IsNumber(1))
-		c->Message(Chat::White, "Usage: #viewnpctype [npctype id]");
-	else
-	{
-		uint32 npctypeid=atoi(sep->arg[1]);
-		const NPCType* npct = content_db.LoadNPCTypesData(npctypeid);
-		if (npct) {
-			c->Message(Chat::White, " NPCType Info, ");
-			c->Message(Chat::White, "  NPCTypeID: %u",  npct->npc_id);
-			c->Message(Chat::White, "  Name: %s",  npct->name);
-			c->Message(Chat::White, "  Level: %i",  npct->level);
-			c->Message(Chat::White, "  Race: %i",  npct->race);
-			c->Message(Chat::White, "  Class: %i",  npct->class_);
-			c->Message(Chat::White, "  MinDmg: %i",  npct->min_dmg);
-			c->Message(Chat::White, "  MaxDmg: %i",  npct->max_dmg);
-			c->Message(Chat::White, "  Special Abilities: %s",  npct->special_abilities);
-			c->Message(Chat::White, "  Spells: %i",  npct->npc_spells_id);
-			c->Message(Chat::White, "  Loot Table: %i",  npct->loottable_id);
-			c->Message(Chat::White, "  NPCFactionID: %i",  npct->npc_faction_id);
+	if (sep->IsNumber(1)) {
+		uint32 npc_id = std::stoul(sep->arg[1]);
+		const NPCType* npc_type_data = content_db.LoadNPCTypesData(npc_id);
+		if (npc_type_data) {
+			auto npc = new NPC(
+				npc_type_data,
+				nullptr,
+				c->GetPosition(),
+				GravityBehavior::Water
+			);
+			npc->ShowStats(c);
+		} else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"NPC ID {} was not found.",
+					npc_id
+				).c_str()
+			);
 		}
-		else
-			c->Message(Chat::White, "NPC #%d not found",  npctypeid);
+	} else {
+		c->Message(Chat::White, "Usage: #viewnpctype [NPC ID]");
 	}
 }
 
 void command_reloadqst(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0)
-	{
-		c->Message(Chat::White, "Clearing quest memory cache.");
-		entity_list.ClearAreas();
-		parse->ReloadQuests();
-	}
-	else
-	{
-		c->Message(Chat::White, "Clearing quest memory cache and stopping timers.");
-		entity_list.ClearAreas();
-		parse->ReloadQuests(true);
+	bool stop_timers = false;
+
+	if (sep->IsNumber(1)) {
+		stop_timers = std::stoi(sep->arg[1]) != 0 ? true : false;
 	}
 
+	std::string stop_timers_message = stop_timers ? " and stopping timers" : "";
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Clearing quest memory cache{}.",
+			stop_timers_message
+		).c_str()
+	);
+	entity_list.ClearAreas();
+	parse->ReloadQuests(stop_timers);
 }
 
 void command_corpsefix(Client *c, const Seperator *sep)
@@ -14327,53 +14380,108 @@ void command_tune(Client *c, const Seperator *sep)
 {
 	//Work in progress - Kayen
 
-	if(sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
+	if (sep->arg[1][0] == '\0' || !strcasecmp(sep->arg[1], "help")) {
 		c->Message(Chat::White, "Syntax: #tune [subcommand].");
 		c->Message(Chat::White, "-- Tune System Commands --");
-		c->Message(Chat::White, "-- Usage: Returning recommended combat statistical values based on a desired outcome.");
-		c->Message(Chat::White, "-- Note: If targeted mob does not have a target (ie not engaged in combat), YOU will be considered the target.");
+		c->Message(Chat::White, "-- Usage: Returns recommended combat statistical values based on a desired outcome through simulated combat.");
+		c->Message(Chat::White, "-- This commmand can answer the following difficult questions whening tunings NPCs and Players.");
+		c->Message(Chat::White, "-- Question: What is the average damage mitigation my AC provides against a specific targets attacks?");
+		c->Message(Chat::White, "-- Question: What is amount of AC would I need to add to acheive a specific average damage mitigation agianst specific targets attacks?");
+		c->Message(Chat::White, "-- Question: What is amount of AC would I need to add to my target to acheive a specific average damage mitigation from my attacks?");
+		c->Message(Chat::White, "-- Question: What is my targets average AC damage mitigation based on my ATK stat?");
+		c->Message(Chat::White, "-- Question: What is amount of ATK would I need to add to myself to acheive a specific average damage mitigation on my target?");
+		c->Message(Chat::White, "-- Question: What is amount of ATK would I need to add to my target to acheive a specific average AC damage mitigation on myself?");
+		c->Message(Chat::White, "-- Question: What is my hit chance against a target?");
+		c->Message(Chat::White, "-- Question: What is the amount of avoidance I need to add to my target to achieve a specific hit chance?");
+		c->Message(Chat::White, "-- Question: What is the amount of accuracy I need to add to my target to achieve a specific chance of hitting me?");
+		c->Message(Chat::White, "-- Question: ... and many more...");
+		c->Message(Chat::White, " ");
+		c->Message(Chat::White, "...#tune stats [A/D]");
+		c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval] [loop_max] [AC override] [Info Level]");
+		c->Message(Chat::White, "...#tune FindAC  [A/D] [pct mitigation] [interval] [loop_max] [ATK override] [Info Level] ");
+		c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval] [loop_max] [Avoidance override] [Info Level]");
+		c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval] [loop_max] [Accuracy override] [Info Level] ");
+		c->Message(Chat::White, " ");
+		c->Message(Chat::White, "-- DETAILS AND EXAMPLES ON USAGE");
+		c->Message(Chat::White, " ");
+		c->Message(Chat::White, "...Returns combat statistics, including AC mitigation pct, hit chance, and avoid melee chance for attacker and defender.");
+		c->Message(Chat::White, "...#tune stats [A/D]");
+		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Returns recommended ATK adjustment (+/-) on ATTACKER that will result in a specific average AC mitigation pct on DEFENDER. ");
+		c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval][loop_max][AC override][Info Level]");
+		c->Message(Chat::White, "...Example: Find the amount of ATK stat I need to add to the targeted NPC so that it hits me for 50 pct damage on average.");
+		c->Message(Chat::White, "...Example: #tune FindATK D 50");
+		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Returns recommended AC adjustment(+/-) on DEFENDER for a specific average AC mitigation pct from ATTACKER. ");
+		c->Message(Chat::White, "...#tune FindAC  [A/D] [pct mitigation] [interval][loop_max][ATK override][Info Level] ");
+		c->Message(Chat::White, "...Example: Find the amount of AC stat I need to add to the targeted NPC so that I hit it for 70 pct damage on average.");
+		c->Message(Chat::White, "...Example: #tune FindAC D 70");
+		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Returns recommended Accuracy adjustment (+/-) on ATTACKER that will result in a specific hit chance pct on DEFENDER. ");
+		c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
+		c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me.");
+		c->Message(Chat::White, "...Example: #tune FindAccuracy D 60");
+		c->Message(Chat::White, "...");
+		c->Message(Chat::White, "...Returns recommended Avoidance adjustment (+/-) on DEFENDER for in a specific hit chance pct from ATTACKER. ");
+		c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval][loop_max][Accuracy override][Info Level] ");
+		c->Message(Chat::White, "...Example: Find the amount of Avoidance stat I need to add to the targeted NPC so that I have a 30 pct hit chance against it.");
+		c->Message(Chat::White, "...Example: #tune FindAvoidance D 30");
+		c->Message(Chat::White, "... ");
+		c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
+		c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+		c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+		c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+
+		c->Message(Chat::White, " ");
+
 		c->Message(Chat::White, "-- Warning: The calculations done in this process are intense and can potentially cause zone crashes depending on parameters set, use with caution!");
 		c->Message(Chat::White, "-- Below are OPTIONAL parameters.");
-		c->Message(Chat::White, "-- Note: [interval] Determines how fast the stat being checked increases/decreases till it finds the best result. Default [ATK/AC 50][Acc/Avoid 10] ");
-		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Default [ATK/AC 100][Acc/Avoid 1000]");
-		c->Message(Chat::White, "-- Note: [Stat Override] Will override that stat on mob being checkd with the specified value. Default=0");
-		c->Message(Chat::White, "-- Note: [Info Level] How much statistical detail is displayed[0 - 3]. Default=0 ");
-		c->Message(Chat::White, "-- Note: Results are only approximations usually accurate to +/- 2 intervals.");
-
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...### Category A ### Target = ATTACKER ### YOU or Target's Target = DEFENDER ###");
-		c->Message(Chat::White, "...### Category B ### Target = DEFENDER ### YOU or Target's Target = ATTACKER ###");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended ATK adjustment +/- on ATTACKER that will result in an average mitigation pct on DEFENDER. ");
-		c->Message(Chat::White, "...tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level]");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended AC adjustment +/- on DEFENDER for an average mitigation pct from ATTACKER. ");
-		c->Message(Chat::White, "...tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended Accuracy adjustment +/- on ATTACKER that will result in a hit chance pct on DEFENDER. ");
-		c->Message(Chat::White, "...tune FindAccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
-		c->Message(Chat::White, "... ");
-		c->Message(Chat::White, "...#Returns recommended Avoidance adjustment +/- on DEFENDER for in a hit chance pct from ATTACKER. ");
-		c->Message(Chat::White, "...tune FindAvoidance [A/B] [pct mitigation] [interval][loop_max][Accuracy Overwride][Info Level] ");
+		c->Message(Chat::White, "-- Note: [interval] Determines how much the stat being checked increases/decreases till it finds the best result. Lower is more accurate. Default=10");
+		c->Message(Chat::White, "-- Note: [loop_max] Determines how many iterations are done to increases/decreases the stat till it finds the best result. Higher is more accurate. Default=1000");
+		c->Message(Chat::White, "-- Note: [Stat Override] Will override that stat on mob being checked with the specified value. Default=0");
+		c->Message(Chat::White, "-- Example: If as the attacker you want to find the ATK value you would need to have agianst a target with 1000 AC to achieve an average AC mitigation of 50 pct.");
+		c->Message(Chat::White, "-- Example: #tune FindATK A 50 0 0 1000");
+		c->Message(Chat::White, "-- Note: [Info Level] How much parsing detail is displayed[0 - 1]. Default: [0] ");
+		c->Message(Chat::White, " ");
 
 		return;
 	}
-	//Default is category A for attacker/defender settings, which then are swapped under category B.
-	Mob* defender = c;
-	Mob* attacker = c->GetTarget();
+	/*
+		Category A: YOU are the attacker and your target is the defender
+		Category D: YOU are the defender and your target is the attacker
+	*/
 
-	if (!attacker)
+	Mob* attacker = c;
+	Mob* defender = c->GetTarget();
+
+	if (!defender)
 	{
-		c->Message(Chat::White, "#Tune - Error no target selected. [#Tune help]");
+		c->Message(Chat::White, "[#Tune] - Error no target selected. [#Tune help]");
 		return;
 	}
 
+	//Use if checkings on engaged targets.
 	Mob* ttarget = attacker->GetTarget();
-
-	if (ttarget)
+	if (ttarget) {
 		defender = ttarget;
+	}
 
-	if(!strcasecmp(sep->arg[1], "FindATK"))
+	if (!strcasecmp(sep->arg[1], "stats"))
+	{
+
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->TuneGetStats(defender, attacker);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")){
+			c->TuneGetStats(attacker, defender);
+		}
+		else {
+			c->TuneGetStats(defender, attacker);
+		}
+		return;
+	}
+
+	if (!strcasecmp(sep->arg[1], "FindATK"))
 	{
 		float pct_mitigation = atof(sep->arg[3]);
 		int interval = atoi(sep->arg[4]);
@@ -14383,32 +14491,48 @@ void command_tune(Client *c, const Seperator *sep)
 
 		if (!pct_mitigation)
 		{
-			c->Message(Chat::Red, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			c->Message(Chat::White, "[#Tune] - Error must enter the desired percent mitigation on defender.");
+			c->Message(Chat::White, "...Returns recommended ATK adjustment (+/-) on ATTACKER that will result in a specific average AC mitigation pct on DEFENDER. ");
+			c->Message(Chat::White, "...#tune FindATK [A/D] [pct mitigation] [interval][loop_max][AC override][Info Level]");
+			c->Message(Chat::White, "...Example: Find the amount of ATK stat I need to add to the targeted NPC so that it hits me for 50 pct damage on average.");
+			c->Message(Chat::White, "...Example: #tune FindATK D 50");
 			return;
 		}
 
-		if (!interval)
-			interval = 50;
-		if (!max_loop)
-			max_loop = 100;
-		if(!ac_override)
+		if (!interval) {
+			interval = 10;
+		}
+		if (!max_loop) {
+			max_loop = 1000;
+		}
+		if (!ac_override) {
 			ac_override = 0;
-		if (!info_level)
-			info_level = 1;
+		}
+		if (!info_level) {
+			info_level = 0;
+		}
 
-		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,ac_override,info_level);
-		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindATKByPctMitigation(attacker,defender, pct_mitigation, interval, max_loop,ac_override,info_level);
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->TuneGetATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, ac_override, info_level);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")) {
+			c->TuneGetATKByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, ac_override, info_level);
+		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "Usage #tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level] ");
-			c->Message(Chat::White, "Example #tune FindATK A 60");
+			c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
+			c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+			c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+			c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+			c->Message(Chat::White, "... ");
+			c->Message(Chat::White, "...Example: Find the amount of ATK stat I need to add to the targeted NPC so that it hits me for 50 pct damage on average.");
+			c->Message(Chat::White, "...Example: #tune FindATK D 50");
 		}
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "FindAC"))
+	if (!strcasecmp(sep->arg[1], "FindAC"))
 	{
 		float pct_mitigation = atof(sep->arg[3]);
 		int interval = atoi(sep->arg[4]);
@@ -14418,33 +14542,49 @@ void command_tune(Client *c, const Seperator *sep)
 
 		if (!pct_mitigation)
 		{
-			c->Message(Chat::Red, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			c->Message(Chat::White, "#Tune - Error must enter the desired percent mitigation on defender.");
+			c->Message(Chat::White, "...Returns recommended AC adjustment(+/-) on DEFENDER for a specific average AC mitigation pct from ATTACKER. ");
+			c->Message(Chat::White, "...#tune FindAC  [A/D] [pct mitigation] [interval][loop_max][ATK override][Info Level] ");
+			c->Message(Chat::White, "...Example: Find the amount of AC stat I need to add to the targeted NPC so that I hit it for 70 pct damage on average.");
+			c->Message(Chat::White, "...Example: #tune FindAC D 70");
 			return;
 		}
 
-		if (!interval)
-			interval = 50;
-		if (!max_loop)
-			max_loop = 100;
-		if(!atk_override)
+		if (!interval) {
+			interval = 10;
+		}
+		if (!max_loop) {
+			max_loop = 1000;
+		}
+		if (!atk_override) {
 			atk_override = 0;
-		if (!info_level)
-			info_level = 1;
+		}
+		if (!info_level) {
+			info_level = 0;
+		}
 
-		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop,atk_override,info_level);
-		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop,atk_override,info_level);
+		if (!strcasecmp(sep->arg[2], "A")) {
+			c->TuneGetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
+		}
+		else if (!strcasecmp(sep->arg[2], "D")) {
+			c->TuneGetACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, atk_override, info_level);
+		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
-			c->Message(Chat::White, "Usage #tune FindAC [A/B] [pct mitigation] [interval][loop_max][ATK Overwride][Info Level] ");
-			c->Message(Chat::White, "Example #tune FindAC A 60");
+			c->Message(Chat::White, "Usage #tune FindATK [A/B] [pct mitigation] [interval][loop_max][AC Overwride][Info Level] ");
+			c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
+			c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+			c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+			c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+			c->Message(Chat::White, "... ");
+			c->Message(Chat::White, "...Example: Find the amount of AC stat I need to add to the targeted NPC so that I hit it for 70 pct damage on average.");
+			c->Message(Chat::White, "...Example: #tune FindAC D 70");
 		}
 
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "FindAccuracy"))
+	if (!strcasecmp(sep->arg[1], "FindAccuracy"))
 	{
 		float hit_chance = atof(sep->arg[3]);
 		int interval = atoi(sep->arg[4]);
@@ -14454,39 +14594,47 @@ void command_tune(Client *c, const Seperator *sep)
 
 		if (!hit_chance)
 		{
-			c->Message(Chat::NPCQuestSay, "#Tune - Error must enter the desired percent mitigation on defender. Ie. Defender to mitigate on average 20 pct of max damage.");
+			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender.");
+			c->Message(Chat::White, "...Returns recommended Accuracy adjustment (+/-) on ATTACKER that will result in a specific hit chance pct on DEFENDER. ");
+			c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
+			c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me.");
+			c->Message(Chat::White, "...Example: #tune FindAccuracy D 60");
 			return;
 		}
 
-		if (!interval)
+		if (!interval) {
 			interval = 10;
-		if (!max_loop)
+		}
+		if (!max_loop) {
 			max_loop = 1000;
-		if(!avoid_override)
+		}
+		if (!avoid_override) {
 			avoid_override = 0;
-		if (!info_level)
-			info_level = 1;
-
-		if (hit_chance > RuleR(Combat,MaxChancetoHit) || hit_chance < RuleR(Combat,MinChancetoHit))
-		{
-			c->Message(Chat::NPCQuestSay, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
-			return;
+		}
+		if (!info_level) {
+			info_level = 0;
 		}
 
-		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindAccuaryByHitChance(defender, attacker, hit_chance, interval, max_loop,avoid_override,info_level);
-		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindAccuaryByHitChance(attacker, defender, hit_chance, interval, max_loop,avoid_override,info_level);
+		if (!strcasecmp(sep->arg[2], "A"))
+			c->TuneGetAccuracyByHitChance(defender, attacker, hit_chance, interval, max_loop, avoid_override, info_level);
+		else if (!strcasecmp(sep->arg[2], "D"))
+			c->TuneGetAccuracyByHitChance(attacker, defender, hit_chance, interval, max_loop, avoid_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
-			c->Message(Chat::White, "Usage #tune FindAcccuracy [A/B] [hit chance] [interval][loop_max][Avoidance Overwride][Info Level]");
-			c->Message(Chat::White, "Exampled #tune FindAccuracy B 30");
+			c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
+			c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
+			c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+			c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+			c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+			c->Message(Chat::White, "... ");
+			c->Message(Chat::White, "...Example: Find the amount of Accuracy stat I need to add to the targeted NPC so that it has a 60 pct hit chance against me.");
+			c->Message(Chat::White, "...Example: #tune FindAccuracy D 60");
 		}
 
 		return;
 	}
 
-	if(!strcasecmp(sep->arg[1], "FindAvoidance"))
+	if (!strcasecmp(sep->arg[1], "FindAvoidance"))
 	{
 		float hit_chance = atof(sep->arg[3]);
 		int interval = atoi(sep->arg[4]);
@@ -14496,47 +14644,47 @@ void command_tune(Client *c, const Seperator *sep)
 
 		if (!hit_chance)
 		{
-			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender. Ie. Defender to have hit chance of 40 pct.");
+			c->Message(Chat::White, "#Tune - Error must enter the desired hit chance on defender.");
+			c->Message(Chat::White, "...Returns recommended Avoidance adjustment (+/-) on DEFENDER for in a specific hit chance pct from ATTACKER. ");
+			c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval][loop_max][Accuracy override][Info Level] ");
+			c->Message(Chat::White, "...Example: Find the amount of Avoidance stat I need to add to the targeted NPC so that I have a 30 pct hit chance against it.");
+			c->Message(Chat::White, "...Example: #tune FindAvoidance D 30");
 			return;
 		}
-
-		if (!interval)
+		if (!interval) {
 			interval = 10;
-		if (!max_loop)
+		}
+		if (!max_loop) {
 			max_loop = 1000;
-		if(!acc_override)
+		}
+		if (!acc_override) {
 			acc_override = 0;
-		if (!info_level)
-			info_level = 1;
-
-		if (hit_chance > RuleR(Combat,MaxChancetoHit) || hit_chance < RuleR(Combat,MinChancetoHit))
-		{
-			c->Message(Chat::NPCQuestSay, "#Tune - Error hit chance out of bounds. [Max %.2f Min .2f]",  RuleR(Combat,MaxChancetoHit),RuleR(Combat,MinChancetoHit));
-			return;
+		}
+		if (!info_level) {
+			info_level = 0;
 		}
 
-		if(!strcasecmp(sep->arg[2], "A"))
-			c->Tune_FindAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop,acc_override, info_level);
-		else if(!strcasecmp(sep->arg[2], "B"))
-			c->Tune_FindAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop,acc_override, info_level);
+		if (!strcasecmp(sep->arg[2], "A"))
+			c->TuneGetAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
+		else if (!strcasecmp(sep->arg[2], "D"))
+			c->TuneGetAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop, acc_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
-			c->Message(Chat::White, "Usage #tune FindAvoidance [A/B] [hit chance] [interval][loop_max][Accuracy Overwride][Info Level]");
-			c->Message(Chat::White, "Exampled #tune FindAvoidance B 30");
+			c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval][loop_max][Accuracy override][Info Level] ");
+			c->Message(Chat::White, "...Usage: [A/D] You must input either A or D.");
+			c->Message(Chat::White, "...Category [A] : YOU are the ATTACKER. YOUR TARGET is the DEFENDER.");
+			c->Message(Chat::White, "...Category [D] : YOU are the DEFENDER. YOUR TARGET is the ATTACKER.");
+			c->Message(Chat::White, "...If TARGET is in combat, DEFENDER is the TARGETs TARGET.");
+			c->Message(Chat::White, "... ");
+			c->Message(Chat::White, "...Example: Find the amount of Avoidance stat I need to add to the targeted NPC so that I have a 30 pct hit chance against it.");
+			c->Message(Chat::White, "...Example: #tune FindAvoidance D 30");
 		}
 
 		return;
 	}
 
-
+	c->Message(Chat::White, "#Tune - Error no command [#Tune help]");
 	return;
-}
-
-void command_crashtest(Client *c, const Seperator *sep)
-{
-	c->Message(Chat::White, "Alright, now we get an GPF ;) ");
-	char* gpf = 0;
-	memcpy(gpf, "Ready to crash",  30);
 }
 
 void command_logs(Client *c, const Seperator *sep){
@@ -14611,20 +14759,6 @@ void command_logs(Client *c, const Seperator *sep){
 		c->Message(Chat::White, "--- #logs list_settings - Shows current log settings and categories loaded into the current process' memory");
 		c->Message(Chat::White, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
 	}
-}
-
-void command_mysqltest(Client *c, const Seperator *sep)
-{
-	clock_t t = std::clock(); /* Function timer start */
-	if (sep->IsNumber(1)){
-		uint32 i = 0;
-		t = std::clock();
-		for (i = 0; i < atoi(sep->arg[1]); i++){
-			std::string query = "SELECT * FROM `zone`";
-			auto results = content_db.QueryDatabase(query);
-		}
-	}
-	LogDebug("MySQL Test Took [{}] seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {
