@@ -5684,6 +5684,16 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 				return true;
 			}
 		}
+
+		if (IsClient()) {
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
+
+				if (aabonuses.SpellProc[i + 1] == spell_id ||
+					aabonuses.RangedProc[i + 1] == spell_id) {
+					return true;
+				}
+			}
+		}
 	}
 
 	return false;
