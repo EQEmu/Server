@@ -11,6 +11,7 @@ EQ::Net::ServertalkServerConnection::ServertalkServerConnection(std::shared_ptr<
 	m_connection->OnRead(std::bind(&ServertalkServerConnection::OnRead, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
 	m_connection->OnDisconnect(std::bind(&ServertalkServerConnection::OnDisconnect, this, std::placeholders::_1));
 	m_connection->Start();
+	m_legacy_mode = false;
 }
 
 EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
@@ -19,17 +20,73 @@ EQ::Net::ServertalkServerConnection::~ServertalkServerConnection()
 
 void EQ::Net::ServertalkServerConnection::Send(uint16_t opcode, EQ::Net::Packet & p)
 {
-	// pad zero size packets
-	if (p.Length() == 0) {
-		p.PutUInt8(0, 0);
+	if (m_legacy_mode) {
+		if (!m_connection)
+			return;
+
+		if (opcode == ServerOP_UsertoWorldReq) {
+			auto req_in = (UsertoWorldRequest_Struct*)p.Data();
+
+			EQ::Net::DynamicPacket req;
+			size_t i = 0;
+			req.PutUInt32(i, req_in->lsaccountid); i += 4;
+			req.PutUInt32(i, req_in->worldid); i += 4;
+			req.PutUInt32(i, req_in->FromID); i += 4;
+			req.PutUInt32(i, req_in->ToID); i += 4;
+			req.PutData(i, req_in->IPAddr, 64); i += 64;
+
+			EQ::Net::DynamicPacket out;
+			out.PutUInt16(0, ServerOP_UsertoWorldReqLeg);
+			out.PutUInt16(2, req.Length() + 4);
+			out.PutPacket(4, req);
+
+			m_connection->Write((const char*)out.Data(), out.Length());
+			return;
+		}
+
+		if (opcode == ServerOP_LSClientAuth) {
+			auto req_in = (ClientAuth_Struct*)p.Data();
+
+			EQ::Net::DynamicPacket req;
+			size_t i = 0;
+			req.PutUInt32(i, req_in->loginserver_account_id); i += 4;
+			req.PutData(i, req_in->account_name, 30); i += 30;
+			req.PutData(i, req_in->key, 30); i += 30;
+			req.PutUInt8(i, req_in->lsadmin); i += 1;
+			req.PutUInt16(i, req_in->is_world_admin); i += 2;
+			req.PutUInt32(i, req_in->ip); i += 4;
+			req.PutUInt8(i, req_in->is_client_from_local_network); i += 1;
+
+			EQ::Net::DynamicPacket out;
+			out.PutUInt16(0, ServerOP_LSClientAuthLeg);
+			out.PutUInt16(2, req.Length() + 4);
+			out.PutPacket(4, req);
+
+			m_connection->Write((const char*)out.Data(), out.Length());
+			return;
+		}
+
+		EQ::Net::DynamicPacket out;
+		out.PutUInt16(0, opcode);
+		out.PutUInt16(2, p.Length() + 4);
+		out.PutPacket(4, p);
+
+		m_connection->Write((const char*)out.Data(), out.Length());
+	} else {
+		// pad zero size packets
+		// pad packets that would cause a collision with legacy identification code
+		// It's unlikely we'd send a 4MB msg for any reason but just incase.
+		if (p.Length() == 0 || p.Length() == 43061256) {
+			p.PutUInt8(0, 0);
+		}
+
+		EQ::Net::DynamicPacket out;
+		out.PutUInt32(0, p.Length());
+		out.PutUInt16(4, opcode);
+		out.PutPacket(6, p);
+
+		InternalSend(ServertalkMessage, out);
 	}
-
-	EQ::Net::DynamicPacket out;
-	out.PutUInt32(0, p.Length());
-	out.PutUInt16(4, opcode);
-	out.PutPacket(6, p);
-
-	InternalSend(ServertalkMessage, out);
 }
 
 void EQ::Net::ServertalkServerConnection::SendPacket(ServerPacket *p)
@@ -54,16 +111,40 @@ void EQ::Net::ServertalkServerConnection::OnMessage(std::function<void(uint16_t,
 void EQ::Net::ServertalkServerConnection::OnRead(TCPConnection *c, const unsigned char *data, size_t sz)
 {
 	m_buffer.insert(m_buffer.end(), (const char*)data, (const char*)data + sz);
-	ProcessReadBuffer();
+
+	if (m_legacy_mode) {
+		ProcessOldReadBuffer();
+	} else {
+		ProcessReadBuffer();
+	}
 }
 
 void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 {
 	size_t current = 0;
 	size_t total = m_buffer.size();
+	constexpr size_t ls_info_size = sizeof(ServerNewLSInfo_Struct);
 
 	while (current < total) {
 		auto left = total - current;
+
+		if (left < 4) {
+			break;
+		}
+
+		auto leg_opcode = *(uint16_t*)&m_buffer[current];
+		auto leg_size = *(uint16_t*)&m_buffer[current + 2] - 4;
+
+		//this creates a small edge case where the exact size of a 
+		//packet from the modern protocol can't be "43061256"
+		//so in send we pad it one byte if that's the case
+		if (leg_opcode == ServerOP_NewLSInfo && leg_size == sizeof(ServerNewLSInfo_Struct)) {
+			m_legacy_mode = true;
+			m_identifier = "World";
+			m_parent->ConnectionIdentified(this);
+			ProcessOldReadBuffer();
+			return;
+		}
 
 		/*
 		//header:
@@ -129,6 +210,57 @@ void EQ::Net::ServertalkServerConnection::ProcessReadBuffer()
 	}
 }
 
+void EQ::Net::ServertalkServerConnection::ProcessOldReadBuffer()
+{
+	size_t current = 0;
+	size_t total = m_buffer.size();
+
+	while (current < total) {
+		auto left = total - current;
+
+		/*
+		//header:
+		//uint32 length;
+		//uint8 type;
+		*/
+		uint16_t length = 0;
+		uint16_t opcode = 0;
+		if (left < 4) {
+			break;
+		}
+
+		opcode = *(uint16_t*)&m_buffer[current];
+		length = *(uint16_t*)&m_buffer[current + 2];
+		if (length < 4) {
+			break;
+		}
+
+		length -= 4;
+
+		if (current + 4 + length > total) {
+			break;
+		}
+
+		if (length == 0) {
+			EQ::Net::DynamicPacket p;
+			ProcessMessageOld(opcode, p);
+		}
+		else {
+			EQ::Net::StaticPacket p(&m_buffer[current + 4], length);
+			ProcessMessageOld(opcode, p);
+		}
+
+		current += length + 4;
+	}
+
+	if (current == total) {
+		m_buffer.clear();
+	}
+	else {
+		m_buffer.erase(m_buffer.begin(), m_buffer.begin() + current);
+	}
+}
+
 void EQ::Net::ServertalkServerConnection::OnDisconnect(TCPConnection *c)
 {
 	m_parent->ConnectionDisconnected(this);
@@ -144,7 +276,7 @@ void EQ::Net::ServertalkServerConnection::SendHello()
 
 void EQ::Net::ServertalkServerConnection::InternalSend(ServertalkPacketType type, EQ::Net::Packet &p)
 {
-	if (!m_connection)
+	if (!m_connection || m_legacy_mode)
 		return;
 
 	EQ::Net::DynamicPacket out;
@@ -199,5 +331,22 @@ void EQ::Net::ServertalkServerConnection::ProcessMessage(EQ::Net::Packet &p)
 	}
 	catch (std::exception &ex) {
 		LogError("Error parsing message from client: {0}", ex.what());
+	}
+}
+
+void EQ::Net::ServertalkServerConnection::ProcessMessageOld(uint16_t opcode, EQ::Net::Packet &p)
+{
+	try {
+		auto cb = m_message_callbacks.find(opcode);
+		if (cb != m_message_callbacks.end()) {
+			cb->second(opcode, p);
+		}
+
+		if (m_message_callback) {
+			m_message_callback(opcode, p);
+		}
+	}
+	catch (std::exception &ex) {
+		LogError("Error parsing legacy message from client: {0}", ex.what());
 	}
 }
