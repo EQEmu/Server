@@ -5314,7 +5314,6 @@ void command_faction(Client *c, const Seperator *sep)
 					npc_faction_id
 				).c_str()
 			);
-			c->Message(Chat::White, "Use: #setfaction [Faction ID] - Set an NPC's Primary Faction ID");
 		}
 	}
 }
