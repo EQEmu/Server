@@ -121,6 +121,20 @@ public:
 	{
 		Options::show_player_count = show_player_count;
 	}
+	inline bool IsWorldDevTestServersListBottom() const { return world_dev_test_servers_list_bottom; }
+	inline void SetWorldDevTestServersListBottom(bool dev_test_servers_list_bottom)
+	{
+		Options::world_dev_test_servers_list_bottom = dev_test_servers_list_bottom;
+	}
+
+	inline bool IsWorldSpecialCharacterStartListBottom() const
+	{
+		return world_special_character_start_list_bottom;
+	}
+	inline void SetWorldSpecialCharacterStartListBottom(bool world_special_character_start_list_bottom)
+	{
+		Options::world_special_character_start_list_bottom = world_special_character_start_list_bottom;
+	}
 
 private:
 	bool        allow_unregistered;
@@ -129,6 +143,8 @@ private:
 	bool        dump_in_packets;
 	bool        dump_out_packets;
 	bool        reject_duplicate_servers;
+	bool        world_dev_test_servers_list_bottom;
+	bool        world_special_character_start_list_bottom;
 	bool        allow_token_login;
 	bool        allow_password_login;
 	bool        show_player_count;

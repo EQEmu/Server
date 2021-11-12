@@ -571,6 +571,12 @@ void WorldServer::Handle_NewLSInfo(ServerNewLSInfo_Struct *new_world_server_info
 		GetServerLongName(),
 		GetRemoteIp()
 	);
+
+	WorldServer::FormatWorldServerName(
+		new_world_server_info_packet->server_long_name,
+		world_registration.server_list_type
+	);
+	SetLongName(new_world_server_info_packet->server_long_name);
 }
 
 /**
@@ -1347,4 +1353,29 @@ void WorldServer::OnKeepAlive(EQ::Timer *t)
 {
 	ServerPacket pack(ServerOP_KeepAlive, 0);
 	m_connection->SendPacket(&pack);
+}
+
+void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
+{
+	std::string server_long_name = name;
+	server_long_name = trim(server_long_name);
+
+	bool name_set_to_bottom = false;
+	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == 3) {
+		std::string s = str_tolower(server_long_name);
+		if (s.find("dev") != std::string::npos || s.find("test") != std::string::npos) {
+			name_set_to_bottom = true;
+		}
+	}
+	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3) {
+		auto first_char = server_long_name.c_str()[0];
+		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
+			name_set_to_bottom = true;
+		}
+	}
+
+	if (name_set_to_bottom){
+		server_long_name = fmt::format("| {}", server_long_name);
+		strcpy(name, SanitizeWorldServerName(server_long_name).c_str());
+	}
 }

@@ -62,9 +62,30 @@ void LoadServerConfig()
 			"worldservers",
 			"reject_duplicate_servers",
 			false
-		));
-	server.options.AllowUnregistered(server.config.GetVariableBool("worldservers", "unregistered_allowed", true));
+		)
+		);
 	server.options.SetShowPlayerCount(server.config.GetVariableBool("worldservers", "show_player_count", false));
+	server.options.AllowUnregistered(
+		server.config.GetVariableBool(
+			"worldservers",
+			"unregistered_allowed",
+			true
+		)
+	);
+	server.options.SetWorldDevTestServersListBottom(
+		server.config.GetVariableBool(
+			"worldservers",
+			"dev_test_servers_list_bottom",
+			false
+		)
+	);
+	server.options.SetWorldSpecialCharacterStartListBottom(
+		server.config.GetVariableBool(
+			"worldservers",
+			"special_character_start_list_bottom",
+			false
+		)
+	);
 
 	/**
 	 * Account
@@ -242,6 +263,14 @@ int main(int argc, char **argv)
 	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
 	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
 	LogInfo("[Config] [WorldServer] ShowPlayerCount [{0}]", server.options.IsShowPlayerCountEnabled());
+	LogInfo(
+		"[Config] [WorldServer] DevAndTestServersListBottom [{0}]",
+		server.options.IsWorldDevTestServersListBottom()
+	);
+	LogInfo(
+		"[Config] [WorldServer] SpecialCharactersStartListBottom [{0}]",
+		server.options.IsWorldSpecialCharacterStartListBottom()
+	);
 	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
 	LogInfo("[Config] [Security] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());
