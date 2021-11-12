@@ -1363,19 +1363,26 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	bool name_set_to_bottom = false;
 	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == 3) {
 		std::string s = str_tolower(server_long_name);
-		if (s.find("dev") != std::string::npos || s.find("test") != std::string::npos || s.find("installer") != std::string::npos) {
+		if (s.find("dev") != std::string::npos) {
+			server_long_name = fmt::format("|D| {}", server_long_name);
+			name_set_to_bottom = true;
+		}
+		else if (s.find("test") != std::string::npos) {
+			server_long_name = fmt::format("|T| {}", server_long_name);
+			name_set_to_bottom = true;
+		}
+		else if (s.find("installer") != std::string::npos) {
+			server_long_name = fmt::format("|I| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 	}
-	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3) {
+	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3 && !name_set_to_bottom) {
 		auto first_char = server_long_name.c_str()[0];
 		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
+			server_long_name = fmt::format("|S| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 	}
 
-	if (name_set_to_bottom){
-		server_long_name = fmt::format("| {}", server_long_name);
-		strcpy(name, server_long_name.c_str());
-	}
+	strcpy(name, server_long_name.c_str());
 }
