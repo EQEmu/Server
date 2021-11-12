@@ -3112,6 +3112,8 @@ void command_mana(Client *c, const Seperator *sep)
 				target->GetID()
 			).c_str()
 		);
+	} else {
+		c->Message(Chat::White, "Restored your Mana to full.");
 	}
 }
 
