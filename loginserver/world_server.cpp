@@ -1361,29 +1361,30 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	server_long_name = trim(server_long_name);
 
 	bool name_set_to_bottom = false;
-	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == LS::ServerType::Standard) {
-		std::string s = str_tolower(server_long_name);
-		if (s.find("dev") != std::string::npos) {
-			server_long_name   = fmt::format("|D| {}", server_long_name);
-			name_set_to_bottom = true;
+	if (server_list_type == LS::ServerType::Standard) {
+		if (server.options.IsWorldDevTestServersListBottom()) {
+			std::string s = str_tolower(server_long_name);
+			if (s.find("dev") != std::string::npos) {
+				server_long_name   = fmt::format("|D| {}", server_long_name);
+				name_set_to_bottom = true;
+			}
+			else if (s.find("test") != std::string::npos) {
+				server_long_name   = fmt::format("|T| {}", server_long_name);
+				name_set_to_bottom = true;
+			}
+			else if (s.find("installer") != std::string::npos) {
+				server_long_name   = fmt::format("|I| {}", server_long_name);
+				name_set_to_bottom = true;
+			}
 		}
-		else if (s.find("test") != std::string::npos) {
-			server_long_name   = fmt::format("|T| {}", server_long_name);
-			name_set_to_bottom = true;
-		}
-		else if (s.find("installer") != std::string::npos) {
-			server_long_name   = fmt::format("|I| {}", server_long_name);
-			name_set_to_bottom = true;
-		}
-	}
-	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == LS::ServerType::Standard &&
-		!name_set_to_bottom) {
-		auto first_char = server_long_name.c_str()[0];
-		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
-			server_long_name   = fmt::format("|*| {}", server_long_name);
-			name_set_to_bottom = true;
+		if (server.options.IsWorldSpecialCharacterStartListBottom() && !name_set_to_bottom) {
+			auto first_char = server_long_name.c_str()[0];
+			if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
+				server_long_name   = fmt::format("|*| {}", server_long_name);
+				name_set_to_bottom = true;
+			}
 		}
 	}
 
-	strcpy(name, server_long_name.c_str());
+	strn0cpy(name, server_long_name.c_str(), 201);
 }
