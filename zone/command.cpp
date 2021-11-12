@@ -5167,20 +5167,11 @@ void command_findnpctype(Client *c, const Seperator *sep)
 
 void command_faction(Client *c, const Seperator *sep)
 {
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #faction -- Displays Target NPC's Primary faction");
-		c->Message(Chat::White, "Usage: #faction Find [criteria | all] -- Displays factions name & id");
-		c->Message(Chat::White, "Usage: #faction Review [criteria | all] -- Review Targeted Players faction hits");
-		c->Message(Chat::White, "Usage: #faction Reset [id] -- Reset Targeted Players specified faction to base");
-		uint32 npcfac;
-		std::string npcname;
-		if (c->GetTarget() && c->GetTarget()->IsNPC()) {
-			npcfac = c->GetTarget()->CastToNPC()->GetPrimaryFaction();
-			npcname = c->GetTarget()->CastToNPC()->GetCleanName();
-			std::string blurb = fmt::format("( Target Npc: {} : has primary faction id: {} )", npcname, npcfac);
-			c->Message(Chat::Yellow, blurb.c_str());
-			c->Message(Chat::White, "Use: #setfaction [id] - to alter an NPC's faction");
-		}
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #faction review [Search Criteria | All] - Review Targeted Player's Faction Hits");
+		c->Message(Chat::White, "Usage: #faction reset [Faction ID] - Reset Targeted Player's Faction to Base Faction Value");
+		c->Message(Chat::White, "Usage: #faction view - Displays Target NPC's Primary Faction");
 		return;
 	}
 
@@ -5188,95 +5179,143 @@ void command_faction(Client *c, const Seperator *sep)
 	if (sep->arg[2]) {
 		faction_filter = str_tolower(sep->arg[2]);
 	}
-	if (strcasecmp(sep->arg[1], "find") == 0) {
-		std::string query;
-		if (strcasecmp(sep->arg[2], "all") == 0) {
 
-			query = "SELECT `id`,`name` FROM `faction_list`";
-		}
-		else {
-			query = fmt::format("SELECT `id`,`name` FROM `faction_list` WHERE `name` LIKE '%{}%'", faction_filter.c_str());
-		}
-		auto results = content_db.QueryDatabase(query);
-		if (!results.Success())
-			return;
-		if (results.RowCount() == 0) {
-			c->Message(Chat::Yellow, "No factions found with specified criteria");
-			return;
-		}
-		int _ctr = 0;
-		for (auto row = results.begin(); row != results.end(); ++row) {
-			auto    id = static_cast<uint32>(atoi(row[0]));
-			std::string name = row[1];
-			_ctr++;
-			c->Message(Chat::Yellow, "%s : id: %s", name.c_str(), std::to_string(id).c_str());
-		}
-		std::string response = _ctr > 0 ? fmt::format("Found {} matching factions", _ctr).c_str() : "No factions found.";
-		c->Message(Chat::Yellow, response.c_str());
-	}
-	if (strcasecmp(sep->arg[1], "review") == 0) {
+	if (!strcasecmp(sep->arg[1], "review")) {
 		if (!(c->GetTarget() && c->GetTarget()->IsClient())) {
 			c->Message(Chat::Red, "Player Target Required for faction review");
 			return;
 		}
-		uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
-		std::string revquery;
-		if (strcasecmp(sep->arg[2], "all") == 0) {
-			revquery = fmt::format(
-				"SELECT id,`name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE char_id = {}", charid);
-		}
-		else
-		{
-			revquery = fmt::format(
-				"SELECT id,`name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE `name` like '%{}%' and char_id = {}", faction_filter.c_str(), charid);
-		}
-		auto revresults = content_db.QueryDatabase(revquery);
-		if (!revresults.Success())
-			return;
-		if (revresults.RowCount() == 0) {
-			c->Message(Chat::Yellow, "No faction hits found. All are at base level");
-			return;
-		}
-		int _ctr2 = 0;
-		for (auto rrow = revresults.begin(); rrow != revresults.end(); ++rrow) {
-			auto    f_id = static_cast<uint32>(atoi(rrow[0]));
-			std::string cname = rrow[1];
-			std::string fvalue = rrow[2];
-			_ctr2++;
-			std::string resetlink = fmt::format("#faction reset {}", f_id);
-			c->Message(Chat::Yellow, "Reset: %s         id: %s (%s)", EQ::SayLinkEngine::GenerateQuestSaylink(resetlink, false, cname.c_str()).c_str(), std::to_string(f_id).c_str(), fvalue.c_str());
-		}
-		std::string response = _ctr2 > 0 ? fmt::format("Found {} matching factions", _ctr2).c_str() : "No faction hits found.";
-		c->Message(Chat::Yellow, response.c_str());
-	}
-	else if (strcasecmp(sep->arg[1], "reset") == 0)
-	{
-		if (!(faction_filter == "")) {
-			if (c->GetTarget() && c->GetTarget()->IsClient())
-			{
-				if (!c->CastToClient()->GetFeigned() && c->CastToClient()->GetAggroCount() == 0)
-				{
-					uint32 charid = c->GetTarget()->CastToClient()->CharacterID();
-					uint32 factionid = atoi(faction_filter.c_str());
 
-					if (c->GetTarget()->CastToClient()->ReloadCharacterFaction(c->GetTarget()->CastToClient(), factionid, charid))
-						c->Message(Chat::Yellow, "faction %u was cleared.", factionid);
-					else
-						c->Message(Chat::Red, "An error occurred clearing faction %u", factionid);
-				}
-				else
-				{
-					c->Message(Chat::Red, "Cannot be in Combat");
+		Client* target = c->GetTarget()->CastToClient();
+		uint32 character_id = target->CharacterID();
+		std::string query;
+		if (!strcasecmp(faction_filter.c_str(), "all")) {
+			query = fmt::format(
+				"SELECT id, `name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE char_id = {}",
+				character_id
+			);
+		} else {
+			query = fmt::format(
+				"SELECT id, `name`, current_value FROM faction_list INNER JOIN faction_values ON faction_list.id = faction_values.faction_id WHERE `name` like '%{}%' and char_id = {}",
+				faction_filter.c_str(),
+				character_id
+			);
+		}
+
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success() || !results.RowCount()) {
+			c->Message(Chat::Yellow, "No faction hits found. All are at base level.");
+			return;
+		}
+
+		uint32 found_count = 0;
+		for (auto row : results) {
+			uint32 faction_number = (found_count + 1);
+			auto faction_id = std::stoul(row[0]);
+			std::string faction_name = row[1];
+			std::string faction_value = row[2];
+			std::string reset_link = EQ::SayLinkEngine::GenerateQuestSaylink(
+				fmt::format("#faction reset {}", faction_id),
+				false,
+				"Reset"
+			);
+
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Faction {} | Name: {} ({}) Value: {} [{}]",
+					faction_number,
+					faction_name,
+					faction_id,
+					faction_value,
+					reset_link
+				).c_str()
+			);
+			found_count++;
+		}
+
+		auto faction_message = (
+			found_count > 0 ? 
+			(
+				found_count == 1 ?
+				"A Faction was" :
+				fmt::format("{} Factions were", found_count)
+			) :
+			"No Factions were"
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} found.",
+				faction_message
+			).c_str()
+		);
+	} else if (!strcasecmp(sep->arg[1], "reset")) {
+		if (strlen(faction_filter.c_str()) > 0) {
+			if (c->GetTarget() && c->GetTarget()->IsClient()) {
+				Client* target = c->GetTarget()->CastToClient();
+				if (
+					(
+						!c->GetFeigned() &&
+						c->GetAggroCount() == 0
+					) ||
+					(
+						!target->GetFeigned() &&
+						target->GetAggroCount() == 0
+					)
+				) {
+					uint32 character_id = target->CharacterID();
+					uint32 faction_id = std::stoul(faction_filter.c_str());
+					if (target->ReloadCharacterFaction(target, faction_id, character_id)) {
+						c->Message(
+							Chat::White,
+							fmt::format(
+								"Faction Reset | {} ({}) was reset for {}.",
+								content_db.GetFactionName(faction_id),
+								faction_id,
+								target->GetCleanName()
+							).c_str()
+						);
+					} else {
+						c->Message(
+							Chat::White,
+							fmt::format(
+								"Faction Reset Failed | {} ({}) was unable to be reset for {}.",
+								content_db.GetFactionName(faction_id),
+								faction_id,
+								target->GetCleanName()
+							).c_str()
+						);
+					}
+				} else {
+					c->Message(Chat::White, "You cannot reset factions while you or your target is in combat or feigned.");
 					return;
 				}
-			}
-			else {
-				c->Message(Chat::Red, "Player Target Required (whose not feigning death)");
+			} else {
+				c->Message(Chat::White, "You must target a PC for this command.");
 				return;
 			}
+		} else {
+			c->Message(Chat::White, "Usage: #faction reset [Faction ID] - Reset Targeted Player's Faction to Base Faction Value");
 		}
-		else
-			c->Message(Chat::Red, "No faction id entered");
+	} else if (!strcasecmp(sep->arg[1], "view")) {
+		if (c->GetTarget() && c->GetTarget()->IsNPC()) {
+			Mob* target = c->GetTarget();
+			uint32 npc_id = target->GetNPCTypeID();
+			uint32 npc_faction_id = target->CastToNPC()->GetPrimaryFaction();
+			std::string npc_name = target->GetCleanName();
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"{} ({}) has a Primary Faction  of {} ({}).",
+					npc_name,
+					npc_id,
+					content_db.GetFactionName(npc_faction_id),
+					npc_faction_id
+				).c_str()
+			);
+			c->Message(Chat::White, "Use: #setfaction [Faction ID] - Set an NPC's Primary Faction ID");
+		}
 	}
 }
 
