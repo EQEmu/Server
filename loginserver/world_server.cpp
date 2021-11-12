@@ -198,15 +198,15 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		LogDebug("User-To-World Response received");
 	}
 
-	auto *user_to_world_response = (UsertoWorldResponseLegacy_Struct *) packet.Data();
+	auto *r = (UsertoWorldResponseLegacy_Struct *) packet.Data();
 
-	LogDebug("Trying to find client with user id of [{0}]", user_to_world_response->lsaccountid);
-	Client *client = server.client_manager->GetClient(user_to_world_response->lsaccountid, "eqemu");
+	LogDebug("Trying to find client with user id of [{0}]", r->lsaccountid);
+	Client *client = server.client_manager->GetClient(r->lsaccountid, "eqemu");
 	if (client) {
 
 		LogDebug(
 			"Found client with user id of [{0}] and account name of [{1}]",
-			user_to_world_response->lsaccountid,
+			r->lsaccountid,
 			client->GetAccountName()
 		);
 
@@ -219,7 +219,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		per->base_header.sequence = client->GetPlaySequence();
 		per->server_number        = client->GetPlayServerID();
 
-		if (user_to_world_response->response > 0) {
+		if (r->response > 0) {
 			per->base_reply.success = true;
 			SendClientAuth(
 				client->GetConnection()->GetRemoteAddr(),
@@ -230,27 +230,27 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 			);
 		}
 
-		switch (user_to_world_response->response) {
+		switch (r->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = 101;
+				per->base_reply.error_str_id = LS::ErrStr::NO_ERROR;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = 326;
+				per->base_reply.error_str_id = LS::ErrStr::SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = 337;
+				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = 338;
+				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = 339;
+				per->base_reply.error_str_id = LS::ErrStr::WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = 111;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_1018_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = 102;
+				per->base_reply.error_str_id = LS::ErrStr::UNKNOWN_ERROR;
 		}
 
 		if (server.options.IsWorldTraceOn()) {
@@ -275,7 +275,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 	else {
 		LogError(
 			"Received User-To-World Response for [{0}] but could not find the client referenced!",
-			user_to_world_response->lsaccountid
+			r->lsaccountid
 		);
 	}
 }
@@ -358,25 +358,25 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = 101;
+				per->base_reply.error_str_id = LS::ErrStr::NO_ERROR;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = 326;
+				per->base_reply.error_str_id = LS::ErrStr::SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = 337;
+				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = 338;
+				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = 339;
+				per->base_reply.error_str_id = LS::ErrStr::WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = 111;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_1018_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = 102;
+				per->base_reply.error_str_id = LS::ErrStr::UNKNOWN_ERROR;
 		}
 
 		if (server.options.IsTraceOn()) {
@@ -1376,7 +1376,8 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 			name_set_to_bottom = true;
 		}
 	}
-	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == LS::ServerType::Standard && !name_set_to_bottom) {
+	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == LS::ServerType::Standard &&
+		!name_set_to_bottom) {
 		auto first_char = server_long_name.c_str()[0];
 		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
 			server_long_name   = fmt::format("|*| {}", server_long_name);
