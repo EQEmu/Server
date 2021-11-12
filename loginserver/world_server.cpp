@@ -1363,7 +1363,7 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	bool name_set_to_bottom = false;
 	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == 3) {
 		std::string s = str_tolower(server_long_name);
-		if (s.find("dev") != std::string::npos || s.find("test") != std::string::npos) {
+		if (s.find("dev") != std::string::npos || s.find("test") != std::string::npos || s.find("installer") != std::string::npos) {
 			name_set_to_bottom = true;
 		}
 	}
