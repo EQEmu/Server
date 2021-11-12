@@ -217,7 +217,7 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
 		per->base_header.sequence = client->GetPlaySequence();
-		per->server_number = client->GetPlayServerID();
+		per->server_number        = client->GetPlayServerID();
 
 		if (user_to_world_response->response > 0) {
 			per->base_reply.success = true;
@@ -335,7 +335,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
 		per->base_header.sequence = client->GetPlaySequence();
-		per->server_number = client->GetPlayServerID();
+		per->server_number        = client->GetPlayServerID();
 
 		LogDebug(
 			"Found sequence and play of [{0}] [{1}]",
@@ -1031,17 +1031,17 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	return false;
 }
 
-void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip) const
+void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_local_ip) const
 {
 	// see LoginClientServerData_Struct
 	if (use_local_ip) {
 		out.WriteString(GetLocalIP());
-	} else {
+	}
+	else {
 		out.WriteString(GetRemoteIP());
 	}
 
-	switch (GetServerListID())
-	{
+	switch (GetServerListID()) {
 		case 1:
 			out.WriteInt32(LS::ServerTypeFlags::Legends);
 			break;
@@ -1364,22 +1364,22 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == 3) {
 		std::string s = str_tolower(server_long_name);
 		if (s.find("dev") != std::string::npos) {
-			server_long_name = fmt::format("|D| {}", server_long_name);
+			server_long_name   = fmt::format("|D| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 		else if (s.find("test") != std::string::npos) {
-			server_long_name = fmt::format("|T| {}", server_long_name);
+			server_long_name   = fmt::format("|T| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 		else if (s.find("installer") != std::string::npos) {
-			server_long_name = fmt::format("|I| {}", server_long_name);
+			server_long_name   = fmt::format("|I| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 	}
 	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3 && !name_set_to_bottom) {
 		auto first_char = server_long_name.c_str()[0];
 		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
-			server_long_name = fmt::format("|*| {}", server_long_name);
+			server_long_name   = fmt::format("|*| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 	}
