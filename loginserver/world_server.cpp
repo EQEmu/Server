@@ -1376,6 +1376,6 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 
 	if (name_set_to_bottom){
 		server_long_name = fmt::format("| {}", server_long_name);
-		strcpy(name, SanitizeWorldServerName(server_long_name).c_str());
+		strcpy(name, server_long_name.c_str());
 	}
 }

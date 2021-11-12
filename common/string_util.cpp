@@ -690,10 +690,30 @@ std::string SanitizeWorldServerName(std::string server_long_name)
 	server_long_name = trim(server_long_name);
 
 	// bad word filter
-	for (auto &word: GetBadWords()) {
-		auto pos = str_tolower(server_long_name).find(word);
-		if (pos != std::string::npos) {
-			server_long_name = server_long_name.replace(pos, word.length(), repeat("*", (int) word.length()));
+	for (auto &piece: split_string(server_long_name, " ")) {
+		for (auto &word: GetBadWords()) {
+			// for shorter words that can actually be part of legitimate words
+			// make sure that it isn't part of another word by matching on a space
+			if (str_tolower(piece) == word) {
+				find_replace(
+					server_long_name,
+					piece,
+					repeat("*", (int) word.length())
+				);
+				continue;
+			}
+
+			auto pos = str_tolower(piece).find(word);
+			if (str_tolower(piece).find(word) != std::string::npos && piece.length() > 4 && word.length() > 4) {
+				auto found_word = piece.substr(pos, word.length());
+				std::string replaced_piece = piece.substr(pos, word.length());
+
+				find_replace(
+					server_long_name,
+					replaced_piece,
+					repeat("*", (int) word.length())
+				);
+			}
 		}
 	}
 
@@ -716,8 +736,6 @@ std::vector<std::string> GetBadWords()
 		"2g1c",
 		"2 girls 1 cup",
 		"acrotomophilia",
-		"alabama hot pocket",
-		"alaskan pipeline",
 		"anal",
 		"anilingus",
 		"anus",
@@ -729,14 +747,6 @@ std::vector<std::string> GetBadWords()
 		"auto erotic",
 		"autoerotic",
 		"babeland",
-		"baby batter",
-		"baby juice",
-		"ball gag",
-		"ball gravy",
-		"ball kicking",
-		"ball licking",
-		"ball sack",
-		"ball sucking",
 		"bangbros",
 		"bangbus",
 		"bareback",
@@ -894,8 +904,6 @@ std::vector<std::string> GetBadWords()
 		"guro",
 		"hand job",
 		"handjob",
-		"hard core",
-		"hardcore",
 		"hentai",
 		"homoerotic",
 		"honkey",
@@ -1011,7 +1019,6 @@ std::vector<std::string> GetBadWords()
 		"rimjob",
 		"rimming",
 		"rosy palm",
-		"rosy palm and her 5 sisters",
 		"rusty trombone",
 		"sadism",
 		"santorum",
