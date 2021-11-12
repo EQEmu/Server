@@ -2225,15 +2225,22 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 		}
 		case TaskType::Shared: {
 			if (m_active_shared_task.task_id == task_id) {
-				auto              outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
-				CancelTask_Struct *cts   = (CancelTask_Struct *) outapp->pBuffer;
-				cts->SequenceNumber      = TASKSLOTSHAREDTASK;
-				cts->type                = static_cast<uint32>(task_type);
 				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
-				client->QueuePacket(outapp);
-				safe_delete(outapp);
-				m_active_shared_task.task_id = TASKSLOTEMPTY;
+
+				// struct
+				auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskAttemptRemove_Struct));
+				auto *r = (ServerSharedTaskAttemptRemove_Struct *)pack->pBuffer;
+
+				// fill
+				r->requested_character_id = character_id;
+				r->requested_task_id = task_id;
+				r->remove_from_db = true;
+
+				// send
+				worldserver.SendPacket(pack);
+				safe_delete(pack);
 			}
+
 			break;
 		}
 		case TaskType::Quest: {
