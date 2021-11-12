@@ -11,6 +11,7 @@
   },
   "worldservers": {
     "unregistered_allowed": true,
+    "show_player_count": false,
     "reject_duplicate_servers": false
   },
   "web_api": {
