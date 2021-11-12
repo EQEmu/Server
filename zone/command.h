@@ -178,7 +178,6 @@ void command_logs(Client *c, const Seperator *sep);
 void command_logtest(Client *c, const Seperator *sep);
 void command_makepet(Client *c, const Seperator *sep);
 void command_mana(Client *c, const Seperator *sep);
-void command_manastat(Client *c, const Seperator *sep);
 void command_max_all_skills(Client *c, const Seperator *sep);
 void command_memspell(Client *c, const Seperator *sep);
 void command_merchantcloseshop(Client *c, const Seperator *sep);
