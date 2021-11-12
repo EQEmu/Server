@@ -4375,12 +4375,7 @@ void command_nudge(Client* c, const Seperator* sep)
 
 void command_heal(Client *c, const Seperator *sep)
 {
-	if (!c->GetTarget()) {
-		c->Message(Chat::White, "This command requires a target.");
-		return;
-	}
-
-	auto target = c->GetTarget();
+	auto target = c->GetTarget() ? c->GetTarget() : c;
 	target->Heal();
 	if (c != target) {
 		c->Message(
