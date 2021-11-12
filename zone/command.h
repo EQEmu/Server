@@ -209,7 +209,6 @@ void command_npctypespawn(Client *c, const Seperator *sep);
 void command_nudge(Client* c, const Seperator* sep);
 void command_nukebuffs(Client *c, const Seperator *sep);
 void command_nukeitem(Client *c, const Seperator *sep);
-void command_numauths(Client *c, const Seperator *sep);
 void command_object(Client* c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
 void command_opcode(Client *c, const Seperator *sep);
