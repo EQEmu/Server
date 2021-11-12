@@ -213,7 +213,6 @@ void command_numauths(Client *c, const Seperator *sep);
 void command_object(Client* c, const Seperator *sep);
 void command_oocmute(Client *c, const Seperator *sep);
 void command_opcode(Client *c, const Seperator *sep);
-void command_optest(Client *c, const Seperator *sep);
 
 #ifdef PACKET_PROFILER
 void command_packetprofile(Client *c, const Seperator *sep);
