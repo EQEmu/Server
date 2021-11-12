@@ -3613,7 +3613,7 @@ void Mob::CommonDamage(Mob* attacker, int &damage, const uint16 spell_id, const 
 			if (spell_id != SPELL_UNKNOWN && IsLifetapSpell(spell_id)) {
 				int healed = damage;
 
-				healed = attacker->GetActSpellHealing(spell_id, healed);
+				healed = RuleB(Spells, CompoundLifetapHeals) ? attacker->GetActSpellHealing(spell_id, healed) : healed;
 				LogCombat("Applying lifetap heal of [{}] to [{}]", healed, attacker->GetName());
 				attacker->HealDamage(healed);
 
