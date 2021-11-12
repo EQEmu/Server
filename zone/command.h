@@ -60,11 +60,6 @@ void command_ban(Client *c, const Seperator *sep);
 void command_beard(Client *c, const Seperator *sep);
 void command_beardcolor(Client *c, const Seperator *sep);
 void command_bind(Client* c, const Seperator *sep);
-
-#ifdef BUGTRACK
-void command_bug(Client *c, const Seperator *sep);
-#endif
-
 void command_camerashake(Client *c, const Seperator *sep);
 void command_castspell(Client *c, const Seperator *sep);
 void command_chat(Client *c, const Seperator *sep);
