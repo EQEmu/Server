@@ -1,6 +1,6 @@
 #include "world_server.h"
 #include "login_server.h"
-#include "login_structures.h"
+#include "login_types.h"
 #include "../common/ip_util.h"
 #include "../common/string_util.h"
 
@@ -1042,10 +1042,10 @@ void WorldServer::SerializeForClientServerList(SerializeBuffer &out, bool use_lo
 	}
 
 	switch (GetServerListID()) {
-		case 1:
+		case LS::ServerType::Legends:
 			out.WriteInt32(LS::ServerTypeFlags::Legends);
 			break;
-		case 2:
+		case LS::ServerType::Preferred:
 			out.WriteInt32(LS::ServerTypeFlags::Preferred);
 			break;
 		default:
@@ -1361,7 +1361,7 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	server_long_name = trim(server_long_name);
 
 	bool name_set_to_bottom = false;
-	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == 3) {
+	if (server.options.IsWorldDevTestServersListBottom() && server_list_type == LS::ServerType::Standard) {
 		std::string s = str_tolower(server_long_name);
 		if (s.find("dev") != std::string::npos) {
 			server_long_name   = fmt::format("|D| {}", server_long_name);
@@ -1376,7 +1376,7 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 			name_set_to_bottom = true;
 		}
 	}
-	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3 && !name_set_to_bottom) {
+	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == LS::ServerType::Standard && !name_set_to_bottom) {
 		auto first_char = server_long_name.c_str()[0];
 		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
 			server_long_name   = fmt::format("|*| {}", server_long_name);

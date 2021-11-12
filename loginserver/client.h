@@ -7,43 +7,8 @@
 #include "../common/eq_stream_intf.h"
 #include "../common/net/dns.h"
 #include "../common/net/daybreak_connection.h"
-#include "login_structures.h"
+#include "login_types.h"
 #include <memory>
-
-enum LSClientVersion {
-	cv_titanium,
-	cv_sod
-};
-
-enum LSClientStatus {
-	cs_not_sent_session_ready,
-	cs_waiting_for_login,
-	cs_creating_account,
-	cs_failed_to_login,
-	cs_logged_in
-};
-
-namespace LS {
-	namespace ServerStatusFlags {
-		enum eServerStatusFlags {
-			Up     = 0, // default
-			Down   = 1,
-			Unused = 2,
-			Locked = 4  // can be combined with Down to show "Locked (Down)"
-		};
-	}
-
-	namespace ServerTypeFlags {
-		enum eServerTypeFlags {
-			None      = 0,
-			Standard  = 1,
-			Unknown2  = 2,
-			Unknown4  = 4,
-			Preferred = 8,
-			Legends   = 16 // can be combined with Preferred flag to override color in Legends section with Preferred color (green)
-		};
-	}
-}
 
 /**
  * Client class, controls a single client and it's connection to the login server
