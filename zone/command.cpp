@@ -985,14 +985,6 @@ void command_setfaction(Client *c, const Seperator *sep)
     content_db.QueryDatabase(query);
 }
 
-void command_serversidename(Client *c, const Seperator *sep)
-{
-	if(c->GetTarget())
-		c->Message(Chat::White, c->GetTarget()->GetName());
-	else
-		c->Message(Chat::White, "Error: no target");
-}
-
 void command_wc(Client *c, const Seperator *sep)
 {
 	if (sep->argnum < 2) {

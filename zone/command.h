@@ -274,7 +274,6 @@ void command_sendzonespawns(Client *c, const Seperator *sep);
 void command_sensetrap(Client *c, const Seperator *sep);
 void command_serverinfo(Client *c, const Seperator *sep);
 void command_serverrules(Client *c, const Seperator *sep);
-void command_serversidename(Client *c, const Seperator *sep);
 void command_set_adventure_points(Client *c, const Seperator *sep);
 void command_setaapts(Client *c, const Seperator *sep);
 void command_setaaxp(Client *c, const Seperator *sep);
