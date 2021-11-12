@@ -150,6 +150,8 @@ public:
 	bool HandleNewLoginserverRegisteredOnly(Database::DbWorldRegistration &world_registration);
 	bool HandleNewLoginserverInfoUnregisteredAllowed(Database::DbWorldRegistration &world_registration);
 
+	void SerializeForClientServerList(class SerializeBuffer& out, bool use_local_ip) const;
+
 private:
 
 	/**

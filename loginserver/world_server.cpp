@@ -216,11 +216,11 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 		);
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->Sequence     = client->GetPlaySequence();
-		per->ServerNumber = client->GetPlayServerID();
+		per->base_header.sequence = client->GetPlaySequence();
+		per->server_number = client->GetPlayServerID();
 
 		if (user_to_world_response->response > 0) {
-			per->Allowed = 1;
+			per->base_reply.success = true;
 			SendClientAuth(
 				client->GetConnection()->GetRemoteAddr(),
 				client->GetAccountName(),
@@ -232,34 +232,34 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->Message = 101;
+				per->base_reply.error_str_id = 101;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->Message = 326;
+				per->base_reply.error_str_id = 326;
 				break;
 			case UserToWorldStatusSuspended:
-				per->Message = 337;
+				per->base_reply.error_str_id = 337;
 				break;
 			case UserToWorldStatusBanned:
-				per->Message = 338;
+				per->base_reply.error_str_id = 338;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->Message = 339;
+				per->base_reply.error_str_id = 339;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->Message = 111;
+				per->base_reply.error_str_id = 111;
 				break;
 			default:
-				per->Message = 102;
+				per->base_reply.error_str_id = 102;
 		}
 
 		if (server.options.IsWorldTraceOn()) {
 			LogDebug(
 				"Sending play response: allowed [{0}] sequence [{1}] server number [{2}] message [{3}]",
-				per->Allowed,
-				per->Sequence,
-				per->ServerNumber,
-				per->Message
+				per->base_reply.success,
+				per->base_header.sequence,
+				per->server_number,
+				per->base_reply.error_str_id
 			);
 
 			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
@@ -334,8 +334,8 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		);
 
 		auto *per = (PlayEverquestResponse_Struct *) outapp->pBuffer;
-		per->Sequence     = client->GetPlaySequence();
-		per->ServerNumber = client->GetPlayServerID();
+		per->base_header.sequence = client->GetPlaySequence();
+		per->server_number = client->GetPlayServerID();
 
 		LogDebug(
 			"Found sequence and play of [{0}] [{1}]",
@@ -346,7 +346,7 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 		LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 
 		if (user_to_world_response->response > 0) {
-			per->Allowed = 1;
+			per->base_reply.success = true;
 			SendClientAuth(
 				client->GetConnection()->GetRemoteAddr(),
 				client->GetAccountName(),
@@ -358,34 +358,34 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->Message = 101;
+				per->base_reply.error_str_id = 101;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->Message = 326;
+				per->base_reply.error_str_id = 326;
 				break;
 			case UserToWorldStatusSuspended:
-				per->Message = 337;
+				per->base_reply.error_str_id = 337;
 				break;
 			case UserToWorldStatusBanned:
-				per->Message = 338;
+				per->base_reply.error_str_id = 338;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->Message = 339;
+				per->base_reply.error_str_id = 339;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->Message = 111;
+				per->base_reply.error_str_id = 111;
 				break;
 			default:
-				per->Message = 102;
+				per->base_reply.error_str_id = 102;
 		}
 
 		if (server.options.IsTraceOn()) {
 			LogDebug(
 				"Sending play response with following data, allowed [{0}], sequence {1}, server number {2}, message {3}",
-				per->Allowed,
-				per->Sequence,
-				per->ServerNumber,
-				per->Message
+				per->base_reply.success,
+				per->base_header.sequence,
+				per->server_number,
+				per->base_reply.error_str_id
 			);
 			LogDebug("[Size: [{0}]] {1}", outapp->size, DumpPacketToString(outapp));
 		}
@@ -1023,6 +1023,49 @@ bool WorldServer::ValidateWorldServerAdminLogin(
 	}
 
 	return false;
+}
+
+void WorldServer::SerializeForClientServerList(SerializeBuffer& out, bool use_local_ip) const
+{
+	// see LoginClientServerData_Struct
+	if (use_local_ip) {
+		out.WriteString(GetLocalIP());
+	} else {
+		out.WriteString(GetRemoteIP());
+	}
+
+	switch (GetServerListID())
+	{
+		case 1:
+			out.WriteInt32(LS::ServerTypeFlags::Legends);
+			break;
+		case 2:
+			out.WriteInt32(LS::ServerTypeFlags::Preferred);
+			break;
+		default:
+			out.WriteInt32(LS::ServerTypeFlags::Standard);
+			break;
+	}
+
+	out.WriteUInt32(GetServerId());
+	out.WriteString(GetServerLongName());
+	out.WriteString("us"); // country code
+	out.WriteString("en"); // language code
+
+	// 0 = Up, 1 = Down, 2 = Up, 3 = down, 4 = locked, 5 = locked(down)
+	if (GetStatus() < 0) {
+		if (GetZonesBooted() == 0) {
+			out.WriteInt32(LS::ServerStatusFlags::Down);
+		}
+		else {
+			out.WriteInt32(LS::ServerStatusFlags::Locked);
+		}
+	}
+	else {
+		out.WriteInt32(LS::ServerStatusFlags::Up);
+	}
+
+	out.WriteUInt32(GetPlayersOnline());
 }
 
 /**
