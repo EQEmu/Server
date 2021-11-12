@@ -1379,7 +1379,7 @@ void WorldServer::FormatWorldServerName(char *name, int8 server_list_type)
 	if (server.options.IsWorldSpecialCharacterStartListBottom() && server_list_type == 3 && !name_set_to_bottom) {
 		auto first_char = server_long_name.c_str()[0];
 		if (IsAllowedWorldServerCharacterList(first_char) && first_char != '|') {
-			server_long_name = fmt::format("|S| {}", server_long_name);
+			server_long_name = fmt::format("|*| {}", server_long_name);
 			name_set_to_bottom = true;
 		}
 	}
