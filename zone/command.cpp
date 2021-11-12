@@ -3087,14 +3087,25 @@ void command_size(Client *c, const Seperator *sep)
 
 void command_mana(Client *c, const Seperator *sep)
 {
-	Mob *t;
+	auto target = c->GetTarget() ? c->GetTarget() : c;	
+	if(target->IsClient()) {
+		target->CastToClient()->SetMana(target->CastToClient()->CalcMaxMana());
+	} else {
+		target->SetMana(target->CalcMaxMana());
+	}
 
-	t = c->GetTarget() ? c->GetTarget() : c;
-
-	if(t->IsClient())
-		t->CastToClient()->SetMana(t->CastToClient()->CalcMaxMana());
-	else
-		t->SetMana(t->CalcMaxMana());
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Set {} ({}) to full Mana.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Restored your Mana to full.");
+	}
 }
 
 void command_flymode(Client *c, const Seperator *sep)
