@@ -884,19 +884,30 @@ void command_worldwide(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #worldwide moveinstance [Instance ID]");
 	}
 }
+
 void command_endurance(Client *c, const Seperator *sep)
 {
-	Mob *t;
+	auto target = c->GetTarget() ? c->GetTarget() : c;
+	if (target->IsClient()) {
+		target->CastToClient()->SetEndurance(target->CastToClient()->GetMaxEndurance());
+	} else {
+		target->SetEndurance(target->GetMaxEndurance());
+	}
 
-	t = c->GetTarget() ? c->GetTarget() : c;
-
-	if (t->IsClient())
-		t->CastToClient()->SetEndurance(t->CastToClient()->GetMaxEndurance());
-	else
-		t->SetEndurance(t->GetMaxEndurance());
-
-	t->Message(Chat::White, "Your endurance has been refilled.");
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Set {} ({}) to full Endurance.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Restored your Endurance to full.");
+	}
 }
+
 void command_setstat(Client* c, const Seperator* sep){
 	if(sep->arg[1][0] && sep->arg[2][0] && c->GetTarget()!=0 && c->GetTarget()->IsClient()){
 		c->GetTarget()->CastToClient()->SetStats(atoi(sep->arg[1]),atoi(sep->arg[2]));
