@@ -64,6 +64,7 @@ void LoadServerConfig()
 			false
 		));
 	server.options.AllowUnregistered(server.config.GetVariableBool("worldservers", "unregistered_allowed", true));
+	server.options.SetShowPlayerCount(server.config.GetVariableBool("worldservers", "show_player_count", false));
 
 	/**
 	 * Account
@@ -240,6 +241,7 @@ int main(int argc, char **argv)
 #endif
 	LogInfo("[Config] [WorldServer] IsRejectingDuplicateServers [{0}]", server.options.IsRejectingDuplicateServers());
 	LogInfo("[Config] [WorldServer] IsUnregisteredAllowed [{0}]", server.options.IsUnregisteredAllowed());
+	LogInfo("[Config] [WorldServer] ShowPlayerCount [{0}]", server.options.IsShowPlayerCountEnabled());
 	LogInfo("[Config] [Security] GetEncryptionMode [{0}]", server.options.GetEncryptionMode());
 	LogInfo("[Config] [Security] IsTokenLoginAllowed [{0}]", server.options.IsTokenLoginAllowed());
 	LogInfo("[Config] [Security] IsPasswordLoginAllowed [{0}]", server.options.IsPasswordLoginAllowed());

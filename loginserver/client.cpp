@@ -553,7 +553,7 @@ void Client::DoSuccessfulLogin(
 	login_reply.unk2                       = 0;
 	login_reply.lsid                       = db_account_id;
 	login_reply.failed_attempts            = 0;
-	login_reply.show_player_count          = false; // todo: config option
+	login_reply.show_player_count          = server.options.IsShowPlayerCountEnabled();
 	login_reply.offer_min_days             = 99;
 	login_reply.offer_min_views            = -1;
 	login_reply.offer_cooldown_minutes     = 0;
