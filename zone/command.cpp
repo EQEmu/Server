@@ -13803,13 +13803,13 @@ void command_tune(Client *c, const Seperator *sep)
 	{
 
 		if (!strcasecmp(sep->arg[2], "A")) {
-			c->Tune_GetStats(defender, attacker);
+			c->TuneGetStats(defender, attacker);
 		}
 		else if (!strcasecmp(sep->arg[2], "D")){
-			c->Tune_GetStats(attacker, defender);
+			c->TuneGetStats(attacker, defender);
 		}
 		else {
-			c->Tune_GetStats(defender, attacker);
+			c->TuneGetStats(defender, attacker);
 		}
 		return;
 	}
@@ -13846,10 +13846,10 @@ void command_tune(Client *c, const Seperator *sep)
 		}
 
 		if (!strcasecmp(sep->arg[2], "A")) {
-			c->Tune_GetATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, ac_override, info_level);
+			c->TuneGetATKByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, ac_override, info_level);
 		}
 		else if (!strcasecmp(sep->arg[2], "D")) {
-			c->Tune_GetATKByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, ac_override, info_level);
+			c->TuneGetATKByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, ac_override, info_level);
 		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
@@ -13895,12 +13895,12 @@ void command_tune(Client *c, const Seperator *sep)
 		if (!info_level) {
 			info_level = 0;
 		}
-		
+
 		if (!strcasecmp(sep->arg[2], "A")) {
-			c->Tune_GetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
+			c->TuneGetACByPctMitigation(defender, attacker, pct_mitigation, interval, max_loop, atk_override, info_level);
 		}
 		else if (!strcasecmp(sep->arg[2], "D")) {
-			c->Tune_GetACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, atk_override, info_level);
+			c->TuneGetACByPctMitigation(attacker, defender, pct_mitigation, interval, max_loop, atk_override, info_level);
 		}
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
@@ -13949,9 +13949,9 @@ void command_tune(Client *c, const Seperator *sep)
 		}
 
 		if (!strcasecmp(sep->arg[2], "A"))
-			c->Tune_GetAccuracyByHitChance(defender, attacker, hit_chance, interval, max_loop, avoid_override, info_level);
+			c->TuneGetAccuracyByHitChance(defender, attacker, hit_chance, interval, max_loop, avoid_override, info_level);
 		else if (!strcasecmp(sep->arg[2], "D"))
-			c->Tune_GetAccuracyByHitChance(attacker, defender, hit_chance, interval, max_loop, avoid_override, info_level);
+			c->TuneGetAccuracyByHitChance(attacker, defender, hit_chance, interval, max_loop, avoid_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "...#tune FindAccuracy  [A/D] [hit chance] [interval][loop_max][Avoidance override][Info Level]");
@@ -13998,9 +13998,9 @@ void command_tune(Client *c, const Seperator *sep)
 		}
 
 		if (!strcasecmp(sep->arg[2], "A"))
-			c->Tune_GetAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
+			c->TuneGetAvoidanceByHitChance(defender, attacker, hit_chance, interval, max_loop, acc_override, info_level);
 		else if (!strcasecmp(sep->arg[2], "D"))
-			c->Tune_GetAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop, acc_override, info_level);
+			c->TuneGetAvoidanceByHitChance(attacker, defender, hit_chance, interval, max_loop, acc_override, info_level);
 		else {
 			c->Message(Chat::White, "#Tune - Error no category selcted. [#Tune help]");
 			c->Message(Chat::White, "...#tune FindAvoidance [A/D] [hit chance] [interval][loop_max][Accuracy override][Info Level] ");
