@@ -238,7 +238,6 @@ void command_proximity(Client *c, const Seperator *sep);
 void command_push(Client *c, const Seperator *sep);
 void command_pvp(Client *c, const Seperator *sep);
 void command_qglobal(Client *c, const Seperator *sep);
-void command_qtest(Client *c, const Seperator *sep);
 void command_questerrors(Client *c, const Seperator *sep);
 void command_race(Client *c, const Seperator *sep);
 void command_raidloot(Client* c, const Seperator *sep);
