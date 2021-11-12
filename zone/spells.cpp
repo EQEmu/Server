@@ -5680,7 +5680,7 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 
 		for (int i = 0; i < MAX_PROCS; i++){
 			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id
-				 || RangedProcs[i].spellID == spell_id){
+				 || RangedProcs[i].spellID == spell_id || DefensiveProcs[i].spellID == spell_id){
 				return true;
 			}
 		}
@@ -5689,7 +5689,8 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 
 				if (aabonuses.SpellProc[i + 1] == spell_id ||
-					aabonuses.RangedProc[i + 1] == spell_id) {
+					aabonuses.RangedProc[i + 1] == spell_id ||
+					aabonuses.DefensiveProc[i + 1] == spell_id) {
 					return true;
 				}
 			}
