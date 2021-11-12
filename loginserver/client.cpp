@@ -120,36 +120,20 @@ void Client::Handle_SessionReady(const char *data, unsigned int size)
 	m_client_status = cs_waiting_for_login;
 
 	/**
-	 * The packets are mostly the same but slightly different between the two versions
+	 * The packets are identical between the two versions
 	 */
-	if (m_client_version == cv_sod) {
-		auto *outapp = new EQApplicationPacket(OP_ChatMessage, 17);
-		outapp->pBuffer[0]  = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
+	auto *outapp = new EQApplicationPacket(OP_ChatMessage, sizeof(LoginHandShakeReply_Struct));
+	auto buf = reinterpret_cast<LoginHandShakeReply_Struct*>(outapp->pBuffer);
+	buf->base_header.sequence    = 0x02;
+	buf->base_reply.success      = true;
+	buf->base_reply.error_str_id = 0x65; // 101 "No Error"
 
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
-
-		m_connection->QueuePacket(outapp);
-		delete outapp;
+	if (server.options.IsDumpOutPacketsOn()) {
+		DumpPacket(outapp);
 	}
-	else {
-		const char *msg    = "ChatMessage";
-		auto       *outapp = new EQApplicationPacket(OP_ChatMessage, 16 + strlen(msg));
-		outapp->pBuffer[0]  = 0x02;
-		outapp->pBuffer[10] = 0x01;
-		outapp->pBuffer[11] = 0x65;
-		strcpy((char *) (outapp->pBuffer + 15), msg);
 
-		if (server.options.IsDumpOutPacketsOn()) {
-			DumpPacket(outapp);
-		}
-
-		m_connection->QueuePacket(outapp);
-		delete outapp;
-	}
+	m_connection->QueuePacket(outapp);
+	delete outapp;
 }
 
 /**
@@ -165,14 +149,18 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	if ((size - 12) % 8 != 0) {
-		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
+	// login user/pass are variable length after unencrypted opcode and base message header (size includes opcode)
+	constexpr int header_size = sizeof(uint16_t) + sizeof(LoginBaseMessage_Struct);
+	int data_size = size - header_size;
+
+	if (size <= header_size) {
+		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
 
 		return;
 	}
 
-	if (size < sizeof(LoginLoginRequest_Struct)) {
-		LogError("Login received packet of size: {0}, this would cause a buffer overflow, discarding", size);
+	if (data_size % 8 != 0) {
+		LogError("Login received packet of size: {0}, this would cause a block corruption, discarding", size);
 
 		return;
 	}
@@ -189,13 +177,14 @@ void Client::Handle_Login(const char *data, unsigned int size)
 	std::string db_account_password_hash;
 
 	std::string outbuffer;
-	outbuffer.resize(size - 12);
+	outbuffer.resize(data_size);
 	if (outbuffer.length() == 0) {
 		LogError("Corrupt buffer sent to server, no length");
 		return;
 	}
 
-	auto r = eqcrypt_block(data + 10, size - 12, &outbuffer[0], 0);
+	// data starts at base message header (opcode not included)
+	auto r = eqcrypt_block(data + sizeof(LoginBaseMessage_Struct), data_size, &outbuffer[0], 0);
 	if (r == nullptr) {
 		LogError("Failed to decrypt eqcrypt block");
 		return;
@@ -209,7 +198,8 @@ void Client::Handle_Login(const char *data, unsigned int size)
 		return;
 	}
 
-	memcpy(&m_llrs, data, sizeof(LoginLoginRequest_Struct));
+	// only need to copy the base header for reply options, ignore login info
+	memcpy(&m_llrs, data, sizeof(LoginBaseMessage_Struct));
 
 	bool result = false;
 	if (outbuffer[0] == 0 && outbuffer[1] == 0) {
@@ -297,8 +287,8 @@ void Client::Handle_Play(const char *data)
 	}
 
 	const auto *play        = (const PlayEverquestRequest_Struct *) data;
-	auto       server_id_in = (unsigned int) play->ServerNumber;
-	auto       sequence_in  = (unsigned int) play->Sequence;
+	auto       server_id_in = (unsigned int) play->server_number;
+	auto       sequence_in  = (unsigned int) play->base_header.sequence;
 
 	if (server.options.IsTraceOn()) {
 		LogInfo(
@@ -309,7 +299,7 @@ void Client::Handle_Play(const char *data)
 		);
 	}
 
-	m_play_server_id   = (unsigned int) play->ServerNumber;
+	m_play_server_id   = (unsigned int) play->server_number;
 	m_play_sequence_id = sequence_in;
 	m_play_server_id   = server_id_in;
 	server.server_manager->SendUserToWorldRequest(server_id_in, m_account_id, m_loginserver_name);
@@ -320,14 +310,13 @@ void Client::Handle_Play(const char *data)
  */
 void Client::SendServerListPacket(uint32 seq)
 {
-	EQApplicationPacket *outapp = server.server_manager->CreateServerListPacket(this, seq);
+	auto outapp = server.server_manager->CreateServerListPacket(this, seq);
 
 	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
+		DumpPacket(outapp.get());
 	}
 
-	m_connection->QueuePacket(outapp);
-	delete outapp;
+	m_connection->QueuePacket(outapp.get());
 }
 
 void Client::SendPlayResponse(EQApplicationPacket *outapp)
@@ -412,16 +401,26 @@ void Client::DoFailedLogin()
 	m_stored_user.clear();
 	m_stored_pass.clear();
 
-	EQApplicationPacket outapp(OP_LoginAccepted, sizeof(LoginLoginFailed_Struct));
-	auto                *login_failed = (LoginLoginFailed_Struct *) outapp.pBuffer;
+	// unencrypted
+	LoginBaseMessage_Struct base_header{};
+	base_header.sequence     = m_llrs.sequence; // login (3)
+	base_header.encrypt_type = m_llrs.encrypt_type;
 
-	login_failed->unknown1 = m_llrs.unknown1;
-	login_failed->unknown2 = m_llrs.unknown2;
-	login_failed->unknown3 = m_llrs.unknown3;
-	login_failed->unknown4 = m_llrs.unknown4;
-	login_failed->unknown5 = m_llrs.unknown5;
+	// encrypted
+	PlayerLoginReply_Struct login_reply{};
+	login_reply.base_reply.success      = false;
+	login_reply.base_reply.error_str_id = 105; // Error - The username and/or password were not valid
 
-	memcpy(login_failed->unknown6, FailedLoginResponseData, sizeof(FailedLoginResponseData));
+	char encrypted_buffer[80] = {0};
+	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
+	if (rc == nullptr) {
+		LogDebug("Failed to encrypt eqcrypt block for failed login");
+	}
+
+	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	EQApplicationPacket outapp(OP_LoginAccepted, outsize);
+	outapp.WriteData(&base_header, sizeof(base_header));
+	outapp.WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	if (server.options.IsDumpOutPacketsOn()) {
 		DumpPacket(&outapp);
@@ -539,51 +538,47 @@ void Client::DoSuccessfulLogin(
 	m_account_name     = in_account_name;
 	m_loginserver_name = db_loginserver;
 
-	auto *outapp         = new EQApplicationPacket(OP_LoginAccepted, 10 + 80);
-	auto *login_accepted = (LoginAccepted_Struct *) outapp->pBuffer;
-	login_accepted->unknown1 = m_llrs.unknown1;
-	login_accepted->unknown2 = m_llrs.unknown2;
-	login_accepted->unknown3 = m_llrs.unknown3;
-	login_accepted->unknown4 = m_llrs.unknown4;
-	login_accepted->unknown5 = m_llrs.unknown5;
+	// unencrypted
+	LoginBaseMessage_Struct base_header{};
+	base_header.sequence     = m_llrs.sequence;
+	base_header.compressed   = false;
+	base_header.encrypt_type = m_llrs.encrypt_type;
+	base_header.unk3         = m_llrs.unk3;
 
-	auto *login_failed_attempts = new LoginFailedAttempts_Struct;
-	memset(login_failed_attempts, 0, sizeof(LoginFailedAttempts_Struct));
-
-	login_failed_attempts->failed_attempts = 0;
-	login_failed_attempts->message         = 0x01;
-	login_failed_attempts->lsid            = db_account_id;
-	login_failed_attempts->unknown3[3]  = 0x03;
-	login_failed_attempts->unknown4[3]  = 0x02;
-	login_failed_attempts->unknown5[0]  = 0xe7;
-	login_failed_attempts->unknown5[1]  = 0x03;
-	login_failed_attempts->unknown6[0]  = 0xff;
-	login_failed_attempts->unknown6[1]  = 0xff;
-	login_failed_attempts->unknown6[2]  = 0xff;
-	login_failed_attempts->unknown6[3]  = 0xff;
-	login_failed_attempts->unknown7[0]  = 0xa0;
-	login_failed_attempts->unknown7[1]  = 0x05;
-	login_failed_attempts->unknown8[3]  = 0x02;
-	login_failed_attempts->unknown9[0]  = 0xff;
-	login_failed_attempts->unknown9[1]  = 0x03;
-	login_failed_attempts->unknown11[0] = 0x63;
-	login_failed_attempts->unknown12[0] = 0x01;
-	memcpy(login_failed_attempts->key, m_key.c_str(), m_key.size());
+	// not serializing any of the variable length strings so just use struct directly
+	PlayerLoginReply_Struct login_reply{};
+	login_reply.base_reply.success         = true;
+	login_reply.base_reply.error_str_id    = 101; // No Error
+	login_reply.unk1                       = 0;
+	login_reply.unk2                       = 0;
+	login_reply.lsid                       = db_account_id;
+	login_reply.failed_attempts            = 0;
+	login_reply.show_player_count          = server.options.IsShowPlayerCountEnabled();
+	login_reply.offer_min_days             = 99;
+	login_reply.offer_min_views            = -1;
+	login_reply.offer_cooldown_minutes     = 0;
+	login_reply.web_offer_number           = 0;
+	login_reply.web_offer_min_days         = 99;
+	login_reply.web_offer_min_views        = -1;
+	login_reply.web_offer_cooldown_minutes = 0;
+	memcpy(login_reply.key, m_key.c_str(), m_key.size());
 
 	char encrypted_buffer[80] = {0};
-	auto rc                   = eqcrypt_block((const char *) login_failed_attempts, 75, encrypted_buffer, 1);
+	auto rc = eqcrypt_block((const char*)&login_reply, sizeof(login_reply), encrypted_buffer, 1);
 	if (rc == nullptr) {
 		LogDebug("Failed to encrypt eqcrypt block");
 	}
 
-	memcpy(login_accepted->encrypt, encrypted_buffer, 80);
+	constexpr int outsize = sizeof(LoginBaseMessage_Struct) + sizeof(encrypted_buffer);
+	auto outapp = std::make_unique<EQApplicationPacket>(OP_LoginAccepted, outsize);
+	outapp->WriteData(&base_header, sizeof(base_header));
+	outapp->WriteData(&encrypted_buffer, sizeof(encrypted_buffer));
 
 	if (server.options.IsDumpOutPacketsOn()) {
-		DumpPacket(outapp);
+		DumpPacket(outapp.get());
 	}
 
-	m_connection->QueuePacket(outapp);
-	delete outapp;
+	m_connection->QueuePacket(outapp.get());
 
 	m_client_status = cs_logged_in;
 }

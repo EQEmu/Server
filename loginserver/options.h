@@ -113,6 +113,15 @@ public:
 	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }
 	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
 
+	inline bool IsShowPlayerCountEnabled() const
+	{
+		return show_player_count;
+	}
+	inline void SetShowPlayerCount(bool show_player_count)
+	{
+		Options::show_player_count = show_player_count;
+	}
+
 private:
 	bool        allow_unregistered;
 	bool        trace;
@@ -122,6 +131,7 @@ private:
 	bool        reject_duplicate_servers;
 	bool        allow_token_login;
 	bool        allow_password_login;
+	bool        show_player_count;
 	bool        auto_create_accounts;
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
@@ -129,6 +139,7 @@ private:
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };
+
 
 #endif
 

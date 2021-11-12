@@ -1594,10 +1594,6 @@ public:
 	uint32 GetLastInvSnapshotTime() { return m_epp.last_invsnapshot_time; }
 	uint32 GetNextInvSnapshotTime() { return m_epp.next_invsnapshot_time; }
 
-	//Command #Tune functions
-	virtual int32 Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
-	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
-
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 	void QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction); // TODO: Fix faction processing
 
