@@ -188,7 +188,6 @@ int command_init(void)
 		command_add("copycharacter", "[source_char_name] [dest_char_name] [dest_account_name] Copies character to destination account", 250, command_copycharacter) ||
 		command_add("corpse", "- Manipulate corpses, use with no arguments for help", 50, command_corpse) ||
 		command_add("corpsefix", "Attempts to bring corpses from underneath the ground within close proximity of the player", 0, command_corpsefix) ||
-		command_add("crashtest", "- Crash the zoneserver", 255, command_crashtest) ||
 		command_add("cvs", "- Summary of client versions currently online.", 200, command_cvs) ||
 		command_add("damage", "[amount] - Damage your target", 100, command_damage) ||
 		command_add("databuckets", "View|Delete [key] [limit]- View data buckets, limit 50 default or Delete databucket by key", 80, command_databuckets) ||
@@ -14671,13 +14670,6 @@ void command_logtest(Client *c, const Seperator *sep){
 		}
 
 	}
-}
-
-void command_crashtest(Client *c, const Seperator *sep)
-{
-	c->Message(Chat::White, "Alright, now we get an GPF ;) ");
-	char* gpf = 0;
-	memcpy(gpf, "Ready to crash",  30);
 }
 
 void command_logs(Client *c, const Seperator *sep){
