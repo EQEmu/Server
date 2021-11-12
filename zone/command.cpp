@@ -4366,10 +4366,20 @@ void command_nudge(Client* c, const Seperator* sep)
 
 void command_heal(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget()==0)
-		c->Message(Chat::White, "Error: #Heal: No Target.");
-	else
-		c->GetTarget()->Heal();
+	auto target = c->GetTarget() ? c->GetTarget() : c;
+	target->Heal();
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Healed {} ({}) to full.",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else {
+		c->Message(Chat::White, "Healed yourself to full.");
+	}
 }
 
 void command_appearance(Client *c, const Seperator *sep)
