@@ -298,7 +298,6 @@ int command_init(void)
 		command_add("movechar", "[charname] [zonename] - Move charname to zonename", 50, command_movechar) ||
 		command_add("movement", "Various movement commands", 200, command_movement) ||
 		command_add("myskills", "- Show details about your current skill levels", 0, command_myskills) ||
-		command_add("mysqltest", "Akkadius MySQL Bench Test", 250, command_mysqltest) ||
 		command_add("mysql", "Mysql CLI, see 'help' for options.", 250, command_mysql) ||
 		command_add("mystats", "- Show details about you or your pet", 50, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", 150, command_name) ||
@@ -14718,20 +14717,6 @@ void command_logs(Client *c, const Seperator *sep){
 		c->Message(Chat::White, "--- #logs list_settings - Shows current log settings and categories loaded into the current process' memory");
 		c->Message(Chat::White, "--- #logs set [console|file|gmsay] <category_id> <debug_level (1-3)> - Sets log settings during the lifetime of the zone");
 	}
-}
-
-void command_mysqltest(Client *c, const Seperator *sep)
-{
-	clock_t t = std::clock(); /* Function timer start */
-	if (sep->IsNumber(1)){
-		uint32 i = 0;
-		t = std::clock();
-		for (i = 0; i < atoi(sep->arg[1]); i++){
-			std::string query = "SELECT * FROM `zone`";
-			auto results = content_db.QueryDatabase(query);
-		}
-	}
-	LogDebug("MySQL Test Took [{}] seconds", ((float)(std::clock() - t)) / CLOCKS_PER_SEC);
 }
 
 void command_resetaa_timer(Client *c, const Seperator *sep) {

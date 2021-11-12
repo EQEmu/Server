@@ -189,7 +189,6 @@ void command_movechar(Client *c, const Seperator *sep);
 void command_movement(Client *c, const Seperator *sep);
 void command_myskills(Client *c, const Seperator *sep);
 void command_mysql(Client *c, const Seperator *sep);
-void command_mysqltest(Client *c, const Seperator *sep);
 void command_mystats(Client *c, const Seperator *sep);
 void command_name(Client *c, const Seperator *sep);
 void command_netstats(Client *c, const Seperator *sep);
