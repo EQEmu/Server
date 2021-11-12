@@ -5144,47 +5144,75 @@ void command_invsnapshot(Client *c, const Seperator *sep)
 
 void command_findnpctype(Client *c, const Seperator *sep)
 {
-	if(sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #findnpctype [search criteria]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #findnpctype [Search Criteria]");
 		return;
     }
 
 	std::string query;
-
-	int id = atoi((const char *)sep->arg[1]);
-	if (id == 0) // If id evaluates to 0, then search as if user entered a string.
-		query = StringFormat("SELECT id, name FROM npc_types WHERE name LIKE '%%%s%%'",  sep->arg[1]);
-	else // Otherwise, look for just that npc id.
-		query = StringFormat("SELECT id, name FROM npc_types WHERE id = %i",  id);
+	std::string search_criteria = sep->arg[1];
+	if (sep->IsNumber(1)) {
+		query = fmt::format(
+			"SELECT id, name FROM npc_types WHERE id = {}",
+			search_criteria
+		);
+	} else {
+		query = fmt::format(
+			"SELECT id, name FROM npc_types WHERE name LIKE '%%{}%%'",
+			search_criteria
+		);
+	}
 
     auto results = content_db.QueryDatabase(query);
-    if (!results.Success()) {
-        c->Message (0, "Error querying database.");
-		c->Message (0, query.c_str());
-    }
+	if (!results.Success() || !results.RowCount()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"No matches found for '{}'.",
+				search_criteria
+			).c_str()
+		);
+		return;
+	}
 
-    if (results.RowCount() == 0) // No matches found.
-        c->Message (0, "No matches found for %s.",  sep->arg[1]);
+	int found_count = 0;
 
-    // If query runs successfully.
-	int count = 0;
-    const int maxrows = 20;
+	for (auto row : results) {
+		int found_number = (found_count + 1);
+		if (found_count == 20) {
+			break;
+		}
 
-    // Process each row returned.
-	for (auto row = results.begin(); row != results.end(); ++row) {
-		// Limit to returning maxrows rows.
-        if (++count > maxrows) {
-            c->Message (0, "%i npc types shown. Too many results.",  maxrows);
-            break;
-        }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"NPC {} | {} ({})",
+				found_number,
+				row[1],
+				row[0]
+			).c_str()
+		);
+		found_count++;
+	}
 
-        c->Message (0, "  %s: %s",  row[0], row[1]);
-    }
+	if (found_count == 20) {
+		c->Message(Chat::White, "20 NPCs were found, max reached.");
+	} else {
+		auto npc_message = (
+			found_count == 1 ?
+			"An NPC was" :
+			fmt::format("{} NPCs were", found_count)
+		);
 
-    // If we did not hit the maxrows limit.
-    if (count <= maxrows)
-        c->Message (0, "Query complete. %i rows shown.",  count);
-
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} found.",
+				npc_message
+			).c_str()
+		);
+	}
 }
 
 void command_faction(Client *c, const Seperator *sep)
