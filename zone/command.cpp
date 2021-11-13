@@ -9263,7 +9263,7 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	}
 
 	std::string crystal_type = str_tolower(sep->arg[1]);
-	uint32 crystal_amount = std::stoul(sep->arg[2]);
+	uint32 crystal_amount = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
 	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
 	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
 	if (!is_ebon && !is_radiant) {
@@ -9283,20 +9283,6 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	}
 
 	auto crystal_link = database.CreateItemLink(crystal_item_id);
-	if (
-		crystal_amount <= 0 ||
-		crystal_amount > 2000000000
-	) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Crystal Amount must be greater than 0 and no more than 2,000,000,000 for {}.",
-				crystal_link
-			).c_str()
-		);
-		return;
-	}
-
 	if (is_radiant || is_ebon) {
 		if (is_radiant) {
 			target->SetRadiantCrystals(crystal_amount);
