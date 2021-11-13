@@ -377,7 +377,7 @@ int command_init(void)
 		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.",  0, command_sensetrap) ||
 		command_add("serverinfo", "- Get OS info about server host", 200, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", 0, command_serverrules) ||
-		command_add("setaapts", "[value] - Set your or your player target's available AA points", 100, command_setaapts) ||
+		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", 100, command_setaapts) ||
 		command_add("setaaxp", "[value] - Set your or your player target's AA experience", 100, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", 150, command_set_adventure_points) ||
 		command_add("setanim", "[animnum] - Set target's appearance to animnum", 200, command_setanim) ||
