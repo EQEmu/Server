@@ -45,6 +45,7 @@ std::vector<std::string> wrap(std::vector<std::string> &src, std::string charact
 std::string implode(std::string glue, std::vector<std::string> src);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
+std::string ConvertSecondsToTime(int duration);
 
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.
