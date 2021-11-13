@@ -9277,11 +9277,6 @@ void command_setcrystals(Client *c, const Seperator *sep)
 		RuleI(Zone, RadiantCrystalItemID)
 	);
 
-	if (!crystal_item_id) {
-		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
-		return;
-	}
-
 	auto crystal_link = database.CreateItemLink(crystal_item_id);
 	if (is_radiant || is_ebon) {
 		if (is_radiant) {
