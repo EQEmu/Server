@@ -493,6 +493,8 @@ luabind::scope lua_register_spell() {
 	return luabind::class_<Lua_Spell>("Spell")
 	.def(luabind::constructor<>())
 	.def(luabind::constructor<int>())
+	.property("null", &Lua_Spell::Null)
+	.property("valid", &Lua_Spell::Valid)
 	.def("AEDuration", &Lua_Spell::GetAEDuration)
 	.def("AEMaxTargets", &Lua_Spell::GetAEMaxTargets)
 	.def("Activated", &Lua_Spell::GetActivated)

@@ -141,6 +141,8 @@ uint32 Lua_Spawn::GetKillCount() {
 luabind::scope lua_register_spawn() {
 	return luabind::class_<Lua_Spawn>("Spawn")
 	.def(luabind::constructor<>())
+	.property("null", &Lua_Spawn::Null)
+	.property("valid", &Lua_Spawn::Valid)
 	.def("CurrentNPCID", (uint32(Lua_Spawn::*)(void))&Lua_Spawn::CurrentNPCID)
 	.def("Depop", (void(Lua_Spawn::*)(void))&Lua_Spawn::Depop)
 	.def("Disable", (void(Lua_Spawn::*)(void))&Lua_Spawn::Disable)

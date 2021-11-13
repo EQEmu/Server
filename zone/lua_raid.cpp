@@ -146,6 +146,8 @@ bool Lua_Raid::DoesAnyMemberHaveExpeditionLockout(std::string expedition_name, s
 luabind::scope lua_register_raid() {
 	return luabind::class_<Lua_Raid>("Raid")
 	.def(luabind::constructor<>())
+	.property("null", &Lua_Raid::Null)
+	.property("valid", &Lua_Raid::Valid)
 	.def("BalanceHP", (void(Lua_Raid::*)(int,uint32))&Lua_Raid::BalanceHP)
 	.def("CastGroupSpell", (void(Lua_Raid::*)(Lua_Mob,int,uint32))&Lua_Raid::CastGroupSpell)
 	.def("DoesAnyMemberHaveExpeditionLockout", (bool(Lua_Raid::*)(std::string, std::string))&Lua_Raid::DoesAnyMemberHaveExpeditionLockout)
