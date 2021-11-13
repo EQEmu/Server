@@ -129,13 +129,13 @@ namespace LS {
 	};
 
 	namespace ErrStr {
-		constexpr static int NO_ERROR                    = 101; // No Error
-		constexpr static int SERVER_UNAVAILABLE          = 326; // That server is currently unavailable.  Please check the EverQuest webpage for current server status and try again later.
-		constexpr static int ACCOUNT_SUSPENDED           = 337; // This account is currently suspended.  Please contact customer service for more information.
-		constexpr static int ACCOUNT_BANNED              = 338; // This account is currently banned.  Please contact customer service for more information.
-		constexpr static int WORLD_MAX_CAPACITY          = 339; // The world server is currently at maximum capacity and not allowing further logins until the number of players online decreases.  Please try again later.
-		constexpr static int ERROR_1018_ACTIVE_CHARACTER = 111; // Error 1018: You currently have an active character on that EverQuest Server, please allow a minute for synchronization and try again.
-		constexpr static int UNKNOWN_ERROR               = 102; // Error - Unknown Error Occurred
+		constexpr static int ERROR_NONE                        = 101; // No Error
+		constexpr static int ERROR_UNKNOWN                     = 102; // Error - Unknown Error Occurred
+		constexpr static int ERROR_ACTIVE_CHARACTER            = 111; // Error 1018: You currently have an active character on that EverQuest Server, please allow a minute for synchronization and try again.
+		constexpr static int ERROR_SERVER_UNAVAILABLE          = 326; // That server is currently unavailable.  Please check the EverQuest webpage for current server status and try again later.
+		constexpr static int ERROR_ACCOUNT_SUSPENDED           = 337; // This account is currently suspended.  Please contact customer service for more information.
+		constexpr static int ERROR_ACCOUNT_BANNED              = 338; // This account is currently banned.  Please contact customer service for more information.
+		constexpr static int ERROR_WORLD_MAX_CAPACITY          = 339; // The world server is currently at maximum capacity and not allowing further logins until the number of players online decreases.  Please try again later.
 	};
 }
 

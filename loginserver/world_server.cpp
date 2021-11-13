@@ -232,25 +232,26 @@ void WorldServer::ProcessUserToWorldResponseLegacy(uint16_t opcode, const EQ::Ne
 
 		switch (r->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = LS::ErrStr::NO_ERROR;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = LS::ErrStr::SERVER_UNAVAILABLE;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_SUSPENDED;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_BANNED;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = LS::ErrStr::WORLD_MAX_CAPACITY;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_1018_ACTIVE_CHARACTER;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = LS::ErrStr::UNKNOWN_ERROR;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
+				break;
 		}
 
 		if (server.options.IsWorldTraceOn()) {
@@ -358,25 +359,26 @@ void WorldServer::ProcessUserToWorldResponse(uint16_t opcode, const EQ::Net::Pac
 
 		switch (user_to_world_response->response) {
 			case UserToWorldStatusSuccess:
-				per->base_reply.error_str_id = LS::ErrStr::NO_ERROR;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_NONE;
 				break;
 			case UserToWorldStatusWorldUnavail:
-				per->base_reply.error_str_id = LS::ErrStr::SERVER_UNAVAILABLE;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_SERVER_UNAVAILABLE;
 				break;
 			case UserToWorldStatusSuspended:
-				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_SUSPENDED;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_SUSPENDED;
 				break;
 			case UserToWorldStatusBanned:
-				per->base_reply.error_str_id = LS::ErrStr::ACCOUNT_BANNED;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACCOUNT_BANNED;
 				break;
 			case UserToWorldStatusWorldAtCapacity:
-				per->base_reply.error_str_id = LS::ErrStr::WORLD_MAX_CAPACITY;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_WORLD_MAX_CAPACITY;
 				break;
 			case UserToWorldStatusAlreadyOnline:
-				per->base_reply.error_str_id = LS::ErrStr::ERROR_1018_ACTIVE_CHARACTER;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_ACTIVE_CHARACTER;
 				break;
 			default:
-				per->base_reply.error_str_id = LS::ErrStr::UNKNOWN_ERROR;
+				per->base_reply.error_str_id = LS::ErrStr::ERROR_UNKNOWN;
+				break;
 		}
 
 		if (server.options.IsTraceOn()) {
