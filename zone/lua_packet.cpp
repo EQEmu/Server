@@ -326,6 +326,8 @@ luabind::scope lua_register_packet() {
 	.def(luabind::constructor<>())
 	.def(luabind::constructor<int,int>())
 	.def(luabind::constructor<int,int,bool>())
+	.property("null", &Lua_Packet::Null)
+	.property("valid", &Lua_Packet::Valid)
 	.def("GetOpcode", &Lua_Packet::GetOpcode)
 	.def("GetRawOpcode", &Lua_Packet::GetRawOpcode)
 	.def("GetSize", &Lua_Packet::GetSize)
