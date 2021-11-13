@@ -208,7 +208,11 @@ void RemoveApostrophes(std::string &s);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
 std::string FormatName(const std::string& char_name);
+bool IsAllowedWorldServerCharacterList(char c);
 void SanitizeWorldServerName(char *name);
+std::string SanitizeWorldServerName(std::string server_long_name);
+std::string repeat(std::string s, int n);
+std::vector<std::string> GetBadWords();
 
 template<typename InputIterator, typename OutputIterator>
 auto CleanMobName(InputIterator first, InputIterator last, OutputIterator result)

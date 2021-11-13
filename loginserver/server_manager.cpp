@@ -1,6 +1,6 @@
 #include "server_manager.h"
 #include "login_server.h"
-#include "login_structures.h"
+#include "login_types.h"
 #include <stdlib.h>
 
 #include "../common/eqemu_logsys.h"
