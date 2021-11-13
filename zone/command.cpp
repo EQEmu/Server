@@ -9250,26 +9250,70 @@ void command_setaapts(Client *c, const Seperator *sep)
 
 void command_setcrystals(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	int arguments = sep->argnum;
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
+	}
 
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 100000)
-		c->Message(Chat::White, "You must have a number greater than 0 for crystals and no more than 100000.");
-	else if(!strcasecmp(sep->arg[1], "radiant"))
-	{
-		t->SetRadiantCrystals(atoi(sep->arg[2]));
+	Client *target = c;
+	if(c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
 	}
-	else if(!strcasecmp(sep->arg[1], "ebon"))
-	{
-		t->SetEbonCrystals(atoi(sep->arg[2]));
+
+	std::string crystal_type = str_tolower(sep->arg[1]);
+	uint32 crystal_amount = std::stoul(sep->arg[2]);
+	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
+	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
+	if (!is_ebon && !is_radiant) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
 	}
-	else
-	{
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
+
+	uint32 crystal_item_id = (
+		is_ebon ?
+		RuleI(Zone, EbonCrystalItemID) :
+		RuleI(Zone, RadiantCrystalItemID)
+	);
+
+	if (!crystal_item_id) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
+	}
+
+	auto crystal_link = database.CreateItemLink(crystal_item_id);
+	if (
+		crystal_amount <= 0 ||
+		crystal_amount > 2000000000
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Crystal Amount must be greater than 0 and no more than 2,000,000,000 for {}.",
+				crystal_link
+			).c_str()
+		);
+		return;
+	}
+
+	if (is_radiant || is_ebon) {
+		if (is_radiant) {
+			target->SetRadiantCrystals(crystal_amount);
+		} else {
+			target->SetEbonCrystals(crystal_amount);
+		}
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} now {} {} {}.",
+				c == target ? "You" : target->GetCleanName(),
+				c == target ? "have" : "has",
+				crystal_amount,
+				crystal_link
+			).c_str()
+		);
 	}
 }
 
