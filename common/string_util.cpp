@@ -1024,29 +1024,142 @@ std::vector<std::string> GetBadWords()
 std::string ConvertSecondsToTime(int duration)
 {
 	int timer_length = duration;
+	int days = int(timer_length / 86400000);
+	timer_length %= 86400000;
 	int hours = int(timer_length / 3600);
 	timer_length %= 3600;
 	int minutes = int(timer_length / 60);
 	timer_length %= 60;
 	int seconds = timer_length;
 	std::string time_string = "Unknown";
+	std::string day_string = (days == 1 ? "Day" : "Days");
 	std::string hour_string = (hours == 1 ? "Hour" : "Hours");
 	std::string minute_string = (minutes == 1 ? "Minute" : "Minutes");
 	std::string second_string = (seconds == 1 ? "Second" : "Seconds");
-	if (hours > 0 && minutes > 0 && seconds > 0) {
-		time_string = fmt::format("{} {}, {} {}, and {} {}", hours, hour_string, minutes, minute_string, seconds, second_string);
-	} else if (hours > 0 && minutes > 0 && seconds == 0) {
-		time_string = fmt::format("{} {} and {} {}", hours, hour_string, minutes, minute_string);
-	} else if (hours > 0 && minutes == 0 && seconds > 0) {
-		time_string = fmt::format("{} {} and {} {}", hours, hour_string, seconds, second_string);
-	} else if (hours > 0 && minutes == 0 && seconds == 0) {
-		time_string = fmt::format("{} {}", hours, hour_string);
-	} else if (hours == 0 && minutes > 0 && seconds > 0) {
-		time_string = fmt::format("{} {} and {} {}", minutes, minute_string, seconds, second_string);
-	} else if (hours == 0 && minutes > 0 && seconds == 0) {
-		time_string = fmt::format("{} {}", minutes, minute_string);
-	} else if (hours == 0 && minutes == 0 && seconds > 0) {
-		time_string = fmt::format("{} {}", seconds, second_string);
+	if (days && hours && minutes && seconds) { // DHMS
+		time_string = fmt::format(
+			"{} {}, {} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (days && hours && minutes && !seconds) { // DHM
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			minutes,
+			minute_string
+		);
+	} else if (days && hours && !minutes && seconds) { // DHS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			seconds,
+			second_string
+		);
+	} else if (days && hours && !minutes && !seconds) { // DH
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string
+		);
+	} else if (days && !hours && minutes && seconds) { // DMS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (days && !hours && minutes && !seconds) { // DM
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			minutes,
+			minute_string
+		);
+	} else if (days && !hours && !minutes && seconds) { // DS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			seconds,
+			second_string
+		);
+	} else if (days && !hours && !minutes && !seconds) { // D
+		time_string = fmt::format(
+			"{} {}",
+			days,
+			day_string
+		);
+	} else if (!days && hours && minutes && seconds) { // HMS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			hours,
+			hour_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (!days && hours && minutes && !seconds) { // HM
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			hours,
+			hour_string,
+			minutes,
+			minute_string
+		);
+	} else if (!days && hours && !minutes && seconds) { // HS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			hours,
+			hour_string,
+			seconds,
+			second_string
+		);
+	} else if (!days &&	hours && !minutes && !seconds) { // H
+		time_string = fmt::format(
+			"{} {}",
+			hours,
+			hour_string
+		);
+	} else if (!days && !hours && minutes && seconds) { // MS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (!days && !hours && minutes && !seconds) { // M
+		time_string = fmt::format(
+			"{} {}",
+			minutes,
+			minute_string
+		);
+	} else if (!days && !hours && !minutes && seconds) { // S
+		time_string = fmt::format(
+			"{} {}",
+			seconds,
+			second_string
+		);
 	}
 	return time_string;
 }
