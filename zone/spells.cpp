@@ -5669,18 +5669,22 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 
 bool Mob::IsCombatProc(uint16 spell_id) {
 
-	if (RuleB(Spells, FocusCombatProcs))
+	if (RuleB(Spells, FocusCombatProcs)) {
 		return false;
+	}
 
-	if(spell_id == SPELL_UNKNOWN)
+	if (spell_id == SPELL_UNKNOWN) {
 		return(false);
+	}
 
 	if ((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0))
 	{
 
 		for (int i = 0; i < MAX_PROCS; i++){
-			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id
-				 || RangedProcs[i].spellID == spell_id || DefensiveProcs[i].spellID == spell_id){
+			if (PermaProcs[i].spellID == spell_id || 
+                SpellProcs[i].spellID == spell_id ||
+                RangedProcs[i].spellID == spell_id || 
+                DefensiveProcs[i].spellID == spell_id){
 				return true;
 			}
 		}
@@ -5689,8 +5693,8 @@ bool Mob::IsCombatProc(uint16 spell_id) {
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 
 				if (aabonuses.SpellProc[i + 1] == spell_id ||
-					aabonuses.RangedProc[i + 1] == spell_id ||
-					aabonuses.DefensiveProc[i + 1] == spell_id) {
+                    aabonuses.RangedProc[i + 1] == spell_id ||
+                    aabonuses.DefensiveProc[i + 1] == spell_id) {
 					return true;
 				}
 			}
