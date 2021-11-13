@@ -266,7 +266,7 @@ void HateList::DoFactionHits(int32 npc_faction_level_id) {
 	}
 }
 
-int HateList::GetSummonedPetCountOnHateList(Mob *hater) {
+int HateList::GetSummonedPetCountOnHateList() {
 
 	//Function to get number of 'Summoned' pets on a targets hate list to allow calculations for certian spell effects.
 	//Unclear from description that pets are required to be 'summoned body type'. Will not require at this time.

@@ -60,7 +60,7 @@ public:
 	bool RemoveEntFromHateList(Mob *ent);
 
 	int AreaRampage(Mob *caster, Mob *target, int count, ExtraAttackOptions *opts);
-	int GetSummonedPetCountOnHateList(Mob *hater);
+	int GetSummonedPetCountOnHateList();
 	int GetHateRatio(Mob *top, Mob *other);
 
 	int32 GetEntHateAmount(Mob *ent, bool in_damage = false);
