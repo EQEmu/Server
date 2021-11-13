@@ -128,14 +128,14 @@ namespace LS {
 		Legends   = 1,
 	};
 
-	namespace ErrStr {
-		constexpr static int NO_ERROR                    = 101; // No Error
-		constexpr static int SERVER_UNAVAILABLE          = 326; // That server is currently unavailable.  Please check the EverQuest webpage for current server status and try again later.
-		constexpr static int ACCOUNT_SUSPENDED           = 337; // This account is currently suspended.  Please contact customer service for more information.
-		constexpr static int ACCOUNT_BANNED              = 338; // This account is currently banned.  Please contact customer service for more information.
-		constexpr static int WORLD_MAX_CAPACITY          = 339; // The world server is currently at maximum capacity and not allowing further logins until the number of players online decreases.  Please try again later.
-		constexpr static int ERROR_1018_ACTIVE_CHARACTER = 111; // Error 1018: You currently have an active character on that EverQuest Server, please allow a minute for synchronization and try again.
-		constexpr static int UNKNOWN_ERROR               = 102; // Error - Unknown Error Occurred
+	enum ErrorString {
+		NoError = 101, // No Error
+		UnknownError = 102, // Error - Unknown Error Occurred
+		CharacterAlreadyOnline = 111, // Error 1018: You currently have an active character on that EverQuest Server, please allow a minute for synchronization and try again.
+		WorldUnavailabe = 326, // That server is currently unavailable.  Please check the EverQuest webpage for current server status and try again later.
+		StatusSuspended = 337, // This account is currently suspended.  Please contact customer service for more information.
+		StatusBanned = 338, // This account is currently banned.  Please contact customer service for more information.
+		WorldMaxCapacity = 339 // The world server is currently at maximum capacity and not allowing further logins until the number of players online decreases.  Please try again later.
 	};
 }
 
