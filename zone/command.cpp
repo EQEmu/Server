@@ -9234,6 +9234,10 @@ void command_setaapts(Client *c, const Seperator *sep)
 	bool is_aa = aa_type.find("aa") != std::string::npos;
 	bool is_group = aa_type.find("group") != std::string::npos;
 	bool is_raid = aa_type.find("raid") != std::string::npos;
+	if (!is_aa && !is_group && !is_raid) {
+		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+		return;
+	}
 
 	if (aa_points < 0) {
 		aa_points = 0;
