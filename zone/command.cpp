@@ -9582,17 +9582,20 @@ void command_oocmute(Client *c, const Seperator *sep)
 
 void command_checklos(Client *c, const Seperator *sep)
 {
-	if (c->GetTarget()) {
-		if (c->CheckLosFN(c->GetTarget())) {
-			c->Message(Chat::White, "You have LOS to %s", c->GetTarget()->GetName());
-		}
-		else {
-			c->Message(Chat::White, "You do not have LOS to %s", c->GetTarget()->GetName());
-		}
+	if (!c->GetTarget()) {		
+		c->Message(Chat::White, "You must have a target to use this command.");
 	}
-	else {
-		c->Message(Chat::White, "ERROR: Target required");
-	}
+	
+	bool has_los = c->CheckLosFN(c->GetTarget());
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"You {}have line of sight to {} ({}).",
+			has_los ? "" : "do not ",
+			c->GetTarget()->GetCleanName(),
+			c->GetTarget()->GetID()
+		).c_str()
+	);
 }
 
 void command_set_adventure_points(Client *c, const Seperator *sep)
