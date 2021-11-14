@@ -7246,7 +7246,7 @@ void command_npcspawn(Client *c, const Seperator *sep)
 			)
 		); // Default to 1200 for Add, 0 for Create if not set
 		content_db.NPCSpawnDB(
-			NPCSpawnTypes::AddNewSpawngroup,
+			is_add ? NPCSpawnTypes::AddNewSpawngroup : NPCSpawnTypes::CreateNewSpawn,
 			zone->GetShortName(),
 			zone->GetInstanceVersion(),
 			c,
