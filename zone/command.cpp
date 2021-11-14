@@ -7209,8 +7209,7 @@ void command_zonespawn(Client *c, const Seperator *sep)
 void command_npcspawn(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
-	if (arguments == 0) {
+	if (!arguments) {
 		c->Message(Chat::White, "Command Syntax: #npcspawn [Add|Create|Delete|Remove|Update]");
 		return;
 	}
@@ -11920,7 +11919,6 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 void command_advnpcspawn(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
 	if (!arguments) {
 		c->Message(Chat::White, "Usage: #advnpcspawn addentry [Spawngroup ID] [NPC ID] [Spawn Chance] - Adds a new Spawngroup Entry");
 		c->Message(Chat::White, "Usage: #advnpcspawn addspawn [Spawngroup ID] - Adds a new Spawngroup Entry from an existing Spawngroup");
