@@ -9276,7 +9276,7 @@ void command_setcrystals(Client *c, const Seperator *sep)
 void command_stun(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-	if (arguments == 0 || !sep->IsNumber(1)) {
+	if (!arguments || !sep->IsNumber(1)) {
 		c->Message(Chat::White, "Usage: #stun [Duration]");
 		return;
 	}
