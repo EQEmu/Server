@@ -277,7 +277,7 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 			connection->SendEmoteMessageRaw(
 				to,
 				0,
-				0,
+				EQ::constants::AccountStatus::Player,
 				Chat::White,
 				fmt::format(
 					"Zone {} | Name: {} ({}) ID: {}",
@@ -299,7 +299,7 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 	connection->SendEmoteMessage(
 		to,
 		0,
-		0,
+		EQ::constants::AccountStatus::Player,
 		Chat::White,
 		zone_message.c_str()
 	);
