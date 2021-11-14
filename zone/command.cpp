@@ -12042,21 +12042,21 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Delay: 0 Distance: 0",
+				"Spawngroup {} Roambox Cleared | Delay: 0 Distance: 0.00",
 				std::stoi(sep->arg[2])
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Minimum X: 0 Maximum X: 0",
+				"Spawngroup {} Roambox Cleared | Minimum X: 0.00 Maximum X: 0.00",
 				std::stoi(sep->arg[2])
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Minimum Y: 0 Maximum Y: 0",
+				"Spawngroup {} Roambox Cleared | Minimum Y: 0.00 Maximum Y: 0.00",
 				std::stoi(sep->arg[2])
 			).c_str()
 		);
@@ -12109,16 +12109,23 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]");
 			return;
 		}
+		auto spawngroup_id = std::stoi(sep->arg[2]);
+		auto distance = std::stof(sep->arg[3]);
+		auto minimum_x = std::stof(sep->arg[4]);
+		auto maximum_x = std::stof(sep->arg[5]);
+		auto minimum_y = std::stof(sep->arg[6]);
+		auto maximum_y = std::stof(sep->arg[7]);
+		auto delay = std::stoi(sep->arg[8]);
 
 		std::string query = fmt::format(
 			"UPDATE spawngroup SET dist = {:.2f}, min_x = {:.2f}, max_x = {:.2f}, max_y = {:.2f}, min_y = {:.2f}, delay = {} WHERE id = {}",
-			std::stof(sep->arg[3]),
-			std::stof(sep->arg[4]),
-			std::stof(sep->arg[5]),
-			std::stof(sep->arg[6]),
-			std::stof(sep->arg[7]),
-			std::stof(sep->arg[8]),
-			std::stoi(sep->arg[2])
+			distance,
+			minimum_x,
+			maximum_x,
+			minimum_y,
+			maximum_y,
+			delay,
+			spawngroup_id
 		);
 		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
@@ -12129,28 +12136,28 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Delay: {} Distance: {}",
-				std::stoi(sep->arg[2]),
-				std::stoi(sep->arg[8]),
-				std::stof(sep->arg[3])
+				"Spawngroup {} Roambox Edited | Delay: {} Distance: {:.2f}",
+				spawngroup_id,
+				delay,
+				distance
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Minimum X: {} Maximum X: {}",
-				std::stoi(sep->arg[2]),
-				std::stof(sep->arg[4]),
-				std::stof(sep->arg[5])
+				"Spawngroup {} Roambox Edited | Minimum X: {:.2f} Maximum X: {:.2f}",
+				spawngroup_id,
+				minimum_x,
+				maximum_x
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Roambox Edited | Minimum Y: {} Maximum Y: {}",
-				std::stoi(sep->arg[2]),
-				std::stof(sep->arg[6]),
-				std::stof(sep->arg[7])
+				"Spawngroup {} Roambox Edited | Minimum Y: {:.2f} Maximum Y: {:.2f}",
+				spawngroup_id,
+				minimum_y,
+				maximum_y
 			).c_str()
 		);
 		return;
@@ -12219,21 +12226,27 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			c->Message(Chat::White, "Usage: #advncspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]");
 			return;
 		}
+		std::string spawngroup_name = sep->arg[2];
+		auto spawn_limit = std::stoi(sep->arg[3]);
+		auto distance = std::stof(sep->arg[4]);
+		auto minimum_x = std::stof(sep->arg[5]);
+		auto maximum_x = std::stof(sep->arg[6);
+		auto minimum_y = std::stof(sep->arg[7]);
+		auto maximum_y = std::stof(sep->arg[8]);
+		auto delay = std::stoi(sep->arg[9]);
 
 		std::string query = fmt::format(
-			SQL(
-				INSERT INTO spawngroup
-				(name, spawn_limit, dist, min_x, max_x, min_y, max_y, delay)
-				VALUES ('{}', {}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {})
-			),
-			sep->arg[2],
-			std::stoi(sep->arg[3]),
-			std::stof(sep->arg[4]),
-			std::stof(sep->arg[5]),
-			std::stof(sep->arg[6]),
-			std::stof(sep->arg[7]),
-			std::stof(sep->arg[8]),
-			std::stoi(sep->arg[9])
+			"INSERT INTO spawngroup"
+			"(name, spawn_limit, dist, min_x, max_x, min_y, max_y, delay)"
+			"VALUES ('{}', {}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {})",
+			spawngroup_name,
+			spawn_limit,
+			distance,
+			minimum_x,
+			maximum_x,
+			minimum_y,
+			maximum_y,
+			delay
 		);
 		auto results = content_db.QueryDatabase(query);
 		if (!results.Success()) {
@@ -12241,40 +12254,41 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 			return;
 		}
 
+		auto spawngroup_id = results.LastInsertedID();
 		c->Message(
 			Chat::White,
 			fmt::format(
 				"Spawngroup {} Created | Name: {} Spawn Limit: {}",
-				results.LastInsertedID(),
-				sep->arg[2],
-				std::stoi(sep->arg[3])
+				spawngroup_id,
+				spawngroup_name,
+				spawn_limit
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Created | Delay: {} Distance: {}",
-				results.LastInsertedID(),
-				std::stoi(sep->arg[9]),
-				std::stof(sep->arg[4])
+				"Spawngroup {} Created | Delay: {} Distance: {:.2f}",
+				spawngroup_id,
+				delay,
+				distance
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Created | Minimum X: {} Maximum X: {}",
-				results.LastInsertedID(),
-				std::stof(sep->arg[5]),
-				std::stof(sep->arg[6])
+				"Spawngroup {} Created | Minimum X: {:.2f} Maximum X: {:.2f}",
+				spawngroup_id,
+				minimum_x,
+				maximum_x
 			).c_str()
 		);
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Spawngroup {} Created | Minimum Y: {} Maximum Y: {}",
-				results.LastInsertedID(),
-				std::stof(sep->arg[7]),
-				std::stof(sep->arg[8])
+				"Spawngroup {} Created | Minimum Y: {:.2f} Maximum Y: {:.2f}",
+				spawngroup_id,
+				minimum_y,
+				maximum_y
 			).c_str()
 		);
 		return;
