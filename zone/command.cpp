@@ -7208,53 +7208,97 @@ void command_zonespawn(Client *c, const Seperator *sep)
 
 void command_npcspawn(Client *c, const Seperator *sep)
 {
-	Mob *target=c->GetTarget();
-	uint32 extra = 0;
+	int arguments = sep->argnum;
 
-	if (target && target->IsNPC()) {
-		if (strcasecmp(sep->arg[1], "create") == 0) {
-			if (atoi(sep->arg[2]))
-			{
-				// Option to try to create the npc_type ID within the range for the current zone (zone_id * 1000)
-				extra = 1;
-			}
-			content_db.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
-			c->Message(Chat::White, "%s created successfully!",  target->GetName());
-		}
-		else if (strcasecmp(sep->arg[1], "add") == 0) {
-			if (atoi(sep->arg[2]))
-			{
-				extra = atoi(sep->arg[2]);
-			}
-			else
-			{
-				// Respawn Timer default if not set
-				extra = 1200;
-			}
-			content_db.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC(), extra);
-			c->Message(Chat::White, "%s added successfully!",  target->GetName());
-		}
-		else if (strcasecmp(sep->arg[1], "update") == 0) {
-			content_db.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
-			c->Message(Chat::White, "%s updated!",  target->GetName());
-		}
-		else if (strcasecmp(sep->arg[1], "remove") == 0) {
-			content_db.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
-			c->Message(Chat::White, "%s removed successfully from database!",  target->GetName());
-			target->Depop(false);
-		}
-		else if (strcasecmp(sep->arg[1], "delete") == 0) {
-			content_db.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
-			c->Message(Chat::White, "%s deleted from database!",  target->GetName());
-			target->Depop(false);
-		}
-		else {
-			c->Message(Chat::White, "Error: #npcspawn: Invalid command.");
-			c->Message(Chat::White, "Usage: #npcspawn [create|add|update|remove|delete]");
-		}
+	if (arguments == 0) {
+		c->Message(Chat::White, "Command Syntax: #npcspawn [Add|Create|Delete|Remove|Update]");
+		return;
 	}
-	else
-		c->Message(Chat::White, "Error: #npcspawn: You must have a NPC targeted!");
+
+	if (!(c->GetTarget() && c->GetTarget()->IsNPC())) {
+		c->Message(Chat::White, "You must target an NPC to use this command.");
+		return;		
+	}
+
+	NPC* target = c->GetTarget()->CastToNPC();
+	std::string spawn_type = str_tolower(sep->arg[1]);
+	uint32 extra = 0;
+	bool is_add = spawn_type.find("add") != std::string::npos;
+	bool is_create = spawn_type.find("create") != std::string::npos;
+	bool is_delete = spawn_type.find("delete") != std::string::npos;
+	bool is_remove = spawn_type.find("remove") != std::string::npos;
+	bool is_update = spawn_type.find("update") != std::string::npos;
+	if (!is_add && !is_create && !is_delete && !is_remove && !is_update) {
+		c->Message(Chat::White, "Command Syntax: #npcspawn [Add|Create|Delete|Remove|Update]");
+		return;
+	}
+	
+	if (is_add || is_create) {
+		extra = (
+			sep->IsNumber(2) ?
+			(
+				is_add ?
+				std::stoi(sep->arg[2]) :
+				1
+			) : (
+				is_add ?
+				1200 :
+				0
+			)
+		); // Default to 1200 for Add, 0 for Create if not set
+		content_db.NPCSpawnDB(
+			NPCSpawnTypes::AddNewSpawngroup,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			c,
+			target,
+			extra
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn {} | Name: {} ({})",
+				is_add ? "Added" : "Created",
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	} else if (is_delete || is_remove || is_update) {
+		uint8 spawn_update_type = (
+			is_delete ?
+			NPCSpawnTypes::DeleteSpawn :
+			(
+				is_remove ?
+				NPCSpawnTypes::RemoveSpawn :
+				NPCSpawnTypes::UpdateAppearance
+			)
+		);
+		std::string spawn_message = (
+			is_delete ?
+			"Deleted" :
+			(
+				is_remove ?
+				"Removed" :
+				"Updated"
+			)
+		);
+		content_db.NPCSpawnDB(
+			spawn_update_type,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			c,
+			target
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn {} | Name: {} ({})",
+				spawn_message,
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+	}
 }
 
 void command_spawnfix(Client *c, const Seperator *sep) {
@@ -11875,253 +11919,475 @@ void command_refreshgroup(Client *c, const Seperator *sep)
 
 void command_advnpcspawn(Client *c, const Seperator *sep)
 {
-	Mob *target=c->GetTarget();
+	int arguments = sep->argnum;
 
-    if (strcasecmp(sep->arg[1], "maketype") == 0) {
-        if(!target || !target->IsNPC()) {
-            c->Message(Chat::White, "Target Required!");
-            return;
-        }
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #advnpcspawn addentry [Spawngroup ID] [NPC ID] [Spawn Chance] - Adds a new Spawngroup Entry");
+		c->Message(Chat::White, "Usage: #advnpcspawn addspawn [Spawngroup ID] - Adds a new Spawngroup Entry from an existing Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID] - Clears the roambox of a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]  - Edit the roambox of a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
+		c->Message(Chat::White, "Usage: #advnpcspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay] - Makes a new Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn makenpc - Makes a new NPC");
+		c->Message(Chat::White, "Usage: #advnpcspawn movespawn - Moves a Spawngroup to your current location");
+		c->Message(Chat::White, "Usage: #advnpcspawn removespawn - Removes a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version] - Sets a Spawngroup's Version");
+		return;
+	}	
 
-        content_db.NPCSpawnDB(6, zone->GetShortName(), zone->GetInstanceVersion(), c, target->CastToNPC());
-        return;
-    }
+	std::string spawn_command = str_tolower(sep->arg[1]);	
+	bool is_add_entry = spawn_command.find("addentry") != std::string::npos;
+	bool is_add_spawn = spawn_command.find("addspawn") != std::string::npos;
+	bool is_clear_box = spawn_command.find("clearbox") != std::string::npos;
+	bool is_delete_spawn = spawn_command.find("deletespawn") != std::string::npos;
+	bool is_edit_box = spawn_command.find("editgroup") != std::string::npos;
+	bool is_edit_respawn = spawn_command.find("editrespawn") != std::string::npos;
+	bool is_make_group = spawn_command.find("makegroup") != std::string::npos;
+	bool is_make_npc = spawn_command.find("makenpc") != std::string::npos;
+	bool is_move_spawn = spawn_command.find("movespawn") != std::string::npos;
+	bool is_set_version = spawn_command.find("setversion") != std::string::npos;
+	if (
+		!is_add_entry &&
+		!is_add_spawn &&
+		!is_clear_box &&
+		!is_delete_spawn &&
+		!is_edit_box &&
+		!is_edit_respawn &&
+		!is_make_group &&
+		!is_make_npc &&
+		!is_move_spawn &&
+		!is_set_version
+	) {
+		c->Message(Chat::White, "Usage: #advnpcspawn addentry [Spawngroup ID] [NPC ID] [Spawn Chance] - Adds a new Spawngroup Entry");
+		c->Message(Chat::White, "Usage: #advnpcspawn addspawn [Spawngroup ID] - Adds a new Spawngroup Entry from an existing Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID] - Clears the roambox of a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn deletespawn - Deletes a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]  - Edit the roambox of a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
+		c->Message(Chat::White, "Usage: #advnpcspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay] - Makes a new Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn makenpc - Makes a new NPC");
+		c->Message(Chat::White, "Usage: #advnpcspawn movespawn - Moves a Spawngroup to your current location");
+		c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version] - Sets a Spawngroup's Version");
+		return;		
+	}
 
-    if (strcasecmp(sep->arg[1], "makegroup") == 0) {
-        if(!sep->arg[2]) {
-            c->Message(Chat::White, "Format: #advnpdspawn makegroup <name> [spawn limit] [dist] [max x] [min x] [max y] [min y] [delay]");
-            return;
-        }
 
-        std::string query = StringFormat("INSERT INTO spawngroup "
-                                        "(name, spawn_limit, dist, max_x, min_x, max_y, min_y, delay) "
-                                        "VALUES (\"%s\",  %i, %f, %f, %f, %f, %f, %i)",
-                                        sep->arg[2],
-                                        (sep->arg[3]? atoi(sep->arg[3]): 0),
-                                        (sep->arg[4]? atof(sep->arg[4]): 0),
-                                        (sep->arg[5]? atof(sep->arg[5]): 0),
-                                        (sep->arg[6]? atof(sep->arg[6]): 0),
-                                        (sep->arg[7]? atof(sep->arg[7]): 0),
-                                        (sep->arg[8]? atof(sep->arg[8]): 0),
-                                        (sep->arg[9]? atoi(sep->arg[9]): 0));
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
+	if (is_add_entry) {
+		if(arguments < 4) {
+			c->Message(Chat::White, "Usage: #advnpcspawn addentry [Spawngroup ID] [NPC ID] [Spawn Chance]");
+			return;
+		}
+		
+		auto spawngroup_id = std::stoi(sep->arg[2]);
+		auto npc_id = std::stoi(sep->arg[2]);
+		auto spawn_chance = std::stoi(sep->arg[2]);
 
-        c->Message(Chat::White, "Group ID %i created successfully!",  results.LastInsertedID());
-        return;
-    }
+		std::string query = fmt::format(
+			SQL(
+				INSERT INTO spawnentry (spawngroupID, npcID, chance)
+				VALUES ({}, {}, {})
+			),
+			spawngroup_id,
+			npc_id,
+			spawn_chance
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to add entry to Spawngroup.");
+			return;
+		}
 
-	if (strcasecmp(sep->arg[1], "addgroupentry") == 0) {
-        if(!atoi(sep->arg[2]) || !atoi(sep->arg[3]) || !atoi(sep->arg[4])) {
-            c->Message(Chat::White, "Format: #advnpdspawn addgroupentry <spawnggroupID> <npcID> <chance>");
-            return;
-        }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) added to Spawngroup {}, its spawn chance is {}%%.",
+				database.GetCleanNPCNameByID(npc_id),
+				npc_id,
+				spawngroup_id,
+				spawn_chance
+			).c_str()
+		);
+		return;
+	} else if (is_add_spawn) {
+		content_db.NPCSpawnDB(
+			NPCSpawnTypes::AddSpawnFromSpawngroup,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			c,
+			0,
+			std::stoi(sep->arg[2])
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn Added | Added spawn from Spawngroup ID {}.",
+				std::stoi(sep->arg[2])
+			).c_str()
+		);
+		return;
+	} else if (is_clear_box) {
+		if (arguments != 2 || !sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID]");
+			return;
+		}
 
-        std::string query = StringFormat("INSERT INTO spawnentry (spawngroupID, npcID, chance) "
-                                        "VALUES (%i, %i, %i)",
-                                        atoi(sep->arg[2]), atoi(sep->arg[3]), atoi(sep->arg[4]));
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
+		std::string query = fmt::format(
+			"UPDATE spawngroup SET dist = 0, min_x = 0, max_x = 0, min_y = 0, max_y = 0, delay = 0 WHERE id = {}",
+			std::stoi(sep->arg[2])
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to clear Spawngroup box.");
+			return;
+		}
 
-        c->Message(Chat::White, "NPC %i added to group %i with %i chance!", atoi(sep->arg[3]), atoi(sep->arg[2]), atoi(sep->arg[4]) );
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Delay: 0 Distance: 0",
+				std::stoi(sep->arg[2])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Minimum X: 0 Maximum X: 0",
+				std::stoi(sep->arg[2])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Minimum Y: 0 Maximum Y: 0",
+				std::stoi(sep->arg[2])
+			).c_str()
+		);
+		return;
+	} else if (is_delete_spawn) {
+		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
+		}
 
-        return;
-    }
+		NPC *target = c->GetTarget()->CastToNPC();
+		Spawn2* spawn2 = target->respawn2;
+		if(!spawn2) {
+			c->Message(Chat::White, "Failed to delete spawn because NPC has no Spawn2.");
+			return;
+		}
 
-    if (strcasecmp(sep->arg[1], "editgroupbox") == 0) {
-        if(!atof(sep->arg[2]) || !atof(sep->arg[3]) || !atof(sep->arg[4]) || !atof(sep->arg[5]) || !atof(sep->arg[6]) || !atof(sep->arg[7]) || !atof(sep->arg[8])) {
-            c->Message(Chat::White, "Format: #advnpdspawn editgroupbox <spawngroupID> <dist> <max x> <min x> <max y> <min y> <delay>");
-            return;
-        }
+		auto spawn2_id = spawn2->GetID();
+		std::string query = fmt::format(
+			"DELETE FROM spawn2 WHERE id = {}",
+			spawn2_id
+		);
+		auto results = content_db.QueryDatabase(query);
+		if(!results.Success()) {
+			c->Message(Chat::White, "Failed to delete spawn.");
+			return;
+		}
 
-        std::string query = StringFormat("UPDATE spawngroup SET dist = '%f', max_x = '%f', min_x = '%f', "
-                                        "max_y = '%f', min_y = '%f', delay = '%i' WHERE id = '%i'",
-                                        atof(sep->arg[3]), atof(sep->arg[4]), atof(sep->arg[5]),
-                                        atof(sep->arg[6]), atof(sep->arg[7]), atoi(sep->arg[8]),
-                                        atoi(sep->arg[2]));
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn2 {} Deleted | Name: {} ({})",
+				spawn2_id,
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+		target->Depop(false);
+		return;
+	} else if (is_edit_box) {
+		if (
+			arguments != 8 ||
+			!sep->IsNumber(3) || 
+			!sep->IsNumber(4) || 
+			!sep->IsNumber(5) || 
+			!sep->IsNumber(6) || 
+			!sep->IsNumber(7) || 
+			!sep->IsNumber(8)
+		) {
+			c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]");
+			return;
+		}
 
-        c->Message(Chat::White, "Group ID %i created successfully!",  results.LastInsertedID());
+		std::string query = fmt::format(
+			"UPDATE spawngroup SET dist = {:.2f}, min_x = {:.2f}, max_x = {:.2f}, max_y = {:.2f}, min_y = {:.2f}, delay = {} WHERE id = {}",
+			std::stof(sep->arg[3]),
+			std::stof(sep->arg[4]),
+			std::stof(sep->arg[5]),
+			std::stof(sep->arg[6]),
+			std::stof(sep->arg[7]),
+			std::stof(sep->arg[8]),
+			std::stoi(sep->arg[2])
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to edit Spawngroup box.");
+			return;
+		}
 
-        return;
-    }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Delay: {} Distance: {}",
+				std::stoi(sep->arg[2]),
+				std::stoi(sep->arg[8]),
+				std::stof(sep->arg[3])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Minimum X: {} Maximum X: {}",
+				std::stoi(sep->arg[2]),
+				std::stof(sep->arg[4]),
+				std::stof(sep->arg[5])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Roambox Edited | Minimum Y: {} Maximum Y: {}",
+				std::stoi(sep->arg[2]),
+				std::stof(sep->arg[6]),
+				std::stof(sep->arg[7])
+			).c_str()
+		);
+		return;
+	} else if (is_edit_respawn) {
+		if (arguments < 2 || !sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
+			return;
+		}
 
-	if (strcasecmp(sep->arg[1], "cleargroupbox") == 0) {
-        if(!atoi(sep->arg[2])) {
-            c->Message(Chat::White, "Format: #advnpdspawn cleargroupbox <spawngroupID>");
-            return;
-        }
+		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
+		}
 
-        std::string query = StringFormat("UPDATE spawngroup "
-                                        "SET dist = '0', max_x = '0', min_x = '0', "
-                                        "max_y = '0', min_y = '0', delay = '0' "
-                                        "WHERE id = '%i' ", atoi(sep->arg[2]));
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::White, "Invalid Arguments -- MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
+		NPC *target = c->GetTarget()->CastToNPC();
+		Spawn2* spawn2 = target->respawn2;
+		if(!spawn2) {
+			c->Message(Chat::White, "Failed to edit respawn because NPC has no Spawn2.");
+			return;
+		}
 
-        c->Message(Chat::White, "Group ID %i created successfully!",  results.LastInsertedID());
+		auto spawn2_id = spawn2->GetID();
+		uint32 respawn_timer = std::stoi(sep->arg[2]);
+		uint32 variance = (
+			sep->IsNumber(3) ?
+			std::stoi(sep->arg[3]) :
+			spawn2->GetVariance()
+		);
+		std::string query = fmt::format(
+			"UPDATE spawn2 SET respawntime = {}, variance = {} WHERE id = {}",
+			respawn_timer,
+			variance, 
+			spawn2_id
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to edit respawn.");
+			return;
+		}
 
-        return;
-    }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn2 {} Respawn Modified | Name: {} ({}) Respawn Timer: {} Variance: {}",
+				spawn2_id,
+				target->GetCleanName(),
+				target->GetID(),
+				respawn_timer,
+				variance
+			).c_str()
+		);
+		spawn2->SetRespawnTimer(respawn_timer);
+		spawn2->SetVariance(variance);
+		return;
+	} else if (is_make_group) {
+		if (
+			arguments != 9 ||
+			!sep->IsNumber(3) || 
+			!sep->IsNumber(4) || 
+			!sep->IsNumber(5) || 
+			!sep->IsNumber(6) || 
+			!sep->IsNumber(7) || 
+			!sep->IsNumber(8) || 
+			!sep->IsNumber(9)
+		) {
+			c->Message(Chat::White, "Usage: #advncspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]");
+			return;
+		}
 
-	if (strcasecmp(sep->arg[1], "addgroupspawn") == 0 && atoi(sep->arg[2])!=0) {
-        content_db.NPCSpawnDB(5, zone->GetShortName(), zone->GetInstanceVersion(), c, 0, atoi(sep->arg[2]));
-        c->Message(Chat::White, "Mob of group %i added successfully!", atoi(sep->arg[2]));
-        return;
-    }
+		std::string query = fmt::format(
+			SQL(
+				INSERT INTO spawngroup
+				(name, spawn_limit, dist, min_x, max_x, min_y, max_y, delay)
+				VALUES ('{}', {}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {:.2f}, {})
+			),
+			sep->arg[2],
+			std::stoi(sep->arg[3]),
+			std::stof(sep->arg[4]),
+			std::stof(sep->arg[5]),
+			std::stof(sep->arg[6]),
+			std::stof(sep->arg[7]),
+			std::stof(sep->arg[8]),
+			std::stoi(sep->arg[9])
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to make Spawngroup.");
+			return;
+		}
 
-	if (strcasecmp(sep->arg[1], "removegroupspawn") == 0) {
-        if (!target || !target->IsNPC()) {
-            c->Message(Chat::White, "Error: Need an NPC target.");
-            return;
-        }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Created | Name: {} Spawn Limit: {}",
+				results.LastInsertedID(),
+				sep->arg[2],
+				std::stoi(sep->arg[3])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Created | Delay: {} Distance: {}",
+				results.LastInsertedID(),
+				std::stoi(sep->arg[9]),
+				std::stof(sep->arg[4])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Created | Minimum X: {} Maximum X: {}",
+				results.LastInsertedID(),
+				std::stof(sep->arg[5]),
+				std::stof(sep->arg[6])
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Created | Minimum Y: {} Maximum Y: {}",
+				results.LastInsertedID(),
+				std::stof(sep->arg[7]),
+				std::stof(sep->arg[8])
+			).c_str()
+		);
+		return;
+	} else if (is_make_npc) {
+		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
+		}
 
-        Spawn2* s2 = target->CastToNPC()->respawn2;
+		NPC *target = c->GetTarget()->CastToNPC();
+		content_db.NPCSpawnDB(
+			NPCSpawnTypes::CreateNewNPC,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			c,
+			target
+		);
+		return;
+	} else if (is_move_spawn) {
+		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
+		}
 
-        if(!s2) {
-            c->Message(Chat::White, "removegroupspawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-            return;
-        }
+		NPC *target = c->GetTarget()->CastToNPC();
+		Spawn2* spawn2 = target->respawn2;
+		if(!spawn2) {
+			c->Message(Chat::White, "Failed to move spawn because NPC has no Spawn2.");
+			return;
+		}
 
-        std::string query = StringFormat("DELETE FROM spawn2 WHERE id = '%i'",  s2->GetID());
-        auto results = content_db.QueryDatabase(query);
-        if(!results.Success()) {
-            c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
+		auto client_position = c->GetPosition();
+		auto spawn2_id = spawn2->GetID();
+		std::string query = fmt::format(
+			"UPDATE spawn2 SET x = {:.2f}, y = {:.2f}, z = {:.2f}, heading = {:.2f} WHERE id = {}",
+			client_position.x,
+			client_position.y,
+			client_position.z,
+			client_position.w,
+			spawn2_id
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to move spawn.");
+			return;
+		}
 
-        c->Message(Chat::White, "Spawnpoint Removed successfully.");
-        target->Depop(false);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn2 {} Moved | Name: {} ({})",
+				spawn2_id,
+				target->GetCleanName(),
+				target->GetID()
+			).c_str()
+		);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawn2 {} Moved | XYZ: {}, {}, {} Heading: {}",
+				spawn2_id,
+				client_position.x,
+				client_position.y,
+				client_position.z,
+				client_position.w
+			).c_str()
+		);
+		target->GMMove(
+			client_position.x,
+			client_position.y,
+			client_position.z,
+			client_position.w
+		);
+		return;
+	} else if (is_set_version) {
+		if (arguments != 2 || !sep->IsNumber(2)) {
+			c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version]");
+			return;
+		}
 
-        return;
-    }
+		if (!c->GetTarget() || !c->GetTarget()->IsNPC()) {
+			c->Message(Chat::White, "You must target an NPC to use this command.");
+			return;
+		}
 
-	if (strcasecmp(sep->arg[1], "movespawn") == 0) {
-        if (!target || !target->IsNPC()) {
-            c->Message(Chat::White, "Error: Need an NPC target.");
-            return;
-        }
+		NPC* target = c->GetTarget()->CastToNPC();
+		auto version = std::stoi(sep->arg[2]);
+		std::string query = fmt::format(
+			"UPDATE spawn2 SET version = {} WHERE spawngroupID = {}",
+			version,
+			target->GetSpawnGroupId()
+		);
+		auto results = content_db.QueryDatabase(query);
+		if (!results.Success()) {
+			c->Message(Chat::White, "Failed to set version.");
+			return;
+		}
 
-        Spawn2* s2 = target->CastToNPC()->respawn2;
-
-        if(!s2) {
-            c->Message(Chat::White, "movespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-            return;
-        }
-
-        std::string query = StringFormat("UPDATE spawn2 SET x = '%f', y = '%f', z = '%f', heading = '%f' "
-                                        "WHERE id = '%i'",
-                                        c->GetX(), c->GetY(), c->GetZ(), c->GetHeading(),s2->GetID());
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
-
-        c->Message(Chat::White, "Updating coordinates successful.");
-        target->GMMove(c->GetX(), c->GetY(), c->GetZ(), c->GetHeading());
-
-        return;
-    }
-
-	if (strcasecmp(sep->arg[1], "editrespawn") == 0) {
-        if (!target || !target->IsNPC()) {
-            c->Message(Chat::White, "Error: Need an NPC target.");
-            return;
-        }
-
-        Spawn2* s2 = target->CastToNPC()->respawn2;
-
-        uint32 new_rs = 0;
-        uint32 new_var = s2->GetVariance();
-        if(!sep->IsNumber(2)) {
-            c->Message(Chat::White, "editrespawn FAILED -- cannot set respawn to be 0");
-            return;
-        }
-
-        new_rs = atoi(sep->arg[2]);
-
-        if(sep->IsNumber(3))
-            new_var = atoi(sep->arg[3]);
-
-        if(!s2) {
-            c->Message(Chat::White, "editrespawn FAILED -- cannot determine which spawn entry in the database this mob came from.");
-            return;
-        }
-
-        std::string query = StringFormat("UPDATE spawn2 SET respawntime = %u, variance = %u "
-                                        "WHERE id = '%i'",  new_rs, new_var, s2->GetID());
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
-
-        c->Message(Chat::White, "Updating respawn timer successful.");
-        s2->SetRespawnTimer(new_rs);
-        s2->SetVariance(new_var);
-
-        return;
-    }
-
-	if (strcasecmp(sep->arg[1], "setversion") == 0) {
-        if (!target || !target->IsNPC()) {
-            c->Message(Chat::White, "Error: Need an NPC target.");
-            return;
-        }
-
-        if(!sep->IsNumber(2)) {
-            c->Message(Chat::White, "setversion FAILED -- You must set a version number");
-            return;
-        }
-
-        int16 version = atoi(sep->arg[2]);
-        std::string query = StringFormat("UPDATE spawn2 SET version = %i "
-                                        "WHERE spawngroupID = '%i'",
-                                        version, c->GetTarget()->CastToNPC()->GetSpawnGroupId());
-        auto results = content_db.QueryDatabase(query);
-        if (!results.Success()) {
-            c->Message(Chat::Red, "Update failed! MySQL gave the following error:");
-            c->Message(Chat::Red, results.ErrorMessage().c_str());
-            return;
-        }
-
-        c->Message(Chat::White, "Version change to %i was successful from SpawnGroupID %i",  version,
-				   c->GetTarget()->CastToNPC()->GetSpawnGroupId());
-        c->GetTarget()->Depop(false);
-
-        return;
-    }
-
-	if (strcasecmp(sep->arg[1], "testload") == 0 && atoi(sep->arg[2])!=0) {
-        content_db.LoadSpawnGroupsByID(atoi(sep->arg[2]),&zone->spawn_group_list);
-        c->Message(Chat::White, "Group %i loaded successfully!", atoi(sep->arg[2]));
-        return;
-    }
-
-    c->Message(Chat::White, "Error: #advnpcspawn: Invalid command.");
-    c->Message(Chat::White, "Usage: #advnpcspawn [maketype|makegroup|addgroupentry|addgroupspawn|setversion]");
-    c->Message(Chat::White, "Usage: #advnpcspawn [removegroupspawn|movespawn|editrespawn|editgroupbox|cleargroupbox]");
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Spawngroup {} Version Modified | Name: {} ({}) Version: {}",
+				target->GetSpawnGroupId(),
+				target->GetCleanName(),
+				target->GetID(),
+				version
+			).c_str()
+		);
+		target->Depop(false);
+		return;
+	}
 }
 
 void command_aggrozone(Client *c, const Seperator *sep) {
@@ -13594,7 +13860,7 @@ void command_object(Client *c, const Seperator *sep)
 void command_showspellslist(Client *c, const Seperator *sep)
 {
 	Mob *target = c->GetTarget();
-	if (!target || !target->IsNPC()) {		
+	if (!target || !target->IsNPC()) {
 		c->Message(Chat::White, "You must target an NPC to use this command.");
 		return;
 	}

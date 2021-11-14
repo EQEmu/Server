@@ -6228,36 +6228,44 @@ void Client::LocateCorpse()
 
 void Client::NPCSpawn(NPC *target_npc, const char *identifier, uint32 extra)
 {
-	if (!target_npc || !identifier)
+	if (!target_npc || !identifier) {
 		return;
-
-	std::string id = identifier;
-	for(int i = 0; i < id.length(); ++i)
-	{
-		id[i] = tolower(id[i]);
 	}
 
-	if (id == "create") {
-		// extra tries to create the npc_type ID within the range for the current zone (zone_id * 1000)
-		content_db.NPCSpawnDB(0, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
-	}
-	else if (id == "add") {
-		// extra sets the respawn timer for add
-		content_db.NPCSpawnDB(1, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC(), extra);
-	}
-	else if (id == "update") {
-		content_db.NPCSpawnDB(2, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
-	}
-	else if (id == "remove") {
-		content_db.NPCSpawnDB(3, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
-		target_npc->Depop(false);
-	}
-	else if (id == "delete") {
-		content_db.NPCSpawnDB(4, zone->GetShortName(), zone->GetInstanceVersion(), this, target_npc->CastToNPC());
-		target_npc->Depop(false);
-	}
-	else {
-		return;
+	std::string spawn_type = str_tolower(identifier);
+	bool is_add = spawn_type.find("add") != std::string::npos;
+	bool is_create = spawn_type.find("create") != std::string::npos;
+	bool is_delete = spawn_type.find("delete") != std::string::npos;
+	bool is_remove = spawn_type.find("remove") != std::string::npos;
+	bool is_update = spawn_type.find("update") != std::string::npos;
+	if (is_add || is_create) {
+		// Add: extra tries to create the NPC ID within the range for the current Zone (Zone ID * 1000)
+		// Create: extra sets the Respawn Timer for add
+		content_db.NPCSpawnDB(
+			is_add ? NPCSpawnTypes::AddNewSpawngroup : NPCSpawnTypes::CreateNewSpawn,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			this,
+			target_npc->CastToNPC(),
+			extra
+		); 
+	} else if (is_delete || is_remove || is_update) {
+		uint8 spawn_update_type = (
+			is_delete ?
+			NPCSpawnTypes::DeleteSpawn :
+			(
+				is_remove ?
+				NPCSpawnTypes::RemoveSpawn :
+				NPCSpawnTypes::UpdateAppearance
+			)
+		);
+		content_db.NPCSpawnDB(
+			spawn_update_type,
+			zone->GetShortName(),
+			zone->GetInstanceVersion(),
+			this,
+			target_npc->CastToNPC()
+		);
 	}
 }
 

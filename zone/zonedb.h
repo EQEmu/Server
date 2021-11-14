@@ -257,6 +257,18 @@ namespace BeastlordPetData {
 	};
 }
 
+namespace NPCSpawnTypes {
+	enum : uint8 {
+		CreateNewSpawn,
+		AddNewSpawngroup,
+		UpdateAppearance,
+		RemoveSpawn,
+		DeleteSpawn,
+		AddSpawnFromSpawngroup,
+		CreateNewNPC
+	};
+}
+
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
