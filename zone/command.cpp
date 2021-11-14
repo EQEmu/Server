@@ -9212,7 +9212,8 @@ void command_setaaxp(Client *c, const Seperator *sep)
 		return;
 	}
 
-	Client *target = c;std::string aa_type = str_tolower(sep->arg[1]);
+	Client *target = c;
+	std::string aa_type = str_tolower(sep->arg[1]);
 	uint32 aa_experience = static_cast<uint32>(std::min(std::stoll(sep->arg[2]), (long long) 2000000000));
 	bool is_aa = aa_type.find("aa") != std::string::npos;
 	bool is_group = aa_type.find("group") != std::string::npos;
