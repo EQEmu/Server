@@ -378,7 +378,7 @@ int command_init(void)
 		command_add("serverinfo", "- Get OS info about server host", 200, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", 0, command_serverrules) ||
 		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", 100, command_setaapts) ||
-		command_add("setaaxp", "[value] - Set your or your player target's AA experience", 100, command_setaaxp) ||
+		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", 100, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", 150, command_set_adventure_points) ||
 		command_add("setanim", "[animnum] - Set target's appearance to animnum", 200, command_setanim) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", 100, command_setcrystals) ||
@@ -9244,18 +9244,59 @@ void command_itemsearch(Client *c, const Seperator *sep)
 
 void command_setaaxp(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+		return;
+	}
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	Client *target = c;	
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (sep->IsNumber(1)) {
-		t->SetEXP(t->GetEXP(), atoi(sep->arg[1]), false);
-		if(sep->IsNumber(2) && sep->IsNumber(3)) {
-			t->SetLeadershipEXP(atoi(sep->arg[2]), atoi(sep->arg[3]));
-		}
-	} else
-		c->Message(Chat::White, "Usage: #setaaxp <new AA XP value> (<new Group AA XP value> <new Raid XP value>)");
+	std::string aa_type = str_tolower(sep->arg[1]);
+	std::string group_raid_string;
+	uint32 aa_experience = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_aa = aa_type.find("aa") != std::string::npos;
+	bool is_group = aa_type.find("group") != std::string::npos;
+	bool is_raid = aa_type.find("raid") != std::string::npos;
+	if (!is_aa && !is_group && !is_raid) {
+		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+		return;
+	}
+
+	if (is_aa) {
+		target->SetEXP(
+			target->GetEXP(),
+			aa_experience,
+			false
+		);
+	} else if (is_group) {
+		group_raid_string = "Group ";
+		target->SetLeadershipEXP(
+			aa_experience,
+			target->GetRaidEXP()
+		);
+	} else if (is_raid) {
+		group_raid_string = "Raid ";
+		target->SetLeadershipEXP(
+			target->GetGroupEXP(),
+			aa_experience
+		);
+	}
+
+	std::string aa_exp_message = fmt::format(
+		"{} now {} {} {}AA Experience.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		aa_experience,
+		group_raid_string
+	);
+	c->Message(
+		Chat::White,
+		aa_exp_message.c_str()
+	);
 }
 
 void command_setaapts(Client *c, const Seperator *sep)
