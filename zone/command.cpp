@@ -9251,7 +9251,6 @@ void command_setaapts(Client *c, const Seperator *sep)
 void command_setcrystals(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
 	if (arguments <= 1 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
 		return;
@@ -9278,24 +9277,22 @@ void command_setcrystals(Client *c, const Seperator *sep)
 	);
 
 	auto crystal_link = database.CreateItemLink(crystal_item_id);
-	if (is_radiant || is_ebon) {
-		if (is_radiant) {
-			target->SetRadiantCrystals(crystal_amount);
-		} else {
-			target->SetEbonCrystals(crystal_amount);
-		}
-
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"{} now {} {} {}.",
-				c == target ? "You" : target->GetCleanName(),
-				c == target ? "have" : "has",
-				crystal_amount,
-				crystal_link
-			).c_str()
-		);
+	if (is_radiant) {
+		target->SetRadiantCrystals(crystal_amount);
+	} else {
+		target->SetEbonCrystals(crystal_amount);
 	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} now {} {} {}.",
+			c == target ? "You" : target->GetCleanName(),
+			c == target ? "have" : "has",
+			crystal_amount,
+			crystal_link
+		).c_str()
+	);
 }
 
 void command_stun(Client *c, const Seperator *sep)
