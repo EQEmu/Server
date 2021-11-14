@@ -9227,10 +9227,15 @@ void command_setaapts(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
 		return;
 	}
-
+	
 	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
 	std::string aa_type = str_tolower(sep->arg[1]);
-	int aa_points = static_cast<int>(std::min(std::stoll(sep->arg[2]), (long long) 2000000000));
+	std::string group_raid_string;
+	uint32 aa_points = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
 	bool is_aa = aa_type.find("aa") != std::string::npos;
 	bool is_group = aa_type.find("group") != std::string::npos;
 	bool is_raid = aa_type.find("raid") != std::string::npos;
@@ -9239,34 +9244,21 @@ void command_setaapts(Client *c, const Seperator *sep)
 		return;
 	}
 
-	if (aa_points < 0) {
-		aa_points = 0;
-	}
-	
-	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		target = c->GetTarget()->CastToClient();
-	}
-
 	if (is_aa) {
 		target->GetPP().aapoints = aa_points;
 		target->GetPP().expAA = 0;
 		target->SendAlternateAdvancementStats();
 	} else if (is_group || is_raid) {
 		if (is_group) {
+			group_raid_string = "Group ";
 			target->GetPP().group_leadership_points = aa_points;
 			target->GetPP().group_leadership_exp = 0;
 		} else if (is_raid) {
+			group_raid_string = "Raid ";
 			target->GetPP().raid_leadership_points = aa_points;
 			target->GetPP().raid_leadership_exp = 0;
 		}
 		target->SendLeadershipEXPUpdate();
-	}
-
-	std::string group_raid_string;
-	if (is_group) {
-		group_raid_string = "Group ";
-	} else if (is_raid) {
-		group_raid_string = "Raid ";
 	}
 
 	std::string aa_message = fmt::format(
