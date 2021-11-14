@@ -12230,7 +12230,7 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		auto spawn_limit = std::stoi(sep->arg[3]);
 		auto distance = std::stof(sep->arg[4]);
 		auto minimum_x = std::stof(sep->arg[5]);
-		auto maximum_x = std::stof(sep->arg[6);
+		auto maximum_x = std::stof(sep->arg[6]);
 		auto minimum_y = std::stof(sep->arg[7]);
 		auto maximum_y = std::stof(sep->arg[8]);
 		auto delay = std::stoi(sep->arg[9]);
