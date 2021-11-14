@@ -1134,7 +1134,7 @@ std::string ConvertSecondsToTime(int duration)
 			seconds,
 			second_string
 		);
-	} else if (!days &&	hours && !minutes && !seconds) { // H
+	} else if (!days && hours && !minutes && !seconds) { // H
 		time_string = fmt::format(
 			"{} {}",
 			hours,

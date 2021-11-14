@@ -9303,15 +9303,30 @@ void command_stun(Client *c, const Seperator *sep)
 	std::string stun_message = (
 		duration ?
 		fmt::format(
-			"You stunned {} ({}) for {}.",
-			c == target ? "yourself" : target->GetCleanName(),
+			"You stunned {} for {}.",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 			target->GetID(),
 			ConvertSecondsToTime(duration)
 		) :
 		fmt::format(
-			"You unstunned {} ({}).",
-			c == target ? "yourself" : target->GetCleanName(),
-			target->GetID()
+			"You unstunned {}.",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 		)
 	);
 	c->Message(
