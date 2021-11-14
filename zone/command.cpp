@@ -387,7 +387,7 @@ int command_init(void)
 		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", 50, command_setlanguage) ||
 		command_add("setlsinfo", "[email] [password] - Set login server email address and password (if supported by login server)", 10, command_setlsinfo) ||
 		command_add("setpass", "[accountname] [password] - Set local password for accountname", 150, command_setpass) ||
-		command_add("setpvppoints", "[value] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
+		command_add("setpvppoints", "[Amount] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", 50, command_setskill) ||
 		command_add("setskillall", "[value] - Set all of your target's skills to value", 50, command_setskillall) ||
 		command_add("setstartzone", "[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity", 80, command_setstartzone) ||
@@ -7007,23 +7007,32 @@ void command_setxp(Client *c, const Seperator *sep)
 
 void command_setpvppoints(Client *c, const Seperator *sep)
 {
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if (sep->IsNumber(1)) {
-		if (atoi(sep->arg[1]) > 9999999)
-			c->Message(Chat::White, "Error: Value too high.");
-		else
-		{
-			t->SetPVPPoints(atoi(sep->arg[1]));
-			t->Save();
-			t->SendPVPStats();
-		}
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Command Syntax: #setpvppoints [Amount]");
+		return;
 	}
-	else
-		c->Message(Chat::White, "Usage: #setpvppoints number");
+
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}		
+
+	uint32 pvp_points = static_cast<uint32>(std::min(std::stoull(sep->arg[1]), (unsigned long long) 2000000000));
+	target->SetPVPPoints(pvp_points);
+	target->Save();
+	target->SendPVPStats();
+	std::string pvp_message = fmt::format(
+		"{} now {} {} PVP Point{}.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		pvp_points,
+		pvp_points != 1 ? "s" : ""
+	);
+	c->Message(
+		Chat::White,
+		pvp_message.c_str()
+	);
 }
 
 void command_name(Client *c, const Seperator *sep)
