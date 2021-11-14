@@ -254,7 +254,7 @@ namespace EQ
 			GMMgmt = 200,
 			GMImpossible = 250
 			Max = 255
-		}
+		};
 	} /*constants*/
 
 	namespace profile {
