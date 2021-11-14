@@ -252,7 +252,7 @@ namespace EQ
 			GMAreas = 170,
 			GMCoder = 180,
 			GMMgmt = 200,
-			GMImpossible = 250
+			GMImpossible = 250,
 			Max = 255
 		};
 	} /*constants*/
