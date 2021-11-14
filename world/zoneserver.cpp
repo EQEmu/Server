@@ -1035,7 +1035,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zoneserver_list.SendEmoteMessage(
 					0,
 					0,
-					80,
+					EQ::constants::AccountStatus::QuestTroupe,
 					Chat::White,
 					fmt::format(
 						"Zone {} | Name: {} ({}) ID: {}",
@@ -1049,7 +1049,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				SendEmoteMessageRaw(
 					lock_zone->adminname,
 					0,
-					0,
+					EQ::constants::AccountStatus::Player,
 					Chat::White,
 					fmt::format(
 						"Zone Failed to {} | Name: {} ({}) ID: {}",
