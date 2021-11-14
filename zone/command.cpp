@@ -377,7 +377,7 @@ int command_init(void)
 		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.",  0, command_sensetrap) ||
 		command_add("serverinfo", "- Get OS info about server host", 200, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", 0, command_serverrules) ||
-		command_add("setaapts", "[value] - Set your or your player target's available AA points", 100, command_setaapts) ||
+		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", 100, command_setaapts) ||
 		command_add("setaaxp", "[value] - Set your or your player target's AA experience", 100, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", 150, command_set_adventure_points) ||
 		command_add("setanim", "[animnum] - Set target's appearance to animnum", 200, command_setanim) ||
@@ -9237,31 +9237,58 @@ void command_setaaxp(Client *c, const Seperator *sep)
 
 void command_setaapts(Client *c, const Seperator *sep)
 {
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(Chat::White, "Usage: #setaapts <AA|group|raid> <new AA points value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 5000)
-		c->Message(Chat::White, "You must have a number greater than 0 for points and no more than 5000.");
-	else if(!strcasecmp(sep->arg[1], "group")) {
-		t->GetPP().group_leadership_points = atoi(sep->arg[2]);
-		t->GetPP().group_leadership_exp = 0;
-		t->Message(Chat::Experience, "Setting Group AA points to %u", t->GetPP().group_leadership_points);
-		t->SendLeadershipEXPUpdate();
-	} else if(!strcasecmp(sep->arg[1], "raid")) {
-		t->GetPP().raid_leadership_points = atoi(sep->arg[2]);
-		t->GetPP().raid_leadership_exp = 0;
-		t->Message(Chat::Experience, "Setting Raid AA points to %u", t->GetPP().raid_leadership_points);
-		t->SendLeadershipEXPUpdate();
-	} else {
-		t->GetPP().aapoints = atoi(sep->arg[2]);
-		t->GetPP().expAA = 0;
-		t->Message(Chat::Experience, "Setting personal AA points to %u", t->GetPP().aapoints);
-		t->SendAlternateAdvancementStats();
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+		return;
 	}
+	
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	std::string aa_type = str_tolower(sep->arg[1]);
+	std::string group_raid_string;
+	uint32 aa_points = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_aa = aa_type.find("aa") != std::string::npos;
+	bool is_group = aa_type.find("group") != std::string::npos;
+	bool is_raid = aa_type.find("raid") != std::string::npos;
+	if (!is_aa && !is_group && !is_raid) {
+		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+		return;
+	}
+
+	if (is_aa) {
+		target->GetPP().aapoints = aa_points;
+		target->GetPP().expAA = 0;
+		target->SendAlternateAdvancementStats();
+	} else if (is_group || is_raid) {
+		if (is_group) {
+			group_raid_string = "Group ";
+			target->GetPP().group_leadership_points = aa_points;
+			target->GetPP().group_leadership_exp = 0;
+		} else if (is_raid) {
+			group_raid_string = "Raid ";
+			target->GetPP().raid_leadership_points = aa_points;
+			target->GetPP().raid_leadership_exp = 0;
+		}
+		target->SendLeadershipEXPUpdate();
+	}
+
+	std::string aa_message = fmt::format(
+		"{} now {} {} {}AA Point{}.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		aa_points,
+		group_raid_string,
+		aa_points != 1 ? "s" : ""
+
+	);
+	c->Message(
+		Chat::White,
+		aa_message.c_str()
+	);
 }
 
 void command_setcrystals(Client *c, const Seperator *sep)
