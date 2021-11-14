@@ -897,6 +897,8 @@ public:
 	void ResetAA();
 	void RefundAA();
 	void SendClearAA();
+	void SendClearLeadershipAA();
+	void SendClearPlayerAA();
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int32 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);

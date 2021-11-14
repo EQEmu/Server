@@ -498,9 +498,19 @@ void Client::ResetAA() {
 
 void Client::SendClearAA()
 {
-	auto outapp = new EQApplicationPacket(OP_ClearLeadershipAbilities, 0);
+	SendClearLeadershipAA();
+	SendClearPlayerAA();
+}
+
+void Client::SendClearPlayerAA()
+{
+	auto outapp = new EQApplicationPacket(OP_ClearAA, 0);
 	FastQueuePacket(&outapp);
-	outapp = new EQApplicationPacket(OP_ClearAA, 0);
+}
+
+void Client::SendClearLeadershipAA()
+{
+	auto outapp = new EQApplicationPacket(OP_ClearLeadershipAbilities, 0);
 	FastQueuePacket(&outapp);
 }
 
