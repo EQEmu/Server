@@ -9313,7 +9313,6 @@ void command_stun(Client *c, const Seperator *sep)
 					target->GetID()
 				)
 			),
-			target->GetID(),
 			ConvertSecondsToTime(duration)
 		) :
 		fmt::format(
@@ -9326,7 +9325,7 @@ void command_stun(Client *c, const Seperator *sep)
 					target->GetCleanName(),
 					target->GetID()
 				)
-			),
+			)
 		)
 	);
 	c->Message(
