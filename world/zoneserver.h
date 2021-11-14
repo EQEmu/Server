@@ -22,13 +22,13 @@
 #include "../common/net/servertalk_server.h"
 #include "../common/event/timer.h"
 #include "../common/timer.h"
+#include "../common/emu_constants.h"
 #include "console.h"
 #include <string.h>
 #include <string>
 
 class Client;
 class ServerPacket;
-
 
 class ZoneServer : public WorldTCPConnection {
 public:
