@@ -5658,11 +5658,11 @@ void command_zonelock(Client *c, const Seperator *sep)
 	}
 	
 	auto pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
-	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
-	strn0cpy(s->adminname, c->GetName(), sizeof(s->adminname));
+	ServerLockZone_Struct* lock_zone = (ServerLockZone_Struct*) pack->pBuffer;
+	strn0cpy(lock_zone->adminname, c->GetName(), sizeof(lock_zone->adminname));
 	
 	if (is_list) {
-		s->op = EQ::constants::ServerLockType::List;
+		lock_zone->op = EQ::constants::ServerLockType::List;
 		worldserver.SendPacket(pack);
 	} else if (!is_list && c->Admin() >= commandLockZones) {		
 		auto zone_id = (
@@ -5673,8 +5673,8 @@ void command_zonelock(Client *c, const Seperator *sep)
 		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
 		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
 		if (zone_id && !is_unknown_zone) {
-			s->op = is_lock ? EQ::constants::ServerLockType::Lock : EQ::constants::ServerLockType::Unlock;
-			s->zoneID = zone_id;
+			lock_zone->op = is_lock ? EQ::constants::ServerLockType::Lock : EQ::constants::ServerLockType::Unlock;
+			lock_zone->zoneID = zone_id;
 			worldserver.SendPacket(pack);
 		} else {
 			c->Message(
