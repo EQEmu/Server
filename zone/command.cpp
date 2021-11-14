@@ -9222,7 +9222,6 @@ void command_setaaxp(Client *c, const Seperator *sep)
 void command_setaapts(Client *c, const Seperator *sep)
 {
 	int arguments = sep->argnum;
-
 	if (arguments <= 1 || !sep->IsNumber(2)) {
 		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
 		return;
