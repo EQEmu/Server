@@ -7308,9 +7308,32 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 
 void command_loc(Client *c, const Seperator *sep)
 {
-	Mob *t=c->GetTarget()?c->GetTarget():c->CastToMob();
+	Mob *target = c;
+	if (c->GetTarget()) {
+		target = c->GetTarget();
+	}
 
-	c->Message(Chat::White, "%s's Location (XYZ): %1.2f, %1.2f, %1.2f; heading=%1.1f",  t->GetName(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+	auto target_position = target->GetPosition();
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} Location | XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
+			(
+				c == target ?
+				"Your" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			target_position.x,
+			target_position.y,
+			target_position.z,
+			target_position.w
+		).c_str()
+	);
 }
 
 void command_goto(Client *c, const Seperator *sep)
