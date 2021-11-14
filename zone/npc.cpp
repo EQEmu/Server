@@ -1719,25 +1719,25 @@ uint32 ZoneDatabase::AddNPCTypes(const char *zone, uint32 zone_version, Client *
 uint32 ZoneDatabase::NPCSpawnDB(uint8 command, const char* zone, uint32 zone_version, Client *c, NPC* spawn, uint32 extra) {
 
 	switch (command) {
-		case 0: { // Create a new NPC and add all spawn related data
+		case NPCSpawnTypes::CreateNewSpawn: { // Create a new NPC and add all spawn related data
 			return CreateNewNPCCommand(zone, zone_version, c, spawn, extra);
 		}
-		case 1:{ // Add new spawn group and spawn point for an existing NPC Type ID
+		case NPCSpawnTypes::AddNewSpawngroup: { // Add new spawn group and spawn point for an existing NPC Type ID
 			return AddNewNPCSpawnGroupCommand(zone, zone_version, c, spawn, extra);
 		}
-		case 2: { // Update npc_type appearance and other data on targeted spawn
+		case NPCSpawnTypes::UpdateAppearance: { // Update npc_type appearance and other data on targeted spawn
 			return UpdateNPCTypeAppearance(c, spawn);
 		}
-		case 3: { // delete spawn from spawning, but leave in npc_types table
+		case NPCSpawnTypes::RemoveSpawn: { // delete spawn from spawning, but leave in npc_types table
 			return DeleteSpawnLeaveInNPCTypeTable(zone, c, spawn);
 		}
-		case 4: { //delete spawn from DB (including npc_type)
+		case NPCSpawnTypes::DeleteSpawn: { //delete spawn from DB (including npc_type)
 			return DeleteSpawnRemoveFromNPCTypeTable(zone, zone_version, c, spawn);
 		}
-		case 5: { // add a spawn from spawngroup
+		case NPCSpawnTypes::AddSpawnFromSpawngroup: { // add a spawn from spawngroup
 			return AddSpawnFromSpawnGroup(zone, zone_version, c, spawn, extra);
         }
-		case 6: { // add npc_type
+		case NPCSpawnTypes::CreateNewNPC: { // add npc_type
 			return AddNPCTypes(zone, zone_version, c, spawn, extra);
 		}
 	}

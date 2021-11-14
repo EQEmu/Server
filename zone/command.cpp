@@ -11925,12 +11925,12 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #advnpcspawn addentry [Spawngroup ID] [NPC ID] [Spawn Chance] - Adds a new Spawngroup Entry");
 		c->Message(Chat::White, "Usage: #advnpcspawn addspawn [Spawngroup ID] - Adds a new Spawngroup Entry from an existing Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID] - Clears the roambox of a Spawngroup");
+		c->Message(Chat::White, "Usage: #advnpcspawn deletespawn - Deletes a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]  - Edit the roambox of a Spawngroup");
-		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
+		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance] - Edit the Respawn Timer of a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay] - Makes a new Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn makenpc - Makes a new NPC");
 		c->Message(Chat::White, "Usage: #advnpcspawn movespawn - Moves a Spawngroup to your current location");
-		c->Message(Chat::White, "Usage: #advnpcspawn removespawn - Removes a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version] - Sets a Spawngroup's Version");
 		return;
 	}	
@@ -11963,12 +11963,12 @@ void command_advnpcspawn(Client *c, const Seperator *sep)
 		c->Message(Chat::White, "Usage: #advnpcspawn clearbox [Spawngroup ID] - Clears the roambox of a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn deletespawn - Deletes a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn editbox [Spawngroup ID] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay]  - Edit the roambox of a Spawngroup");
-		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance]");
+		c->Message(Chat::White, "Usage: #advnpcspawn editrespawn [Respawn Timer] [Variance] - Edit the Respawn Timer of a Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn makegroup [Spawn Group Name] [Spawn Limit] [Distance] [Minimum X] [Maximum X] [Minimum Y] [Maximum Y] [Delay] - Makes a new Spawngroup");
 		c->Message(Chat::White, "Usage: #advnpcspawn makenpc - Makes a new NPC");
 		c->Message(Chat::White, "Usage: #advnpcspawn movespawn - Moves a Spawngroup to your current location");
 		c->Message(Chat::White, "Usage: #advnpcspawn setversion [Version] - Sets a Spawngroup's Version");
-		return;		
+		return;
 	}
 
 
