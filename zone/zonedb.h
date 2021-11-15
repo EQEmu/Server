@@ -266,6 +266,15 @@ namespace NPCSpawnTypes {
 		DeleteSpawn,
 		AddSpawnFromSpawngroup,
 		CreateNewNPC
+  };
+}
+
+namespace RaidLootTypes {
+	enum : uint32 {
+		RaidLeader = 1,
+		GroupLeader,
+		Selected,
+		All
 	};
 }
 

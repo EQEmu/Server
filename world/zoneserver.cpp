@@ -1022,22 +1022,44 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			LogInfo("Wrong size on ServerOP_LockZone. Got: [{}], Expected: [{}]", pack->size, sizeof(ServerLockZone_Struct));
 			break;
 		}
-		ServerLockZone_Struct* s = (ServerLockZone_Struct*)pack->pBuffer;
-		switch (s->op) {
-		case 0:
-			zoneserver_list.ListLockedZones(s->adminname, this);
+
+		ServerLockZone_Struct* lock_zone = (ServerLockZone_Struct*) pack->pBuffer;
+		if (lock_zone->op == EQ::constants::ServerLockType::List) {
+			zoneserver_list.ListLockedZones(lock_zone->adminname, this);
 			break;
-		case 1:
-			if (zoneserver_list.SetLockedZone(s->zoneID, true))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(s->zoneID));
-			else
-				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
-			break;
-		case 2:
-			if (zoneserver_list.SetLockedZone(s->zoneID, false))
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(s->zoneID));
-			else
-				this->SendEmoteMessageRaw(s->adminname, 0, 0, 0, "Failed to change lock");
+		} else if (
+			lock_zone->op == EQ::constants::ServerLockType::Lock ||
+			lock_zone->op == EQ::constants::ServerLockType::Unlock
+		) {
+			if (zoneserver_list.SetLockedZone(lock_zone->zoneID, lock_zone->op == EQ::constants::ServerLockType::Lock)) {
+				zoneserver_list.SendEmoteMessage(
+					0,
+					0,
+					EQ::constants::AccountStatus::QuestTroupe,
+					Chat::White,
+					fmt::format(
+						"Zone {} | Name: {} ({}) ID: {}",
+						lock_zone->op == EQ::constants::ServerLockType::Lock ? "Locked" : "Unlocked",
+						ZoneLongName(lock_zone->zoneID),
+						ZoneName(lock_zone->zoneID),
+						lock_zone->zoneID
+					).c_str()
+				);
+			} else {
+				SendEmoteMessageRaw(
+					lock_zone->adminname,
+					0,
+					EQ::constants::AccountStatus::Player,
+					Chat::White,
+					fmt::format(
+						"Zone Failed to {} | Name: {} ({}) ID: {}",
+						lock_zone->op == EQ::constants::ServerLockType::Lock ? "Lock" : "Unlock",
+						ZoneLongName(lock_zone->zoneID),
+						ZoneName(lock_zone->zoneID),
+						lock_zone->zoneID
+					).c_str()
+				);
+			}
 			break;
 		}
 		break;

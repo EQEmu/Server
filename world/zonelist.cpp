@@ -270,14 +270,39 @@ bool ZSList::IsZoneLocked(uint16 iZoneID) {
 }
 
 void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
-	int x = 0;
-	for (auto &zone : pLockedZones) {
-		if (zone) {
-			connection->SendEmoteMessageRaw(to, 0, 0, 0, ZoneName(zone, true));
-			x++;
+	int zone_count = 0;
+	for (const auto& zone_id : pLockedZones) {
+		if (zone_id) {
+			int zone_number = (zone_count + 1);
+			connection->SendEmoteMessageRaw(
+				to,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::White,
+				fmt::format(
+					"Zone {} | Name: {} ({}) ID: {}",
+					zone_number,
+					ZoneLongName(zone_id),
+					ZoneName(zone_id),
+					zone_id
+				).c_str()
+			);
+			zone_count++;
 		}
 	}
-	connection->SendEmoteMessage(to, 0, 0, 0, "%i zones locked.", x);
+
+	std::string zone_message = (
+		zone_count ?
+		fmt::format("{} Zones are locked.", zone_count) :
+		"There are no zones locked."
+	);
+	connection->SendEmoteMessage(
+		to,
+		0,
+		EQ::constants::AccountStatus::Player,
+		Chat::White,
+		zone_message.c_str()
+	);
 }
 
 void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* connection) {

@@ -346,7 +346,7 @@ int command_init(void)
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", 100, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", 50, command_race) ||
-		command_add("raidloot", "LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.", 0, command_raidloot) ||
+		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", 0, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", 80, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.",  0, command_refreshgroup) ||
 		command_add("reloadaa", "Reloads AA data", 200, command_reloadaa) ||
@@ -377,8 +377,8 @@ int command_init(void)
 		command_add("sensetrap",  "Analog for ldon sense trap for the newer clients since we still don't have it working.",  0, command_sensetrap) ||
 		command_add("serverinfo", "- Get OS info about server host", 200, command_serverinfo) ||
 		command_add("serverrules", "- Read this server's rules", 0, command_serverrules) ||
-		command_add("setaapts", "[value] - Set your or your player target's available AA points", 100, command_setaapts) ||
-		command_add("setaaxp", "[value] - Set your or your player target's AA experience", 100, command_setaaxp) ||
+		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", 100, command_setaapts) ||
+		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", 100, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", 150, command_set_adventure_points) ||
 		command_add("setanim", "[animnum] - Set target's appearance to animnum", 200, command_setanim) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", 100, command_setcrystals) ||
@@ -387,7 +387,7 @@ int command_init(void)
 		command_add("setlanguage", "[language ID] [value] - Set your target's language skillnum to value", 50, command_setlanguage) ||
 		command_add("setlsinfo", "[email] [password] - Set login server email address and password (if supported by login server)", 10, command_setlsinfo) ||
 		command_add("setpass", "[accountname] [password] - Set local password for accountname", 150, command_setpass) ||
-		command_add("setpvppoints", "[value] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
+		command_add("setpvppoints", "[Amount] - Set your or your player target's PVP points", 100, command_setpvppoints) ||
 		command_add("setskill", "[skillnum] [value] - Set your target's skill skillnum to value", 50, command_setskill) ||
 		command_add("setskillall", "[value] - Set all of your target's skills to value", 50, command_setskillall) ||
 		command_add("setstartzone", "[zoneid] - Set target's starting zone. Set to zero to allow the player to use /setstartcity", 80, command_setstartzone) ||
@@ -455,7 +455,7 @@ int command_init(void)
 		command_add("zone", "[zonename] [x] [y] [z] - Go to specified zone (coords optional)", 50, command_zone) ||
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", 150, command_zonebootup) ||
 		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", 50, command_zone_instance) ||
-		command_add("zonelock", "[list/lock/unlock] - Set/query lock flag for zoneservers", 100, command_zonelock) ||
+		command_add("zonelock", "[List|Lock|Unlock] [Zone ID|Zone Short Name] - Set or get lock status of a Zone by ID or Short Name", 100, command_zonelock) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", 150, command_zoneshutdown) ||
 		command_add("zonespawn", "- Not implemented", 250, command_zonespawn) ||
 		command_add("zonestatus", "- Show connected zoneservers, synonymous with /servers", 150, command_zonestatus) ||
@@ -5757,40 +5757,56 @@ void command_equipitem(Client *c, const Seperator *sep)
 
 void command_zonelock(Client *c, const Seperator *sep)
 {
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #zonelock list - Lists Locked Zones");
+		if (c->Admin() >= commandLockZones) {
+			c->Message(Chat::White, "Usage: #zonelock lock [Zone ID] or #zonelock lock [Zone Short Name] - Locks a Zone by ID or Short Name");
+			c->Message(Chat::White, "Usage: #zonelock unlock [Zone ID] or #zonelock unlock [Zone Short Name] - Unlocks a Zone by ID or Short Name");
+		}
+		return;
+	}
+	
+	std::string lock_type = str_tolower(sep->arg[1]);
+	bool is_list = lock_type.find("list") != std::string::npos;
+	bool is_lock = lock_type.find("lock") != std::string::npos;
+	bool is_unlock = lock_type.find("unlock") != std::string::npos;
+	if (!is_list && !is_lock && !is_unlock) {
+		c->Message(Chat::White, "Usage: #zonelock list - Lists Locked Zones");
+		if (c->Admin() >= commandLockZones) {
+			c->Message(Chat::White, "Usage: #zonelock lock [Zone ID] or #zonelock lock [Zone Short Name] - Locks a Zone by ID or Short Name");
+			c->Message(Chat::White, "Usage: #zonelock unlock [Zone ID] or #zonelock unlock [Zone Short Name] - Unlocks a Zone by ID or Short Name");
+		}
+		return;
+	}
+	
 	auto pack = new ServerPacket(ServerOP_LockZone, sizeof(ServerLockZone_Struct));
-	ServerLockZone_Struct* s = (ServerLockZone_Struct*) pack->pBuffer;
-	strn0cpy(s->adminname, c->GetName(), sizeof(s->adminname));
-	if (strcasecmp(sep->arg[1], "list") == 0) {
-		s->op = 0;
+	ServerLockZone_Struct* lock_zone = (ServerLockZone_Struct*) pack->pBuffer;
+	strn0cpy(lock_zone->adminname, c->GetName(), sizeof(lock_zone->adminname));
+	
+	if (is_list) {
+		lock_zone->op = EQ::constants::ServerLockType::List;
 		worldserver.SendPacket(pack);
-	}
-	else if (strcasecmp(sep->arg[1], "lock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = ZoneID(sep->arg[2]);
-		if (tmp) {
-			s->op = 1;
-			s->zoneID = tmp;
+	} else if (!is_list && c->Admin() >= commandLockZones) {		
+		auto zone_id = (
+			sep->IsNumber(2) ?
+			static_cast<uint16>(std::stoul(sep->arg[2])) :
+			static_cast<uint16>(ZoneID(sep->arg[2]))
+		);
+		std::string zone_short_name = str_tolower(ZoneName(zone_id, true));
+		bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
+		if (zone_id && !is_unknown_zone) {
+			lock_zone->op = is_lock ? EQ::constants::ServerLockType::Lock : EQ::constants::ServerLockType::Unlock;
+			lock_zone->zoneID = zone_id;
 			worldserver.SendPacket(pack);
-		}
-		else
-			c->Message(Chat::White, "Usage: #zonelock lock [zonename]");
-	}
-	else if (strcasecmp(sep->arg[1], "unlock") == 0 && c->Admin() >= commandLockZones) {
-		uint16 tmp = ZoneID(sep->arg[2]);
-		if (tmp) {
-			s->op = 2;
-			s->zoneID = tmp;
-			worldserver.SendPacket(pack);
-		}
-		else
-			c->Message(Chat::White, "Usage: #zonelock unlock [zonename]");
-	}
-	else {
-		c->Message(Chat::White, "#zonelock sub-commands");
-		c->Message(Chat::White, "  list");
-		if(c->Admin() >= commandLockZones)
-		{
-			c->Message(Chat::White, "  lock [zonename]");
-			c->Message(Chat::White, "  unlock [zonename]");
+		} else {
+			c->Message(
+				Chat::White, 
+				fmt::format(
+					"Usage: #zonelock {} [Zone ID] or #zonelock {} [Zone Short Name]",
+					is_lock ? "lock" : "unlock"
+				).c_str()
+			);
 		}
 	}
 	safe_delete(pack);
@@ -6991,23 +7007,32 @@ void command_setxp(Client *c, const Seperator *sep)
 
 void command_setpvppoints(Client *c, const Seperator *sep)
 {
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if (sep->IsNumber(1)) {
-		if (atoi(sep->arg[1]) > 9999999)
-			c->Message(Chat::White, "Error: Value too high.");
-		else
-		{
-			t->SetPVPPoints(atoi(sep->arg[1]));
-			t->Save();
-			t->SendPVPStats();
-		}
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Command Syntax: #setpvppoints [Amount]");
+		return;
 	}
-	else
-		c->Message(Chat::White, "Usage: #setpvppoints number");
+
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}		
+
+	uint32 pvp_points = static_cast<uint32>(std::min(std::stoull(sep->arg[1]), (unsigned long long) 2000000000));
+	target->SetPVPPoints(pvp_points);
+	target->Save();
+	target->SendPVPStats();
+	std::string pvp_message = fmt::format(
+		"{} now {} {} PVP Point{}.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		pvp_points,
+		pvp_points != 1 ? "s" : ""
+	);
+	c->Message(
+		Chat::White,
+		pvp_message.c_str()
+	);
 }
 
 void command_name(Client *c, const Seperator *sep)
@@ -7335,9 +7360,32 @@ void command_spawnfix(Client *c, const Seperator *sep) {
 
 void command_loc(Client *c, const Seperator *sep)
 {
-	Mob *t=c->GetTarget()?c->GetTarget():c->CastToMob();
+	Mob *target = c;
+	if (c->GetTarget()) {
+		target = c->GetTarget();
+	}
 
-	c->Message(Chat::White, "%s's Location (XYZ): %1.2f, %1.2f, %1.2f; heading=%1.1f",  t->GetName(), t->GetX(), t->GetY(), t->GetZ(), t->GetHeading());
+	auto target_position = target->GetPosition();
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} Location | XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
+			(
+				c == target ?
+				"Your" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			target_position.x,
+			target_position.y,
+			target_position.z,
+			target_position.w
+		).c_str()
+	);
 }
 
 void command_goto(Client *c, const Seperator *sep)
@@ -9248,91 +9296,222 @@ void command_itemsearch(Client *c, const Seperator *sep)
 
 void command_setaaxp(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+		return;
+	}
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	Client *target = c;	
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (sep->IsNumber(1)) {
-		t->SetEXP(t->GetEXP(), atoi(sep->arg[1]), false);
-		if(sep->IsNumber(2) && sep->IsNumber(3)) {
-			t->SetLeadershipEXP(atoi(sep->arg[2]), atoi(sep->arg[3]));
-		}
-	} else
-		c->Message(Chat::White, "Usage: #setaaxp <new AA XP value> (<new Group AA XP value> <new Raid XP value>)");
+	std::string aa_type = str_tolower(sep->arg[1]);
+	std::string group_raid_string;
+	uint32 aa_experience = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_aa = aa_type.find("aa") != std::string::npos;
+	bool is_group = aa_type.find("group") != std::string::npos;
+	bool is_raid = aa_type.find("raid") != std::string::npos;
+	if (!is_aa && !is_group && !is_raid) {
+		c->Message(Chat::White, "Usage: #setaaxp [AA|Group|Raid] [AA Experience]");
+		return;
+	}
+
+	if (is_aa) {
+		target->SetEXP(
+			target->GetEXP(),
+			aa_experience,
+			false
+		);
+	} else if (is_group) {
+		group_raid_string = "Group ";
+		target->SetLeadershipEXP(
+			aa_experience,
+			target->GetRaidEXP()
+		);
+	} else if (is_raid) {
+		group_raid_string = "Raid ";
+		target->SetLeadershipEXP(
+			target->GetGroupEXP(),
+			aa_experience
+		);
+	}
+
+	std::string aa_exp_message = fmt::format(
+		"{} now {} {} {}AA Experience.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		aa_experience,
+		group_raid_string
+	);
+	c->Message(
+		Chat::White,
+		aa_exp_message.c_str()
+	);
 }
 
 void command_setaapts(Client *c, const Seperator *sep)
 {
-	Client *t=c;
-
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
-
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(Chat::White, "Usage: #setaapts <AA|group|raid> <new AA points value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 5000)
-		c->Message(Chat::White, "You must have a number greater than 0 for points and no more than 5000.");
-	else if(!strcasecmp(sep->arg[1], "group")) {
-		t->GetPP().group_leadership_points = atoi(sep->arg[2]);
-		t->GetPP().group_leadership_exp = 0;
-		t->Message(Chat::Experience, "Setting Group AA points to %u", t->GetPP().group_leadership_points);
-		t->SendLeadershipEXPUpdate();
-	} else if(!strcasecmp(sep->arg[1], "raid")) {
-		t->GetPP().raid_leadership_points = atoi(sep->arg[2]);
-		t->GetPP().raid_leadership_exp = 0;
-		t->Message(Chat::Experience, "Setting Raid AA points to %u", t->GetPP().raid_leadership_points);
-		t->SendLeadershipEXPUpdate();
-	} else {
-		t->GetPP().aapoints = atoi(sep->arg[2]);
-		t->GetPP().expAA = 0;
-		t->Message(Chat::Experience, "Setting personal AA points to %u", t->GetPP().aapoints);
-		t->SendAlternateAdvancementStats();
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+		return;
 	}
+	
+	Client *target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	std::string aa_type = str_tolower(sep->arg[1]);
+	std::string group_raid_string;
+	uint32 aa_points = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_aa = aa_type.find("aa") != std::string::npos;
+	bool is_group = aa_type.find("group") != std::string::npos;
+	bool is_raid = aa_type.find("raid") != std::string::npos;
+	if (!is_aa && !is_group && !is_raid) {
+		c->Message(Chat::White, "Usage: #setaapts [AA|Group|Raid] [AA Amount]");
+		return;
+	}
+
+	if (is_aa) {
+		target->GetPP().aapoints = aa_points;
+		target->GetPP().expAA = 0;
+		target->SendAlternateAdvancementStats();
+	} else if (is_group || is_raid) {
+		if (is_group) {
+			group_raid_string = "Group ";
+			target->GetPP().group_leadership_points = aa_points;
+			target->GetPP().group_leadership_exp = 0;
+		} else if (is_raid) {
+			group_raid_string = "Raid ";
+			target->GetPP().raid_leadership_points = aa_points;
+			target->GetPP().raid_leadership_exp = 0;
+		}
+		target->SendLeadershipEXPUpdate();
+	}
+
+	std::string aa_message = fmt::format(
+		"{} now {} {} {}AA Point{}.",
+		c == target ? "You" : target->GetCleanName(),
+		c == target ? "have" : "has",
+		aa_points,
+		group_raid_string,
+		aa_points != 1 ? "s" : ""
+
+	);
+	c->Message(
+		Chat::White,
+		aa_message.c_str()
+	);
 }
 
 void command_setcrystals(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
+	}
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	Client *target = c;
+	if(c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 100000)
-		c->Message(Chat::White, "You must have a number greater than 0 for crystals and no more than 100000.");
-	else if(!strcasecmp(sep->arg[1], "radiant"))
-	{
-		t->SetRadiantCrystals(atoi(sep->arg[2]));
+	std::string crystal_type = str_tolower(sep->arg[1]);
+	uint32 crystal_amount = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
+	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
+	if (!is_ebon && !is_radiant) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
 	}
-	else if(!strcasecmp(sep->arg[1], "ebon"))
-	{
-		t->SetEbonCrystals(atoi(sep->arg[2]));
+
+	uint32 crystal_item_id = (
+		is_ebon ?
+		RuleI(Zone, EbonCrystalItemID) :
+		RuleI(Zone, RadiantCrystalItemID)
+	);
+
+	auto crystal_link = database.CreateItemLink(crystal_item_id);
+	if (is_radiant) {
+		target->SetRadiantCrystals(crystal_amount);
+	} else {
+		target->SetEbonCrystals(crystal_amount);
 	}
-	else
-	{
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} now {} {} {}.",
+			c == target ? "You" : target->GetCleanName(),
+			c == target ? "have" : "has",
+			crystal_amount,
+			crystal_link
+		).c_str()
+	);
 }
 
 void command_stun(Client *c, const Seperator *sep)
 {
-	Mob *t=c->CastToMob();
-	uint32 duration;
-
-	if(sep->arg[1][0])
-	{
-		duration = atoi(sep->arg[1]);
-		if(c->GetTarget())
-			t=c->GetTarget();
-		if(t->IsClient())
-			t->CastToClient()->Stun(duration);
-		else
-			t->CastToNPC()->Stun(duration);
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #stun [Duration]");
+		return;
 	}
-	else
-		c->Message(Chat::White, "Usage: #stun [duration]");
+
+	Mob* target = c;
+	int duration = static_cast<int>(std::min(std::stoll(sep->arg[1]), (long long) 2000000000));
+	
+	if (duration < 0) {
+		duration = 0;
+	}
+
+	if (c->GetTarget()) {
+		target = c->GetTarget();
+		if (target->IsClient()) {
+			target->CastToClient()->Stun(duration);
+		} else if (target->IsNPC()) {
+			target->CastToNPC()->Stun(duration);
+		}
+	} else {
+		c->Stun(duration);
+	}
+
+	std::string stun_message = (
+		duration ?
+		fmt::format(
+			"You stunned {} for {}.",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			ConvertSecondsToTime(duration)
+		) :
+		fmt::format(
+			"You unstunned {}.",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			)
+		)
+	);
+	c->Message(
+		Chat::White,
+		stun_message.c_str()
+	);
 }
 
 
@@ -13882,58 +14061,64 @@ void command_showspellslist(Client *c, const Seperator *sep)
 
 void command_raidloot(Client *c, const Seperator *sep)
 {
-	if(!sep->arg[1][0]) {
-		c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
 		return;
 	}
 
-	Raid *r = c->GetRaid();
-	if(r)
-	{
-		for(int x = 0; x < 72; ++x)
-		{
-			if(r->members[x].member == c)
-			{
-				if(r->members[x].IsRaidLeader == 0)
-				{
-					c->Message(Chat::White, "You must be the raid leader to use this command.");
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
+	auto client_raid = c->GetRaid();
+	if (!client_raid) {
+		c->Message(Chat::White, "You must be in a Raid to use this command.");
+		return;
+	}
 
-		if(strcasecmp(sep->arg[1], "LEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 1");
-			r->ChangeLootType(1);
-		}
-		else if(strcasecmp(sep->arg[1], "GROUPLEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 2");
-			r->ChangeLootType(2);
-		}
-		else if(strcasecmp(sep->arg[1], "SELECTED") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 3");
-			r->ChangeLootType(3);
-		}
-		else if(strcasecmp(sep->arg[1], "ALL") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 4");
-			r->ChangeLootType(4);
-		}
-		else
-		{
-			c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
-		}
+	if (!client_raid->IsLeader(c)) {
+		c->Message(Chat::White, "You must be the Raid Leader to use this command.");
+		return;
 	}
-	else
-	{
-		c->Message(Chat::White, "You must be in a raid to use that command.");
+
+	std::string raid_loot_type = str_tolower(sep->arg[1]);
+	bool is_all = raid_loot_type.find("all") != std::string::npos;
+	bool is_group_leader = raid_loot_type.find("groupleader") != std::string::npos;
+	bool is_raid_leader = raid_loot_type.find("raidleader") != std::string::npos;
+	bool is_selected = raid_loot_type.find("selected") != std::string::npos;
+	if (
+		!is_all &&
+		!is_group_leader &&
+		!is_raid_leader &&
+		!is_selected
+	) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
+		return;
 	}
+
+	std::map<uint32, std::string> loot_types = {
+		{ RaidLootTypes::All, "All" },
+		{ RaidLootTypes::GroupLeader, "GroupLeader" },
+		{ RaidLootTypes::RaidLeader, "RaidLeader" },
+		{ RaidLootTypes::Selected, "Selected" }
+	};
+	
+	uint32 loot_type;
+	if (is_all) {
+		loot_type = RaidLootTypes::All;
+	} else if (is_group_leader) {
+		loot_type = RaidLootTypes::GroupLeader;
+	} else if (is_raid_leader) {
+		loot_type = RaidLootTypes::RaidLeader;
+	} else if (is_selected) {
+		loot_type = RaidLootTypes::Selected;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Loot type changed to {} ({}).",
+			loot_types[loot_type],
+			loot_type
+		).c_str()
+	);
 }
 
 void command_emoteview(Client *c, const Seperator *sep)
