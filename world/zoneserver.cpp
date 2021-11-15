@@ -438,7 +438,16 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						safe_delete(pack);
 					}))) && (!scm->noreply))
 					{
-						zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "%s is not online at this time.", scm->to);
+						zoneserver_list.SendEmoteMessage(
+							scm->from,
+							0,
+							EQ::constants::AccountStatus::Player,
+							Chat::White,
+							fmt::format(
+								"{} is not online at this time.",
+								scm->to
+							).c_str()
+						);
 					}
 				}
 				break;
@@ -446,7 +455,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
 			if (cle == 0 || cle->Online() < CLE_Status::Zoning ||
-				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < 80))) {
+				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < EQ::constants::AccountStatus::QuestTroupe))) {
 				if (!scm->noreply) {
 					ClientListEntry* sender = client_list.FindCharacter(scm->from);
 					if (!sender || !sender->Server())
@@ -491,7 +500,17 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			}
 			else if (cle->Server() == 0) {
 				if (!scm->noreply)
-					zoneserver_list.SendEmoteMessage(scm->from, 0, 0, 0, "You told %s, '%s is not contactable at this time'", scm->to, scm->to);
+					zoneserver_list.SendEmoteMessage(
+						scm->from,
+						0,
+						EQ::constants::AccountStatus::Player,
+						Chat::White,
+						fmt::format(
+							"You told {}, '{} is not contactable at this time'",
+							scm->to,
+							scm->to
+						).c_str()
+					);
 			}
 			else
 				cle->Server()->SendPacket(pack);
@@ -518,29 +537,36 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	}
 	case ServerOP_EmoteMessage: {
 		ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*)pack->pBuffer;
-		zoneserver_list.SendEmoteMessageRaw(sem->to, sem->guilddbid, sem->minstatus, sem->type, sem->message);
+		zoneserver_list.SendEmoteMessageRaw(
+			sem->to,
+			sem->guilddbid,
+			sem->minstatus,
+			sem->type,
+			sem->message
+		);
 		break;
 	}
 	case ServerOP_VoiceMacro: {
-
 		ServerVoiceMacro_Struct* svm = (ServerVoiceMacro_Struct*)pack->pBuffer;
-
 		if (svm->Type == VoiceMacroTell) {
-
 			ClientListEntry* cle = client_list.FindCharacter(svm->To);
-
 			if (!cle || (cle->Online() < CLE_Status::Zoning) || !cle->Server()) {
-
-				zoneserver_list.SendEmoteMessage(svm->From, 0, 0, 0, "'%s is not online at this time'", svm->To);
-
+				zoneserver_list.SendEmoteMessage(
+					svm->From,
+					0,
+					EQ::constants::AccountStatus::Player,
+					Chat::White,
+					fmt::format(
+						"'{} is not online at this time'",
+						svm->To
+					).c_str()
+				);
 				break;
 			}
-
 			cle->Server()->SendPacket(pack);
-		}
-		else
+		} else {
 			zoneserver_list.SendPacket(pack);
-
+		}
 		break;
 	}
 
@@ -656,17 +682,31 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 	case ServerOP_ZoneShutdown: {
 		ServerZoneStateChange_struct* s = (ServerZoneStateChange_struct *)pack->pBuffer;
 		ZoneServer* zs = 0;
-		if (s->ZoneServerID != 0)
+		if (s->ZoneServerID != 0) {
 			zs = zoneserver_list.FindByID(s->ZoneServerID);
-		else if (s->zoneid != 0)
+		} else if (s->zoneid != 0) {
 			zs = zoneserver_list.FindByName(ZoneName(s->zoneid));
-		else
-			zoneserver_list.SendEmoteMessage(s->adminname, 0, 0, 0, "Error: SOP_ZoneShutdown: neither ID nor name specified");
+		} else {
+			zoneserver_list.SendEmoteMessage(
+				s->adminname,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::White,
+				"Error: SOP_ZoneShutdown: neither ID nor name specified"
+			);
+		}
 
-		if (zs == 0)
-			zoneserver_list.SendEmoteMessage(s->adminname, 0, 0, 0, "Error: SOP_ZoneShutdown: zoneserver not found");
-		else
+		if (!zs) {
+			zoneserver_list.SendEmoteMessage(
+				s->adminname,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::White,
+				"Error: SOP_ZoneShutdown: zoneserver not found"
+			);
+		} else {
 			zs->SendPacket(pack);
+		}
 		break;
 	}
 	case ServerOP_ZoneBootup: {
@@ -717,7 +757,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id) {
 			LogInfo("Processing ZTZ for egress from zone for client [{}]", ztz->name);
 
-			if (ztz->admin < 80 && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
+			if (ztz->admin < EQ::constants::AccountStatus::QuestTroupe && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
 				ztz->response = 0;
 				SendPacket(pack);
 				break;
@@ -909,15 +949,43 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		ServerGMGoto_Struct* gmg = (ServerGMGoto_Struct*)pack->pBuffer;
 		ClientListEntry* cle = client_list.FindCharacter(gmg->gotoname);
 		if (cle != 0) {
-			if (cle->Server() == 0)
-				this->SendEmoteMessage(gmg->myname, 0, 0, 13, "Error: Cannot identify %s's zoneserver.", gmg->gotoname);
-			else if (cle->Anon() == 1 && cle->Admin() > gmg->admin) // no snooping for anon GMs
-				this->SendEmoteMessage(gmg->myname, 0, 0, 13, "Error: %s not found", gmg->gotoname);
-			else
+			if (!cle->Server()) {
+				SendEmoteMessage(
+					gmg->myname,
+					0,
+					EQ::constants::AccountStatus::Player,
+					Chat::Red,
+					fmt::format(
+						"Error: Cannot identify {}'s zoneserver.",
+						gmg->gotoname
+					).c_str()
+				);
+			} else if (cle->Anon() == 1 && cle->Admin() > gmg->admin) { // no snooping for anon GMs
+				SendEmoteMessage(
+					gmg->myname,
+					0,
+					EQ::constants::AccountStatus::Player,
+					Chat::Red,
+					fmt::format(
+						"Error: {} not found.",
+						gmg->gotoname
+					).c_str()
+				);
+			} else {
 				cle->Server()->SendPacket(pack);
+			}
 		}
 		else {
-			this->SendEmoteMessage(gmg->myname, 0, 0, 13, "Error: %s not found", gmg->gotoname);
+			SendEmoteMessage(
+				gmg->myname,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::Red,
+				fmt::format(
+					"Error: {} not found",
+					gmg->gotoname
+				).c_str()
+			);
 		}
 		break;
 	}
@@ -933,16 +1001,28 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			WorldConfig::UnlockWorld();
 		if (loginserverlist.Connected()) {
 			loginserverlist.SendStatus();
-			if (slock->mode >= 1)
-				this->SendEmoteMessage(slock->myname, 0, 0, 13, "World locked");
-			else
-				this->SendEmoteMessage(slock->myname, 0, 0, 13, "World unlocked");
+			SendEmoteMessage(
+				slock->myname,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::Red,
+				fmt::format(
+					"World {}.",
+					slock->mode ? "locked" : "unlocked"
+				).c_str()
+			);
 		}
 		else {
-			if (slock->mode >= 1)
-				this->SendEmoteMessage(slock->myname, 0, 0, 13, "World locked, but login server not connected.");
-			else
-				this->SendEmoteMessage(slock->myname, 0, 0, 13, "World unlocked, but login server not conencted.");
+			SendEmoteMessage(
+				slock->myname,
+				0,
+				EQ::constants::AccountStatus::Player,
+				Chat::Red,
+				fmt::format(
+					"World {}, but login server not connected.",
+					slock->mode ? "locked" : "unlocked"
+				).c_str()
+			);
 		}
 		break;
 	}
@@ -953,7 +1033,6 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 		ServerMotd_Struct* smotd = (ServerMotd_Struct*)pack->pBuffer;
 		database.SetVariable("MOTD", smotd->motd);
-		//this->SendEmoteMessage(smotd->myname, 0, 0, 13, "Updated Motd.");
 		zoneserver_list.SendPacket(pack);
 		break;
 	}
@@ -1404,7 +1483,13 @@ void ZoneServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_
 	va_start(argptr, message);
 	vsnprintf(buffer, sizeof(buffer), message, argptr);
 	va_end(argptr);
-	SendEmoteMessageRaw(to, to_guilddbid, to_minstatus, type, buffer);
+	SendEmoteMessageRaw(
+		to,
+		to_guilddbid,
+		to_minstatus,
+		type,
+		buffer
+	);
 }
 
 void ZoneServer::SendEmoteMessageRaw(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message) {

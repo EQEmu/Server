@@ -205,41 +205,45 @@ void Trade::LogTrade()
 				item_count++;
 		}
 
-		if (((this->cp + this->sp + this->gp + this->pp)>0) || (item_count>0))
+		if ((cp + sp + gp + pp) || item_count) {
 			admin_level = trader->Admin();
-		else
-			admin_level = 999;
+		} else {
+			admin_level = (EQ::constants::AccountStatus::Max + 1);
+		}
 
 		if (zone->tradevar == 7) {
 			logtrade = true;
-		}
-		else if ((admin_level>=10) && (admin_level<20)) {
-			if ((zone->tradevar<8) && (zone->tradevar>5))
+		} else if (
+			admin_level >= EQ::constants::AccountStatus::Steward &&
+			admin_level < EQ::constants::AccountStatus::ApprenticeGuide
+		) {
+			if (zone->tradevar < 8 && zone->tradevar > 5) {
 				logtrade = true;
-		}
-		else if (admin_level<=20) {
-			if ((zone->tradevar<8) && (zone->tradevar>4))
+			}
+		} else if (admin_level <= EQ::constants::AccountStatus::ApprenticeGuide) {
+			if (zone->tradevar < 8 && zone->tradevar > 4) {
 				logtrade = true;
-		}
-		else if (admin_level<=80) {
-			if ((zone->tradevar<8) && (zone->tradevar>3))
+			}
+		} else if (admin_level <= EQ::constants::AccountStatus::QuestTroupe) {
+			if (zone->tradevar < 8 && zone->tradevar > 3) {
 				logtrade = true;
-		}
-		else if (admin_level<=100){
-			if ((zone->tradevar<9) && (zone->tradevar>2))
+			}
+		} else if (admin_level <= EQ::constants::AccountStatus::GMAdmin) {
+			if (zone->tradevar < 9 && zone->tradevar > 2) {
 				logtrade = true;
-		}
-		else if (admin_level<=150){
-			if (((zone->tradevar<8) && (zone->tradevar>1)) || (zone->tradevar==9))
+			}
+		} else if (admin_level <= EQ::constants::AccountStatus::GMLeadAdmin) {
+			if ((zone->tradevar < 8 && zone->tradevar > 1) || zone->tradevar == 9) {
 				logtrade = true;
-		}
-		else if (admin_level<=255){
-			if ((zone->tradevar<8) && (zone->tradevar>0))
+			}
+		} else if (admin_level <= EQ::constants::AccountStatus::Max){
+			if (zone->tradevar < 8 && zone->tradevar > 0) {
 				logtrade = true;
+			}
 		}
 	}
 
-	if (logtrade == true) {
+	if (logtrade) {
 		char logtext[1000] = {0};
 		uint32 cash = 0;
 		bool comma = false;

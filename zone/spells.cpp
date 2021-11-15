@@ -2183,7 +2183,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	(
 		this->IsClient() &&
 		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) &&	// load
-		CastToClient()->Admin() < 80
+		CastToClient()->Admin() < EQ::constants::AccountStatus::QuestTroupe
 	)
 	{
 		if

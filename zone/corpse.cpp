@@ -977,7 +977,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// loot_request_type is scoped to class Corpse and reset on a per-loot session basis
 	if (client->GetGM()) {
-		if (client->Admin() >= 100)
+		if (client->Admin() >= EQ::constants::AccountStatus::GMAdmin)
 			loot_request_type = LootRequestType::GMAllowed;
 		else
 			loot_request_type = LootRequestType::GMPeek;

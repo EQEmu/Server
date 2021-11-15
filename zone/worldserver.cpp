@@ -161,13 +161,22 @@ void WorldServer::OnConnected() {
 	safe_delete(pack);
 
 	if (is_zone_loaded) {
-		this->SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
+		SetZoneData(zone->GetZoneID(), zone->GetInstanceID());
 		entity_list.UpdateWho(true);
-		this->SendEmoteMessage(0, 0, 15, "Zone connect: %s", zone->GetLongName());
+		SendEmoteMessage(
+			0,
+			0,
+			Chat::Yellow,
+			fmt::format(
+				"Zone Connected | {} ({})",
+				zone->GetLongName(),
+				zone->GetZoneID()
+			).c_str()
+		);
 		zone->GetTimeSync();
 	}
 	else {
-		this->SetZoneData(0);
+		SetZoneData(0);
 	}
 
 	pack = new ServerPacket(ServerOP_LSZoneBoot, sizeof(ZoneBoot_Struct));
@@ -449,7 +458,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerEmoteMessage_Struct* sem = (ServerEmoteMessage_Struct*)pack->pBuffer;
 		if (sem->to[0] != 0) {
 			if (strcasecmp(sem->to, zone->GetShortName()) == 0)
-				entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, (char*)sem->message);
+				entity_list.MessageStatus(
+					sem->guilddbid,
+					sem->minstatus,
+					sem->type,
+					(char*)sem->message
+				);
 			else {
 				Client* client = entity_list.GetClientByName(sem->to);
 				if (client) {
@@ -465,11 +479,22 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		else {
 			char* newmessage = 0;
-			if (strstr(sem->message, "^") == 0)
-				entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, sem->message);
-			else {
-				for (newmessage = strtok((char*)sem->message, "^"); newmessage != nullptr; newmessage = strtok(nullptr, "^"))
-					entity_list.MessageStatus(sem->guilddbid, sem->minstatus, sem->type, newmessage);
+			if (strstr(sem->message, "^") == 0) {
+				entity_list.MessageStatus(
+					sem->guilddbid,
+					sem->minstatus,
+					sem->type,
+					sem->message
+				);
+			} else {
+				for (newmessage = strtok((char*)sem->message, "^"); newmessage != nullptr; newmessage = strtok(nullptr, "^")) {
+					entity_list.MessageStatus(
+						sem->guilddbid,
+						sem->minstatus,
+						sem->type,
+						newmessage
+					);
+				}
 			}
 		}
 		break;
@@ -502,7 +527,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			SetZoneData(0);
 		}
 		else {
-			SendEmoteMessage(0, 0, 15, "Zone shutdown: %s", zone->GetLongName());
+			SendEmoteMessage(
+				0,
+				0,
+				Chat::Yellow,
+				fmt::format(
+					"Zone Shutdown | {} ({})",
+					zone->GetLongName(),
+					zone->GetZoneID()
+				).c_str()
+			);
 
 			ServerZoneStateChange_struct* zst = (ServerZoneStateChange_struct *)pack->pBuffer;
 			std::cout << "Zone shutdown by " << zst->adminname << std::endl;
@@ -523,7 +557,16 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 				zone->StartShutdownTimer(AUTHENTICATION_TIMEOUT * 1000);
 			}
 			else {
-				SendEmoteMessage(zst->adminname, 0, 0, "Zone bootup failed: Already running '%s'", zone->GetShortName());
+				SendEmoteMessage(
+					zst->adminname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Zone Bootup Failed | {} ({}) Already running",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					).c_str()
+				);
 			}
 			break;
 		}
@@ -590,7 +633,19 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			else if (client->GetAnon() == 1 && client->Admin() > szp->adminrank)
 				break;
 			else {
-				SendEmoteMessage(szp->adminname, 0, 0, "Summoning %s to %s %1.1f, %1.1f, %1.1f", szp->name, szp->zone, szp->x_pos, szp->y_pos, szp->z_pos);
+				SendEmoteMessage(
+					szp->adminname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Summoning {} to {} at {:.2f}, {:.2f}, {:.2f}",
+						szp->name,
+						szp->zone,
+						szp->x_pos,
+						szp->y_pos,
+						szp->z_pos
+					).c_str()
+				);
 			}
 			if (!szp->instance_id) {
 				client->MovePC(ZoneID(szp->zone), szp->instance_id, szp->x_pos, szp->y_pos, szp->z_pos, client->GetHeading(), szp->ignorerestrictions, GMSummon);
@@ -615,13 +670,33 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (client) {
 			if (skp->adminrank >= client->Admin()) {
 				client->WorldKick();
-				if (is_zone_loaded)
-					SendEmoteMessage(skp->adminname, 0, 0, "Remote Kick: %s booted in zone %s.", skp->name, zone->GetShortName());
-				else
-					SendEmoteMessage(skp->adminname, 0, 0, "Remote Kick: %s booted.", skp->name);
+				SendEmoteMessage(
+					skp->adminname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Remote Kick | {} booted{}",
+						skp->name,
+						is_zone_loaded ?
+						fmt::format(
+							"in {} ({})",
+							zone->GetLongName(),
+							zone->GetZoneID()
+						) :
+						""
+					).c_str()
+				);
+			} else if (client->GetAnon() != 1) {
+				SendEmoteMessage(
+					skp->adminname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Remote Kick | Your Status Level is not high enough to kick {}.",
+						skp->name
+					).c_str()
+				);
 			}
-			else if (client->GetAnon() != 1)
-				SendEmoteMessage(skp->adminname, 0, 0, "Remote Kick: Your avatar level is not high enough to kick %s", skp->name);
 		}
 		break;
 	}
@@ -631,13 +706,33 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (client) {
 			if (skp->admin >= client->Admin()) {
 				client->GMKill();
-				if (is_zone_loaded)
-					SendEmoteMessage(skp->gmname, 0, 0, "Remote Kill: %s killed in zone %s.", skp->target, zone->GetShortName());
-				else
-					SendEmoteMessage(skp->gmname, 0, 0, "Remote Kill: %s killed.", skp->target);
+				SendEmoteMessage(
+					skp->gmname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Remote Kill | {} killed{}",
+						skp->target,
+						is_zone_loaded ?
+						fmt::format(
+							"in {} ({})",
+							zone->GetLongName(),
+							zone->GetZoneID()
+						) :
+						""
+					).c_str()
+				);
+			} else if (client->GetAnon() != 1) {
+				SendEmoteMessage(
+					skp->gmname,
+					0,
+					Chat::White,
+					fmt::format(
+						"Remote Kill | Your Status Level is not high enough to kill {}",
+						skp->target
+					).c_str()
+				);
 			}
-			else if (client->GetAnon() != 1)
-				SendEmoteMessage(skp->gmname, 0, 0, "Remote Kill: Your avatar level is not high enough to kill %s", skp->target);
 		}
 		break;
 	}
@@ -674,7 +769,20 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		ServerGMGoto_Struct* gmg = (ServerGMGoto_Struct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(gmg->gotoname);
 		if (client) {
-			SendEmoteMessage(gmg->myname, 0, 13, "Summoning you to: %s @ %s, %1.1f, %1.1f, %1.1f", client->GetName(), zone->GetShortName(), client->GetX(), client->GetY(), client->GetZ());
+			SendEmoteMessage(
+				gmg->myname,
+				0,
+				Chat::Red,
+				fmt::format(
+					"Summoning you to {} ({}) in {} at {:.2f}, {:.2f}, {:.2f}",
+					client->GetCleanName(),
+					zone->GetLongName(),
+					zone->GetZoneID(),
+					client->GetX(),
+					client->GetY(),
+					client->GetZ()
+				).c_str()
+			);
 			auto outpack = new ServerPacket(ServerOP_ZonePlayer, sizeof(ServerZonePlayer_Struct));
 			ServerZonePlayer_Struct* szp = (ServerZonePlayer_Struct*)outpack->pBuffer;
 			strcpy(szp->adminname, gmg->myname);
@@ -688,7 +796,15 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			safe_delete(outpack);
 		}
 		else {
-			SendEmoteMessage(gmg->myname, 0, 13, "Error: %s not found", gmg->gotoname);
+			SendEmoteMessage(
+				gmg->myname,
+				0,
+				Chat::Red,
+				fmt::format(
+					"Error: {} not found.",
+					gmg->gotoname
+				).c_str()
+			);
 		}
 		break;
 	}
@@ -710,19 +826,17 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		ServerUptime_Struct* sus = (ServerUptime_Struct*)pack->pBuffer;
 		uint32 ms = Timer::GetCurrentTime();
-		uint32 d = ms / 86400000;
-		ms -= d * 86400000;
-		uint32 h = ms / 3600000;
-		ms -= h * 3600000;
-		uint32 m = ms / 60000;
-		ms -= m * 60000;
-		uint32 s = ms / 1000;
-		if (d)
-			this->SendEmoteMessage(sus->adminname, 0, 0, "Zone #%i Uptime: %02id %02ih %02im %02is", sus->zoneserverid, d, h, m, s);
-		else if (h)
-			this->SendEmoteMessage(sus->adminname, 0, 0, "Zone #%i Uptime: %02ih %02im %02is", sus->zoneserverid, h, m, s);
-		else
-			this->SendEmoteMessage(sus->adminname, 0, 0, "Zone #%i Uptime: %02im %02is", sus->zoneserverid, m, s);
+		std::string time_string = ConvertSecondsToTime(ms);
+		SendEmoteMessage(
+			sus->adminname,
+			0,
+			Chat::White,
+			fmt::format(
+				"Zoneserver {} | Uptime: {}",
+				sus->zoneserverid,
+				time_string
+			).c_str()
+		);
 	}
 	case ServerOP_Petition: {
 		std::cout << "Got Server Requested Petition List Refresh" << std::endl;
@@ -856,9 +970,19 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 	case ServerOP_Revoke: {
 		RevokeStruct* rev = (RevokeStruct*)pack->pBuffer;
 		Client* client = entity_list.GetClientByName(rev->name);
-		if (client)
-		{
-			SendEmoteMessage(rev->adminname, 0, 0, "%s: %srevoking %s", zone->GetShortName(), rev->toggle ? "" : "un", client->GetName());
+		if (client) {
+			SendEmoteMessage(
+				rev->adminname,
+				0,
+				Chat::White,
+				fmt::format(
+					"Zone {} ({}) | {} {}.",
+					zone->GetLongName(),
+					zone->GetZoneID(),
+					rev->toggle ? "Revoking" : "Unrevoking",
+					client->GetCleanName()
+				).c_str()
+			);
 			client->SetRevoked(rev->toggle);
 		}
 		break;
@@ -1826,12 +1950,30 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		break;
 	}
 	case ServerOP_ReloadRules: {
-		worldserver.SendEmoteMessage(
-			0, 0, 100, 15,
-			"Rules reloaded for Zone: '%s' Instance ID: %u",
-			(zone ? zone->GetLongName() : StringFormat("Null zone pointer [pid]:[%i]", getpid()).c_str()),
-			(zone ? zone->GetInstanceID() : 0xFFFFFFFFF)
-		);
+		if (zone) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				EQ::constants::AccountStatus::GMAdmin,
+				Chat::Yellow,
+				fmt::format(
+					"Rules reloaded for {}.",
+					fmt::format(
+						"{} ({})",
+						zone->GetLongName(),
+						zone->GetZoneID()
+					),
+					(
+						zone->GetInstanceID() ?
+						fmt::format(
+							"Instance ID: {}",
+							zone->GetInstanceID()
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
 		RuleManager::Instance()->LoadRules(&database, RuleManager::Instance()->GetActiveRuleset(), true);
 		break;
 	}
@@ -2716,7 +2858,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWDW->min_status;
 		uint8 max_status = WWDW->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 				DialogueWindow::Render(client.second, message);
 			}
 		}
@@ -2733,27 +2875,27 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWLDoNUpdateType_AddLoss:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, false);
 					}
 					break;
 				case WWLDoNUpdateType_AddPoints:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->UpdateLDoNPoints(theme_id, points);
 					}
 					break;
 				case WWLDoNUpdateType_AddWin:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, true);
 					}
 					break;
 				case WWLDoNUpdateType_RemoveLoss:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, false, true);
 					}
 					break;
 				case WWLDoNUpdateType_RemoveWin:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, true, true);
 					}
 					break;
@@ -2773,7 +2915,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 				client.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 			}
 		}
@@ -2787,7 +2929,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 				client.second->Message(type, message);
 			}
 		}
@@ -2804,12 +2946,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWMoveUpdateType_MoveZone:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->MoveZone(zone_short_name);
 					}
 					break;
 				case WWMoveUpdateType_MoveZoneInstance:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 						client.second->MoveZoneInstance(instance_id);
 					}
 					break;
@@ -2827,7 +2969,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWSEV->max_status;
 		if (update_type == WWSetEntityVariableUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 					client.second->SetEntityVariable(variable_name, variable_value);
 				}
 			}
@@ -2847,7 +2989,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSignalUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 					client.second->Signal(signal);
 				}
 			}
@@ -2867,13 +3009,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSpellUpdateType_Cast) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 					client.second->SpellFinished(spell_id, client.second);
 				}
 			}
 		} else if (update_type == WWSpellUpdateType_Remove) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 					client.second->BuffFadeBySpellID(spell_id);
 				}
 			}
@@ -2891,7 +3033,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWTU->min_status;
 		uint8 max_status = WWTU->max_status;		
 		for (auto &client : entity_list.GetClientList()) {				
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == 0)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
 				switch (update_type) {
 					case WWTaskUpdateType_ActivityReset:
 						client.second->ResetTaskActivity(task_identifier, task_subidentifier);
@@ -2959,11 +3101,28 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		if (request_zone_short_name == local_zone_short_name || can_reload_global_script) {
 			zone->SetQuestHotReloadQueued(true);
 		} else if (request_zone_short_name == "all") {
-			std::string reload_quest_saylink = EQ::SayLinkEngine::GenerateQuestSaylink("#reloadquest", false, "Locally");
-			std::string reload_world_saylink = EQ::SayLinkEngine::GenerateQuestSaylink("#reloadworld", false, "Globally");
-			worldserver.SendEmoteMessage(0, 0, 20, 15, "A quest, plugin, or global script has changed reload quests [%s] [%s].", reload_quest_saylink.c_str(), reload_world_saylink.c_str());
+			std::string reload_quest_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+				"#reloadquest",
+				false,
+				"Locally"
+			);
+			std::string reload_world_saylink = EQ::SayLinkEngine::GenerateQuestSaylink(
+				"#reloadworld",
+				false,
+				"Globally"
+			);
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				EQ::constants::AccountStatus::ApprenticeGuide,
+				Chat::Yellow,
+				fmt::format(
+					"A quest, plugin, or global script has changed. Reload: [{}] [{}]",
+					reload_quest_saylink,
+					reload_world_saylink
+				).c_str()
+			);
 		}
-
 		break;
 	}
 	case ServerOP_ChangeSharedMem:
@@ -3075,7 +3234,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 
 	if (from == 0) {
 		strcpy(scm->from, "ZServer");
-		scm->fromadmin = 0;
+		scm->fromadmin = EQ::constants::AccountStatus::Player;
 	}
 	else {
 		strcpy(scm->from, from->GetName());
@@ -3110,7 +3269,13 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 t
 	vsnprintf(buffer, sizeof(buffer) - 1, message, argptr);
 	va_end(argptr);
 
-	return SendEmoteMessage(to, to_guilddbid, 0, type, buffer);
+	return SendEmoteMessage(
+		to,
+		to_guilddbid,
+		EQ::constants::AccountStatus::Player,
+		type,
+		buffer
+	);
 }
 
 bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to_minstatus, uint32 type, const char* message, ...) {
@@ -3122,7 +3287,12 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, int16 to
 	va_end(argptr);
 
 	if (!Connected() && to == 0) {
-		entity_list.MessageStatus(to_guilddbid, to_minstatus, type, buffer);
+		entity_list.MessageStatus(
+			to_guilddbid,
+			to_minstatus,
+			type,
+			buffer
+		);
 		return false;
 	}
 
