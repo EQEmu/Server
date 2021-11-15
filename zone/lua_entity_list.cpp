@@ -217,7 +217,12 @@ void Lua_EntityList::Message(uint32 guild_dbid, uint32 type, const char *message
 
 void Lua_EntityList::MessageStatus(uint32 guild_dbid, int min_status, uint32 type, const char *message) {
 	Lua_Safe_Call_Void();
-	self->MessageStatus(guild_dbid, min_status, type, message);
+	self->MessageStatus(
+		guild_dbid,
+		min_status,
+		type,
+		message
+	);
 }
 
 void Lua_EntityList::MessageClose(Lua_Mob sender, bool skip_sender, float dist, uint32 type, const char *message) {

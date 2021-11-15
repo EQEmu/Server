@@ -45,7 +45,13 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 			if (ValidateEventReadyToActivate(e)) {
 				if (e.event_type == ServerEvents::EVENT_TYPE_BROADCAST) {
 					LogScheduler("Sending broadcast [{}]", e.event_data.c_str());
-					zs_list->SendEmoteMessage(nullptr, 0, 0, 15, e.event_data.c_str());
+					zs_list->SendEmoteMessage(
+						0,
+						0,
+						AccountStatus::Player,
+						Chat::Yellow,
+						e.event_data.c_str()
+					);
 				}
 
 				if (e.event_type == ServerEvents::EVENT_TYPE_RELOAD_WORLD) {

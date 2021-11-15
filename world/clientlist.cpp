@@ -296,7 +296,13 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 				fmt:format_to(out, "{}  CharID: {}  CharName: {}  Zone: {} ({})", newline, cle->CharID(), cle->name(), ZoneName(cle->zone()), cle->zone());
 			if (out.size() >= 3072) {
 				auto output = fmt::to_string(out);
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				connection->SendEmoteMessageRaw(
+					to,
+					0,
+					AccountStatus::Player,
+					Chat::NPCQuestSay,
+					output.c_str()
+				);
 				addnewline = false;
 				out.clear();
 			} else {
@@ -309,7 +315,13 @@ void ClientList::SendCLEList(const int16& admin, const char* to, WorldTCPConnect
 	}
 	fmt::format_to(out, "{}{} CLEs in memory. {} CLEs listed. numplayers = {}.", newline, x, y, numplayers);
 	auto output = fmt::to_string(out);
-	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+	connection->SendEmoteMessageRaw(
+		to,
+		0,
+		AccountStatus::Player,
+		Chat::NPCQuestSay,
+		output.c_str()
+	);
 }
 
 
@@ -558,7 +570,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	(countcle->Online() >= CLE_Status::Zoning) &&
 	(!countcle->GetGM() || countcle->Anon() != 1 || admin >= countcle->Admin()) &&
 	(whom == 0 || (
-		((countcle->Admin() >= 80 && countcle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+		((countcle->Admin() >= AccountStatus::QuestTroupe && countcle->GetGM()) || whom->gmlookup == 0xFFFF) &&
 		(whom->lvllow == 0xFFFF || (countcle->level() >= whom->lvllow && countcle->level() <= whom->lvlhigh && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
 		(whom->wclass == 0xFFFF || (countcle->class_() == whom->wclass && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
 		(whom->wrace == 0xFFFF || (countcle->race() == whom->wrace && (countcle->Anon()==0 || admin > countcle->Admin()))) &&
@@ -566,18 +578,18 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 			strncasecmp(countcle->name(),whom->whom, whomlen) == 0 ||
 			(strncasecmp(guild_mgr.GetGuildName(countcle->GuildID()), whom->whom, whomlen) == 0) ||
-			(admin >= 100 && strncasecmp(countcle->AccountName(), whom->whom, whomlen) == 0)
+			(admin >= AccountStatus::GMAdmin && strncasecmp(countcle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
 ) {
-			if((countcle->Anon()>0 && admin>=countcle->Admin() && admin>0) || countcle->Anon()==0 ){
+			if((countcle->Anon()>0 && admin >= countcle->Admin() && admin > AccountStatus::Player) || countcle->Anon()==0 ){
 				totalusers++;
-				if(totalusers<=20 || admin>=100)
+				if(totalusers<=20 || admin >= AccountStatus::GMAdmin)
 					totallength=totallength+strlen(countcle->name())+strlen(countcle->AccountName())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
 			}
 			else if((countcle->Anon()>0 && admin<=countcle->Admin()) || (countcle->Anon()==0 && !countcle->GetGM())) {
 				totalusers++;
-				if(totalusers<=20 || admin>=100)
+				if(totalusers<=20 || admin >= AccountStatus::GMAdmin)
 					totallength=totallength+strlen(countcle->name())+strlen(guild_mgr.GetGuildName(countcle->GuildID()))+5;
 			}
 		}
@@ -589,7 +601,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	uint8 unknown35=0x0A;
 	uint32 unknown36=0;
 	uint32 playersinzonestring=5028;
-	if(totalusers>20 && admin<100){
+	if(totalusers>20 && admin<AccountStatus::GMAdmin){
 		totalusers=20;
 		playersinzonestring=5033;
 	}
@@ -638,7 +650,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	(cle->Online() >= CLE_Status::Zoning) &&
 	(!cle->GetGM() || cle->Anon() != 1 || admin >= cle->Admin()) &&
 	(whom == 0 || (
-		((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+		((cle->Admin() >= AccountStatus::QuestTroupe && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
 		(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh && (cle->Anon()==0 || admin>cle->Admin()))) &&
 		(whom->wclass == 0xFFFF || (cle->class_() == whom->wclass && (cle->Anon()==0 || admin>cle->Admin()))) &&
 		(whom->wrace == 0xFFFF || (cle->race() == whom->wrace && (cle->Anon()==0 || admin>cle->Admin()))) &&
@@ -646,60 +658,60 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 			(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 			strncasecmp(cle->name(),whom->whom, whomlen) == 0 ||
 			(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
-			(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
+			(admin >= AccountStatus::GMAdmin && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 		))
 	))
 ) {
 			line[0] = 0;
-			uint32 rankstring=0xFFFFFFFF;
-				if((cle->Anon()==1 && cle->GetGM() && cle->Admin()>admin) || (idx>=20 && admin<100)){ //hide gms that are anon from lesser gms and normal players, cut off at 20
-					rankstring=0;
+			uint32 rankstring = 0xFFFFFFFF;
+				if((cle->Anon()==1 && cle->GetGM() && cle->Admin()>admin) || (idx>=20 && admin < AccountStatus::GMAdmin)){ //hide gms that are anon from lesser gms and normal players, cut off at 20
+					rankstring = 0;
 					iterator.Advance();
 					continue;
 				} else if (cle->GetGM()) {
-					if (cle->Admin() >=250)
-						rankstring=5021;
-					else if (cle->Admin() >= 200)
-						rankstring=5020;
-					else if (cle->Admin() >= 180)
-						rankstring=5019;
-					else if (cle->Admin() >= 170)
-						rankstring=5018;
-					else if (cle->Admin() >= 160)
-						rankstring=5017;
-					else if (cle->Admin() >= 150)
-						rankstring=5016;
-					else if (cle->Admin() >= 100)
-						rankstring=5015;
-					else if (cle->Admin() >= 95)
-						rankstring=5014;
-					else if (cle->Admin() >= 90)
-						rankstring=5013;
-					else if (cle->Admin() >= 85)
-						rankstring=5012;
-					else if (cle->Admin() >= 81)
-						rankstring=5011;
-					else if (cle->Admin() >= 80)
-						rankstring=5010;
-					else if (cle->Admin() >= 50)
-						rankstring=5009;
-					else if (cle->Admin() >= 20)
-						rankstring=5008;
-					else if (cle->Admin() >= 10)
-						rankstring=5007;
+					if (cle->Admin() >= AccountStatus::GMImpossible)
+						rankstring = 5021;
+					else if (cle->Admin() >= AccountStatus::GMMgmt)
+						rankstring = 5020;
+					else if (cle->Admin() >= AccountStatus::GMCoder)
+						rankstring = 5019;
+					else if (cle->Admin() >= AccountStatus::GMAreas)
+						rankstring = 5018;
+					else if (cle->Admin() >= AccountStatus::QuestMaster)
+						rankstring = 5017;
+					else if (cle->Admin() >= AccountStatus::GMLeadAdmin)
+						rankstring = 5016;
+					else if (cle->Admin() >= AccountStatus::GMAdmin)
+						rankstring = 5015;
+					else if (cle->Admin() >= AccountStatus::GMStaff)
+						rankstring = 5014;
+					else if (cle->Admin() >= AccountStatus::EQSupport)
+						rankstring = 5013;
+					else if (cle->Admin() >= AccountStatus::GMTester)
+						rankstring = 5012;
+					else if (cle->Admin() >= AccountStatus::SeniorGuide)
+						rankstring = 5011;
+					else if (cle->Admin() >= AccountStatus::QuestTroupe)
+						rankstring = 5010;
+					else if (cle->Admin() >= AccountStatus::Guide)
+						rankstring = 5009;
+					else if (cle->Admin() >= AccountStatus::ApprenticeGuide)
+						rankstring = 5008;
+					else if (cle->Admin() >= AccountStatus::Steward)
+						rankstring = 5007;
 				}
 			idx++;
 			char guildbuffer[67]={0};
 			if (cle->GuildID() != GUILD_NONE && cle->GuildID()>0)
 				sprintf(guildbuffer,"<%s>", guild_mgr.GetGuildName(cle->GuildID()));
 			uint32 formatstring=5025;
-			if(cle->Anon()==1 && (admin<cle->Admin() || admin==0))
+			if(cle->Anon()==1 && (admin<cle->Admin() || admin == AccountStatus::Player))
 				formatstring=5024;
-			else if(cle->Anon()==1 && admin>=cle->Admin() && admin>0)
+			else if(cle->Anon()==1 && admin>=cle->Admin() && admin > AccountStatus::Player)
 				formatstring=5022;
-			else if(cle->Anon()==2 && (admin<cle->Admin() || admin==0))
+			else if(cle->Anon()==2 && (admin<cle->Admin() || admin == AccountStatus::Player))
 				formatstring=5023;//display guild
-			else if(cle->Anon()==2 && admin>=cle->Admin() && admin>0)
+			else if(cle->Anon()==2 && admin>=cle->Admin() && admin > AccountStatus::Player)
 				formatstring=5022;//display everything
 
 	//war* wars2 = (war*)pack2->pBuffer;
@@ -711,10 +723,10 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	uint32 zonestring=0xFFFFFFFF;
 	uint32 plzone=0;
 	uint32 unknown80[2];
-	if(cle->Anon()==0 || (admin>=cle->Admin() && admin>0)){
+	if(cle->Anon()==0 || (admin>=cle->Admin() && admin> AccountStatus::Player)){
 		plclass_=cle->class_();
 		pllevel=cle->level();
-		if(admin>=100)
+		if(admin>=AccountStatus::GMAdmin)
 			pidstring=5003;
 		plrace=cle->race();
 		zonestring=5006;
@@ -722,7 +734,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	}
 
 
-	if(admin>=cle->Admin() && admin>0)
+	if(admin>=cle->Admin() && admin > AccountStatus::Player)
 		unknown80[0]=cle->Admin();
 	else
 		unknown80[0]=0xFFFFFFFF;
@@ -735,7 +747,7 @@ void ClientList::SendWhoAll(uint32 fromid,const char* to, int16 admin, Who_All_S
 	strcpy(plname,cle->name());
 
 	char placcount[30]={0};
-	if(admin>=cle->Admin() && admin>0)
+	if(admin>=cle->Admin() && admin > AccountStatus::Player)
 		strcpy(placcount,cle->AccountName());
 
 	memcpy(bufptr,&formatstring, sizeof(uint32));
@@ -1020,7 +1032,7 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 		if (
 			(cle->Online() >= CLE_Status::Zoning)
 			&& (whom == 0 || (
-				((cle->Admin() >= 80 && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
+				((cle->Admin() >= AccountStatus::QuestTroupe && cle->GetGM()) || whom->gmlookup == 0xFFFF) &&
 				(whom->lvllow == 0xFFFF || (cle->level() >= whom->lvllow && cle->level() <= whom->lvlhigh)) &&
 				(whom->wclass == 0xFFFF || cle->class_() == whom->wclass) &&
 				(whom->wrace == 0xFFFF || cle->race() == whom->wrace) &&
@@ -1028,41 +1040,41 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 					(tmpZone != 0 && strncasecmp(tmpZone, whom->whom, whomlen) == 0) ||
 					strncasecmp(cle->name(), whom->whom, whomlen) == 0 ||
 					(strncasecmp(guild_mgr.GetGuildName(cle->GuildID()), whom->whom, whomlen) == 0) ||
-					(admin >= 100 && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
+					(admin >= AccountStatus::GMAdmin && strncasecmp(cle->AccountName(), whom->whom, whomlen) == 0)
 					))
 				))
 			) {
 			line[0] = 0;
 			// MYRA - use new (5.x) Status labels in who for telnet connection
-			if (cle->Admin() >= 250)
+			if (cle->Admin() >= AccountStatus::GMImpossible)
 				strcpy(tmpgm, "* GM-Impossible * ");
-			else if (cle->Admin() >= 200)
+			else if (cle->Admin() >= AccountStatus::GMMgmt)
 				strcpy(tmpgm, "* GM-Mgmt * ");
-			else if (cle->Admin() >= 180)
+			else if (cle->Admin() >= AccountStatus::GMCoder)
 				strcpy(tmpgm, "* GM-Coder * ");
-			else if (cle->Admin() >= 170)
+			else if (cle->Admin() >= AccountStatus::GMAreas)
 				strcpy(tmpgm, "* GM-Areas * ");
-			else if (cle->Admin() >= 160)
+			else if (cle->Admin() >= AccountStatus::QuestMaster)
 				strcpy(tmpgm, "* QuestMaster * ");
-			else if (cle->Admin() >= 150)
+			else if (cle->Admin() >= AccountStatus::GMLeadAdmin)
 				strcpy(tmpgm, "* GM-Lead Admin * ");
-			else if (cle->Admin() >= 100)
+			else if (cle->Admin() >= AccountStatus::GMAdmin)
 				strcpy(tmpgm, "* GM-Admin * ");
-			else if (cle->Admin() >= 95)
+			else if (cle->Admin() >= AccountStatus::GMStaff)
 				strcpy(tmpgm, "* GM-Staff * ");
-			else if (cle->Admin() >= 90)
+			else if (cle->Admin() >= AccountStatus::EQSupport)
 				strcpy(tmpgm, "* EQ Support * ");
-			else if (cle->Admin() >= 85)
+			else if (cle->Admin() >= AccountStatus::GMTester)
 				strcpy(tmpgm, "* GM-Tester * ");
-			else if (cle->Admin() >= 81)
+			else if (cle->Admin() >= AccountStatus::SeniorGuide)
 				strcpy(tmpgm, "* Senior Guide * ");
-			else if (cle->Admin() >= 80)
+			else if (cle->Admin() >= AccountStatus::QuestTroupe)
 				strcpy(tmpgm, "* QuestTroupe * ");
-			else if (cle->Admin() >= 50)
+			else if (cle->Admin() >= AccountStatus::Guide)
 				strcpy(tmpgm, "* Guide * ");
-			else if (cle->Admin() >= 20)
+			else if (cle->Admin() >= AccountStatus::ApprenticeGuide)
 				strcpy(tmpgm, "* Apprentice Guide * ");
-			else if (cle->Admin() >= 10)
+			else if (cle->Admin() >= AccountStatus::Steward)
 				strcpy(tmpgm, "* Steward * ");
 			else
 				tmpgm[0] = 0;
@@ -1079,16 +1091,16 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			else
 				LFG[0] = 0;
 
-			if (admin >= 150 && admin >= cle->Admin()) {
+			if (admin >= AccountStatus::GMLeadAdmin && admin >= cle->Admin()) {
 				sprintf(accinfo, " AccID: %i AccName: %s LSID: %i Status: %i", cle->AccountID(), cle->AccountName(), cle->LSAccountID(), cle->Admin());
 			}
 			else
 				accinfo[0] = 0;
 
 			if (cle->Anon() == 2) { // Roleplay
-				if (admin >= 100 && admin >= cle->Admin())
+				if (admin >= AccountStatus::GMAdmin && admin >= cle->Admin())
 					sprintf(line, "  %s[RolePlay %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
-				else if (cle->Admin() >= 80 && admin < 80 && cle->GetGM()) {
+				else if (cle->Admin() >= AccountStatus::QuestTroupe && admin < AccountStatus::QuestTroupe && cle->GetGM()) {
 					iterator.Advance();
 					continue;
 				}
@@ -1096,9 +1108,9 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 					sprintf(line, "  %s[ANONYMOUS] %s%s%s%s", tmpgm, cle->name(), tmpguild, LFG, accinfo);
 			}
 			else if (cle->Anon() == 1) { // Anon
-				if (admin >= 100 && admin >= cle->Admin())
+				if (admin >= AccountStatus::GMAdmin && admin >= cle->Admin())
 					sprintf(line, "  %s[ANON %i %s] %s (%s)%s zone: %s%s%s", tmpgm, cle->level(), GetClassIDName(cle->class_(), cle->level()), cle->name(), GetRaceIDName(cle->race()), tmpguild, tmpZone, LFG, accinfo);
-				else if (cle->Admin() >= 80 && cle->GetGM()) {
+				else if (cle->Admin() >= AccountStatus::QuestTroupe && cle->GetGM()) {
 					iterator.Advance();
 					continue;
 				}
@@ -1111,7 +1123,13 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 			fmt::format_to(out, line);
 			if (out.size() >= 3584) {
 				auto output = fmt::to_string(out);
-				connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+				connection->SendEmoteMessageRaw(
+					to,
+					0,					
+					AccountStatus::Player,
+					Chat::NPCQuestSay,
+					output.c_str()
+				);
 				out.clear();
 			}
 			else {
@@ -1121,17 +1139,17 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 					fmt::format_to(out, "\n");
 			}
 			x++;
-			if (x >= 20 && admin < 80)
+			if (x >= 20 && admin < AccountStatus::QuestTroupe)
 				break;
 		}
 		iterator.Advance();
 	}
 
-	if (x >= 20 && admin < 80)
+	if (x >= 20 && admin < AccountStatus::QuestTroupe)
 		fmt::format_to(out, "too many results...20 players shown");
 	else
 		fmt::format_to(out, "{} players online", x);
-	if (admin >= 150 && (whom == 0 || whom->gmlookup != 0xFFFF)) {
+	if (admin >= AccountStatus::GMAdmin && (whom == 0 || whom->gmlookup != 0xFFFF)) {
 		if (connection->IsConsole())
 			fmt::format_to(out, "\r\n");
 		else
@@ -1140,7 +1158,13 @@ void ClientList::ConsoleSendWhoAll(const char* to, int16 admin, Who_All_Struct* 
 		//console_list.SendConsoleWho(connection, to, admin, &output, &outsize, &outlen);
 	}
 	auto output = fmt::to_string(out);
-	connection->SendEmoteMessageRaw(to, 0, 0, 10, output.c_str());
+	connection->SendEmoteMessageRaw(
+		to,
+		0,		
+		AccountStatus::Player,
+		Chat::NPCQuestSay,
+		output.c_str()
+	);
 }
 
 void ClientList::Add(Client* client) {
@@ -1386,7 +1410,7 @@ void ClientList::SendClientVersionSummary(const char *Name)
 	zoneserver_list.SendEmoteMessage(
 		Name,
 		0,
-		0,
+		AccountStatus::Player,
 		Chat::White,
 		fmt::format(
 			"There {} {} Titanium, {} SoF, {} SoD, {} UF, {} RoF, and {} RoF2 Client{} currently connected for a total of {} Client{} and {} Unique IP{} connected.",

@@ -3935,7 +3935,7 @@ void Mob::SetTarget(Mob *mob)
 	else if (IsClient()) {
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-		if (CastToClient()->admin > 200) {
+		if (CastToClient()->admin > AccountStatus::GMMgmt) {
 			DisplayInfo(mob);
 		}
 

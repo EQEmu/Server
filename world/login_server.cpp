@@ -306,7 +306,13 @@ void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	ServerSystemwideMessage *swm = (ServerSystemwideMessage *) p.Data();
-	zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+	zoneserver_list.SendEmoteMessageRaw(
+		0,
+		0,
+		AccountStatus::Player,
+		swm->type,
+		swm->message
+	);
 }
 
 void LoginServer::ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p)

@@ -37,6 +37,7 @@
 #include "launcher_list.h"
 #include "launcher_link.h"
 #include "wguild_mgr.h"
+#include "../common/emu_constants.h"
 
 #ifdef seed
 #undef seed
@@ -360,7 +361,13 @@ void EQW::ResolveBug(const char *id) {
 }
 
 void EQW::SendMessage(uint32 type, const char *msg) {
-    zoneserver_list.SendEmoteMessage(0, 0, 0, type, msg);
+    zoneserver_list.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::Player,
+		type,
+		msg
+	);
 }
 
 void EQW::WorldShutDown(uint32 time, uint32 interval) {

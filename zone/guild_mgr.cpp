@@ -1513,7 +1513,17 @@ void GuildApproval::GuildApproved()
 	database.InsertPetitionToDB(pet);
 	petition_list.UpdateGMQueue();
 	petition_list.UpdateZoneListQueue();
-	worldserver.SendEmoteMessage(0, 0, 80, 15, "%s has made a petition. #%i", owner->CastToClient()->GetName(), pet->GetID());
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		AccountStatus::QuestTroupe,
+		Chat::Yellow,
+		fmt::format(
+			"{} has made a petition. ID: {}",
+			owner->CastToClient()->GetName(),
+			pet->GetID()
+		).c_str()
+	);
 	auto pack = new ServerPacket;
 	pack->opcode = ServerOP_RefreshGuild;
 	pack->size = tmp;

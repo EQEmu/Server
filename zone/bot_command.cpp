@@ -1652,47 +1652,68 @@ int bot_command_real_dispatch(Client *c, const char *message)
 
 void bot_command_log_command(Client *c, const char *message)
 {
-	int admin = c->Admin();
+int admin = c->Admin();
 
 	bool continueevents = false;
-	switch (zone->loglevelvar) { //catch failsafe
-	case 9: // log only LeadGM
-		if ((admin >= 150) && (admin <200))
+	switch (zone->loglevelvar){ //catch failsafe
+		case 9: { // log only LeadGM
+			if (
+				admin >= AccountStatus::GMLeadAdmin &&
+				admin < AccountStatus::GMMgmt
+			) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 8: { // log only GM
+			if (
+				admin >= AccountStatus::GMAdmin &&
+				admin < AccountStatus::GMLeadAdmin
+			) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 1: {
+			if (admin >= AccountStatus::GMMgmt) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 2: {
+			if (admin >= AccountStatus::GMLeadAdmin) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 3: {
+			if (admin >= AccountStatus::GMAdmin) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 4: {
+			if (admin >= AccountStatus::QuestTroupe) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 5: {
+			if (admin >= AccountStatus::ApprenticeGuide) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 6: {
+			if (admin >= AccountStatus::Steward) {
+				continueevents = true;
+			}
+			break;
+		}
+		case 7: {
 			continueevents = true;
-		break;
-	case 8: // log only GM
-		if ((admin >= 100) && (admin <150))
-			continueevents = true;
-		break;
-	case 1:
-		if ((admin >= 200))
-			continueevents = true;
-		break;
-	case 2:
-		if ((admin >= 150))
-			continueevents = true;
-		break;
-	case 3:
-		if ((admin >= 100))
-			continueevents = true;
-		break;
-	case 4:
-		if ((admin >= 80))
-			continueevents = true;
-		break;
-	case 5:
-		if ((admin >= 20))
-			continueevents = true;
-		break;
-	case 6:
-		if ((admin >= 10))
-			continueevents = true;
-		break;
-	case 7:
-		continueevents = true;
-		break;
-	default:
-		break;
+			break;
+		}
 	}
 
 	if (continueevents)
@@ -3382,7 +3403,7 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 		return;
 
 #if (EQDEBUG >= 12)
-	while (c->Admin() >= 250) {
+	while (c->Admin() >= AccountStatus::GMImpossible) {
 		if (strcasecmp(sep->arg[1], "shone")) { break; }
 		Bot* my_bot = ActionableBots::AsTarget_ByBot(c);
 		if (!my_bot || !(my_bot->IsHealRotationMember())) { break; }
