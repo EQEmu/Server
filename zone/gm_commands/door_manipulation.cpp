@@ -37,7 +37,10 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 	// option
 	if (arg1.empty()) {
 		DoorManipulation::CommandHeader(c);
-		c->Message(Chat::White, "#door create <modelname> | Creates a door from a model. (Example IT78 creates a campfire)");
+		c->Message(
+			Chat::White,
+			"#door create <modelname> | Creates a door from a model. (Example IT78 creates a campfire)"
+		);
 		c->Message(Chat::White, "#door setinvertstate [0|1] | Sets selected door invert state");
 		c->Message(Chat::White, "#door setincline <incline> | Sets selected door incline");
 		c->Message(Chat::White, "#door opentype <opentype> | Sets selected door opentype");
@@ -129,7 +132,7 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 			std::vector<std::string> move_h_options_negative;
 			std::vector<std::string> set_size_options_positive;
 			std::vector<std::string> set_size_options_negative;
-			for (const auto &move_option : move_options) {
+			for (const auto          &move_option : move_options) {
 				if (move_option == move_x_action) {
 					move_x_options_positive.emplace_back(
 						EQ::SayLinkEngine::GenerateQuestSaylink(
@@ -297,10 +300,10 @@ void DoorManipulation::CommandHandler(Client *c, const Seperator *sep)
 
 			// we're passing a move action here
 			if (!arg3.empty() && StringIsNumber(arg3)) {
-				float x_move = 0.0f;
-				float y_move = 0.0f;
-				float z_move = 0.0f;
-				float h_move = 0.0f;
+				float x_move   = 0.0f;
+				float y_move   = 0.0f;
+				float z_move   = 0.0f;
+				float h_move   = 0.0f;
 				float set_size = 0.0f;
 
 				if (arg2 == move_x_action) {

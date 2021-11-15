@@ -65,3 +65,8 @@ void FileUtil::mkdir(const std::string& directory_name)
 	::mkdir(directory_name.c_str(), 0755);
 #endif
 }
+
+bool file_exists(const std::string& name) {
+	std::ifstream f(name.c_str());
+	return f.good();
+}
