@@ -1516,7 +1516,7 @@ void GuildApproval::GuildApproved()
 	worldserver.SendEmoteMessage(
 		0,
 		0,
-		EQ::constants::AccountStatus::QuestTroupe,
+		AccountStatus::QuestTroupe,
 		Chat::Yellow,
 		fmt::format(
 			"{} has made a petition. ID: {}",

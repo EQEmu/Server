@@ -252,9 +252,9 @@ static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string messa
 
 		for (size_t iter = 0; iter < message_split.size(); ++iter) {
 			zoneserver_list.SendEmoteMessage(
-				nullptr,
 				0,
-				EQ::constants::AccountStatus::QuestTroupe,
+				0,
+				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
 				fmt::format(
 					" {}{}",
@@ -268,9 +268,9 @@ static void GMSayHookCallBackProcessWorld(uint16 log_category, std::string messa
 	}
 
 	zoneserver_list.SendEmoteMessage(
-		nullptr,
 		0,
-		EQ::constants::AccountStatus::QuestTroupe,
+		0,
+		AccountStatus::QuestTroupe,
 		LogSys.GetGMSayColorFromCategory(log_category),
 		"%s",
 		message.c_str()

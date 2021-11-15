@@ -1658,8 +1658,8 @@ int admin = c->Admin();
 	switch (zone->loglevelvar){ //catch failsafe
 		case 9: { // log only LeadGM
 			if (
-				admin >= EQ::constants::AccountStatus::GMLeadAdmin &&
-				admin < EQ::constants::AccountStatus::GMMgmt
+				admin >= AccountStatus::GMLeadAdmin &&
+				admin < AccountStatus::GMMgmt
 			) {
 				continueevents = true;
 			}
@@ -1667,45 +1667,45 @@ int admin = c->Admin();
 		}
 		case 8: { // log only GM
 			if (
-				admin >= EQ::constants::AccountStatus::GMAdmin &&
-				admin < EQ::constants::AccountStatus::GMLeadAdmin
+				admin >= AccountStatus::GMAdmin &&
+				admin < AccountStatus::GMLeadAdmin
 			) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 1: {
-			if (admin >= EQ::constants::AccountStatus::GMMgmt) {
+			if (admin >= AccountStatus::GMMgmt) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 2: {
-			if (admin >= EQ::constants::AccountStatus::GMLeadAdmin) {
+			if (admin >= AccountStatus::GMLeadAdmin) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 3: {
-			if (admin >= EQ::constants::AccountStatus::GMAdmin) {
+			if (admin >= AccountStatus::GMAdmin) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 4: {
-			if (admin >= EQ::constants::AccountStatus::QuestTroupe) {
+			if (admin >= AccountStatus::QuestTroupe) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 5: {
-			if (admin >= EQ::constants::AccountStatus::ApprenticeGuide) {
+			if (admin >= AccountStatus::ApprenticeGuide) {
 				continueevents = true;
 			}
 			break;
 		}
 		case 6: {
-			if (admin >= EQ::constants::AccountStatus::Steward) {
+			if (admin >= AccountStatus::Steward) {
 				continueevents = true;
 			}
 			break;
@@ -3403,7 +3403,7 @@ void bot_command_heal_rotation(Client *c, const Seperator *sep)
 		return;
 
 #if (EQDEBUG >= 12)
-	while (c->Admin() >= EQ::constants::AccountStatus::GMImpossible) {
+	while (c->Admin() >= AccountStatus::GMImpossible) {
 		if (strcasecmp(sep->arg[1], "shone")) { break; }
 		Bot* my_bot = ActionableBots::AsTarget_ByBot(c);
 		if (!my_bot || !(my_bot->IsHealRotationMember())) { break; }

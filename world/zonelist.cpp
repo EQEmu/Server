@@ -55,7 +55,7 @@ void ZSList::ShowUpTime(WorldTCPConnection* con, const char* adminname) {
 	con->SendEmoteMessage(
 		adminname,
 		0,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		Chat::White,
 		fmt::format(
 			"Worldserver Uptime | {}",
@@ -111,7 +111,7 @@ void ZSList::Process() {
 		SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			Chat::Yellow,
 			fmt::format(
 				"[SYSTEM] World will be shutting down in {} minutes.",
@@ -275,7 +275,7 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 			connection->SendEmoteMessageRaw(
 				to,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::White,
 				fmt::format(
 					"Zone {} | Name: {} ({}) ID: {}",
@@ -297,7 +297,7 @@ void ZSList::ListLockedZones(const char* to, WorldTCPConnection* connection) {
 	connection->SendEmoteMessage(
 		to,
 		0,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		Chat::White,
 		zone_message.c_str()
 	);
@@ -353,7 +353,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 		else
 			is_static_string[0] = 'D';
 
-		if (admin >= EQ::constants::AccountStatus::GMLeadAdmin) {
+		if (admin >= AccountStatus::GMLeadAdmin) {
 			if (zone_server_data->GetZoneID()) {
 				snprintf(zone_data_string, sizeof(zone_data_string), "%s (%i)", zone_server_data->GetZoneName(), zone_server_data->GetZoneID());
 			}
@@ -382,7 +382,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				connection->SendEmoteMessageRaw(
 					to,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::NPCQuestSay,
 					output.c_str()
 				);
@@ -407,7 +407,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 				connection->SendEmoteMessageRaw(
 					to,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::NPCQuestSay,
 					output.c_str()
 				);
@@ -440,7 +440,7 @@ void ZSList::SendZoneStatus(const char* to, int16 admin, WorldTCPConnection* con
 	connection->SendEmoteMessageRaw(
 		to,
 		0,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		Chat::NPCQuestSay,
 		output.c_str()
 	);
@@ -578,7 +578,7 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 		SendEmoteMessage(
 			adminname,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			Chat::White,
 			fmt::format(
 				"Error: SOP_ZoneBootup: Zone '{}' not found in 'zone' table.",
@@ -592,7 +592,7 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 			SendEmoteMessage(
 				adminname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::White,
 				"Error: SOP_ZoneBootup: Server ID must be specified."
 			);
@@ -602,7 +602,7 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 			SendEmoteMessage(
 				adminname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::White,
 				"Error: SOP_ZoneBootup: Zoneserver not found."
 			);
@@ -612,7 +612,7 @@ void ZSList::SOPZoneBootup(const char* adminname, uint32 ZoneServerID, const cha
 				SendEmoteMessage(
 					adminname,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::White,
 					fmt::format(
 						"Error: SOP_ZoneBootup: Zone '{}' already being hosted by Zoneserver ID {}.",
@@ -762,7 +762,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			Chat::Yellow,
 			fmt::format(
 				"[SYSTEM] World will be shutting down in {} minutes.",
@@ -784,7 +784,7 @@ void ZSList::WorldShutDown(uint32 time, uint32 interval)
 		SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			Chat::Yellow,
 			"[SYSTEM] World is shutting down."
 		);

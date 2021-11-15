@@ -181,7 +181,7 @@ void Client::Handle_OP_ZoneChange(const EQApplicationPacket *app) {
 
 	/* Load up the Safe Coordinates, restrictions and verify the zone name*/
 	float safe_x, safe_y, safe_z, safe_heading;
-	int16 min_status = EQ::constants::AccountStatus::Player;
+	int16 min_status = AccountStatus::Player;
 	uint8 min_level = 0;
 	char flag_needed[128];
 	if(!content_db.GetSafePoints(
@@ -1059,7 +1059,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 		const char* zone_short_name = ZoneName(zone_id);
 		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
 		float safe_x, safe_y, safe_z, safe_heading;
-		int16 min_status = EQ::constants::AccountStatus::Player;
+		int16 min_status = AccountStatus::Player;
 		uint8 min_level = 0;
 		char flag_name[128];
 		if(!content_db.GetSafePoints(
@@ -1089,7 +1089,7 @@ bool Client::CanBeInZone() {
 		return(true);
 
 	float safe_x, safe_y, safe_z, safe_heading;
-	int16 min_status = EQ::constants::AccountStatus::Player;
+	int16 min_status = AccountStatus::Player;
 	uint8 min_level = 0;
 	char flag_needed[128];
 	if(!content_db.GetSafePoints(

@@ -441,7 +441,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 						zoneserver_list.SendEmoteMessage(
 							scm->from,
 							0,
-							EQ::constants::AccountStatus::Player,
+							AccountStatus::Player,
 							Chat::White,
 							fmt::format(
 								"{} is not online at this time.",
@@ -455,7 +455,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 
 			ClientListEntry* cle = client_list.FindCharacter(scm->deliverto);
 			if (cle == 0 || cle->Online() < CLE_Status::Zoning ||
-				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < EQ::constants::AccountStatus::QuestTroupe))) {
+				(cle->TellsOff() && ((cle->Anon() == 1 && scm->fromadmin < cle->Admin()) || scm->fromadmin < AccountStatus::QuestTroupe))) {
 				if (!scm->noreply) {
 					ClientListEntry* sender = client_list.FindCharacter(scm->from);
 					if (!sender || !sender->Server())
@@ -503,7 +503,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 					zoneserver_list.SendEmoteMessage(
 						scm->from,
 						0,
-						EQ::constants::AccountStatus::Player,
+						AccountStatus::Player,
 						Chat::White,
 						fmt::format(
 							"You told {}, '{} is not contactable at this time'",
@@ -554,7 +554,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				zoneserver_list.SendEmoteMessage(
 					svm->From,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::White,
 					fmt::format(
 						"'{} is not online at this time'",
@@ -690,7 +690,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendEmoteMessage(
 				s->adminname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::White,
 				"Error: SOP_ZoneShutdown: neither ID nor name specified"
 			);
@@ -700,7 +700,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			zoneserver_list.SendEmoteMessage(
 				s->adminname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::White,
 				"Error: SOP_ZoneShutdown: zoneserver not found"
 			);
@@ -757,7 +757,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		if (GetZoneID() == ztz->current_zone_id && GetInstanceID() == ztz->current_instance_id) {
 			LogInfo("Processing ZTZ for egress from zone for client [{}]", ztz->name);
 
-			if (ztz->admin < EQ::constants::AccountStatus::QuestTroupe && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
+			if (ztz->admin < AccountStatus::QuestTroupe && ztz->ignorerestrictions < 2 && zoneserver_list.IsZoneLocked(ztz->requested_zone_id)) {
 				ztz->response = 0;
 				SendPacket(pack);
 				break;
@@ -953,7 +953,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				SendEmoteMessage(
 					gmg->myname,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::Red,
 					fmt::format(
 						"Error: Cannot identify {}'s zoneserver.",
@@ -964,7 +964,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				SendEmoteMessage(
 					gmg->myname,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::Red,
 					fmt::format(
 						"Error: {} not found.",
@@ -979,7 +979,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			SendEmoteMessage(
 				gmg->myname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::Red,
 				fmt::format(
 					"Error: {} not found",
@@ -1004,7 +1004,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			SendEmoteMessage(
 				slock->myname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::Red,
 				fmt::format(
 					"World {}.",
@@ -1016,7 +1016,7 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 			SendEmoteMessage(
 				slock->myname,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::Red,
 				fmt::format(
 					"World {}, but login server not connected.",
@@ -1103,22 +1103,22 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 		}
 
 		ServerLockZone_Struct* lock_zone = (ServerLockZone_Struct*) pack->pBuffer;
-		if (lock_zone->op == EQ::constants::ServerLockType::List) {
+		if (lock_zone->op == ServerLockType::List) {
 			zoneserver_list.ListLockedZones(lock_zone->adminname, this);
 			break;
 		} else if (
-			lock_zone->op == EQ::constants::ServerLockType::Lock ||
-			lock_zone->op == EQ::constants::ServerLockType::Unlock
+			lock_zone->op == ServerLockType::Lock ||
+			lock_zone->op == ServerLockType::Unlock
 		) {
-			if (zoneserver_list.SetLockedZone(lock_zone->zoneID, lock_zone->op == EQ::constants::ServerLockType::Lock)) {
+			if (zoneserver_list.SetLockedZone(lock_zone->zoneID, lock_zone->op == ServerLockType::Lock)) {
 				zoneserver_list.SendEmoteMessage(
 					0,
 					0,
-					EQ::constants::AccountStatus::QuestTroupe,
+					AccountStatus::QuestTroupe,
 					Chat::White,
 					fmt::format(
 						"Zone {} | Name: {} ({}) ID: {}",
-						lock_zone->op == EQ::constants::ServerLockType::Lock ? "Locked" : "Unlocked",
+						lock_zone->op == ServerLockType::Lock ? "Locked" : "Unlocked",
 						ZoneLongName(lock_zone->zoneID),
 						ZoneName(lock_zone->zoneID),
 						lock_zone->zoneID
@@ -1128,11 +1128,11 @@ void ZoneServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p) {
 				SendEmoteMessageRaw(
 					lock_zone->adminname,
 					0,
-					EQ::constants::AccountStatus::Player,
+					AccountStatus::Player,
 					Chat::White,
 					fmt::format(
 						"Zone Failed to {} | Name: {} ({}) ID: {}",
-						lock_zone->op == EQ::constants::ServerLockType::Lock ? "Lock" : "Unlock",
+						lock_zone->op == ServerLockType::Lock ? "Lock" : "Unlock",
 						ZoneLongName(lock_zone->zoneID),
 						ZoneName(lock_zone->zoneID),
 						lock_zone->zoneID

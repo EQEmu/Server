@@ -309,7 +309,7 @@ void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 	zoneserver_list.SendEmoteMessageRaw(
 		0,
 		0,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		swm->type,
 		swm->message
 	);

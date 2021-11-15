@@ -769,7 +769,7 @@ void QuestManager::shout2(const char *str) {
 		worldserver.SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			Chat::Red,
 			fmt::format(
 				"{} shouts, '{}'",
@@ -1375,7 +1375,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 		worldserver.SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::QuestTroupe,
+			AccountStatus::QuestTroupe,
 			Chat::Yellow,
 			"Guild Error | Guild leader not found."
 		);
@@ -1387,7 +1387,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 		worldserver.SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::QuestTroupe,
+			AccountStatus::QuestTroupe,
 			Chat::Yellow,
 			fmt::format(
 				"Guild Error | {} already is the leader of {} ({}).",
@@ -1402,7 +1402,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 			worldserver.SendEmoteMessage(
 				0,
 				0,
-				EQ::constants::AccountStatus::QuestTroupe,
+				AccountStatus::QuestTroupe,
 				Chat::Yellow,
 				"Guild Error | Guild creation failed."
 			);
@@ -1410,7 +1410,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 			worldserver.SendEmoteMessage(
 				0,
 				0,
-				EQ::constants::AccountStatus::QuestTroupe,
+				AccountStatus::QuestTroupe,
 				Chat::Yellow,
 				fmt::format(
 					"Guild Created | Leader: {} ({}) ID: {}",
@@ -1423,7 +1423,7 @@ void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 				worldserver.SendEmoteMessage(
 					0,
 					0,
-					EQ::constants::AccountStatus::QuestTroupe,
+					AccountStatus::QuestTroupe,
 					Chat::Yellow,
 					"Unable to set guild leader's guild in the database. Use #guild set."
 				);

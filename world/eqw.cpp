@@ -364,7 +364,7 @@ void EQW::SendMessage(uint32 type, const char *msg) {
     zoneserver_list.SendEmoteMessage(
 		0,
 		0,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		type,
 		msg
 	);

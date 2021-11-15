@@ -533,7 +533,7 @@ bool Client::Process() {
 		OnDisconnect(true);
 		LogInfo("Client linkdead: {}", name);
 
-		if (Admin() > EQ::constants::AccountStatus::GMAdmin) {
+		if (Admin() > AccountStatus::GMAdmin) {
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
@@ -1729,7 +1729,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(admin < EQ::constants::AccountStatus::QuestTroupe)
+		if(admin < AccountStatus::QuestTroupe)
 		{
 			return;
 		}

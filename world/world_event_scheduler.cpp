@@ -48,7 +48,7 @@ void WorldEventScheduler::Process(ZSList *zs_list)
 					zs_list->SendEmoteMessage(
 						0,
 						0,
-						EQ::constants::AccountStatus::Player,
+						AccountStatus::Player,
 						Chat::Yellow,
 						e.event_data.c_str()
 					);

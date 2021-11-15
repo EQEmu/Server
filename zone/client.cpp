@@ -200,7 +200,7 @@ Client::Client(EQStreamInterface* ieqs)
 	TrackingID = 0;
 	WID = 0;
 	account_id = 0;
-	admin = EQ::constants::AccountStatus::Player;
+	admin = AccountStatus::Player;
 	lsaccountid = 0;
 	guild_id = GUILD_NONE;
 	guildrank = 0;
@@ -1013,7 +1013,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 				else
 					return;
 			}
-			if(worldserver.IsOOCMuted() && admin < EQ::constants::AccountStatus::GMAdmin)
+			if(worldserver.IsOOCMuted() && admin < AccountStatus::GMAdmin)
 			{
 				Message(0,"OOC has been muted. Try again later.");
 				return;
@@ -1052,7 +1052,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 	}
 	case ChatChannel_Broadcast: /* Broadcast */
 	case ChatChannel_GMSAY: { /* GM Say */
-		if (!(admin >= EQ::constants::AccountStatus::QuestTroupe))
+		if (!(admin >= AccountStatus::QuestTroupe))
 			Message(0, "Error: Only GMs can use this channel");
 		else if (!worldserver.SendChannelMessage(this, targetname, chan_num, 0, language, lang_skill, message))
 			Message(0, "Error: World server disconnected");
@@ -1230,7 +1230,7 @@ void Client::ChannelMessageReceived(uint8 chan_num, uint8 language, uint8 lang_s
 }
 
 void Client::ChannelMessageSend(const char* from, const char* to, uint8 chan_num, uint8 language, uint8 lang_skill, const char* message, ...) {
-	if ((chan_num==11 && !(this->GetGM())) || (chan_num==10 && this->Admin() < EQ::constants::AccountStatus::QuestTroupe)) // dont need to send /pr & /petition to everybody
+	if ((chan_num==11 && !(this->GetGM())) || (chan_num==10 && this->Admin() < AccountStatus::QuestTroupe)) // dont need to send /pr & /petition to everybody
 		return;
 	va_list argptr;
 	char buffer[4096];
@@ -2647,7 +2647,7 @@ void Client::GMKill() {
 }
 
 bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
-	if ((admin >= iDBLevel) || (iDBLevel == EQ::constants::AccountStatus::Max && admin >= iDefaultLevel))
+	if ((admin >= iDBLevel) || (iDBLevel == AccountStatus::Max && admin >= iDefaultLevel))
 		return true;
 	else
 		return false;
@@ -6999,7 +6999,7 @@ void Client::SendStatsWindow(Client* client, bool use_window)
 	Extra_Info:
 
 	client->Message(Chat::White, " BaseRace: %i  Gender: %i  BaseGender: %i Texture: %i  HelmTexture: %i", GetBaseRace(), GetGender(), GetBaseGender(), GetTexture(), GetHelmTexture());
-	if (client->Admin() >= EQ::constants::AccountStatus::GMAdmin) {
+	if (client->Admin() >= AccountStatus::GMAdmin) {
 		client->Message(Chat::White, "  CharID: %i  EntityID: %i  PetID: %i  OwnerID: %i  AIControlled: %i  Targetted: %i", CharacterID(), GetID(), GetPetID(), GetOwnerID(), IsAIControlled(), targeted);
 	}
 }
@@ -8568,7 +8568,7 @@ void Client::ExpeditionSay(const char *str, int ExpID) {
 			worldserver.SendEmoteMessage(
 				charName,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::Lime,
 				fmt::format(
 					"{} says to the expedition, '{}'",

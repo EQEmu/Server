@@ -1954,7 +1954,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			worldserver.SendEmoteMessage(
 				0,
 				0,
-				EQ::constants::AccountStatus::GMAdmin,
+				AccountStatus::GMAdmin,
 				Chat::Yellow,
 				fmt::format(
 					"Rules reloaded for {}.",
@@ -2858,7 +2858,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWDW->min_status;
 		uint8 max_status = WWDW->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 				DialogueWindow::Render(client.second, message);
 			}
 		}
@@ -2875,27 +2875,27 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWLDoNUpdateType_AddLoss:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, false);
 					}
 					break;
 				case WWLDoNUpdateType_AddPoints:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->UpdateLDoNPoints(theme_id, points);
 					}
 					break;
 				case WWLDoNUpdateType_AddWin:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, true);
 					}
 					break;
 				case WWLDoNUpdateType_RemoveLoss:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, false, true);
 					}
 					break;
 				case WWLDoNUpdateType_RemoveWin:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->UpdateLDoNWinLoss(theme_id, true, true);
 					}
 					break;
@@ -2915,7 +2915,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 				client.second->SendMarqueeMessage(type, priority, fade_in, fade_out, duration, message);
 			}
 		}
@@ -2929,7 +2929,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWM->min_status;
 		uint8 max_status = WWM->max_status;
 		for (auto &client : entity_list.GetClientList()) {
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 				client.second->Message(type, message);
 			}
 		}
@@ -2946,12 +2946,12 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		for (auto &client : entity_list.GetClientList()) {
 			switch (update_type) {
 				case WWMoveUpdateType_MoveZone:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->MoveZone(zone_short_name);
 					}
 					break;
 				case WWMoveUpdateType_MoveZoneInstance:
-					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+					if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 						client.second->MoveZoneInstance(instance_id);
 					}
 					break;
@@ -2969,7 +2969,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWSEV->max_status;
 		if (update_type == WWSetEntityVariableUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->SetEntityVariable(variable_name, variable_value);
 				}
 			}
@@ -2989,7 +2989,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSignalUpdateType_Character) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->Signal(signal);
 				}
 			}
@@ -3009,13 +3009,13 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 max_status = WWS->max_status;
 		if (update_type == WWSpellUpdateType_Cast) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->SpellFinished(spell_id, client.second);
 				}
 			}
 		} else if (update_type == WWSpellUpdateType_Remove) {
 			for (auto &client : entity_list.GetClientList()) {				
-				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+				if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 					client.second->BuffFadeBySpellID(spell_id);
 				}
 			}
@@ -3033,7 +3033,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		uint8 min_status = WWTU->min_status;
 		uint8 max_status = WWTU->max_status;		
 		for (auto &client : entity_list.GetClientList()) {				
-			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == EQ::constants::AccountStatus::Player)) {
+			if (client.second->Admin() >= min_status && (client.second->Admin() <= max_status || max_status == AccountStatus::Player)) {
 				switch (update_type) {
 					case WWTaskUpdateType_ActivityReset:
 						client.second->ResetTaskActivity(task_identifier, task_subidentifier);
@@ -3114,7 +3114,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 			worldserver.SendEmoteMessage(
 				0,
 				0,
-				EQ::constants::AccountStatus::ApprenticeGuide,
+				AccountStatus::ApprenticeGuide,
 				Chat::Yellow,
 				fmt::format(
 					"A quest, plugin, or global script has changed. Reload: [{}] [{}]",
@@ -3234,7 +3234,7 @@ bool WorldServer::SendChannelMessage(Client* from, const char* to, uint8 chan_nu
 
 	if (from == 0) {
 		strcpy(scm->from, "ZServer");
-		scm->fromadmin = EQ::constants::AccountStatus::Player;
+		scm->fromadmin = AccountStatus::Player;
 	}
 	else {
 		strcpy(scm->from, from->GetName());
@@ -3272,7 +3272,7 @@ bool WorldServer::SendEmoteMessage(const char* to, uint32 to_guilddbid, uint32 t
 	return SendEmoteMessage(
 		to,
 		to_guilddbid,
-		EQ::constants::AccountStatus::Player,
+		AccountStatus::Player,
 		type,
 		buffer
 	);

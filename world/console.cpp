@@ -283,7 +283,7 @@ void ConsoleEmote(
 		zoneserver_list.SendEmoteMessageRaw(
 			0,
 			0,
-			EQ::constants::AccountStatus::Player,
+			AccountStatus::Player,
 			atoi(args[1].c_str()),
 			JoinString(join_args, " ").c_str()
 		);
@@ -294,7 +294,7 @@ void ConsoleEmote(
 			zs->SendEmoteMessageRaw(
 				0,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				atoi(args[1].c_str()),
 				JoinString(join_args, " ").c_str()
 			);
@@ -303,7 +303,7 @@ void ConsoleEmote(
 			zoneserver_list.SendEmoteMessageRaw(
 				args[0].c_str(),
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				atoi(args[1].c_str()),
 				JoinString(join_args, " ").c_str()
 			);
@@ -653,7 +653,7 @@ void ConsoleZoneLock(
 				zoneserver_list.SendEmoteMessage(
 					0,
 					0,
-					EQ::constants::AccountStatus::QuestTroupe,
+					AccountStatus::QuestTroupe,
 					Chat::Yellow,
 					fmt::format(
 						"Zone locked: {}",
@@ -680,7 +680,7 @@ void ConsoleZoneLock(
 				zoneserver_list.SendEmoteMessage(
 					0,
 					0,
-					EQ::constants::AccountStatus::QuestTroupe,
+					AccountStatus::QuestTroupe,
 					Chat::Yellow,
 					fmt::format(
 						"Zone unlocked: {}",
@@ -813,7 +813,7 @@ void ConsoleWorldShutdown(
 			zoneserver_list.SendEmoteMessage(
 				0,
 				0,
-				EQ::constants::AccountStatus::Player,
+				AccountStatus::Player,
 				Chat::Yellow,
 				"[SYSTEM] World shutdown has been aborted."
 			);

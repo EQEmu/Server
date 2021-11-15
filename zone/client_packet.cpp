@@ -4756,7 +4756,7 @@ void Client::Handle_OP_ClientUpdate(const EQApplicationPacket *app) {
 		MakeSpawnUpdate(position_update);
 
 		if (gm_hide_me) {
-			entity_list.QueueClientsStatus(this, outapp, true, Admin(), EQ::constants::AccountStatus::Max);
+			entity_list.QueueClientsStatus(this, outapp, true, Admin(), AccountStatus::Max);
 		} else {
 			entity_list.QueueCloseClients(this, outapp, true, RuleI(Range, ClientPositionUpdates), nullptr, true);
 		}
@@ -6667,7 +6667,7 @@ void Client::Handle_OP_GMZoneRequest(const EQApplicationPacket *app)
 	GMZoneRequest_Struct* gmzr = (GMZoneRequest_Struct*)app->pBuffer;
 	float target_x = -1, target_y = -1, target_z = -1, target_heading;
 
-	int16 min_status = EQ::constants::AccountStatus::Player;
+	int16 min_status = AccountStatus::Player;
 	uint8 min_level = 0;
 	char target_zone[32];
 	uint16 zone_id = gmzr->zone_id;
@@ -10938,7 +10938,7 @@ void Client::Handle_OP_Petition(const EQApplicationPacket *app)
 		worldserver.SendEmoteMessage(
 			0,
 			0,
-			EQ::constants::AccountStatus::QuestTroupe,
+			AccountStatus::QuestTroupe,
 			Chat::Yellow,
 			fmt::format(
 				"{} has made a petition. ID: {}",
@@ -15332,7 +15332,7 @@ void Client::Handle_OP_YellForHelp(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ResetAA(const EQApplicationPacket *app)
 {
-	if (Admin() >= EQ::constants::AccountStatus::Guide) {
+	if (Admin() >= AccountStatus::Guide) {
 		Message(0, "Resetting AA points.");
 		ResetAA();
 	}

@@ -328,7 +328,7 @@ public:
 			auto message_split = SplitString(message, '\n');
 			entity_list.MessageStatus(
 				0,
-				EQ::constants::AccountStatus::QuestTroupe,
+				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
 				message_split[0].c_str()
 			);
@@ -336,7 +336,7 @@ public:
 			for (size_t iter = 1; iter < message_split.size(); ++iter) {
 				entity_list.MessageStatus(
 					0,
-					EQ::constants::AccountStatus::QuestTroupe,
+					AccountStatus::QuestTroupe,
 					LogSys.GetGMSayColorFromCategory(log_category),
 					fmt::format(
 						"--- {}",
@@ -347,7 +347,7 @@ public:
 		} else {
 			entity_list.MessageStatus(
 				0,
-				EQ::constants::AccountStatus::QuestTroupe,
+				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
 				message.c_str()
 			);
