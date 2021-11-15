@@ -28,5 +28,6 @@ public:
 	static void mkdir(const std::string& directory_name);
 };
 
+bool file_exists(const std::string& name);
 
 #endif //EQEMU_FILE_UTIL_H
