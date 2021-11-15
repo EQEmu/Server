@@ -2212,49 +2212,23 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 	switch (task_type) {
 		case TaskType::Task: {
 			if (m_active_task.task_id == task_id) {
-				auto              outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
-				CancelTask_Struct *cts   = (CancelTask_Struct *) outapp->pBuffer;
-				cts->SequenceNumber = TASKSLOTTASK;
-				cts->type           = static_cast<uint32>(task_type);
 				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
-				client->QueuePacket(outapp);
-				safe_delete(outapp);
-				m_active_task.task_id = TASKSLOTEMPTY;
+				CancelTask(client, TASKSLOTTASK, TaskType::Task, true);
 			}
 			break;
 		}
 		case TaskType::Shared: {
 			if (m_active_shared_task.task_id == task_id) {
 				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
-
-				// struct
-				auto pack = new ServerPacket(ServerOP_SharedTaskAttemptRemove, sizeof(ServerSharedTaskAttemptRemove_Struct));
-				auto *r = (ServerSharedTaskAttemptRemove_Struct *)pack->pBuffer;
-
-				// fill
-				r->requested_character_id = character_id;
-				r->requested_task_id = task_id;
-				r->remove_from_db = true;
-
-				// send
-				worldserver.SendPacket(pack);
-				safe_delete(pack);
+				CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, true);
 			}
-
 			break;
 		}
 		case TaskType::Quest: {
 			for (int active_quest = 0; active_quest < MAXACTIVEQUESTS; active_quest++) {
-				if (m_active_quests[active_quest].task_id == task_id) {
-					auto              outapp = new EQApplicationPacket(OP_CancelTask, sizeof(CancelTask_Struct));
-					CancelTask_Struct *cts   = (CancelTask_Struct *) outapp->pBuffer;
-					cts->SequenceNumber      = active_quest;
-					cts->type                = static_cast<uint32>(task_type);
+				if (m_active_quests[active_quest].task_id == task_id) {					
 					LogTasks("[UPDATE] RemoveTaskByTaskID found Quest [{}] at index [{}]", task_id, active_quest);
-					m_active_quests[active_quest].task_id = TASKSLOTEMPTY;
-					m_active_task_count--;
-					client->QueuePacket(outapp);
-					safe_delete(outapp);
+					CancelTask(client, active_quest, TaskType::Quest, true);
 				}
 			}
 		}
