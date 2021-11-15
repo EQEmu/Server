@@ -346,7 +346,7 @@ int command_init(void)
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", AccountStatus::GMAdmin, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", AccountStatus::GMAdmin, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", AccountStatus::Guide, command_race) ||
-		command_add("raidloot", "LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.", AccountStatus::Player, command_raidloot) ||
+		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", AccountStatus::Player, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", AccountStatus::QuestTroupe, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.", AccountStatus::Player, command_refreshgroup) ||
 		command_add("reloadaa", "Reloads AA data", AccountStatus::GMMgmt, command_reloadaa) ||
@@ -9330,27 +9330,49 @@ void command_setaapts(Client *c, const Seperator *sep)
 
 void command_setcrystals(Client *c, const Seperator *sep)
 {
-	Client *t=c;
+	int arguments = sep->argnum;
+	if (arguments <= 1 || !sep->IsNumber(2)) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
+	}
 
-	if(c->GetTarget() && c->GetTarget()->IsClient())
-		t=c->GetTarget()->CastToClient();
+	Client *target = c;
+	if(c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if(sep->arg[1][0] == '\0' || sep->arg[2][0] == '\0')
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	else if(atoi(sep->arg[2]) <= 0 || atoi(sep->arg[2]) > 100000)
-		c->Message(Chat::White, "You must have a number greater than 0 for crystals and no more than 100000.");
-	else if(!strcasecmp(sep->arg[1], "radiant"))
-	{
-		t->SetRadiantCrystals(atoi(sep->arg[2]));
+	std::string crystal_type = str_tolower(sep->arg[1]);
+	uint32 crystal_amount = static_cast<uint32>(std::min(std::stoull(sep->arg[2]), (unsigned long long) 2000000000));
+	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
+	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
+	if (!is_ebon && !is_radiant) {
+		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
+		return;
 	}
-	else if(!strcasecmp(sep->arg[1], "ebon"))
-	{
-		t->SetEbonCrystals(atoi(sep->arg[2]));
+
+	uint32 crystal_item_id = (
+		is_ebon ?
+		RuleI(Zone, EbonCrystalItemID) :
+		RuleI(Zone, RadiantCrystalItemID)
+	);
+
+	auto crystal_link = database.CreateItemLink(crystal_item_id);
+	if (is_radiant) {
+		target->SetRadiantCrystals(crystal_amount);
+	} else {
+		target->SetEbonCrystals(crystal_amount);
 	}
-	else
-	{
-		c->Message(Chat::White, "Usage: #setcrystals <radiant|ebon> <new crystal count value>");
-	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} now {} {} {}.",
+			c == target ? "You" : target->GetCleanName(),
+			c == target ? "have" : "has",
+			crystal_amount,
+			crystal_link
+		).c_str()
+	);
 }
 
 void command_stun(Client *c, const Seperator *sep)
@@ -13725,58 +13747,64 @@ void command_showspellslist(Client *c, const Seperator *sep)
 
 void command_raidloot(Client *c, const Seperator *sep)
 {
-	if(!sep->arg[1][0]) {
-		c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
 		return;
 	}
 
-	Raid *r = c->GetRaid();
-	if(r)
-	{
-		for(int x = 0; x < 72; ++x)
-		{
-			if(r->members[x].member == c)
-			{
-				if(r->members[x].IsRaidLeader == 0)
-				{
-					c->Message(Chat::White, "You must be the raid leader to use this command.");
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
+	auto client_raid = c->GetRaid();
+	if (!client_raid) {
+		c->Message(Chat::White, "You must be in a Raid to use this command.");
+		return;
+	}
 
-		if(strcasecmp(sep->arg[1], "LEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 1");
-			r->ChangeLootType(1);
-		}
-		else if(strcasecmp(sep->arg[1], "GROUPLEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 2");
-			r->ChangeLootType(2);
-		}
-		else if(strcasecmp(sep->arg[1], "SELECTED") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 3");
-			r->ChangeLootType(3);
-		}
-		else if(strcasecmp(sep->arg[1], "ALL") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 4");
-			r->ChangeLootType(4);
-		}
-		else
-		{
-			c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
-		}
+	if (!client_raid->IsLeader(c)) {
+		c->Message(Chat::White, "You must be the Raid Leader to use this command.");
+		return;
 	}
-	else
-	{
-		c->Message(Chat::White, "You must be in a raid to use that command.");
+
+	std::string raid_loot_type = str_tolower(sep->arg[1]);
+	bool is_all = raid_loot_type.find("all") != std::string::npos;
+	bool is_group_leader = raid_loot_type.find("groupleader") != std::string::npos;
+	bool is_raid_leader = raid_loot_type.find("raidleader") != std::string::npos;
+	bool is_selected = raid_loot_type.find("selected") != std::string::npos;
+	if (
+		!is_all &&
+		!is_group_leader &&
+		!is_raid_leader &&
+		!is_selected
+	) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
+		return;
 	}
+
+	std::map<uint32, std::string> loot_types = {
+		{ RaidLootTypes::All, "All" },
+		{ RaidLootTypes::GroupLeader, "GroupLeader" },
+		{ RaidLootTypes::RaidLeader, "RaidLeader" },
+		{ RaidLootTypes::Selected, "Selected" }
+	};
+	
+	uint32 loot_type;
+	if (is_all) {
+		loot_type = RaidLootTypes::All;
+	} else if (is_group_leader) {
+		loot_type = RaidLootTypes::GroupLeader;
+	} else if (is_raid_leader) {
+		loot_type = RaidLootTypes::RaidLeader;
+	} else if (is_selected) {
+		loot_type = RaidLootTypes::Selected;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Loot type changed to {} ({}).",
+			loot_types[loot_type],
+			loot_type
+		).c_str()
+	);
 }
 
 void command_emoteview(Client *c, const Seperator *sep)

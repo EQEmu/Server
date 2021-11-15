@@ -257,6 +257,15 @@ namespace BeastlordPetData {
 	};
 }
 
+namespace RaidLootTypes {
+	enum : uint32 {
+		RaidLeader = 1,
+		GroupLeader,
+		Selected,
+		All
+	};
+}
+
 class ZoneDatabase : public SharedDatabase {
 	typedef std::list<ServerLootItem_Struct*> ItemList;
 public:
