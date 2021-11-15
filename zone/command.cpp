@@ -1,36 +1,3 @@
-/*	EQEMu: Everquest Server Emulator
-	Copyright (C) 2001-2016 EQEMu Development Team (http://eqemulator.org)
-
-	This program is free software; you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation; version 2 of the License.
-
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY except by those people which sell it, which
-	are required to give you total support for your newly bought product;
-	without even the implied warranty of MERCHANTABILITY or FITNESS FOR
-	A PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-*/
-
-/*
-
-	To add a new command 3 things must be done:
-
-	1.	At the bottom of command.h you must add a prototype for it.
-	2.	Add the function in this file.
-	3.	In the command_init function you must add a call to command_add
-		for your function.
-
-	Notes: If you want an alias for your command, add an entry to the
-	`command_settings` table in your database. The access level you
-	set with command_add is the default setting if the command isn't
-	listed in the `command_settings` db table.
-
-*/
 
 #include <string.h>
 #include <stdlib.h>
@@ -47,15 +14,10 @@
 #include "../common/global_define.h"
 #include "../common/eq_packet.h"
 #include "../common/features.h"
-#include "../common/guilds.h"
-#include "../common/patches/patches.h"
 #include "../common/ptimer.h"
 #include "../common/rulesys.h"
-#include "../common/serverinfo.h"
 #include "../common/string_util.h"
 #include "../common/say_link.h"
-#include "../common/eqemu_logsys.h"
-#include "../common/profanity_manager.h"
 #include "../common/net/eqstream.h"
 #include "../common/file_util.h"
 #include "../common/repositories/dynamic_zones_repository.h"
@@ -65,22 +27,15 @@
 #include "dynamic_zone.h"
 #include "expedition.h"
 #include "guild_mgr.h"
-#include "map.h"
 #include "qglobals.h"
 #include "queryserv.h"
 #include "quest_parser_collection.h"
-#include "string_ids.h"
 #include "titles.h"
 #include "water_map.h"
 #include "worldserver.h"
 #include "fastmath.h"
 #include "mob_movement_manager.h"
 #include "npc_scale_manager.h"
-#include "../common/content/world_content_service.h"
-#include "../common/http/httplib.h"
-#include "../common/shared_tasks.h"
-#include "gm_commands/door_manipulation.h"
-#include "../common/languages.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -94,10 +49,6 @@ int commandcount;					// how many commands we have
 // this is the pointer to the dispatch function, updated once
 // init has been performed to point at the real function
 int (*command_dispatch)(Client *,char const *)=command_notavail;
-
-
-void command_bestz(Client *c, const Seperator *message);
-void command_pf(Client *c, const Seperator *message);
 
 std::map<std::string, CommandRecord *> commandlist;
 std::map<std::string, std::string> commandaliases;
