@@ -257,6 +257,18 @@ namespace BeastlordPetData {
 	};
 }
 
+namespace NPCSpawnTypes {
+	enum : uint8 {
+		CreateNewSpawn,
+		AddNewSpawngroup,
+		UpdateAppearance,
+		RemoveSpawn,
+		DeleteSpawn,
+		AddSpawnFromSpawngroup,
+		CreateNewNPC
+  };
+}
+
 namespace RaidLootTypes {
 	enum : uint32 {
 		RaidLeader = 1,
