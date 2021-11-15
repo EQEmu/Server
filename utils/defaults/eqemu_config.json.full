@@ -1,32 +1,35 @@
 {
 	"server": {
 		"zones": {
-			"defaultstatus": "20",
+			"defaultstatus": "0",
 			"ports": {
 				"low": "7000",
 				"high": "7100"
 			}
 		},
 		"database": {
-			"password": "eq",
-			"db": "eq",
 			"host": "127.0.0.1",
 			"port": "3306",
-			"username": "eq"
+			"db": "eq",
+			"username": "eq",
+			"password": "eq"
 		},
 		"world": {
+			"address": "external_ip",
+			"localaddress": "internal_ip",
 			"shortname": "setme",
 			"longname": "I Forgot To Edit My Config",
 			"loginserver": {
-				"password": "",
 				"host": "login.eqemulator.net",
 				"port": "5998",
-				"account": ""
+				"legacy": "1",
+				"account": "",
+				"password": ""
 			},
 			"tcp": {
+				"ip": "127.0.0.1",
 				"port": "9000",
-				"telnet": "disable",
-				"ip": "127.0.0.1"
+				"telnet": "disable"
 			},
 			"key": "some long random string",
 			"http": {
@@ -46,9 +49,9 @@
 		"qsdatabase": {
 			"host": "127.0.0.1",
 			"port": "3306",
+			"db": "eq",
 			"username": "eq",
-			"password": "eq",
-			"db": "eq"
+			"password": "eq"
 		}
 	}
 }
