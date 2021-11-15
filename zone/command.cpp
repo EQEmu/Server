@@ -346,7 +346,7 @@ int command_init(void)
 		command_add("qglobal", "[on/off/view] - Toggles qglobal functionality on an NPC", 100, command_qglobal) ||
 		command_add("questerrors", "Shows quest errors.", 100, command_questerrors) ||
 		command_add("race", "[racenum] - Change your or your target's race. Use racenum 0 to return to normal", 50, command_race) ||
-		command_add("raidloot", "LEADER|GROUPLEADER|SELECTED|ALL - Sets your raid loot settings if you have permission to do so.", 0, command_raidloot) ||
+		command_add("raidloot", "[All|GroupLeader|RaidLeader|Selected] - Sets your Raid Loot Type if you have permission to do so.", 0, command_raidloot) ||
 		command_add("randomfeatures", "- Temporarily randomizes the Facial Features of your target", 80, command_randomfeatures) ||
 		command_add("refreshgroup", "- Refreshes Group.",  0, command_refreshgroup) ||
 		command_add("reloadaa", "Reloads AA data", 200, command_reloadaa) ||
@@ -13783,58 +13783,64 @@ void command_showspellslist(Client *c, const Seperator *sep)
 
 void command_raidloot(Client *c, const Seperator *sep)
 {
-	if(!sep->arg[1][0]) {
-		c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
 		return;
 	}
 
-	Raid *r = c->GetRaid();
-	if(r)
-	{
-		for(int x = 0; x < 72; ++x)
-		{
-			if(r->members[x].member == c)
-			{
-				if(r->members[x].IsRaidLeader == 0)
-				{
-					c->Message(Chat::White, "You must be the raid leader to use this command.");
-				}
-				else
-				{
-					break;
-				}
-			}
-		}
+	auto client_raid = c->GetRaid();
+	if (!client_raid) {
+		c->Message(Chat::White, "You must be in a Raid to use this command.");
+		return;
+	}
 
-		if(strcasecmp(sep->arg[1], "LEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 1");
-			r->ChangeLootType(1);
-		}
-		else if(strcasecmp(sep->arg[1], "GROUPLEADER") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 2");
-			r->ChangeLootType(2);
-		}
-		else if(strcasecmp(sep->arg[1], "SELECTED") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 3");
-			r->ChangeLootType(3);
-		}
-		else if(strcasecmp(sep->arg[1], "ALL") == 0)
-		{
-			c->Message(Chat::Yellow, "Loot type changed to: 4");
-			r->ChangeLootType(4);
-		}
-		else
-		{
-			c->Message(Chat::White, "Usage: #raidloot [LEADER/GROUPLEADER/SELECTED/ALL]");
-		}
+	if (!client_raid->IsLeader(c)) {
+		c->Message(Chat::White, "You must be the Raid Leader to use this command.");
+		return;
 	}
-	else
-	{
-		c->Message(Chat::White, "You must be in a raid to use that command.");
+
+	std::string raid_loot_type = str_tolower(sep->arg[1]);
+	bool is_all = raid_loot_type.find("all") != std::string::npos;
+	bool is_group_leader = raid_loot_type.find("groupleader") != std::string::npos;
+	bool is_raid_leader = raid_loot_type.find("raidleader") != std::string::npos;
+	bool is_selected = raid_loot_type.find("selected") != std::string::npos;
+	if (
+		!is_all &&
+		!is_group_leader &&
+		!is_raid_leader &&
+		!is_selected
+	) {
+		c->Message(Chat::White, "Usage: #raidloot [All|GroupLeader|RaidLeader|Selected]");
+		return;
 	}
+
+	std::map<uint32, std::string> loot_types = {
+		{ RaidLootTypes::All, "All" },
+		{ RaidLootTypes::GroupLeader, "GroupLeader" },
+		{ RaidLootTypes::RaidLeader, "RaidLeader" },
+		{ RaidLootTypes::Selected, "Selected" }
+	};
+	
+	uint32 loot_type;
+	if (is_all) {
+		loot_type = RaidLootTypes::All;
+	} else if (is_group_leader) {
+		loot_type = RaidLootTypes::GroupLeader;
+	} else if (is_raid_leader) {
+		loot_type = RaidLootTypes::RaidLeader;
+	} else if (is_selected) {
+		loot_type = RaidLootTypes::Selected;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Loot type changed to {} ({}).",
+			loot_types[loot_type],
+			loot_type
+		).c_str()
+	);
 }
 
 void command_emoteview(Client *c, const Seperator *sep)
