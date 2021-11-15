@@ -2278,7 +2278,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 
 	if (!inst->IsStackable())
 	{
-		DeleteItemInInventory(ams_in->slot, 0, false);
+		DeleteItemInInventory(ams_in->slot);
 	}
 	else
 	{
@@ -2293,7 +2293,7 @@ void Client::Handle_OP_AdventureMerchantSell(const EQApplicationPacket *app)
 			return;
 		}
 
-		DeleteItemInInventory(ams_in->slot, ams_in->charges, false);
+		DeleteItemInInventory(ams_in->slot, ams_in->charges);
 		price *= ams_in->charges;
 	}
 
@@ -2764,7 +2764,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 
 		if (!inst->IsStackable())
 		{
-			DeleteItemInInventory(sell->slot_id, 0, false);
+			DeleteItemInInventory(sell->slot_id);
 		}
 		else
 		{
@@ -2779,7 +2779,7 @@ void Client::Handle_OP_AltCurrencySell(const EQApplicationPacket *app)
 				return;
 			}
 
-			DeleteItemInInventory(sell->slot_id, sell->charges, false);
+			DeleteItemInInventory(sell->slot_id, sell->charges);
 			cost *= sell->charges;
 		}
 
@@ -9057,48 +9057,6 @@ void Client::Handle_OP_ItemVerifyRequest(const EQApplicationPacket *app)
 					{
 						LogDebug("Error: unknown item->Click.Type ([{}])", item->Click.Type);
 					}
-					else
-					{
-
-						/*
-						//This is food/drink - consume it
-						if (item->ItemType == EQ::item::ItemTypeFood && m_pp.hunger_level < 5000)
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == EQ::item::ItemTypeDrink && m_pp.thirst_level < 5000)
-						{
-							Consume(item, item->ItemType, slot_id, false);
-						}
-						else if (item->ItemType == EQ::item::ItemTypeAlcohol)
-						{
-#if EQDEBUG >= 1
-							LogDebug("Drinking Alcohol from slot:[{}]", slot_id);
-#endif
-							// This Seems to be handled in OP_DeleteItem handling
-							//DeleteItemInInventory(slot_id, 1, false);
-							//entity_list.MessageCloseString(this, true, 50, 0, DRINKING_MESSAGE, GetName(), item->Name);
-							//Should add intoxication level to the PP at some point
-							//CheckIncreaseSkill(ALCOHOL_TOLERANCE, nullptr, 25);
-						}
-
-						EQApplicationPacket *outapp2 = nullptr;
-						outapp2 = new EQApplicationPacket(OP_Stamina, sizeof(Stamina_Struct));
-						Stamina_Struct* sta = (Stamina_Struct*)outapp2->pBuffer;
-
-						if (m_pp.hunger_level > 6000)
-							sta->food = 6000;
-						if (m_pp.thirst_level > 6000)
-							sta->water = 6000;
-
-						sta->food = m_pp.hunger_level;
-						sta->water = m_pp.thirst_level;
-
-						QueuePacket(outapp2);
-						safe_delete(outapp2);
-						*/
-					}
-
 				}
 				else
 				{
@@ -13413,26 +13371,14 @@ void Client::Handle_OP_ShopPlayerSell(const EQApplicationPacket *app)
 	// end QS code
 
 	// Now remove the item from the player, this happens regardless of outcome
-	if (!inst->IsStackable())
-		this->DeleteItemInInventory(mp->itemslot, 0, false);
-	else {
-		// HACK: DeleteItemInInventory uses int8 for quantity type. There is no consistent use of types in code in this path so for now iteratively delete from inventory.
-		if (mp->quantity > 255) {
-			uint32 temp = mp->quantity;
-			while (temp > 255 && temp != 0) {
-				// Delete chunks of 255
-				this->DeleteItemInInventory(mp->itemslot, 255, false);
-				temp -= 255;
-			}
-			if (temp != 0) {
-				// Delete remaining
-				this->DeleteItemInInventory(mp->itemslot, temp, false);
-			}
-		}
-		else {
-			this->DeleteItemInInventory(mp->itemslot, mp->quantity, false);
-		}
-	}
+	DeleteItemInInventory(
+		mp->itemslot,
+		(
+			!inst->IsStackable() ?
+			0 :
+			mp->quantity
+		)
+	);
 
 
 	//This forces the price to show up correctly for charged items.
