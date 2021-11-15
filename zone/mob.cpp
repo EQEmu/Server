@@ -1708,8 +1708,9 @@ void Mob::ShowStats(Client* client)
 		client->Message(
 			Chat::White,
 			fmt::format(
-				"NPC | ID: {} Name: {}{} Level: {}",
+				"NPC | ID: {} Entity ID: {} Name: {}{} Level: {}",
 				target->GetNPCTypeID(),
+				target->GetID(),
 				target_name,
 				(
 					!target_last_name.empty() ?
