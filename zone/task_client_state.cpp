@@ -2196,20 +2196,7 @@ void ClientTaskState::RemoveTask(Client *client, int sequence_number, TaskType t
 
 void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 {
-	auto task_type    = task_manager->GetTaskType(task_id);
-	int  character_id = client->CharacterID();
-
-	CharacterActivitiesRepository::DeleteWhere(
-		database,
-		fmt::format("charid = {} AND taskid = {}", character_id, task_id)
-	);
-
-	CharacterTasksRepository::DeleteWhere(
-		database,
-		fmt::format("charid = {} AND taskid = {} AND type = {}", character_id, task_id, (int) task_type)
-	);
-
-	switch (task_type) {
+	switch (task_manager->GetTaskType(task_id)) {
 		case TaskType::Task: {
 			if (m_active_task.task_id == task_id) {
 				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
@@ -2219,7 +2206,7 @@ void ClientTaskState::RemoveTaskByTaskID(Client *client, uint32 task_id)
 		}
 		case TaskType::Shared: {
 			if (m_active_shared_task.task_id == task_id) {
-				LogTasks("[UPDATE] RemoveTaskByTaskID found Task [{}]", task_id);
+				LogTasks("[UPDATE] RemoveTaskByTaskID found Shared Task [{}]", task_id);
 				CancelTask(client, TASKSLOTSHAREDTASK, TaskType::Shared, true);
 			}
 			break;
