@@ -6327,3 +6327,24 @@ int Client::GetNextAvailableDisciplineSlot(int starting_slot) {
 
 	return -1; // Return -1 if No Slots open
 }
+
+// IsWithinRange returns true if target is within range of spell ID casted by mob
+bool Mob::IsWithinSpellRange(Mob *target, float spellRange, uint16 spellID) {
+	float range = GetActSpellRange(spellID, spellRange, false);
+	if (!target) {
+		return false;
+	}
+
+	if (target->GetID() == GetID()) return true;
+
+	float dist2 = DistanceSquared(GetPosition(), target->GetPosition());
+	float range2 = spellRange * spellRange;
+	float min_range2 = spells[spellID].min_range * spells[spellID].min_range;
+	if(dist2 > range2) {
+		return false;
+	}
+	if (dist2 < min_range2){
+		return false;
+	}
+	return true;
+}

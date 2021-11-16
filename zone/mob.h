@@ -354,7 +354,8 @@ public:
 	void CalcDestFromHeading(float heading, float distance, float MaxZDiff, float StartX, float StartY, float &dX, float &dY, float &dZ);
 	void BeamDirectional(uint16 spell_id, int16 resist_adjust);
 	void ConeDirectional(uint16 spell_id, int16 resist_adjust);
-	void TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id);
+	void TryOnSpellFinished(Mob *caster, Mob *target, uint16 spell_id);	
+	bool IsWithinSpellRange(Mob *target, float spellRange, uint16 spellID);
 
 	//Buff
 	void BuffProcess();
@@ -854,7 +855,7 @@ public:
 	inline bool HasBaseEffectFocus() const { return (spellbonuses.FocusEffects[focusFcBaseEffects] || aabonuses.FocusEffects[focusFcBaseEffects] || itembonuses.FocusEffects[focusFcBaseEffects]); }
 	int32 GetDualWieldingSameDelayWeapons() const { return dw_same_delay; }
 	inline void SetDualWieldingSameDelayWeapons(int32 val) { dw_same_delay = val; }
-
+	int8 ElixirCastSpellCheck(uint16 spellID, Mob* outMob);
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
 	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }

@@ -320,7 +320,9 @@ public:
 	uint8 GetStopMeleeLevel() { return _stopMeleeLevel; }
 	void SetStopMeleeLevel(uint8 level);
 	void SetGuardMode();
-	void SetHoldMode();
+	void SetHoldMode();	
+	bool ElixirAIDetermineSpellToCast();
+	bool ElixirAITryCastSpell(BotSpell botSpell, bool isHeal = false);
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();

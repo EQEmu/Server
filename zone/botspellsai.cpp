@@ -1134,6 +1134,14 @@ bool Bot::AI_PursueCastCheck() {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
 
+		if (RuleB(Bots, IsBotsElixirEnabled)) {
+			if (ElixirAIDetermineSpellToCast()) {
+				AIautocastspell_timer->Start(RandomTimer(500, 2000), false); // avg human response is much less than 5 seconds..even for non-combat situations...
+				return true;
+			}
+			return false;
+		}
+
 		LogAI("Bot Engaged (pursuing) autocast check triggered. Trying to cast offensive spells");
 
 		if(!AICastSpell(GetTarget(), 100, SpellType_Snare)) {
@@ -1165,6 +1173,14 @@ bool Bot::AI_IdleCastCheck() {
 		LogAI("Bot Non-Engaged autocast check triggered: [{}]", this->GetCleanName());
 #endif
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
+
+		if (RuleB(Bots, IsBotsElixirEnabled)) {
+			if (ElixirAIDetermineSpellToCast()) {
+				AIautocastspell_timer->Start(RandomTimer(500, 2000), false); // avg human response is much less than 5 seconds..even for non-combat situations...
+				return true;
+			}
+			return false;
+		}
 
 		bool pre_combat = false;
 		Client* test_against = nullptr;
@@ -1308,6 +1324,13 @@ bool Bot::AI_EngagedCastCheck() {
 	if (GetTarget() && AIautocastspell_timer->Check(false)) {
 
 		AIautocastspell_timer->Disable();	//prevent the timer from going off AGAIN while we are casting.
+		if (RuleB(Bots, IsBotsElixirEnabled)) {
+			if (ElixirAIDetermineSpellToCast()) {
+				AIautocastspell_timer->Start(RandomTimer(500, 2000), false); // avg human response is much less than 5 seconds..even for non-combat situations...
+				return true;
+			}
+			return false;
+		}
 
 		uint8 botClass = GetClass();
 		EQ::constants::StanceType botStance = GetBotStance();
@@ -2674,4 +2697,209 @@ uint8 Bot::GetChanceToCastBySpellType(uint32 spellType)
 	return database.botdb.GetSpellCastingChance(spell_type_index, class_index, stance_index, type_index);
 }
 
+
+
+// ElixirAIDetermineSpellToCast is called during AI bot logics
+// It determines by class which spell to cast
+bool Bot::ElixirAIDetermineSpellToCast() {
+		BotSpell selectedBotSpell;
+		int8 spellAIResult;
+		Group *grp = GetGroup();
+
+		if (GetClass() == WARRIOR || GetClass() == SHADOWKNIGHT || GetClass() == PALADIN) {
+			
+			/*if(CheckAETaunt()) {
+				selectedBotSpell = GetBestBotSpellForAETaunt(this);
+				if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+					Log(Logs::General, Logs::Botenaries, "%s AE Taunting.", GetName());
+					return true;
+				}
+			}
+
+			if(CheckTaunt()) {
+				selectedBotSpell = GetBestBotSpellForTaunt(this);
+				if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+			}
+			*/
+		}
+
+		switch (GetClass()) {
+		case CLERIC:
+		case PALADIN:
+		case RANGER: 
+			selectedBotSpell = GetBestBotSpellForGroupHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+
+			selectedBotSpell = GetBestBotSpellForHealOverTime(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			selectedBotSpell = GetBestBotSpellForFastHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			selectedBotSpell = GetBestBotSpellForRegularSingleTargetHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				if (!grp) break;
+				if (!grp->members[i]) continue;
+				if (!grp->members[i]->qglobal) continue;					
+				if(!GetNeedsCured(grp->members[i])) continue;
+				if (grp->members[i]->DontCureMeBefore() > Timer::GetCurrentTime()) continue;
+				selectedBotSpell = GetBestBotSpellForCure(this, grp->members[i]);
+				if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+					return true;
+				}
+			}
+
+			if (GetManaRatio() > 50) { // healers only offensive or buff at > 50% mana
+				selectedBotSpell = GetBestBotSpellForNukeByTargetType(this, ST_Target);
+				if (ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+
+				auto buffSpells = GetBotSpellsBySpellType(this, SpellType_Buff);
+				for (auto buffSpell : buffSpells) {
+					if (!ElixirAITryCastSpell(selectedBotSpell)) continue;
+					return true;
+				}
+			}
+			return false;
+		// Pets class will first cast their pet, then buffs
+		case DRUID:
+		case MAGICIAN:
+		case SHADOWKNIGHT:
+		case SHAMAN:
+		case NECROMANCER:
+		case ENCHANTER:
+		case BEASTLORD:
+			selectedBotSpell = GetBestBotSpellForGroupHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+
+			selectedBotSpell = GetBestBotSpellForHealOverTime(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			selectedBotSpell = GetBestBotSpellForFastHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			selectedBotSpell = GetBestBotSpellForRegularSingleTargetHeal(this);
+			if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+				return true;
+			}
+			
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				if (!grp) break;
+				if (!grp->members[i]) continue;
+				if (!grp->members[i]->qglobal) continue;					
+				if(!GetNeedsCured(grp->members[i])) continue;
+				if (grp->members[i]->DontCureMeBefore() > Timer::GetCurrentTime()) continue;
+				selectedBotSpell = GetBestBotSpellForCure(this, grp->members[i]);
+				if (ElixirAITryCastSpell(selectedBotSpell, true)) {
+					return true;
+				}
+			}
+
+			if (GetManaRatio() > 50) { // healers only offensive or buff at > 50% mana
+				selectedBotSpell = GetBestBotSpellForNukeByTargetType(this, ST_Target);
+				if (ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+
+				auto buffSpells = GetBotSpellsBySpellType(this, SpellType_Buff);
+				for (auto buffSpell : buffSpells) {
+					if (!ElixirAITryCastSpell(selectedBotSpell)) continue;
+					return true;
+				}
+			}
+			return false;
+		case WIZARD: // This can eventually be move into the BEASTLORD case handler once pre-combat is fully implemented
+			if (GetTarget() && HasOrMayGetAggro()) {
+				selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_Escape);
+				if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+			}
+
+			selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_Nuke);
+			if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+				return true;
+			}
+			return false;
+		case BARD:
+			if (GetTarget() && HasOrMayGetAggro()) {
+				selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_PreCombatBuffSong);
+				if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+			}
+
+			selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_InCombatBuffSong);
+			if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+				return true;
+			}
+			return false;
+		default:
+			if (GetTarget() && HasOrMayGetAggro()) {
+				selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_Escape);
+				if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+					return true;
+				}
+			}
+
+			selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_Nuke);
+			if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+				return true;
+			}
+
+			selectedBotSpell = GetFirstBotSpellBySpellType(this, SpellType_InCombatBuff);
+			if (selectedBotSpell.SpellId > 0 && ElixirAITryCastSpell(selectedBotSpell)) {
+				return true;
+			}
+			return false;
+		}
+		return false;
+}
+
+// ElixirAITryCastSpell takes a provided spell id and does a spell check to determine if the spell is valid
+// Once valid, it will cast on returned mob candidate
+bool Bot::ElixirAITryCastSpell(BotSpell botSpell, bool isHeal) {
+	auto spellID = botSpell.SpellId;
+	if (spellID == 0) return false;
+
+	Mob* outMob;
+	auto spellAIResult = ElixirCastSpellCheck(spellID, outMob);
+
+	if (spellAIResult < 0) return false;
+
+	if (spellAIResult == 0) {
+		AIDoSpellCast(botSpell.SpellIndex, GetTarget(), -1);
+		if (GetTarget() == this) return true;
+		if (isHeal)	BotGroupSay(this, "Casting %s on %s.", spells[spellID].name, GetTarget()->GetCleanName());
+		return true;
+	}
+	
+	if (outMob == nullptr) {
+		return false;		
+	}
+
+	AIDoSpellCast(botSpell.SpellIndex, outMob, -1);
+	if (outMob == this) return true;
+	if (isHeal) BotGroupSay(this, "Casting %s on %s.", spells[spellID].name, outMob->GetCleanName());
+	return true;
+}
 #endif

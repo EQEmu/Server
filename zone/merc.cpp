@@ -2020,6 +2020,10 @@ bool Merc::AICastSpell(int8 iChance, uint32 iSpellTypes) {
 	if(!AI_HasSpells())
 		return false;
 
+	if (RuleB(Mercs, IsMercsElixirEnabled)) {
+		return ElixirAIDetermineSpellToCast();
+	}
+
 	if (iChance < 100) {
 		if (zone->random.Int(0, 100) > iChance){
 			return false;
@@ -6361,4 +6365,156 @@ uint32 Merc::CalcUpkeepCost(uint32 templateID , uint8 level, uint8 currency_type
 	}
 
 	return cost;
+}
+
+
+// ElixirAIDetermineSpellToCast is called during Merc::AICastSpell and overrides normal logic
+// It determines by class which spell to cast
+bool Merc::ElixirAIDetermineSpellToCast() {
+		MercSpell selectedMercSpell;
+		int8 spellAIResult;
+		Group *grp = GetGroup();
+
+		switch (GetClass()) {
+		case HEALER:
+			selectedMercSpell = GetBestMercSpellForGroupHeal(this);
+			if (ElixirAITryCastSpell(selectedMercSpell, true)) {
+				return true;
+			}
+
+			selectedMercSpell = GetBestMercSpellForHealOverTime(this);
+			if (ElixirAITryCastSpell(selectedMercSpell, true)) {
+				return true;
+			}
+			
+			selectedMercSpell = GetBestMercSpellForFastHeal(this);
+			if (ElixirAITryCastSpell(selectedMercSpell, true)) {
+				return true;
+			}
+			
+			selectedMercSpell = GetBestMercSpellForRegularSingleTargetHeal(this);
+			if (ElixirAITryCastSpell(selectedMercSpell, true)) {
+				return true;
+			}
+			
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				if (!grp) break;
+				if (!grp->members[i]) continue;
+				if (!grp->members[i]->qglobal) continue;					
+				if(!GetNeedsCured(grp->members[i])) continue;
+				if (grp->members[i]->DontCureMeBefore() > Timer::GetCurrentTime()) continue;
+				selectedMercSpell = GetBestMercSpellForCure(this, grp->members[i]);
+				if (ElixirAITryCastSpell(selectedMercSpell, true)) {
+					return true;
+				}
+			}
+
+			if (GetManaRatio() > 50) { // healers only offensive or buff at > 50% mana
+				selectedMercSpell = GetBestMercSpellForStun(this);
+				if (ElixirAITryCastSpell(selectedMercSpell)) {
+					return true;
+				}
+
+				selectedMercSpell = GetBestMercSpellForNuke(this);
+				if (ElixirAITryCastSpell(selectedMercSpell)) {
+					return true;
+				}
+
+				auto buffSpells = GetMercSpellsBySpellType(this, SpellType_Buff);
+				for (auto buffSpell : buffSpells) {
+					if (!ElixirAITryCastSpell(selectedMercSpell)) continue;
+					return true;
+				}
+			}
+			return false;
+		case MELEEDPS:
+			if (GetTarget() && HasOrMayGetAggro()) {
+				selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Escape);
+				if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+					return true;
+				}
+			}
+
+			selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Nuke);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+
+			selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_InCombatBuff);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+			return false;
+		case TANK:
+			if(CheckAETaunt()) {
+				selectedMercSpell = GetBestMercSpellForAETaunt(this);
+				if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+					Log(Logs::General, Logs::Mercenaries, "%s AE Taunting.", GetName());
+					return true;
+				}
+			}
+
+			if(CheckTaunt()) {
+				selectedMercSpell = GetBestMercSpellForTaunt(this);
+				if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+					return true;
+				}
+			}
+
+			selectedMercSpell = GetBestMercSpellForHate(this);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+
+			selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Nuke);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+
+			selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_InCombatBuff);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+			return false;
+		case CASTERDPS:
+			if (GetTarget() && HasOrMayGetAggro()) {
+				selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Escape);
+				if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+					return true;
+				}
+			}
+
+			selectedMercSpell = GetFirstMercSpellBySpellType(this, SpellType_Nuke);
+			if (selectedMercSpell.spellid > 0 && ElixirAITryCastSpell(selectedMercSpell)) {
+				return true;
+			}
+		}
+		return false;
+}
+
+// ElixirAITryCastSpell takes a provided spell id and does a spell check to determine if the spell is valid
+// Once valid, it will cast on returned mob candidate
+bool Merc::ElixirAITryCastSpell(MercSpell mercSpell, bool isHeal) {
+	auto spellID = mercSpell.spellid;
+	if (spellID == 0) return false;
+
+	Mob* outMob;
+	auto spellAIResult = ElixirCastSpellCheck(spellID, outMob);
+
+	if (spellAIResult < 0) return false;
+
+	if (spellAIResult == 0) {
+		AIDoSpellCast(spellID, GetTarget(), -1);
+		if (GetTarget() == this) return true;
+		if (isHeal)	MercGroupSay(this, "Casting %s on %s.", spells[spellID].name, GetTarget()->GetCleanName());
+		return true;
+	}
+	
+	if (outMob == nullptr) {
+		return false;
+	}
+	AIDoSpellCast(spellID, outMob, -1);
+	if (outMob == this) return true;
+	if (isHeal) MercGroupSay(this, "Casting %s on %s.", spells[spellID].name, outMob->GetCleanName());
+	return true;
 }

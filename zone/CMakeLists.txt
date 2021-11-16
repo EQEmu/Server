@@ -26,6 +26,7 @@ SET(zone_sources
 	dialogue_window.cpp
 	dynamic_zone.cpp
 	effects.cpp
+	elixir.cpp
 	embparser.cpp
 	embparser_api.cpp
 	embperl.cpp
@@ -187,6 +188,7 @@ SET(zone_headers
 	doors.h
 	dialogue_window.h
 	dynamic_zone.h
+	elixir.h
 	embparser.h
 	embperl.h
 	embxs.h

@@ -178,6 +178,8 @@ public:
 	bool CheckAETaunt();
 	bool CheckConfidence();
 	bool TryHide();
+	bool ElixirAIDetermineSpellToCast();
+	bool ElixirAITryCastSpell(MercSpell mercSpell, bool isHeal = false);
 
 	// stat functions
 	virtual void ScaleStats(int scalepercent, bool setmax = false);

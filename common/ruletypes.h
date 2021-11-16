@@ -188,6 +188,9 @@ RULE_INT(Mercs, AggroRadiusPuller, 25, "Determines the distance from which a mer
 RULE_INT(Mercs, ResurrectRadius, 50, "Determines the distance from which a healer merc will attempt to resurrect a group member's corpse")
 RULE_INT(Mercs, ScaleRate, 100, "Merc scale factor")
 RULE_BOOL(Mercs, AllowMercSuspendInCombat, true, "Allow merc suspend in combat")
+RULE_BOOL(Mercs, IsMercsElixirEnabled, false, "Override AI with elixir logic")
+RULE_INT(Mercs, MercsElixirHealPercent, 90, "Heal allies at this percent health")
+RULE_INT(Mercs, MercsElixirAEMinimum, 3, "AE Minimum to trigger AE spells (heals and nukes)")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Guild)
@@ -599,6 +602,9 @@ RULE_BOOL(Bots, OldRaceRezEffects, false, "Older clients had ID 757 for races wi
 RULE_BOOL(Bots, ResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
 RULE_INT(Bots, OldResurrectionSicknessSpell, 757, "757 is Default Old Resurrection Sickness Spell")
 RULE_INT(Bots, ResurrectionSicknessSpell, 756, "756 is Default Resurrection Sickness Spell")
+RULE_BOOL(Bots, IsBotsElixirEnabled, false, "Override AI with elixir logic")
+RULE_INT(Bots, BotsElixirHealPercent, 90, "Heal allies at this percent health")
+RULE_INT(Bots, BotsElixirAEMinimum, 3, "AE Minimum to trigger AE spells (heals and nukes)")
 RULE_CATEGORY_END()
 #endif
 
