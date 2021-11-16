@@ -8501,7 +8501,7 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 
 		LogFood("Consuming food, points added to hunger_level: [{}] - current_hunger: [{}]", increase, m_pp.hunger_level);
 
-		DeleteItemInInventory(slot, 1, false);
+		DeleteItemInInventory(slot, 1);
 
 		if (!auto_consume) // no message if the client consumed for us
 			entity_list.MessageCloseString(this, true, 50, 0, EATING_MESSAGE, GetName(), item->Name);
@@ -8516,7 +8516,7 @@ void Client::Consume(const EQ::ItemData *item, uint8 type, int16 slot, bool auto
 
 		m_pp.thirst_level += increase;
 
-		DeleteItemInInventory(slot, 1, false);
+		DeleteItemInInventory(slot, 1);
 
 		LogFood("Consuming drink, points added to thirst_level: [{}] current_thirst: [{}]", increase, m_pp.thirst_level);
 
@@ -10285,7 +10285,7 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 		{ EQ::invslot::SHARED_BANK_BEGIN, EQ::invslot::SHARED_BANK_END },
 		{ EQ::invbag::SHARED_BANK_BAGS_BEGIN, EQ::invbag::SHARED_BANK_BAGS_END },
 	};
-	int removed_count = 0;
+	int16 removed_count = 0;
 	const size_t size = sizeof(slots) / sizeof(slots[0]);
 	for (int slot_index = 0; slot_index < size; ++slot_index) {
 		for (int slot_id = slots[slot_index][0]; slot_id <= slots[slot_index][1]; ++slot_id) {
@@ -10295,13 +10295,13 @@ void Client::RemoveItem(uint32 item_id, uint32 quantity)
 
 			item = GetInv().GetItem(slot_id);
 			if (item && item->GetID() == item_id) {
-				int charges = item->IsStackable() ? item->GetCharges() : 0;
-				int stack_size = std::max(charges, 1);
+				int16 charges = item->IsStackable() ? item->GetCharges() : 0;
+				int16 stack_size = std::max(charges, static_cast<int16>(1));
 				if ((removed_count + stack_size) <= quantity) {
 					removed_count += stack_size;
 					DeleteItemInInventory(slot_id, charges, true);
 				} else {
-					int amount_left = (quantity - removed_count);
+					int16 amount_left = (quantity - removed_count);
 					if (amount_left > 0 && stack_size >= amount_left) {
 						removed_count += amount_left;
 						DeleteItemInInventory(slot_id, amount_left, true);

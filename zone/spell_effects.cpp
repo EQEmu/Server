@@ -622,22 +622,21 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 				if(IsClient()){
 					EQ::ItemInstance* transI = CastToClient()->GetInv().GetItem(EQ::invslot::slotCursor);
 					if (transI && transI->IsClassCommon() && transI->IsStackable()){
-						uint32 fcharges = transI->GetCharges();
-							//Does it sound like meat... maybe should check if it looks like meat too...
-							if(strstr(transI->GetItem()->Name, "meat") ||
-								strstr(transI->GetItem()->Name, "Meat") ||
-								strstr(transI->GetItem()->Name, "flesh") ||
-								strstr(transI->GetItem()->Name, "Flesh") ||
-								strstr(transI->GetItem()->Name, "parts") ||
-								strstr(transI->GetItem()->Name, "Parts")){
-								CastToClient()->DeleteItemInInventory(EQ::invslot::slotCursor, fcharges, true);
-								CastToClient()->SummonItem(13073, fcharges);
-							}
-							else{
-								Message(Chat::Red, "You can only transmute flesh to bone.");
-							}
+						int16 fcharges = transI->GetCharges();
+						//Does it sound like meat... maybe should check if it looks like meat too...
+						if(strstr(transI->GetItem()->Name, "meat") ||
+							strstr(transI->GetItem()->Name, "Meat") ||
+							strstr(transI->GetItem()->Name, "flesh") ||
+							strstr(transI->GetItem()->Name, "Flesh") ||
+							strstr(transI->GetItem()->Name, "parts") ||
+							strstr(transI->GetItem()->Name, "Parts")){
+							CastToClient()->DeleteItemInInventory(EQ::invslot::slotCursor, fcharges, true);
+							CastToClient()->SummonItem(13073, fcharges);
 						}
-					else{
+						else{
+							Message(Chat::Red, "You can only transmute flesh to bone.");
+						}
+					} else{
 						Message(Chat::Red, "You can only transmute flesh to bone.");
 					}
 				}
