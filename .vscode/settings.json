@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "chrono": "cpp",
+        "xutility": "cpp",
+        "iterator": "cpp",
+        "*.ipp": "cpp"
+    }
+}
