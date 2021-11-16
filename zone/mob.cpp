@@ -5205,7 +5205,7 @@ void Mob::MeleeLifeTap(int32 damage) {
 	if(melee_lifetap_mod && damage > 0){
 
 		lifetap_amt = damage * (static_cast<float>(melee_lifetap_mod) / 100.0f);
-		LogCombat("Melee lifetap healing [{}] points of damage wiht modifier of [{}] ", lifetap_amt, melee_lifetap_mod);
+		LogCombat("Melee lifetap healing [{}] points of damage with modifier of [{}] ", lifetap_amt, melee_lifetap_mod);
 
 		if (lifetap_amt >= 0) {
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
