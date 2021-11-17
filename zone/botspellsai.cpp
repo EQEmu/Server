@@ -2750,11 +2750,6 @@ void Bot::ElixirSpellCacheRefresh() {
 		if (GetSpellLevel(spellID, GetClass()) <= 0) continue;
 		if (GetSpellLevel(spellID, GetClass()) > GetLevel()) continue;
 
-		if (spellID == 13) {
-			if (true) {
-
-			}
-		}
 		if (spells[spellID].target_type == ST_Target && IsEffectInSpell(spellID, SE_CurrentHP) && spellSlot == -1 && spells[spellID].base_value > 0) {
 			if (GetClass() == CLERIC || GetClass() == DRUID || GetClass() == SHAMAN || GetClass() == PALADIN) spellSlot = 4;
 			else spellSlot = 6;
