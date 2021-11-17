@@ -80,6 +80,7 @@
 #include "../common/shared_tasks.h"
 #include "gm_commands/door_manipulation.h"
 #include "../common/languages.h"
+#include "elixir.h"
 
 extern QueryServ* QServ;
 extern WorldServer worldserver;
@@ -209,6 +210,7 @@ int command_init(void)
 		command_add("dz", "Manage expeditions and dynamic zone instances", 80, command_dz) ||
 		command_add("dzkickplayers", "Removes all players from current expedition. (/kickplayers alternative for pre-RoF clients)", 0, command_dzkickplayers) ||
 		command_add("editmassrespawn", "[name-search] [second-value] - Mass (Zone wide) NPC respawn timer editing command", 100, command_editmassrespawn) ||
+		command_add("elixircheck", "[spellid] - Check how elixir AI works with provided spell id", 100, command_elixircheck) ||
 		command_add("emote", "['name'/'world'/'zone'] [type] [message] - Send an emote message", 80, command_emote) ||
 		command_add("emotesearch", "Searches NPC Emotes", 80, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", 80, command_emoteview) ||
@@ -15899,6 +15901,97 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 		}
   }
 }
+
+
+void command_elixircheck(Client* c, const Seperator* sep)
+{
+	if (sep->arg[1][0] == 0) {
+		c->Message(Chat::White, "Usage: #elixircheck [spellid]");
+		return;
+	}
+
+	auto spellid = atoi(sep->arg[1]);
+	if (spellid < 1) {
+		c->Message(Chat::Red, "Invalid spell id: %d", spellid);
+		return;
+	}
+	Mob* outMob = nullptr;
+	const SPDat_Spell_Struct& spDat = spells[spellid];
+	auto result = c->ElixirCastSpellCheck(spellid, &outMob);
+	if (result < 0) {
+		switch (result) {
+		case ELIXIR_UNHANDLED_SPELL:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNHANDLED_SPELL)", spDat.name, result);
+				return;
+		case ELIXIR_CANNOT_CAST_BAD_STATE:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_CAST_BAD_STATE)", spDat.name, result);
+				return;
+		case ELIXIR_NOT_ENOUGH_MANA:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_MANA)", spDat.name, result);
+				return;
+		case ELIXIR_LULL_IGNORED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (LULL_IGNORED)", spDat.name, result);
+				return;
+		case ELIXIR_MEZ_IGNORED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (MEZ_IGNORED)", spDat.name, result);
+				return;
+		case ELIXIR_CHARM_IGNORED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CHARM_IGNORED)", spDat.name, result);
+				return;
+		case ELIXIR_NO_TARGET:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_TARGET)", spDat.name, result);
+				return;
+		case ELIXIR_INVALID_TARGET_BODYTYPE:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (INVALID_TARGET_BODYTYPE)", spDat.name, result);
+				return;
+		case ELIXIR_TRANSPORT_IGNORED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (TRANSPORT_IGNORED)", spDat.name, result);
+				return;
+		case ELIXIR_NOT_LINE_OF_SIGHT:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_LINE_OF_SIGHT)", spDat.name, result);
+				return;
+		case ELIXIR_COMPONENT_REQUIRED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (COMPONENT_REQUIRED)", spDat.name, result);
+				return;
+		case ELIXIR_ALREADY_HAVE_BUFF:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_BUFF)", spDat.name, result);
+				return;
+		case ELIXIR_ZONETYPE_FAIL:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ZONETYPE_FAIL)", spDat.name, result);
+				return;
+		case ELIXIR_CANNOT_USE_IN_COMBAT:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_USE_IN_COMBAT)", spDat.name, result);
+				return;
+		case ELIXIR_NOT_ENOUGH_ENDURANCE:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_ENDURANCE)", spDat.name, result);
+				return;
+		case ELIXIR_ALREADY_HAVE_PET:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_PET)", spDat.name, result);
+				return;
+		case ELIXIR_OUT_OF_RANGE:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (OUT_OF_RANGE)", spDat.name, result);
+				return;
+		case ELIXIR_NO_PET:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_PET)", spDat.name, result);
+				return;
+		case ELIXIR_NOT_NEEDED:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_NEEDED)", spDat.name, result);
+				return;
+		default:
+			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNKNOWN)", spDat.name, result);
+			return;
+		}
+	}
+
+	if (result == 0) {
+		c->Message(Chat::White, "Elixir AI would return OK to cast %s", spDat.name);
+		return;
+	}
+	if (result == 1) {
+		c->Message(Chat::White, "Elixir AI would return OK if target changes to %s to cast %s", outMob->GetCleanName(), spDat.name);
+	}
+}
+
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
 #ifdef BOTS

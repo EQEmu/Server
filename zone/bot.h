@@ -322,7 +322,7 @@ public:
 	void SetGuardMode();
 	void SetHoldMode();	
 	bool ElixirAIDetermineSpellToCast();
-	bool ElixirAITryCastSpell(BotSpell botSpell, bool isHeal = false);
+	bool ElixirAITryCastSpell(uint16 spellID, bool isHeal = false);
 
 	// Mob AI Virtual Override Methods
 	virtual void AI_Process();
@@ -608,6 +608,7 @@ protected:
 	virtual int32 CalcBotAAFocus(focusType type, uint32 aa_ID, uint32 points, uint16 spell_id);
 	virtual void PerformTradeWithClient(int16 beginSlotID, int16 endSlotID, Client* client);
 	virtual bool AIDoSpellCast(uint8 i, Mob* tar, int32 mana_cost, uint32* oDontDoAgainBefore = 0);
+	virtual bool AIElixirDoSpellCast(uint16 spellID, Mob* tar, int32 mana_cost);
 
 	BotCastingRoles& GetCastingRoles() { return m_CastingRoles; }
 	void SetGroupHealer(bool flag = true) { m_CastingRoles.GroupHealer = flag; }
@@ -657,6 +658,8 @@ private:
 	int32	max_end;
 	int32	end_regen;
 	uint32 timers[MaxTimer];
+	bool isElixirSpellCacheBuilt;
+	int elixirCacheSpells[15]{ -1,-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
 	Timer m_evade_timer; // can be moved to pTimers at some point
 	Timer m_alt_combat_hate_timer;
@@ -716,6 +719,7 @@ private:
 	void SetAttackingFlag(bool flag = true) { m_attacking_flag = flag; }
 	void SetPullingFlag(bool flag = true) { m_pulling_flag = flag; }
 	void SetReturningFlag(bool flag = true) { m_returning_flag = flag; }
+	void ElixirSpellCacheRefresh();
 
 	// Private "Inventory" Methods
 	void GetBotItems(EQ::InventoryProfile &inv, std::string* errorMessage);

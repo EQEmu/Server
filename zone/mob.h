@@ -855,7 +855,7 @@ public:
 	inline bool HasBaseEffectFocus() const { return (spellbonuses.FocusEffects[focusFcBaseEffects] || aabonuses.FocusEffects[focusFcBaseEffects] || itembonuses.FocusEffects[focusFcBaseEffects]); }
 	int32 GetDualWieldingSameDelayWeapons() const { return dw_same_delay; }
 	inline void SetDualWieldingSameDelayWeapons(int32 val) { dw_same_delay = val; }
-	int8 ElixirCastSpellCheck(uint16 spellID, Mob* outMob);
+	int8 ElixirCastSpellCheck(uint16 spellID, Mob** outMob);
 	bool TryDoubleMeleeRoundEffect();
 	bool GetUseDoubleMeleeRoundDmgBonus() const { return use_double_melee_round_dmg_bonus; }
 	inline void SetUseDoubleMeleeRoundDmgBonus(bool val) { use_double_melee_round_dmg_bonus = val; }

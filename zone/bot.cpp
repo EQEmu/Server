@@ -8821,6 +8821,10 @@ void Bot::CalcBotStats(bool showtext) {
 	CalcBonuses();
 
 	AI_AddNPCSpells(this->GetBotSpellID());
+	if (RuleB(Bot, IsBotsElixirEnabled)) {
+		isElixirSpellCacheBuilt = false;
+		ElixirSpellCacheRefresh();
+	}
 
 	if(showtext) {
 		GetBotOwner()->Message(Chat::Yellow, "%s has been updated.", GetCleanName());

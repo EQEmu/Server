@@ -13,12 +13,12 @@ extern Zone* zone;
 // If 0 is returned, spell is valid and no target changing is required
 // If a negative value is returned, an error occured. See elixir.h ELIXIR_ prefix const error lookup of reasons
 // If 1 is returned, outMob is set to the suggested mob entity
-int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
+int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 {
-    int manaCurrent = GetMana();
-    int manaMax = GetMaxMana();
-    int hpCurrent = GetHP();
-    int hpMax = GetMaxHP();
+	int manaCurrent = GetMana();
+	int manaMax = GetMaxMana();
+	int hpCurrent = GetHP();
+	int hpMax = GetMaxHP();
 	int endCurrent = GetEndurance();
 	int endMax = GetMaxEndurance();
 
@@ -38,33 +38,38 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 	if (aeMinimum < 1) aeMinimum = 1;
 	if (aeMinimum > 99) aeMinimum = 99;
 
-    if (IsCorpse()) return ELIXIR_CANNOT_CAST_BAD_STATE;
-    
-    bool isHeal = false;
+	if (IsCorpse()) return ELIXIR_CANNOT_CAST_BAD_STATE;
+
+	bool isHeal = false;
 	bool isDebuff = false;
 	bool isBuff = false;
 	bool isLifetap = false;
 	bool isMana = false;
 	bool isCharm = false;
 	bool isSnare = false;
-	bool isSow = false;	
+	bool isSow = false;
 	bool isTaunt = false;
 	bool isSingleTargetSpell = false;
 	bool isPetSummon = false;
 	bool isTransport = false;
 	bool isGroupSpell = false;
 	bool isBardSong = false;
+	bool isBeneficial = false;
+	bool isStun = false;
 	bool isMez = false;
 	bool isLull = false;
 	long stunDuration = 0;
 	long damageAmount = 0;
 	long healAmount = 0;
+	bool isGroupHated = false;
 
-	int skillID;
+	int skillID = 0;
 
-    bodyType targetBodyType = BT_NoTarget2;
-	
-    const SPDat_Spell_Struct &spDat = spells[spellID];
+	bodyType targetBodyType = BT_NoTarget2;
+
+	const SPDat_Spell_Struct& spDat = spells[spellID];
+
+	Log(Logs::General, Logs::Mercenaries, "%s checking %s vs %s", GetName(), spDat.name, target == nullptr ? "no target" : target->GetCleanName());
 
 	int spellgroup = spDat.type_description_id;
 	uint32 ticks = spDat.buff_duration;
@@ -75,42 +80,42 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 	int category = spDat.spell_category;
 	int subcategory = spDat.effect_description_id;
 
-	uint32 buffCount;
-	Group *grp = GetGroup();
-	Raid *raid = GetRaid();
+	uint32 buffCount = 0;
+	Group* grp = GetGroup();
+	Raid* raid = GetRaid();
 
-    for (int i = 0; i < EFFECT_COUNT; i++) {        
-        if (IsBlankSpellEffect(spellID, i)) continue;
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (IsBlankSpellEffect(spellID, i)) continue;
 
-        int attr = spDat.effect_id[i];
-        int base = spDat.base_value[i];
-        int base2 = spDat.limit_value[i];
-        int max = spDat.max_value[i];
-        int calc = spDat.formula[i];
+		int attr = spDat.effect_id[i];
+		int base = spDat.base_value[i];
+		int base2 = spDat.limit_value[i];
+		int max = spDat.max_value[i];
+		int calc = spDat.formula[i];
 
-        if (attr == SE_CurrentHP) { //0
-            if (max > 0) { //Heal / HoT
-                if (ticks < 5 && base > 0) { //regen
-                    isHeal = true;
-                    healAmount = base;
-                }
-                if (ticks > 0) {
-                    isBuff = true;
-                }
-                if (category == 114) { //taps like touch of zlandicar
-                    isLifetap = true;
-                }
-            }
-            if (base < 0 && damageAmount == 0) {
-                damageAmount = -base;
-            }
-            if (max < 0) { //Nuke / DoT
+		if (attr == SE_CurrentHP) { //0
+			if (max > 0) { //Heal / HoT
+				if (ticks < 5 && base > 0) { //regen
+					isHeal = true;
+					healAmount = base;
+				}
+				if (ticks > 0) {
+					isBuff = true;
+				}
+				if (category == 114) { //taps like touch of zlandicar
+					isLifetap = true;
+				}
+			}
+			if (base < 0 && damageAmount == 0) {
+				damageAmount = -base;
+			}
+			if (max < 0) { //Nuke / DoT
 				damageAmount = -max;
 			}
-        }
+		}
 
-        if (attr == SE_ArmorClass || // 1 ac
-            attr == SE_ATK || //2 attack
+		if (attr == SE_ArmorClass || // 1 ac
+			attr == SE_ATK || //2 attack
 			attr == SE_STR || //4 str
 			attr == SE_DEX || //5 dex
 			attr == SE_AGI || //6 agi
@@ -124,9 +129,9 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			if (base < 0) { //-stat
 				isDebuff = true;
 			}
-        }
+		}
 
-        if (attr == SE_MovementSpeed) { //3
+		if (attr == SE_MovementSpeed) { //3
 			if (base > 0) { //+Movement
 				isBuff = true;
 				isSow = true;
@@ -137,7 +142,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			}
 		}
 
-        if (attr == SE_CHA) { //10 CHA
+		if (attr == SE_CHA) { //10 CHA
 			if (base > 0 && base < 254) { //+CHA
 				isBuff = true;
 			}
@@ -155,7 +160,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			}
 		}
 
-        if (attr == SE_CurrentMana) { //15 Mana
+		if (attr == SE_CurrentMana) { //15 Mana
 			isMana = true;
 		}
 		if (attr == SE_Lull) { // pacify (lull)
@@ -175,7 +180,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			isTransport = true;
 		}
 
-        if (attr == SE_ChangeFrenzyRad) { //30 frenzy radius reduction (lull)
+		if (attr == SE_ChangeFrenzyRad) { //30 frenzy radius reduction (lull)
 			isLull = true;
 		}
 
@@ -194,12 +199,17 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		if (attr == SE_Teleport) { //83 Transport
 			isTransport = true;
 		}
-		
+
 		if (attr == SE_Harmony) { //86 reaction radius reduction (lull)
 			isLull = true;
 		}
 		if (attr == SE_Succor) { //88 Evac
 			isTransport = true;
+		}
+
+
+		if (attr == SE_HealOverTime) { //100 Heal over times
+			isHeal = true;
 		}
 
 		if (attr == SE_Familiar) { //108 Summon Familiar
@@ -213,7 +223,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		if (attr == SE_SkillAttack) { //193 skill attack
 			skillID = spDat.skill;
 		}
-    }
+	}
 
 	if (subcategory == 43 && ticks < 10) { //Health
 		isHeal = true;
@@ -224,6 +234,8 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			isLifetap = true;
 		}
 	}
+	isBeneficial = IsBeneficialSpell(spellID);
+	isStun = IsStunSpell(spellID);
 
 	/*
 	//TODO TargetTypes:
@@ -243,7 +255,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 	if (targettype == ST_GroupTeleport) { //3 Group v1
 		isGroupSpell = true;
 	}
-	
+
 	if (isGroupSpell && IsBardSong(spellID)) {
 		isBardSong = true;
 	}
@@ -304,28 +316,28 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		if (targetBodyType != BT_Animal) return ELIXIR_INVALID_TARGET_BODYTYPE;
 	}
 
-	if (targettype == ST_Undead ) { //10 Undead
+	if (targettype == ST_Undead) { //10 Undead
 		if (target == nullptr) return ELIXIR_NO_TARGET;
 		if (targetBodyType != BT_Undead) return ELIXIR_INVALID_TARGET_BODYTYPE;
 	}
 
 	if (targettype == ST_Summoned) { //11 Summoned
-		if (target == nullptr) return ELIXIR_NO_TARGET;	
+		if (target == nullptr) return ELIXIR_NO_TARGET;
 		if (targetBodyType != BT_Summoned) return ELIXIR_INVALID_TARGET_BODYTYPE;
 	}
 
 	if (targettype == ST_Plant) { //Plant
-		if (target == nullptr) return ELIXIR_NO_TARGET;	
+		if (target == nullptr) return ELIXIR_NO_TARGET;
 		if (targetBodyType != BT_Plant) return ELIXIR_INVALID_TARGET_BODYTYPE;
 	}
 
 	if (isTransport) return ELIXIR_TRANSPORT_IGNORED;
 
-	if (spDat.npc_no_los == 0 && target && isSingleTargetSpell && CheckLosFN(target)) return ELIXIR_NOT_LINE_OF_SIGHT;
+	if (spDat.npc_no_los == 0 && target && isSingleTargetSpell && !isBeneficial && !CheckLosFN(target)) return ELIXIR_NOT_LINE_OF_SIGHT;
 
 	for (int i = 0; i < 4; i++) { // Reagent check
-		if (spDat.component[i] == 0) continue;
-		if (spDat.component_count[i] == -1) continue;
+		if (spDat.component[i] < 1) continue;
+		if (spDat.component_count[i] < 1) continue;
 		if (IsMerc()) continue; //mercs don't have inventory nor require reagents
 #ifdef BOTS
 		if (IsBot()) continue; //bots don't have inventory nor require reagents
@@ -340,7 +352,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 
 
 	if (skillID == EQ::skills::SkillBackstab) { // 8 backstab
-		if (!target) {
+		if (target == nullptr) {
 			return ELIXIR_NO_TARGET;
 		}
 		if (!BehindMob(target)) {
@@ -351,9 +363,9 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		}
 		return 0;
 	}
-	
+
 	if (recourseID > 0) { //recourse buff attached
-		const SPDat_Spell_Struct &spDatRecourse = spells[recourseID];
+		const SPDat_Spell_Struct& spDatRecourse = spells[recourseID];
 		if (spDatRecourse.buff_duration > 0) {
 			buffCount = GetMaxTotalSlots();
 			for (uint32 i = 0; i < buffCount; i++) {
@@ -372,8 +384,8 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		}
 	}
 
-	if (ticks > 0 && !IsBeneficialSpell(spellID) && targettype == ST_Target) { // debuff
-		if (!target) {
+	if (ticks > 0 && !isBeneficial && targettype == ST_Target) { // debuff
+		if (target == nullptr) {
 			return ELIXIR_NO_TARGET;
 		}
 
@@ -397,14 +409,31 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		return ELIXIR_ZONETYPE_FAIL;
 	}
 
+	if (target) { //do aggro check
+		if (target->GetHateAmount(this) > 0) isGroupHated = true;
+		if (!isGroupHated) {
+			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+				if (!grp) break;
+				if (!grp->members[i]) continue;
+				if (target->GetHateAmount(grp->members[i]) == 0) continue;
+				isGroupHated = true;
+				break;
+			}
+		}
+	}
 	//TODO: zone_type 2 check (can't cast outdoors indoor only)
 
 	if (IsEffectInSpell(spellID, SE_Levitate) && !zone->CanLevitate()) {
 		return ELIXIR_ZONETYPE_FAIL;
 	}
-	
+
 	if (!spDat.can_cast_in_combat) {
-		if (IsEngaged()) return ELIXIR_CANNOT_USE_IN_COMBAT;
+		if (IsEngaged()) {
+			return ELIXIR_CANNOT_USE_IN_COMBAT;
+		}
+		if (target == nullptr) {
+			return ELIXIR_NO_TARGET;
+		}
 		buffCount = target->GetMaxTotalSlots();
 		for (uint32 i = 0; i < buffCount; i++) {
 			auto buff = target->buffs[i];
@@ -412,7 +441,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			if (IsDetrimentalSpell(buff.spellid) && buff.ticsremaining > 0 && !DetrimentalSpellAllowsRest(buff.spellid)) {
 				return ELIXIR_CANNOT_USE_IN_COMBAT;
 			}
-		}		
+		}
 	}
 
 	if (IsDisciplineBuff(spellID)) {
@@ -434,7 +463,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 
 	if (isPetSummon && HasPet()) return ELIXIR_ALREADY_HAVE_PET;
 
-	
+
 	if (targettype == ST_Pet && isHeal) {
 		if (!HasPet()) {
 			return ELIXIR_NO_PET;
@@ -445,11 +474,11 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		return ELIXIR_NOT_NEEDED;
 	}
 
-	if (isBuff && targettype == ST_Pet && IsBeneficialSpell(spellID)) {
+	if (isBuff && targettype == ST_Pet && isBeneficial) {
 		if (!HasPet()) {
 			return ELIXIR_NO_PET;
 		}
-		
+
 		buffCount = GetPet()->GetMaxTotalSlots();
 		for (uint32 i = 0; i < buffCount; i++) {
 			auto buff = GetPet()->buffs[i];
@@ -471,7 +500,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 	}
 
 	if (isMana && targettype == ST_Self && ticks <= 0 && !isPetSummon) { // self only regen, like harvest, canni
-		if (stunDuration > 0 && IsEngaged()) {
+		if (stunDuration > 0 && isGroupHated) {
 			return ELIXIR_CANNOT_USE_IN_COMBAT;
 		}
 
@@ -487,64 +516,22 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		return ELIXIR_NOT_NEEDED;
 	}
 
-
-	if (isGroupSpell && isHeal && ticks == 0) { //self/group instant heals
+	if (isHeal) { //heal logic
 		int groupHealCount = 0;
-		
-		float sqDistance = spDat.aoe_range * spDat.aoe_range;
-		for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-			if (!grp) break;
-			if (!grp->members[i]) continue;
-			if (grp->members[i]->GetHPRatio() > healPercent) continue;
-			if (sqDistance > 0 && DistanceSquaredNoZ(target->GetPosition(), grp->members[i]->GetPosition()) > sqDistance) continue;		
-			groupHealCount++;
-		}
-
-		if (groupHealCount < aeMinimum) {
-			return ELIXIR_NOT_NEEDED;
-		}
-		return 0;
-	}
-
-
-	if ((targettype == ST_Self || isGroupSpell) && IsBeneficialSpell(spellID)) { //self/group beneficial spell
-		if (IsEngaged() && !isBardSong) {
-			return ELIXIR_CANNOT_USE_IN_COMBAT;
-		}
-
-		if (ticks > 0) {
-			bool isBuffNeeded = true;
-
-			buffCount = GetMaxTotalSlots();
-			for (uint32 i = 0; i < buffCount; i++) {
-				auto buff = buffs[i];
-				if (buff.spellid == SPELL_UNKNOWN) continue;
-				if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
-				if (buff.ticsremaining < 2) continue;
-				if (buff.spellid == spellID) {
-					isBuffNeeded = false;
-					break;
-				}
-				int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
-				if (stackResult == -1) {					
-					isBuffNeeded = false;
-					break;
-				}
+		int healIDPercent = 100;
+		// figure out who is lowest HP party member
+		if (GetHPRatio() <= healPercent) {
+			if (ticks == 0) { // instant heal, just apply				
+				*outMob = this;
+				healIDPercent = GetHPRatio();
 			}
-			if (isBuffNeeded) return 0;
-			if (!isGroupSpell) return ELIXIR_NOT_NEEDED;
-
-			isBuffNeeded = true;
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-
-				if (!grp) break;
-				if (!grp->members[i]) continue;
-				buffCount = grp->members[i]->GetMaxTotalSlots();
+			else { // it's a heal buff, check if player already has it
+				bool isBuffNeeded = true;
+				buffCount = GetMaxTotalSlots();
 				for (uint32 i = 0; i < buffCount; i++) {
 					auto buff = buffs[i];
 					if (buff.spellid == SPELL_UNKNOWN) continue;
 					if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
-					if (buff.ticsremaining < 2) continue;
 					if (buff.spellid == spellID) {
 						isBuffNeeded = false;
 						break;
@@ -555,90 +542,129 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 						break;
 					}
 				}
-				if (!isBuffNeeded) continue;
-				outMob = grp->members[i];
-				return 1;
+				if (isBuffNeeded) {
+					*outMob = this;
+					healIDPercent = GetHPRatio();
+				}
 			}
+		}
+
+		for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+			if (!grp) break;
+			if (!grp->members[i]) continue;
+			if (grp->members[i]->GetHPRatio() > healPercent) continue;
+			if (grp->members[i]->GetHPRatio() > healIDPercent) continue;
+			if (!IsWithinSpellRange(grp->members[i], spDat.range, spellID)) continue;
+
+			groupHealCount++;
+			if (ticks == 0) { // instant heal, just apply
+				*outMob = grp->members[i];
+				healIDPercent = grp->members[i]->GetHPRatio();
+			}
+			else { // it's a heal buff, check if player already has it
+				bool isBuffNeeded = true;
+				buffCount = grp->members[i]->GetMaxTotalSlots();
+				for (uint32 j = 0; j < buffCount; j++) {
+					auto buff = grp->members[i]->buffs[j];
+					if (buff.spellid == SPELL_UNKNOWN) continue;
+					if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
+					if (buff.spellid == spellID) {
+						isBuffNeeded = false;
+						break;
+					}
+					int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
+					if (stackResult == -1) {
+						isBuffNeeded = false;
+						break;
+					}
+					// TODO: Immune Check						
+				}
+				if (isBuffNeeded) {
+					*outMob = grp->members[i];
+					healIDPercent = GetHPRatio();
+				}
+			}
+		}
+
+		if (isGroupSpell && groupHealCount < aeMinimum) {
 			return ELIXIR_NOT_NEEDED;
 		}
 
-		return 0;
+		if (!*outMob) {
+			return ELIXIR_NOT_NEEDED;
+		}
+		return 1;
 	}
 
-	if (targettype == ST_Target || IsBeneficialSpell(spellID)) { //single target beneficial spell
-		if (isHeal) { //heal logic
-			int healIDPercent = 100;
-			// figure out who is lowest HP party member
-			if (GetHPRatio() <= healPercent) {
-				if (ticks == 0) { // instant heal, just apply				
-					outMob = this;
-					healIDPercent = GetHPRatio();
-				} else { // it's a heal buff, check if player already has it
-					bool isBuffNeeded = true;
-					for (uint32 i = 0; i < buffCount; i++) {
-						auto buff = buffs[i];
-						if (buff.spellid == SPELL_UNKNOWN) continue;
-						if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
-						if (buff.spellid == spellID) {
-							isBuffNeeded = false;
-							break;
-						}
-						int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
-						if (stackResult == -1) {							
-							isBuffNeeded = false;
-							break;
-						}
-					}
-					if (isBuffNeeded) {
-						outMob = this;
-						healIDPercent = GetHPRatio();
-					}
+
+	if ((targettype == ST_Self || isGroupSpell) && isBeneficial) { //self/group beneficial spell
+		if (isGroupHated && !isBardSong) {
+			return ELIXIR_CANNOT_USE_IN_COMBAT;
+		}
+		
+		if (ticks <= 4 && GetClass() != BARD) { //don't bother with short duration buffs
+			return ELIXIR_NOT_NEEDED;
+		}
+
+		if (ticks == 0) {
+			return 0;
+		}
+		bool isBuffNeeded = true;
+
+		buffCount = GetMaxTotalSlots();
+		for (uint32 i = 0; i < buffCount; i++) {
+			auto buff = buffs[i];
+			if (buff.spellid == SPELL_UNKNOWN) continue;
+			if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
+			if (buff.ticsremaining < 2) continue;
+			if (buff.spellid == spellID) {
+				isBuffNeeded = false;
+				break;
+			}
+			int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
+			if (stackResult == -1) {
+				isBuffNeeded = false;
+				break;
+			}
+		}
+		if (isBuffNeeded) return 0;
+		if (!isGroupSpell) return ELIXIR_NOT_NEEDED;
+
+		isBuffNeeded = true;
+		for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
+
+			if (!grp) break;
+			if (!grp->members[i]) continue;
+			buffCount = grp->members[i]->GetMaxTotalSlots();
+			for (uint32 j = 0; j < buffCount; j++) {
+				auto buff = grp->members[i]->buffs[j];
+				if (buff.spellid == SPELL_UNKNOWN) continue;
+				if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
+				if (buff.ticsremaining < 2) continue;
+				if (buff.spellid == spellID) {
+					isBuffNeeded = false;
+					break;
+				}
+				int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
+				if (stackResult == -1) {
+					isBuffNeeded = false;
+					break;
 				}
 			}
-
-			for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
-				if (!grp) break;
-				if (!grp->members[i]) continue;
-				if (grp->members[i]->GetHPRatio() > healPercent) continue;
-				if (grp->members[i]->GetHPRatio() > healIDPercent) continue;
-				if (!IsWithinSpellRange(grp->members[i], spDat.range, spellID)) continue;
-
-				if (ticks == 0) { // instant heal, just apply
-					outMob = grp->members[i];
-					healIDPercent = grp->members[i]->GetHPRatio();
-				} else { // it's a heal buff, check if player already has it
-					bool isBuffNeeded = true;
-					for (uint32 i = 0; i < buffCount; i++) {
-						auto buff = grp->members[i]->buffs[i];
-						if (buff.spellid == SPELL_UNKNOWN) continue;
-						if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
-						if (buff.spellid == spellID) {
-							isBuffNeeded = false;
-							break;
-						}
-						int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
-						if (stackResult == -1) {							
-							isBuffNeeded = false;
-							break;
-						}
-						// TODO: Immune Check						
-					}
-					if (isBuffNeeded) {
-						outMob = grp->members[i];
-						healIDPercent = GetHPRatio();
-					}
-				}
-			}
-			if (!outMob) {
-				return ELIXIR_NOT_NEEDED;
-			}
+			if (!isBuffNeeded) continue;
+			*outMob = grp->members[i];
 			return 1;
 		}
+		return ELIXIR_NOT_NEEDED;
+
+	}
+
+	if (targettype == ST_Target && isBeneficial && damageAmount == 0) { //single target beneficial spell
 
 		// TODO: add exceptions for combat buffs situation
 		bool isCombatBuff = false;
 
-		if (IsEngaged() && !isCombatBuff) {
+		if (isGroupHated && !isCombatBuff) {
 			return ELIXIR_NOT_NEEDED;
 		}
 
@@ -647,9 +673,12 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		if (ticks == 0) {
 			return ELIXIR_NOT_NEEDED;
 		}
-		
+		if (ticks <= 4 && GetClass() != BARD) { //don't bother with short duration buffs
+			return ELIXIR_NOT_NEEDED;
+		}
 		// always self buff first
 		bool isBuffNeeded = true;
+		buffCount = GetMaxBuffSlots();
 		for (uint32 i = 0; i < buffCount; i++) {
 			auto buff = buffs[i];
 			if (buff.spellid == SPELL_UNKNOWN) continue;
@@ -669,7 +698,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			if (target && target->GetID() == GetID()) {
 				return 0;
 			}
-			outMob = this;
+			*outMob = this;
 			return 1;
 		}
 
@@ -677,10 +706,11 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			if (!grp) break;
 			if (!grp->members[i]) continue;
 			if (!IsWithinSpellRange(grp->members[i], spDat.range, spellID)) continue;
-		
+
 			bool isBuffNeeded = true;
-			for (uint32 i = 0; i < buffCount; i++) {
-				auto buff = grp->members[i]->buffs[i];
+			buffCount = grp->members[i]->GetMaxTotalSlots();
+			for (uint32 j = 0; j < buffCount; j++) {
+				auto buff = grp->members[i]->buffs[j];
 				if (buff.spellid == SPELL_UNKNOWN) continue;
 				if (spells[buff.spellid].buff_duration_formula == DF_Permanent) continue;
 				if (buff.spellid == spellID) {
@@ -688,7 +718,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 					break;
 				}
 				int stackResult = CheckStackConflict(buff.spellid, buff.casterlevel, spellID, GetLevel(), entity_list.GetMobID(buff.casterid), this, i);
-				if (stackResult == -1) {		
+				if (stackResult == -1) {
 					isBuffNeeded = false;
 					break;
 				}
@@ -698,12 +728,28 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 				if (target && target->GetID() == grp->members[i]->GetID()) {
 					return 0;
 				}
-				outMob = grp->members[i];
+				*outMob = grp->members[i];
 				return 1;
 			}
 		}
 
 		return ELIXIR_NOT_NEEDED;
+	}
+
+	if (isStun && (targettype == ST_AEClientV1 || targettype == ST_AreaClientOnly || targettype == ST_AECaster)) { // PB AE stun
+		int targetCount = 0;
+		float sqDistance = spDat.aoe_range * spDat.aoe_range;
+		auto hates = GetHateList();
+		auto iter = hates.begin();
+		for (auto iter : hates) {
+			if (sqDistance > 0 && DistanceSquaredNoZ(GetPosition(), iter->entity_on_hatelist->GetPosition()) > sqDistance) continue;
+			if (iter->entity_on_hatelist->IsStunned()) continue;
+			targetCount++;
+		}
+		if (targetCount < aeMinimum) {
+			return ELIXIR_NOT_NEEDED;
+		}
+		return 0;
 	}
 
 	if (damageAmount > 0 && (targettype == ST_AEClientV1 || targettype == ST_AreaClientOnly || targettype == ST_AECaster)) { // PB AE DD
@@ -724,13 +770,13 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 
 
 	if (damageAmount > 0 && (targettype == ST_TargetAETap || targettype == ST_AETarget)) { // Target AE DD
-		if (!target) {
+		if (target == nullptr) {
 			return ELIXIR_NO_TARGET;
 		}
 		if (!IsWithinSpellRange(target, spDat.range, spellID)) {
 			return ELIXIR_OUT_OF_RANGE;
 		}
-		
+
 		int targetCount = 0;
 		float sqDistance = spDat.aoe_range * spDat.aoe_range;
 		auto hates = GetHateList();
@@ -746,17 +792,21 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		return 0;
 	}
 
-	
-	if (targettype == ST_Target || !IsBeneficialSpell(spellID)) { // single target detrimental spell
-		if (!hate_list.IsEntOnHateList(target)) {
+
+	if (targettype == ST_Target && !isBeneficial) { // single target detrimental spell
+		if (target == nullptr) {
 			return ELIXIR_NO_TARGET;
 		}
-		
+
+		if (!isGroupHated) {
+			return ELIXIR_NOT_NEEDED;
+		}
+
 		if (target->GetHPRatio() <= 0) {
 			return ELIXIR_NOT_NEEDED;
 		}
 
-		if (!IsWithinSpellRange(GetPet(), spDat.range, spellID)) {
+		if (!IsWithinSpellRange(target, spDat.range, spellID)) {
 			return ELIXIR_OUT_OF_RANGE;
 		}
 
@@ -768,13 +818,17 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 			return ELIXIR_NOT_NEEDED;
 		}
 
-		if (ticks == 0) {
-			if (!target) {
-				return ELIXIR_NO_TARGET;
+		if (isStun) {
+			if (target->IsStunned()) {
+				return ELIXIR_NOT_NEEDED;
 			}
 			return 0;
 		}
-		
+
+		if (ticks == 0) {
+			return 0;
+		}
+		buffCount = target->GetMaxTotalSlots();
 		for (uint32 i = 0; i < buffCount; i++) {
 			auto buff = target->buffs[i];
 			if (buff.spellid == SPELL_UNKNOWN) continue;
@@ -791,7 +845,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob *outMob)
 		return 0;
 	}
 
-    return ELIXIR_UNHANDLED_SPELL;
+	return ELIXIR_UNHANDLED_SPELL;
 }
 
 /*
