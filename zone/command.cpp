@@ -15918,78 +15918,99 @@ void command_elixircheck(Client* c, const Seperator* sep)
 	Mob* outMob = nullptr;
 	const SPDat_Spell_Struct& spDat = spells[spellid];
 	auto result = c->ElixirCastSpellCheck(spellid, &outMob);
-	if (result < 0) {
-		switch (result) {
-		case ELIXIR_UNHANDLED_SPELL:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNHANDLED_SPELL)", spDat.name, result);
-				return;
-		case ELIXIR_CANNOT_CAST_BAD_STATE:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_CAST_BAD_STATE)", spDat.name, result);
-				return;
-		case ELIXIR_NOT_ENOUGH_MANA:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_MANA)", spDat.name, result);
-				return;
-		case ELIXIR_LULL_IGNORED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (LULL_IGNORED)", spDat.name, result);
-				return;
-		case ELIXIR_MEZ_IGNORED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (MEZ_IGNORED)", spDat.name, result);
-				return;
-		case ELIXIR_CHARM_IGNORED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CHARM_IGNORED)", spDat.name, result);
-				return;
-		case ELIXIR_NO_TARGET:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_TARGET)", spDat.name, result);
-				return;
-		case ELIXIR_INVALID_TARGET_BODYTYPE:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (INVALID_TARGET_BODYTYPE)", spDat.name, result);
-				return;
-		case ELIXIR_TRANSPORT_IGNORED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (TRANSPORT_IGNORED)", spDat.name, result);
-				return;
-		case ELIXIR_NOT_LINE_OF_SIGHT:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_LINE_OF_SIGHT)", spDat.name, result);
-				return;
-		case ELIXIR_COMPONENT_REQUIRED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (COMPONENT_REQUIRED)", spDat.name, result);
-				return;
-		case ELIXIR_ALREADY_HAVE_BUFF:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_BUFF)", spDat.name, result);
-				return;
-		case ELIXIR_ZONETYPE_FAIL:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ZONETYPE_FAIL)", spDat.name, result);
-				return;
-		case ELIXIR_CANNOT_USE_IN_COMBAT:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_USE_IN_COMBAT)", spDat.name, result);
-				return;
-		case ELIXIR_NOT_ENOUGH_ENDURANCE:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_ENDURANCE)", spDat.name, result);
-				return;
-		case ELIXIR_ALREADY_HAVE_PET:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_PET)", spDat.name, result);
-				return;
-		case ELIXIR_OUT_OF_RANGE:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (OUT_OF_RANGE)", spDat.name, result);
-				return;
-		case ELIXIR_NO_PET:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_PET)", spDat.name, result);
-				return;
-		case ELIXIR_NOT_NEEDED:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_NEEDED)", spDat.name, result);
-				return;
-		default:
-			c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNKNOWN)", spDat.name, result);
-			return;
-		}
-	}
-
-	if (result == 0) {
+	switch (result) {
+	case ELIXIR_TARGET_CHANGE:
+		c->Message(Chat::White, "Elixir AI would return OK if target changes to %s to cast %s", outMob->GetCleanName(), spDat.name);
+		return;
+	case ELIXIR_OK:
 		c->Message(Chat::White, "Elixir AI would return OK to cast %s", spDat.name);
 		return;
+	case ELIXIR_UNHANDLED_SPELL:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNHANDLED_SPELL)", spDat.name, result);
+		return;
+	case ELIXIR_CANNOT_CAST_BAD_STATE:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_CAST_BAD_STATE)", spDat.name, result);
+		return;
+	case ELIXIR_NOT_ENOUGH_MANA:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_MANA)", spDat.name, result);
+		return;
+	case ELIXIR_LULL_IGNORED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (LULL_IGNORED)", spDat.name, result);
+		return;
+	case ELIXIR_MEZ_IGNORED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (MEZ_IGNORED)", spDat.name, result);
+		return;
+	case ELIXIR_CHARM_IGNORED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CHARM_IGNORED)", spDat.name, result);
+		return;
+	case ELIXIR_NO_TARGET:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_TARGET)", spDat.name, result);
+		return;
+	case ELIXIR_INVALID_TARGET_BODYTYPE:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (INVALID_TARGET_BODYTYPE)", spDat.name, result);
+		return;
+	case ELIXIR_TRANSPORT_IGNORED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (TRANSPORT_IGNORED)", spDat.name, result);
+		return;
+	case ELIXIR_NOT_LINE_OF_SIGHT:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_LINE_OF_SIGHT)", spDat.name, result);
+		return;
+	case ELIXIR_COMPONENT_REQUIRED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (COMPONENT_REQUIRED)", spDat.name, result);
+		return;
+	case ELIXIR_ALREADY_HAVE_BUFF:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_BUFF)", spDat.name, result);
+		return;
+	case ELIXIR_ZONETYPE_FAIL:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ZONETYPE_FAIL)", spDat.name, result);
+		return;
+	case ELIXIR_CANNOT_USE_IN_COMBAT:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (CANNOT_USE_IN_COMBAT)", spDat.name, result);
+		return;
+	case ELIXIR_NOT_ENOUGH_ENDURANCE:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_ENOUGH_ENDURANCE)", spDat.name, result);
+		return;
+	case ELIXIR_ALREADY_HAVE_PET:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ALREADY_HAVE_PET)", spDat.name, result);
+		return;
+	case ELIXIR_OUT_OF_RANGE:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (OUT_OF_RANGE)", spDat.name, result);
+		return;
+	case ELIXIR_NO_PET:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NO_PET)", spDat.name, result);
+		return;
+	case ELIXIR_NOT_NEEDED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (NOT_NEEDED)", spDat.name, result);
+		return;
+	case ELIXIR_NOT_BEHIND_MOB:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_NOT_BEHIND_MOB)", spDat.name, result);
+		return;
+	case ELIXIR_HP_NOT_LOW:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_HP_NOT_LOW)", spDat.name, result);
+		return;
+	case ELIXIR_MANA_NOT_LOW:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_MANA_NOT_LOW)", spDat.name, result);
+		return;
+	case ELIXIR_AE_LIMIT_NOT_MET:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_AE_LIMIT_NOT_MET)", spDat.name, result);
+		return;
+	case ELIXIR_NO_HATE:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_NO_HATE)", spDat.name, result);
+		return;
+	case ELIXIR_TARGET_MEZZED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_TARGET_MEZZED)", spDat.name, result);
+		return;
+	case ELIXIR_ATTACK_NOT_ALLOWED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_ATTACK_NOT_ALLOWED)", spDat.name, result);
+		return;
+	case ELIXIR_TARGET_ALREADY_STUNNED:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (ELIXIR_TARGET_ALREADY_STUNNED)", spDat.name, result);
+		return;
+	default:
+		c->Message(Chat::Red, "Elixir AI failed to cast %s due to error %d (UNKNOWN)", spDat.name, result);
+		return;
 	}
-	if (result == 1) {
-		c->Message(Chat::White, "Elixir AI would return OK if target changes to %s to cast %s", outMob->GetCleanName(), spDat.name);
-	}
+
 }
 
 

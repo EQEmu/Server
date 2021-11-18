@@ -356,12 +356,12 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			return ELIXIR_NO_TARGET;
 		}
 		if (!BehindMob(target)) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_NOT_BEHIND_MOB;
 		}
 		if (!IsWithinSpellRange(target, spDat.range, spellID)) {
 			return ELIXIR_OUT_OF_RANGE;
 		}
-		return 0;
+		return ELIXIR_OK;
 	}
 
 	if (recourseID > 0) { //recourse buff attached
@@ -461,18 +461,22 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 	}
 
-	if (isPetSummon && HasPet()) return ELIXIR_ALREADY_HAVE_PET;
 
+	if (isPetSummon) {
+		if (HasPet()) return ELIXIR_ALREADY_HAVE_PET;
+		return ELIXIR_OK;
+	}
 
 	if (targettype == ST_Pet && isHeal) {
 		if (!HasPet()) {
 			return ELIXIR_NO_PET;
 		}
-		if (GetPet()->GetHPRatio() <= healPercent) {
-			return 0;
+		if (GetPet()->GetHPRatio() > healPercent) {
+			return ELIXIR_HP_NOT_LOW;
 		}
-		return ELIXIR_NOT_NEEDED;
+		return ELIXIR_OK;
 	}
+
 
 	if (isBuff && targettype == ST_Pet && isBeneficial) {
 		if (!HasPet()) {
@@ -495,8 +499,8 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			if (!IsWithinSpellRange(GetPet(), spDat.range, spellID)) {
 				return ELIXIR_OUT_OF_RANGE;
 			}
-			return 0;
 		}
+		return ELIXIR_OK;
 	}
 
 	if (isMana && targettype == ST_Self && ticks <= 0 && !isPetSummon) { // self only regen, like harvest, canni
@@ -505,15 +509,14 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 
 		if (GetManaRatio() > 50) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_MANA_NOT_LOW;
 		}
 
-		return 0;
+		return ELIXIR_OK;
 	}
 
-	if (isLifetap && GetHPRatio() <= healPercent) {
-		//TODO: check if it's a group recourse lifetap regen so necros can bond heal group
-		return ELIXIR_NOT_NEEDED;
+	if (isLifetap && GetHPRatio() > healPercent) {
+		return ELIXIR_HP_NOT_LOW;
 	}
 
 	if (isHeal) { //heal logic
@@ -587,13 +590,13 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 
 		if (isGroupSpell && groupHealCount < aeMinimum) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_AE_LIMIT_NOT_MET;
 		}
 
 		if (!*outMob) {
 			return ELIXIR_NOT_NEEDED;
 		}
-		return 1;
+		return ELIXIR_TARGET_CHANGE;
 	}
 
 
@@ -607,7 +610,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 
 		if (ticks == 0) {
-			return 0;
+			return ELIXIR_OK;
 		}
 		bool isBuffNeeded = true;
 
@@ -627,7 +630,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 				break;
 			}
 		}
-		if (isBuffNeeded) return 0;
+		if (isBuffNeeded) return ELIXIR_OK;
 		if (!isGroupSpell) return ELIXIR_NOT_NEEDED;
 
 		isBuffNeeded = true;
@@ -653,7 +656,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			}
 			if (!isBuffNeeded) continue;
 			*outMob = grp->members[i];
-			return 1;
+			return ELIXIR_TARGET_CHANGE;
 		}
 		return ELIXIR_NOT_NEEDED;
 
@@ -696,10 +699,10 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 		if (isBuffNeeded) {
 			if (target && target->GetID() == GetID()) {
-				return 0;
+				return ELIXIR_OK;
 			}
 			*outMob = this;
-			return 1;
+			return ELIXIR_TARGET_CHANGE;
 		}
 
 		for (int i = 0; i < MAX_GROUP_MEMBERS; i++) {
@@ -726,10 +729,10 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			}
 			if (isBuffNeeded) {
 				if (target && target->GetID() == grp->members[i]->GetID()) {
-					return 0;
+					return ELIXIR_OK;
 				}
 				*outMob = grp->members[i];
-				return 1;
+				return ELIXIR_TARGET_CHANGE;
 			}
 		}
 
@@ -747,9 +750,9 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			targetCount++;
 		}
 		if (targetCount < aeMinimum) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_AE_LIMIT_NOT_MET;
 		}
-		return 0;
+		return ELIXIR_OK;
 	}
 
 	if (damageAmount > 0 && (targettype == ST_AEClientV1 || targettype == ST_AreaClientOnly || targettype == ST_AECaster)) { // PB AE DD
@@ -762,10 +765,10 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			targetCount++;
 		}
 		if (targetCount < aeMinimum) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_AE_LIMIT_NOT_MET;
 		}
 
-		return 0;
+		return ELIXIR_OK;
 	}
 
 
@@ -786,24 +789,24 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			targetCount++;
 		}
 		if (targetCount < aeMinimum) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_AE_LIMIT_NOT_MET;
 		}
 
-		return 0;
+		return ELIXIR_OK;
 	}
 
 
-	if (targettype == ST_Target && !isBeneficial) { // single target detrimental spell
+	if ((targettype == ST_Target || targettype == ST_Tap) && !isBeneficial) { // single target detrimental spell
 		if (target == nullptr) {
 			return ELIXIR_NO_TARGET;
 		}
 
 		if (!isGroupHated) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_NO_HATE;
 		}
 
 		if (target->GetHPRatio() <= 0) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_HP_NOT_LOW;
 		}
 
 		if (!IsWithinSpellRange(target, spDat.range, spellID)) {
@@ -811,22 +814,22 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 		}
 
 		if (target->IsMezzed()) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_TARGET_MEZZED;
 		}
 
 		if (!IsAttackAllowed(target)) {
-			return ELIXIR_NOT_NEEDED;
+			return ELIXIR_ATTACK_NOT_ALLOWED;
 		}
 
 		if (isStun) {
 			if (target->IsStunned()) {
-				return ELIXIR_NOT_NEEDED;
+				return ELIXIR_TARGET_ALREADY_STUNNED;
 			}
-			return 0;
+			return ELIXIR_OK;
 		}
 
 		if (ticks == 0) {
-			return 0;
+			return ELIXIR_OK;
 		}
 		buffCount = target->GetMaxTotalSlots();
 		for (uint32 i = 0; i < buffCount; i++) {
@@ -842,7 +845,7 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			}
 			// TODO: Immune Check
 		}
-		return 0;
+		return ELIXIR_OK;
 	}
 
 	return ELIXIR_UNHANDLED_SPELL;
