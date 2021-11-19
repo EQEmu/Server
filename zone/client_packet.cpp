@@ -3403,6 +3403,13 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
+	if (this->GetTarget() == this) {
+		this->MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+		auto_fire = false;
+		return;
+	}
+
 	bool *af = (bool*)app->pBuffer;
 	auto_fire = *af;
 	auto_attack = false;
