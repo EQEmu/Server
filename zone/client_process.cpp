@@ -302,8 +302,8 @@ bool Client::Process() {
 		}
 
 		if (AutoFireEnabled()) {
-			if (this->GetTarget() == this) {
-				this->MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+			if (GetTarget() == this) {
+				MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
 				auto_fire = false;
 			}
 			EQ::ItemInstance *ranged = GetInv().GetItem(EQ::invslot::slotRange);
