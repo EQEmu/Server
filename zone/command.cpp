@@ -267,7 +267,7 @@ int command_init(void)
 		command_add("npctypespawn", "[npctypeid] [factionid] - Spawn an NPC from the db", AccountStatus::Steward, command_npctypespawn) ||
 		command_add("nudge", "- Nudge your target's current position by specific values", AccountStatus::QuestTroupe, command_nudge) ||
 		command_add("nukebuffs", "- Strip all buffs on you or your target", AccountStatus::Guide, command_nukebuffs) ||
-		command_add("nukeitem", "[itemid] - Remove itemid from your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
+		command_add("nukeitem", "[Item ID] - Removes the specified Item ID from you or your your player target's inventory", AccountStatus::GMLeadAdmin, command_nukeitem) ||
 		command_add("object", "List|Add|Edit|Move|Rotate|Copy|Save|Undo|Delete - Manipulate static and tradeskill objects within the zone", AccountStatus::GMAdmin, command_object) ||
 		command_add("oocmute", "[1/0] - Mutes OOC chat", AccountStatus::GMMgmt, command_oocmute) ||
 		command_add("opcode", "- opcode management", AccountStatus::GMImpossible, command_opcode) ||
