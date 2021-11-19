@@ -498,7 +498,7 @@ int Mob::MonkSpecialAttack(Mob *other, uint8 unchecked_type)
 		reuse = KickReuseTime;
 		break;
 	default:
-		Log(Logs::Detail, Logs::Attack, "Invalid special attack type %d attempted", unchecked_type);
+		Log(Logs::Detail, Logs::Attack, "Invalid special attack type %d attempted.", unchecked_type);
 		return (1000); /* nice long delay for them, the caller depends on this! */
 	}
 
