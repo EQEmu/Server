@@ -401,10 +401,10 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				wuchance /= 4;
 			}
 			// They didn't add a string ID for this.
-			if(extra > 0)
-				std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
+			std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
 			// live uses 400 here -- not sure if it's the best for all clients though
-			SendColoredText(400, msg);
+			if (extra)
+				SendColoredText(400, msg);
 			auto classic = RuleB(Combat, ClassicMasterWu);
 			while (extra) {
 				MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill));
