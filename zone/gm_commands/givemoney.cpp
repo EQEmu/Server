@@ -23,7 +23,7 @@ void command_givemoney(Client *c, const Seperator *sep)
 		return;
 	}
 
-	c->GetTarget()->CastToClient()->AddMoneyToPP(
+	target->AddMoneyToPP(
 		copper,
 		silver,
 		gold,
