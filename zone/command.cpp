@@ -274,7 +274,7 @@ int command_init(void)
 		command_add("path", "- view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
 		command_add("peqzone", "[zonename] - Go to specified zone, if you have > 75% health", AccountStatus::Player, command_peqzone) ||
-		command_add("permaclass", "[classnum] - Change your or your player target's class (target is disconnected)", AccountStatus::QuestTroupe, command_permaclass) ||
+		command_add("permaclass", "[Class ID] - Change your or your player target's class, changed client is disconnected", AccountStatus::QuestTroupe, command_permaclass) ||
 		command_add("permagender", "[gendernum] - Change your or your player target's gender (zone to take effect)", AccountStatus::QuestTroupe, command_permagender) ||
 		command_add("permarace", "[racenum] - Change your or your player target's race (zone to take effect)", AccountStatus::QuestTroupe, command_permarace) ||
 		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
