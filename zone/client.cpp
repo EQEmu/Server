@@ -10829,3 +10829,46 @@ uint16 Client::LearnDisciplines(uint8 min_level, uint8 max_level)
 
 	return learned_disciplines;
 }
+
+uint16 Client::GetClassTrackingDistanceMultiplier(uint16 class_) {
+	switch (class_) {
+	case WARRIOR:
+		return RuleI(Character, WarriorTrackingDistanceMultiplier);
+	case CLERIC:
+		return RuleI(Character, ClericTrackingDistanceMultiplier);
+	case PALADIN:
+		return RuleI(Character, PaladinTrackingDistanceMultiplier);
+	case RANGER:
+		return RuleI(Character, RangerTrackingDistanceMultiplier);
+	case SHADOWKNIGHT:
+		return RuleI(Character, ShadowKnightTrackingDistanceMultiplier);
+	case DRUID:
+		return RuleI(Character, DruidTrackingDistanceMultiplier);
+	case MONK:
+		return RuleI(Character, MonkTrackingDistanceMultiplier);
+	case BARD:
+		return RuleI(Character, BardTrackingDistanceMultiplier);
+	case ROGUE:
+		return RuleI(Character, RogueTrackingDistanceMultiplier);
+	case SHAMAN:
+		return RuleI(Character, ShamanTrackingDistanceMultiplier);
+	case NECROMANCER:
+		return RuleI(Character, NecromancerTrackingDistanceMultiplier);
+	case WIZARD:
+		return RuleI(Character, WizardTrackingDistanceMultiplier);
+	case MAGICIAN:
+		return RuleI(Character, MagicianTrackingDistanceMultiplier);
+	case ENCHANTER:
+		return RuleI(Character, EnchanterTrackingDistanceMultiplier);
+	case BEASTLORD:
+		return RuleI(Character, BeastlordTrackingDistanceMultiplier);
+	case BERSERKER:
+		return RuleI(Character, BerserkerTrackingDistanceMultiplier);
+	default: 
+		return 0;
+	}
+}
+
+bool Client::CanThisClassTrack() {
+	return (GetClassTrackingDistanceMultiplier(GetClass()) > 0) ? true : false;
+}

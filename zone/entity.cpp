@@ -3531,12 +3531,8 @@ bool EntityList::MakeTrackPacket(Client *client)
 	uint32 distance = 0;
 	float MobDistance;
 
-	if (client->GetClass() == DRUID)
-		distance = (client->GetSkill(EQ::skills::SkillTracking) * 10);
-	else if (client->GetClass() == RANGER)
-		distance = (client->GetSkill(EQ::skills::SkillTracking) * 12);
-	else if (client->GetClass() == BARD)
-		distance = (client->GetSkill(EQ::skills::SkillTracking) * 7);
+	distance = (client->GetSkill(EQ::skills::SkillTracking) * client->GetClassTrackingDistanceMultiplier(client->GetClass()));	
+
 	if (distance <= 0)
 		return false;
 	if (distance < 300)
