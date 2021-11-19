@@ -171,6 +171,9 @@ RULE_BOOL(Character, EnableTestBuff, false, "Allow the use of /testbuff")
 RULE_BOOL(Character, UseResurrectionSickness, true, "Use Resurrection Sickness based on Resurrection spell cast, set to false to disable Resurrection Sickness.")
 RULE_INT(Character, OldResurrectionSicknessSpellID, 757, "757 is Default Old Resurrection Sickness Spell ID")
 RULE_INT(Character, ResurrectionSicknessSpellID, 756, "756 is Default Resurrection Sickness Spell ID")
+RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
@@ -387,6 +390,7 @@ RULE_BOOL(Spells, InvisRequiresGroup, false, "Invis requires the the target to b
 RULE_INT(Spells, ClericInnateHealFocus, 5, "Clerics on live get a 5 pct innate heal focus")
 RULE_BOOL(Spells, DOTsScaleWithSpellDmg, false, "Allow SpellDmg stat to affect DoT spells")
 RULE_BOOL(Spells, HOTsScaleWithHealAmt, false, "Allow HealAmt stat to affect HoT spells")
+RULE_BOOL(Spells, CompoundLifetapHeals, true, "True: Lifetap heals calculate damage bonuses and then heal bonuses.  False:  Lifetaps heal using the amount damaged to mob.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Combat)
@@ -485,6 +489,8 @@ RULE_BOOL(Combat, UseExtendedPoisonProcs, false, "Allow old school poisons to la
 RULE_BOOL(Combat, EnableSneakPull, false, "Enable implementation of Sneak Pull")
 RULE_INT(Combat, SneakPullAssistRange, 400, "Modified range of assist for sneak pull")
 RULE_BOOL(Combat, Classic2HBAnimation, false, "2HB will use the 2 hand piercing animation instead of the overhead slashing animation")
+RULE_BOOL(Combat, ArcheryConsumesAmmo, true, "Set to false to disable Archery Ammo Consumption")
+RULE_BOOL(Combat, ThrowingConsumesAmmo, true, "Set to false to disable Throwing Ammo Consumption")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(NPC)
@@ -758,6 +764,7 @@ RULE_CATEGORY_END()
 
 RULE_CATEGORY(Expansion)
 RULE_INT(Expansion, CurrentExpansion, -1, "The current expansion enabled for the server [-1 = ALL, 0 = Classic, 1 = Kunark etc.]")
+RULE_BOOL(Expansion, UseCurrentExpansionAAOnly, false, "When true will only load AA ranks that match CurrentExpansion rule")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Instances)

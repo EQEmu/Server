@@ -756,11 +756,22 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//EndlessQuiver AA base1 = 100% Chance to avoid consumption arrow.
 	int ChanceAvoidConsume = aabonuses.ConsumeProjectile + itembonuses.ConsumeProjectile + spellbonuses.ConsumeProjectile;
 
-	if (RangeItem->ExpendableArrow || !ChanceAvoidConsume || (ChanceAvoidConsume < 100 && zone->random.Int(0,99) > ChanceAvoidConsume)){
+	// Consume Ammo, unless Ammo Consumption is disabled or player has Endless Quiver
+	bool consumes_ammo = RuleB(Combat, ArcheryConsumesAmmo);
+	if (
+		consumes_ammo &&
+		(
+			RangeItem->ExpendableArrow ||
+			!ChanceAvoidConsume ||
+			(ChanceAvoidConsume < 100 && zone->random.Int(0,99) > ChanceAvoidConsume)
+		)
+	) {
 		DeleteItemInInventory(ammo_slot, 1, true);
-		LogCombat("Consumed one arrow from slot [{}]", ammo_slot);
+		LogCombat("Consumed Archery Ammo from slot {}.", ammo_slot);
+	} else if (!consumes_ammo) {
+		LogCombat("Archery Ammo Consumption is disabled.");
 	} else {
-		LogCombat("Endless Quiver prevented ammo consumption");
+		LogCombat("Endless Quiver prevented Ammo Consumption.");
 	}
 
 	CheckIncreaseSkill(EQ::skills::SkillArchery, GetTarget(), -15);
@@ -1338,8 +1349,14 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	DoThrowingAttackDmg(other, RangeWeapon, item);
 
-	//consume ammo
-	DeleteItemInInventory(ammo_slot, 1, true);
+	// Consume Ammo, unless Ammo Consumption is disabled
+	if (RuleB(Combat, ThrowingConsumesAmmo)) {
+		DeleteItemInInventory(ammo_slot, 1, true);
+		LogCombat("Consumed Throwing Ammo from slot {}.", ammo_slot);
+	} else {
+		LogCombat("Throwing Ammo Consumption is disabled.");
+	}
+
 	CommonBreakInvisibleFromCombat();
 }
 

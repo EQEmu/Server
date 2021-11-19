@@ -1239,10 +1239,10 @@ bool IsEffectIgnoredInStacking(int spa)
 	case SE_GravityEffect:
 	case 425:
 	//Spell effects implemented after ROF2, following same pattern, lets assume these should go here.
-	case SE_Fc_Spell_Damage_Pct_IncomingPC:	
+	case SE_Fc_Spell_Damage_Pct_IncomingPC:
 	case SE_Fc_Spell_Damage_Amt_IncomingPC:
 	case SE_Ff_CasterClass:
-	case SE_Ff_Same_Caster: 
+	case SE_Ff_Same_Caster:
 	case SE_Proc_Timer_Modifier:
 	case SE_Weapon_Stance:
 	case SE_TwinCastBlocker:
@@ -1417,8 +1417,8 @@ bool IsInstrumentModAppliedToSpellEffect(int32 spell_id, int effect)
 		case SE_MinDamageModifier:
 		case SE_ProcChance:
 		case SE_PetFlurry: // ? Need verified
-		case SE_DiseaseCounter:			
-		case SE_PoisonCounter: 
+		case SE_DiseaseCounter:
+		case SE_PoisonCounter:
 		case SE_CurseCounter:
 		case SE_CorruptionCounter:
 			return true;
@@ -1576,7 +1576,7 @@ int GetSpellStatValue(uint32 spell_id, const char* stat_identifier, uint8 slot)
 	return 0;
 }
 
-bool IsVirusSpell(int32 spell_id) 
+bool IsVirusSpell(int32 spell_id)
 {
 	if (GetViralMinSpreadTime(spell_id) && GetViralMaxSpreadTime(spell_id) && GetViralSpreadRange(spell_id)){
 		return true;
@@ -1584,17 +1584,17 @@ bool IsVirusSpell(int32 spell_id)
 	return false;
 }
 
-int32 GetViralMinSpreadTime(int32 spell_id) 
+int32 GetViralMinSpreadTime(int32 spell_id)
 {
 	return spells[spell_id].viral_targets;
 }
 
-int32 GetViralMaxSpreadTime(int32 spell_id) 
+int32 GetViralMaxSpreadTime(int32 spell_id)
 {
 	return spells[spell_id].viral_timer;
 }
 
-int32 GetViralSpreadRange(int32 spell_id) 
+int32 GetViralSpreadRange(int32 spell_id)
 {
 	return spells[spell_id].viral_range;
 }
@@ -1605,7 +1605,7 @@ uint32 GetProcLimitTimer(int32 spell_id, int proc_type) {
 	if (!IsValidSpell(spell_id)) {
 		return 0;
 	}
-		
+
 	bool use_next_timer = false;
 	for (int i = 0; i < EFFECT_COUNT; ++i) {
 
@@ -1632,4 +1632,42 @@ uint32 GetProcLimitTimer(int32 spell_id, int proc_type) {
 		}
 	}
 	return 0;
+}
+
+bool CastRestrictedSpell(int spellid)
+{
+	switch (spellid) {
+		case SPELL_TOUCH_OF_VINITRAS:
+		case SPELL_DESPERATE_HOPE:
+		case SPELL_CHARM:
+		case SPELL_METAMORPHOSIS65:
+		case SPELL_JT_BUFF:
+		case SPELL_CAN_O_WHOOP_ASS:
+		case SPELL_PHOENIX_CHARM:
+		case SPELL_CAZIC_TOUCH:
+		case SPELL_AVATAR_KNOCKBACK:
+		case SPELL_SHAPECHANGE65:
+		case SPELL_SUNSET_HOME1218:
+		case SPELL_SUNSET_HOME819:
+		case SPELL_SHAPECHANGE75:
+		case SPELL_SHAPECHANGE80:
+		case SPELL_SHAPECHANGE85:
+		case SPELL_SHAPECHANGE90:
+		case SPELL_SHAPECHANGE95:
+		case SPELL_SHAPECHANGE100:
+		case SPELL_SHAPECHANGE25:
+		case SPELL_SHAPECHANGE30:
+		case SPELL_SHAPECHANGE35:
+		case SPELL_SHAPECHANGE40:
+		case SPELL_SHAPECHANGE45:
+		case SPELL_SHAPECHANGE50:
+		case SPELL_NPC_AEGOLISM:
+		case SPELL_SHAPECHANGE55:
+		case SPELL_SHAPECHANGE60:
+		case SPELL_COMMAND_OF_DRUZZIL:
+		case SPELL_SHAPECHANGE70:
+			return true;
+		default:
+			return false;
+	}
 }

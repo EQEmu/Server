@@ -1641,15 +1641,21 @@ void Mob::ShowStats(Client* client)
 		);
 
 		// Spawn Data
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Spawn | Group: {} Point: {} Grid: {}",
-				target->GetSpawnGroupId(),
-				target->GetSpawnPointID(),
-				target->GetGrid()
-			).c_str()
-		);
+		if (
+			target->GetGrid() ||
+			target->GetSpawnGroupId() ||
+			target->GetSpawnPointID()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Spawn | Group: {} Point: {} Grid: {}",
+					target->GetSpawnGroupId(),
+					target->GetSpawnPointID(),
+					target->GetGrid()
+				).c_str()
+			);
+		}
 
 		client->Message(
 			Chat::White,
@@ -1702,8 +1708,9 @@ void Mob::ShowStats(Client* client)
 		client->Message(
 			Chat::White,
 			fmt::format(
-				"NPC | ID: {} Name: {}{} Level: {}",
+				"NPC | ID: {} Entity ID: {} Name: {}{} Level: {}",
 				target->GetNPCTypeID(),
+				target->GetID(),
 				target_name,
 				(
 					!target_last_name.empty() ?
@@ -1817,24 +1824,35 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Textures | Arms: {} Bracers: {} Hands: {}",
-				target->GetArmTexture(),
-				target->GetBracerTexture(),
-				target->GetHandTexture()
-			).c_str()
-		);
+		if (
+			target->GetArmTexture() ||
+			target->GetBracerTexture() ||
+			target->GetHandTexture()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Textures | Arms: {} Bracers: {} Hands: {}",
+					target->GetArmTexture(),
+					target->GetBracerTexture(),
+					target->GetHandTexture()
+				).c_str()
+			);
+		}
 		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Textures | Legs: {} Feet: {}",
-				target->GetLegTexture(),
-				target->GetFeetTexture()
-			).c_str()
-		);
+		if (
+			target->GetFeetTexture() ||
+			target->GetLegTexture()
+		) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Textures | Legs: {} Feet: {}",
+					target->GetLegTexture(),
+					target->GetFeetTexture()
+				).c_str()
+			);
+		}
 
 		// Hero's Forge
 		if (target->GetHeroForgeModel()) {
@@ -2147,14 +2165,16 @@ void Mob::ShowStats(Client* client)
 			).c_str()
 		);
 
-		// Emote		
-		client->Message(
-			Chat::White,
-			fmt::format(
-				"Emote: {}",
-				target->GetEmoteID()
-			).c_str()
-		);
+		// Emote
+		if (target->GetEmoteID()) {
+			client->Message(
+				Chat::White,
+				fmt::format(
+					"Emote: {}",
+					target->GetEmoteID()
+				).c_str()
+			);
+		}
 
 		// Run/Walk Speed
 		client->Message(
@@ -3916,7 +3936,7 @@ void Mob::SetTarget(Mob *mob)
 	else if (IsClient()) {
 		parse->EventPlayer(EVENT_TARGET_CHANGE, CastToClient(), "", 0);
 
-		if (CastToClient()->admin > 200) {
+		if (CastToClient()->admin > AccountStatus::GMMgmt) {
 			DisplayInfo(mob);
 		}
 
@@ -5179,18 +5199,20 @@ int16 Mob::GetPositionalDmgAmt(Mob* defender)
 void Mob::MeleeLifeTap(int32 damage) {
 
 	int32 lifetap_amt = 0;
-	lifetap_amt = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
-				+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
+	int32 melee_lifetap_mod = spellbonuses.MeleeLifetap + itembonuses.MeleeLifetap + aabonuses.MeleeLifetap
+					+ spellbonuses.Vampirism + itembonuses.Vampirism + aabonuses.Vampirism;
 
-	if(lifetap_amt && damage > 0){
+	if(melee_lifetap_mod && damage > 0){
 
-		lifetap_amt = damage * lifetap_amt / 100;
-		LogCombat("Melee lifetap healing for [{}] damage", damage);
+		lifetap_amt = damage * (static_cast<float>(melee_lifetap_mod) / 100.0f);
+		LogCombat("Melee lifetap healing [{}] points of damage with modifier of [{}] ", lifetap_amt, melee_lifetap_mod);
 
-		if (lifetap_amt > 0)
+		if (lifetap_amt >= 0) {
 			HealDamage(lifetap_amt); //Heal self for modified damage amount.
-		else
+		}
+		else {
 			Damage(this, -lifetap_amt, 0, EQ::skills::SkillEvocation, false); //Dmg self for modified damage amount.
+		}
 	}
 }
 

@@ -765,18 +765,39 @@ void QuestManager::shout2(const char *str) {
 	if (!owner) {
 		LogQuests("QuestManager::shout2 called with nullptr owner. Probably syntax error in quest file");
 		return;
-	}
-	else {
-		worldserver.SendEmoteMessage(0,0,0,13, "%s shouts, '%s'", owner->GetCleanName(), str);
+	} else {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::Player,
+			Chat::Red,
+			fmt::format(
+				"{} shouts, '{}'",
+				owner->GetCleanName(),
+				str
+			).c_str()
+		);
 	}
 }
 
 void QuestManager::gmsay(const char *str, uint32 color, bool send_to_world, uint32 to_guilddbid, uint32 to_minstatus) {
 	QuestManagerCurrentQuestVars();
-	if(send_to_world)
-		worldserver.SendEmoteMessage(0, to_guilddbid, to_minstatus, color, "%s", str);
-	else
-		entity_list.MessageStatus(to_guilddbid, to_minstatus, color, "%s", str);
+	if(send_to_world) {
+		worldserver.SendEmoteMessage(
+			0,
+			to_guilddbid,
+			to_minstatus,
+			color,
+			str
+		);
+	} else {
+		entity_list.MessageStatus(
+			to_guilddbid,
+			to_minstatus,
+			color,
+			str
+		);
+	}
 }
 
 void QuestManager::depop(int npc_type) {
@@ -1349,30 +1370,66 @@ void QuestManager::setguild(uint32 new_guild_id, uint8 new_rank) {
 
 void QuestManager::CreateGuild(const char *guild_name, const char *leader) {
 	QuestManagerCurrentQuestVars();
-	uint32 cid = database.GetCharacterID(leader);
-	char hString[250];
-			if (cid == 0) {
-				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild leader not found.");
-				return;
-			}
+	uint32 character_id = database.GetCharacterID(leader);
+	if (character_id == 0) {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::QuestTroupe,
+			Chat::Yellow,
+			"Guild Error | Guild leader not found."
+		);
+		return;
+	}
 
-			uint32 tmp = guild_mgr.FindGuildByLeader(cid);
-			if (tmp != GUILD_NONE) {
-				sprintf(hString, "Guild Creation: Error: %s already is the leader of DB# %u '%s'.", leader, tmp, guild_mgr.GetGuildName(tmp));
-				worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
+	uint32 tmp = guild_mgr.FindGuildByLeader(character_id);
+	if (tmp != GUILD_NONE) {
+		worldserver.SendEmoteMessage(
+			0,
+			0,
+			AccountStatus::QuestTroupe,
+			Chat::Yellow,
+			fmt::format(
+				"Guild Error | {} already is the leader of {} ({}).",
+				leader,
+				guild_mgr.GetGuildName(tmp),
+				tmp
+			).c_str()
+		);
+	} else {
+		uint32 gid = guild_mgr.CreateGuild(guild_name, character_id);
+		if (gid == GUILD_NONE) {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::QuestTroupe,
+				Chat::Yellow,
+				"Guild Error | Guild creation failed."
+			);
+		} else {
+			worldserver.SendEmoteMessage(
+				0,
+				0,
+				AccountStatus::QuestTroupe,
+				Chat::Yellow,
+				fmt::format(
+					"Guild Created | Leader: {} ({}) ID: {}",
+					leader,
+					character_id,
+					gid
+				).c_str()
+			);
+			if (!guild_mgr.SetGuild(character_id, gid, GUILD_LEADER)) {
+				worldserver.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					"Unable to set guild leader's guild in the database. Use #guild set."
+				);
 			}
-			else {
-				uint32 gid = guild_mgr.CreateGuild(guild_name, cid);
-				if (gid == GUILD_NONE)
-					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Guild Creation: Guild creation failed");
-				else {
-					sprintf(hString, "Guild Creation: Guild created: Leader: %u, number %u: %s", cid, gid, leader);
-					worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", hString);
-					if(!guild_mgr.SetGuild(cid, gid, GUILD_LEADER))
-						worldserver.SendEmoteMessage(0, 0, 80, 15, "%s", "Unable to set guild leader's guild in the database. Your going to have to run #guild set");
-				}
-
-			}
+		}
+	}
 }
 
 void QuestManager::settime(uint8 new_hour, uint8 new_min, bool update_world /*= true*/)
@@ -2458,7 +2515,12 @@ void QuestManager::ze(int type, const char *str) {
 }
 
 void QuestManager::we(int type, const char *str) {
-	worldserver.SendEmoteMessage(0, 0, type, str);
+	worldserver.SendEmoteMessage(
+		0,
+		0,
+		type,
+		str
+	);
 }
 
 void QuestManager::message(int color, const char *message) {
@@ -3353,32 +3415,7 @@ EQ::ItemInstance *QuestManager::CreateItem(uint32 item_id, int16 charges, uint32
 }
 
 std::string QuestManager::secondstotime(int duration) {
-	int timer_length = duration;
-	int hours = int(timer_length / 3600);
-	timer_length %= 3600;
-	int minutes = int(timer_length / 60);
-	timer_length %= 60;
-	int seconds = timer_length;
-	std::string time_string = "Unknown";
-	std::string hour_string = (hours == 1 ? "Hour" : "Hours");
-	std::string minute_string = (minutes == 1 ? "Minute" : "Minutes");
-	std::string second_string = (seconds == 1 ? "Second" : "Seconds");
-	if (hours > 0 && minutes > 0 && seconds > 0) {
-		time_string = fmt::format("{} {}, {} {}, and {} {}", hours, hour_string, minutes, minute_string, seconds, second_string);
-	} else if (hours > 0 && minutes > 0 && seconds == 0) {
-		time_string = fmt::format("{} {} and {} {}", hours, hour_string, minutes, minute_string);
-	} else if (hours > 0 && minutes == 0 && seconds > 0) {
-		time_string = fmt::format("{} {} and {} {}", hours, hour_string, seconds, second_string);
-	} else if (hours > 0 && minutes == 0 && seconds == 0) {
-		time_string = fmt::format("{} {}", hours, hour_string);
-	} else if (hours == 0 && minutes > 0 && seconds > 0) {
-		time_string = fmt::format("{} {} and {} {}", minutes, minute_string, seconds, second_string);
-	} else if (hours == 0 && minutes > 0 && seconds == 0) {
-		time_string = fmt::format("{} {}", minutes, minute_string);
-	} else if (hours == 0 && minutes == 0 && seconds > 0) {
-		time_string = fmt::format("{} {}", seconds, second_string);
-	}
-	return time_string;
+	return ConvertSecondsToTime(duration);
 }
 
 std::string QuestManager::gethexcolorcode(std::string color_name) {

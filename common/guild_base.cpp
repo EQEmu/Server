@@ -1208,7 +1208,7 @@ BaseGuildManager::RankInfo::RankInfo() {
 
 BaseGuildManager::GuildInfo::GuildInfo() {
 	leader_char_id = 0;
-	minstatus = 0;
+	minstatus = AccountStatus::Player;
 }
 
 uint32 BaseGuildManager::DoesAccountContainAGuildLeader(uint32 AccountID)

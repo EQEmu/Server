@@ -22,7 +22,7 @@ SET(eqlogin_headers
 	loginserver_command_handler.h
 	loginserver_webserver.h
 	login_server.h
-	login_structures.h
+	login_types.h
 	options.h
 	server_manager.h
 	world_server.h

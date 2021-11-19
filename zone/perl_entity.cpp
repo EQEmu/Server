@@ -856,7 +856,12 @@ XS(XS_EntityList_MessageStatus) {
 		uint32     type         = (uint32) SvUV(ST(3));
 		char       *message     = (char *) SvPV_nolen(ST(4));
 		VALIDATE_THIS_IS_ENTITY;
-		THIS->MessageStatus(to_guilddbid, to_minstatus, type, message);
+		THIS->MessageStatus(
+			to_guilddbid,
+			to_minstatus,
+			type,
+			message
+		);
 	}
 	XSRETURN_EMPTY;
 }

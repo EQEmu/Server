@@ -113,6 +113,29 @@ public:
 	inline void UpdateInsecurePasswords(bool b) { update_insecure_passwords = b; }
 	inline bool IsUpdatingInsecurePasswords() const { return update_insecure_passwords; }
 
+	inline bool IsShowPlayerCountEnabled() const
+	{
+		return show_player_count;
+	}
+	inline void SetShowPlayerCount(bool show_player_count)
+	{
+		Options::show_player_count = show_player_count;
+	}
+	inline bool IsWorldDevTestServersListBottom() const { return world_dev_test_servers_list_bottom; }
+	inline void SetWorldDevTestServersListBottom(bool dev_test_servers_list_bottom)
+	{
+		Options::world_dev_test_servers_list_bottom = dev_test_servers_list_bottom;
+	}
+
+	inline bool IsWorldSpecialCharacterStartListBottom() const
+	{
+		return world_special_character_start_list_bottom;
+	}
+	inline void SetWorldSpecialCharacterStartListBottom(bool world_special_character_start_list_bottom)
+	{
+		Options::world_special_character_start_list_bottom = world_special_character_start_list_bottom;
+	}
+
 private:
 	bool        allow_unregistered;
 	bool        trace;
@@ -120,8 +143,11 @@ private:
 	bool        dump_in_packets;
 	bool        dump_out_packets;
 	bool        reject_duplicate_servers;
+	bool        world_dev_test_servers_list_bottom;
+	bool        world_special_character_start_list_bottom;
 	bool        allow_token_login;
 	bool        allow_password_login;
+	bool        show_player_count;
 	bool        auto_create_accounts;
 	bool        auto_link_accounts;
 	bool        update_insecure_passwords;
@@ -129,6 +155,7 @@ private:
 	std::string eqemu_loginserver_address;
 	std::string default_loginserver_name;
 };
+
 
 #endif
 

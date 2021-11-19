@@ -306,7 +306,13 @@ void LoginServer::ProcessSystemwideMessage(uint16_t opcode, EQ::Net::Packet &p)
 	LogNetcode("Received ServerPacket from LS OpCode {:#04x}", opcode);
 
 	ServerSystemwideMessage *swm = (ServerSystemwideMessage *) p.Data();
-	zoneserver_list.SendEmoteMessageRaw(0, 0, 0, swm->type, swm->message);
+	zoneserver_list.SendEmoteMessageRaw(
+		0,
+		0,
+		AccountStatus::Player,
+		swm->type,
+		swm->message
+	);
 }
 
 void LoginServer::ProcessLSRemoteAddr(uint16_t opcode, EQ::Net::Packet &p)
@@ -602,8 +608,6 @@ void LoginServer::SendInfo()
 		strcpy(l->local_ip_address, local_addr.c_str());
 		WorldConfig::SetLocalAddress(l->local_ip_address);
 	}
-
-	SanitizeWorldServerName(l->server_long_name);
 
 	LogInfo(
 		"[LoginServer::SendInfo] protocol_version [{}] server_version [{}] long_name [{}] short_name [{}] account_name [{}] remote_ip_address [{}] local_ip [{}]",

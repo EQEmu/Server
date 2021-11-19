@@ -280,20 +280,33 @@ void ConsoleEmote(
 	join_args.erase(join_args.begin(), join_args.begin() + 2);
 
 	if (strcasecmp(args[0].c_str(), "world") == 0) {
-		zoneserver_list.SendEmoteMessageRaw(0, 0, 0, atoi(args[1].c_str()), JoinString(join_args, " ").c_str());
+		zoneserver_list.SendEmoteMessageRaw(
+			0,
+			0,
+			AccountStatus::Player,
+			atoi(args[1].c_str()),
+			JoinString(join_args, " ").c_str()
+		);
 	}
 	else {
 		ZoneServer *zs = zoneserver_list.FindByName(args[0].c_str());
 		if (zs != 0) {
-			zs->SendEmoteMessageRaw(0, 0, 0, atoi(args[1].c_str()), JoinString(join_args, " ").c_str());
+			zs->SendEmoteMessageRaw(
+				0,
+				0,
+				AccountStatus::Player,
+				atoi(args[1].c_str()),
+				JoinString(join_args, " ").c_str()
+			);
 		}
 		else {
 			zoneserver_list.SendEmoteMessageRaw(
 				args[0].c_str(),
 				0,
-				0,
+				AccountStatus::Player,
 				atoi(args[1].c_str()),
-				JoinString(join_args, " ").c_str());
+				JoinString(join_args, " ").c_str()
+			);
 		}
 	}
 }
@@ -637,7 +650,16 @@ void ConsoleZoneLock(
 		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, true)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone locked: %s", ZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					fmt::format(
+						"Zone locked: {}",
+						ZoneName(tmp)
+					).c_str()
+				);
 			}
 			else {
 				connection->SendLine("Failed to change lock");
@@ -655,7 +677,16 @@ void ConsoleZoneLock(
 		uint16 tmp = ZoneID(args[1].c_str());
 		if (tmp) {
 			if (zoneserver_list.SetLockedZone(tmp, false)) {
-				zoneserver_list.SendEmoteMessage(0, 0, 80, 15, "Zone unlocked: %s", ZoneName(tmp));
+				zoneserver_list.SendEmoteMessage(
+					0,
+					0,
+					AccountStatus::QuestTroupe,
+					Chat::Yellow,
+					fmt::format(
+						"Zone unlocked: {}",
+						ZoneName(tmp)
+					).c_str()
+				);
 			}
 			else {
 				connection->SendLine("Failed to change lock");
@@ -782,7 +813,7 @@ void ConsoleWorldShutdown(
 			zoneserver_list.SendEmoteMessage(
 				0,
 				0,
-				0,
+				AccountStatus::Player,
 				Chat::Yellow,
 				"[SYSTEM] World shutdown has been aborted."
 			);

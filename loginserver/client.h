@@ -7,21 +7,8 @@
 #include "../common/eq_stream_intf.h"
 #include "../common/net/dns.h"
 #include "../common/net/daybreak_connection.h"
-#include "login_structures.h"
+#include "login_types.h"
 #include <memory>
-
-enum LSClientVersion {
-	cv_titanium,
-	cv_sod
-};
-
-enum LSClientStatus {
-	cs_not_sent_session_ready,
-	cs_waiting_for_login,
-	cs_creating_account,
-	cs_failed_to_login,
-	cs_logged_in
-};
 
 /**
  * Client class, controls a single client and it's connection to the login server
@@ -189,7 +176,7 @@ private:
 
 	std::unique_ptr<EQ::Net::DaybreakConnectionManager> m_login_connection_manager;
 	std::shared_ptr<EQ::Net::DaybreakConnection>        m_login_connection;
-	LoginLoginRequest_Struct                            m_llrs;
+	LoginBaseMessage_Struct                             m_llrs;
 
 	std::string m_stored_user;
 	std::string m_stored_pass;

@@ -533,7 +533,7 @@ bool Client::Process() {
 		OnDisconnect(true);
 		LogInfo("Client linkdead: {}", name);
 
-		if (Admin() > 100) {
+		if (Admin() > AccountStatus::GMAdmin) {
 			if (GetMerc()) {
 				GetMerc()->Save();
 				GetMerc()->Depop();
@@ -1026,6 +1026,11 @@ void Client::OPTGB(const EQApplicationPacket *app)
 {
 	if(!app) return;
 	if(!app->pBuffer) return;
+	
+	if(!RuleB(Character, EnableTGB))
+	{
+		return;
+	}
 
 	uint32 tgb_flag = *(uint32 *)app->pBuffer;
 	if(tgb_flag == 2)
@@ -1724,7 +1729,7 @@ void Client::OPGMSummon(const EQApplicationPacket *app)
 	}
 	else
 	{
-		if(admin < 80)
+		if(admin < AccountStatus::QuestTroupe)
 		{
 			return;
 		}

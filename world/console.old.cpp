@@ -481,10 +481,10 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "  version");
 					SendMessage(1, "  worldshutdown");
 				}
-				if (admin >= 201) {
+				if (admin >= AccountStatus::GMMgmt) {
 					SendMessage(1, "  IPLookup [name]");
 				}
-				if (admin >= 100) {
+				if (admin >= AccountStatus::GMAdmin) {
 					SendMessage(1, "  LSReconnect");
 					SendMessage(1, "  signalcharbyname charname ID");
 					SendMessage(1, "  reloadworld");
@@ -799,7 +799,7 @@ void Console::ProcessCommand(const char* command) {
 				SendMessage(1, "  Compiled on: %s at %s", COMPILE_DATE, COMPILE_TIME);
 				SendMessage(1, "  Last modified on: %s", LAST_MODIFIED);
 			}
-			else if (strcasecmp(sep.arg[0], "serverinfo") == 0 && admin >= 200) {
+			else if (strcasecmp(sep.arg[0], "serverinfo") == 0 && admin >= AccountStatus::GMMgmt) {
 				if (strcasecmp(sep.arg[1], "os") == 0)	{
 				#ifdef _WINDOWS
 					GetOS();
@@ -821,10 +821,10 @@ void Console::ProcessCommand(const char* command) {
 					SendMessage(1, "  OS - Operating system version information.");
 				}
 			}
-			else if (strcasecmp(sep.arg[0], "IPLookup") == 0 && admin >= 201) {
+			else if (strcasecmp(sep.arg[0], "IPLookup") == 0 && admin >= AccountStatus::GMMgmt) {
 				client_list.SendCLEList(admin, 0, this, sep.argplus[1]);
 			}
-			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= 100) {
+			else if (strcasecmp(sep.arg[0], "LSReconnect") == 0 && admin >= AccountStatus::GMAdmin) {
 				#ifdef _WINDOWS
 					_beginthread(AutoInitLoginServer, 0, nullptr);
 				#else
@@ -839,7 +839,7 @@ void Console::ProcessCommand(const char* command) {
 				if (strcasecmp(sep.arg[1], "list") == 0) {
 					zoneserver_list.ListLockedZones(0, this);
 				}
-				else if (strcasecmp(sep.arg[1], "lock") == 0 && admin >= 101) {
+				else if (strcasecmp(sep.arg[1], "lock") == 0 && admin >= AccountStatus::GMAdmin) {
 					uint16 tmp = ZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, true))
@@ -850,7 +850,7 @@ void Console::ProcessCommand(const char* command) {
 					else
 						SendMessage(1, "Usage: #zonelock lock [zonename]");
 				}
-				else if (strcasecmp(sep.arg[1], "unlock") == 0 && admin >= 101) {
+				else if (strcasecmp(sep.arg[1], "unlock") == 0 && admin >= AccountStatus::GMAdmin) {
 					uint16 tmp = ZoneID(sep.arg[2]);
 					if (tmp) {
 						if (zoneserver_list.SetLockedZone(tmp, false))
@@ -864,13 +864,13 @@ void Console::ProcessCommand(const char* command) {
 				else {
 					SendMessage(1, "#zonelock sub-commands");
 					SendMessage(1, "  list");
-					if (admin >= 101) {
+					if (admin >= AccountStatus::GMAdmin) {
 						SendMessage(1, "  lock [zonename]");
 						SendMessage(1, "  unlock [zonename]");
 					}
 				}
 			}
-			else if (strcasecmp(sep.arg[0], "reloadworld") == 0 && admin > 101)
+			else if (strcasecmp(sep.arg[0], "reloadworld") == 0 && admin > AccountStatus::GMAdmin)
 			{
 				SendEmoteMessage(0,0,0,15,"Reloading World...");
 				auto pack = new ServerPacket(ServerOP_ReloadWorld, sizeof(ReloadWorld_Struct));

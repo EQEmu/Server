@@ -265,10 +265,12 @@ void Lua_ItemInst::ClearTimers() {
 }
 
 luabind::scope lua_register_iteminst() {
-	return luabind::class_<Lua_ItemInst>("ItemInst")	
+	return luabind::class_<Lua_ItemInst>("ItemInst")
 	.def(luabind::constructor<>())
 	.def(luabind::constructor<int>())
 	.def(luabind::constructor<int,int>())
+	.property("null", &Lua_ItemInst::Null)
+	.property("valid", &Lua_ItemInst::Valid)
 	.def("AddExp", (void(Lua_ItemInst::*)(uint32))&Lua_ItemInst::AddExp)
 	.def("ClearTimers", (void(Lua_ItemInst::*)(void))&Lua_ItemInst::ClearTimers)
 	.def("Clone", (Lua_ItemInst(Lua_ItemInst::*)(void))&Lua_ItemInst::Clone)

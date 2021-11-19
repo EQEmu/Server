@@ -150,6 +150,8 @@ public:
 	bool HandleNewLoginserverRegisteredOnly(Database::DbWorldRegistration &world_registration);
 	bool HandleNewLoginserverInfoUnregisteredAllowed(Database::DbWorldRegistration &world_registration);
 
+	void SerializeForClientServerList(class SerializeBuffer& out, bool use_local_ip) const;
+
 private:
 
 	/**
@@ -192,6 +194,7 @@ private:
 	void OnKeepAlive(EQ::Timer *t);
 	std::unique_ptr<EQ::Timer> m_keepalive;
 
+	static void FormatWorldServerName(char *name, int8 server_list_type);
 };
 
 #endif

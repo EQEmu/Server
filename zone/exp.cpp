@@ -793,7 +793,7 @@ void Client::SetEXP(uint32 set_exp, uint32 set_aaxp, bool isrezzexp) {
 		FastQueuePacket(&outapp);
 	}
 
-	if (admin>=100 && GetGM()) {
+	if (admin >= AccountStatus::GMAdmin && GetGM()) {
 		char val1[20]={0};
 		char val2[20]={0};
 		char val3[20]={0};

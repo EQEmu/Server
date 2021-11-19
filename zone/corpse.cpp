@@ -953,7 +953,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 		// return;
 	}
 
-	if(is_locked && client->Admin() < 100) {
+	if(is_locked && client->Admin() < AccountStatus::GMAdmin) {
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(Chat::Red, "Error: Corpse locked by GM.");
 		return;
@@ -977,7 +977,7 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 
 	// loot_request_type is scoped to class Corpse and reset on a per-loot session basis
 	if (client->GetGM()) {
-		if (client->Admin() >= 100)
+		if (client->Admin() >= AccountStatus::GMAdmin)
 			loot_request_type = LootRequestType::GMAllowed;
 		else
 			loot_request_type = LootRequestType::GMPeek;
@@ -1203,14 +1203,14 @@ void Corpse::LootItem(Client *client, const EQApplicationPacket *app)
 	}
 
 	if (IsPlayerCorpse() && !CanPlayerLoot(client->CharacterID()) && !become_npc &&
-		(char_id != client->CharacterID() && client->Admin() < 150)) {
+		(char_id != client->CharacterID() && client->Admin() < AccountStatus::GMLeadAdmin)) {
 		client->Message(Chat::Red, "Error: This is a player corpse and you dont own it.");
 		client->QueuePacket(app);
 		SendEndLootErrorPacket(client);
 		return;
 	}
 
-	if (is_locked && client->Admin() < 100) {
+	if (is_locked && client->Admin() < AccountStatus::GMAdmin) {
 		client->QueuePacket(app);
 		SendLootReqErrorPacket(client, LootResponse::SomeoneElse);
 		client->Message(Chat::Red, "Error: Corpse locked by GM.");
@@ -1580,7 +1580,7 @@ bool Corpse::Summon(Client* client, bool spell, bool CheckDistance) {
 	uint32 dist2 = 10000; // pow(100, 2);
 	if (!spell) {
 		if (this->GetCharID() == client->CharacterID()) {
-			if (IsLocked() && client->Admin() < 100) {
+			if (IsLocked() && client->Admin() < AccountStatus::GMAdmin) {
 				client->Message(Chat::Red, "That corpse is locked by a GM.");
 				return false;
 			}

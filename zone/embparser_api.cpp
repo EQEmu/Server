@@ -7473,8 +7473,8 @@ XS(XS__worldwideaddldonloss) {
 		uint8 update_type = CZLDoNUpdateSubtype_AddLoss;
 		uint32 theme_id = (uint32)SvUV(ST(0));
 		int points = 1;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8)SvUV(ST(1));
 
@@ -7495,8 +7495,8 @@ XS(XS__worldwideaddldonpoints) {
 		uint8 update_type = CZLDoNUpdateSubtype_AddPoints;
 		uint32 theme_id = (uint32)SvUV(ST(0));
 		int points = 1;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			points = (int)SvIV(ST(1));
 
@@ -7520,8 +7520,8 @@ XS(XS__worldwideaddldonwin) {
 		uint8 update_type = CZLDoNUpdateSubtype_AddWin;
 		uint32 theme_id = (uint32)SvUV(ST(0));
 		int points = 1;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8)SvUV(ST(1));
 
@@ -7541,8 +7541,8 @@ XS(XS__worldwideassigntask) {
 	{
 		uint8 update_type = WWTaskUpdateType_AssignTask;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int task_subidentifier = -1;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
@@ -7565,8 +7565,8 @@ XS(XS__worldwidecastspell) {
 	{
 		uint8 update_type = WWSpellUpdateType_Cast;
 		uint32 spell_id = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8) SvUV(ST(1));
 
@@ -7585,8 +7585,8 @@ XS(XS__worldwidedialoguewindow) {
 		Perl_croak(aTHX_ "Usage: quest::worldwidedialoguewindow(string message, [uint8 min_status = 0, uint8 max_status = 0])");
 	{
 		const char* message = (const char*) SvPV_nolen(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8)SvUV(ST(1));
 
@@ -7606,8 +7606,8 @@ XS(XS__worldwidedisabletask) {
 	{
 		uint8 update_type = WWTaskUpdateType_DisableTask;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int task_subidentifier = -1;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
@@ -7630,8 +7630,8 @@ XS(XS__worldwideenabletask) {
 	{
 		uint8 update_type = WWTaskUpdateType_EnableTask;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int task_subidentifier = -1;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
@@ -7654,8 +7654,8 @@ XS(XS__worldwidefailtask) {
 	{
 		uint8 update_type = WWTaskUpdateType_FailTask;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int task_subidentifier = -1;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
@@ -7682,8 +7682,8 @@ XS(XS__worldwidemarquee) {
 		uint32 fade_out = (uint32) SvUV(ST(3));
 		uint32 duration = (uint32) SvUV(ST(4));
 		const char* message = (const char*) SvPV_nolen(ST(5));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 7)
 			min_status = (uint8) SvUV(ST(6));
 
@@ -7703,8 +7703,8 @@ XS(XS__worldwidemessage) {
 	{
 		uint32 type = (uint32) SvUV(ST(0));
 		const char* message = (const char*) SvPV_nolen(ST(1));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 3)
 			min_status = (uint8) SvUV(ST(2));
 
@@ -7725,8 +7725,8 @@ XS(XS__worldwidemove) {
 		uint8 update_type = WWMoveUpdateType_MoveZone;
 		const char* zone_short_name = (const char*) SvPV_nolen(ST(0));
 		uint16 instance_id = 0;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8) SvUV(ST(1));
 
@@ -7747,8 +7747,8 @@ XS(XS__worldwidemoveinstance) {
 		uint8 update_type = WWMoveUpdateType_MoveZoneInstance;
 		const char* zone_short_name = "";
 		uint16 instance_id = (uint16) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8) SvUV(ST(1));
 
@@ -7769,8 +7769,8 @@ XS(XS__worldwideremoveldonloss) {
 		uint8 update_type = CZLDoNUpdateSubtype_RemoveLoss;
 		uint32 theme_id = (uint32)SvUV(ST(0));
 		int points = 1;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8)SvUV(ST(1));
 
@@ -7791,8 +7791,8 @@ XS(XS__worldwideremoveldonwin) {
 		uint8 update_type = CZLDoNUpdateSubtype_RemoveWin;
 		uint32 theme_id = (uint32)SvUV(ST(0));
 		int points = 1;
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8)SvUV(ST(1));
 
@@ -7812,8 +7812,8 @@ XS(XS__worldwideremovespell) {
 	{
 		uint8 update_type = WWSpellUpdateType_Remove;
 		uint32 spell_id = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8) SvUV(ST(1));
 
@@ -7833,8 +7833,8 @@ XS(XS__worldwideremovetask) {
 	{
 		uint8 update_type = WWTaskUpdateType_RemoveTask;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int task_subidentifier = -1;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
@@ -7859,8 +7859,8 @@ XS(XS__worldwideresetactivity) {
 		uint8 update_type = WWTaskUpdateType_ActivityReset;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
 		int task_subidentifier = (int) SvIV(ST(1));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
 		if (items == 3)
@@ -7883,8 +7883,8 @@ XS(XS__worldwidesetentityvariableclient) {
 		uint8 update_type = WWSetEntityVariableUpdateType_Character;
 		const char* variable_name = (const char*) SvPV_nolen(ST(0));
 		const char* variable_value = (const char*) SvPV_nolen(ST(1));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 3)
 			min_status = (uint8) SvUV(ST(2));
 
@@ -7931,8 +7931,8 @@ XS(XS__worldwidesignalclient) {
 	{
 		uint8 update_type = WWSignalUpdateType_Character;
 		uint32 signal = (uint32) SvUV(ST(0));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		if (items == 2)
 			min_status = (uint8) SvUV(ST(1));
 
@@ -7953,8 +7953,8 @@ XS(XS__worldwideupdateactivity) {
 		uint8 update_type = WWTaskUpdateType_ActivityUpdate;
 		uint32 task_identifier = (uint32) SvUV(ST(0));
 		int task_subidentifier = (int) SvIV(ST(1));
-		uint8 min_status = 0;
-		uint8 max_status = 0;
+		uint8 min_status = AccountStatus::Player;
+		uint8 max_status = AccountStatus::Player;
 		int update_count = 1;
 		bool enforce_level_requirement = false;
 		if (items == 3)

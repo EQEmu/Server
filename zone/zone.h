@@ -328,24 +328,29 @@ public:
 			auto message_split = SplitString(message, '\n');
 			entity_list.MessageStatus(
 				0,
-				80,
+				AccountStatus::QuestTroupe,
 				LogSys.GetGMSayColorFromCategory(log_category),
-				"%s",
 				message_split[0].c_str()
 			);
 
 			for (size_t iter = 1; iter < message_split.size(); ++iter) {
 				entity_list.MessageStatus(
 					0,
-					80,
+					AccountStatus::QuestTroupe,
 					LogSys.GetGMSayColorFromCategory(log_category),
-					"--- %s",
-					message_split[iter].c_str()
+					fmt::format(
+						"--- {}",
+						message_split[iter]
+					).c_str()					
 				);
 			}
-		}
-		else {
-			entity_list.MessageStatus(0, 80, LogSys.GetGMSayColorFromCategory(log_category), "%s", message.c_str());
+		} else {
+			entity_list.MessageStatus(
+				0,
+				AccountStatus::QuestTroupe,
+				LogSys.GetGMSayColorFromCategory(log_category),
+				message.c_str()
+			);
 		}
 	}
 

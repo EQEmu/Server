@@ -1479,7 +1479,8 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			}
 			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems)
 				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, spells[spell_id].recast_time / 1000);
-			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			if(RuleB(Spells, EnableBardMelody))
+				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
@@ -2182,7 +2183,7 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 	(
 		this->IsClient() &&
 		(zone->GetZoneID() == 183 || zone->GetZoneID() == 184) &&	// load
-		CastToClient()->Admin() < 80
+		CastToClient()->Admin() < AccountStatus::QuestTroupe
 	)
 	{
 		if
@@ -5668,19 +5669,34 @@ bool Mob::FindType(uint16 type, bool bOffensive, uint16 threshold) {
 
 bool Mob::IsCombatProc(uint16 spell_id) {
 
-	if (RuleB(Spells, FocusCombatProcs))
+	if (RuleB(Spells, FocusCombatProcs)) {
 		return false;
+	}
 
-	if(spell_id == SPELL_UNKNOWN)
+	if (spell_id == SPELL_UNKNOWN) {
 		return(false);
+	}
 
 	if ((spells[spell_id].cast_time == 0) && (spells[spell_id].recast_time == 0) && (spells[spell_id].recovery_time == 0))
 	{
 
 		for (int i = 0; i < MAX_PROCS; i++){
-			if (PermaProcs[i].spellID == spell_id || SpellProcs[i].spellID == spell_id
-				 || RangedProcs[i].spellID == spell_id){
+			if (PermaProcs[i].spellID == spell_id || 
+				SpellProcs[i].spellID == spell_id ||
+				RangedProcs[i].spellID == spell_id || 
+				DefensiveProcs[i].spellID == spell_id){
 				return true;
+			}
+		}
+
+		if (IsClient()) {
+			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
+
+				if (aabonuses.SpellProc[i + 1] == spell_id ||
+					aabonuses.RangedProc[i + 1] == spell_id ||
+					aabonuses.DefensiveProc[i + 1] == spell_id) {
+					return true;
+				}
 			}
 		}
 	}

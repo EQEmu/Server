@@ -15,36 +15,38 @@
  */
 
 #include "string_util.h"
+#include <fmt/format.h>
 #include <algorithm>
 #include <cctype>
 
 #ifdef _WINDOWS
-	#include <windows.h>
+#include <windows.h>
 
-	#define snprintf	_snprintf
-	#define strncasecmp	_strnicmp
-	#define strcasecmp  _stricmp
+#define snprintf	_snprintf
+#define strncasecmp	_strnicmp
+#define strcasecmp  _stricmp
 
 #else
-	#include <stdlib.h>
-	#include <stdio.h>
+
+#include <stdlib.h>
+#include <stdio.h>
 #include <iostream>
 
 #endif
 
 #ifndef va_copy
-	#define va_copy(d,s) ((d) = (s))
+#define va_copy(d,s) ((d) = (s))
 #endif
 
 // original source:
 // https://github.com/facebook/folly/blob/master/folly/String.cpp
 //
-const std::string vStringFormat(const char* format, va_list args)
+const std::string vStringFormat(const char *format, va_list args)
 {
 	std::string output;
-	va_list tmpargs;
+	va_list     tmpargs;
 
-	va_copy(tmpargs,args);
+	va_copy(tmpargs, args);
 	int characters_used = vsnprintf(nullptr, 0, format, tmpargs);
 	va_end(tmpargs);
 
@@ -52,7 +54,7 @@ const std::string vStringFormat(const char* format, va_list args)
 	if (characters_used > 0) {
 		output.resize(characters_used + 1);
 
-		va_copy(tmpargs,args);
+		va_copy(tmpargs, args);
 		characters_used = vsnprintf(&output[0], output.capacity(), format, tmpargs);
 		va_end(tmpargs);
 
@@ -60,8 +62,9 @@ const std::string vStringFormat(const char* format, va_list args)
 
 		// We shouldn't have a format error by this point, but I can't imagine what error we
 		// could have by this point. Still, return empty string;
-		if (characters_used < 0)
+		if (characters_used < 0) {
 			output.clear();
+		}
 	}
 	return output;
 }
@@ -87,8 +90,9 @@ const std::string str_toupper(std::string s)
 const std::string ucfirst(std::string s)
 {
 	std::string output = s;
-	if (!s.empty())
+	if (!s.empty()) {
 		output[0] = static_cast<char>(::toupper(s[0]));
+	}
 
 	return output;
 }
@@ -102,18 +106,20 @@ const std::string StringFormat(const char *format, ...)
 	return output;
 }
 
-std::vector<std::string> SplitString(const std::string &str, const char delim) {
+std::vector<std::string> SplitString(const std::string &str, const char delim)
+{
 	std::vector<std::string> ret;
-	std::string::size_type start = 0;
-	auto end = str.find(delim);
+	std::string::size_type   start = 0;
+	auto                     end   = str.find(delim);
 	while (end != std::string::npos) {
 		ret.emplace_back(str, start, end - start);
 		start = end + 1;
-		end = str.find(delim, start);
+		end   = str.find(delim, start);
 	}
 	// this will catch the last word since the string is unlikely to end with a delimiter
-	if (str.length() > start)
+	if (str.length() > start) {
 		ret.emplace_back(str, start, str.length() - start);
+	}
 	return ret;
 }
 
@@ -153,14 +159,16 @@ std::string get_between(const std::string &s, std::string start_delim, std::stri
 	return "";
 }
 
-std::string::size_type search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator)
+std::string::size_type
+search_deliminated_string(const std::string &haystack, const std::string &needle, const char deliminator)
 {
 	// this shouldn't go out of bounds, even without obvious bounds checks
 	auto pos = haystack.find(needle);
 	while (pos != std::string::npos) {
 		auto c = haystack[pos + needle.length()];
-		if ((c == '\0' || c == deliminator) && (pos == 0 || haystack[pos - 1] == deliminator))
+		if ((c == '\0' || c == deliminator) && (pos == 0 || haystack[pos - 1] == deliminator)) {
 			return pos;
+		}
 		pos = haystack.find(needle, pos + needle.length());
 	}
 	return std::string::npos;
@@ -180,7 +188,7 @@ std::string implode(std::string glue, std::vector<std::string> src)
 	}
 
 	std::string final_output = output.str();
-	final_output.resize (output.str().size () - glue.size());
+	final_output.resize(output.str().size() - glue.size());
 
 	return final_output;
 }
@@ -202,80 +210,83 @@ std::vector<std::string> wrap(std::vector<std::string> &src, std::string charact
 	return new_vector;
 }
 
-std::string EscapeString(const std::string &s) {
+std::string EscapeString(const std::string &s)
+{
 	std::string ret;
 
-	size_t sz = s.length();
-	for(size_t i = 0; i < sz; ++i) {
+	size_t      sz = s.length();
+	for (size_t i  = 0; i < sz; ++i) {
 		char c = s[i];
-		switch(c) {
-		case '\x00':
-			ret += "\\x00";
-			break;
-		case '\n':
-			ret += "\\n";
-			break;
-		case '\r':
-			ret += "\\r";
-			break;
-		case '\\':
-			ret += "\\\\";
-			break;
-		case '\'':
-			ret += "\\'";
-			break;
-		case '\"':
-			ret += "\\\"";
-			break;
-		case '\x1a':
-			ret += "\\x1a";
-			break;
-		default:
-			ret.push_back(c);
-			break;
+		switch (c) {
+			case '\x00':
+				ret += "\\x00";
+				break;
+			case '\n':
+				ret += "\\n";
+				break;
+			case '\r':
+				ret += "\\r";
+				break;
+			case '\\':
+				ret += "\\\\";
+				break;
+			case '\'':
+				ret += "\\'";
+				break;
+			case '\"':
+				ret += "\\\"";
+				break;
+			case '\x1a':
+				ret += "\\x1a";
+				break;
+			default:
+				ret.push_back(c);
+				break;
 		}
 	}
 
 	return ret;
 }
 
-std::string EscapeString(const char *src, size_t sz) {
+std::string EscapeString(const char *src, size_t sz)
+{
 	std::string ret;
 
-	for(size_t i = 0; i < sz; ++i) {
+	for (size_t i = 0; i < sz; ++i) {
 		char c = src[i];
-		switch(c) {
-		case '\x00':
-			ret += "\\x00";
-			break;
-		case '\n':
-			ret += "\\n";
-			break;
-		case '\r':
-			ret += "\\r";
-			break;
-		case '\\':
-			ret += "\\\\";
-			break;
-		case '\'':
-			ret += "\\'";
-			break;
-		case '\"':
-			ret += "\\\"";
-			break;
-		case '\x1a':
-			ret += "\\x1a";
-			break;
-		default:
-			ret.push_back(c);
-			break;
+		switch (c) {
+			case '\x00':
+				ret += "\\x00";
+				break;
+			case '\n':
+				ret += "\\n";
+				break;
+			case '\r':
+				ret += "\\r";
+				break;
+			case '\\':
+				ret += "\\\\";
+				break;
+			case '\'':
+				ret += "\\'";
+				break;
+			case '\"':
+				ret += "\\\"";
+				break;
+			case '\x1a':
+				ret += "\\x1a";
+				break;
+			default:
+				ret.push_back(c);
+				break;
 		}
 	}
 
 	return ret;
 }
 
-bool StringIsNumber(const std::string &s) {
+bool StringIsNumber(const std::string &s)
+{
 	try {
 		auto r = stod(s);
 		return true;
@@ -285,15 +296,18 @@ bool StringIsNumber(const std::string &s) {
 	}
 }
 
-void ToLowerString(std::string &s) {
+void ToLowerString(std::string &s)
+{
 	std::transform(s.begin(), s.end(), s.begin(), ::tolower);
 }
 
-void ToUpperString(std::string &s) {
+void ToUpperString(std::string &s)
+{
 	std::transform(s.begin(), s.end(), s.begin(), ::toupper);
 }
 
-std::string JoinString(const std::vector<std::string>& ar, const std::string &delim) {
+std::string JoinString(const std::vector<std::string> &ar, const std::string &delim)
+{
 	std::string ret;
 	for (size_t i = 0; i < ar.size(); ++i) {
 		if (i != 0) {
@@ -313,7 +327,7 @@ void find_replace(std::string &string_subject, const std::string &search_string,
 	}
 
 	size_t start_pos = 0;
-	while((start_pos = string_subject.find(search_string, start_pos)) != std::string::npos) {
+	while ((start_pos = string_subject.find(search_string, start_pos)) != std::string::npos) {
 		string_subject.replace(start_pos, search_string.length(), replace_string);
 		start_pos += replace_string.length();
 	}
@@ -334,9 +348,9 @@ void ParseAccountString(const std::string &s, std::string &account, std::string 
 	auto split = SplitString(s, ':');
 	if (split.size() == 2) {
 		loginserver = split[0];
-		account = split[1];
+		account     = split[1];
 	}
-	else if(split.size() == 1) {
+	else if (split.size() == 1) {
 		account = split[0];
 	}
 }
@@ -345,9 +359,11 @@ void ParseAccountString(const std::string &s, std::string &account, std::string 
 
 // normal strncpy doesnt put a null term on copied strings, this one does
 // ref: http://msdn.microsoft.com/library/default.asp?url=/library/en-us/wcecrt/htm/_wcecrt_strncpy_wcsncpy.asp
-char* strn0cpy(char* dest, const char* source, uint32 size) {
-	if (!dest)
+char *strn0cpy(char *dest, const char *source, uint32 size)
+{
+	if (!dest) {
 		return 0;
+	}
 	if (size == 0 || source == 0) {
 		dest[0] = 0;
 		return dest;
@@ -359,123 +375,159 @@ char* strn0cpy(char* dest, const char* source, uint32 size) {
 
 // String N w/null Copy Truncated?
 // return value =true if entire string(source) fit, false if it was truncated
-bool strn0cpyt(char* dest, const char* source, uint32 size) {
-	if (!dest)
+bool strn0cpyt(char *dest, const char *source, uint32 size)
+{
+	if (!dest) {
 		return 0;
+	}
 	if (size == 0 || source == 0) {
 		dest[0] = 0;
 		return false;
 	}
 	strncpy(dest, source, size);
 	dest[size - 1] = 0;
-	return (bool)(source[strlen(dest)] == 0);
+	return (bool) (source[strlen(dest)] == 0);
 }
 
-const char *MakeLowerString(const char *source) {
+const char *MakeLowerString(const char *source)
+{
 	static char str[128];
-	if (!source)
+	if (!source) {
 		return nullptr;
+	}
 	MakeLowerString(source, str);
 	return str;
 }
 
-void MakeLowerString(const char *source, char *target) {
+void MakeLowerString(const char *source, char *target)
+{
 	if (!source || !target) {
 		*target = 0;
 		return;
 	}
-	while (*source)
-	{
+	while (*source) {
 		*target = tolower(*source);
-		target++; source++;
+		target++;
+		source++;
 	}
 	*target = 0;
 }
 
-uint32 hextoi(const char* num) {
-	if (num == nullptr)
+uint32 hextoi(const char *num)
+{
+	if (num == nullptr) {
 		return 0;
+	}
 
 	int len = strlen(num);
-	if (len < 3)
+	if (len < 3) {
 		return 0;
+	}
 
-	if (num[0] != '0' || (num[1] != 'x' && num[1] != 'X'))
+	if (num[0] != '0' || (num[1] != 'x' && num[1] != 'X')) {
 		return 0;
+	}
 
-	uint32 ret = 0;
-	int mul = 1;
-	for (int i = len - 1; i >= 2; i--) {
-		if (num[i] >= 'A' && num[i] <= 'F')
+	uint32   ret = 0;
+	int      mul = 1;
+	for (int i   = len - 1; i >= 2; i--) {
+		if (num[i] >= 'A' && num[i] <= 'F') {
 			ret += ((num[i] - 'A') + 10) * mul;
-		else if (num[i] >= 'a' && num[i] <= 'f')
+		}
+		else if (num[i] >= 'a' && num[i] <= 'f') {
 			ret += ((num[i] - 'a') + 10) * mul;
-		else if (num[i] >= '0' && num[i] <= '9')
+		}
+		else if (num[i] >= '0' && num[i] <= '9') {
 			ret += (num[i] - '0') * mul;
-		else
+		}
+		else {
 			return 0;
+		}
 		mul *= 16;
 	}
 	return ret;
 }
 
-uint64 hextoi64(const char* num) {
-	if (num == nullptr)
+uint64 hextoi64(const char *num)
+{
+	if (num == nullptr) {
 		return 0;
+	}
 
 	int len = strlen(num);
-	if (len < 3)
+	if (len < 3) {
 		return 0;
+	}
 
-	if (num[0] != '0' || (num[1] != 'x' && num[1] != 'X'))
+	if (num[0] != '0' || (num[1] != 'x' && num[1] != 'X')) {
 		return 0;
+	}
 
-	uint64 ret = 0;
-	int mul = 1;
-	for (int i = len - 1; i >= 2; i--) {
-		if (num[i] >= 'A' && num[i] <= 'F')
+	uint64   ret = 0;
+	int      mul = 1;
+	for (int i   = len - 1; i >= 2; i--) {
+		if (num[i] >= 'A' && num[i] <= 'F') {
 			ret += ((num[i] - 'A') + 10) * mul;
-		else if (num[i] >= 'a' && num[i] <= 'f')
+		}
+		else if (num[i] >= 'a' && num[i] <= 'f') {
 			ret += ((num[i] - 'a') + 10) * mul;
-		else if (num[i] >= '0' && num[i] <= '9')
+		}
+		else if (num[i] >= '0' && num[i] <= '9') {
 			ret += (num[i] - '0') * mul;
-		else
+		}
+		else {
 			return 0;
+		}
 		mul *= 16;
 	}
 	return ret;
 }
 
-bool atobool(const char* iBool) {
+bool atobool(const char *iBool)
+{
 
-	if (iBool == nullptr)
+	if (iBool == nullptr) {
 		return false;
-	if (!strcasecmp(iBool, "true"))
+	}
+	if (!strcasecmp(iBool, "true")) {
 		return true;
-	if (!strcasecmp(iBool, "false"))
+	}
+	if (!strcasecmp(iBool, "false")) {
 		return false;
-	if (!strcasecmp(iBool, "yes"))
+	}
+	if (!strcasecmp(iBool, "yes")) {
 		return true;
-	if (!strcasecmp(iBool, "no"))
+	}
+	if (!strcasecmp(iBool, "no")) {
 		return false;
-	if (!strcasecmp(iBool, "on"))
+	}
+	if (!strcasecmp(iBool, "on")) {
 		return true;
-	if (!strcasecmp(iBool, "off"))
+	}
+	if (!strcasecmp(iBool, "off")) {
 		return false;
-	if (!strcasecmp(iBool, "enable"))
+	}
+	if (!strcasecmp(iBool, "enable")) {
 		return true;
-	if (!strcasecmp(iBool, "disable"))
+	}
+	if (!strcasecmp(iBool, "disable")) {
 		return false;
-	if (!strcasecmp(iBool, "enabled"))
+	}
+	if (!strcasecmp(iBool, "enabled")) {
 		return true;
-	if (!strcasecmp(iBool, "disabled"))
+	}
+	if (!strcasecmp(iBool, "disabled")) {
 		return false;
-	if (!strcasecmp(iBool, "y"))
+	}
+	if (!strcasecmp(iBool, "y")) {
 		return true;
-	if (!strcasecmp(iBool, "n"))
+	}
+	if (!strcasecmp(iBool, "n")) {
 		return false;
-	if (atoi(iBool))
+	}
+	if (atoi(iBool)) {
 		return true;
+	}
 	return false;
 }
 
@@ -484,21 +536,19 @@ char *CleanMobName(const char *in, char *out)
 {
 	unsigned i, j;
 
-	for (i = j = 0; i < strlen(in); i++)
-	{
+	for (i = j = 0; i < strlen(in); i++) {
 		// convert _ to space.. any other conversions like this?  I *think* this
 		// is the only non alpha char that's not stripped but converted.
-		if (in[i] == '_')
-		{
+		if (in[i] == '_') {
 			out[j++] = ' ';
 		}
-		else
-		{
-			if (isalpha(in[i]) || (in[i] == '`'))	// numbers, #, or any other crap just gets skipped
+		else {
+			if (isalpha(in[i]) || (in[i] == '`')) {    // numbers, #, or any other crap just gets skipped
 				out[j++] = in[i];
+			}
 		}
 	}
-	out[j] = 0;	// terimnate the string before returning it
+	out[j] = 0;    // terimnate the string before returning it
 	return out;
 }
 
@@ -506,8 +556,9 @@ char *CleanMobName(const char *in, char *out)
 void RemoveApostrophes(std::string &s)
 {
 	for (unsigned int i = 0; i < s.length(); ++i)
-		if (s[i] == '\'')
+		if (s[i] == '\'') {
 			s[i] = '_';
+		}
 }
 
 char *RemoveApostrophes(const char *s)
@@ -517,8 +568,9 @@ char *RemoveApostrophes(const char *s)
 	strcpy(NewString, s);
 
 	for (unsigned int i = 0; i < strlen(NewString); ++i)
-		if (NewString[i] == '\'')
+		if (NewString[i] == '\'') {
 			NewString[i] = '_';
+		}
 
 	return NewString;
 }
@@ -537,11 +589,12 @@ const char *ConvertArrayF(float input, char *returnchar)
 
 bool isAlphaNumeric(const char *text)
 {
-	for (unsigned int charIndex = 0; charIndex<strlen(text); charIndex++) {
+	for (unsigned int charIndex = 0; charIndex < strlen(text); charIndex++) {
 		if ((text[charIndex] < 'a' || text[charIndex] > 'z') &&
 			(text[charIndex] < 'A' || text[charIndex] > 'Z') &&
-			(text[charIndex] < '0' || text[charIndex] > '9'))
+			(text[charIndex] < '0' || text[charIndex] > '9')) {
 			return false;
+		}
 	}
 
 	return true;
@@ -596,11 +649,10 @@ std::string numberToWords(unsigned long long int n)
 }
 
 // first letter capitalized and rest made lower case
-std::string FormatName(const std::string& char_name)
+std::string FormatName(const std::string &char_name)
 {
 	std::string formatted(char_name);
-	if (!formatted.empty())
-	{
+	if (!formatted.empty()) {
 		std::transform(formatted.begin(), formatted.end(), formatted.begin(), ::tolower);
 		formatted[0] = ::toupper(formatted[0]);
 	}
@@ -620,6 +672,12 @@ bool IsAllowedWorldServerCharacterList(char c)
 void SanitizeWorldServerName(char *name)
 {
 	std::string server_long_name = name;
+
+	strcpy(name, SanitizeWorldServerName(server_long_name).c_str());
+}
+
+std::string SanitizeWorldServerName(std::string server_long_name)
+{
 	server_long_name.erase(
 		std::remove_if(
 			server_long_name.begin(),
@@ -632,5 +690,476 @@ void SanitizeWorldServerName(char *name)
 
 	server_long_name = trim(server_long_name);
 
-	strcpy(name, server_long_name.c_str());
+	// bad word filter
+	for (auto &piece: split_string(server_long_name, " ")) {
+		for (auto &word: GetBadWords()) {
+			// for shorter words that can actually be part of legitimate words
+			// make sure that it isn't part of another word by matching on a space
+			if (str_tolower(piece) == word) {
+				find_replace(
+					server_long_name,
+					piece,
+					repeat("*", (int) word.length())
+				);
+				continue;
+			}
+
+			auto pos = str_tolower(piece).find(word);
+			if (str_tolower(piece).find(word) != std::string::npos && piece.length() > 4 && word.length() > 4) {
+				auto found_word = piece.substr(pos, word.length());
+				std::string replaced_piece = piece.substr(pos, word.length());
+
+				find_replace(
+					server_long_name,
+					replaced_piece,
+					repeat("*", (int) word.length())
+				);
+			}
+		}
+	}
+
+	return server_long_name;
+}
+
+std::string repeat(std::string s, int n)
+{
+	std::string s1 = s;
+	for (int    i  = 1; i < n; i++) {
+		s += s1;
+	}
+
+	return s;
+}
+
+std::vector<std::string> GetBadWords()
+{
+	return std::vector<std::string>{
+		"2g1c",
+		"acrotomophilia",
+		"anal",
+		"anilingus",
+		"anus",
+		"apeshit",
+		"arsehole",
+		"ass",
+		"asshole",
+		"assmunch",
+		"autoerotic",
+		"babeland",
+		"bangbros",
+		"bangbus",
+		"bareback",
+		"barenaked",
+		"bastard",
+		"bastardo",
+		"bastinado",
+		"bbw",
+		"bdsm",
+		"beaner",
+		"beaners",
+		"beaver",
+		"beastiality",
+		"bestiality",
+		"bimbos",
+		"birdlock",
+		"bitch",
+		"bitches",
+		"blowjob",
+		"blumpkin",
+		"bollocks",
+		"bondage",
+		"boner",
+		"boob",
+		"boobs",
+		"bukkake",
+		"bulldyke",
+		"bullshit",
+		"bung",
+		"bunghole",
+		"busty",
+		"butt",
+		"buttcheeks",
+		"butthole",
+		"camel toe",
+		"camgirl",
+		"camslut",
+		"camwhore",
+		"carpetmuncher",
+		"cialis",
+		"circlejerk",
+		"clit",
+		"clitoris",
+		"clusterfuck",
+		"cock",
+		"cocks",
+		"coprolagnia",
+		"coprophilia",
+		"cornhole",
+		"coon",
+		"coons",
+		"creampie",
+		"cum",
+		"cumming",
+		"cumshot",
+		"cumshots",
+		"cunnilingus",
+		"cunt",
+		"darkie",
+		"daterape",
+		"deepthroat",
+		"dendrophilia",
+		"dick",
+		"dildo",
+		"dingleberry",
+		"dingleberries",
+		"doggiestyle",
+		"doggystyle",
+		"dolcett",
+		"domination",
+		"dominatrix",
+		"dommes",
+		"hump",
+		"dvda",
+		"ecchi",
+		"ejaculation",
+		"erotic",
+		"erotism",
+		"escort",
+		"eunuch",
+		"fag",
+		"faggot",
+		"fecal",
+		"felch",
+		"fellatio",
+		"feltch",
+		"femdom",
+		"figging",
+		"fingerbang",
+		"fingering",
+		"fisting",
+		"footjob",
+		"frotting",
+		"fuck",
+		"fuckin",
+		"fucking",
+		"fucktards",
+		"fudgepacker",
+		"futanari",
+		"gangbang",
+		"gangbang",
+		"gaysex",
+		"genitals",
+		"goatcx",
+		"goatse",
+		"gokkun",
+		"goodpoop",
+		"goregasm",
+		"grope",
+		"g-spot",
+		"guro",
+		"handjob",
+		"hentai",
+		"homoerotic",
+		"honkey",
+		"hooker",
+		"horny",
+		"humping",
+		"incest",
+		"intercourse",
+		"jailbait",
+		"jigaboo",
+		"jiggaboo",
+		"jiggerboo",
+		"jizz",
+		"juggs",
+		"kike",
+		"kinbaku",
+		"kinkster",
+		"kinky",
+		"knobbing",
+		"livesex",
+		"lolita",
+		"lovemaking",
+		"masturbate",
+		"masturbating",
+		"masturbation",
+		"milf",
+		"mong",
+		"motherfucker",
+		"muffdiving",
+		"nambla",
+		"nawashi",
+		"negro",
+		"neonazi",
+		"nigga",
+		"nigger",
+		"nimphomania",
+		"nipple",
+		"nipples",
+		"nsfw",
+		"nude",
+		"nudity",
+		"nutten",
+		"nympho",
+		"nymphomania",
+		"octopussy",
+		"omorashi",
+		"orgasm",
+		"orgy",
+		"paedophile",
+		"paki",
+		"panties",
+		"panty",
+		"pedobear",
+		"pedophile",
+		"pegging",
+		"penis",
+		"pikey",
+		"pissing",
+		"pisspig",
+		"playboy",
+		"ponyplay",
+		"poof",
+		"poon",
+		"poontang",
+		"punany",
+		"poopchute",
+		"porn",
+		"porno",
+		"pornography",
+		"pthc",
+		"pubes",
+		"pussy",
+		"queaf",
+		"queef",
+		"quim",
+		"raghead",
+		"rape",
+		"raping",
+		"rapist",
+		"rectum",
+		"rimjob",
+		"rimming",
+		"sadism",
+		"santorum",
+		"scat",
+		"schlong",
+		"scissoring",
+		"semen",
+		"sex",
+		"sexcam",
+		"sexo",
+		"sexy",
+		"sexual",
+		"sexually",
+		"sexuality",
+		"shemale",
+		"shibari",
+		"shit",
+		"shitblimp",
+		"shitty",
+		"shota",
+		"shrimping",
+		"skeet",
+		"slanteye",
+		"slut",
+		"s&m",
+		"smut",
+		"snatch",
+		"snowballing",
+		"sodomize",
+		"sodomy",
+		"spastic",
+		"spic",
+		"splooge",
+		"spooge",
+		"spunk",
+		"strapon",
+		"strappado",
+		"suck",
+		"sucks",
+		"swastika",
+		"swinger",
+		"threesome",
+		"throating",
+		"thumbzilla",
+		"tight white",
+		"tit",
+		"tits",
+		"titties",
+		"titty",
+		"topless",
+		"tosser",
+		"towelhead",
+		"tranny",
+		"tribadism",
+		"tubgirl",
+		"tushy",
+		"twat",
+		"twink",
+		"twinkie",
+		"undressing",
+		"upskirt",
+		"urophilia",
+		"vagina",
+		"viagra",
+		"vibrator",
+		"vorarephilia",
+		"voyeur",
+		"voyeurweb",
+		"voyuer",
+		"vulva",
+		"wank",
+		"wetback",
+		"whore",
+		"worldsex",
+		"xx",
+		"xxx",
+		"yaoi",
+		"yiffy",
+		"zoophilia"
+	};
+}
+
+std::string ConvertSecondsToTime(int duration)
+{
+	int timer_length = duration;
+	int days = int(timer_length / 86400000);
+	timer_length %= 86400000;
+	int hours = int(timer_length / 3600);
+	timer_length %= 3600;
+	int minutes = int(timer_length / 60);
+	timer_length %= 60;
+	int seconds = timer_length;
+	std::string time_string = "Unknown";
+	std::string day_string = (days == 1 ? "Day" : "Days");
+	std::string hour_string = (hours == 1 ? "Hour" : "Hours");
+	std::string minute_string = (minutes == 1 ? "Minute" : "Minutes");
+	std::string second_string = (seconds == 1 ? "Second" : "Seconds");
+	if (days && hours && minutes && seconds) { // DHMS
+		time_string = fmt::format(
+			"{} {}, {} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (days && hours && minutes && !seconds) { // DHM
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			minutes,
+			minute_string
+		);
+	} else if (days && hours && !minutes && seconds) { // DHS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string,
+			seconds,
+			second_string
+		);
+	} else if (days && hours && !minutes && !seconds) { // DH
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			hours,
+			hour_string
+		);
+	} else if (days && !hours && minutes && seconds) { // DMS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			days,
+			day_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (days && !hours && minutes && !seconds) { // DM
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			minutes,
+			minute_string
+		);
+	} else if (days && !hours && !minutes && seconds) { // DS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			days,
+			day_string,
+			seconds,
+			second_string
+		);
+	} else if (days && !hours && !minutes && !seconds) { // D
+		time_string = fmt::format(
+			"{} {}",
+			days,
+			day_string
+		);
+	} else if (!days && hours && minutes && seconds) { // HMS
+		time_string = fmt::format(
+			"{} {}, {} {}, and {} {}",
+			hours,
+			hour_string,
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (!days && hours && minutes && !seconds) { // HM
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			hours,
+			hour_string,
+			minutes,
+			minute_string
+		);
+	} else if (!days && hours && !minutes && seconds) { // HS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			hours,
+			hour_string,
+			seconds,
+			second_string
+		);
+	} else if (!days && hours && !minutes && !seconds) { // H
+		time_string = fmt::format(
+			"{} {}",
+			hours,
+			hour_string
+		);
+	} else if (!days && !hours && minutes && seconds) { // MS
+		time_string = fmt::format(
+			"{} {} and {} {}",
+			minutes,
+			minute_string,
+			seconds,
+			second_string
+		);
+	} else if (!days && !hours && minutes && !seconds) { // M
+		time_string = fmt::format(
+			"{} {}",
+			minutes,
+			minute_string
+		);
+	} else if (!days && !hours && !minutes && seconds) { // S
+		time_string = fmt::format(
+			"{} {}",
+			seconds,
+			second_string
+		);
+	}
+	return time_string;
 }

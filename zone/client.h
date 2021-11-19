@@ -301,8 +301,8 @@ public:
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	EQ::ItemInstance* FindTraderItemBySerialNumber(int32 SerialNumber);
-	void FindAndNukeTraderItem(int32 item_id,uint16 quantity,Client* customer,uint16 traderslot);
-	void NukeTraderItem(uint16 slot, int16 charges, uint16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
+	void FindAndNukeTraderItem(int32 item_id,int16 quantity,Client* customer,uint16 traderslot);
+	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
@@ -897,6 +897,8 @@ public:
 	void ResetAA();
 	void RefundAA();
 	void SendClearAA();
+	void SendClearLeadershipAA();
+	void SendClearPlayerAA();
 	inline uint32 GetAAXP() const { return m_pp.expAA; }
 	inline uint32 GetAAPercent() const { return m_epp.perAA; }
 	int32 CalcAAFocus(focusType type, const AA::Rank &rank, uint16 spell_id);
@@ -917,7 +919,7 @@ public:
 	bool PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, bool client_update = false);
 	bool PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update = false);
 	void SendCursorBuffer();
-	void DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
+	void DeleteItemInInventory(int16 slot_id, int16 quantity = 0, bool client_update = false, bool update_db = true);
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity = 1);
 	bool SwapItem(MoveItem_Struct* move_in);
@@ -971,7 +973,7 @@ public:
 
 	//remove charges/multiple objects from inventory:
 	//bool DecreaseByType(uint32 type, uint8 amt);
-	bool DecreaseByID(uint32 type, uint8 amt);
+	bool DecreaseByID(uint32 type, int16 quantity);
 	uint8 SlotConvert2(uint8 slot); //Maybe not needed.
 	void Escape(); //AA Escape
 	void DisenchantSummonedBags(bool client_update = true);
@@ -1593,10 +1595,6 @@ public:
 	}
 	uint32 GetLastInvSnapshotTime() { return m_epp.last_invsnapshot_time; }
 	uint32 GetNextInvSnapshotTime() { return m_epp.next_invsnapshot_time; }
-
-	//Command #Tune functions
-	virtual int32 Tune_GetMeleeMitDmg(Mob* GM, Mob *attacker, int32 damage, int32 minhit, float mit_rating, float atk_rating);
-	int32 GetMeleeDamage(Mob* other, bool GetMinDamage = false);
 
 	void QuestReward(Mob* target, uint32 copper = 0, uint32 silver = 0, uint32 gold = 0, uint32 platinum = 0, uint32 itemid = 0, uint32 exp = 0, bool faction = false);
 	void QuestReward(Mob* target, const QuestReward_Struct &reward, bool faction); // TODO: Fix faction processing

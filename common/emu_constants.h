@@ -328,13 +328,32 @@ namespace EQ
 			Guild
 		};
 	}; // namespace consent
-
 } /*EQEmu*/
 
+enum ServerLockType : int {
+	List,
+	Lock,
+	Unlock
+};
+
+enum AccountStatus : uint8 {
+	Player = 0,
+	Steward = 10,
+	ApprenticeGuide = 20,
+	Guide = 50,
+	QuestTroupe = 80,
+	SeniorGuide = 81,
+	GMTester = 85,
+	EQSupport = 90,
+	GMStaff = 95,
+	GMAdmin = 100,
+	GMLeadAdmin = 150,
+	QuestMaster = 160,
+	GMAreas = 170,
+	GMCoder = 180,
+	GMMgmt = 200,
+	GMImpossible = 250,
+	Max = 255
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/
-
-/*	hack list to prevent circular references
-	
-	eq_limits.h:EQ::inventory::LookupEntry::InventoryTypeSize[n];
-
-*/

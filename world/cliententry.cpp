@@ -274,7 +274,7 @@ void ClientListEntry::ClearVars(bool iAll)
 
 		paccountid = 0;
 		memset(paccountname, 0, sizeof(paccountname));
-		padmin = 0;
+		padmin = AccountStatus::Player;
 	}
 	pzoneserver = 0;
 	pzone       = 0;
@@ -365,7 +365,7 @@ bool ClientListEntry::CheckAuth(uint32 loginserver_account_id, const char *key_p
 		}
 		std::string lsworldadmin;
 		if (database.GetVariable("honorlsworldadmin", lsworldadmin)) {
-			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == 0)) {
+			if (atoi(lsworldadmin.c_str()) == 1 && pworldadmin != 0 && (padmin < pworldadmin || padmin == AccountStatus::Player)) {
 				padmin = pworldadmin;
 			}
 		}
