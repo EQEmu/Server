@@ -3298,7 +3298,8 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 
 	// If this is a DoT, use DoT Shielding...
 	if (iBuffTic) {
-		damage -= (damage * itembonuses.DoTShielding / 100);
+		int total_dotshielding = itembonuses.DoTShielding + itembonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] + aabonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT];
+		damage -= (damage * total_dotshielding / 100);
 
 		if (spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT]) {
 			slot = spellbonuses.MitigateDotRune[SBIndex::MITIGATION_RUNE_BUFFSLOT];
@@ -3330,7 +3331,11 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	else
 	{
 		// Reduce damage by the Spell Shielding first so that the runes don't take the raw damage.
-		damage -= (damage * itembonuses.SpellShield / 100);
+		int total_spellshielding = itembonuses.SpellShield + itembonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] + aabonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT];
+		Shout("SPELL SHIELD %i %i", itembonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT], aabonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT]);
+		Shout("DAMGE1 %i", damage);
+		damage -= (damage * total_spellshielding / 100);
+		Shout("DAMGE2 %i", damage);
 
 		//Only mitigate if damage is above the minimium specified.
 		if (spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT]) {
