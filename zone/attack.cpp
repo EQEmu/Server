@@ -3332,11 +3332,8 @@ int32 Mob::AffectMagicalDamage(int32 damage, uint16 spell_id, const bool iBuffTi
 	{
 		// Reduce damage by the Spell Shielding first so that the runes don't take the raw damage.
 		int total_spellshielding = itembonuses.SpellShield + itembonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] + aabonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT];
-		Shout("SPELL SHIELD %i %i", itembonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT], aabonuses.MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT]);
-		Shout("DAMGE1 %i", damage);
 		damage -= (damage * total_spellshielding / 100);
-		Shout("DAMGE2 %i", damage);
-
+		
 		//Only mitigate if damage is above the minimium specified.
 		if (spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_MITIGATION_PERCENT]) {
 			slot = spellbonuses.SpellThresholdGuard[SBIndex::THRESHOLDGUARD_BUFFSLOT];
