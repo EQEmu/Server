@@ -46,6 +46,7 @@ std::string implode(std::string glue, std::vector<std::string> src);
 std::string convert2digit(int n, std::string suffix);
 std::string numberToWords(unsigned long long int n);
 std::string ConvertSecondsToTime(int duration);
+std::string ConvertMoneyToString(uint32 platinum, uint32 gold = 0, uint32 silver = 0, uint32 copper = 0);
 
 // For converstion of numerics into English
 // Used for grid nodes, as NPC names remove numerals.

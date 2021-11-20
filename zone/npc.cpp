@@ -674,12 +674,18 @@ void NPC::QueryLoot(Client* to)
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Item {} | Name: {} ID: {} Min Level: {} Max Level: {}",
+					"Item {} | Name: {} ({}){}",
 					item_number,
 					linker.GenerateLink().c_str(),
 					current_item->item_id,
-					current_item->trivial_min_level,
-					current_item->trivial_max_level
+					(
+						current_item->charges > 1 ?
+						fmt::format(
+							" Amount: {}",
+							current_item->charges
+						) :
+						""
+					)
 				).c_str()
 			);
 			item_count++;
@@ -696,11 +702,13 @@ void NPC::QueryLoot(Client* to)
 		to->Message(
 			Chat::White,
 			fmt::format(
-				"Money | Platinum: {} Gold: {} Silver: {} Copper: {}",
-				platinum,
-				gold,
-				silver,
-				copper
+				"Money | {}",
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				)
 			).c_str()
 		);
 	}
