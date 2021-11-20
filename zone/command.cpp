@@ -133,7 +133,7 @@ int command_init(void)
 		command_add("bot", "- Type \"#bot help\" or \"^help\" to the see the list of available commands for bots.", AccountStatus::Player, command_bot) ||
 #endif
 
-		command_add("camerashake",  "Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
+		command_add("camerashake",  "[Duration (Milliseconds)] [Intensity (1-10)] - Shakes the camera on everyone's screen globally.", AccountStatus::QuestTroupe, command_camerashake) ||
 		command_add("castspell", "[Spell ID] [Instant (0 = False, 1 = True, Default is 1 if Unused)] - Cast a spell", AccountStatus::Guide, command_castspell) ||
 		command_add("chat", "[channel num] [message] - Send a channel message to all zones", AccountStatus::GMMgmt, command_chat) ||
 		command_add("checklos", "- Check for line of sight to your target", AccountStatus::Guide, command_checklos) ||
