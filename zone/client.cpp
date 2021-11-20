@@ -9407,7 +9407,7 @@ void Client::CheckVirtualZoneLines()
 			LogZonePoints(
 				"Virtual Zone Box Sending player [{}] to [{}]",
 				GetCleanName(),
-				zone_store.GetZoneLongName(virtual_zone_point.target_zone_id)
+				ZoneLongName(virtual_zone_point.target_zone_id)
 			);
 		}
 	}

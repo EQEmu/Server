@@ -1057,7 +1057,7 @@ void Client::SendZoneFlagInfo(Client *to) const {
 	for(; cur != end; ++cur) {
 		uint32 zone_id = *cur;
 		const char* zone_short_name = ZoneName(zone_id);
-		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
+		std::string zone_long_name = ZoneLongName(zone_id);
 		float safe_x, safe_y, safe_z, safe_heading;
 		int16 min_status = AccountStatus::Player;
 		uint8 min_level = 0;
