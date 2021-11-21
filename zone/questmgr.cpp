@@ -3105,19 +3105,19 @@ uint8 QuestManager::FactionValue()
 			case FACTION_SCOWLS:
 				newfac = 1;
 				break;
-			case FACTION_THREATENLY:
+			case FACTION_THREATENINGLY:
 				newfac = 2;
 				break;
-			case FACTION_DUBIOUS:
+			case FACTION_DUBIOUSLY:
 				newfac = 3;
 				break;
-			case FACTION_APPREHENSIVE:
+			case FACTION_APPREHENSIVELY:
 				newfac = 4;
 				break;
-			case FACTION_INDIFFERENT:
+			case FACTION_INDIFFERENTLY:
 				newfac = 5;
 				break;
-			case FACTION_AMIABLE:
+			case FACTION_AMIABLY:
 				newfac = 6;
 				break;
 			case FACTION_KINDLY:
