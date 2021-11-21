@@ -2613,10 +2613,11 @@ void Client::SetPVP(bool toggle, bool message) {
 	m_pp.pvp = toggle ? 1 : 0;
 
 	if (message) {
-		if(GetPVP())
-			this->MessageString(Chat::Shout,PVP_ON);
-		else
-			Message(Chat::Red, "You no longer follow the ways of discord.");
+		if(GetPVP()) {
+			MessageString(Chat::Shout, PVP_ON);
+		} else {
+			Message(Chat::Shout, "You now follow the ways of Order.");
+		}
 	}
 
 	SendAppearancePacket(AT_PVP, GetPVP());
@@ -3471,7 +3472,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 	if (other)
 	{
 		int factionlvl = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetFactionRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
-		if (factionlvl >= FACTION_APPREHENSIVE) // Apprehensive or worse.
+		if (factionlvl >= FACTION_APPREHENSIVELY) // Apprehensive or worse.
 		{
 			if (GetCHA() > 103)
 			{
@@ -3486,7 +3487,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
-		if (factionlvl <= FACTION_INDIFFERENT) // Indifferent or better.
+		if (factionlvl <= FACTION_INDIFFERENTLY) // Indifferent or better.
 		{
 			if (GetCHA() > 75)
 			{
@@ -5321,31 +5322,82 @@ uint32 Client::GetStartZone()
 
 void Client::ShowSkillsWindow()
 {
-	const char *WindowTitle = "Skills";
-	std::string WindowText;
-	std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
+	std::string popup_text;
+	std::map<EQ::skills::SkillType, std::string> skills_map = EQ::skills::GetSkillTypeMap();
 
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2)
-		Skills[EQ::skills::Skill1HPiercing] = "Piercing";
-
-	// print out all available skills
-	for (auto skills_iter : Skills) {
-		if (skills_iter.first == EQ::skills::Skill2HPiercing && ClientVersion() < EQ::versions::ClientVersion::RoF2)
-			continue;
-		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
-			continue;
-
-		WindowText += skills_iter.second;
-		// line up the values
-		WindowText += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		WindowText += itoa(this->GetSkill(skills_iter.first));
-		if (MaxSkill(skills_iter.first) > 0) {
-			WindowText += "/";
-			WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(skills_iter.first, this->MaxSkill(skills_iter.first)));
-		}
-		WindowText += "<br>";
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2) {
+		skills_map[EQ::skills::Skill1HPiercing] = "Piercing";
 	}
-	this->SendPopupToClient(WindowTitle, WindowText.c_str());
+
+	// Table Start
+	popup_text += "<table>";
+
+	for (const auto& skill : skills_map) {
+		auto skill_id = skill.first;
+		auto skill_name = skill.second;
+		auto can_have_skill = CanHaveSkill(skill_id);
+		auto current_skill = GetSkill(skill_id);
+		auto max_skill = MaxSkill(skill_id);
+		auto skill_maxed = current_skill >= max_skill;
+		if (
+			skill_id == EQ::skills::Skill2HPiercing &&
+			ClientVersion() < EQ::versions::ClientVersion::RoF2
+		) {
+			continue;
+		}
+
+		if (
+			!can_have_skill ||
+			!current_skill ||
+			!max_skill
+		) {
+			continue;
+		}
+
+		// Row Start
+		popup_text += "<tr>";
+
+		// Skill Name
+		popup_text += fmt::format(
+			"<td>{}</td>",
+			skill_name
+		);
+
+		// Current Skill Level out of Max Skill Level or a Check Mark for Maxed
+		popup_text += fmt::format(
+			"<td>{}{}{}</td>",
+			(
+				skill_maxed ?
+				"<c \"#00FF00\">" :
+				""
+			),
+			(
+				skill_maxed ?				
+				"✔" :
+				fmt::format(
+					"{}/{}",
+					current_skill,
+					max_skill
+				)
+			),
+			(
+				skill_maxed ?
+				"</c>" :
+				""
+			)
+		);
+
+		// Row End
+		popup_text += "</tr>";
+	}
+	
+	// Table End
+	popup_text += "</table>";
+	
+	SendPopupToClient(
+		"Skills",
+		popup_text.c_str()
+	);
 }
 
 void Client::Signal(uint32 data)
@@ -7809,7 +7861,7 @@ FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
 		return GetSpecialFactionCon(iOther);
 
 	if (iOther->GetPrimaryFaction() == 0)
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 
 	return GetFactionLevel(CharacterID(), 0, GetFactionRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
 }
@@ -7832,25 +7884,25 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 {
 	if (pFaction < 0)
 		return GetSpecialFactionCon(tnpc);
-	FACTION_VALUE fac = FACTION_INDIFFERENT;
+	FACTION_VALUE fac = FACTION_INDIFFERENTLY;
 	int32 tmpFactionValue;
 	FactionMods fmods;
 
 	// few optimizations
 	if (GetFeigned())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if(!zone->CanDoCombat())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (invisible_undead && tnpc && !tnpc->SeeInvisibleUndead())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (IsInvisible(tnpc))
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (tnpc && tnpc->GetOwnerID() != 0) // pets con amiably to owner and indiff to rest
 	{
 		if (char_id == tnpc->GetOwner()->CastToClient()->CharacterID())
-			return FACTION_AMIABLE;
+			return FACTION_AMIABLY;
 		else
-			return FACTION_INDIFFERENT;
+			return FACTION_INDIFFERENTLY;
 	}
 
 	//First get the NPC's Primary faction
@@ -7870,15 +7922,15 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 	}
 	else
 	{
-		return(FACTION_INDIFFERENT);
+		return(FACTION_INDIFFERENTLY);
 	}
 
 	// merchant fix
-	if (tnpc && tnpc->IsNPC() && tnpc->CastToNPC()->MerchantType && (fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
-		fac = FACTION_DUBIOUS;
+	if (tnpc && tnpc->IsNPC() && tnpc->CastToNPC()->MerchantType && (fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS))
+		fac = FACTION_DUBIOUSLY;
 
 	if (tnpc != 0 && fac != FACTION_SCOWLS && tnpc->CastToNPC()->CheckAggro(this))
-		fac = FACTION_THREATENLY;
+		fac = FACTION_THREATENINGLY;
 
 	return fac;
 }
@@ -9407,7 +9459,7 @@ void Client::CheckVirtualZoneLines()
 			LogZonePoints(
 				"Virtual Zone Box Sending player [{}] to [{}]",
 				GetCleanName(),
-				zone_store.GetZoneLongName(virtual_zone_point.target_zone_id)
+				ZoneLongName(virtual_zone_point.target_zone_id)
 			);
 		}
 	}

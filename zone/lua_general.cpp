@@ -4193,11 +4193,11 @@ luabind::scope lua_register_faction() {
 			luabind::value("Ally", static_cast<int>(FACTION_ALLY)),
 			luabind::value("Warmly", static_cast<int>(FACTION_WARMLY)),
 			luabind::value("Kindly", static_cast<int>(FACTION_KINDLY)),
-			luabind::value("Amiable", static_cast<int>(FACTION_AMIABLE)),
-			luabind::value("Indifferent", static_cast<int>(FACTION_INDIFFERENT)),
-			luabind::value("Apprehensive", static_cast<int>(FACTION_APPREHENSIVE)),
-			luabind::value("Dubious", static_cast<int>(FACTION_DUBIOUS)),
-			luabind::value("Threatenly", static_cast<int>(FACTION_THREATENLY)),
+			luabind::value("Amiable", static_cast<int>(FACTION_AMIABLY)),
+			luabind::value("Indifferent", static_cast<int>(FACTION_INDIFFERENTLY)),
+			luabind::value("Apprehensive", static_cast<int>(FACTION_APPREHENSIVELY)),
+			luabind::value("Dubious", static_cast<int>(FACTION_DUBIOUSLY)),
+			luabind::value("Threatenly", static_cast<int>(FACTION_THREATENINGLY)),
 			luabind::value("Scowls", static_cast<int>(FACTION_SCOWLS))
 		];
 }

@@ -3386,6 +3386,13 @@ void Client::Handle_OP_AutoFire(const EQApplicationPacket *app)
 		DumpPacket(app);
 		return;
 	}
+
+	if (GetTarget() == this) {
+		MessageString(Chat::TooFarAway, TRY_ATTACKING_SOMEONE);
+		auto_fire = false;
+		return;
+	}
+
 	bool *af = (bool*)app->pBuffer;
 	auto_fire = *af;
 	if(!RuleB(Character, EnableRangerAutoFire))
@@ -4875,7 +4882,7 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 	if (tmob->IsNPC())
 	{
 		if (GetFeigned())
-			con->faction = FACTION_INDIFFERENT;
+			con->faction = FACTION_INDIFFERENTLY;
 	}
 
 	if (!(con->faction == FACTION_SCOWLS))
@@ -4883,21 +4890,21 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 		if (tmob->IsNPC())
 		{
 			if (tmob->CastToNPC()->IsOnHatelist(this))
-				con->faction = FACTION_THREATENLY;
+				con->faction = FACTION_THREATENINGLY;
 		}
 	}
 
-	if (con->faction == FACTION_APPREHENSIVE) {
+	if (con->faction == FACTION_APPREHENSIVELY) {
 		con->faction = FACTION_SCOWLS;
 	}
-	else if (con->faction == FACTION_DUBIOUS) {
-		con->faction = FACTION_THREATENLY;
+	else if (con->faction == FACTION_DUBIOUSLY) {
+		con->faction = FACTION_THREATENINGLY;
 	}
 	else if (con->faction == FACTION_SCOWLS) {
-		con->faction = FACTION_APPREHENSIVE;
+		con->faction = FACTION_APPREHENSIVELY;
 	}
-	else if (con->faction == FACTION_THREATENLY) {
-		con->faction = FACTION_DUBIOUS;
+	else if (con->faction == FACTION_THREATENINGLY) {
+		con->faction = FACTION_DUBIOUSLY;
 	}
 
 	mod_consider(tmob, con);
@@ -12869,7 +12876,7 @@ void Client::Handle_OP_SetStartCity(const EQApplicationPacket *app)
 		else
 			zone_id = atoi(row[0]);
 
-		std::string zone_long_name = zone_store.GetZoneLongName(zone_id);
+		std::string zone_long_name = ZoneLongName(zone_id);
 		Message(Chat::Yellow, "%d - %s", zone_id, zone_long_name.c_str());
 	}
 

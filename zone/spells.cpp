@@ -4255,21 +4255,27 @@ void Corpse::CastRezz(uint16 spellid, Mob* Caster)
 	safe_delete(outapp);
 }
 
-bool Mob::FindBuff(uint16 spellid)
+bool Mob::FindBuff(uint16 spell_id)
 {
-	int i;
-
 	uint32 buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-		if(buffs[i].spellid == spellid)
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			current_spell_id == spell_id
+		) {
 			return true;
+		}
+	}
 
 	return false;
 }
 
 uint16 Mob::FindBuffBySlot(int slot) {
-	if (buffs[slot].spellid != SPELL_UNKNOWN)
-		return buffs[slot].spellid;
+	auto current_spell_id = buffs[slot].spellid;
+	if (IsValidSpell(current_spell_id)) {
+		return current_spell_id;
+	}
 
 	return 0;
 }
@@ -4277,167 +4283,221 @@ uint16 Mob::FindBuffBySlot(int slot) {
 uint32 Mob::BuffCount() {
 	uint32 active_buff_count = 0;
 	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; i++)
-		if (buffs[i].spellid != SPELL_UNKNOWN)
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (IsValidSpell(buffs[buff_slot].spellid)) {
 			active_buff_count++;
+		}
+	}
 
 	return active_buff_count;
 }
 
-bool Mob::HasBuffWithSpellGroup(int spellgroup)
+bool Mob::HasBuffWithSpellGroup(int spell_group)
 {
-	for (int i = 0; i < GetMaxTotalSlots(); i++) {
-		if (IsValidSpell(buffs[i].spellid) && spells[buffs[i].spellid].spell_group == spellgroup) {
+	for (int buff_slot = 0; buff_slot < GetMaxTotalSlots(); buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].spell_group == spell_group
+		) {
 			return true;
 		}
 	}
+
 	return false;
 }
 
-// removes all buffs
 void Mob::BuffFadeAll()
 {
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN)
-			BuffFadeBySlot(j, false);
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeNonPersistDeath()
-{
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if (buffs[j].spellid != SPELL_UNKNOWN && !IsPersistDeathSpell(buffs[j].spellid))
-			BuffFadeBySlot(j, false);
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeDetrimental() {
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
-			if(IsDetrimentalSpell(buffs[j].spellid))
-				BuffFadeBySlot(j, false);
-		}
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
-{
-	if(!caster)
-		return;
-
-	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++) {
-		if(buffs[j].spellid != SPELL_UNKNOWN) {
-			if(IsDetrimentalSpell(buffs[j].spellid))
-			{
-				//this is a pretty terrible way to do this but
-				//there really isn't another way till I rewrite the basics
-				Mob * c = entity_list.GetMob(buffs[j].casterid);
-				if(c && c == caster)
-					BuffFadeBySlot(j, false);
-			}
-		}
-	}
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
-}
-
-void Mob::BuffFadeBySitModifier()
-{
-	bool r_bonus = false;
-	uint32 buff_count = GetMaxTotalSlots();
-	for(uint32 j = 0; j < buff_count; ++j)
-	{
-		if(buffs[j].spellid != SPELL_UNKNOWN)
-		{
-			if(spells[buffs[j].spellid].disallow_sit)
-			{
-				BuffFadeBySlot(j, false);
-				r_bonus = true;
-			}
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (IsValidSpell(buffs[buff_slot].spellid)) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
 		}
 	}
 
-	if(r_bonus)
-	{
+	if (recalc_bonus) {
 		CalcBonuses();
 	}
 }
 
-// removes the buff matching spell_id
-void Mob::BuffFadeBySpellID(uint16 spell_id)
+void Mob::BuffFadeNonPersistDeath()
 {
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for (int j = 0; j < buff_count; j++)
-	{
-		if (buffs[j].spellid == spell_id)
-			BuffFadeBySlot(j, false);
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			!IsPersistDeathSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
 	}
 
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBeneficial() {
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsBeneficialSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeDetrimental() {
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsDetrimentalSpell(current_spell_id)
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeDetrimentalByCaster(Mob *caster)
+{
+	if(!caster) {
+		return;
+	}
+
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsDetrimentalSpell(current_spell_id) &&
+			caster->GetID() == buffs[buff_slot].casterid
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBySitModifier()
+{
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].disallow_sit
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
+}
+
+void Mob::BuffFadeBySpellID(uint16 spell_id)
+{
+	bool recalc_bonus = false;
+	int buff_count = GetMaxTotalSlots();
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (buffs[buff_slot].spellid == spell_id) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
+	}
+
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
 }
 
 void Mob::BuffFadeBySpellIDAndCaster(uint16 spell_id, uint16 caster_id)
 {
 	bool recalc_bonus = false;
 	auto buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i) {
-		if (buffs[i].spellid == spell_id && buffs[i].casterid == caster_id) {
-			BuffFadeBySlot(i, false);
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		if (
+			buffs[buff_slot].spellid == spell_id &&
+			buffs[buff_slot].casterid == caster_id
+		) {
+			BuffFadeBySlot(buff_slot, false);
 			recalc_bonus = true;
 		}
 	}
 
-	if (recalc_bonus)
+	if (recalc_bonus) {
 		CalcBonuses();
+	}
 }
 
-// removes buffs containing effectid, skipping skipslot
-void Mob::BuffFadeByEffect(int effect_id, int skipslot)
+void Mob::BuffFadeByEffect(int effect_id, int slot_to_skip)
 {
-	int i;
-
+	bool recalc_bonus = false;
 	int buff_count = GetMaxTotalSlots();
-	for(i = 0; i < buff_count; i++)
-	{
-		if(buffs[i].spellid == SPELL_UNKNOWN)
-			continue;
-		if(IsEffectInSpell(buffs[i].spellid, effect_id) && i != skipslot)
-			BuffFadeBySlot(i, false);
+	for(int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			IsEffectInSpell(current_spell_id, effect_id) &&
+			buff_slot != slot_to_skip
+		) {
+			BuffFadeBySlot(buff_slot, false);
+			recalc_bonus = true;
+		}
 	}
 
-	//we tell BuffFadeBySlot not to recalc, so we can do it only once when were done
-	CalcBonuses();
+	if (recalc_bonus) {
+		CalcBonuses();
+	}
 }
 
 bool Mob::IsAffectedByBuff(uint16 spell_id)
 {
-	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i)
-		if (buffs[i].spellid == spell_id)
-			return true;
-
-	return false;
+	return FindBuff(spell_id);
 }
 
 bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
 {
 	int buff_count = GetMaxTotalSlots();
-	for (int i = 0; i < buff_count; ++i) {
-		if (buffs[i].spellid == SPELL_UNKNOWN)
-			continue;
-		if (spells[buffs[i].spellid].spell_category == static_cast<int>(group))
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
+		auto current_spell_id = buffs[buff_slot].spellid;
+		if (
+			IsValidSpell(current_spell_id) &&
+			spells[current_spell_id].spell_category == static_cast<int>(group)
+		) {
 			return true;
+		}
 	}
 
 	return false;
@@ -6181,13 +6241,13 @@ void Mob::BeamDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE)) {
+				if (!(fac <= FACTION_AMIABLY)) {
 					++iter;
 					continue;
 				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS)) {
 					++iter;
 					continue;
 				}
@@ -6256,13 +6316,13 @@ void Mob::ConeDirectional(uint16 spell_id, int16 resist_adjust)
 			auto fac = (*iter)->GetReverseFactionCon(this);
 			if (beneficial_targets) {
 				// only affect mobs we would assist.
-				if (!(fac <= FACTION_AMIABLE)) {
+				if (!(fac <= FACTION_AMIABLY)) {
 					++iter;
 					continue;
 				}
 			} else {
 				// affect mobs that are on our hate list, or which have bad faction with us
-				if (!(CheckAggro(*iter) || fac == FACTION_THREATENLY || fac == FACTION_SCOWLS)) {
+				if (!(CheckAggro(*iter) || fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS)) {
 					++iter;
 					continue;
 				}

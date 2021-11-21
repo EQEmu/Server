@@ -440,8 +440,8 @@ public:
 
 	void	ListNPCCorpses(Client* client);
 	void	ListPlayerCorpses(Client* client);
-	int32	DeleteNPCCorpses();
-	int32	DeletePlayerCorpses();
+	uint32	DeleteNPCCorpses();
+	uint32	DeletePlayerCorpses();
 	void	CorpseFix(Client* c);
 	void	WriteEntityIDs();
 	void	HalveAggro(Mob* who);

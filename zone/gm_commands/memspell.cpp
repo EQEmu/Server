@@ -2,21 +2,47 @@
 
 void command_memspell(Client *c, const Seperator *sep)
 {
-	uint32 slot;
-	uint16 spell_id;
-
-	if (!(sep->IsNumber(1) && sep->IsNumber(2))) {
-		c->Message(Chat::White, "Usage: #MemSpell slotid spellid");
+	int arguments = sep->argnum;
+	if (
+		!arguments ||
+		!sep->IsNumber(1) ||
+		!sep->IsNumber(2)
+	) {
+		c->Message(Chat::White, "Usage: #memspell [Slot] [Spell ID]");
+		return;
 	}
-	else {
-		slot     = atoi(sep->arg[1]) - 1;
-		spell_id = atoi(sep->arg[2]);
-		if (slot > EQ::spells::SPELL_GEM_COUNT || spell_id >= SPDAT_RECORDS) {
-			c->Message(Chat::White, "Error: #MemSpell: Arguement out of range");
-		}
-		else {
-			c->MemSpell(spell_id, slot);
-			c->Message(Chat::White, "Spell slot changed, have fun!");
-		}
+
+	Client* target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient() && c->GetGM()) {
+		target = c->GetTarget()->CastToClient();
+	}
+
+	uint32 spell_gem = std::stoul(sep->arg[1]);
+	uint32 slot = (spell_gem - 1);
+	uint16 spell_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+	if (
+		IsValidSpell(spell_id) &&
+		slot < EQ::spells::SPELL_GEM_COUNT
+	)  {			
+		target->MemSpell(spell_id, slot);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) has been memorized to Spell Gem {} ({}) for {}.",
+				GetSpellName(spell_id),
+				spell_id,
+				spell_gem,
+				slot,
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
+			).c_str()
+		);
 	}
 }
