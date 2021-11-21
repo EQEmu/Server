@@ -5321,31 +5321,82 @@ uint32 Client::GetStartZone()
 
 void Client::ShowSkillsWindow()
 {
-	const char *WindowTitle = "Skills";
-	std::string WindowText;
-	std::map<EQ::skills::SkillType, std::string> Skills = EQ::skills::GetSkillTypeMap();
+	std::string popup_text;
+	std::map<EQ::skills::SkillType, std::string> skills_map = EQ::skills::GetSkillTypeMap();
 
-	if (ClientVersion() < EQ::versions::ClientVersion::RoF2)
-		Skills[EQ::skills::Skill1HPiercing] = "Piercing";
-
-	// print out all available skills
-	for (auto skills_iter : Skills) {
-		if (skills_iter.first == EQ::skills::Skill2HPiercing && ClientVersion() < EQ::versions::ClientVersion::RoF2)
-			continue;
-		if (!GetSkill(skills_iter.first) && !MaxSkill(skills_iter.first))
-			continue;
-
-		WindowText += skills_iter.second;
-		// line up the values
-		WindowText += "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-		WindowText += itoa(this->GetSkill(skills_iter.first));
-		if (MaxSkill(skills_iter.first) > 0) {
-			WindowText += "/";
-			WindowText += itoa(this->GetMaxSkillAfterSpecializationRules(skills_iter.first, this->MaxSkill(skills_iter.first)));
-		}
-		WindowText += "<br>";
+	if (ClientVersion() < EQ::versions::ClientVersion::RoF2) {
+		skills_map[EQ::skills::Skill1HPiercing] = "Piercing";
 	}
-	this->SendPopupToClient(WindowTitle, WindowText.c_str());
+
+	// Table Start
+	popup_text += "<table>";
+
+	for (const auto& skill : skills_map) {
+		auto skill_id = skill.first;
+		auto skill_name = skill.second;
+		auto can_have_skill = CanHaveSkill(skill_id);
+		auto current_skill = GetSkill(skill_id);
+		auto max_skill = MaxSkill(skill_id);
+		auto skill_maxed = current_skill >= max_skill;
+		if (
+			skill_id == EQ::skills::Skill2HPiercing &&
+			ClientVersion() < EQ::versions::ClientVersion::RoF2
+		) {
+			continue;
+		}
+
+		if (
+			!can_have_skill ||
+			!current_skill ||
+			!max_skill
+		) {
+			continue;
+		}
+
+		// Row Start
+		popup_text += "<tr>";
+
+		// Skill Name
+		popup_text += fmt::format(
+			"<td>{}</td>",
+			skill_name
+		);
+
+		// Current Skill Level out of Max Skill Level or a Check Mark for Maxed
+		popup_text += fmt::format(
+			"<td>{}{}{}</td>",
+			(
+				skill_maxed ?
+				"<c \"#00FF00\">" :
+				""
+			),
+			(
+				skill_maxed ?				
+				"✔" :
+				fmt::format(
+					"{}/{}",
+					current_skill,
+					max_skill
+				)
+			),
+			(
+				skill_maxed ?
+				"</c>" :
+				""
+			)
+		);
+
+		// Row End
+		popup_text += "</tr>";
+	}
+	
+	// Table End
+	popup_text += "</table>";
+	
+	SendPopupToClient(
+		"Skills",
+		popup_text.c_str()
+	);
 }
 
 void Client::Signal(uint32 data)
