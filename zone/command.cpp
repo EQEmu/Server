@@ -321,7 +321,7 @@ int command_init(void)
 		command_add("setaapts", "[AA|Group|Raid] [AA Amount] - Set your or your player target's Available AA Points by Type", AccountStatus::GMAdmin, command_setaapts) ||
 		command_add("setaaxp", "[AA|Group|Raid] [AA Experience] - Set your or your player target's AA Experience by Type", AccountStatus::GMAdmin, command_setaaxp) ||
 		command_add("setadventurepoints", "- Set your or your player target's available adventure points", AccountStatus::GMLeadAdmin, command_set_adventure_points) ||
-		command_add("setanim", "[animnum] - Set target's appearance to animnum", AccountStatus::GMMgmt, command_setanim) ||
+		command_add("setanim", "[Animation ID (IDs are 0 to 4)] - Set target's appearance to Animation ID", AccountStatus::GMMgmt, command_setanim) ||
 		command_add("setcrystals", "[value] - Set your or your player target's available radiant or ebon crystals", AccountStatus::GMAdmin, command_setcrystals) ||
 		command_add("setfaction", "[faction number] - Sets targeted NPC's faction in the database", AccountStatus::GMAreas, command_setfaction) ||
 		command_add("setgraveyard", "[zone name] - Creates a graveyard for the specified zone based on your target's LOC.", AccountStatus::GMMgmt, command_setgraveyard) ||
