@@ -863,7 +863,7 @@ typedef enum {
 #define SE_Reflect						158 // implemented, @SpellMisc, reflect casted detrimental spell back at caster, base: chance pct, limit: resist modifier (positive value reduces resists), max: pct of base dmg mod (50=50pct of base)
 #define SE_AllStats						159	// implemented
 //#define SE_MakeDrunk					160 // *not implemented - Effect works entirely client side (Should check against tolerance)
-#define SE_MitigateSpellDamage			161	// implemented - rune with max value
+#define SE_MitigateSpellDamage			161	// implemented, @Runes, mitigate incoming spell damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
 #define SE_MitigateMeleeDamage			162	// implemented - rune with max value
 #define SE_NegateAttacks				163	// implemented
 #define SE_AppraiseLDonChest			164	// implemented
@@ -1152,7 +1152,7 @@ typedef enum {
 #define SE_BStacker						447 // implemented
 #define SE_CStacker						448 // implemented
 #define SE_DStacker						449 // implemented
-#define SE_MitigateDotDamage			450 // implemented  DOT spell mitigation rune with max value
+#define SE_MitigateDotDamage			450 // implemented, @Runes, mitigate incoming dot damage by percentage until rune fades, base: percent mitigation, limit: max dmg absorbed per hit, max: rune amt, Note: If placed on item or AA, will provide stackable percent mitigation.
 #define SE_MeleeThresholdGuard			451 // implemented  Partial Melee Rune that only is lowered if melee hits are over X amount of damage
 #define SE_SpellThresholdGuard			452 // implemented  Partial Spell Rune that only is lowered if spell hits are over X amount of damage
 #define SE_TriggerMeleeThreshold		453 // implemented  Trigger effect on X amount of melee damage taken in a single hit

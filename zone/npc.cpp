@@ -2915,7 +2915,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 		return GetSpecialFactionCon(iOther);
 
 	if (primaryFaction == 0)
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 
 	//if we are a pet, use our owner's faction stuff
 	Mob *own = GetOwner();
@@ -2925,7 +2925,7 @@ FACTION_VALUE NPC::GetReverseFactionCon(Mob* iOther) {
 	//make sure iOther is an npc
 	//also, if we dont have a faction, then they arnt gunna think anything of us either
 	if(!iOther->IsNPC() || GetPrimaryFaction() == 0)
-		return(FACTION_INDIFFERENT);
+		return(FACTION_INDIFFERENTLY);
 
 	//if we get here, iOther is an NPC too
 
@@ -2949,7 +2949,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 			else if (fac->npc_value < 0)
 				return FACTION_SCOWLS;
 			else
-				return FACTION_INDIFFERENT;
+				return FACTION_INDIFFERENTLY;
 		}
 	}
 
@@ -2961,7 +2961,7 @@ FACTION_VALUE NPC::CheckNPCFactionAlly(int32 other_faction) {
 	if (GetPrimaryFaction() == other_faction)
 		return FACTION_ALLY;
 	else
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 }
 
 bool NPC::IsFactionListAlly(uint32 other_faction) {
@@ -3429,7 +3429,7 @@ void NPC::AIYellForHelp(Mob *sender, Mob *attacker)
 					}
 				}
 
-				if (sender->GetReverseFactionCon(mob) <= FACTION_AMIABLE) {
+				if (sender->GetReverseFactionCon(mob) <= FACTION_AMIABLY) {
 					//attacking someone on same faction, or a friend
 					//Father Nitwit: make sure we can see them.
 					if (mob->CheckLosFN(sender)) {

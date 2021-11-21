@@ -1021,9 +1021,26 @@ std::vector<std::string> GetBadWords()
 	};
 }
 
-std::string ConvertSecondsToTime(int duration)
+std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 {
-	int timer_length = duration;
+	if (duration <= 0) {
+		return "Unknown";
+	}
+
+	if (is_milliseconds && duration < 1000) {
+		return fmt::format(
+			"{} Millisecond{}",
+			duration,
+			duration != 1 ? "s" : ""
+		);
+	}
+
+	int timer_length = (
+		is_milliseconds ?
+		static_cast<int>(std::ceil(static_cast<float>(duration) / 1000.0f)) :
+		duration
+	);
+
 	int days = int(timer_length / 86400000);
 	timer_length %= 86400000;
 	int hours = int(timer_length / 3600);

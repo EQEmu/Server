@@ -3693,7 +3693,7 @@ void EntityList::SendAlarm(Trap *trap, Mob *currenttarget, uint8 kos)
 
 		if (kos) {
 			uint8 factioncon = currenttarget->GetReverseFactionCon(cur);
-			if (factioncon == FACTION_THREATENLY || factioncon == FACTION_SCOWLS) {
+			if (factioncon == FACTION_THREATENINGLY || factioncon == FACTION_SCOWLS) {
 				cur->AddToHateList(currenttarget,1);
 			}
 		}
