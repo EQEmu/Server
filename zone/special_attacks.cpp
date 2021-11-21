@@ -331,7 +331,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
 		int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
-		DoAnim(anim2HSlashing, 0, false);
+		DoAnim(anim1HWeapon, 0, false);
 
 		max_dmg = mod_frenzy_damage(max_dmg);
 
@@ -403,10 +403,16 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 				}
 				wuchance /= 4;
 			}
-			// They didn't add a string ID for this.
-			std::string msg = StringFormat("The spirit of Master Wu fills you!  You gain %d additional attack(s).", extra);
-			// live uses 400 here -- not sure if it's the best for all clients though
-			SendColoredText(400, msg);
+			if (extra) {
+				SendColoredText(
+					400,
+					fmt::format(
+						"The spirit of Master Wu fills you! You gain {} additional attack{}.",
+						extra,
+						extra != 1 ? "s" : ""
+					)
+				);
+			}
 			auto classic = RuleB(Combat, ClassicMasterWu);
 			while (extra) {
 				MonkSpecialAttack(GetTarget(), (classic ? MonkSPA[zone->random.Int(0, 4)] : ca_atk->m_skill));
@@ -638,6 +644,8 @@ void Mob::RogueAssassinate(Mob* other)
 void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//conditions to use an attack checked before we are called
 	if (!other)
+		return;
+	else if (other == this)
 		return;
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
@@ -1851,7 +1859,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	if (skill_to_use == EQ::skills::SkillFrenzy) {
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
-		DoAnim(anim2HSlashing, 0, false);
+		DoAnim(anim1HWeapon, 0, false);
 
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 

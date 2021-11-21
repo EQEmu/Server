@@ -1043,19 +1043,29 @@ bool Client::HasZoneFlag(uint32 zone_id) const {
 
 void Client::SendZoneFlagInfo(Client *to) const {
 	if(zone_flags.empty()) {
-		to->Message(Chat::White, "%s has no zone flags.", GetName());
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"{} {} no Zone Flags.",
+				to == this ? "You" : GetName(),
+				to == this ? "have" : "has"
+			).c_str()
+		);
 		return;
 	}
 
-	std::set<uint32>::const_iterator cur, end;
-	cur = zone_flags.begin();
-	end = zone_flags.end();
-	char empty[1] = { '\0' };
+	to->Message(
+		Chat::White,
+		fmt::format(
+			"{} {} the following Flags:",
+			to == this ? "You" : GetName(),
+			to == this ? "have" : "has"
+		).c_str()
+	);
 
-	to->Message(Chat::White, "Flags for %s:", GetName());
-
-	for(; cur != end; ++cur) {
-		uint32 zone_id = *cur;
+	int flag_count = 0;
+	for (const auto& zone_id : zone_flags) {
+		int flag_number = (flag_count + 1);
 		const char* zone_short_name = ZoneName(zone_id);
 		std::string zone_long_name = ZoneLongName(zone_id);
 		float safe_x, safe_y, safe_z, safe_heading;
@@ -1073,11 +1083,32 @@ void Client::SendZoneFlagInfo(Client *to) const {
 			&min_level,
 			flag_name
 		)) {
-			strcpy(flag_name, "(ERROR GETTING NAME)");
+			strcpy(flag_name, "ERROR");
 		}
 
-		to->Message(Chat::White, "Has Flag %s for zone %s (%d,%s)", flag_name, zone_long_name.c_str(), zone_id, zone_short_name);
+		to->Message(
+			Chat::White,
+			fmt::format(
+				"Zone Flag {} | Zone ID: {} Zone Name: {} ({}) Flag Name: {}",
+				flag_number,
+				zone_id,
+				zone_long_name,
+				zone_short_name,
+				flag_name
+			).c_str()
+		);
+		flag_count++;
 	}
+
+	to->Message(
+		Chat::White,
+		fmt::format(
+			"{} {} {} Zone Flags.",
+			to == this ? "You" : GetName(),
+			to == this ? "have" : "has",
+			flag_count
+		).c_str()
+	);
 }
 
 bool Client::CanBeInZone() {
