@@ -2,19 +2,27 @@
 
 void command_pvp(Client *c, const Seperator *sep)
 {
-	bool   state = atobool(sep->arg[1]);
-	Client *t    = c;
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #pvp [On|Off]");
+		return;
+	}
 
+	bool pvp_state = atobool(sep->arg[1]);
+	Client* target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c->GetTarget()->CastToClient();
+		target = c->GetTarget()->CastToClient();
 	}
 
-	if (sep->arg[1][0] != 0) {
-		t->SetPVP(state);
-		c->Message(Chat::White, "%s now follows the ways of %s.", t->GetName(), state ? "discord" : "order");
-	}
-	else {
-		c->Message(Chat::White, "Usage: #pvp [on/off]");
+	target->SetPVP(pvp_state);
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} now follows the ways of {}.",
+				target->GetCleanName(),
+				pvp_state ? "Discord" : "Order"
+			).c_str()
+		);
 	}
 }
-
