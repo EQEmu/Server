@@ -3471,7 +3471,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 	if (other)
 	{
 		int factionlvl = GetFactionLevel(CharacterID(), other->CastToNPC()->GetNPCTypeID(), GetFactionRace(), GetClass(), GetDeity(), other->CastToNPC()->GetPrimaryFaction(), other);
-		if (factionlvl >= FACTION_APPREHENSIVE) // Apprehensive or worse.
+		if (factionlvl >= FACTION_APPREHENSIVELY) // Apprehensive or worse.
 		{
 			if (GetCHA() > 103)
 			{
@@ -3486,7 +3486,7 @@ float Client::CalcPriceMod(Mob* other, bool reverse)
 					chaformula = 1*(RuleI(Merchant, PricePenaltyPct));
 			}
 		}
-		if (factionlvl <= FACTION_INDIFFERENT) // Indifferent or better.
+		if (factionlvl <= FACTION_INDIFFERENTLY) // Indifferent or better.
 		{
 			if (GetCHA() > 75)
 			{
@@ -7860,7 +7860,7 @@ FACTION_VALUE Client::GetReverseFactionCon(Mob* iOther) {
 		return GetSpecialFactionCon(iOther);
 
 	if (iOther->GetPrimaryFaction() == 0)
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 
 	return GetFactionLevel(CharacterID(), 0, GetFactionRace(), GetClass(), GetDeity(), iOther->GetPrimaryFaction(), iOther);
 }
@@ -7883,25 +7883,25 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 {
 	if (pFaction < 0)
 		return GetSpecialFactionCon(tnpc);
-	FACTION_VALUE fac = FACTION_INDIFFERENT;
+	FACTION_VALUE fac = FACTION_INDIFFERENTLY;
 	int32 tmpFactionValue;
 	FactionMods fmods;
 
 	// few optimizations
 	if (GetFeigned())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if(!zone->CanDoCombat())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (invisible_undead && tnpc && !tnpc->SeeInvisibleUndead())
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (IsInvisible(tnpc))
-		return FACTION_INDIFFERENT;
+		return FACTION_INDIFFERENTLY;
 	if (tnpc && tnpc->GetOwnerID() != 0) // pets con amiably to owner and indiff to rest
 	{
 		if (char_id == tnpc->GetOwner()->CastToClient()->CharacterID())
-			return FACTION_AMIABLE;
+			return FACTION_AMIABLY;
 		else
-			return FACTION_INDIFFERENT;
+			return FACTION_INDIFFERENTLY;
 	}
 
 	//First get the NPC's Primary faction
@@ -7921,15 +7921,15 @@ FACTION_VALUE Client::GetFactionLevel(uint32 char_id, uint32 npc_id, uint32 p_ra
 	}
 	else
 	{
-		return(FACTION_INDIFFERENT);
+		return(FACTION_INDIFFERENTLY);
 	}
 
 	// merchant fix
-	if (tnpc && tnpc->IsNPC() && tnpc->CastToNPC()->MerchantType && (fac == FACTION_THREATENLY || fac == FACTION_SCOWLS))
-		fac = FACTION_DUBIOUS;
+	if (tnpc && tnpc->IsNPC() && tnpc->CastToNPC()->MerchantType && (fac == FACTION_THREATENINGLY || fac == FACTION_SCOWLS))
+		fac = FACTION_DUBIOUSLY;
 
 	if (tnpc != 0 && fac != FACTION_SCOWLS && tnpc->CastToNPC()->CheckAggro(this))
-		fac = FACTION_THREATENLY;
+		fac = FACTION_THREATENINGLY;
 
 	return fac;
 }
