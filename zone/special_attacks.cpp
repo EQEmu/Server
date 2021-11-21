@@ -331,7 +331,7 @@ void Client::OPCombatAbility(const CombatAbility_Struct *ca_atk)
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
 		int32 max_dmg = GetBaseSkillDamage(EQ::skills::SkillFrenzy, GetTarget());
-		DoAnim(anim2HSlashing, 0, false);
+		DoAnim(anim1HWeapon, 0, false);
 
 		max_dmg = mod_frenzy_damage(max_dmg);
 
@@ -1851,7 +1851,7 @@ void Client::DoClassAttacks(Mob *ca_target, uint16 skill, bool IsRiposte)
 	if (skill_to_use == EQ::skills::SkillFrenzy) {
 		CheckIncreaseSkill(EQ::skills::SkillFrenzy, GetTarget(), 10);
 		int AtkRounds = 1;
-		DoAnim(anim2HSlashing, 0, false);
+		DoAnim(anim1HWeapon, 0, false);
 
 		ReuseTime = (FrenzyReuseTime - 1) / HasteMod;
 
