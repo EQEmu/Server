@@ -276,7 +276,7 @@ int command_init(void)
 		command_add("peqzone", "[zonename] - Go to specified zone, if you have > 75% health", AccountStatus::Player, command_peqzone) ||
 		command_add("permaclass", "[Class ID] - Change your or your player target's class, changed client is disconnected", AccountStatus::QuestTroupe, command_permaclass) ||
 		command_add("permagender", "[gendernum] - Change your or your player target's gender (zone to take effect)", AccountStatus::QuestTroupe, command_permagender) ||
-		command_add("permarace", "[racenum] - Change your or your player target's race (zone to take effect)", AccountStatus::QuestTroupe, command_permarace) ||
+		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
 		command_add("petitioninfo", "[petition number] - Get info about a petition", AccountStatus::ApprenticeGuide, command_petitioninfo) ||
 		command_add("pf", "- Display additional mob coordinate and wandering data", AccountStatus::Player, command_pf) ||
 		command_add("picklock",  "Analog for ldon pick lock for the newer clients since we still don't have it working.", AccountStatus::Player, command_picklock) ||
