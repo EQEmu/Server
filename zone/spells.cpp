@@ -4490,7 +4490,7 @@ bool Mob::IsAffectedByBuff(uint16 spell_id)
 bool Mob::IsAffectedByBuffByGlobalGroup(GlobalGroup group)
 {
 	int buff_count = GetMaxTotalSlots();
-	for (int buff_slot = 0; buff_slot < buff_count; ++buff_slot) {
+	for (int buff_slot = 0; buff_slot < buff_count; buff_slot++) {
 		auto current_spell_id = buffs[buff_slot].spellid;
 		if (
 			IsValidSpell(current_spell_id) &&
