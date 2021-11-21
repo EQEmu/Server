@@ -645,6 +645,8 @@ void Client::RangedAttack(Mob* other, bool CanDoubleAttack) {
 	//conditions to use an attack checked before we are called
 	if (!other)
 		return;
+	else if (other == this)
+		return;
 	//make sure the attack and ranged timers are up
 	//if the ranged timer is disabled, then they have no ranged weapon and shouldent be attacking anyhow
 	if(!CanDoubleAttack && ((attack_timer.Enabled() && !attack_timer.Check(false)) || (ranged_timer.Enabled() && !ranged_timer.Check()))) {
