@@ -273,7 +273,7 @@ int command_init(void)
 		command_add("opcode", "- opcode management", AccountStatus::GMImpossible, command_opcode) ||
 		command_add("path", "- view and edit pathing", AccountStatus::GMMgmt, command_path) ||
 		command_add("peekinv", "[equip/gen/cursor/poss/limbo/curlim/trib/bank/shbank/allbank/trade/world/all] - Print out contents of your player target's inventory", AccountStatus::GMAdmin, command_peekinv) ||
-		command_add("peqzone", "[zonename] - Go to specified zone, if you have > 75% health", AccountStatus::Player, command_peqzone) ||
+		command_add("peqzone", "[Zone ID|Zone Short Name] - Teleports you to the specified zone if you meet the requirements.", AccountStatus::Player, command_peqzone) ||
 		command_add("permaclass", "[Class ID] - Change your or your player target's class, changed client is disconnected", AccountStatus::QuestTroupe, command_permaclass) ||
 		command_add("permagender", "[Gender ID] - Change your or your player target's gender", AccountStatus::QuestTroupe, command_permagender) ||
 		command_add("permarace", "[Race ID] - Change your or your player target's race", AccountStatus::QuestTroupe, command_permarace) ||
