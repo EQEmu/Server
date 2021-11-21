@@ -3538,6 +3538,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 				)
 			).c_str()
 		);
+		return;
 	}
 
 	client->Message(
