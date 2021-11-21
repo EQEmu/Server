@@ -2,15 +2,16 @@
 
 void command_flags(Client *c, const Seperator *sep)
 {
-	Client *t = c;
+	Client *target = c;
 
-	if (c->Admin() >= minStatusToSeeOthersZoneFlags) {
-		Mob *tgt = c->GetTarget();
-		if (tgt != nullptr && tgt->IsClient()) {
-			t = tgt->CastToClient();
-		}
+	if (
+		c->GetTarget() &&
+		c->GetTarget()->IsClient() &&
+		c->Admin() >= minStatusToSeeOthersZoneFlags
+	) {
+		target =  c->GetTarget()->CastToClient();
 	}
 
-	t->SendZoneFlagInfo(c);
+	target->SendZoneFlagInfo(c);
 }
 
