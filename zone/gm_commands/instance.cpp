@@ -87,7 +87,13 @@ void command_instance(Client *c, const Seperator *sep)
 		}
 
 		if (!database.CheckInstanceExists(instance_id)) {
-			c->Message(Chat::White, "Instance does not exist.");
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
+			);
 			return;
 		}
 
@@ -160,7 +166,7 @@ void command_instance(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Zone with ID {} was not found by the server.",
+					"Zone ID {} was not found by the server.",
 					zone_id
 				).c_str()
 			);
@@ -199,7 +205,7 @@ void command_instance(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Instance {} Created |  Duration: {} ({}) ",
+				"Instance {} Created |  Duration: {} ({})",
 				instance_id,
 				ConvertSecondsToTime(duration),
 				duration
@@ -215,6 +221,17 @@ void command_instance(Client *c, const Seperator *sep)
 		}
 
 		uint16 instance_id = std::stoul(sep->arg[2]);
+		if (!database.CheckInstanceExists(instance_id)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
+			);
+			return;
+		}
+
 		database.DeleteInstance(instance_id);
 		c->Message(
 			Chat::White,
@@ -266,6 +283,17 @@ void command_instance(Client *c, const Seperator *sep)
 		uint32 character_id = database.GetCharacterID(character_name.c_str());
 		if (instance_id <= 0 || character_id <= 0) {
 			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
+			return;
+		}
+
+		if (!database.CheckInstanceExists(instance_id)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
+			);
 			return;
 		}
 

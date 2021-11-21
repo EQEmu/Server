@@ -3493,7 +3493,7 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
 
 void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 {
-	if(!client) {
+	if (!client) {
 		return;
 	}
 
@@ -3504,12 +3504,12 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 		"WHERE instance_list_player.charid = {}",
 		character_id
 	);
-    auto results = QueryDatabase(query);
-    if (!results.Success()) {
-        return;
+	auto results = QueryDatabase(query);
+	if (!results.Success()) {
+		return;
 	}
 
-    auto character_name = database.GetCharNameByID(character_id);
+	auto character_name = database.GetCharNameByID(character_id);
 	bool is_same_client = client->CharacterID() == character_id;
 	if (character_name.empty()) {
 		client->Message(
@@ -3540,7 +3540,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 		);
 	}
 
-    client->Message(
+	client->Message(
 		Chat::White,
 		fmt::format(
 			"{} in the following Instances.",
@@ -3557,7 +3557,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 	);
 
 	uint32 instance_count = 0;
-    for (auto row : results) {
+	for (auto row : results) {
 		auto instance_id = std::stoul(row[0]);
 		auto zone_id = std::stoul(row[1]);
 		auto version = std::stoul(row[2]);
@@ -3577,7 +3577,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 			}
 		}
 		
-        client->Message(
+		client->Message(
 			Chat::White,
 			fmt::format("Instance {} | Zone: {} ({}){}",
 				instance_id,
@@ -3605,7 +3605,7 @@ void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 		);
 
 		instance_count++;
-    }
+	}
 
 	client->Message(
 		Chat::White,
