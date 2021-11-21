@@ -2379,17 +2379,17 @@ XS(XS_Client_DeleteItemInInventory); /* prototype to pass -Wmissing-prototypes *
 XS(XS_Client_DeleteItemInInventory) {
 	dXSARGS;
 	if (items < 2 || items > 4)
-		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int8 quantity = 0], [bool client_update = false])"); // @categories Inventory and Items
+		Perl_croak(aTHX_ "Usage: Client::DeleteItemInInventory(THIS, int16 slot_id, [int16 quantity = 0], [bool client_update = false])"); // @categories Inventory and Items
 	{
 		Client *THIS;
 		int16  slot_id = (int16) SvIV(ST(1));
-		int8   quantity;
+		int16   quantity;
 		bool   client_update;
 		VALIDATE_THIS_IS_CLIENT;
 		if (items < 3)
 			quantity = 0;
 		else {
-			quantity = (int8) SvIV(ST(2));
+			quantity = (int16) SvIV(ST(2));
 		}
 
 		if (items < 4)
@@ -2638,14 +2638,14 @@ XS(XS_Client_DecreaseByID); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Client_DecreaseByID) {
 	dXSARGS;
 	if (items != 3)
-		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, unit8 amount)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Client::DecreaseByID(THIS, uint32 type, int16 quantity)"); // @categories Script Utility
 	{
 		Client *THIS;
 		bool   RETVAL;
 		uint32 type = (uint32) SvUV(ST(1));
-		uint8  amt  = (uint8) SvUV(ST(2));
+		int16  quantity  = (int16) SvIV(ST(2));
 		VALIDATE_THIS_IS_CLIENT;
-		RETVAL = THIS->DecreaseByID(type, amt);
+		RETVAL = THIS->DecreaseByID(type, quantity);
 		ST(0)       = boolSV(RETVAL);
 		sv_2mortal(ST(0));
 	}

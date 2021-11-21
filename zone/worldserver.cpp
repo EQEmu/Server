@@ -826,7 +826,7 @@ void WorldServer::HandleMessage(uint16 opcode, const EQ::Net::Packet &p)
 		}
 		ServerUptime_Struct* sus = (ServerUptime_Struct*)pack->pBuffer;
 		uint32 ms = Timer::GetCurrentTime();
-		std::string time_string = ConvertSecondsToTime(ms);
+		std::string time_string = ConvertMillisecondsToTime(ms);
 		SendEmoteMessage(
 			sus->adminname,
 			0,

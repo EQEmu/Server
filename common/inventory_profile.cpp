@@ -399,7 +399,7 @@ bool EQ::InventoryProfile::SwapItem(
 }
 
 // Remove item from inventory (with memory delete)
-bool EQ::InventoryProfile::DeleteItem(int16 slot_id, uint8 quantity) {
+bool EQ::InventoryProfile::DeleteItem(int16 slot_id, int16 quantity) {
 	// Pop item out of inventory map (or queue)
 	ItemInstance *item_to_delete = PopItem(slot_id);
 
