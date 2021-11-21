@@ -3491,28 +3491,139 @@ void ZoneDatabase::UpdateKarma(uint32 acct_id, uint32 amount)
     QueryDatabase(query);
 }
 
-void ZoneDatabase::ListAllInstances(Client* client, uint32 charid)
+void ZoneDatabase::ListAllInstances(Client* client, uint32 character_id)
 {
-	if(!client)
+	if(!client) {
 		return;
+	}
 
-	std::string query = StringFormat("SELECT instance_list.id, zone, version "
-                                    "FROM instance_list JOIN instance_list_player "
-                                    "ON instance_list.id = instance_list_player.id "
-                                    "WHERE instance_list_player.charid = %lu",
-                                    (unsigned long)charid);
+	std::string query = fmt::format(
+		"SELECT instance_list.id, zone, version, start_time, duration, never_expires "
+		"FROM instance_list JOIN instance_list_player "
+		"ON instance_list.id = instance_list_player.id "
+		"WHERE instance_list_player.charid = {}",
+		character_id
+	);
     auto results = QueryDatabase(query);
-    if (!results.Success())
+    if (!results.Success()) {
         return;
+	}
 
-    char name[64];
-    database.GetCharName(charid, name);
-    client->Message(Chat::White, "%s is part of the following instances:", name);
+    auto character_name = database.GetCharNameByID(character_id);
+	bool is_same_client = client->CharacterID() == character_id;
+	if (character_name.empty()) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Character ID '{}' does not exist.",
+				character_id
+			).c_str()
+		);
+		return;
+	}
 
-    for (auto row = results.begin(); row != results.end(); ++row) {
-        client->Message(Chat::White, "%s - id: %lu, version: %lu", ZoneName(atoi(row[1])),
-				(unsigned long)atoi(row[0]), (unsigned long)atoi(row[2]));
+	if (!results.RowCount()) {
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"{} not in any Instances.",
+				(
+					is_same_client ?
+					"You are" :
+					fmt::format(
+						"{} ({}) is",
+						character_name,
+						character_id
+					)
+				)
+			).c_str()
+		);
+	}
+
+    client->Message(
+		Chat::White,
+		fmt::format(
+			"{} in the following Instances.",
+			(
+				is_same_client ?
+				"You are" :
+				fmt::format(
+					"{} ({}) is",
+					character_name,
+					character_id
+				)
+			)
+		).c_str()
+	);
+
+	uint32 instance_count = 0;
+    for (auto row : results) {
+		auto instance_id = std::stoul(row[0]);
+		auto zone_id = std::stoul(row[1]);
+		auto version = std::stoul(row[2]);
+		auto start_time = std::stoul(row[3]);
+		auto duration = std::stoul(row[4]);
+		auto never_expires = std::stoi(row[5]) ? true : false;
+		std::string remaining_time_string = "Never";
+		timeval time_value;
+		gettimeofday(&time_value, nullptr);
+		auto current_time = time_value.tv_sec;
+		auto remaining_time = ((start_time + duration) - current_time);
+		if (!never_expires) {
+			if (remaining_time > 0) {
+				remaining_time_string = ConvertSecondsToTime(remaining_time);
+			} else {
+				remaining_time_string = "Already Expired";
+			}
+		}
+		
+        client->Message(
+			Chat::White,
+			fmt::format("Instance {} | Zone: {} ({}){}",
+				instance_id,
+				ZoneLongName(zone_id),
+				zone_id,
+				(
+					version ?
+					fmt::format(
+						" Version: {}",
+						version
+					) :
+					""
+				)
+			).c_str()
+		);
+
+		client->Message(
+			Chat::White,
+			fmt::format(
+				"Instance {} | Expires: {}",
+				instance_id,
+				remaining_time_string,
+				remaining_time
+			).c_str()
+		);
+
+		instance_count++;
     }
+
+	client->Message(
+		Chat::White,
+		fmt::format(
+			"{} in {} Instance{}.",
+			(
+				is_same_client ?
+				"You are" :
+				fmt::format(
+					"{} ({}) is",
+					character_name,
+					character_id
+				)
+			),
+			instance_count,
+			instance_count != 1 ? "s" : ""
+		).c_str()
+	);
 }
 
 void ZoneDatabase::QGlobalPurge()

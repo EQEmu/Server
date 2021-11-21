@@ -576,7 +576,7 @@ public:
 	uint8 RaidGroupCount(uint32 raidid, uint32 groupid);
 
 	/* Instancing   */
-	void ListAllInstances(Client* c, uint32 charid);
+	void ListAllInstances(Client* c, uint32 character_id);
 
 	/* QGlobals   */
 	void QGlobalPurge();
