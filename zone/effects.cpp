@@ -1033,14 +1033,14 @@ void EntityList::AESpell(
 				//which have bad faction with us
 				if (
 					!(caster_mob->CheckAggro(current_mob) ||
-					  faction_value == FACTION_THREATENLY ||
+					  faction_value == FACTION_THREATENINGLY ||
 					  faction_value == FACTION_SCOWLS)) {
 					continue;
 				}
 			}
 			else {
 				//only affect mobs we would assist.
-				if (!(faction_value <= FACTION_AMIABLE)) {
+				if (!(faction_value <= FACTION_AMIABLY)) {
 					continue;
 				}
 			}
@@ -1209,13 +1209,13 @@ void EntityList::AEBardPulse(
 			if (is_detrimental_spell) {
 				//affect mobs that are on our hate list, or
 				//which have bad faction with us
-				if (!(caster->CheckAggro(current_mob) || faction == FACTION_THREATENLY || faction == FACTION_SCOWLS)) {
+				if (!(caster->CheckAggro(current_mob) || faction == FACTION_THREATENINGLY || faction == FACTION_SCOWLS)) {
 					continue;
 				}
 			}
 			else {
 				//only affect mobs we would assist.
-				if (!(faction <= FACTION_AMIABLE)) {
+				if (!(faction <= FACTION_AMIABLY)) {
 					continue;
 				}
 			}

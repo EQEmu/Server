@@ -2,19 +2,27 @@
 
 void command_invul(Client *c, const Seperator *sep)
 {
-	bool   state = atobool(sep->arg[1]);
-	Client *t    = c;
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #invul [On|Off]");
+		return;
+	}
 
+	bool invul_flag = atobool(sep->arg[1]);
+	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c->GetTarget()->CastToClient();
+		target = c->GetTarget()->CastToClient();
 	}
 
-	if (sep->arg[1][0] != 0) {
-		t->SetInvul(state);
-		c->Message(Chat::White, "%s is %s invulnerable from attack.", t->GetName(), state ? "now" : "no longer");
-	}
-	else {
-		c->Message(Chat::White, "Usage: #invulnerable [on/off]");
-	}
+	target->SetInvul(invul_flag);
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"{} {} now {}.",
+			c == target ? "You" : target->GetCleanName(),
+			c == target ? "are" : "is",
+			invul_flag ? "invulnerable" : "vulnerable"
+		).c_str()
+	);
 }
 
