@@ -278,8 +278,9 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 
 		/**
 		 * Key required
+		 * If using a lock_pick_item leave messaging to that code below
 		 */
-		if (!IsDoorOpen()) {
+		if (lock_pick_item == nullptr && !IsDoorOpen()) {
 			sender->Message(Chat::LightBlue, "This is locked...");
 		}
 
