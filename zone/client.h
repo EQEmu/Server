@@ -1521,6 +1521,7 @@ public:
 	void UpdateMercLevel();
 	void CheckMercSuspendTimer();
 	Timer* GetMercTimer() { return &merc_timer; };
+	Timer* GetPickLockTimer() { return &pick_lock_timer; };
 
 	const char* GetRacePlural(Client* client);
 	const char* GetClassPlural(Client* client);
@@ -1862,6 +1863,7 @@ private:
 	Timer consent_throttle_timer;
 	Timer dynamiczone_removal_timer;
 	Timer task_request_timer;
+	Timer pick_lock_timer;
 
 	glm::vec3 m_Proximity;
 	glm::vec4 last_position_before_bulk_update;
