@@ -1041,8 +1041,8 @@ std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 		duration
 	);
 
-	int days = int(timer_length / 86400000);
-	timer_length %= 86400000;
+	int days = int(timer_length / 86400);
+	timer_length %= 86400;
 	int hours = int(timer_length / 3600);
 	timer_length %= 3600;
 	int minutes = int(timer_length / 60);
