@@ -9,7 +9,7 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		!sep->IsNumber(2) ||
 		!sep->IsNumber(3)
 	) {
-		c->Message(Chat::White, "Usage: #zsafecoords [X] [Y] [Z] [Heading] [Permanent (0 = False, 1 = True]");
+		c->Message(Chat::White, "Usage: #zsafecoords [X] [Y] [Z] [Heading] [Permanent (0 = False, 1 = True)]");
 		return;
 	}
 
