@@ -329,7 +329,6 @@ void command_zsave(Client *c, const Seperator *sep);
 void command_zsky(Client *c, const Seperator *sep);
 void command_zstats(Client *c, const Seperator *sep);
 void command_zunderworld(Client *c, const Seperator *sep);
-void command_zuwcoords(Client *c, const Seperator *sep);
 
 #ifdef BOTS
 #include "bot.h"
