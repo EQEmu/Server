@@ -31,24 +31,10 @@ void command_zcolor(Client *c, const Seperator *sep)
 
 	if (permanent) {		
 		auto query = fmt::format(
-			"UPDATE zone SET fog_red = {}, fog_red1 = {}, fog_red2 = {}, fog_red3 = {}, fog_red4 = {}, "
-			"fog_green = {}, fog_green1 = {}, fog_green2 = {}, fog_green3 = {}, fog_green4 = {}, "
-			"fog_blue = {}, fog_blue1 = {}, fog_blue2 = {}, fog_blue3 = {}, fog_blue4 = {} "
+			"UPDATE zone SET fog_red = {}, fog_green = {}, fog_blue = {} "
 			"WHERE zoneidnumber = {} AND version = {}",
 			red,
-			red,
-			red,
-			red,
-			red,
 			green,
-			green,
-			green,
-			green,
-			green,
-			blue,
-			blue,
-			blue,
-			blue,
 			blue,
 			zone->GetZoneID(),
 			zone->GetInstanceVersion()
@@ -57,9 +43,9 @@ void command_zcolor(Client *c, const Seperator *sep)
 	}
 
 	for (int fog_index = 0; fog_index < 4; fog_index++) {
-		zone->newzone_data.fog_red[fog_index] = red;
-		zone->newzone_data.fog_green[fog_index] = green;
-		zone->newzone_data.fog_blue[fog_index] = blue;
+		zone->newzone_data.fog_red[fog_index] = static_cast<uint8>(red);
+		zone->newzone_data.fog_green[fog_index] = static_cast<uint8>(green);
+		zone->newzone_data.fog_blue[fog_index] = static_cast<uint8>(blue);
 	}
 
 	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
