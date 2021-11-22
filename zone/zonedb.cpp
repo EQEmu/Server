@@ -63,11 +63,11 @@ ZoneDatabase::~ZoneDatabase() {
 
 bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd) {
 	std::string query = fmt::format(
-		"UPDATE zone SET underworld = {}, minclip = {}, "
-		"maxclip = {}, fog_minclip = {}, fog_maxclip = {}, "
+		"UPDATE zone SET underworld = {:.2f}, minclip = {:.2f}, "
+		"maxclip = {:.2f}, fog_minclip = {:.2f}, fog_maxclip = {:.2f}, "
 		"fog_blue = {}, fog_red = {}, fog_green = {}, "
-		"sky = {}, ztype = {}, zone_exp_multiplier = {}, "
-		"safe_x = {}, safe_y = {}, safe_z = {} "
+		"sky = {}, ztype = {}, zone_exp_multiplier = {:.2f}, "
+		"safe_x = {:.2f}, safe_y = {:.2f}, safe_z = {:.2f} "
 		"WHERE zoneidnumber = {} AND version = {}",
 		zd->underworld,
 		zd->minclip,
