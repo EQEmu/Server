@@ -18,15 +18,6 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 	auto z = std::stof(sep->arg[3]);
 	auto heading = sep->arg[3] ? std::stof(sep->arg[3]) : c->GetHeading();
 	auto permanent = sep->arg[4] ? atobool(sep->arg[4]) : false;
-	zone->newzone_data.safe_x = x;
-	zone->newzone_data.safe_y = y;
-	zone->newzone_data.safe_z = z;
-
-	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
-	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-	entity_list.QueueClients(c, outapp);
-	safe_delete(outapp);
-
 	if (permanent) {
 		auto query = fmt::format(
 			"UPDATE zone SET safe_x = {:.2f}, safe_y = {:.2f}, safe_z = {:.2f}, safe_heading = {:.2f} WHERE zoneidnumber = {} AND version = {}",
@@ -39,6 +30,15 @@ void command_zsafecoords(Client *c, const Seperator *sep)
 		);
 		database.QueryDatabase(query);
 	}
+	
+	zone->newzone_data.safe_x = x;
+	zone->newzone_data.safe_y = y;
+	zone->newzone_data.safe_z = z;
+
+	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+	entity_list.QueueClients(c, outapp);
+	safe_delete(outapp);
 
 	c->Message(
 		Chat::White,
