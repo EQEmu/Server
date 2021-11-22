@@ -392,7 +392,7 @@ int command_init(void)
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.", AccountStatus::GMImpossible, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", AccountStatus::QuestTroupe, command_zclip) ||
 		command_add("zcolor", "[red] [green] [blue] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
-		command_add("zheader", "[zonename] - Load zheader for zonename from the database", AccountStatus::QuestTroupe, command_zheader) ||
+		command_add("zheader", "[Zone ID|Zone Short Name] [Version] - Load a zone header from the database", AccountStatus::QuestTroupe, command_zheader) ||
 		command_add("zone", "[zonename] [x] [y] [z] - Go to specified zone (coords optional)", AccountStatus::Guide, command_zone) ||
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
 		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", AccountStatus::Guide, command_zone_instance) ||

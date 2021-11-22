@@ -134,7 +134,7 @@ public:
 	bool IsUCSServerAvailable() { return m_ucss_available; }
 	bool IsZone(uint32 zone_id, uint16 instance_id) const;
 	bool LoadGroundSpawns();
-	bool LoadZoneCFG(const char *filename, uint16 instance_id);
+	bool LoadZoneCFG(const char *filename, uint16 instance_version);
 	bool LoadZoneObjects();
 	bool Process();
 	bool SaveZoneCFG();

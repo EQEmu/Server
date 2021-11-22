@@ -61,20 +61,31 @@ ZoneDatabase::~ZoneDatabase() {
 	}
 }
 
-bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct* zd) {
-
-	std::string query = StringFormat("UPDATE zone SET underworld = %f, minclip = %f, "
-                                    "maxclip = %f, fog_minclip = %f, fog_maxclip = %f, "
-                                    "fog_blue = %i, fog_red = %i, fog_green = %i, "
-                                    "sky = %i, ztype = %i, zone_exp_multiplier = %f, "
-                                    "safe_x = %f, safe_y = %f, safe_z = %f "
-                                    "WHERE zoneidnumber = %i AND version = %i",
-                                    zd->underworld, zd->minclip,
-                                    zd->maxclip, zd->fog_minclip[0], zd->fog_maxclip[0],
-                                    zd->fog_blue[0], zd->fog_red[0], zd->fog_green[0],
-                                    zd->sky, zd->ztype, zd->zone_exp_multiplier,
-                                    zd->safe_x, zd->safe_y, zd->safe_z,
-                                    zoneid, instance_id);
+bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_version, NewZone_Struct* zd) {
+	std::string query = fmt::format(
+		"UPDATE zone SET underworld = {}, minclip = {}, "
+		"maxclip = {}, fog_minclip = {}, fog_maxclip = {}, "
+		"fog_blue = {}, fog_red = {}, fog_green = {}, "
+		"sky = {}, ztype = {}, zone_exp_multiplier = {}, "
+		"safe_x = {}, safe_y = {}, safe_z = {} "
+		"WHERE zoneidnumber = {} AND version = {}",
+		zd->underworld,
+		zd->minclip,
+		zd->maxclip,
+		zd->fog_minclip[0],
+		zd->fog_maxclip[0],
+		zd->fog_blue[0],
+		zd->fog_red[0],
+		zd->fog_green[0],
+		zd->sky,
+		zd->ztype,
+		zd->zone_exp_multiplier,
+		zd->safe_x,
+		zd->safe_y,
+		zd->safe_z,
+		zoneid,
+		instance_version
+	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
         return false;
@@ -85,7 +96,7 @@ bool ZoneDatabase::SaveZoneCFG(uint32 zoneid, uint16 instance_id, NewZone_Struct
 
 bool ZoneDatabase::GetZoneCFG(
 	uint32 zoneid,
-	uint16 instance_id,
+	uint16 instance_version,
 	NewZone_Struct *zone_data,
 	bool &can_bind,
 	bool &can_combat,
@@ -102,7 +113,7 @@ bool ZoneDatabase::GetZoneCFG(
 	*map_filename = new char[100];
 	zone_data->zone_id = zoneid;
 
-	std::string query = StringFormat(
+	std::string query = fmt::format(
 		"SELECT "
 		"ztype, "						// 0
 		"fog_red, "						// 1
@@ -169,10 +180,10 @@ bool ZoneDatabase::GetZoneCFG(
 		"underworld_teleport_index, "	// 62
 		"lava_damage, "					// 63
 		"min_lava_damage "				// 64
-		"FROM zone WHERE zoneidnumber = %i AND version = %i %s",
+		"FROM zone WHERE zoneidnumber = {} AND version = {} {}",
 		zoneid,
-		instance_id,
-		ContentFilterCriteria::apply().c_str()
+		instance_version,
+		ContentFilterCriteria::apply()
 	);
 	auto results = QueryDatabase(query);
 	if (!results.Success()) {
