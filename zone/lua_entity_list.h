@@ -99,8 +99,8 @@ public:
 	std::string MakeNameUnique(const char *name);
 	std::string RemoveNumbers(const char *name);
 	void SignalMobsByNPCID(uint32 npc_id, int signal);
-	int DeleteNPCCorpses();
-	int DeletePlayerCorpses();
+	uint32 DeleteNPCCorpses();
+	uint32 DeletePlayerCorpses();
 	void HalveAggro(Lua_Mob who);
 	void DoubleAggro(Lua_Mob who);
 	void ClearFeignAggro(Lua_Mob who);

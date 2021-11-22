@@ -2,187 +2,327 @@
 
 void command_instance(Client *c, const Seperator *sep)
 {
-	if (!c) {
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(
+			Chat::White,
+			"Usage: #instance create [Zone ID|Zone Short Name] [Version] [Duration]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance destroy [Instance ID]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance add [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance remove [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance list [Name]"
+		);
 		return;
 	}
 
-	//options:
-	//help
-	//create [zone_id] [version]
-	//destroy [instance_id]
-	//add [instance_id] [player_name]
-	//remove [instance_id] [player_name]
-	//list [player_name]
+	Client* target = c;
+	if (c->GetTarget() && c->GetTarget()->IsClient()) {
+		target = c->GetTarget()->CastToClient();
+	}
 
-	if (strcasecmp(sep->arg[1], "help") == 0) {
-		c->Message(Chat::White, "#instance usage:");
+	bool is_add = !strcasecmp(sep->arg[1], "add");
+	bool is_create = !strcasecmp(sep->arg[1], "create");
+	bool is_destroy = !strcasecmp(sep->arg[1], "destroy");
+	bool is_help = !strcasecmp(sep->arg[1], "help");
+	bool is_list = !strcasecmp(sep->arg[1], "list");
+	bool is_remove = !strcasecmp(sep->arg[1], "remove");
+	if (
+		!is_add &&
+		!is_create &&
+		!is_destroy &&
+		!is_help &&
+		!is_list &&
+		!is_remove
+	) {
 		c->Message(
-			Chat::White, "#instance create zone_id version duration - Creates an instance of version 'version' in the "
-						 "zone with id matching zone_id, will last for duration seconds."
-		);
-		c->Message(Chat::White, "#instance destroy instance_id - Destroys the instance with id matching instance_id.");
-		c->Message(
-			Chat::White, "#instance add instance_id player_name - adds the player 'player_name' to the instance "
-						 "with id matching instance_id."
+			Chat::White,
+			"Usage: #instance create [Zone ID|Zone Short Name] [Version] [Duration]"
 		);
 		c->Message(
-			Chat::White, "#instance remove instance_id player_name - removes the player 'player_name' from the "
-						 "instance with id matching instance_id."
+			Chat::White,
+			"Usage: #instance destroy [Instance ID]"
 		);
-		c->Message(Chat::White, "#instance list player_name - lists all the instances 'player_name' is apart of.");
+		c->Message(
+			Chat::White,
+			"Usage: #instance add [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance remove [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance list [Name]"
+		);
 		return;
 	}
-	else if (strcasecmp(sep->arg[1], "create") == 0) {
-		if (!sep->IsNumber(3) || !sep->IsNumber(4)) {
+
+	if (is_add) {
+		if (!sep->IsNumber(2)) {
 			c->Message(
 				Chat::White,
-				"#instance create zone_id version duration - Creates an instance of version 'version' in the "
-				"zone with id matching zone_id, will last for duration seconds."
+				"#instance add [Instance ID] [Name]"
 			);
 			return;
 		}
 
-		const char *zn     = nullptr;
-		uint32     zone_id = 0;
-
-		if (sep->IsNumber(2)) {
-			zone_id = atoi(sep->arg[2]);
-		}
-		else {
-			zone_id = ZoneID(sep->arg[2]);
-		}
-
-		uint32 version  = atoi(sep->arg[3]);
-		uint32 duration = atoi(sep->arg[4]);
-		zn = ZoneName(zone_id);
-
-		if (!zn) {
-			c->Message(Chat::White, "Zone with id %lu was not found by the server.", (unsigned long) zone_id);
+		std::string character_name = sep->arg[3];
+		uint16 instance_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+		uint32 character_id = database.GetCharacterID(character_name.c_str());
+		if (instance_id <= 0 || character_id <= 0) {
+			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
 			return;
 		}
 
-		uint16 id = 0;
-		if (!database.GetUnusedInstanceID(id)) {
+		if (!database.CheckInstanceExists(instance_id)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
+			);
+			return;
+		}
+
+		uint32 zone_id = database.ZoneIDFromInstanceID(instance_id);
+		uint32 version = database.VersionFromInstanceID(instance_id);
+		uint32 current_id  = database.GetInstanceID(zone_id, character_id, version);
+		if (!current_id) {
+			std::string target_string = (
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					character_name,
+					character_id
+				)
+			);
+			
+			c->Message(
+				Chat::White,
+				(
+					database.AddClientToInstance(instance_id, character_id) ?
+					fmt::format(
+						"Added {} to Instance ID {}.",
+						target_string,
+						instance_id
+					) :				
+					fmt::format(
+						"Failed to add {} to Instance ID {}.",
+						target_string,
+						instance_id
+					)
+				).c_str()
+			);
+		}
+		else {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Client was already saved to Instance ID {}{}.",
+					current_id,
+					(
+						current_id != instance_id ?
+						fmt::format(
+							"which has the same zone and version as Instance ID {}",
+							instance_id
+						) :
+						""
+					)
+				).c_str()
+			);
+		}
+	} else if (is_create) {
+		if (!sep->IsNumber(3) || !sep->IsNumber(4)) {
+			c->Message(
+				Chat::White,
+				"Usage: #instance create [Zone ID|Zone Short Name] [Version] [Duration]"
+			);
+			return;
+		}
+
+		uint32 zone_id = (
+			sep->IsNumber(2) ?
+			std::stoul(sep->arg[2]) :
+			ZoneID(sep->arg[2])
+		);
+		uint32 version = std::stoul(sep->arg[3]);
+		uint32 duration = std::stoul(sep->arg[4]);
+		std::string zone_short_name = ZoneName(zone_id);
+		if (zone_short_name.empty()) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Zone ID {} was not found by the server.",
+					zone_id
+				).c_str()
+			);
+			return;
+		}
+
+		uint16 instance_id = 0;
+		if (!database.GetUnusedInstanceID(instance_id)) {
 			c->Message(Chat::White, "Server was unable to find a free instance id.");
 			return;
 		}
 
-		if (!database.CreateInstance(id, zone_id, version, duration)) {
+		if (!database.CreateInstance(instance_id, zone_id, version, duration)) {
 			c->Message(Chat::White, "Server was unable to create a new instance.");
 			return;
 		}
 
-		c->Message(Chat::White, "New instance %s was created with id %lu.", zn, (unsigned long) id);
-	}
-	else if (strcasecmp(sep->arg[1], "destroy") == 0) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Instance {} Created | Zone: {} ({}){}",
+				instance_id,
+				ZoneLongName(zone_id),
+				zone_id,
+				(
+					version ? 
+					fmt::format(
+						" Version: {}",
+						version
+					) :
+					""
+				)
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Instance {} Created |  Duration: {} ({})",
+				instance_id,
+				ConvertSecondsToTime(duration),
+				duration
+			).c_str()
+		);
+	} else if (is_destroy) {
 		if (!sep->IsNumber(2)) {
 			c->Message(
 				Chat::White,
-				"#instance destroy instance_id - Destroys the instance with id matching instance_id."
+				"#instance destroy [Instance ID]"
 			);
 			return;
 		}
 
-		uint16 id = atoi(sep->arg[2]);
-		database.DeleteInstance(id);
-		c->Message(Chat::White, "Destroyed instance with id %lu.", (unsigned long) id);
-	}
-	else if (strcasecmp(sep->arg[1], "add") == 0) {
-		if (!sep->IsNumber(2)) {
-			c->Message(
-				Chat::White, "#instance add instance_id player_name - adds the player 'player_name' to the instance "
-							 "with id matching instance_id."
-			);
-			return;
-		}
-
-		uint16 id     = atoi(sep->arg[2]);
-		uint32 charid = database.GetCharacterID(sep->arg[3]);
-
-		if (id <= 0 || charid <= 0) {
-			c->Message(Chat::White, "Must enter a valid instance id and player name.");
-			return;
-		}
-
-		if (!database.CheckInstanceExists(id)) {
-			c->Message(Chat::White, "Instance does not exist.");
-			return;
-		}
-
-		uint32 zone_id = database.ZoneIDFromInstanceID(id);
-		uint32 version = database.VersionFromInstanceID(id);
-		uint32 cur_id  = database.GetInstanceID(zone_id, charid, version);
-		if (cur_id == 0) {
-			if (database.AddClientToInstance(id, charid)) {
-				c->Message(Chat::White, "Added client to instance.");
-			}
-			else {
-				c->Message(Chat::White, "Failed to add client to instance.");
-			}
-		}
-		else {
+		uint16 instance_id = std::stoul(sep->arg[2]);
+		if (!database.CheckInstanceExists(instance_id)) {
 			c->Message(
 				Chat::White,
-				"Client was already saved to %u which has uses the same zone and version as that instance.",
-				cur_id
-			);
-		}
-	}
-	else if (strcasecmp(sep->arg[1], "remove") == 0) {
-		if (!sep->IsNumber(2)) {
-			c->Message(
-				Chat::White, "#instance remove instance_id player_name - removes the player 'player_name' from the "
-							 "instance with id matching instance_id."
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
 			);
 			return;
 		}
 
-		uint16 id     = atoi(sep->arg[2]);
-		uint32 charid = database.GetCharacterID(sep->arg[3]);
-
-		if (id <= 0 || charid <= 0) {
-			c->Message(Chat::White, "Must enter a valid instance id and player name.");
-		}
-
-		if (database.RemoveClientFromInstance(id, charid)) {
-			c->Message(Chat::White, "Removed client from instance.");
-		}
-		else {
-			c->Message(Chat::White, "Failed to remove client from instance.");
-		}
-	}
-	else if (strcasecmp(sep->arg[1], "list") == 0) {
-		uint32 charid = database.GetCharacterID(sep->arg[2]);
-		if (charid <= 0) {
-			if (c->GetTarget() == nullptr || (c->GetTarget() && !c->GetTarget()->IsClient())) {
-				c->Message(Chat::White, "Character not found.");
-				return;
-			}
-			else {
-				charid = c->GetTarget()->CastToClient()->CharacterID();
-			}
-		}
-
-		database.ListAllInstances(c, charid);
-	}
-	else {
-		c->Message(Chat::White, "Invalid Argument.");
-		c->Message(Chat::White, "#instance usage:");
+		database.DeleteInstance(instance_id);
 		c->Message(
-			Chat::White, "#instance create zone_id version duration - Creates an instance of version 'version' in the "
-						 "zone with id matching zone_id, will last for duration seconds."
+			Chat::White,
+			fmt::format(
+				"Instance ID {} Deleted.",
+				instance_id
+			).c_str()
 		);
-		c->Message(Chat::White, "#instance destroy instance_id - Destroys the instance with id matching instance_id.");
+	} else if (is_help) {
 		c->Message(
-			Chat::White, "#instance add instance_id player_name - adds the player 'player_name' to the instance "
-						 "with id matching instance_id."
+			Chat::White,
+			"Usage: #instance create [Zone ID|Zone Short Name] [Version] [Duration]"
 		);
 		c->Message(
-			Chat::White, "#instance remove instance_id player_name - removes the player 'player_name' from the "
-						 "instance with id matching instance_id."
+			Chat::White,
+			"Usage: #instance destroy [Instance ID]"
 		);
-		c->Message(Chat::White, "#instance list player_name - lists all the instances 'player_name' is apart of.");
+		c->Message(
+			Chat::White,
+			"Usage: #instance add [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance remove [Instance ID] [Name]"
+		);
+		c->Message(
+			Chat::White,
+			"Usage: #instance list [Name]"
+		);
 		return;
+	} else if (is_list) {
+		uint32 character_id = database.GetCharacterID(sep->arg[2]);
+		if (character_id <= 0) {
+			character_id = target->CharacterID();
+		}
+
+		database.ListAllInstances(c, character_id);
+	} else if (is_remove) {
+		if (!sep->IsNumber(2)) {
+			c->Message(
+				Chat::White,
+				"#instance remove [Instance ID] [Name]"
+			);
+			return;
+		}
+
+		std::string character_name = sep->arg[3];
+		uint16 instance_id = static_cast<uint16>(std::stoul(sep->arg[2]));
+		uint32 character_id = database.GetCharacterID(character_name.c_str());
+		if (instance_id <= 0 || character_id <= 0) {
+			c->Message(Chat::White, "You must enter a valid Instance ID and player name.");
+			return;
+		}
+
+		if (!database.CheckInstanceExists(instance_id)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Instance ID {} does not exist.",
+					instance_id
+				).c_str()
+			);
+			return;
+		}
+
+		std::string target_string = (
+			c->CharacterID() == character_id ?
+			"yourself" :
+			fmt::format(
+				"{} ({})",
+				character_name,
+				character_id
+			)
+		);
+
+		c->Message(
+			Chat::White,
+			(
+				database.RemoveClientFromInstance(instance_id, character_id) ?
+				fmt::format(
+					"Removed {} from Instance ID {}.",
+					target_string,
+					instance_id
+				) :				
+				fmt::format(
+					"Failed to remove {} from Instance ID {}.",
+					target_string,
+					instance_id
+				)
+			).c_str()
+		);
 	}
 }
 

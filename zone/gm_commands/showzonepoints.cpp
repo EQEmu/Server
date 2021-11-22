@@ -16,7 +16,7 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 	c->SendChatLineBreak();
 
 	for (auto &virtual_zone_point : zone->virtual_zone_point_list) {
-		std::string zone_long_name = zone_store.GetZoneLongName(virtual_zone_point.target_zone_id);
+		std::string zone_long_name = ZoneLongName(virtual_zone_point.target_zone_id);
 
 		c->Message(
 			Chat::White,
@@ -112,7 +112,7 @@ void command_showzonepoints(Client *c, const Seperator *sep)
 	iterator.Reset();
 	while (iterator.MoreElements()) {
 		ZonePoint   *zone_point    = iterator.GetData();
-		std::string zone_long_name = zone_store.GetZoneLongName(zone_point->target_zone_id);
+		std::string zone_long_name = ZoneLongName(zone_point->target_zone_id);
 		std::string node_name      = fmt::format("ZonePoint To [{}]", zone_long_name);
 
 		NPC::SpawnZonePointNodeNPC(

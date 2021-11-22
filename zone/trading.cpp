@@ -1373,7 +1373,7 @@ uint16 Client::FindTraderItem(int32 SerialNumber, uint16 Quantity){
 	return 0;
 }
 
-void Client::NukeTraderItem(uint16 Slot,int16 Charges,uint16 Quantity,Client* Customer,uint16 TraderSlot, int32 SerialNumber, int32 itemid) {
+void Client::NukeTraderItem(uint16 Slot,int16 Charges,int16 Quantity,Client* Customer,uint16 TraderSlot, int32 SerialNumber, int32 itemid) {
 
 	if(!Customer)
 		return;
@@ -1451,7 +1451,7 @@ void Client::TraderUpdate(uint16 SlotID,uint32 TraderID){
 	safe_delete(outapp);
 }
 
-void Client::FindAndNukeTraderItem(int32 SerialNumber, uint16 Quantity, Client* Customer, uint16 TraderSlot){
+void Client::FindAndNukeTraderItem(int32 SerialNumber, int16 Quantity, Client* Customer, uint16 TraderSlot){
 
 	const EQ::ItemInstance* item= nullptr;
 	bool Stackable = false;

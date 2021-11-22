@@ -1761,6 +1761,18 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			newbon->Amplification += base_value;
 			break;
 
+		case SE_MitigateSpellDamage:
+		{
+			newbon->MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] += base_value;
+			break;
+		}
+
+		case SE_MitigateDotDamage:
+		{
+			newbon->MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] += base_value;
+			break;
+		}
+
 		// to do
 		case SE_PetDiscipline:
 			break;
@@ -3019,6 +3031,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MitigateSpellDamage:
 			{
+				if (WornType) {
+					new_bonus->MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] += effect_value;
+				}
+
 				if (new_bonus->MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT] < effect_value){
 					new_bonus->MitigateSpellRune[SBIndex::MITIGATION_RUNE_PERCENT]                = effect_value;
 					new_bonus->MitigateSpellRune[SBIndex::MITIGATION_RUNE_BUFFSLOT]               = buffslot;
@@ -3030,6 +3046,10 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_MitigateDotDamage:
 			{
+				if (WornType) {
+					new_bonus->MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] += effect_value;
+				}
+
 				if (new_bonus->MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT] < effect_value){
 					new_bonus->MitigateDotRune[SBIndex::MITIGATION_RUNE_PERCENT]                = effect_value;
 					new_bonus->MitigateDotRune[SBIndex::MITIGATION_RUNE_BUFFSLOT]               = buffslot;

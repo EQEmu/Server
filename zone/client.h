@@ -301,8 +301,8 @@ public:
 	uint16 FindTraderItem(int32 SerialNumber,uint16 Quantity);
 	uint32 FindTraderItemSerialNumber(int32 ItemID);
 	EQ::ItemInstance* FindTraderItemBySerialNumber(int32 SerialNumber);
-	void FindAndNukeTraderItem(int32 item_id,uint16 quantity,Client* customer,uint16 traderslot);
-	void NukeTraderItem(uint16 slot, int16 charges, uint16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
+	void FindAndNukeTraderItem(int32 item_id,int16 quantity,Client* customer,uint16 traderslot);
+	void NukeTraderItem(uint16 slot, int16 charges, int16 quantity, Client* customer, uint16 traderslot, int32 uniqueid, int32 itemid = 0);
 	void ReturnTraderReq(const EQApplicationPacket* app,int16 traderitemcharges, uint32 itemid = 0);
 	void TradeRequestFailed(const EQApplicationPacket* app);
 	void BuyTraderItem(TraderBuy_Struct* tbs,Client* trader,const EQApplicationPacket* app);
@@ -924,7 +924,7 @@ public:
 	bool PutItemInInventory(int16 slot_id, const EQ::ItemInstance& inst, bool client_update = false);
 	bool PushItemOnCursor(const EQ::ItemInstance& inst, bool client_update = false);
 	void SendCursorBuffer();
-	void DeleteItemInInventory(int16 slot_id, int8 quantity = 0, bool client_update = false, bool update_db = true);
+	void DeleteItemInInventory(int16 slot_id, int16 quantity = 0, bool client_update = false, bool update_db = true);
 	int CountItem(uint32 item_id);
 	void RemoveItem(uint32 item_id, uint32 quantity = 1);
 	bool SwapItem(MoveItem_Struct* move_in);
@@ -978,7 +978,7 @@ public:
 
 	//remove charges/multiple objects from inventory:
 	//bool DecreaseByType(uint32 type, uint8 amt);
-	bool DecreaseByID(uint32 type, uint8 amt);
+	bool DecreaseByID(uint32 type, int16 quantity);
 	uint8 SlotConvert2(uint8 slot); //Maybe not needed.
 	void Escape(); //AA Escape
 	void DisenchantSummonedBags(bool client_update = true);

@@ -138,20 +138,20 @@ void Client::DoTributeUpdate() {
 			uint32 tid = m_pp.tributes[r].tribute;
 			if(tid == TRIBUTE_NONE) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				continue;
 			}
 
 			if(tribute_list.count(tid) != 1) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				continue;
 			}
 
 			//sanity check
 			if(m_pp.tributes[r].tier >= MAX_TRIBUTE_TIERS) {
 				if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+					DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 				m_pp.tributes[r].tier = 0;
 				continue;
 			}
@@ -165,7 +165,7 @@ void Client::DoTributeUpdate() {
 			if(inst == nullptr)
 				continue;
 
-			PutItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, *inst, false);
+			PutItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, *inst);
 			SendItemPacket(EQ::invslot::TRIBUTE_BEGIN + r, inst, ItemPacketTributeItem);
 			safe_delete(inst);
 		}
@@ -173,7 +173,7 @@ void Client::DoTributeUpdate() {
 		//unequip tribute items...
 		for (r = 0; r < EQ::invtype::TRIBUTE_SIZE; r++) {
 			if (m_inv[EQ::invslot::TRIBUTE_BEGIN + r])
-				DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r, 0, false);
+				DeleteItemInInventory(EQ::invslot::TRIBUTE_BEGIN + r);
 		}
 	}
 	CalcBonuses();
@@ -261,10 +261,10 @@ int32 Client::TributeItem(uint32 slot, uint32 quantity) {
 	if(inst->IsStackable()) {
 		if(inst->GetCharges() < (int32)quantity)	//dont have enough....
 			return(0);
-		DeleteItemInInventory(slot, quantity, false);
+		DeleteItemInInventory(slot, quantity);
 	} else {
 		quantity = 1;
-		DeleteItemInInventory(slot, 0, false);
+		DeleteItemInInventory(slot);
 	}
 
 	pts *= quantity;

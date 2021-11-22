@@ -1021,11 +1021,28 @@ std::vector<std::string> GetBadWords()
 	};
 }
 
-std::string ConvertSecondsToTime(int duration)
+std::string ConvertSecondsToTime(int duration, bool is_milliseconds)
 {
-	int timer_length = duration;
-	int days = int(timer_length / 86400000);
-	timer_length %= 86400000;
+	if (duration <= 0) {
+		return "Unknown";
+	}
+
+	if (is_milliseconds && duration < 1000) {
+		return fmt::format(
+			"{} Millisecond{}",
+			duration,
+			duration != 1 ? "s" : ""
+		);
+	}
+
+	int timer_length = (
+		is_milliseconds ?
+		static_cast<int>(std::ceil(static_cast<float>(duration) / 1000.0f)) :
+		duration
+	);
+
+	int days = int(timer_length / 86400);
+	timer_length %= 86400;
 	int hours = int(timer_length / 3600);
 	timer_length %= 3600;
 	int minutes = int(timer_length / 60);
@@ -1162,4 +1179,79 @@ std::string ConvertSecondsToTime(int duration)
 		);
 	}
 	return time_string;
+}
+
+std::string ConvertMoneyToString(uint32 platinum, uint32 gold, uint32 silver, uint32 copper)
+{
+	std::string money_string = "Unknown";
+	if (copper && silver && gold && platinum) { // CSGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, {} Silver, and {} Copper",
+			platinum,
+			gold,
+			silver,
+			copper
+		);
+	} else if (copper && silver && gold && !platinum) { // CSG
+		money_string = fmt::format(
+			"{} Gold, {} Silver, and {} Copper",
+			gold,
+			silver,
+			copper
+		);
+	} else if (copper && silver && !gold && !platinum) { // CS
+		money_string = fmt::format(
+			"{} Silver and {} Copper",
+			silver,
+			copper
+		);
+	} else if (copper && !silver && !gold && !platinum) { // C
+		money_string = fmt::format(
+			"{} Copper",
+			copper
+		);
+	} else if (!copper && silver && gold && platinum) { // SGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, and {} Silver",
+			platinum,
+			gold,
+			silver
+		);
+	} else if (!copper && silver && gold && !platinum) { // SG
+		money_string = fmt::format(
+			"{} Gold and {} Silver",
+			gold,
+			silver
+		);
+	} else if (!copper && silver && !gold && !platinum) { // S
+		money_string = fmt::format(
+			"{} Silver",
+			silver
+		);
+	} else if (copper && !silver && gold && platinum) { // CGP
+		money_string = fmt::format(
+			"{} Platinum, {} Gold, and {} Copper",
+			platinum,
+			gold,
+			copper
+		);
+	} else if (copper && !silver && gold && !platinum) { // CG
+		money_string = fmt::format(
+			"{} Gold and {} Copper",
+			gold,
+			copper
+		);
+	} else if (!copper && !silver && gold && platinum) { // GP
+		money_string = fmt::format(
+			"{} Platinum and {} Gold",
+			platinum,
+			gold
+		);
+	} else if (!copper && !silver && gold && !platinum) { // G
+		money_string = fmt::format(
+			"{} Gold",
+			gold
+		);
+	}
+	return money_string;
 }

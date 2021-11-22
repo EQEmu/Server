@@ -27,13 +27,13 @@ enum FACTION_VALUE {
 	FACTION_ALLY = 1,
 	FACTION_WARMLY = 2,
 	FACTION_KINDLY = 3,
-	FACTION_AMIABLE = 4,
+	FACTION_AMIABLY = 4,
 
-	FACTION_INDIFFERENT = 5,
+	FACTION_INDIFFERENTLY = 5,
 
-	FACTION_APPREHENSIVE = 6,
-	FACTION_DUBIOUS = 7,
-	FACTION_THREATENLY = 8,
+	FACTION_APPREHENSIVELY = 6,
+	FACTION_DUBIOUSLY = 7,
+	FACTION_THREATENINGLY = 8,
 	FACTION_SCOWLS = 9
 };
 
@@ -75,6 +75,6 @@ struct NPCFaction
 	uint8 temp;
 };
 
-const char *FactionValueToString(FACTION_VALUE fv);
+const char *FactionValueToString(FACTION_VALUE faction_value);
 FACTION_VALUE CalculateFaction(FactionMods* fm, int32 tmpCharacter_value);
 #endif

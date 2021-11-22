@@ -41,7 +41,7 @@ void command_stun(Client *c, const Seperator *sep)
 							target->GetID()
 						)
 				),
-				ConvertSecondsToTime(duration)
+				ConvertMillisecondsToTime(duration)
 			) :
 			fmt::format(
 				"You unstunned {}.",

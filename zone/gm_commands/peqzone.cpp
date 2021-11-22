@@ -2,74 +2,109 @@
 
 void command_peqzone(Client *c, const Seperator *sep)
 {
-	uint32 timeleft = c->GetPTimers().GetRemainingTime(pTimerPeqzoneReuse) / 60;
-
-	if (!c->GetPTimers().Expired(&database, pTimerPeqzoneReuse, false)) {
-		c->Message(Chat::Red, "You must wait %i minute(s) before using this ability again.", timeleft);
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #peqzone [Zone ID] or #peqzone [Zone Short Name]");
 		return;
 	}
 
-	if (c->GetHPRatio() < 75) {
-		c->Message(Chat::White, "You cannot use this command with less than 75 percent health.");
+	auto reuse_timer = RuleI(Zone, PEQZoneReuseTime);
+	if (reuse_timer) {
+		uint32 time_left = c->GetPTimers().GetRemainingTime(pTimerPeqzoneReuse);
+		if (!c->GetPTimers().Expired(&database, pTimerPeqzoneReuse, false)) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"You must wait {} before using this command again.",
+					ConvertSecondsToTime(time_left)
+				).c_str()
+			);
+			return;
+		}
+	}
+
+	auto hp_ratio = RuleI(Zone, PEQZoneHPRatio);
+	if (c->GetHPRatio() < hp_ratio) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You cannot use this command with less than {}%% health.",
+				hp_ratio
+			).c_str()
+		);
 		return;
 	}
 
-	//this isnt perfect, but its better...
 	if (
-		c->IsInvisible(c)
-		|| c->IsRooted()
-		|| c->IsStunned()
-		|| c->IsMezzed()
-		|| c->AutoAttackEnabled()
-		|| c->GetInvul()
-		) {
+		c->IsInvisible(c) ||
+		c->IsRooted() ||
+		c->IsStunned() ||
+		c->IsMezzed() ||
+		c->AutoAttackEnabled() ||
+		c->GetInvul()
+	) {
 		c->Message(Chat::White, "You cannot use this command in your current state. Settle down and wait.");
 		return;
 	}
 
-	uint16 zoneid   = 0;
-	uint8  destzone = 0;
-	if (sep->IsNumber(1)) {
-		zoneid   = atoi(sep->arg[1]);
-		destzone = content_db.GetPEQZone(zoneid, 0);
-		if (destzone == 0) {
-			c->Message(Chat::Red, "You cannot use this command to enter that zone!");
-			return;
-		}
-		if (zoneid == zone->GetZoneID()) {
-			c->Message(Chat::Red, "You cannot use this command on the zone you are in!");
-			return;
-		}
-	}
-	else if (sep->arg[1][0] == 0 || sep->IsNumber(2) || sep->IsNumber(3) || sep->IsNumber(4) || sep->IsNumber(5)) {
-		c->Message(Chat::White, "Usage: #peqzone [zonename]");
-		c->Message(Chat::White, "Optional Usage: #peqzone [zoneid]");
+	auto zone_id = (
+		sep->IsNumber(1) ?
+		static_cast<uint16>(std::stoul(sep->arg[1])) :
+		static_cast<uint16>(ZoneID(sep->arg[1]))
+	);
+	auto zone_short_name = ZoneName(zone_id);
+	auto zone_long_name = ZoneLongName(zone_id);
+	if (
+		!zone_id ||
+		!zone_short_name
+	) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"No zones were found matching '{}'.",
+				sep->arg[1]
+			).c_str()
+		);
 		return;
 	}
-	else {
-		zoneid   = ZoneID(sep->arg[1]);
-		destzone = content_db.GetPEQZone(zoneid, 0);
-		if (zoneid == 0) {
-			c->Message(Chat::White, "Unable to locate zone '%s'", sep->arg[1]);
-			return;
-		}
-		if (destzone == 0) {
-			c->Message(Chat::Red, "You cannot use this command to enter that zone!");
-			return;
-		}
-		if (zoneid == zone->GetZoneID()) {
-			c->Message(Chat::Red, "You cannot use this command on the zone you are in!");
-			return;
-		}
+
+	bool allows_peqzone = (
+		content_db.GetPEQZone(zone_id, 0) ?
+		true :
+		false
+	);
+	if (!allows_peqzone) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You cannot use this command to enter {} ({}).",
+				zone_long_name,
+				zone_short_name
+			).c_str()
+		);
+		return;
 	}
 
-	if (RuleB (Zone, UsePEQZoneDebuffs)) {
+	if (zone_id == zone->GetZoneID()) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You are already in {} ({}).",
+				zone->GetLongName(),
+				zone->GetShortName()
+			).c_str()
+		);
+		return;
+	}
+
+	if (RuleB(Zone, UsePEQZoneDebuffs)) {
 		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff1), c);
 		c->SpellOnTarget(RuleI(Zone, PEQZoneDebuff2), c);
 	}
 
-	//zone to safe coords
-	c->GetPTimers().Start(pTimerPeqzoneReuse, RuleI(Zone, PEQZoneReuseTime));
-	c->MovePC(zoneid, 0.0f, 0.0f, 0.0f, 0.0f, 0, ZoneToSafeCoords);
-}
+	if (reuse_timer) {
+		c->GetPTimers().Start(pTimerPeqzoneReuse, reuse_timer);
+	}
 
+	c->MoveZone(zone_short_name);
+}
