@@ -3,7 +3,7 @@
 void command_zsave(Client *c, const Seperator *sep)
 {
 	c->Message(
-		Chat::Red,
+		Chat::White,
 		fmt::format(
 			"Zone header {}.",
 			(
