@@ -9549,8 +9549,15 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 			if(spells[spell_id].timer_id > 0 && spells[spell_id].timer_id < MAX_DISCIPLINE_TIMERS)
 				SetDisciplineRecastTimer(spells[spell_id].timer_id, spell.recast_time);
 		} else {
-			uint32 remain = (GetDisciplineRemainingTime(this, spells[spell_id].timer_id) / 1000);
-			GetOwner()->Message(Chat::White, "%s can use this discipline in %d minutes %d seconds.", GetCleanName(), (remain / 60), (remain % 60));
+			uint32 remaining_time = (GetDisciplineRemainingTime(this, spells[spell_id].timer_id) / 1000);			
+			GetOwner()->Message(
+				Chat::White,
+				fmt::format(
+					"{} can use this Discipline in {}.",
+					GetCleanName(),
+					ConvertSecondsToTime(remaining_time)
+				).c_str()
+			);
 			return false;
 		}
 	}
