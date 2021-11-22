@@ -329,11 +329,11 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 			if (sender->GetSkill(EQ::skills::SkillPickLock)) {
 				Timer* pick_lock_timer = sender->GetPickLockTimer();
 				if (lock_pick_item->GetItem()->ItemType == EQ::item::ItemTypeLockPick) {
-				if (!pick_lock_timer->Check()) {
-					// Stop full scale mad spamming
-					safe_delete(outapp);
-					return;
-					}
+					if (!pick_lock_timer->Check()) {
+						// Stop full scale mad spamming
+						safe_delete(outapp);
+						return;
+						}
 
 					float player_pick_lock_skill = sender->GetSkill(EQ::skills::SkillPickLock);
 
