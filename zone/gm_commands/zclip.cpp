@@ -21,6 +21,7 @@ void command_zclip(Client *c, const Seperator *sep)
 		return;
 	} else if (minimum_clip > maximum_clip) {
 		c->Message(Chat::White, "Minimum Clip must be less than or equal to Maximum Clip!");
+		return;
 	} else {
 		zone->newzone_data.minclip = minimum_clip;
 		zone->newzone_data.maxclip = maximum_clip;
@@ -39,7 +40,7 @@ void command_zclip(Client *c, const Seperator *sep)
 
 		if (permanent) {
 			auto query = fmt::format(
-				"UPDATE zone SET minclip = {}, maxclip = {} WHERE zoneidnumber = {} AND version = {}",
+				"UPDATE zone SET minclip = {:.2f}, maxclip = {:.2f} WHERE zoneidnumber = {} AND version = {}",
 				minimum_clip,
 				maximum_clip,
 				zone->GetZoneID(),
@@ -49,11 +50,7 @@ void command_zclip(Client *c, const Seperator *sep)
 
 			if (minimum_fog_clip) {
 				query = fmt::format(
-					"UPDATE zone SET fog_minclip = {}, fog_minclip1 = {}, fog_minclip2 = {}, fog_minclip3 = {}, fog_minclip4 = {} WHERE zoneidnumber = {} AND version = {}",
-					minimum_fog_clip,
-					minimum_fog_clip,
-					minimum_fog_clip,
-					minimum_fog_clip,
+					"UPDATE zone SET fog_minclip = {:.2f} WHERE zoneidnumber = {} AND version = {}",
 					minimum_fog_clip,
 					zone->GetZoneID(),
 					zone->GetInstanceVersion()
@@ -63,11 +60,7 @@ void command_zclip(Client *c, const Seperator *sep)
 
 			if (maximum_fog_clip) {
 				query = fmt::format(
-					"UPDATE zone SET fog_maxclip = {}, fog_maxclip1 = {}, fog_maxclip2 = {}, fog_maxclip3 = {}, fog_maxclip4 = {} WHERE zoneidnumber = {} AND version = {}",
-					maximum_fog_clip,
-					maximum_fog_clip,
-					maximum_fog_clip,
-					maximum_fog_clip,
+					"UPDATE zone SET fog_maxclip = {:.2f} WHERE zoneidnumber = {} AND version = {}",
 					maximum_fog_clip,
 					zone->GetZoneID(),
 					zone->GetInstanceVersion()
@@ -94,7 +87,7 @@ void command_zclip(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Clipping Changed | Minimum Clip: {} Maximum Clip: {}",
+				"Clipping Changed | Minimum Clip: {:.2f} Maximum Clip: {:.2f}",
 				minimum_clip,
 				maximum_clip
 			).c_str()
@@ -104,7 +97,7 @@ void command_zclip(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"Clipping Changed | Fog Minimum Clip: {} Fog Maximum Clip: {}",
+					"Clipping Changed | Fog Minimum Clip: {:.2f} Fog Maximum Clip: {:.2f}",
 					minimum_fog_clip,
 					maximum_fog_clip
 				).c_str()
