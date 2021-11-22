@@ -333,7 +333,7 @@ void Doors::HandleClick(Client* sender, uint8 trigger) {
 						// Stop full scale mad spamming
 						safe_delete(outapp);
 						return;
-						}
+					}
 
 					float player_pick_lock_skill = sender->GetSkill(EQ::skills::SkillPickLock);
 
