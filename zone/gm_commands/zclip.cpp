@@ -2,38 +2,114 @@
 
 void command_zclip(Client *c, const Seperator *sep)
 {
-	// modifys and resends zhdr packet
-	if (sep->arg[2][0] == 0) {
-		c->Message(Chat::White, "Usage: #zclip <min clip> <max clip>");
+	int arguments = sep->argnum;
+	if (
+		!arguments ||
+		!sep->IsNumber(1) ||
+		!sep->IsNumber(2)
+	) {		
+		c->Message(Chat::White, "Usage: #zclip [Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)]");
 	}
-	else if (atoi(sep->arg[1]) <= 0) {
-		c->Message(Chat::White, "ERROR: Min clip can not be zero or less!");
-	}
-	else if (atoi(sep->arg[2]) <= 0) {
-		c->Message(Chat::White, "ERROR: Max clip can not be zero or less!");
-	}
-	else if (atoi(sep->arg[1]) > atoi(sep->arg[2])) {
-		c->Message(Chat::White, "ERROR: Min clip is greater than max clip!");
-	}
-	else {
-		zone->newzone_data.minclip = atof(sep->arg[1]);
-		zone->newzone_data.maxclip = atof(sep->arg[2]);
-		if (sep->arg[3][0] != 0) {
-			zone->newzone_data.fog_minclip[0] = atof(sep->arg[3]);
+
+	auto minimum_clip = std::stof(sep->arg[1]);
+	auto maximum_clip = std::stof(sep->arg[2]);
+	auto minimum_fog_clip = sep->arg[3] ? std::stof(sep->arg[3]) : 0;
+	auto maximum_fog_clip = sep->arg[4] ? std::stof(sep->arg[4]) : 0;
+	auto permanent = sep->arg[5] ? atobool(sep->arg[5]) : false;
+	if (minimum_clip <= 0 || maximum_clip <= 0) {
+		c->Message(Chat::White, "Minimum Clip and Maximum Clip must be greater than 0.");
+		return;
+	} else if (minimum_clip > maximum_clip) {
+		c->Message(Chat::White, "Minimum Clip must be less than or equal to Maximum Clip!");
+	} else {
+		zone->newzone_data.minclip = minimum_clip;
+		zone->newzone_data.maxclip = maximum_clip;
+
+		if (minimum_fog_clip) {
+			for (int fog_index = 0; fog_index < 4; fog_index++) {
+				zone->newzone_data.fog_minclip[fog_index] = minimum_fog_clip;
+			}
 		}
-		if (sep->arg[4][0] != 0) {
-			zone->newzone_data.fog_minclip[1] = atof(sep->arg[4]);
+
+		if (maximum_fog_clip) {
+			for (int fog_index = 0; fog_index < 4; fog_index++) {
+				zone->newzone_data.fog_maxclip[fog_index] = maximum_fog_clip;
+			}
 		}
-		if (sep->arg[5][0] != 0) {
-			zone->newzone_data.fog_maxclip[0] = atof(sep->arg[5]);
+
+		if (permanent) {
+			auto query = fmt::format(
+				"UPDATE zone SET minclip = {}, maxclip = {} WHERE zoneidnumber = {} AND version = {}",
+				minimum_clip,
+				maximum_clip,
+				zone->GetZoneID(),
+				zone->GetInstanceVersion()
+			);
+			database.QueryDatabase(query);
+
+			if (minimum_fog_clip) {
+				query = fmt::format(
+					"UPDATE zone SET fog_minclip = {}, fog_minclip1 = {}, fog_minclip2 = {}, fog_minclip3 = {}, fog_minclip4 = {} WHERE zoneidnumber = {} AND version = {}",
+					minimum_fog_clip,
+					minimum_fog_clip,
+					minimum_fog_clip,
+					minimum_fog_clip,
+					minimum_fog_clip,
+					zone->GetZoneID(),
+					zone->GetInstanceVersion()
+				);
+				database.QueryDatabase(query);
+			}
+
+			if (maximum_fog_clip) {
+				query = fmt::format(
+					"UPDATE zone SET fog_maxclip = {}, fog_maxclip1 = {}, fog_maxclip2 = {}, fog_maxclip3 = {}, fog_maxclip4 = {} WHERE zoneidnumber = {} AND version = {}",
+					maximum_fog_clip,
+					maximum_fog_clip,
+					maximum_fog_clip,
+					maximum_fog_clip,
+					maximum_fog_clip,
+					zone->GetZoneID(),
+					zone->GetInstanceVersion()
+				);
+				database.QueryDatabase(query);
+			}
 		}
-		if (sep->arg[6][0] != 0) {
-			zone->newzone_data.fog_maxclip[1] = atof(sep->arg[6]);
-		}
-		auto outapp                = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+
+		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
 		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
 		entity_list.QueueClients(c, outapp);
 		safe_delete(outapp);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Clipping Changed | Zone: {} ({}) Permanent: {}",
+				zone->GetLongName(),
+				zone->GetZoneID(),
+				permanent ? "Yes" : "No"
+			).c_str()
+		);
+
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Clipping Changed | Minimum Clip: {} Maximum Clip: {}",
+				minimum_clip,
+				maximum_clip
+			).c_str()
+		);
+
+		if (minimum_fog_clip || maximum_fog_clip) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Clipping Changed | Fog Minimum Clip: {} Fog Maximum Clip: {}",
+					minimum_fog_clip,
+					maximum_fog_clip
+				).c_str()
+			);
+		}
 	}
 }
 
