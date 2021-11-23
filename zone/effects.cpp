@@ -774,12 +774,15 @@ bool Client::UseDiscipline(uint32 spell_id, uint32 target) {
 	//Check the disc timer
 	pTimerType DiscTimer = pTimerDisciplineReuseStart + spell.timer_id;
 	if(!p_timers.Expired(&database, DiscTimer, false)) { // lets not set the reuse timer in case CastSpell fails (or we would have to turn off the timer, but CastSpell will set it as well)
-		/*char val1[20]={0};*/	//unused
-		/*char val2[20]={0};*/	//unused
-		uint32 remain = p_timers.GetRemainingTime(DiscTimer);
-		//MessageString(Chat::White, DISCIPLINE_CANUSEIN, ConvertArray((remain)/60,val1), ConvertArray(remain%60,val2));
-		Message(0, "You can use this discipline in %d minutes %d seconds.", ((remain)/60), (remain%60));
-		return(false);
+		uint32 remaining_time = p_timers.GetRemainingTime(DiscTimer);
+		Message(
+			Chat::White,
+			fmt::format(
+				"You can use this discipline in {}.",
+				ConvertSecondsToTime(remaining_time)
+			).c_str()
+		);
+		return false;
 	}
 
 	if(spell.recast_time > 0)
