@@ -403,9 +403,9 @@ int command_init(void)
 		command_add("zopp",  "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", AccountStatus::GMImpossible, command_zopp) ||
 		command_add("zsafecoords", "[x] [y] [z] - Set safe coords", AccountStatus::QuestTroupe, command_zsafecoords) ||
 		command_add("zsave", " - Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
-		command_add("zsky", "[skytype] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
+		command_add("zsky", "[Sky Type] [Permanent (0 = False, 1 = True)] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", AccountStatus::QuestTroupe, command_zstats) ||
-		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", AccountStatus::QuestTroupe, command_zunderworld)
+		command_add("zunderworld", "[Z] [Permanent (0 = False, 1 = True)] - Change zone underworld Z", AccountStatus::QuestTroupe, command_zunderworld)
 	) {
 		command_deinit();
 		return -1;
