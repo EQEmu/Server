@@ -559,7 +559,6 @@ SET(gm_commands
     gm_commands/zonebootup.cpp
     gm_commands/zonelock.cpp
     gm_commands/zoneshutdown.cpp
-    gm_commands/zonespawn.cpp
     gm_commands/zonestatus.cpp
     gm_commands/zopp.cpp
     gm_commands/zsafecoords.cpp
