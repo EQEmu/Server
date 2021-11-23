@@ -1262,7 +1262,7 @@ void Zone::ReloadStaticData() {
 	LogInfo("Zone Static Data Reloaded");
 }
 
-bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
+bool Zone::LoadZoneCFG(const char* filename, uint16 instance_version)
 {
 
 	memset(&newzone_data, 0, sizeof(NewZone_Struct));
@@ -1270,7 +1270,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 
 	if (!content_db.GetZoneCFG(
 		ZoneID(filename),
-		instance_id,
+		instance_version,
 		&newzone_data,
 		can_bind,
 		can_combat,
@@ -1285,7 +1285,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		&map_name
 	)) {
 		// If loading a non-zero instance failed, try loading the default
-		if (instance_id != 0) {
+		if (instance_version != 0) {
 			safe_delete_array(map_name);
 			if (!content_db.GetZoneCFG(
 				ZoneID(filename),
@@ -1319,7 +1319,7 @@ bool Zone::LoadZoneCFG(const char* filename, uint16 instance_id)
 		GetShortName(),
 		GetLongName(),
 		GetInstanceVersion(),
-		instance_id
+		instance_version
 	);
 
 	return true;
