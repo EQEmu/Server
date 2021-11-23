@@ -2,25 +2,60 @@
 
 void command_zheader(Client *c, const Seperator *sep)
 {
-	// sends zhdr packet
-	if (sep->arg[1][0] == 0) {
-		c->Message(Chat::White, "Usage: #zheader <zone name>");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #zheader [Zone ID|Zone Short Name] [Version]");
+		return;
 	}
-	else if (ZoneID(sep->argplus[1]) == 0) {
-		c->Message(Chat::White, "Invalid Zone Name: %s", sep->argplus[1]);
-	}
-	else {
 
-		if (zone->LoadZoneCFG(sep->argplus[1], 0)) {
-			c->Message(Chat::White, "Successfully loaded zone header for %s from database.", sep->argplus[1]);
-		}
-		else {
-			c->Message(Chat::White, "Failed to load zone header %s from database", sep->argplus[1]);
-		}
-		auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
-		memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
-		entity_list.QueueClients(c, outapp);
-		safe_delete(outapp);
+	auto zone_id = (
+		sep->IsNumber(1) ?
+		std::stoul(sep->arg[1]) :
+		ZoneID(sep->arg[1])
+	);
+	if (!zone_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Zone ID {} could not be found.",
+				zone_id
+			).c_str()
+		);
+		return;
 	}
+
+	auto zone_short_name = ZoneName(zone_id);
+	auto zone_long_name = ZoneLongName(zone_id);
+	auto version = (
+		sep->IsNumber(2) ?
+		std::stoul(sep->arg[2]) :
+		0
+	);
+	
+	auto outapp = new EQApplicationPacket(OP_NewZone, sizeof(NewZone_Struct));
+	memcpy(outapp->pBuffer, &zone->newzone_data, outapp->size);
+	entity_list.QueueClients(c, outapp);
+	safe_delete(outapp);
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Zone Header Load {} | Zone: {} ({}){}",
+			(
+				zone->LoadZoneCFG(zone_short_name, version) ?
+				"Suceeded" :
+				"Failed"
+			),
+			zone_long_name,
+			zone_short_name,
+			(
+				version ?
+				fmt::format(
+					" Version: {}",
+					version
+				) :
+				""
+			)
+		).c_str()
+	);
 }
-

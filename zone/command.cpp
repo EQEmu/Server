@@ -391,22 +391,22 @@ int command_init(void)
 		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", AccountStatus::GMImpossible, command_worldwide) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.", AccountStatus::GMImpossible, command_xtargets) ||
 		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", AccountStatus::QuestTroupe, command_zclip) ||
-		command_add("zcolor", "[Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
 		command_add("zheader", "[zonename] - Load zheader for zonename from the database", AccountStatus::QuestTroupe, command_zheader) ||
+		command_add("zclip", "[Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)] - Change zone clipping", AccountStatus::QuestTroupe, command_zclip) ||
+		command_add("zcolor", "[Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
+		command_add("zheader", "[Zone ID|Zone Short Name] [Version] - Load a zone header from the database", AccountStatus::QuestTroupe, command_zheader) ||
 		command_add("zone", "[zonename] [x] [y] [z] - Go to specified zone (coords optional)", AccountStatus::Guide, command_zone) ||
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
 		command_add("zoneinstance", "[instanceid] [x] [y] [z] - Go to specified instance zone (coords optional)", AccountStatus::Guide, command_zone_instance) ||
 		command_add("zonelock", "[List|Lock|Unlock] [Zone ID|Zone Short Name] - Set or get lock status of a Zone by ID or Short Name", AccountStatus::GMAdmin, command_zonelock) ||
 		command_add("zoneshutdown", "[shortname] - Shut down a zone server", AccountStatus::GMLeadAdmin, command_zoneshutdown) ||
-		command_add("zonespawn", "- Not implemented", AccountStatus::GMImpossible, command_zonespawn) ||
 		command_add("zonestatus", "- Show connected zoneservers, synonymous with /servers", AccountStatus::GMLeadAdmin, command_zonestatus) ||
 		command_add("zopp",  "Troubleshooting command - Sends a fake item packet to you. No server reference is created.", AccountStatus::GMImpossible, command_zopp) ||
 		command_add("zsafecoords", "[x] [y] [z] - Set safe coords", AccountStatus::QuestTroupe, command_zsafecoords) ||
 		command_add("zsave", " - Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
-		command_add("zsky", "[skytype] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
+		command_add("zsky", "[Sky Type] [Permanent (0 = False, 1 = True)] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", AccountStatus::QuestTroupe, command_zstats) ||
-		command_add("zunderworld", "[zcoord] - Sets the underworld using zcoord", AccountStatus::QuestTroupe, command_zunderworld) ||
-		command_add("zuwcoords", "[z coord] - Set underworld coord", AccountStatus::QuestTroupe, command_zuwcoords)
+		command_add("zunderworld", "[Z] [Permanent (0 = False, 1 = True)] - Change zone underworld Z", AccountStatus::QuestTroupe, command_zunderworld)
 	) {
 		command_deinit();
 		return -1;

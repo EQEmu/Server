@@ -559,7 +559,6 @@ SET(gm_commands
     gm_commands/zonebootup.cpp
     gm_commands/zonelock.cpp
     gm_commands/zoneshutdown.cpp
-    gm_commands/zonespawn.cpp
     gm_commands/zonestatus.cpp
     gm_commands/zopp.cpp
     gm_commands/zsafecoords.cpp
@@ -567,7 +566,6 @@ SET(gm_commands
     gm_commands/zsky.cpp
     gm_commands/zstats.cpp
     gm_commands/zunderworld.cpp
-    gm_commands/zuwcoords.cpp
 )
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${gm_commands})
