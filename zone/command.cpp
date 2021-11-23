@@ -152,7 +152,7 @@ int command_init(void)
 		command_add("depopzone", "- Depop the zone", AccountStatus::GMAdmin, command_depopzone) ||
 		command_add("devtools", "- Manages devtools", AccountStatus::GMMgmt, command_devtools) ||
 		command_add("details", "- Change the details of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_details) ||
-		command_add("disablerecipe",  "[recipe_id] - Disables a recipe using the recipe id.", AccountStatus::QuestTroupe, command_disablerecipe) ||
+		command_add("disablerecipe",  "[Recipe ID] - Disables a Recipe", AccountStatus::QuestTroupe, command_disablerecipe) ||
 		command_add("disarmtrap",  "Analog for ldon disarm trap for the newer clients since we still don't have it working.", AccountStatus::QuestTroupe, command_disarmtrap) ||
 		command_add("distance", "- Reports the distance between you and your target.", AccountStatus::QuestTroupe, command_distance) ||
 		command_add("door", "Door editing command", AccountStatus::QuestTroupe, command_door) ||
