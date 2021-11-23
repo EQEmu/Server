@@ -390,8 +390,10 @@ int command_init(void)
 		command_add("wpinfo", "- Show waypoint info about your NPC target", AccountStatus::GMAreas, command_wpinfo) ||
 		command_add("worldwide", "Performs world-wide GM functions such as cast (can be extended for other commands). Use caution", AccountStatus::GMImpossible, command_worldwide) ||
 		command_add("xtargets",  "Show your targets Extended Targets and optionally set how many xtargets they can have.", AccountStatus::GMImpossible, command_xtargets) ||
+		command_add("zclip", "[min] [max] - modifies and resends zhdr packet", AccountStatus::QuestTroupe, command_zclip) ||
+		command_add("zheader", "[zonename] - Load zheader for zonename from the database", AccountStatus::QuestTroupe, command_zheader) ||
 		command_add("zclip", "[Minimum Clip] [Maximum Clip] [Fog Minimum Clip] [Fog Maximum Clip] [Permanent (0 = False, 1 = True)] - Change zone clipping", AccountStatus::QuestTroupe, command_zclip) ||
-		command_add("zcolor", "[red] [green] [blue] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
+		command_add("zcolor", "[Red] [Green] [Blue] [Permanent (0 = False, 1 = True)] - Change sky color", AccountStatus::QuestTroupe, command_zcolor) ||
 		command_add("zheader", "[Zone ID|Zone Short Name] [Version] - Load a zone header from the database", AccountStatus::QuestTroupe, command_zheader) ||
 		command_add("zone", "[zonename] [x] [y] [z] - Go to specified zone (coords optional)", AccountStatus::Guide, command_zone) ||
 		command_add("zonebootup", "[ZoneServerID] [shortname] - Make a zone server boot a specific zone", AccountStatus::GMLeadAdmin, command_zonebootup) ||
