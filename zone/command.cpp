@@ -404,8 +404,7 @@ int command_init(void)
 		command_add("zsave", " - Saves zheader to the database", AccountStatus::QuestTroupe, command_zsave) ||
 		command_add("zsky", "[Sky Type] [Permanent (0 = False, 1 = True)] - Change zone sky type", AccountStatus::QuestTroupe, command_zsky) ||
 		command_add("zstats", "- Show info about zone header", AccountStatus::QuestTroupe, command_zstats) ||
-		command_add("zunderworld", "[Z] [Permanent (0 = False, 1 = True)] - Change zone underworld Z", AccountStatus::QuestTroupe, command_zunderworld) ||
-		command_add("zuwcoords", "[z coord] - Set underworld coord", AccountStatus::QuestTroupe, command_zuwcoords)
+		command_add("zunderworld", "[Z] [Permanent (0 = False, 1 = True)] - Change zone underworld Z", AccountStatus::QuestTroupe, command_zunderworld)
 	) {
 		command_deinit();
 		return -1;

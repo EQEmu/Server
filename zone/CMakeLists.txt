@@ -566,7 +566,6 @@ SET(gm_commands
     gm_commands/zsky.cpp
     gm_commands/zstats.cpp
     gm_commands/zunderworld.cpp
-    gm_commands/zuwcoords.cpp
 )
 
 ADD_EXECUTABLE(zone ${zone_sources} ${zone_headers} ${gm_commands})
