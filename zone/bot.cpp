@@ -9553,7 +9553,7 @@ bool Bot::UseDiscipline(uint32 spell_id, uint32 target) {
 			GetOwner()->Message(
 				Chat::White,
 				fmt::format(
-					"{} can use this Discipline in {}.",
+					"{} can use this discipline in {}.",
 					GetCleanName(),
 					ConvertSecondsToTime(remaining_time)
 				).c_str()
