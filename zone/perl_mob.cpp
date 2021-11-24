@@ -4877,6 +4877,7 @@ XS(XS_Mob_SpellEffect) {
 		Client *client = nullptr;
 		uint32 caster_id = 0;
 		uint32 target_id = 0;
+		bool nullclient = false;
 		VALIDATE_THIS_IS_MOB;
 		if (items > 2) { duration = (uint32) SvUV(ST(2)); }
 		if (items > 3) { finish_delay = (uint32) SvUV(ST(3)); }
@@ -4885,18 +4886,26 @@ XS(XS_Mob_SpellEffect) {
 		if (items > 6) { perm_effect = (bool) SvTRUE(ST(6)); }
 		if (items > 7) {
 			if (sv_derived_from(ST(7), "Client")) {
-				IV tmp = SvIV((SV *) SvRV(ST(7)));
+				IV tmp = SvIV((SV *)SvRV(ST(7)));
 				client = INT2PTR(Client *, tmp);
-			} else
-				Perl_croak(aTHX_ "client is not of type Client");
-			if (client == nullptr)
-				Perl_croak(aTHX_ "client is nullptr, avoiding crash.");
+			}
+			else {
+				nullclient = true;
+			}
+			if (client == nullptr) {
+				nullclient = true;
+			}
 		}
 		if (items > 8) { caster_id = (uint32)SvUV(ST(8)); }
 		if (items > 9) { target_id = (uint32)SvUV(ST(9)); }
+		
+		if (nullclient) {
+			THIS->SendSpellEffect(effect, duration, finish_delay, zone_wide, unk20, perm_effect, 0, caster_id, target_id);
+		}
+		else {
+			THIS->SendSpellEffect(effect, duration, finish_delay, zone_wide, unk20, perm_effect, client, caster_id, target_id);
+		}
 
-
-		THIS->SendSpellEffect(effect, duration, finish_delay, zone_wide, unk20, perm_effect, client, caster_id, target_id);
 	}
 	XSRETURN_EMPTY;
 }
