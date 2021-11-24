@@ -3644,13 +3644,11 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
+	//KAYENFIX
 	// select target
-	if	// Bind Sight line of spells
-	(
-		spell_id == 500 ||	// bind sight
-		spell_id == 407		// cast sight
-	)
+	if (IsEffectInSpell(spell_id, SE_BindSight))
 	{
+		Shout("DEBUG 1: Bind Sight Cast");
 		action->target = GetID();
 	}
 	else

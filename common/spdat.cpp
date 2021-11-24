@@ -242,7 +242,7 @@ bool IsBeneficialSpell(uint16 spell_id)
 				    (sai == SAI_Calm || sai == SAI_Dispell_Sight || sai == SAI_Memory_Blur ||
 				     sai == SAI_Calm_Song))
 					return false;
-			} else {
+			} else {//KAYENFIX
 				// If the resisttype is not magic and spell is Bind Sight or Cast Sight
 				// It's not beneficial
 				if ((sai == SAI_Calm && IsEffectInSpell(spell_id, SE_Harmony)) || (sai == SAI_Calm_Song && IsEffectInSpell(spell_id, SE_BindSight)) || (sai == SAI_Dispell_Sight && spells[spell_id].skill == 18 && !IsEffectInSpell(spell_id, SE_VoiceGraft)))
