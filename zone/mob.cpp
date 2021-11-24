@@ -2853,7 +2853,7 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 		6 = right foot
 		9 = Face
 
-		value#ground = 1, will place the effect on ground, this is permanent
+		value#ground = 1, will place the effect on ground, of corresponding slot is set to 0 effect is permanenant, if > 0 will fade if mob death/despawn.
 	*/
 
 	//higher values can crash client
