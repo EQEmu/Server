@@ -212,6 +212,16 @@ int8 Mob::ElixirCastSpellCheck(uint16 spellID, Mob** outMob)
 			isHeal = true;
 		}
 
+
+		if (attr == SE_CallPet) { //103 Summon Shaman pet
+			isPetSummon = true;
+		}
+
+		if (attr == SE_SummonBSTPet) { // 106 Bst Pet
+			isPetSummon = true;
+		}
+
+
 		if (attr == SE_Familiar) { //108 Summon Familiar
 			isPetSummon = true;
 		}
