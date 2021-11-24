@@ -165,7 +165,7 @@ int command_init(void)
 		command_add("emotesearch", "Searches NPC Emotes", AccountStatus::QuestTroupe, command_emotesearch) ||
 		command_add("emoteview", "Lists all NPC Emotes", AccountStatus::QuestTroupe, command_emoteview) ||
 		command_add("emptyinventory", "- Clears you or your target's entire inventory (Equipment, General, Bank, and Shared Bank)", AccountStatus::GMImpossible, command_emptyinventory) ||
-		command_add("enablerecipe",  "[recipe_id] - Enables a recipe using the recipe id.", AccountStatus::QuestTroupe, command_enablerecipe) ||
+		command_add("enablerecipe",  "[Recipe ID] - Enables a Recipe", AccountStatus::QuestTroupe, command_enablerecipe) ||
 		command_add("endurance", "Restores you or your target's endurance.", AccountStatus::Guide, command_endurance) ||
 		command_add("equipitem", "[slotid(0-21)] - Equip the item on your cursor into the specified slot", AccountStatus::Guide, command_equipitem) ||
 		command_add("face", "- Change the face of your target", AccountStatus::QuestTroupe, command_face) ||
