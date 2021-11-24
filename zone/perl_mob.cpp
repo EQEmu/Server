@@ -4782,16 +4782,16 @@ XS(XS_Mob_SendAppearanceEffectActor) {
 		Client *client = nullptr;
 		VALIDATE_THIS_IS_MOB;
 		if (items > 3) { parm2 = (int32)SvIV(ST(3)); }
-		if (items > 4) { value2slot = (uint32)SvIV(ST(7)); }
-		if (items > 5) { parm3 = (int32)SvIV(ST(3)); }
-		if (items > 6) { value3slot = (uint32)SvIV(ST(7)); }
-		if (items > 7) { parm4 = (int32)SvIV(ST(4)); }
-		if (items > 8) { value4slot = (uint32)SvIV(ST(7)); }
-		if (items > 9) { parm5 = (int32)SvIV(ST(5)); }
-		if (items > 10) { value5slot = (uint32)SvIV(ST(7)); }
+		if (items > 4) { value2slot = (uint32)SvIV(ST(4)); }
+		if (items > 5) { parm3 = (int32)SvIV(ST(5)); }
+		if (items > 6) { value3slot = (uint32)SvIV(ST(6)); }
+		if (items > 7) { parm4 = (int32)SvIV(ST(7)); }
+		if (items > 8) { value4slot = (uint32)SvIV(ST(8)); }
+		if (items > 9) { parm5 = (int32)SvIV(ST(9)); }
+		if (items > 10) { value5slot = (uint32)SvIV(ST(10)); }
 		if (items > 11) {
-			if (sv_derived_from(ST(6), "Client")) {
-				IV tmp = SvIV((SV *)SvRV(ST(6)));
+			if (sv_derived_from(ST(11), "Client")) {
+				IV tmp = SvIV((SV *)SvRV(ST(11)));
 				client = INT2PTR(Client *, tmp);
 			}
 			else
@@ -4826,16 +4826,16 @@ XS(XS_Mob_SendAppearanceEffectGround) {
 		Client *client = nullptr;
 		VALIDATE_THIS_IS_MOB;
 		if (items > 3) { parm2 = (int32)SvIV(ST(3)); }
-		if (items > 4) { value2slot = (uint32)SvIV(ST(7)); }
-		if (items > 5) { parm3 = (int32)SvIV(ST(3)); }
-		if (items > 6) { value3slot = (uint32)SvIV(ST(7)); }
-		if (items > 7) { parm4 = (int32)SvIV(ST(4)); }
-		if (items > 8) { value4slot = (uint32)SvIV(ST(7)); }
-		if (items > 9) { parm5 = (int32)SvIV(ST(5)); }
-		if (items > 10) { value5slot = (uint32)SvIV(ST(7)); }
+		if (items > 4) { value2slot = (uint32)SvIV(ST(4)); }
+		if (items > 5) { parm3 = (int32)SvIV(ST(5)); }
+		if (items > 6) { value3slot = (uint32)SvIV(ST(6)); }
+		if (items > 7) { parm4 = (int32)SvIV(ST(7)); }
+		if (items > 8) { value4slot = (uint32)SvIV(ST(8)); }
+		if (items > 9) { parm5 = (int32)SvIV(ST(9)); }
+		if (items > 10) { value5slot = (uint32)SvIV(ST(10)); }
 		if (items > 11) {
 			if (sv_derived_from(ST(6), "Client")) {
-				IV tmp = SvIV((SV *)SvRV(ST(6)));
+				IV tmp = SvIV((SV *)SvRV(ST(11)));
 				client = INT2PTR(Client *, tmp);
 			}
 			else
