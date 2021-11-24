@@ -2838,8 +2838,44 @@ void Mob::SendStunAppearance()
 	safe_delete(outapp);
 }
 
-void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target){
+void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 parm4, uint32 parm5, Client *specific_target, 
+	uint32 value1slot, uint32 value1ground, uint32 value2slot, uint32 value2ground, uint32 value3slot, uint32 value3ground, 
+	uint32 value4slot, uint32 value4ground, uint32 value5slot, uint32 value5ground){
 	auto outapp = new EQApplicationPacket(OP_LevelAppearance, sizeof(LevelAppearance_Struct));
+	
+	/* Location of the effect from value#slot, this is removed upon mob death/despawn.
+		0 = pelvis1
+		1 = pelvis2
+		2 = helm
+		3 = Offhand
+		4 = Mainhand
+		5 = left foot
+		6 = right foot
+		9 = Face
+
+		value#ground = 1, will place the effect on ground, this is permanent
+	*/
+
+	//higher values can crash client
+	if (value1slot > 9) {
+		value1slot = 1;
+	}
+	else if (value2slot > 9) {
+		value1slot = 1;
+	}
+	else if (value2slot > 9) {
+		value1slot = 1;
+	}
+	else if (value3slot > 9) {
+		value1slot = 1;
+	}
+	else if (value4slot > 9) {
+		value1slot = 1;
+	}
+	else if (value5slot > 9) {
+		value1slot = 1;
+	}
+
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
 	la->spawn_id = GetID();
 	la->parm1 = parm1;
@@ -2849,16 +2885,16 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	la->parm5 = parm5;
 	// Note that setting the b values to 0 will disable the related effect from the corresponding parameter.
 	// Setting the a value appears to have no affect at all.s
-	la->value1a = 1;
-	la->value1b = 1;
-	la->value2a = 1;
-	la->value2b = 1;
-	la->value3a = 1;
-	la->value3b = 1;
-	la->value4a = 1;
-	la->value4b = 1;
-	la->value5a = 1;
-	la->value5b = 1;
+	la->value1a = value1slot;
+	la->value1b = value1ground;
+	la->value2a = value2slot;
+	la->value2b = value2ground;
+	la->value3a = value3slot;
+	la->value3b = value3ground;
+	la->value4a = value4slot;
+	la->value4b = value4ground;
+	la->value5a = value5slot;
+	la->value5b = value5ground;
 	if(specific_target == nullptr) {
 		entity_list.QueueClients(this,outapp);
 	}
