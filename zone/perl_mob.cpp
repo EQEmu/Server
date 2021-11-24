@@ -4885,7 +4885,7 @@ XS(XS_Mob_SpellEffect) {
 		if (items > 5) { unk20 = (uint32) SvUV(ST(5)); }
 		if (items > 6) { perm_effect = (bool) SvTRUE(ST(6)); }
 		if (items > 7) {
-			if (sv_derived_from(ST(3), "Client")) {
+			if (sv_derived_from(ST(7), "Client")) {
 				IV tmp = SvIV((SV *)SvRV(ST(7)));
 				client = INT2PTR(Client *, tmp);
 			}
