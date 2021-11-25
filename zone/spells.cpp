@@ -1462,7 +1462,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 		for (int i = 0; i < GetMaxTotalSlots(); i++) {
 			if (buffs[i].spellid == spell_id) {
 				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
-				continue;
+				break;
 			}
 		}
 	}
