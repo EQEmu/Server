@@ -1458,6 +1458,15 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	if(DeleteChargeFromSlot >= 0)
 		CastToClient()->DeleteItemInInventory(DeleteChargeFromSlot, 1, true);
 
+	if (IsClient() && IsEffectInSpell(spell_id, SE_BindSight)) {
+		for (int i = 0; i < GetMaxTotalSlots(); i++) {
+			if (buffs[i].spellid == spell_id) {
+				CastToClient()->SendBuffNumHitPacket(buffs[i], i);//its hack, it works.
+				continue;
+			}
+		}
+	}
+
 	//
 	// at this point the spell has successfully been cast
 	//
@@ -3644,11 +3653,9 @@ bool Mob::SpellOnTarget(uint16 spell_id, Mob *spelltar, int reflect_effectivenes
 		}
 	}
 
-	//KAYENFIX
 	// select target
 	if (IsEffectInSpell(spell_id, SE_BindSight))
 	{
-		Shout("DEBUG 1: Bind Sight Cast");
 		action->target = GetID();
 	}
 	else
