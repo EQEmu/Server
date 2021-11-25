@@ -1205,11 +1205,6 @@ std::string ConvertMoneyToString(uint32 platinum, uint32 gold, uint32 silver, ui
 			silver,
 			copper
 		);
-	} else if (copper && !silver && !gold && !platinum) { // C
-		money_string = fmt::format(
-			"{} Copper",
-			copper
-		);
 	} else if (!copper && silver && gold && platinum) { // SGP
 		money_string = fmt::format(
 			"{} Platinum, {} Gold, and {} Silver",
@@ -1221,11 +1216,6 @@ std::string ConvertMoneyToString(uint32 platinum, uint32 gold, uint32 silver, ui
 		money_string = fmt::format(
 			"{} Gold and {} Silver",
 			gold,
-			silver
-		);
-	} else if (!copper && silver && !gold && !platinum) { // S
-		money_string = fmt::format(
-			"{} Silver",
 			silver
 		);
 	} else if (copper && !silver && gold && platinum) { // CGP
@@ -1247,10 +1237,25 @@ std::string ConvertMoneyToString(uint32 platinum, uint32 gold, uint32 silver, ui
 			platinum,
 			gold
 		);
+	} else if (!copper && !silver && !gold && platinum) { // P
+		money_string = fmt::format(
+			"{} Platinum",
+			platinum
+		);
 	} else if (!copper && !silver && gold && !platinum) { // G
 		money_string = fmt::format(
 			"{} Gold",
 			gold
+		);
+	} else if (!copper && silver && !gold && !platinum) { // S
+		money_string = fmt::format(
+			"{} Silver",
+			silver
+		);
+	} else if (copper && !silver && !gold && !platinum) { // C
+		money_string = fmt::format(
+			"{} Copper",
+			copper
 		);
 	}
 	return money_string;
