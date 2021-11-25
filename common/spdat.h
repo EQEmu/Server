@@ -775,7 +775,7 @@ typedef enum {
 //#define SE_CorpseBomb					70	// not used
 #define SE_NecPet						71	// implemented
 //#define SE_PreserveCorpse				72	// not used
-#define SE_BindSight					73	// implemented
+#define SE_BindSight					73	// implemented, @Vision, see through the eyes of your target, click off buff to end effect, base: 1, limit: none, max: none
 #define SE_FeignDeath					74	// implemented
 #define SE_VoiceGraft					75	// implemented
 #define SE_Sentinel						76	// *not implemented?(just seems to send a message)
