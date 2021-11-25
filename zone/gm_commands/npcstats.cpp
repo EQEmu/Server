@@ -9,9 +9,7 @@ void command_npcstats(Client *c, const Seperator *sep)
 		target->ShowStats(c);
 
 		// Loot Data
-		if (target->GetLoottableID()) {
-			target->QueryLoot(c);
-		}
+		target->QueryLoot(c);
 	}
 	else {
 		c->Message(Chat::White, "You must target an NPC to use this command.");
