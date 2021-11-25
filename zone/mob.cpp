@@ -2860,20 +2860,20 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	if (value1slot > 9) {
 		value1slot = 1;
 	}
-	else if (value2slot > 9) {
-		value1slot = 1;
+	if (value2slot > 9) {
+		value2slot = 1;
 	}
-	else if (value2slot > 9) {
-		value1slot = 1;
+	if (value2slot > 9) {
+		value2slot = 1;
 	}
-	else if (value3slot > 9) {
-		value1slot = 1;
+	if (value3slot > 9) {
+		value3slot = 1;
 	}
-	else if (value4slot > 9) {
-		value1slot = 1;
+	if (value4slot > 9) {
+		value4slot = 1;
 	}
-	else if (value5slot > 9) {
-		value1slot = 1;
+	if (value5slot > 9) {
+		value5slot = 1;
 	}
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;

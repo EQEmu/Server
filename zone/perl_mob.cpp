@@ -4702,7 +4702,7 @@ XS(XS_Mob_SendAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SendAppearanceEffect) {
 	dXSARGS;
 	if (items < 2 || items > 17)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 param_1, [int32 param_2 = 0], [int32 param_3 = 0], [int32 param_4 = 0], [int32 param_5 = 0], [Client* single_client_to_send_to = null]), [uint32 value1slot = 1], [uint32 value1ground = 1], [uint32 value2slot = 1], [uint32 value2ground = 1], [uint32 value3slot = 1], [uint32 value3ground = 1], [uint32 value4slot = 1], [uint32 value4ground = 1], [uint32 value5slot = 1], [uint32 value5ground = 1]"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffect(THIS, int32 effect1, [int32 effect2 = 0], [int32 effect3 = 0], [int32 effect4 = 0], [int32 effect5 = 0], [Client* single_client_to_send_to = null]), [uint32 slot1 = 1], [uint32 ground1 = 1], [uint32 slot2 = 1], [uint32 ground2 = 1], [uint32 slot3 = 1], [uint32 ground2 = 1], [uint32 slot4 = 1], [uint32 ground4 = 1], [uint32 slot5 = 1], [uint32 ground5 = 1]"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 parm1 = (int32) SvIV(ST(1));
@@ -4766,7 +4766,7 @@ XS(XS_Mob_SendAppearanceEffectActor); /* prototype to pass -Wmissing-prototypes 
 XS(XS_Mob_SendAppearanceEffectActor) {
 	dXSARGS;
 	if (items < 3 || items > 12)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectActor(THIS, int32 param_1, uint32 value1slot = 0, [int32 param_2 = 0] [uint32 value2slot = 0], [int32 param_3 = 0] [uint32 value3slot = 0], [int32 param_4 = 0] [uint32 value4slot = 0], [int32 param_5 = 0], [uint32 value5slot = 0], [Client* single_client_to_send_to = null])"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectActor(THIS, int32 effect1, uint32 slot1 = 0, [int32 effect2 = 0] [uint32 slot2 = 0], [int32 effect3 = 0] [uint32 slot3 = 0], [int32 effect4 = 0] [uint32 slot4 = 0], [int32 effect5 = 0], [uint32 slot5 = 0], [Client* single_client_to_send_to = null])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 parm1 = (int32)SvIV(ST(1));
@@ -4810,7 +4810,7 @@ XS(XS_Mob_SendAppearanceEffectGround); /* prototype to pass -Wmissing-prototypes
 XS(XS_Mob_SendAppearanceEffectGround) {
 	dXSARGS;
 	if (items < 3 || items > 12)
-		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectGround(THIS, int32 param_1, uint32 value1slot = 1, [int32 param_2 = 0] [uint32 value2slot = 1], [int32 param_3 = 0] [uint32 value3slot = 1], [int32 param_4 = 0] [uint32 value4slot = 1], [int32 param_5 = 0], [uint32 value5slot = 1], [Client* single_client_to_send_to = null])"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::SendAppearanceEffectActor(THIS, int32 effect1, uint32 slot1 = 1, [int32 effect2 = 0] [uint32 slot2 = 1], [int32 effect3 = 0] [uint32 slot3 = 1], [int32 effect4 = 0] [uint32 slot4 = 1], [int32 effect5 = 0], [uint32 slot5 = 1], [Client* single_client_to_send_to = null])"); // @categories Script Utility
 	{
 		Mob *THIS;
 		int32 parm1 = (int32)SvIV(ST(1));
