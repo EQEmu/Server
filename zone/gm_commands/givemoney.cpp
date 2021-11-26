@@ -36,7 +36,15 @@ void command_givemoney(Client *c, const Seperator *sep)
 		fmt::format(
 			"Added {} to {}.",
 			ConvertMoneyToString(platinum, gold, silver, copper),
-			c == target ? "yourself" : target->GetCleanName()
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			)
 		).c_str()
 	);
 }

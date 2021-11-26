@@ -13,9 +13,16 @@ void command_ginfo(Client *c, const Seperator *sep)
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"{} {} not in a group.",
-				c == target ? "You" : target->GetCleanName(),
-				c == target ? "are" : "is"
+				"{} not in a group.",
+				(
+					c == target ?
+					"You are" :
+					fmt::format(
+						"{} ({}) is",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
 			).c_str()
 		);
 		return;
@@ -25,7 +32,15 @@ void command_ginfo(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Group Info for {} | ID: {} Members: {}",
-			c == target ? "Yourself" : target->GetCleanName(),
+			(
+				c == target ?
+				"Yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 			target_group->GetID(),
 			target_group->GroupCount()
 		).c_str()

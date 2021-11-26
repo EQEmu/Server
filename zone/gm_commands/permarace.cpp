@@ -36,7 +36,15 @@ void command_permarace(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Race changed for {} to {} ({}).",
-			c == target ? "yourself" : target->GetCleanName(),
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 			GetRaceIDName(race_id),
 			race_id
 		).c_str()

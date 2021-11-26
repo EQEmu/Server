@@ -48,29 +48,24 @@ void command_castspell(Client *c, const Seperator *sep)
 				c->CastSpell(spell_id, target->GetID(), EQ::spells::CastingSlot::Item, spells[spell_id].cast_time);
 			}
 
-			if (c != target) {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Cast {} ({}) on {}{}.",
-						GetSpellName(spell_id),
-						spell_id,
-						target->GetCleanName(),
-						instant_cast ? " instantly" : ""
-					).c_str()
-				);
-			}
-			else {
-				c->Message(
-					Chat::White,
-					fmt::format(
-						"Cast {} ({}) on yourself{}.",
-						GetSpellName(spell_id),
-						spell_id,
-						instant_cast ? " instantly" : ""
-					).c_str()
-				);
-			}
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Cast {} ({}) on {}{}.",
+					GetSpellName(spell_id),
+					spell_id,
+					(
+						c == target ?
+						"yourself" :
+						fmt::format(
+							"{} ({})",
+							target->GetCleanName(),
+							target->GetID()
+						)
+					),
+					instant_cast ? " instantly" : ""
+				).c_str()
+			);
 		}
 	}
 }
