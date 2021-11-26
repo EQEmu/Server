@@ -641,18 +641,21 @@ void NPC::ClearItemList() {
 		SendAppearancePacket(AT_Light, GetActiveLightType());
 }
 
-void NPC::QueryLoot(Client* to)
+void NPC::QueryLoot(Client* to, bool is_pet_query)
 {
-	if (itemlist.size() > 0) {
-		to->Message(
-			Chat::White,
-			fmt::format(
-				"Loot | Name: {} ID: {} Loottable ID: {}",
-				GetName(),
-				GetNPCTypeID(),
-				GetLoottableID()
-			).c_str()
-		);
+	if (!itemlist.empty()) {
+		if (!is_pet_query) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Loot | {} ({}) ID: {} Loottable ID: {}",
+					GetName(),
+					GetID(),
+					GetNPCTypeID(),
+					GetLoottableID()
+				).c_str()
+			);
+		}
 
 		int item_count = 0;
 		for (auto current_item : itemlist) {
@@ -674,7 +677,7 @@ void NPC::QueryLoot(Client* to)
 			to->Message(
 				Chat::White,
 				fmt::format(
-					"Item {} | Name: {} ({}){}",
+					"Item {} | {} ({}){}",
 					item_number,
 					linker.GenerateLink().c_str(),
 					current_item->item_id,
@@ -692,25 +695,27 @@ void NPC::QueryLoot(Client* to)
 		}
 	}
 
-	bool has_money = (
-		platinum > 0 ||
-		gold > 0 ||
-		silver > 0 ||
-		copper > 0
-	);
-	if (has_money) {
-		to->Message(
-			Chat::White,
-			fmt::format(
-				"Money | {}",
-				ConvertMoneyToString(
-					platinum,
-					gold,
-					silver,
-					copper
-				)
-			).c_str()
+	if (!is_pet_query) {
+		bool has_money = (
+			platinum > 0 ||
+			gold > 0 ||
+			silver > 0 ||
+			copper > 0
 		);
+		if (has_money) {
+			to->Message(
+				Chat::White,
+				fmt::format(
+					"Money | {}",
+					ConvertMoneyToString(
+						platinum,
+						gold,
+						silver,
+						copper
+					)
+				).c_str()
+			);
+		}
 	}
 }
 

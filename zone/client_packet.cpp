@@ -857,39 +857,18 @@ void Client::CompleteConnect()
 	}
 
 	if (zone && zone->GetInstanceTimer()) {
-
-		bool   is_permanent           = false;
-		uint32 remaining_time_seconds = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
-		uint32 day                    = (remaining_time_seconds / 86400);
-		uint32 hour                   = (remaining_time_seconds / 3600) % 24;
-		uint32 minute                 = (remaining_time_seconds / 60) % 60;
-		uint32 second                 = (remaining_time_seconds / 1) % 60;
-
-		if (day) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u days, %u hours, %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), day, hour, minute, second
-			);
-		}
-		else if (hour) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u hours, %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), hour, minute, second
-			);
-		}
-		else if (minute) {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in %u minutes, and %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), minute, second
-			);
-		}
-		else {
-			Message(
-				Chat::Yellow, "%s (%u) will expire in in %u seconds.",
-				zone->GetLongName(), zone->GetInstanceID(), second
-			);
-		}
-
+		bool is_permanent = false;
+		uint32 remaining_time = database.GetTimeRemainingInstance(zone->GetInstanceID(), is_permanent);
+		auto time_string = ConvertSecondsToTime(remaining_time);
+		Message(
+			Chat::Yellow,
+			fmt::format(
+				"{} ({}) will expire in {}.",
+				zone->GetLongName(),
+				zone->GetInstanceID(),
+				time_string
+			).c_str()
+		);
 	}
 
 	SendRewards();
@@ -4007,8 +3986,9 @@ void Client::Handle_OP_BuffRemoveRequest(const EQApplicationPacket *app)
 
 	uint16 SpellID = m->GetSpellIDFromSlot(brrs->SlotID);
 
-	if (SpellID && IsBeneficialSpell(SpellID) && !spells[SpellID].no_remove)
+	if (SpellID && (IsBeneficialSpell(SpellID) || IsEffectInSpell(SpellID, SE_BindSight)) && !spells[SpellID].no_remove) {
 		m->BuffFadeBySlot(brrs->SlotID, true);
+	}
 }
 
 void Client::Handle_OP_Bug(const EQApplicationPacket *app)
@@ -4963,54 +4943,44 @@ void Client::Handle_OP_Consider(const EQApplicationPacket *app)
 
 void Client::Handle_OP_ConsiderCorpse(const EQApplicationPacket *app)
 {
-	if (app->size != sizeof(Consider_Struct))
-	{
+	if (app->size != sizeof(Consider_Struct)) {
 		LogDebug("Size mismatch in Consider corpse expected [{}] got [{}]", sizeof(Consider_Struct), app->size);
 		return;
 	}
+
 	Consider_Struct* conin = (Consider_Struct*)app->pBuffer;
-	Corpse* tcorpse = entity_list.GetCorpseByID(conin->targetid);
+	Corpse* target = entity_list.GetCorpseByID(conin->targetid);
 	std::string export_string = fmt::format("{}", conin->targetid);
-	if (tcorpse && tcorpse->IsNPCCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
-			return;
-		}
-
-		uint32 min; uint32 sec; uint32 ttime;
-		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds / 60 drop .00
-			char val1[20] = { 0 };
-			char val2[20] = { 0 };
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY1, ConvertArray(min, val1), ConvertArray(sec, val2));
-		}
-		else {
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
-		}
+	if (!target) {
+		return;
 	}
-	else if (tcorpse && tcorpse->IsPlayerCorpse()) {
-		if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0) == 1) {
-			return;
-		}
 
-		uint32 day, hour, min, sec, ttime;
-		if ((ttime = tcorpse->GetDecayTime()) != 0) {
-			sec = (ttime / 1000) % 60; // Total seconds
-			min = (ttime / 60000) % 60; // Total seconds
-			hour = (ttime / 3600000) % 24; // Total hours
-			day = ttime / 86400000; // Total Days
-			if (day)
-				Message(0, "This corpse will decay in %i days, %i hours, %i minutes and %i seconds.", day, hour, min, sec);
-			else if (hour)
-				Message(0, "This corpse will decay in %i hours, %i minutes and %i seconds.", hour, min, sec);
-			else
-				Message(0, "This corpse will decay in %i minutes and %i seconds.", min, sec);
+	if (parse->EventPlayer(EVENT_CONSIDER_CORPSE, this, export_string, 0)) {
+		return;
+	}
 
-			Message(0, "This corpse %s be resurrected.", tcorpse->IsRezzed() ? "cannot" : "can");
+	uint32 decay_time = target->GetDecayTime();
+	if (decay_time) {
+		auto time_string = ConvertSecondsToTime(decay_time, true);
+		Message(
+			Chat::NPCQuestSay,
+			fmt::format(
+				"This corpse will decay in {}.",
+				time_string
+			).c_str()
+		);
+		
+		if (target->IsPlayerCorpse()) {
+			Message(
+				Chat::NPCQuestSay,
+				fmt::format(
+					"This corpse {} be resurrected.",
+					target->IsRezzed() ? "cannot" : "can"
+				).c_str()
+			);
 		}
-		else {
-			MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
-		}
+	} else {
+		MessageString(Chat::NPCQuestSay, CORPSE_DECAY_NOW);
 	}
 }
 
@@ -12943,8 +12913,14 @@ void Client::Handle_OP_Shielding(const EQApplicationPacket *app)
 	pTimerType timer = pTimerShieldAbility;
 
 	if (!p_timers.Expired(&database, timer, false)) {
-		uint32 remain = p_timers.GetRemainingTime(timer);
-		Message(Chat::White, "You can use the ability /shield in %d minutes %d seconds.", ((remain) / 60), (remain % 60));
+		uint32 remaining_time = p_timers.GetRemainingTime(timer);
+		Message(
+			Chat::White,
+			fmt::format(
+				"You can use the ability /shield in {}.",
+				ConvertSecondsToTime(remaining_time)
+			).c_str()
+		);
 		return;
 	}
 

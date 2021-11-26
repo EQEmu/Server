@@ -440,6 +440,7 @@ SET(gm_commands
     gm_commands/permaclass.cpp
     gm_commands/permagender.cpp
     gm_commands/permarace.cpp
+    gm_commands/petitems.cpp
     gm_commands/petitioninfo.cpp
     gm_commands/petname.cpp
     gm_commands/pf.cpp

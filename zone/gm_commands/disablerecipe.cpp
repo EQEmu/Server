@@ -2,28 +2,28 @@
 
 void command_disablerecipe(Client *c, const Seperator *sep)
 {
-	uint32 recipe_id = 0;
-	bool   success   = false;
-	if (c) {
-		if (sep->argnum == 1) {
-			recipe_id = atoi(sep->arg[1]);
-		}
-		else {
-			c->Message(Chat::White, "Invalid number of arguments.\nUsage: #disablerecipe recipe_id");
-			return;
-		}
-		if (recipe_id > 0) {
-			success = content_db.DisableRecipe(recipe_id);
-			if (success) {
-				c->Message(Chat::White, "Recipe disabled.");
-			}
-			else {
-				c->Message(Chat::White, "Recipe not disabled.");
-			}
-		}
-		else {
-			c->Message(Chat::White, "Invalid recipe id.\nUsage: #disablerecipe recipe_id");
-		}
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		c->Message(Chat::White, "Usage: #disablerecipe [Recipe ID]");
+		return;
 	}
-}
 
+	auto recipe_id = std::stoul(sep->arg[1]);
+	if (!recipe_id) {		
+		c->Message(Chat::White, "Usage: #disablerecipe [Recipe ID]");
+		return;
+	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Recipe ID {} {} disabled.",
+			recipe_id,
+			(
+				content_db.DisableRecipe(recipe_id) ?
+				"successfully" :
+				"failed to be"
+			)
+		).c_str()
+	);
+}
