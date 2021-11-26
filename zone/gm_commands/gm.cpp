@@ -2,26 +2,28 @@
 
 void command_gm(Client *c, const Seperator *sep)
 {
-	bool   state = atobool(sep->arg[1]);
-	Client *t    = c;
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #gm [On|Off]");
+		return;
+	}
 
+	bool gm_flag = atobool(sep->arg[1]);
+	Client *target = c;
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
-		t = c->GetTarget()->CastToClient();
+		target = c->GetTarget()->CastToClient();
 	}
 
-	if (sep->arg[1][0] != 0) {
-		t->SetGM(state);
-		c->Message(Chat::White, "%s is %s a GM.", t->GetName(), state ? "now" : "no longer");
-	}
-	else {
-		c->Message(Chat::White, "Usage: #gm [on/off]");
+	target->SetGM(gm_flag);
+	if (c != target) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} ({}) is {} flagged as a GM.",
+				target->GetCleanName(),
+				target->GetID(),
+				gm_flag ? "now" : "no longer"
+			).c_str()
+		);
 	}
 }
-
-// there's no need for this, as /summon already takes care of it
-// this command is here for reference but it is not added to the
-// list above
-
-//To whoever wrote the above: And what about /kill, /zone, /zoneserver, etc?
-//There is a reason for the # commands: so that admins can specifically enable certain
-//commands for their users. Some might want users to #summon but not to /kill. Cant do that if they are a GM
