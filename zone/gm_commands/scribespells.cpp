@@ -13,12 +13,11 @@ void command_scribespells(Client *c, const Seperator *sep)
 	}
 
 	uint8 rule_max_level = (uint8) RuleI(Character, MaxLevel);
-	uint8 max_level      = (uint8) std::stoi(sep->arg[1]);
-	uint8 min_level      = (
+	uint8 max_level = (uint8) std::stoi(sep->arg[1]);
+	uint8 min_level = (
 		sep->IsNumber(2) ?
-			(uint8)
-				std::stoi(sep->arg[2]) :
-			1
+		(uint8) std::stoi(sep->arg[2]) :
+		1
 	); // Default to Level 1 if there isn't a 2nd argument
 
 	if (!c->GetGM()) { // Default to Character:MaxLevel if we're not a GM and Level is higher than the max level
@@ -42,15 +41,18 @@ void command_scribespells(Client *c, const Seperator *sep)
 	}
 
 	uint16 scribed_spells = target->ScribeSpells(min_level, max_level);
-	if (target != c) {
+	if (c != target) {
 		std::string spell_message = (
 			scribed_spells > 0 ?
-				(
-					scribed_spells == 1 ?
-						"A new spell" :
-						fmt::format("{} New spells", scribed_spells)
-				) :
-				"No new spells"
+			(
+				scribed_spells == 1 ?
+				"A new spell" :
+				fmt::format(
+					"{} New spells",
+					scribed_spells
+				)
+			) :
+			"No new spells"
 		);
 		c->Message(
 			Chat::White,

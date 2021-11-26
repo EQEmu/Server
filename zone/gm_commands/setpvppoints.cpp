@@ -19,7 +19,15 @@ void command_setpvppoints(Client *c, const Seperator *sep)
 	target->SendPVPStats();
 	std::string pvp_message = fmt::format(
 		"{} now {} {} PVP Point{}.",
-		c == target ? "You" : target->GetCleanName(),
+		(
+			c == target ?
+			"You" :
+			fmt::format(
+				"{} ({})",
+				target->GetCleanName(),
+				target->GetID()
+			)
+		),
 		c == target ? "have" : "has",
 		pvp_points,
 		pvp_points != 1 ? "s" : ""

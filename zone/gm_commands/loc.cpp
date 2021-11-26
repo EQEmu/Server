@@ -12,15 +12,15 @@ void command_loc(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} Location | XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
+			"Location for {} | XYZ: {:.2f}, {:.2f}, {:.2f} Heading: {:.2f}",
 			(
 				c == target ?
-					"Your" :
-					fmt::format(
-						"{} ({})",
-						target->GetCleanName(),
-						target->GetID()
-					)
+				"Yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
 			),
 			target_position.x,
 			target_position.y,

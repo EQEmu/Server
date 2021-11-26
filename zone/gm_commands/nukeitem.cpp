@@ -23,7 +23,15 @@ void command_nukeitem(Client *c, const Seperator *sep)
 				deleted_count,
 				database.CreateItemLink(item_id),
 				item_id,
-				c == target ? "yourself" : target->GetCleanName()
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
 			).c_str()
 		);
 	} else {
@@ -33,7 +41,15 @@ void command_nukeitem(Client *c, const Seperator *sep)
 				"Could not find any {} ({}) to delete from {}.",
 				database.CreateItemLink(item_id),
 				item_id,
-				c == target ? "yourself" : target->GetCleanName()
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
 			).c_str()
 		);
 	}

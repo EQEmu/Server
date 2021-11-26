@@ -1099,39 +1099,40 @@ void command_emptyinventory(Client *c, const Seperator *sep)
 		}
 	}
 
-	if (c != target) {
-		auto target_name = target->GetCleanName();
-		if (removed_count) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Inventory cleared for {}, {} items deleted.",
-					target_name,
-					removed_count
-				).c_str()
-			);
-		} else {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"{} has no items to delete.",
-					target_name
-				).c_str()
-			);
-		}
+	if (removed_count) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Inventory cleared for {}, {} items deleted.",
+				(
+					c == target ?
+					"yourself" :
+					fmt::format(
+						"{} ({})",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				),
+				removed_count
+			).c_str()
+		);
 	} else {
-		if (removed_count) {
-			c->Message(
-				Chat::White,
-				fmt::format(
-					"Your inventory has been cleared, {} items deleted.",
-					removed_count
-				).c_str()
-			);
-		} else {
-			c->Message(Chat::White, "You have no items to delete.");
-		}
-  }
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} no items to delete.",
+				(
+					c == target ?
+					"You have" :
+					fmt::format(
+						"{} ({}) has",
+						target->GetCleanName(),
+						target->GetID()
+					)
+				)
+			).c_str()
+		);
+	}
 }
 
 // All new code added to command.cpp should be BEFORE this comment line. Do no append code to this file below the BOTS code block.
