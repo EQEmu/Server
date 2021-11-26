@@ -13,6 +13,16 @@ void command_gmspeed(Client *c, const Seperator *sep)
 	if (c->GetTarget() && c->GetTarget()->IsClient()) {
 		target = c->GetTarget()->CastToClient();
 	}
+	
+	auto target_string = (
+		c == target ?
+		"yourself" :
+		fmt::format(
+			"{} ({})",
+			target->GetCleanName(),
+			target->GetID()
+		)
+	);
 
 	database.SetGMSpeed(
 		target->AccountID(),
@@ -23,16 +33,8 @@ void command_gmspeed(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Turning GM Speed {} for {}.",
-			gm_speed_flag ? "On" : "Off",
-			(
-				c == target ?
-				"yourself" :
-				fmt::format(
-					"{} ({})",
-					target->GetCleanName(),
-					target->GetID()
-				)
-			)
+			gm_speed_flag ? "on" : "off",
+			target_string
 		).c_str()
 	);
 
@@ -40,13 +42,7 @@ void command_gmspeed(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Note: {} must zone for it to take effect.",
-			c == target ?
-			"You" :
-			fmt::format(
-				"{} ({})",
-				target->GetCleanName(),
-				target->GetID()
-			)
+			target_string
 		).c_str()
 	);
 }
