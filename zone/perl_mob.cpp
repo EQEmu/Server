@@ -4850,6 +4850,19 @@ XS(XS_Mob_SendAppearanceEffectGround) {
 	XSRETURN_EMPTY;
 }
 
+XS(XS_Mob_RemoveAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RemoveAppearanceEffect) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: Mob::RemoveAppearanceEffect(THIS)"); // @categories Script Utility
+	{
+		Mob *THIS;
+		VALIDATE_THIS_IS_MOB;
+		THIS->SendIllusionPacket(THIS->GetRace());
+	}
+	XSRETURN_EMPTY;
+}
+
 XS(XS_Mob_SetFlyMode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Mob_SetFlyMode) {
 	dXSARGS;
@@ -6823,6 +6836,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SendAppearanceEffect"), XS_Mob_SendAppearanceEffect, file, "$$;$$$$$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendAppearanceEffectActor"), XS_Mob_SendAppearanceEffectActor, file, "$$$;$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendAppearanceEffectGround"), XS_Mob_SendAppearanceEffectGround, file, "$$$;$$$$$$$$$");
+	newXSproto(strcpy(buf, "RemoveAppearanceEffect"), XS_Mob_RemoveAppearanceEffect, file, "$");
 	newXSproto(strcpy(buf, "SendIllusion"), XS_Mob_SendIllusion, file, "$$;$$$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendTo"), XS_Mob_SendTo, file, "$$$$");
 	newXSproto(strcpy(buf, "SendToFixZ"), XS_Mob_SendToFixZ, file, "$$$$");
