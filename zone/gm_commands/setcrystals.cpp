@@ -13,13 +13,13 @@ void command_setcrystals(Client *c, const Seperator *sep)
 		target = c->GetTarget()->CastToClient();
 	}
 
-	std::string crystal_type   = str_tolower(sep->arg[1]);
-	uint32      crystal_amount = static_cast<uint32>(std::min(
+	std::string crystal_type = str_tolower(sep->arg[1]);
+	uint32 crystal_amount = static_cast<uint32>(std::min(
 		std::stoull(sep->arg[2]),
 		(unsigned long long) 2000000000
 	));
-	bool        is_ebon        = crystal_type.find("ebon") != std::string::npos;
-	bool        is_radiant     = crystal_type.find("radiant") != std::string::npos;
+	bool is_ebon = crystal_type.find("ebon") != std::string::npos;
+	bool is_radiant = crystal_type.find("radiant") != std::string::npos;
 	if (!is_ebon && !is_radiant) {
 		c->Message(Chat::White, "Usage: #setcrystals [Ebon|Radiant] [Crystal Amount]");
 		return;
@@ -27,15 +27,14 @@ void command_setcrystals(Client *c, const Seperator *sep)
 
 	uint32 crystal_item_id = (
 		is_ebon ?
-			RuleI(Zone, EbonCrystalItemID) :
-			RuleI(Zone, RadiantCrystalItemID)
+		RuleI(Zone, EbonCrystalItemID) :
+		RuleI(Zone, RadiantCrystalItemID)
 	);
 
 	auto crystal_link = database.CreateItemLink(crystal_item_id);
 	if (is_radiant) {
 		target->SetRadiantCrystals(crystal_amount);
-	}
-	else {
+	} else {
 		target->SetEbonCrystals(crystal_amount);
 	}
 
@@ -43,7 +42,15 @@ void command_setcrystals(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"{} now {} {} {}.",
-			c == target ? "You" : target->GetCleanName(),
+			(
+				c == target ?
+				"You" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 			c == target ? "have" : "has",
 			crystal_amount,
 			crystal_link

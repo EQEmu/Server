@@ -2076,7 +2076,13 @@ bool Client::ChangeFirstName(const char* in_firstname, const char* gmname)
 void Client::SetGM(bool toggle) {
 	m_pp.gm = toggle ? 1 : 0;
 	m_inv.SetGMInventory((bool)m_pp.gm);
-	Message(Chat::Red, "You are %s a GM.", m_pp.gm ? "now" : "no longer");
+	Message(
+		Chat::White,
+		fmt::format(
+			"You are {} flagged as a GM.",
+			m_pp.gm ? "now" : "no longer"
+		).c_str()
+	);
 	SendAppearancePacket(AT_GM, m_pp.gm);
 	Save();
 	UpdateWho();

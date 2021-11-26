@@ -15,6 +15,11 @@ void command_permagender(Client *c, const Seperator *sep)
 	}
 
 	auto gender_id = std::stoi(sep->arg[1]);
+	if (gender_id < 0 || gender_id > 2) {
+		c->Message(Chat::White, "Usage: #permagender [Gender ID]");
+		c->Message(Chat::White, "Genders: 0 = Male, 1 = Female, 2 = Neuter");
+		return;
+	}
 	
 	LogInfo("Gender changed by {} for {} to {} ({})",
 		c->GetCleanName(),
@@ -31,7 +36,15 @@ void command_permagender(Client *c, const Seperator *sep)
 		Chat::White,
 		fmt::format(
 			"Gender changed for {} to {} ({}).",
-			c == target ? "yourself" : target->GetCleanName(),
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
 			GetGenderName(gender_id),
 			gender_id
 		).c_str()

@@ -42,15 +42,18 @@ void command_traindisc(Client *c, const Seperator *sep)
 	}
 
 	uint16 learned_disciplines = target->LearnDisciplines(min_level, max_level);
-	if (target != c) {
+	if (c != target) {
 		std::string discipline_message = (
 			learned_disciplines > 0 ?
-				(
-					learned_disciplines == 1 ?
-						"A new discipline" :
-						fmt::format("{} New disciplines", learned_disciplines)
-				) :
-				"No new disciplines"
+			(
+				learned_disciplines == 1 ?
+				"A new discipline" :
+				fmt::format(
+					"{} New disciplines",
+					learned_disciplines
+				)
+			) :
+			"No new disciplines"
 		);
 		c->Message(
 			Chat::White,
