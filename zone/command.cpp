@@ -360,7 +360,7 @@ int command_init(void)
 		command_add("tattoo", "- Change the tattoo of your target (Drakkin Only)", AccountStatus::QuestTroupe, command_tattoo) ||
 		command_add("tempname", "[newname] - Temporarily renames your target. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_tempname) ||
 		command_add("petname", "[newname] - Temporarily renames your pet. Leave name blank to restore the original name.", AccountStatus::GMAdmin, command_petname) ||
-		command_add("texture", "[texture] [helmtexture] - Change your or your target's appearance, use 255 to show equipment", AccountStatus::Steward, command_texture) ||
+		command_add("texture", "[Texture] [Helmet Texture] - Change your or your target's texture (Helmet Texture defaults to 0 if not sued)", AccountStatus::Steward, command_texture) ||
 		command_add("time", "[HH] [MM] - Set EQ time", AccountStatus::EQSupport, command_time) ||
 		command_add("timers", "- Display persistent timers for target", AccountStatus::GMMgmt, command_timers) ||
 		command_add("timezone", "[HH] [MM] - Set timezone. Minutes are optional", AccountStatus::EQSupport, command_timezone) ||
