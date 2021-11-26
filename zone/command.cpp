@@ -248,7 +248,7 @@ int command_init(void)
 		command_add("movechar", "[charname] [zonename] - Move charname to zonename", AccountStatus::Guide, command_movechar) ||
 		command_add("movement", "Various movement commands", AccountStatus::GMMgmt, command_movement) ||
 		command_add("myskills", "- Show details about your current skill levels", AccountStatus::Player, command_myskills) ||
-		command_add("mysql", "Mysql CLI, see 'help' for options.", AccountStatus::GMImpossible, command_mysql) ||
+		command_add("mysql", "[Help|Query] [SQL Query] - Mysql CLI, see 'Help' for options.", AccountStatus::GMImpossible, command_mysql) ||
 		command_add("mystats", "- Show details about you or your pet", AccountStatus::Guide, command_mystats) ||
 		command_add("name", "[newname] - Rename your player target", AccountStatus::GMLeadAdmin, command_name) ||
 		command_add("netstats", "- Gets the network stats for a stream.", AccountStatus::GMMgmt, command_netstats) ||
