@@ -224,12 +224,7 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
 	}
-	//If you do not have the 'Eye of Zomm' spell on you then remove the buff when any spell with Se_EyeOfZomm is cast.
-	if (spellbonuses.EyeOfZomm && spellbonuses.EyeOfZomm != SPELL_EYE_OF_ZOMM && IsEffectInSpell(spell_id, SE_EyeOfZomm)) {
-		Shout("Try remove");
-		BuffFadeByEffect(SE_EyeOfZomm);
-	}
-	
+
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
 		return false;
@@ -3018,15 +3013,13 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 		return -1;
 	}
 
-	if (spellbonuses.EyeOfZomm && IsEffectInSpell(spellid2, SE_EyeOfZomm)) {
-		//only the original Eye of Zomm spell will not take hold if affect is already on you.
-		if (spellid1 == SPELL_EYE_OF_ZOMM && spellid2 == SPELL_EYE_OF_ZOMM) {
+	if (spellid1 == spellid2 ) {
+		
+		if (spellid1 == SPELL_EYE_OF_ZOMM && spellid2 == SPELL_EYE_OF_ZOMM) {//only the original Eye of Zomm spell will not take hold if affect is already on you, other versions client fades the buff as soon as cast.
 			MessageString(Chat::Red, SPELL_NO_HOLD);
 			return -1;
 		}
-	}
 
-	if (spellid1 == spellid2 ) {
 		if (!IsStackableDot(spellid1) && !IsEffectInSpell(spellid1, SE_ManaBurn)) { // mana burn spells we need to use the stacking command blocks live actually checks those first, we should probably rework to that too
 			if (caster_level1 > caster_level2) { // cur buff higher level than new
 				if (IsEffectInSpell(spellid1, SE_ImprovedTaunt)) {

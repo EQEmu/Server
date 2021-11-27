@@ -3794,15 +3794,6 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				new_bonus->CompleteHealBuffBlocker = true;
 				break;
 
-			case SE_EyeOfZomm:
-				if (spell_id == SPELL_EYE_OF_ZOMM) {
-					new_bonus->EyeOfZomm = SPELL_EYE_OF_ZOMM;
-				}
-				else {
-					new_bonus->EyeOfZomm = 1; //Any other eye of zomm effect
-				}
-				break;
-
 			//Special custom cases for loading effects on to NPC from 'npc_spels_effects' table
 			if (IsAISpellEffect) {
 
