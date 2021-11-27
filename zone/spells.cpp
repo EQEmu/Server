@@ -995,13 +995,18 @@ void Mob::StopCasting()
 			c->ResetAlternateAdvancementTimer(casting_spell_aa_id);
 		}
 
+		int casting_slot = -1;
+		if (casting_spell_slot < CastingSlot::MaxGems) {
+			casting_slot = static_cast<int>(casting_spell_slot);
+		}
+
 		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 		auto mc = (ManaChange_Struct *)outapp->pBuffer;
 		mc->new_mana = GetMana();
 		mc->stamina = GetEndurance();
 		mc->spell_id = casting_spell_id;
 		mc->keepcasting = 0;
-		mc->slot = -1;
+		mc->slot = casting_slot;
 		c->FastQueuePacket(&outapp);
 	}
 	ZeroCastingVars();
