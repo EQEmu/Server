@@ -4850,11 +4850,11 @@ XS(XS_Mob_SendAppearanceEffectGround) {
 	XSRETURN_EMPTY;
 }
 
-XS(XS_Mob_RemoveAppearanceEffect); /* prototype to pass -Wmissing-prototypes */
-XS(XS_Mob_RemoveAppearanceEffect) {
+XS(XS_Mob_RemoveAllAppearanceEffects); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Mob_RemoveAllAppearanceEffects) {
 	dXSARGS;
 	if (items != 1)
-		Perl_croak(aTHX_ "Usage: Mob::RemoveAppearanceEffect(THIS)"); // @categories Script Utility
+		Perl_croak(aTHX_ "Usage: Mob::RemoveAllAppearanceEffects(THIS)"); // @categories Script Utility
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
@@ -6822,6 +6822,7 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "RandomizeFeatures"), XS_Mob_RandomizeFeatures, file, "$$;$");
 	newXSproto(strcpy(buf, "RangedAttack"), XS_Mob_RangedAttack, file, "$$");
 	newXSproto(strcpy(buf, "RemoveAllNimbusEffects"), XS_Mob_RemoveAllNimbusEffects, file, "$");
+	newXSproto(strcpy(buf, "RemoveAllAppearanceEffects"), XS_Mob_RemoveAllAppearanceEffects, file, "$");
 	newXSproto(strcpy(buf, "RemoveFromFeignMemory"), XS_Mob_RemoveFromFeignMemory, file, "$$");
 	newXSproto(strcpy(buf, "RemoveNimbusEffect"), XS_Mob_RemoveNimbusEffect, file, "$$");
 	newXSproto(strcpy(buf, "RemovePet"), XS_Mob_RemovePet, file, "$");
@@ -6836,7 +6837,6 @@ XS(boot_Mob) {
 	newXSproto(strcpy(buf, "SendAppearanceEffect"), XS_Mob_SendAppearanceEffect, file, "$$;$$$$$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendAppearanceEffectActor"), XS_Mob_SendAppearanceEffectActor, file, "$$$;$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendAppearanceEffectGround"), XS_Mob_SendAppearanceEffectGround, file, "$$$;$$$$$$$$$");
-	newXSproto(strcpy(buf, "RemoveAppearanceEffect"), XS_Mob_RemoveAppearanceEffect, file, "$");
 	newXSproto(strcpy(buf, "SendIllusion"), XS_Mob_SendIllusion, file, "$$;$$$$$$$$$$$$");
 	newXSproto(strcpy(buf, "SendTo"), XS_Mob_SendTo, file, "$$$$");
 	newXSproto(strcpy(buf, "SendToFixZ"), XS_Mob_SendToFixZ, file, "$$$$");
