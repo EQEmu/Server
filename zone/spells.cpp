@@ -995,13 +995,18 @@ void Mob::StopCasting()
 			c->ResetAlternateAdvancementTimer(casting_spell_aa_id);
 		}
 
+		int casting_slot = -1;
+		if (casting_spell_slot < CastingSlot::MaxGems) {
+			casting_slot = static_cast<int>(casting_spell_slot);
+		}
+
 		auto outapp = new EQApplicationPacket(OP_ManaChange, sizeof(ManaChange_Struct));
 		auto mc = (ManaChange_Struct *)outapp->pBuffer;
 		mc->new_mana = GetMana();
 		mc->stamina = GetEndurance();
 		mc->spell_id = casting_spell_id;
 		mc->keepcasting = 0;
-		mc->slot = -1;
+		mc->slot = casting_slot;
 		c->FastQueuePacket(&outapp);
 	}
 	ZeroCastingVars();
@@ -5219,7 +5224,7 @@ void Mob::SendSpellBarEnable(uint16 spell_id)
 	manachange->spell_id = spell_id;
 	manachange->stamina = CastToClient()->GetEndurance();
 	manachange->keepcasting = 0;
-	manachange->slot = -1;
+	manachange->slot = CastToClient()->FindMemmedSpellByID(spell_id);
 	outapp->priority = 6;
 	CastToClient()->QueuePacket(outapp);
 	safe_delete(outapp);
@@ -5426,6 +5431,15 @@ int Client::MemmedCount() {
 			memmed_count++;
 
 	return memmed_count;
+}
+
+int Client::FindMemmedSpellByID(uint16 spell_id) {
+	for (int i = 0; i < EQ::spells::SPELL_GEM_COUNT; i++) {
+		if (m_pp.mem_spells[i] == spell_id) {
+			return i;
+		}
+	}
+	return -1;
 }
 
 

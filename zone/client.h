@@ -793,6 +793,7 @@ public:
 	void UnmemSpellBySpellID(int32 spell_id);
 	void UnmemSpellAll(bool update_client = true);
 	uint16 FindMemmedSpellBySlot(int slot);
+	int FindMemmedSpellByID(uint16 spell_id);
 	int MemmedCount();
 	std::vector<int> GetLearnableDisciplines(uint8 min_level = 1, uint8 max_level = 0);
 	std::vector<int> GetLearnedDisciplines();
