@@ -1936,14 +1936,6 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 	}
 
 	Adventure_Purchase_Struct* aps = (Adventure_Purchase_Struct*)app->pBuffer;
-	/*
-	Get item apc->itemid (can check NPC if thats necessary), ldon point theme check only if theme is not 0 (I am not sure what 1-5 are though for themes)
-	if(ldon_points_available >= item ldonpointcost)
-	{
-	give item (67 00 00 00 for the packettype using opcode 0x02c5)
-	ldon_points_available -= ldonpointcost;
-	}
-	*/
 	uint32 merchantid = 0;
 	Mob* tmp = entity_list.GetMob(aps->npcid);
 	if (tmp == 0 || !tmp->IsNPC() || ((tmp->GetClass() != ADVENTUREMERCHANT) &&
@@ -2000,39 +1992,47 @@ void Client::Handle_OP_AdventureMerchantPurchase(const EQApplicationPacket *app)
 		}
 
 		if (item->LDoNTheme <= LDoNThemeBits::TAKBit) {
+			uint32 ldon_theme;
 			if (item->LDoNTheme & LDoNThemeBits::TAKBit) {
 				if (m_pp.ldon_points_tak < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Deepest Guk Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::TAK;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::RUJBit) {
 				if (m_pp.ldon_points_ruj < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Miragul's Menagerie Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::RUJ;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MMCBit) {
 				if (m_pp.ldon_points_mmc < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Mistmoore Catacombs Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::MMC;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::MIRBit) {
 				if (m_pp.ldon_points_mir < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Rujarkian Hills Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::MIR;
 				}
 			} else if (item->LDoNTheme & LDoNThemeBits::GUKBit) {
 				if (m_pp.ldon_points_guk < item_cost) {
 					cannot_afford = true;
-					merchant_type = fmt::format("Takish-Hiz Point{}", item_cost != 1 ? "s" : "");
+					ldon_theme = LDoNThemes::GUK;
 				}
 			}
 
-
+			merchant_type = fmt::format(
+				"{} Point{}",
+				EQ::constants::GetLDoNThemeName(ldon_theme),
+				item_cost != 1 ? "s" : ""
+			);
 		}
 	} else if (aps->Type == DiscordMerchant) {
 		if (GetPVPPoints() < item_cost) {
 			cannot_afford = true;
-			merchant_type = fmt::format("PVP Point{}", item_cost != 1 ? "s" : "");
+			merchant_type = fmt::format(
+				"PVP Point{}",
+				item_cost != 1 ? "s" : ""
+			);
 		}
 	} else if (aps->Type == NorrathsKeepersMerchant) {
 		if (GetRadiantCrystals() < item_cost) {

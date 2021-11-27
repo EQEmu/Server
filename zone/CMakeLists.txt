@@ -542,6 +542,7 @@ SET(gm_commands
     gm_commands/untraindiscs.cpp
     gm_commands/uptime.cpp
     gm_commands/version.cpp
+    gm_commands/viewcurrencies.cpp
     gm_commands/viewnpctype.cpp
     gm_commands/viewpetition.cpp
     gm_commands/viewzoneloot.cpp

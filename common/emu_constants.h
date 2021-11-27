@@ -226,6 +226,9 @@ namespace EQ
 		extern const std::map<int, std::string>& GetLanguageMap();
 		std::string GetLanguageName(int language_id);
 
+		extern const std::map<uint32, std::string>& GetLDoNThemeNameMap();
+		std::string GetLDoNThemeName(uint32 theme_id);
+
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
 		const int STANCE_TYPE_COUNT = stanceBurnAE;
