@@ -932,6 +932,19 @@ namespace Titanium
 		FINISH_ENCODE();
 	}
 
+	ENCODE(OP_ManaChange)
+	{
+		ENCODE_LENGTH_EXACT(ManaChange_Struct);
+		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
+
+		OUT(new_mana);
+		OUT(stamina);
+		OUT(spell_id);
+		OUT(keepcasting);
+
+		FINISH_ENCODE();
+	}
+
 	ENCODE(OP_MemorizeSpell)
 	{
 		ENCODE_LENGTH_EXACT(MemorizeSpell_Struct);

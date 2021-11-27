@@ -448,6 +448,7 @@ struct ManaChange_Struct
 /*08*/	uint32	spell_id;
 /*12*/	uint8	keepcasting;	// won't stop the cast. Change mana while casting?
 /*13*/	uint8	padding[3];		// client doesn't read it, garbage data seems like
+/*16*/	int32	slot;			// -1 normal, otherwise clear ETA and GCD
 };
 
 struct SwapSpell_Struct

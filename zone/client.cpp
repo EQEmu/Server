@@ -1869,9 +1869,7 @@ void Client::CheckManaEndUpdate() {
 		mana_change->stamina = current_endurance;
 		mana_change->spell_id = casting_spell_id;
 		mana_change->keepcasting = 1;
-		mana_change->padding[0] = 0;
-		mana_change->padding[1] = 0;
-		mana_change->padding[2] = 0;
+		mana_change->slot = -1;
 		outapp->priority = 6;
 		QueuePacket(outapp);
 		safe_delete(outapp);
