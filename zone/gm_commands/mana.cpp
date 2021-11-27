@@ -21,7 +21,7 @@ void command_mana(Client *c, const Seperator *sep)
 				c == target ?
 				"yourself" :
 				fmt::format(
-					"{} ({})"
+					"{} ({})",
 					target->GetCleanName(),
 					target->GetID()
 				)
