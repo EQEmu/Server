@@ -468,6 +468,7 @@ SET(gm_commands
     gm_commands/reloadworld.cpp
     gm_commands/reloadworldrules.cpp
     gm_commands/reloadzps.cpp
+    gm_commands/removeitem.cpp
     gm_commands/repop.cpp
     gm_commands/resetaa.cpp
     gm_commands/resetaa_timer.cpp
