@@ -249,6 +249,7 @@ void command_setfaction(Client *c, const Seperator *sep);
 void command_setgraveyard(Client *c, const Seperator *sep);
 void command_setlanguage(Client *c, const Seperator *sep);
 void command_setlsinfo(Client *c, const Seperator *sep);
+void command_setmana(Client *c, const Seperator *sep);
 void command_setpass(Client *c, const Seperator *sep);
 void command_setpvppoints(Client *c, const Seperator *sep);
 void command_setskill(Client *c, const Seperator *sep);
