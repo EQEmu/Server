@@ -3004,7 +3004,6 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 //if all effects are better or the same, we overwrite, else we do nothing
 int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2, int buffslot)
 {
-	Shout("%i || Check Stacking conflicts %i %i", spellbonuses.EyeOfZomm, spellid1, spellid2);
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
 
