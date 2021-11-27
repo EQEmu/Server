@@ -308,6 +308,7 @@ SET(gm_commands
     gm_commands/copycharacter.cpp
     gm_commands/corpse.cpp
     gm_commands/corpsefix.cpp
+    gm_commands/countitem.cpp
     gm_commands/cvs.cpp
     gm_commands/damage.cpp
     gm_commands/databuckets.cpp
