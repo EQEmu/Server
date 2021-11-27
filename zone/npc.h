@@ -300,6 +300,7 @@ public:
 	void	PickPocket(Client* thief);
 	void	Disarm(Client* client, int chance);
 	void	StartSwarmTimer(uint32 duration) { swarm_timer.Start(duration); }
+	void	DisableSwarmTimer() { swarm_timer.Disable(); }
 
 	void AddLootDrop(
 		const EQ::ItemData *item2,

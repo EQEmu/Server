@@ -221,9 +221,15 @@ bool Mob::CastSpell(uint16 spell_id, uint16 target_id, CastingSlot slot,
 		return(false);
 	}
 
-	if (spellbonuses.NegateIfCombat)
+	if (spellbonuses.NegateIfCombat) {
 		BuffFadeByEffect(SE_NegateIfCombat);
-
+	}
+	//If you do not have the 'Eye of Zomm' spell on you then remove the buff when any spell with Se_EyeOfZomm is cast.
+	if (spellbonuses.EyeOfZomm && spellbonuses.EyeOfZomm != SPELL_EYE_OF_ZOMM && IsEffectInSpell(spell_id, SE_EyeOfZomm)) {
+		Shout("Try remove");
+		BuffFadeByEffect(SE_EyeOfZomm);
+	}
+	
 	if (IsClient() && IsHarmonySpell(spell_id) && !HarmonySpellLevelCheck(spell_id, entity_list.GetMobID(target_id))) {
 		InterruptSpell(SPELL_NO_EFFECT, 0x121, spell_id);
 		return false;
@@ -2998,6 +3004,7 @@ int CalcBuffDuration_formula(int level, int formula, int duration)
 //if all effects are better or the same, we overwrite, else we do nothing
 int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2, int caster_level2, Mob* caster1, Mob* caster2, int buffslot)
 {
+	Shout("%i || Check Stacking conflicts %i %i", spellbonuses.EyeOfZomm, spellid1, spellid2);
 	const SPDat_Spell_Struct &sp1 = spells[spellid1];
 	const SPDat_Spell_Struct &sp2 = spells[spellid2];
 
@@ -3010,6 +3017,14 @@ int Mob::CheckStackConflict(uint16 spellid1, int caster_level1, uint16 spellid2,
 	if (spellbonuses.CompleteHealBuffBlocker && IsEffectInSpell(spellid2, SE_CompleteHeal)) {
 		Message(0, "You must wait before you can be affected by this spell again.");
 		return -1;
+	}
+
+	if (spellbonuses.EyeOfZomm && IsEffectInSpell(spellid2, SE_EyeOfZomm)) {
+		//only the original Eye of Zomm spell will not take hold if affect is already on you.
+		if (spellid1 == SPELL_EYE_OF_ZOMM && spellid2 == SPELL_EYE_OF_ZOMM) {
+			MessageString(Chat::Red, SPELL_NO_HOLD);
+			return -1;
+		}
 	}
 
 	if (spellid1 == spellid2 ) {
