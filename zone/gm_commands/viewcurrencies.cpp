@@ -81,9 +81,8 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} ({}) for {} | {}",
+					"{} for {} | {}",
 					database.CreateItemLink(alternate_currency->item_id),
-					alternate_currency->id,
 					target_string,
 					currency_value
 				).c_str()
@@ -102,9 +101,8 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 			c->Message(
 				Chat::White,
 				fmt::format(
-					"{} ({}) for {} | {}",
+					"{} for {} | {}",
 					EQ::constants::GetLDoNThemeName(ldon_currency_id),
-					ldon_currency_id,
 					target_string,
 					ldon_currency_value
 				).c_str()
