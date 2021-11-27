@@ -11,6 +11,10 @@ void command_killallnpcs(Client *c, const Seperator *sep)
 	for (auto& npc_entity : entity_list.GetNPCList()) {
 		auto entity_id = npc_entity.first;
 		auto npc = npc_entity.second;
+		if (!npc) {
+			continue;
+		}
+		
 		std::string entity_name = str_tolower(npc->GetName());
 		if (
 			(
