@@ -3483,7 +3483,7 @@ XS(XS__getcurrencyitemid) {
 	dXSTARG;
 
 	int RETVAL;
-	int currency_id = (int) SvUV(ST(0));
+	uint32 currency_id = (uint32) SvUV(ST(0));
 
 	RETVAL = quest_manager.getcurrencyitemid(currency_id);
 
@@ -3499,8 +3499,8 @@ XS(XS__getcurrencyid) {
 		Perl_croak(aTHX_ "Usage: quest::getcurrencyid(uint32 item_id)");
 	dXSTARG;
 
-	int 		RETVAL;
-	uint32      item_id = (int) SvUV(ST(0));
+	uint32 RETVAL;
+	uint32 item_id = (uint32) SvUV(ST(0));
 
 	RETVAL = quest_manager.getcurrencyid(item_id);
 	XSprePUSH;

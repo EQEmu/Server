@@ -486,6 +486,7 @@ SET(gm_commands
     gm_commands/set_adventure_points.cpp
     gm_commands/setaapts.cpp
     gm_commands/setaaxp.cpp
+    gm_commands/setaltcurrency.cpp
     gm_commands/setanim.cpp
     gm_commands/setcrystals.cpp
     gm_commands/setfaction.cpp

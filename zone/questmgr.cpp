@@ -3009,28 +3009,12 @@ std::string QuestManager::getclassname(uint8 class_id, uint8 level) {
 	return GetClassIDName(class_id, level);
 }
 
-int QuestManager::getcurrencyid(uint32 item_id) {
-	auto iter = zone->AlternateCurrencies.begin();
-	while (iter != zone->AlternateCurrencies.end()) {
-		if (item_id == (*iter).item_id) {
-			return (*iter).id;
-		}
-		++iter;
-	}
-	return 0;
+uint32 QuestManager::getcurrencyid(uint32 item_id) {
+	return zone->GetCurrencyID(item_id);
 }
 
-int QuestManager::getcurrencyitemid(int currency_id) {
-	if (currency_id > 0) {
-		auto iter = zone->AlternateCurrencies.begin();
-		while (iter != zone->AlternateCurrencies.end()) {
-			if (currency_id == (*iter).id) {
-				return (*iter).item_id;
-			}
-			++iter;
-		}
-	}
-	return 0;
+uint32 QuestManager::getcurrencyitemid(uint32 currency_id) {
+	return zone->GetCurrencyItemID(currency_id);
 }
 
 const char* QuestManager::getguildnamebyid(int guild_id) {
