@@ -220,11 +220,23 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum GravityBehavior : uint8 {
+			Ground,
+			Flying,
+			Levitating,
+			Water,
+			Floating,
+			LevitateWhileRunning
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
 		extern const std::map<int, std::string>& GetLanguageMap();
 		std::string GetLanguageName(int language_id);
+
+		extern const std::map<uint8, std::string>& GetFlyModeMap();
+		std::string GetFlyModeName(uint8 flymode_id);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;
