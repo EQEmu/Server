@@ -488,6 +488,7 @@ SET(gm_commands
     gm_commands/setaaxp.cpp
     gm_commands/setanim.cpp
     gm_commands/setcrystals.cpp
+    gm_commands/setendurance.cpp
     gm_commands/setfaction.cpp
     gm_commands/setgraveyard.cpp
     gm_commands/sethp.cpp
