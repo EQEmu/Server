@@ -198,6 +198,28 @@ std::string EQ::constants::GetLanguageName(int language_id)
 	return std::string();
 }
 
+const std::map<uint32, std::string>& EQ::constants::GetLDoNThemeMap()
+{
+	static const std::map<uint32, std::string> ldon_theme_map = {
+		{ LDoNThemes::Unused, "Unused" },
+		{ LDoNThemes::GUK, "Deepest Guk" },
+		{ LDoNThemes::MIR, "Miragul's Menagerie" },
+		{ LDoNThemes::MMC, "Mistmoore Catacombs" },
+		{ LDoNThemes::RUJ, "Rujarkian Hills" },
+		{ LDoNThemes::TAK, "Takish-Hiz" },
+	};
+	return ldon_theme_map;
+}
+
+std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
+{
+	if (theme_id >= LDoNThemes::Unused && theme_id <= LDoNThemes::TAK) {
+		auto ldon_themes = EQ::constants::GetLDoNThemeMap();
+		return ldon_themes[theme_id];
+	}
+	return std::string();	
+}
+
 const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
 {
 	static const std::map<uint8, std::string> flymode_map = {
