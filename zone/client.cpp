@@ -7146,7 +7146,7 @@ void Client::AddAlternateCurrencyValue(uint32 currency_id, int32 amount, int8 me
 
 void Client::SendAlternateCurrencyValues()
 {
-	for (const auto& alternate_currency : zone->AlternateCurrencies);
+	for (const auto& alternate_currency : zone->AlternateCurrencies) {
 		SendAlternateCurrencyValue(alternate_currency.id, false);
 	}
 }
