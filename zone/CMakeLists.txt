@@ -492,6 +492,7 @@ SET(gm_commands
     gm_commands/setgraveyard.cpp
     gm_commands/setlanguage.cpp
     gm_commands/setlsinfo.cpp
+    gm_commands/setmana.cpp
     gm_commands/setpass.cpp
     gm_commands/setpvppoints.cpp
     gm_commands/setskill.cpp
