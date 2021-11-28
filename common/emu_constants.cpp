@@ -219,3 +219,28 @@ std::string EQ::constants::GetLDoNThemeName(uint32 theme_id)
 	}
 	return std::string();	
 }
+
+const std::map<uint8, std::string>& EQ::constants::GetFlyModeMap()
+{
+	static const std::map<uint8, std::string> flymode_map = {
+		{ EQ::constants::GravityBehavior::Ground, "Ground" },
+		{ EQ::constants::GravityBehavior::Flying, "Flying" },
+		{ EQ::constants::GravityBehavior::Levitating, "Levitating" },
+		{ EQ::constants::GravityBehavior::Water, "Water" },
+		{ EQ::constants::GravityBehavior::Floating, "Floating" },
+		{ EQ::constants::GravityBehavior::LevitateWhileRunning, "Levitating While Running" },
+	};
+	return flymode_map;
+}
+
+std::string EQ::constants::GetFlyModeName(uint8 flymode_id)
+{
+	if (
+		flymode_id >= GravityBehavior::Ground &&
+		flymode_id <= GravityBehavior::LevitateWhileRunning
+	) {
+		auto flymodes = EQ::constants::GetFlyModeMap();
+		return flymodes[flymode_id];
+	}
+	return std::string();
+}

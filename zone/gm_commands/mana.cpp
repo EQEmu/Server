@@ -3,25 +3,31 @@
 void command_mana(Client *c, const Seperator *sep)
 {
 	auto target = c->GetTarget() ? c->GetTarget() : c;
+	int mana = 0;
 	if (target->IsClient()) {
-		target->CastToClient()->SetMana(target->CastToClient()->CalcMaxMana());
+		mana = target->CastToClient()->CalcMaxMana();
+		target->CastToClient()->SetMana(mana);
 	}
 	else {
-		target->SetMana(target->CalcMaxMana());
+		mana = target->CalcMaxMana();
+		target->SetMana(mana);
 	}
 
-	if (c != target) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Set {} ({}) to full Mana.",
-				target->GetCleanName(),
-				target->GetID()
-			).c_str()
-		);
-	}
-	else {
-		c->Message(Chat::White, "Restored your Mana to full.");
-	}
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Set {} to full Mana ({}).",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			mana
+		).c_str()
+	);
 }
 

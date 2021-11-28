@@ -220,6 +220,15 @@ namespace EQ
 			stanceBurnAE
 		};
 
+		enum GravityBehavior : uint8 {
+			Ground,
+			Flying,
+			Levitating,
+			Water,
+			Floating,
+			LevitateWhileRunning
+		};
+
 		const char *GetStanceName(StanceType stance_type);
 		int ConvertStanceTypeToIndex(StanceType stance_type);
 
@@ -228,6 +237,9 @@ namespace EQ
 
 		extern const std::map<uint32, std::string>& GetLDoNThemeMap();
 		std::string GetLDoNThemeName(uint32 theme_id);
+    
+		extern const std::map<uint8, std::string>& GetFlyModeMap();
+		std::string GetFlyModeName(uint8 flymode_id);
 
 		const int STANCE_TYPE_FIRST = stancePassive;
 		const int STANCE_TYPE_LAST = stanceBurnAE;

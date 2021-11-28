@@ -1634,20 +1634,6 @@ namespace RoF
 		FINISH_ENCODE();
 	}
 
-	ENCODE(OP_ManaChange)
-	{
-		ENCODE_LENGTH_EXACT(ManaChange_Struct);
-		SETUP_DIRECT_ENCODE(ManaChange_Struct, structs::ManaChange_Struct);
-
-		OUT(new_mana);
-		OUT(stamina);
-		OUT(spell_id);
-		OUT(keepcasting);
-		eq->slot = -1; // this is spell gem slot. It's -1 in normal operation
-
-		FINISH_ENCODE();
-	}
-
 	ENCODE(OP_MercenaryDataResponse)
 	{
 		//consume the packet

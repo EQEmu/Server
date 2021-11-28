@@ -153,7 +153,7 @@ void command_npcedit(Client *c, const Seperator *sep)
 		);
 		c->Message(
 			Chat::White,
-			"#npcedit flymode - Sets an NPC's flymode [0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running]"
+			"#npcedit flymode - Sets an NPC's Fly Mode [0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running]"
 		);
 		c->Message(
 			Chat::White,
@@ -1271,29 +1271,17 @@ void command_npcedit(Client *c, const Seperator *sep)
 	}
 
 	if (strcasecmp(sep->arg[1], "flymode") == 0) {
-		auto        flymode_id   = atoi(sep->arg[2]);
-		std::string flymode_name = "Unknown";
-		if (flymode_id == GravityBehavior::Ground) {
-			flymode_name = "Ground";
-		}
-		else if (flymode_id == GravityBehavior::Flying) {
-			flymode_name = "Flying";
-		}
-		else if (flymode_id == GravityBehavior::Levitating) {
-			flymode_name = "Levitating";
-		}
-		else if (flymode_id == GravityBehavior::Water) {
-			flymode_name = "Water";
-		}
-		else if (flymode_id == GravityBehavior::Floating) {
-			flymode_name = "Floating";
-		}
-		else if (flymode_id == GravityBehavior::LevitateWhileRunning) {
-			flymode_name = "Levitating While Running";
-		}
+		auto flymode_id = static_cast<uint8>(std::stoul(sep->arg[2]));
+		std::string flymode_name = EQ::constants::GetFlyModeName(flymode_id);
 		c->Message(
 			Chat::Yellow,
-			fmt::format("NPC ID {} is now using Fly Mode {} ({}).", npc_id, flymode_name, flymode_id).c_str());
+			fmt::format(
+				"NPC ID {} is now using Fly Mode {} ({}).",
+				npc_id,
+				flymode_name,
+				flymode_id
+			).c_str()
+		);
 		std::string query = fmt::format("UPDATE npc_types SET flymode = {} WHERE id = {}", flymode_id, npc_id);
 		content_db.QueryDatabase(query);
 		return;

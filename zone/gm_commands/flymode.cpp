@@ -2,39 +2,45 @@
 
 void command_flymode(Client *c, const Seperator *sep)
 {
-	Mob *t = c;
-
-	if (strlen(sep->arg[1]) == 1 && sep->IsNumber(1) && atoi(sep->arg[1]) >= 0 && atoi(sep->arg[1]) <= 5) {
-		if (c->GetTarget()) {
-			t = c->GetTarget();
-		}
-
-		int fm = atoi(sep->arg[1]);
-
-		t->SetFlyMode(static_cast<GravityBehavior>(fm));
-		t->SendAppearancePacket(AT_Levitate, fm);
-		if (sep->arg[1][0] == '0') {
-			c->Message(Chat::White, "Setting %s to Grounded", t->GetName());
-		}
-		else if (sep->arg[1][0] == '1') {
-			c->Message(Chat::White, "Setting %s to Flying", t->GetName());
-		}
-		else if (sep->arg[1][0] == '2') {
-			c->Message(Chat::White, "Setting %s to Levitating", t->GetName());
-		}
-		else if (sep->arg[1][0] == '3') {
-			c->Message(Chat::White, "Setting %s to In Water", t->GetName());
-		}
-		else if (sep->arg[1][0] == '4') {
-			c->Message(Chat::White, "Setting %s to Floating(Boat)", t->GetName());
-		}
-		else if (sep->arg[1][0] == '5') {
-			c->Message(Chat::White, "Setting %s to Levitating While Running", t->GetName());
-		}
+	int arguments = sep->argnum;
+	if (!arguments || !sep->IsNumber(1)) {
+		return;
 	}
-	else {
-		c->Message(Chat::White, "#flymode [0/1/2/3/4/5]");
+
+	Mob *target = c;
+	if (c->GetTarget()) {
+		target = c->GetTarget();
 	}
+
+	auto flymode_id = std::stoul(sep->arg[1]);
+	if (
+		flymode_id < EQ::constants::GravityBehavior::Ground &&
+		flymode_id > EQ::constants::GravityBehavior::LevitateWhileRunning
+	) {		
+		c->Message(Chat::White, "Usage:: #flymode [Flymode ID]");
+		c->Message(Chat::White, "0 = Ground, 1 = Flying, 2 = Levitating, 3 = Water, 4 = Floating, 5 = Levitating While Running");
+		return;
+	}
+
+	target->SetFlyMode(static_cast<GravityBehavior>(flymode_id));
+	target->SendAppearancePacket(AT_Levitate, flymode_id);
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Fly Mode for {} is now {} ({}).",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			EQ::constants::GetFlyModeName(flymode_id),
+			flymode_id
+		).c_str()
+	);
 }
 
 
