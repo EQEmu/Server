@@ -42,53 +42,66 @@ void command_viewcurrencies(Client *c, const Seperator *sep)
 		target->GetMoney(0, 2)
 	);
 
-	c->Message(
-		Chat::White,
-		fmt::format(
-			"Money for {} | {}",
-			target_string,
-			ConvertMoneyToString(
-				platinum,
-				gold,
-				silver,
-				copper
-			)
-		).c_str()
-	);
-
 	if (
-		target->GetEbonCrystals() ||
-		target->GetRadiantCrystals()
+		platinum ||
+		gold ||
+		silver ||
+		copper
 	) {
 		c->Message(
 			Chat::White,
 			fmt::format(
-				"Crystals for {} | {}: {} {}: {}",
+				"Money for {} | {}",
 				target_string,
-				database.CreateItemLink(RuleI(Zone, EbonCrystalItemID)),
-				target->GetEbonCrystals(),
-				database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID)),
-				target->GetRadiantCrystals()
+				ConvertMoneyToString(
+					platinum,
+					gold,
+					silver,
+					copper
+				)
 			).c_str()
 		);
 	}
 
-	auto alternate_currency = zone->AlternateCurrencies.begin();
-	while (alternate_currency != zone->AlternateCurrencies.end()) {
-		auto currency_id = alternate_currency->id;
-		auto currency_value = target->GetAlternateCurrencyValue(currency_id);
+	auto ebon_crystals = target->GetEbonCrystals();
+	if (ebon_crystals) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} for {} | {}",
+				database.CreateItemLink(RuleI(Zone, EbonCrystalItemID)),
+				target_string,
+				ebon_crystals
+			).c_str()
+		);
+	}
+
+	auto radiant_crystals = target->GetRadiantCrystals();
+	if (radiant_crystals) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"{} for {} | {}",
+				database.CreateItemLink(RuleI(Zone, RadiantCrystalItemID)),
+				target_string,
+				radiant_crystals
+			).c_str()
+		);
+	}
+
+	for (const auto& alternate_currency : zone->AlternateCurrencies) {
+		auto currency_value = target->GetAlternateCurrencyValue(alternate_currency.id);
 		if (currency_value) {
 			c->Message(
 				Chat::White,
 				fmt::format(
 					"{} for {} | {}",
-					database.CreateItemLink(alternate_currency->item_id),
+					database.CreateItemLink(alternate_currency.item_id),
 					target_string,
 					currency_value
 				).c_str()
 			);
 		}
-		++alternate_currency;
 	}
 
 	for (
