@@ -2,20 +2,28 @@
 
 void command_heal(Client *c, const Seperator *sep)
 {
-	auto target = c->GetTarget() ? c->GetTarget() : c;
+	Mob* target = c;
+	if (c->GetTarget()) {
+		target = c->GetTarget();
+	}
+
 	target->Heal();
-	if (c != target) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Healed {} ({}) to full.",
-				target->GetCleanName(),
-				target->GetID()
-			).c_str()
-		);
-	}
-	else {
-		c->Message(Chat::White, "Healed yourself to full.");
-	}
+	
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Set {} to full Health ({}).",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			target->GetMaxHP()
+		).c_str()
+	);
 }
 

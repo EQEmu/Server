@@ -4440,9 +4440,17 @@ void Mob::BuffFadeBySlot(int slot, bool iRecalcBonuses)
 			case SE_EyeOfZomm:
 			{
 				if (IsClient())
-					{
-					CastToClient()->SetControlledMobId(0);
+				{
+					NPC* tmp_eye_of_zomm = entity_list.GetNPCByID(CastToClient()->GetControlledMobId());
+					//On live there is about a 6 second delay before it despawns once new one spawns. 
+					if (tmp_eye_of_zomm) {
+						tmp_eye_of_zomm->GetSwarmInfo()->duration->Disable();
+						tmp_eye_of_zomm->GetSwarmInfo()->duration->Start(6000);
+						tmp_eye_of_zomm->DisableSwarmTimer();
+						tmp_eye_of_zomm->StartSwarmTimer(6000);
 					}
+					CastToClient()->SetControlledMobId(0);
+				}
 			}
 
 			case SE_Weapon_Stance:

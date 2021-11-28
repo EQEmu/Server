@@ -3,86 +3,156 @@
 
 void command_gmzone(Client *c, const Seperator *sep)
 {
-	if (!sep->arg[1]) {
-		c->Message(Chat::White, "Usage");
-		c->Message(Chat::White, "-------");
-		c->Message(Chat::White, "#gmzone [zone_short_name] [zone_version=0]");
+	int arguments = sep->argnum;
+	if (!arguments) {
+		c->Message(Chat::White, "Usage: #gmzone [Zone ID|Zone Short Name] [Version] [Instance Identifier]");
 		return;
 	}
 
-	std::string zone_short_name_string = sep->arg[1];
-	const char  *zone_short_name       = sep->arg[1];
-	auto        zone_version           = static_cast<uint32>(sep->arg[2] ? atoi(sep->arg[2]) : 0);
-	std::string identifier             = "gmzone";
-	uint32      zone_id                = ZoneID(zone_short_name);
-	uint32      duration               = 100000000;
-	uint16      instance_id            = 0;
+	std::string zone_short_name = str_tolower(
+		sep->IsNumber(1) ?
+		ZoneName(std::stoul(sep->arg[1]), true) :
+		sep->arg[1]
+	);
+	bool is_unknown_zone = zone_short_name.find("unknown") != std::string::npos;
+	if (is_unknown_zone) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Zone {} could not be found.",
+				zone_short_name
+			).c_str()
+		);
+	}
 
-	if (zone_id == 0) {
-		c->Message(Chat::Red, "Invalid zone specified");
+	auto zone_id = ZoneID(zone_short_name);
+	if (!zone_id) {
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Zone ID {} could not be found.",
+				zone_id
+			).c_str()
+		);
 		return;
 	}
 
-	if (sep->arg[3] && sep->arg[3][0]) {
-		identifier = sep->arg[3];
-	}
+	std::string zone_long_name = ZoneLongName(zone_id);
 
-	std::string bucket_key             = StringFormat(
-		"%s-%s-%u-instance",
+	auto zone_version = (
+		sep->IsNumber(2) ?
+		std::stoul(sep->arg[2]) :
+		0
+	);
+	
+	std::string instance_identifier = (
+		sep->arg[3] ?
+		sep->arg[3] :
+		"gmzone"
+	);
+	
+	auto bucket_key = fmt::format(
+		"{}-{}-{}-instance",
 		zone_short_name,
-		identifier.c_str(),
+		instance_identifier,
 		zone_version
 	);
-	std::string existing_zone_instance = DataBucket::GetData(bucket_key);
 
-	if (existing_zone_instance.length() > 0) {
+	auto existing_zone_instance = DataBucket::GetData(bucket_key);
+	uint16 instance_id = 0;
+	uint32 duration = 100000000;
+
+	if (!existing_zone_instance.empty()) {
 		instance_id = std::stoi(existing_zone_instance);
-
-		c->Message(Chat::Yellow, "Found already created instance (%s) (%u)", zone_short_name, instance_id);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"You already have an Instance ID of {} for Version {} of {} ({}).",
+				instance_id,
+				zone_version,
+				zone_long_name,
+				zone_short_name
+			).c_str()
+		);
 	}
 
-	if (instance_id == 0) {
+	if (!instance_id) {
 		if (!database.GetUnusedInstanceID(instance_id)) {
-			c->Message(Chat::Red, "Server was unable to find a free instance id.");
+			c->Message(Chat::White, "Failed to find an unused Instance ID.");
 			return;
 		}
 
 		if (!database.CreateInstance(instance_id, zone_id, zone_version, duration)) {
-			c->Message(Chat::Red, "Server was unable to create a new instance.");
+			c->Message(Chat::White, "Failed to create an Instance.");
 			return;
 		}
 
 		c->Message(
-			Chat::Yellow,
-			"New private GM instance %s was created with id %lu.",
-			zone_short_name,
-			(unsigned long) instance_id
+			Chat::White,
+			fmt::format(
+				"New GM Instance ID {} for Version {} of {} ({}) was created.",
+				instance_id,
+				zone_version,
+				zone_long_name,
+				zone_short_name
+			).c_str()
 		);
-		DataBucket::SetData(bucket_key, std::to_string(instance_id));
+
+		DataBucket::SetData(
+			bucket_key,
+			std::to_string(instance_id)
+		);
 	}
 
-	if (instance_id > 0) {
-		float target_x   = -1, target_y = -1, target_z = -1, target_heading = -1;
+	if (instance_id) {
+		float target_x = -1, target_y = -1, target_z = -1, target_heading = -1;
 		int16 min_status = AccountStatus::Player;
-		uint8 min_level  = 0;
+		uint8 min_level = 0;
 
-		if (!content_db.GetSafePoints(
-			zone_short_name,
-			zone_version,
-			&target_x,
-			&target_y,
-			&target_z,
-			&target_heading,
-			&min_status,
-			&min_level
-		)) {
-			c->Message(Chat::Red, "Failed to find safe coordinates for specified zone");
+		if (
+			!content_db.GetSafePoints(
+				zone_short_name.c_str(),
+				zone_version,
+				&target_x,
+				&target_y,
+				&target_z,
+				&target_heading,
+				&min_status,
+				&min_level
+			)
+		) {
+			c->Message(
+				Chat::White,
+				fmt::format(
+					"Failed to find the safe coordinates for Version {} of {} ({}).",
+					zone_version,
+					zone_long_name,
+					zone_short_name
+				).c_str()
+			);
 		}
 
-		c->Message(Chat::Yellow, "Zoning to private GM instance (%s) (%u)", zone_short_name, instance_id);
+		c->Message(
+			Chat::White,
+			fmt::format(
+				"Zoning to GM Instance ID {} for Version {} of {} ({}).",
+				instance_id,
+				zone_version,
+				zone_long_name,
+				zone_short_name
+			).c_str()
+		);
 
 		c->AssignToInstance(instance_id);
-		c->MovePC(zone_id, instance_id, target_x, target_y, target_z, target_heading, 1);
+		c->MovePC(
+			zone_id,
+			instance_id,
+			target_x,
+			target_y,
+			target_z,
+			target_heading,
+			1
+		);
 	}
 }
 

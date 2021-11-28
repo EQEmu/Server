@@ -2,26 +2,35 @@
 
 void command_endurance(Client *c, const Seperator *sep)
 {
-	auto target = c->GetTarget() ? c->GetTarget() : c;
-	if (target->IsClient()) {
-		target->CastToClient()->SetEndurance(target->CastToClient()->GetMaxEndurance());
-	}
-	else {
-		target->SetEndurance(target->GetMaxEndurance());
+	Mob* target = c;
+	if (c->GetTarget()) {
+		target = c->GetTarget();
 	}
 
-	if (c != target) {
-		c->Message(
-			Chat::White,
-			fmt::format(
-				"Set {} ({}) to full Endurance.",
-				target->GetCleanName(),
-				target->GetID()
-			).c_str()
-		);
+	int endurance = 0;
+	if (target->IsClient()) {
+		endurance = target->CastToClient()->GetMaxEndurance();
+		target->CastToClient()->SetEndurance(endurance);
+	} else {
+		endurance = target->GetMaxEndurance();
+		target->SetEndurance(endurance);
 	}
-	else {
-		c->Message(Chat::White, "Restored your Endurance to full.");
-	}
+
+	c->Message(
+		Chat::White,
+		fmt::format(
+			"Set {} to full Endurance ({}).",
+			(
+				c == target ?
+				"yourself" :
+				fmt::format(
+					"{} ({})",
+					target->GetCleanName(),
+					target->GetID()
+				)
+			),
+			endurance
+		).c_str()
+	);
 }
 
