@@ -41,7 +41,7 @@ void command_countitem(Client *c, const Seperator *sep)
 	c->Message(
 		Chat::White,
 		fmt::format(
-			"{} {}{} {} {}.",
+			"{} {} {} {}.",
 			(
 				c == target ?
 				"You" :
@@ -51,20 +51,11 @@ void command_countitem(Client *c, const Seperator *sep)
 					target->GetID()
 				)
 			),
-			(
-				!item_count ?
-				(
-					c == target ?
-					"do not " :
-					"does not "
-				) :
-				""
-			),
 			c == target ? "have" : "has",
 			(
 				item_count ?
 				std::to_string(item_count) :
-				"any"
+				"no"
 			),
 			database.CreateItemLink(item_id)
 		).c_str()
