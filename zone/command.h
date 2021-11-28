@@ -247,6 +247,7 @@ void command_setanim(Client *c, const Seperator *sep);
 void command_setcrystals(Client *c, const Seperator *sep);
 void command_setfaction(Client *c, const Seperator *sep);
 void command_setgraveyard(Client *c, const Seperator *sep);
+void command_sethp(Client *c, const Seperator *sep);
 void command_setlanguage(Client *c, const Seperator *sep);
 void command_setlsinfo(Client *c, const Seperator *sep);
 void command_setmana(Client *c, const Seperator *sep);
