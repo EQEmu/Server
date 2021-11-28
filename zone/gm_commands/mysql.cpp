@@ -21,13 +21,13 @@ void command_mysql(Client *c, const Seperator *sep)
 	if (is_help) {
 		c->Message(Chat::White, "Usage: #mysql query \"Query goes here quoted\"");
 		c->Message(Chat::White, "Note: To use 'LIKE \"%%something%%\"  replace the %% with a #");
-		c->Message(Chat::White, "Usage: #mysql query \"SELECT * FROM items WHERE `name` LIKE \"#Apple#\"");
+		c->Message(Chat::White, "Example: #mysql query \"SELECT * FROM items WHERE `name` LIKE \"#Apple#\"");
 		return;
 	} else if (is_query) {
 		if (arguments < 2) {
 			c->Message(Chat::White, "Usage: #mysql query \"Query goes here quoted\"");
 			c->Message(Chat::White, "Note: To use 'LIKE \"%%something%%\"  replace the %% with a #");
-			c->Message(Chat::White, "Usage: #mysql query \"SELECT * FROM items WHERE `name` LIKE \"#Apple#\"");
+			c->Message(Chat::White, "Example: #mysql query \"SELECT * FROM items WHERE `name` LIKE \"#Apple#\"");
 			return;
 		}
 
