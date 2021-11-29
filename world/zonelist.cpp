@@ -30,7 +30,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 #include "world_store.h"
 
 extern uint32 numzones;
-extern bool holdzones;
 extern EQ::Random emu_random;
 extern WebInterfaceList web_interface;
 volatile bool UCSServerAvailable_ = false;
