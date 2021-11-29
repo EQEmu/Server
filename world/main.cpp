@@ -119,7 +119,6 @@ EQ::Random          emu_random;
 volatile bool       RunLoops   = true;
 uint32              numclients = 0;
 uint32              numzones   = 0;
-bool                holdzones  = false;
 const WorldConfig   *Config;
 EQEmuLogSys         LogSys;
 WorldContentService content_service;
