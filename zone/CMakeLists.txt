@@ -507,7 +507,6 @@ SET(gm_commands
     gm_commands/showbonusstats.cpp
     gm_commands/showbuffs.cpp
     gm_commands/shownpcgloballoot.cpp
-    gm_commands/shownumhits.cpp
     gm_commands/showskills.cpp
     gm_commands/showspellslist.cpp
     gm_commands/showstats.cpp

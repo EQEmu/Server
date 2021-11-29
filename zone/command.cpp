@@ -342,7 +342,6 @@ int command_init(void)
 		command_add("setxp", "[value] - Set your or your player target's experience", AccountStatus::GMAdmin, command_setxp) ||
 		command_add("showbonusstats", "[item|spell|all] Shows bonus stats for target from items or spells. Shows both by default.", AccountStatus::Guide, command_showbonusstats) ||
 		command_add("showbuffs", "- List buffs active on your target or you if no target", AccountStatus::Guide, command_showbuffs) ||
-		command_add("shownumhits",  "Shows buffs numhits for yourself.", AccountStatus::Player, command_shownumhits) ||
 		command_add("shownpcgloballoot", "Show GlobalLoot entires on this npc", AccountStatus::Guide, command_shownpcgloballoot) ||
 		command_add("showskills", "- Show the values of your or your player target's skills", AccountStatus::Guide, command_showskills) ||
 		command_add("showspellslist", "Shows spell list of targeted NPC", AccountStatus::GMAdmin, command_showspellslist) ||

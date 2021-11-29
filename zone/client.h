@@ -1577,8 +1577,6 @@ public:
 	int mod_food_value(const EQ::ItemData *item, int change);
 	int mod_drink_value(const EQ::ItemData *item, int change);
 
-	void ShowNumHits(); // work around function for numhits not showing on buffs
-
 	void ApplyWeaponsStance();
 	void TogglePassiveAlternativeAdvancement(const AA::Rank &rank, uint32 ability_id);
 	bool UseTogglePassiveHotkey(const AA::Rank &rank);
