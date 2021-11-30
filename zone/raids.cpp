@@ -733,12 +733,8 @@ void Raid::BalanceMana(int32 penalty, uint32 gid, float range, Mob* caster, int3
 
 //basically the same as Group's version just with more people like a lot of non group specific raid stuff
 //this only functions if the member has a group in the raid. This does not support /autosplit?
-void Raid::SplitMoney(uint32 group_id, uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
+void Raid::SplitMoney(uint32 copper, uint32 silver, uint32 gold, uint32 platinum, Client *splitter)
 {
-	if (group_id == RAID_GROUPLESS) {
-		return;
-	}
-
 	if (
 		!platinum &&
 		!gold &&
@@ -751,10 +747,7 @@ void Raid::SplitMoney(uint32 group_id, uint32 copper, uint32 silver, uint32 gold
 	uint32 member_index;
 	uint8 split_count = 0;
 	for (member_index = 0; member_index < MAX_RAID_MEMBERS; member_index++) {
-		if (
-			members[member_index].member &&
-			members[member_index].GroupNumber == group_id
-		) {
+		if (members[member_index].member) {
 			split_count++;
 		}
 	}
@@ -764,7 +757,7 @@ void Raid::SplitMoney(uint32 group_id, uint32 copper, uint32 silver, uint32 gold
 	}
 
 	uint32 split_modifier;
-	if(split_count > 1) {
+	if (split_count > 1) {
 		split_modifier = platinum % split_count;
 		if (split_modifier) {
 			platinum -= split_modifier;

@@ -176,16 +176,15 @@ XS(XS_Raid_SplitMoney); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Raid_SplitMoney) {
 	dXSARGS;
 	if (items != 5)
-		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 gid, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)"); // @categories Currency and Points, Raid
+		Perl_croak(aTHX_ "Usage: Raid::SplitMoney(THIS, uint32 copper, uint32 silver, uint32 gold, uint32 platinum)"); // @categories Currency and Points, Raid
 	{
 		Raid   *THIS;
-		uint32 gid      = (uint32) SvUV(ST(1));
-		uint32 copper   = (uint32) SvUV(ST(2));
-		uint32 silver   = (uint32) SvUV(ST(3));
-		uint32 gold     = (uint32) SvUV(ST(4));
-		uint32 platinum = (uint32) SvUV(ST(5));
+		uint32 copper   = (uint32) SvUV(ST(1));
+		uint32 silver   = (uint32) SvUV(ST(2));
+		uint32 gold     = (uint32) SvUV(ST(3));
+		uint32 platinum = (uint32) SvUV(ST(4));
 		VALIDATE_THIS_IS_RAID;
-		THIS->SplitMoney(gid, copper, silver, gold, platinum);
+		THIS->SplitMoney(copper, silver, gold, platinum);
 	}
 	XSRETURN_EMPTY;
 }
@@ -437,7 +436,7 @@ XS(boot_Raid) {
 	newXSproto(strcpy(buf, "IsRaidMember"), XS_Raid_IsRaidMember, file, "$$");
 	newXSproto(strcpy(buf, "RaidCount"), XS_Raid_RaidCount, file, "$");
 	newXSproto(strcpy(buf, "SplitExp"), XS_Raid_SplitExp, file, "$$$");
-	newXSproto(strcpy(buf, "SplitMoney"), XS_Raid_SplitMoney, file, "$$$$$$");
+	newXSproto(strcpy(buf, "SplitMoney"), XS_Raid_SplitMoney, file, "$$$$$");
 	newXSproto(strcpy(buf, "TeleportGroup"), XS_Raid_TeleportGroup, file, "$$$$$$$$");
 	newXSproto(strcpy(buf, "TeleportRaid"), XS_Raid_TeleportRaid, file, "$$$$$$$");
 	XSRETURN_YES;
