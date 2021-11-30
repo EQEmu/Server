@@ -1083,7 +1083,6 @@ void Corpse::MakeLootRequestPackets(Client* client, const EQApplicationPacket* a
 			d->gold = 0;
 			d->platinum = 0;
 			client_raid->SplitMoney(
-				client_raid->GetGroup(client),
 				GetCopper(),
 				GetSilver(),
 				GetGold(),
