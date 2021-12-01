@@ -4178,10 +4178,10 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 		//AA Procs
 		if (IsClient()){
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
-				int32 aa_rank_id = aabonuses.DefensiveProc[i];
-				int32 aa_spell_id = aabonuses.DefensiveProc[i + 1];
-				int32 aa_proc_chance = 100 + aabonuses.DefensiveProc[i + 2];
-				uint32 aa_proc_reuse_timer = aabonuses.DefensiveProc[i + 3];
+				int32 aa_rank_id = aabonuses.DefensiveProc[i + +SBIndex::COMBAT_PROC_ORIGIN_ID];
+				int32 aa_spell_id = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
+				int32 aa_proc_chance = 100 + aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
+				uint32 aa_proc_reuse_timer = aabonuses.DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER];
 				
 				if (aa_rank_id) {
 					if (!IsProcLimitTimerActive(-aa_rank_id, aa_proc_reuse_timer, SE_DefensiveProc)) {
@@ -4411,7 +4411,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 	}
 
-	//AA Procs
+	//AA Melee and Ranged Procs
 	if (IsClient()) {
 		for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 

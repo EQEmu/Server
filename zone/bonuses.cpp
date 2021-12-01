@@ -1078,7 +1078,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					newbon->SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
 					newbon->SpellProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
 					newbon->SpellProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
-					newbon->SpellProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = 0;	  //Lock out Timer
+					newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	  //Lock out Timer
 					break;
 				}
 			}
@@ -1090,7 +1090,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					newbon->RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
 					newbon->RangedProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
 					newbon->RangedProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
-					newbon->RangedProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = 0;	   //Lock out Timer
+					newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	   //Lock out Timer
 					break;
 				}
 			}
@@ -1102,7 +1102,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] = rank.id;   //aa rank id
 					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_SPELL_ID] = base_value; //proc spell id
 					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_RATE_MOD] = limit_value; //proc rate modifer
-					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = 0;	  //Lock out Timer
+					newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = 0;	  //Lock out Timer
 					break;
 				}
 			}
@@ -1119,22 +1119,22 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 
 			for (int i = 0; i < MAX_AA_PROCS; i += 4) {
 				if (newbon->SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
-					if (!newbon->SpellProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER]) {
-						newbon->SpellProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = limit_value;//Lock out Timer
+					if (!newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->SpellProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
-					if (!newbon->RangedProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER]) {
-						newbon->RangedProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = limit_value;//Lock out Timer
+					if (!newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->RangedProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}
 
 				if (newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID] == rank.id) {
-					if (!newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER]) {
-						newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_LOCKOUT_TIMER] = limit_value;//Lock out Timer
+					if (!newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER]) {
+						newbon->DefensiveProc[i + SBIndex::COMBAT_PROC_REUSE_TIMER] = limit_value;//Lock out Timer
 						break;
 					}
 				}

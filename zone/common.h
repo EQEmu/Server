@@ -690,7 +690,7 @@ namespace SBIndex {
 	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA 
 	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA 
 	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA 
-	constexpr uint16 COMBAT_PROC_LOCKOUT_TIMER              = 3; // SPA 
+	constexpr uint16 COMBAT_PROC_REUSE_TIMER              = 3; // SPA 
 };
 
 

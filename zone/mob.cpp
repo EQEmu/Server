@@ -5621,22 +5621,6 @@ uint8 Mob::GetItemTypeBySkill(EQ::skills::SkillType skill)
 	}
  }
 
-
-bool Mob::PassLimitToSkill(uint16 spell_id, uint16 skill) {
-
-	if (!IsValidSpell(spell_id))
-		return false;
-
-	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spells[spell_id].effect_id[i] == SE_LimitToSkill){
-			if (spells[spell_id].base_value[i] == skill){
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 uint16 Mob::GetWeaponSpeedbyHand(uint16 hand) {
 
 	uint16 weapon_speed = 0;

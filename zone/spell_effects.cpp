@@ -8644,6 +8644,29 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	return true;
 }
 
+bool Mob::PassLimitToSkillNew(EQ::skills::SkillType skill, int32 spell_id)
+{
+	if (!IsValidSpell(spell_id)) {
+		return false;
+	}
+
+	int32 proc_spell_id = SPELL_UNKNOWN;
+
+	for (int i = 0; i < EFFECT_COUNT; i++) {
+		if (spells[spell_id].effect_id[i] == SE_SkillProc || spells[spell_id].effect_id[i] == SE_SkillProcSuccess) {
+			proc_spell_id = spells[spell_id].limit_value[i];
+		}
+
+		if (spells[spell_id].effect_id[i] == SE_LimitToSkill) {
+			if (spells[spell_id].base_value[i] == skill) {
+				return proc_spell_id;
+			}
+		}
+	}
+
+	return false;
+}
+
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)
 {
 	switch (type) {
