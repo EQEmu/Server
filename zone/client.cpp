@@ -2658,17 +2658,17 @@ bool Client::CheckAccess(int16 iDBLevel, int16 iDefaultLevel) {
 		return false;
 }
 
-void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing){
+void Client::MemorizeSpell(uint32 slot,uint32 spellid,uint32 scribing, uint32 reduction){
 	if (slot < 0 || slot >= EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellbookSize)
 		return;
 	if ((spellid < 3 || spellid > EQ::spells::DynamicLookup(ClientVersion(), GetGM())->SpellIdMax) && spellid != 0xFFFFFFFF)
 		return;
-
 	auto outapp = new EQApplicationPacket(OP_MemorizeSpell, sizeof(MemorizeSpell_Struct));
 	MemorizeSpell_Struct* mss=(MemorizeSpell_Struct*)outapp->pBuffer;
 	mss->scribing=scribing;
 	mss->slot=slot;
 	mss->spell_id=spellid;
+	mss->reduction = reduction;
 	outapp->priority = 5;
 	QueuePacket(outapp);
 	safe_delete(outapp);

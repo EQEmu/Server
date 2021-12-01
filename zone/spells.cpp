@@ -882,6 +882,7 @@ void Mob::ZeroCastingVars()
 	casting_spell_resist_adjust = 0;
 	casting_spell_checks = false;
 	casting_spell_aa_id = 0;
+	casting_spell_recast_adjust = 0;
 	delaytimer = false;
 }
 
@@ -1502,10 +1503,12 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			if((IsFromItem  && RuleB(Character, SkillUpFromItems)) || !IsFromItem) {
 				c->CheckSongSkillIncrease(spell_id);
 			}
-			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems)
-				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, spells[spell_id].recast_time / 1000);
-			if(RuleB(Spells, EnableBardMelody))
-				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
+				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
+			}
+			if (RuleB(Spells, EnableBardMelody)) {
+				c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
+			}
 		}
 		LogSpells("Bard song [{}] should be started", spell_id);
 	}
@@ -1517,9 +1520,11 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 			SendSpellBarEnable(spell_id);
 
 			// this causes the delayed refresh of the spell bar gems
-			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems)
-				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, spells[spell_id].recast_time / 1000);
-			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar);
+			if (spells[spell_id].timer_id > 0 && slot < CastingSlot::MaxGems) {
+				c->SetLinkedSpellReuseTimer(spells[spell_id].timer_id, (spells[spell_id].recast_time / 1000) - (casting_spell_recast_adjust / 1000));
+			}
+			
+			c->MemorizeSpell(static_cast<uint32>(slot), spell_id, memSpellSpellbar, casting_spell_recast_adjust);
 
 			// this tells the client that casting may happen again
 			SetMana(GetMana());
@@ -2575,13 +2580,23 @@ bool Mob::SpellFinished(uint16 spell_id, Mob *spell_target, CastingSlot slot, ui
 			{
 				recast -= GetAA(aaTouchoftheWicked) * 420;
 			}
-			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);//Client only
 
-			if(reduction)
+			int reduction = CastToClient()->GetFocusEffect(focusReduceRecastTime, spell_id);
+
+			if (reduction) {
 				recast -= reduction;
-
+				casting_spell_recast_adjust = reduction * 1000; //used later to adjust on client with memorizespell_struct
+				if (recast < 0) {
+					casting_spell_recast_adjust = spells[spell_id].recast_time;
+				}
+				recast = std::max(recast, 0);
+			}
+			
 			LogSpells("Spell [{}]: Setting long reuse timer to [{}] s (orig [{}])", spell_id, recast, spells[spell_id].recast_time);
-			CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			
+			if (recast > 0) {
+				CastToClient()->GetPTimers().Start(pTimerSpellStart + spell_id, recast);
+			}
 		}
 	}
 
