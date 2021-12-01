@@ -1529,6 +1529,7 @@ protected:
 	uint32 casting_spell_type;
 	int16 casting_spell_resist_adjust;
 	uint32 casting_spell_aa_id;
+	uint32 casting_spell_recast_adjust;
 	bool casting_spell_checks;
 	uint16 bardsong;
 	EQ::spells::CastingSlot bardsong_slot;
