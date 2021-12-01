@@ -4387,94 +4387,22 @@ int32 Mob::GetVulnerability(Mob* caster, uint32 spell_id, uint32 ticsremaining)
 	int32 fc_spell_damage_pct_incomingPC_mod = 0;
 
 	//Apply innate vulnerabilities from quest functions and tables
-	if (Vulnerability_Mod[GetSpellResistType(spell_id)] != 0)
+	if (Vulnerability_Mod[GetSpellResistType(spell_id)] != 0) {
 		innate_mod = Vulnerability_Mod[GetSpellResistType(spell_id)];
-
-	else if (Vulnerability_Mod[HIGHEST_RESIST+1] != 0)
-		innate_mod = Vulnerability_Mod[HIGHEST_RESIST+1];
-
-	//[Apply spell derived vulnerabilities] Step 1: Check this focus effect exists on the mob.
-	if (spellbonuses.FocusEffects[focusSpellVulnerability]){
-
-		int32 tmp_focus = 0;
-		int tmp_buffslot = -1;
-
-		/*
-		Find all buffs that may contain SPA 296, then find which slot has the highest possible effect. Since the focus can use
-		a min and max amount value to determine final focus amt. To find the best focus, use only max value if possible. Once the
-		best is found. Run it again to get the final value randoming between min and max.
-		*/
-		int buff_count = GetMaxTotalSlots();
-		for(int i = 0; i < buff_count; i++) {
-
-			if((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_FcSpellVulnerability))){
-
-				int32 focus = caster->CalcFocusEffect(focusSpellVulnerability, buffs[i].spellid, spell_id, true, buffs[tmp_buffslot].casterid);
-
-				if (!focus)
-					continue;
-
-				if (tmp_focus && focus > tmp_focus){
-					tmp_focus = focus;
-					tmp_buffslot = i;
-				}
-
-				else if (!tmp_focus){
-					tmp_focus = focus;
-					tmp_buffslot = i;
-				}
-			}
-		}
-
-		fc_spell_vulnerability_mod = caster->CalcFocusEffect(focusSpellVulnerability, buffs[tmp_buffslot].spellid, spell_id, false, buffs[tmp_buffslot].casterid);
-
-		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
+	}
+	else if (Vulnerability_Mod[HIGHEST_RESIST + 1] != 0) {
+		innate_mod = Vulnerability_Mod[HIGHEST_RESIST + 1];
 	}
 
-	if (spellbonuses.FocusEffects[focusFcSpellDamagePctIncomingPC]) {
-
-		int32 tmp_focus = 0;
-		int tmp_buffslot = -1;
-
-		/*
-		Find all buffs that may contain SPA 483, then find which slot has the highest possible effect. Since the focus can use
-		a min and max amount value to determine final focus amt. To find the best focus, use only max value if possible. Once the
-		best is found. Run it again to get the final value randoming between min and max.
-		*/
-		int buff_count = GetMaxTotalSlots();
-		for (int i = 0; i < buff_count; i++) {
-
-			if ((IsValidSpell(buffs[i].spellid) && IsEffectInSpell(buffs[i].spellid, SE_Fc_Spell_Damage_Pct_IncomingPC))) {
-
-				int32 focus = caster->CalcFocusEffect(focusFcSpellDamagePctIncomingPC, buffs[i].spellid, spell_id, true, buffs[tmp_buffslot].casterid);
-
-				if (!focus)
-					continue;
-
-				if (tmp_focus && focus > tmp_focus) {
-					tmp_focus = focus;
-					tmp_buffslot = i;
-				}
-
-				else if (!tmp_focus) {
-					tmp_focus = focus;
-					tmp_buffslot = i;
-				}
-			}
-		}
-
-		fc_spell_damage_pct_incomingPC_mod = caster->CalcFocusEffect(focusFcSpellDamagePctIncomingPC, buffs[tmp_buffslot].spellid, spell_id, false, buffs[tmp_buffslot].casterid);
-
-		if (tmp_buffslot >= 0)
-			CheckNumHitsRemaining(NumHit::MatchingSpells, tmp_buffslot);
-	}
-
+	fc_spell_vulnerability_mod = GetFocusEffect(focusSpellVulnerability, spell_id);
+	fc_spell_damage_pct_incomingPC_mod = GetFocusEffect(focusFcSpellDamagePctIncomingPC, spell_id);
+	
 	total_mod = fc_spell_vulnerability_mod + fc_spell_damage_pct_incomingPC_mod;
 
 	//Don't let focus derived mods reduce past 99% mitigation. Quest related can, and for custom functionality if negative will give a healing affect instead of damage.
-	if (total_mod < -99)
+	if (total_mod < -99) {
 		total_mod = -99;
+	}
 
 	total_mod += innate_mod;
 	return total_mod;
