@@ -196,12 +196,12 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	DoAttack(who, my_hit);
 
 	who->AddToHateList(this, hate, 0);
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SKILL] == skill &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] / 1000.0f;
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == skill &&
+		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID], who, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID]].resist_difficulty);
+			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], who, EQ::spells::CastingSlot::Item, 0, -1,
+						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 	}
 
 	who->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, skill, false);
@@ -2228,12 +2228,12 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	}
 
 	other->AddToHateList(this, hate, 0);
-	if (damage > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SKILL] == skillinuse &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] / 1000.0f;
+	if (damage > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == skillinuse &&
+		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID]].resist_difficulty);
+			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
+						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 	}
 
 	other->Damage(this, damage, SPELL_UNKNOWN, skillinuse);

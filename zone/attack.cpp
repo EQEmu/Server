@@ -1603,12 +1603,12 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 	///////////////////////////////////////////////////////////
 	////// Send Attack Damage
 	///////////////////////////////////////////////////////////
-	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SKILL] == my_hit.skill &&
-		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID])) {
-		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLPROC_CHANCE] / 1000.0f;
+	if (my_hit.damage_done > 0 && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] && aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SKILL] == my_hit.skill &&
+		IsValidSpell(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID])) {
+		float chance = aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_CHANCE] / 1000.0f;
 		if (zone->random.Roll(chance))
-			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
-						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLPROC_SPELL_ID]].resist_difficulty);
+			SpellFinished(aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID], other, EQ::spells::CastingSlot::Item, 0, -1,
+						  spells[aabonuses.SkillAttackProc[SBIndex::SKILLATK_PROC_SPELL_ID]].resist_difficulty);
 	}
 	other->Damage(this, my_hit.damage_done, SPELL_UNKNOWN, my_hit.skill, true, -1, false, m_specialattacks);
 
@@ -4423,17 +4423,17 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 
 			if (!rangedattk) {
 
-				aa_rank_id = aabonuses.SpellProc[i];
-				aa_spell_id = aabonuses.SpellProc[i + 1];
-				aa_proc_chance += aabonuses.SpellProc[i + 2];
-				aa_proc_reuse_timer = aabonuses.SpellProc[i + 3];
+				aa_rank_id = aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID];
+				aa_spell_id = aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
+				aa_proc_chance += aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
+				aa_proc_reuse_timer = aabonuses.SpellProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
 				proc_type = SE_WeaponProc;
 			}
 			else {
-				aa_rank_id = aabonuses.RangedProc[i];
-				aa_spell_id = aabonuses.RangedProc[i + 1];
-				aa_proc_chance += aabonuses.RangedProc[i + 2];
-				aa_proc_reuse_timer = aabonuses.RangedProc[i + 3];
+				aa_rank_id = aabonuses.RangedProc[i + SBIndex::COMBAT_PROC_ORIGIN_ID];
+				aa_spell_id = aabonuses.RangedProc[i + SBIndex::COMBAT_PROC_SPELL_ID];
+				aa_proc_chance += aabonuses.RangedProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
+				aa_proc_reuse_timer = aabonuses.RangedProc[i + SBIndex::COMBAT_PROC_RATE_MOD];
 				proc_type = SE_RangedProc;
 			}
 			

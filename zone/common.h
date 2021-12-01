@@ -670,9 +670,9 @@ namespace SBIndex {
 	constexpr uint16 POSITION_FRONT							= 1; // SPA 503-506
 	constexpr uint16 PET_RAMPAGE_CHANCE                     = 0; // SPA 464,465
 	constexpr uint16 PET_RAMPAGE_DMG_MOD                    = 1; // SPA 465,465
-	constexpr uint16 SKILLPROC_CHANCE                       = 0; // SPA 427
-	constexpr uint16 SKILLPROC_SKILL                        = 1; // SPA 427
-	constexpr uint16 SKILLPROC_SPELL_ID                     = 2; // SPA 427
+	constexpr uint16 SKILLATK_PROC_CHANCE                   = 0; // SPA 427
+	constexpr uint16 SKILLATK_PROC_SKILL                    = 1; // SPA 427
+	constexpr uint16 SKILLATK_PROC_SPELL_ID                 = 2; // SPA 427
 	constexpr uint16 SLAYUNDEAD_RATE_MOD                    = 0; // SPA 219
 	constexpr uint16 SLAYUNDEAD_DMG_MOD                     = 1; // SPA 219
 	constexpr uint16 DOUBLE_RIPOSTE_CHANCE                  = 0; // SPA 223
@@ -687,6 +687,10 @@ namespace SBIndex {
 	constexpr uint16 REFLECT_CHANCE                         = 0; // SPA 158
 	constexpr uint16 REFLECT_RESISTANCE_MOD                 = 1; // SPA 158
 	constexpr uint16 REFLECT_DMG_EFFECTIVENESS              = 2; // SPA 158
+	constexpr uint16 COMBAT_PROC_ORIGIN_ID                  = 0; // SPA 
+	constexpr uint16 COMBAT_PROC_SPELL_ID                   = 1; // SPA 
+	constexpr uint16 COMBAT_PROC_RATE_MOD                   = 2; // SPA 
+	constexpr uint16 COMBAT_PROC_LOCKOUT_TIMER              = 3; // SPA 
 };
 
 
