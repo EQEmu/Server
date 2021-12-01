@@ -371,4 +371,10 @@ enum AccountStatus : uint8 {
 	Max = 255
 };
 
+enum Invisibility : uint8 {
+	Visible,
+	Invisible,
+	Special = 255
+};
+
 #endif /*COMMON_EMU_CONSTANTS_H*/
