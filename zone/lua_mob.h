@@ -373,7 +373,7 @@ public:
 	void ModSkillDmgTaken(int skill, int value);
 	int GetModSkillDmgTaken(int skill);
 	int GetSkillDmgTaken(int skill);
-	int GetFcDamageAmtIncoming(Lua_Mob caster, uint32 spell_id, bool use_skill, uint16 skill);
+	int GetFcDamageAmtIncoming(Lua_Mob caster, int32 spell_id);
 	int GetSkillDmgAmt(uint16 skill);
 	void SetAllowBeneficial(bool value);
 	bool GetAllowBeneficial();
