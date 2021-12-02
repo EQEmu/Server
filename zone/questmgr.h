@@ -115,6 +115,7 @@ public:
 	std::string getracename(uint16 race_id);
 	std::string getspellname(uint32 spell_id);
 	std::string getskillname(int skill_id);
+	std::string getldonthemename(uint32 theme_id);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);

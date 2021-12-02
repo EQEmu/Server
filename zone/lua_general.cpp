@@ -3351,6 +3351,10 @@ Lua_Spell lua_get_spell(uint32 spell_id) {
 	return Lua_Spell(spell_id);
 }
 
+std::string lua_get_ldon_theme_name(uint32 theme_id) {
+	return quest_manager.getldonthemename(theme_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3794,6 +3798,7 @@ luabind::scope lua_register_general() {
 		luabind::def("is_npc_spawned", &lua_is_npc_spawned),
 		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
 		luabind::def("get_spell", &lua_get_spell),
+		luabind::def("get_ldon_theme_name", &lua_get_ldon_theme_name),
 
 		/*
 			Cross Zone
