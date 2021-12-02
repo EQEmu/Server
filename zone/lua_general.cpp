@@ -3355,6 +3355,14 @@ std::string lua_get_ldon_theme_name(uint32 theme_id) {
 	return quest_manager.getldonthemename(theme_id);
 }
 
+std::string lua_get_faction_name(int faction_id) {
+	return quest_manager.getfactionname(faction_id);
+}
+
+std::string lua_get_language_name(int language_id) {
+	return quest_manager.getlanguagename(language_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3799,6 +3807,8 @@ luabind::scope lua_register_general() {
 		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
 		luabind::def("get_spell", &lua_get_spell),
 		luabind::def("get_ldon_theme_name", &lua_get_ldon_theme_name),
+		luabind::def("get_faction_name", &lua_get_faction_name),
+		luabind::def("get_language_name", &lua_get_language_name),
 
 		/*
 			Cross Zone
