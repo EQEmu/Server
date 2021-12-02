@@ -1040,6 +1040,10 @@ std::string QuestManager::getfactionname(int faction_id) {
 	return content_db.GetFactionName(faction_id);
 }
 
+std::string QuestManager::getlanguagename(int language_id) {
+	return EQ::constants::GetLanguageName(language_id);
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())
