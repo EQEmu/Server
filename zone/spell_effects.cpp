@@ -8959,7 +8959,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 		
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (spell_proclimit_spellid[i] == base_spell_id) {
 				if (spell_proclimit_timer[i].Enabled()) {
 					if (spell_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8972,7 +8972,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_RangedProc) {
+		else if (proc_type == ProcType::RANGED_PROC) {
 			if (ranged_proclimit_spellid[i] == base_spell_id) {
 				if (ranged_proclimit_timer[i].Enabled()) {
 					if (ranged_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -8985,7 +8985,7 @@ bool Mob::IsProcLimitTimerActive(int32 base_spell_id, uint32 proc_reuse_time, in
 				}
 			}
 		}
-		else if (proc_type == SE_DefensiveProc) {
+		else if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (def_proclimit_spellid[i] == base_spell_id) {
 				if (def_proclimit_timer[i].Enabled()) {
 					if (def_proclimit_timer[i].GetRemainingTime() > 0) {
@@ -9012,7 +9012,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 
 	for (int i = 0; i < MAX_PROC_LIMIT_TIMERS; i++) {
 
-		if (proc_type == SE_WeaponProc) {
+		if (proc_type == ProcType::MELEE_PROC) {
 			if (!spell_proclimit_spellid[i] && !is_set) {
 				spell_proclimit_spellid[i] = base_spell_id;
 				spell_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -9024,7 +9024,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_RangedProc) {
+		if (proc_type == ProcType::RANGED_PROC) {
 			if (!ranged_proclimit_spellid[i] && !is_set) {
 				ranged_proclimit_spellid[i] = base_spell_id;
 				ranged_proclimit_timer[i].SetTimer(proc_reuse_time);
@@ -9036,7 +9036,7 @@ void Mob::SetProcLimitTimer(int32 base_spell_id, uint32 proc_reuse_time, int pro
 			}
 		}
 
-		if (proc_type == SE_DefensiveProc) {
+		if (proc_type == ProcType::DEFENSIVE_PROC) {
 			if (!def_proclimit_spellid[i] && !is_set) {
 				def_proclimit_spellid[i] = base_spell_id;
 				def_proclimit_timer[i].SetTimer(proc_reuse_time);
