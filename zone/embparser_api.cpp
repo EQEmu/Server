@@ -8023,6 +8023,23 @@ XS(XS__getspell) {
     }
 }
 
+XS(XS__getlanguagename);
+XS(XS__getlanguagename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getlanguagename(int language_id)");
+	{
+		dXSTARG;
+		int language_id = (int) SvIV(ST(0));
+		std::string language_name = quest_manager.getlanguagename(language_id);
+
+		sv_setpv(TARG, language_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8315,6 +8332,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
 	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
+	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
