@@ -63,7 +63,7 @@ bool BaseGuildManager::LoadGuilds() {
 	for (auto row=results.begin();row!=results.end();++row)
 		_CreateGuild(atoi(row[0]), row[1], atoi(row[2]), atoi(row[3]), row[4], row[5], row[6], row[7]);
 
-    query = "SELECT guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
+    query = "SELECT guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace FROM guild_ranks";
 	results = m_db->QueryDatabase(query);
 
 	if (!results.Success())
@@ -131,7 +131,7 @@ bool BaseGuildManager::RefreshGuild(uint32 guild_id) {
 
 	info = _CreateGuild(guild_id, row[0], atoi(row[1]), atoi(row[2]), row[3], row[4], row[5], row[6]);
 
-    query = StringFormat("SELECT guild_id, rank, title, can_hear, can_speak, can_invite, can_remove, can_promote, can_demote, can_motd, can_warpeace "
+    query = StringFormat("SELECT guild_id, `rank`, title, can_hear, can_speak, can_invite, can_remove, can_promote, can_demote, can_motd, can_warpeace "
                         "FROM guild_ranks WHERE guild_id=%lu", (unsigned long)guild_id);
 	results = m_db->QueryDatabase(query);
 
@@ -268,7 +268,7 @@ bool BaseGuildManager::_StoreGuildDB(uint32 guild_id) {
 		m_db->DoEscapeString(title_esc, rankInfo.name.c_str(), rankInfo.name.length());
 
         query = StringFormat("INSERT INTO guild_ranks "
-        "(guild_id,rank,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
+        "(guild_id,`rank`,title,can_hear,can_speak,can_invite,can_remove,can_promote,can_demote,can_motd,can_warpeace)"
 		" VALUES(%d,%d,'%s',%d,%d,%d,%d,%d,%d,%d,%d)",
 			guild_id, rank, title_esc,
 			rankInfo.permissions[GUILD_HEAR],
@@ -738,7 +738,7 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 	std::string query;
 
 	if(guild_id != GUILD_NONE) {
-        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,rank,public_note) VALUES(%d,%d,%d,'')", charid, guild_id, rank);
+        query = StringFormat("REPLACE INTO guild_members (char_id,guild_id,`rank`,public_note) VALUES(%d,%d,%d,'')", charid, guild_id, rank);
         auto results = m_db->QueryDatabase(query);
 
 		if (!results.Success()) {
@@ -758,7 +758,7 @@ bool BaseGuildManager::DBSetGuild(uint32 charid, uint32 guild_id, uint8 rank) {
 }
 
 bool BaseGuildManager::DBSetGuildRank(uint32 charid, uint8 rank) {
-	std::string query = StringFormat("UPDATE guild_members SET rank=%d WHERE char_id=%d", rank, charid);
+	std::string query = StringFormat("UPDATE guild_members SET `rank`=%d WHERE char_id=%d", rank, charid);
 	return(QueryWithLogging(query, "setting a guild member's rank"));
 }
 
