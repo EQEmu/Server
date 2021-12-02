@@ -8023,7 +8023,6 @@ XS(XS__getspell) {
     }
 }
 
-
 XS(XS__getfactionname);
 XS(XS__getfactionname) {
 	dXSARGS;
