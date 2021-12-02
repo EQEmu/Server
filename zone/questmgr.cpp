@@ -1036,6 +1036,10 @@ std::string QuestManager::getskillname(int skill_id) {
 	return EQ::skills::GetSkillName(static_cast<EQ::skills::SkillType>(skill_id));
 }
 
+std::string QuestManager::getfactionname(int faction_id) {
+	return content_db.GetFactionName(faction_id);
+}
+
 std::string QuestManager::getlanguagename(int language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }

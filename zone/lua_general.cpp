@@ -3351,6 +3351,10 @@ Lua_Spell lua_get_spell(uint32 spell_id) {
 	return Lua_Spell(spell_id);
 }
 
+std::string lua_get_faction_name(int faction_id) {
+	return quest_manager.getfactionname(faction_id);
+}
+
 std::string lua_get_language_name(int language_id) {
 	return quest_manager.getlanguagename(language_id);
 }
@@ -3798,6 +3802,7 @@ luabind::scope lua_register_general() {
 		luabind::def("is_npc_spawned", &lua_is_npc_spawned),
 		luabind::def("count_spawned_npcs", &lua_count_spawned_npcs),
 		luabind::def("get_spell", &lua_get_spell),
+		luabind::def("get_faction_name", &lua_get_faction_name),
 		luabind::def("get_language_name", &lua_get_language_name),
 
 		/*

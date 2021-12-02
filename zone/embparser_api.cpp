@@ -8023,6 +8023,23 @@ XS(XS__getspell) {
     }
 }
 
+XS(XS__getfactionname);
+XS(XS__getfactionname) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getfactionname(int faction_id)");
+	{
+		dXSTARG;
+		int faction_id = (int) SvIV(ST(0));
+		std::string faction_name = quest_manager.getfactionname(faction_id);
+
+		sv_setpv(TARG, faction_name.c_str());
+    		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 XS(XS__getlanguagename);
 XS(XS__getlanguagename) {
 	dXSARGS;
@@ -8332,11 +8349,12 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "get_expedition_by_zone_instance"), XS__get_expedition_by_zone_instance, file);
 	newXS(strcpy(buf, "get_expedition_lockout_by_char_id"), XS__get_expedition_lockout_by_char_id, file);
 	newXS(strcpy(buf, "get_expedition_lockouts_by_char_id"), XS__get_expedition_lockouts_by_char_id, file);
-	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
+	newXS(strcpy(buf, "getfactionname"), XS__getfactionname, file);
 	newXS(strcpy(buf, "getinventoryslotid"), XS__getinventoryslotid, file);
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "getitemstat"), XS__getitemstat, file);
+  	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
 	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
