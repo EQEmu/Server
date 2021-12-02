@@ -5107,16 +5107,16 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 	if (spellbonuses.LimitToSkill[skill]) {
 
-		for (int e = 0; e < MAX_SKILL_PROCS; e++) {
+		for (int i = 0; i < MAX_SKILL_PROCS; i++) {
 			if (CanProc &&
-				((!Success && spellbonuses.SkillProc[e] && IsValidSpell(spellbonuses.SkillProc[e]))
-					|| (Success && spellbonuses.SkillProcSuccess[e] && IsValidSpell(spellbonuses.SkillProcSuccess[e])))) {
+				((!Success && spellbonuses.SkillProc[i] && IsValidSpell(spellbonuses.SkillProc[i]))
+					|| (Success && spellbonuses.SkillProcSuccess[i] && IsValidSpell(spellbonuses.SkillProcSuccess[i])))) {
 
 				if (Success) {
-					base_spell_id = spellbonuses.SkillProcSuccess[e];
+					base_spell_id = spellbonuses.SkillProcSuccess[i];
 				}
 				else {
-					base_spell_id = spellbonuses.SkillProc[e];
+					base_spell_id = spellbonuses.SkillProc[i];
 				}
 
 				proc_spell_id = 0;
@@ -5124,7 +5124,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 				for (int i = 0; i < EFFECT_COUNT; i++) {
 
-					if (spells[base_spell_id].effect_id[i] == SE_SkillProc || spells[base_spell_id].effect_id[i] == SE_SkillProcSuccess) {
+					if (spells[base_spell_id].effect_id[i] == SE_SkillProcAttempt || spells[base_spell_id].effect_id[i] == SE_SkillProcSuccess) {
 						proc_spell_id = spells[base_spell_id].base_value[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].limit_value[i]);
 					}
@@ -5153,23 +5153,23 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 
 	if (itembonuses.LimitToSkill[skill]) {
 		CanProc = true;
-		for (int e = 0; e < MAX_SKILL_PROCS; e++) {
+		for (int i = 0; i < MAX_SKILL_PROCS; i++) {
 			if (CanProc &&
-				((!Success && itembonuses.SkillProc[e] && IsValidSpell(itembonuses.SkillProc[e]))
-					|| (Success && itembonuses.SkillProcSuccess[e] && IsValidSpell(itembonuses.SkillProcSuccess[e])))) {
+				((!Success && itembonuses.SkillProc[i] && IsValidSpell(itembonuses.SkillProc[i]))
+					|| (Success && itembonuses.SkillProcSuccess[i] && IsValidSpell(itembonuses.SkillProcSuccess[i])))) {
 
 				if (Success) {
-					base_spell_id = itembonuses.SkillProcSuccess[e];
+					base_spell_id = itembonuses.SkillProcSuccess[i];
 				}
 				else {
-					base_spell_id = itembonuses.SkillProc[e];
+					base_spell_id = itembonuses.SkillProc[i];
 				}
 
 				proc_spell_id = 0;
 				ProcMod = 0;
 
 				for (int i = 0; i < EFFECT_COUNT; i++) {
-					if (spells[base_spell_id].effect_id[i] == SE_SkillProc || spells[base_spell_id].effect_id[i] == SE_SkillProcSuccess) {
+					if (spells[base_spell_id].effect_id[i] == SE_SkillProcAttempt || spells[base_spell_id].effect_id[i] == SE_SkillProcSuccess) {
 						proc_spell_id = spells[base_spell_id].base_value[i];
 						ProcMod = static_cast<float>(spells[base_spell_id].limit_value[i]);
 					}
@@ -5202,16 +5202,16 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 		int32 limit_value = 0;
 		uint32 slot = 0;
 
-		for (int e = 0; e < MAX_SKILL_PROCS; e++) {
+		for (int i = 0; i < MAX_SKILL_PROCS; i++) {
 			if (CanProc &&
-				((!Success && aabonuses.SkillProc[e])
-					|| (Success && aabonuses.SkillProcSuccess[e]))) {
+				((!Success && aabonuses.SkillProc[i])
+					|| (Success && aabonuses.SkillProcSuccess[i]))) {
 				int aaid = 0;
 
 				if (Success)
-					base_spell_id = aabonuses.SkillProcSuccess[e];
+					base_spell_id = aabonuses.SkillProcSuccess[i];
 				else
-					base_spell_id = aabonuses.SkillProc[e];
+					base_spell_id = aabonuses.SkillProc[i];
 
 				proc_spell_id = 0;
 				ProcMod = 0;
@@ -5231,7 +5231,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 						limit_value = effect.limit_value;
 						slot = effect.slot;
 
-						if (effect_id == SE_SkillProc || effect_id == SE_SkillProcSuccess) {
+						if (effect_id == SE_SkillProcAttempt || effect_id == SE_SkillProcSuccess) {
 							proc_spell_id = base_value;
 							ProcMod = static_cast<float>(limit_value);
 						}
@@ -5266,12 +5266,14 @@ float Mob::GetSkillProcChances(uint16 ReuseTime, uint16 hand) {
 	if (!ReuseTime && hand) {
 		weapon_speed = GetWeaponSpeedbyHand(hand);
 		ProcChance = static_cast<float>(weapon_speed) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
-		if (hand == EQ::invslot::slotSecondary)
+		if (hand == EQ::invslot::slotSecondary) {
 			ProcChance /= 2;
+		}
 	}
 
-	else
+	else {
 		ProcChance = static_cast<float>(ReuseTime) * (RuleR(Combat, AvgProcsPerMinute) / 60000.0f);
+	}
 
 	return ProcChance;
 }

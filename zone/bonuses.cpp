@@ -1470,7 +1470,7 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 			break;
 		}
 
-		case SE_SkillProc: {
+		case SE_SkillProcAttempt: {
 			for (int e = 0; e < MAX_SKILL_PROCS; e++) {
 				if (newbon->SkillProc[e] && newbon->SkillProc[e] == rank.id)
 					break; // Do not use the same aa id more than once.
@@ -3548,7 +3548,7 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 				break;
 			}
 
-			case SE_SkillProc:{
+			case SE_SkillProcAttempt:{
 
 				for(int e = 0; e < MAX_SKILL_PROCS; e++)
 				{
@@ -5529,7 +5529,7 @@ void Mob::NegateSpellEffectBonuses(uint16 spell_id)
 					}
 				}
 
-				case SE_SkillProc: {
+				case SE_SkillProcAttempt: {
 					for (int e = 0; e < MAX_SKILL_PROCS; e++)
 					{
 						if (negate_spellbonus) { spellbonuses.SkillProc[e] = effect_value; }

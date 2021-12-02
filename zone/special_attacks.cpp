@@ -900,34 +900,39 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillArchery);
 
-	// Skill Proc Success
-	if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime)
-			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
-		else
-			TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
-	}
-	// end of old fuck
 
-	if (LaunchProjectile)
-		return; // Shouldn't reach this point durring initial launch phase, but just in case.
 
 	// Weapon Proc
-	if (RangeWeapon && other && !other->HasDied())
+	if (RangeWeapon && other && !other->HasDied()) {
 		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange);
+	}
 
-	// Ammo Proc
-	if (last_ammo_used)
+	// Ammo Proc, do not try spell procs if from ammo.
+	if (last_ammo_used) {
 		TryWeaponProc(nullptr, last_ammo_used, other, EQ::invslot::slotRange);
-	else if (Ammo && other && !other->HasDied())
-		TryCombatProcs(Ammo, other, EQ::invslot::slotRange);
+	}
+	else if (Ammo && other && !other->HasDied()) {
+		TryWeaponProc(Ammo, Ammo->GetItem(), other, EQ::invslot::slotRange);
+	}
 
-	// Skill Proc
+	// Skill Proc Success ... can proc off hits OR misses
+	if (HasSkillProcSuccess() && other && !other->HasDied()) {
+		if (ReuseTime) {
+			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
+		}
+		else {
+			TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
+		}
+	}
+
+	// Skill Proc Attempt
 	if (HasSkillProcs() && other && !other->HasDied()) {
-		if (ReuseTime)
+		if (ReuseTime) {
 			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime);
-		else
+		}
+		else {
 			TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
+		}
 	}
 }
 
@@ -1391,21 +1396,16 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	if (RuleB(Combat, ProjectileDmgOnImpact)) {
 		if (AmmoItem) {
 			LaunchProjectile = true;
-			Shout("Projectile Launch slot %i", AmmoSlot);
 		} else {
-			Shout("Projectile HIT %i", AmmoSlot);
 			if (!RangeWeapon && range_id) {
 				if (IsClient()) {
 					m_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
 					
 					if (m_RangeWeapon && m_RangeWeapon->GetItem() && m_RangeWeapon->GetItem()->ID == range_id) {
-						Shout("CHeck ids %i xxxx %i", m_RangeWeapon->GetItem()->ID, range_id);
 						RangeWeapon = m_RangeWeapon;
-						Shout("PASS Range weapons");
 					}
 					else {
 						last_ammo_used = database.GetItem(range_id);
-						Shout("PASS Lost AMMO");
 					}
 				}
 			}
@@ -1420,11 +1420,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	if (!weapon_damage) {
 		if (IsClient() && RangeWeapon) {
-			Shout("use range item");
 			WDmg = GetWeaponDamage(other, RangeWeapon);
 		}
 		else if (AmmoItem) {
-			Shout("use ammo item");
 			WDmg = GetWeaponDamage(other, AmmoItem);
 		}
 
@@ -1468,26 +1466,28 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, EQ::skills::SkillThrowing);
 
-	if (TotalDmg > 0 && HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime)
-			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
-		else
-			TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
-	}
-	// end old shit
-
-	Shout("Launch %i :: Throw damage completed try procs", LaunchProjectile);
-
 	if (other && !other->HasDied()) {
 		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange, last_ammo_used);
 	}
 
-	if (HasSkillProcs() && other && !other->HasDied()) {
-		if (ReuseTime)
-			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
-		else
-			TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
+	if (HasSkillProcSuccess() && other && !other->HasDied()) {
+		if (ReuseTime) {
+			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
+		}
+		else {
+			TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
+		}
 	}
+
+	if (HasSkillProcs() && other && !other->HasDied()) {
+		if (ReuseTime) {
+			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
+		}
+		else {
+			TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
+		}
+	}
+
 	if (IsClient()) {
 		CastToClient()->CheckIncreaseSkill(EQ::skills::SkillThrowing, GetTarget());
 	}

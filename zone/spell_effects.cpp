@@ -3236,7 +3236,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 			case SE_LimitSpellClass:
 			case SE_Sanctuary:
 			case SE_PetMeleeMitigation:
-			case SE_SkillProc:
+			case SE_SkillProcAttempt:
 			case SE_SkillProcSuccess:
 			case SE_SpellResistReduction:
 			case SE_Duration_HP_Pct:
@@ -8647,7 +8647,6 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 
 bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type, int aa_id)
 {
-	Shout("TEST spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] %i", spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]);
 	/*
 		Check if SE_AddMeleProc or SE_RangedProc have a skill limiter. Passes automatically if no skill limiters present.
 	*/
