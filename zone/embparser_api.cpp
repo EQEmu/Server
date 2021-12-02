@@ -8034,7 +8034,7 @@ XS(XS__getfactionname) {
 		std::string faction_name = quest_manager.getfactionname(faction_id);
 
 		sv_setpv(TARG, faction_name.c_str());
-    XSprePUSH;
+    		XSprePUSH;
 		PUSHTARG;
 		XSRETURN(1);
 	}
