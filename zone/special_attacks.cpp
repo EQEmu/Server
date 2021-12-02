@@ -822,7 +822,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 			if (!RangeWeapon && !Ammo && range_id && ammo_id) {
 				if (IsClient()) {
 					_RangeWeapon = CastToClient()->m_inv[EQ::invslot::slotRange];
-					if (_RangeWeapon && _RangeWeapon->GetItem() &&
+					if (_RangeWeapon && _RangeWeapon->GetItem() && 
 					    _RangeWeapon->GetItem()->ID == range_id)
 						RangeWeapon = _RangeWeapon;
 
@@ -1412,12 +1412,17 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	int WDmg = 0;
 
 	if (!weapon_damage) {
-		if (IsClient() && RangeWeapon)
+		if (IsClient() && RangeWeapon) {
+			Shout("use range item");
 			WDmg = GetWeaponDamage(other, RangeWeapon);
-		else if (AmmoItem)
+		}
+		else if (AmmoItem) {
+			Shout("use ammo item");
 			WDmg = GetWeaponDamage(other, AmmoItem);
+		}
 
 		if (LaunchProjectile) {
+			//Shout("Range Weapon %s Ammo Weapon %s", RangeWeapon->GetItem()->Name);
 			TryProjectileAttack(other, AmmoItem, EQ::skills::SkillThrowing, WDmg, RangeWeapon,
 					    nullptr, AmmoSlot, speed);
 			return;
@@ -1426,7 +1431,7 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		WDmg = weapon_damage;
 	}
 
-	if (focus) // From FcBaseEffects
+	if (focus) // no longer used
 		WDmg += WDmg * focus / 100;
 
 	int TotalDmg = 0;
@@ -1465,12 +1470,32 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 
 	if (LaunchProjectile)
 		return;
-
+	Shout("Throw damage completed try procs %i", ammo_lost);
 	// Throwing item Proc
+
+	// Throwing weapon proc and spell procs
+	if (RangeWeapon && other && !other->HasDied()) {
+		Shout("Try spell and weapon proc");
+		TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
+	}
+	/*/
+	// Ammo Proc
 	if (ammo_lost)
 		TryWeaponProc(nullptr, ammo_lost, other, EQ::invslot::slotRange);
-	else if (RangeWeapon && other && !other->HasDied())
-		TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
+	else if (Ammo && other && !other->HasDied())
+		TryWeaponProc(Ammo, other, EQ::invslot::slotRange);
+	*/
+
+	if (other && !other->HasDied()) {
+		if (ammo_lost) {
+			Shout("Try spellproc");
+			TryWeaponProc(nullptr, ammo_lost, other, EQ::invslot::slotRange);
+		}
+		else if (RangeWeapon && other && !other->HasDied()) {
+			Shout("Try wpnproc");
+			TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
+		}
+	}
 
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime)

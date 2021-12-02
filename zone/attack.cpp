@@ -4198,6 +4198,7 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 }
 
 void Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) {
+	Shout("TryWeaponPROC Good");
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
@@ -4235,6 +4236,7 @@ void Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) 
 
 void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon, Mob *on, uint16 hand)
 {
+	Shout("TryWeaponPROC bad");
 	if (!on) {
 		return;
 	}
@@ -4324,7 +4326,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	if (!on) {
 		return;
 	}
-
+	Shout("TrySpellProc %i", hand);
 	float ProcBonus = static_cast<float>(spellbonuses.SpellProcChance +
 		itembonuses.SpellProcChance + aabonuses.SpellProcChance);
 	float ProcChance = 0.0f;
@@ -4336,7 +4338,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	if (weapon){
 		skillinuse = GetSkillByItemType(weapon->ItemType);
 	}
-
+	Shout("TrySpellProc skill %i", static_cast<int>(skillinuse));
 	if (hand == EQ::invslot::slotSecondary) {
 		ProcChance /= 2;
 	}
@@ -4350,7 +4352,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			rangedattk = true;
 		}
 	}
-
+	Shout("TrySpellProc is ranged %i", rangedattk);
 	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK)) {
 		rangedattk = true;
 	}
@@ -4408,7 +4410,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
 
 				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, SE_RangedProc);
-
+				Shout("Pass Skill LIMIT CHECK %i", passed_skill_limit_check);
 				if (passed_skill_limit_check && !IsProcLimitTimerActive(RangedProcs[i].base_spellID, RangedProcs[i].proc_reuse_time, ProcType::RANGED_PROC)) {
 					float chance = ProcChance * (static_cast<float>(RangedProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
