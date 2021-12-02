@@ -1917,6 +1917,7 @@ bool Mob::SpellEffect(Mob* caster, uint16 spell_id, float partial, int level_ove
 #ifdef SPELL_EFFECT_SPAM
 				snprintf(effect_desc, _EDLEN, "Ranged Proc: %+i", effect_value);
 #endif
+				Shout("ADD RANGED PROC %i %i %i", procid, spells[spell_id].limit_value[i], spell_id);
 				AddRangedProc(procid, 100 + spells[spell_id].limit_value[i], spell_id, GetProcLimitTimer(spell_id, SE_RangedProc));
 				break;
 			}
@@ -8644,27 +8645,35 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	return true;
 }
 
-bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type_spaid, int aa_id)
+bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type, int aa_id)
 {
+	Shout("TEST spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] %i", spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]);
 	/*
 		Check if SE_AddMeleProc or SE_RangedProc have a skill limiter. Passes automatically if no skill limiters present.
 	*/
-
-	if (!spellbonuses.LimitToSkill[skill] && !itembonuses.LimitToSkill[skill] && !aabonuses.LimitToSkill[skill]) {
-		return true; //Quick check to see if you have any limit to skill bonuses defined for that skill.
+	int32 proc_type_spaid = 0;
+	if (proc_type == ProcType::MELEE_PROC) {
+		proc_type_spaid = SE_AddMeleeProc;
+	}
+	if (proc_type == ProcType::RANGED_PROC) {
+		proc_type_spaid = SE_RangedProc;
 	}
 
 	bool match_proc_type = false;
 	bool has_limit_check = false;
 
-	if (!aa_id) {
+	if (!aa_id && spellbonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
+		if (spell_id == SPELL_UNKNOWN) {
+			return false;
+		}
 
 		for (int i = 0; i < EFFECT_COUNT; i++) {
 			if (spells[spell_id].effect_id[i] == proc_type_spaid) {
 				match_proc_type = true;
 			}
-
 			if (match_proc_type && spells[spell_id].effect_id[i] == SE_LimitToSkill && spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+				
 				has_limit_check = true;
 				if (spells[spell_id].base_value[i] == skill) {
 					return true;
@@ -8672,9 +8681,10 @@ bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc
 			}
 		}
 	}
-	else {
+	else if (aabonuses.LimitToSkill[EQ::skills::HIGHEST_SKILL + 3]) {
+
 		int rank_id = 1;
-		AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+		AA::Rank *rank = zone->GetAlternateAdvancementRank(aa_id);
 
 		if (!rank) {
 			return true;

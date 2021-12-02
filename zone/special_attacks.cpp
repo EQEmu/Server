@@ -798,7 +798,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	const EQ::ItemInstance *_RangeWeapon = nullptr;
 	const EQ::ItemInstance *_Ammo = nullptr;
-	const EQ::ItemData *ammo_lost = nullptr;
+	const EQ::ItemData *last_ammo_used = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -830,7 +830,7 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 					if (_Ammo && _Ammo->GetItem() && _Ammo->GetItem()->ID == ammo_id)
 						Ammo = _Ammo;
 					else
-						ammo_lost = database.GetItem(ammo_id);
+						last_ammo_used = database.GetItem(ammo_id);
 				}
 			}
 		}
@@ -914,13 +914,13 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 
 	// Weapon Proc
 	if (RangeWeapon && other && !other->HasDied())
-		TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
+		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange);
 
 	// Ammo Proc
-	if (ammo_lost)
-		TryWeaponProc(nullptr, ammo_lost, other, EQ::invslot::slotRange);
+	if (last_ammo_used)
+		TryWeaponProc(nullptr, last_ammo_used, other, EQ::invslot::slotRange);
 	else if (Ammo && other && !other->HasDied())
-		TryWeaponProc(Ammo, other, EQ::invslot::slotRange);
+		TryCombatProcs(Ammo, other, EQ::invslot::slotRange);
 
 	// Skill Proc
 	if (HasSkillProcs() && other && !other->HasDied()) {
@@ -991,7 +991,7 @@ bool Mob::TryProjectileAttack(Mob *other, const EQ::ItemData *item, EQ::skills::
 	if (Ammo && Ammo->GetItem())
 		ProjectileAtk[slot].ammo_id = Ammo->GetItem()->ID;
 
-	ProjectileAtk[slot].ammo_slot = 0;
+	ProjectileAtk[slot].ammo_slot = AmmoSlot;
 	ProjectileAtk[slot].skill = skillInUse;
 	ProjectileAtk[slot].speed_mod = speed;
 
@@ -1294,7 +1294,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 
 	int ammo_slot = EQ::invslot::slotRange;
 	const EQ::ItemInstance* RangeWeapon = m_inv[EQ::invslot::slotRange];
-
+	
 	if (!RangeWeapon || !RangeWeapon->IsClassCommon()) {
 		LogCombat("Ranged attack canceled. Missing or invalid ranged weapon ([{}]) in slot [{}]", GetItemIDAt(EQ::invslot::slotRange), EQ::invslot::slotRange);
 		Message(0, "Error: Rangeweapon: GetItem(%i)==0, you have nothing to throw!", GetItemIDAt(EQ::invslot::slotRange));
@@ -1355,7 +1355,7 @@ void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
 		return;
 	}
 
-	DoThrowingAttackDmg(other, RangeWeapon, item);
+	DoThrowingAttackDmg(other, RangeWeapon, item, 0, 0, 0, 0, 0,ammo_slot);
 
 	// Consume Ammo, unless Ammo Consumption is disabled
 	if (RuleB(Combat, ThrowingConsumesAmmo)) {
@@ -1378,8 +1378,8 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		return;
 	}
 
-	const EQ::ItemInstance *_RangeWeapon = nullptr;
-	const EQ::ItemData *ammo_lost = nullptr;
+	const EQ::ItemInstance *m_RangeWeapon = nullptr;//throwing weapon
+	const EQ::ItemData *last_ammo_used = nullptr;
 
 	/*
 	If LaunchProjectile is false this function will do archery damage on target,
@@ -1391,15 +1391,22 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	if (RuleB(Combat, ProjectileDmgOnImpact)) {
 		if (AmmoItem) {
 			LaunchProjectile = true;
+			Shout("Projectile Launch slot %i", AmmoSlot);
 		} else {
+			Shout("Projectile HIT %i", AmmoSlot);
 			if (!RangeWeapon && range_id) {
 				if (IsClient()) {
-					_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
-					if (_RangeWeapon && _RangeWeapon->GetItem() &&
-					    _RangeWeapon->GetItem()->ID != range_id)
-						RangeWeapon = _RangeWeapon;
-					else
-						ammo_lost = database.GetItem(range_id);
+					m_RangeWeapon = CastToClient()->m_inv[AmmoSlot];
+					
+					if (m_RangeWeapon && m_RangeWeapon->GetItem() && m_RangeWeapon->GetItem()->ID == range_id) {
+						Shout("CHeck ids %i xxxx %i", m_RangeWeapon->GetItem()->ID, range_id);
+						RangeWeapon = m_RangeWeapon;
+						Shout("PASS Range weapons");
+					}
+					else {
+						last_ammo_used = database.GetItem(range_id);
+						Shout("PASS Lost AMMO");
+					}
 				}
 			}
 		}
@@ -1431,8 +1438,9 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		WDmg = weapon_damage;
 	}
 
-	if (focus) // no longer used
+	if (focus) { // no longer used, keep for quests
 		WDmg += WDmg * focus / 100;
+	}
 
 	int TotalDmg = 0;
 
@@ -1468,33 +1476,10 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 	}
 	// end old shit
 
-	if (LaunchProjectile)
-		return;
-	Shout("Throw damage completed try procs %i", ammo_lost);
-	// Throwing item Proc
-
-	// Throwing weapon proc and spell procs
-	if (RangeWeapon && other && !other->HasDied()) {
-		Shout("Try spell and weapon proc");
-		TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
-	}
-	/*/
-	// Ammo Proc
-	if (ammo_lost)
-		TryWeaponProc(nullptr, ammo_lost, other, EQ::invslot::slotRange);
-	else if (Ammo && other && !other->HasDied())
-		TryWeaponProc(Ammo, other, EQ::invslot::slotRange);
-	*/
+	Shout("Launch %i :: Throw damage completed try procs", LaunchProjectile);
 
 	if (other && !other->HasDied()) {
-		if (ammo_lost) {
-			Shout("Try spellproc");
-			TryWeaponProc(nullptr, ammo_lost, other, EQ::invslot::slotRange);
-		}
-		else if (RangeWeapon && other && !other->HasDied()) {
-			Shout("Try wpnproc");
-			TryWeaponProc(RangeWeapon, other, EQ::invslot::slotRange);
-		}
+		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange, last_ammo_used);
 	}
 
 	if (HasSkillProcs() && other && !other->HasDied()) {

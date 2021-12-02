@@ -395,7 +395,7 @@ bool Client::Process() {
 			else if (auto_attack_target->GetHP() > -10) // -10 so we can watch people bleed in PvP
 			{
 				EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotPrimary);
-				TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotPrimary);
+				TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotPrimary);
 				TriggerDefensiveProcs(auto_attack_target, EQ::invslot::slotPrimary, false);
 
 				DoAttackRounds(auto_attack_target, EQ::invslot::slotPrimary);
@@ -441,7 +441,7 @@ bool Client::Process() {
 				CheckIncreaseSkill(EQ::skills::SkillDualWield, auto_attack_target, -10);
 				if (CheckDualWield()) {
 					EQ::ItemInstance *wpn = GetInv().GetItem(EQ::invslot::slotSecondary);
-					TryWeaponProc(wpn, auto_attack_target, EQ::invslot::slotSecondary);
+					TryCombatProcs(wpn, auto_attack_target, EQ::invslot::slotSecondary);
 
 					DoAttackRounds(auto_attack_target, EQ::invslot::slotSecondary);
 				}

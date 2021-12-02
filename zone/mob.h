@@ -1440,12 +1440,12 @@ protected:
 	void CalcSpellBonuses(StatBonuses* newbon);
 	virtual void CalcBonuses();
 	void TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success = false, uint16 hand = 0, bool IsDefensive = false); // hand = SlotCharm?
-	bool PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type_spaid, int aa_id=0);
+	bool PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type, int aa_id=0);
 	bool PassLimitClass(uint32 Classes_, uint16 Class_);
 	void TryDefensiveProc(Mob *on, uint16 hand = EQ::invslot::slotPrimary);
 	void TryWeaponProc(const EQ::ItemInstance* inst, const EQ::ItemData* weapon, Mob *on, uint16 hand = EQ::invslot::slotPrimary);
 	void TrySpellProc(const EQ::ItemInstance* inst, const EQ::ItemData* weapon, Mob *on, uint16 hand = EQ::invslot::slotPrimary);
-	void TryWeaponProc(const EQ::ItemInstance* weapon, Mob *on, uint16 hand = EQ::invslot::slotPrimary);
+	void TryCombatProcs(const EQ::ItemInstance* weapon, Mob *on, uint16 hand = EQ::invslot::slotPrimary, const EQ::ItemData* weapon_data = nullptr);
 	void ExecWeaponProc(const EQ::ItemInstance* weapon, uint16 spell_id, Mob *on, int level_override = -1);
 	virtual float GetProcChances(float ProcBonus, uint16 hand = EQ::invslot::slotPrimary);
 	virtual float GetDefensiveProcChances(float &ProcBonus, float &ProcChance, uint16 hand = EQ::invslot::slotPrimary, Mob *on = nullptr);

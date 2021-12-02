@@ -4197,8 +4197,8 @@ void Mob::TryDefensiveProc(Mob *on, uint16 hand) {
 	}
 }
 
-void Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) {
-	Shout("TryWeaponPROC Good");
+void Mob::TryCombatProcs(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand, const EQ::ItemData* weapon_data) {
+	Shout("Try Comabt Proc");
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TryWeaponProc for evaluation!");
@@ -4212,6 +4212,14 @@ void Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) 
 
 	if (DivineAura()) {
 		LogCombat("Procs cancelled, Divine Aura is in effect");
+		return;
+	}
+
+	//used for special case when checking last ammo item on projectile hit.
+	if (!weapon_g && weapon_data) {
+		Shout("Use special case");
+		TryWeaponProc(nullptr, weapon_data, on, hand);
+		TrySpellProc(nullptr, weapon_data, on, hand);
 		return;
 	}
 
@@ -4237,6 +4245,14 @@ void Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) 
 void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon, Mob *on, uint16 hand)
 {
 	Shout("TryWeaponPROC bad");
+	/*
+		Proc logic is messy.
+		Mob::TryWeaponProc(const EQ::ItemInstance* weapon_g, Mob *on, uint16 hand) calls this function.
+		const EQ::ItemInstance *inst is used when we need to find augment procs and is passed to sub EVENT_WEAPON_PROC. Not required.
+		const EQ::ItemData *weapon is used to pull the weapons base proc data, therefore is required.
+	*/
+
+
 	if (!on) {
 		return;
 	}
@@ -4388,7 +4404,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 					continue; // Process the poison proc last per @mackal
 				}
 
-				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, SE_AddMeleeProc);
+				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, ProcType::MELEE_PROC);
 
 				if (passed_skill_limit_check && !IsProcLimitTimerActive(SpellProcs[i].base_spellID, SpellProcs[i].proc_reuse_time, ProcType::MELEE_PROC)) {
 					float chance = ProcChance * (static_cast<float>(SpellProcs[i].chance) / 100.0f);
@@ -4409,8 +4425,8 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 							   // ranged spell procs (buffs)
 			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
 
-				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, SE_RangedProc);
-				Shout("Pass Skill LIMIT CHECK %i", passed_skill_limit_check);
+				passed_skill_limit_check = PassLimitToSkill(skillinuse, RangedProcs[i].base_spellID, ProcType::RANGED_PROC);
+
 				if (passed_skill_limit_check && !IsProcLimitTimerActive(RangedProcs[i].base_spellID, RangedProcs[i].proc_reuse_time, ProcType::RANGED_PROC)) {
 					float chance = ProcChance * (static_cast<float>(RangedProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
@@ -4454,7 +4470,10 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			}
 			
 			if (aa_rank_id) {
-				if (!IsProcLimitTimerActive(-aa_rank_id, aa_proc_reuse_timer, proc_type)) {
+
+				passed_skill_limit_check = PassLimitToSkill(skillinuse, 0, proc_type, aa_rank_id);
+
+				if (passed_skill_limit_check && !IsProcLimitTimerActive(-aa_rank_id, aa_proc_reuse_timer, proc_type)) {
 					float chance = ProcChance * (static_cast<float>(aa_proc_chance) / 100.0f);
 					if (zone->random.Roll(chance) && IsValidSpell(aa_spell_id)) {
 						LogCombat("AA proc [{}] procing spell [{}] ([{}] percent chance)", aa_rank_id, aa_spell_id, chance);

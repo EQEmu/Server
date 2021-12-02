@@ -1460,10 +1460,13 @@ void Mob::ApplyAABonuses(const AA::Rank &rank, StatBonuses *newbon)
 		case SE_LimitToSkill: {
 
 			// Bad data or unsupported new skill
-			if (limit_value > EQ::skills::HIGHEST_SKILL)
+			if (base_value > EQ::skills::HIGHEST_SKILL) {
 				break;
-			if (base_value <= EQ::skills::HIGHEST_SKILL)
+			}
+			if (base_value <= EQ::skills::HIGHEST_SKILL) {
 				newbon->LimitToSkill[base_value] = true;
+				newbon->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
+			}
 			break;
 		}
 
@@ -3535,10 +3538,12 @@ void Mob::ApplySpellsBonuses(uint16 spell_id, uint8 casterlevel, StatBonuses *ne
 
 			case SE_LimitToSkill:{
 				// Bad data or unsupported new skill
-				if (limit_value > EQ::skills::HIGHEST_SKILL)
+				if (effect_value > EQ::skills::HIGHEST_SKILL) {
 					break;
+				}
 				if (effect_value <= EQ::skills::HIGHEST_SKILL){
 					new_bonus->LimitToSkill[effect_value] = true;
+					new_bonus->LimitToSkill[EQ::skills::HIGHEST_SKILL + 3] = true; //Used as a general exists check
 				}
 				break;
 			}
