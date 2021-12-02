@@ -8057,6 +8057,23 @@ XS(XS__getlanguagename) {
 	}
 }
 
+XS(XS__getbodytypename);
+XS(XS__getbodytypename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getbodytypename(uint32 bodytype_id)");
+	{
+		dXSTARG;
+		uint32 bodytype_id = (uint32) SvUV(ST(0));
+		std::string bodytype_name = quest_manager.getbodytypename(bodytype_id);
+
+		sv_setpv(TARG, bodytype_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 /*
 This is the callback perl will look for to setup the
 quest package's XSUBs
@@ -8337,6 +8354,7 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "forcedoorclose"), XS__forcedoorclose, file);
 	newXS(strcpy(buf, "forcedooropen"), XS__forcedooropen, file);
 	newXS(strcpy(buf, "getaaexpmodifierbycharid"), XS__getaaexpmodifierbycharid, file);
+	newXS(strcpy(buf, "getbodytypename"), XS__getbodytypename, file);
 	newXS(strcpy(buf, "getcharidbyname"), XS__getcharidbyname, file);
 	newXS(strcpy(buf, "getclassname"), XS__getclassname, file);
 	newXS(strcpy(buf, "getcleannpcnamebyid"), XS__getcleannpcnamebyid, file);

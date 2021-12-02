@@ -1044,6 +1044,10 @@ std::string QuestManager::getlanguagename(int language_id) {
 	return EQ::constants::GetLanguageName(language_id);
 }
 
+std::string QuestManager::getbodytypename(uint32 bodytype_id) {
+	return EQ::constants::GetBodyTypeName(static_cast<bodyType>(bodytype_id));
+}
+
 void QuestManager::safemove() {
 	QuestManagerCurrentQuestVars();
 	if (initiator && initiator->IsClient())

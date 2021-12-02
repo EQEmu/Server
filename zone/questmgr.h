@@ -117,6 +117,7 @@ public:
 	std::string getskillname(int skill_id);
 	std::string getfactionname(int faction_id);
 	std::string getlanguagename(int language_id);
+	std::string getbodytypename(uint32 bodytype_id);
 	void safemove();
 	void rain(int weather);
 	void snow(int weather);
