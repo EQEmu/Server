@@ -1765,12 +1765,24 @@ void Mob::ShowStats(Client* client)
 		}
 
 		// Body
+		auto bodytype_name = EQ::constants::GetBodyTypeName(target->GetBodyType());
 		client->Message(
 			Chat::White,
 			fmt::format(
 				"Body | Size: {:.2f} Type: {}",
 				target->GetSize(),
-				target->GetBodyType()
+				(
+					bodytype_name.empty() ?
+					fmt::format(
+						"{}",
+						target->GetBodyType()
+					) :
+					fmt::format(
+						"{} ({})",
+						bodytype_name,
+						target->GetBodyType()
+					)
+				)
 			).c_str()
 		);
 
