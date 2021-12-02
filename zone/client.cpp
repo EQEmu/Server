@@ -2418,6 +2418,7 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	if (skillid > EQ::skills::HIGHEST_SKILL)
 		return false;
 	int skillval = GetRawSkill(skillid);
+	int maxlevel = GetClientMaxLevel();
 	int maxskill = GetMaxSkillAfterSpecializationRules(skillid, MaxSkill(skillid));
 	std::string export_string = fmt::format(
 		"{} {}",
@@ -2442,15 +2443,29 @@ bool Client::CheckIncreaseSkill(EQ::skills::SkillType skillid, Mob *against_who,
 	// Make sure we're not already at skill cap
 	if (skillval < maxskill)
 	{
-		// the higher your current skill level, the harder it is
-		int32 Chance = 10 + chancemodi + ((252 - skillval) / 20);
+		double Chance = 0;
+		if (RuleB(Character, UseExponentialDecaySkillUpFormula)) {
+			if (RuleI(Character, SkillUpMaximumChancePercentage) <= RuleI(Character, SkillUpMinimumChancePercentage)) {
+				Chance = RuleI(Character, SkillUpMinimumChancePercentage);
+			}
+			else {
+				// f(x) = max - min * .99 +/- modification + min
+				// This results in a exponential decay where as you skill up, you lose a slight chance to skill up, ranging from your maximum to approaching your minimum
+				double working_chance = ((RuleI(Character, SkillUpMaximumChancePercentage) - RuleI(Character, SkillUpMinimumChancePercentage)) * (pow(0.99 + (chancemodi / 10000),skillval) + RuleI(Character, SkillUpMinimumChancePercentage)));
+				Chance = (working_chance + (working_chance * RuleI(Character, SkillUpModifier) / 100)) >= RuleI(Character, SkillUpMaximumChancePercentage) ? RuleI(Character, SkillUpMaximumChancePercentage) : (working_chance + (working_chance * RuleI(Character, SkillUpModifier) / 100));				
+			}
+		}
+		else {
+			// the higher your current skill level, the harder it is
+			Chance = 10 + chancemodi + ((252 - skillval) / 20);
 
-		Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
+			// Make it always possible
+			Chance = Chance < 1 ? 1 : Chance;			
 
-		Chance = mod_increase_skill_chance(Chance, against_who);
+			Chance = (Chance * RuleI(Character, SkillUpModifier) / 100);
 
-		if(Chance < 1)
-			Chance = 1; // Make it always possible
+			Chance = mod_increase_skill_chance(Chance, against_who);
+		}
 
 		if(zone->random.Real(0, 99) < Chance)
 		{

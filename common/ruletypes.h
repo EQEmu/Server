@@ -174,6 +174,9 @@ RULE_INT(Character, ResurrectionSicknessSpellID, 756, "756 is Default Resurrecti
 RULE_BOOL(Character, EnableBardMelody, true, "Enable Bard /melody by default, to disable change to false for a classic experience.")
 RULE_BOOL(Character, EnableRangerAutoFire, true, "Enable Ranger /autofire by default, to disable change to false for a classic experience.")
 RULE_BOOL(Character, EnableTGB, true, "Enable /tgb (Target Group Buff) by default, to disable change to false for a classic experience.")
+RULE_BOOL(Character, UseExponentialDecaySkillUpFormula, false, "Use a new, configurable, formula for calculating probability of skill ups.  If true, use SkillUpMaximumChancePercentage and SkillUpMinimumChancePercentage to configure formula.")
+RULE_INT(Character, SkillUpMaximumChancePercentage, 10, "Maximum chance to improve a combat skill.  This should be greater than SkillUpMinimumChancePercentage.")
+RULE_INT(Character, SkillUpMinimumChancePercentage, 2, "Minimum chance to improve a combat skill.  This should be lesser than SkillUpMaximumChancePercentage.")
 RULE_CATEGORY_END()
 
 RULE_CATEGORY(Mercs)
