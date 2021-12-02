@@ -8644,27 +8644,77 @@ bool Mob::PassCharmTargetRestriction(Mob *target) {
 	return true;
 }
 
-bool Mob::PassLimitToSkillNew(EQ::skills::SkillType skill, int32 spell_id)
+bool Mob::PassLimitToSkill(EQ::skills::SkillType skill, int32 spell_id, int proc_type_spaid, int aa_id)
 {
-	if (!IsValidSpell(spell_id)) {
-		return false;
+	/*
+		Check if SE_AddMeleProc or SE_RangedProc have a skill limiter. Passes automatically if no skill limiters present.
+	*/
+
+	if (!spellbonuses.LimitToSkill[skill] && !itembonuses.LimitToSkill[skill] && !aabonuses.LimitToSkill[skill]) {
+		return true; //Quick check to see if you have any limit to skill bonuses defined for that skill.
 	}
 
-	int32 proc_spell_id = SPELL_UNKNOWN;
+	bool match_proc_type = false;
+	bool has_limit_check = false;
 
-	for (int i = 0; i < EFFECT_COUNT; i++) {
-		if (spells[spell_id].effect_id[i] == SE_SkillProc || spells[spell_id].effect_id[i] == SE_SkillProcSuccess) {
-			proc_spell_id = spells[spell_id].limit_value[i];
+	if (!aa_id) {
+
+		for (int i = 0; i < EFFECT_COUNT; i++) {
+			if (spells[spell_id].effect_id[i] == proc_type_spaid) {
+				match_proc_type = true;
+			}
+
+			if (match_proc_type && spells[spell_id].effect_id[i] == SE_LimitToSkill && spells[spell_id].base_value[i] <= EQ::skills::HIGHEST_SKILL) {
+				has_limit_check = true;
+				if (spells[spell_id].base_value[i] == skill) {
+					return true;
+				}
+			}
+		}
+	}
+	else {
+		int rank_id = 1;
+		AA::Rank *rank = zone->GetAlternateAdvancementRank(rank_id);
+
+		if (!rank) {
+			return true;
 		}
 
-		if (spells[spell_id].effect_id[i] == SE_LimitToSkill) {
-			if (spells[spell_id].base_value[i] == skill) {
-				return proc_spell_id;
+		AA::Ability *ability_in = rank->base_ability;
+		if (!ability_in) {
+			return true;
+		}
+
+		for (auto &aa : aa_ranks) {
+			auto ability_rank = zone->GetAlternateAdvancementAbilityAndRank(aa.first, aa.second.first);
+			auto ability = ability_rank.first;
+			auto rank = ability_rank.second;
+
+			if (!ability) {
+				continue;
+			}
+
+			for (auto &effect : rank->effects) {
+				if (effect.effect_id == proc_type_spaid) {
+					match_proc_type = true;
+				}
+
+				if (match_proc_type && effect.effect_id == SE_LimitToSkill && effect.base_value <= EQ::skills::HIGHEST_SKILL) {
+					has_limit_check = true;
+					if (effect.base_value == skill) {
+						return true;
+					}
+				}
 			}
 		}
 	}
 
-	return false;
+	if (has_limit_check) {
+		return false; //Limit was found, but not matched, fail.
+	}
+	else {
+		return true; //No limit is present, automatically pass.
+	}
 }
 
 bool Mob::CanFocusUseRandomEffectivenessByType(focusType type)

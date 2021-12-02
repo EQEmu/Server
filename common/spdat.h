@@ -529,6 +529,15 @@ enum ReflectSpellType
 	RELFECT_ALL_SINGLE_TARGET_SPELLS  = 3,
 	REFLECT_ALL_SPELLS                = 4,
 };
+//For better organizing in proc effects, not used in spells.
+enum ProcType
+{
+	MELEE_PROC             = 1,
+	RANGED_PROC            = 2,
+	DEFENSIVE_PROC         = 3,
+	SKILL_PROC             = 4,
+	SKILL_PROC_SUCCESS     = 5,
+};
 
 enum SpellTypes : uint32
 {

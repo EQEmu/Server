@@ -4253,7 +4253,7 @@ void Mob::TryWeaponProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon
 	// Try innate proc on weapon
 	// We can proc once here, either weapon or one aug
 	bool proced = false; // silly bool to prevent augs from going if weapon does
-	skillinuse = GetSkillByItemType(weapon->ItemType);
+
 	if (weapon->Proc.Type == EQ::item::ItemEffectCombatProc && IsValidSpell(weapon->Proc.Effect)) {
 		float WPC = ProcChance * (100.0f + // Proc chance for this weapon
 			static_cast<float>(weapon->ProcRate)) / 100.0f;
@@ -4330,8 +4330,16 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	float ProcChance = 0.0f;
 	ProcChance = GetProcChances(ProcBonus, hand);
 
-	if (hand == EQ::invslot::slotSecondary)
+	bool passed_skill_limit_check = true;
+	EQ::skills::SkillType skillinuse = EQ::skills::SkillHandtoHand;
+
+	if (weapon){
+		skillinuse = GetSkillByItemType(weapon->ItemType);
+	}
+
+	if (hand == EQ::invslot::slotSecondary) {
 		ProcChance /= 2;
+	}
 
 	bool rangedattk = false;
 	if (weapon && hand == EQ::invslot::slotRange) {
@@ -4343,8 +4351,9 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		}
 	}
 
-	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK))
+	if (!weapon && hand == EQ::invslot::slotRange && GetSpecialAbility(SPECATK_RANGED_ATK)) {
 		rangedattk = true;
+	}
 
 	int16 poison_slot=-1;
 
@@ -4353,8 +4362,9 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 			continue; // If pets ever can proc from off hand, this will need to change
 
 		if (SpellProcs[i].base_spellID == POISON_PROC &&
-		    	(!weapon || weapon->ItemType != EQ::item::ItemType1HPiercing))
+			(!weapon || weapon->ItemType != EQ::item::ItemType1HPiercing)) {
 			continue; // Old school poison will only proc with 1HP equipped.
+		}
 
 		// Not ranged
 		if (!rangedattk) {
@@ -4375,8 +4385,10 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 					poison_slot=i;
 					continue; // Process the poison proc last per @mackal
 				}
-				
-				if (!IsProcLimitTimerActive(SpellProcs[i].base_spellID, SpellProcs[i].proc_reuse_time, SE_WeaponProc)) {
+
+				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, SE_AddMeleeProc);
+
+				if (passed_skill_limit_check && !IsProcLimitTimerActive(SpellProcs[i].base_spellID, SpellProcs[i].proc_reuse_time, SE_WeaponProc)) {
 					float chance = ProcChance * (static_cast<float>(SpellProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
 						LogCombat("Spell proc [{}] procing spell [{}] ([{}] percent chance)", i, SpellProcs[i].spellID, chance);
@@ -4395,7 +4407,9 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 							   // ranged spell procs (buffs)
 			if (RangedProcs[i].spellID != SPELL_UNKNOWN) {
 
-				if (!IsProcLimitTimerActive(RangedProcs[i].base_spellID, RangedProcs[i].proc_reuse_time, SE_RangedProc)) {
+				passed_skill_limit_check = PassLimitToSkill(skillinuse, SpellProcs[i].base_spellID, SE_RangedProc);
+
+				if (passed_skill_limit_check && !IsProcLimitTimerActive(RangedProcs[i].base_spellID, RangedProcs[i].proc_reuse_time, SE_RangedProc)) {
 					float chance = ProcChance * (static_cast<float>(RangedProcs[i].chance) / 100.0f);
 					if (zone->random.Roll(chance)) {
 						LogCombat("Ranged proc [{}] procing spell [{}] ([{}] percent chance)", i, RangedProcs[i].spellID, chance);
@@ -5049,12 +5063,15 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 		return;
 	}
 
-	if (!spellbonuses.LimitToSkill[skill] && !itembonuses.LimitToSkill[skill] && !aabonuses.LimitToSkill[skill])
+	if (!spellbonuses.LimitToSkill[skill] && !itembonuses.LimitToSkill[skill] && !aabonuses.LimitToSkill[skill]) {
 		return;
+	}
 
-	/*Allow one proc from each (Spell/Item/AA)
-	Kayen: Due to limited avialability of effects on live it is too difficult
-	to confirm how they stack at this time, will adjust formula when more data is avialablle to test.*/
+	/*
+		Allow one proc from each (Spell/Item/AA)
+		Kayen: Due to limited avialability of effects on live it is too difficult
+		to confirm how they stack at this time, will adjust formula when more data is avialablle to test.
+	*/
 	bool CanProc = true;
 
 	uint16 base_spell_id = 0;
@@ -5074,10 +5091,12 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 				((!Success && spellbonuses.SkillProc[e] && IsValidSpell(spellbonuses.SkillProc[e]))
 					|| (Success && spellbonuses.SkillProcSuccess[e] && IsValidSpell(spellbonuses.SkillProcSuccess[e])))) {
 
-				if (Success)
+				if (Success) {
 					base_spell_id = spellbonuses.SkillProcSuccess[e];
-				else
+				}
+				else {
 					base_spell_id = spellbonuses.SkillProc[e];
+				}
 
 				proc_spell_id = 0;
 				ProcMod = 0;
@@ -5095,8 +5114,7 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 							float final_chance = chance * (ProcMod / 100.0f);
 							if (zone->random.Roll(final_chance)) {
 								ExecWeaponProc(nullptr, proc_spell_id, on);
-								CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0,
-									base_spell_id);
+								CheckNumHitsRemaining(NumHit::OffensiveSpellProcs, 0, base_spell_id);
 								CanProc = false;
 								break;
 							}
@@ -5119,10 +5137,12 @@ void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, ui
 				((!Success && itembonuses.SkillProc[e] && IsValidSpell(itembonuses.SkillProc[e]))
 					|| (Success && itembonuses.SkillProcSuccess[e] && IsValidSpell(itembonuses.SkillProcSuccess[e])))) {
 
-				if (Success)
+				if (Success) {
 					base_spell_id = itembonuses.SkillProcSuccess[e];
-				else
+				}
+				else {
 					base_spell_id = itembonuses.SkillProc[e];
+				}
 
 				proc_spell_id = 0;
 				ProcMod = 0;
