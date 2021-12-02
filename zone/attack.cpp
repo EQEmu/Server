@@ -1616,9 +1616,6 @@ bool Client::Attack(Mob* other, int Hand, bool bRiposte, bool IsStrikethrough, b
 
 	MeleeLifeTap(my_hit.damage_done);
 
-	if (my_hit.damage_done > 0 && HasSkillProcSuccess() && other && other->GetHP() > 0)
-		TrySkillProc(other, my_hit.skill, 0, true, Hand);
-
 	CommonBreakInvisibleFromCombat();
 
 	if (GetTarget())
@@ -3471,7 +3468,6 @@ bool Mob::HasDefensiveProcs() const
 
 bool Mob::HasSkillProcs() const
 {
-
 	for (int i = 0; i < MAX_SKILL_PROCS; i++) {
 		if (spellbonuses.SkillProc[i] || itembonuses.SkillProc[i] || aabonuses.SkillProc[i])
 			return true;
@@ -4504,13 +4500,12 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 	}
 
 	if (HasSkillProcs() && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
-		uint16 skillinuse = 28;
-		if (weapon)
-			skillinuse = GetSkillByItemType(weapon->ItemType);
-
 		TrySkillProc(on, skillinuse, 0, false, hand);
 	}
 
+	if (HasSkillProcSuccess && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
+		TrySkillProc(on, skillinuse, 0, true, hand);
+	}
 	return;
 }
 
@@ -5075,12 +5070,16 @@ void Mob::ApplyDamageTable(DamageHitInfo &hit)
 	Log(Logs::Detail, Logs::Attack, "Damage table applied %d (max %d)", percent, damage_table.max_extra);
 }
 
-void Mob::TrySkillProc(Mob *on, uint16 skill, uint16 ReuseTime, bool Success, uint16 hand, bool IsDefensive)
+void Mob::TrySkillProc(Mob *on, EQ::skills::SkillType skill, uint16 ReuseTime, bool Success, uint16 hand, bool IsDefensive)
 {
 
 	if (!on) {
 		SetTarget(nullptr);
 		LogError("A null Mob object was passed to Mob::TrySkillProc for evaluation!");
+		return;
+	}
+
+	if (on->HasDied()) {
 		return;
 	}
 

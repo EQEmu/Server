@@ -212,11 +212,12 @@ void Mob::DoSpecialAttackDamage(Mob *who, EQ::skills::SkillType skill, int32 bas
 	if (HasDied())
 		return;
 
-	if (HasSkillProcs())
+	if (HasSkillProcs()) {
 		TrySkillProc(who, skill, ReuseTime * 1000);
-
-	if (my_hit.damage_done > 0 && HasSkillProcSuccess())
+	}
+	if (my_hit.damage_done > 0 && HasSkillProcSuccess()) {
 		TrySkillProc(who, skill, ReuseTime * 1000, true);
+	}
 }
 
 // We should probably refactor this to take the struct not the packet
@@ -915,16 +916,6 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		TryWeaponProc(Ammo, Ammo->GetItem(), other, EQ::invslot::slotRange);
 	}
 
-	// Skill Proc Success ... can proc off hits OR misses
-	if (HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
-		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
-		}
-	}
-
 	// Skill Proc Attempt
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime) {
@@ -932,6 +923,16 @@ void Mob::DoArcheryAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, co
 		}
 		else {
 			TrySkillProc(other, EQ::skills::SkillArchery, 0, false, EQ::invslot::slotRange);
+		}
+	}
+
+	// Skill Proc Success ... can proc off hits OR misses
+	if (HasSkillProcSuccess() && other && !other->HasDied()) {
+		if (ReuseTime) {
+			TrySkillProc(other, EQ::skills::SkillArchery, ReuseTime, true);
+		}
+		else {
+			TrySkillProc(other, EQ::skills::SkillArchery, 0, true, EQ::invslot::slotRange);
 		}
 	}
 }
@@ -1273,15 +1274,18 @@ void NPC::DoRangedAttackDmg(Mob* other, bool Launch, int16 damage_mod, int16 cha
 
 	other->Damage(this, TotalDmg, SPELL_UNKNOWN, skillInUse);
 
-	if (TotalDmg > 0 && HasSkillProcSuccess() && !other->HasDied())
-		TrySkillProc(other, skillInUse, 0, true, EQ::invslot::slotRange);
-
 	//try proc on hits and misses
-	if(other && !other->HasDied())
+	if (other && !other->HasDied()) {
 		TrySpellProc(nullptr, (const EQ::ItemData*)nullptr, other, EQ::invslot::slotRange);
+	}
 
-	if (HasSkillProcs() && other && !other->HasDied())
+	if (HasSkillProcs() && other && !other->HasDied()) {
 		TrySkillProc(other, skillInUse, 0, false, EQ::invslot::slotRange);
+	}
+
+	if (HasSkillProcSuccess() && other && !other->HasDied()) {
+		TrySkillProc(other, skillInUse, 0, true, EQ::invslot::slotRange);
+	}
 }
 
 void Client::ThrowingAttack(Mob* other, bool CanDoubleAttack) { //old was 51
@@ -1470,21 +1474,21 @@ void Mob::DoThrowingAttackDmg(Mob *other, const EQ::ItemInstance *RangeWeapon, c
 		TryCombatProcs(RangeWeapon, other, EQ::invslot::slotRange, last_ammo_used);
 	}
 
-	if (HasSkillProcSuccess() && other && !other->HasDied()) {
-		if (ReuseTime) {
-			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
-		}
-		else {
-			TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
-		}
-	}
-
 	if (HasSkillProcs() && other && !other->HasDied()) {
 		if (ReuseTime) {
 			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime);
 		}
 		else {
 			TrySkillProc(other, EQ::skills::SkillThrowing, 0, false, EQ::invslot::slotRange);
+		}
+	}
+
+	if (HasSkillProcSuccess() && other && !other->HasDied()) {
+		if (ReuseTime) {
+			TrySkillProc(other, EQ::skills::SkillThrowing, ReuseTime, true);
+		}
+		else {
+			TrySkillProc(other, EQ::skills::SkillThrowing, 0, true, EQ::invslot::slotRange);
 		}
 	}
 
@@ -1975,7 +1979,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 	Mob *hate_top = who->GetHateMost();
 
 	int level_difference = GetLevel() - who->GetLevel();
-	bool Success = false;
+	bool success = false;
 
 	// Support for how taunt worked pre 2000 on LIVE - Can not taunt NPC over your level.
 	if ((RuleB(Combat, TauntOverLevel) == false) && (level_difference < 0) ||
@@ -2043,11 +2047,13 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 		MessageString(Chat::SpellFailure, FAILED_TAUNT);
 	}
 
-	if (HasSkillProcs())
+	if (HasSkillProcs()) {
 		TrySkillProc(who, EQ::skills::SkillTaunt, TauntReuseTime * 1000);
+	}
 
-	if (Success && HasSkillProcSuccess())
+	if (success && HasSkillProcSuccess()) {
 		TrySkillProc(who, EQ::skills::SkillTaunt, TauntReuseTime * 1000, true);
+	}
 }
 
 void Mob::InstillDoubt(Mob *who) {
@@ -2071,6 +2077,7 @@ void Mob::InstillDoubt(Mob *who) {
 
 	//I think this formula needs work
 	int value = 0;
+	bool success = false;
 
 	//user's bonus
 	value += GetSkill(EQ::skills::SkillIntimidation) + GetCHA() / 4;
@@ -2083,6 +2090,7 @@ void Mob::InstillDoubt(Mob *who) {
 		//cast fear on them... should prolly be a different spell
 		//and should be un-resistable.
 		SpellOnTarget(229, who, 0, true, -2000);
+		success = true;
 		//is there a success message?
 	} else {
 		MessageString(Chat::LightBlue,NOT_SCARING);
@@ -2092,6 +2100,14 @@ void Mob::InstillDoubt(Mob *who) {
 			//should we actually do this? and the range is completely made up, unconfirmed
 			entity_list.AEAttack(target, 50);
 		}*/
+	}
+
+	if (HasSkillProcs()) {
+		TrySkillProc(who, EQ::skills::SkillIntimidation, InstillDoubtReuseTime * 1000);
+	}
+
+	if (success && HasSkillProcSuccess()) {
+		TrySkillProc(who, EQ::skills::SkillIntimidation, InstillDoubtReuseTime * 1000, true);
 	}
 }
 
@@ -2251,11 +2267,13 @@ void Mob::DoMeleeSkillAttackDmg(Mob *other, uint16 weapon_damage, EQ::skills::Sk
 	if (HasDied())
 		return;
 
-	if (CanSkillProc && HasSkillProcs())
+	if (CanSkillProc && HasSkillProcs()) {
 		TrySkillProc(other, skillinuse, ReuseTime);
+	}
 
-	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess())
+	if (CanSkillProc && (damage > 0) && HasSkillProcSuccess()) {
 		TrySkillProc(other, skillinuse, ReuseTime, true);
+	}
 }
 
 bool Mob::CanDoSpecialAttack(Mob *other) {
