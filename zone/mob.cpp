@@ -2884,26 +2884,28 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 		value5slot = 1;
 	}
 
-	if (!value1ground) {
-		appearance_effects[value1slot] = parm1;
-		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	if (!value1ground && parm1) {
+		SetAppearenceEffect(value1slot, parm1);
+		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
 	}
-	if (!value2ground) {
-		appearance_effects[value2slot] = parm2;
-		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	if (!value2ground && parm2) {
+		SetAppearenceEffect(value2slot, parm2);
+		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
 	}
-	if (!value3ground) {
-		appearance_effects[value3slot] = parm3;
-		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	if (!value3ground && parm3) {
+		SetAppearenceEffect(value3slot, parm3);
+		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
 	}
-	if (!value4ground) {
-		appearance_effects[value4slot] = parm4;
-		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	if (!value4ground && parm4) {
+		SetAppearenceEffect(value4slot, parm4);
+		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
 	}
-	if (!value5ground) {
-		appearance_effects[value5slot] = parm5;
-		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	if (!value5ground && parm5) {
+		SetAppearenceEffect(value5slot, parm5);
+		SetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1, 1);
 	}
+	Shout("Value slot 2 %i Parama 2 %i", value1slot, parm1);
+	Shout("SET %i [%i] %i %i %i", GetAppearenceEffect(1), GetAppearenceEffect(2), GetAppearenceEffect(3), GetAppearenceEffect(4), GetAppearenceEffect(MAX_APPEARANCE_EFFECTS + 1));
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
 	la->spawn_id = GetID();
@@ -2931,6 +2933,13 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 		specific_target->CastToClient()->QueuePacket(outapp, false);
 	}
 	safe_delete(outapp);
+}
+
+void Mob::ClearAppearenceEffects()
+{
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
+		SetAppearenceEffect(i,0);
+	}
 }
 
 void Mob::SendTargetable(bool on, Client *specific_target) {

@@ -426,7 +426,8 @@ public:
 	bool HasBuffWithSpellGroup(int spell_group);
 	bool HasAppearenceEffect() const { return appearance_effects[MAX_APPEARANCE_EFFECTS + 1]; }
 	void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects[slot] = value; }
-	bool GetAppearenceEffect(int32 slot) const { return appearance_effects[slot]; }
+	int32 GetAppearenceEffect(int32 slot) const { return appearance_effects[slot]; }
+	void ClearAppearenceEffects();
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
