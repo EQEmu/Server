@@ -1475,7 +1475,7 @@ void Mob::CastedSpellFinished(uint16 spell_id, uint32 target_id, CastingSlot slo
 	}
 
 	//Check if buffs has numhits, then resend packet so it displays the hit count.
-	if (IsClient() && (spells[spell_id].buff_duration > 0 || spells[spell_id].short_buff_box)) {
+	if (IsClient() && spells[spell_id].hit_number) {
 		for (int i = 0; i < GetMaxTotalSlots(); i++) {
 			if (buffs[i].spellid == spell_id && buffs[i].hit_number > 0) {
 				CastToClient()->SendBuffNumHitPacket(buffs[i], i);
