@@ -4582,6 +4582,33 @@ void EntityList::SendUntargetable(Client *c)
 	}
 }
 
+void EntityList::SendAppearanceEffects(Client *c)
+{
+	if (!c)
+		return;
+
+	auto it = mob_list.begin();
+	while (it != mob_list.end()) {
+		Mob *cur = it->second;
+
+		if (cur) {
+			if (cur == c) {
+				++it;
+				continue;
+			}
+			if (cur->HasAppearenceEffect()){
+				for (uint32 i = 0; i <= MAX_APPEARANCE_EFFECTS; i++) {
+					cur->Shout("[%i] Get apperance effect %i", i, cur->GetAppearenceEffect(i));
+					if (cur->GetAppearenceEffect(i)) {
+						cur->SendAppearanceEffect(cur->GetAppearenceEffect(i), 0, 0, 0, 0, c, i, 0);
+					}
+				}
+			}
+		}
+		++it;
+	}
+}
+
 void EntityList::ZoneWho(Client *c, Who_All_Struct *Who)
 {
 	// This is only called for SoF clients, as regular /who is now handled server-side for that client.

@@ -424,6 +424,9 @@ public:
 	inline bool HasEndurUpkeep() const { return endur_upkeep; }
 	inline void SetEndurUpkeep(bool val) { endur_upkeep = val; }
 	bool HasBuffWithSpellGroup(int spell_group);
+	bool HasAppearenceEffect() const { return appearance_effects[MAX_APPEARANCE_EFFECTS + 1]; }
+	void SetAppearenceEffect(int32 slot, int32 value) { appearance_effects[slot] = value; }
+	bool GetAppearenceEffect(int32 slot) const { return appearance_effects[slot]; }
 
 	//Basic Stats/Inventory
 	virtual void SetLevel(uint8 in_level, bool command = false) { level = in_level; }
@@ -1506,6 +1509,8 @@ protected:
 	int32 ranged_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];		//SPA 512
 	Timer def_proclimit_timer[MAX_PROC_LIMIT_TIMERS];			//SPA 512
 	int32 def_proclimit_spellid[MAX_PROC_LIMIT_TIMERS];			//SPA 512
+
+	int32 appearance_effects[MAX_APPEARANCE_EFFECTS];
 
 	Timer shield_timer;
 	uint32 m_shield_target_id;

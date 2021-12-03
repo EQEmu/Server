@@ -480,6 +480,10 @@ Mob::Mob(
 		Vulnerability_Mod[i] = 0;
 	}
 
+	for (int i = 0; i < MAX_APPEARANCE_EFFECTS + 1; i++) {
+		appearance_effects[i] = 0;
+	}
+
 	emoteid              = 0;
 	endur_upkeep         = false;
 	degenerating_effects = false;
@@ -2878,6 +2882,27 @@ void Mob::SendAppearanceEffect(uint32 parm1, uint32 parm2, uint32 parm3, uint32 
 	}
 	if (value5slot > 9) {
 		value5slot = 1;
+	}
+
+	if (!value1ground) {
+		appearance_effects[value1slot] = parm1;
+		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	}
+	if (!value2ground) {
+		appearance_effects[value2slot] = parm2;
+		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	}
+	if (!value3ground) {
+		appearance_effects[value3slot] = parm3;
+		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	}
+	if (!value4ground) {
+		appearance_effects[value4slot] = parm4;
+		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
+	}
+	if (!value5ground) {
+		appearance_effects[value5slot] = parm5;
+		appearance_effects[MAX_APPEARANCE_EFFECTS + 1] = 1;
 	}
 
 	LevelAppearance_Struct* la = (LevelAppearance_Struct*)outapp->pBuffer;
