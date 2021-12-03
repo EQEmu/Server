@@ -1992,7 +1992,7 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 	if ((hate_top && hate_top->GetHPRatio() >= 20) || hate_top == nullptr || chance_bonus) {
 		// SE_Taunt this is flat chance
 		if (chance_bonus) {
-			Success = zone->random.Roll(chance_bonus);
+			success = zone->random.Roll(chance_bonus);
 		} else {
 			float tauntchance = 50.0f;
 
@@ -2026,14 +2026,14 @@ void Mob::Taunt(NPC *who, bool always_succeed, int chance_bonus, bool FromSpell,
 
 			tauntchance /= 100.0f;
 
-			Success = tauntchance > zone->random.Real(0, 1);
+			success = tauntchance > zone->random.Real(0, 1);
 		}
 
-		if (Success) {
+		if (success) {
 			if (hate_top && hate_top != this) {
 				int newhate = (who->GetNPCHate(hate_top) - who->GetNPCHate(this)) + 1 + bonus_hate;
 				who->CastToNPC()->AddToHateList(this, newhate);
-				Success = true;
+				success = true;
 			} else {
 				who->CastToNPC()->AddToHateList(this, 12);
 			}

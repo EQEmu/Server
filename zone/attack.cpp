@@ -4503,7 +4503,7 @@ void Mob::TrySpellProc(const EQ::ItemInstance *inst, const EQ::ItemData *weapon,
 		TrySkillProc(on, skillinuse, 0, false, hand);
 	}
 
-	if (HasSkillProcSuccess && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
+	if (HasSkillProcSuccess() && hand != EQ::invslot::slotRange) { //We check ranged skill procs within the attack functions.
 		TrySkillProc(on, skillinuse, 0, true, hand);
 	}
 	return;
