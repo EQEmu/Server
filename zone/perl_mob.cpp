@@ -4858,7 +4858,10 @@ XS(XS_Mob_RemoveAllAppearanceEffects) {
 	{
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
-		THIS->SendIllusionPacket(THIS->GetRace());
+		THIS->SendIllusionPacket(THIS->GetRace(), THIS->GetGender(), THIS->GetTexture(), THIS->GetHelmTexture(), 
+								THIS->GetHairColor(), THIS->GetBeardColor(), THIS->GetEyeColor1(), THIS->GetEyeColor2(), 
+								THIS->GetHairStyle(), THIS->GetLuclinFace(), THIS->GetBeard(), 0xFF, 
+								THIS->GetDrakkinHeritage(), THIS->GetDrakkinTattoo(), THIS->GetDrakkinDetails(), THIS->GetSize());
 	}
 	XSRETURN_EMPTY;
 }
