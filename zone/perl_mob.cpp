@@ -4850,6 +4850,7 @@ XS(XS_Mob_RemoveAllAppearanceEffects) {
 		Mob *THIS;
 		VALIDATE_THIS_IS_MOB;
 		THIS->SendIllusionPacket(THIS->GetRace());
+		THIS->ClearAppearenceEffects();
 	}
 	XSRETURN_EMPTY;
 }
