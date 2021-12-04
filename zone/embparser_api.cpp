@@ -8023,6 +8023,23 @@ XS(XS__getspell) {
     }
 }
 
+XS(XS__getldonthemename);
+XS(XS__getldonthemename) {
+	dXSARGS;
+	if (items != 1)
+		Perl_croak(aTHX_ "Usage: quest::getldonthemename(uint32 theme_id)");
+	{
+		dXSTARG;
+		uint32 theme_id = (uint32) SvUV(ST(0));
+		std::string theme_name = quest_manager.getldonthemename(theme_id);
+
+		sv_setpv(TARG, theme_name.c_str());
+		XSprePUSH;
+		PUSHTARG;
+		XSRETURN(1);
+	}
+}
+
 XS(XS__getfactionname);
 XS(XS__getfactionname) {
 	dXSARGS;
@@ -8034,7 +8051,7 @@ XS(XS__getfactionname) {
 		std::string faction_name = quest_manager.getfactionname(faction_id);
 
 		sv_setpv(TARG, faction_name.c_str());
-    		XSprePUSH;
+		XSprePUSH;
 		PUSHTARG;
 		XSRETURN(1);
 	}
@@ -8372,7 +8389,8 @@ EXTERN_C XS(boot_quest) {
 	newXS(strcpy(buf, "getitemname"), XS__getitemname, file);
 	newXS(strcpy(buf, "getItemName"), XS_qc_getItemName, file);
 	newXS(strcpy(buf, "getitemstat"), XS__getitemstat, file);
-  	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
+	newXS(strcpy(buf, "getlanguagename"), XS__getlanguagename, file);
+	newXS(strcpy(buf, "getldonthemename"), XS__getldonthemename, file);
 	newXS(strcpy(buf, "getnpcnamebyid"), XS__getnpcnamebyid, file);
 	newXS(strcpy(buf, "get_spawn_condition"), XS__get_spawn_condition, file);
 	newXS(strcpy(buf, "getcharnamebyid"), XS__getcharnamebyid, file);
