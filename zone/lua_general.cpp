@@ -3359,6 +3359,10 @@ std::string lua_get_language_name(int language_id) {
 	return quest_manager.getlanguagename(language_id);
 }
 
+std::string lua_get_body_type_name(uint32 bodytype_id) {
+	return quest_manager.getbodytypename(bodytype_id);
+}
+
 #define LuaCreateNPCParse(name, c_type, default_value) do { \
 	cur = table[#name]; \
 	if(luabind::type(cur) != LUA_TNIL) { \
@@ -3804,6 +3808,7 @@ luabind::scope lua_register_general() {
 		luabind::def("get_spell", &lua_get_spell),
 		luabind::def("get_faction_name", &lua_get_faction_name),
 		luabind::def("get_language_name", &lua_get_language_name),
+		luabind::def("get_body_type_name", &lua_get_body_type_name),
 
 		/*
 			Cross Zone

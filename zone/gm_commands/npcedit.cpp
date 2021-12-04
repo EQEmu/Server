@@ -215,8 +215,18 @@ void command_npcedit(Client *c, const Seperator *sep)
 	if (strcasecmp(sep->arg[1], "bodytype") == 0) {
 		c->Message(
 			Chat::Yellow,
-			fmt::format("NPC ID {} is now using Bodytype {} .", npc_id, atoi(sep->arg[2])).c_str());
-		std::string query = fmt::format("UPDATE npc_types SET bodytype = {} WHERE id = {}", atoi(sep->arg[2]), npc_id);
+			fmt::format(
+				"NPC ID {} is now using Bodytype {} ({}).",
+				npc_id,
+				EQ::constants::GetBodyTypeName(static_cast<bodyType>(std::stoul(sep->arg[2]))),
+				std::stoul(sep->arg[2])
+			).c_str()
+		);
+		std::string query = fmt::format(
+			"UPDATE npc_types SET bodytype = {} WHERE id = {}",
+			std::stoul(sep->arg[2]),
+			npc_id
+		);
 		content_db.QueryDatabase(query);
 		return;
 	}
