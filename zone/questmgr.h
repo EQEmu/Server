@@ -60,6 +60,7 @@ public:
 
 	void ClearTimers(Mob *who);
 	void ClearAllTimers();
+	void StopNPCTimers();
 
 	//quest functions
 	void echo(int colour, const char *str);

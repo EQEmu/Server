@@ -153,6 +153,19 @@ void QuestManager::ClearAllTimers() {
 	QTimerList.clear();
 }
 
+void QuestManager::StopNPCTimers() {
+
+	std::list<QuestTimer>::iterator cur = QTimerList.begin(), end;
+
+	end = QTimerList.end();
+	while (cur != end) {
+		if (cur->mob && cur->mob->IsNPC() && !cur->mob->IsPetOwnerClient()) {
+			QTimerList.erase(cur);
+		}
+		++cur;
+	}
+}
+
 //quest perl functions
 void QuestManager::echo(int colour, const char *str) {
 	QuestManagerCurrentQuestVars();

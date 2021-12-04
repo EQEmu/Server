@@ -1791,7 +1791,7 @@ void Zone::Repop(uint32 delay)
 
 	entity_list.ClearTrapPointers();
 
-	quest_manager.ClearAllTimers();
+	quest_manager.StopNPCTimers();
 
 	LogInfo("Loading spawn groups");
 	if (!content_db.LoadSpawnGroups(short_name, GetInstanceVersion(), &spawn_group_list)) {
