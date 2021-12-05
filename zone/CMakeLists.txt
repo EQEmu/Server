@@ -541,6 +541,8 @@ SET(gm_commands
     gm_commands/undyeme.cpp
     gm_commands/unfreeze.cpp
     gm_commands/unlock.cpp
+    gm_commands/unmemspell.cpp
+    gm_commands/unmemspells.cpp
     gm_commands/unscribespell.cpp
     gm_commands/unscribespells.cpp
     gm_commands/untraindisc.cpp

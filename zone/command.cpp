@@ -241,7 +241,7 @@ int command_init(void)
 		command_add("makepet", "[level] [class] [race] [texture] - Make a pet", AccountStatus::Guide, command_makepet) ||
 		command_add("mana", "- Fill your or your target's mana", AccountStatus::Guide, command_mana) ||
 		command_add("maxskills", "Maxes skills for you.", AccountStatus::GMMgmt, command_max_all_skills) ||
-		command_add("memspell", "[Slot] [Spell ID] - Memorize a Spell by ID in the specified Slot", AccountStatus::Guide, command_memspell) ||
+		command_add("memspell", "[Spell ID] [Spell Gem] - Memorize a Spell by ID to the specified Spell Gem for you or your target", AccountStatus::Guide, command_memspell) ||
 		command_add("merchant_close_shop",  "Closes a merchant shop", AccountStatus::GMAdmin, command_merchantcloseshop) ||
 		command_add("merchant_open_shop",  "Opens a merchants shop", AccountStatus::GMAdmin, command_merchantopenshop) ||
 		command_add("modifynpcstat", "- Modifys a NPC's stats", AccountStatus::GMLeadAdmin, command_modifynpcstat) ||
@@ -378,6 +378,8 @@ int command_init(void)
 		command_add("undyeme", "- Remove dye from all of your armor slots", AccountStatus::Player, command_undyeme) ||
 		command_add("unfreeze", "- Unfreeze your target", AccountStatus::QuestTroupe, command_unfreeze) ||
 		command_add("unlock", "- Unlock the worldserver", AccountStatus::GMLeadAdmin, command_unlock) ||
+		command_add("unmemspell", "[Spell ID] - Unmemorize a Spell by ID for you or your target", AccountStatus::Guide, command_unmemspell) ||
+		command_add("unmemspells", " - Unmemorize all spells for you or your target", AccountStatus::Guide, command_unmemspells) ||
 		command_add("unscribespell", "[spellid] - Unscribe specified spell from your target's spell book.", AccountStatus::GMCoder, command_unscribespell) ||
 		command_add("unscribespells", "- Clear out your or your player target's spell book.", AccountStatus::GMCoder, command_unscribespells) ||
 		command_add("untraindisc", "[spellid] - Untrain specified discipline from your target.", AccountStatus::GMCoder, command_untraindisc) ||
