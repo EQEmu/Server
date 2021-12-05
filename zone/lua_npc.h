@@ -80,7 +80,7 @@ public:
 	void StartSwarmTimer(uint32 duration);
 	void DoClassAttacks(Lua_Mob target);
 	int GetMaxWp();
-	void DisplayWaypointInfo(Lua_Client to);
+	void DisplayWaypointInfo(Lua_Client client);
 	void CalculateNewWaypoint();
 	void AssignWaypoints(int grid);
 	void SetWaypointPause();

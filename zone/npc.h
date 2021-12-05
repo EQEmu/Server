@@ -327,7 +327,7 @@ public:
 
 	//waypoint crap
 	int					GetMaxWp() const { return max_wp; }
-	void				DisplayWaypointInfo(Client *to);
+	void				DisplayWaypointInfo(Client *client);
 	void				CalculateNewWaypoint();
 	void				AssignWaypoints(int32 grid_id, int start_wp = 0);
 	void				SetWaypointPause();
