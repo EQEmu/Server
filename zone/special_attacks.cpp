@@ -1746,7 +1746,7 @@ void NPC::DoClassAttacks(Mob *target) {
 				DoAnim(animTailRake, 0, false);
 				int32 dmg = GetBaseSkillDamage(EQ::skills::SkillBash);
 
-				if (GetWeaponDamage(target, boots) <= 0)
+				if (GetWeaponDamage(target, (const EQ::ItemData*)nullptr) <= 0)
 					dmg = DMG_INVULNERABLE;
 
 				reuse = (BashReuseTime + 3) * 1000;
